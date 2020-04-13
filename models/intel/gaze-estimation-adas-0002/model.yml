@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/gaze-estimation-adas-0002.xml
-    size: 63630
-    sha256: 181d0dfe7257c8f1cb2872bf01c30f5806b270957d76f3bce21a7962d920c855
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
+    size: 63654
+    sha256: e2c3fc482937e5c4524f0a160d6f5b9d142bca001fa99b37d9fe0876a37af6b6
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
   - name: FP32/gaze-estimation-adas-0002.bin
     size: 7529308
     sha256: df935569980ab2654c46463fccb0ecc9ddd90423dcee85b3f933aa375baa15cf
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
   - name: FP16/gaze-estimation-adas-0002.xml
-    size: 63589
-    sha256: 54cb251b65cab1bb45f8251b3980096c3f85a33a37a258c523e0c53fd690454c
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
+    size: 63613
+    sha256: 7a0d2d8fbf6b10897f16e2e780928228951819a9627459c6eaad1fc0facc8a83
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
   - name: FP16/gaze-estimation-adas-0002.bin
     size: 3764670
     sha256: 03fa9ec80b6edf2ff6bfe5208e1fa13f17be534b80461de7e91b70f0ec1bcf85
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
-  - name: FP32-INT8/gaze-estimation-adas-0002.xml
-    size: 142699
-    sha256: 7208d5c77929af6fa6488edf4f28b31a88c8328af6af8399dd76d54994a63e8e
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/gaze-estimation-adas-0002/FP32-INT8/gaze-estimation-adas-0002.xml
-  - name: FP32-INT8/gaze-estimation-adas-0002.bin
-    size: 7542172
-    sha256: 0254e6bacc23912ba647a626ebe9e4562e8b824ab157442714dbf2e3d13d4996
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/gaze-estimation-adas-0002/FP32-INT8/gaze-estimation-adas-0002.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
+  - name: FP16-INT8/gaze-estimation-adas-0002.xml
+    size: 139491
+    sha256: 4b6e3970aa9801e6e6abbaab63750be0eb62a71d703435664102d94259fe3359
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.xml
+  - name: FP16-INT8/gaze-estimation-adas-0002.bin
+    size: 2056740
+    sha256: 49089cbb09ea9e5941df67680dd69aefa3b33017dd2183ace875956dc7a4b8d1
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

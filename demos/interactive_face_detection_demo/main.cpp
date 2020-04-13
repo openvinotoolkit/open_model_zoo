@@ -13,7 +13,6 @@
 #include <fstream>
 #include <random>
 #include <memory>
-#include <chrono>
 #include <vector>
 #include <string>
 #include <utility>
@@ -35,9 +34,6 @@
 #include "visualizer.hpp"
 
 #include <ie_iextension.h>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 using namespace InferenceEngine;
 
@@ -139,9 +135,6 @@ int main(int argc, char *argv[]) {
 
             /** Loading extensions for the CPU device **/
             if ((deviceName.find("CPU") != std::string::npos)) {
-#ifdef WITH_EXTENSIONS
-                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -181,8 +174,6 @@ int main(int argc, char *argv[]) {
 
         std::ostringstream out;
         size_t framesCounter = 0;
-        bool frameReadStatus;
-        bool isLastFrame;
         int delay = 1;
         double msrate = -1;
         cv::Mat prev_frame, next_frame;
@@ -208,7 +199,7 @@ int main(int argc, char *argv[]) {
         prev_frame = frame.clone();
 
         // Reading the next frame
-        frameReadStatus = cap.read(frame);
+        bool frameReadStatus = cap.read(frame);
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
@@ -224,7 +215,7 @@ int main(int argc, char *argv[]) {
         while (true) {
             timer.start("total");
             framesCounter++;
-            isLastFrame = !frameReadStatus;
+            bool isLastFrame = !frameReadStatus;
 
             // Retrieving face detection results for the previous frame
             faceDetector.wait();
@@ -295,7 +286,7 @@ int main(int argc, char *argv[]) {
                     float intensity_mean = calcMean(prev_frame(rect));
 
                     if ((face == nullptr) ||
-                        ((face != nullptr) && ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f))) {
+                        ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f)) {
                         face = std::make_shared<Face>(id++, rect);
                     } else {
                         prev_faces.remove(face);

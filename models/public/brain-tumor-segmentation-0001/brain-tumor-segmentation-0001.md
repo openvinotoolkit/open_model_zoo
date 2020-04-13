@@ -19,7 +19,7 @@ Each input modality has its own encoder which are later fused together to produc
 
 ## Accuracy
 
-See [https://github.com/lachinov/brats2018-graphlabunn]()
+See [the original repository](https://github.com/lachinov/brats2018-graphlabunn).
 
 
 ## Performance

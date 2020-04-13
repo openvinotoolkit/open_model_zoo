@@ -13,11 +13,10 @@
 # limitations under the License.
 
 description: >-
-  The `ssd_mobilenet_v1_coco` model is a Single-Shot multibox Detection <SSD>
-  <https://arxiv.org/pdf/1801.04381.pdf> network intended to perform object detection.
-  The difference bewteen this model and the `mobilenet-ssd` is that there the
-  `mobilenet-ssd` can only detect face, the `ssd_mobilenet_v1_coco` model can
-  detect objects.
+  The "ssd_mobilenet_v1_coco" model is a Single-Shot multibox Detection <SSD> <https://arxiv.org/abs/1801.04381>
+  network intended to perform object detection. The difference bewteen this model
+  and the "mobilenet-ssd" is that there the "mobilenet-ssd" can only detect face,
+  the "ssd_mobilenet_v1_coco" model can detect objects.
 task_type: detection
 files:
   - name: ssd_mobilenet_v1_coco.tar.gz
@@ -33,7 +32,7 @@ model_optimizer_args:
   - --input_shape=[1,300,300,3]
   - --input=image_tensor
   - --output=detection_scores,detection_boxes,num_detections
-  - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/ssd_v2_support.json
+  - --transformations_config=$mo_dir/extensions/front/tf/ssd_v2_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssd_mobilenet_v1_coco_2018_01_28/pipeline.config
   - --input_model=$dl_dir/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb
 framework: tf

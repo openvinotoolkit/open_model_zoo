@@ -71,7 +71,7 @@ pip install -r requirements.txt
 Running the application with the `-h` option or without
 any arguments yields the following message:
 
-``` sh
+```
 python ./face_recognition_demo.py -h
 
 usage: face_recognition_demo.py [-h] [-i PATH] [-o PATH] [--no_show] [-tl]
@@ -185,7 +185,7 @@ python ./face_recognition_demo.py \
 
 Windows (`cmd`, `powershell`) (assuming OpenVINO installed in `C:/Intel/openvino`):
 
-``` powershell
+```bat
 # Set up the environment
 call C:/Intel/openvino/bin/setupvars.bat
 

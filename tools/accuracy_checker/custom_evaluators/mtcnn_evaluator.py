@@ -27,14 +27,14 @@ from accuracy_checker.launcher import create_launcher, InputFeeder
 from accuracy_checker.dataset import Dataset
 from accuracy_checker.data_readers import BaseReader, REQUIRES_ANNOTATIONS
 from accuracy_checker.preprocessor import PreprocessingExecutor
-from accuracy_checker.utils import extract_image_representations, read_pickle
+from accuracy_checker.utils import extract_image_representations, read_pickle, contains_any
 from accuracy_checker.adapters import MTCNNPAdapter
 from accuracy_checker.metrics import MetricsExecutor
 from accuracy_checker.postprocessor import PostprocessingExecutor
 from accuracy_checker.config import ConfigError
 
 
-def build_stages(models_info, preprocessors_config, launcher):
+def build_stages(models_info, preprocessors_config, launcher, model_args):
     def merge_preprocessing(model_specific, common_preprocessing):
         if model_specific:
             model_specific.extend(common_preprocessing)
@@ -60,6 +60,9 @@ def build_stages(models_info, preprocessors_config, launcher):
             stage_framework = 'dummy'
         else:
             stage_framework = framework
+        if not contains_any(model_config, ['model', 'caffe_model']) and stage_framework != 'dummy':
+            if model_args:
+                model_config['model'] = model_args[len(stages) if len(model_args) > 1 else 0]
         stage = stage_classes.get(stage_framework)
         if not stage_classes:
             raise ConfigError('{} stage does not support {} framework'.format(stage_name, stage_framework))
@@ -69,6 +72,7 @@ def build_stages(models_info, preprocessors_config, launcher):
 
     if not stages:
         raise ConfigError('please provide information about MTCNN pipeline stages')
+
     return stages
 
 
@@ -104,6 +108,8 @@ class BaseStage:
 
 
 class ProposalBaseStage(BaseStage):
+    default_model_name = 'mtcnn-p'
+
     def __init__(self, model_info, preprocessor):
         super().__init__(model_info, preprocessor)
         self.adapter = None
@@ -162,6 +168,7 @@ class DummyProposalStage(ProposalBaseStage):
 class RefineBaseStage(BaseStage):
     input_size = 24
     include_boundaries = True
+    default_model_name = 'mtcnn-r'
 
     def preprocess_data(self, batch_input, batch_annotation, previous_stage_prediction, *lrgs, **kwargs):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
@@ -198,6 +205,7 @@ class RefineBaseStage(BaseStage):
 class OutputBaseStage(RefineBaseStage):
     input_size = 48
     include_boundaries = False
+    default_model_name = 'mtcnn-o'
 
     def postprocess_result(self, identifiers, this_stage_result, batch_meta, previous_stage_result, *args, **kwargs):
         batch_predictions = calibrate_predictions(
@@ -242,15 +250,42 @@ class CaffeModelMixin:
     def release(self):
         del self.net
 
-    def fit_to_input(self, data, layer_name, layout):
+    def fit_to_input(self, data, layer_name, layout, precision):
         data_shape = np.shape(data)
         layer_shape = self.inputs[layer_name]
         if len(data_shape) == 5 and len(layer_shape) == 4:
             data = data[0]
             data_shape = np.shape(data)
         data = np.transpose(data, layout) if len(data_shape) == 4 else np.array(data)
+        if precision:
+            data = data.astype(precision)
 
         return data
+
+    def automatic_model_search(self, network_info):
+        model = Path(network_info.get('model', ''))
+        weights = network_info.get('weights')
+        if model.is_dir():
+            models_list = list(Path(model).glob('{}.prototxt'.format(self.default_model_name)))
+            if not models_list:
+                models_list = list(Path(model).glob('*.prototxt'))
+            if not models_list:
+                raise ConfigError('Suitable model description is not detected')
+            if len(models_list) != 1:
+                raise ConfigError('Several suitable models found, please specify required model')
+            model = models_list[0]
+            if weights is None or Path(weights).is_dir():
+                weights_dir = weights or model.parent
+                weights = Path(weights_dir) / model.name.replace('prototxt', 'caffemodel')
+                if not weights.exists():
+                    weights_list = list(weights_dir.glob('*.caffemodel'))
+                    if not weights_list:
+                        raise ConfigError('Suitable weights is not detected')
+                    if len(weights_list) != 1:
+                        raise ConfigError('Several suitable weights found, please specify required explicitly')
+                    weights = weights_list[0]
+            weights = Path(weights)
+            return model, weights
 
 
 class DLSDKModelMixin:
@@ -270,7 +305,7 @@ class DLSDKModelMixin:
     def _reshape_input(self, input_shapes):
         del self.exec_network
         self.network.reshape(input_shapes)
-        self.exec_network = self.launcher.plugin.load(network=self.network)
+        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
 
     @property
     def inputs(self):
@@ -281,13 +316,15 @@ class DLSDKModelMixin:
         del self.exec_network
         self.launcher.release()
 
-    def fit_to_input(self, data, layer_name, layout):
+    def fit_to_input(self, data, layer_name, layout, precision):
         layer_shape = tuple(self.inputs[layer_name].shape)
         data_shape = np.shape(data)
         if len(layer_shape) == 4:
             if len(data_shape) == 5:
                 data = data[0]
             data = np.transpose(data, layout)
+        if precision:
+            data = data.astype(precision)
 
         return data
 
@@ -311,7 +348,7 @@ class DLSDKModelMixin:
                     model_mo_flags.append(launcher_flag)
 
             for launcher_mo_key, launcher_mo_value in launcher_mo_params.items():
-                if launcher_mo_key not in launcher_mo_params:
+                if launcher_mo_key not in model_mo_params:
                     model_mo_params[launcher_mo_key] = launcher_mo_value
 
             model_config['mo_flags'] = model_mo_flags
@@ -319,13 +356,36 @@ class DLSDKModelMixin:
 
         update_mo_params(launcher.config, self.model_info)
         if 'caffe_model' in self.model_info:
-            self.model_info.update(launcher.config)
-            model_xml, model_bin = launcher.convert_model(self.model_info)
+            model, weights = launcher.convert_model(self.model_info)
         else:
-            model_xml = self.model_info['model']
-            model_bin = self.model_info['weights']
+            model, weights = self.auto_model_search(self.model_info)
 
-        return model_xml, model_bin
+        return model, weights
+
+    def auto_model_search(self, network_info):
+        model = Path(network_info.get('model', ''))
+        weights = network_info.get('weights')
+        if model.is_dir():
+            models_list = list(Path(model).glob('{}.xml'.format(self.default_model_name)))
+            if not models_list:
+                models_list = list(Path(model).glob('*.xml'))
+            if not models_list:
+                raise ConfigError('Suitable model description is not detected')
+            if len(models_list) != 1:
+                raise ConfigError('Several suitable models found, please specify required model')
+            model = models_list[0]
+            if weights is None or Path(weights).is_dir():
+                weights_dir = weights or model.parent
+                weights = Path(weights_dir) / model.name.replace('xml', 'bin')
+                if not weights.exists():
+                    weights_list = list(weights_dir.glob('*.bin'))
+                    if not weights_list:
+                        raise ConfigError('Suitable weights is not detected')
+                    if len(weights_list) != 1:
+                        raise ConfigError('Several suitable weights found, please specify required explicitly')
+                    weights = weights_list[0]
+            weights = Path(weights)
+        return model, weights
 
 
 class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):
@@ -346,7 +406,6 @@ class CaffeRefineStage(CaffeModelMixin, RefineBaseStage):
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs,  self.fit_to_input)
 
 
-
 class CaffeOutputStage(CaffeModelMixin, OutputBaseStage):
     def __init__(self,  model_info, preprocessor, launcher):
         super().__init__(model_info, preprocessor)
@@ -357,11 +416,9 @@ class CaffeOutputStage(CaffeModelMixin, OutputBaseStage):
 class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
     def __init__(self,  model_info, preprocessor, launcher):
         super().__init__(model_info, preprocessor)
-        if not hasattr(launcher, 'plugin'):
-            launcher.create_ie_plugin(True)
         model_xml, model_bin = self.prepare_model(launcher)
         self.network = launcher.create_ie_network(str(model_xml), str(model_bin))
-        self.exec_network = launcher.plugin.load(self.network)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
         pnet_outs = model_info['outputs']
@@ -373,12 +430,9 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
 class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
     def __init__(self,  model_info, preprocessor, launcher):
         super().__init__(model_info, preprocessor)
-
-        if not hasattr(launcher, 'plugin'):
-            launcher.create_ie_plugin(True)
         model_xml, model_bin = self.prepare_model(launcher)
         self.network = launcher.create_ie_network(str(model_xml), str(model_bin))
-        self.exec_network = launcher.plugin.load(self.network)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
 
@@ -386,11 +440,9 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
 class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
     def __init__(self,  model_info, preprocessor, launcher):
         super().__init__(model_info,  preprocessor)
-        if not hasattr(launcher, 'plugin'):
-            launcher.create_ie_plugin(True)
         model_xml, model_bin = self.prepare_model(launcher)
         self.network = launcher.create_ie_network(str(model_xml), str(model_bin))
-        self.exec_network = launcher.plugin.load(self.network)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
 
@@ -450,6 +502,33 @@ class MTCNNEvaluator(BaseEvaluator):
 
         return self._metrics_results
 
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+        if not self._metrics_results:
+            self.compute_metrics(False, ignore_results_formatting)
+
+        result_presenters = self.metrics_executor.get_metric_presenters()
+        extracted_results, extracted_meta = [], []
+        for presenter, metric_result in zip(result_presenters, self._metrics_results):
+            result, metadata = presenter.extract_result(metric_result)
+            if isinstance(result, list):
+                extracted_results.extend(result)
+                extracted_meta.extend(metadata)
+            else:
+                extracted_results.append(result)
+                extracted_meta.append(metadata)
+            if print_results:
+                presenter.write_result(metric_result, ignore_results_formatting)
+
+        return extracted_results, extracted_meta
+
+    def print_metrics_results(self, ignore_results_formatting=False):
+        if not self._metrics_results:
+            self.compute_metrics(True, ignore_results_formatting)
+            return
+        result_presenters = self.metrics_executor.get_metric_presenters()
+        for presenter, metric_result in zip(result_presenters, self._metrics_results):
+            presenter.write_result(metric_result, ignore_results_formatting)
+
     @classmethod
     def from_configs(cls, config):
         dataset_config = config['datasets'][0]
@@ -470,7 +549,7 @@ class MTCNNEvaluator(BaseEvaluator):
         launcher_config = config['launchers'][0]
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
         preprocessors_config = dataset_config.get('preprocessing', [])
-        stages = build_stages(models_info, preprocessors_config, launcher)
+        stages = build_stages(models_info, preprocessors_config, launcher, config.get('_models'))
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         postprocessing = PostprocessingExecutor(dataset_config['postprocessing'])
 

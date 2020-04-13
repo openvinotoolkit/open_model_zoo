@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-[ResNet-152](https://arxiv.org/pdf/1512.03385.pdf)
+[ResNet-152](https://arxiv.org/abs/1512.03385)
 
 ## Example
 
@@ -17,7 +17,7 @@
 
 ## Accuracy
 
-See [https://github.com/shicai/DenseNet-Caffe]()
+See [the original repository](https://github.com/KaimingHe/deep-residual-networks).
 
 ## Performance
 

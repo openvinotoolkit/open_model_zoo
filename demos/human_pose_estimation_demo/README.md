@@ -21,7 +21,7 @@ On the start-up, the application reads command line parameters and loads human p
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./human_pose_estimation_demo -h
 InferenceEngine:
     API version ............ <version>

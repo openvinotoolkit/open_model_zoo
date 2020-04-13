@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Text detector based on [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) architecture with [MobileNetV2, depth_multiplier=1.4](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for indoor/outdoor scenes.
+Text detector based on [PixelLink](https://arxiv.org/abs/1801.01315) architecture with [MobileNetV2, depth_multiplier=1.4](https://arxiv.org/abs/1801.04381) as a backbone for indoor/outdoor scenes.
 
 ## Example
 
@@ -33,9 +33,11 @@ Text detector based on [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) archite
 
 ## Outputs
 
-1. The net outputs two blobs. Refer to [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) and demos for details.
-    - [1x2x192x320] - logits related to text/no-text classification for each pixel.
-    - [1x16x192x320] - logits related to linkage between pixels and their neighbors.
+1. name: "model/link\_logits\_/add", shape: [1x16x192x320] - logits related to linkage between pixels and their neighbors.
+
+2. name: "model/segm\_logits/add", shape: [1x2x192x320] - logits related to text/no-text classification for each pixel.
+
+Refer to [PixelLink](https://arxiv.org/abs/1801.01315) and demos for details.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

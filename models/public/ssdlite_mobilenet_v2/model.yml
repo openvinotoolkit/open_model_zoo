@@ -13,8 +13,9 @@
 # limitations under the License.
 
 description: >-
-  MobileNetV2: Inverted Residuals and Linear Bottlenecks. Used for object detection.
-  For details see paper <https://arxiv.org/pdf/1801.04381.pdf>.
+  The "ssdlite_mobilenet_v2" model is used for object detection. For details, see
+  the paper <https://arxiv.org/abs/1801.04381>, MobileNetV2: Inverted Residuals
+  and Linear Bottlenecks.
 task_type: detection
 files:
   - name: ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
@@ -30,7 +31,7 @@ model_optimizer_args:
   - --input_shape=[1,300,300,3]
   - --input=image_tensor
   - --output=detection_scores,detection_boxes,num_detections
-  - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/ssd_v2_support.json
+  - --transformations_config=$mo_dir/extensions/front/tf/ssd_v2_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssdlite_mobilenet_v2_coco_2018_05_09/pipeline.config
   - --input_model=$dl_dir/ssdlite_mobilenet_v2_coco_2018_05_09/frozen_inference_graph.pb
 framework: tf

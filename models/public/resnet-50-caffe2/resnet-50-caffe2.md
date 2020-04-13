@@ -5,7 +5,7 @@
 This is a Caffe2\* version of `resnet-50` model, designed to perform image classification.
 This model was converted from Caffe\* to Caffe2\* format. 
 For details see repository <https://github.com/caffe2/models/tree/master/resnet50>,
-paper <https://arxiv.org/pdf/1512.03385.pdf>.
+paper <https://arxiv.org/abs/1512.03385>.
 
 ## Example
 

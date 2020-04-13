@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-[ResNet-50](https://arxiv.org/pdf/1512.03385.pdf)
+[ResNet-50](https://arxiv.org/abs/1512.03385)
 
 ## Example
 
@@ -16,6 +16,8 @@
 | Source framework  | Caffe\*       |
 
 ## Accuracy
+
+See [the original repository](https://github.com/KaimingHe/deep-residual-networks).
 
 ## Performance
 

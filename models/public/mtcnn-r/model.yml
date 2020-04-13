@@ -13,21 +13,21 @@
 # limitations under the License.
 
 description: >-
-  The `mtcnn-r` model is one of the mtcnn <https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf>
+  The "mtcnn-r" model is one of the mtcnn <https://arxiv.org/abs/1604.02878>
   group of models designed to perform face detection. Short for "Multi-task Cascaded
-  Convolutional Neural Network", it is implemented using the Caffe\* framework.
-  The "r" designation indicates that this model is the "refine" network intended
-  to refine the data returned as output from the "proposal" `mtcnn-p` network.
-  For details about this family of models, check out the repository <https://github.com/DuinoDu/mtcnn>.
+  Convolutional Neural Network", it is implemented using the Caffe* framework. The
+  "r" designation indicates that this model is the "refine" network intended to refine
+  the data returned as output from the "proposal" "mtcnn-p" network. For details about
+  this family of models, check out the repository <https://github.com/DuinoDu/mtcnn>.
 
   The model input is a blob with a vector containing the first pass of face data,
-  as returned by the `mtcnn-p` model. The mean values need to be subtracted as
-  follows: [127.5, 127.5, 127.5] before passing the image blob into the network.
-  In addition, values must be divided by 0.0078125.
+  as returned by the "mtcnn-p" model. The mean values need to be subtracted as follows:
+  [127.5, 127.5, 127.5] before passing the image blob into the network. In addition,
+  values must be divided by 0.0078125.
 
-  The model output is a blob with a vector containing the refined face data. If
-  there are no faces detected by the refine pass, no further processing is needed.
-  Otherwise, you will typically use this output as input to the `mtcnn-o` model.
+  The model output is a blob with a vector containing the refined face data. If there
+  are no faces detected by the refine pass, no further processing is needed. Otherwise,
+  you will typically use this output as input to the "mtcnn-o" model.
 task_type: detection
 files:
   - name: mtcnn-r.prototxt

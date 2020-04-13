@@ -13,8 +13,7 @@
 # limitations under the License.
 
 description: >-
-  MobileNetV1 FPN. Used for object detection. For details see paper
-  <https://arxiv.org/pdf/1807.03284.pdf>.
+  MobileNetV1 FPN is used for object detection. For details, see the paper <https://arxiv.org/abs/1807.03284>.
 task_type: detection
 files:
   - name: ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
@@ -30,7 +29,7 @@ model_optimizer_args:
   - --input_shape=[1,640,640,3]
   - --input=image_tensor
   - --output=detection_scores,detection_boxes,num_detections
-  - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/ssd_v2_support.json
+  - --transformations_config=$mo_dir/extensions/front/tf/ssd_v2_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03/pipeline.config
   - --input_model=$dl_dir/ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03/frozen_inference_graph.pb
 framework: tf

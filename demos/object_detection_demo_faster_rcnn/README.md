@@ -29,11 +29,8 @@ output image and outputs data to the standard output stream.
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
-./object_detection_demo_faster_rcnn -h
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
+```
+[ INFO ] InferenceEngine: <version>
 
 object_detection_demo_faster_rcnn [OPTION]
 Options:
@@ -41,16 +38,15 @@ Options:
     -h                        Print a usage message.
     -i "<path>"               Required. Path to a .bmp image.
     -m "<path>"               Required. Path to an .xml file with a trained model.
-      -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
-      -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
+      -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernels implementations.
+      -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernels descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -bbox_name "<string>"     Optional. The name of output box prediction layer. Default value is "bbox_pred"
     -proposal_name "<string>" Optional. The name of output proposal layer. Default value is "proposal"
     -prob_name "<string>"     Optional. The name of output probability layer. Default value is "cls_prob"
-    -p_msg                    Optional. Enables messages from a plugin
 ```
 
-Running the application with the empty list of options yields the usage message given above and an error message.
+Running the application with the empty list of options yields an error message.
 
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
 

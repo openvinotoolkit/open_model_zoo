@@ -17,20 +17,18 @@
 #include <map>
 
 #include <inference_engine.hpp>
+#include <ngraph/ngraph.hpp>
 
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
 #include <ie_iextension.h>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 #include "detectors.hpp"
 
 using namespace InferenceEngine;
 
-BaseDetection::BaseDetection(std::string topoName,
+BaseDetection::BaseDetection(const std::string &topoName,
                              const std::string &pathToModel,
                              const std::string &deviceForInference,
                              int maxBatch, bool isBatchDynamic, bool isAsync,
@@ -92,6 +90,7 @@ FaceDetection::FaceDetection(const std::string &pathToModel,
     : BaseDetection("Face Detection", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
       detectionThreshold(detectionThreshold),
       maxProposalCount(0), objectSize(0), enquedFrames(0), width(0), height(0),
+      network_input_width(0), network_input_height(0),
       bb_enlarge_coefficient(bb_enlarge_coefficient), bb_dx_coefficient(bb_dx_coefficient),
       bb_dy_coefficient(bb_dy_coefficient), resultsFetched(false) {}
 
@@ -120,79 +119,68 @@ void FaceDetection::enqueue(const cv::Mat &frame) {
     enquedFrames = 1;
 }
 
-CNNNetwork FaceDetection::read()  {
+CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     slog::info << "Loading network files for Face Detection" << slog::endl;
-    CNNNetReader netReader;
     /** Read network model **/
-    netReader.ReadNetwork(pathToModel);
-    /** Extract model name and load its weights **/
-    std::string binFileName = fileNameNoExt(pathToModel) + ".bin";
-    netReader.ReadWeights(binFileName);
+    auto network = ie.ReadNetwork(pathToModel);
     /** Set batch size to 1 **/
     slog::info << "Batch size is set to " << maxBatch << slog::endl;
-    netReader.getNetwork().setBatchSize(maxBatch);
-    /** Read labels (if any)**/
-    std::string labelFileName = fileNameNoExt(pathToModel) + ".labels";
-
-    std::ifstream inputFile(labelFileName);
-    std::copy(std::istream_iterator<std::string>(inputFile),
-              std::istream_iterator<std::string>(),
-              std::back_inserter(labels));
+    network.setBatchSize(maxBatch);
     // -----------------------------------------------------------------------------------------------------
 
-    /** SSD-based network should have one input and one output **/
     // ---------------------------Check inputs -------------------------------------------------------------
     slog::info << "Checking Face Detection network inputs" << slog::endl;
-    InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+    InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Face Detection network should have only one input");
     }
     InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
     inputInfoFirst->setPrecision(Precision::U8);
+
+    const SizeVector inputDims = inputInfoFirst->getTensorDesc().getDims();
+    network_input_height = inputDims[2];
+    network_input_width = inputDims[3];
+
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
     slog::info << "Checking Face Detection network outputs" << slog::endl;
-    OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
-    if (outputInfo.size() != 1) {
-        throw std::logic_error("Face Detection network should have only one output");
+    OutputsDataMap outputInfo(network.getOutputsInfo());
+    if (outputInfo.size() == 1) {
+        DataPtr& _output = outputInfo.begin()->second;
+        output = outputInfo.begin()->first;
+        const SizeVector outputDims = _output->getTensorDesc().getDims();
+        maxProposalCount = outputDims[2];
+        objectSize = outputDims[3];
+        if (objectSize != 7) {
+            throw std::logic_error("Face Detection network output layer should have 7 as a last dimension");
+        }
+        if (outputDims.size() != 4) {
+            throw std::logic_error("Face Detection network output dimensions not compatible shoulld be 4, but was " +
+                                   std::to_string(outputDims.size()));
+        }
+        _output->setPrecision(Precision::FP32);
+    } else {
+        for (const auto& outputLayer: outputInfo) {
+            const SizeVector outputDims = outputLayer.second->getTensorDesc().getDims();
+            if (outputDims.size() == 2 && outputDims.back() == 5) {
+                output = outputLayer.first;
+                maxProposalCount = outputDims[0];
+                objectSize = outputDims.back();
+                outputLayer.second->setPrecision(Precision::FP32);
+            } else if (outputDims.size() == 1 && outputLayer.second->getPrecision() == Precision::I32) {
+                labels_output = outputLayer.first;
+            }
+        }
+        if (output.empty() || labels_output.empty()) {
+            throw std::logic_error("Face Detection network must contain ether single DetectionOutput or "
+                                   "'boxes' [nx5] and 'labels' [n] at least, where 'n' is a number of detected objects.");
+        }
     }
-    DataPtr& _output = outputInfo.begin()->second;
-    output = outputInfo.begin()->first;
 
-    const CNNLayerPtr outputLayer = netReader.getNetwork().getLayerByName(output.c_str());
-    if (outputLayer->type != "DetectionOutput") {
-        throw std::logic_error("Face Detection network output layer(" + outputLayer->name +
-                               ") should be DetectionOutput, but was " +  outputLayer->type);
-    }
-
-    if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
-        throw std::logic_error("Face Detection network output layer (" +
-                               output + ") should have num_classes integer attribute");
-    }
-
-    const size_t num_classes = outputLayer->GetParamAsUInt("num_classes");
-    if (labels.size() != num_classes) {
-        if (labels.size() == (num_classes - 1))  // if network assumes default "background" class, which has no label
-            labels.insert(labels.begin(), "fake");
-        else
-            labels.clear();
-    }
-    const SizeVector outputDims = _output->getTensorDesc().getDims();
-    maxProposalCount = outputDims[2];
-    objectSize = outputDims[3];
-    if (objectSize != 7) {
-        throw std::logic_error("Face Detection network output layer should have 7 as a last dimension");
-    }
-    if (outputDims.size() != 4) {
-        throw std::logic_error("Face Detection network output dimensions not compatible shoulld be 4, but was " +
-                               std::to_string(outputDims.size()));
-    }
-    _output->setPrecision(Precision::FP32);
-
-    slog::info << "Loading Face Detection model to the "<< deviceForInference << " device" << slog::endl;
+    slog::info << "Loading Face Detection model to the " << deviceForInference << " device" << slog::endl;
     input = inputInfo.begin()->first;
-    return netReader.getNetwork();
+    return network;
 }
 
 void FaceDetection::fetchResults() {
@@ -201,8 +189,52 @@ void FaceDetection::fetchResults() {
     if (resultsFetched) return;
     resultsFetched = true;
     const float *detections = request->GetBlob(output)->buffer().as<float *>();
+    const int32_t *labels = !labels_output.empty() ? request->GetBlob(labels_output)->buffer().as<int32_t *>() : nullptr;
 
-    for (int i = 0; i < maxProposalCount; i++) {
+    for (int i = 0; i < maxProposalCount && objectSize == 5; i++) {
+        Result r;
+        r.label = labels[i];
+        r.confidence = detections[i * objectSize + 4];
+
+        if (r.confidence <= detectionThreshold && !doRawOutputMessages) {
+            continue;
+        }
+
+        r.location.x = static_cast<int>(detections[i * objectSize + 0] / network_input_width * width);
+        r.location.y = static_cast<int>(detections[i * objectSize + 1] / network_input_height * height);
+        r.location.width = static_cast<int>(detections[i * objectSize + 2] / network_input_width * width - r.location.x);
+        r.location.height = static_cast<int>(detections[i * objectSize + 3] / network_input_height * height - r.location.y);
+
+        // Make square and enlarge face bounding box for more robust operation of face analytics networks
+        int bb_width = r.location.width;
+        int bb_height = r.location.height;
+
+        int bb_center_x = r.location.x + bb_width / 2;
+        int bb_center_y = r.location.y + bb_height / 2;
+
+        int max_of_sizes = std::max(bb_width, bb_height);
+
+        int bb_new_width = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
+        int bb_new_height = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
+
+        r.location.x = bb_center_x - static_cast<int>(std::floor(bb_dx_coefficient * bb_new_width / 2));
+        r.location.y = bb_center_y - static_cast<int>(std::floor(bb_dy_coefficient * bb_new_height / 2));
+
+        r.location.width = bb_new_width;
+        r.location.height = bb_new_height;
+
+        if (doRawOutputMessages) {
+            std::cout << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
+                         "    (" << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
+                      << r.location.height << ")"
+                      << ((r.confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << std::endl;
+        }
+        if (r.confidence > detectionThreshold) {
+            results.push_back(r);
+        }
+    }
+
+    for (int i = 0; i < maxProposalCount && objectSize == 7; i++) {
         float image_id = detections[i * objectSize + 0];
         if (image_id < 0) {
             break;
@@ -300,22 +332,18 @@ AgeGenderDetection::Result AgeGenderDetection::operator[] (int idx) const {
     return r;
 }
 
-CNNNetwork AgeGenderDetection::read() {
+CNNNetwork AgeGenderDetection::read(const InferenceEngine::Core& ie) {
     slog::info << "Loading network files for Age/Gender Recognition network" << slog::endl;
-    CNNNetReader netReader;
     // Read network
-    netReader.ReadNetwork(pathToModel);
-    // Extract model name and load its weights
-    std::string binFileName = fileNameNoExt(pathToModel) + ".bin";
-    netReader.ReadWeights(binFileName);
+    auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size to be used.
-    netReader.getNetwork().setBatchSize(maxBatch);
-    slog::info << "Batch size is set to " << netReader.getNetwork().getBatchSize() << " for Age/Gender Recognition network" << slog::endl;
+    network.setBatchSize(maxBatch);
+    slog::info << "Batch size is set to " << network.getBatchSize() << " for Age/Gender Recognition network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
     // Age/Gender Recognition network should have one input and two outputs
     slog::info << "Checking Age/Gender Recognition network inputs" << slog::endl;
-    InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+    InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Age/Gender Recognition network should have only one input");
     }
@@ -326,7 +354,7 @@ CNNNetwork AgeGenderDetection::read() {
 
     // ---------------------------Check outputs ------------------------------------------------------------
     slog::info << "Checking Age/Gender Recognition network outputs" << slog::endl;
-    OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+    OutputsDataMap outputInfo(network.getOutputsInfo());
     if (outputInfo.size() != 2) {
         throw std::logic_error("Age/Gender Recognition network should have two output layers");
     }
@@ -335,46 +363,12 @@ CNNNetwork AgeGenderDetection::read() {
     DataPtr ptrAgeOutput = (it++)->second;
     DataPtr ptrGenderOutput = (it++)->second;
 
-    if (!ptrAgeOutput) {
-        throw std::logic_error("Age output data pointer is not valid");
-    }
-    if (!ptrGenderOutput) {
-        throw std::logic_error("Gender output data pointer is not valid");
-    }
-
-    auto genderCreatorLayer = ptrGenderOutput->getCreatorLayer().lock();
-    auto ageCreatorLayer = ptrAgeOutput->getCreatorLayer().lock();
-
-    if (!ageCreatorLayer) {
-        throw std::logic_error("Age creator layer pointer is not valid");
-    }
-    if (!genderCreatorLayer) {
-        throw std::logic_error("Gender creator layer pointer is not valid");
-    }
-
-    // if gender output is convolution, it can be swapped with age
-    if (genderCreatorLayer->type == "Convolution") {
-        std::swap(ptrAgeOutput, ptrGenderOutput);
-    }
-
-    if (ptrAgeOutput->getCreatorLayer().lock()->type != "Convolution") {
-        throw std::logic_error("In Age/Gender Recognition network, age layer (" + ageCreatorLayer->name +
-                               ") should be a Convolution, but was: " + ageCreatorLayer->type);
-    }
-
-    if (ptrGenderOutput->getCreatorLayer().lock()->type != "SoftMax") {
-        throw std::logic_error("In Age/Gender Recognition network, gender layer (" + genderCreatorLayer->name +
-                               ") should be a SoftMax, but was: " + genderCreatorLayer->type);
-    }
-    slog::info << "Age layer: " << ageCreatorLayer->name<< slog::endl;
-    slog::info << "Gender layer: " << genderCreatorLayer->name<< slog::endl;
-
     outputAge = ptrAgeOutput->getName();
     outputGender = ptrGenderOutput->getName();
 
-    slog::info << "Loading Age/Gender Recognition model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Age/Gender Recognition model to the " << deviceForInference << " plugin" << slog::endl;
     _enabled = true;
-    return netReader.getNetwork();
+    return network;
 }
 
 
@@ -431,21 +425,17 @@ HeadPoseDetection::Results HeadPoseDetection::operator[] (int idx) const {
     return r;
 }
 
-CNNNetwork HeadPoseDetection::read() {
+CNNNetwork HeadPoseDetection::read(const InferenceEngine::Core& ie) {
     slog::info << "Loading network files for Head Pose Estimation network" << slog::endl;
-    CNNNetReader netReader;
     // Read network model
-    netReader.ReadNetwork(pathToModel);
-    // Extract model name and load its weights
-    std::string binFileName = fileNameNoExt(pathToModel) + ".bin";
-    netReader.ReadWeights(binFileName);
+    auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size
-    netReader.getNetwork().setBatchSize(maxBatch);
-    slog::info << "Batch size is set to  " << netReader.getNetwork().getBatchSize() << " for Head Pose Estimation network" << slog::endl;
+    network.setBatchSize(maxBatch);
+    slog::info << "Batch size is set to  " << network.getBatchSize() << " for Head Pose Estimation network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
     slog::info << "Checking Head Pose Estimation network inputs" << slog::endl;
-    InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+    InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Head Pose Estimation network should have only one input");
     }
@@ -456,47 +446,20 @@ CNNNetwork HeadPoseDetection::read() {
 
     // ---------------------------Check outputs ------------------------------------------------------------
     slog::info << "Checking Head Pose Estimation network outputs" << slog::endl;
-    OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
-    if (outputInfo.size() != 3) {
-        throw std::logic_error("Head Pose Estimation network should have 3 outputs");
-    }
+    OutputsDataMap outputInfo(network.getOutputsInfo());
     for (auto& output : outputInfo) {
         output.second->setPrecision(Precision::FP32);
     }
-    std::map<std::string, bool> layerNames = {
-        {outputAngleR, false},
-        {outputAngleP, false},
-        {outputAngleY, false}
-    };
-
-    for (auto && output : outputInfo) {
-        CNNLayerPtr layer = output.second->getCreatorLayer().lock();
-        if (!layer) {
-            throw std::logic_error("Layer pointer is invalid");
+    for (const std::string& outName : {outputAngleR, outputAngleP, outputAngleY}) {
+        if (outputInfo.find(outName) == outputInfo.end()) {
+            throw std::logic_error("There is no " + outName + " output in Head Pose Estimation network");
         }
-        if (layerNames.find(layer->name) == layerNames.end()) {
-            throw std::logic_error("Head Pose Estimation network output layer unknown: " + layer->name + ", should be " +
-                                   outputAngleR + " or " + outputAngleP + " or " + outputAngleY);
-        }
-        if (layer->type != "FullyConnected") {
-            throw std::logic_error("Head Pose Estimation network output layer (" + layer->name + ") has invalid type: " +
-                                   layer->type + ", should be FullyConnected");
-        }
-        auto fc = dynamic_cast<FullyConnectedLayer*>(layer.get());
-        if (!fc) {
-            throw std::logic_error("Fully connected layer is not valid");
-        }
-        if (fc->_out_num != 1) {
-            throw std::logic_error("Head Pose Estimation network output layer (" + layer->name + ") has invalid out-size=" +
-                                   std::to_string(fc->_out_num) + ", should be 1");
-        }
-        layerNames[layer->name] = true;
     }
 
-    slog::info << "Loading Head Pose Estimation model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Head Pose Estimation model to the " << deviceForInference << " plugin" << slog::endl;
 
     _enabled = true;
-    return netReader.getNetwork();
+    return network;
 }
 
 EmotionsDetection::EmotionsDetection(const std::string &pathToModel,
@@ -573,23 +536,19 @@ std::map<std::string, float> EmotionsDetection::operator[] (int idx) const {
     return emotions;
 }
 
-CNNNetwork EmotionsDetection::read() {
+CNNNetwork EmotionsDetection::read(const InferenceEngine::Core& ie) {
     slog::info << "Loading network files for Emotions Recognition" << slog::endl;
-    InferenceEngine::CNNNetReader netReader;
     // Read network model
-    netReader.ReadNetwork(pathToModel);
-    // Extract model name and load its weights
-    std::string binFileName = fileNameNoExt(pathToModel) + ".bin";
-    netReader.ReadWeights(binFileName);
+    auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size
-    netReader.getNetwork().setBatchSize(maxBatch);
-    slog::info << "Batch size is set to " << netReader.getNetwork().getBatchSize() << " for Emotions Recognition" << slog::endl;
+    network.setBatchSize(maxBatch);
+    slog::info << "Batch size is set to " << network.getBatchSize() << " for Emotions Recognition" << slog::endl;
     // -----------------------------------------------------------------------------------------------------
 
     // Emotions Recognition network should have one input and one output.
     // ---------------------------Check inputs -------------------------------------------------------------
     slog::info << "Checking Emotions Recognition network inputs" << slog::endl;
-    InferenceEngine::InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+    InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Emotions Recognition network should have only one input");
     }
@@ -600,7 +559,7 @@ CNNNetwork EmotionsDetection::read() {
 
     // ---------------------------Check outputs ------------------------------------------------------------
     slog::info << "Checking Emotions Recognition network outputs" << slog::endl;
-    InferenceEngine::OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+    InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
     if (outputInfo.size() != 1) {
         throw std::logic_error("Emotions Recognition network should have one output layer");
     }
@@ -608,31 +567,11 @@ CNNNetwork EmotionsDetection::read() {
         output.second->setPrecision(Precision::FP32);
     }
 
-    DataPtr emotionsOutput = outputInfo.begin()->second;
+    outputEmotions = outputInfo.begin()->first;
 
-    if (!emotionsOutput) {
-        throw std::logic_error("Emotions output data pointer is invalid");
-    }
-
-    auto emotionsCreatorLayer = emotionsOutput->getCreatorLayer().lock();
-
-    if (!emotionsCreatorLayer) {
-        throw std::logic_error("Emotions creator layer pointer is invalid");
-    }
-
-    if (emotionsCreatorLayer->type != "SoftMax") {
-        throw std::logic_error("In Emotions Recognition network, Emotion layer ("
-                               + emotionsCreatorLayer->name +
-                               ") should be a SoftMax, but was: " +
-                               emotionsCreatorLayer->type);
-    }
-    slog::info << "Emotions layer: " << emotionsCreatorLayer->name<< slog::endl;
-
-    outputEmotions = emotionsOutput->getName();
-
-    slog::info << "Loading Emotions Recognition model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Emotions Recognition model to the " << deviceForInference << " plugin" << slog::endl;
     _enabled = true;
-    return netReader.getNetwork();
+    return network;
 }
 
 
@@ -699,21 +638,17 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
     return normedLandmarks;
 }
 
-CNNNetwork FacialLandmarksDetection::read() {
+CNNNetwork FacialLandmarksDetection::read(const InferenceEngine::Core& ie) {
     slog::info << "Loading network files for Facial Landmarks Estimation" << slog::endl;
-    CNNNetReader netReader;
     // Read network model
-    netReader.ReadNetwork(pathToModel);
-    // Extract model name and load its weights
-    std::string binFileName = fileNameNoExt(pathToModel) + ".bin";
-    netReader.ReadWeights(binFileName);
+    auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size
-    netReader.getNetwork().setBatchSize(maxBatch);
-    slog::info << "Batch size is set to  " << netReader.getNetwork().getBatchSize() << " for Facial Landmarks Estimation network" << slog::endl;
+    network.setBatchSize(maxBatch);
+    slog::info << "Batch size is set to  " << network.getBatchSize() << " for Facial Landmarks Estimation network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
     slog::info << "Checking Facial Landmarks Estimation network inputs" << slog::endl;
-    InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+    InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Facial Landmarks Estimation network should have only one input");
     }
@@ -724,37 +659,25 @@ CNNNetwork FacialLandmarksDetection::read() {
 
     // ---------------------------Check outputs ------------------------------------------------------------
     slog::info << "Checking Facial Landmarks Estimation network outputs" << slog::endl;
-    OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
-    if (outputInfo.size() != 1) {
-        throw std::logic_error("Facial Landmarks Estimation network should have only one output");
+    OutputsDataMap outputInfo(network.getOutputsInfo());
+    const std::string outName = outputInfo.begin()->first;
+    if (outName != outputFacialLandmarksBlobName) {
+        throw std::logic_error("Facial Landmarks Estimation network output layer unknown: " + outName
+                               + ", should be " + outputFacialLandmarksBlobName);
     }
-    for (auto& output : outputInfo) {
-        output.second->setPrecision(Precision::FP32);
-    }
-    std::map<std::string, bool> layerNames = {
-        {outputFacialLandmarksBlobName, false}
-    };
-
-    for (auto && output : outputInfo) {
-        CNNLayerPtr layer = output.second->getCreatorLayer().lock();
-        if (!layer) {
-            throw std::logic_error("Layer pointer is invalid");
-        }
-        if (layerNames.find(layer->name) == layerNames.end()) {
-            throw std::logic_error("Facial Landmarks Estimation network output layer unknown: " + layer->name + ", should be " +
-                                   outputFacialLandmarksBlobName);
-        }
-        const SizeVector outputDims = output.second->getTensorDesc().getDims();
-        if (outputDims[1] != 70) {
-            throw std::logic_error("Facial Landmarks Estimation network output layer should have 70 as a last dimension");
-        }
-        layerNames[layer->name] = true;
+    Data& data = *outputInfo.begin()->second;
+    data.setPrecision(Precision::FP32);
+    const SizeVector& outSizeVector = data.getTensorDesc().getDims();
+    if (outSizeVector.size() != 2 && outSizeVector.back() != 70) {
+        throw std::logic_error("Facial Landmarks Estimation network output layer should have 2 dimensions and 70 as"
+                               " the last dimension");
     }
 
-    slog::info << "Loading Facial Landmarks Estimation model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Facial Landmarks Estimation model to the " << deviceForInference << " plugin"
+        << slog::endl;
 
     _enabled = true;
-    return netReader.getNetwork();
+    return network;
 }
 
 
@@ -771,7 +694,7 @@ void Load::into(InferenceEngine::Core & ie, const std::string & deviceName, bool
             config[PluginConfigParams::KEY_DYN_BATCH_ENABLED] = PluginConfigParams::YES;
         }
 
-        detector.net = ie.LoadNetwork(detector.read(), deviceName, config);
+        detector.net = ie.LoadNetwork(detector.read(ie), deviceName, config);
     }
 }
 

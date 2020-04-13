@@ -82,6 +82,7 @@ void showUsage() {
     std::cout << "    -duplicate_num               " << duplication_channel_number << std::endl;
     std::cout << "    -real_input_fps              " << real_input_fps << std::endl;
     std::cout << "    -i                           " << input_video << std::endl;
+    std::cout << "    -loop_video                  " << loop_video_output_message << std::endl;
     std::cout << "    -u                           " << utilization_monitors_message << std::endl;
 }
 
@@ -215,7 +216,6 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        std::string weightsPath;
         std::string modelPath = FLAGS_m;
         std::size_t found = modelPath.find_last_of(".");
         if (found > modelPath.size()) {
@@ -223,9 +223,7 @@ int main(int argc, char* argv[]) {
             slog::info << "Expected to be <model_name>.xml" << slog::endl;
             return -1;
         }
-        weightsPath = modelPath.substr(0, found) + ".bin";
         slog::info << "Model   path: " << modelPath << slog::endl;
-        slog::info << "Weights path: " << weightsPath << slog::endl;
 
         IEGraph::InitParams graphParams;
         graphParams.batchSize       = FLAGS_bs;
@@ -233,7 +231,6 @@ int main(int argc, char* argv[]) {
         graphParams.collectStats    = FLAGS_show_stats;
         graphParams.reportPerf      = FLAGS_pc;
         graphParams.modelPath       = modelPath;
-        graphParams.weightsPath     = weightsPath;
         graphParams.cpuExtPath      = FLAGS_l;
         graphParams.cldnnConfigPath = FLAGS_c;
         graphParams.deviceName      = FLAGS_d;
@@ -254,6 +251,10 @@ int main(int argc, char* argv[]) {
         const auto duplicateFactor = (1 + FLAGS_duplicate_num);
         size_t numberOfInputs = (FLAGS_nc + files.size()) * duplicateFactor;
 
+        if (numberOfInputs == 0) {
+            throw std::runtime_error("No valid inputs were supplied");
+        }
+
         DisplayParams params = prepareDisplayParams(numberOfInputs);
 
         slog::info << "\tNumber of input channels:    " << numberOfInputs << slog::endl;
@@ -273,7 +274,7 @@ int main(int argc, char* argv[]) {
             slog::info << "Trying to open input video ..." << slog::endl;
             for (auto& file : files) {
                 try {
-                    sources.openVideo(file, false);
+                    sources.openVideo(file, false, FLAGS_loop_video);
                 } catch (...) {
                     slog::info << "Cannot open video [" << file << "]" << slog::endl;
                     throw;
@@ -284,7 +285,7 @@ int main(int argc, char* argv[]) {
             slog::info << "Trying to connect " << FLAGS_nc << " web cams ..." << slog::endl;
             for (size_t i = 0; i < FLAGS_nc; ++i) {
                 try {
-                    sources.openVideo(std::to_string(i), true);
+                    sources.openVideo(std::to_string(i), true, false);
                 } catch (...) {
                     slog::info << "Cannot open web cam [" << i << "]" << slog::endl;
                     throw;

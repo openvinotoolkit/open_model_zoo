@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Image retrieval model based on [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) architecture as a backbone.
+Image retrieval model based on [MobileNetV2](https://arxiv.org/abs/1801.04381) architecture as a backbone.
 
 ## Example
 

@@ -56,13 +56,13 @@ struct HigherPriority {
 class Worker {
 public:
     explicit Worker(unsigned threadNum):
-        threadPull(threadNum), running{false} {}
+        threadPool(threadNum), running{false} {}
     ~Worker() {
         stop();
     }
     void runThreads() {
         running = true;
-        for (std::thread& t : threadPull) {
+        for (std::thread& t : threadPool) {
             t = std::thread(&Worker::threadFunc, this);
         }
     }
@@ -100,7 +100,7 @@ public:
         tasksCondVar.notify_all();
     }
     void join() {
-        for (auto& t : threadPull) {
+        for (auto& t : threadPool) {
             t.join();
         }
         if (nullptr != currentException) {
@@ -112,7 +112,7 @@ private:
     std::condition_variable tasksCondVar;
     std::set<std::shared_ptr<Task>, HigherPriority> tasks;
     std::mutex tasksMutex;
-    std::vector<std::thread> threadPull;
+    std::vector<std::thread> threadPool;
     std::atomic<bool> running;
     std::exception_ptr currentException;
     std::mutex excpetionMutex;

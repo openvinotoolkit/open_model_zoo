@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  Deep face recognition net with MobileFaceNet architecture and Arcface loss <https://arxiv.org/abs/1801.07698>
+  Deep face recognition net with MobileFaceNet backbone and Arcface loss <https://arxiv.org/abs/1801.07698>
 task_type: face_recognition
 files:
   - name: model-MobileFaceNet-arcface-ms1m-refine-v1.zip

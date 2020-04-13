@@ -1,4 +1,4 @@
-# Brain-tumor-segmentation-0002
+# brain-tumor-segmentation-0002
 
 ## Use Case and High-Level Description
 

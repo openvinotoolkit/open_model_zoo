@@ -34,20 +34,6 @@
   #endif
 #endif
 
-/**
- * @brief This class represents a console error listener.
- *
- */
-class ConsoleErrorListener : public InferenceEngine::IErrorListener {
-    /**
-     * @brief The plugin calls this method with a null terminated error message (in case of error)
-     * @param msg Error message
-     */
-    void onError(const char *msg) noexcept override {
-        std::clog << "Device message: " << msg << std::endl;
-    }
-};
-
 template <typename T, std::size_t N>
 constexpr std::size_t arraySize(const T (&)[N]) noexcept {
     return N;
@@ -118,7 +104,7 @@ public:
 };
 
 // Known colors for training classes from the Cityscapes dataset
-static const Color CITYSCAPES_COLORS[] = {
+static UNUSED const Color CITYSCAPES_COLORS[] = {
     { 128, 64,  128 },
     { 232, 35,  244 },
     { 70,  70,  70 },
@@ -142,95 +128,6 @@ static const Color CITYSCAPES_COLORS[] = {
     { 81,  0,   81 }
 };
 
-/**
- * @brief Writes output data to image
- * @param name - image name
- * @param data - output data
- * @param classesNum - the number of classes
- * @return false if error else true
- */
-static UNUSED void writeOutputBmp(std::vector<std::vector<size_t>> data, size_t classesNum, std::ostream &outFile) {
-    unsigned int seed = (unsigned int) time(NULL);
-    static std::vector<Color> colors(std::begin(CITYSCAPES_COLORS), std::end(CITYSCAPES_COLORS));
-
-    while (classesNum > colors.size()) {
-        static std::mt19937 rng(seed);
-        std::uniform_int_distribution<int> dist(0, 255);
-        Color color(dist(rng), dist(rng), dist(rng));
-        colors.push_back(color);
-    }
-
-    unsigned char file[14] = {
-            'B', 'M',           // magic
-            0, 0, 0, 0,         // size in bytes
-            0, 0,               // app data
-            0, 0,               // app data
-            40 + 14, 0, 0, 0      // start of data offset
-    };
-    unsigned char info[40] = {
-            40, 0, 0, 0,        // info hd size
-            0, 0, 0, 0,         // width
-            0, 0, 0, 0,         // height
-            1, 0,               // number color planes
-            24, 0,              // bits per pixel
-            0, 0, 0, 0,         // compression is none
-            0, 0, 0, 0,         // image bits size
-            0x13, 0x0B, 0, 0,   // horz resolution in pixel / m
-            0x13, 0x0B, 0, 0,   // vert resolution (0x03C3 = 96 dpi, 0x0B13 = 72 dpi)
-            0, 0, 0, 0,         // #colors in palette
-            0, 0, 0, 0,         // #important colors
-    };
-
-    auto height = data.size();
-    auto width = data.at(0).size();
-
-    if (height > (size_t) std::numeric_limits<int32_t>::max || width > (size_t) std::numeric_limits<int32_t>::max) {
-        THROW_IE_EXCEPTION << "File size is too big: " << height << " X " << width;
-    }
-
-    int padSize = static_cast<int>(4 - (width * 3) % 4) % 4;
-    int sizeData = static_cast<int>(width * height * 3 + height * padSize);
-    int sizeAll = sizeData + sizeof(file) + sizeof(info);
-
-    file[2] = (unsigned char) (sizeAll);
-    file[3] = (unsigned char) (sizeAll >> 8);
-    file[4] = (unsigned char) (sizeAll >> 16);
-    file[5] = (unsigned char) (sizeAll >> 24);
-
-    info[4] = (unsigned char) (width);
-    info[5] = (unsigned char) (width >> 8);
-    info[6] = (unsigned char) (width >> 16);
-    info[7] = (unsigned char) (width >> 24);
-
-    int32_t negativeHeight = -(int32_t) height;
-    info[8] = (unsigned char) (negativeHeight);
-    info[9] = (unsigned char) (negativeHeight >> 8);
-    info[10] = (unsigned char) (negativeHeight >> 16);
-    info[11] = (unsigned char) (negativeHeight >> 24);
-
-    info[20] = (unsigned char) (sizeData);
-    info[21] = (unsigned char) (sizeData >> 8);
-    info[22] = (unsigned char) (sizeData >> 16);
-    info[23] = (unsigned char) (sizeData >> 24);
-
-    outFile.write(reinterpret_cast<char *>(file), sizeof(file));
-    outFile.write(reinterpret_cast<char *>(info), sizeof(info));
-
-    unsigned char pad[3] = {0, 0, 0};
-
-    for (size_t y = 0; y < height; y++) {
-        for (size_t x = 0; x < width; x++) {
-            unsigned char pixel[3];
-            size_t index = data.at(y).at(x);
-            pixel[0] = colors.at(index).red();
-            pixel[1] = colors.at(index).green();
-            pixel[2] = colors.at(index).blue();
-            outFile.write(reinterpret_cast<char *>(pixel), 3);
-        }
-        outFile.write(reinterpret_cast<char *>(pad), padSize);
-    }
-}
-
 static std::vector<std::pair<std::string, InferenceEngine::InferenceEngineProfileInfo>>
 perfCountersSorted(std::map<std::string, InferenceEngine::InferenceEngineProfileInfo> perfMap) {
     using perfItem = std::pair<std::string, InferenceEngine::InferenceEngineProfileInfo>;
@@ -246,7 +143,7 @@ perfCountersSorted(std::map<std::string, InferenceEngine::InferenceEngineProfile
 }
 
 static UNUSED void printPerformanceCounts(const std::map<std::string, InferenceEngine::InferenceEngineProfileInfo>& performanceMap,
-                                          std::ostream &stream, std::string deviceName,
+                                          std::ostream &stream, const std::string &deviceName,
                                           bool bshowHeader = true) {
     long long totalTime = 0;
     // Print performance counts

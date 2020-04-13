@@ -17,20 +17,28 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/driver-action-recognition-adas-0002-decoder.xml
-    size: 120884
-    sha256: f0a1806363cad8934fc498fa4f7b4a363b8688d49213a8c0875114dd934eeae2
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
+    size: 120930
+    sha256: b0649b638050295f857b2e09a73f1a1be1f2820d0ab6cdc0515308df0f372e9c
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
   - name: FP32/driver-action-recognition-adas-0002-decoder.bin
     size: 29436428
-    sha256: fbefb055d8fa7a40461ce11175e9717291eed46caa8614cc42450ee28d4e467d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
+    sha256: 174e8a7b8d7ddce4d291c2e54837f73a7ece094030c27c0c089065e3c1e49a0c
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
   - name: FP16/driver-action-recognition-adas-0002-decoder.xml
-    size: 120844
-    sha256: cc7aedbc5ddec61379f5836a07631fd16a3d4c2ca6005a8f835d865464372440
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
+    size: 120894
+    sha256: 49b137c1702ebc200c1cb720c3e71ca10b5613df2db6d1e959ddb5254a19505f
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
   - name: FP16/driver-action-recognition-adas-0002-decoder.bin
     size: 14718330
-    sha256: d2973b89668dbad748bb1e758f0f425e43a1878d77ae0874b32c103c8d39572e
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+    sha256: 21a0986458dac8a3711fea3230e9aaa2488eaa5794eeaed686fdc1f96a70bed7
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+  - name: FP16-INT8/driver-action-recognition-adas-0002-decoder.xml
+    size: 306116
+    sha256: 061383b445c81e31e4461006fadc1c98d8aa6fdb9f6d8decf35e4827ead8221b
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/driver-action-recognition-adas-0002-decoder/FP16-INT8/driver-action-recognition-adas-0002-decoder.xml
+  - name: FP16-INT8/driver-action-recognition-adas-0002-decoder.bin
+    size: 29519792
+    sha256: bef2bbca8977f7354388153b42e164fb1191d5b1f7eff24fbea8233316ba5a6c
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/driver-action-recognition-adas-0002-decoder/FP16-INT8/driver-action-recognition-adas-0002-decoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

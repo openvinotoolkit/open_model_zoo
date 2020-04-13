@@ -14,15 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from tqdm import tqdm
 import numpy as np
 
 from ..config import BoolField, PathField
+from ..logging import print_info
 from ..utils import read_json, convert_bboxes_xywh_to_x1y1x2y2, check_file_existence
 from ..representation import (
     DetectionAnnotation, PoseEstimationAnnotation, CoCoInstanceSegmentationAnnotation, ContainerAnnotation
 )
 from .format_converter import BaseFormatConverter, FileBasedAnnotationConverter, ConverterReturn, verify_label_map
+
+try:
+    from tqdm import tqdm
+except ImportError:
+    tqdm = None
 
 
 def get_image_annotation(image_id, annotations_):
@@ -124,8 +129,9 @@ class MSCocoDetectionConverter(BaseFormatConverter):
         detection_annotations = []
         content_errors = [] if check_content else None
         num_iterations = len(image_info)
+        image_iter = tqdm(enumerate(image_info)) if tqdm is not None else enumerate(image_info)
 
-        for (image_id, image) in tqdm(enumerate(image_info)):
+        for (image_id, image) in image_iter:
             image_labels, xmins, ymins, xmaxs, ymaxs, is_crowd, _ = self._read_image_annotation(
                 image, annotations,
                 label_id_to_label
@@ -137,6 +143,8 @@ class MSCocoDetectionConverter(BaseFormatConverter):
             detection_annotation = DetectionAnnotation(image[1], image_labels, xmins, ymins, xmaxs, ymaxs)
             detection_annotation.metadata['iscrowd'] = is_crowd
             detection_annotations.append(detection_annotation)
+            if tqdm is None and image_id % progress_interval == 0:
+                print_info('{} / {} processed'.format(image_id, num_iterations))
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id / num_iterations * 100)
 
@@ -237,8 +245,9 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
         segmentation_annotations = []
         content_errors = None if not check_content else []
         num_iterations = len(image_info)
+        image_iter = tqdm(enumerate(image_info)) if tqdm is not None else enumerate(image_info)
 
-        for (image_id, image) in tqdm(enumerate(image_info)):
+        for (image_id, image) in image_iter:
             image_labels, _, _, _, _, is_crowd, segmentations = self._read_image_annotation(
                 image, annotations,
                 label_id_to_label
@@ -250,6 +259,9 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
                     content_errors.append('{}: does not exist'.format(image_full_path))
             annotation.metadata['iscrowd'] = is_crowd
             segmentation_annotations.append(annotation)
+            if tqdm is None and image_id % progress_interval == 0:
+                print_info('{} / {} processed'.format(image_id, num_iterations))
+
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id / num_iterations * 100)
 
@@ -266,8 +278,9 @@ class MSCocoMaskRCNNConverter(MSCocoDetectionConverter):
         container_annotations = []
         content_errors = None if not check_content else []
         num_iterations = len(image_info)
+        image_iter = tqdm(enumerate(image_info)) if tqdm is not None else enumerate(image_info)
 
-        for (image_id, image) in tqdm(enumerate(image_info)):
+        for (image_id, image) in image_iter:
             image_labels, xmins, ymins, xmaxs, ymaxs, is_crowd, segmentations = self._read_image_annotation(
                 image, annotations,
                 label_id_to_label
@@ -285,6 +298,9 @@ class MSCocoMaskRCNNConverter(MSCocoDetectionConverter):
                 'detection_annotation': detection_annotation,
                 'segmentation_annotation': segmentation_annotation
             }))
+
+            if tqdm is None and image_id % progress_interval == 0:
+                print_info('{} / {} processed'.format(image_id, num_iterations))
 
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id / num_iterations * 100)

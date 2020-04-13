@@ -27,9 +27,6 @@
 #include <samples/slog.hpp>
 #include "perf_timer.hpp"
 #include "input.hpp"
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 void loadImageToIEGraph(cv::Mat img, void* ie_buffer);
 
@@ -45,7 +42,6 @@ private:
     std::size_t batchSize;
 
     std::string modelPath;
-    std::string weightsPath;
     std::string cpuExtensionPath;
     std::string cldnnConfigPath;
 
@@ -77,7 +73,7 @@ private:
     GetterFunc getter;
     using PostprocessingFunc = std::function<std::vector<Detections>(InferenceEngine::InferRequest::Ptr, const std::vector<std::string>&, cv::Size)>;
     PostprocessingFunc postprocessing;
-    using PostLoadFunc = std::function<void (const std::vector<std::string>&, InferenceEngine::CNNNetReader&)>;
+    using PostLoadFunc = std::function<void (const std::vector<std::string>&, InferenceEngine::CNNNetwork&)>;
     PostLoadFunc postLoad;
     std::thread getterThread;
 
@@ -90,7 +86,6 @@ public:
         bool collectStats = false;
         bool reportPerf = false;
         std::string modelPath;
-        std::string weightsPath;
         std::string cpuExtPath;
         std::string cldnnConfigPath;
         std::string deviceName;

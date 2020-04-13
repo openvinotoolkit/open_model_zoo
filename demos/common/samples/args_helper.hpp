@@ -34,7 +34,7 @@
 inline void readInputFilesArguments(std::vector<std::string> &files, const std::string& arg) {
     struct stat sb;
     if (stat(arg.c_str(), &sb) != 0) {
-        if (arg.find("rtsp:") != 0) {
+        if (arg.compare(0, 5, "rtsp:") != 0) {
             slog::warn << "File " << arg << " cannot be opened!" << slog::endl;
             return;
         }

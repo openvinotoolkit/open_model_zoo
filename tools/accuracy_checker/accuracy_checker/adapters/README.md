@@ -32,6 +32,7 @@ AccuracyChecker supports following set of adapters:
     - `tiny_yolo_v2` - `[1.08, 1.19, 3.42, 4.41, 6.63, 11.38, 9.42, 5.11, 16.62, 10.52]`
   * `coords` - number of bbox coordinates (default 4).
   * `num` - num parameter from DarkNet configuration file (default 5).
+  * `cells` - number of cells across width and height (default 13).
 * `yolo_v3` - converting output of YOLO v3 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 80).
   * `anchors` - anchor values provided as comma-separited list or precomputed:
@@ -52,6 +53,8 @@ AccuracyChecker supports following set of adapters:
   * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.05).
   * `nms_threshold` - overlap threshold for NMS (optional, default 0.5).
   * `keep_top_k ` - maximal number of boxes which should be kept (optional, default 200).
+  * `feat_size` - features size in format [[feature_width, feature_height], ...] (Optional, default values got from [MLPerf](https://github.com/mlperf/inference/blob/0691366473fd4fbbc4eb432fad990683a5a87099/v0.5/classification_and_detection/python/models/ssd_r34.py#L208))
+  * `do_softmax` - boolean flag which says should be softmax applied to detection scores or not. (Optional, default True)
 * `ssd_onnx` - converting output of SSD-based model from PyTorch with NonMaxSuppression layer.
   * `labels_out` - name of output layer with labels or regular expression for it searching.
   * `scores_out`- name of output layer with scores or regular expression for it searching.
@@ -91,6 +94,14 @@ AccuracyChecker supports following set of adapters:
   * `action_scale` - scale for correct action score calculation.
 * `super_resolution` - converting output of single image super resolution network to `SuperResolutionPrediction`.
   * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
+  * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
+  * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
+  The order of actions:
+  1. Multiply on `std`
+  2. Add `mean`
+  3. Reverse channels if this option enabled.
+  * `target_out` - super resolution model output layer name in case when model has several outputs.
 * `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.
@@ -124,6 +135,8 @@ AccuracyChecker supports following set of adapters:
   * `beam_size` -  size of the beam to use during decoding (default 10).
   * `blank_label` - index of the CTC blank label.
   * `softmaxed_probabilities` - indicator that model uses softmax for output layer (default False).
+* `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
+  * `blank_label` - index of the CTC blank label (default 0).
 * `gaze_estimation` - converting output of gaze estimation model to `GazeVectorPrediction`.
 * `hit_ratio_adapter` - converting output NCF model to `HitRatioPrediction`.
 * `brain_tumor_segmentation` - converting output of brain tumor segmentation model to `BrainTumorSegmentationPrediction`.
@@ -158,6 +171,8 @@ AccuracyChecker supports following set of adapters:
   * `raw_masks_out` - name of output layer with raw instances masks.
   * `texts_out` - name of output layer with texts.
   * `confidence_threshold` - confidence threshold that is used to filter out detected instances.
-* `fcos_person` - converting output of FCOS (single class) model to `DetectionPrediction` representation.
+* `class_agnostic_detection` - converting 'boxes' [n, 5] output of detection model to `DetectionPrediction` representation.
   * `output_blob` - name of output layer with bboxes.
   * `scale` - scalar value to normalize bbox coordinates.
+* `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.
+* `inpainting` - converting output of Image Inpainting model to `ImageInpaintingPrediction` representation.

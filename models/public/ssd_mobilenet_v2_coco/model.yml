@@ -13,19 +13,16 @@
 # limitations under the License.
 
 description: >-
-  The `ssd_mobilenet_v2_coco` model is a Single-Shot multibox Detection <SSD>
-  <https://arxiv.org/pdf/1801.04381.pdf> network intended to perform object detection.
-  The difference between this model and the `mobilenet-ssd` is that the while
-  `mobilenet-ssd` detects faces only, the `ssd_mobilenet_v2_coco` model detects
-  objects, as it has been trained from the Common Objects in Context (COCO) image
-  dataset.
+  The "ssd_mobilenet_v2_coco" model is a Single-Shot multibox Detection <SSD> <https://arxiv.org/abs/1801.04381>
+  network intended to perform object detection. The model has been trained from the
+  Common Objects in Context (COCO) image dataset.
 
-  The model input is a blob that consists of a single image of 1x3x300x300 in
-  RGB order.
+  The model input is a blob that consists of a single image of 1x3x300x300 in RGB
+  order.
 
-  The model output is a typical vector containing the tracked object data, as
-  previously described. Note that the "class_id" data is now significant and should
-  be used to determine the classification for any detected object.
+  The model output is a typical vector containing the tracked object data, as previously
+  described. Note that the "class_id" data is now significant and should be used to
+  determine the classification for any detected object.
 task_type: detection
 files:
   - name: ssd_mobilenet_v2_coco.tar.gz
@@ -40,7 +37,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,300,300,3]
   - --input=image_tensor
-  - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/ssd_v2_support.json
+  - --transformations_config=$mo_dir/extensions/front/tf/ssd_v2_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssd_mobilenet_v2_coco_2018_03_29/pipeline.config
   - --output=detection_classes,detection_scores,detection_boxes,num_detections
   - --input_model=$dl_dir/ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.pb

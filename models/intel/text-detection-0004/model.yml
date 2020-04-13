@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/text-detection-0004.xml
-    size: 156936
-    sha256: bdc4f42d3020f99430364a6af2adf30b20a7817a57efcf33b179c4f58db4482a
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-detection-0004/FP32/text-detection-0004.xml
+    size: 185512
+    sha256: d7b2ea700fa4f6fbde3d3deb6318531daa8bd7879bd64d1f85ed1453930a9902
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-detection-0004/FP32/text-detection-0004.xml
   - name: FP32/text-detection-0004.bin
     size: 17312168
-    sha256: 6da6456f27123be2d9a0e68bb73a7750f6aaee2f0af75d7f34ec6fa97f6727dc
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-detection-0004/FP32/text-detection-0004.bin
+    sha256: 6da328c7675c2d1568cbb50b2c1643c8ba6194461b01b3461216c77e1258c7d5
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-detection-0004/FP32/text-detection-0004.bin
   - name: FP16/text-detection-0004.xml
-    size: 156839
-    sha256: 9a2c8f21ccfe54cc520cfe3ed7295178e99e6174913a64c2699394557bccf731
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-detection-0004/FP16/text-detection-0004.xml
+    size: 185381
+    sha256: 4005a61c891d003aa33892f05decf86382de635acbcd4b3787c59a21b14ff9f0
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-detection-0004/FP16/text-detection-0004.xml
   - name: FP16/text-detection-0004.bin
     size: 8656000
-    sha256: 719639a52b46f94455ad8c2fb6d0e0bb98c485179f4321c558d5d88aacfbfd0e
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-detection-0004/FP16/text-detection-0004.bin
-  - name: FP32-INT8/text-detection-0004.xml
-    size: 461339
-    sha256: 68a3d329defcc6b97098e06e1a568aa9dbf84e8bec014fe8c9d1a185db0e7be2
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-detection-0004/FP32-INT8/text-detection-0004.xml
-  - name: FP32-INT8/text-detection-0004.bin
-    size: 17559056
-    sha256: fa2e973387c7b8a1e8d3165dae15e72e0537ef8e55eeae98081b0fb2b88676c6
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-detection-0004/FP32-INT8/text-detection-0004.bin
+    sha256: 54f0a45a2b0903c59ebb4a68ceadac3037ac137bec7677dae1a5089dd164b40c
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-detection-0004/FP16/text-detection-0004.bin
+  - name: FP16-INT8/text-detection-0004.xml
+    size: 517635
+    sha256: fd61e3933d3c65640704a0c230da995e82354816157e37172bc0335b2aacf019
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-detection-0004/FP16-INT8/text-detection-0004.xml
+  - name: FP16-INT8/text-detection-0004.bin
+    size: 4475588
+    sha256: 9120a086f48b2478eebf0d1c1a10824efb6f335985cb3effe9780a755f9a3840
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-detection-0004/FP16-INT8/text-detection-0004.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

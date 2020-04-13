@@ -24,9 +24,6 @@
 #include <samples/slog.hpp>
 
 #include <ie_iextension.h>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 #include <opencv2/opencv.hpp>
 
@@ -45,7 +42,7 @@ struct BaseDetection {
     mutable bool _enabled;
     const bool doRawOutputMessages;
 
-    BaseDetection(std::string topoName,
+    BaseDetection(const std::string &topoName,
                   const std::string &pathToModel,
                   const std::string &deviceForInference,
                   int maxBatch, bool isBatchDynamic, bool isAsync,
@@ -54,7 +51,7 @@ struct BaseDetection {
     virtual ~BaseDetection();
 
     InferenceEngine::ExecutableNetwork* operator ->();
-    virtual InferenceEngine::CNNNetwork read() = 0;
+    virtual InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) = 0;
     virtual void submitRequest();
     virtual void wait();
     bool enabled() const;
@@ -70,17 +67,19 @@ struct FaceDetection : BaseDetection {
 
     std::string input;
     std::string output;
+    std::string labels_output;
     double detectionThreshold;
     int maxProposalCount;
     int objectSize;
     int enquedFrames;
     float width;
     float height;
+    float network_input_width;
+    float network_input_height;
     float bb_enlarge_coefficient;
     float bb_dx_coefficient;
     float bb_dy_coefficient;
     bool resultsFetched;
-    std::vector<std::string> labels;
     std::vector<Result> results;
 
     FaceDetection(const std::string &pathToModel,
@@ -90,7 +89,7 @@ struct FaceDetection : BaseDetection {
                   float bb_enlarge_coefficient, float bb_dx_coefficient,
                   float bb_dy_coefficient);
 
-    InferenceEngine::CNNNetwork read() override;
+    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
     void submitRequest() override;
 
     void enqueue(const cv::Mat &frame);
@@ -113,7 +112,7 @@ struct AgeGenderDetection : BaseDetection {
                        int maxBatch, bool isBatchDynamic, bool isAsync,
                        bool doRawOutputMessages);
 
-    InferenceEngine::CNNNetwork read() override;
+    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
     void submitRequest() override;
 
     void enqueue(const cv::Mat &face);
@@ -139,7 +138,7 @@ struct HeadPoseDetection : BaseDetection {
                       int maxBatch, bool isBatchDynamic, bool isAsync,
                       bool doRawOutputMessages);
 
-    InferenceEngine::CNNNetwork read() override;
+    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
     void submitRequest() override;
 
     void enqueue(const cv::Mat &face);
@@ -156,7 +155,7 @@ struct EmotionsDetection : BaseDetection {
                       int maxBatch, bool isBatchDynamic, bool isAsync,
                       bool doRawOutputMessages);
 
-    InferenceEngine::CNNNetwork read() override;
+    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
     void submitRequest() override;
 
     void enqueue(const cv::Mat &face);
@@ -177,7 +176,7 @@ struct FacialLandmarksDetection : BaseDetection {
                              int maxBatch, bool isBatchDynamic, bool isAsync,
                              bool doRawOutputMessages);
 
-    InferenceEngine::CNNNetwork read() override;
+    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
     void submitRequest() override;
 
     void enqueue(const cv::Mat &face);

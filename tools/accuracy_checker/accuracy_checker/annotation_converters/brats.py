@@ -19,7 +19,7 @@ import warnings
 
 from ..representation import BrainTumorSegmentationAnnotation
 from ..utils import get_path, read_txt, read_pickle, check_file_existence
-from ..config import StringField, PathField
+from ..config import StringField, PathField, BoolField
 from .format_converter import DirectoryBasedAnnotationConverter
 from ..representation.segmentation_representation import GTMaskLoader
 from .format_converter import ConverterReturn
@@ -35,7 +35,8 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
         parameters.update({
             'image_folder': StringField(optional=True, default='imagesTr', description="Image folder."),
             'mask_folder': StringField(optional=True, default='labelsTr', description="Mask folder."),
-            'labels_file': PathField(optional=True, default=None, description="File with labels")
+            'labels_file': PathField(optional=True, default=None, description="File with labels"),
+            'mask_channels_first': BoolField(optional=True, default=False)
         })
 
         return parameters
@@ -45,13 +46,14 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
         self.image_folder = self.get_value_from_config('image_folder')
         self.mask_folder = self.get_value_from_config('mask_folder')
         self.labels_file = self.get_value_from_config('labels_file')
+        self.mask_channels_first = self.get_value_from_config('mask_channels_first')
 
     def convert(self, check_content=False, **kwargs):
         mask_folder = Path(self.mask_folder)
         image_folder = Path(self.image_folder)
         image_dir = get_path(self.data_dir / image_folder, is_directory=True)
         mask_dir = get_path(self.data_dir / mask_folder, is_directory=True)
-        content_check_erros = [] if check_content else None
+        content_check_errors = [] if check_content else None
 
         annotations = []
         for file_in_dir in image_dir.iterdir():
@@ -61,7 +63,7 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
                 if not check_content:
                     warnings.warn('Annotation mask for {} does not exists. File will be ignored.'.format(file_name))
                 else:
-                    content_check_erros.append(
+                    content_check_errors.append(
                         '{}: '.format(str(file_in_dir)) +
                         'annotation mask does not exists, please remove this file or add gt mask '
                         '({}).'.format(str(mask))
@@ -70,11 +72,12 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
             annotation = BrainTumorSegmentationAnnotation(
                 str(image_folder / file_name),
                 str(mask_folder / file_name),
+                loader=GTMaskLoader.NIFTI_CHANNELS_FIRST if self.mask_channels_first else GTMaskLoader.NIFTI
             )
 
             annotations.append(annotation)
 
-        return ConverterReturn(annotations, self._get_meta(), content_check_erros)
+        return ConverterReturn(annotations, self._get_meta(), content_check_errors)
 
     def _get_meta(self):
         if not self.labels_file:

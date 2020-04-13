@@ -22,7 +22,7 @@ On the start-up, the application reads command line parameters and loads the spe
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./multi_channel_face_detection_demo -h
 
 multi_channel_face_detection_demo [OPTION]
@@ -47,6 +47,7 @@ Options:
     -duplicate_num               Optional. Enable and specify the number of channels additionally copied from real sources
     -real_input_fps              Optional. Disable input frames caching for maximum throughput pipeline
     -i                           Optional. Specify full path to input video files
+    -loop_video                  Optional. Enable playing video on a loop.
     -u                           Optional. List of monitors to show initially.
 ```
 
@@ -76,7 +77,7 @@ On the top of the screen, the demo reports throughput in frames per second. You 
 
 ## Input Video Sources
 
-General parameter for input video source is `-i`. Use it to specify video files and web (**USB**) or IP cameras as input video source. You can add the parameter to a sample command line as follows:
+General parameter for input video source is `-i`. Use it to specify video files or web cameras as input video sources. You can add the parameter to a sample command line as follows:
 ```
 -i <file1> <file2>
 ```
@@ -85,7 +86,7 @@ General parameter for input video source is `-i`. Use it to specify video files 
 
 To see all available web cameras, run the `ls /dev/video*` command. You will get output similar to the following:
 
-```sh
+```
 user@user-PC:~ $ ls /dev/video*
 /dev/video0  /dev/video1  /dev/video2
 ```
@@ -100,7 +101,7 @@ Alternatively, you can just set `-nc 3`, which simplifies application usage.
 
 If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use the `-i` parameter.
 
-IP сameras support:
+To connect to IP cameras, use RTSP URIs:
 ```
 -i rtsp://camera_address_1/ rtsp://camera_address_2/
 ```

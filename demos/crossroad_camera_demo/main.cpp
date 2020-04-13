@@ -27,9 +27,6 @@
 #include <samples/slog.hpp>
 #include <samples/ocv_common.hpp>
 #include "crossroad_camera_demo.hpp"
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 using namespace InferenceEngine;
 
@@ -67,13 +64,13 @@ struct BaseDetection {
     std::string inputName;
     std::string outputName;
 
-    BaseDetection(std::string &commandLineFlag, std::string topoName)
+    BaseDetection(std::string &commandLineFlag, const std::string &topoName)
             : commandLineFlag(commandLineFlag), topoName(topoName) {}
 
     ExecutableNetwork * operator ->() {
         return &net;
     }
-    virtual CNNNetwork read()  = 0;
+    virtual CNNNetwork read(const Core& ie)  = 0;
 
     virtual void setRoiBlob(const Blob::Ptr &roiBlob) {
         if (!enabled())
@@ -161,23 +158,19 @@ struct PersonDetection : BaseDetection{
     }
 
     PersonDetection() : BaseDetection(FLAGS_m, "Person Detection"), maxProposalCount(0), objectSize(0) {}
-    CNNNetwork read() override {
+    CNNNetwork read(const Core& ie) override {
         slog::info << "Loading network files for PersonDetection" << slog::endl;
-        CNNNetReader netReader;
         /** Read network model **/
-        netReader.ReadNetwork(FLAGS_m);
-        /** Extract model name and load it's weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m) + ".bin";
-        netReader.ReadWeights(binFileName);
+        auto network = ie.ReadNetwork(FLAGS_m);
         /** Set batch size to 1 **/
         slog::info << "Batch size is forced to  1" << slog::endl;
-        netReader.getNetwork().setBatchSize(1);
+        network.setBatchSize(1);
         // -----------------------------------------------------------------------------------------------------
 
         /** SSD-based network should have one input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
         slog::info << "Checking Person Detection inputs" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+        InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Detection network should have only one input");
         }
@@ -195,7 +188,7 @@ struct PersonDetection : BaseDetection{
 
         // ---------------------------Check outputs ------------------------------------------------------
         slog::info << "Checking Person Detection outputs" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+        OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("Person Detection network should have only one output");
         }
@@ -214,7 +207,7 @@ struct PersonDetection : BaseDetection{
         _output->setLayout(Layout::NCHW);
 
         slog::info << "Loading Person Detection model to the "<< FLAGS_d << " device" << slog::endl;
-        return netReader.getNetwork();
+        return network;
     }
 
     void fetchResults() {
@@ -340,22 +333,19 @@ struct PersonAttribsDetection : BaseDetection {
         return returnValue;
     }
 
-    CNNNetwork read() override {
+    CNNNetwork read(const Core& ie) override {
         slog::info << "Loading network files for PersonAttribs" << slog::endl;
-        CNNNetReader netReader;
         /** Read network model **/
-        netReader.ReadNetwork(FLAGS_m_pa);
+        auto network = ie.ReadNetwork(FLAGS_m_pa);
         /** Extract model name and load it's weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m_pa) + ".bin";
-        netReader.ReadWeights(binFileName);
-        netReader.getNetwork().setBatchSize(1);
+        network.setBatchSize(1);
         slog::info << "Batch size is forced to 1 for Person Attribs" << slog::endl;
         // -----------------------------------------------------------------------------------------------------
 
         /** Person Attribs network should have one input two outputs **/
         // ---------------------------Check inputs ------------------------------------------------------
         slog::info << "Checking PersonAttribs inputs" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+        InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Attribs topology should have only one input");
         }
@@ -372,7 +362,7 @@ struct PersonAttribsDetection : BaseDetection {
 
         // ---------------------------Check outputs ------------------------------------------------------
         slog::info << "Checking Person Attribs outputs" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+        OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 3) {
              throw std::logic_error("Person Attribs Network expects networks having one output");
         }
@@ -382,7 +372,7 @@ struct PersonAttribsDetection : BaseDetection {
         outputNameForBottomColorPoint = (it++)->second->getName();  // bottom color location
         slog::info << "Loading Person Attributes Recognition model to the "<< FLAGS_d_pa << " device" << slog::endl;
         _enabled = true;
-        return netReader.getNetwork();
+        return network;
     }
 };
 
@@ -392,12 +382,11 @@ struct PersonReIdentification : BaseDetection {
     PersonReIdentification() : BaseDetection(FLAGS_m_reid, "Person Reidentification Retail") {}
 
     unsigned long int findMatchingPerson(const std::vector<float> &newReIdVec) {
-        float cosSim;
         auto size = globalReIdVec.size();
 
         /* assigned REID is index of the matched vector from the globalReIdVec */
         for (size_t i = 0; i < size; ++i) {
-            cosSim = cosineSimilarity(newReIdVec, globalReIdVec[i]);
+            float cosSim = cosineSimilarity(newReIdVec, globalReIdVec[i]);
             if (FLAGS_r) {
                 std::cout << "cosineSimilarity: " << cosSim << std::endl;
             }
@@ -444,20 +433,16 @@ struct PersonReIdentification : BaseDetection {
         return mul / (sqrt(denomA) * sqrt(denomB));
     }
 
-    CNNNetwork read() override {
+    CNNNetwork read(const Core& ie) override {
         slog::info << "Loading network files for Person Reidentification" << slog::endl;
-        CNNNetReader netReader;
         /** Read network model **/
-        netReader.ReadNetwork(FLAGS_m_reid);
-        /** Extract model name and load it's weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m_reid) + ".bin";
-        netReader.ReadWeights(binFileName);
+        auto network = ie.ReadNetwork(FLAGS_m_reid);
         slog::info << "Batch size is forced to  1 for Person Reidentification Network" << slog::endl;
-        netReader.getNetwork().setBatchSize(1);
+        network.setBatchSize(1);
         /** Person Reidentification network should have 1 input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
         slog::info << "Checking Person Reidentification Network input" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+        InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Reidentification Retail should have 1 input");
         }
@@ -474,7 +459,7 @@ struct PersonReIdentification : BaseDetection {
 
         // ---------------------------Check outputs ------------------------------------------------------
         slog::info << "Checking Person Reidentification Network output" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+        OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("Person Reidentification Network should have 1 output");
         }
@@ -482,7 +467,7 @@ struct PersonReIdentification : BaseDetection {
         slog::info << "Loading Person Reidentification Retail model to the "<< FLAGS_d_reid << " device" << slog::endl;
 
         _enabled = true;
-        return netReader.getNetwork();
+        return network;
     }
 };
 
@@ -492,7 +477,7 @@ struct Load {
 
     void into(Core & ie, const std::string & deviceName) const {
         if (detector.enabled()) {
-            detector.net = ie.LoadNetwork(detector.read(), deviceName);
+            detector.net = ie.LoadNetwork(detector.read(ie), deviceName);
         }
     }
 };
@@ -549,10 +534,6 @@ int main(int argc, char *argv[]) {
             std::cout << ie.GetVersions(flag) << std::endl;
 
             if ((flag.find("CPU") != std::string::npos)) {
-#ifdef WITH_EXTENSIONS
-                /** Load default extensions lib for the CPU device (e.g. SSD's DetectionOutput)**/
-                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);

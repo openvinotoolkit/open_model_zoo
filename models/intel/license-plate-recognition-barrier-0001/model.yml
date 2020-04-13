@@ -17,28 +17,28 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/license-plate-recognition-barrier-0001.xml
-    size: 48901
-    sha256: 892a32b8174c2e81990a2ac3b4b754f7ad8ee92b32ac47f7408f6a97c43f1898
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
+    size: 48891
+    sha256: e2ba236094094af05e0a0932367887b36e70a6780c9851b8a5b0996e92d12726
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
   - name: FP32/license-plate-recognition-barrier-0001.bin
     size: 4871940
-    sha256: ccadac90772667c730d78f736f9e8fcb67bdbfcc25575b37634e6ec74dfaf7da
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
+    sha256: 3ef022a17b5f303c676c9c3a23669d09a257a54acdb894b6db295acc141cc4dd
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
   - name: FP16/license-plate-recognition-barrier-0001.xml
-    size: 48882
-    sha256: d1f51451ffa020534716f1f122d81a9049803d7ffac4d3a8a1156ee06e256af6
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
+    size: 48872
+    sha256: c9cf97c8e97ee1fe1895a8772d8f6d016f2bcd772d2803ad6d350528514459af
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
   - name: FP16/license-plate-recognition-barrier-0001.bin
     size: 2436038
-    sha256: a1db2c8c25cda70d8efdda6a8dcb70180e4bc9a613a3db8d49926b4153892e13
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
-  - name: FP32-INT8/license-plate-recognition-barrier-0001.xml
-    size: 105462
-    sha256: af1778b159e2068fbf6f30b774fbd90b4cbb6f16f2d562a0e9991b2ea102e693
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/license-plate-recognition-barrier-0001/FP32-INT8/license-plate-recognition-barrier-0001.xml
-  - name: FP32-INT8/license-plate-recognition-barrier-0001.bin
-    size: 4882552
-    sha256: 309f08580e1284a702c4d661ffc64cb370dfeb66622724b8dfb1e2ebee646720
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/license-plate-recognition-barrier-0001/FP32-INT8/license-plate-recognition-barrier-0001.bin
+    sha256: 184d9312c71b660639898edb46b85a99477e8d6a756b2b611e71a3afad5f25c1
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
+  - name: FP16-INT8/license-plate-recognition-barrier-0001.xml
+    size: 125367
+    sha256: b574e34a62e63b9b86f28c85d204702345ed7ad42900971c7cafbb0db8e20891
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/license-plate-recognition-barrier-0001/FP16-INT8/license-plate-recognition-barrier-0001.xml
+  - name: FP16-INT8/license-plate-recognition-barrier-0001.bin
+    size: 2040632
+    sha256: 66391913e1d606da9eb4887a846e057c3e8d0b2f147d060114c98cf80c23bdc3
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/license-plate-recognition-barrier-0001/FP16-INT8/license-plate-recognition-barrier-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

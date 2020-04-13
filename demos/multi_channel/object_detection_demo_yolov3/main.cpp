@@ -26,6 +26,7 @@
 #endif
 
 #include <opencv2/opencv.hpp>
+#include <ngraph/ngraph.hpp>
 
 #include <monitors/presenter.h>
 #include <samples/slog.hpp>
@@ -67,6 +68,7 @@ void showUsage() {
     std::cout << "    -duplicate_num               " << duplication_channel_number << std::endl;
     std::cout << "    -real_input_fps              " << real_input_fps << std::endl;
     std::cout << "    -i                           " << input_video << std::endl;
+    std::cout << "    -loop_video                  " << loop_video_output_message << std::endl;
     std::cout << "    -u                           " << utilization_monitors_message << std::endl;
 }
 
@@ -108,12 +110,44 @@ static int EntryIndex(int side, int lcoords, int lclasses, int location, int ent
     return n * side * side * (lcoords + lclasses + 1) + entry * side * side + loc;
 }
 
-struct YoloParams {
-    int num;
-    int classes;
-    int coords;
+class YoloParams {
+    template <typename T>
+    void computeAnchors(const std::vector<float> & initialAnchors, const std::vector<T> & mask) {
+        anchors.resize(num * 2);
+        for (int i = 0; i < num; ++i) {
+            anchors[i * 2] = initialAnchors[mask[i] * 2];
+            anchors[i * 2 + 1] = initialAnchors[mask[i] * 2 + 1];
+        }
+    }
 
+public:
+    int num = 0, classes = 0, coords = 0;
     std::vector<float> anchors;
+
+    YoloParams() {}
+
+    YoloParams(const std::shared_ptr<ngraph::op::RegionYolo> regionYolo) {
+        coords = regionYolo->get_num_coords();
+        classes = regionYolo->get_num_classes();
+        auto initialAnchors = regionYolo->get_anchors();
+        auto mask = regionYolo->get_mask();
+        num = mask.size();
+
+        computeAnchors(initialAnchors, mask);
+    }
+
+    YoloParams(InferenceEngine::CNNLayer::Ptr layer) {
+        if (layer->type != "RegionYolo")
+            throw std::runtime_error("Invalid output type: " + layer->type + ". RegionYolo expected");
+
+        coords = layer->GetParamAsInt("coords");
+        classes = layer->GetParamAsInt("classes");
+        auto initialAnchors = layer->GetParamAsFloats("anchors");
+        auto mask = layer->GetParamAsInts("mask");
+        num = mask.size();
+
+        computeAnchors(initialAnchors, mask);
+    }
 };
 
 struct DetectionObject {
@@ -150,9 +184,9 @@ double IntersectionOverUnion(const DetectionObject &box_1, const DetectionObject
     return area_of_overlap / area_of_union;
 }
 
-void ParseYOLOV3Output(InferenceEngine::InferRequest::Ptr req, 
-                       const std::string outputName,
-                       const YoloParams yoloParams, const unsigned long resized_im_h,
+void ParseYOLOV3Output(InferenceEngine::InferRequest::Ptr req,
+                       const std::string &outputName,
+                       const YoloParams &yoloParams, const unsigned long resized_im_h,
                        const unsigned long resized_im_w, const unsigned long original_im_h,
                        const unsigned long original_im_w,
                        const double threshold, std::vector<DetectionObject> &objects) {
@@ -203,12 +237,12 @@ void ParseYOLOV3Output(InferenceEngine::InferRequest::Ptr req,
 
 void drawDetections(cv::Mat& img, const std::vector<DetectionObject>& detections, const std::vector<cv::Scalar>& colors) {
     for (const DetectionObject& f : detections) {
-        cv::rectangle(img, 
+        cv::rectangle(img,
                       cv::Rect2f(static_cast<float>(f.xmin),
                                  static_cast<float>(f.ymin),
                                  static_cast<float>((f.xmax-f.xmin)),
-                                 static_cast<float>((f.ymax-f.ymin))), 
-                      colors[static_cast<int>(f.class_id)], 
+                                 static_cast<float>((f.ymax-f.ymin))),
+                      colors[static_cast<int>(f.class_id)],
                       2);
     }
 }
@@ -244,34 +278,30 @@ DisplayParams prepareDisplayParams(size_t count) {
     return params;
 }
 
-std::map<std::string, YoloParams> GetYoloParams(const std::vector<std::string>& outputDataBlobNames, 
-                                                InferenceEngine::CNNNetReader &netReader) {
+std::map<std::string, YoloParams> GetYoloParams(const std::vector<std::string>& outputDataBlobNames,
+                                                InferenceEngine::CNNNetwork &network) {
     std::map<std::string, YoloParams> __yoloParams;
 
-    for (auto &output_name :outputDataBlobNames) {
-        InferenceEngine::CNNLayerPtr layer = netReader.getNetwork().getLayerByName(output_name.c_str());
+    for (auto &output_name : outputDataBlobNames) {
+        YoloParams params;
 
-        if (layer->type != "RegionYolo")
-            throw std::runtime_error("Invalid output type: " + layer->type + ". RegionYolo expected");
+        if (auto ngraphFunction = network.getFunction()) {
+            for (const auto op : ngraphFunction->get_ops()) {
+                if (op->get_friendly_name() == output_name) {
+                    auto regionYolo = std::dynamic_pointer_cast<ngraph::op::RegionYolo>(op);
+                    if (!regionYolo) {
+                        throw std::runtime_error("Invalid output type: " +
+                            std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
+                    }
 
-        auto num = layer->GetParamAsInt("num");
-        auto coords = layer->GetParamAsInt("coords");
-        auto classes = layer->GetParamAsInt("classes");
-    
-        std::vector<float> anchors = layer->GetParamAsFloats("anchors");
-
-        auto mask = layer->GetParamAsInts("mask");
-        num = mask.size();
-
-        std::vector<float> maskedAnchors(num * 2);
-        for (int i = 0; i < num; ++i) {
-            maskedAnchors[i * 2] = anchors[mask[i] * 2];
-            maskedAnchors[i * 2 + 1] = anchors[mask[i] * 2 + 1];
+                    params = regionYolo;
+                    break;
+                }
+            }
+        } else {
+            throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
         }
-        anchors = maskedAnchors;
-
-        YoloParams param{num, classes, coords, anchors};
-        __yoloParams.insert(std::pair<std::string, YoloParams>(output_name.c_str(), param));
+        __yoloParams.insert(std::pair<std::string, YoloParams>(output_name.c_str(), params));
     }
 
     return __yoloParams;
@@ -281,7 +311,7 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
                      float time,
                      const std::string& stats,
                      const DisplayParams& params,
-                     const std::vector<cv::Scalar> colors,
+                     const std::vector<cv::Scalar> &colors,
                      Presenter& presenter) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
@@ -347,7 +377,6 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        std::string weightsPath;
         std::string modelPath = FLAGS_m;
         std::size_t found = modelPath.find_last_of(".");
         if (found > modelPath.size()) {
@@ -355,9 +384,7 @@ int main(int argc, char* argv[]) {
             slog::info << "Expected to be <model_name>.xml" << slog::endl;
             return -1;
         }
-        weightsPath = modelPath.substr(0, found) + ".bin";
         slog::info << "Model   path: " << modelPath << slog::endl;
-        slog::info << "Weights path: " << weightsPath << slog::endl;
 
         std::map<std::string, YoloParams> yoloParams;
 
@@ -367,13 +394,12 @@ int main(int argc, char* argv[]) {
         graphParams.collectStats    = FLAGS_show_stats;
         graphParams.reportPerf      = FLAGS_pc;
         graphParams.modelPath       = modelPath;
-        graphParams.weightsPath     = weightsPath;
         graphParams.cpuExtPath      = FLAGS_l;
         graphParams.cldnnConfigPath = FLAGS_c;
         graphParams.deviceName      = FLAGS_d;
-        graphParams.postLoadFunc    = [&yoloParams](const std::vector<std::string>& outputDataBlobNames, 
-                                                    InferenceEngine::CNNNetReader &reader) {
-                                                        yoloParams = GetYoloParams(outputDataBlobNames, reader);
+        graphParams.postLoadFunc    = [&yoloParams](const std::vector<std::string>& outputDataBlobNames,
+                                                    InferenceEngine::CNNNetwork &network) {
+                                                        yoloParams = GetYoloParams(outputDataBlobNames, network);
                                                     };
 
         std::shared_ptr<IEGraph> network(new IEGraph(graphParams));
@@ -391,6 +417,10 @@ int main(int argc, char* argv[]) {
 
         const auto duplicateFactor = (1 + FLAGS_duplicate_num);
         size_t numberOfInputs = (FLAGS_nc + files.size()) * duplicateFactor;
+
+        if (numberOfInputs == 0) {
+            throw std::runtime_error("No valid inputs were supplied");
+        }
 
         DisplayParams params = prepareDisplayParams(numberOfInputs);
 
@@ -411,7 +441,7 @@ int main(int argc, char* argv[]) {
             slog::info << "Trying to open input video ..." << slog::endl;
             for (auto& file : files) {
                 try {
-                    sources.openVideo(file, false);
+                    sources.openVideo(file, false, FLAGS_loop_video);
                 } catch (...) {
                     slog::info << "Cannot open video [" << file << "]" << slog::endl;
                     throw;
@@ -422,7 +452,7 @@ int main(int argc, char* argv[]) {
             slog::info << "Trying to connect " << FLAGS_nc << " web cams ..." << slog::endl;
             for (size_t i = 0; i < FLAGS_nc; ++i) {
                 try {
-                    sources.openVideo(std::to_string(i), true);
+                    sources.openVideo(std::to_string(i), true, false);
                 } catch (...) {
                     slog::info << "Cannot open web cam [" << i << "]" << slog::endl;
                     throw;
@@ -443,9 +473,9 @@ int main(int argc, char* argv[]) {
             auto camIdx = currentFrame / duplicateFactor;
             currentFrame = (currentFrame + 1) % numberOfInputs;
             return sources.getFrame(camIdx, img);
-        }, [&yoloParams](InferenceEngine::InferRequest::Ptr req, 
-                const std::vector<std::string>& outputDataBlobNames, 
-                cv::Size frameSize 
+        }, [&yoloParams](InferenceEngine::InferRequest::Ptr req,
+                const std::vector<std::string>& outputDataBlobNames,
+                cv::Size frameSize
                 ) {
             unsigned long resized_im_h = 416;
             unsigned long resized_im_w = 416;
@@ -467,7 +497,7 @@ int main(int argc, char* argv[]) {
 
             std::vector<Detections> detections(1);
             detections[0].set(new std::vector<DetectionObject>);
-            
+
             for (auto &object : objects) {
                 if (object.confidence < FLAGS_t)
                     continue;

@@ -25,7 +25,7 @@ Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference
 ## Running
 
 Running the application with the <code>-h</code> option yields the following usage message:
-```sh
+```
 ./object_detection_demo_yolov3_async -h
 InferenceEngine:
     API version ............ <version>

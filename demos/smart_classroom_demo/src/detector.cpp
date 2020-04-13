@@ -11,6 +11,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <inference_engine.hpp>
 
+#include <ngraph/ngraph.hpp>
+
 using namespace InferenceEngine;
 
 #define SSD_EMPTY_DETECTIONS_INDICATOR -1.0
@@ -71,14 +73,9 @@ void FaceDetection::enqueue(const cv::Mat &frame) {
 FaceDetection::FaceDetection(const DetectorConfig& config) :
         BaseCnnDetection(config.is_async), config_(config) {
     topoName = "face detector";
-    CNNNetReader net_reader;
-    net_reader.ReadNetwork(config.path_to_model);
-    net_reader.ReadWeights(config.path_to_weights);
-    if (!net_reader.isParseSuccess()) {
-        THROW_IE_EXCEPTION << "Cannot load model";
-    }
+    auto cnnNetwork = config.ie.ReadNetwork(config.path_to_model);
 
-    InputsDataMap inputInfo(net_reader.getNetwork().getInputsInfo());
+    InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         THROW_IE_EXCEPTION << "Face Detection network should have only one input";
     }
@@ -91,25 +88,14 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
     input_dims[3] = config_.input_w;
     std::map<std::string, SizeVector> input_shapes;
     input_shapes[inputInfo.begin()->first] = input_dims;
-    net_reader.getNetwork().reshape(input_shapes);
+    cnnNetwork.reshape(input_shapes);
 
-    OutputsDataMap outputInfo(net_reader.getNetwork().getOutputsInfo());
+    OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     if (outputInfo.size() != 1) {
         THROW_IE_EXCEPTION << "Face Detection network should have only one output";
     }
     DataPtr& _output = outputInfo.begin()->second;
     output_name_ = outputInfo.begin()->first;
-
-    const CNNLayerPtr outputLayer = net_reader.getNetwork().getLayerByName(output_name_.c_str());
-    if (outputLayer->type != "DetectionOutput") {
-        THROW_IE_EXCEPTION << "Face Detection network output layer(" + outputLayer->name +
-                              ") should be DetectionOutput, but was " +  outputLayer->type;
-    }
-
-    if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
-        THROW_IE_EXCEPTION << "Face Detection network output layer (" +
-                              output_name_ + ") should have num_classes integer attribute";
-    }
 
     const SizeVector outputDims = _output->getTensorDesc().getDims();
     max_detections_count_ = outputDims[2];
@@ -125,7 +111,7 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
     input_name_ = inputInfo.begin()->first;
-    net_ = config_.ie.LoadNetwork(net_reader.getNetwork(), config_.deviceName);
+    net_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
 }
 
 DetectedObjects FaceDetection::fetchResults() {

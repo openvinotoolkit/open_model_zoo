@@ -25,9 +25,8 @@ struct DetectedObject {
 using DetectedObjects = std::vector<DetectedObject>;
 
 struct DetectorConfig : public CnnConfig {
-    explicit DetectorConfig(const std::string& path_to_model,
-                            const std::string& path_to_weights)
-        : CnnConfig(path_to_model, path_to_weights) {}
+    explicit DetectorConfig(const std::string& path_to_model)
+        : CnnConfig(path_to_model) {}
 
     float confidence_threshold{0.6f};
     float increase_scale_x{1.15f};

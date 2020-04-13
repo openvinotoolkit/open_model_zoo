@@ -35,7 +35,7 @@ support the `reshape` function.
 
 ## Inputs
 
-1. name: `0`, shape: [1x3x768x1280] - An input image in the format [BxCxHxW],
+1. name: `0`, shape: [1x1x360x640] - An input image in the format [BxCxHxW],
    where:
     - B - batch size
     - C - number of channels

@@ -350,8 +350,10 @@ describing a single model. Each such object has the following keys:
   * `feature_extraction`
   * `head_pose_estimation`
   * `human_pose_estimation`
+  * `image_inpainting`
   * `image_processing`
   * `instance_segmentation`
+  * `monocular_depth_estimation`
   * `object_attributes`
   * `optical_character_recognition`
   * `semantic_segmentation`
@@ -425,18 +427,6 @@ face-detection-retail-0005
 
 Either `--print_all` or one of the filter options must be specified.
 
-Deprecated options
-------------------
-
-In earlier releases, the tools used a single configuration file instead of
-per-model configuration files. For compatibility, loading such a file is still
-supported. However, this feature is deprecated and will be removed in a future release.
-
-To load a configuration file in the old format, use the `-c`/`--config` option:
-
-```sh
-./TOOL.py --all --config my-config.yml
-```
 __________
 
 OpenVINO is a trademark of Intel Corporation or its subsidiaries in the U.S.

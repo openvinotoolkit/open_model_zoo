@@ -23,7 +23,8 @@ from accuracy_checker.launcher.launcher import create_launcher
 from accuracy_checker.config import ConfigError
 from accuracy_checker.data_readers import DataRepresentation
 
-def get_mx_test_model(models_dir):
+
+def get_mx_test_model(models_dir, config_override=None):
     config = {
         "framework": 'mxnet',
         "model": models_dir / 'samplenet-0000.params',
@@ -31,8 +32,11 @@ def get_mx_test_model(models_dir):
         "device": 'cpu',
         'inputs': [{'name': 'data', 'type': 'INPUT', 'shape': '3,32,32'}]
     }
+    if config_override:
+        config.update(config_override)
 
     return create_launcher(config)
+
 
 class TestMxNetLauncher:
     def test_launcher_creates(self, models_dir):
@@ -57,6 +61,10 @@ class TestMxNetLauncher:
         zeros = DataRepresentation(np.zeros((1, 3, 32, 32)))
         launcher.predict([{'data': zeros.data}], [zeros.metadata])
         assert zeros.metadata['input_shape'] == {'data': (1, 3, 32, 32)}
+
+    def test_mxnet_launcher_auto_model_search(self, models_dir):
+        launcher = get_mx_test_model(models_dir, {'model': models_dir})
+        assert launcher.model == models_dir / 'samplenet-0000.params'
 
 
 @pytest.mark.usefixtures('mock_path_exists')
