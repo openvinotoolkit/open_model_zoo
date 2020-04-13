@@ -42,9 +42,10 @@ The converted model has the same parameters as the original model.
 
 3. The array of detection summary info, name - `yolov30_slice_axis3`,  shape - `1,18,32,32`. The anchor values are `10,12,  16,20,  23,29`.
 
-For each case format is `B,N,Cx,Cy`, where
+For each case format is `B,N*DB,Cx,Cy`, where
     - `B` - batch size
     - `N` - number of detection boxes for cell
+    - `DB` - size of each detection box
     - `Cx`, `Cy` - cell index
 
 Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class`], where:
@@ -61,9 +62,10 @@ Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class`], where:
 
 3. The array of detection summary info, name - `yolov30_yolooutputv32_conv0_fwd/YoloRegion`,  shape - `1,18,32,32`. The anchor values are `10,12,  16,20,  23,29`.
 
-For each case format is `B,N,Cx,Cy`, where
+For each case format is `B,N*DB,Cx,Cy`, where
     - `B` - batch size
     - `N` - number of detection boxes for cell
+    - `DB` - size of each detection box
     - `Cx`, `Cy` - cell index
 
 Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class`], where:
