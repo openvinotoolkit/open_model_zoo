@@ -83,7 +83,7 @@ The table below shows the correlation between models, demos, and supported plugi
 | landmarks-regression-retail-0009                 | [Smart Classroom Demo](./smart_classroom_demo/README.md)<br>[Interactive Face Recognition Python* Demo](./python_demos/face_recognition_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
 | person-detection-action-recognition-0005         | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
 | person-detection-action-recognition-teacher-0002 | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported |             | Supported       |
-| single-human-pose-estimation-0001                | [Single Human Pose Estimation Python* Demo](./python_demos/single_human_pose_estimation_demo/README.md)     | Supported | Supported |
+| single-human-pose-estimation-0001                | [Single Human Pose Estimation Python* Demo](./python_demos/single_human_pose_estimation_demo/README.md)     | Supported | Supported |  |      |
 | single-image-super-resolution-1032               | [Super Resolution Demo](./super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
 | single-image-super-resolution-1033               | [Super Resolution Demo](./super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
 | text-detection-0003                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
@@ -116,7 +116,7 @@ You can also build demos manually using Inference Engine binaries from the
 [dldt](https://github.com/opencv/dldt/tree/master) repo. In this case please set `InferenceEngine_DIR` to a CMake folder you built the dldt project from, for example `<dldt_repo>/inference-engine/build`.
 Please also set the `OpenCV_DIR` variable pointing to the required OpenCV package. The same OpenCV
 version should be used both for the inference engine and demos build.
-Please refer to the Inference Engine [build instructions](https://github.com/opencv/dldt/blob/master/inference-engine/README.md)
+Please refer to the Inference Engine <a href="https://github.com/opencv/dldt/blob/master/inference-engine/README.md">build instructions</a>
 for details. Please also add path to built Inference Engine libraries to `LD_LIBRARY_PATH` (Linux*) or `PATH` (Windows*) variable before building the demos.
 
 ### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*
