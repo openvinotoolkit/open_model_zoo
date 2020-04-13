@@ -30,6 +30,8 @@ Expected color order -  `BGR`.
 
 The converted model has the same parameters as the original model.
 
+    WARNING: Note that input layout of converted model is `[BxHxWxC]`.
+
 ## Output
 
 ### Original model
