@@ -1,4 +1,7 @@
 import unicodedata
+import re
+import collections
+import itertools
 try:
     import sentencepiece as spm
 except ImportError:
@@ -6,7 +9,6 @@ except ImportError:
 from ..config import ConfigError
 from ..utils import contains_all
 
-import re,six,os,collections,itertools
 
 SPIECE_UNDERLINE = '\N{LOWER ONE EIGHTH BLOCK}'
 SEG_ID_A = 0
@@ -506,10 +508,9 @@ class PreTrainedTokenizer:
         for key, value in kwargs.items():
             if key in self.SPECIAL_TOKENS_ATTRIBUTES:
                 if key == 'additional_special_tokens':
-                    assert isinstance(value, (list, tuple)) and all(
-                        isinstance(t, str) or (six.PY2 and isinstance(t, unicode)) for t in value)
+                    assert isinstance(value, (list, tuple)) and all(isinstance(t, str))
                 else:
-                    assert isinstance(value, str) or (six.PY2 and isinstance(value, unicode))
+                    assert isinstance(value, str)
                 setattr(self, key, value)
 
     def convert_ids_to_tokens(self, ids, skip_special_tokens=False):
@@ -542,7 +543,7 @@ class PreTrainedTokenizer:
         if tokens is None:
             return None
 
-        if isinstance(tokens, str) or (six.PY2 and isinstance(tokens, unicode)):
+        if isinstance(tokens, str):
             return self._convert_token_to_id_with_added_voc(tokens)
 
         ids = []
@@ -576,8 +577,7 @@ class PreTrainedTokenizer:
         def lowercase_text(t):
             # convert non-special tokens to lowercase
             escaped_special_toks = [re.escape(s_tok) for s_tok in all_special_tokens]
-            pattern = r'(' + r'|'.join(escaped_special_toks) + r')|' + \
-                      r'(.+?)'
+            pattern = r'(' + r'|'.join(escaped_special_toks) + r')|' + r'(.+?)'
             return re.sub(
                 pattern,
                 lambda m: m.groups()[0] or m.groups()[1].lower(),
@@ -615,16 +615,19 @@ class PreTrainedTokenizer:
             for tok in tok_list:
                 tokenized_text = []
                 for sub_text in text_list:
-                    if sub_text not in self.added_tokens_encoder \
-                            and sub_text not in all_special_tokens:
+                    if sub_text not in self.added_tokens_encoder and sub_text not in all_special_tokens:
                         tokenized_text += split_on_token(tok, sub_text)
                     else:
                         tokenized_text += [sub_text]
                 text_list = tokenized_text
+            output_tokens = []
+            for token in tokenized_text:
+                if token not in self.added_tokens_encoder and token not in all_special_tokens:
+                    output_tokens.append(list(itertools.chain.from_iterable(self._tokenize(token, **kwargs))))
+                else:
+                    output_tokens.append([token])
 
-            return list(itertools.chain.from_iterable((self._tokenize(token, **kwargs) if token not \
-                    in self.added_tokens_encoder and token not in all_special_tokens \
-                    else [token] for token in tokenized_text)))
+            return output_tokens
 
         added_tokens = list(self.added_tokens_encoder.keys()) + all_special_tokens
         tokenized_text = split_on_tokens(added_tokens, text)
@@ -668,9 +671,9 @@ class PreTrainedTokenizer:
                     **kwargs):
 
         def get_input_ids(text):
-            if isinstance(text, six.string_types):
+            if isinstance(text, str):
                 return self.convert_tokens_to_ids(self.tokenize(text, **kwargs))
-            elif isinstance(text, (list, tuple)) and len(text) > 0 and isinstance(text[0], six.string_types):
+            elif isinstance(text, (list, tuple)) and len(text) > 0 and isinstance(text[0], str):
                 return self.convert_tokens_to_ids(text)
             elif isinstance(text, (list, tuple)) and len(text) > 0 and isinstance(text[0], int):
                 return text
@@ -913,11 +916,6 @@ class BertTokenizer(PreTrainedTokenizer):
         )
         self.max_len_single_sentence = self.max_len - 2  # take into account special tokens
         self.max_len_sentences_pair = self.max_len - 3  # take into account special tokens
-
-        if not os.path.isfile(vocab_file):
-            raise ValueError(
-                "Can't find a vocabulary file at path '{}'. To load the vocabulary from a Google pretrained "
-                "model use `tokenizer = BertTokenizer.from_pretrained(PRETRAINED_MODEL_NAME)`".format(vocab_file))
         self.vocab = load_vocab(vocab_file)
         self.ids_to_tokens = collections.OrderedDict([(ids, tok) for tok, ids in self.vocab.items()])
         self.do_basic_tokenize = do_basic_tokenize
