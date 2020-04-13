@@ -96,6 +96,7 @@ class ColorizationEvaluator(BaseEvaluator):
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
         if 'progress_reporter' in kwargs:
             _progress_reporter = kwargs['progress_reporter']
+            _progress_reporter.reset(self.dataset.size)
         else:
             _progress_reporter = None if not check_progress else self._create_progress_reporter(
                 check_progress, self.dataset.size
