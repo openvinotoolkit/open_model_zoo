@@ -1,6 +1,6 @@
 layer {
   name: "data"
-  type: `input`
+  type: "Input"
   top: "data"
   input_param {shape: {dim: 1 dim: 3 dim: 256 dim: 456}}
 }

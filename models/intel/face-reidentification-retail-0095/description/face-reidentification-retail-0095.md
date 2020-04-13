@@ -36,14 +36,14 @@ To align the face, use a landmarks regression model: using regressed points and 
 
 ## Inputs
 
-1. Name: "data" , shape: [1x3x128x128] - An input image in the format [BxCxHxW],
-   where:
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+Name: "data" , shape: [1x3x128x128] - An input image in the format [BxCxHxW],
+where:
+- B - batch size
+- C - number of channels
+- H - image height
+- W - image width
 
-   Expected color order is BGR.
+Expected color order is BGR.
 
 ## Outputs
 The net outputs a blob with the shape [1, 256, 1, 1], containing a row-vector of 256 floating point values. Outputs on different images are comparable in cosine distance.

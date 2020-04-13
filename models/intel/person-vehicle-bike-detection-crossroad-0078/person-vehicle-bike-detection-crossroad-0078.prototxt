@@ -2,7 +2,7 @@ name: "RMNet_SSD"
 
 layer {
   name: "data"
-  type: `input`
+  type: "Input"
   top: "data"
   input_param {
     shape {

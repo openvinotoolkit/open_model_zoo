@@ -21,7 +21,7 @@ Text detector based on [PixelLink](https://arxiv.org/abs/1801.01315) architectur
 
 ## Inputs
 
-Name: `input` , shape: [1x3x768x1280] - An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x768x1280] - An input image in the format [BxCxHxW],
 where:
 
    - B - batch size

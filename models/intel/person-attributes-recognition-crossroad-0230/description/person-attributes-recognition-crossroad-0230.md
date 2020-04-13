@@ -46,7 +46,7 @@ This model presents a person attributes classification algorithm analysis scenar
 
     - C - number of channels
         - H - image height
-        - W - image width.
+        - W - image width
 
     The expected color order is BGR.
 

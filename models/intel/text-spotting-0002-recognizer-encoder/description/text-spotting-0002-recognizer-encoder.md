@@ -31,7 +31,7 @@ This model is a fully-convolutional encoder of text recognition head.
 
 ## Inputs
 
-Name: `input` , shape: [1x64x28x28]. Text recognition features obtained from detection part.
+Name: `input`, shape: [1x64x28x28]. Text recognition features obtained from detection part.
 
 ## Outputs
 

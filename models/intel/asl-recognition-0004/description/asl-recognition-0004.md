@@ -27,7 +27,7 @@ on the input clip.
 
 ## Inputs
 
-Name: `input` , shape: [1x3x16x224x224]. An input image sequence in the format [BxCxTxHxW], where:
+Name: `input`, shape: [1x3x16x224x224]. An input image sequence in the format [BxCxTxHxW], where:
  - B - batch size
  - C - number of channels
  - T - duration of input clip

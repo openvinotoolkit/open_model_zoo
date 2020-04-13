@@ -2,7 +2,7 @@ name: "RMNet_LReLU with SSD head for Action Detection and Action Recognition"
 
 layer {
   name: "data"
-  type: `input`
+  type: "Input"
   top: "data"
   input_param {
     shape {

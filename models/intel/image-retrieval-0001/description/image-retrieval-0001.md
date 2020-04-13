@@ -21,7 +21,7 @@ Image retrieval model based on [MobileNetV2](https://arxiv.org/abs/1801.04381) a
 
 ## Inputs
 
-Name: `input` , shape: [1x3x224x224] — An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x224x224] — An input image in the format [BxCxHxW],
 where:
 
    - B - batch size

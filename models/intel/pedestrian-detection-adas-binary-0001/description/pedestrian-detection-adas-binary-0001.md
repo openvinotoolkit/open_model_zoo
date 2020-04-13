@@ -30,12 +30,12 @@ Tested on an internal dataset with 1001 pedestrian to detect.
 
 ## Inputs
 
-Name: `input` , shape: [1x3x384x672] - An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x384x672] - An input image in the format [BxCxHxW],
   where:
     - B - batch size
     - C - number of channels
     - H - image height
-    - W - image width.
+    - W - image width
   Expected color order is BGR.
 
 ## Outputs

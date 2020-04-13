@@ -28,7 +28,7 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 
 ## Inputs
 
-Name: `input` , shape: [1x3x448x448] - An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x448x448] - An input image in the format [BxCxHxW],
 where:
 
 - B - batch size

@@ -39,14 +39,14 @@ For reference, PSNR for bicubic upsampling on test dataset is 26.79 dB.
     - B - batch size
     - C - number of channels
     - H - image height
-    - W - image width.
+    - W - image width
 
 2. name: "1" , shape: [1x3x1080x1920] - Bicubic interpolation of the input image in the format [BxCxHxW],
   where:
     - B - batch size
     - C - number of channels
     - H - image height
-    - W - image width.
+    - W - image width
 
 
   Expected color order is BGR.

@@ -1,7 +1,7 @@
 name: "cnn_fd_004_sq_light_ssd"
 layer {
   name: "data"
-  type: `input`
+  type: "Input"
   top: "data"
   input_param {
     shape {

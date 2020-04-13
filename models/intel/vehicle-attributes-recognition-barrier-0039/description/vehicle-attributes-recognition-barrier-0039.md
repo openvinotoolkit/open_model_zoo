@@ -57,7 +57,7 @@ This model presents a vehicle attributes classification algorithm for a traffic 
 
     - C - number of channels
     - H - image height
-    - W - image width.
+    - W - image width
 
 Expected color order: BGR.
 
