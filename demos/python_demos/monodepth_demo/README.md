@@ -1,17 +1,14 @@
 # MonoDepth Python Demo
 
 This topic demonstrates how to run the MonoDepth demo application, which produces a disparity map for a given input image.
-To this end, the code uses the network described in the [paper](https://arxiv.org/abs/1907.01341):
-
-> Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-Shot Cross-Dataset Transfer  
-Rene Ranftl, Katrin Lasinger, David Hafner, Konrad Schindler, Vladlen Koltun
+To this end, the code uses the network described in [Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-dataset Transfer](https://arxiv.org/abs/1907.01341).
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network and an image to the
-Inference Engine plugin. When inference is done, the application outputs the disparity map in pfm and png format (color-coded).
+Upon the start-up, the demo application reads command-line parameters and loads a network and an image to the
+Inference Engine plugin. When inference is done, the application outputs the disparity map in PFM and PNG format (color-coded).
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with the BGR channel order. If you trained your model to work with the RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Running
 
@@ -47,10 +44,10 @@ Running the application with the empty list of options yields the usage message 
 
 ## Demo Output
 
-The application outputs are the floating disparity map (pfm) as well as a color-coded version (png).
+The application outputs are the floating disparity map (PFM) as well as a color-coded version (PNG).
 
 ## See Also
 
-* [Using Open Model Zoo demos](../../README.md)
+* [Using Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
