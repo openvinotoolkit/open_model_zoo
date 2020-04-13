@@ -36,6 +36,11 @@ try:
 except ImportError:
     nib = None
 
+try:
+    from scipy.io import wavfile
+except ImportError:
+    wavfile = None
+
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
 from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField
@@ -405,3 +410,16 @@ class AnnotationFeaturesReader(BaseReader):
     def reset(self):
         self.subset = range(len(self.data_source))
         self.counter = 0
+
+
+class WavReader(BaseReader):
+    __provider__ = 'wav_reader'
+
+    def read(self, data_id):
+        sample_rate, wav = wavfile.read(str(self.data_source / data_id))
+        if len(wav.shape) == 1:
+            wav = np.expand_dims(wav, axis=0)
+        return wav, {'sample_rate': sample_rate}
+
+    def read_item(self, data_id):
+        return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)
