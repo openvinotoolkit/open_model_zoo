@@ -504,12 +504,12 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
         raw_outputs = self._infer(input_blobs, batch_meta)
 
         if output_callback:
-            output_callback(self.transform_for_callback(input_blobs, raw_outputs))
+            batch_size = np.shape(next(iter(input_blobs[0].values())))[0]
+            output_callback(self.transform_for_callback(batch_size, raw_outputs))
         return raw_outputs
 
-    def transform_for_callback(self, input_blobs, raw_outputs):
+    def transform_for_callback(self, batch_size, raw_outputs):
         output_per_box = []
-        batch_size = np.shape(next(iter(input_blobs[0].values())))[0]
         for i in range(batch_size):
             box_outs = OrderedDict()
             for layer_name, data in raw_outputs[0].items():
@@ -529,9 +529,8 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
         raw_outputs = self._infer(input_blobs, batch_meta)
         return raw_outputs
 
-    def transform_for_callback(self, input_blobs, raw_outputs):
+    def transform_for_callback(self, batch_size, raw_outputs):
         output_per_box = []
-        batch_size = np.shape(next(iter(input_blobs[0].values())))[0]
         for i in range(batch_size):
             box_outs = OrderedDict()
             for layer_name, data in raw_outputs[0].items():
@@ -590,19 +589,18 @@ class MTCNNEvaluator(BaseEvaluator):
                                                 metrics_result=None,
                                                 element_identifiers=batch_identifiers,
                                                 dataset_indices=batch_input_ids)
+            batch_size = 1
             for stage_id, stage in enumerate(self.stages.values()):
                 previous_stage_predictions = batch_prediction
                 filled_inputs, batch_meta = stage.preprocess_data(copy.deepcopy(batch_inputs), batch_annotation,
                                                                   previous_stage_predictions)
                 batch_raw_prediction = stage.predict(filled_inputs, batch_meta, intermediate_callback)
+                batch_size = np.shape(next(iter(filled_inputs[0].values())))[0]
                 batch_prediction = stage.postprocess_result(
                     batch_identifiers, batch_raw_prediction, batch_meta, previous_stage_predictions
                 )
                 if no_detections(batch_prediction):
                     break
-
-            self._annotations.extend(batch_annotation)
-            self._predictions.extend(batch_prediction)
 
             metrics_result = None
             if self.metric_executor:
@@ -615,7 +613,7 @@ class MTCNNEvaluator(BaseEvaluator):
 
             if output_callback:
                 output_callback(
-                    list(self.stages.values())[-1].transform_for_callback(filled_inputs, batch_raw_prediction),
+                    list(self.stages.values())[-1].transform_for_callback(batch_size, batch_raw_prediction),
                     metrics_result=metrics_result,
                     element_identifiers=batch_identifiers,
                     dataset_indices=batch_input_ids
