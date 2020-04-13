@@ -35,9 +35,11 @@ class QuestionAnsweringAnnotation(QuestionAnswering):
         self.tokens = tokens
 
 class ExtendedQuestionAnsweringAnnotation(QuestionAnswering):
-    def __init__(self, identifier, unique_id, input_ids, input_mask, segment_ids, cls_index,\
-                 p_mask, answer_text, paragraph_text, doc_tokens, is_impossible, paragraph_len, token_is_max_context, \
-                 tokens, token_to_orig_map, start_position, end_position):
+    def __init__(
+        self, identifier, unique_id, input_ids, input_mask, segment_ids, cls_index,
+        p_mask, answer_text, paragraph_text, doc_tokens, is_impossible, paragraph_len, token_is_max_context,
+        tokens, token_to_orig_map, start_position, end_position
+    ):
         super().__init__(identifier)
         self.unique_id = unique_id
         self.input_ids = input_ids
