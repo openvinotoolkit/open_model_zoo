@@ -25,6 +25,9 @@ import logging as log
 
 from openvino.inference_engine import IENetwork, IECore
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -46,6 +49,8 @@ def build_argparser():
     args.add_argument("-pt", "--prob_threshold", help="Optional. Probability threshold for detections filtering",
                       default=0.5, type=float)
     args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
+    args.add_argument("-u", "--utilization_monitors", default='', type=str,
+                      help="Optional. List of monitors to show initially.")
 
     return parser
 
@@ -100,7 +105,7 @@ def main():
     else:
         input_stream = args.input
     cap = cv2.VideoCapture(input_stream)
-    assert cap.isOpened(), "Can't open " + input_stream
+    assert cap.isOpened(), "Can't open " + str(input_stream)
 
     if args.labels:
         with open(args.labels, 'r') as f:
@@ -117,6 +122,9 @@ def main():
     if is_async_mode:
         ret, frame = cap.read()
         frame_h, frame_w = frame.shape[:2]
+
+    presenter = monitors.Presenter(args.utilization_monitors, 45,
+        (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between sync/async modes, press TAB key in the output window")
@@ -179,7 +187,7 @@ def main():
             cv2.putText(frame, async_mode_message, (10, int(frame_h - 20)), cv2.FONT_HERSHEY_COMPLEX, 0.5,
                         (10, 10, 200), 1)
 
-        #
+        presenter.drawGraphs(frame)
         render_start = time.time()
         if not args.no_show:
             cv2.imshow("Detection Results", frame)
@@ -198,8 +206,9 @@ def main():
             if (9 == key):
                 is_async_mode = not is_async_mode
                 log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
-
-    cv2.destroyAllWindows()
+            else:
+                presenter.handleKey(key)
+    print(presenter.reportMeans())
 
 
 if __name__ == '__main__':

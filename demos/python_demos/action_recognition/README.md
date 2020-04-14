@@ -36,7 +36,8 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: action_recognition.py [-h] -m_en M_ENCODER -m_de M_DECODER -i INPUT
                              [-l CPU_EXTENSION] [-d DEVICE] [--fps FPS]
-                             [-lb LABELS]
+                             [-lb LABELS] [--no_show]
+                             [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -61,6 +62,8 @@ Options:
   -lb LABELS, --labels LABELS
                         Optional. Path to file with label names
   --no_show             Optional. Don't show output
+  -u UTILIZATION_MONITORS, --utilization-monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.
