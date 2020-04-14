@@ -24,7 +24,7 @@ import numpy as np
 from collections import deque
 from argparse import ArgumentParser, SUPPRESS
 from math import exp as exp
-from time import time
+from time import time, perf_counter
 from enum import Enum
 
 import cv2
@@ -115,7 +115,7 @@ class Mode():
 
 class ModeInfo():
     def __init__(self):
-        self.last_start_time = time()
+        self.last_start_time = perf_counter()
         self.last_end_time = None
         self.frames_count = 0
         self.latency_sum = 0
@@ -128,11 +128,11 @@ def entry_index(side, coord, classes, location, entry):
     return int(side_power_2 * (n * (coord + classes + 1) + entry) + loc)
 
 
-def scale_bbox(x, y, h, w, class_id, confidence, h_scale, w_scale):
-    xmin = int((x - w / 2) * w_scale)
-    ymin = int((y - h / 2) * h_scale)
-    xmax = int(xmin + w * w_scale)
-    ymax = int(ymin + h * h_scale)
+def scale_bbox(x, y, input_height, input_width, class_id, confidence, h_scale, w_scale):
+    xmin = int((x - input_width / 2) * w_scale)
+    ymin = int((y - input_height / 2) * h_scale)
+    xmax = int(xmin + input_width * w_scale)
+    ymax = int(ymin + input_height * h_scale)
     return dict(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, class_id=class_id, confidence=confidence)
 
 
@@ -171,16 +171,16 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
             except OverflowError:
                 continue
             # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
-            w = w_exp * params.anchors[2 * n] / (resized_image_w if params.isYoloV3 else params.side)
-            h = h_exp * params.anchors[2 * n + 1] / (resized_image_h if params.isYoloV3 else params.side)
+            input_width = w_exp * params.anchors[2 * n] / (resized_image_w if params.isYoloV3 else params.side)
+            input_height = h_exp * params.anchors[2 * n + 1] / (resized_image_h if params.isYoloV3 else params.side)
             for j in range(params.classes):
                 class_index = entry_index(params.side, params.coords, params.classes, n * side_square + i,
                                           params.coords + 1 + j)
                 confidence = scale * predictions[class_index]
                 if confidence < threshold:
                     continue
-                objects.append(scale_bbox(x=x, y=y, h=h, w=w, class_id=j, confidence=confidence,
-                                          h_scale=orig_im_h, w_scale=orig_im_w))
+                objects.append(scale_bbox(x=x, y=y, input_height=input_height, input_width=input_width, class_id=j, \
+                                          confidence=confidence, h_scale=orig_im_h, w_scale=orig_im_w))
     return objects
 
 
@@ -199,21 +199,20 @@ def intersection_over_union(box_1, box_2):
     return area_of_overlap / area_of_union
 
 
-def preprocess_frame(frame, h, w):
-    in_frame = cv2.resize(frame, (w, h))
+def preprocess_frame(frame, input_height, input_width):
+    in_frame = cv2.resize(frame, (input_width, input_height))
     in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
     in_frame = np.expand_dims(in_frame, axis=0)
     return in_frame
 
 
-def get_objects(output, net, new_frame_shape, raw_frame_shape, prob_threshold):
+def get_objects(output, net, new_frame_height_width, source_height_width, prob_threshold):
     objects = list()
 
     for layer_name, out_blob in output.items():
         out_blob = out_blob.reshape(net.layers[net.layers[layer_name].parents[0]].out_data[0].shape)
         layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
-        objects += parse_yolo_region(out_blob, new_frame_shape,
-                                     raw_frame_shape, layer_params,
+        objects += parse_yolo_region(out_blob, new_frame_height_width, source_height_width, layer_params,
                                      prob_threshold)
 
     return objects
@@ -233,18 +232,17 @@ def filter_objects(objects, iou_threshold, prob_threshold):
 
 
 def async_callback(status, callback_args):
-    request_id, exec_net, frame_id, frame_mode, frame, start_time, raw_frame_shape, completed_request_results, \
-    empty_request_ids, mode, event, callback_exceptions = callback_args
+    request, exec_net, frame_id, frame_mode, frame, start_time, completed_request_results, empty_requests, mode, \
+    event, callback_exceptions = callback_args
     
     try:
         if status != 0:
             raise RuntimeError('Infer Request has returned status code {}'.format(status))
         
-        outputs = exec_net.requests[request_id].outputs.copy()
-        completed_request_results[frame_id] = (frame, outputs, start_time, raw_frame_shape, frame_mode == mode.current)
+        completed_request_results[frame_id] = (frame, request.outputs, start_time, frame_mode == mode.current)
 
         if mode.current == frame_mode:
-            empty_request_ids.append(request_id)
+            empty_requests.append(request)
     except Exception as e:
         callback_exceptions.append(e)
     
@@ -324,7 +322,7 @@ def main():
     input_blob = next(iter(net.inputs))
 
     # Read and pre-process input images
-    n, c, h, w = net.inputs[input_blob].shape
+    input_height, input_width = net.inputs[input_blob].shape[2:]
 
     if args.labels:
         with open(args.labels, 'r') as f:
@@ -358,21 +356,12 @@ def main():
     exec_nets[Modes.MIN_LATENCY] = ie.load_network(network=net, device_name=args.device.split(":")[-1].split(",")[0],
                                                    num_requests=1)
 
-    # shared
-    empty_request_ids = deque()
+    empty_requests = deque(exec_nets[mode.current].requests)
     completed_request_results = {}
     next_frame_id = 0
-    next_shown_frame_id = 0
+    next_frame_id_to_show = 0
     event = threading.Event()
     callback_exceptions = []
-
-    # user specified
-    if mode.current == Modes.USER_SPECIFIED:
-        empty_request_ids.extend(range(args.num_infer_requests))
-
-    # min latency
-    if mode.current == Modes.MIN_LATENCY:
-        empty_request_ids.append(0)
 
     # ----------------------------------------------- 6. Doing inference -----------------------------------------------
     log.info("Starting inference...")
@@ -380,21 +369,23 @@ def main():
     print("To switch between min_latency/user_specified modes, press TAB key in the output window")
 
     mode_info = { mode.current: ModeInfo() }
-    
+    active_requests_data = {}
+
     while (cap.isOpened() \
           or completed_request_results \
-          or len(empty_request_ids) < len(exec_nets[mode.current].requests)) \
-          and not callback_exceptions:
+          or len(empty_requests) < len(exec_nets[mode.current].requests)):
 
-        if next_shown_frame_id in completed_request_results:
-            frame, output, start_time, \
-            raw_frame_shape, is_same_mode = completed_request_results.pop(next_shown_frame_id)
+        if callback_exceptions:
+            raise callback_exceptions[0]
+
+        if next_frame_id_to_show in completed_request_results:
+            frame, output, start_time, is_same_mode = completed_request_results.pop(next_frame_id_to_show)
             
-            next_shown_frame_id += 1
+            next_frame_id_to_show += 1
             if is_same_mode:
                 mode_info[mode.current].frames_count += 1
 
-            objects = get_objects(output, net, (h, w), raw_frame_shape, args.prob_threshold)
+            objects = get_objects(output, net, (input_height, input_width), frame.shape[:-1], args.prob_threshold)
             objects = filter_objects(objects, args.iou_threshold, args.prob_threshold)
 
             if len(objects) and args.raw_output_message:
@@ -426,8 +417,8 @@ def main():
             # Draw performance stats over frame
             if mode_info[mode.current].frames_count != 0:
                 fps_message = "FPS: {:.1f}".format(mode_info[mode.current].frames_count / \
-                                                   (time() - mode_info[mode.current].last_start_time))
-                mode_info[mode.current].latency_sum += time() - start_time
+                                                   (perf_counter() - mode_info[mode.current].last_start_time))
+                mode_info[mode.current].latency_sum += perf_counter() - start_time
                 latency_message = "Latency: {:.1f} ms".format((mode_info[mode.current].latency_sum / \
                                                               mode_info[mode.current].frames_count) * 1e3)
 
@@ -442,23 +433,21 @@ def main():
                 cv2.imshow("Detection Results", frame)
                 key = cv2.waitKey(wait_key_time)
 
-                if key == 27: # ESC key
+                if key in {ord("q"), ord("Q"), 27}: # ESC key
                     break
                 if key == 9: # Tab key
                     prev_mode = mode.current
                     mode.next()
                     
                     await_requests_completion(exec_nets[prev_mode].requests)
-                    empty_request_ids.clear()
-                    if mode.current == Modes.USER_SPECIFIED:
-                        empty_request_ids.extend(range(args.num_infer_requests))
-                    elif mode.current == Modes.MIN_LATENCY:
-                        empty_request_ids.append(0)
+                    empty_requests.clear()
+                    empty_requests.extend(exec_nets[mode.current].requests)
                     
-                    mode_info[prev_mode].last_end_time = time()
+                    mode_info[prev_mode].last_end_time = perf_counter()
                     mode_info[mode.current] = ModeInfo()
 
-        elif empty_request_ids and cap.isOpened():
+        elif empty_requests and cap.isOpened():
+            start_time = perf_counter()
             ret, frame = cap.read()
             if not ret:
                 if args.loop_input:
@@ -466,52 +455,46 @@ def main():
                 else:
                     cap.release()
                 continue
-            request_id = empty_request_ids.popleft()
-            
-            raw_frame_shape = frame.shape[:-1]
-
-            frame_id = next_frame_id
-            next_frame_id += 1
+            request = empty_requests.popleft()
 
             # resize input_frame to network size
-            in_frame = preprocess_frame(frame, h, w)
+            in_frame = preprocess_frame(frame, input_height, input_width)
 
             # Start inference
-            exec_nets[mode.current].requests[request_id].set_completion_callback(py_callback=async_callback,
-                                                                                 py_data=(request_id,
-                                                                                          exec_nets[mode.current],
-                                                                                          frame_id,
-                                                                                          mode.current,
-                                                                                          frame.copy(),
-                                                                                          time(),
-                                                                                          raw_frame_shape,
-                                                                                          completed_request_results,
-                                                                                          empty_request_ids,
-                                                                                          mode,
-                                                                                          event,
-                                                                                          callback_exceptions))
-            exec_nets[mode.current].start_async(request_id=request_id, inputs={input_blob: in_frame})
+            request.async_infer(inputs={input_blob: in_frame})
+            active_requests_data[next_frame_id] = (request,
+                                                   exec_nets[mode.current],
+                                                   next_frame_id,
+                                                   mode.current,
+                                                   frame,
+                                                   start_time,
+                                                   completed_request_results,
+                                                   empty_requests,
+                                                   mode,
+                                                   event,
+                                                   callback_exceptions)
+            next_frame_id += 1
     
         else:
-            event.wait()
+            for request, exec_net, frame_id, *_ in active_requests_data.values():
+                if request.wait(1) == 0:
+                    async_callback(0, active_requests_data.pop(frame_id))
+                    break
     
-    if not callback_exceptions:
-        for mode_value in mode_info.keys():
-            log.info("")
-            log.info("Mode: {}".format(mode_value.name))
+    for mode_value in mode_info.keys():
+        log.info("")
+        log.info("Mode: {}".format(mode_value.name))
 
-            end_time = mode_info[mode_value].last_end_time if mode_value in mode_info \
-                                                              and mode_info[mode_value].last_end_time is not None \
-                                                              else time()
-            log.info("FPS: {:.1f}".format(mode_info[mode_value].frames_count / \
-                                          (end_time - mode_info[mode_value].last_start_time)))
-            log.info("Latency: {:.1f} ms".format((mode_info[mode_value].latency_sum / \
-                                                 mode_info[mode_value].frames_count) * 1e3))
-    else:
-        log.error(callback_exceptions[0])
+        end_time = mode_info[mode_value].last_end_time if mode_value in mode_info \
+                                                          and mode_info[mode_value].last_end_time is not None \
+                                                          else perf_counter()
+        log.info("FPS: {:.1f}".format(mode_info[mode_value].frames_count / \
+                                      (end_time - mode_info[mode_value].last_start_time)))
+        log.info("Latency: {:.1f} ms".format((mode_info[mode_value].latency_sum / \
+                                             mode_info[mode_value].frames_count) * 1e3))
 
-    for mode_value in Modes:
-        await_requests_completion(exec_nets[mode_value].requests)
+    for exec_net in exec_nets.values():
+        await_requests_completion(exec_net.requests)
 
 
 if __name__ == '__main__':
