@@ -46,8 +46,7 @@ Channel order is `BGR`.
 
 ### Original model
 Model outputs are floating points tensors:
-1.  -
-name: `face_rpn_cls_prob_reshape_stride32`, shape: `1,4, 20, 20`, format: `[B, Ax2, H, W]`, where
+1.  name: `face_rpn_cls_prob_reshape_stride32`, shape: `1,4, 20, 20`, format: `[B, Ax2, H, W]`, where
    - `B` - batch size
    - `A` - number of anchors
    - `H` - feature height
