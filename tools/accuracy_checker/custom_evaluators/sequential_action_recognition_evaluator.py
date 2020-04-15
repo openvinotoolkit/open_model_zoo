@@ -63,9 +63,9 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             allow_pairwise_subset=False,
             dump_prediction_to_annotation=False,
             **kwargs):
-        self._annotations, self._predictions = ([], []) if self.metric_executor.need_store_predictions else None, None
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
+        self._annotations, self._predictions = [], []
         if dump_prediction_to_annotation:
             self._dumped_annotations = []
 

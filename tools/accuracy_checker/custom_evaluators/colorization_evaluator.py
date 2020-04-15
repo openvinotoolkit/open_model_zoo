@@ -86,7 +86,7 @@ class ColorizationEvaluator(BaseEvaluator):
             dump_prediction_to_annotation=False,
             **kwargs):
 
-        self._annotations, self._predictions = ([], []) if self.metric_executor.need_store_predictions else None, None
+        self._annotations, self._predictions = [], []
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
 
