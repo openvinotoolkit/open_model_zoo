@@ -35,8 +35,8 @@ def create_model_evaluator(config):
     cascade = 'evaluations' in config
     if not cascade:
         return ModelEvaluator.from_configs(config)
-    else:
-        return PipelineEvaluator.from_configs(config['evaluations'][0], delayed_model_loading=True)
+
+    return PipelineEvaluator.from_configs(config['evaluations'][0], delayed_model_loading=True)
 
 
 class ModelEvaluator:
