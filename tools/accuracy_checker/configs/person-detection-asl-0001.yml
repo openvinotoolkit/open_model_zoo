@@ -8,8 +8,16 @@ models:
         model:   intel/person-detection-asl-0001/FP32/person-detection-asl-0001.xml
         weights: intel/person-detection-asl-0001/FP32/person-detection-asl-0001.bin
         adapter:
-          type: fcos_person
-          output_blob: 17701/Split.0
+          type: class_agnostic_detection
+          scale: 0.003125
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/person-detection-asl-0001/FP16/person-detection-asl-0001.xml
+        weights: intel/person-detection-asl-0001/FP16/person-detection-asl-0001.bin
+        adapter:
+          type: class_agnostic_detection
           scale: 0.003125
 
     datasets:

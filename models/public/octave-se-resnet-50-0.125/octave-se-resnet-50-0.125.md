@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `octave-se-resnet-50-0.125` model is a modification of `se-resnet-50` from [this paper](https://arxiv.org/pdf/1709.01507.pdf) with octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.125`. As origin, it's designed to perform image classification. For details about family of octave convolution models, check out the [repository](https://github.com/facebookresearch/OctConv).
+The `octave-se-resnet-50-0.125` model is a modification of `se-resnet-50` from [this paper](https://arxiv.org/abs/1709.01507) with octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.125`. As origin, it's designed to perform image classification. For details about family of octave convolution models, check out the [repository](https://github.com/facebookresearch/OctConv).
 
 The model input is a blob that consists of a single image of 1x3x224x224 in RGB order. The RGB mean values need to be subtracted as follows: [124,117,104] before passing the image blob into the network. In addition, values must be divided by 0.0167.
 

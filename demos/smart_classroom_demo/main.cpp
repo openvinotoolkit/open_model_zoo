@@ -8,9 +8,6 @@
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 #include <string>
 #include <memory>
 #include <limits>
@@ -614,10 +611,6 @@ int main(int argc, char* argv[]) {
 
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
-#ifdef WITH_EXTENSIONS
-                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
-
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);

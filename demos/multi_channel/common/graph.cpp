@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <string>
-#include <memory>
-#include <vector>
-#include <utility>
 #include <algorithm>
+#include <chrono>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "graph.hpp"
 #include "threading.hpp"
@@ -41,9 +42,6 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     auto cnnNetwork = ie.ReadNetwork(modelPath);
 
     if (deviceName.find("CPU") != std::string::npos) {
-#ifdef WITH_EXTENSIONS
-        ie.AddExtension(std::make_shared<InferenceEngine::Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CPU_BIND_THREAD, "NO"}}, "CPU");
     }
     if (!cpuExtensionPath.empty()) {

@@ -27,7 +27,7 @@ After that, the application displays the tracks and the latest detections on the
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./pedestrian_tracker_demo -h
 InferenceEngine:
     API version ............ <version>

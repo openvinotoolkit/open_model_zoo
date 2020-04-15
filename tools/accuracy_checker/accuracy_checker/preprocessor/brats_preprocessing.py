@@ -15,11 +15,15 @@ limitations under the License.
 """
 
 import numpy as np
-from scipy.ndimage import interpolation
 
 from ..config import ConfigError, BaseField, NumberField, ListField, StringField
 from ..preprocessor import Preprocessor
 from ..utils import get_or_parse_value
+
+try:
+    from scipy.ndimage import interpolation
+except ImportError:
+    interpolation = None
 
 
 class Resize3D(Preprocessor):
@@ -34,6 +38,9 @@ class Resize3D(Preprocessor):
         return parameters
 
     def configure(self):
+        if interpolation is None:
+            raise ValueError('resize3d require scipy, please install it before usage.')
+
         self.shape = self._check_size(
             get_or_parse_value(self.config.get('size'), default=(128, 128, 128), casting_type=int))
 
@@ -51,7 +58,7 @@ class Resize3D(Preprocessor):
 
     def _check_size(self, size):
         if len(size) != 3:
-            raise ConfigError("Incorrect size dimenstion for {} - must be 3, but {} found"
+            raise ConfigError("Incorrect size dimension for {} - must be 3, but {} found"
                               .format(self.__provider__, len(size)))
         if not all(np.array(size) > 0):
             raise ConfigError("Size must be positive value for {}, but {} found".format(self.__provider__, size))
@@ -168,9 +175,11 @@ class SwapModalitiesBrats(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'modality_order': ListField(value_type=NumberField(value_type=int, min_value=0, max_value=3),
-                                        validate_values=True,
-                                        description="Specifies order of modality according to model input")
+            'modality_order': ListField(
+                value_type=NumberField(value_type=int, min_value=0, max_value=3),
+                validate_values=True,
+                description="Specifies order of modality according to model input"
+            )
         })
 
         return parameters

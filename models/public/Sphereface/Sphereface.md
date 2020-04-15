@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-[Deep face recognition under open-set protocol](https://arxiv.org/pdf/1704.08063.pdf)
+[Deep face recognition under open-set protocol](https://arxiv.org/abs/1704.08063)
 
 ## Example
 

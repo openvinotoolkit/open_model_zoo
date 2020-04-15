@@ -26,9 +26,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/semantic-segmentation-adas-0001/FP32-INT8/semantic-segmentation-adas-0001.xml
-        weights: intel/semantic-segmentation-adas-0001/FP32-INT8/semantic-segmentation-adas-0001.bin
+          - FP16-INT8
+        model:   intel/semantic-segmentation-adas-0001/FP16-INT8/semantic-segmentation-adas-0001.xml
+        weights: intel/semantic-segmentation-adas-0001/FP16-INT8/semantic-segmentation-adas-0001.bin
         adapter: segmentation
         inputs:
           - name: data

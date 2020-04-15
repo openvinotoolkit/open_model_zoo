@@ -3,7 +3,7 @@ models:
 
     # list of launchers for your topology.
     launchers:
-        # launcher framework (e.g. caffe, dlsdk, opencv)
+      # launcher framework (e.g. caffe, dlsdk, opencv)
       - framework: opencv
         # device for infer (e.g. for dlsdk cpu, gpu, hetero:cpu,gpu ...)
         device: CPU
@@ -15,9 +15,9 @@ models:
         inputs:
           # name of input layer
           - name: 'input'
-          # type for setting input data: INPUT for dynamic dataset input, CONST_INPUT for setting value from config, IMAGE_INFO for using image size as input.
+            # type for setting input data: INPUT for dynamic dataset input, CONST_INPUT for setting value from config, IMAGE_INFO for using image size as input.
             type: INPUT
-          # comma separated list of input dimensions without batch size.
+            # comma separated list of input dimensions without batch size.
             shape: 3, 32, 32
         # *.prototxt for caffe, *.xml for InferenceEngine, etc
         # path to topology is prefixed with directory, specified in "-m/--models" option
@@ -33,10 +33,10 @@ models:
     # there is typically definitions file, which contains options for common datasets and which is merged
     # during evaluation, but since "sample_dataset" is not used anywhere else, this config contains full definition
     datasets:
-        # uniquely distinguishable name for dataset
-        # note that all other steps are specific for this dataset only
-        # if you need to test topology on multiple datasets, you need to specify
-        # every step explicitly for each dataset
+      # uniquely distinguishable name for dataset
+      # note that all other steps are specific for this dataset only
+      # if you need to test topology on multiple datasets, you need to specify
+      # every step explicitly for each dataset
       - name: sample_dataset
         # directory where input images are searched.
         # prefixed with directory specified in "-s/--source" option
@@ -47,7 +47,7 @@ models:
           #  In order to do this you need to provide your own annotation converter,
           # i.e. implement BaseFormatConverter interface.
           # All annotation converters are stored in accuracy_checker/annotation_converters directory.
-          converter: cifar10
+          converter: cifar
           # converter specific parameters.
           # Full range available options you can find in accuracy_checker/annotation_converters/README.md
           # relative paths will be merged with "-s/--source" option
@@ -57,19 +57,21 @@ models:
           convert_images: True
           # path to save converted images.
           converted_images_dir: sample_dataset/test
+          # number of classes in the dataset, used for label_map generation
+          num_classes: 10
 
         # list of preprocessing, applied to each image during validation
         # order of entries matters
         preprocessing:
-            # resize input image to topology input size
-            # you may specify size to which image should be resized
-            # via dst_width, dst_height fields
+          # resize input image to topology input size
+          # you may specify size to which image should be resized
+          # via dst_width, dst_height fields
           - type: resize
             size: 32
-            # topology is trained on RGB images, but OpenCV reads in BGR
-            # thence it must be converted to RGB
+          # topology is trained on RGB images, but OpenCV reads in BGR
+          # thence it must be converted to RGB
           - type: bgr_to_rgb
-            # dataset mean and standard deviation
+          # dataset mean and standard deviation
           - type: normalization
             # you may specify precomputed statistics manually or use precomputed values, such as ImageNet as well
             mean: (125.307, 122.961, 113.8575)

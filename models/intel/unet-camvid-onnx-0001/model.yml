@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  U-Net trained on CamVid in PyTorch (71.95% mIoU)
+task_type: semantic_segmentation
+files:
+  - name: FP32/unet-camvid-onnx-0001.xml
+    size: 64416
+    sha256: 5e84e74600c8c0263165115050d3ab25c43a2d405f41061736165caf231f0fa1
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.xml
+  - name: FP32/unet-camvid-onnx-0001.bin
+    size: 124129876
+    sha256: cf996b45dadfa397f16aad5a7264787e3666a7645eba3653e5c48d42076e86d7
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.bin
+  - name: FP16/unet-camvid-onnx-0001.xml
+    size: 64370
+    sha256: f0e51f4cd2a26d120029bb45d8a966c65b0fe95fd63ac44b02bdcabee5c49ab1
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.xml
+  - name: FP16/unet-camvid-onnx-0001.bin
+    size: 62064942
+    sha256: 0c8dda21bc6ad71f6e78dea15d228f1bb293efeb2e97dff8d91ea91d357ca080
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.bin
+  - name: FP16-INT8/unet-camvid-onnx-0001.xml
+    size: 151918
+    sha256: fe927cb3d74edc63f1fc4c06ab24809907b6ef3b53aae68a1bef68a2f7d84626
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.xml
+  - name: FP16-INT8/unet-camvid-onnx-0001.bin
+    size: 33848330
+    sha256: 0f4e805b829d185d404ea70d9e009a1508577f55e3f82fca3aefd7d23d53e0a8
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -26,7 +26,7 @@ public:
     static constexpr int objectSize = 7;  // Output should have 7 as a last dimension"
 
     Detector() = default;
-    Detector(InferenceEngine::Core& ie, const std::string deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
+    Detector(InferenceEngine::Core& ie, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
             const bool autoResize, const std::map<std::string, std::string> & pluginConfig) :
         detectionTresholds{detectionTresholds}, ie_{ie} {
         auto network = ie.ReadNetwork(xmlPath);

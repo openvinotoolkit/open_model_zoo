@@ -13,11 +13,10 @@
 # limitations under the License.
 
 description: >-
-  `mobilenet-v1-0.25-128` is one of MobileNets - small, low-latency, low-power
-  models parameterized to meet the resource constraints of a variety of use cases.
-  They can be built upon for classification, detection, embeddings and segmentation
-  similar to how other popular large scale models are used. For details see paper
-  <https://arxiv.org/abs/1704.04861>
+  "mobilenet-v1-0.25-128" is one of MobileNets - small, low-latency, low-power models
+  parameterized to meet the resource constraints of a variety of use cases. They can
+  be built upon for classification, detection, embeddings and segmentation similar
+  to how other popular large scale models are used. For details, see paper <https://arxiv.org/abs/1704.04861>.
 task_type: classification
 files:
   - name: mobilenet_v1_0.25_128.tgz
@@ -33,7 +32,7 @@ model_optimizer_args:
   - --input_shape=[1,128,128,3]
   - --input=input
   - --mean_values=input[127.5,127.5,127.5]
-  - --scale_values=input[127.50000414375013]
+  - --scale_values=input[127.5]
   - --output=MobilenetV1/Predictions/Reshape_1
   - --input_model=$dl_dir/mobilenet_v1_0.25_128_frozen.pb
 framework: tf

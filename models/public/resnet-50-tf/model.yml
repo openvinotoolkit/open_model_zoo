@@ -1,0 +1,33 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  resnet-50-tf is a TensorFlow\* implementation of ResNet-50 - an image classification model
+  pretrained on the ImageNet dataset. For details see paper <https://arxiv.org/abs/1512.03385>,
+  repository <https://github.com/tensorflow/models/tree/master/official/r1/resnet>.
+task_type: classification
+files:
+  - name: resnet_v1-50.pb
+    size: 102170160
+    sha256: 7c186a471a30682cdee02b246eeb0bfd93fc71d9fa53834d69f8101e664d12f8
+    source: https://download.01.org/opencv/public_models/012020/resnet-50-tf/resnet_v1-50.pb
+model_optimizer_args:
+  - --input_shape=[1,224,224,3]
+  - --mean_values=[123.68,116.78,103.94]
+  - --input=map/TensorArrayStack/TensorArrayGatherV3
+  - --output=softmax_tensor
+  - --input_model=$dl_dir/resnet_v1-50.pb
+  - --reverse_input_channels
+framework: tf
+license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

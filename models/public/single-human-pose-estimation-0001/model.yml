@@ -13,10 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The model based on for the paper [Global Context for Convolutional Pose Machines](https://arxiv.org/pdf/1906.04104.pdf) and trained on COCO dataset.
-  The model input is a blob that consists of one images of "1x3x384x288" in
-  BGR order.
-  The model outputs one blob: heatmaps ( shape of output blob "1x17x48x36")
+  Single human pose estimation model based on https://arxiv.org/abs/1906.04104.
 task_type: human_pose_estimation
 files:
   - name: single-human-pose-estimation-0001.tar.gz

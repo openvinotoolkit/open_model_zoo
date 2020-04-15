@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  ICNet trained on CamVid in TensorFlow with 60% weight sparsity (69.49% mIoU)
+task_type: semantic_segmentation
+files:
+  - name: FP32/icnet-camvid-ava-sparse-60-0001.xml
+    size: 210605
+    sha256: 547f2cb51bb0cf18d493a39c80abe47d0ba428138f40109d2c4365a8cbac2d89
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/icnet-camvid-ava-sparse-60-0001/FP32/icnet-camvid-ava-sparse-60-0001.xml
+  - name: FP32/icnet-camvid-ava-sparse-60-0001.bin
+    size: 106816756
+    sha256: eed6911e4a4e56613ea01317d386f51b7f5529f944b65a97aeb045f7afa4b9eb
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/icnet-camvid-ava-sparse-60-0001/FP32/icnet-camvid-ava-sparse-60-0001.bin
+  - name: FP16/icnet-camvid-ava-sparse-60-0001.xml
+    size: 210513
+    sha256: 74053971593c02fb2be9c70d9635d419565c39f16e6b9b9ca1c0053af61351b6
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/icnet-camvid-ava-sparse-60-0001/FP16/icnet-camvid-ava-sparse-60-0001.xml
+  - name: FP16/icnet-camvid-ava-sparse-60-0001.bin
+    size: 53408464
+    sha256: 7a5d41199e2a121f67251bd7a4acb41f72033e24611b3333956f89bf27697e3b
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/icnet-camvid-ava-sparse-60-0001/FP16/icnet-camvid-ava-sparse-60-0001.bin
+  - name: FP16-INT8/icnet-camvid-ava-sparse-60-0001.xml
+    size: 593758
+    sha256: 3f9002d60974b9106fda27c3471d17bd753ada8c588764871150b818591dc907
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/icnet-camvid-ava-sparse-60-0001/FP16-INT8/icnet-camvid-ava-sparse-60-0001.xml
+  - name: FP16-INT8/icnet-camvid-ava-sparse-60-0001.bin
+    size: 26847578
+    sha256: 0978e3b369b56eea7149edf76c395859ad711552e7950d887a592e44863b2ca6
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/icnet-camvid-ava-sparse-60-0001/FP16-INT8/icnet-camvid-ava-sparse-60-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

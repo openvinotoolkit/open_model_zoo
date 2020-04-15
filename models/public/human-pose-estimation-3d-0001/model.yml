@@ -13,18 +13,9 @@
 # limitations under the License.
 
 description: >-
-  Multi-person 3D human pose estimation model based on "Lightweight OpenPose"
-  <https://arxiv.org/pdf/1811.12004.pdf> and
-  "Single-Shot Multi-Person 3D Pose Estimation From Monocular RGB"
-  <https://arxiv.org/pdf/1712.03453.pdf> papers.
-
-  The model input is a blob that consists of a single image of "1x3x256x448" in
-  BGR order.
-
-  The model outputs three blobs: features_3d, heatmaps, and pafs.
-  The first blob contains coordinates in 3D space, the second one contains
-  keypoint heatmaps and the third is keypoint pairwise relations
-  (part affinity fields).
+  Multi-person 3D human pose estimation model based on the Lightweight OpenPose <https://arxiv.org/abs/1811.12004>
+  and Single-Shot Multi-Person 3D Pose Estimation From Monocular RGB <https://arxiv.org/abs/1712.03453>
+  papers.
 task_type: human_pose_estimation
 files:
   - name: human-pose-estimation-3d-0001.tar.gz

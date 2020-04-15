@@ -11,6 +11,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <inference_engine.hpp>
 
+#include <ngraph/ngraph.hpp>
+
 using namespace InferenceEngine;
 
 #define SSD_EMPTY_DETECTIONS_INDICATOR -1.0
@@ -94,17 +96,6 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
     }
     DataPtr& _output = outputInfo.begin()->second;
     output_name_ = outputInfo.begin()->first;
-
-    const CNNLayerPtr outputLayer = cnnNetwork.getLayerByName(output_name_.c_str());
-    if (outputLayer->type != "DetectionOutput") {
-        THROW_IE_EXCEPTION << "Face Detection network output layer(" + outputLayer->name +
-                              ") should be DetectionOutput, but was " +  outputLayer->type;
-    }
-
-    if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
-        THROW_IE_EXCEPTION << "Face Detection network output layer (" +
-                              output_name_ + ") should have num_classes integer attribute";
-    }
 
     const SizeVector outputDims = _output->getTensorDesc().getDims();
     max_detections_count_ = outputDims[2];

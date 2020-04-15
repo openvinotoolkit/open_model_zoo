@@ -17,11 +17,17 @@ limitations under the License.
 from .metric_executor import MetricsExecutor
 from .metric import Metric, PerImageMetricResult
 
-from .classification import ClassificationAccuracy, ClassificationAccuracyClasses, ClipAccuracy
+from .classification import (
+    ClassificationAccuracy,
+    ClassificationAccuracyClasses,
+    ClipAccuracy,
+    ClassificationF1Score,
+    MetthewsCorrelation
+)
 from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric)
 from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets
 from .semantic_segmentation import SegmentationAccuracy, SegmentationIOU, SegmentationMeanAccuracy, SegmentationFWAcc
-from .character_recognition import CharacterRecognitionAccuracy
+from .character_recognition import CharacterRecognitionAccuracy, LabelLevelRecognitionAccuracy
 from .regression import (
     MeanAbsoluteErrorOnInterval,
     MeanSquaredErrorOnInterval,
@@ -36,6 +42,7 @@ from .regression import (
     FacialLandmarksNormedError,
 
     PeakSignalToNoiseRatio,
+    StructuralSimilarity,
 
     AngleError
 )
@@ -72,6 +79,7 @@ __all__ = [
     'ClassificationAccuracy',
     'ClassificationAccuracyClasses',
     'ClipAccuracy',
+    'ClassificationF1Score',
 
     'DetectionMAP',
     'MissRate',
@@ -89,6 +97,7 @@ __all__ = [
     'SegmentationFWAcc',
 
     'CharacterRecognitionAccuracy',
+    'LabelLevelRecognitionAccuracy',
 
     'MeanAbsoluteError',
     'MeanSquaredError',
@@ -99,6 +108,7 @@ __all__ = [
     'FacialLandmarksPerPointNormedError',
     'FacialLandmarksNormedError',
     'PeakSignalToNoiseRatio',
+    'StructuralSimilarity',
     'AngleError',
 
     'MultiLabelAccuracy',

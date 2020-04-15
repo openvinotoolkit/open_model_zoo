@@ -14,7 +14,6 @@ public:
     bool GrabNext();
     bool Retrieve(cv::Mat& img);
     bool IsOpened() const;
-    int GetFrameIndex() const;
     int GetFPS() const;
     std::string GetVideoPath() const;
 
@@ -27,7 +26,4 @@ private:
     std::vector<std::vector<int>> frames;
     int current_video_idx;
     int current_frame_idx;
-    int cap_frame_index;
-
-    bool NextVideo();
 };

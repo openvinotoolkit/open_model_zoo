@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
         auto total_t0 = std::chrono::high_resolution_clock::now();
         auto wallclock = std::chrono::high_resolution_clock::now();
-        double decode_time = 0, render_time = 0;
+        double render_time = 0;
 
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
                 estimator.frameToBlobCurr(curr_frame);
             }
             auto t1 = std::chrono::high_resolution_clock::now();
-            decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
+            double decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
 
             t0 = std::chrono::high_resolution_clock::now();
             // Main sync point:
@@ -173,7 +173,9 @@ int main(int argc, char* argv[]) {
                 if (FLAGS_r) {
                     if (!poses.empty()) {
                         std::time_t result = std::time(nullptr);
-                        std::cout << std::asctime(std::localtime(&result));
+                        char timeString[sizeof("2020-01-01 00:00:00: ")];
+                        std::strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S: ", std::localtime(&result));
+                        std::cout << timeString;
                      }
 
                     for (HumanPose const& pose : poses) {

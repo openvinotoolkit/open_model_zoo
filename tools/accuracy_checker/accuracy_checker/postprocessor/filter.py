@@ -24,6 +24,7 @@ from ..representation import (DetectionAnnotation, DetectionPrediction, TextDete
                               TextDetectionPrediction, PoseEstimationPrediction, PoseEstimationAnnotation)
 from ..utils import in_interval, polygon_from_points, convert_to_range
 
+
 class FilterPostprocessor(PostprocessorWithSpecificTargets):
     __provider__ = 'filter'
 

@@ -16,7 +16,6 @@ limitations under the License.
 
 import warnings
 from collections import defaultdict, namedtuple
-from sklearn.metrics import auc, precision_recall_curve
 import numpy as np
 
 from ..representation import (
@@ -26,6 +25,11 @@ from ..representation import (
 )
 from ..config import BaseField, BoolField, NumberField
 from .metric import FullDatasetEvaluationMetric
+
+try:
+    from sklearn.metrics import auc, precision_recall_curve
+except ImportError:
+    auc, precision_recall_curve = None, None
 
 PairDesc = namedtuple('PairDesc', 'image1 image2 same')
 
@@ -429,6 +433,8 @@ def get_embedding_distances(annotation, prediction, train=False):
 
 
 def binary_average_precision(y_true, y_score, interpolated_auc=True):
+    if auc is None:
+        raise ValueError('please install sklearn')
     def _average_precision(y_true_, y_score_):
         precision, recall, _ = precision_recall_curve(y_true_, y_score_)
         if not interpolated_auc:

@@ -13,9 +13,9 @@
 # limitations under the License.
 
 description: >-
-  The `googlenet-v3` model is the first of the Inception family of models designed
-  to perform image classification. Like the other Inception models. For details
-  about this family of models, check out the paper <https://arxiv.org/pdf/1602.07261.pdf>.
+  The "googlenet-v3" model is the first of the Inception family of models designed
+  to perform image classification. For details about this family of models, check
+  out the paper <https://arxiv.org/abs/1602.07261>.
 task_type: classification
 files:
   - name: googlenet-v3.tar.gz
@@ -31,7 +31,7 @@ model_optimizer_args:
   - --input_shape=[1,299,299,3]
   - --input=input
   - --mean_values=input[127.5,127.5,127.5]
-  - --scale_values=input[127.50000414375013]
+  - --scale_values=input[127.5]
   - --output=InceptionV3/Predictions/Softmax
   - --input_model=$dl_dir/inception_v3_2016_08_28_frozen.pb
 framework: tf

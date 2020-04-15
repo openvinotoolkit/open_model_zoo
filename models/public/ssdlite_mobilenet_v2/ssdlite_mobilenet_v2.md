@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `ssdlite_mobilenet_v2` model is used for object detection. For details, see the [paper](https://arxiv.org/pdf/1801.04381.pdf), MobileNetV2: Inverted Residuals and Linear Bottlenecks.
+The `ssdlite_mobilenet_v2` model is used for object detection. For details, see the [paper](https://arxiv.org/abs/1801.04381), MobileNetV2: Inverted Residuals and Linear Bottlenecks.
 
 ## Example
 

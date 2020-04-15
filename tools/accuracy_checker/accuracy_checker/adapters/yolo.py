@@ -107,7 +107,12 @@ class YoloV2Adapter(Adapter):
                 optional=True, choices=YoloV2Adapter.PRECOMPUTED_ANCHORS,
                 allow_own_choice=True, default='yolo_v2',
                 description="Anchor values provided as comma-separated list or one of precomputed: "
-                            "{}".format(', '.join(YoloV2Adapter.PRECOMPUTED_ANCHORS)))
+                            "{}".format(', '.join(YoloV2Adapter.PRECOMPUTED_ANCHORS))
+            ),
+            'cells': NumberField(
+                value_type=int, optional=True, min_value=1, default=13,
+                description="Number of cells across width and height"
+            )
         })
         return parameters
 
@@ -119,6 +124,7 @@ class YoloV2Adapter(Adapter):
         self.coords = self.get_value_from_config('coords')
         self.num = self.get_value_from_config('num')
         self.anchors = get_or_parse_value(self.get_value_from_config('anchors'), YoloV2Adapter.PRECOMPUTED_ANCHORS)
+        self.cells = self.get_value_from_config('cells')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -130,7 +136,7 @@ class YoloV2Adapter(Adapter):
         """
         predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
 
-        cells_x, cells_y = 13, 13
+        cells_x, cells_y = self.cells, self.cells
 
         result = []
         for identifier, prediction in zip(identifiers, predictions):

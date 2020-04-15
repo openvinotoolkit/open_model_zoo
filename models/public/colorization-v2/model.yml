@@ -1,0 +1,50 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+    The colorization-v2 model is one of the colorization
+    group of models designed to perform image colorization. For details
+    about this family of models, check out the repository - https://github.com/richzhang/colorization.
+
+    Model consumes as input L-channel of LAB-image.
+    Model give as output predict A- and B-channels of LAB-image.
+
+task_type: "colorization"
+files:
+  - name: colorization-v2.prototxt
+    sha256: d16418cef8df4ccd703a55ae0ef3960861d5010418f77c90d0a47689998a7169
+    source: https://raw.githubusercontent.com/richzhang/colorization/master/models/colorization_deploy_v2.prototxt
+    size: 9945
+  - name: colorization-v2.caffemodel
+    size: 128946764
+    sha256: f5af1e602646328c792e1094f9876fe9cd4c09ac46fa886e5708a1abc89137b1
+    source: http://eecs.berkeley.edu/~rich.zhang/projects/2016_colorization/files/demo_v2/colorization_release_v2.caffemodel
+  - name: colorization-v2.npy
+    size: 5088
+    sha256: b5dec01315c34f43f1c8c089e84c45ae35d1838d8e77ed0e7ca930f79ffa450e
+    source: https://github.com/richzhang/colorization/raw/master/resources/pts_in_hull.npy
+model_optimizer_args:
+  - --input_shape=[1,1,224,224]
+  - --input=data_l
+  - --mean_values=data_l[50]
+  - --output=class8_313_rh
+  - --input_model=$dl_dir/colorization-v2.caffemodel
+  - --input_proto=$dl_dir/colorization-v2.prototxt
+postprocessing:
+  - $type: regex_replace
+    file: colorization-v2.prototxt
+    pattern: 'layer {\n  name: "Silence"\n  type: "Silence"\n  bottom: "class8_ab"\n}'
+    replacement: ''
+framework: caffe
+license: https://raw.githubusercontent.com/richzhang/colorization/master/LICENSE

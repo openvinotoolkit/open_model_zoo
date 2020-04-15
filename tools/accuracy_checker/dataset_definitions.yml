@@ -153,13 +153,31 @@ datasets:
         ignore_difficult: True
         presenter: print_scalar
 
+  - name: VOC2012_without_background
+    annotation_conversion:
+      converter: voc_detection
+      annotations_dir: VOCdevkit/VOC2012/Annotations
+      images_dir: VOCdevkit/VOC2012/JPEGImages
+      imageset_file: VOCdevkit/VOC2012/ImageSets/Main/val.txt
+    data_source: VOCdevkit/VOC2012/JPEGImages
+    annotation: voc12_without_background.pickle
+    dataset_meta: voc12_without_background.json
+    postprocessing:
+      - type: resize_prediction_boxes
+    metrics:
+      - type: map
+        integral: 11point
+        ignore_difficult: True
+        presenter: print_scalar
+
   - name: VOC2012_Segmentation
     annotation_conversion:
       converter: voc_segmentation
       imageset_file: VOCdevkit/VOC2012/ImageSets/Segmentation/val.txt
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       mask_dir: VOCdevkit/VOC2012/SegmentationClass/
-    data_source: VOCdevkit/VOC2012
+    data_source: VOCdevkit/VOC2012/JPEGImages/
+    segmentation_masks_source:  VOCdevkit/VOC2012/SegmentationClass/
     annotation: voc2012_segmentation.pickle
     dataset_meta: voc2012_segmentation.json
 
@@ -411,12 +429,12 @@ datasets:
       data_dir: Market-1501-v15.09.15
     annotation: market1501_reid.pickle
 
-  - name: globalme-reid
-    data_source: GlobalMe-reID
+  - name: reid_dataset
+    data_source: Market-1501-v15.09.15
     annotation_conversion:
       converter: market1501_reid
-      data_dir: globalme-reid/GlobalMe-reID
-    annotation: globalme-reid.pickle
+      data_dir: Market-1501-v15.09.15
+    annotation: market1501_reid.pickle
 
   - name: vgg2face
     data_source: VGGFaces2/test
@@ -574,6 +592,28 @@ datasets:
     annotation: kinetics_action_recognition.pickle
     dataset_meta: kinetics_action_recognition.json
 
+  - name: kinetics-400-frames-79
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/kinetics_400.json
+      data_dir: kinetics/frames_val
+      clip_duration: 79
+    annotation: kinetics_action_recognition_79.pickle
+    dataset_meta: kinetics_action_recognition_79.json
+
+  - name: kinetics-400-frames-79-400
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/kinetics_400.json
+      data_dir: kinetics/frames_val
+      clip_duration: 79
+      temporal_stride: 1
+      num_samples: 400
+    annotation: kinetics_action_recognition_79_400.pickle
+    dataset_meta: kinetics_action_recognition_79_400.json
+
   - name: driver_action_recognition_dataset
     data_source: kinetics/frames_val
     annotation_conversion:
@@ -643,3 +683,28 @@ datasets:
       out_fps: 15
       clip_length: 16
     annotation: msasl/msasl_action_recognition.pickle
+
+  - name: ReDWeb_V1
+    data_source: ReDWeb_V1
+    annotation_conversion:
+      converter: redweb
+      data_dir: ReDWeb_V1
+      annotation_file: ReDWeb_validation_360.txt
+    annotation: mono_depth.pickle
+
+  - name: Kondate_nakayosi
+    data_source: Kondate_nakayosi/test_data
+    annotation_conversion:
+      converter: kondate_nakayosi_recognition
+      decoding_char_file: Kondate_nakayosi/kondate_nakayosi_char_list.txt
+      annotation_file: Kondate_nakayosi/test_img_id_gt.txt
+    annotation: kondate_nakayosi_recognition.pickle
+    dataset_meta: kondate_nakayosi_recognition.json
+
+  - name: inpainting_free_form_masks
+    data_source: VOCdevkit/VOC2012/JPEGImages/
+    annotation_conversion:
+      converter: inpainting
+      images_dir: VOCdevkit/VOC2012/JPEGImages/
+      masks_dir: free_form_masks/masks_2k
+    annotation: inpainting_voc12_masks2k.pickle

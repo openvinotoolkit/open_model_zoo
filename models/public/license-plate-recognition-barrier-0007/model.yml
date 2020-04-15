@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-description: TensorFlow LPRNet
+description: >-
+  This model uses a small-footprint network trained end-to-end to recognize Chinese
+  license plates in traffic.
 task_type: optical_character_recognition
 files:
   - name: license-plate-recognition-barrier-0007.tar.gz
@@ -27,7 +29,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,24,94,3]
   - --input=input
-  - --scale_values=input[254.99997577500233]
+  - --scale_values=input[255.0]
   - --output=d_predictions
   - --input_model=$dl_dir/license-plate-recognition-barrier-0007/graph.pb.frozen
 framework: tf

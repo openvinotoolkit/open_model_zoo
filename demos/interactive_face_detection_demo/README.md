@@ -37,7 +37,7 @@ The new Async API operates with a new notion of the Infer Request that encapsula
 
 Running the application with the `-h` option yields the following usage message:
 
-```sh
+```
 ./interactive_face_detection_demo -h
 InferenceEngine:
     API version ............ <version>

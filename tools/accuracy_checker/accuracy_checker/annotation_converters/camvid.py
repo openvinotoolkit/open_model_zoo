@@ -13,20 +13,19 @@ class CamVidConverter(FileBasedAnnotationConverter):
             0: 'Sky',
             1: 'Building',
             2: 'Pole',
-            3: 'Road_marking',
-            4: 'Road',
-            5: 'Pavement',
-            6: 'Tree',
-            7: 'SignSymbol',
-            8: 'Fence',
-            9: 'Car',
-            10: 'Pedestrian',
-            11: 'Bicyclist',
-            12: 'Unlabelled'
+            3: 'Road',
+            4: 'Pavement',
+            5: 'Tree',
+            6: 'SignSymbol',
+            7: 'Fence',
+            8: 'Car',
+            9: 'Pedestrian',
+            10: 'Bicyclist',
+            11: 'Unlabelled'
         },
-        'background_label': 12,
+        'background_label': 11,
         'segmentation_colors': (
-            (128, 128, 128), (128, 0, 0), (192, 192, 128), (255, 69, 0), (128, 64, 128), (60, 40, 222), (128, 128, 0),
+            (128, 128, 128), (128, 0, 0), (192, 192, 128), (128, 64, 128), (60, 40, 222), (128, 128, 0),
             (192, 128, 128), (64, 64, 128), (64, 0, 128), (64, 64, 0), (0, 128, 192), (0, 0, 0)
         )
     }

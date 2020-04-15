@@ -64,7 +64,7 @@ protected:
      * @param results_fetcher Callback to fetch inference results
      */
     void Infer(const cv::Mat& frame,
-               std::function<void(const InferenceEngine::BlobMap&, size_t)> results_fetcher) const;
+               const std::function<void(const InferenceEngine::BlobMap&, size_t)>& results_fetcher) const;
 
     /**
      * @brief Run network in batch mode
@@ -73,7 +73,7 @@ protected:
      * @param results_fetcher Callback to fetch inference results
      */
     void InferBatch(const std::vector<cv::Mat>& frames,
-                    std::function<void(const InferenceEngine::BlobMap&, size_t)> results_fetcher) const;
+                    const std::function<void(const InferenceEngine::BlobMap&, size_t)>& results_fetcher) const;
 
     /** @brief Config */
     Config config_;

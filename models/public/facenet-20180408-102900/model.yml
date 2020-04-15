@@ -13,8 +13,8 @@
 # limitations under the License.
 
 description: >-
-  FaceNet: A Unified Embedding for Face Recognition and Clustering. For details
-  see repository <https://github.com/davidsandberg/facenet/>, paper <https://arxiv.org/pdf/1503.03832.pdf>
+  FaceNet: A Unified Embedding for Face Recognition and Clustering. For details see
+  the repository <https://github.com/davidsandberg/facenet/>, paper <https://arxiv.org/abs/1503.03832>
 task_type: face_recognition
 files:
   - name: 20180408-102900.zip

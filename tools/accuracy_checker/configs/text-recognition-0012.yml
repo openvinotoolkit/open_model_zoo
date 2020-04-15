@@ -18,9 +18,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/text-recognition-0012/FP32-INT8/text-recognition-0012.xml
-        weights: intel/text-recognition-0012/FP32-INT8/text-recognition-0012.bin
+          - FP16-INT8
+        model:   intel/text-recognition-0012/FP16-INT8/text-recognition-0012.xml
+        weights: intel/text-recognition-0012/FP16-INT8/text-recognition-0012.bin
         adapter: beam_search_decoder
 
     datasets:

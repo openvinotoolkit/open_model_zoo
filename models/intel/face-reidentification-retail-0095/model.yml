@@ -17,28 +17,28 @@ description: >-
 task_type: face_recognition
 files:
   - name: FP32/face-reidentification-retail-0095.xml
-    size: 225832
-    sha256: 3d0c0bebecb1d138dff373124d63e9baaa97b0259992f8741eb581d50c43b156
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
+    size: 225841
+    sha256: 6745d97ad4e765fa10a72eae3087cf6b4d4296c63f728840f77fced45acda5f5
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
   - name: FP32/face-reidentification-retail-0095.bin
     size: 4427256
-    sha256: 03836a6a1d03828322491b0608a579b1c47e5097d355c489b5b8aaf5fce1ef48
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
+    sha256: 5ac2b046dd8644be5bf26677fbe3db955a0777a777ed6767c772d665f21d89b8
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
   - name: FP16/face-reidentification-retail-0095.xml
-    size: 225728
-    sha256: b8677b046dacd91a9ea0dfe388a7d58701fc09dfd8388716342da406078633b0
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
+    size: 225737
+    sha256: b943dcc9a2b5cae07d731db4363cfb21b9f63654e65466c630ead2b70987aa5b
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
   - name: FP16/face-reidentification-retail-0095.bin
     size: 2213724
     sha256: c2f8a7b9268e5b5236574d6fda2216df43c03acaa39c078848a98fbb707ae0a3
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
-  - name: FP32-INT8/face-reidentification-retail-0095.xml
-    size: 643466
-    sha256: 6814d50c0ef1339d28447ffdd47335540a8d910bc8494c6afc185983f34bd466
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/face-reidentification-retail-0095/FP32-INT8/face-reidentification-retail-0095.xml
-  - name: FP32-INT8/face-reidentification-retail-0095.bin
-    size: 4551656
-    sha256: eaae8881109a2dab91fb7fddc73052378b015d6f3aa61b1c772eca21f87e4741
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/face-reidentification-retail-0095/FP32-INT8/face-reidentification-retail-0095.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
+  - name: FP16-INT8/face-reidentification-retail-0095.xml
+    size: 671548
+    sha256: 00e49f77188efc6197483f1da5468029ae4798c9f7de315c686534944424ede6
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.xml
+  - name: FP16-INT8/face-reidentification-retail-0095.bin
+    size: 1181084
+    sha256: 02464b526ab8834dded89e04bc7fc58bf0a95d6c0d358f0e2ac3f9f64afa2318
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -27,11 +27,12 @@ from .vgg_face_regression import VGGFaceRegressionConverter
 from .super_resolution_converter import SRConverter, SRMultiFrameConverter
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
+from .kondate_nakayosi import KondateNakayosiRecognitionDatasetConverter
 from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter, MSCocoSingleKeypointsConverter
 from .cityscapes import CityscapesConverter
 from .ncf_converter import MovieLensConverter
 from .brats import BratsConverter, BratsNumpyConverter
-from .cifar10 import Cifar10FormatConverter
+from .cifar import CifarFormatConverter
 from .mnist import MNISTCSVFormatConverter
 from .wmt import WMTConverter
 from .common_semantic_segmentation import CommonSegmentationConverter
@@ -47,10 +48,21 @@ from .cvat_multilabel_recognition import CVATMultilabelAttributesRecognitionConv
 from .cvat_human_pose import CVATPoseEstimationConverter
 from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
 from .squad import SQUADConverter
-from .xnli import XNLIDatasetConverter, BertXNLITFRecordConverter
+from .text_classification import (
+    XNLIDatasetConverter,
+    BertXNLITFRecordConverter,
+    IMDBConverter,
+    MRPCConverter,
+    CoLAConverter
+)
 from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
 from .ms_asl_continuous import MSASLContiniousConverter
+
+from .monocular_depth_perception import ReDWebDatasetConverter
+
+from .fashion_mnist import FashionMnistConverter
+from .inpainting import InpaintingConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -71,6 +83,7 @@ __all__ = [
     'SRMultiFrameConverter',
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
+    'KondateNakayosiRecognitionDatasetConverter',
     'MSCocoKeypointsConverter',
     'MSCocoSingleKeypointsConverter',
     'MSCocoDetectionConverter',
@@ -78,7 +91,7 @@ __all__ = [
     'MovieLensConverter',
     'BratsConverter',
     'BratsNumpyConverter',
-    'Cifar10FormatConverter',
+    'CifarFormatConverter',
     'MNISTCSVFormatConverter',
     'WMTConverter',
     'CommonSegmentationConverter',
@@ -96,7 +109,13 @@ __all__ = [
     'SQUADConverter',
     'XNLIDatasetConverter',
     'BertXNLITFRecordConverter',
+    'IMDBConverter',
+    'MRPCConverter',
+    'CoLAConverter',
     'CmuPanopticKeypointsConverter',
     'ActionRecognitionConverter',
-    'MSASLContiniousConverter'
+    'MSASLContiniousConverter',
+    'ReDWebDatasetConverter',
+    'FashionMnistConverter',
+    'InpaintingConverter'
 ]
