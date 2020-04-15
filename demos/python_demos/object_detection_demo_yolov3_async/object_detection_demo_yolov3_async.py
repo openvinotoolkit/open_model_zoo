@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (C) 2018-2019 Intel Corporation
 
@@ -14,7 +14,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-from __future__ import print_function, division
 
 import logging
 import os
