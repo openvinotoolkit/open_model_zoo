@@ -19,7 +19,9 @@ class ModuleEvaluator(BaseEvaluator):
         return cls(load_module(module, python_path).from_configs(module_config, *args, **kwargs))
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
-        self._internal_module.process_dataset(*args, stored_predictions=stored_predictions, progress_reporter=progress_reporter, **kwargs)
+        self._internal_module.process_dataset(
+            *args, stored_predictions=stored_predictions, progress_reporter=progress_reporter, **kwargs
+        )
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         return self._internal_module.compute_metrics(print_results, ignore_results_formatting)
