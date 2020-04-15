@@ -38,7 +38,7 @@ from ..utils import (
 from .launcher import Launcher, LauncherConfigValidator
 from .model_conversion import convert_model, FrameworkParameters
 from ..logging import print_info
-from .input_feeder import PRECISION_TO_DTYPE
+from .input_feeder import PRECISION_TO_DTYPE, DIM_IDS_TO_LAYOUT
 try:
     from cpuinfo import get_cpu_info
 except ImportError:
@@ -49,10 +49,6 @@ try:
 except ImportError:
     IEBlob, IETensorDesc = None, None
 
-DIM_IDS_TO_LAYOUT = {
-    (0, 3, 1, 2): 'NCHW',
-    (0, 1, 2, 3): 'NHWC',
-}
 
 HETERO_KEYWORD = 'HETERO:'
 MULTI_DEVICE_KEYWORD = 'MULTI:'
@@ -625,14 +621,12 @@ class DLSDKLauncher(Launcher):
             data = np.concatenate([data, filled_part])
         precision = self.inputs[input_blob].precision
         data = data.astype(PRECISION_TO_DTYPE[precision])
-
-        if len(data.shape) == 4 and len(input_shape) == 4:
-            data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
-            input_layout = self.inputs[input_blob].layout
-            if input_layout != data_layout and IEBlob is not None:
-                self._target_layout_mapping[input_blob] = data_layout
-                self._use_set_blob = True
-                return data
+        data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
+        input_layout = self.inputs[input_blob].layout
+        if len(input_layout) == len(data_layout) and input_layout != data_layout and IEBlob is not None:
+            self._target_layout_mapping[input_blob] = data_layout
+            self._use_set_blob = True
+            return data
 
         return data.reshape(input_shape)
 
