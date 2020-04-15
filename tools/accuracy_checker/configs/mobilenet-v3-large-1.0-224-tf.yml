@@ -1,9 +1,9 @@
 models:
-  - name: MobileNet-v3-large-1.0
+  - name: mobilenet-v3-large-1.0-224-tf
 
     launchers:
       - framework: tf
-        model: public/mobilenet-v3-large-1.0/v3-large_224_1.0_float/v3-large_224_1.0_float.pb
+        model: public/mobilenet-v3-large-1.0-224-tf/v3-large_224_1.0_float/v3-large_224_1.0_float.pb
         adapter: classification
 
     datasets:
@@ -18,20 +18,20 @@ models:
           mean: 127.5
           std: 127.5
 
-  - name: MobileNet-v3-large-1.0
+  - name: mobilenet-v3-large-1.0-224-tf
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/mobilenet-v3-large-1.0/FP32/mobilenet-v3-large-1.0.xml
-        weights: public/mobilenet-v3-large-1.0/FP32/mobilenet-v3-large-1.0.bin
+        model:   public/mobilenet-v3-large-1.0-224-tf/FP32/mobilenet-v3-large-1.0-224-tf.xml
+        weights: public/mobilenet-v3-large-1.0-224-tf/FP32/mobilenet-v3-large-1.0-224-tf.bin
         adapter: classification
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/mobilenet-v3-large-1.0/FP16/mobilenet-v3-large-1.0.xml
-        weights: public/mobilenet-v3-large-1.0/FP16/mobilenet-v3-large-1.0.bin
+        model:   public/mobilenet-v3-large-1.0-224-tf/FP16/mobilenet-v3-large-1.0-224-tf.xml
+        weights: public/mobilenet-v3-large-1.0-224-tf/FP16/mobilenet-v3-large-1.0-224-tf.bin
         adapter: classification
 
     datasets:

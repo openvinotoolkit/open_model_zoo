@@ -13,20 +13,20 @@
 # limitations under the License.
 
 description: >-
-  `mobilenet-v3-small-1.0-tf` is one of MobileNets V3 - next generation of MobileNets,
+  `mobilenet-v3-large-1.0-224-tf` is one of MobileNets V3 - next generation of MobileNets,
   based on a combination of complementary search techniques as well as a novel architecture design.
-  `mobilenet-v3-small-1.0-tf` is targeted for low resource use cases.
-  For details see paper <https://arxiv.org/abs/1905.02244>
+  `mobilenet-v3-large-1.0-224-tf` is targeted for high resource use cases.
+  For details see paper <https://arxiv.org/abs/1905.02244>.
 task_type: classification
 files:
-  - name: v3-small_224_1.0_float.tgz
-    size: 113230261
-    sha256: e60ad9f450f892ae56f8b9122ffc750d88940d9e6b63f6dc70649179fb3a9065
-    source: https://storage.googleapis.com/mobilenet_v3/checkpoints/v3-small_224_1.0_float.tgz
+  - name: v3-large_224_1.0_float.tgz
+    size: 184251120 
+    sha256: 9be8563f92022f412c82f2811d670888d6db998e2da9af3e71415fdde2f4f504
+    source: https://storage.googleapis.com/mobilenet_v3/checkpoints/v3-large_224_1.0_float.tgz
 postprocessing:
   - $type: unpack_archive
     format: gztar
-    file: v3-small_224_1.0_float.tgz
+    file: v3-large_224_1.0_float.tgz
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,224,224,3]
@@ -34,6 +34,6 @@ model_optimizer_args:
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]
   - --output=MobilenetV3/Predictions/Softmax
-  - --input_model=$dl_dir/v3-small_224_1.0_float/v3-small_224_1.0_float.pb
+  - --input_model=$dl_dir/v3-large_224_1.0_float/v3-large_224_1.0_float.pb
 framework: tf
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

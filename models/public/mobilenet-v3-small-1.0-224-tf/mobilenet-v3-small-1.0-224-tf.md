@@ -1,10 +1,10 @@
-# mobilenet-v3-large-1.0-tf
+# mobilenet-v3-small-1.0-tf
 
 ## Use Case and High-Level Description
 
-`mobilenet-v3-large-1.0-tf` is one of MobileNets V3 - next generation of MobileNets,
+`mobilenet-v3-small-1.0-224-tf` is one of MobileNets V3 - next generation of MobileNets,
 based on a combination of complementary search techniques as well as a novel architecture design.
-`mobilenet-v3-large-1.0-tf` is targeted for high resource use cases. For details see [paper](https://arxiv.org/abs/1905.02244).
+`mobilenet-v3-small-1.0-224-tf` is targeted for low resource use cases. For details see [paper](https://arxiv.org/abs/1905.02244).
 
 ## Example
 
@@ -13,16 +13,16 @@ based on a combination of complementary search techniques as well as a novel arc
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | Type                            | Classification                            |
-| GFlops                          | 1.183                                     |
-| MParams                         | 6.087                                     |
+| GFlops                          | 0.121                                     |
+| MParams                         | 2.537                                     |
 | Source framework                | TensorFlow\*                              |
 
 ## Accuracy
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 75.70          | 75.70           |
-| Top 5  | 92.76          | 92.76           |
+| Top 1  | 67.36          | 67.36           |
+| Top 5  | 87.45          | 87.45           |
 
 ## Performance
 
