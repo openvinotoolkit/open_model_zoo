@@ -15,7 +15,7 @@ Please see more information about `Model downloader` [here](../../../tools/downl
 
 The demo workflow is the following:
 
-The demo first reads an image and performs the preprocessing such as resize and padding. Then after loading model to the plugin, the inference will start. After decoding the returned indexes into chars, the demo will display the predicted text.
+The demo first reads an image and performs the preprocessing such as resize and padding. Then after loading model to the plugin, the inference will start. After decoding the returned indexes into characters, the demo will display the predicted text.
 
 ### Installation and dependencies
 

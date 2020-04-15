@@ -76,7 +76,8 @@ python ./face_recognition_demo.py -h
 
 usage: face_recognition_demo.py [-h] [-i PATH] [-o PATH] [--no_show] [-tl]
                                 [-cw CROP_WIDTH] [-ch CROP_HEIGHT]
-                                [--match_algo {HUNGARIAN,MIN_DIST}] -fg PATH
+                                [--match_algo {HUNGARIAN,MIN_DIST}]
+                                [-u UTILIZATION_MONITORS] -fg PATH
                                 [--run_detector] -m_fd PATH -m_lm PATH -m_reid
                                 PATH [-fd_iw FD_INPUT_WIDTH]
                                 [-fd_ih FD_INPUT_HEIGHT]
@@ -85,6 +86,7 @@ usage: face_recognition_demo.py [-h] [-i PATH] [-o PATH] [--no_show] [-tl]
                                 [-d_reid {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
                                 [-l PATH] [-c PATH] [-v] [-pc] [-t_fd [0..1]]
                                 [-t_id [0..1]] [-exp_r_fd NUMBER]
+                                [--allow_grow]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -108,6 +110,8 @@ General:
   --match_algo {HUNGARIAN,MIN_DIST}
                         (optional)algorithm for face matching(default:
                         HUNGARIAN)
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 
 Faces database:
   -fg PATH              Path to the face images directory
