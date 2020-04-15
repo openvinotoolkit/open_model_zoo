@@ -602,6 +602,7 @@ class MTCNNEvaluator(BaseEvaluator):
                 if no_detections(batch_prediction):
                     break
 
+            batch_annotation, batch_predictions = self.postprocessor.process_batch(batch_annotation, batch_prediction)
             metrics_result = None
             if self.metric_executor:
                 metrics_result = self.metric_executor.update_metrics_on_batch(
