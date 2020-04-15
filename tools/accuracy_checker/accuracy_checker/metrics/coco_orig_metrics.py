@@ -46,52 +46,6 @@ if SHOULD_DISPLAY_DEBUG_IMAGES:
     import cv2
 
 
-def box_to_coco(prediction_data_to_store, pred):
-    x_mins = pred.x_mins.tolist()
-    y_mins = pred.y_mins.tolist()
-    x_maxs = pred.x_maxs.tolist()
-    y_maxs = pred.y_maxs.tolist()
-
-    for data_record, x_min, y_min, x_max, y_max in zip(
-            prediction_data_to_store, x_mins, y_mins, x_maxs, y_maxs
-    ):
-        width = x_max - x_min + 1
-        height = y_max - y_min + 1
-        data_record.update({'bbox': [x_min, y_min, width, height]})
-
-    return prediction_data_to_store
-
-
-def segm_to_coco(prediction_data_to_store, pred):
-    encoded_masks = pred.mask
-
-    for data_record, segm_mask in zip(prediction_data_to_store, encoded_masks):
-        data_record.update({'segmentation': segm_mask})
-
-    return prediction_data_to_store
-
-
-def keypoints_to_coco(prediction_data_to_store, pred):
-    for data_record, x_val, y_val, vis in zip(
-            prediction_data_to_store, pred.x_values, pred.y_values, pred.visibility
-    ):
-        keypoints = []
-        for x, y, v in zip(x_val, y_val, vis):
-            keypoints.extend([x, y, int(v)])
-        data_record.update({
-            'keypoints': keypoints
-        })
-
-    return prediction_data_to_store
-
-
-iou_specific_processing = {
-    'bbox': box_to_coco,
-    'segm': segm_to_coco,
-    'keypoints': keypoints_to_coco
-}
-
-
 class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
     annotation_types = (DetectionAnnotation, )
     prediction_types = (DetectionPrediction, )
@@ -117,23 +71,71 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             raise ConfigError('coco_orig metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerated annotation')
 
+    @staticmethod
+    def _box_to_coco(data_to_store, data):
+        x_mins = data.x_mins.tolist()
+        y_mins = data.y_mins.tolist()
+        x_maxs = data.x_maxs.tolist()
+        y_maxs = data.y_maxs.tolist()
+
+        for data_record, x_min, y_min, x_max, y_max in zip(
+            data_to_store, x_mins, y_mins, x_maxs, y_maxs
+        ):
+            width = x_max - x_min + 1
+            height = y_max - y_min + 1
+            area = width * height
+            data_record.update({
+                'bbox': [x_min, y_min, width, height],
+                'area': area
+            })
+
+        return data_to_store
+
+    def _segm_to_coco(self, data_to_store, data):
+        encoded_masks = data.mask
+
+        for data_record, segm_mask in zip(data_to_store, encoded_masks):
+            data_record.update({'segmentation': segm_mask})
+
+        return data_to_store
+
+    def _keypoints_to_coco(self, data_to_store, data):
+        for data_record, x_val, y_val, vis in zip(
+            data_to_store, data.x_values, data.y_values, data.visibility
+        ):
+            keypoints = []
+            num_keypoints = 0
+            for x, y, v in zip(x_val, y_val, vis):
+                keypoints.extend([int(x), int(y), int(v)])
+                if x != 0:
+                    num_keypoints += 1
+            data_record.update({
+                'keypoints': keypoints,
+                'num_keypoints': num_keypoints
+            })
+
+        return data_to_store
+
+    _iou_specific_processing = {
+        'bbox': _box_to_coco,
+        'segm': _segm_to_coco,
+        'keypoints': _keypoints_to_coco
+    }
+
     def _prepare_coco_structures(self, annotations):
         meta = self.dataset.metadata
 
         if COCO is None:
             raise ValueError('pycocotools is not installed, please install it')
         coco_data_to_store = self._prepare_data_for_annotation_file(
-            annotations, meta.get('label_map'), self.iou_type)
+            annotations, meta.get('label_map'))
 
         coco_annotation = self._create_json(coco_data_to_store)
         coco = COCO(str(coco_annotation))
 
         return coco
 
-    @staticmethod
-    def _convert_data_to_coco_format(
-            predictions, iou_type='bbox'
-    ):
+    def _convert_data_to_coco_format(self, predictions):
         coco_data_to_store = []
         for pred in predictions:
             prediction_data_to_store = []
@@ -152,24 +154,53 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
                     'category_id': cur_cat,
                     '_image_name_from_dataset': cur_name,
                 })
-            iou_specific_converter = iou_specific_processing.get(iou_type)
+            iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
             if iou_specific_converter is None:
-                raise ValueError("unknown iou type: '{}'".format(iou_type))
+                raise ValueError("unknown iou type: '{}'".format(self.iou_type))
             prediction_data_to_store = iou_specific_converter(prediction_data_to_store, pred)
             coco_data_to_store.extend(prediction_data_to_store)
 
         return coco_data_to_store
 
-    @staticmethod
-    def _calculate_area(data):
-        width = data.x_maxs - data.x_mins + 1
-        height = data.y_maxs - data.y_mins + 1
-        area = width * height
+    def _box_coco_annotation(self, annotation_data_to_store, annotation):
+        iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
+        if iou_specific_converter is None:
+            raise ValueError("unknown iou type: '{}'".format(self.iou_type))
+        annotation_data_to_store = iou_specific_converter(annotation_data_to_store, annotation)
+        return annotation_data_to_store
 
-        return area
+    def _segm_coco_annotation(self, annotation_data_to_store, annotation):
+        iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
+        if iou_specific_converter is None:
+            raise ValueError("unknown iou type: '{}'".format(self.iou_type))
+        annotation_data_to_store = iou_specific_converter(annotation_data_to_store, annotation)
+        return annotation_data_to_store
+
+    def _keypoints_coco_annotation(self, annotation_data_to_store, annotation):
+        iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
+        if iou_specific_converter is None:
+            raise ValueError("unknown iou type: '{}'".format(self.iou_type))
+        annotation_data_to_store = iou_specific_converter(annotation_data_to_store, annotation)
+        for data_record, bbox, area in zip(
+            annotation_data_to_store, annotation.bboxes, annotation.areas
+        ):
+            bbox_new = float(bbox)
+            area_new = float(area[0])
+            data_record.update({
+                'bbox': bbox_new,
+                'area': area_new
+            })
+        return annotation_data_to_store
+
+
+    _iou_processing_coco_annotation = {
+        'bbox': _box_coco_annotation,
+        'segm': _segm_coco_annotation,
+        'keypoints': _keypoints_coco_annotation
+    }
 
     def _prepare_data_for_annotation_file(
-            self, annotations, dataset_label_map, iou_type='bbox'
+            self, annotations, dataset_label_map
     ):
         coco_annotation_to_store = []
         coco_category_to_store = []
@@ -182,24 +213,23 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             cur_img_id = int(cur_name.split(".")[0])
 
             labels = annotation.labels.tolist()
-            areas = self._calculate_area(annotation).tolist()
             iscrowds = annotation.metadata.get('iscrowd')
 
-            for cur_cat, iscrowd, area in zip(labels, iscrowds, areas):
+            for cur_cat, iscrowd in zip(labels, iscrowds):
                 annotation_data_to_store.append({
                     'id': count,
                     'image_id': cur_img_id,
                     'category_id': cur_cat,
                     '_image_name_from_dataset': cur_name,
-                    'iscrowd': iscrowd,
-                    'area': area
+                    'iscrowd': iscrowd
                 })
                 count += 1
                 label_map.add(cur_cat)
 
-            iou_specific_converter = iou_specific_processing.get(iou_type)
+            # iou_specific_converter = self._iou_processing_coco_annotation.get(self.iou_type)
+            iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
             if iou_specific_converter is None:
-                raise ValueError("unknown iou type: '{}'".format(iou_type))
+                raise ValueError("unknown iou type: '{}'".format(self.iou_type))
             annotation_data_to_store = iou_specific_converter(annotation_data_to_store, annotation)
             coco_annotation_to_store.extend(annotation_data_to_store)
 
@@ -207,7 +237,6 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
                 'id': cur_img_id,
                 'file_name': cur_name
             })
-
         for cat in label_map:
             coco_category_to_store.append({
                 'id': cat,
@@ -292,9 +321,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
     def compute_precision_recall(self, annotations, predictions):
         coco = self._prepare_coco_structures(annotations)
-        coco_data_to_store = self._convert_data_to_coco_format(
-            predictions, self.iou_type
-        )
+        coco_data_to_store = self._convert_data_to_coco_format(predictions)
 
         coco_res = self._reload_results_to_coco_class(coco, coco_data_to_store)
 
