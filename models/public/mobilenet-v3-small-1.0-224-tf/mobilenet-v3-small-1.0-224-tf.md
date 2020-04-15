@@ -1,4 +1,4 @@
-# mobilenet-v3-small-1.0-tf
+# mobilenet-v3-small-1.0-224-tf
 
 ## Use Case and High-Level Description
 
