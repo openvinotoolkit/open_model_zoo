@@ -17,6 +17,7 @@ limitations under the License.
 import os
 import tempfile
 import json
+import pathlib
 try:
     from pycocotools.coco import COCO
 except ImportError:
@@ -108,16 +109,16 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
     def configure(self):
         self.threshold = get_or_parse_value(self.get_value_from_config('threshold'), COCO_THRESHOLDS)
-
-    def _prepare_coco_structures(self, annotations):
         if not self.dataset.metadata:
             raise ConfigError('coco orig metrics require dataset_meta'
                               'Please provide dataset meta file or regenerate annotation')
-        meta = self.dataset.metadata
 
-        if not meta.get('label_map'):
+        if not self.dataset.metadata.get('label_map'):
             raise ConfigError('coco_orig metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerated annotation')
+
+    def _prepare_coco_structures(self, annotations):
+        meta = self.dataset.metadata
 
         if COCO is None:
             raise ValueError('pycocotools is not installed, please install it')
@@ -136,8 +137,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         coco_data_to_store = []
         for pred in predictions:
             prediction_data_to_store = []
-            cur_name = pred.identifier
-            cur_name = os.path.basename(cur_name)
+            cur_name = pathlib.PurePath(pred.identifier).name
             cur_img_id = int(cur_name.split(".")[0])
 
             labels = pred.labels.tolist()
@@ -178,17 +178,14 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         count = 0
         for annotation in annotations:
             annotation_data_to_store = []
-            cur_name = annotation.identifier
-            cur_name = os.path.basename(cur_name)
+            cur_name = pathlib.PurePath(annotation.identifier).name
             cur_img_id = int(cur_name.split(".")[0])
 
             labels = annotation.labels.tolist()
             areas = self._calculate_area(annotation).tolist()
             iscrowds = annotation.metadata.get('iscrowd')
 
-            for cur_cat, iscrowd, area in zip(
-                    labels, iscrowds, areas
-            ):
+            for cur_cat, iscrowd, area in zip(labels, iscrowds, areas):
                 annotation_data_to_store.append({
                     'id': count,
                     'image_id': cur_img_id,
