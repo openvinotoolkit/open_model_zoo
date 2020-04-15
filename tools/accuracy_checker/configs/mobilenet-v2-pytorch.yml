@@ -39,7 +39,7 @@ models:
 
             # Using accuracy metric, achieved result of public model - 71.8
 
-  - name: mobilenet_v2_pytorch
+  - name: mobilenet-v2-pytorch
 
     # list of launchers for MobileNetV2.
     launchers:

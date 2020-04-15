@@ -4,7 +4,7 @@
 
 Inception v3 is image classification model pretrained on ImageNet dataset. This
 PyTorch implementation of architecture described in the paper ["Rethinking
-the Inception Architecture for Computer Vision"](https://arxiv.org/pdf/1512.00567.pdf) in
+the Inception Architecture for Computer Vision"](https://arxiv.org/abs/1512.00567) in
 TorchVision package (see [here](https://github.com/pytorch/vision)).
 
 The model input is a blob that consists of a single image of "1x3x299x299"

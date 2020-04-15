@@ -13,20 +13,20 @@ models:
           - conv2d_66/BiasAdd
           - conv2d_74/BiasAdd
         adapter:
-            type: yolo_v3
-            anchors: "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326"
-            num: 9
-            coords: 4
-            classes: 80
-            anchor_masks: [[6,7,8],[3,4,5],[0,1,2]]
-            raw_output: True
-            outputs:
-              - conv2d_58/BiasAdd
-              - conv2d_66/BiasAdd
-              - conv2d_74/BiasAdd
+          type: yolo_v3
+          anchors: "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326"
+          num: 9
+          coords: 4
+          classes: 80
+          anchor_masks: [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
+          raw_output: True
+          outputs:
+            - conv2d_58/BiasAdd
+            - conv2d_66/BiasAdd
+            - conv2d_74/BiasAdd
 
     datasets:
-      - name: ms_coco_detection_80_class_without_backgound
+      - name: ms_coco_detection_80_class_without_background
 
         preprocessing:
           - type: bgr_to_rgb
@@ -64,16 +64,16 @@ models:
         model:   public/yolo-v3-tf/FP32/yolo-v3-tf.xml
         weights: public/yolo-v3-tf/FP32/yolo-v3-tf.bin
         adapter:
-            type: yolo_v3
-            anchors: "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326"
-            num: 9
-            coords: 4
-            classes: 80
-            anchor_masks: [[6,7,8],[3,4,5],[0,1,2]]
-            outputs:
-              - conv2d_58/Conv2D/YoloRegion
-              - conv2d_66/Conv2D/YoloRegion
-              - conv2d_74/Conv2D/YoloRegion
+          type: yolo_v3
+          anchors: "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326"
+          num: 9
+          coords: 4
+          classes: 80
+          anchor_masks: [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
+          outputs:
+            - conv2d_58/Conv2D/YoloRegion
+            - conv2d_66/Conv2D/YoloRegion
+            - conv2d_74/Conv2D/YoloRegion
 
       - framework: dlsdk
         tags:
@@ -81,19 +81,19 @@ models:
         model:   public/yolo-v3-tf/FP16/yolo-v3-tf.xml
         weights: public/yolo-v3-tf/FP16/yolo-v3-tf.bin
         adapter:
-            type: yolo_v3
-            anchors: "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326"
-            num: 9
-            coords: 4
-            classes: 80
-            anchor_masks: [[6,7,8],[3,4,5],[0,1,2]]
-            outputs:
-              - conv2d_58/Conv2D/YoloRegion
-              - conv2d_66/Conv2D/YoloRegion
-              - conv2d_74/Conv2D/YoloRegion
+          type: yolo_v3
+          anchors: "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326"
+          num: 9
+          coords: 4
+          classes: 80
+          anchor_masks: [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
+          outputs:
+            - conv2d_58/Conv2D/YoloRegion
+            - conv2d_66/Conv2D/YoloRegion
+            - conv2d_74/Conv2D/YoloRegion
 
     datasets:
-      - name: ms_coco_detection_80_class_without_backgound
+      - name: ms_coco_detection_80_class_without_background
 
         preprocessing:
           - type: resize

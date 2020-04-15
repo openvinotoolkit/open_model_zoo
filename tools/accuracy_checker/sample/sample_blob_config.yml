@@ -3,13 +3,13 @@ models:
 
     # list of launchers for your topology.
     launchers:
-        # launcher framework (e.g. caffe, dlsdk)
+      # launcher framework (e.g. caffe, dlsdk)
       - framework: dlsdk
         # device for infer (e.g. for dlsdk cpu, gpu, hetero:cpu,gpu ...)
         # Note: not all devices support blob execution, it is the reason why for sample we will use myriad.
         device: MYRIAD
         # exported executable network blob
-        # you can export executable network blob from OpenVINO IR using compile_tool, see http://docs.openvinotoolkit.org/latest/_inference_engine_tools_compile_tool_README.html
+        # you can export executable network blob from OpenVINO IR using compile_tool, see https://docs.openvinotoolkit.org/latest/_inference_engine_tools_compile_tool_README.html
         # path to model is prefixed with directory, specified in "-m/--models" option
         model: SampleNet.blob
         # launcher returns raw result, so it should be converted
@@ -21,10 +21,10 @@ models:
     # there is typically definitions file, which contains options for common datasets and which is merged
     # during evaluation, but since "sample_dataset" is not used anywhere else, this config contains full definition
     datasets:
-        # uniquely distinguishable name for dataset
-        # note that all other steps are specific for this dataset only
-        # if you need to test topology on multiple datasets, you need to specify
-        # every step explicitly for each dataset
+      # uniquely distinguishable name for dataset
+      # note that all other steps are specific for this dataset only
+      # if you need to test topology on multiple datasets, you need to specify
+      # every step explicitly for each dataset
       - name: sample_dataset
         # directory where input images are searched.
         # prefixed with directory specified in "-s/--source" option
@@ -51,15 +51,15 @@ models:
         # list of preprocessing, applied to each image during validation
         # order of entries matters
         preprocessing:
-            # resize input image to topology input size
-            # you may specify size to which image should be resized
-            # via dst_width, dst_height fields
+          # resize input image to topology input size
+          # you may specify size to which image should be resized
+          # via dst_width, dst_height fields
           - type: resize
             size: 32
             # topology is trained on RGB images, but OpenCV reads in BGR
             # thence it must be converted to RGB
           - type: bgr_to_rgb
-            # dataset mean and standard deviation
+          # dataset mean and standard deviation
           - type: normalization
             # you may specify precomputed statistics manually or use precomputed values, such as ImageNet as well
             mean: (125.307, 122.961, 113.8575)

@@ -36,6 +36,7 @@ usage: human_pose_estimation_3d_demo.py [-h] -m MODEL [-i INPUT [INPUT ...]]
                                         [--height_size HEIGHT_SIZE]
                                         [--extrinsics_path EXTRINSICS_PATH]
                                         [--fx FX] [--no_show]
+                                        [-u UTILIZATION_MONITORS]
 
 Lightweight 3D human pose estimation demo. Press esc to exit, "p" to (un)pause
 video or process next image.
@@ -58,7 +59,8 @@ Options:
                         Optional. Path to file with camera extrinsics.
   --fx FX               Optional. Camera focal length.
   --no_show             Optional. Do not display output.
-
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.

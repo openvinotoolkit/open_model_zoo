@@ -67,6 +67,10 @@ AccuracyChecker supports following set of adapters:
 * `retinanet` - converting output of RetinaNet-based model.
   * `loc_out` - name of output layer with bounding box deltas.
   * `class_out` - name of output layer with classification probabilities.
+* `rfcn_class_agnostic` - convert output of Caffe RFCN model with agnostic bounding box regression approach.
+  * `cls_out` - the name of output layer with detected probabilities for each class. The layer shape is [num_boxes, num_classes], where `num_boxes` is number of predicted boxes, `num_classes` - number of classes in the dataset including background.
+  * `bbox_out` - the name of output layer with detected boxes deltas. The layer shape is [num_boxes, 8] where  `num_boxes` is number of predicted boxes, 8 (4 for background + 4 for foreground) bouding boxes coordinates.
+  * `roid_out` - the name of output layer with regions of interest.
 * `face_person_detection` - converting face person detection model output with 2 detection outputs to `ContainerPredition`, where value of parameters `face_out`and `person_out` are used for identification `DetectionPrediction` in container.
   * `face_out` -  face detection output layer name.
   * `person_out` - person detection output layer name.
@@ -171,7 +175,7 @@ AccuracyChecker supports following set of adapters:
   * `raw_masks_out` - name of output layer with raw instances masks.
   * `texts_out` - name of output layer with texts.
   * `confidence_threshold` - confidence threshold that is used to filter out detected instances.
-* `fcos_person` - converting output of FCOS (single class) model to `DetectionPrediction` representation.
+* `class_agnostic_detection` - converting 'boxes' [n, 5] output of detection model to `DetectionPrediction` representation.
   * `output_blob` - name of output layer with bboxes.
   * `scale` - scalar value to normalize bbox coordinates.
 * `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.

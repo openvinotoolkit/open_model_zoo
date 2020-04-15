@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Decoder part of text recognition head that takes encoder features from text-spotting-0002-text-recognizer-encoder
+  as input.
+task_type: optical_character_recognition
+files:
+  - name: FP32/text-spotting-0002-recognizer-decoder.xml
+    size: 30553
+    sha256: 4cc2cd17adcb77fd863c02fe52042d643427aa922fd3732823f3271230250951
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-spotting-0002-recognizer-decoder/FP32/text-spotting-0002-recognizer-decoder.xml
+  - name: FP32/text-spotting-0002-recognizer-decoder.bin
+    size: 2707804
+    sha256: 23a5601d0f974b9764d1de34f2f260d1aed28ea30b9f701f4dca9c45c915912a
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-spotting-0002-recognizer-decoder/FP32/text-spotting-0002-recognizer-decoder.bin
+  - name: FP16/text-spotting-0002-recognizer-decoder.xml
+    size: 30537
+    sha256: 61d1d61eb32687aeab595c8baae48143254e9b8bb28ef277c67d361694a16333
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-spotting-0002-recognizer-decoder/FP16/text-spotting-0002-recognizer-decoder.xml
+  - name: FP16/text-spotting-0002-recognizer-decoder.bin
+    size: 1354000
+    sha256: bedfc34060407b3af706ed70701701c42f240671899b170ae244d7120ed8f821
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-spotting-0002-recognizer-decoder/FP16/text-spotting-0002-recognizer-decoder.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

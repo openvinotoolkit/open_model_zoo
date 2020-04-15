@@ -31,9 +31,10 @@ TEXT_LEFT_MARGIN = 15
 
 
 class ResultRenderer(object):
-    def __init__(self, no_show, display_fps=False, display_confidence=True, number_of_predictions=1, labels=None,
-                 output_height=720):
+    def __init__(self, no_show, presenter, display_fps=False, display_confidence=True, number_of_predictions=1,
+                 labels=None, output_height=720):
         self.no_show = no_show
+        self.presenter = presenter
         self.number_of_predictions = number_of_predictions
         self.display_confidence = display_confidence
         self.display_fps = display_fps
@@ -65,6 +66,7 @@ class ResultRenderer(object):
         new_w = int(h * (new_h / w))
         frame = cv2.resize(frame, (new_w, new_h))
 
+        self.presenter.drawGraphs(frame)
         # Fill text area
         fill_area(frame, (0, 70), (700, 0), alpha=0.6, color=(0, 0, 0))
 
@@ -91,6 +93,7 @@ class ResultRenderer(object):
             key = cv2.waitKey(1) & 0xFF
             if key in {ord('q'), ord('Q'), 27}:
                 return -1
+            self.presenter.handleKey(key)
 
 
 class LabelPostprocessing:

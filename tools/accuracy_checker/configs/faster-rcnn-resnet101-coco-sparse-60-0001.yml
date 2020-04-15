@@ -24,30 +24,9 @@ models:
           - name: image_info
             type: CONST_INPUT
             value: [[800, 1280, 1]]
-        tags:
-          - FP32-INT8
-        model: intel/faster-rcnn-resnet101-coco-sparse-60-0001/FP32-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.xml
-        weights: intel/faster-rcnn-resnet101-coco-sparse-60-0001/FP32-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.bin
-        adapter:
-          type: ssd
-        inputs:
-          - name: image_info
-            type: CONST_INPUT
-            value: [[800, 1280, 1]]
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model: intel/faster-rcnn-resnet101-coco-sparse-60-0001/FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.xml
-        weights: intel/faster-rcnn-resnet101-coco-sparse-60-0001/FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.bin
-        adapter:
-          type: ssd
-        inputs:
-          - name: image_info
-            type: CONST_INPUT
-            value: [[800, 1280, 1]]
-            
+
     datasets:
-      - name: ms_coco_detection_80_class_with_backgound
+      - name: ms_coco_detection_80_class_with_background
 
         preprocessing:
           - type: resize

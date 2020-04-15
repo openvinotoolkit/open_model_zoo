@@ -38,9 +38,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/person-detection-action-recognition-teacher-0002/FP32-INT8/person-detection-action-recognition-teacher-0002.xml
-        weights: intel/person-detection-action-recognition-teacher-0002/FP32-INT8/person-detection-action-recognition-teacher-0002.bin
+          - FP16-INT8
+        model:   intel/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.xml
+        weights: intel/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.bin
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox

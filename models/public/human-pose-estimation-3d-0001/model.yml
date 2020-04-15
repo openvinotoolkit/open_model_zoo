@@ -13,8 +13,8 @@
 # limitations under the License.
 
 description: >-
-  Multi-person 3D human pose estimation model based on the Lightweight OpenPose <https://arxiv.org/pdf/1811.12004.pdf>
-  and Single-Shot Multi-Person 3D Pose Estimation From Monocular RGB <https://arxiv.org/pdf/1712.03453.pdf>
+  Multi-person 3D human pose estimation model based on the Lightweight OpenPose <https://arxiv.org/abs/1811.12004>
+  and Single-Shot Multi-Person 3D Pose Estimation From Monocular RGB <https://arxiv.org/abs/1712.03453>
   papers.
 task_type: human_pose_estimation
 files:

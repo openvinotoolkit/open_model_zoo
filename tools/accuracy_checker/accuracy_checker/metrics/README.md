@@ -67,7 +67,7 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
 * `frequency_weighted_accuracy` - frequency weighted accuracy for semantic segmentation models. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
   * `use_argmax` - allows to use argmax for prediction mask.
   * `ignore_label` - specified which class_id prediction should be ignored during metric calculation. (Optional, if not provided, all labels will be used)
-More detailed information about calculation segmentation metrics you can find [here](https://arxiv.org/pdf/1411.4038v2.pdf).
+More detailed information about calculation segmentation metrics you can find [here](https://arxiv.org/abs/1411.4038v2).
 * `cmc` - Cumulative Matching Characteristics (CMC) score. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
   * `top_k` -  number of k highest ranked samples to consider when matching.
   * `separate_camera_set` - should identities from the same camera view be filtered out.

@@ -10,7 +10,7 @@ Install prerequisites first:
 
 **accuracy checker** uses **Python 3**. Install it first:
 
-- [Python3](https://www.python.org/downloads/), [setuptools](https://pypi.python.org/pypi/setuptools):
+- [Python3](https://www.python.org/downloads/), [setuptools](https://pypi.org/project/setuptools/):
 
 ```bash
 sudo apt-get install python3 python3-dev python3-setuptools python3-pip
@@ -51,7 +51,7 @@ In order to evaluate some models required frameworks have to be installed. Accur
 - [ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/master/README.md).
 - [PyTorch](https://pytorch.org/)
 
-You can use any of them or several at a time.
+You can use any of them or several at a time. For correct work, Accuracy Checker requires at least one. You are able postpone installation of other frameworks and install them when they will be necessary.
 
 ### Install accuracy checker
 
@@ -235,9 +235,9 @@ metrics:
 Typical workflow for testing new model include:
 
 1. Convert annotation of your dataset. Use one of the converters from annotation-converters, or write your own if there is no converter for your dataset. You can find detailed instruction how to use converters in [Annotation Conversion Guide](accuracy_checker/annotation_converters/README.md).
-1. Choose one of *adapters* or write your own. Adapter converts raw output produced by framework to high level problem specific representation (e.g. *ClassificationPrediction*, *DetectionPrediction*, etc).
-1. Reproduce preprocessing, metrics and postprocessing from canonical paper.
-1. Create entry in config file and execute.
+2. Choose one of *adapters* or write your own. Adapter converts raw output produced by framework to high level problem specific representation (e.g. *ClassificationPrediction*, *DetectionPrediction*, etc).
+3. Reproduce preprocessing, metrics and postprocessing from canonical paper.
+4. Create entry in config file and execute.
 
 ### Customizing Evaluation
 

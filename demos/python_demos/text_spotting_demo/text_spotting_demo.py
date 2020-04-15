@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (c) 2019 Intel Corporation
 
@@ -15,8 +15,6 @@
  limitations under the License.
 """
 
-from __future__ import print_function
-
 import logging as log
 import os
 import sys
@@ -29,6 +27,10 @@ from openvino.inference_engine import IENetwork, IECore
 
 from text_spotting_demo.tracker import StaticIOUTracker
 from text_spotting_demo.visualizer import Visualizer
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
+
 
 SOS_INDEX = 0
 EOS_INDEX = 1
@@ -133,6 +135,8 @@ def build_argparser():
     args.add_argument("--no_show",
                       help="Optional. Don't show output",
                       action='store_true')
+    args.add_argument('-u', '--utilization_monitors', default='', type=str,
+                      help='Optional. List of monitors to show initially.')
     return parser
 
 
@@ -229,13 +233,13 @@ def main():
 
     try:
         input_source = int(args.input_source)
+        cap = cv2.VideoCapture(input_source)
     except ValueError:
         input_source = args.input_source
-
-    if os.path.isdir(input_source):
-        cap = FolderCapture(input_source)
-    else:
-        cap = cv2.VideoCapture(input_source)
+        if os.path.isdir(input_source):
+            cap = FolderCapture(input_source)
+        else:
+            cap = cv2.VideoCapture(input_source)
 
     if not cap.isOpened():
         log.error('Failed to open "{}"'.format(args.input_source))
@@ -251,6 +255,8 @@ def main():
 
     render_time = 0
 
+    presenter = monitors.Presenter(args.utilization_monitors, 45,
+        (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     while cap.isOpened():
@@ -345,6 +351,8 @@ def main():
         if tracker is not None:
             masks_tracks_ids = tracker(masks, classes)
 
+        presenter.drawGraphs(frame)
+
         # Visualize masks.
         frame = visualizer(frame, boxes, classes, scores, masks, texts, masks_tracks_ids)
 
@@ -375,7 +383,9 @@ def main():
             esc_code = 27
             if key == esc_code:
                 break
+            presenter.handleKey(key)
 
+    print(presenter.reportMeans())
     cv2.destroyAllWindows()
     cap.release()
 

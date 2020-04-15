@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (c) 2019 Intel Corporation
 
@@ -15,8 +15,6 @@
  limitations under the License.
 """
 
-from __future__ import print_function
-
 import sys
 from argparse import ArgumentParser, SUPPRESS
 
@@ -27,11 +25,16 @@ from action_recognition_demo.result_renderer import ResultRenderer
 from action_recognition_demo.steps import run_pipeline
 from os import path
 
+sys.path.append(path.join(path.dirname(path.dirname(path.abspath(__file__))), 'common'))
+import monitors
 
-def video_demo(encoder, decoder, videos, no_show, fps=30, labels=None):
+
+def video_demo(encoder, decoder, videos, no_show, utilization_monitors, fps=30, labels=None):
     """Continuously run demo on provided video list"""
-    result_presenter = ResultRenderer(no_show=no_show, labels=labels)
+    presenter = monitors.Presenter(utilization_monitors, 70)
+    result_presenter = ResultRenderer(no_show=no_show, presenter=presenter, labels=labels)
     run_pipeline(videos, encoder, decoder, result_presenter.render_frame, fps=fps)
+    print(presenter.reportMeans())
 
 
 def build_argparser():
@@ -55,6 +58,8 @@ def build_argparser():
     args.add_argument("--fps", help="Optional. FPS for renderer", default=30, type=int)
     args.add_argument("-lb", "--labels", help="Optional. Path to file with label names", type=str)
     args.add_argument("--no_show", action='store_true', help="Optional. Don't show output")
+    args.add_argument("-u", "--utilization-monitors", default="", type=str,
+                      help="Optional. List of monitors to show initially.")
 
     return parser
 
@@ -103,7 +108,7 @@ def main():
     encoder = IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
                       num_requests=(3 if args.device == 'MYRIAD' else 1))
     decoder = IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2)
-    video_demo(encoder, decoder, videos, args.no_show, args.fps, labels)
+    video_demo(encoder, decoder, videos, args.no_show, args.utilization_monitors, args.fps, labels)
 
 
 if __name__ == '__main__':

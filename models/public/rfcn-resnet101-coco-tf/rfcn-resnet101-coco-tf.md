@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-R-FCN Resnet-101 model, pretrained on COCO\* dataset. Used for object detection. For details, see the [paper](https://arxiv.org/pdf/1605.06409.pdf).
+R-FCN Resnet-101 model, pretrained on COCO\* dataset. Used for object detection. For details, see the [paper](https://arxiv.org/abs/1605.06409).
 
 ## Example
 

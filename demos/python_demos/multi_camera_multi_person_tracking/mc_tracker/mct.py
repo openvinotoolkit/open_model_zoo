@@ -23,18 +23,25 @@ class MultiCameraTracker:
     def __init__(self, num_sources, reid_model,
                  sct_config={},
                  time_window=20,
-                 global_match_thresh=0.35
+                 global_match_thresh=0.35,
+                 bbox_min_aspect_ratio=1.2,
+                 visual_analyze=None,
                  ):
         self.scts = []
         self.time = 0
         self.last_global_id = 0
         self.global_ids_queue = queue.Queue()
+        assert time_window >= 1
         self.time_window = time_window  # should be greater than time window in scts
+        assert 0 <= global_match_thresh <= 1
         self.global_match_thresh = global_match_thresh
+        assert bbox_min_aspect_ratio >= 0
+        self.bbox_min_aspect_ratio = bbox_min_aspect_ratio
+        assert num_sources > 0
         for i in range(num_sources):
             self.scts.append(SingleCameraTracker(i, self._get_next_global_id,
                                                  self._release_global_id,
-                                                 reid_model, **sct_config))
+                                                 reid_model, visual_analyze=visual_analyze, **sct_config))
 
     def process(self, frames, all_detections, masks=None):
         assert len(frames) == len(all_detections) == len(self.scts)
@@ -44,23 +51,54 @@ class MultiCameraTracker:
                 mask = masks[i]
             else:
                 mask = None
+            if self.bbox_min_aspect_ratio is not None:
+                all_detections[i], mask = self._filter_detections(all_detections[i], mask)
             sct.process(frames[i], all_detections[i], mask)
             all_tracks += sct.get_tracks()
 
         if self.time > 0 and self.time % self.time_window == 0:
-            distance_matrix = self._compute_mct_distance_matrix(all_tracks)
-            assignment = self._compute_greedy_assignment(distance_matrix)
-
-            for i, idx in enumerate(assignment):
-                if idx is not None and all_tracks[idx]['id'] is not None and all_tracks[i]['timestamps'] is not None:
-                    if all_tracks[idx]['id'] >= all_tracks[i]['id']:
-                        if all_tracks[idx]['timestamps'][0] >= all_tracks[i]['timestamps'][0]:
-                            self.scts[all_tracks[idx]['cam_id']].check_and_merge(all_tracks[i], all_tracks[idx])
-                    else:
-                        if all_tracks[idx]['timestamps'][0] <= all_tracks[i]['timestamps'][0]:
-                            self.scts[all_tracks[i]['cam_id']].check_and_merge(all_tracks[idx], all_tracks[i])
+            self._merge_all(all_tracks)
 
         self.time += 1
+
+    def _merge_all(self, all_tracks):
+        distance_matrix = self._compute_mct_distance_matrix(all_tracks)
+        indices_rows = np.arange(distance_matrix.shape[0])
+        indices_cols = np.arange(distance_matrix.shape[1])
+
+        while len(indices_rows) > 0 and len(indices_cols) > 0:
+            i, j = np.unravel_index(np.argmin(distance_matrix), distance_matrix.shape)
+            dist = distance_matrix[i, j]
+            if dist < self.global_match_thresh:
+                idx1, idx2 = indices_rows[i], indices_cols[j]
+                if all_tracks[idx1].id > all_tracks[idx2].id:
+                    self.scts[all_tracks[idx1].cam_id].check_and_merge(all_tracks[idx2], all_tracks[idx1])
+                else:
+                    self.scts[all_tracks[idx2].cam_id].check_and_merge(all_tracks[idx1], all_tracks[idx2])
+                assert i != j
+                distance_matrix = np.delete(distance_matrix, max(i, j), 0)
+                distance_matrix = np.delete(distance_matrix, max(i, j), 1)
+                distance_matrix = np.delete(distance_matrix, min(i, j), 0)
+                distance_matrix = np.delete(distance_matrix, min(i, j), 1)
+                indices_rows = np.delete(indices_rows, max(i, j))
+                indices_rows = np.delete(indices_rows, min(i, j))
+                indices_cols = np.delete(indices_cols, max(i, j))
+                indices_cols = np.delete(indices_cols, min(i, j))
+            else:
+                break
+
+    def _filter_detections(self, detections, masks):
+        clean_detections = []
+        clean_masks = []
+        for i, det in enumerate(detections):
+            w = det[2] - det[0]
+            h = det[3] - det[1]
+            ar = h / w
+            if ar > self.bbox_min_aspect_ratio:
+                clean_detections.append(det)
+                if i < len(masks):
+                    clean_masks.append(masks[i])
+        return clean_detections, clean_masks
 
     def _compute_mct_distance_matrix(self, all_tracks):
         distance_matrix = THE_BIGGEST_DISTANCE * np.eye(len(all_tracks), dtype=np.float32)
@@ -68,34 +106,18 @@ class MultiCameraTracker:
             for j, track2 in enumerate(all_tracks):
                 if j >= i:
                     break
-                if track1['id'] != track2['id'] and track1['cam_id'] != track2['cam_id'] and \
-                        len(track1['timestamps']) > self.time_window and len(track2['timestamps']) > self.time_window and \
-                        track1['avg_feature'] is not None and track2['avg_feature'] is not None:
-                    clust_dist = clusters_distance(track1['f_cluster'], track2['f_cluster'])
-                    avg_dist = cosine(track1['avg_feature'], track2['avg_feature'])
-                    distance_matrix[i, j] = min(clust_dist, avg_dist)
+                if track1.id != track2.id and track1.cam_id != track2.cam_id and \
+                        len(track1) > self.time_window and len(track2) > self.time_window and \
+                        track1.f_avg.is_valid() and track2.f_avg.is_valid():
+                    if not track1.f_orient.is_valid():
+                        f_complex_dist = clusters_distance(track1.f_clust, track2.f_clust)
+                    else:
+                        f_complex_dist = track1.f_orient.dist_to_other(track2.f_orient)
+                    f_avg_dist = 0.5 * cosine(track1.f_avg.get(), track2.f_avg.get())
+                    distance_matrix[i, j] = min(f_avg_dist, f_complex_dist)
                 else:
-                    distance_matrix[i, j] = 10
+                    distance_matrix[i, j] = THE_BIGGEST_DISTANCE
         return distance_matrix + np.transpose(distance_matrix)
-
-    def _compute_greedy_assignment(self, distance_matrix):
-        assignment = [None]*distance_matrix.shape[0]
-        indices_rows = np.arange(distance_matrix.shape[0])
-        indices_cols = np.arange(distance_matrix.shape[1])
-
-        while (len(indices_rows) > 0 and len(indices_cols) > 0):
-            i, j = np.unravel_index(np.argmin(distance_matrix), distance_matrix.shape)
-            dist = distance_matrix[i, j]
-            if dist < self.global_match_thresh:
-                assignment[indices_rows[i]] = indices_cols[j]
-                distance_matrix = np.delete(distance_matrix, i, 0)
-                distance_matrix = np.delete(distance_matrix, j, 1)
-                indices_rows = np.delete(indices_rows, i)
-                indices_cols = np.delete(indices_cols, j)
-            else:
-                break
-
-        return assignment
 
     def _get_next_global_id(self):
         if self.global_ids_queue.empty():
@@ -109,19 +131,15 @@ class MultiCameraTracker:
         self.global_ids_queue.put(id)
 
     def get_tracked_objects(self):
-        objs = [sct.get_tracked_objects() for sct in self.scts]
-
-        return objs
+        return [sct.get_tracked_objects() for sct in self.scts]
 
     def get_all_tracks_history(self):
         history = []
         for sct in self.scts:
             cam_tracks = sct.get_archived_tracks() + sct.get_tracks()
             for i in range(len(cam_tracks)):
-                cam_tracks[i] = {'id': cam_tracks[i]['id'],
-                                 'timestamps':  cam_tracks[i]['timestamps'],
-                                 'boxes': cam_tracks[i]['boxes']}
-
+                cam_tracks[i] = {'id': cam_tracks[i].id,
+                                 'timestamps':  cam_tracks[i].timestamps,
+                                 'boxes': cam_tracks[i].boxes}
             history.append(cam_tracks)
-
         return history

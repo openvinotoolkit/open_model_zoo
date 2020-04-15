@@ -29,10 +29,11 @@ python3 object_detection_demo_yolov3_async.py -h
 The command yields the following usage message:
 ```
 usage: object_detection_demo_yolov3_async.py [-h] -m MODEL -i INPUT
-                                       [-l CPU_EXTENSION] [-d DEVICE]
-                                       [--labels LABELS] [-t PROB_THRESHOLD]
-                                       [-iout IOU_THRESHOLD] [-r]
-                                       [-nireq]
+                                             [-l CPU_EXTENSION] [-d DEVICE]
+                                             [--labels LABELS] [-t PROB_THRESHOLD]
+                                             [-iout IOU_THRESHOLD] [-r]
+                                             [-nireq]
+                                             [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -73,6 +74,8 @@ Options:
   -loop_input, --loop_input
                         Optional. Iterate over input infinitely
   -no_show, --no_show   Optional. Don't show output
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

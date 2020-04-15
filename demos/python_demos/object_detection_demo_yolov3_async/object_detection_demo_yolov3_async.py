@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (C) 2018-2020 Intel Corporation
 
@@ -14,7 +14,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-from __future__ import print_function, division
 
 import logging
 import threading
@@ -29,6 +28,10 @@ from enum import Enum
 
 import cv2
 from openvino.inference_engine import IENetwork, IECore
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
+
 
 logging.basicConfig(format="[ %(levelname)s ] %(message)s", level=logging.INFO, stream=sys.stdout)
 log = logging.getLogger()
@@ -68,6 +71,8 @@ def build_argparser():
     args.add_argument("-loop_input", "--loop_input", help="Optional. Iterate over input infinitely",
                       action='store_true')
     args.add_argument("-no_show", "--no_show", help="Optional. Don't show output", action='store_true')
+    args.add_argument('-u', '--utilization_monitors', default='', type=str,
+                      help='Optional. List of monitors to show initially.')
     return parser
 
 
@@ -368,6 +373,9 @@ def main():
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between min_latency/user_specified modes, press TAB key in the output window")
 
+    presenter = monitors.Presenter(args.utilization_monitors, 55,
+        (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
+
     mode_info = { mode.current: ModeInfo() }
     active_requests_data = {}
 
@@ -392,6 +400,7 @@ def main():
                 log.info(" Class ID | Confidence | XMIN | YMIN | XMAX | YMAX | COLOR ")
 
             origin_im_size = frame.shape[:-1]
+            presenter.drawGraphs(frame)
             for obj in objects:
                 # Validation bbox of detected object
                 if obj['xmax'] > origin_im_size[1] or obj['ymax'] > origin_im_size[0] \
@@ -445,6 +454,8 @@ def main():
                     
                     mode_info[prev_mode].last_end_time = perf_counter()
                     mode_info[mode.current] = ModeInfo()
+                else:
+                    presenter.handleKey(key)
 
         elif empty_requests and cap.isOpened():
             start_time = perf_counter()
@@ -492,6 +503,7 @@ def main():
                                       (end_time - mode_info[mode_value].last_start_time)))
         log.info("Latency: {:.1f} ms".format((mode_info[mode_value].latency_sum / \
                                              mode_info[mode_value].frames_count) * 1e3))
+    print(presenter.reportMeans())
 
     for exec_net in exec_nets.values():
         await_requests_completion(exec_net.requests)

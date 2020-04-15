@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `densenet-169` model is one of the [DenseNet](https://arxiv.org/pdf/1608.06993)
+The `densenet-169` model is one of the [DenseNet](https://arxiv.org/abs/1608.06993)
 group of models designed to perform image classification. The main difference with
 the `densenet-121` model is the size and accuracy of the model. The `densenet-169`
 is larger at just about 55MB in size vs the `densenet-121` model's roughly 31MB size.
@@ -31,7 +31,7 @@ the 1000 different classifications matching those in the ImageNet database.
 
 ## Accuracy
 
-See [https://github.com/shicai/DenseNet-Caffe]().
+See [the original repository](https://github.com/shicai/DenseNet-Caffe).
 
 ## Performance
 

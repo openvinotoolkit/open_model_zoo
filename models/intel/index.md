@@ -25,6 +25,11 @@ network to detect objects of the same type better.
 | [face-detection-adas-binary-0001](./face-detection-adas-binary-0001/description/face-detection-adas-binary-0001.md)                                                                 | 0.819                | 1.053      | X     |         |          |       |                |         |
 | [face-detection-retail-0004](./face-detection-retail-0004/description/face-detection-retail-0004.md)                                                                                | 1.067                | 0.588      | X     |         |          |       |                |         |
 | [face-detection-retail-0005](./face-detection-retail-0005/description/face-detection-retail-0005.md)                                                                                | 0.982                | 1.021      | X     |         |          |       |                |         |
+| [face-detection-0100](./face-detection-0100/description/face-detection-0100.md)                                                                                                     | 0.785                | 1.828      | X     |         |          |       |                |         |
+| [face-detection-0102](./face-detection-0102/description/face-detection-0102.md)                                                                                                     | 1.767                | 1.842      | X     |         |          |       |                |         |
+| [face-detection-0104](./face-detection-0104/description/face-detection-0104.md)                                                                                                     | 2.405                | 1.851      | X     |         |          |       |                |         |
+| [face-detection-0105](./face-detection-0105/description/face-detection-0105.md)                                                                                                     | 2.853                | 2.392      | X     |         |          |       |                |         |
+| [face-detection-0106](./face-detection-0106/description/face-detection-0106.md)                                                                                                     | 339.597              | 69.920     | X     |         |          |       |                |         |
 | [person-detection-retail-0002](./person-detection-retail-0002/description/person-detection-retail-0002.md)                                                                          | 12.427               | 3.244      |       | X       |          |       |                |         |
 | [person-detection-retail-0013](./person-detection-retail-0013/description/person-detection-retail-0013.md)                                                                          | 2.300                | 0.723      |       | X       |          |       |                |         |
 | [person-detection-action-recognition-0005](./person-detection-action-recognition-0005/description/person-detection-action-recognition-0005.md)                                      | 7.140                | 1.951      |       | X       |          |       |                |         |
@@ -85,14 +90,14 @@ vectors that are "close" by L2 metric (Euclidean distance).
 There are multiple models that provide various trade-offs between performance
 and accuracy (expect a bigger model to perform better).
 
-| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Rank-1 |
+| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Rank-1 on Market-1501 |
 |-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
 | [person-reidentification-retail-0031](./person-reidentification-retail-0031/description/person-reidentification-retail-0031.md)   | 0.028                | 0.280      | 92.11%            |
-| [person-reidentification-retail-0103](./person-reidentification-retail-0103/description/person-reidentification-retail-0103.md)   | 0.564                | 0.597      | 93.5%             |
-| [person-reidentification-retail-0107](./person-reidentification-retail-0107/description/person-reidentification-retail-0107.md)   | 0.174                | 0.183      | 91.7%             |
-| [person-reidentification-retail-0200](./person-reidentification-retail-0200/description/person-reidentification-retail-0200.md)   | 5.506                | 4.723      | 95.4%             |
+| [person-reidentification-retail-0248](./person-reidentification-retail-0248/description/person-reidentification-retail-0248.md)   | 0.174                | 0.183      | 84.3%             |
+| [person-reidentification-retail-0249](./person-reidentification-retail-0249/description/person-reidentification-retail-0249.md)   | 0.564                | 0.597      | 92.9%             |
+| [person-reidentification-retail-0300](./person-reidentification-retail-0300/description/person-reidentification-retail-0300.md)   | 3.521                | 5.289      | 96.3%             |
 
-| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Pairwise accuracy |
+| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Pairwise accuracy on LFW |
 |-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
 | [face-reidentification-retail-0095](./face-reidentification-retail-0095/description/face-reidentification-retail-0095.md)         | 0.588                | 1.107      | 99.33%            |
 
@@ -123,6 +128,7 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [instance-segmentation-security-1025](./instance-segmentation-security-1025/description/instance-segmentation-security-1025.md)                | 30.146               | 26.69      |
 | [instance-segmentation-security-0050](./instance-segmentation-security-0050/description/instance-segmentation-security-0050.md)                | 46.602               | 30.448     |
 | [instance-segmentation-security-0083](./instance-segmentation-security-0083/description/instance-segmentation-security-0083.md)                | 365.626              | 143.444    |
 | [instance-segmentation-security-0010](./instance-segmentation-security-0010/description/instance-segmentation-security-0010.md)                | 899.568              | 174.568    |

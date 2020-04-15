@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-DeepLab is a state-of-art deep learning model for semantic image segmentation. For details see [paper](https://arxiv.org/pdf/1706.05587.pdf).
+DeepLab is a state-of-art deep learning model for semantic image segmentation. For details see [paper](https://arxiv.org/abs/1706.05587).
 
 ## Example
 
