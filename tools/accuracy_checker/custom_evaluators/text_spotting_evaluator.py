@@ -61,8 +61,6 @@ class TextSpottingEvaluator(BaseEvaluator):
             allow_pairwise_subset=False,
             dump_prediction_to_annotation=False,
             **kwargs):
-
-        self._annotations, self._predictions = ([], []) if self.metric_executor.need_store_predictions else None, None
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
         if dump_prediction_to_annotation:
@@ -74,6 +72,7 @@ class TextSpottingEvaluator(BaseEvaluator):
             self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
         elif num_images is not None:
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
+        self._annotations, self._predictions = [], []
         if 'progress_reporter' in kwargs:
             _progress_reporter = kwargs['progress_reporter']
             _progress_reporter.reset(self.dataset.size)
