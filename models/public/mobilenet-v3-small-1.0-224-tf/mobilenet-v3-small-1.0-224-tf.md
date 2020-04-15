@@ -4,7 +4,8 @@
 
 `mobilenet-v3-small-1.0-224-tf` is one of MobileNets V3 - next generation of MobileNets,
 based on a combination of complementary search techniques as well as a novel architecture design.
-`mobilenet-v3-small-1.0-224-tf` is targeted for low resource use cases. For details see [paper](https://arxiv.org/abs/1905.02244).
+`mobilenet-v3-small-1.0-224-tf` is targeted for low resource use cases.
+For details see [paper](https://arxiv.org/abs/1905.02244).
 
 ## Example
 
@@ -55,7 +56,8 @@ Image, name: `input` , shape: [1x3x224x224], format: [BxCxHxW], where:
 
 ### Original Model
 
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `MobilenetV3/Predictions/Softmax`, shape: [1,1001], format: [BxC],
+Probabilities for all dataset classes (0 class is background). Name: `MobilenetV3/Predictions/Softmax`,
+shape: [1,1001], format: [BxC],
     where:
 
     - B - batch size
@@ -63,7 +65,8 @@ Probabilities for all dataset classes (0 class is background). Probabilities are
 
 ### Converted Model
 
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `MobilenetV3/Predictions/Softmax`, shape: [1,1001], format: [BxC],
+Probabilities for all dataset classes (0 class is background). Name: `MobilenetV3/Predictions/Softmax`,
+shape: [1,1001], format: [BxC],
     where:
 
     - B - batch size
