@@ -27,7 +27,7 @@ from pathlib import Path
 import yaml
 
 DOWNLOAD_TIMEOUT = 5 * 60
-MODEL_ROOT = (Path(__file__).resolve().parent / '../../models').resolve()
+MODEL_ROOT = Path(__file__).resolve().parents[2] / 'models'
 
 # make sure to update the documentation if you modify these
 KNOWN_FRAMEWORKS = {
