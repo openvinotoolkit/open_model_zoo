@@ -30,7 +30,7 @@ Expected color order -  `BGR`.
 
 The converted model has the same parameters as the original model.
 
-    WARNING: Note that input layout of converted model is `[BxHxWxC]`.
+> **WARNING:** Please pay attention that input layout of converted model is `[BxHxWxC]`.
 
 ## Output
 
@@ -52,7 +52,7 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`face_score`], where:
 - (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get coordinates relative to the cell
 - `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get height and width values relative to cell
 - `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
-- `face_score` - probability that detected object belongs to specific class, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
+- `face_score` - probability that detected object belongs to face class, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
 
 ### Converted model
 
