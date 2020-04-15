@@ -437,10 +437,12 @@ class SequentialModel:
 class DetectorDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher, 'detector')
-        if not delayed_model_loading:
-            self.load_model(network_info, launcher)
         self.im_info_name = None
         self.im_data_name = None
+        if not delayed_model_loading:
+            self.load_model(network_info, launcher)
+            self.im_info_name = [x for x in self.exec_network.inputs if len(self.exec_network.inputs[x].shape) == 2][0]
+            self.im_data_name = [x for x in self.exec_network.inputs if len(self.exec_network.inputs[x].shape) == 4][0]
         self.text_feats_out = 'text_features'
 
     def predict(self, identifiers, input_data):
