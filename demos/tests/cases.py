@@ -419,10 +419,11 @@ PYTHON_DEMOS = [
                 '-m': ModelArg('road-segmentation-adas-0001'),
                 '-i': DATA_SEQUENCES['road-segmentation-adas'],
             }),
-            TestCase(options={
-                '-m': ModelArg('semantic-segmentation-adas-0001'),
-                '-i': DATA_SEQUENCES['semantic-segmentation-adas'],
-            }),
+            *combine_cases(
+                TestCase(options={'-i': DATA_SEQUENCES['semantic-segmentation-adas']}),
+                single_option_cases('-m',
+                    ModelArg('semantic-segmentation-adas-0001'),
+                    ModelArg('deeplabv3'))),
         ],
     )),
 ]
