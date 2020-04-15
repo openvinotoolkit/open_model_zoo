@@ -2,7 +2,7 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import ListField
 from ..postprocessor import NMS
-from..representation import DetectionPrediction, FacialLandmarksPrediction, ContainerPrediction
+from ..representation import DetectionPrediction, FacialLandmarksPrediction, ContainerPrediction
 
 
 class RetinaFaceAdapter(Adapter):
