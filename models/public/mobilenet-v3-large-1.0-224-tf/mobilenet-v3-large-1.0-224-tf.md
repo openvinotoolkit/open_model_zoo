@@ -55,7 +55,11 @@ Image, name: `input` , shape: [1x3x224x224], format: [BxCxHxW], where:
 
 ### Original Model
 
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `MobilenetV3/Predictions/Softmax`.
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `MobilenetV3/Predictions/Softmax`, shape: [1,1001], format: [BxC],
+    where:
+
+    - B - batch size
+    - C - vector of probabilities.
 
 ### Converted Model
 

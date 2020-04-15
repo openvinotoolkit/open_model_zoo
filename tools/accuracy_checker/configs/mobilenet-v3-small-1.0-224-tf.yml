@@ -9,14 +9,14 @@ models:
     datasets:
       - name: imagenet_1001_classes
         preprocessing:
-        - type: bgr_to_rgb
-        - type: resize
-          size: 256
-        - type: crop
-          size: 224
-        - type: normalization
-          mean: 127.5
-          std: 127.5
+          - type: bgr_to_rgb
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 127.5
+            std: 127.5
 
   - name: mobilenet-v3-small-1.0-224-tf
     launchers:
@@ -37,8 +37,8 @@ models:
     datasets:
       - name: imagenet_1001_classes
         preprocessing:
-        - type: resize
-          size: 256
-        - type: crop
-          size: 224
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224
 global_definitions: ../dataset_definitions.yml
