@@ -122,6 +122,24 @@ NATIVE_DEMOS = [
         TestCase(options={'-m': ModelArg('human-pose-estimation-0001')}),
     )),
 
+    NativeDemo(subdirectory='classification_demo',
+            device_keys=['-d'],
+            test_cases=combine_cases(
+        TestCase(options={
+            '-no_show': None,
+            '-time': '5',
+            '-i': DataDirectoryOrigFileNamesArg('classification'),
+            '-labels': DemoFileArg('synset_words.txt'),
+            '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt"),
+            '-b': '8'}),
+        single_option_cases('-m',
+            ModelArg('alexnet'),
+            ModelArg('densenet-121-tf'),
+            ModelArg('densenet-169'),
+            ModelArg('mobilenet-v2-pytorch'),
+            ModelArg('resnet-50')),
+    )),
+
     NativeDemo(subdirectory='interactive_face_detection_demo',
             device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
             test_cases=combine_cases(
