@@ -71,7 +71,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             raise ConfigError('coco_orig metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerated annotation')
 
-    def _box_to_coco(self, data_to_store, data):
+    def _iou_type_data_to_coo(self, data_to_store, data):
         x_mins = data.x_mins.tolist()
         y_mins = data.y_mins.tolist()
         x_maxs = data.x_maxs.tolist()
@@ -89,37 +89,6 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             })
 
         return data_to_store
-
-    def _segm_to_coco(self, data_to_store, data):
-        encoded_masks = data.mask
-
-        for data_record, segm_mask in zip(data_to_store, encoded_masks):
-            data_record.update({'segmentation': segm_mask})
-
-        return data_to_store
-
-    def _keypoints_to_coco(self, data_to_store, data):
-        for data_record, x_val, y_val, vis in zip(
-            data_to_store, data.x_values, data.y_values, data.visibility
-        ):
-            keypoints = []
-            num_keypoints = 0
-            for x, y, v in zip(x_val, y_val, vis):
-                keypoints.extend([int(x), int(y), int(v)])
-                if x != 0:
-                    num_keypoints += 1
-            data_record.update({
-                'keypoints': keypoints,
-                'num_keypoints': num_keypoints
-            })
-
-        return data_to_store
-
-    _iou_specific_processing = {
-        'bbox': _box_to_coco,
-        'segm': _segm_to_coco,
-        'keypoints': _keypoints_to_coco
-    }
 
     def _prepare_coco_structures(self, annotations):
         meta = self.dataset.metadata
@@ -153,56 +122,14 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
                     'category_id': cur_cat,
                     '_image_name_from_dataset': cur_name,
                 })
-            iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
-            if iou_specific_converter is None:
-                raise ValueError("unknown iou type: '{}'".format(self.iou_type))
-            prediction_data_to_store = iou_specific_converter(self, prediction_data_to_store, pred)
+            prediction_data_to_store = self._iou_type_data_to_coo(prediction_data_to_store, pred)
             coco_data_to_store.extend(prediction_data_to_store)
 
         return coco_data_to_store
 
-    def _box_coco_annotation(self, annotation_data_to_store, annotation):
-        iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
-        if iou_specific_converter is None:
-            raise ValueError("unknown iou type: '{}'".format(self.iou_type))
-        annotation_data_to_store = iou_specific_converter(self, annotation_data_to_store, annotation)
+    def _iou_type_specific_coco_annotation(self, annotation_data_to_store, annotation):
+        annotation_data_to_store = self._iou_type_data_to_coo(annotation_data_to_store, annotation)
         return annotation_data_to_store
-
-    def _segm_coco_annotation(self, annotation_data_to_store, annotation):
-        encoded_masks = annotation.mask
-
-        for data_record, area, segm_mask in zip(
-            annotation_data_to_store, annotation.areas, encoded_masks
-        ):
-            segm_mask.update({'counts': str(segm_mask.get('counts'), 'utf-8')})
-            area_new = float(area)
-            data_record.update({
-                'area': area_new,
-                'segmentation': segm_mask
-            })
-        return annotation_data_to_store
-
-    def _keypoints_coco_annotation(self, annotation_data_to_store, annotation):
-        iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
-        if iou_specific_converter is None:
-            raise ValueError("unknown iou type: '{}'".format(self.iou_type))
-        annotation_data_to_store = iou_specific_converter(self, annotation_data_to_store, annotation)
-        for data_record, bbox, area in zip(
-            annotation_data_to_store, annotation.bboxes, annotation.areas
-        ):
-            bbox_new = [float(bb) for bb in bbox]
-            area_new = float(area)
-            data_record.update({
-                'bbox': bbox_new,
-                'area': area_new
-            })
-        return annotation_data_to_store
-
-    _iou_processing_coco_annotation = {
-        'bbox': _box_coco_annotation,
-        'segm': _segm_coco_annotation,
-        'keypoints': _keypoints_coco_annotation
-    }
 
     def _prepare_data_for_annotation_file(
             self, annotations, dataset_label_map
@@ -235,10 +162,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
                 count += 1
                 label_map.add(cur_cat)
 
-            iou_specific_converter = self._iou_processing_coco_annotation.get(self.iou_type)
-            if iou_specific_converter is None:
-                raise ValueError("unknown iou type: '{}'".format(self.iou_type))
-            annotation_data_to_store = iou_specific_converter(self, annotation_data_to_store, annotation)
+            annotation_data_to_store = self._iou_type_specific_coco_annotation(annotation_data_to_store, annotation)
             coco_annotation_to_store.extend(annotation_data_to_store)
 
             coco_image_to_store.append({
@@ -363,6 +287,29 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
 
     iou_type = 'segm'
 
+    def _iou_type_data_to_coo(self, data_to_store, data):
+        encoded_masks = data.mask
+
+        for data_record, segm_mask in zip(data_to_store, encoded_masks):
+            data_record.update({'segmentation': segm_mask})
+
+        return data_to_store
+
+    def _iou_type_specific_coco_annotation(self, annotation_data_to_store, annotation):
+        encoded_masks = annotation.mask
+
+        for data_record, area, segm_mask in zip(
+            annotation_data_to_store, annotation.areas, encoded_masks
+        ):
+            segm_mask.update({'counts': str(segm_mask.get('counts'), 'utf-8')})
+            area_new = float(area)
+            data_record.update({
+                'area': area_new,
+                'segmentation': segm_mask
+            })
+
+        return annotation_data_to_store
+
 
 class MSCOCOorigRecall(MSCOCOorigBaseMetric):
     __provider__ = 'coco_orig_recall'
@@ -378,6 +325,29 @@ class MSCOCOorigSegmRecall(MSCOCOorigRecall):
 
     iou_type = 'segm'
 
+    def _iou_type_data_to_coo(self, data_to_store, data):
+        encoded_masks = data.mask
+
+        for data_record, segm_mask in zip(data_to_store, encoded_masks):
+            data_record.update({'segmentation': segm_mask})
+
+        return data_to_store
+
+    def _iou_type_specific_coco_annotation(self, annotation_data_to_store, annotation):
+        encoded_masks = annotation.mask
+
+        for data_record, area, segm_mask in zip(
+            annotation_data_to_store, annotation.areas, encoded_masks
+        ):
+            segm_mask.update({'counts': str(segm_mask.get('counts'), 'utf-8')})
+            area_new = float(area)
+            data_record.update({
+                'area': area_new,
+                'segmentation': segm_mask
+            })
+
+        return annotation_data_to_store
+
 
 class MSCOCOOrigKeyPointsAveragePrecision(MSCOCOorigAveragePrecision):
     __provider__ = 'coco_orig_keypoints_precision'
@@ -385,3 +355,33 @@ class MSCOCOOrigKeyPointsAveragePrecision(MSCOCOorigAveragePrecision):
     prediction_types = (PoseEstimationPrediction, )
 
     iou_type = 'keypoints'
+
+    def _iou_type_data_to_coo(self, data_to_store, data):
+        for data_record, x_val, y_val, vis in zip(
+            data_to_store, data.x_values, data.y_values, data.visibility
+        ):
+            keypoints = []
+            num_keypoints = 0
+            for x, y, v in zip(x_val, y_val, vis):
+                keypoints.extend([int(x), int(y), int(v)])
+                if x != 0:
+                    num_keypoints += 1
+            data_record.update({
+                'keypoints': keypoints,
+                'num_keypoints': num_keypoints
+            })
+
+        return data_to_store
+
+    def _iou_type_specific_coco_annotation(self, annotation_data_to_store, annotation):
+        annotation_data_to_store = self._iou_type_data_to_coo(annotation_data_to_store, annotation)
+        for data_record, bbox, area in zip(
+            annotation_data_to_store, annotation.bboxes, annotation.areas
+        ):
+            bbox_new = [float(bb) for bb in bbox]
+            area_new = float(area)
+            data_record.update({
+                'bbox': bbox_new,
+                'area': area_new
+            })
+        return annotation_data_to_store
