@@ -37,7 +37,7 @@ class InferenceContext:
             if len(not_supported_layers) != 0:
                 log.error("The following layers are not supported " \
                     "by the plugin for the specified device {}:\n {}" \
-                    .format(plugin.device, ', '.join(not_supported_layers)))
+                    .format(device, ', '.join(not_supported_layers)))
                 log.error("Please try to specify cpu extensions " \
                     "library path in the command line parameters using " \
                     "the '-l' parameter")
