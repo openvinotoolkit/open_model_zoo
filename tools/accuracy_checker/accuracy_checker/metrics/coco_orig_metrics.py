@@ -169,10 +169,17 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         return annotation_data_to_store
 
     def _segm_coco_annotation(self, annotation_data_to_store, annotation):
-        iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
-        if iou_specific_converter is None:
-            raise ValueError("unknown iou type: '{}'".format(self.iou_type))
-        annotation_data_to_store = iou_specific_converter(self, annotation_data_to_store, annotation)
+        encoded_masks = annotation.mask
+
+        for data_record, area, segm_mask in zip(
+            annotation_data_to_store, annotation.areas, encoded_masks
+        ):
+            segm_mask.update({'counts': str(segm_mask.get('counts'), 'utf-8')})
+            area_new = float(area)
+            data_record.update({
+                'area': area_new,
+                'segmentation': segm_mask
+            })
         return annotation_data_to_store
 
     def _keypoints_coco_annotation(self, annotation_data_to_store, annotation):
@@ -210,7 +217,11 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             cur_name = pathlib.PurePath(annotation.identifier).name
             cur_img_id = int(cur_name.split(".")[0])
 
-            labels = annotation.labels.tolist()
+            if self.iou_type != 'segm':
+                labels = annotation.labels.tolist()
+            else:
+                labels = annotation.labels
+
             iscrowds = annotation.metadata.get('iscrowd')
 
             for cur_cat, iscrowd in zip(labels, iscrowds):
@@ -232,7 +243,9 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
             coco_image_to_store.append({
                 'id': cur_img_id,
-                'file_name': cur_name
+                'file_name': cur_name,
+                'width': annotation.metadata.get('image_size')[0][0],
+                'height': annotation.metadata.get('image_size')[0][1]
             })
         for cat in label_map:
             coco_category_to_store.append({
