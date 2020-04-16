@@ -79,14 +79,13 @@ PyModuleDef pose_extractor_module = {
 };
 
 PyMODINIT_FUNC PyInit_pose_extractor(void) {
-    PyObject* module = PyModule_Create(&pose_extractor_module);
-    if (module == nullptr) {
-        return nullptr;
-    }
     import_array();
     if (PyErr_Occurred()) {
         return nullptr;
     }
-
+    PyObject* module = PyModule_Create(&pose_extractor_module);
+    if (module == nullptr) {
+        return nullptr;
+    }
     return module;
 }
