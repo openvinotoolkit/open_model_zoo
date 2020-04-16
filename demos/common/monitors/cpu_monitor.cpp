@@ -52,8 +52,17 @@ public:
         for (std::size_t i = 0; i < coreTimeCounters.size(); ++i) {
             status = PdhGetFormattedCounterValue(coreTimeCounters[i], PDH_FMT_DOUBLE, NULL,
                 &displayValue);
-            if (ERROR_SUCCESS != status) {
-                throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
+            switch (status) {
+                case ERROR_SUCCESS: break;
+                case PDH_INVALID_ARGUMENT:
+                case PDH_INVALID_DATA:
+                case PDH_INVALID_HANDLE:
+                    throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
+                default:
+                    // It looks that frequent calls of PdhCollectQueryData() for Processor Time may result in
+                    // PdhGetFormattedCounterValue() returning status which is not equal to any of {ERROR_SUCCESS,
+                    // PDH_INVALID_ARGUMENT, PDH_INVALID_DATA, PDH_INVALID_HANDLE} sometimes.
+                    return {};
             }
             if (PDH_CSTATUS_VALID_DATA != displayValue.CStatus && PDH_CSTATUS_NEW_DATA != displayValue.CStatus) {
                 throw std::runtime_error("Error in counter data");
