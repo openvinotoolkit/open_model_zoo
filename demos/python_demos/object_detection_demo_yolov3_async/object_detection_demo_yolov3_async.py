@@ -341,7 +341,7 @@ def main():
     cap = cv2.VideoCapture(input_stream)
 
     number_input_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    if number_input_frames == 1: # input is image
+    if number_input_frames == 1 and not args.loop_input: # show image only once
         wait_key_time = 0
         mode.current = Modes.MIN_LATENCY
     else:
@@ -462,7 +462,10 @@ def main():
             ret, frame = cap.read()
             if not ret:
                 if args.loop_input:
-                    cap.open(input_stream)
+                    if number_input_frames != 1:
+                        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                    else:
+                        cap.open(input_stream)
                 else:
                     cap.release()
                 continue
@@ -488,7 +491,7 @@ def main():
     
         else:
             for request, exec_net, frame_id, *_ in active_requests_data.values():
-                if request.wait(1) == 0:
+                if request.wait(-1) == 0:
                     async_callback(0, active_requests_data.pop(frame_id))
                     break
     
