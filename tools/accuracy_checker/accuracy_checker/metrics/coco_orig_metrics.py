@@ -71,8 +71,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             raise ConfigError('coco_orig metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerated annotation')
 
-    @staticmethod
-    def _box_to_coco(data_to_store, data):
+    def _box_to_coco(self, data_to_store, data):
         x_mins = data.x_mins.tolist()
         y_mins = data.y_mins.tolist()
         x_maxs = data.x_maxs.tolist()
@@ -157,7 +156,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
             if iou_specific_converter is None:
                 raise ValueError("unknown iou type: '{}'".format(self.iou_type))
-            prediction_data_to_store = iou_specific_converter(prediction_data_to_store, pred)
+            prediction_data_to_store = iou_specific_converter(self, prediction_data_to_store, pred)
             coco_data_to_store.extend(prediction_data_to_store)
 
         return coco_data_to_store
@@ -166,32 +165,31 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
         if iou_specific_converter is None:
             raise ValueError("unknown iou type: '{}'".format(self.iou_type))
-        annotation_data_to_store = iou_specific_converter(annotation_data_to_store, annotation)
+        annotation_data_to_store = iou_specific_converter(self, annotation_data_to_store, annotation)
         return annotation_data_to_store
 
     def _segm_coco_annotation(self, annotation_data_to_store, annotation):
         iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
         if iou_specific_converter is None:
             raise ValueError("unknown iou type: '{}'".format(self.iou_type))
-        annotation_data_to_store = iou_specific_converter(annotation_data_to_store, annotation)
+        annotation_data_to_store = iou_specific_converter(self, annotation_data_to_store, annotation)
         return annotation_data_to_store
 
     def _keypoints_coco_annotation(self, annotation_data_to_store, annotation):
         iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
         if iou_specific_converter is None:
             raise ValueError("unknown iou type: '{}'".format(self.iou_type))
-        annotation_data_to_store = iou_specific_converter(annotation_data_to_store, annotation)
+        annotation_data_to_store = iou_specific_converter(self, annotation_data_to_store, annotation)
         for data_record, bbox, area in zip(
             annotation_data_to_store, annotation.bboxes, annotation.areas
         ):
-            bbox_new = float(bbox)
-            area_new = float(area[0])
+            bbox_new = [float(bb) for bb in bbox]
+            area_new = float(area)
             data_record.update({
                 'bbox': bbox_new,
                 'area': area_new
             })
         return annotation_data_to_store
-
 
     _iou_processing_coco_annotation = {
         'bbox': _box_coco_annotation,
@@ -226,11 +224,10 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
                 count += 1
                 label_map.add(cur_cat)
 
-            # iou_specific_converter = self._iou_processing_coco_annotation.get(self.iou_type)
-            iou_specific_converter = self._iou_specific_processing.get(self.iou_type)
+            iou_specific_converter = self._iou_processing_coco_annotation.get(self.iou_type)
             if iou_specific_converter is None:
                 raise ValueError("unknown iou type: '{}'".format(self.iou_type))
-            annotation_data_to_store = iou_specific_converter(annotation_data_to_store, annotation)
+            annotation_data_to_store = iou_specific_converter(self, annotation_data_to_store, annotation)
             coco_annotation_to_store.extend(annotation_data_to_store)
 
             coco_image_to_store.append({
