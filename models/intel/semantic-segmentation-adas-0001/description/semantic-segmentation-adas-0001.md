@@ -83,7 +83,7 @@ The blob with BGR image in format: [B, C=3, H=1024, W=2048], where:
 
 ## Outputs
 
-1. The net outputs a blob with the shape [B, H=1024, W=2048]. It can be treated as a
+1. The net outputs a blob with the shape [B, C=1, H=1024, W=2048]. It can be treated as a
    one-channel feature map, where each pixel is a label of one of the classes.
 
 ## Legal Information

@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
             for (int rowId = 0; rowId < outHeight; ++rowId) {
                 for (int colId = 0; colId < outWidth; ++colId) {
                     std::size_t classId = 0;
-                    if (outChannels == 0) {  // assume the output is already ArgMax'ed
+                    if (outChannels < 2) {  // assume the output is already ArgMax'ed
                         classId = static_cast<std::size_t>(predictions[rowId * outWidth + colId]);
                     } else {
                         float maxProb = -1.0f;

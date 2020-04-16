@@ -15,6 +15,7 @@ usage: single_human_pose_estimation_demo.py [-h] -m_od MODEL_OD -m_hpe
                                             [-d DEVICE]
                                             [--person_label PERSON_LABEL]
                                             [--no_show]
+                                            [-u UTILIZATION_MONITORS]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -29,6 +30,8 @@ optional arguments:
   --person_label PERSON_LABEL
                         Label of class person for detector
   --no_show             Optional. Do not display output.
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO Model Downloader or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
 

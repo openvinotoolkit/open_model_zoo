@@ -42,9 +42,10 @@ The demo workflow is the following:
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>" -i
-                             "<path>" [-d "<device>"] [-l "<absolute_path>"]
-                             [--delay "<num>"] [-pt "<num>"] [-a ALPHABET]
+usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>"
+                             -i "<path>" [-d "<device>"]
+                             [-l "<absolute_path>"] [--delay "<num>"]
+                             [-pt "<num>"] [-a ALPHABET]
                              [--trd_input_prev_symbol TRD_INPUT_PREV_SYMBOL]
                              [--trd_input_prev_hidden TRD_INPUT_PREV_HIDDEN]
                              [--trd_input_encoder_outputs TRD_INPUT_ENCODER_OUTPUTS]
@@ -52,7 +53,7 @@ usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>" -i
                              [--trd_output_cur_hidden TRD_OUTPUT_CUR_HIDDEN]
                              [--keep_aspect_ratio] [--no_track]
                              [--show_scores] [--show_boxes] [-pc] [-r]
-                             [--no_show]
+                             [--no_show] [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -105,6 +106,8 @@ Options:
   -r, --raw_output_message
                         Optional. Output inference results raw values.
   --no_show             Optional. Don't show output
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.

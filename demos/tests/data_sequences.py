@@ -87,6 +87,17 @@ DATA_SEQUENCES = {
         image_net_arg('00048311'),
     ],
 
+    'classification': [
+        image_net_arg('00000002'),
+        image_net_arg('00000003'),
+        image_net_arg('00000012'),
+        image_net_arg('00000014'),
+        image_net_arg('00000031'),
+        image_net_arg('00000046'),
+        image_net_arg('00000089'),
+        image_net_arg('00000094'),
+    ],
+
     'image-retrieval-video': [
         image_retrieval_arg('4946fb41-9da0-4af7-a858-b443bee6d0f6.dav'),
     ],
