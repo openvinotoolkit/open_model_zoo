@@ -20,9 +20,9 @@ description: >-
 task_type: classification
 files:
   - name: inception_v2.frozen.pb
-    size: 26735789
-    sha256: 5098978b1c82717bb4d1702b200d715f6e1e37121fdf51795ff5d8a228a26485
-    source: https://download.01.org/opencv/public_models/012020/googlenet-v2-tf/inception_v2.frozen.pb
+    size: 45039908
+    sha256: a2a044405ffd222150818e9dfd495dfcaf169bddca84c919aa825696e71b37a0
+    source: https://download.01.org/opencv/public_models/042020/googlenet-v2-tf/inception_v2.frozen.pb
 model_optimizer_args:
   - --input_shape=[1,224,224,3]
   - --input=input
