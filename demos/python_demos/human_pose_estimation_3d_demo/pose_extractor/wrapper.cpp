@@ -83,9 +83,5 @@ PyMODINIT_FUNC PyInit_pose_extractor(void) {
     if (PyErr_Occurred()) {
         return nullptr;
     }
-    PyObject* module = PyModule_Create(&pose_extractor_module);
-    if (module == nullptr) {
-        return nullptr;
-    }
-    return module;
+    return PyModule_Create(&pose_extractor_module);
 }
