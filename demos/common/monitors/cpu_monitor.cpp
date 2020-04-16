@@ -18,7 +18,7 @@ const std::size_t nCores = []() {
         return sysinfo.dwNumberOfProcessors;
     }();
 }
-
+#include <iostream>
 class CpuMonitor::PerformanceCounter {
 public:
     PerformanceCounter() : coreTimeCounters(nCores) {
@@ -54,15 +54,10 @@ public:
                 &displayValue);
             switch (status) {
                 case ERROR_SUCCESS: break;
-                case PDH_INVALID_ARGUMENT:
-                case PDH_INVALID_DATA:
-                case PDH_INVALID_HANDLE:
-                    throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
+                // PdhGetFormattedCounterValue() can sometimes return PDH_CALC_NEGATIVE_DENOMINATOR for some reason
+                case PDH_CALC_NEGATIVE_DENOMINATOR: return {};
                 default:
-                    // It looks that frequent calls of PdhCollectQueryData() for Processor Time may result in
-                    // PdhGetFormattedCounterValue() returning status which is not equal to any of {ERROR_SUCCESS,
-                    // PDH_INVALID_ARGUMENT, PDH_INVALID_DATA, PDH_INVALID_HANDLE} sometimes.
-                    return {};
+                    throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
             }
             if (PDH_CSTATUS_VALID_DATA != displayValue.CStatus && PDH_CSTATUS_NEW_DATA != displayValue.CStatus) {
                 throw std::runtime_error("Error in counter data");
