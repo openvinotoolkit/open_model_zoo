@@ -71,14 +71,15 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             raise ConfigError('coco_orig metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerated annotation')
 
-    def _iou_type_data_to_coo(self, data_to_store, data):
+    @staticmethod
+    def _iou_type_data_to_coo(data_to_store, data):
         x_mins = data.x_mins.tolist()
         y_mins = data.y_mins.tolist()
         x_maxs = data.x_maxs.tolist()
         y_maxs = data.y_maxs.tolist()
 
         for data_record, x_min, y_min, x_max, y_max in zip(
-            data_to_store, x_mins, y_mins, x_maxs, y_maxs
+                data_to_store, x_mins, y_mins, x_maxs, y_maxs
         ):
             width = x_max - x_min + 1
             height = y_max - y_min + 1
@@ -287,7 +288,8 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
 
     iou_type = 'segm'
 
-    def _iou_type_data_to_coo(self, data_to_store, data):
+    @staticmethod
+    def _iou_type_data_to_coo(data_to_store, data):
         encoded_masks = data.mask
 
         for data_record, segm_mask in zip(data_to_store, encoded_masks):
@@ -299,7 +301,7 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
         encoded_masks = annotation.mask
 
         for data_record, area, segm_mask in zip(
-            annotation_data_to_store, annotation.areas, encoded_masks
+                annotation_data_to_store, annotation.areas, encoded_masks
         ):
             segm_mask.update({'counts': str(segm_mask.get('counts'), 'utf-8')})
             area_new = float(area)
@@ -325,7 +327,8 @@ class MSCOCOorigSegmRecall(MSCOCOorigRecall):
 
     iou_type = 'segm'
 
-    def _iou_type_data_to_coo(self, data_to_store, data):
+    @staticmethod
+    def _iou_type_data_to_coo(data_to_store, data):
         encoded_masks = data.mask
 
         for data_record, segm_mask in zip(data_to_store, encoded_masks):
@@ -337,7 +340,7 @@ class MSCOCOorigSegmRecall(MSCOCOorigRecall):
         encoded_masks = annotation.mask
 
         for data_record, area, segm_mask in zip(
-            annotation_data_to_store, annotation.areas, encoded_masks
+                annotation_data_to_store, annotation.areas, encoded_masks
         ):
             segm_mask.update({'counts': str(segm_mask.get('counts'), 'utf-8')})
             area_new = float(area)
@@ -356,9 +359,10 @@ class MSCOCOOrigKeyPointsAveragePrecision(MSCOCOorigAveragePrecision):
 
     iou_type = 'keypoints'
 
-    def _iou_type_data_to_coo(self, data_to_store, data):
+    @staticmethod
+    def _iou_type_data_to_coo(data_to_store, data):
         for data_record, x_val, y_val, vis in zip(
-            data_to_store, data.x_values, data.y_values, data.visibility
+                data_to_store, data.x_values, data.y_values, data.visibility
         ):
             keypoints = []
             num_keypoints = 0
@@ -376,7 +380,7 @@ class MSCOCOOrigKeyPointsAveragePrecision(MSCOCOorigAveragePrecision):
     def _iou_type_specific_coco_annotation(self, annotation_data_to_store, annotation):
         annotation_data_to_store = self._iou_type_data_to_coo(annotation_data_to_store, annotation)
         for data_record, bbox, area in zip(
-            annotation_data_to_store, annotation.bboxes, annotation.areas
+                annotation_data_to_store, annotation.bboxes, annotation.areas
         ):
             bbox_new = [float(bb) for bb in bbox]
             area_new = float(area)
