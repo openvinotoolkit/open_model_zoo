@@ -43,7 +43,7 @@ Run the application with the `-h` option to see the following usage message:
 ```
 usage: multi_camera_multi_person_tracking.py [-h] -i I [I ...]
                                              [--config CONFIG]
-                                             [--detections DETECTIONS [DETECTIONS ...]]
+                                             [--detections DETECTIONS]
                                              [-m M_DETECTOR]
                                              [--t_detector T_DETECTOR]
                                              [--m_segmentation M_SEGMENTATION]
@@ -54,6 +54,7 @@ usage: multi_camera_multi_person_tracking.py [-h] -i I [I ...]
                                              [--save_detections SAVE_DETECTIONS]
                                              [--no_show] [-d DEVICE]
                                              [-l CPU_EXTENSION]
+                                             [-u UTILIZATION_MONITORS]
 
 Multi camera multi person tracking live demo script
 
@@ -62,7 +63,7 @@ optional arguments:
   -i I [I ...]          Input sources (indexes of cameras or paths to video
                         files)
   --config CONFIG       Configuration file
-  --detections DETECTIONS [DETECTIONS ...]
+  --detections DETECTIONS
                         JSON file with bounding boxes
   -m M_DETECTOR, --m_detector M_DETECTOR
                         Path to the person detection model
@@ -79,13 +80,15 @@ optional arguments:
                         Optional. Path to file in JSON format to save results
                         of the demo
   --save_detections SAVE_DETECTIONS
-                        Optional. Path to file in JSON format to save
-                        bounding boxes
+                        Optional. Path to file in JSON format to save bounding
+                        boxes
   --no_show             Optional. Don't show output
   -d DEVICE, --device DEVICE
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         MKLDNN (CPU)-targeted custom layers.Absolute path to a
                         shared library with the kernels impl.
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 Minimum command examples to run the demo:
 

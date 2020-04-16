@@ -17,7 +17,7 @@
 
 ## Accuracy
 
-See [https://github.com/shicai/DenseNet-Caffe]()
+See [the original repository](https://github.com/KaimingHe/deep-residual-networks).
 
 ## Performance
 

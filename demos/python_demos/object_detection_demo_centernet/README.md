@@ -14,8 +14,9 @@ Running the application with the <code>-h</code> option yields the following usa
 
 ```
 usage: object_detection_demo_centernet.py [-h] -m MODEL [-i INPUT [INPUT ...]]
-                                          [--labels LABELS]
+                                          [-d DEVICE] [--labels LABELS]
                                           [-pt PROB_THRESHOLD] [--no_show]
+                                          [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -33,6 +34,8 @@ Options:
                         Optional. Probability threshold for detections
                         filtering
   --no_show             Optional. Don't show output
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
