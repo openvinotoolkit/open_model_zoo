@@ -30,7 +30,7 @@ where:
    - W - image width
 
 Expected color order: BGR.
-   Mean values: [104.0, 117.0, 123.0].
+Mean values: [104.0, 117.0, 123.0].
 
 ### Converted Model
 

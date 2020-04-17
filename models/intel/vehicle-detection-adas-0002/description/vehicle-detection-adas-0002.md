@@ -20,7 +20,6 @@ This is a vehicle detection network based on an SSD framework with tuned MobileN
 | Source framework                | Caffe*                                    |
 
 For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
-Tested on the VOC 2012 validation dataset.
 
 Tested on a challenging internal dataset with 3000 images and 12585 vehicles to detect.
 
