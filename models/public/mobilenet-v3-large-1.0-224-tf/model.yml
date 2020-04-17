@@ -13,14 +13,14 @@
 # limitations under the License.
 
 description: >-
-  `mobilenet-v3-large-1.0-224-tf` is one of MobileNets V3 - next generation of MobileNets,
-  based on a combination of complementary search techniques as well as a novel architecture design.
-  `mobilenet-v3-large-1.0-224-tf` is targeted for high resource use cases.
+  "mobilenet-v3-large-1.0-224-tf" is one of MobileNets V3 - next generation of MobileNets,
+  based on a combination of complementary search techniques as well as a novel architecture
+  design. "mobilenet-v3-large-1.0-224-tf" is targeted for high resource use cases.
   For details see paper <https://arxiv.org/abs/1905.02244>.
 task_type: classification
 files:
   - name: v3-large_224_1.0_float.tgz
-    size: 184251120 
+    size: 184251120
     sha256: 9be8563f92022f412c82f2811d670888d6db998e2da9af3e71415fdde2f4f504
     source: https://storage.googleapis.com/mobilenet_v3/checkpoints/v3-large_224_1.0_float.tgz
 postprocessing:
