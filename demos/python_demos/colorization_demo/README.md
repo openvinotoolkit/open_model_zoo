@@ -22,10 +22,9 @@ Once the program receives an image, it performs the following steps:
 Running the application with the `-h` option yields the following usage message:
 
 ```
-colorization_demo.py -h
-
 usage: colorization_demo.py [-h] -m MODEL --coeffs COEFFS [-d DEVICE] -i
                             "<path>" [--no_show] [-v]
+                            [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Help with the script.
@@ -39,6 +38,8 @@ Options:
                         Required. Input to process.
   --no_show             Optional. Disable display of results on screen.
   -v, --verbose         Optional. Enable display of processing logs on screen.
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 To run the demo, you can use public or pretrained models. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md) or go to the [Intel&reg; Open Source Technology Center](https://download.01.org/opencv/).

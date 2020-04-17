@@ -37,11 +37,11 @@ Run the application with the `-h` option to see the following usage message:
 ```
 usage: instance_segmentation_demo.py [-h] -m "<path>" --labels "<path>" -i
                                      "<path>" [-d "<device>"]
-                                     [-l "<absolute_path>"]
-                                     [-pp "<absolute_path>"] [--delay "<num>"]
+                                     [-l "<absolute_path>"] [--delay "<num>"]
                                      [-pt "<num>"] [--no_keep_aspect_ratio]
                                      [--no_track] [--show_scores]
-                                     [--show_boxes] [-pc] [-r]
+                                     [--show_boxes] [-pc] [-r] [--no_show]
+                                     [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -72,6 +72,8 @@ Options:
   -r, --raw_output_message
                         Optional. Output inference results raw values.
   --no_show             Optional. Don't show output
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.

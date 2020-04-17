@@ -31,6 +31,10 @@ from utils.video import MulticamCapture, NormalizerCLAHE
 from utils.visualization import visualize_multicam_detections, get_target_size
 from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
+
+
 set_log_config()
 
 
@@ -123,12 +127,14 @@ def run(params, config, capture, detector, reid):
 
     prev_frames = thread_body.frames_queue.get()
     detector.run_async(prev_frames, frame_number)
+    presenter = monitors.Presenter(params.utilization_monitors, 0)
 
     while thread_body.process:
         if not params.no_show:
             key = check_pressed_keys(key)
             if key == 27:
                 break
+            presenter.handleKey(key)
         start = time.time()
         try:
             frames = thread_body.frames_queue.get_nowait()
@@ -157,6 +163,7 @@ def run(params, config, capture, detector, reid):
         fps = round(1. / latency, 1)
 
         vis = visualize_multicam_detections(prev_frames, tracked_objects, fps, **config['visualization_config'])
+        presenter.drawGraphs(vis)
         if not params.no_show:
             cv.imshow(win_name, vis)
 
@@ -166,6 +173,7 @@ def run(params, config, capture, detector, reid):
         print('\rProcessing frame: {}, fps = {} (avg_fps = {:.3})'.format(
                             frame_number, fps, 1. / avg_latency.get()), end="")
         prev_frames, frames = frames, prev_frames
+    print(presenter.reportMeans())
     print('')
 
     thread_body.process = False
@@ -218,6 +226,8 @@ def main():
                         help='MKLDNN (CPU)-targeted custom layers.Absolute \
                               path to a shared library with the kernels impl.',
                              type=str, default=None)
+    parser.add_argument('-u', '--utilization_monitors', default='', type=str,
+                        help='Optional. List of monitors to show initially.')
 
     args = parser.parse_args()
     if check_detectors(args) != 1:

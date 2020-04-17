@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a UNet model that is designed to perform semantic segmentation. The model has been trained on the CamVid dataset from scratch using PyTorch framework. Training used median frequency balancing for class weighing. For details about the original floating-point model, check out the [U-Net: Convolutional Networks for Biomedical Image Segmentation](https://arxiv.org/abs/1505.04597).
+This is a U-Net model that is designed to perform semantic segmentation. The model has been trained on the CamVid dataset from scratch using PyTorch framework. Training used median frequency balancing for class weighing. For details about the original floating-point model, check out [U-Net: Convolutional Networks for Biomedical Image Segmentation](https://arxiv.org/abs/1505.04597).
 
 The model input is a blob that consists of a single image of `1x3x368x480` in the BGR order. The pixel values are integers in the [0, 255] range.
 

@@ -38,6 +38,7 @@ Note that the source image should be converted to grayscale, resized to specific
 ## Outputs
 
 The net outputs a blob with the shape [186, 1, 1161] in the format [WxBxL],
+
 where:
   - W - output sequence length
   - B - batch size
