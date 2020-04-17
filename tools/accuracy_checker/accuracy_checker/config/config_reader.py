@@ -43,8 +43,13 @@ PREPROCESSING_PATHS = {
     'mask_dir': 'source',
     'vocabulary_file': ['vocab', 'models']
 }
+
 ADAPTERS_PATHS = {
     'vocabulary_file': ['vocab', 'models']
+}
+
+ANNOTATION_CONVERSION_PATHS = {
+    'vocab_file': ['vocab', 'models']
 }
 
 LIST_ENTRIES_PATHS = {
@@ -727,7 +732,7 @@ def process_config(
         for datasets_config in datasets_configs:
             annotation_conversion_config = datasets_config.get('annotation_conversion')
             if annotation_conversion_config:
-                command_line_conversion = (create_command_line_mapping(annotation_conversion_config, 'source'))
+                command_line_conversion = (create_command_line_mapping(annotation_conversion_config, 'source', ANNOTATION_CONVERSION_PATHS))
                 merge_entry_paths(command_line_conversion, annotation_conversion_config, args)
             if 'preprocessing' in datasets_config:
                 for preprocessor in datasets_config['preprocessing']:
@@ -752,7 +757,7 @@ def process_config(
                     merge_entry_paths(LIST_ENTRIES_PATHS, new_launcher, args, model_id)
                     adapter_config = new_launcher.get('adapter')
                     if isinstance(adapter_config, dict):
-                        command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
+                        command_line_adapter = (create_command_line_mapping(adapter_config, 'models', ADAPTERS_PATHS))
                         merge_entry_paths(command_line_adapter, adapter_config, args, model_id)
                     if not updated_launchers or new_launcher != updated_launchers[-1]:
                         updated_launchers.append(new_launcher)
@@ -787,12 +792,6 @@ def process_config(
 
 
 def merge_entry_paths(keys, value, args, value_id=0):
-    def select_argument_by_priority(argument_list):
-        for current_arg in argument_list:
-            if current_arg in args and args[current_arg]:
-                return current_arg
-        return argument_list[-1]
-
     for field, argument in keys.items():
         if field not in value:
             continue
@@ -803,7 +802,7 @@ def merge_entry_paths(keys, value, args, value_id=0):
             continue
 
         if isinstance(argument, list):
-            argument = select_argument_by_priority(argument)
+            argument = next(filter(args.get, argument), argument[-1])
 
         if argument not in args or not args[argument]:
             continue
