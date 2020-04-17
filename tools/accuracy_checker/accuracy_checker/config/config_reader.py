@@ -40,7 +40,11 @@ ENTRIES_PATHS = {
 }
 
 PREPROCESSING_PATHS = {
-    'mask_dir': 'source'
+    'mask_dir': 'source',
+    'vocabulary_file': ['vocab', 'models']
+}
+ADAPTERS_PATHS = {
+    'vocabulary_file': ['vocab', 'models']
 }
 
 LIST_ENTRIES_PATHS = {
@@ -73,7 +77,6 @@ ACCEPTABLE_MODEL = [
     'kaldi_model',
     'model'
 ]
-
 
 
 class ConfigReader:
@@ -757,7 +760,7 @@ def process_config(
                 merge_entry_paths(LIST_ENTRIES_PATHS, launcher_config, args)
                 adapter_config = launcher_config.get('adapter')
                 if isinstance(adapter_config, dict):
-                    command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
+                    command_line_adapter = (create_command_line_mapping(adapter_config, 'models', ADAPTERS_PATHS))
                     merge_entry_paths(command_line_adapter, adapter_config, args)
                 updated_launchers.append(launcher_config)
 
@@ -784,6 +787,12 @@ def process_config(
 
 
 def merge_entry_paths(keys, value, args, value_id=0):
+    def select_argument_by_priority(argument_list):
+        for current_arg in argument_list:
+            if current_arg in args and args[current_arg]:
+                return current_arg
+        return argument_list[-1]
+
     for field, argument in keys.items():
         if field not in value:
             continue
@@ -792,6 +801,9 @@ def merge_entry_paths(keys, value, args, value_id=0):
         if config_path.is_absolute():
             value[field] = Path(value[field])
             continue
+
+        if isinstance(argument, list):
+            argument = select_argument_by_priority(argument)
 
         if argument not in args or not args[argument]:
             continue

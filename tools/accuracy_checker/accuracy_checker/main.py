@@ -235,6 +235,11 @@ def build_arguments_parser():
         required=False,
         type=cast_to_bool
     )
+    parser.add_argument(
+        '-v', '--vocab', help="Prefix for vocabulary files for NLP models",
+        required=False,
+        type=partial(get_path, is_directory=True)
+    )
 
     return parser
 
