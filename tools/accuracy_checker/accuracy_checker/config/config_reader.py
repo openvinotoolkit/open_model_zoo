@@ -55,7 +55,7 @@ ANNOTATION_CONVERSION_PATHS = {
 LIST_ENTRIES_PATHS = {
         'model': 'models',
         'weights': 'models',
-        'color_coeff': 'models',
+        'color_coeff': ['model_attributes', 'models'],
         'caffe_model': 'models',
         'caffe_weights': 'models',
         'tf_model': 'models',
