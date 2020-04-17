@@ -33,13 +33,11 @@ where:
   - H - image height
   - W - image width
 
-Note that the source image should be converted to grayscale, resized to specific height (such as 96) while keeping aspect ratio, normalized to [-1, 1], and right-bottom padded.
+Note that the source image should be converted to grayscale, resized to specific height (such as 96) while keeping aspect ratio, and right-bottom padded.
 
 ## Outputs
 
-The net outputs a blob with the shape [186, 1, 1161] in the format [WxBxL],
-
-where:
+The net outputs a blob with the shape [186, 1, 4442] in the format [WxBxL], where:
   - W - output sequence length
   - B - batch size
   - L - confidence distribution across the supported symbols in [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html).
