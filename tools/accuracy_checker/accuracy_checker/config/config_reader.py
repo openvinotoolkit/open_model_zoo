@@ -41,15 +41,15 @@ ENTRIES_PATHS = {
 
 PREPROCESSING_PATHS = {
     'mask_dir': 'source',
-    'vocabulary_file': ['vocab', 'models']
+    'vocabulary_file': ['model_attributes', 'models']
 }
 
 ADAPTERS_PATHS = {
-    'vocabulary_file': ['vocab', 'models']
+    'vocabulary_file': ['model_attributes', 'models']
 }
 
 ANNOTATION_CONVERSION_PATHS = {
-    'vocab_file': ['vocab', 'models']
+    'vocab_file': ['model_attributes', 'models']
 }
 
 LIST_ENTRIES_PATHS = {
