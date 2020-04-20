@@ -71,6 +71,7 @@ COMMAND_LINE_ARGS_AS_ENV_VARS = {
     'bitstreams': 'BITSTREAMS_DIR',
     'models': 'MODELS_DIR',
     'extensions': 'EXTENSIONS_DIR',
+    'model_attributes': 'ATTRIBUTES_DIR',
 }
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
 CONFIG_SHARED_PARAMETERS = ['bitstream']
