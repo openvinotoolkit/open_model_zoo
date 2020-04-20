@@ -45,7 +45,7 @@ Name: `input`, shape: [1x3x62x62] - An input image in [1xCxHxW] format. Expected
 ## Outputs
 
 1. Name: `age_conv3`, shape: [1, 1, 1, 1] - Estimated age divided by 100.
-2. Name: `prob`, shape: [1, 2, 1, 1] - Softmax output across 2 type classes [female, male]
+2. Name: `prob`, shape: [1, 2, 1, 1] - Softmax output across 2 type classes [female, male].
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
