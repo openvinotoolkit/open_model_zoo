@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a reimplemented and retrained version of the [YOLO v2](https://arxiv.org/abs/1612.08242) object-detection network trained with the VOC2012 training dataset.
+This is a reimplemented and retrained version of the [YOLO v2](https://arxiv.org/abs/1612.08242) object detection network trained with the VOC2012 training dataset.
 
 ## Example
 
