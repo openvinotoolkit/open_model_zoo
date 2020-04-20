@@ -44,7 +44,7 @@ Channel order is `RGB`.
 
 ### Converted Model
 
-Image, name - `sub/placeholder_port_0`,  shape - `[1x224x224x3]`, format is `[BxCxHxW]`, where:
+Image, name - `sub/placeholder_port_0`,  shape - `[1x3x224x224]`, format is `[BxCxHxW]`, where:
 
 - `B` - batch size
 - `C` - channel

@@ -11,7 +11,7 @@ This is a reimplemented and retrained version of the [YOLO v2](https://arxiv.org
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | Mean Average Precision (mAP)    | 63.9%                                     |
-| Flops                           | 48.29Bn*                                  |
+| Flops                           | 48.29Bn\*                                  |
 | Source framework                | TensorFlow\*                              |
 
 For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
