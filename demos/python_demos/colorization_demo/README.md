@@ -13,9 +13,9 @@ For more information about pretrained models, refer to the [model documentation]
 On the start-up, the application reads command-line parameters and loads one network to the Inference Engine for execution.
 
 Once the program receives an image, it performs the following steps:
-1. Converts the frame of video into the LAB color space
-2. Uses the L-channel to predict A and B channels
-3. Restores the image by converting it into the BGR color space
+1. Converts the frame of video into the LAB color space.
+2. Uses the L-channel to predict A and B channels.
+3. Restores the image by converting it into the BGR color space.
 
 ### Running the Demo
 
