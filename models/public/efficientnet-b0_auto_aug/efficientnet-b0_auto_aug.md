@@ -40,7 +40,7 @@ Image, name - `image`,  shape - `[1x224x224x3]`, format is `[BxHxWxC]`, where:
 - `W` - width
 - `C` - channel
 
-Channel order is `BGR`.
+Channel order is `RGB`.
 
 ### Converted Model
 
@@ -51,7 +51,7 @@ Image, name - `sub/placeholder_port_0`,  shape - `[1x224x224x3]`, format is `[Bx
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`.
+Channel order is `BGR`.
 
 ## Output
 
