@@ -87,7 +87,6 @@ All relative paths in config files will be prefixed with values specified in com
 
 You may refer to `-h, --help` to full list of command line options. Some optional arguments are:
 
-- `-r, --root` prefix for all relative paths.
 - `-d, --definitions` path to the global configuration file.
 - `-e, --extensions` directory with InferenceEngine extensions.
 - `-b, --bitstreams` directory with bitstream (for Inference Engine with fpga plugin).
@@ -96,7 +95,7 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 - `-td, --target_devices` devices for infer. You can specify several devices using space as a delimiter.
 - `--async_mode` allows run the tool in async mode if launcher support it.
 - `--num_requests` number requests for async execution. Allows override provided in config info. Default is `AUTO`
-- `--model_attributes` prefix for path with additional models attributes.
+- `--model_attributes` directory with additional models attributes.
 
 You are also able to replace some command line arguments with environment variables for path prefixing. Supported following list of variables:
 * `DATA_DIR` -  equivalent of `-s`, `--source`.
