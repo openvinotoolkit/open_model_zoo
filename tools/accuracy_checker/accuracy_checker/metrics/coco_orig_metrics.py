@@ -111,7 +111,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         for pred in predictions:
             prediction_data_to_store = []
             cur_name = pathlib.Path(pred.identifier).name
-            cur_img_id = int(cur_name.split(".")[0])
+            cur_img_id = int((cur_name.split(".")[0]).split("_")[-1])
 
             labels = pred.labels.tolist()
             scores = pred.scores.tolist()
