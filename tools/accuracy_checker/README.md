@@ -104,7 +104,7 @@ You are also able to replace some command line arguments with environment variab
 * `EXTENSIONS` - equivalent of `-e`, `--extensions`.
 * `ANNOTATIONS_DIR` - equivalent of `-a`, `--annotations`.
 * `BITSTREAMS_DIR` - equivalent of `-b`, `--bitstreams`.
-* `ATTRIBUTES_DIR` - equivalent of `--model_attributes`.
+* `MODEL_ATTRIBUTES_DIR` - equivalent of `--model_attributes`.
 
 #### Configuration
 
