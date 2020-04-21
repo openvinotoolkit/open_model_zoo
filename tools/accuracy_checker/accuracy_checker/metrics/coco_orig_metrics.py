@@ -143,7 +143,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         for annotation in annotations:
             annotation_data_to_store = []
             cur_name = pathlib.Path(annotation.identifier).name
-            cur_img_id = int(cur_name.split(".")[0])
+            cur_img_id = int((cur_name.split(".")[0]).split("_")[-1])
 
             if self.iou_type != 'segm':
                 labels = annotation.labels.tolist()
