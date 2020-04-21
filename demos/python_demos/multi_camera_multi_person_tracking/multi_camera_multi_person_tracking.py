@@ -165,7 +165,6 @@ def run(params, config, capture, detector, reid):
         fps = round(1. / latency, 1)
 
         vis = visualize_multicam_detections(prev_frames, tracked_objects, fps, **config['visualization_config'])
-        presenter.drawGraphs(vis)
         if not params.no_show:
             cv.imshow(win_name, vis)
 
