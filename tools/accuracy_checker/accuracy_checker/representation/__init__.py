@@ -40,7 +40,9 @@ from .segmentation_representation import (
     BrainTumorSegmentationAnnotation,
     BrainTumorSegmentationPrediction,
     CoCoInstanceSegmentationAnnotation,
-    CoCocInstanceSegmentationPrediction
+    CoCocInstanceSegmentationPrediction,
+    OAR3DTilingSegmentationAnnotation,
+    OAR3DTilingSegmentationPrediction,
 )
 from .character_recognition_representation import (
     CharacterRecognition,

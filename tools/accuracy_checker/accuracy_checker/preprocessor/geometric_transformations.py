@@ -700,3 +700,48 @@ class ImagePyramid(Preprocessor):
         image.metadata.update({'multi_infer': True, 'scales': scales})
 
         return image
+
+class Tiling3D(Preprocessor):
+    __provider__ = 'tiling3d'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'tile_width'  : NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination width of tiled fragment."
+            ),
+            'tile_height' : NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination height of tiled fragment."
+            ),
+            'tile_depth': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination depth of tiled fragment."
+            ),
+        })
+        return parameters
+
+    def configure(self):
+        self.tile_width = self.get_value_from_config('tile_width')
+        self.tile_height = self.get_value_from_config('tile_height')
+        self.tile_depth = self.get_value_from_config('tile_depth')
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        inp = np.zeros([1, self.tile_depth, self.tile_height, self.tile_width], dtype=np.float)
+        cD = annotation_meta['cD']
+        cH = annotation_meta['cH']
+        cW = annotation_meta['cW']
+        for d in range(self.tile_depth):
+            for h in range(self.tile_height):
+                for w in range(self.tile_width):
+                    inp[0, d, h, w] = data[0, 0, cD + d, cH + h, cW + w]
+
+        image.data = inp
+        image.metadata['image_size'] = inp.shape
+        image.metadata['tile_start_width'] = cW
+        image.metadata['tile_start_height'] = cH
+        image.metadata['tile_start_depth'] = cD
+        image.metadata['identifier'] = image.identifier
+        image.identifier = 'input_1'
+
+        return image
