@@ -18,7 +18,7 @@ const std::size_t nCores = []() {
         return sysinfo.dwNumberOfProcessors;
     }();
 }
-#include <iostream>
+
 class CpuMonitor::PerformanceCounter {
 public:
     PerformanceCounter() : coreTimeCounters(nCores) {
