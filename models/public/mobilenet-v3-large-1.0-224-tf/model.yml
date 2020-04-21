@@ -1,0 +1,39 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  "mobilenet-v3-large-1.0-224-tf" is one of MobileNets V3 - next generation of MobileNets,
+  based on a combination of complementary search techniques as well as a novel architecture
+  design. "mobilenet-v3-large-1.0-224-tf" is targeted for high resource use cases.
+  For details see paper <https://arxiv.org/abs/1905.02244>.
+task_type: classification
+files:
+  - name: v3-large_224_1.0_float.tgz
+    size: 184251120
+    sha256: 9be8563f92022f412c82f2811d670888d6db998e2da9af3e71415fdde2f4f504
+    source: https://storage.googleapis.com/mobilenet_v3/checkpoints/v3-large_224_1.0_float.tgz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: v3-large_224_1.0_float.tgz
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,224,224,3]
+  - --input=input
+  - --mean_values=input[127.5,127.5,127.5]
+  - --scale_values=input[127.5]
+  - --output=MobilenetV3/Predictions/Softmax
+  - --input_model=$dl_dir/v3-large_224_1.0_float/v3-large_224_1.0_float.pb
+framework: tf
+license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

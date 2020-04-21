@@ -187,7 +187,8 @@ def main():
         expanded_mo_args = [
             string.Template(arg).substitute(dl_dir=args.download_dir / model.subdirectory,
                                             mo_dir=mo_path.parent,
-                                            conv_dir=output_dir / model.subdirectory)
+                                            conv_dir=output_dir / model.subdirectory,
+                                            config_dir=common.MODEL_ROOT / model.subdirectory)
             for arg in model.mo_args]
 
         for model_precision in sorted(model_precisions):

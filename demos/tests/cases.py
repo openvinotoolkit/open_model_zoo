@@ -399,7 +399,8 @@ PYTHON_DEMOS = [
             ModelArg('person-detection-retail-0013'),
             ModelArg('vehicle-detection-adas-0002'),
             ModelArg('vehicle-detection-adas-binary-0001', "FP32-INT1"),
-            ModelArg('vehicle-license-plate-detection-barrier-0106')),
+            ModelArg('vehicle-license-plate-detection-barrier-0106'),
+            ModelArg('ssd-resnet34-1200-onnx')),
     )),
 
     PythonDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
