@@ -16,6 +16,7 @@ import collections
 import contextlib
 import fnmatch
 import json
+import platform
 import re
 import shlex
 import shutil
@@ -482,3 +483,17 @@ def load_models_from_args(parser, args):
                 models[model.name] = model
 
         return list(models.values())
+
+def quote_arg_windows(arg):
+    if not arg: return '""'
+    if not re.search(r'\s|"', arg): return arg
+    # On Windows, only backslashes that precede a quote or the end of the argument must be escaped.
+    return '"' + re.sub(r'(\\+)$', r'\1\1', re.sub(r'(\\*)"', r'\1\1\\"', arg)) + '"'
+
+if platform.system() == 'Windows':
+    quote_arg = quote_arg_windows
+else:
+    quote_arg = shlex.quote
+
+def command_string(args):
+    return ' '.join(map(quote_arg, args))

@@ -17,10 +17,8 @@
 import argparse
 import concurrent.futures
 import os
-import platform
 import queue
 import re
-import shlex
 import string
 import subprocess
 import sys
@@ -77,17 +75,6 @@ class JobWithQueuedOutput():
         self._future.cancel()
 
 
-def quote_windows(arg):
-    if not arg: return '""'
-    if not re.search(r'\s|"', arg): return arg
-    # On Windows, only backslashes that precede a quote or the end of the argument must be escaped.
-    return '"' + re.sub(r'(\\+)$', r'\1\1', re.sub(r'(\\*)"', r'\1\1\\"', arg)) + '"'
-
-if platform.system() == 'Windows':
-    quote_arg = quote_windows
-else:
-    quote_arg = shlex.quote
-
 def convert_to_onnx(context, model, output_dir, args):
     context.printf('========= {}Converting {} to ONNX',
                    '(DRY RUN) ' if args.dry_run else '', model.name)
@@ -97,7 +84,7 @@ def convert_to_onnx(context, model, output_dir, args):
                                for arg in model.conversion_to_onnx_args]
     cmd = [str(args.python), str(Path(__file__).absolute().parent / model.converter_to_onnx), *conversion_to_onnx_args]
 
-    context.printf('Conversion to ONNX command: {}', ' '.join(map(quote_arg, cmd)))
+    context.printf('Conversion to ONNX command: {}', common.command_string(cmd))
     context.printf('')
 
     success = True if args.dry_run else context.subprocess(cmd)
@@ -206,7 +193,7 @@ def main():
             context.printf('========= {}Converting {} to IR ({})',
                 '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
 
-            context.printf('Conversion command: {}', ' '.join(map(quote_arg, mo_cmd)))
+            context.printf('Conversion command: {}', common.command_string(mo_cmd))
 
             if not args.dry_run:
                 context.printf('', flush=True)
