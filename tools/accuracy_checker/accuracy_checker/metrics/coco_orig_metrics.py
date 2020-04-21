@@ -92,12 +92,14 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         return data_to_store
 
     def _prepare_coco_structures(self, annotations):
-        meta = self.dataset.metadata
+        label_map = self.dataset.metadata.get('label_map')
+        if self.dataset.metadata.get('background_label') is not None:
+            label_map.pop(self.dataset.metadata.get('background_label'))
 
         if COCO is None:
             raise ValueError('pycocotools is not installed, please install it')
         coco_data_to_store = self._prepare_data_for_annotation_file(
-            annotations, meta.get('label_map'))
+            annotations, label_map)
 
         coco_annotation = self._create_json(coco_data_to_store)
         coco = COCO(str(coco_annotation))
@@ -138,7 +140,6 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         coco_annotation_to_store = []
         coco_category_to_store = []
         coco_image_to_store = []
-        label_map = set()
         count = 0
         for annotation in annotations:
             annotation_data_to_store = []
@@ -164,7 +165,6 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
                     'iscrowd': iscrowd
                 })
                 count += 1
-                label_map.add(cur_cat)
 
             annotation_data_to_store = self._iou_type_specific_coco_annotation(annotation_data_to_store, annotation)
             coco_annotation_to_store.extend(annotation_data_to_store)
@@ -175,10 +175,11 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
                 'width': annotation.metadata.get('image_size')[0][0],
                 'height': annotation.metadata.get('image_size')[0][1]
             })
-        for cat in label_map:
+
+        for cat, cat_name in dataset_label_map.items():
             coco_category_to_store.append({
-                'id': cat,
-                'name': dataset_label_map[cat]
+                    'id': cat,
+                    'name': cat_name
             })
 
         coco_data_to_store = {
