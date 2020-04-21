@@ -175,8 +175,8 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
         for cat, cat_name in dataset_label_map.items():
             coco_category_to_store.append({
-                    'id': cat,
-                    'name': cat_name
+                'id': cat,
+                'name': cat_name
             })
 
         coco_data_to_store = {
