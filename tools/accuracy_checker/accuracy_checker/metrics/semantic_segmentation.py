@@ -20,7 +20,9 @@ from ..representation import (
     SegmentationAnnotation,
     SegmentationPrediction,
     BrainTumorSegmentationAnnotation,
-    BrainTumorSegmentationPrediction
+    BrainTumorSegmentationPrediction,
+    OAR3DTilingSegmentationAnnotation,
+    OAR3DTilingSegmentationPrediction
 )
 from .metric import PerImageEvaluationMetric
 from ..utils import finalize_metric_result
@@ -198,8 +200,8 @@ class SegmentationDSCAcc(PerImageEvaluationMetric):
 
 class SegmentationDIAcc(PerImageEvaluationMetric):
     __provider__ = 'dice_index'
-    annotation_types = (BrainTumorSegmentationAnnotation, SegmentationAnnotation)
-    prediction_types = (BrainTumorSegmentationPrediction, SegmentationPrediction)
+    annotation_types = (BrainTumorSegmentationAnnotation, SegmentationAnnotation, OAR3DTilingSegmentationAnnotation)
+    prediction_types = (BrainTumorSegmentationPrediction, SegmentationPrediction, OAR3DTilingSegmentationPrediction)
 
     overall_metric = []
 
@@ -275,3 +277,34 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         self.meta['names'] = names_mean + names_median
         self.meta['calculate_mean'] = False
         self.overall_metric = []
+
+class SegmentationOAR3DTiling(PerImageEvaluationMetric):
+    class SegmentationDIAcc(PerImageEvaluationMetric):
+        __provider__ = 'dice_oar3d'
+        annotation_types = (OAR3DTilingSegmentationAnnotation,)
+        prediction_types = (OAR3DTilingSegmentationPrediction,)
+
+        overall_metric = []
+
+        def configure(self):
+            self.overall_metric = []
+
+        def update(self, annotation, prediction):
+
+            eps = 1e-6
+            y_true = np.round(annotation.mask)
+            y_pred = np.round(prediction.mask)
+            numerator = 2.0 * np.sum(y_true * y_pred)
+            denominator = np.sum(y_true) + np.sum(y_pred)
+            result = (numerator + eps) / (denominator + eps)
+
+            self.overall_metric.append(result)
+
+            return result
+
+        def evaluate(self, annotations, predictions):
+            result = np.mean(self.overall_metric, axis=0)
+            return result
+
+        def reset(self):
+            self.overall_metric = []

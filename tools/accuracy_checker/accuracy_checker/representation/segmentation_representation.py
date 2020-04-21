@@ -231,3 +231,55 @@ class CoCocInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation
 
     def to_annotation(self, **kwargs):
         return CoCoInstanceSegmentationAnnotation(self.identifier, self.mask, self.labels)
+
+class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
+    def __init__(self, identifier, path_to_mask, depth, height, width, wDepth, wHeight, wWidth):
+        super().__init__(identifier, path_to_mask, GTMaskLoader.NUMPY)
+        self.depth = depth
+        self.height = height
+        self.width = width
+        self.wDepth = wDepth
+        self.wHeight = wHeight
+        self.wWidth = wWidth
+        self.metadata['cD'] = self.depth
+        self.metadata['cH'] = self.height
+        self.metadata['cW'] = self.width
+
+    def _load_mask(self):
+        if self._mask is None:
+            loader_config = self.LOADERS.get(self._mask_loader)
+            data_source = self.metadata.get('segmentation_masks_source')
+            if data_source is None:
+                data_source = self.metadata['data_source']
+            if isinstance(loader_config, str):
+                loader = BaseReader.provide(loader_config, data_source)
+            else:
+                loader = BaseReader.provide(loader_config['type'], data_source, config=loader_config)
+            if self._mask_loader == GTMaskLoader.PILLOW:
+                loader.convert_to_rgb = False
+            mask = loader.read(self._mask_path)
+
+            inputs = mask['inputs']
+            outputs = mask['outputs']
+
+            B,C,D,H,W = inputs.shape
+            B, SZ, CLS = outputs.shape
+            outputs = outputs.reshape([B,D,H,W,CLS])
+
+            ref = np.zeros([self.wDepth, self.wHeight, self.wWidth, CLS], dtype=np.float)
+            for d in range(self.wDepth):
+                for h in range(self.wHeight):
+                    for w in range(self.wWidth):
+                        for c in range(CLS):
+                            ref[d, h, w, c] = outputs[0, self.depth + d, self.height + h, self.width + w, c]
+
+            ref = ref.reshape([self.wDepth * self.wWidth * self.wHeight, CLS])
+
+            return ref
+
+        return self._mask
+
+
+class OAR3DTilingSegmentationPrediction(SegmentationPrediction):
+    def __init__(self, identifiers, mask):
+        super().__init__(identifiers, mask)
