@@ -146,18 +146,14 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             cur_name = pathlib.Path(annotation.identifier).name
             cur_img_id = int((cur_name.split(".")[0]).split("_")[-1])
 
-            if self.iou_type != 'segm':
-                labels = annotation.labels.tolist()
-            else:
-                labels = annotation.labels
-
+            labels = annotation.labels
             iscrowds = annotation.metadata.get('iscrowd', [0]*annotation.size)
 
             for cur_cat, iscrowd in zip(labels, iscrowds):
                 annotation_data_to_store.append({
                     'id': count,
                     'image_id': cur_img_id,
-                    'category_id': cur_cat,
+                    'category_id': int(cur_cat),
                     '_image_name_from_dataset': cur_name,
                     'iscrowd': iscrowd
                 })
