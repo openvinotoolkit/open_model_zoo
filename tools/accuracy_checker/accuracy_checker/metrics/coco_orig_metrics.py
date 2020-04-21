@@ -151,10 +151,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             else:
                 labels = annotation.labels
 
-            if annotation.metadata.get('iscrowd'):
-                iscrowds = annotation.metadata.get('iscrowd')
-            else:
-                iscrowds = [0]*annotation.size
+            iscrowds = annotation.metadata.get('iscrowd', [0]*annotation.size)
 
             for cur_cat, iscrowd in zip(labels, iscrowds):
                 annotation_data_to_store.append({
