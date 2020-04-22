@@ -129,7 +129,7 @@ def run(params, config, capture, detector, reid):
             key = check_pressed_keys(key)
             if key == 27:
                 break
-        start = time.time()
+        start = time.perf_counter()
         try:
             frames = thread_body.frames_queue.get_nowait()
         except queue.Empty:
@@ -152,7 +152,7 @@ def run(params, config, capture, detector, reid):
         tracker.process(prev_frames, all_detections, all_masks)
         tracked_objects = tracker.get_tracked_objects()
 
-        latency = time.time() - start
+        latency = max(time.perf_counter() - start, sys.float_info.epsilon)
         avg_latency.update(latency)
         fps = round(1. / latency, 1)
 
