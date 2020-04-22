@@ -40,13 +40,22 @@ ENTRIES_PATHS = {
 }
 
 PREPROCESSING_PATHS = {
-    'mask_dir': 'source'
+    'mask_dir': 'source',
+    'vocabulary_file': ['model_attributes', 'models']
+}
+
+ADAPTERS_PATHS = {
+    'vocabulary_file': ['model_attributes', 'models']
+}
+
+ANNOTATION_CONVERSION_PATHS = {
+    'vocab_file': ['model_attributes', 'models']
 }
 
 LIST_ENTRIES_PATHS = {
         'model': 'models',
         'weights': 'models',
-        'color_coeff': 'models',
+        'color_coeff': ['model_attributes', 'models'],
         'caffe_model': 'models',
         'caffe_weights': 'models',
         'tf_model': 'models',
@@ -62,6 +71,7 @@ COMMAND_LINE_ARGS_AS_ENV_VARS = {
     'bitstreams': 'BITSTREAMS_DIR',
     'models': 'MODELS_DIR',
     'extensions': 'EXTENSIONS_DIR',
+    'model_attributes': 'MODEL_ATTRIBUTES_DIR',
 }
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
 CONFIG_SHARED_PARAMETERS = ['bitstream']
@@ -73,7 +83,6 @@ ACCEPTABLE_MODEL = [
     'kaldi_model',
     'model'
 ]
-
 
 
 class ConfigReader:
@@ -724,7 +733,8 @@ def process_config(
         for datasets_config in datasets_configs:
             annotation_conversion_config = datasets_config.get('annotation_conversion')
             if annotation_conversion_config:
-                command_line_conversion = (create_command_line_mapping(annotation_conversion_config, 'source'))
+                command_line_conversion = (create_command_line_mapping(annotation_conversion_config,
+                                                                       'source', ANNOTATION_CONVERSION_PATHS))
                 merge_entry_paths(command_line_conversion, annotation_conversion_config, args)
             if 'preprocessing' in datasets_config:
                 for preprocessor in datasets_config['preprocessing']:
@@ -749,7 +759,7 @@ def process_config(
                     merge_entry_paths(LIST_ENTRIES_PATHS, new_launcher, args, model_id)
                     adapter_config = new_launcher.get('adapter')
                     if isinstance(adapter_config, dict):
-                        command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
+                        command_line_adapter = (create_command_line_mapping(adapter_config, 'models', ADAPTERS_PATHS))
                         merge_entry_paths(command_line_adapter, adapter_config, args, model_id)
                     if not updated_launchers or new_launcher != updated_launchers[-1]:
                         updated_launchers.append(new_launcher)
@@ -757,7 +767,7 @@ def process_config(
                 merge_entry_paths(LIST_ENTRIES_PATHS, launcher_config, args)
                 adapter_config = launcher_config.get('adapter')
                 if isinstance(adapter_config, dict):
-                    command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
+                    command_line_adapter = (create_command_line_mapping(adapter_config, 'models', ADAPTERS_PATHS))
                     merge_entry_paths(command_line_adapter, adapter_config, args)
                 updated_launchers.append(launcher_config)
 
@@ -792,6 +802,9 @@ def merge_entry_paths(keys, value, args, value_id=0):
         if config_path.is_absolute():
             value[field] = Path(value[field])
             continue
+
+        if isinstance(argument, list):
+            argument = next(filter(args.get, argument), argument[-1])
 
         if argument not in args or not args[argument]:
             continue
