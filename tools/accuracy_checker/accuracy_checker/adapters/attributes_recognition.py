@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, StringField
+from ..config import ConfigValidator, StringField, PathField
 from ..representation import (
     ContainerPrediction,
     RegressionPrediction,
@@ -232,13 +232,18 @@ class GazeEstimationAdapter(Adapter):
 
 class PRNetAdapter(Adapter):
     __provider__ = 'prnet'
-    landmarks_uv = np.array(
-        [[15, 22, 26, 32, 45, 67, 91, 112, 128, 143, 164, 188, 210, 223, 229, 233, 240, 58, 71, 85, 97, 106, 149, 158,
-          170, 184, 197, 128, 128, 128, 128, 117, 122, 128, 133, 138, 78, 86, 95, 102, 96, 87, 153, 160, 169, 177, 168,
-          159, 108, 116, 124, 128, 131, 139, 146, 137, 132, 128, 123, 118, 110, 122, 128, 133, 145, 132, 128, 123],
-         [96, 118, 141, 165, 183, 190, 188, 187, 193, 187, 188, 190, 183, 165, 141, 118, 96, 49, 42, 39, 40, 42, 42, 40,
-          39, 42, 49, 59, 73, 86, 96, 111, 113, 115, 113, 111, 67, 60, 61, 65, 68, 69, 65, 61, 60, 67, 69, 68, 142, 131,
-          127, 128, 127, 131, 142, 148, 150, 150, 150, 148, 141, 135, 134, 135, 142, 143, 142, 143]])
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'landmarks_ids_file': PathField(description='text file with landmarks indexes in 3D face dense pose mask')
+        })
+        return params
+
+    def configure(self):
+        self.landmarks_ids_file = self.get_value_from_config('landmarks_ids_file')
+        self.landmarks_uv = np.loadtxt(str(self.landmarks_ids_file))
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
