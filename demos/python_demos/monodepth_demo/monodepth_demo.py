@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 import cv2
 import numpy as np
 import logging as log
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 import matplotlib.pyplot as plt
 
 
@@ -30,17 +30,13 @@ def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s",
                     level=log.INFO, stream=sys.stdout)
 
-    # load and prepare net
-    model_xml = args.model
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
-
     log.info("creating inference engine")
     ie = IECore()
     if args.cpu_extension and "CPU" in args.device:
         ie.add_extension(args.cpu_extension, "CPU")
 
-    log.info("loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
-    net = IENetwork(model=model_xml, weights=model_bin)
+    log.info("Loading network")
+    net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
     if "CPU" in args.device:
         supported_layers = ie.query_network(net, "CPU")
