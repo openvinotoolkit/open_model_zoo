@@ -235,6 +235,11 @@ def build_arguments_parser():
         required=False,
         type=cast_to_bool
     )
+    parser.add_argument(
+        '--model_attributes', help="path's prefix for additional models attributes",
+        required=False,
+        type=partial(get_path, is_directory=True)
+    )
 
     return parser
 
