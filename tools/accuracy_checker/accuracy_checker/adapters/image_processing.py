@@ -13,13 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
+from copy import deepcopy
 import cv2
 import numpy as np
 
 from ..adapters import Adapter
-from ..representation import SuperResolutionPrediction
-from ..config import ConfigValidator, BoolField, BaseField, StringField, ConfigError
+from ..representation import SuperResolutionPrediction, ContainerPrediction
+from ..config import ConfigValidator, BoolField, BaseField, StringField, DictField, ConfigError
 from ..utils import get_or_parse_value
 from ..preprocessor import Normalize
 try:
@@ -87,3 +87,48 @@ class SuperResolutionAdapter(Adapter):
             result.append(SuperResolutionPrediction(identifier, img_sr))
 
         return result
+
+
+class MultiSuperResolutionAdapter(Adapter):
+    __provider__ = 'multi_super_resolution'
+    prediction_types = (SuperResolutionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'reverse_channels': BoolField(
+                optional=True, default=False, description="Allow switching output image channels e.g. RGB to BGR"
+            ),
+            'mean': BaseField(
+                optional=True, default=0,
+                description='The value which should be added to prediction pixels for scaling to range [0, 255]'
+                            '(usually it is the same mean value which subtracted in preprocessing step))'
+            ),
+            'std':  BaseField(
+                optional=True, default=255,
+                description='The value on which prediction pixels should be multiplied for scaling to range '
+                            '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
+            ),
+            'target_mapping': DictField(allow_empty=False, key_type=StringField, value_type=StringField)
+        })
+        return parameters
+
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
+
+    def configure(self):
+        self.target_mapping = self.get_value_from_config('target_mapping')
+        common_adapter_config = deepcopy(self.launcher_config)
+        self._per_target_adapters = {}
+        for key, output_name in self.target_mapping.items():
+            self._per_target_adapters[key] = SuperResolutionAdapter(common_adapter_config, output_blob=output_name)
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        predictions = [{}] * len(identifiers)
+        for key, adapter in self._per_target_adapters.items():
+            result = adapter.process(raw, identifiers, frame_meta)
+            for batch_id, output_res in enumerate(result):
+                predictions[batch_id][key] = output_res
+        results = [ContainerPrediction(prediction_mapping) for prediction_mapping in predictions]
+        return results
