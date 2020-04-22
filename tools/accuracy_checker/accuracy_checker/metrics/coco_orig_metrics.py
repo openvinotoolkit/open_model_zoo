@@ -17,7 +17,7 @@ limitations under the License.
 import os
 import tempfile
 import json
-import pathlib
+from pathlib import Path
 try:
     from pycocotools.coco import COCO
 except ImportError:
@@ -110,7 +110,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         coco_data_to_store = []
         for pred in predictions:
             prediction_data_to_store = []
-            cur_name = pathlib.Path(pred.identifier).name
+            cur_name = Path(pred.identifier).name
             cur_img_id = int((cur_name.split(".")[0]).split("_")[-1])
 
             labels = pred.labels.tolist()
@@ -143,7 +143,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         count = 0
         for annotation in annotations:
             annotation_data_to_store = []
-            cur_name = pathlib.Path(annotation.identifier).name
+            cur_name = Path(annotation.identifier).name
             cur_img_id = int((cur_name.split(".")[0]).split("_")[-1])
 
             labels = annotation.labels
