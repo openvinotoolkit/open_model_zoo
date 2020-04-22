@@ -4,7 +4,7 @@
 
 This is a network for handwritten Japanese text recognition scenario. It consists of a VGG16-like backbone, 
 reshape layer and a fully connected layer.
-The network is able to recognize Japanese text. For details on characters in datasets, see [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html).
+The network is able to recognize Japanese text consisting of characters in the [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html) datasets.
 
 ## Example
 
