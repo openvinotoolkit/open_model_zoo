@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a reimplemented and retrained version of the [tiny YOLO v2](https://arxiv.org/abs/1612.08242) object-detection network trained with the VOC2012 training dataset.
+This is a reimplemented and retrained version of the [tiny YOLO v2](https://arxiv.org/abs/1612.08242) object detection network trained with the VOC2012 training dataset.
 
 ## Example
 
@@ -15,7 +15,6 @@ This is a reimplemented and retrained version of the [tiny YOLO v2](https://arxi
 | Source framework                | TensorFlow\*                              |
 
 For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
-Tested on the VOC 2012 validation dataset.
 Tested on the VOC 2012 validation dataset.
 
 ## Performance

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a reimplemented and retrained version of the [tiny YOLO v2](https://arxiv.org/abs/1612.08242) object-detection network trained with the VOC2012 training dataset.
+This is a reimplemented and retrained version of the [tiny YOLO v2](https://arxiv.org/abs/1612.08242) object detection network trained with the VOC2012 training dataset.
 [Network weight pruning](https://arxiv.org/abs/1710.01878) is applied to sparsify convolution layers (30% of network parameters are set to zeros).
 
 ## Example
@@ -17,7 +17,6 @@ This is a reimplemented and retrained version of the [tiny YOLO v2](https://arxi
 
 For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
 Tested on the VOC 2012 validation dataset.
-Tested on VOC 2012 validation dataset.
 
 ## Performance
 
