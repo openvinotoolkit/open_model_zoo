@@ -110,7 +110,7 @@ class MultiSuperResolutionAdapter(Adapter):
                 description='The value on which prediction pixels should be multiplied for scaling to range '
                             '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
             ),
-            'target_mapping': DictField(allow_empty=False, key_type=StringField, value_type=StringField)
+            'target_mapping': DictField(allow_empty=False, key_type=str, value_type=str)
         })
         return parameters
 

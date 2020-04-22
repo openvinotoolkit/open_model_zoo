@@ -189,8 +189,8 @@ class MultiTargetSuperResolutionConverter(BaseFormatConverter):
         params = super().parameters()
         params.update({
             'data_dir': PathField(description='Dataset root directory', is_directory=True),
-            'lr_path': StringField(descrition='path to directory with low resolution images'),
-            'sr_mapping': DictField(key_type=StringField, value_type=StringField, allow_empty=False),
+            'lr_path': StringField(description='path to directory with low resolution images'),
+            'hr_mapping': DictField(key_type=str, value_type=str, allow_empty=False),
             'annotation_loader': StringField(
                 optional=True, choices=LOADERS_MAPPING.keys(), default='pillow',
                 description="Which library will be used for ground truth image reading. "
@@ -219,7 +219,7 @@ class MultiTargetSuperResolutionConverter(BaseFormatConverter):
             for hr_name, hr_dir in self.hr_mapping.items():
                 hr_file = '{}/{}'.format(hr_dir, lr_image.name.replace('lr', 'hr'))
                 image_annotations[hr_name] = SuperResolutionAnnotation(
-                    '{}/{}'.format(self.lr_dir, lr_image.name),  hr_file, gt_loader=self.annotation_loader
+                    '{}/{}'.format(self.lr_dir, lr_image.name), hr_file, gt_loader=self.annotation_loader
                 )
             annotations.append(ContainerAnnotation(image_annotations))
 
