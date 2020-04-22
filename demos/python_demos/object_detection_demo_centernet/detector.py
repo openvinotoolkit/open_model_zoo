@@ -19,7 +19,6 @@ import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
-from openvino.inference_engine import IECore
 
 class Detector(object):
     def __init__(self, ie, model_path, threshold=0.3, device='CPU'):

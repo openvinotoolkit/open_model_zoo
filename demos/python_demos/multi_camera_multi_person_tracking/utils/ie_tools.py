@@ -16,7 +16,6 @@ import os
 
 import logging as log
 import numpy as np
-from openvino.inference_engine import IECore # pylint: disable=import-error,E0611
 import cv2 as cv
 
 
