@@ -1,8 +1,6 @@
 import os
 import cv2
 
-from openvino.inference_engine import IECore
-
 
 class Detector(object):
     def __init__(self, ie, path_to_model_xml, label_class, scale=None, thr=0.3, device='CPU'):

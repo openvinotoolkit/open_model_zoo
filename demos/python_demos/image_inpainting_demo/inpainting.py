@@ -15,7 +15,6 @@ import os
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IECore
 
 class ImageInpainting(object):
     def __init__(self, ie, model_path, parts, max_brush_width, max_length, max_vertex, device='CPU'):
