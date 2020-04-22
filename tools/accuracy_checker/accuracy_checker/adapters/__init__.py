@@ -36,7 +36,8 @@ from .attributes_recognition import (
     PersonAttributesAdapter,
     AgeGenderAdapter,
     LandmarksRegressionAdapter,
-    GazeEstimationAdapter
+    GazeEstimationAdapter,
+    PRNetAdapter
 )
 
 from .reidentification import ReidAdapter
@@ -111,6 +112,7 @@ __all__ = [
     'AgeGenderAdapter',
     'LandmarksRegressionAdapter',
     'GazeEstimationAdapter',
+    'PRNetAdapter',
 
     'TextDetectionAdapter',
     'TextProposalsDetectionAdapter',

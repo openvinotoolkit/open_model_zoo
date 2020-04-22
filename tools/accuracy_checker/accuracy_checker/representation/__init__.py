@@ -55,6 +55,8 @@ from .regression_representation import (
     RegressionPrediction,
     FacialLandmarksAnnotation,
     FacialLandmarksPrediction,
+    FacialLandmarks3DAnnotation,
+    FacialLandmarks3DPrediction,
     GazeVectorAnnotation,
     GazeVectorPrediction
 )
@@ -120,6 +122,8 @@ __all__ = [
     'RegressionPrediction',
     'FacialLandmarksAnnotation',
     'FacialLandmarksPrediction',
+    'FacialLandmarks3DAnnotation',
+    'FacialLandmarks3DPrediction',
     'GazeVectorAnnotation',
     'GazeVectorPrediction',
 
