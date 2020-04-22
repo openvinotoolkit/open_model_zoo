@@ -27,6 +27,7 @@ from time import perf_counter
 from enum import Enum
 
 import cv2
+import numpy as np
 from openvino.inference_engine import IECore
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
@@ -133,11 +134,16 @@ def entry_index(side, coord, classes, location, entry):
     return int(side_power_2 * (n * (coord + classes + 1) + entry) + loc)
 
 
-def scale_bbox(x, y, h, w, class_id, confidence, h_scale, w_scale):
-    xmin = int((x - w / 2) * w_scale)
-    ymin = int((y - h / 2) * h_scale)
-    xmax = int(xmin + w * w_scale)
-    ymax = int(ymin + h * h_scale)
+def scale_bbox(x, y, h, w, class_id, confidence, im_h, im_w, aspect_ratio_keeped=True):
+    if aspect_ratio_keeped:
+        scale = np.array([min(im_w/im_h, 1), min(im_h/im_w, 1)])
+        offset = 0.5*(np.ones(2) - scale)
+        x, y = (np.array([x, y]) - offset) / scale
+        w, h = np.array([w,h]) / scale
+    xmin = int((x - w / 2) * im_w)
+    ymin = int((y - h / 2) * im_h)
+    xmax = int(xmin + w * im_w)
+    ymax = int(ymin + h * im_h)
     return dict(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, class_id=class_id, confidence=confidence)
 
 
@@ -196,7 +202,7 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
             if confidence < threshold:
                 continue
             objects.append(scale_bbox(x=x, y=y, h=h, w=w, class_id=label, confidence=confidence,
-                                      h_scale=orig_im_h, w_scale=orig_im_w))
+                                      im_h=orig_im_h, im_w=orig_im_w))
     return objects
 
 
@@ -213,6 +219,24 @@ def intersection_over_union(box_1, box_2):
     if area_of_union == 0:
         return 0
     return area_of_overlap / area_of_union
+
+
+def resize(image, size, interpolation=cv2.INTER_CUBIC, keep_aspect_ration=True):
+    if not keep_aspect_ration:
+        return cv2.resize(image, size, interpolation=interpolation)
+
+    iw, ih = image.shape[0:2][::-1]
+    w, h = size
+    scale = min(w/iw, h/ih)
+    nw = int(iw*scale)
+    nh = int(ih*scale)
+    image = cv2.resize(image, (nw,nh), interpolation=interpolation)
+    new_image = np.zeros((size[1], size[0], 3), np.uint8)
+    new_image.fill(128)
+    dx = (w-nw)//2
+    dy = (h-nh)//2
+    new_image[dy:dy+nh, dx:dx+nw, :] = image
+    return new_image
 
 
 def preprocess_frame(frame, input_height, input_width, nchw_shape):
