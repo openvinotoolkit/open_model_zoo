@@ -242,7 +242,7 @@ class Visualizer:
         self.print_perf_stats = args.perf_stats
 
         self.frame_time = 0
-        self.frame_start_time = 0
+        self.frame_start_time = time.perf_counter()
         self.fps = 0
         self.frame_num = 0
         self.frame_count = -1
@@ -254,8 +254,8 @@ class Visualizer:
         self.frame_timeout = 0 if args.timelapse else 1
 
     def update_fps(self):
-        now = time.time()
-        self.frame_time = now - self.frame_start_time
+        now = time.perf_counter()
+        self.frame_time = max(now - self.frame_start_time, sys.float_info.epsilon)
         self.fps = 1.0 / self.frame_time
         self.frame_start_time = now
 
