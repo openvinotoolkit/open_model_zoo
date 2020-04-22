@@ -29,6 +29,79 @@ import common
 
 OMZ_ROOT = Path(__file__).resolve().parents[2]
 
+def quantize(model, precision, args, output_dir, pot_path, pot_env):
+    input_precision = common.KNOWN_QUANTIZED_PRECISIONS[precision]
+
+    pot_config = {
+        'compression': {
+            'algorithms': [
+                {
+                    'name': 'DefaultQuantization',
+                    'params': {
+                        'preset': 'performance',
+                        'stat_subset_size': 300,
+                    },
+                },
+            ],
+        },
+        'engine': {
+            'config': str(OMZ_ROOT / 'tools/accuracy_checker/configs' / (model.name + '.yml')),
+        },
+        'model': {
+            'model': str(args.model_dir / model.subdirectory / input_precision / (model.name + '.xml')),
+            'weights': str(args.model_dir / model.subdirectory / input_precision / (model.name + '.bin')),
+            'model_name': model.name,
+        }
+    }
+
+    if args.target_device:
+        pot_config['compression']['target_device'] = args.target_device
+
+    print('========= {}Quantizing {} from {} to {}'.format(
+        '(DRY RUN) ' if args.dry_run else '', model.name, input_precision, precision))
+
+    model_output_dir = output_dir / model.subdirectory / precision
+    pot_config_path = model_output_dir / 'pot-config.json'
+
+    print('Creating {}...'.format(pot_config_path))
+    pot_config_path.parent.mkdir(parents=True, exist_ok=True)
+    with pot_config_path.open('w') as pot_config_file:
+        json.dump(pot_config, pot_config_file, indent=4)
+        pot_config_file.write('\n')
+
+    pot_output_dir = model_output_dir / 'pot-output'
+    pot_output_dir.mkdir(parents=True, exist_ok=True)
+
+    pot_cmd = [str(args.python), '--', str(pot_path),
+        '--config={}'.format(pot_config_path),
+        '--direct-dump',
+        '--output-dir={}'.format(pot_output_dir),
+    ]
+
+    print('Quantization command: {}'.format(common.command_string(pot_cmd)))
+    print('Quantization environment: {}'.format(
+        ' '.join('{}={}'.format(k, common.quote_arg(v))
+            for k, v in sorted(pot_env.items()))))
+
+    success = True
+
+    if not args.dry_run:
+        print('', flush=True)
+
+        success = subprocess.run(pot_cmd, env={**os.environ, **pot_env}).returncode == 0
+
+    print('')
+    if not success: return False
+
+    if not args.dry_run:
+        print('Moving quantized model to {}...'.format(model_output_dir))
+        for ext in ['.xml', '.bin']:
+            (pot_output_dir / 'optimized' / (model.name + ext)).replace(
+                model_output_dir / (model.name + ext))
+        print('')
+
+    return True
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_dir', type=Path, metavar='DIR',
@@ -47,6 +120,8 @@ def main():
     parser.add_argument('--pot', type=Path, help='Post-Training Optimization Toolkit entry point script')
     parser.add_argument('--dry_run', action='store_true',
         help='print the quantization commands without running them')
+    parser.add_argument('--precisions', metavar='PREC[,PREC...]',
+        help='quantize only to the specified precisions')
     parser.add_argument('--target_device', help='target device for the quantized model')
     args = parser.parse_args()
 
@@ -64,6 +139,14 @@ def main():
     # So we have to check it manually.
     if not args.dataset_dir:
         sys.exit('--dataset_dir must be specified.')
+
+    if args.precisions is None:
+        requested_precisions = common.KNOWN_QUANTIZED_PRECISIONS.keys()
+    else:
+        requested_precisions = set(args.precisions.split(','))
+        unknown_precisions = requested_precisions - common.KNOWN_QUANTIZED_PRECISIONS.keys()
+        if unknown_precisions:
+            sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
     output_dir = args.output_dir or args.model_dir
 
@@ -84,73 +167,11 @@ def main():
                 print('')
                 continue
 
-            input_precision = 'FP32'
-
-            pot_config = {
-                'compression': {
-                    'algorithms': [
-                        {
-                            'name': 'DefaultQuantization',
-                            'params': {
-                                'preset': 'performance',
-                                'stat_subset_size': 300,
-                            },
-                        },
-                    ],
-                },
-                'engine': {
-                    'config': str(OMZ_ROOT / 'tools/accuracy_checker/configs' / (model.name + '.yml')),
-                },
-                'model': {
-                    'model': str(args.model_dir / model.subdirectory / input_precision / (model.name + '.xml')),
-                    'weights': str(args.model_dir / model.subdirectory / input_precision / (model.name + '.bin')),
-                    'model_name': model.name,
-                }
-            }
-
-            if args.target_device:
-                pot_config['compression']['target_device'] = args.target_device
-
-            print('========= {}Quantizing {} from {}'.format(
-                '(DRY RUN) ' if args.dry_run else '', model.name, input_precision))
-
-            model_output_dir = output_dir / model.subdirectory / (input_precision + '-INT8')
-            pot_config_path = model_output_dir / 'pot-config.json'
-
-            print('Creating {}...'.format(pot_config_path))
-            pot_config_path.parent.mkdir(parents=True, exist_ok=True)
-            with pot_config_path.open('w') as pot_config_file:
-                json.dump(pot_config, pot_config_file, indent=4)
-                pot_config_file.write('\n')
-
-            pot_output_dir = model_output_dir / 'pot-output'
-            pot_output_dir.mkdir(parents=True, exist_ok=True)
-
-            pot_cmd = [str(args.python), '--', str(pot_path),
-                '--config={}'.format(pot_config_path),
-                '--direct-dump',
-                '--output-dir={}'.format(pot_output_dir),
-            ]
-
-            print('Quantization command: {}'.format(common.command_string(pot_cmd)))
-            print('Quantization environment: {}'.format(
-                ' '.join('{}={}'.format(k, common.quote_arg(v))
-                    for k, v in sorted(pot_env.items()))))
-
-            if not args.dry_run:
-                print('', flush=True)
-
-                if subprocess.run(pot_cmd, env={**os.environ, **pot_env}).returncode != 0:
+            for precision in sorted(requested_precisions):
+                if not quantize(model, precision, args, output_dir, pot_path, pot_env):
                     failed_models.append(model.name)
+                    break
 
-            print('')
-
-            if not args.dry_run:
-                print('Moving quantized model to {}...'.format(model_output_dir))
-                for ext in ['.xml', '.bin']:
-                    (pot_output_dir / 'optimized' / (model.name + ext)).replace(
-                        model_output_dir / (model.name + ext))
-                print('')
 
     if failed_models:
         print('FAILED:')

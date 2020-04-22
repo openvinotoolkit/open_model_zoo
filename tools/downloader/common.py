@@ -63,6 +63,9 @@ KNOWN_TASK_TYPES = {
     'semantic_segmentation',
 }
 
+KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}
+assert KNOWN_QUANTIZED_PRECISIONS.keys() <= KNOWN_PRECISIONS
+
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
 RE_SHA256SUM = re.compile(r'[0-9a-fA-F]{64}')
 
