@@ -70,7 +70,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 To run the demo, please provide paths to the model in the IR format, and to an input video or image(s):
 ```bash
-python human_pose_estination_3d_demo.py \
+python human_pose_estimation_3d_demo.py \
 -m /home/user/human-pose-estimation-3d-0001.xml \
 -i /home/user/video_name.mp4
 ```
