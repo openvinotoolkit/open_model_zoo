@@ -1,14 +1,14 @@
 import os
 import cv2
 
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 
 
 class Detector(object):
     def __init__(self, ie, path_to_model_xml, label_class, scale=None, thr=0.3, device='CPU'):
         self.OUTPUT_SIZE = 7
         self.CHANNELS_SIZE = 3
-        self.model = IENetwork(model=path_to_model_xml, weights=os.path.splitext(path_to_model_xml)[0] + '.bin')
+        self.model = ie.read_network(path_to_model_xml, os.path.splitext(path_to_model_xml)[0] + '.bin')
 
         assert len(self.model.inputs) == 1, "Expected 1 input blob"
 
