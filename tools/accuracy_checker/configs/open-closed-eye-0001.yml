@@ -12,8 +12,8 @@ models:
           - type: resize
             size: 32
           - type: normalization
-            mean: 128.0, 128.0, 128.0
-            std: 256.0, 256.0, 256.0
+            mean: 127.0, 127.0, 127.0
+            std: 255.0, 255.0, 255.0
 
   - name: open-closed-eye-0001
     launchers:
@@ -38,7 +38,7 @@ models:
             size: 32
             aspect_ratio_scale: greater
           - type: normalization
-            mean: 128.0, 128.0, 128.0
-            std: 256.0, 256.0, 256.0
+            mean: 127.0, 127.0, 127.0
+            std: 255.0, 255.0, 255.0
 
 global_definitions: ../dataset_definitions.yml
