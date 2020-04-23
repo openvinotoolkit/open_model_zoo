@@ -1,0 +1,184 @@
+"""
+ Copyright (c) 2020 Intel Corporation
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
+import argparse
+import cv2
+import logging as log
+import numpy as np
+import time
+
+from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
+
+from utils.capture import VideoCapture
+from utils.network_wrappers import MaskRCNN, SemanticSegmentation
+from utils.misc import MouseClick, set_log_config, path_exist, check_pressed_keys
+
+set_log_config()
+WINNAME = 'Whiteboard_inpainting_demo'
+
+
+def upsample_mask(detection):
+    for i in range(len(detection[0])):
+        detection[0][i][2] = extend_mask(detection[0][i][2])
+
+
+def extend_mask(mask, d=35):
+    contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for contour in contours:
+        for c in contour:
+            for x, y in c:
+                cv2.circle(mask, (x, y), d, (1, 1, 1), -1)
+    return mask
+
+
+def remove_background(img, kernel_size=(7, 7), blur_kernel_size=21, invert_colors=True):
+    bgr_planes = cv2.split(img)
+    result = []
+    kernel = np.ones(kernel_size, np.uint8)
+    for plane in bgr_planes:
+        dilated_img = cv2.morphologyEx(plane, cv2.MORPH_OPEN, kernel)
+        dilated_img = cv2.dilate(dilated_img, kernel)
+        bg_img = cv2.medianBlur(dilated_img, blur_kernel_size)
+        if invert_colors:
+            diff_img = 255 - cv2.absdiff(plane, bg_img)
+        else:
+            diff_img = cv2.absdiff(plane, bg_img)
+        result.append(diff_img)
+    return cv2.merge(result)
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Whiteboard inpainting demo')
+    parser.add_argument('-i', type=str, help='Input sources (index of camera \
+                        or path to a video file)', required=True)
+    parser.add_argument('-mi', '--m_instance_segmentation', type=str, required=False,
+                        help='Path to the instance segmentation model')
+    parser.add_argument('-ms', '--m_semantic_segmentation', type=str, required=False,
+                        help='Path to the semantic segmentation model')
+    parser.add_argument('-t', '--threshold', type=float, default=0.6,
+                        help='Threshold for person instance segmentation model')
+    parser.add_argument('--output_video', type=str, default='', required=False,
+                        help='Optional. Path to output video')
+    parser.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
+
+    parser.add_argument('-d', '--device', type=str, default='CPU')
+    parser.add_argument('-l', '--cpu_extension', type=str, default=None,
+                        help='MKLDNN (CPU)-targeted custom layers.Absolute \
+                              path to a shared library with the kernels impl.')
+    args = parser.parse_args()
+
+    if not path_exist(args.i, type='file') and not str.isdigit(args.i):
+        raise ValueError('File not found or wrong camera id: {}'.format(args.i))
+    else:
+        capture = VideoCapture(args.i)
+
+    if (args.m_instance_segmentation and args.m_semantic_segmentation) or \
+       (not args.m_instance_segmentation and not args.m_semantic_segmentation):
+        raise ValueError('Set up exectly one of segmentation models: '\
+                         '--m_instance_segmentation or --m_semantic_segmentation')
+
+    frame_size, fps = capture.get_source_parameters()
+    out_frame_size = (int(frame_size[0]), int(frame_size[1] * 2))
+
+    mouse = MouseClick()
+    cv2.namedWindow(WINNAME)
+    cv2.setMouseCallback(WINNAME, mouse.get_points)
+
+    if args.output_video:
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        output_video = cv2.VideoWriter(args.output_video, fourcc, fps, out_frame_size)
+    else:
+        output_video = None
+
+    log.info("Creating Inference Engine")
+    ie = IECore()
+    if args.m_instance_segmentation:
+        segmentation = MaskRCNN(ie, args.m_instance_segmentation, args.threshold,
+                                args.device, args.cpu_extension, 1)
+    elif args.m_semantic_segmentation:
+        segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, args.threshold,
+                                            args.device, args.cpu_extension)
+
+    has_frame = True
+    output_frame = None
+    black_board = False
+    frame_number = 0
+    key = -1
+
+    while has_frame:
+        start = time.time()
+        if not args.no_show:
+            key = check_pressed_keys(key)
+            if key == 27:
+                break
+            elif key == 105:
+                black_board = not black_board
+                if output_frame is not None:
+                    output_frame = 255 - output_frame
+
+        has_frame, frame = capture.get_frame()
+
+        mask = None
+        if frame is not None:
+            detections = segmentation.get_detections([frame])
+            upsample_mask(detections)
+            if len(detections[0]) > 0:
+                mask = detections[0][0][2]
+                for i in range(1, len(detections[0])):
+                    mask = cv2.bitwise_or(mask, detections[0][i][2])
+
+        if mask is not None:
+            mask = np.stack([mask, mask, mask], axis=-1)
+        else:
+            mask = np.zeros(frame.shape, dtype='uint8')
+
+        clear_frame = remove_background(frame, invert_colors=not black_board)
+
+        if output_frame is None:
+            fill_value = 0 if black_board else 255
+            white_black = np.full(frame.shape, fill_value, dtype='uint8')
+            output_frame = np.where(mask, white_black, clear_frame)
+        else:
+            output_frame = np.where(mask, output_frame, clear_frame)
+        merged_frame = np.vstack([frame, output_frame])
+        merged_frame = cv2.resize(merged_frame, out_frame_size)
+
+        if output_video is not None:
+            output_video.write(merged_frame)
+        
+        if not args.no_show:
+            cv2.imshow(WINNAME, merged_frame)
+
+        if mouse.crop_available:
+            x0, x1 = min(mouse.points[0][0], mouse.points[1][0]), \
+                     max(mouse.points[0][0], mouse.points[1][0])
+            y0, y1 = min(mouse.points[0][1], mouse.points[1][1]), \
+                     max(mouse.points[0][1], mouse.points[1][1])
+            x1, y1 = min(x1, output_frame.shape[1] - 1), min(y1, output_frame.shape[0] - 1)
+            board = output_frame[y0: y1, x0: x1, :]
+            if board.shape[0] > 0 and board.shape[1] > 0:
+                cv2.namedWindow('Board', cv2.WINDOW_KEEPRATIO)
+                cv2.imshow('Board', board)
+            
+        end = time.time()
+        print('\rProcessing frame: {}, fps = {:.3}' \
+            .format(frame_number, 1. / (end - start)), end="")
+        frame_number += 1
+    
+    if output_video is not None:
+        output_video.release()
+        
+
+if __name__ == '__main__':
+    main()
+
