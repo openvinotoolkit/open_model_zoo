@@ -104,7 +104,7 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
                 padded_chars[0] = ord(self._bow_char)
                 for char_id, char in enumerate(word):
                     padded_chars[char_id + 1] = ord(char)
-                padded_chars[len(word)] = ord(self._eow_char)
+                padded_chars[len(word) + 1] = ord(self._eow_char)
                 self._word_to_char_ids.append(padded_chars)
             self._bos_char_ids = np.full(self.max_word_length, ord(self._pad_char))
             self._bos_char_ids[:3] = [ord(self._bow_char), ord(self._bos_char), ord(self._eow_char)]
@@ -124,6 +124,6 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
         sentence_rep = [self._bos_char_ids]
         for word_id in encoded_sentence[1:-1]:
             sentence_rep.append(self._word_to_char_ids[word_id])
-        sentence_rep.append(self._eos_char_ids)
+        #sentence_rep.append(self._eos_char_ids)   #google lm-1b does not evaluate the last terminal symbol
 
         return sentence_rep

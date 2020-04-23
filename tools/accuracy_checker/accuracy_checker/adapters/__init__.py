@@ -68,7 +68,8 @@ from .hit_ratio import HitRatioAdapter
 from .mask_rcnn import MaskRCNNAdapter
 from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
 
-from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter, LanguageModelingAdapter
+from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
+from .language_model import LanguageModelingAdapter
 
 from .centernet import CTDETAdapter
 
