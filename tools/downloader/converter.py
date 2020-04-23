@@ -135,12 +135,17 @@ def main():
         help='Python executable to run Model Optimizer with')
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
         help='Model Optimizer entry point script')
-    parser.add_argument('--add-mo-arg', dest='extra_mo_args', metavar='ARG', action='append',
+    parser.add_argument('--add_mo_arg', dest='extra_mo_args', metavar='ARG', action='append',
         help='Extra argument to pass to Model Optimizer')
-    parser.add_argument('--dry-run', action='store_true',
+    parser.add_argument('--dry_run', action='store_true',
         help='Print the conversion commands without running them')
     parser.add_argument('-j', '--jobs', type=num_jobs_arg, default=1,
         help='number of conversions to run concurrently')
+
+    # aliases for backwards compatibility
+    parser.add_argument('--add-mo-arg', dest='extra_mo_args', action='append', help=argparse.SUPPRESS)
+    parser.add_argument('--dry-run', action='store_true', help=argparse.SUPPRESS)
+
     args = parser.parse_args()
 
     mo_path = args.mo

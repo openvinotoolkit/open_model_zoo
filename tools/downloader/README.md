@@ -259,11 +259,11 @@ script. You can override this heuristic with the `--mo` option:
 ```
 
 You can add extra Model Optimizer arguments to the ones specified in the model
-configuration by using the `--add-mo-arg` option. The option can be repeated
+configuration by using the `--add_mo_arg` option. The option can be repeated
 to add multiple arguments:
 
 ```sh
-./converter.py --name=caffenet --add-mo-arg=--reverse_input_channels --add-mo-arg=--silent
+./converter.py --name=caffenet --add_mo_arg=--reverse_input_channels --add_mo_arg=--silent
 ```
 
 By default, the script will run Model Optimizer using the same Python executable
@@ -286,10 +286,10 @@ executed commands, or "auto", in which case the number of CPUs in the system is 
 By default, all commands are run sequentially.
 
 The script can print the conversion commands without actually running them.
-To do this, use the `--dry-run` option:
+To do this, use the `--dry_run` option:
 
 ```sh
-./converter.py --all --dry-run
+./converter.py --all --dry_run
 ```
 
 See the "Shared options" section for information on other options accepted by
