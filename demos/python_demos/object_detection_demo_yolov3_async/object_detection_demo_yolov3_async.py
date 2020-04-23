@@ -168,8 +168,8 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
         col = i % params.side
         for n in range(params.num):
             obj_index = entry_index(params.side, params.coords, params.classes, n * side_square + i, params.coords)
-            scale = predictions[obj_index]
-            if scale < threshold:
+            object_probability = predictions[obj_index]
+            if object_probability < threshold:
                 continue
             box_index = entry_index(params.side, params.coords, params.classes, n * side_square + i, 0)
             # Network produces location predictions in absolute coordinates of feature maps.
@@ -185,14 +185,14 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
             # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
             w = w_exp * params.anchors[2 * n] / (resized_image_w if params.isYoloV3 else params.side)
             h = h_exp * params.anchors[2 * n + 1] / (resized_image_h if params.isYoloV3 else params.side)
-            classes = []
+            class_probabilities = []
             for j in range(params.classes):
                 class_index = entry_index(params.side, params.coords, params.classes, n * side_square + i,
                                           params.coords + 1 + j)
-                classes.append(predictions[class_index])
+                class_probabilities.append(predictions[class_index])
 
-            label = argmax(classes)
-            confidence = classes[label]*scale
+            label = argmax(class_probabilities)
+            confidence = class_probabilities[label]*object_probability
             if confidence < threshold:
                 continue
             objects.append(scale_bbox(x=x, y=y, h=h, w=w, class_id=label, confidence=confidence,
