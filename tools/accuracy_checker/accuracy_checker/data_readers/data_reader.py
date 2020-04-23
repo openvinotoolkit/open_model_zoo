@@ -20,6 +20,7 @@ from collections import OrderedDict, namedtuple
 import re
 import cv2
 import numpy as np
+import wave
 
 try:
     import tensorflow as tf
@@ -35,11 +36,6 @@ try:
     import nibabel as nib
 except ImportError:
     nib = None
-
-try:
-    from scipy.io import wavfile
-except ImportError:
-    wavfile = None
 
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
@@ -415,11 +411,27 @@ class AnnotationFeaturesReader(BaseReader):
 class WavReader(BaseReader):
     __provider__ = 'wav_reader'
 
+    _samplewidth_types = {
+        1: np.uint8,
+        2: np.int16
+    }
+
     def read(self, data_id):
-        sample_rate, wav = wavfile.read(str(self.data_source / data_id))
-        if len(wav.shape) == 1:
-            wav = np.expand_dims(wav, axis=0)
-        return wav, {'sample_rate': sample_rate}
+        with wave.open(str(self.data_source / data_id), "rb") as wav:
+            sample_rate = wav.getframerate()
+            sample_width = wav.getsampwidth()
+            nframes = wav.getnframes()
+            data = wav.readframes(nframes)
+            if self._samplewidth_types.get(sample_width):
+                data = np.frombuffer(data, dtype=self._samplewidth_types[sample_width])
+            else:
+                raise RuntimeError("Reader {} coudn't process file {}: unsupported sample width {}"
+                                   "(reader only supports {})"
+                                   .format(self.__provider__, str(self.data_source / data_id),
+                                           sample_width, [*self._samplewidth_types.keys()]))
+            data = data.reshape(-1, wav.getnchannels()).T
+
+        return data, {'sample_rate': sample_rate}
 
     def read_item(self, data_id):
         return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)
