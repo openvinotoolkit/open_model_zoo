@@ -623,7 +623,10 @@ class DLSDKLauncher(Launcher):
         data = data.astype(PRECISION_TO_DTYPE[precision])
         data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
         input_layout = self.inputs[input_blob].layout
-        if len(input_layout) == len(data_layout) and input_layout != data_layout and IEBlob is not None:
+        layout_mismatch = (
+            data_layout is not None and len(input_layout) == len(data_layout) and input_layout != data_layout
+        )
+        if layout_mismatch and IEBlob is not None and self.network is None:
             self._target_layout_mapping[input_blob] = data_layout
             self._use_set_blob = True
             return data
