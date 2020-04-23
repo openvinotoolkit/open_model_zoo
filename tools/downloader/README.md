@@ -67,16 +67,17 @@ The basic usage is to run the script like this:
 ./downloader.py --all
 ```
 
-This will download all models into a directory tree rooted in the current
-directory. To download into a different directory, use the `-o`/`--output_dir`
-option:
+This will download all models. The `--all` option can be replaced with
+other filter options to download only a subset of models. See the "Shared options"
+section.
+
+By default, the script will download models into a directory tree rooted
+in the current directory. To download into a different directory, use
+the `-o`/`--output_dir` option:
 
 ```sh
 ./downloader.py --all --output_dir my/download/directory
 ```
-
-The `--all` option can be replaced with other filter options to download only
-a subset of models. See the "Shared options" section.
 
 You may use `--precisions` flag to specify comma separated precisions of weights
 to be downloaded.
@@ -221,6 +222,9 @@ This will convert all models into the Inference Engine IR format. Models that
 were originally in that format are ignored. Models in PyTorch and Caffe2 formats will be
 converted in ONNX format first.
 
+The `--all` option can be replaced with other filter options to convert only
+a subset of models. See the "Shared options" section.
+
 The current directory must be the root of a download tree created by the model
 downloader. To specify a different download tree path, use the `-d`/`--download_dir`
 option:
@@ -236,9 +240,6 @@ into a different directory tree, use the `-o`/`--output_dir` option:
 ./converter.py --all --output_dir my/output/directory
 ```
 >Note: models in intermediate format are placed to this directory too.
-
-The `--all` option can be replaced with other filter options to convert only
-a subset of models. See the "Shared options" section.
 
 By default, the script will produce models in every precision that is supported
 for conversion. To only produce models in a specific precision, use the `--precisions`
