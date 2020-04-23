@@ -513,12 +513,21 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
     @staticmethod
     def transform_for_callback(batch_size, raw_outputs):
         output_per_box = []
+        fq_weights = []
         for i in range(batch_size):
             box_outs = OrderedDict()
             for layer_name, data in raw_outputs[0].items():
-                box_outs[layer_name] = np.expand_dims(data[i], axis=0)
+                if layer_name in fq_weights:
+                    continue
+                if layer_name.endswith('fq_weights_1'):
+                    fq_weights.append(layer_name)
+                    box_outs[layer_name] = data
+                else:
+                    box_outs[layer_name] = np.expand_dims(data[i], axis=0)
             output_per_box.append(box_outs)
+
         return output_per_box
+
 
 
 class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
@@ -535,12 +544,21 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
     @staticmethod
     def transform_for_callback(batch_size, raw_outputs):
         output_per_box = []
+        fq_weights = []
         for i in range(batch_size):
             box_outs = OrderedDict()
             for layer_name, data in raw_outputs[0].items():
-                box_outs[layer_name] = np.expand_dims(data[i], axis=0)
+                if layer_name in fq_weights:
+                    continue
+                if layer_name.endswith('fq_weights_1'):
+                    fq_weights.append(layer_name)
+                    box_outs[layer_name] = data
+                else:
+                    box_outs[layer_name] = np.expand_dims(data[i], axis=0)
             output_per_box.append(box_outs)
+
         return output_per_box
+
 
 
 
