@@ -17,6 +17,7 @@ limitations under the License.
 import os
 import tempfile
 import json
+import warnings
 from pathlib import Path
 try:
     from pycocotools.coco import COCO
@@ -254,6 +255,10 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
     def compute_precision_recall(self, annotations, predictions):
         coco = self._prepare_coco_structures(annotations)
         coco_data_to_store = self._convert_data_to_coco_format(predictions)
+
+        if not coco_data_to_store:
+            warnings.warn("No detections to compute coco_orig_metric")
+            return [[0], [0]]
 
         coco_res = self._reload_results_to_coco_class(coco, coco_data_to_store)
 
