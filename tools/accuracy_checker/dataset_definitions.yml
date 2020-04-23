@@ -739,3 +739,11 @@ datasets:
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       masks_dir: free_form_masks/masks_2k
     annotation: inpainting_voc12_masks2k.pickle
+
+  - name: mrlEyes_2018_01
+    annotation_conversion:
+      converter: mrlEyes_2018_01
+      annotation_file: annotation.txt
+    annotation: mrlEyes_2018_01.pickle
+    dataset_meta: mrlEyes_2018_01.json
+    data_source: mrlEyes_2018_01

@@ -13,6 +13,7 @@
 #include <fstream>
 #include <random>
 #include <memory>
+#include <chrono>
 #include <vector>
 #include <string>
 #include <utility>
@@ -40,6 +41,7 @@
 #include "base_estimator.hpp"
 #include "head_pose_estimator.hpp"
 #include "landmarks_estimator.hpp"
+#include "eye_state_estimator.hpp"
 #include "gaze_estimator.hpp"
 
 #include "results_marker.hpp"
@@ -49,6 +51,9 @@
 #include "utils.hpp"
 
 #include <ie_iextension.h>
+#ifdef WITH_EXTENSIONS
+#include <ext_list.hpp>
+#endif
 
 using namespace InferenceEngine;
 using namespace gaze_estimation;
@@ -72,6 +77,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -m_hp is not set");
     if (FLAGS_m_lm.empty())
         throw std::logic_error("Parameter -m_lm is not set");
+    if (FLAGS_m_es.empty())
+        throw std::logic_error("Parameter -m_es is not set");
 
     return true;
 }
@@ -114,12 +121,13 @@ int main(int argc, char *argv[]) {
         }
 
         bool flipImage = false;
-        ResultsMarker resultsMarker(false, false, false, true);
+        ResultsMarker resultsMarker(false, false, false, true, true);
 
         // Loading Inference Engine
         std::vector<std::pair<std::string, std::string>> cmdOptions = {
             {FLAGS_d, FLAGS_m}, {FLAGS_d_fd, FLAGS_m_fd},
-            {FLAGS_d_hp, FLAGS_m_hp}, {FLAGS_d_lm, FLAGS_m_lm}
+            {FLAGS_d_hp, FLAGS_m_hp}, {FLAGS_d_lm, FLAGS_m_lm},
+            {FLAGS_d_es, FLAGS_m_es}
         };
 
         InferenceEngine::Core ie;
@@ -135,11 +143,12 @@ int main(int argc, char *argv[]) {
 
         HeadPoseEstimator headPoseEstimator(ie, FLAGS_m_hp, FLAGS_d_hp);
         LandmarksEstimator landmarksEstimator(ie, FLAGS_m_lm, FLAGS_d_lm);
+        EyeStateEstimator eyeStateEstimator(ie, FLAGS_m_es, FLAGS_d_es);
         GazeEstimator gazeEstimator(ie, FLAGS_m, FLAGS_d);
 
         // Put pointers to all estimators in an array so that they could be processed uniformly in a loop
-        BaseEstimator* estimators[] = {&headPoseEstimator, &landmarksEstimator, &gazeEstimator};
-
+        BaseEstimator* estimators[] = {&headPoseEstimator, &landmarksEstimator, &eyeStateEstimator, &gazeEstimator};
+         
         // Each element of the vector contains inference results on one face
         std::vector<FaceInferenceResults> inferenceResults;
 
@@ -150,6 +159,7 @@ int main(int argc, char *argv[]) {
 
         int delay = 1;
         std::string windowName = "Gaze estimation demo";
+        double overallTime = 0., inferenceTime = 0.;
         cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
         Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
         auto tIterationBegins = cv::getTickCount();
@@ -170,11 +180,11 @@ int main(int argc, char *argv[]) {
 
             // Measure FPS
             auto tIterationEnds = cv::getTickCount();
-            double overallTime = (tIterationEnds - tIterationBegins) * 1000. / cv::getTickFrequency();
+            overallTime = (tIterationEnds - tIterationBegins) * 1000. / cv::getTickFrequency();
             overallTimeAverager.updateValue(overallTime);
             tIterationBegins = tIterationEnds;
 
-            double inferenceTime = (tInferenceEnds - tInferenceBegins) * 1000. / cv::getTickFrequency();
+            inferenceTime = (tInferenceEnds - tInferenceBegins) * 1000. / cv::getTickFrequency();
             inferenceTimeAverager.updateValue(inferenceTime);
 
             if (FLAGS_pc) {
