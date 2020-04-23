@@ -274,7 +274,7 @@ class YoloV3Adapter(Adapter):
             return int((num * 2) * (len(anchors) / (num * 2) - 1 - math.log2(x / 13)))
 
         def parse_yolo_v3_results(prediction, threshold, w, h, det, layer_id):
-            cells_x, cells_y = prediction.shape[1:]
+            cells_y, cells_x = prediction.shape[1:]
             anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
             num = len(anchors) // 2 if self.masked_anchors else self.num
             prediction = prediction.flatten()
