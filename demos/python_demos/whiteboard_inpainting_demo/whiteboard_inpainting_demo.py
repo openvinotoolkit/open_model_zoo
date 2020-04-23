@@ -71,7 +71,9 @@ def main():
                         help='Optional. Path to output video')
     parser.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
-    parser.add_argument('-d', '--device', type=str, default='CPU')
+    parser.add_argument('-d', '--device', type=str, default='CPU',
+                        help='Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is '
+                             'acceptable. The demo will look for a suitable plugin for the device specified')
     parser.add_argument('-l', '--cpu_extension', type=str, default=None,
                         help='MKLDNN (CPU)-targeted custom layers.Absolute \
                               path to a shared library with the kernels impl.')
@@ -82,9 +84,8 @@ def main():
     else:
         capture = VideoCapture(args.i)
 
-    if (args.m_instance_segmentation and args.m_semantic_segmentation) or \
-       (not args.m_instance_segmentation and not args.m_semantic_segmentation):
-        raise ValueError('Set up exectly one of segmentation models: '\
+    if bool(args.m_instance_segmentation) != bool(args.m_semantic_segmentation):
+        raise ValueError('Set up exactly one of segmentation models: '\
                          '--m_instance_segmentation or --m_semantic_segmentation')
 
     frame_size, fps = capture.get_source_parameters()
@@ -100,7 +101,7 @@ def main():
     else:
         output_video = None
 
-    log.info("Creating Inference Engine")
+    log.info("Initializing Inference Engine")
     ie = IECore()
     if args.m_instance_segmentation:
         segmentation = MaskRCNN(ie, args.m_instance_segmentation, args.threshold,
@@ -119,9 +120,9 @@ def main():
         start = time.time()
         if not args.no_show:
             key = check_pressed_keys(key)
-            if key == 27:
+            if key == 27:  # 'Esc'
                 break
-            elif key == 105:
+            elif key == ord('i'):  # catch pressing of key 'i'
                 black_board = not black_board
                 if output_frame is not None:
                     output_frame = 255 - output_frame
