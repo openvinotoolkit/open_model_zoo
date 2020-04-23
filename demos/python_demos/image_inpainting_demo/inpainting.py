@@ -15,11 +15,10 @@ import os
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IENetwork, IECore
 
 class ImageInpainting(object):
     def __init__(self, ie, model_path, parts, max_brush_width, max_length, max_vertex, device='CPU'):
-        model = IENetwork(model=model_path, weights=os.path.splitext(model_path)[0] + '.bin')
+        model = ie.read_network(model_path, os.path.splitext(model_path)[0] + '.bin')
 
         assert len(model.inputs) == 2, "Expected 2 input blob"
         assert len(model.outputs) == 1, "Expected 1 output blobs"
