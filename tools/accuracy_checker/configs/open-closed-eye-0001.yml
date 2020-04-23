@@ -36,7 +36,6 @@ models:
         preprocessing:
           - type: resize
             size: 32
-            aspect_ratio_scale: greater
           - type: normalization
             mean: 127.0, 127.0, 127.0
             std: 255.0, 255.0, 255.0
