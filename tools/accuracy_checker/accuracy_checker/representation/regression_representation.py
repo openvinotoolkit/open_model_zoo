@@ -90,13 +90,16 @@ class FacialLandmarks3DAnnotation(FacialLandmarks3DRepresentation):
 
     def normalization_coef(self, is_2d=False):
         if self.face_mask is None:
-            return 1
-        face_vertices_x = self.x_values[self.face_mask > 0]
-        face_vertices_y = self.y_values[self.face_mask > 0]
-        face_vertices_z = self.x_values[self.face_mask > 0]
-        min_x, max_x = np.min(face_vertices_x), np.max(face_vertices_x)
-        min_y, max_y = np.min(face_vertices_y), np.max(face_vertices_y)
-        min_z, max_z = np.min(face_vertices_z), np.max(face_vertices_z)
+            min_x, max_x = np.min(self.x_values), np.max(self.x_values)
+            min_y, max_y = np.min(self.y_values), np.max(self.y_values)
+            min_z, max_z = np.min(self.z_values), np.max(self.z_values)
+        else:
+            face_vertices_x = self.x_values[self.face_mask > 0]
+            face_vertices_y = self.y_values[self.face_mask > 0]
+            face_vertices_z = self.x_values[self.face_mask > 0]
+            min_x, max_x = np.min(face_vertices_x), np.max(face_vertices_x)
+            min_y, max_y = np.min(face_vertices_y), np.max(face_vertices_y)
+            min_z, max_z = np.min(face_vertices_z), np.max(face_vertices_z)
         if is_2d:
             return np.sqrt((max_x - min_x) ** 2 + (max_y - min_y) ** 2)
         return np.sqrt((max_x - min_x) ** 2 + (max_y - min_y) ** 2 + (max_z - min_z) ** 2)
