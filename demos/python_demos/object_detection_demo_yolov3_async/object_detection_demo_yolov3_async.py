@@ -293,9 +293,8 @@ def main():
                 layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
                 log.info("Layer {} parameters: ".format(layer_name))
                 layer_params.log_params()
-                objects += parse_yolo_region(out_blob, in_frame.shape[2:],
-                                             frame.shape[:-1], layer_params,
-                                             args.prob_threshold)
+                objects += parse_yolo_region(out_blob, [h, w], frame.shape[:-1],
+                                             layer_params, args.prob_threshold)
             parsing_time = time() - start_time
 
         # Filtering overlapping boxes with respect to the --iou_threshold CLI parameter
