@@ -18,9 +18,10 @@ from pathlib import Path
 from functools import singledispatch
 from collections import OrderedDict, namedtuple
 import re
+import wave
+
 import cv2
 import numpy as np
-import wave
 
 try:
     import tensorflow as tf
