@@ -211,10 +211,10 @@ def main():
     # Read and pre-process input images
     if net.inputs[input_blob].shape[1] == 3:
         n, c, h, w = net.inputs[input_blob].shape
-        shape = 'nchw'
-    elif net.inputs[input_blob].shape[3] == 3:
+        nchw_shape = True
+    else:
         n, h, w, c = net.inputs[input_blob].shape
-        shape = 'nhwc'
+        nchw_shape = False
 
     if args.labels:
         with open(args.labels, 'r') as f:
@@ -272,10 +272,10 @@ def main():
             in_frame = cv2.resize(frame, (w, h))
 
         # resize input_frame to network size
-        if shape == 'nchw':
+        if nchw_shape:
             in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
             in_frame = in_frame.reshape((n, c, h, w))
-        elif shape == 'nhwc':
+        else:
             in_frame = in_frame.reshape((n, h, w, c))
 
         # Start inference
