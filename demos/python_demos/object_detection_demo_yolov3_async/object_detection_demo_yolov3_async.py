@@ -209,7 +209,12 @@ def main():
     net.batch_size = 1
 
     # Read and pre-process input images
-    n, c, h, w = net.inputs[input_blob].shape
+    if net.inputs[input_blob].shape[1] == 3:
+        n, c, h, w = net.inputs[input_blob].shape
+        shape = 'nchw'
+    elif net.inputs[input_blob].shape[3] == 3:
+        n, h, w, c = net.inputs[input_blob].shape
+        shape = 'nhwc'
 
     if args.labels:
         with open(args.labels, 'r') as f:
@@ -267,8 +272,11 @@ def main():
             in_frame = cv2.resize(frame, (w, h))
 
         # resize input_frame to network size
-        in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        in_frame = in_frame.reshape((n, c, h, w))
+        if shape == 'nchw':
+            in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+            in_frame = in_frame.reshape((n, c, h, w))
+        elif shape == 'nhwc':
+            in_frame = in_frame.reshape((n, h, w, c))
 
         # Start inference
         start_time = time()
@@ -353,7 +361,7 @@ def main():
 
         if not args.no_show:
             key = cv2.waitKey(wait_key_code)
-    
+
             # ESC key
             if key == 27:
                 break
