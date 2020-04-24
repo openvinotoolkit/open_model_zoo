@@ -84,7 +84,8 @@ def main():
     else:
         capture = VideoCapture(args.i)
 
-    if bool(args.m_instance_segmentation) != bool(args.m_semantic_segmentation):
+    print(bool(args.m_instance_segmentation), bool(args.m_semantic_segmentation))
+    if bool(args.m_instance_segmentation) == bool(args.m_semantic_segmentation):
         raise ValueError('Set up exactly one of segmentation models: '\
                          '--m_instance_segmentation or --m_semantic_segmentation')
 
@@ -105,7 +106,7 @@ def main():
     ie = IECore()
     if args.m_instance_segmentation:
         segmentation = MaskRCNN(ie, args.m_instance_segmentation, args.threshold,
-                                args.device, args.cpu_extension, 1)
+                                args.device, args.cpu_extension)
     elif args.m_semantic_segmentation:
         segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, args.threshold,
                                             args.device, args.cpu_extension)
@@ -128,7 +129,6 @@ def main():
                     output_frame = 255 - output_frame
 
         has_frame, frame = capture.get_frame()
-
         mask = None
         if frame is not None:
             detections = segmentation.get_detections([frame])

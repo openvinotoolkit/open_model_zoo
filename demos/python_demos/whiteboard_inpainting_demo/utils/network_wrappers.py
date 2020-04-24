@@ -17,29 +17,24 @@ import logging as log
 import cv2
 import numpy as np
 
-from utils.ie_tools import load_ie_model
+from utils.ie_tools import IEModel
 from .segm_postprocess import postprocess
 
 
-class MaskRCNN:
-    """Wrapper class for a network returning masks of objects"""
-
-    def __init__(self, ie, model_path, conf=.6, device='CPU', ext_path='',
-                 max_reqs=100):
-        self.max_reqs = max_reqs
-        self.confidence = conf
-        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
+class MaskRCNN(IEModel):
+    def __init__(self, ie, model_path, conf=.6, device='CPU', ext_path='', max_reqs=1):
+        super().__init__(ie, model_path, conf, device, ext_path, max_reqs)
 
         required_input_keys = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
-        current_input_keys = set(self.net.inputs_info.keys())
+        current_input_keys = set(self.inputs_info.keys())
         assert current_input_keys in required_input_keys
         required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks'}
-        assert required_output_keys.issubset(self.net.net.outputs)
+        assert required_output_keys.issubset(self.net.outputs)
 
-        self.n, self.c, self.h, self.w = self.net.inputs_info['im_data'].shape
+        self.n, self.c, self.h, self.w = self.inputs_info['im_data'].shape
         assert self.n == 1, 'Only batch 1 is supported.'
 
-    def preprocess(self, frame):
+    def _preprocess(self, frame):
         image_height, image_width = frame.shape[:2]
         scale = min(self.h / image_height, self.w / image_width)
         processed_image = cv2.resize(frame, None, fx=scale, fy=scale)
@@ -61,7 +56,7 @@ class MaskRCNN:
                                    (0, self.w - im_data.shape[2])),
                          mode='constant', constant_values=0).reshape(1, self.c, self.h, self.w)
         im_info = im_info.reshape(1, *im_info.shape)
-        output = self.net.net.infer(dict(im_data=im_data, im_info=im_info))
+        output = self.net.infer(dict(im_data=im_data, im_info=im_info))
 
         classes = output['classes']
         valid_detections_mask = classes > 0
@@ -74,7 +69,7 @@ class MaskRCNN:
     def get_detections(self, frames, return_cropped_masks=False, only_class_person=True):
         outputs = []
         for frame in frames:
-            data_batch = self.preprocess(frame)
+            data_batch = self._preprocess(frame)
             im_data = data_batch['im_data']
             im_info = data_batch['im_info']
             meta = data_batch['meta']
@@ -102,16 +97,15 @@ class MaskRCNN:
         return outputs
 
 
-class SemanticSegmentation:
-    def __init__(self, ie, model_path, conf=.6, device='CPU', ext_path=''):
-        self.confidence = conf
-        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=1)
+class SemanticSegmentation(IEModel):
+    def __init__(self, ie, model_path, conf=.6, device='CPU', ext_path='', max_reqs=1):
+        super().__init__(ie, model_path, conf, device, ext_path, max_reqs)
 
     def get_detections(self, frames, only_class_person=True):
         outputs = []
         for frame in frames:
             out_h, out_w = frame.shape[:-1]
-            res = self.net.forward(frame)
+            res = self.forward(frame)
             output = []
             for batch, data in enumerate(res):
                 data = data.transpose((1, 2, 0)).astype('uint8')
