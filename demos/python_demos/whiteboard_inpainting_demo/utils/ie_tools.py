@@ -36,8 +36,8 @@ class IEModel:
         res = self.net.infer(inputs={self.input_key: self._preprocess(img)})
         return np.copy(res[self.output_key])
 
-    def get_dedections(self, input):
-        pass
+    def get_detections(self, input):
+        raise NotImplementedError
 
     def get_input_shape(self):
         """Returns an input shape of the wrapped IE model"""
@@ -65,10 +65,10 @@ class IEModel:
                           "or --cpu_extension command line argument")
                 sys.exit(1)
 
-        assert len(net.inputs.keys()) == 1 or len(net.inputs.keys()) == 2, \
-            "Supports topologies with only 1 or 2 inputs"
-        assert len(net.outputs) == 1 or len(net.outputs) == 4 or len(net.outputs) == 5, \
-            "Supports topologies with only 1, 4 or 5 outputs"
+        assert len(net.inputs.keys()) in [1, 2], \
+            "Supports topologies with only 1 or 2 inputs, but got {}".format(len(net.inputs.keys()))
+        assert len(net.outputs) in [1, 4, 5], \
+            "Supports topologies with only 1, 4 or 5 outputs, but got {}".format(len(net.outputs))
 
         log.info("Preparing input blobs")
         input_blob = next(iter(net.inputs))

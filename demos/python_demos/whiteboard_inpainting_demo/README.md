@@ -69,7 +69,7 @@ Example of command:
 ```
 python whiteboard_inpainting_demo.py \
     -i path/to/video.avi \
-    -mi path/to/instance-segmentation-security-0050.xml \
+    -mi path/to/instance-segmentation-security-0050.xml
 ```
 
 ## Using
