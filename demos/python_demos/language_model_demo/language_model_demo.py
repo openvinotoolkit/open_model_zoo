@@ -26,6 +26,7 @@ from openvino.inference_engine import IENetwork, IECore
 import data_utils
 from six.moves import xrange
 import tensorflow as tf
+from perplexity import Calculate_Perplexity
 
 BATCH_SIZE = 1
 NUM_TIMESTEPS = 1
@@ -55,6 +56,9 @@ def build_argparser():
     args.add_argument("-n", "--number_samples",
                       help="Optional. Set number of samples. "
                            "number of samples", type=int, default=1)
+    args.add_argument("-p", "--perplexity",
+                      help="Optional. Calculate perplexity. ",
+                      type=int, default=0)
     return parser
 
 def _SampleSoftmax(softmax):
@@ -67,6 +71,7 @@ def main():
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
     prefix_words = args.input
     number_samples = args.number_samples
+    show_perplexity = bool(int(args.perplexity))
     
     print("open vocab file: {}".format(args.vocab))
     vocab = data_utils.CharsVocabulary(args.vocab, MAX_WORD_LEN)
@@ -103,6 +108,12 @@ def main():
 
     prefix = [vocab.word_to_id(w) for w in prefix_words.split()]
     prefix_char_ids = [vocab.word_to_char_ids(w) for w in prefix_words.split()]
+
+    if show_perplexity is True:
+        sum_num = 0.0
+        sum_den = 0.0
+        sentence_perplexity = 0.0
+        target_weights_in = np.ones([1, 1], np.float32)
     for _ in xrange(number_samples):
         inputs = np.zeros([BATCH_SIZE, NUM_TIMESTEPS], np.int32)
         char_ids_inputs = np.zeros([BATCH_SIZE, NUM_TIMESTEPS, vocab.max_word_length], np.int32)
@@ -133,8 +144,20 @@ def main():
             sent += vocab.id_to_word(samples[0]) + ' '
             sys.stderr.write('%s\n' % sent)
 
+            if show_perplexity is True:
+                tgts = np.array([[samples[0]]])
+                cal_log_perp = Calculate_Perplexity(tgts, _, softmax_out[0])
+                log_perp = cal_log_perp._log_perplexity_out()
+                sum_num += log_perp * target_weights_in.mean()
+                sum_den += target_weights_in.mean()
+                if sum_den > 0:
+                    sentence_perplexity = np.exp(sum_num / sum_den)
+
             if (vocab.id_to_word(samples[0]) == '</S>' or len(sent) > 100):
                 break
+
+    if show_perplexity is True:
+        sys.stderr.write("Eval sentence perplexity: %f.\n" % sentence_perplexity)
 
 if __name__ == '__main__':
     sys.exit(main() or 0)
