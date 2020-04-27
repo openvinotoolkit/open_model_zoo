@@ -65,16 +65,11 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             **kwargs):
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
-        self._annotations, self._predictions = [], []
-        if dump_prediction_to_annotation:
-            self._dumped_annotations = []
 
-        if self.dataset.batch is None:
-            self.dataset.batch = 1
-        if subset is not None:
-            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
-        elif num_images is not None:
-            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
+        self._annotations, self._predictions = [], []
+
+        self._create_subset(subset, num_images, allow_pairwise_subset)
+
         if 'progress_reporter' in kwargs:
             _progress_reporter = kwargs['progress_reporter']
             _progress_reporter.reset(self.dataset.size)
@@ -84,8 +79,8 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             )
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
-            batch_inputs_extr, batch_meta = extract_image_representations(batch_inputs)
-            encoder_callback=None
+            batch_inputs_extr, _ = extract_image_representations(batch_inputs)
+            encoder_callback = None
             if output_callback:
                 encoder_callback = partial(output_callback,
                                            metrics_result=None,
@@ -107,10 +102,10 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             if output_callback:
                 output_callback(
                     batch_raw_prediction[0],
-                        metrics_result=metrics_result,
-                        element_identifiers=batch_identifiers,
-                        dataset_indices=batch_input_ids
-                    )
+                    metrics_result=metrics_result,
+                    element_identifiers=batch_identifiers,
+                    dataset_indices=batch_input_ids
+                )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
 
@@ -189,6 +184,14 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             model_name, launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
             dataset_config['name']
         )
+
+    def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
+        if self.dataset.batch is None:
+            self.dataset.batch = 1
+        if subset is not None:
+            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
+        elif num_images is not None:
+            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
 
     def load_network(self, network=None):
         self.model.load_network(network, self.launcher)
@@ -396,8 +399,8 @@ class EncoderDLSDKModel(BaseModel):
                 model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
                 blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
                 if not model_list and not blob_list:
-                    model_list = list(model.glob('*.xml'.format(self.default_model_suffix)))
-                    blob_list = list(model.glob('*.blob'.format(self.default_model_suffix)))
+                    model_list = list(model.glob('*.xml'))
+                    blob_list = list(model.glob('*.blob'))
                     if not model_list:
                         model_list = blob_list
             if not model_list:
@@ -468,8 +471,8 @@ class DecoderDLSDKModel(BaseModel):
                 model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
                 blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
                 if not model_list and not blob_list:
-                    model_list = list(model.glob('*.xml'.format(self.default_model_suffix)))
-                    blob_list = list(model.glob('*.blob'.format(self.default_model_suffix)))
+                    model_list = list(model.glob('*.xml'))
+                    blob_list = list(model.glob('*.blob'))
                 if not model_list and is_blob is None:
                     model_list = blob_list
             if not model_list:
