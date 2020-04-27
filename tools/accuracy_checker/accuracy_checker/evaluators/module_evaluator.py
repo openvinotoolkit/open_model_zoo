@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 import sys
 import importlib
-
+from pathlib import Path
 from .base_evaluator import BaseEvaluator
 
 
@@ -101,9 +101,17 @@ class ModuleEvaluator(BaseEvaluator):
 def load_module(model_cls, python_path=None):
     module_parts = model_cls.split(".")
     model_cls = module_parts[-1]
-    model_path = ".".join(module_parts[:-1])
+    module_as_path = '/'.join(module_parts[:-1]) + '.py'
+    relative_path = Path(__file__).parent / module_as_path
+    if not relative_path.exists():
+        model_path = ".".join(module_parts[:-1])
+        with append_to_path(python_path):
+            module_cls = importlib.import_module(model_path).__getattribute__(model_cls)
+            return module_cls
+    model_path = ".{}".format(".".join(module_parts[:-1]))
     with append_to_path(python_path):
-        module_cls = importlib.import_module(model_path).__getattribute__(model_cls)
+        package = ".".join(__name__.split(".")[:-1])
+        module_cls = importlib.import_module(model_path, package=package).__getattribute__(model_cls)
         return module_cls
 
 
