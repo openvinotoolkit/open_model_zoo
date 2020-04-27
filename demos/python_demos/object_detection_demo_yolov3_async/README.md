@@ -30,9 +30,13 @@ The command yields the following usage message:
 ```
 usage: object_detection_demo_yolov3_async.py [-h] -m MODEL -i INPUT
                                              [-l CPU_EXTENSION] [-d DEVICE]
-                                             [--labels LABELS] [-t PROB_THRESHOLD]
+                                             [--labels LABELS]
+                                             [-t PROB_THRESHOLD]
                                              [-iout IOU_THRESHOLD] [-r]
-                                             [-nireq]
+                                             [-nireq NUM_INFER_REQUESTS]
+                                             [-nstreams NUM_STREAMS]
+                                             [-nthreads NUMBER_THREADS]
+                                             [-loop_input] [-no_show]
                                              [-u UTILIZATION_MONITORS]
 
 Options:
@@ -77,6 +81,10 @@ Options:
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```
+
+The number of InferRequests is specified by -nireq flag. An increase of this number usually leads to an increase of performance, since in this case several InferRequests can be processed simultaneously if the device supports parallelization. However, a large number of InferRequests increases the latency because each frame still has to wait before being sent for inference.
+
+For higher FPS, it is recommended that you set -nireq to slightly exceed the -nstreams value, summed across all devices used.
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 You can use the following command to do inference on GPU with a pre-trained object detection model:
