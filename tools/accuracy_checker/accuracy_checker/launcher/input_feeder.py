@@ -33,6 +33,15 @@ LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
     'CN': [1, 0]
 }
 
+DIM_IDS_TO_LAYOUT = {
+    (0, 3, 1, 2): 'NCHW',
+    (0, 1, 2, 3): 'NHWC',
+    (0, 4, 1, 2, 3): 'NCDHW',
+    (0, 1, 4, 2, 3): 'NDHWC',
+    (0, 1): 'NC',
+    (1, 0): 'CN'
+}
+
 PRECISION_TO_DTYPE = {
     'FP32': np.float32,  # float
     'FP16': np.float16,  # signed short
