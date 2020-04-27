@@ -17,13 +17,13 @@ from pathlib import Path
 import numpy as np
 import cv2
 
-from accuracy_checker.evaluators.base_evaluator import BaseEvaluator
-from accuracy_checker.evaluators.quantization_model_evaluator import create_dataset_attributes
-from accuracy_checker.adapters import create_adapter
-from accuracy_checker.config import ConfigError
-from accuracy_checker.launcher import create_launcher
-from accuracy_checker.utils import extract_image_representations, contains_all
-from accuracy_checker.progress_reporters import ProgressReporter
+from ..base_evaluator import BaseEvaluator
+from ..quantization_model_evaluator import create_dataset_attributes
+from ...adapters import create_adapter
+from ...config import ConfigError
+from ...launcher import create_launcher
+from ...utils import extract_image_representations, contains_all
+from ...progress_reporters import ProgressReporter
 
 
 class ColorizationEvaluator(BaseEvaluator):
@@ -68,8 +68,8 @@ class ColorizationEvaluator(BaseEvaluator):
             if not contains_all(network_info, ['colorization_network', 'verification_network']):
                 raise ConfigError('configuration for colorization_network/verification_network does not exist')
 
-        test_model = ColorizationTestModel(network_info.get(
-            'colorization_network', {}), launcher, delayed_model_loading
+        test_model = ColorizationTestModel(
+            network_info.get('colorization_network', {}), launcher, delayed_model_loading
         )
         check_model = ColorizationCheckModel(
             network_info.get('verification_network', {}), launcher, delayed_model_loading
@@ -103,7 +103,7 @@ class ColorizationEvaluator(BaseEvaluator):
             )
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
-            extr_batch_inputs, batch_meta = extract_image_representations(batch_inputs)
+            extr_batch_inputs, _ = extract_image_representations(batch_inputs)
             metrics_result = None
             batch_raw_prediction, batch_out = self.test_model.predict(batch_identifiers, extr_batch_inputs)
             if output_callback:
@@ -141,7 +141,8 @@ class ColorizationEvaluator(BaseEvaluator):
             self._metrics_results = []
 
         for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
-            self._annotations, self._predictions):
+                self._annotations, self._predictions
+        ):
             self._metrics_results.append(evaluated_metric)
             if print_results:
                 result_presenter.write_result(evaluated_metric, ignore_results_formatting)
@@ -310,9 +311,10 @@ class ColorizationTestModel(BaseModel):
         super().__init__(network_info, launcher, delayed_model_loading)
         self.color_coeff = np.load(network_info['color_coeff'])
 
-    def data_preparation(self, input_data):
-        input = input_data[0].astype(np.float32)
-        img_lab = cv2.cvtColor(input, cv2.COLOR_RGB2Lab)
+    @staticmethod
+    def data_preparation(input_data):
+        input_ = input_data[0].astype(np.float32)
+        img_lab = cv2.cvtColor(input_, cv2.COLOR_RGB2Lab)
         img_l = np.copy(img_lab[:, :, 0])
         img_l_rs = np.copy(img_lab[:, :, 0])
         return img_l, img_l_rs

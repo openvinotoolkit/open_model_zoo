@@ -38,11 +38,16 @@ from ..utils import (
 from .launcher import Launcher, LauncherConfigValidator
 from .model_conversion import convert_model, FrameworkParameters
 from ..logging import print_info
-
+from .input_feeder import PRECISION_TO_DTYPE, DIM_IDS_TO_LAYOUT
 try:
     from cpuinfo import get_cpu_info
 except ImportError:
     get_cpu_info = None
+
+try:
+    from openvino.inference_engine import IEBlob, IETensorDesc
+except ImportError:
+    IEBlob, IETensorDesc = None, None
 
 
 HETERO_KEYWORD = 'HETERO:'
@@ -267,6 +272,8 @@ class DLSDKLauncher(Launcher):
         else:
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
         self._do_reshape = False
+        self._use_set_blob = False
+        self._target_layout_mapping = {}
 
     @property
     def device(self):
@@ -304,14 +311,23 @@ class DLSDKLauncher(Launcher):
             if self._do_reshape:
                 input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
-
-            result = self.exec_network.infer(infer_inputs)
+            if self._use_set_blob:
+                for key, input_data in infer_inputs.items():
+                    layout = self._target_layout_mapping.get(key, self.exec_network.inputs[key].layout)
+                    tensor_desc = IETensorDesc(
+                        self.exec_network.inputs[key].precision,
+                        self.exec_network.inputs[key].shape,
+                        layout
+                    )
+                    self.exec_network.requests[0].set_blob(key, IEBlob(tensor_desc, input_data))
+            result = self.exec_network.infer(infer_inputs) if not self._use_set_blob else self.exec_network.infer()
             results.append(result)
 
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
         self._do_reshape = False
+        self._use_set_blob = False
 
         return results
 
@@ -590,7 +606,7 @@ class DLSDKLauncher(Launcher):
 
         self.network.reshape({**const_inputs_shapes, **new_non_const_input_shapes})
 
-    def _align_data_shape(self, data, input_blob):
+    def _align_data_shape(self, data, input_blob, data_layout):
         input_shape = self.inputs[input_blob].shape
         data_batch_size = data.shape[0]
         input_batch_size = input_shape[0]
@@ -603,6 +619,17 @@ class DLSDKLauncher(Launcher):
             diff_number = input_batch_size - data_batch_size
             filled_part = [data[-1]] * diff_number
             data = np.concatenate([data, filled_part])
+        precision = self.inputs[input_blob].precision
+        data = data.astype(PRECISION_TO_DTYPE[precision])
+        data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
+        input_layout = self.inputs[input_blob].layout
+        layout_mismatch = (
+            data_layout is not None and len(input_layout) == len(data_layout) and input_layout != data_layout
+        )
+        if layout_mismatch and IEBlob is not None and self.network is None:
+            self._target_layout_mapping[input_blob] = data_layout
+            self._use_set_blob = True
+            return data
 
         return data.reshape(input_shape)
 
@@ -723,7 +750,7 @@ class DLSDKLauncher(Launcher):
                 print_info('    {} - {}'.format(device, nreq))
 
     def _set_device_config(self, device_config):
-        device_specific_configuration = read_yaml(device_config)
+        device_specific_configuration = read_yaml(device_config, ordered=False)
         if not isinstance(device_specific_configuration, dict):
             raise ConfigError('device configuration should be a dict-like')
         self.ie_core.set_config(device_specific_configuration, self.device)
@@ -840,7 +867,7 @@ class DLSDKLauncher(Launcher):
                 self._do_reshape = True
                 return data
 
-        return self._align_data_shape(data, layer_name)
+        return self._align_data_shape(data, layer_name, layout)
 
     def _set_precision(self):
         config_inputs = self.config.get('inputs', [])

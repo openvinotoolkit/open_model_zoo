@@ -31,13 +31,15 @@ Run the application with the `-h` option to see the following usage message:
 ```
 usage: image_retrieval_demo.py [-h] -m MODEL -i I -g GALLERY
                                [-gt GROUND_TRUTH] [-d DEVICE]
-                               [-l CPU_EXTENSION]
+                               [-l CPU_EXTENSION] [--no_show]
+                               [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -i I                  Required. Path to a video file or a device node of a web-camera.
+  -i I                  Required. Path to a video file or a device node of a
+                        web-camera.
   -g GALLERY, --gallery GALLERY
                         Required. Path to a file listing gallery images.
   -gt GROUND_TRUTH, --ground_truth GROUND_TRUTH
@@ -52,6 +54,8 @@ Options:
                         path to a shared library with the kernels
                         implementations.
   --no_show             Optional. Do not visualize inference results.
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.

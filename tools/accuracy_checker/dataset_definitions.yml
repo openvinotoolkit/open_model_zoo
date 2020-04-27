@@ -92,6 +92,17 @@ datasets:
     annotation:  mscoco_det_80.pickle
     dataset_meta:  mscoco_det_80.json
 
+  - name: ms_coco_detection_80_class_with_background
+    data_source: val2017
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: instances_val2017.json
+      has_background: True
+      sort_annotations: True
+      use_full_label_map: False
+    annotation: mscoco_det_80_bkgr.pickle
+    dataset_meta:  mscoco_det_80_bkgr.json
+
   - name: ms_coco_keypoints
     data_source: val2017
     annotation_conversion:
@@ -199,6 +210,15 @@ datasets:
       annotation_file: wider_face_split/wider_face_val_bbx_gt.txt
     annotation: wider.pickle
     dataset_meta: wider.json
+
+  - name: wider_without_bkgr
+    data_source: WIDER_val/images
+    annotation_conversion:
+      converter: wider
+      annotation_file: wider_face_split/wider_face_val_bbx_gt.txt
+      label_start: 0
+    annotation: wider_0.pickle
+    dataset_meta: wider_0.json
 
   - name: facial_landmarks_35
     data_source: VOCdevkit/VOC2012/JPEGImages
