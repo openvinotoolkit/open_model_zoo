@@ -61,17 +61,8 @@ class TextSpottingEvaluator(BaseEvaluator):
             allow_pairwise_subset=False,
             dump_prediction_to_annotation=False,
             **kwargs):
-        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
-            self.select_dataset(dataset_tag)
-        if dump_prediction_to_annotation:
-            self._dumped_annotations = []
-
-        if self.dataset.batch is None:
-            self.dataset.batch = 1
-        if subset is not None:
-            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
-        elif num_images is not None:
-            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
+        self._prepare_dataset(dataset_tag)
+        self._create_subset(subset, num_images, allow_pairwise_subset)
         self._annotations, self._predictions = [], []
         if 'progress_reporter' in kwargs:
             _progress_reporter = kwargs['progress_reporter']
@@ -121,7 +112,8 @@ class TextSpottingEvaluator(BaseEvaluator):
             self._metrics_results = []
 
         for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
-            self._annotations, self._predictions):
+                self._annotations, self._predictions
+        ):
             self._metrics_results.append(evaluated_metric)
             if print_results:
                 result_presenter.write_result(evaluated_metric, ignore_results_formatting)
@@ -228,6 +220,19 @@ class TextSpottingEvaluator(BaseEvaluator):
 
         return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
 
+    def _prepare_dataset(self, dataset_tag=''):
+        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
+            self.select_dataset(dataset_tag)
+
+        if self.dataset.batch is None:
+            self.dataset.batch = 1
+
+    def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
+        if subset is not None:
+            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
+        elif num_images is not None:
+            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
+
 
 class BaseModel:
     def __init__(self, network_info, launcher, default_model_suffix, delayed_model_loading=False):
@@ -252,8 +257,8 @@ class BaseModel:
                 model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
                 blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
                 if not model_list and not blob_list:
-                    model_list = list(model.glob('*.xml'.format(self.default_model_suffix)))
-                    blob_list = list(model.glob('*.blob'.format(self.default_model_suffix)))
+                    model_list = list(model.glob('*.xml'))
+                    blob_list = list(model.glob('*.blob'))
                     if not model_list:
                         model_list = blob_list
             if not model_list:
@@ -298,7 +303,7 @@ def create_recognizer(model_config, launcher, suffix, delayed_model_loading=Fals
 
 
 class SequentialModel:
-    def __init__(self, network_info, launcher, models_args, is_blob=None,  delayed_model_loading=False):
+    def __init__(self, network_info, launcher, models_args, is_blob=None, delayed_model_loading=False):
         if not delayed_model_loading:
             detector = network_info.get('detector', {})
             recognizer_encoder = network_info.get('recognizer_encoder', {})
@@ -361,7 +366,7 @@ class SequentialModel:
 
             text = str()
 
-            for i in range(self.max_seq_len):
+            for _ in range(self.max_seq_len):
                 input_to_decoder = {
                     self.recognizer_decoder_inputs['prev_symbol']: prev_symbol_index,
                     self.recognizer_decoder_inputs['prev_hidden']: hidden,
@@ -411,16 +416,21 @@ class SequentialModel:
         def generate_name(prefix, with_prefix, layer_name):
             return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
 
-        with_prefix = isinstance(self.detector.im_data_name, str) and self.detector.im_data_name.startswith('detector_')
+        with_prefix = (
+            isinstance(self.detector.im_data_name, str) and self.detector.im_data_name.startswith('detector_')
+        )
         if with_prefix != self.with_prefix:
             self.detector.text_feats_out = generate_name('detector_', with_prefix, self.detector.text_feats_out)
             self.adapter.classes_out = generate_name('detector_', with_prefix, self.adapter.classes_out)
             self.adapter.scores_out = generate_name('detector_', with_prefix, self.adapter.scores_out)
             self.adapter.boxes_out = generate_name('detector_', with_prefix, self.adapter.boxes_out)
-           # self.adapter.num_detections_out = generate_name('detector_', with_prefix, self.adapter.num_detections_out)
             self.adapter.raw_masks_out = generate_name('detector_', with_prefix, self.adapter.raw_masks_out)
-            self.recognizer_encoder_input = generate_name('recognizer_encoder_', with_prefix, self.recognizer_encoder_input)
-            self.recognizer_encoder_output = generate_name('recognizer_encoder_', with_prefix, self.recognizer_encoder_output)
+            self.recognizer_encoder_input = generate_name(
+                'recognizer_encoder_', with_prefix, self.recognizer_encoder_input
+            )
+            self.recognizer_encoder_output = generate_name(
+                'recognizer_encoder_', with_prefix, self.recognizer_encoder_output
+            )
             recognizer_decoder_inputs = {
                 key: generate_name('recognizer_decoder_', with_prefix, value)
                 for key, value in self.recognizer_decoder_inputs.items()
