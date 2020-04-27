@@ -209,7 +209,12 @@ def main():
     net.batch_size = 1
 
     # Read and pre-process input images
-    n, c, h, w = net.inputs[input_blob].shape
+    if net.inputs[input_blob].shape[1] == 3:
+        n, c, h, w = net.inputs[input_blob].shape
+        nchw_shape = True
+    else:
+        n, h, w, c = net.inputs[input_blob].shape
+        nchw_shape = False
 
     if args.labels:
         with open(args.labels, 'r') as f:
@@ -267,8 +272,11 @@ def main():
             in_frame = cv2.resize(frame, (w, h))
 
         # resize input_frame to network size
-        in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        in_frame = in_frame.reshape((n, c, h, w))
+        if nchw_shape:
+            in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+            in_frame = in_frame.reshape((n, c, h, w))
+        else:
+            in_frame = in_frame.reshape((n, h, w, c))
 
         # Start inference
         start_time = time()
@@ -285,9 +293,8 @@ def main():
                 layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
                 log.info("Layer {} parameters: ".format(layer_name))
                 layer_params.log_params()
-                objects += parse_yolo_region(out_blob, in_frame.shape[2:],
-                                             frame.shape[:-1], layer_params,
-                                             args.prob_threshold)
+                objects += parse_yolo_region(out_blob, [h, w], frame.shape[:-1],
+                                             layer_params, args.prob_threshold)
             parsing_time = time() - start_time
 
         # Filtering overlapping boxes with respect to the --iou_threshold CLI parameter
@@ -353,7 +360,7 @@ def main():
 
         if not args.no_show:
             key = cv2.waitKey(wait_key_code)
-    
+
             # ESC key
             if key == 27:
                 break
