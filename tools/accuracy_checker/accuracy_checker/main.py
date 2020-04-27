@@ -240,6 +240,11 @@ def build_arguments_parser():
         required=False,
         type=partial(get_path, is_directory=True)
     )
+    parser.add_argument(
+        '--subsample_size', help="number of samples to be used",
+        required=False,
+        type=int
+    )
 
     return parser
 
