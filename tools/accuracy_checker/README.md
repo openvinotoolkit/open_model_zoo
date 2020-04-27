@@ -244,4 +244,4 @@ Typical workflow for testing new model include:
 
 Standard Accuracy Checker validation pipeline: Annotation Reading -> Data Reading -> Preprocessing -> Inference -> Postprocessing -> Metrics.
 In some cases it can be unsuitable (e.g. if you have sequence of models). You are able to customize validation pipeline using own evaluator.
-More details about custom evaluations can be found in [related section](custom_evaluators/README.md).
+More details about custom evaluations can be found in [related section](accuracy_checker/evaluators/custom_evaluators/README.md).

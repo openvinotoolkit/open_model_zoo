@@ -17,13 +17,13 @@ from pathlib import Path
 import numpy as np
 import cv2
 
-from accuracy_checker.evaluators.base_evaluator import BaseEvaluator
-from accuracy_checker.evaluators.quantization_model_evaluator import create_dataset_attributes
-from accuracy_checker.adapters import create_adapter
-from accuracy_checker.config import ConfigError
-from accuracy_checker.launcher import create_launcher
-from accuracy_checker.utils import extract_image_representations, contains_all
-from accuracy_checker.progress_reporters import ProgressReporter
+from ..base_evaluator import BaseEvaluator
+from ..quantization_model_evaluator import create_dataset_attributes
+from ...adapters import create_adapter
+from ...config import ConfigError
+from ...launcher import create_launcher
+from ...utils import extract_image_representations, contains_all
+from ...progress_reporters import ProgressReporter
 
 
 class ColorizationEvaluator(BaseEvaluator):

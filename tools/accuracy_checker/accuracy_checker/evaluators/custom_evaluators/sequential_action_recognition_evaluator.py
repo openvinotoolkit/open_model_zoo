@@ -19,13 +19,13 @@ import pickle
 from functools import partial
 import numpy as np
 
-from accuracy_checker.evaluators import BaseEvaluator
-from accuracy_checker.evaluators.quantization_model_evaluator import create_dataset_attributes
-from accuracy_checker.adapters import create_adapter
-from accuracy_checker.config import ConfigError
-from accuracy_checker.launcher import create_launcher
-from accuracy_checker.utils import contains_all, contains_any, extract_image_representations, read_pickle
-from accuracy_checker.progress_reporters import ProgressReporter
+from ..base_evaluator import BaseEvaluator
+from ..quantization_model_evaluator import create_dataset_attributes
+from ...adapters import create_adapter
+from ...config import ConfigError
+from ...launcher import create_launcher
+from ...utils import contains_all, contains_any, extract_image_representations, read_pickle
+from ...progress_reporters import ProgressReporter
 
 
 class SequentialActionRecognitionEvaluator(BaseEvaluator):
