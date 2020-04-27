@@ -206,7 +206,8 @@ void ParseYOLOV3Output(InferenceEngine::InferRequest::Ptr req,
 
     auto side = out_blob_h;
     auto side_square = side * side;
-    const float *output_blob = blob->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
+    const float *output_blob = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->rwmap()
+        .as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
     // --------------------------- Parsing YOLO Region output -------------------------------------
     for (int i = 0; i < side_square; ++i) {
         int row = i / side;

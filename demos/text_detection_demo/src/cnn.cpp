@@ -68,8 +68,8 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
     // --------------------------- Preparing input -------------------------------------------------------
 
     /* Resize manually and copy data from the image to the input blob */
-    Blob::Ptr input = infer_request_.GetBlob(input_name);
-    input_data_ = input->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+    input_data_ = as<MemoryBlob>(infer_request_.GetBlob(input_name))->rwmap()
+        .as<PrecisionTrait<Precision::FP32>::value_type *>();
 
     is_initialized_ = true;
 }

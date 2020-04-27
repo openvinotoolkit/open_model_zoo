@@ -135,19 +135,19 @@ DetectedActions ActionDetection::fetchResults() {
         new_network_
           ? cv::Mat()
           : cv::Mat(ieSizeToVector(request->GetBlob(config_.old_priorbox_blob_name)->getTensorDesc().getDims()),
-                    CV_32F, request->GetBlob(config_.old_priorbox_blob_name)->buffer());
+                    CV_32F, as<MemoryBlob>(request->GetBlob(config_.old_priorbox_blob_name))->rwmap());
 
     const cv::Mat loc_out(ieSizeToVector(request->GetBlob(loc_blob_name)->getTensorDesc().getDims()),
-                          CV_32F, request->GetBlob(loc_blob_name)->buffer());
+                          CV_32F, as<MemoryBlob>(request->GetBlob(loc_blob_name))->rwmap());
 
     const cv::Mat main_conf_out(ieSizeToVector(request->GetBlob(det_conf_blob_name)->getTensorDesc().getDims()),
-                                CV_32F, request->GetBlob(det_conf_blob_name)->buffer());
+                                CV_32F, as<MemoryBlob>(request->GetBlob(det_conf_blob_name))->rwmap());
 
     std::vector<cv::Mat> add_conf_out;
     for (int glob_anchor_id = 0; glob_anchor_id < num_glob_anchors_; ++glob_anchor_id) {
         const auto& blob_name = glob_anchor_names_[glob_anchor_id];
         add_conf_out.emplace_back(ieSizeToVector(request->GetBlob(blob_name)->getTensorDesc().getDims()),
-                                  CV_32F, request->GetBlob(blob_name)->buffer());
+                                  CV_32F, as<MemoryBlob>(request->GetBlob(blob_name))->rwmap());
     }
 
     /** Parse detections **/

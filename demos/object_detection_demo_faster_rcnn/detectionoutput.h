@@ -107,21 +107,21 @@ public:
 
     StatusCode execute(std::vector<Blob::Ptr>& inputs, std::vector<Blob::Ptr>& outputs,
                        ResponseDesc *resp) noexcept {
-        float *dst_data = outputs[0]->buffer();
+        float *dst_data = as<MemoryBlob>(outputs[0])->rwmap();
 
-        const float *loc_data    = inputs[idx_location]->buffer();
-        const float *conf_data   = inputs[idx_confidence]->buffer();
-        const float *prior_data  = inputs[idx_priors]->buffer();
+        const float *loc_data    = as<MemoryBlob>(inputs[idx_location])->rwmap();
+        const float *conf_data   = as<MemoryBlob>(inputs[idx_confidence])->rwmap();
+        const float *prior_data  = as<MemoryBlob>(inputs[idx_priors])->rwmap();
 
         const int N = 1;  // TODO: Support batch
 
-        float *decoded_bboxes_data = _decoded_bboxes->buffer();
-        float *reordered_conf_data = _reordered_conf->buffer();
-        float *bbox_sizes_data     = _bbox_sizes->buffer();
-        int *detections_data       = _detections_count->buffer();
-        int *buffer_data           = _buffer->buffer();
-        int *indices_data          = _indices->buffer();
-        int *num_priors_actual     = _num_priors_actual->buffer();
+        float *decoded_bboxes_data = as<MemoryBlob>(_decoded_bboxes)->rwmap();
+        float *reordered_conf_data = as<MemoryBlob>(_reordered_conf)->rwmap();
+        float *bbox_sizes_data     = as<MemoryBlob>(_bbox_sizes)->rwmap();
+        int *detections_data       = as<MemoryBlob>(_detections_count)->rwmap();
+        int *buffer_data           = as<MemoryBlob>(_buffer)->rwmap();
+        int *indices_data          = as<MemoryBlob>(_indices)->rwmap();
+        int *num_priors_actual     = as<MemoryBlob>(_num_priors_actual)->rwmap();
 
         const float *prior_variances = prior_data + _num_priors*_prior_size;
         const float *ppriors = prior_data;

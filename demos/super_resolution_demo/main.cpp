@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 8. Process output -------------------------------------------------------
         const Blob::Ptr outputBlob = inferRequest.GetBlob(firstOutputName);
-        const auto outputData = outputBlob->buffer().as<PrecisionTrait<Precision::FP32>::value_type*>();
+        const auto outputData = as<MemoryBlob>(outputBlob)->rwmap().as<PrecisionTrait<Precision::FP32>::value_type*>();
 
         size_t numOfImages = outputBlob->getTensorDesc().getDims()[0];
         size_t numOfChannels = outputBlob->getTensorDesc().getDims()[1];

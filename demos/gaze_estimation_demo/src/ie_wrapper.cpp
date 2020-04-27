@@ -84,8 +84,8 @@ void IEWrapper::setInputBlob(const std::string& blobName,
     if (dimsProduct != data.size()) {
         throw std::runtime_error("Input data does not match size of the blob");
     }
-    auto inputBlob = request.GetBlob(blobName);
-    auto buffer = inputBlob->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
+    auto buffer = as<MemoryBlob>(request.GetBlob(blobName))->rwmap()
+        .as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
     for (unsigned long int i = 0; i < data.size(); ++i) {
         buffer[i] = data[i];
     }
@@ -99,8 +99,9 @@ void IEWrapper::getOutputBlob(const std::string& blobName,
     for (auto dim : blobDims) {
         dataSize *= dim;
     }
-    auto outputBlob = request.GetBlob(blobName);
-    auto buffer = outputBlob->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
+    
+    auto buffer = as<MemoryBlob>(request.GetBlob(blobName))->rwmap()
+        .as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
 
     for (int i = 0; i < dataSize; ++i) {
         output.push_back(buffer[i]);

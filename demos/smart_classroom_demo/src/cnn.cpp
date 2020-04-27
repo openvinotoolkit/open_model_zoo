@@ -110,7 +110,7 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
             for (size_t i = 0; i < blob_sizes.size(); ++i) {
                 blob_sizes[i] = ie_output_dims[i];
             }
-            cv::Mat out_blob(blob_sizes, CV_32F, blob->buffer());
+            cv::Mat out_blob(blob_sizes, CV_32F, as<MemoryBlob>(blob)->rwmap());
             for (size_t b = 0; b < batch_size; b++) {
                 cv::Mat blob_wrapper(out_blob.size[1], 1, CV_32F,
                                      reinterpret_cast<void*>((out_blob.ptr<float>(0) + b * out_blob.size[1])));

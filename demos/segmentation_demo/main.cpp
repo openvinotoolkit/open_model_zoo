@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
             inferRequest.SetBlob(inName, wrapMat2Blob(inImg));
             inferRequest.Infer();
 
-            const float * const predictions = inferRequest.GetBlob(outName)->cbuffer().as<float*>();
+            const float * const predictions = as<MemoryBlob>(inferRequest.GetBlob(outName))->rmap().as<float*>();
             for (int rowId = 0; rowId < outHeight; ++rowId) {
                 for (int colId = 0; colId < outWidth; ++colId) {
                     std::size_t classId = 0;

@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
             auto imInfoDim = inputsInfo.find(imInfoInputName)->second->getTensorDesc().getDims()[1];
 
             /** Fill input tensor with values **/
-            float *p = input2->buffer().as<PrecisionTrait<Precision::FP32>::value_type*>();
+            float *p = as<MemoryBlob>(input2)->rwmap().as<PrecisionTrait<Precision::FP32>::value_type*>();
 
             for (size_t image_id = 0; image_id < std::min(images.size(), batchSize); ++image_id) {
                 p[image_id * imInfoDim + 0] = static_cast<float>(inputsInfo[imageInputName]->getTensorDesc().getDims()[2]);
@@ -250,7 +250,8 @@ int main(int argc, char *argv[]) {
 
         detOutPostProcessor.execute(detOutInBlobs, detOutOutBlobs, nullptr);
 
-        const float* detection = static_cast<PrecisionTrait<Precision::FP32>::value_type*>(output_blob->buffer());
+        const float* detection = as<MemoryBlob>(output_blob)->rwmap()
+            .as<PrecisionTrait<Precision::FP32>::value_type *>();
 
         /* Each detection has image_id that denotes processed image */
         for (size_t curProposal = 0; curProposal < maxProposalCount; curProposal++) {
