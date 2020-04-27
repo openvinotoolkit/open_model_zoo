@@ -14,7 +14,8 @@ models:
           - type: normalization
             mean: 127.0, 127.0, 127.0
             std: 255.0, 255.0, 255.0
-
+        metrics:
+          - type: accuracy
   - name: open-closed-eye-0001
     launchers:
       - framework: dlsdk
