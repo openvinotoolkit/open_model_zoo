@@ -23,7 +23,7 @@ The models can be downloaded via Model Downloader
 | EfficientNet B7   | [PyTorch\*](./efficientnet-b7-pytorch/efficientnet-b7-pytorch.md) | efficientnet-b7-pytorch | 84.42/96.91 | 77.618  | 66.193 |
 | EfficientNet B7 AutoAugment  | [TensorFlow\*](./efficientnet-b7_auto_aug/efficientnet-b7_auto_aug.md) | efficientnet-b7_auto_aug | 84.68/97.09 | 77.618  | 66.193 |
 | Inception (GoogleNet) V1 | [Caffe\*](./googlenet-v1/googlenet-v1.md)<br>[TensorFlow\*](./googlenet-v1-tf/googlenet-v1-tf.md) | googlenet-v1<br>googlenet-v1-tf | | 3.016~3.266 | 6.619~6.999 |
-| Inception (GoogleNet) V2 | [Caffe\*](./googlenet-v2/googlenet-v2.md) | googlenet-v2 | | 4.058 | 11.185 |
+| Inception (GoogleNet) V2 | [Caffe\*](./googlenet-v2/googlenet-v2.md)<br>[TensorFlow\*](./googlenet-v2-tf/googlenet-v2-tf.md) | googlenet-v2<br>googlenet-v2-tf | | 4.058 | 11.185 |
 | Inception (GoogleNet) V3 | [TensorFlow\*](./googlenet-v3/googlenet-v3.md)<br>[PyTorch\*](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | googlenet-v3 <br> googlenet-v3-pytorch |  | 11.469 | 23.817 |
 | Inception (GoogleNet) V4 | [TensorFlow\*](./googlenet-v4-tf/googlenet-v4-tf.md) | googlenet-v4-tf | | 24.584 | 42.648 |
 | Inception-ResNet V2      | [TensorFlow\*](./inception-resnet-v2-tf/inception-resnet-v2-tf.md) | inception-resnet-v2-tf | | 22.227 | 30.223 |
@@ -33,6 +33,8 @@ The models can be downloaded via Model Downloader
 | MobileNet V1 1.0 224 | [Caffe\*](./mobilenet-v1-1.0-224/mobilenet-v1-1.0-224.md)<br>[TensorFlow\*](./mobilenet-v1-1.0-224-tf/mobilenet-v1-1.0-224-tf.md) | mobilenet-v1-1.0-224 <br> mobilenet-v1-1.0-224-tf | | 1.148 | 4.221 |
 | MobileNet V2 1.0 224 | [Caffe\*](./mobilenet-v2/mobilenet-v2.md)<br>[TensorFlow\*](./mobilenet-v2-1.0-224/mobilenet-v2-1.0-224.md)<br>[PyTorch\*](./mobilenet-v2-pytorch/mobilenet-v2-pytorch.md) | mobilenet-v2 <br>  mobilenet-v2-1.0-224 <br> mobilenet-v2-pytorch | | 0.615~0.876 | 3.489 |
 | MobileNet V2 1.4 224 | [TensorFlow\*](./mobilenet-v2-1.4-224/mobilenet-v2-1.4-224.md)  | mobilenet-v2-1.4-224 | | 1.183  | 6.087 |
+| MobileNet V3 Small 1.0 | [TensorFlow\*](./mobilenet-v3-small-1.0-224-tf/mobilenet-v3-small-1.0-224-tf.md) | mobilenet-v3-small-1.0-224-tf | 67.36/87.45 | 0.121 | 2.537 |
+| MobileNet V3 Large 1.0 | [TensorFlow\*](./mobilenet-v3-large-1.0-224-tf/mobilenet-v3-large-1.0-224-tf.md) | mobilenet-v3-large-1.0-224-tf | 75.70/92.76 | 0.4536 | 5.4721 |
 | ResNet 50            | [Caffe\*](./resnet-50/resnet-50.md) <br> [PyTorch\*](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[Caffe2\*](./resnet-50-caffe2/resnet-50-caffe2.md)<br>[TensorFlow\*](./resnet-50-tf/resnet-50-tf.md) | resnet-50 <br> resnet-50-pytorch<br>resnet-50-caffe2<br>resnet-50-tf | | 6.996~8.216 | 25.53 |
 | ResNet 101           | [Caffe\*](./resnet-101/resnet-101.md) | resnet-101 | | 14.441 | 44.496 |
 | ResNet 152           | [Caffe\*](./resnet-152/resnet-152.md) | resnet-152 | | 21.89 | 60.117 |

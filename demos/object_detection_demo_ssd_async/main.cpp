@@ -188,14 +188,8 @@ int main(int argc, char *argv[]) {
                     break;
                 }
             }
-        } else {
-            const CNNLayerPtr outputLayer = cnnNetwork.getLayerByName(outputName.c_str());
-            if (outputLayer->type != "DetectionOutput") {
-                throw std::logic_error("Object Detection network output layer(" + outputLayer->name +
-                                       ") should be DetectionOutput, but was " +  outputLayer->type);
-            }
-
-            num_classes = outputLayer->GetParamAsInt("num_classes");
+        } else if (!labels.empty()) {
+            throw std::logic_error("Class labels are not supported with IR version older than 10");
         }
 
         if (static_cast<int>(labels.size()) != num_classes) {
