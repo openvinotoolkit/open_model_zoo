@@ -21,15 +21,15 @@ Text detector based on [PixelLink](https://arxiv.org/abs/1801.01315) architectur
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x768x1280] - An input image in the format [BxCxHxW],
-   where:
+Name: `input`, shape: [1x3x768x1280] - An input image in the format [BxCxHxW],
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order - BGR.
+Expected color order: BGR.
 
 ## Outputs
 

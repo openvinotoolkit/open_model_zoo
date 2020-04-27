@@ -34,19 +34,19 @@ This model is a Mask-RCNN-based text detector with ResNet50 backbone and additio
 1.	Name: `im_data` , shape: [1x3x768x1280]. An input image in the [1xCxHxW] format.
     The expected channel order is BGR.
 2.	Name: `im_info`, shape: [1x3]. Image information: processed image height,
-    processed image width and processed image scale with respect to the original image resolution.
+    processed image width, and processed image scale with respect to the original image resolution.
 
 ## Outputs
 
 1.	Name: `classes`, shape: [100]. Contiguous integer class ID for every
     detected object, `0` for background (no object detected).
-1.	Name: `scores`, shape: [100]. Detection confidence scores in the [0, 1] range
+2.	Name: `scores`, shape: [100]. Detection confidence scores in the [0, 1] range
     for every object.
-1.	Name: `boxes`, shape: [100x4]. Bounding boxes around every detected object
+3.	Name: `boxes`, shape: [100x4]. Bounding boxes around every detected object
     in the (top_left_x, top_left_y, bottom_right_x, bottom_right_y) format.
-1.	Name: `raw_masks`, shape: [100x2x28x28]. Segmentation heatmaps for all
+4.	Name: `raw_masks`, shape: [100x2x28x28]. Segmentation heatmaps for all
     classes for every output bounding box.
-1.  Name: `text_features`, shape [100x64x28x28]. Text features that are fed to a text recognition head.
+5.  Name: `text_features`, shape [100x64x28x28]. Text features that are fed to a text recognition head.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

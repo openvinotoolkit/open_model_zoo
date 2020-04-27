@@ -1,6 +1,6 @@
 # person-detection-retail-0013
 
-## Use case and High-level description
+## Use Case and High-Level Description
 
 This is a pedestrian detector for the Retail scenario. It is based on MobileNetV2-like
 backbone that includes depth-wise convolutions to reduce the amount of
@@ -32,7 +32,7 @@ curve.
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x320x544] - An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x320x544] - An input image in the format [BxCxHxW],
    where:
     - B - batch size
     - C - number of channels
