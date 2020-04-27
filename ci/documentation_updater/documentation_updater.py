@@ -31,33 +31,42 @@ MODES = [
     'update'
     ]
 
+LOG_LEVELS = [
+    'CRITICAL',
+    'ERROR',
+    'WARNING',
+    'INFO',
+    'DEBUG',
+]
+
 
 def parse():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--model-dir', type=str, default='../../models',
+    parser.add_argument('-d', '--model-dir', type=Path, default='../../models',
                         help='Path to root directory with models documentation and configuration files')
     parser.add_argument('--mode', type=str, choices=MODES, default='check',
                         help='Script work mode: "check" only finds diffs, "update" - updates values')
-    parser.add_argument('--log-level', choices=logging._levelToName.values(), default='WARNING',
+    parser.add_argument('--log-level', choices=LOG_LEVELS, default='WARNING',
                         help='Level of logging')
     parser.add_argument('--ignored-files', type=str,
                         help='List of files which will be ignored')
     parser.add_argument('--ignored-files-list', type=Path,
                         help='Path to file with ignored files')
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if not args.model_dir.is_dir():
+        logging.critical("Directory {} does not exist. Please check '--model-dir' option."
+                         .format(args.model_dir))
+        exit(1)
+    if args.ignored_files_list and not args.ignored_files_list.is_file():
+        logging.critical("File {} does not exist. Please check '--ignored-files-list' option."
+                         .format(args.ignored_files_list))
+        exit(1)
+    return args
 
 
 def collect_readme(directory, ignored_files=('index.md',)):
-    if not Path(directory).is_dir():
-        logging.critical("Directory {} does not exist. Please check '--model-dir' option."
-                         .format(directory))
-        exit(1)
-    files = {}
-    md_files = Path(directory).glob('**/*.md')
-    for file in md_files:
-        if file.name in ignored_files:
-            continue
-        files[file.stem] = file
+    files = {file.stem: file for file in directory.glob('**/*.md') if file.name not in ignored_files}
     logging.info('Collected {} readme files'.format(len(files)))
     if not files:
         logging.error("No markdown file found in {}. Exceptions - {}. Ensure, that you set right directory."
@@ -85,7 +94,7 @@ def convert(lines):
             result += ' '
         result += line.rstrip('\n')
         result = flatten_links(result)
-        result = result.replace("`", "\"").replace("\*", "*")
+    result = result.replace("`", "\"").replace("\*", "*")
     return result.strip()
 
 
@@ -109,31 +118,26 @@ def collect_descriptions(files):
             descriptions[name] = desc
         else:
             logging.warning('No description found in {} file. '
-                            'Note, that file must be marked and description must be first chapter'.format(file))
+                            'Check  compliance with the OMZ Contribution Guide.'.format(file))
     return descriptions
 
 
 def get_models_from_configs(directory):
-    if not Path(directory).is_dir():
-        logging.critical("Directory {} does not exist. Please check '--config-dir' option.".
-                         format(directory))
-        exit(1)
     yaml = ruamel.yaml.YAML()
     yaml.preserve_quotes = True
-    topologies = {}
-    models = Path(directory).glob('**/model.yml')
-    for model in models:
+    models = {}
+    model_configs = Path(directory).glob('**/model.yml')
+    for model in model_configs:
         with open(str(model), "r") as file:
-            topologies[model.parent.name] = (model, yaml.load(file))
+            models[model.parent.name] = (model, yaml.load(file))
 
-    return topologies
+    return models
 
 
-def update_model_descriptions(topologies, descriptions, mode):
-    updated_models_count = 0
-    updated_models = []
+def update_model_descriptions(models, descriptions, mode):
+    update_models = []
     for name, desc in descriptions.items():
-        model = topologies.get(name, None)
+        model = models.get(name, None)
         if model is None:
             logging.warning('For description file {}.md no model found in topologies list'.format(name))
             continue
@@ -141,29 +145,29 @@ def update_model_descriptions(topologies, descriptions, mode):
         if model['description'] != desc:
             if mode == 'update':
                 model['description'] = FoldedScalarString(desc)
-                updated_models.append(name)
             else:
                 logging.warning('Found diff for {} model'.format(name))
                 logging.debug('\n{:12s}{}\n\tvs\n{:12s}{}'
                               .format('In config:', model['description'], 'In readme:', desc))
-            updated_models_count += 1
+            update_models.append(name)
     if mode == 'update':
-        logging.info('Description updated for {} models'.format(updated_models_count))
+        logging.info('Description updated for {} models'.format(len(update_models)))
     else:
-        logging.info('Description differs for {} models'.format(updated_models_count))
-    return updated_models, updated_models_count
+        logging.info('Description differs for {} models'.format(len(update_models)))
+    return update_models
 
 
-def update_model_configs(topologies, descriptions, mode):
-    diffs, diff_count = update_model_descriptions(topologies, descriptions, mode)
-    for name, topology in topologies.items():
-        if name in diffs:
-            yaml = ruamel.yaml.YAML()
-            yaml.indent(mapping=2, sequence=4, offset=2)
-            yaml.width = 80
-            with open(topology[0], "w") as file:
-                yaml.dump(topology[1], file)
-    return diff_count
+def update_model_configs(models, descriptions, mode):
+    diffs = update_model_descriptions(models, descriptions, mode)
+    if mode == 'update':
+        for name, model in models.items():
+            if name in diffs:
+                yaml = ruamel.yaml.YAML()
+                yaml.indent(mapping=2, sequence=4, offset=2)
+                yaml.width = 80
+                with open(model[0], "w") as file:
+                    yaml.dump(model[1], file)
+    return len(diffs)
 
 
 def get_ignored_files(args):
@@ -186,8 +190,8 @@ def main():
     logging.basicConfig(level=getattr(logging, args.log_level.upper()), format='%(levelname)s: %(message)s')
 
     descriptions = collect_descriptions(collect_readme(args.model_dir, get_ignored_files(args)))
-    topologies = get_models_from_configs(args.model_dir)
-    diffs = update_model_configs(topologies, descriptions, args.mode)
+    models = get_models_from_configs(args.model_dir)
+    diffs = update_model_configs(models, descriptions, args.mode)
 
     return diffs
 
