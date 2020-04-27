@@ -43,6 +43,12 @@ class IEModel:
         """Returns an input shape of the wrapped IE model"""
         return self.inputs_info[self.input_key]
 
+    def get_allowed_inputs_len(self):
+        return (1, )
+
+    def get_allowed_outputs_len(self):
+        return (1, )
+
     def load_ie_model(self, ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=1):
         """Loads a model in the Inference Engine format"""
         model_bin = os.path.splitext(model_xml)[0] + ".bin"
@@ -65,10 +71,12 @@ class IEModel:
                           "or --cpu_extension command line argument")
                 sys.exit(1)
 
-        assert len(net.inputs.keys()) in [1, 2], \
-            "Supports topologies with only 1 or 2 inputs, but got {}".format(len(net.inputs.keys()))
-        assert len(net.outputs) in [1, 4, 5], \
-            "Supports topologies with only 1, 4 or 5 outputs, but got {}".format(len(net.outputs))
+        assert len(net.inputs.keys()) in self.get_allowed_inputs_len(), \
+            "Supports topologies with only {} inputs, but got {}" \
+            .format(self.get_allowed_inputs_len(), len(net.inputs.keys()))
+        assert len(net.outputs) in self.get_allowed_outputs_len(), \
+            "Supports topologies with only {} outputs, but got {}" \
+            .format(self.get_allowed_outputs_len(), len(net.outputs))
 
         log.info("Preparing input blobs")
         input_blob = next(iter(net.inputs))

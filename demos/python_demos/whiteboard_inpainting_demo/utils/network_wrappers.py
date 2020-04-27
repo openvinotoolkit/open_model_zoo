@@ -34,6 +34,12 @@ class MaskRCNN(IEModel):
         self.n, self.c, self.h, self.w = self.inputs_info['im_data'].shape
         assert self.n == 1, 'Only batch 1 is supported.'
 
+    def get_allowed_inputs_len(self):
+        return (2, )
+
+    def get_allowed_outputs_len(self):
+        return (4, 5)
+
     def _preprocess(self, frame):
         image_height, image_width = frame.shape[:2]
         scale = min(self.h / image_height, self.w / image_width)
