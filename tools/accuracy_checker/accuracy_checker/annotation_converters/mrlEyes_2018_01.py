@@ -64,9 +64,7 @@ class mrlEyes_2018_01_Converter(BaseFormatConverter):
         for i, file in enumerate(dataset_directory.rglob('*.png')):
                 subj_id, img_num, gender, glasses, eye_state, reflection, light_cond, sensor_type = file.stem.split("_")
                 if i % 10 == 0:
-                    annotations.append(ClassificationAnnotation(full_path, int(eye_state)))
-
-        annotations = self._convert_annotations(images_dir, labels, progress_callback, progress_interval)
+                    annotations.append(ClassificationAnnotation(file, int(eye_state)))
 
         # convert label list to label map
         label_map = {0:'closed', 1: 'open'} 
