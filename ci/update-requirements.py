@@ -52,9 +52,10 @@ def main():
     pc = functools.partial(pip_compile, upgrade=args.upgrade)
 
     pc('ci/requirements-ac.txt',
-        'tools/accuracy_checker/requirements.in')
+        'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements.in')
     pc('ci/requirements-ac-test.txt',
-        'tools/accuracy_checker/requirements.in', 'tools/accuracy_checker/requirements-test.in')
+        'tools/accuracy_checker/requirements.in', 'tools/accuracy_checker/requirements-test.in', 
+        'tools/accuracy_checker/requirements-core.in')
     pc('ci/requirements-conversion.txt',
         'tools/downloader/requirements-pytorch.in', 'tools/downloader/requirements-caffe2.in',
         openvino_dir / 'deployment_tools/model_optimizer/requirements.txt')
