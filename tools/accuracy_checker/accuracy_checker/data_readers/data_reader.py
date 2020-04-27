@@ -18,6 +18,8 @@ from pathlib import Path
 from functools import singledispatch
 from collections import OrderedDict, namedtuple
 import re
+import wave
+
 import cv2
 import numpy as np
 
@@ -405,3 +407,32 @@ class AnnotationFeaturesReader(BaseReader):
     def reset(self):
         self.subset = range(len(self.data_source))
         self.counter = 0
+
+
+class WavReader(BaseReader):
+    __provider__ = 'wav_reader'
+
+    _samplewidth_types = {
+        1: np.uint8,
+        2: np.int16
+    }
+
+    def read(self, data_id):
+        with wave.open(str(self.data_source / data_id), "rb") as wav:
+            sample_rate = wav.getframerate()
+            sample_width = wav.getsampwidth()
+            nframes = wav.getnframes()
+            data = wav.readframes(nframes)
+            if self._samplewidth_types.get(sample_width):
+                data = np.frombuffer(data, dtype=self._samplewidth_types[sample_width])
+            else:
+                raise RuntimeError("Reader {} coudn't process file {}: unsupported sample width {}"
+                                   "(reader only supports {})"
+                                   .format(self.__provider__, str(self.data_source / data_id),
+                                           sample_width, [*self._samplewidth_types.keys()]))
+            data = data.reshape(-1, wav.getnchannels()).T
+
+        return data, {'sample_rate': sample_rate}
+
+    def read_item(self, data_id):
+        return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)

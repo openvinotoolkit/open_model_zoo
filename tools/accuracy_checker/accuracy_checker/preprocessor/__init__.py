@@ -16,6 +16,7 @@ limitations under the License.
 
 from .preprocessing_executor import PreprocessingExecutor
 from .preprocessor import Preprocessor
+from .audio_preprocessing import ResampleAudio, ClipAudio
 from .color_space_conversion import BgrToRgb, RgbToBgr, BgrToGray, RgbToGray, TfConvertImageDType, SelectInputChannel
 from .normalization import Normalize, Normalize3d
 from .geometric_transformations import (
@@ -41,6 +42,9 @@ __all__ = [
 
     'Preprocessor',
     'GeometricOperationMetadata',
+
+    'ResampleAudio',
+    'ClipAudio',
 
     'Resize',
     'Resize3D',
