@@ -16,6 +16,7 @@ import collections
 import contextlib
 import fnmatch
 import json
+import platform
 import re
 import shlex
 import shutil
@@ -60,6 +61,9 @@ KNOWN_TASK_TYPES = {
     'optical_character_recognition',
     'semantic_segmentation',
 }
+
+KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}
+assert KNOWN_QUANTIZED_PRECISIONS.keys() <= KNOWN_PRECISIONS
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
 RE_SHA256SUM = re.compile(r'[0-9a-fA-F]{64}')
@@ -307,13 +311,14 @@ class PostprocUnpackArchive(Postproc):
 Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Model:
-    def __init__(self, name, subdirectory, files, postprocessing, mo_args, framework,
+    def __init__(self, name, subdirectory, files, postprocessing, mo_args, quantizable, framework,
                  description, license_url, precisions, task_type, conversion_to_onnx_args):
         self.name = name
         self.subdirectory = subdirectory
         self.files = files
         self.postprocessing = postprocessing
         self.mo_args = mo_args
+        self.quantizable = quantizable
         self.framework = framework
         self.description = description
         self.license_url = license_url
@@ -389,13 +394,17 @@ class Model:
 
                 precisions = set(files_per_precision.keys())
 
+            quantizable = model.get('quantizable', False)
+            if not isinstance(quantizable, bool):
+                raise DeserializationError('"quantizable": expected a boolean, got {!r}'.format(quantizable))
+
             description = validate_string('"description"', model['description'])
 
             license_url = validate_string('"license"', model['license'])
 
             task_type = validate_string_enum('"task_type"', model['task_type'], KNOWN_TASK_TYPES)
 
-            return cls(name, subdirectory, files, postprocessing, mo_args, framework,
+            return cls(name, subdirectory, files, postprocessing, mo_args, quantizable, framework,
                 description, license_url, precisions, task_type, conversion_to_onnx_args)
 
 def load_models(args):
@@ -482,3 +491,17 @@ def load_models_from_args(parser, args):
                 models[model.name] = model
 
         return list(models.values())
+
+def quote_arg_windows(arg):
+    if not arg: return '""'
+    if not re.search(r'\s|"', arg): return arg
+    # On Windows, only backslashes that precede a quote or the end of the argument must be escaped.
+    return '"' + re.sub(r'(\\+)$', r'\1\1', re.sub(r'(\\*)"', r'\1\1\\"', arg)) + '"'
+
+if platform.system() == 'Windows':
+    quote_arg = quote_arg_windows
+else:
+    quote_arg = shlex.quote
+
+def command_string(args):
+    return ' '.join(map(quote_arg, args))
