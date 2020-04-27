@@ -413,7 +413,7 @@ class ConfigReader:
                 model['launchers'] = provide_models(model['launchers'])
                 for dataset_entry in model['datasets']:
                     if 'subsample_size' in arguments:
-                         dataset_entry['subsample_size'] = arguments.subsample_size
+                        dataset_entry['subsample_size'] = arguments.subsample_size
 
         def merge_pipelines(config, arguments, update_launcher_entry):
             for pipeline in config['pipelines']:
