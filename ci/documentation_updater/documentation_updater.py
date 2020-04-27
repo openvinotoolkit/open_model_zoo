@@ -31,6 +31,7 @@ MODES = [
     'update'
     ]
 
+
 def parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--model-dir', type=str, default='../../models',
@@ -103,7 +104,7 @@ def collect_descriptions(files):
                         break
                 if started:
                     desc.append(line)
-        desc = convert(desc).strip('\n')
+        desc = convert(desc)
         if desc != '':
             descriptions[name] = desc
         else:
@@ -112,7 +113,7 @@ def collect_descriptions(files):
     return descriptions
 
 
-def get_topologies_from_configs(directory):
+def get_models_from_configs(directory):
     if not Path(directory).is_dir():
         logging.critical("Directory {} does not exist. Please check '--config-dir' option.".
                          format(directory))
@@ -122,13 +123,13 @@ def get_topologies_from_configs(directory):
     topologies = {}
     models = Path(directory).glob('**/model.yml')
     for model in models:
-        with open(model, "r") as file:
+        with open(str(model), "r") as file:
             topologies[model.parent.name] = (model, yaml.load(file))
 
     return topologies
 
 
-def update_topologies(topologies, descriptions, mode, compare=lambda lhs, rhs: rhs == lhs):
+def update_model_descriptions(topologies, descriptions, mode):
     updated_models_count = 0
     updated_models = []
     for name, desc in descriptions.items():
@@ -137,7 +138,7 @@ def update_topologies(topologies, descriptions, mode, compare=lambda lhs, rhs: r
             logging.warning('For description file {}.md no model found in topologies list'.format(name))
             continue
         model = model[1]
-        if not compare(model['description'], desc):
+        if model['description'] != desc:
             if mode == 'update':
                 model['description'] = FoldedScalarString(desc)
                 updated_models.append(name)
@@ -153,19 +154,16 @@ def update_topologies(topologies, descriptions, mode, compare=lambda lhs, rhs: r
     return updated_models, updated_models_count
 
 
-def update_topologies_configs(topologies, descriptions, mode):
-    diffs, diff_count = update_topologies(topologies, descriptions, mode)
+def update_model_configs(topologies, descriptions, mode):
+    diffs, diff_count = update_model_descriptions(topologies, descriptions, mode)
     for name, topology in topologies.items():
         if name in diffs:
-            save_topology(topology[0], topology[1])
+            yaml = ruamel.yaml.YAML()
+            yaml.indent(mapping=2, sequence=4, offset=2)
+            yaml.width = 80
+            with open(topology[0], "w") as file:
+                yaml.dump(topology[1], file)
     return diff_count
-
-
-def save_topology(file, topology):
-    yaml = ruamel.yaml.YAML()
-    yaml.indent(mapping=2, sequence=4, offset=2)
-    yaml.width = 80
-    yaml.dump(topology, open(file, 'w'))
 
 
 def get_ignored_files(args):
@@ -188,8 +186,8 @@ def main():
     logging.basicConfig(level=getattr(logging, args.log_level.upper()), format='%(levelname)s: %(message)s')
 
     descriptions = collect_descriptions(collect_readme(args.model_dir, get_ignored_files(args)))
-    topologies = get_topologies_from_configs(args.model_dir)
-    diffs = update_topologies_configs(topologies, descriptions, args.mode)
+    topologies = get_models_from_configs(args.model_dir)
+    diffs = update_model_configs(topologies, descriptions, args.mode)
 
     return diffs
 
