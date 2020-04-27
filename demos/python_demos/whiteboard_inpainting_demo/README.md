@@ -1,37 +1,36 @@
-# Whiteboard inpainting demo
+# Whiteboard Inpainting Demo
 
-This demo focuses on a whiteboard text that can be overlapped by a person.
-The demo shows how to detect and hide a person on a video in a way to show all
-text on the whiteboard using OpenVINO<sup>TM</sup>.
+This demo focuses on a whiteboard text overlapped by a person. The demo shows
+how to use the OpenVINO<sup>TM</sup> toolkit to detect and hide a person on a
+video so that all text on a whiteboard is visible.
 
-## How it works
+## How It Works
 
 The demo expects one of the following models in the Intermediate Representation (IR) format:
 
     * Instance segmentation model
     * Semantic segmentation model
 
-It can be your own models or pre-trained model from OpenVINO Open Model Zoo.
-In the `models.lst` are the list of appropriate models for this demo that can
-be obtained via `Model downloader`. Please see more information about
-`Model downloader` [here](../../../tools/downloader/README.md).
+Use your own model or a pretrained model from the OpenVINO<sup>TM</sup> Open Model Zoo.
+Find the list of models suitable for this demo in `models.lst`. Use the
+[Model Downloader](../../../tools/downloader/README.md) to obtain the models.
 
-As input, the demo application takes:
+As an input, the demo application takes:
 
-    * path to a video file
-    * index of a web camera
+    * Path to a video file
+    * Index of a web camera
 
-## Running
+## Run the Demo
 
-### Installation of dependencies
+### Install Dependencies
 
-To install required dependencies run
+To install required dependencies, open a terminal and run the following:
 
 ```bash
 pip3 install -r requirements.txt
 ```
 
-### Command line arguments
+### Command-Line Arguments
 
 Run the application with the `-h` option to see the following usage message:
 
@@ -64,7 +63,7 @@ optional arguments:
                         shared library with the kernels impl.
 ```
 
-Example of command:
+Example of a command:
 
 ```
 python whiteboard_inpainting_demo.py \
@@ -72,9 +71,8 @@ python whiteboard_inpainting_demo.py \
     -mi path/to/instance-segmentation-security-0050.xml
 ```
 
-## Using
+## Usage
 
-During the demo execution it is possible to invert colors on the result frame
-by pressing `i` key. Via mouse you can set a part of frame which will be shown
-in a separate window (using left buttom of mouse). `Esc` - exit the demo.
-
+    * Invert colors on the resulting frame by pressing the `i` key.
+    * Select a part of the frame be shown in a separate window by using your left mouse button.
+    * Exit the demo by pressing `Esc`.
