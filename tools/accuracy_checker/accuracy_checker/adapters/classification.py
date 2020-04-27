@@ -53,7 +53,10 @@ class ClassificationAdapter(Adapter):
         Returns:
             list of ClassificationPrediction objects
         """
+        multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
         prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        if multi_infer:
+            prediction = np.mean(prediction, axis=0)
         if len(np.shape(prediction)) == 1:
             prediction = np.expand_dims(prediction, axis=0)
         prediction = np.reshape(prediction, (prediction.shape[0], -1))
@@ -67,3 +70,16 @@ class ClassificationAdapter(Adapter):
             result.append(single_prediction)
 
         return result
+
+    @staticmethod
+    def _extract_predictions(outputs_list, meta):
+        is_multi_infer = meta[-1].get('multi_infer', False) if meta else False
+        if not is_multi_infer:
+            return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
+
+        output_map = {}
+        for output_key in outputs_list[0].keys():
+            output_data = np.asarray([output[output_key] for output in outputs_list])
+            output_map[output_key] = output_data
+
+        return output_map
