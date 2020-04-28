@@ -35,7 +35,7 @@ The models can be downloaded via Model Downloader
 | MobileNet V2 1.4 224 | [TensorFlow\*](./mobilenet-v2-1.4-224/mobilenet-v2-1.4-224.md)  | mobilenet-v2-1.4-224 | | 1.183  | 6.087 |
 | MobileNet V3 Small 1.0 | [TensorFlow\*](./mobilenet-v3-small-1.0-224-tf/mobilenet-v3-small-1.0-224-tf.md) | mobilenet-v3-small-1.0-224-tf | 67.36/87.45 | 0.121 | 2.537 |
 | MobileNet V3 Large 1.0 | [TensorFlow\*](./mobilenet-v3-large-1.0-224-tf/mobilenet-v3-large-1.0-224-tf.md) | mobilenet-v3-large-1.0-224-tf | 75.70/92.76 | 0.4536 | 5.4721 |
-| ResNet 34            | [PyTorch\*](./resnet-34-pytorch/resnet-34-pytorch.md) | resnet-34-pytorch | |  |  |
+| ResNet 34            | [PyTorch\*](./resnet-34-pytorch/resnet-34-pytorch.md) | resnet-34-pytorch | | 7.3409 | 21.7892 |
 | ResNet 50            | [Caffe\*](./resnet-50/resnet-50.md) <br> [PyTorch\*](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[Caffe2\*](./resnet-50-caffe2/resnet-50-caffe2.md)<br>[TensorFlow\*](./resnet-50-tf/resnet-50-tf.md) | resnet-50 <br> resnet-50-pytorch<br>resnet-50-caffe2<br>resnet-50-tf | | 6.996~8.216 | 25.53 |
 | ResNet 101           | [Caffe\*](./resnet-101/resnet-101.md) | resnet-101 | | 14.441 | 44.496 |
 | ResNet 152           | [Caffe\*](./resnet-152/resnet-152.md) | resnet-152 | | 21.89 | 60.117 |
@@ -57,7 +57,7 @@ This is are modifications of networks using Octave Convolutions. More details ca
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | DenseNet 121, alpha=0.125 | [MXNet\*](./octave-densenet-121-0.125/octave-densenet-121-0.125.md)   | octave-densenet-121-0.125 | | 4.883 | 7.977 |
-| ResNet 26, alpha=0.25     | [MXNet\*](./octave-resnet-26-0.25/octave-resnet-26-0.25.md)           | octave-resnet-26-0.25     | | 3.768 | 15.99 
+| ResNet 26, alpha=0.25     | [MXNet\*](./octave-resnet-26-0.25/octave-resnet-26-0.25.md)           | octave-resnet-26-0.25     | | 3.768 | 15.99 |
 | ResNet 50, alpha=0.125    | [MXNet\*](./octave-resnet-50-0.125/octave-resnet-50-0.125.md)         | octave-resnet-50-0.125    | | 7.221 | 25.551 |
 | ResNet 101, alpha=0.125   | [MXNet\*](./octave-resnet-101-0.125/octave-resnet-101-0.125.md)       | octave-resnet-101-0.125   | | 13.387 | 44.543 |
 | ResNet 200, alpha=0.125   | [MXNet\*](./octave-resnet-200-0.125/octave-resnet-200-0.125.md)       | octave-resnet-200-0.125   | | 25.407 | 64.667 |

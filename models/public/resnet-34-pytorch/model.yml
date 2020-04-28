@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  Resnet 50 is image classification model pretrained on ImageNet dataset. This is
+  Resnet 34 is image classification model pretrained on ImageNet dataset. This is
   PyTorch implementation based on architecture described in paper "Deep Residual Learning
   for Image Recognition" <https://arxiv.org/abs/1512.03385> in TorchVision package
   (see here <https://github.com/pytorch/vision>).

@@ -17,12 +17,12 @@ matching with those in the ImageNet database.
 
 ## Specification
 
-| Metric            | Value         |
-|-------------------|---------------|
-| Type              | Classification|
-| GFLOPs            | 8.216         |
-| MParams           | 25.53         |
-| Source framework  | PyTorch\*     |
+| Metric           | Value          |
+| ---------------- | -------------- |
+| Type             | Classification |
+| GFLOPs           | 7.3409         |
+| MParams          | 21.7892        |
+| Source framework | PyTorch\*      |
 
 ## Accuracy
 
