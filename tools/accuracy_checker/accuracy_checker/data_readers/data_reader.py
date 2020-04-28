@@ -371,14 +371,6 @@ class NumPyReader(BaseReader):
             return res
         return data
 
-class OAR3DReader(BaseReader):
-    __provider__ = 'oar3d_reader'
-
-    def read(self, data_id):
-        data = np.load(str(self.data_source / data_id))
-        return data['inputs']
-
-
 class TensorflowImageReader(BaseReader):
     __provider__ = 'tf_imread'
 
