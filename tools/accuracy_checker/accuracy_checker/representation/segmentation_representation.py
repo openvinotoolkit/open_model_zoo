@@ -234,7 +234,7 @@ class CoCocInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation
 
 class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
     def __init__(self, identifier, path_to_mask, depth, height, width, wDepth, wHeight, wWidth,
-                 inputs = 'inputs', outputs = 'outputs'):
+                 inputs='inputs', outputs='outputs'):
         super().__init__(identifier, path_to_mask, GTMaskLoader.NUMPY)
         self.depth = depth
         self.height = height

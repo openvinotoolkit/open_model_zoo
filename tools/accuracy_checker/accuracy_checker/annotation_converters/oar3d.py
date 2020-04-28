@@ -80,8 +80,8 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
                                     self.wD,
                                     self.wH,
                                     self.wW,
-                                    inputs = self.input,
-                                    outputs = self.output
+                                    inputs=self.input,
+                                    outputs=self.output
                                 ))
                             tiles = []
 

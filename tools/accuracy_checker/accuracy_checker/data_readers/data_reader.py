@@ -364,7 +364,7 @@ class NumPyReader(BaseReader):
 
     def read(self, data_id):
         data = np.load(str(self.data_source / data_id))
-        if isinstance(data, NpzFile) and len(self.keys):
+        if isinstance(data, NpzFile) and (len(self.keys) > 0):
             res = []
             for k in self.keys:
                 res.append(data[k])
