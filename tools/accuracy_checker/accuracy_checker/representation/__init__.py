@@ -145,7 +145,7 @@ __all__ = [
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',
     'ImageInpaintingAnnotation',
-    'ImageInpaintingPrediction'
+    'ImageInpaintingPrediction',
 
     'OAR3DTilingSegmentationAnnotation',
 ]
