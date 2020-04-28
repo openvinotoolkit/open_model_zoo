@@ -42,7 +42,6 @@ from .segmentation_representation import (
     CoCoInstanceSegmentationAnnotation,
     CoCocInstanceSegmentationPrediction,
     OAR3DTilingSegmentationAnnotation,
-    OAR3DTilingSegmentationPrediction,
 )
 from .character_recognition_representation import (
     CharacterRecognition,
@@ -147,4 +146,6 @@ __all__ = [
     'DepthEstimationPrediction',
     'ImageInpaintingAnnotation',
     'ImageInpaintingPrediction'
+
+    'OAR3DTilingSegmentationAnnotation',
 ]

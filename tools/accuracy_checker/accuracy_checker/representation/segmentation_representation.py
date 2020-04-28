@@ -262,9 +262,9 @@ class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
             inputs = mask['inputs']
             outputs = mask['outputs']
 
-            B,C,D,H,W = inputs.shape
-            B, SZ, CLS = outputs.shape
-            outputs = outputs.reshape([B,D,H,W,CLS])
+            B, _, D, H, W = inputs.shape
+            B, _, CLS = outputs.shape
+            outputs = outputs.reshape([B, D, H, W, CLS])
 
             ref = np.zeros([self.wDepth, self.wHeight, self.wWidth, CLS], dtype=np.float)
             for d in range(self.wDepth):
@@ -278,8 +278,3 @@ class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
             return ref
 
         return self._mask
-
-
-class OAR3DTilingSegmentationPrediction(SegmentationPrediction):
-    def __init__(self, identifiers, mask):
-        super().__init__(identifiers, mask)

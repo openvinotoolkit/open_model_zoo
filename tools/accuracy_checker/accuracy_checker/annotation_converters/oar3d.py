@@ -15,19 +15,17 @@ limitations under the License.
 """
 
 from pathlib import Path
-import warnings
 import numpy as np
 
-from ..representation import BrainTumorSegmentationAnnotation, OAR3DTilingSegmentationAnnotation
-from ..config import StringField, PathField, BoolField, NumberField
+from ..representation import OAR3DTilingSegmentationAnnotation
+from ..config import NumberField
 from .format_converter import DirectoryBasedAnnotationConverter
-from ..representation.segmentation_representation import GTMaskLoader
 from .format_converter import ConverterReturn
 
 
 class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
     __provider__ = 'ge_tiling'
-    annotation_types = (BrainTumorSegmentationAnnotation, )
+    annotation_types = (OAR3DTilingSegmentationAnnotation, )
 
     @classmethod
     def parameters(cls):
@@ -54,7 +52,7 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
         annotations = []
         for src in data_folder.glob('*.npz'):
             data = np.load(src)
-            N, C, D, H, W = data['inputs'].shape
+            _, _, D, H, W = data['inputs'].shape
 
             D = int(D / self.wD) * self.wD
             H = int(H / self.wH) * self.wH
@@ -67,7 +65,7 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
                         tiles.append([cD, cH, cW])
                         if len(tiles) == self.batch:
                             for tile in tiles:
-                                tD,tH,tW = tile
+                                tD, tH, tW = tile
                                 annotations.append(OAR3DTilingSegmentationAnnotation(
                                     str(data_folder / src),
                                     str(data_folder / src),

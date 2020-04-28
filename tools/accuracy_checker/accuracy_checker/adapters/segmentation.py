@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 from ..adapters import Adapter
-from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction, OAR3DTilingSegmentationPrediction
+from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction
 from ..config import ConfigValidator, BoolField, ListField, NumberField
 
 
@@ -149,13 +149,12 @@ class BrainTumorSegmentationAdapter(Adapter):
 
 class OAR3DSegmentationAdapter(Adapter):
     __provider__ = 'oar3d_segmentation'
-    prediction_types = (OAR3DTilingSegmentationPrediction, )
+    prediction_types = (SegmentationPrediction, )
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
-            result.append(OAR3DTilingSegmentationPrediction(identifier, output))
+            result.append(SegmentationPrediction(identifier, output))
 
         return result
-
