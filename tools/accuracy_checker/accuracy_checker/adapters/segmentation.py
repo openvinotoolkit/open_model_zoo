@@ -147,14 +147,3 @@ class BrainTumorSegmentationAdapter(Adapter):
 
         return output_map
 
-class OAR3DSegmentationAdapter(Adapter):
-    __provider__ = 'oar3d_segmentation'
-    prediction_types = (SegmentationPrediction, )
-
-    def process(self, raw, identifiers=None, frame_meta=None):
-        result = []
-        raw_outputs = self._extract_predictions(raw, frame_meta)
-        for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
-            result.append(SegmentationPrediction(identifier, output))
-
-        return result
