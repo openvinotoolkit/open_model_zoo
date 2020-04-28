@@ -16,7 +16,6 @@ EyeStateEstimator::EyeStateEstimator(InferenceEngine::Core& ie,
     inputBlobName = ieWrapper.expectSingleInput();
     ieWrapper.expectImageInput(inputBlobName);
     outputBlobName = ieWrapper.expectSingleOutput();
-    const auto& outputInfo = ieWrapper.getOutputBlobDimsInfo();
 }
 
 cv::Rect EyeStateEstimator::createEyeBoundingBox(const cv::Point2i& p1,
