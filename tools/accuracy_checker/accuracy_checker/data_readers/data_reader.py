@@ -20,6 +20,7 @@ from collections import OrderedDict, namedtuple
 import re
 import cv2
 import numpy as np
+from numpy.lib.npyio import NpzFile
 
 try:
     import tensorflow as tf
@@ -344,12 +345,31 @@ class NiftiImageReader(BaseReader):
 
         return image
 
+class NumpyReaderConfig(ConfigValidator):
+    type = StringField(optional=True)
+    keys = StringField(optional=True, default="")
 
 class NumPyReader(BaseReader):
     __provider__ = 'numpy_reader'
 
+    def validate_config(self):
+        if self.config:
+            config_validator = NumpyReaderConfig('numpy_reader_config')
+            config_validator.validate(self.config)
+
+    def configure(self):
+        self.keys  = self.config.get('keys', []) if self.config else []
+        if self.keys:
+            self.keys = self.keys.split(',')
+
     def read(self, data_id):
-        return np.load(str(self.data_source / data_id))
+        data = np.load(str(self.data_source / data_id))
+        if isinstance(data, NpzFile) and len(self.keys):
+            res = []
+            for k in self.keys:
+                res.append(data[k])
+            return res
+        return data
 
 class OAR3DReader(BaseReader):
     __provider__ = 'oar3d_reader'

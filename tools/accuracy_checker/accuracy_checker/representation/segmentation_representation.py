@@ -233,7 +233,8 @@ class CoCocInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation
         return CoCoInstanceSegmentationAnnotation(self.identifier, self.mask, self.labels)
 
 class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
-    def __init__(self, identifier, path_to_mask, depth, height, width, wDepth, wHeight, wWidth):
+    def __init__(self, identifier, path_to_mask, depth, height, width, wDepth, wHeight, wWidth,
+                 inputs = 'inputs', outputs = 'outputs'):
         super().__init__(identifier, path_to_mask, GTMaskLoader.NUMPY)
         self.depth = depth
         self.height = height
@@ -244,6 +245,8 @@ class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
         self.metadata['cD'] = self.depth
         self.metadata['cH'] = self.height
         self.metadata['cW'] = self.width
+        self.inputs = inputs
+        self.outputs = outputs
 
     def _load_mask(self):
         if self._mask is None:
@@ -259,8 +262,8 @@ class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
                 loader.convert_to_rgb = False
             mask = loader.read(self._mask_path)
 
-            inputs = mask['inputs']
-            outputs = mask['outputs']
+            inputs = mask[self.inputs]
+            outputs = mask[self.outputs]
 
             B, _, D, H, W = inputs.shape
             B, _, CLS = outputs.shape

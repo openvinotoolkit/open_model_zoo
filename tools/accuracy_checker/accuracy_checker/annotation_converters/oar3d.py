@@ -18,7 +18,7 @@ from pathlib import Path
 import numpy as np
 
 from ..representation import OAR3DTilingSegmentationAnnotation
-from ..config import NumberField
+from ..config import NumberField, StringField
 from .format_converter import DirectoryBasedAnnotationConverter
 from .format_converter import ConverterReturn
 
@@ -35,6 +35,8 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
             "height": NumberField(optional=True, default=128, description="Tile height."),
             "width": NumberField(optional=True, default=128, description="Tile width."),
             "batch": NumberField(optional=True, default=5, description="Number of tiles in batch."),
+            "input": StringField(optional=True, default="inputs", description="Name of input data variable."),
+            "output": StringField(optional=True, default="outputs", description="Name of output data variable.")
         })
 
         return parameters
@@ -45,6 +47,8 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
         self.wW = self.get_value_from_config('width')
         self.wH = self.get_value_from_config('height')
         self.batch = self.get_value_from_config('batch')
+        self.input = self.get_value_from_config('input')
+        self.output = self.get_value_from_config('output')
 
     def convert(self, check_content=False, **kwargs):
         data_folder = Path(self.data_dir)
@@ -75,7 +79,10 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
                                     tW,
                                     self.wD,
                                     self.wH,
-                                    self.wW))
+                                    self.wW,
+                                    inputs = self.input,
+                                    outputs = self.output
+                                ))
                             tiles = []
 
         return ConverterReturn(annotations, None, None)

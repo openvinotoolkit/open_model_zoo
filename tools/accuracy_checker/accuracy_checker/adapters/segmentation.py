@@ -146,4 +146,3 @@ class BrainTumorSegmentationAdapter(Adapter):
             output_map[output_key] = output_data
 
         return output_map
-

@@ -290,10 +290,8 @@ class SegmentationOAR3DTiling(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
 
         eps = 1e-6
-        y_true = np.round(annotation.mask)
-        y_pred = np.round(prediction.mask)
-        numerator = 2.0 * np.sum(y_true * y_pred)
-        denominator = np.sum(y_true) + np.sum(y_pred)
+        numerator = 2.0 * np.sum(annotation.mask * prediction.mask)
+        denominator = np.sum(annotation.mask) + np.sum(prediction.mask)
         result = (numerator + eps) / (denominator + eps)
 
         self.overall_metric.append(result)

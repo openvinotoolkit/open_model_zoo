@@ -726,7 +726,7 @@ class Tiling3D(Preprocessor):
         self.tile_depth = self.get_value_from_config('tile_depth')
 
     def process(self, image, annotation_meta=None):
-        data = image.data
+        data = image.data[0]
         inp = np.zeros([1, self.tile_depth, self.tile_height, self.tile_width], dtype=np.float)
         cD = annotation_meta['cD']
         cH = annotation_meta['cH']
