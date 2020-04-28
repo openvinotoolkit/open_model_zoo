@@ -22,7 +22,7 @@ from tqdm import tqdm
 
 from image_retrieval_demo.common import from_list, crop_resize
 
-from openvino.inference_engine import IENetwork, IECore # pylint: disable=no-name-in-module
+from openvino.inference_engine import IECore # pylint: disable=no-name-in-module
 
 
 class IEModel(): # pylint: disable=too-few-public-methods
@@ -34,7 +34,7 @@ class IEModel(): # pylint: disable=too-few-public-methods
             ie.add_extension(cpu_extension, 'CPU')
 
         path = '.'.join(model_path.split('.')[:-1])
-        self.net = IENetwork(model=path + '.xml', weights=path + '.bin')
+        self.net = ie.read_network(path + '.xml', path + '.bin')
         self.output_name = list(self.net.outputs.keys())[0]
         self.exec_net = ie.load_network(network=self.net, device_name=device)
 

@@ -388,6 +388,10 @@ class ConfigReader:
 
     @staticmethod
     def _provide_cmd_arguments(arguments, config, mode):
+        def _add_subsample_size_arg(dataset_entry):
+            if 'subsample_size' in arguments:
+                dataset_entry['subsample_size'] = arguments.subsample_size
+
         def merge_models(config, arguments, update_launcher_entry):
             def provide_models(launchers):
                 if 'models' not in arguments or not arguments.models:
@@ -411,12 +415,16 @@ class ConfigReader:
                 for launcher_entry in model['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry)
                 model['launchers'] = provide_models(model['launchers'])
+                for dataset_entry in model['datasets']:
+                    _add_subsample_size_arg(dataset_entry)
 
         def merge_pipelines(config, arguments, update_launcher_entry):
             for pipeline in config['pipelines']:
                 for stage in pipeline['stages']:
                     if 'launcher' in stage:
                         merge_dlsdk_launcher_args(arguments, stage['launcher'], update_launcher_entry)
+                    if 'dataset' in stage:
+                        _add_subsample_size_arg(stage['dataset'])
 
         def merge_modules(config, arguments, update_launcher_entry):
             for evaluation in config['evaluations']:
@@ -431,6 +439,8 @@ class ConfigReader:
                     continue
                 for launcher in module_config['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher, update_launcher_entry)
+                for dataset in module_config['datasets']:
+                    _add_subsample_size_arg(dataset)
 
         functors_by_mode = {
             'models': merge_models,

@@ -19,7 +19,6 @@ from itertools import cycle
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IENetwork
 
 
 def center_crop(frame, crop_size):
@@ -87,7 +86,7 @@ class IEModel:
 
         # Read IR
         print("Reading IR...")
-        self.net = IENetwork(model_xml, model_bin)
+        self.net = ie_core.read_network(model_xml, model_bin)
         self.net.batch_size = batch_size
         assert len(self.net.inputs.keys()) == 1, "One input is expected"
         assert len(self.net.outputs) == 1, "One output is expected"
