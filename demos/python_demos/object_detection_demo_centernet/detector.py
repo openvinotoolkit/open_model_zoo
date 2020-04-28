@@ -19,11 +19,10 @@ import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
-from openvino.inference_engine import IENetwork, IECore
 
 class Detector(object):
     def __init__(self, ie, model_path, threshold=0.3, device='CPU'):
-        model = IENetwork(model=model_path, weights=os.path.splitext(model_path)[0] + '.bin')
+        model = ie.read_network(model_path, os.path.splitext(model_path)[0] + '.bin')
 
         assert len(model.inputs) == 1, "Expected 1 input blob"
         assert len(model.outputs) == 3, "Expected 3 output blobs"

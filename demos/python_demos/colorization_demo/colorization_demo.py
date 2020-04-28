@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 import cv2 as cv
 import numpy as np
 import os
@@ -53,8 +53,6 @@ def build_arg():
 
 if __name__ == '__main__':
     args = build_arg().parse_args()
-    model_path = os.path.splitext(args.model)[0]
-    weights_bin = model_path + ".bin"
     coeffs = args.coeffs
 
     # mean is stored in the source caffe model and passed to IR
@@ -62,9 +60,10 @@ if __name__ == '__main__':
                     level=log.INFO if not args.verbose else log.DEBUG, stream=sys.stdout)
 
     log.debug("Load network")
-    load_net = IENetwork(model=args.model, weights=weights_bin)
+    ie = IECore()
+    load_net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
     load_net.batch_size = 1
-    exec_net = IECore().load_network(network=load_net, device_name=args.device)
+    exec_net = ie.load_network(network=load_net, device_name=args.device)
 
     assert len(load_net.inputs) == 1, "Expected number of inputs is equal 1"
     input_blob = next(iter(load_net.inputs))
