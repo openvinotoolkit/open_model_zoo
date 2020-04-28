@@ -20,23 +20,20 @@ models:
         preprocessing:
           - type: resize
             aspect_ratio_scale: frcnn_keep_aspect_ratio
-            dst_height: 1333
-            dst_width: 1333
+            size: 1333
           - type: padding
-            dst_height: 1333
-            dst_width: 1333
+            size: 1333
             pad_type: right_bottom
 
         postprocessing:
           - type: faster_rcnn_postprocessing_resize
-            dst_height: 1333
-            dst_width: 1333
+            size: 1333
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.05
+            remove_filtered: True
 
         metrics:
-          - type: map
-            integral: 11point
-            presenter: print_scalar
-
           - type: coco_precision
 
 global_definitions: ../dataset_definitions.yml
