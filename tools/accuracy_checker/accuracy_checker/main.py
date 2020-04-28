@@ -240,6 +240,11 @@ def build_arguments_parser():
         required=False,
         type=partial(get_path, is_directory=True)
     )
+    parser.add_argument(
+        '-ss', '--subsample_size', help="dataset subsample size",
+        required=False,
+        type=str
+    )
 
     return parser
 
