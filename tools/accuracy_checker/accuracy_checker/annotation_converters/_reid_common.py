@@ -17,12 +17,15 @@ limitations under the License.
 from pathlib import Path
 
 from ..representation import ReIdentificationAnnotation
+from ..utils import OrderedSet
 
 
 def read_directory(directory, query, image_pattern):
-    pids = set()
+    pids = OrderedSet()
     images = []
-    for image in directory.glob("*.jpg"):
+    images_list = list(directory.glob("*.jpg"))
+    images_list.sort()
+    for image in images_list:
         pid, camid = map(int, image_pattern.search(image.name).groups())
         if pid == -1:
             continue
