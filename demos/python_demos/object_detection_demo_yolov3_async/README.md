@@ -86,6 +86,8 @@ The number of InferRequests is specified by -nireq flag. An increase of this num
 
 For higher FPS, it is recommended that you set -nireq to slightly exceed the -nstreams value, summed across all devices used.
 
+> **NOTE**: This demo is based on the callback functionality from the Inference Engine Python API. The selected approach makes the execution in multi-device mode optimal by preventing wait delays caused by the differences in device performance. However, the internal organization of the callback mechanism in Python API leads to FPS decrease. Please, keep it in mind and use the C++ version of this demo for performance-critical cases.
+
 Running the application with the empty list of options yields the usage message given above and an error message.
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 ```

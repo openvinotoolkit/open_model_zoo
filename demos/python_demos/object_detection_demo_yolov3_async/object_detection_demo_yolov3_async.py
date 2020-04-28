@@ -369,9 +369,10 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, 55,
         (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
-    while cap.isOpened() \
-          or completed_request_results \
-          or len(empty_requests) < len(exec_nets[mode.current].requests):
+    while (cap.isOpened() \
+           or completed_request_results \
+           or len(empty_requests) < len(exec_nets[mode.current].requests)) \
+          and not callback_exceptions:
         if next_frame_id_to_show in completed_request_results:
             frame, output, start_time, is_same_mode = completed_request_results.pop(next_frame_id_to_show)
             
@@ -476,21 +477,21 @@ def main():
         else:
             event.wait()
     
-    if not callback_exceptions:
-        for mode_value in mode_info.keys():
-            log.info("")
-            log.info("Mode: {}".format(mode_value.name))
+    if callback_exceptions:
+        raise callback_exceptions[0]
 
-            end_time = mode_info[mode_value].last_end_time if mode_value in mode_info \
-                                                              and mode_info[mode_value].last_end_time is not None \
-                                                              else perf_counter()
-            log.info("FPS: {:.1f}".format(mode_info[mode_value].frames_count / \
-                                          (end_time - mode_info[mode_value].last_start_time)))
-            log.info("Latency: {:.1f} ms".format((mode_info[mode_value].latency_sum / \
-                                                 mode_info[mode_value].frames_count) * 1e3))
-        print(presenter.reportMeans())
-    else:
-        log.error(callback_exceptions[0])
+    for mode_value in mode_info.keys():
+        log.info("")
+        log.info("Mode: {}".format(mode_value.name))
+        
+        end_time = mode_info[mode_value].last_end_time if mode_value in mode_info \
+                                                          and mode_info[mode_value].last_end_time is not None \
+                                                       else perf_counter()
+        log.info("FPS: {:.1f}".format(mode_info[mode_value].frames_count / \
+                                      (end_time - mode_info[mode_value].last_start_time)))
+        log.info("Latency: {:.1f} ms".format((mode_info[mode_value].latency_sum / \
+                                             mode_info[mode_value].frames_count) * 1e3))
+    print(presenter.reportMeans())
         
     for exec_net in exec_nets.values():
         await_requests_completion(exec_net.requests)
