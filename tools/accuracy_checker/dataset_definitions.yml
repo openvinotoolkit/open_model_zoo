@@ -743,7 +743,7 @@ datasets:
   - name: mrlEyes_2018_01
     annotation_conversion:
       converter: mrlEyes_2018_01
-      annotation_file: annotation.txt
+      data_dir: mrlEyes_2018_01
     annotation: mrlEyes_2018_01.pickle
     dataset_meta: mrlEyes_2018_01.json
     data_source: mrlEyes_2018_01
