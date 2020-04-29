@@ -33,4 +33,6 @@ models:
         preprocessing:
           - type: resize
             size: 32
+        metrics:
+          - type: accuracy
 global_definitions: ../dataset_definitions.yml
