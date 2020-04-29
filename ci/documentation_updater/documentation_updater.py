@@ -130,30 +130,46 @@ def get_models_from_configs(directory):
     for model in model_configs:
         with model.open("r", encoding="utf-8") as file:
             models[model.parent.name] = (model, yaml.load(file))
+        if not models[model.parent.name][1]:
+            logging.error("File {} is empty. It will be ignored.".format(model))
+            del models[model.parent.name]
 
     return models
 
 
 def update_model_descriptions(models, descriptions, mode):
     update_models = []
+    missed_models = []
     for name, desc in descriptions.items():
         model = models.get(name, None)
         if model is None:
-            logging.warning('For description file {}.md no model found'.format(name))
+            logging.error('For description file {}.md no model found'.format(name))
+            missed_models.append(name)
+            continue
+        if not model[1].get('description', None):
+            logging.error('No description found in {} for {} model'.format(model[0], name))
+            missed_models.append(name)
             continue
         model = model[1]
-        if model['description'] != desc:
+        if model.get('description', '') != desc:
             if mode == 'update':
                 model['description'] = FoldedScalarString(desc)
             else:
-                logging.warning('Found diff for {} model'.format(name))
+                logging.debug('Found diff for {} model'.format(name))
                 logging.debug('\n{:12s}{}\n\tvs\n{:12s}{}'
                               .format('In config:', model['description'], 'In readme:', desc))
             update_models.append(name)
     if mode == 'update':
-        logging.info('Description updated for {} models'.format(len(update_models)))
+        msg = 'Description updated for {} models, missed for {} models.'
+        msg_model_list = 'UPDATED:\n\t{}'
     else:
-        logging.info('Description differs for {} models'.format(len(update_models)))
+        msg = 'Description differs for {} models, missed for {} models.'
+        msg_model_list = 'DIFFERENCE:\n\t{}'
+    logging.info(msg.format(len(update_models), len(missed_models)))
+    if len(update_models) > 0:
+        logging.info(msg_model_list.format("\n\t".join(update_models)))
+    if len(missed_models) > 0:
+        logging.info('FAILED:\n\t{}'.format("\n\t".join(missed_models)))
     return update_models
 
 
