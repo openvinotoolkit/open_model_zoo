@@ -128,7 +128,7 @@ def get_models_from_configs(directory):
     models = {}
     model_configs = directory.glob('**/model.yml')
     for model in model_configs:
-        with model.open("r") as file:
+        with model.open("r", encoding="utf-8") as file:
             models[model.parent.name] = (model, yaml.load(file))
 
     return models
@@ -165,7 +165,7 @@ def update_model_configs(models, descriptions, mode):
                 yaml = ruamel.yaml.YAML()
                 yaml.indent(mapping=2, sequence=4, offset=2)
                 yaml.width = 80
-                with open(model[0], "w") as file:
+                with model[0].open("w", encoding="utf-8") as file:
                     yaml.dump(model[1], file)
     return len(diffs)
 
