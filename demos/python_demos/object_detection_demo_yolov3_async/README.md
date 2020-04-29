@@ -68,6 +68,7 @@ Options:
   --no_show             Optional. Don't show output
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+  --keep_aspect_ratio   Optional. Keeps aspect ratio on resize.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
