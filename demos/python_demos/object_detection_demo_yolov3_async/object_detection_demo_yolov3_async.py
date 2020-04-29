@@ -74,6 +74,8 @@ def build_argparser():
     args.add_argument("-no_show", "--no_show", help="Optional. Don't show output", action='store_true')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
+    args.add_argument("--keep_aspect_ratio", action="store_true", default=False,
+                      help='Optional. Keeps aspect ratio on resize.')
     return parser
 
 
@@ -134,8 +136,8 @@ def entry_index(side, coord, classes, location, entry):
     return int(side_power_2 * (n * (coord + classes + 1) + entry) + loc)
 
 
-def scale_bbox(x, y, h, w, class_id, confidence, im_h, im_w, aspect_ratio_keeped=True):
-    if aspect_ratio_keeped:
+def scale_bbox(x, y, h, w, class_id, confidence, im_h, im_w, is_proportional=True):
+    if is_proportional:
         scale = np.array([min(im_w/im_h, 1), min(im_h/im_w, 1)])
         offset = 0.5*(np.ones(2) - scale)
         x, y = (np.array([x, y]) - offset) / scale
@@ -147,14 +149,7 @@ def scale_bbox(x, y, h, w, class_id, confidence, im_h, im_w, aspect_ratio_keeped
     return dict(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, class_id=class_id, confidence=confidence)
 
 
-def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, threshold):
-    def argmax(array):
-        index, max_val = -1, -1
-        for i, val in enumerate(array):
-            if val > max_val:
-                index, max_val = i, val
-        return index
-
+def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, threshold, is_proportional):
     # ------------------------------------------ Validating output parameters ------------------------------------------
     _, _, out_blob_h, out_blob_w = blob.shape
     assert out_blob_w == out_blob_h, "Invalid size of output blob. It sould be in NCHW layout and height should " \
@@ -197,12 +192,12 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
                                           params.coords + 1 + j)
                 class_probabilities.append(predictions[class_index])
 
-            label = argmax(class_probabilities)
+            label = np.argmax(class_probabilities)
             confidence = class_probabilities[label]*object_probability
             if confidence < threshold:
                 continue
             objects.append(scale_bbox(x=x, y=y, h=h, w=w, class_id=label, confidence=confidence,
-                                      im_h=orig_im_h, im_w=orig_im_w))
+                                      im_h=orig_im_h, im_w=orig_im_w, is_proportional=is_proportional))
     return objects
 
 
@@ -221,8 +216,8 @@ def intersection_over_union(box_1, box_2):
     return area_of_overlap / area_of_union
 
 
-def resize(image, size, interpolation=cv2.INTER_CUBIC, keep_aspect_ration=True):
-    if not keep_aspect_ration:
+def resize(image, size, keep_aspect_ratio, interpolation=cv2.INTER_LINEAR):
+    if not keep_aspect_ratio:
         return cv2.resize(image, size, interpolation=interpolation)
 
     iw, ih = image.shape[0:2][::-1]
@@ -230,7 +225,7 @@ def resize(image, size, interpolation=cv2.INTER_CUBIC, keep_aspect_ration=True):
     scale = min(w/iw, h/ih)
     nw = int(iw*scale)
     nh = int(ih*scale)
-    image = cv2.resize(image, (nw,nh), interpolation=interpolation)
+    image = cv2.resize(image, (nw, nh), interpolation=interpolation)
     new_image = np.zeros((size[1], size[0], 3), np.uint8)
     new_image.fill(128)
     dx = (w-nw)//2
@@ -430,7 +425,7 @@ def main():
                 obj['xmin'] = max(obj['xmin'], 0)
                 obj['ymin'] = max(obj['ymin'], 0)
                 color = (int(min(obj['class_id'] * 12.5, 255)),
-                         min(obj['class_id'] * 7, 255), min(obj['class_id'] * 5, 255))
+                         int(min(obj['class_id'] * 7, 255)), int(min(obj['class_id'] * 5, 255)))
                 det_label = labels_map[obj['class_id']] if labels_map and len(labels_map) >= obj['class_id'] else \
                     str(obj['class_id'])
 
