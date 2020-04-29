@@ -26,7 +26,7 @@ matching with those in the ImageNet database.
 
 ## Accuracy
 
-| Metric |       | 
+| Metric | Value | 
 | ------ | ----- | 
 | Top 1  | 73.30 | 
 | Top 5  | 91.42 | 
