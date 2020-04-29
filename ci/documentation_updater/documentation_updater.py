@@ -93,7 +93,7 @@ def convert(lines):
         if len(result) > 0 and result[len(result)-1] != '\n':
             result += ' '
         result += line.rstrip('\n')
-        result = flatten_links(result)
+    result = flatten_links(result)
     result = result.replace("`", "\"").replace("\*", "*")
     return result.strip()
 
@@ -103,7 +103,7 @@ def collect_descriptions(files):
     for name, file in files.items():
         started = False
         desc = []
-        with open(file, "r", encoding="utf-8") as readme:
+        with file.open("r", encoding="utf-8") as readme:
             for line in readme:
                 if line.startswith('##'):
                     if not started:
@@ -126,9 +126,9 @@ def get_models_from_configs(directory):
     yaml = ruamel.yaml.YAML()
     yaml.preserve_quotes = True
     models = {}
-    model_configs = Path(directory).glob('**/model.yml')
+    model_configs = directory.glob('**/model.yml')
     for model in model_configs:
-        with open(str(model), "r") as file:
+        with model.open("r") as file:
             models[model.parent.name] = (model, yaml.load(file))
 
     return models
@@ -139,7 +139,7 @@ def update_model_descriptions(models, descriptions, mode):
     for name, desc in descriptions.items():
         model = models.get(name, None)
         if model is None:
-            logging.warning('For description file {}.md no model found in topologies list'.format(name))
+            logging.warning('For description file {}.md no model found'.format(name))
             continue
         model = model[1]
         if model['description'] != desc:
