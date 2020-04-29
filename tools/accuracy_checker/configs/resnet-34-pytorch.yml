@@ -53,7 +53,7 @@ models:
         reader: pillow_imread
 
         preprocessing:
-          - type: bgr_to_rgb
+          - type: rgb_to_bgr
 
           - type: resize
             size: 256
