@@ -32,9 +32,11 @@ usage: object_detection_demo_yolov3_async.py [-h] -m MODEL -i INPUT
                                              [-l CPU_EXTENSION] [-d DEVICE]
                                              [--labels LABELS]
                                              [-t PROB_THRESHOLD]
-                                             [-iout IOU_THRESHOLD]
-                                             [-ni NUMBER_ITER] [-pc] [-r]
-                                             [--no_show]
+                                             [-iout IOU_THRESHOLD] [-r]
+                                             [-nireq NUM_INFER_REQUESTS]
+                                             [-nstreams NUM_STREAMS]
+                                             [-nthreads NUMBER_THREADS]
+                                             [-loop_input] [-no_show]
                                              [-u UTILIZATION_MONITORS]
 
 Options:
@@ -60,15 +62,31 @@ Options:
   -iout IOU_THRESHOLD, --iou_threshold IOU_THRESHOLD
                         Optional. Intersection over union threshold for
                         overlapping detections filtering
-  -ni NUMBER_ITER, --number_iter NUMBER_ITER
-                        Optional. Number of inference iterations
-  -pc, --perf_counts    Optional. Report performance counters
   -r, --raw_output_message
                         Optional. Output inference results raw values showing
-  --no_show             Optional. Don't show output
+  -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
+                        Optional. Number of infer requests
+  -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
+                        Optional. Number of streams to use for inference on
+                        the CPU or/and GPU in throughput mode (for HETERO and
+                        MULTI device cases use format
+                        <device1>:<nstreams1>,<device2>:<nstreams2> or just
+                        <nstreams>)
+  -nthreads NUMBER_THREADS, --number_threads NUMBER_THREADS
+                        Optional. Number of threads to use for inference on
+                        CPU (including HETERO cases)
+  -loop_input, --loop_input
+                        Optional. Iterate over input infinitely
+  -no_show, --no_show   Optional. Don't show output
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```
+
+The number of InferRequests is specified by -nireq flag. An increase of this number usually leads to an increase of performance, since in this case several InferRequests can be processed simultaneously if the device supports parallelization. However, a large number of InferRequests increases the latency because each frame still has to wait before being sent for inference.
+
+For higher FPS, it is recommended that you set -nireq to slightly exceed the -nstreams value, summed across all devices used.
+
+> **NOTE**: This demo is based on the callback functionality from the Inference Engine Python API. The selected approach makes the execution in multi-device mode optimal by preventing wait delays caused by the differences in device performance. However, the internal organization of the callback mechanism in Python API leads to FPS decrease. Please, keep it in mind and use the C++ version of this demo for performance-critical cases.
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 You can use the following command to do inference on GPU with a pre-trained object detection model:
