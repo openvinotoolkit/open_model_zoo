@@ -169,13 +169,13 @@ def update_model_descriptions(models, descriptions, mode):
 def update_model_configs(models, descriptions, mode):
     diffs = update_model_descriptions(models, descriptions, mode)
     if mode == 'update':
-        for name, model in models.items():
-            if name in diffs:
-                yaml = ruamel.yaml.YAML()
-                yaml.indent(mapping=2, sequence=4, offset=2)
-                yaml.width = 80
-                with model[0].open("w", encoding="utf-8") as file:
-                    yaml.dump(model[1], file)
+        for name in diffs:
+            model = models[name]
+            yaml = ruamel.yaml.YAML()
+            yaml.indent(mapping=2, sequence=4, offset=2)
+            yaml.width = 80
+            with model[0].open("w", encoding="utf-8") as file:
+                yaml.dump(model[1], file)
     return len(diffs)
 
 
