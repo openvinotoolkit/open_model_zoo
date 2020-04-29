@@ -26,6 +26,11 @@ matching with those in the ImageNet database.
 
 ## Accuracy
 
+| Metric |       | 
+| ------ | ----- | 
+| Top 1  | 73.30 | 
+| Top 5  | 91.42 | 
+
 ## Performance
 
 ## Input
