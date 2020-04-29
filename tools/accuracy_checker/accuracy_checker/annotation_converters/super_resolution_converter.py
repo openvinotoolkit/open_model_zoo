@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import re
 import cv2
 import numpy as np
 from ..config import PathField, StringField, BoolField, ConfigError, NumberField, DictField
@@ -150,15 +151,26 @@ class SRMultiFrameConverter(BaseFormatConverter):
         self.max_frame_id = self.get_value_from_config('max_frame_id')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        def get_index(image_name, suffix):
+            name_parts = image_name.split(suffix)
+            numbers = []
+            for part in name_parts:
+                numbers += [int(s) for s in re.findall(r'\d+', part)]
+            if not numbers:
+                raise ValueError('no numeric in {}'.format(image_name))
+            return numbers[-1]
+
         content_errors = [] if check_content else None
         frames_ids = []
         frame_names = []
         annotations = []
         for file_in_dir in self.data_dir.iterdir():
+            if file_in_dir.suffix not in ['.jpg', '.png']:
+                continue
             image_name = file_in_dir.parts[-1]
             if self.lr_suffix in image_name and self.hr_suffix not in image_name:
                 frame_names.append(image_name)
-                frames_ids.append(int(image_name.split(self.lr_suffix)[0]))
+                frames_ids.append(get_index(image_name, self.lr_suffix))
         sorted_frames = np.argsort(frames_ids)
         frames_ids.sort()
         sorted_frame_names = [frame_names[idx] for idx in sorted_frames]
@@ -169,7 +181,7 @@ class SRMultiFrameConverter(BaseFormatConverter):
                 break
             input_ids = list(range(self.num_frames))
             input_frames = [sorted_frame_names[idx + shift] for shift in input_ids]
-            hr_name = self.hr_suffix.join(input_frames[0].split(self.lr_suffix))
+            hr_name = self.hr_suffix.join(input_frames[self.num_frames // 2].split(self.lr_suffix))
             if check_content and not check_file_existence(self.data_dir / hr_name):
                 content_errors.append('{}: does not exist'.format(self.data_dir / hr_name))
             annotations.append(SuperResolutionAnnotation(
