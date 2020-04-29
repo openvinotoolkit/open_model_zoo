@@ -26,10 +26,6 @@ optional arguments:
                         updates values
   --log-level {CRITICAL,ERROR,WARNING,INFO,DEBUG}
                         Level of logging
-  --ignored-files IGNORED_FILES
-                        List of files which will be ignored
-  --ignored-files-list IGNORED_FILES_LIST
-                        Path to file with ignored files
 ```
 
 ## Examples

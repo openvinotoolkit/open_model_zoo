@@ -48,24 +48,16 @@ def parse():
                         help='Script work mode: "check" only finds diffs, "update" - updates values')
     parser.add_argument('--log-level', choices=LOG_LEVELS, default='WARNING',
                         help='Level of logging')
-    parser.add_argument('--ignored-files', type=str,
-                        help='List of files which will be ignored')
-    parser.add_argument('--ignored-files-list', type=Path,
-                        help='Path to file with ignored files')
     args = parser.parse_args()
 
     if not args.model_dir.is_dir():
         logging.critical("Directory {} does not exist. Please check '--model-dir' option."
                          .format(args.model_dir))
         exit(1)
-    if args.ignored_files_list and not args.ignored_files_list.is_file():
-        logging.critical("File {} does not exist. Please check '--ignored-files-list' option."
-                         .format(args.ignored_files_list))
-        exit(1)
     return args
 
 
-def collect_readme(directory, ignored_files=('index.md',)):
+def collect_readme(directory, ignored_files ):
     files = {file.stem: file for file in directory.glob('**/*.md') if file.name not in ignored_files}
     logging.info('Collected {} readme files'.format(len(files)))
     if not files:
@@ -150,6 +142,7 @@ def update_model_descriptions(models, descriptions, mode):
             logging.error('No description found in {} for {} model'.format(model[0], name))
             missed_models.append(name)
             continue
+
         model = model[1]
         if model.get('description', '') != desc:
             if mode == 'update':
@@ -186,26 +179,12 @@ def update_model_configs(models, descriptions, mode):
     return len(diffs)
 
 
-def get_ignored_files(args):
-    files_to_ignore = ['index.md']
-    if args.ignored_files_list:
-        if args.ignored_files_list.is_file():
-            with args.ignored_files_list.open() as file:
-                for line in file:
-                    files_to_ignore.extend(shlex.split(line, comments=True))
-        else:
-            logging.error('File {} not exist. Please, recheck "--ignored-files-list" option'
-                          .format(args.ignored_files_list))
-    if args.ignored_files:
-        files_to_ignore.extend(args.ignored_files.split(','))
-    return files_to_ignore
-
-
 def main():
     args = parse()
     logging.basicConfig(level=getattr(logging, args.log_level.upper()), format='%(levelname)s: %(message)s')
 
-    descriptions = collect_descriptions(collect_readme(args.model_dir, get_ignored_files(args)))
+    ignored_files = ('index.md',)
+    descriptions = collect_descriptions(collect_readme(args.model_dir, ignored_files))
     models = get_models_from_configs(args.model_dir)
     diffs = update_model_configs(models, descriptions, args.mode)
 
