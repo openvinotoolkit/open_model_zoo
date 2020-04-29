@@ -1,6 +1,6 @@
 # Object Detection FaceBoxes Demo
 
-This demo showcases Object Detection with FaceBoxes. The task is to identify objects as axis-aligned boxes in an image.
+This demo showcases Face Detection with FaceBoxes. The task is to identify faces as axis-aligned boxes in an image.
 
 ## How It Works
 

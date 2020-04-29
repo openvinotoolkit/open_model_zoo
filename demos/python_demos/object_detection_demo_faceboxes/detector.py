@@ -19,11 +19,11 @@ import numpy as np
 import os
 import cv2
 
-from openvino.inference_engine import IENetwork
+from openvino.inference_engine import IECore
 
 class Detector(object):
     def __init__(self, ie, model_path, device='CPU'):
-        model = IENetwork(model=model_path, weights=os.path.splitext(model_path)[0] + '.bin')
+        model = IECore().read_network(model=model_path, weights=os.path.splitext(model_path)[0] + '.bin')
 
         assert len(model.inputs) == 1, "Expected 1 input blob"
         assert len(model.outputs) == 2, "Expected 2 output blobs"
