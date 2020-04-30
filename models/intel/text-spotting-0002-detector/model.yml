@@ -17,20 +17,20 @@ description: >-
 task_type: detection
 files:
   - name: FP32/text-spotting-0002-detector.xml
-    size: 275797
-    sha256: 49bcbe66c99d29fb5477b5ecefbf4bce25f337de150263660b166c690a091b5f
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-spotting-0002-detector/FP32/text-spotting-0002-detector.xml
+    size: 275774
+    sha256: e93f38e60fcada9ddf5851992cf1162e1ba3f3712e47d7335edc32b4fe7dfddd
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/text-spotting-0002-detector/FP32/text-spotting-0002-detector.xml
   - name: FP32/text-spotting-0002-detector.bin
     size: 105906904
     sha256: d714e3bbb952f5f783aedd71e480f5a0136d435e32530b3d3a9603638a27a689
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-spotting-0002-detector/FP32/text-spotting-0002-detector.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/text-spotting-0002-detector/FP32/text-spotting-0002-detector.bin
   - name: FP16/text-spotting-0002-detector.xml
-    size: 275683
-    sha256: d92652dde960fe6b6854bd9b98f668148c777e88bad0d6e111969ab495e1b65f
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-spotting-0002-detector/FP16/text-spotting-0002-detector.xml
+    size: 275660
+    sha256: 6a6e6f2903b20975756df21480f17eb15a065ab6824f493b7c7da242db8dc1b5
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/text-spotting-0002-detector/FP16/text-spotting-0002-detector.xml
   - name: FP16/text-spotting-0002-detector.bin
     size: 52953494
     sha256: b7b7cd45a5f4a381d64992aebb14748ae20ae6888758a3f1745cf7cd84f1677b
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/text-spotting-0002-detector/FP16/text-spotting-0002-detector.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/text-spotting-0002-detector/FP16/text-spotting-0002-detector.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
