@@ -19,11 +19,9 @@ import numpy as np
 import os
 import cv2
 
-from openvino.inference_engine import IECore
-
 class Detector(object):
-    def __init__(self, ie, model_path, device='CPU'):
-        model = IECore().read_network(model=model_path, weights=os.path.splitext(model_path)[0] + '.bin')
+    def __init__(self, ie, model_path, device='CPU', threshold=0.5):
+        model = ie.read_network(model=model_path, weights=os.path.splitext(model_path)[0] + '.bin')
 
         assert len(model.inputs) == 1, "Expected 1 input blob"
         assert len(model.outputs) == 2, "Expected 2 output blobs"
@@ -40,7 +38,7 @@ class Detector(object):
         self.min_sizes = [[32, 64, 128], [256], [512]]
         self.steps = [32, 64, 128]
         self.variance = [0.1, 0.2]
-        self.confidence_threshold = 0.05
+        self.confidence_threshold = threshold
         self.nms_threshold = 0.3
         self.keep_top_k = 750
 

@@ -40,6 +40,8 @@ def build_argparser():
                            "acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU", default="CPU", type=str)
     args.add_argument("--labels", help="Optional. Path to labels mapping file", default=None, type=str)
+    args.add_argument("-pt", "--prob_threshold", help="Optional. Probability threshold for detections filtering",
+                      default=0.5, type=float)
     args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
     args.add_argument("-u", "--utilization_monitors", default="", type=str,
                       help="Optional. List of monitors to show initially.")
@@ -89,7 +91,7 @@ def main():
     args = build_argparser().parse_args()
 
     ie = IECore()
-    detector = Detector(ie, args.model, args.device)
+    detector = Detector(ie, args.model, args.device, args.prob_threshold)
 
     img = cv2.imread(args.input[0], cv2.IMREAD_COLOR)
     frames_reader, delay = (VideoReader(args.input), 1) if img is None else (ImageReader(args.input), 0)
