@@ -38,6 +38,12 @@ try:
 except ImportError:
     nib = None
 
+try:
+    import pydicom
+except ImportError:
+    pydicom = None
+
+
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
 from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField
@@ -436,3 +442,18 @@ class WavReader(BaseReader):
 
     def read_item(self, data_id):
         return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)
+
+
+class DicomReader(BaseReader):
+    __provider__ = 'dicom_reader'
+
+    def __init__(self, data_source, config=None, **kwargs):
+        super().__init__(data_source, config)
+        if pydicom is None:
+            raise ImportError('dicom backend for reading requires pydicom. Please install it before usage.')
+
+    def read(self, data_id):
+        dataset = pydicom.dcmread(str(self.data_source / data_id))
+        return dataset.pixel_array
+
+
