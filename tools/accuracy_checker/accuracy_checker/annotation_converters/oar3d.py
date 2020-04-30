@@ -16,9 +16,10 @@ limitations under the License.
 
 from pathlib import Path
 import numpy as np
+import os
 
 from ..representation import OAR3DTilingSegmentationAnnotation
-from ..config import NumberField, StringField
+from ..config import NumberField, StringField, PathField
 from .format_converter import DirectoryBasedAnnotationConverter
 from .format_converter import ConverterReturn
 
@@ -34,9 +35,9 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
             "depth": NumberField(optional=True, default=32, description="Tile depth."),
             "height": NumberField(optional=True, default=128, description="Tile height."),
             "width": NumberField(optional=True, default=128, description="Tile width."),
-            "batch": NumberField(optional=True, default=5, description="Number of tiles in batch."),
             "input": StringField(optional=True, default="inputs", description="Name of input data variable."),
-            "output": StringField(optional=True, default="outputs", description="Name of output data variable.")
+            "output": StringField(optional=True, default="outputs", description="Name of output data variable."),
+            "preprocessed_dir": PathField(optional=False, is_directory=True, check_exists=True, description="Preprocessed dataset location")
         })
 
         return parameters
@@ -46,43 +47,68 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
         self.wD = self.get_value_from_config('depth')
         self.wW = self.get_value_from_config('width')
         self.wH = self.get_value_from_config('height')
-        self.batch = self.get_value_from_config('batch')
         self.input = self.get_value_from_config('input')
         self.output = self.get_value_from_config('output')
+        self.preprocesed_dir = self.get_value_from_config('preprocessed_dir')
 
     def convert(self, check_content=False, **kwargs):
         data_folder = Path(self.data_dir)
+        preprocessed_folder = Path(self.preprocesed_dir)
+        input_folder = preprocessed_folder / 'input'
+        mask_folder = preprocessed_folder / 'mask'
+
+        for folder in [input_folder, mask_folder]:
+            if not os.path.exists(folder):
+                os.mkdir(folder)
 
         annotations = []
         for src in data_folder.glob('*.npz'):
+
+            src_input_folder = input_folder / "{}_{}_{}_{}".format(src.stem, self.wD, self.wH, self.wW)
+            src_mask_folder = mask_folder / "{}_{}_{}_{}".format(src.stem, self.wD, self.wH, self.wW)
+
+            for folder in [src_input_folder, src_mask_folder]:
+                if not os.path.exists(folder):
+                    os.mkdir(folder)
+
             data = np.load(src)
-            _, _, D, H, W = data['inputs'].shape
+            inputs = data[self.input]
+            outputs = data[self.output]
+            B, _, D, H, W = inputs.shape
+            B, _, CLS = outputs.shape
+            outputs = outputs.reshape([B, D, H, W, CLS])
 
             D = int(D / self.wD) * self.wD
             H = int(H / self.wH) * self.wH
             W = int(W / self.wW) * self.wW
 
-            tiles = []
             for cD in range(0, D, self.wD):
                 for cH in range(0, H, self.wH):
                     for cW in range(0, W, self.wW):
-                        tiles.append([cD, cH, cW])
-                        if len(tiles) == self.batch:
-                            for tile in tiles:
-                                tD, tH, tW = tile
-                                annotations.append(OAR3DTilingSegmentationAnnotation(
-                                    str(data_folder / src),
-                                    str(data_folder / src),
-                                    # tiles,
-                                    tD,
-                                    tH,
-                                    tW,
-                                    self.wD,
-                                    self.wH,
-                                    self.wW,
-                                    inputs=self.input,
-                                    outputs=self.output
-                                ))
-                            tiles = []
+
+                        mask_name = src_mask_folder / "{}_{}_{}.npy".format(cD, cH, cW)
+                        input_name = src_input_folder / "{}_{}_{}.npy".format(cD, cH, cW)
+
+                        if not (os.path.exists(str(mask_name)) and (os.path.exists(str(input_name)))):
+
+                            inp = np.zeros([1, self.wD, self.wH, self.wW], dtype=np.float)
+                            ref = np.zeros([self.wD, self.wH, self.wW, CLS], dtype=np.float)
+                            for d in range(self.wD):
+                                for h in range(self.wH):
+                                    for w in range(self.wW):
+                                        inp[0, d, h, w] = inputs[0, 0, cD + d, cH + h, cW + w]
+                                        for c in range(CLS):
+                                            ref[d, h, w, c] = outputs[0, cD + d, cH + h, cW + w, c]
+
+                            ref = ref.reshape([self.wD * self.wW * self.wH, CLS])
+
+                            np.save(input_name, inp)
+                            np.save(mask_name, ref)
+
+                        annotations.append(OAR3DTilingSegmentationAnnotation(
+                            str(input_name),
+                            str(mask_name)
+                        ))
+
 
         return ConverterReturn(annotations, None, None)
