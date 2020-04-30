@@ -16,6 +16,7 @@ import cv2
 import logging as log
 import numpy as np
 import time
+from os import path as osp
 
 from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
 
@@ -61,9 +62,9 @@ def main():
     parser = argparse.ArgumentParser(description='Whiteboard inpainting demo')
     parser.add_argument('-i', type=str, help='Input sources (index of camera \
                         or path to a video file)', required=True)
-    parser.add_argument('-mi', '--m_instance_segmentation', type=str, required=False,
+    parser.add_argument('-m_i', '--m_instance_segmentation', type=str, required=False,
                         help='Path to the instance segmentation model')
-    parser.add_argument('-ms', '--m_semantic_segmentation', type=str, required=False,
+    parser.add_argument('-m_s', '--m_semantic_segmentation', type=str, required=False,
                         help='Path to the semantic segmentation model')
     parser.add_argument('-t', '--threshold', type=float, default=0.6,
                         help='Threshold for person instance segmentation model')
@@ -84,13 +85,14 @@ def main():
     else:
         capture = VideoCapture(args.i)
 
-    print(bool(args.m_instance_segmentation), bool(args.m_semantic_segmentation))
     if bool(args.m_instance_segmentation) == bool(args.m_semantic_segmentation):
         raise ValueError('Set up exactly one of segmentation models: '\
                          '--m_instance_segmentation or --m_semantic_segmentation')
 
     frame_size, fps = capture.get_source_parameters()
     out_frame_size = (int(frame_size[0]), int(frame_size[1] * 2))
+
+    root_dir = osp.dirname(osp.abspath(__file__))
 
     mouse = MouseClick()
     cv2.namedWindow(WINNAME)
@@ -105,11 +107,13 @@ def main():
     log.info("Initializing Inference Engine")
     ie = IECore()
     if args.m_instance_segmentation:
-        segmentation = MaskRCNN(ie, args.m_instance_segmentation, args.threshold,
-                                args.device, args.cpu_extension)
+        labels_file = osp.join(root_dir, 'coco_labels.txt')
+        segmentation = MaskRCNN(ie, args.m_instance_segmentation, labels_file,
+                                args.threshold, args.device, args.cpu_extension)
     elif args.m_semantic_segmentation:
-        segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, args.threshold,
-                                            args.device, args.cpu_extension)
+        labels_file = osp.join(root_dir, 'cityscapes_labels.txt')
+        segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, labels_file,
+                                            args.threshold, args.device, args.cpu_extension)
 
     has_frame = True
     output_frame = None

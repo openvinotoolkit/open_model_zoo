@@ -1,2 +1,1 @@
-opencv-python>=3.4.5.20
 numpy>=1.16.4

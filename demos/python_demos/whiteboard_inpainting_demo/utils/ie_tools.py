@@ -22,9 +22,18 @@ from openvino.inference_engine import IENetwork, IECore # pylint: disable=import
 
 class IEModel:
     """Class for inference of models in the Inference Engine format"""
-    def __init__(self, ie, model_path, conf=.6, device='CPU', ext_path='', num_reqs=1):
+    def __init__(self, ie, model_path, labels_file, conf=.6, device='CPU', ext_path='', num_reqs=1):
         self.confidence = conf
         self.load_ie_model(ie, model_path, device, None, ext_path, num_reqs)
+        with open(labels_file, 'r') as f:
+            self.labels = f.readlines()
+        self.labels = {num: name.replace('\n', '') for num, name in enumerate(self.labels)}
+        self.classes_to_hide = self.set_classes_to_hide()
+        self.labels_to_hide = [num for num, name in self.labels.items() if name in self.classes_to_hide]
+
+    @staticmethod
+    def set_classes_to_hide():
+        return ('person', )
 
     def _preprocess(self, img):
         _, _, h, w = self.get_input_shape().shape

@@ -20,7 +20,7 @@ As an input, the demo application takes:
     * Path to a video file
     * Index of a web camera
 
-## Run the Demo
+## Running
 
 ### Install Dependencies
 
@@ -35,8 +35,8 @@ pip3 install -r requirements.txt
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: whiteboard_inpainting_demo.py [-h] -i I [-mi M_INSTANCE_SEGMENTATION]
-                                     [-ms M_SEMANTIC_SEGMENTATION] [-t THRESHOLD]
+usage: whiteboard_inpainting_demo.py [-h] -i I [-m_i M_INSTANCE_SEGMENTATION]
+                                     [-m_s M_SEMANTIC_SEGMENTATION] [-t THRESHOLD]
                                      [--output_video OUTPUT_VIDEO] [--no_show]
                                      [-d DEVICE] [-l CPU_EXTENSION]
 
@@ -45,9 +45,9 @@ Whiteboard inpainting demo
 optional arguments:
   -h, --help            show this help message and exit
   -i I                  Input sources (index of camera or path to a video file)
-  -mi M_INSTANCE_SEGMENTATION, --m_instance_segmentation M_INSTANCE_SEGMENTATION
+  -m_i M_INSTANCE_SEGMENTATION, --m_instance_segmentation M_INSTANCE_SEGMENTATION
                         Path to the instance segmentation model
-  -ms M_SEMANTIC_SEGMENTATION, --m_semantic_segmentation M_SEMANTIC_SEGMENTATION
+  -m_s M_SEMANTIC_SEGMENTATION, --m_semantic_segmentation M_SEMANTIC_SEGMENTATION
                         Path to the semantic segmentation model
   -t THRESHOLD, --threshold THRESHOLD
                         Threshold for person instance segmentation model
@@ -71,7 +71,9 @@ python whiteboard_inpainting_demo.py \
     -mi path/to/instance-segmentation-security-0050.xml
 ```
 
-## Usage
+## Demo output
+
+The demo outputs original video with the processed one. Usage:
 
     * Invert colors on the resulting frame by pressing the `i` key.
     * Select a part of the frame be shown in a separate window by using your left mouse button.

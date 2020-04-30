@@ -61,7 +61,7 @@ class MaskRCNN(IEModel):
                                    (0, self.h - im_data.shape[1]),
                                    (0, self.w - im_data.shape[2])),
                          mode='constant', constant_values=0).reshape(1, self.c, self.h, self.w)
-        im_info = im_info.reshape(1, *im_info.shape)
+        im_info = im_info[None, ]
         output = self.net.infer(dict(im_data=im_data, im_info=im_info))
 
         classes = output['classes']
@@ -72,7 +72,7 @@ class MaskRCNN(IEModel):
         masks = output['raw_masks'][valid_detections_mask]
         return boxes, classes, scores, np.full(len(classes), 0, dtype=np.int32), masks
 
-    def get_detections(self, frames, return_cropped_masks=False, only_class_person=True):
+    def get_detections(self, frames, return_cropped_masks=False):
         outputs = []
         for frame in frames:
             data_batch = self._preprocess(frame)
@@ -90,15 +90,14 @@ class MaskRCNN(IEModel):
                                                         confidence_threshold=self.confidence)
             frame_output = []
             for i in range(len(scores)):
-                if only_class_person and classes[i] != 1:
-                    continue
-                bbox = [int(value) for value in boxes[i]]
-                if return_cropped_masks:
-                    left, top, right, bottom = bbox
-                    mask = masks[i][top:bottom, left:right]
-                else:
-                    mask = masks[i]
-                frame_output.append([bbox, scores[i], mask])
+                if classes[i] in self.labels_to_hide:
+                    bbox = [int(value) for value in boxes[i]]
+                    if return_cropped_masks:
+                        left, top, right, bottom = bbox
+                        mask = masks[i][top:bottom, left:right]
+                    else:
+                        mask = masks[i]
+                    frame_output.append([bbox, scores[i], mask])
             outputs.append(frame_output)
         return outputs
 
@@ -106,6 +105,10 @@ class MaskRCNN(IEModel):
 class SemanticSegmentation(IEModel):
     def __init__(self, ie, model_path, conf=.6, device='CPU', ext_path='', max_reqs=1):
         super().__init__(ie, model_path, conf, device, ext_path, max_reqs)
+
+    @staticmethod
+    def set_classes_to_hide():
+        return ('person', 'rider', )
 
     def get_detections(self, frames, only_class_person=True):
         outputs = []
@@ -116,7 +119,7 @@ class SemanticSegmentation(IEModel):
             for batch, data in enumerate(res):
                 data = data.transpose((1, 2, 0)).astype('uint8')
                 data = cv2.resize(data, (out_w, out_h))
-                data = np.where(data > 9, 1, 0)
+                data = np.isin(data, self.labels_to_hide).astype('uint8')
                 output.append([[0, 0, out_w - 1, out_h - 1], 1., data.astype('uint8')])
             outputs.append(output)
         return outputs

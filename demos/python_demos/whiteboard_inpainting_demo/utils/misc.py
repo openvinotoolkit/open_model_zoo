@@ -17,6 +17,10 @@ from os import path as osp
 import sys
 
 
+ESC = 27
+SPACE = 32
+ENTER = 13
+
 class MouseClick:
     def __init__(self):
         self.points = {}
@@ -47,10 +51,10 @@ def path_exist(name, type='dir', root=None):
 
 
 def check_pressed_keys(key):
-    if key == 32:  # Pause
+    if key == SPACE:  # Pause
         while True:
             key = cv2.waitKey(0)
-            if key == 27 or key == 32 or key == 13:  # enter: resume, space: next frame, esc: exit
+            if key == ESC or key == SPACE or key == ENTER:  # enter: resume, space: next frame, esc: exit
                 break
     else:
         key = cv2.waitKey(1)
