@@ -17,7 +17,7 @@ import logging as log
 import cv2
 import numpy as np
 
-from utils.ie_tools import IEModel
+from .ie_tools import IEModel
 from .segm_postprocess import postprocess
 
 
