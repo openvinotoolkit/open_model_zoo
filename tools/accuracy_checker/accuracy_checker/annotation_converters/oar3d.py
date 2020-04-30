@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import os
 from pathlib import Path
 import numpy as np
-import os
 
 from ..representation import OAR3DTilingSegmentationAnnotation
 from ..config import NumberField, StringField, PathField
@@ -37,7 +37,8 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
             "width": NumberField(optional=True, default=128, description="Tile width."),
             "input": StringField(optional=True, default="inputs", description="Name of input data variable."),
             "output": StringField(optional=True, default="outputs", description="Name of output data variable."),
-            "preprocessed_dir": PathField(optional=False, is_directory=True, check_exists=True, description="Preprocessed dataset location")
+            "preprocessed_dir": PathField(optional=False, is_directory=True, check_exists=True,
+                                          description="Preprocessed dataset location")
         })
 
         return parameters
@@ -49,11 +50,11 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
         self.wH = self.get_value_from_config('height')
         self.input = self.get_value_from_config('input')
         self.output = self.get_value_from_config('output')
-        self.preprocesed_dir = self.get_value_from_config('preprocessed_dir')
+        self.preprocessed_dir = self.get_value_from_config('preprocessed_dir')
 
     def convert(self, check_content=False, **kwargs):
         data_folder = Path(self.data_dir)
-        preprocessed_folder = Path(self.preprocesed_dir)
+        preprocessed_folder = Path(self.preprocessed_dir)
         input_folder = preprocessed_folder / 'input'
         mask_folder = preprocessed_folder / 'mask'
 
