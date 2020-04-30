@@ -89,8 +89,9 @@ public:
     std::list<Result> getResults(InferenceEngine::InferRequest& inferRequest, cv::Size upscale, std::ostream* rawResults = nullptr) {
         // there is no big difference if InferReq of detector from another device is passed because the processing is the same for the same topology
         std::list<Result> results;
-        const float * const detections = InferenceEngine::as<InferenceEngine::MemoryBlob>(
-            inferRequest.GetBlob(detectorOutputBlobName))->rwmap().as<float *>();
+        InferenceEngine::LockedMemory<void> detectorOutputBlobMapped = InferenceEngine::as<
+            InferenceEngine::MemoryBlob>(inferRequest.GetBlob(detectorOutputBlobName))->rwmap();
+        const float * const detections = detectorOutputBlobMapped.as<float *>();
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
             float image_id = detections[i * objectSize + 0];  // in case of batch
@@ -186,11 +187,13 @@ public:
         };
 
         // 7 possible colors for each vehicle and we should select the one with the maximum probability
-        auto colorsValues = InferenceEngine::as<InferenceEngine::MemoryBlob>(
-            inferRequest.GetBlob(outputNameForColor))->rwmap().as<float*>();
+        InferenceEngine::LockedMemory<void> colorsMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
+            inferRequest.GetBlob(outputNameForColor))->rwmap();
+        auto colorsValues = colorsMapped.as<float*>();
         // 4 possible types for each vehicle and we should select the one with the maximum probability
-        auto typesValues = InferenceEngine::as<InferenceEngine::MemoryBlob>(
-            inferRequest.GetBlob(outputNameForType))->rwmap().as<float*>();
+        InferenceEngine::LockedMemory<void> typesMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
+            inferRequest.GetBlob(outputNameForType))->rwmap();
+        auto typesValues = typesMapped.as<float*>();
 
         const auto color_id = std::max_element(colorsValues, colorsValues + 7) - colorsValues;
         const auto  type_id = std::max_element(typesValues,  typesValues  + 4) - typesValues;
@@ -274,7 +277,9 @@ public:
             InferenceEngine::Blob::Ptr seqBlob = inferRequest.GetBlob(LprInputSeqName);
             // second input is sequence, which is some relic from the training
             // it should have the leading 0.0f and rest 1.0f
-            float* blob_data = InferenceEngine::as<InferenceEngine::MemoryBlob>(seqBlob)->rwmap().as<float*>();
+	        InferenceEngine::LockedMemory<void> seqBlobMapped = InferenceEngine::as<
+                InferenceEngine::MemoryBlob>(seqBlob)->rwmap();
+            float* blob_data = seqBlobMapped.as<float*>();
             blob_data[0] = 0.0f;
             std::fill(blob_data + 1, blob_data + seqBlob->getTensorDesc().getDims()[0], 1.0f);
         }
@@ -299,8 +304,9 @@ public:
         std::string result;
         result.reserve(14u + 6u);  // the longest province name + 6 plate signs
         // up to 88 items per license plate, ended with "-1"
-        const auto data = InferenceEngine::as<InferenceEngine::MemoryBlob>(
-            inferRequest.GetBlob(LprOutputName))->rwmap().as<float*>();
+        InferenceEngine::LockedMemory<void> lprOutputMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
+            inferRequest.GetBlob(LprOutputName))->rwmap();
+        const auto data = lprOutputMapped.as<float*>();
         for (int i = 0; i < maxSequenceSizePerPlate; i++) {
             if (data[i] == -1) {
                 break;

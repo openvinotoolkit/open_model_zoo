@@ -116,7 +116,8 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
 
 DetectedObjects FaceDetection::fetchResults() {
     DetectedObjects results;
-    const float *data = as<MemoryBlob>(request->GetBlob(output_name_))->rwmap().as<float *>();
+	LockedMemory<void> outputMapped = as<MemoryBlob>(request->GetBlob(output_name_))->rwmap();
+    const float *data = outputMapped.as<float *>();
 
     for (int det_id = 0; det_id < max_detections_count_; ++det_id) {
         const int start_pos = det_id * object_size_;

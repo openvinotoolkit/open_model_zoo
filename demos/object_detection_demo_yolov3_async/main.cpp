@@ -182,7 +182,8 @@ void ParseYOLOV3Output(const CNNNetwork &cnnNetwork, const std::string & output_
 
     auto side = out_blob_h;
     auto side_square = side * side;
-    const float *output_blob = as<MemoryBlob>(blob)->rwmap().as<PrecisionTrait<Precision::FP32>::value_type *>();
+	LockedMemory<void> blobMapped = as<MemoryBlob>(blob)->rwmap();
+    const float *output_blob = blobMapped.as<PrecisionTrait<Precision::FP32>::value_type *>();
     // --------------------------- Parsing YOLO Region output -------------------------------------
     for (int i = 0; i < side_square; ++i) {
         int row = i / side;

@@ -84,8 +84,8 @@ void IEWrapper::setInputBlob(const std::string& blobName,
     if (dimsProduct != data.size()) {
         throw std::runtime_error("Input data does not match size of the blob");
     }
-    auto buffer = as<MemoryBlob>(request.GetBlob(blobName))->rwmap()
-        .as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
+	LockedMemory<void> blobMapped = as<MemoryBlob>(request.GetBlob(blobName))->rwmap();
+    auto buffer = blobMapped.as<PrecisionTrait<Precision::FP32>::value_type *>();
     for (unsigned long int i = 0; i < data.size(); ++i) {
         buffer[i] = data[i];
     }
@@ -100,8 +100,8 @@ void IEWrapper::getOutputBlob(const std::string& blobName,
         dataSize *= dim;
     }
     
-    auto buffer = as<MemoryBlob>(request.GetBlob(blobName))->rwmap()
-        .as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
+	LockedMemory<void> blobMapped = as<MemoryBlob>(request.GetBlob(blobName))->rwmap();
+    auto buffer = blobMapped.as<PrecisionTrait<Precision::FP32>::value_type *>();
 
     for (int i = 0; i < dataSize; ++i) {
         output.push_back(buffer[i]);

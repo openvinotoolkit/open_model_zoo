@@ -215,7 +215,8 @@ struct PersonDetection : BaseDetection{
         results.clear();
         if (resultsFetched) return;
         resultsFetched = true;
-        const float *detections = as<MemoryBlob>(request.GetBlob(outputName))->rwmap().as<float *>();
+	    LockedMemory<void> outputMapped = as<MemoryBlob>(request.GetBlob(outputName))->rwmap();
+        const float *detections = outputMapped.as<float *>();
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
             float image_id = detections[i * objectSize + 0];  // in case of batch
@@ -313,9 +314,12 @@ struct PersonAttribsDetection : BaseDetection {
                                    "Person Attributes Recognition network is not equal to point coordinates (2)");
         }
 
-        auto outputAttrValues = as<MemoryBlob>(attribsBlob)->rwmap().as<float*>();
-        auto outputTCPointValues = as<MemoryBlob>(topColorPointBlob)->rwmap().as<float*>();
-        auto outputBCPointValues = as<MemoryBlob>(bottomColorPointBlob)->rwmap().as<float*>();
+	    LockedMemory<void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rwmap();
+        auto outputAttrValues = attribsBlobMapped.as<float*>();
+	    LockedMemory<void> topColorPointBlobMapped = as<MemoryBlob>(topColorPointBlob)->rwmap();
+        auto outputTCPointValues = topColorPointBlobMapped.as<float*>();
+	    LockedMemory<void> bottomColorPointBlobMapped = as<MemoryBlob>(bottomColorPointBlob)->rwmap();
+        auto outputBCPointValues = bottomColorPointBlobMapped.as<float*>();
 
         AttributesAndColorPoints returnValue;
 
@@ -405,7 +409,8 @@ struct PersonReIdentification : BaseDetection {
         Blob::Ptr attribsBlob = request.GetBlob(outputName);
 
         auto numOfChannels = attribsBlob->getTensorDesc().getDims().at(1);
-        auto outputValues = as<MemoryBlob>(attribsBlob)->rwmap().as<float*>();
+	    LockedMemory<void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rwmap();
+        auto outputValues = attribsBlobMapped.as<float*>();
         return std::vector<float>(outputValues, outputValues + numOfChannels);
     }
 

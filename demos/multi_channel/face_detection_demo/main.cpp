@@ -306,7 +306,9 @@ int main(int argc, char* argv[]) {
         }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize) {
             auto output = req->GetBlob(outputDataBlobNames[0]);
 
-            float* dataPtr = InferenceEngine::as<InferenceEngine::MemoryBlob>(output)->rwmap();
+	        InferenceEngine::LockedMemory<void> outputMapped = InferenceEngine::as<
+                InferenceEngine::MemoryBlob>(output)->rwmap();
+            float* dataPtr = outputMapped;
             InferenceEngine::SizeVector svec = output->getTensorDesc().getDims();
             size_t total = 1;
             for (auto v : svec) {

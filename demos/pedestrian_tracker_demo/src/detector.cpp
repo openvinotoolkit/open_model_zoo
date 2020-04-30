@@ -77,7 +77,8 @@ void ObjectDetector::enqueue(const cv::Mat &frame) {
     matU8ToBlob<uint8_t>(frame, inputBlob);
 
     if (!im_info_name_.empty()) {
-        float* buffer = as<MemoryBlob>(request->GetBlob(im_info_name_))->rwmap().as<float*>();
+	    LockedMemory<void> imInfoMapped = as<MemoryBlob>(request->GetBlob(im_info_name_))->rwmap();
+        float* buffer = imInfoMapped.as<float*>();
         buffer[0] = static_cast<float>(inputBlob->getTensorDesc().getDims()[2]);
         buffer[1] = static_cast<float>(inputBlob->getTensorDesc().getDims()[3]);
         buffer[2] = buffer[4] = static_cast<float>(inputBlob->getTensorDesc().getDims()[3]) / width_;
@@ -159,7 +160,8 @@ void ObjectDetector::fetchResults() {
     results_.clear();
     if (results_fetched_) return;
     results_fetched_ = true;
-    const float *data = as<MemoryBlob>(request->GetBlob(output_name_))->rwmap().as<float *>();
+	LockedMemory<void> outputMapped = as<MemoryBlob>(request->GetBlob(output_name_))->rwmap();
+    const float *data = outputMapped.as<float *>();
 
     for (int det_id = 0; det_id < max_detections_count_; ++det_id) {
         const int start_pos = det_id * object_size_;

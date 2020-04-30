@@ -131,23 +131,28 @@ DetectedActions ActionDetection::fetchResults() {
     const auto loc_blob_name = new_network_ ? config_.new_loc_blob_name : config_.old_loc_blob_name;
     const auto det_conf_blob_name = new_network_ ? config_.new_det_conf_blob_name : config_.old_det_conf_blob_name;
 
+    LockedMemory<void> oldPriorboxBlobMapped = as<MemoryBlob>(
+        request->GetBlob(config_.old_priorbox_blob_name))->rwmap();
     const cv::Mat priorbox_out =
         new_network_
           ? cv::Mat()
           : cv::Mat(ieSizeToVector(request->GetBlob(config_.old_priorbox_blob_name)->getTensorDesc().getDims()),
-                    CV_32F, as<MemoryBlob>(request->GetBlob(config_.old_priorbox_blob_name))->rwmap());
+                    CV_32F, oldPriorboxBlobMapped);
 
+    LockedMemory<void> locBlobMapped = as<MemoryBlob>(request->GetBlob(loc_blob_name))->rwmap();
     const cv::Mat loc_out(ieSizeToVector(request->GetBlob(loc_blob_name)->getTensorDesc().getDims()),
-                          CV_32F, as<MemoryBlob>(request->GetBlob(loc_blob_name))->rwmap());
+                          CV_32F, locBlobMapped);
 
+    LockedMemory<void> detConfBlobMapped = as<MemoryBlob>(request->GetBlob(det_conf_blob_name))->rwmap();
     const cv::Mat main_conf_out(ieSizeToVector(request->GetBlob(det_conf_blob_name)->getTensorDesc().getDims()),
-                                CV_32F, as<MemoryBlob>(request->GetBlob(det_conf_blob_name))->rwmap());
+                                CV_32F, detConfBlobMapped);
 
     std::vector<cv::Mat> add_conf_out;
     for (int glob_anchor_id = 0; glob_anchor_id < num_glob_anchors_; ++glob_anchor_id) {
         const auto& blob_name = glob_anchor_names_[glob_anchor_id];
+        LockedMemory<void> blobMapped = as<MemoryBlob>(request->GetBlob(blob_name))->rwmap();
         add_conf_out.emplace_back(ieSizeToVector(request->GetBlob(blob_name)->getTensorDesc().getDims()),
-                                  CV_32F, as<MemoryBlob>(request->GetBlob(blob_name))->rwmap());
+                                  CV_32F, blobMapped);
     }
 
     /** Parse detections **/
