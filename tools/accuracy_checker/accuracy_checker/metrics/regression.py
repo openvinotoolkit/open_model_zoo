@@ -459,11 +459,12 @@ def _ssim(annotation_image, prediction_image):
     mssim = (2*mu_x*mu_y + c1)*(2*sig_xy + c2)/((mu_x**2 + mu_y**2 + c1)*(var_x + var_y + c2))
     return mssim
 
+
 class StructuralSimilarity(BaseRegressionMetric):
     __provider__ = 'ssim'
 
-    annotation_types = (ImageInpaintingAnnotation, )
-    prediction_types = (ImageInpaintingPrediction, )
+    annotation_types = (ImageInpaintingAnnotation, SuperResolutionAnnotation)
+    prediction_types = (ImageInpaintingPrediction, SuperResolutionPrediction)
 
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)
