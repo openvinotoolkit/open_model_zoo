@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import re
+from pathlib import Path
 import cv2
 import numpy as np
 from ..config import PathField, StringField, BoolField, ConfigError, NumberField, DictField
@@ -219,7 +220,7 @@ class MultiTargetSuperResolutionConverter(BaseFormatConverter):
         self.annotation_loader = LOADERS_MAPPING.get(self.get_value_from_config('annotation_loader'))
         if not self.annotation_loader:
             raise ConfigError('provided not existing loader')
-        self.full_lr_dir = self.data_dir / self.lr_dir
+        self.full_lr_dir = Path(self.data_dir) / self.lr_dir
         if not self.full_lr_dir.exists():
             raise ConfigError('directory with low resolution images does not exist')
 
