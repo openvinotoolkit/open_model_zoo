@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2020 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ from .pipeline import AsyncPipeline, PipelineStep
 from .queue import Signal
 
 
-def run_pipeline(video, encoder, decoder, render_fn, fps=30):
+def run_pipeline(video, encoder, decoder, render_fn, decoder_seq_size=16, fps=30):
     pipeline = AsyncPipeline()
     pipeline.add_step("Data", DataStep(video), parallel=False)
     pipeline.add_step("Encoder", EncoderStep(encoder), parallel=False)
-    pipeline.add_step("Decoder", DecoderStep(decoder), parallel=False)
+    pipeline.add_step("Decoder", DecoderStep(decoder, sequence_size=decoder_seq_size), parallel=False)
     pipeline.add_step("Render", RenderStep(render_fn, fps=fps), parallel=True)
 
     pipeline.run()
@@ -96,10 +96,10 @@ class EncoderStep(PipelineStep):
 
 class DecoderStep(PipelineStep):
 
-    def __init__(self, decoder, sequence_size=16, num_classes=9):
+    def __init__(self, decoder, sequence_size=16):
         super().__init__()
+        assert sequence_size > 0
         self.sequence_size = sequence_size
-        self.num_classes = num_classes
         self.decoder = decoder
         self.async_model = AsyncWrapper(self.decoder, self.decoder.num_requests)
         self._embeddings = deque(maxlen=self.sequence_size)
