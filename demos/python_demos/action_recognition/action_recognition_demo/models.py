@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2020 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -82,9 +82,6 @@ class AsyncWrapper:
 
 class IEModel:
     def __init__(self, model_xml, model_bin, ie_core, target_device, num_requests, batch_size=1):
-        # Plugin initialization for specified device and load extensions library if specified
-
-        # Read IR
         print("Reading IR...")
         self.net = ie_core.read_network(model_xml, model_bin)
         self.net.batch_size = batch_size
@@ -92,7 +89,6 @@ class IEModel:
         assert len(self.net.outputs) == 1, "One output is expected"
 
         print("Loading IR to the plugin...")
-
         self.exec_net = ie_core.load_network(network=self.net, device_name=target_device, num_requests=num_requests)
         self.input_name = next(iter(self.net.inputs))
         self.output_name = next(iter(self.net.outputs))
@@ -113,6 +109,28 @@ class IEModel:
     def wait_request(self, req_id):
         self.exec_net.requests[req_id].wait()
         return self.exec_net.requests[req_id].outputs[self.output_name]
+
+
+class DummyDecoder:
+    def __init__(self, *args, num_requests=1, **kwargs):
+        self.num_requests = num_requests
+        self.requests = dict()
+
+    @staticmethod
+    def _average(model_input):
+        return np.mean(model_input, axis=1)
+
+    def async_infer(self, model_input, req_id):
+        self.requests[req_id] = self._average(model_input)
+    
+    def infer(self, model_input):
+        return self._average(model_input)
+
+    def wait_request(self, req_id):
+        assert req_id in self.requests
+        output = self.requests[req_id]
+        del self.requests[req_id]
+        return output
 
 
 class ActionRecognitionSequential:
