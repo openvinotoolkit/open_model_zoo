@@ -145,7 +145,9 @@ def scale_bbox(x, y, h, w, class_id, confidence, im_h, im_w, is_proportional):
     ymin = int((y - h / 2) * im_h)
     xmax = int(xmin + w * im_w)
     ymax = int(ymin + h * im_h)
-    return dict(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, class_id=class_id, confidence=confidence)
+    # Method item() used here to convert NumPy types to native types for compatibility with functions, which don't
+    # support Numpy types (e.g., cv2.rectangle doesn't support int64 in color parameter)
+    return dict(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, class_id=class_id.item(), confidence=confidence.item())
 
 
 def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, threshold, is_proportional):
@@ -191,11 +193,11 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
                                           params.coords + 1 + j)
                 class_probabilities.append(predictions[class_index])
 
-            label = np.argmax(class_probabilities)
-            confidence = class_probabilities[label]*object_probability
+            class_id = np.argmax(class_probabilities)
+            confidence = class_probabilities[class_id]*object_probability
             if confidence < threshold:
                 continue
-            objects.append(scale_bbox(x=x, y=y, h=h, w=w, class_id=label, confidence=confidence,
+            objects.append(scale_bbox(x=x, y=y, h=h, w=w, class_id=class_id, confidence=confidence,
                                       im_h=orig_im_h, im_w=orig_im_w, is_proportional=is_proportional))
     return objects
 
@@ -423,8 +425,9 @@ def main():
                 obj['ymax'] = min(obj['ymax'], origin_im_size[0])
                 obj['xmin'] = max(obj['xmin'], 0)
                 obj['ymin'] = max(obj['ymin'], 0)
-                color = (int(min(obj['class_id'] * 12.5, 255)),
-                         int(min(obj['class_id'] * 7, 255)), int(min(obj['class_id'] * 5, 255)))
+                color = (min(obj['class_id'] * 12.5, 255),
+                         min(obj['class_id'] * 7, 255),
+                         min(obj['class_id'] * 5, 255))
                 det_label = labels_map[obj['class_id']] if labels_map and len(labels_map) >= obj['class_id'] else \
                     str(obj['class_id'])
 
