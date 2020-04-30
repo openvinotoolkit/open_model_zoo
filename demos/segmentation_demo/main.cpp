@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
             inferRequest.SetBlob(inName, wrapMat2Blob(inImg));
             inferRequest.Infer();
 
-	        LockedMemory<const void> outMapped = as<MemoryBlob>(inferRequest.GetBlob(outName))->rmap();
+            LockedMemory<const void> outMapped = as<MemoryBlob>(inferRequest.GetBlob(outName))->rmap();
             const float * const predictions = outMapped.as<float*>();
             for (int rowId = 0; rowId < outHeight; ++rowId) {
                 for (int colId = 0; colId < outWidth; ++colId) {

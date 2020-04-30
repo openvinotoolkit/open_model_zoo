@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
                     }
                     
-	                LockedMemory<void> blobMapped = as<MemoryBlob>(blobs.begin()->second)->rwmap();
+                    LockedMemory<void> blobMapped = as<MemoryBlob>(blobs.begin()->second)->rwmap();
                     float *output_data_pointer = blobMapped.as<PrecisionTrait<Precision::FP32>::value_type *>();
                     std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
 

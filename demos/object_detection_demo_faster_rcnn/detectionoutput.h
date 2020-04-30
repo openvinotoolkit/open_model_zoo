@@ -107,31 +107,31 @@ public:
 
     StatusCode execute(std::vector<Blob::Ptr>& inputs, std::vector<Blob::Ptr>& outputs,
                        ResponseDesc *resp) noexcept {
-	    LockedMemory<void> outputMapped = as<MemoryBlob>(outputs[0])->rwmap();
+        LockedMemory<void> outputMapped = as<MemoryBlob>(outputs[0])->rwmap();
         float *dst_data = outputMapped;
 
-	    LockedMemory<void> idxLocationMapped = as<MemoryBlob>(inputs[idx_location])->rwmap();
+        LockedMemory<void> idxLocationMapped = as<MemoryBlob>(inputs[idx_location])->rwmap();
         const float *loc_data   = idxLocationMapped;
-	    LockedMemory<void> idxConfidenceMapped = as<MemoryBlob>(inputs[idx_confidence])->rwmap();
+        LockedMemory<void> idxConfidenceMapped = as<MemoryBlob>(inputs[idx_confidence])->rwmap();
         const float *conf_data  = idxConfidenceMapped;
-	    LockedMemory<void> idxPriorsMapped = as<MemoryBlob>(inputs[idx_priors])->rwmap();
+        LockedMemory<void> idxPriorsMapped = as<MemoryBlob>(inputs[idx_priors])->rwmap();
         const float *prior_data = idxPriorsMapped;
 
         const int N = 1;  // TODO: Support batch
 
-	    LockedMemory<void> decodedBboxesMapped = as<MemoryBlob>(_decoded_bboxes)->rwmap();
+        LockedMemory<void> decodedBboxesMapped = as<MemoryBlob>(_decoded_bboxes)->rwmap();
         float *decoded_bboxes_data = decodedBboxesMapped;
-	    LockedMemory<void> reorderedConfMapped = as<MemoryBlob>(_reordered_conf)->rwmap();
+        LockedMemory<void> reorderedConfMapped = as<MemoryBlob>(_reordered_conf)->rwmap();
         float *reordered_conf_data = reorderedConfMapped;
-	    LockedMemory<void> bboxSizesMapped = as<MemoryBlob>(_bbox_sizes)->rwmap();
+        LockedMemory<void> bboxSizesMapped = as<MemoryBlob>(_bbox_sizes)->rwmap();
         float *bbox_sizes_data     = bboxSizesMapped;
-	    LockedMemory<void> detectionsCountMapped = as<MemoryBlob>(_detections_count)->rwmap();
+        LockedMemory<void> detectionsCountMapped = as<MemoryBlob>(_detections_count)->rwmap();
         int *detections_data       = detectionsCountMapped;
-	    LockedMemory<void> bufferMapped = as<MemoryBlob>(_buffer)->rwmap();
+        LockedMemory<void> bufferMapped = as<MemoryBlob>(_buffer)->rwmap();
         int *buffer_data           = bufferMapped;
-	    LockedMemory<void> indicesMapped = as<MemoryBlob>(_indices)->rwmap();
+        LockedMemory<void> indicesMapped = as<MemoryBlob>(_indices)->rwmap();
         int *indices_data          = indicesMapped;
-	    LockedMemory<void> numPriorsActualMapped = as<MemoryBlob>(_num_priors_actual)->rwmap();
+        LockedMemory<void> numPriorsActualMapped = as<MemoryBlob>(_num_priors_actual)->rwmap();
         int *num_priors_actual     = numPriorsActualMapped;
 
         const float *prior_variances = prior_data + _num_priors*_prior_size;

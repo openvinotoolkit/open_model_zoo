@@ -215,7 +215,7 @@ struct PersonDetection : BaseDetection{
         results.clear();
         if (resultsFetched) return;
         resultsFetched = true;
-	    LockedMemory<void> outputMapped = as<MemoryBlob>(request.GetBlob(outputName))->rwmap();
+        LockedMemory<void> outputMapped = as<MemoryBlob>(request.GetBlob(outputName))->rwmap();
         const float *detections = outputMapped.as<float *>();
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
@@ -314,11 +314,11 @@ struct PersonAttribsDetection : BaseDetection {
                                    "Person Attributes Recognition network is not equal to point coordinates (2)");
         }
 
-	    LockedMemory<void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rwmap();
+        LockedMemory<void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rwmap();
         auto outputAttrValues = attribsBlobMapped.as<float*>();
-	    LockedMemory<void> topColorPointBlobMapped = as<MemoryBlob>(topColorPointBlob)->rwmap();
+        LockedMemory<void> topColorPointBlobMapped = as<MemoryBlob>(topColorPointBlob)->rwmap();
         auto outputTCPointValues = topColorPointBlobMapped.as<float*>();
-	    LockedMemory<void> bottomColorPointBlobMapped = as<MemoryBlob>(bottomColorPointBlob)->rwmap();
+        LockedMemory<void> bottomColorPointBlobMapped = as<MemoryBlob>(bottomColorPointBlob)->rwmap();
         auto outputBCPointValues = bottomColorPointBlobMapped.as<float*>();
 
         AttributesAndColorPoints returnValue;
@@ -409,7 +409,7 @@ struct PersonReIdentification : BaseDetection {
         Blob::Ptr attribsBlob = request.GetBlob(outputName);
 
         auto numOfChannels = attribsBlob->getTensorDesc().getDims().at(1);
-	    LockedMemory<void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rwmap();
+        LockedMemory<void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rwmap();
         auto outputValues = attribsBlobMapped.as<float*>();
         return std::vector<float>(outputValues, outputValues + numOfChannels);
     }

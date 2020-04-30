@@ -77,7 +77,7 @@ void ObjectDetector::enqueue(const cv::Mat &frame) {
     matU8ToBlob<uint8_t>(frame, inputBlob);
 
     if (!im_info_name_.empty()) {
-	    LockedMemory<void> imInfoMapped = as<MemoryBlob>(request->GetBlob(im_info_name_))->rwmap();
+        LockedMemory<void> imInfoMapped = as<MemoryBlob>(request->GetBlob(im_info_name_))->rwmap();
         float* buffer = imInfoMapped.as<float*>();
         buffer[0] = static_cast<float>(inputBlob->getTensorDesc().getDims()[2]);
         buffer[1] = static_cast<float>(inputBlob->getTensorDesc().getDims()[3]);
