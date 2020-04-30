@@ -206,7 +206,7 @@ void ParseYOLOV3Output(InferenceEngine::InferRequest::Ptr req,
 
     auto side = out_blob_h;
     auto side_square = side * side;
-	InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->rwmap();
+    InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->rwmap();
     const float *output_blob  = blobMapped
         .as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
     // --------------------------- Parsing YOLO Region output -------------------------------------

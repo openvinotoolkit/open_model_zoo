@@ -27,7 +27,7 @@ void matU8ToBlob(const cv::Mat& orig_image, InferenceEngine::Blob::Ptr& blob, in
     if (static_cast<size_t>(orig_image.channels()) != channels) {
         THROW_IE_EXCEPTION << "The number of channels for net input and image must match";
     }
-	InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->rwmap();
+    InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->rwmap();
     T* blob_data = blobMapped.as<T*>();
 
     cv::Mat resized_image(orig_image);
