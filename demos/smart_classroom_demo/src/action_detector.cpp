@@ -131,13 +131,17 @@ DetectedActions ActionDetection::fetchResults() {
     const auto loc_blob_name = new_network_ ? config_.new_loc_blob_name : config_.old_loc_blob_name;
     const auto det_conf_blob_name = new_network_ ? config_.new_det_conf_blob_name : config_.old_det_conf_blob_name;
 
-    LockedMemory<void> oldPriorboxBlobMapped = as<MemoryBlob>(
-        request->GetBlob(config_.old_priorbox_blob_name))->rwmap();
-    const cv::Mat priorbox_out =
-        new_network_
-          ? cv::Mat()
-          : cv::Mat(ieSizeToVector(request->GetBlob(config_.old_priorbox_blob_name)->getTensorDesc().getDims()),
-                    CV_32F, oldPriorboxBlobMapped);
+    cv::Mat priorboxMat;
+    if (new_network_) {
+        priorboxMat = cv::Mat();
+    } else {
+        LockedMemory<void> priorboxOutBlobMapped = as<MemoryBlob>(request->
+                                                                  GetBlob(config_.old_priorbox_blob_name))->rwmap();
+        priorboxMat = cv::Mat(ieSizeToVector(request->
+                              GetBlob(config_.old_priorbox_blob_name)->getTensorDesc().getDims()), CV_32F,
+                              priorboxOutBlobMapped);
+    }
+    const cv::Mat priorbox_out = priorboxMat;
 
     LockedMemory<void> locBlobMapped = as<MemoryBlob>(request->GetBlob(loc_blob_name))->rwmap();
     const cv::Mat loc_out(ieSizeToVector(request->GetBlob(loc_blob_name)->getTensorDesc().getDims()),
