@@ -112,7 +112,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         for pred in predictions:
             prediction_data_to_store = []
             cur_name = Path(pred.identifier).name
-            cur_img_id = int((cur_name.split(".")[0]).split("_")[-1])
+            cur_img_id = (cur_name.split(".jpg")[0]).split("_")[-1]
 
             labels = pred.labels.tolist()
             scores = pred.scores.tolist()
@@ -145,7 +145,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         for annotation in annotations:
             annotation_data_to_store = []
             cur_name = Path(annotation.identifier).name
-            cur_img_id = int((cur_name.split(".")[0]).split("_")[-1])
+            cur_img_id = (cur_name.split(".jpg")[0]).split("_")[-1]
 
             labels = annotation.labels
             iscrowds = annotation.metadata.get('iscrowd', [0]*annotation.size)
