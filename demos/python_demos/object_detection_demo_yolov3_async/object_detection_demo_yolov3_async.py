@@ -19,7 +19,6 @@ import logging
 import threading
 import os
 import sys
-import numpy as np
 from collections import deque
 from argparse import ArgumentParser, SUPPRESS
 from math import exp as exp
@@ -136,12 +135,12 @@ def entry_index(side, coord, classes, location, entry):
     return int(side_power_2 * (n * (coord + classes + 1) + entry) + loc)
 
 
-def scale_bbox(x, y, h, w, class_id, confidence, im_h, im_w, is_proportional=True):
+def scale_bbox(x, y, h, w, class_id, confidence, im_h, im_w, is_proportional):
     if is_proportional:
         scale = np.array([min(im_w/im_h, 1), min(im_h/im_w, 1)])
         offset = 0.5*(np.ones(2) - scale)
         x, y = (np.array([x, y]) - offset) / scale
-        w, h = np.array([w,h]) / scale
+        w, h = np.array([w, h]) / scale
     xmin = int((x - w / 2) * im_w)
     ymin = int((y - h / 2) * im_h)
     xmax = int(xmin + w * im_w)
@@ -162,7 +161,7 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
     objects = list()
     predictions = blob.flatten()
     side_square = params.side * params.side
-
+    size_normalizer = (resized_image_w, resized_image_h) if params.isYoloV3 else (params.side, params.side)
     # ------------------------------------------- Parsing YOLO Region output -------------------------------------------
     for i in range(side_square):
         row = i // params.side
@@ -184,8 +183,8 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
             except OverflowError:
                 continue
             # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
-            w = w_exp * params.anchors[2 * n] / (resized_image_w if params.isYoloV3 else params.side)
-            h = h_exp * params.anchors[2 * n + 1] / (resized_image_h if params.isYoloV3 else params.side)
+            w = w_exp * params.anchors[2 * n] / size_normalizer[0]
+            h = h_exp * params.anchors[2 * n + 1] / size_normalizer[1]
             class_probabilities = []
             for j in range(params.classes):
                 class_index = entry_index(params.side, params.coords, params.classes, n * side_square + i,
@@ -226,30 +225,29 @@ def resize(image, size, keep_aspect_ratio, interpolation=cv2.INTER_LINEAR):
     nw = int(iw*scale)
     nh = int(ih*scale)
     image = cv2.resize(image, (nw, nh), interpolation=interpolation)
-    new_image = np.zeros((size[1], size[0], 3), np.uint8)
-    new_image.fill(128)
+    new_image = np.full((size[1], size[0], 3), 128, dtype=np.uint8)
     dx = (w-nw)//2
     dy = (h-nh)//2
     new_image[dy:dy+nh, dx:dx+nw, :] = image
     return new_image
 
 
-def preprocess_frame(frame, input_height, input_width, nchw_shape):
-    in_frame = cv2.resize(frame, (input_width, input_height))
+def preprocess_frame(frame, input_height, input_width, nchw_shape, keep_aspect_ratio):
+    in_frame = resize(frame, (input_width, input_height), keep_aspect_ratio)
     if nchw_shape:
         in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
     in_frame = np.expand_dims(in_frame, axis=0)
     return in_frame
 
 
-def get_objects(output, net, new_frame_height_width, source_height_width, prob_threshold):
+def get_objects(output, net, new_frame_height_width, source_height_width, prob_threshold, is_proportional):
     objects = list()
 
     for layer_name, out_blob in output.items():
         out_blob = out_blob.reshape(net.layers[net.layers[layer_name].parents[0]].out_data[0].shape)
         layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
         objects += parse_yolo_region(out_blob, new_frame_height_width, source_height_width, layer_params,
-                                     prob_threshold)
+                                     prob_threshold, is_proportional)
 
     return objects
 
@@ -410,7 +408,8 @@ def main():
             if is_same_mode:
                 mode_info[mode.current].frames_count += 1
 
-            objects = get_objects(output, net, (input_height, input_width), frame.shape[:-1], args.prob_threshold)
+            objects = get_objects(output, net, (input_height, input_width), frame.shape[:-1], args.prob_threshold,
+                                  args.keep_aspect_ratio)
             objects = filter_objects(objects, args.iou_threshold, args.prob_threshold)
 
             if len(objects) and args.raw_output_message:
@@ -488,7 +487,7 @@ def main():
             request = empty_requests.popleft()
 
             # resize input_frame to network size
-            in_frame = preprocess_frame(frame, input_height, input_width, nchw_shape)
+            in_frame = preprocess_frame(frame, input_height, input_width, nchw_shape, args.keep_aspect_ratio)
 
             # Start inference
             request.set_completion_callback(py_callback=async_callback,
