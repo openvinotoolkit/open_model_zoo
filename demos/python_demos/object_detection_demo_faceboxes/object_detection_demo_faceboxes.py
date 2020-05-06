@@ -108,9 +108,9 @@ def main():
     for frame in frames_reader:
         detections = detector.detect(frame)
         presenter.drawGraphs(frame)
-        for x_min, x_max, y_min, y_max, score, label in zip(detections['x_mins'], detections['x_maxs'],
-                                                     detections['y_mins'], detections['y_maxs'],
-                                                     detections['scores'], detections['labels']):
+        for label, score, x_min, y_min, x_max, y_max in zip(detections[0], detections[1],
+                                                     detections[2], detections[3],
+                                                     detections[4], detections[5]):
             x_min = int(max(0, x_min))
             y_min = int(max(0, y_min))
             x_max = int(min(frame.shape[1], x_max))

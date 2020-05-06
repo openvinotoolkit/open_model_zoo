@@ -18,6 +18,7 @@ import math
 import numpy as np
 import os
 import cv2
+from collections import namedtuple
 
 class Detector(object):
     def __init__(self, ie, model_path, device='CPU', threshold=0.5):
@@ -116,10 +117,11 @@ class Detector(object):
     @staticmethod
     def resize_boxes(detections, image_size):
         h, w = image_size
-        detections['x_mins'] = [x_min * w for x_min in detections['x_mins']]
-        detections['x_maxs'] = [x_max * w for x_max in detections['x_maxs']]
-        detections['y_mins'] = [y_min * h for y_min in detections['y_mins']]
-        detections['y_maxs'] = [y_max * h for y_max in detections['y_maxs']]
+        x_mins = [x_min * w for x_min in detections[2]]
+        x_maxs = [x_max * w for x_max in detections[4]]
+        y_mins = [y_min * h for y_min in detections[3]]
+        y_maxs = [y_max * h for y_max in detections[5]]
+        detections = detections._replace(x_mins=x_mins, y_mins=y_mins,x_maxs=x_maxs,y_maxs=y_maxs)
         return detections
 
     def preprocess(self, image):
@@ -135,7 +137,8 @@ class Detector(object):
     def postprocess(self, raw_output, image_sizes):
         boxes, scores = raw_output
 
-        detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+        detections = namedtuple('detections', 'labels, scores, x_mins, y_mins, x_maxs, y_maxs')
+        dets = detections(labels=[], scores=[], x_mins=[], y_mins=[], x_maxs=[], y_maxs=[])
         image_info = [self.input_height, self.input_width]
 
         feature_maps = [[math.ceil(image_info[0] / step), math.ceil(image_info[1] / step)] for step in
@@ -179,15 +182,15 @@ class Detector(object):
                 y_maxs = y_maxs[:self.keep_top_k]
 
             labels = np.full_like(filtered_score, label, dtype=int)
-            detections['labels'].extend(labels)
-            detections['scores'].extend(filtered_score)
-            detections['x_mins'].extend(x_mins)
-            detections['y_mins'].extend(y_mins)
-            detections['x_maxs'].extend(x_maxs)
-            detections['y_maxs'].extend(y_maxs)
+            dets[0].extend(labels)
+            dets[1].extend(filtered_score)
+            dets[2].extend(x_mins)
+            dets[3].extend(y_mins)
+            dets[4].extend(x_maxs)
+            dets[5].extend(y_maxs)
 
-        detections = self.resize_boxes(detections, image_sizes)
-        return detections
+        dets = self.resize_boxes(dets, image_sizes)
+        return dets
 
     def detect(self, image):
         image_sizes = image.shape[:2]
