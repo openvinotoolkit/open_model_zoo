@@ -30,6 +30,11 @@ class Detector(object):
         self._input_layer_name = next(iter(model.inputs))
         self._output_layer_names = sorted(model.outputs)
 
+        assert model.outputs[self._output_layer_names[0]].shape[0] == \
+               model.outputs[self._output_layer_names[1]].shape[0], "Expected the same dimension for boxes and scores"
+        assert model.outputs[self._output_layer_names[0]].shape[1] == 4, "Expected 4-coordinate boxes"
+        assert model.outputs[self._output_layer_names[1]].shape[1] == 2, "Expected 2-class scores(background, face)"
+
         self._ie = ie
         self._exec_model = self._ie.load_network(model, device)
         self.infer_time = -1
@@ -150,16 +155,12 @@ class Detector(object):
         boxes[:, :2] = boxes[:, :2] * prior_data[:, 2:] + prior_data[:, :2]
         boxes[:, 2:] = np.exp(boxes[:, 2:]) * prior_data[:, 2:]
 
-        for label, score in enumerate(np.transpose(scores)):
+        score = np.transpose(scores)[1]
+        label = 1
 
-            if label == 0:
-                continue
-
-            mask = score > self.confidence_threshold
-            filtered_boxes, filtered_score = boxes[mask, :], score[mask]
-            if filtered_score.size == 0:
-                continue
-
+        mask = score > self.confidence_threshold
+        filtered_boxes, filtered_score = boxes[mask, :], score[mask]
+        if filtered_score.size != 0:
             x_mins = (filtered_boxes[:, 0] - 0.5 * filtered_boxes[:, 2])
             y_mins = (filtered_boxes[:, 1] - 0.5 * filtered_boxes[:, 3])
             x_maxs = (filtered_boxes[:, 0] + 0.5 * filtered_boxes[:, 2])
