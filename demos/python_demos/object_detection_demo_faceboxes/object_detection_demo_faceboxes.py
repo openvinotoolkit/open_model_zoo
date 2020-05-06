@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
  Copyright (c) 2020 Intel Corporation
 
@@ -109,10 +111,10 @@ def main():
         for x_min, x_max, y_min, y_max, score, label in zip(detections['x_mins'], detections['x_maxs'],
                                                      detections['y_mins'], detections['y_maxs'],
                                                      detections['scores'], detections['labels']):
-            x_min = max(0, x_min).astype(np.int)
-            y_min = max(0, y_min).astype(np.int)
-            x_max = min(frame.shape[1], x_max).astype(np.int)
-            y_max = min(frame.shape[0], y_max).astype(np.int)
+            x_min = int(max(0, x_min))
+            y_min = int(max(0, y_min))
+            x_max = int(min(frame.shape[1], x_max))
+            y_max = int(min(frame.shape[0], y_max))
             det_label = labels_map[int(label)] if labels_map else str(int(label))
             color = (min(label * 12.5, 255), min(label * 7.0, 255), min(label * 3.0, 255))
             cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), color, 2)
