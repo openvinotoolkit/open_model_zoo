@@ -27,7 +27,6 @@ import data_utils
 from six.moves import xrange
 import tensorflow as tf
 from perplexity import Calculate_Perplexity
-from unique import Calculate_Unique
 
 BATCH_SIZE = 1
 NUM_TIMESTEPS = 1
@@ -127,13 +126,10 @@ def main():
             char_ids_inputs[0, 0, :] = char_ids_samples[0]  #input source
             samples = samples[1:]
             char_ids_samples = char_ids_samples[1:]  
-
-            cal_unique = Calculate_Unique(char_ids_inputs)
-            y, idx = cal_unique._Unique()
-            res = exec_net.infer(inputs={'char_embedding/EmbeddingLookupUnique/Unique/placeholder_out_port_0':y,
-                                         'char_embedding/EmbeddingLookupUnique/Unique/placeholder_out_port_1':idx,
+            
+            res = exec_net.infer(inputs={'char_embedding/Reshape/placeholder_port_0':char_ids_inputs,
                                          'Variable/read/placeholder_port_0':var,
-                                         'Variable_1/read/placeholder_port_0':var1})
+                                         'Variable_1/read/placeholder_port_0':var1})  
 
             # Processing output blob
             softmax_out = res["softmax_out"]
