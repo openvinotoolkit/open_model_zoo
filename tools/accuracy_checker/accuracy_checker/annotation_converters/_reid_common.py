@@ -20,11 +20,11 @@ from ..representation import ReIdentificationAnnotation
 from ..utils import OrderedSet
 
 
-def read_directory(directory, query, image_pattern):
+def read_directory(directory, query, image_pattern, descent_order=False):
     pids = OrderedSet()
     images = []
     images_list = list(directory.glob("*.jpg"))
-    images_list.sort()
+    images_list.sort(reverse=descent_order)
     for image in images_list:
         pid, camid = map(int, image_pattern.search(image.name).groups())
         if pid == -1:
