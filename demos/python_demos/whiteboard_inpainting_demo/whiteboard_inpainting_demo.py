@@ -17,6 +17,7 @@ import cv2
 import logging as log
 import numpy as np
 import time
+import sys
 from os import path as osp
 
 from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
@@ -24,6 +25,9 @@ from openvino.inference_engine import IECore  # pylint: disable=import-error,E06
 from utils.capture import VideoCapture
 from utils.network_wrappers import MaskRCNN, SemanticSegmentation
 from utils.misc import MouseClick, set_log_config, path_exist, check_pressed_keys
+
+sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
+import monitors
 
 set_log_config()
 WINNAME = 'Whiteboard_inpainting_demo'
@@ -79,9 +83,11 @@ def main():
     parser.add_argument('-l', '--cpu_extension', type=str, default=None,
                         help='MKLDNN (CPU)-targeted custom layers.Absolute \
                               path to a shared library with the kernels impl.')
+    parser.add_argument('-u', '--utilization_monitors', default='', type=str,
+                        help='Optional. List of monitors to show initially')
     args = parser.parse_args()
 
-    if not path_exist(args.i, type='file') and not str.isdigit(args.i):
+    if not path_exist(args.i) and not str.isdigit(args.i):
         raise ValueError('File not found or wrong camera id: {}'.format(args.i))
     else:
         capture = VideoCapture(args.i)
@@ -92,12 +98,16 @@ def main():
 
     frame_size, fps = capture.get_source_parameters()
     out_frame_size = (int(frame_size[0]), int(frame_size[1] * 2))
+    presenter = monitors.Presenter(args.utilization_monitors,
+                                   out_frame_size[1] * 2 - out_frame_size[1],
+                                   out_frame_size)
 
     root_dir = osp.dirname(osp.abspath(__file__))
 
     mouse = MouseClick()
-    cv2.namedWindow(WINNAME)
-    cv2.setMouseCallback(WINNAME, mouse.get_points)
+    if not args.no_show:
+        cv2.namedWindow(WINNAME)
+        cv2.setMouseCallback(WINNAME, mouse.get_points)
 
     if args.output_video:
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -134,7 +144,7 @@ def main():
         mask = None
         if frame is not None:
             detections = segmentation.get_detections([frame])
-            upsample_mask(detections)
+            expand_mask(detections)
             if len(detections[0]) > 0:
                 mask = detections[0][0][2]
                 for i in range(1, len(detections[0])):
@@ -161,12 +171,10 @@ def main():
         if output_video is not None:
             output_video.write(merged_frame)
         
+        presenter.drawGraphs(merged_frame)
         if not args.no_show:
             cv2.imshow(WINNAME, merged_frame)
-
-        if key == ord('i'):  # catch pressing of key 'i'
-            black_board = not black_board
-            output_frame = 255 - output_frame
+            presenter.handleKey(key)
 
         if mouse.crop_available:
             x0, x1 = min(mouse.points[0][0], mouse.points[1][0]), \
@@ -178,11 +186,17 @@ def main():
             if board.shape[0] > 0 and board.shape[1] > 0:
                 cv2.namedWindow('Board', cv2.WINDOW_KEEPRATIO)
                 cv2.imshow('Board', board)
+
+        if key == ord('i'):  # catch pressing of key 'i'
+            black_board = not black_board
+            output_frame = 255 - output_frame
             
         end = time.time()
         print('\rProcessing frame: {}, fps = {:.3}' \
             .format(frame_number, 1. / (end - start)), end="")
         frame_number += 1
+
+    log.info(presenter.reportMeans())
     
     if output_video is not None:
         output_video.release()
@@ -190,4 +204,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

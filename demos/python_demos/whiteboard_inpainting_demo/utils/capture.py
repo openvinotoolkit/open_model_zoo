@@ -19,17 +19,13 @@ class VideoCapture:
     def __init__(self, source):
         try:
             cam_id = int(source)
-            mode = 'cam'
-        except ValueError:
-            mode = 'video'
-        if mode == 'cam':
             log.info('Connection to cam#{}'.format(cam_id))
             self.capture = cv2.VideoCapture(cam_id)
             self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
             self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
             self.capture.set(cv2.CAP_PROP_FPS, 30)
             self.capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
-        else:
+        except ValueError:
             log.info('Open video file {}'.format(source))
             self.capture = cv2.VideoCapture(source)
         assert self.capture.isOpened()
@@ -42,4 +38,3 @@ class VideoCapture:
                       int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
         fps = self.capture.get(cv2.CAP_PROP_FPS)
         return frame_size, fps
-

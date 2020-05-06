@@ -41,13 +41,8 @@ def set_log_config():
                     datefmt='%Y-%m-%d %H:%M:%S', level=log.DEBUG)
 
 
-def path_exist(name, type='dir', root=None):
-    assert type in ['dir', 'file']
-    full_path = osp.join(root, name) if root is not None else name
-    if type == 'dir':
-        return osp.isdir(full_path)
-    else:
-        return osp.isfile(full_path)
+def path_exist(name):
+    return osp.isfile(name)
 
 
 def check_pressed_keys(key):
@@ -59,4 +54,3 @@ def check_pressed_keys(key):
     else:
         key = cv2.waitKey(1)
     return key
-

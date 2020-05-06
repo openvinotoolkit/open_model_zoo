@@ -17,14 +17,12 @@ import numpy as np
 import os
 import sys
 
-from openvino.inference_engine import IENetwork, IECore # pylint: disable=import-error,E0611
-
 
 class IEModel:
     """Class for inference of models in the Inference Engine format"""
-    def __init__(self, ie, model_path, labels_file, conf=.6, device='CPU', ext_path='', num_reqs=1):
+    def __init__(self, ie, model_path, labels_file, conf=.6, device='CPU', ext_path=''):
         self.confidence = conf
-        self.load_ie_model(ie, model_path, device, None, ext_path, num_reqs)
+        self.load_ie_model(ie, model_path, device, ext_path)
         with open(labels_file, 'r') as f:
             self.labels = f.readlines()
         self.labels = {num: name.replace('\n', '') for num, name in enumerate(self.labels)}
@@ -43,7 +41,7 @@ class IEModel:
     def forward(self, img):
         """Performs forward pass of the wrapped IE model"""
         res = self.net.infer(inputs={self.input_key: self._preprocess(img)})
-        return np.copy(res[self.output_key])
+        return res[self.output_key]
 
     def get_detections(self, input):
         raise NotImplementedError
@@ -58,7 +56,7 @@ class IEModel:
     def get_allowed_outputs_len(self):
         return (1, )
 
-    def load_ie_model(self, ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=1):
+    def load_ie_model(self, ie, model_xml, device, cpu_extension=''):
         """Loads a model in the Inference Engine format"""
         model_bin = os.path.splitext(model_xml)[0] + ".bin"
         # Plugin initialization for specified device and load extensions library if specified
@@ -68,7 +66,7 @@ class IEModel:
             ie.add_extension(cpu_extension, 'CPU')
         # Read IR
         log.info("Loading network files:\n\t%s\n\t%s", model_xml, model_bin)
-        net = IENetwork(model=model_xml, weights=model_bin)
+        net = ie.read_network(model=model_xml, weights=model_bin)
 
         if "CPU" in device:
             supported_layers = ie.query_network(net, "CPU")
@@ -94,8 +92,7 @@ class IEModel:
 
         # Loading model to the plugin
         log.info("Loading model to the plugin")
-        self.net = ie.load_network(network=net, device_name=device, num_requests=num_reqs)
+        self.net = ie.load_network(network=net, device_name=device)
         self.inputs_info = net.inputs
         self.input_key = input_blob
         self.output_key = out_blob
-
