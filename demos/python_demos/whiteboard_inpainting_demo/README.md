@@ -76,5 +76,5 @@ python whiteboard_inpainting_demo.py \
 The demo outputs original video with the processed one. Usage:
 
     * Invert colors on the resulting frame by pressing the `i` key.
-    * Select a part of the frame be shown in a separate window by using your left mouse button.
+    * Select a part of the frame to be shown in a separate window by using your left mouse button.
     * Exit the demo by pressing `Esc`.

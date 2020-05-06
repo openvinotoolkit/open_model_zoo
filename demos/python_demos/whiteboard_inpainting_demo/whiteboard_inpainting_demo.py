@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
  Copyright (c) 2020 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +29,7 @@ set_log_config()
 WINNAME = 'Whiteboard_inpainting_demo'
 
 
-def upsample_mask(detection):
+def expand_mask(detection):
     for i in range(len(detection[0])):
         detection[0][i][2] = extend_mask(detection[0][i][2])
 
@@ -127,12 +128,9 @@ def main():
             key = check_pressed_keys(key)
             if key == 27:  # 'Esc'
                 break
-            elif key == ord('i'):  # catch pressing of key 'i'
-                black_board = not black_board
-                if output_frame is not None:
-                    output_frame = 255 - output_frame
 
         has_frame, frame = capture.get_frame()
+
         mask = None
         if frame is not None:
             detections = segmentation.get_detections([frame])
@@ -141,6 +139,8 @@ def main():
                 mask = detections[0][0][2]
                 for i in range(1, len(detections[0])):
                     mask = cv2.bitwise_or(mask, detections[0][i][2])
+        else:
+            continue
 
         if mask is not None:
             mask = np.stack([mask, mask, mask], axis=-1)
@@ -163,6 +163,10 @@ def main():
         
         if not args.no_show:
             cv2.imshow(WINNAME, merged_frame)
+
+        if key == ord('i'):  # catch pressing of key 'i'
+            black_board = not black_board
+            output_frame = 255 - output_frame
 
         if mouse.crop_available:
             x0, x1 = min(mouse.points[0][0], mouse.points[1][0]), \
