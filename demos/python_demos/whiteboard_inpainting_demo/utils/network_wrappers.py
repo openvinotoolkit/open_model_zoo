@@ -96,9 +96,6 @@ class MaskRCNN(IEModel):
 
 
 class SemanticSegmentation(IEModel):
-    def __init__(self, ie, model_path, labels_file, conf=.6, device='CPU', ext_path=''):
-        super().__init__(ie, model_path, labels_file, conf, device, ext_path)
-
     @staticmethod
     def set_classes_to_hide():
         return ('person', 'rider', )
