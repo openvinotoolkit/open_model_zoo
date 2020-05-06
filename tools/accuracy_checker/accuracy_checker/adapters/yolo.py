@@ -375,7 +375,7 @@ class YoloV3Adapter(Adapter):
                 self.processor.x_normalizer = cells
                 self.processor.y_normalizer = cells
                 if len(p.shape) != 3:
-                    new_shape = (self.num * box_size, cells, cells) if self.output_format == 'BHW' \
+                    new_shape = (num * box_size, cells, cells) if self.output_format == 'BHW' \
                         else (cells, cells, num * box_size)
                     p = np.reshape(p, new_shape)
                 labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num,
