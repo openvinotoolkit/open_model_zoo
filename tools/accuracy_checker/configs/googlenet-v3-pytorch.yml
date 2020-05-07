@@ -48,6 +48,20 @@ models:
         weights: public/googlenet-v3-pytorch/FP16/googlenet-v3-pytorch.bin
         adapter: classification
 
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   public/googlenet-v3-pytorch/FP32-INT8/googlenet-v3-pytorch.xml
+        weights: public/googlenet-v3-pytorch/FP32-INT8/googlenet-v3-pytorch.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   public/googlenet-v3-pytorch/FP16-INT8/googlenet-v3-pytorch.xml
+        weights: public/googlenet-v3-pytorch/FP16-INT8/googlenet-v3-pytorch.bin
+        adapter: classification
+
     datasets:
       - name: imagenet_1000_classes
         # images read with Pillow
