@@ -125,15 +125,14 @@ def main():
         segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, labels_file,
                                             args.threshold, args.device, args.cpu_extension)
 
-    has_frame = True
     black_board = False
     output_frame = np.full((frame_size[1], frame_size[0], 3), 255, dtype='uint8')
     frame_number = 0
     key = -1
 
-    while has_frame:
+    while True:
         start = time.time()
-        has_frame, frame = capture.get_frame()
+        _, frame = capture.get_frame()
 
         mask = None
         if frame is not None:
@@ -164,12 +163,13 @@ def main():
         if not args.no_show:
             cv2.imshow(WINNAME, merged_frame)
             key = check_pressed_keys(key)
-            presenter.handleKey(key)
             if key == 27:  # 'Esc'
                 break
-            elif key == ord('i'):  # catch pressing of key 'i'
+            if key == ord('i'):  # catch pressing of key 'i'
                 black_board = not black_board
                 output_frame = 255 - output_frame
+            else:
+                presenter.handleKey(key)
 
         if mouse.crop_available:
             x0, x1 = min(mouse.points[0][0], mouse.points[1][0]), \
