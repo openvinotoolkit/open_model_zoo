@@ -120,8 +120,8 @@ void HumanPoseEstimator::reshape(const cv::Mat& image){
 
 void HumanPoseEstimator::frameToBlobCurr(const cv::Mat& image) {
     CV_Assert(image.type() == CV_8UC3);
-    InferenceEngine::LockedMemory<void> requestCurrBlobMapped = InferenceEngine::as<
-        InferenceEngine::MemoryBlob>(requestCurr->GetBlob(network.getInputsInfo().begin()->first))->rwmap();
+    InferenceEngine::LockedMemory<const void> requestCurrBlobMapped = InferenceEngine::as<
+        InferenceEngine::MemoryBlob>(requestCurr->GetBlob(network.getInputsInfo().begin()->first))->rmap();
     auto buffer = requestCurrBlobMapped.as<
         InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
     preprocess(image, buffer);
@@ -129,8 +129,8 @@ void HumanPoseEstimator::frameToBlobCurr(const cv::Mat& image) {
 
 void HumanPoseEstimator::frameToBlobNext(const cv::Mat& image) {
     CV_Assert(image.type() == CV_8UC3);
-    InferenceEngine::LockedMemory<void> requestNextBlobMapped = InferenceEngine::as<
-        InferenceEngine::MemoryBlob>(requestNext->GetBlob(network.getInputsInfo().begin()->first))->rwmap();
+    InferenceEngine::LockedMemory<const void> requestNextBlobMapped = InferenceEngine::as<
+        InferenceEngine::MemoryBlob>(requestNext->GetBlob(network.getInputsInfo().begin()->first))->rmap();
     auto buffer = requestNextBlobMapped.as<
         InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
     preprocess(image, buffer);
@@ -161,15 +161,15 @@ std::vector<HumanPose> HumanPoseEstimator::postprocessCurr() {
     InferenceEngine::Blob::Ptr heatMapsBlob = requestCurr->GetBlob(heatmapsBlobName);
     InferenceEngine::SizeVector heatMapDims = heatMapsBlob->getTensorDesc().getDims();
 
-    InferenceEngine::LockedMemory<void> heatMapsBlobMapped = InferenceEngine::as<
-        InferenceEngine::MemoryBlob>(heatMapsBlob)->rwmap();
-    InferenceEngine::LockedMemory<void> pafsBlobMapped = InferenceEngine::as<
-        InferenceEngine::MemoryBlob>(pafsBlob)->rwmap();
+    InferenceEngine::LockedMemory<const void> heatMapsBlobMapped = InferenceEngine::as<
+        InferenceEngine::MemoryBlob>(heatMapsBlob)->rmap();
+    InferenceEngine::LockedMemory<const void> pafsBlobMapped = InferenceEngine::as<
+        InferenceEngine::MemoryBlob>(pafsBlob)->rmap();
     std::vector<HumanPose> poses = postprocess(
-            heatMapsBlobMapped,
+            heatMapsBlobMapped.as<float*>(),
             heatMapDims[2] * heatMapDims[3],
             keypointsNumber,
-            pafsBlobMapped,
+            pafsBlobMapped.as<float*>(),
             heatMapDims[2] * heatMapDims[3],
             pafsBlob->getTensorDesc().getDims()[1],
             heatMapDims[3], heatMapDims[2], imageSize);

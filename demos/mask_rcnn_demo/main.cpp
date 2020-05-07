@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
 
             /** Fill second input tensor with image info **/
             if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {
-                LockedMemory<void> inputMapped = as<MemoryBlob>(input)->rwmap();
+                LockedMemory<void> inputMapped = as<MemoryBlob>(input)->wmap();
                 auto data = inputMapped.as<PrecisionTrait<Precision::FP32>::value_type *>();
                 data[0] = static_cast<float>(netInputHeight);  // height
                 data[1] = static_cast<float>(netInputWidth);  // width
@@ -209,11 +209,11 @@ int main(int argc, char *argv[]) {
         slog::info << "Processing output blobs" << slog::endl;
 
         const auto do_blob = infer_request.GetBlob(FLAGS_detection_output_name.c_str());
-        LockedMemory<void> doBlobMapped = as<MemoryBlob>(do_blob)->rwmap();
+        LockedMemory<const void> doBlobMapped = as<MemoryBlob>(do_blob)->rmap();
         const auto do_data  = doBlobMapped.as<float*>();
 
         const auto masks_blob = infer_request.GetBlob(FLAGS_masks_name.c_str());
-        LockedMemory<void> masksBlobMapped = as<MemoryBlob>(masks_blob)->rwmap();
+        LockedMemory<const void> masksBlobMapped = as<MemoryBlob>(masks_blob)->rmap();
         const auto masks_data = masksBlobMapped.as<float*>();
 
         const float PROBABILITY_THRESHOLD = 0.2f;

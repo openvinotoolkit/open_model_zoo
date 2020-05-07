@@ -135,28 +135,28 @@ DetectedActions ActionDetection::fetchResults() {
     if (new_network_) {
         priorboxMat = cv::Mat();
     } else {
-        LockedMemory<void> priorboxOutBlobMapped = as<MemoryBlob>(request->
-                                                                  GetBlob(config_.old_priorbox_blob_name))->rwmap();
+        LockedMemory<const void> priorboxOutBlobMapped =
+            as<MemoryBlob>(request->GetBlob(config_.old_priorbox_blob_name))->rmap();
         priorboxMat = cv::Mat(ieSizeToVector(request->
                               GetBlob(config_.old_priorbox_blob_name)->getTensorDesc().getDims()), CV_32F,
-                              priorboxOutBlobMapped);
+                              priorboxOutBlobMapped.as<float*>());
     }
     const cv::Mat priorbox_out = priorboxMat;
 
-    LockedMemory<void> locBlobMapped = as<MemoryBlob>(request->GetBlob(loc_blob_name))->rwmap();
+    LockedMemory<const void> locBlobMapped = as<MemoryBlob>(request->GetBlob(loc_blob_name))->rmap();
     const cv::Mat loc_out(ieSizeToVector(request->GetBlob(loc_blob_name)->getTensorDesc().getDims()),
-                          CV_32F, locBlobMapped);
+                          CV_32F, locBlobMapped.as<float*>());
 
-    LockedMemory<void> detConfBlobMapped = as<MemoryBlob>(request->GetBlob(det_conf_blob_name))->rwmap();
+    LockedMemory<const void> detConfBlobMapped = as<MemoryBlob>(request->GetBlob(det_conf_blob_name))->rmap();
     const cv::Mat main_conf_out(ieSizeToVector(request->GetBlob(det_conf_blob_name)->getTensorDesc().getDims()),
-                                CV_32F, detConfBlobMapped);
+                                CV_32F, detConfBlobMapped.as<float*>());
 
     std::vector<cv::Mat> add_conf_out;
     for (int glob_anchor_id = 0; glob_anchor_id < num_glob_anchors_; ++glob_anchor_id) {
         const auto& blob_name = glob_anchor_names_[glob_anchor_id];
-        LockedMemory<void> blobMapped = as<MemoryBlob>(request->GetBlob(blob_name))->rwmap();
+        LockedMemory<const void> blobMapped = as<MemoryBlob>(request->GetBlob(blob_name))->rmap();
         add_conf_out.emplace_back(ieSizeToVector(request->GetBlob(blob_name)->getTensorDesc().getDims()),
-                                  CV_32F, blobMapped);
+                                  CV_32F, blobMapped.as<float*>());
     }
 
     /** Parse detections **/

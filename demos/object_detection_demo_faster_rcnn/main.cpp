@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
             auto imInfoDim = inputsInfo.find(imInfoInputName)->second->getTensorDesc().getDims()[1];
 
             /** Fill input tensor with values **/
-            LockedMemory<void> input2Mapped = as<MemoryBlob>(input2)->rwmap();
+            LockedMemory<void> input2Mapped = as<MemoryBlob>(input2)->wmap();
             float *p = input2Mapped.as<PrecisionTrait<Precision::FP32>::value_type*>();
 
             for (size_t image_id = 0; image_id < std::min(images.size(), batchSize); ++image_id) {
@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
 
         detOutPostProcessor.execute(detOutInBlobs, detOutOutBlobs, nullptr);
 
-        LockedMemory<void> outputBlobMapped = as<MemoryBlob>(output_blob)->rwmap();
+        LockedMemory<const void> outputBlobMapped = as<MemoryBlob>(output_blob)->rmap();
         const float* detection  = outputBlobMapped
             .as<PrecisionTrait<Precision::FP32>::value_type *>();
 

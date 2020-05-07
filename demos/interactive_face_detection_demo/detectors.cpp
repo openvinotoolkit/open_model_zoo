@@ -188,10 +188,10 @@ void FaceDetection::fetchResults() {
     results.clear();
     if (resultsFetched) return;
     resultsFetched = true;
-    LockedMemory<void> outputMapped = as<MemoryBlob>(request->GetBlob(output))->rwmap();
+    LockedMemory<const void> outputMapped = as<MemoryBlob>(request->GetBlob(output))->rmap();
     const float *detections = outputMapped.as<float *>();
     const int32_t *labels = !labels_output.empty()
-                            ? as<MemoryBlob>(request->GetBlob(labels_output))->rwmap().as<int32_t *>() : nullptr;
+                            ? as<MemoryBlob>(request->GetBlob(labels_output))->rmap().as<int32_t *>() : nullptr;
 
     for (int i = 0; i < maxProposalCount && objectSize == 5; i++) {
         Result r;
@@ -325,8 +325,8 @@ AgeGenderDetection::Result AgeGenderDetection::operator[] (int idx) const {
     Blob::Ptr  genderBlob = request->GetBlob(outputGender);
     Blob::Ptr  ageBlob    = request->GetBlob(outputAge);
 
-    LockedMemory<void> ageBlobMapped = as<MemoryBlob>(ageBlob)->rwmap();
-    LockedMemory<void> genderBlobMapped = as<MemoryBlob>(genderBlob)->rwmap();
+    LockedMemory<const void> ageBlobMapped = as<MemoryBlob>(ageBlob)->rmap();
+    LockedMemory<const void> genderBlobMapped = as<MemoryBlob>(genderBlob)->rmap();
     AgeGenderDetection::Result r = {ageBlobMapped.as<float*>()[idx] * 100,
                                     genderBlobMapped.as<float*>()[idx * 2 + 1]};
     if (doRawOutputMessages) {
@@ -416,9 +416,9 @@ HeadPoseDetection::Results HeadPoseDetection::operator[] (int idx) const {
     Blob::Ptr  angleP = request->GetBlob(outputAngleP);
     Blob::Ptr  angleY = request->GetBlob(outputAngleY);
 
-    LockedMemory<void> angleRMapped = as<MemoryBlob>(angleR)->rwmap();
-    LockedMemory<void> anglePMapped = as<MemoryBlob>(angleP)->rwmap();
-    LockedMemory<void> angleYMapped = as<MemoryBlob>(angleY)->rwmap();
+    LockedMemory<const void> angleRMapped = as<MemoryBlob>(angleR)->rmap();
+    LockedMemory<const void> anglePMapped = as<MemoryBlob>(angleP)->rmap();
+    LockedMemory<const void> angleYMapped = as<MemoryBlob>(angleY)->rmap();
     HeadPoseDetection::Results r = {angleRMapped.as<float*>()[idx],
                                     anglePMapped.as<float*>()[idx],
                                     angleYMapped.as<float*>()[idx]};
@@ -519,7 +519,7 @@ std::map<std::string, float> EmotionsDetection::operator[] (int idx) const {
                                std::to_string(emotionsVec.size()) + ")");
     }
 
-    LockedMemory<void> emotionsBlobMapped = as<MemoryBlob>(emotionsBlob)->rwmap();
+    LockedMemory<const void> emotionsBlobMapped = as<MemoryBlob>(emotionsBlob)->rmap();
     auto emotionsValues = emotionsBlobMapped.as<float *>();
     auto outputIdxPos = emotionsValues + idx * emotionsVecSize;
     std::map<std::string, float> emotions;
@@ -623,8 +623,8 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
 
     auto landmarksBlob = request->GetBlob(outputFacialLandmarksBlobName);
     auto n_lm = getTensorChannels(landmarksBlob->getTensorDesc());
-    LockedMemory<void> facialLandmarksBlobMapped = as<MemoryBlob>(
-        request->GetBlob(outputFacialLandmarksBlobName))->rwmap();
+    LockedMemory<const void> facialLandmarksBlobMapped =
+        as<MemoryBlob>(request->GetBlob(outputFacialLandmarksBlobName))->rmap();
     const float *normed_coordinates = facialLandmarksBlobMapped.as<float *>();
 
     if (doRawOutputMessages) {

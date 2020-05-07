@@ -145,7 +145,7 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
 
             auto preprocess = [&]() {
                 InferenceEngine::LockedMemory<void> buff = InferenceEngine::as<
-                    InferenceEngine::MemoryBlob>(inputBlob)->rwmap();
+                    InferenceEngine::MemoryBlob>(inputBlob)->wmap();
                 float* inputPtr = static_cast<float*>(buff);
                 auto loopBody = [&](size_t i) {
                     cv::resize(vframes[i]->frame,

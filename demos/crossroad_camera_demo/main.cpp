@@ -215,7 +215,7 @@ struct PersonDetection : BaseDetection{
         results.clear();
         if (resultsFetched) return;
         resultsFetched = true;
-        LockedMemory<void> outputMapped = as<MemoryBlob>(request.GetBlob(outputName))->rwmap();
+        LockedMemory<const void> outputMapped = as<MemoryBlob>(request.GetBlob(outputName))->rmap();
         const float *detections = outputMapped.as<float *>();
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
@@ -314,11 +314,11 @@ struct PersonAttribsDetection : BaseDetection {
                                    "Person Attributes Recognition network is not equal to point coordinates (2)");
         }
 
-        LockedMemory<void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rwmap();
+        LockedMemory<const void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rmap();
         auto outputAttrValues = attribsBlobMapped.as<float*>();
-        LockedMemory<void> topColorPointBlobMapped = as<MemoryBlob>(topColorPointBlob)->rwmap();
+        LockedMemory<const void> topColorPointBlobMapped = as<MemoryBlob>(topColorPointBlob)->rmap();
         auto outputTCPointValues = topColorPointBlobMapped.as<float*>();
-        LockedMemory<void> bottomColorPointBlobMapped = as<MemoryBlob>(bottomColorPointBlob)->rwmap();
+        LockedMemory<const void> bottomColorPointBlobMapped = as<MemoryBlob>(bottomColorPointBlob)->rmap();
         auto outputBCPointValues = bottomColorPointBlobMapped.as<float*>();
 
         AttributesAndColorPoints returnValue;
@@ -409,7 +409,7 @@ struct PersonReIdentification : BaseDetection {
         Blob::Ptr attribsBlob = request.GetBlob(outputName);
 
         auto numOfChannels = attribsBlob->getTensorDesc().getDims().at(1);
-        LockedMemory<void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rwmap();
+        LockedMemory<const void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rmap();
         auto outputValues = attribsBlobMapped.as<float*>();
         return std::vector<float>(outputValues, outputValues + numOfChannels);
     }

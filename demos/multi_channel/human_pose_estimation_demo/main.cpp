@@ -317,10 +317,10 @@ int main(int argc, char* argv[]) {
             std::vector<Detections> detections(pafsBatch);
 
 
-            InferenceEngine::LockedMemory<void> heatMapsBlobMapped = InferenceEngine::as<
-                InferenceEngine::MemoryBlob>(heatMapsBlobIt)->rwmap();
-            InferenceEngine::LockedMemory<void> pafsBlobMapped = InferenceEngine::as<
-                InferenceEngine::MemoryBlob>(pafsBlobIt)->rwmap();
+            InferenceEngine::LockedMemory<const void> heatMapsBlobMapped = InferenceEngine::as<
+                InferenceEngine::MemoryBlob>(heatMapsBlobIt)->rmap();
+            InferenceEngine::LockedMemory<const void> pafsBlobMapped = InferenceEngine::as<
+                InferenceEngine::MemoryBlob>(pafsBlobIt)->rmap();
             for (size_t i = 0; i < pafsBatch; i++) {
                 std::vector<HumanPose> poses = postprocess(
                 heatMapsBlobMapped.as<float*>() + i * heatMapsWidth * heatMapsHeight * heatMapsChannels,

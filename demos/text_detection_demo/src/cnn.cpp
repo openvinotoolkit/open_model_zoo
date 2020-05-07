@@ -68,8 +68,8 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
     // --------------------------- Preparing input -------------------------------------------------------
 
     /* Resize manually and copy data from the image to the input blob */
-    InferenceEngine::LockedMemory<void> inputMapped = InferenceEngine::as<
-        InferenceEngine::MemoryBlob>(infer_request_.GetBlob(input_name))->rwmap();
+    InferenceEngine::LockedMemory<const void> inputMapped = InferenceEngine::as<
+        InferenceEngine::MemoryBlob>(infer_request_.GetBlob(input_name))->rmap();
     input_data_ = inputMapped.as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
 
     is_initialized_ = true;
