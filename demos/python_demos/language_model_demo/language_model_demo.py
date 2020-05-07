@@ -25,7 +25,6 @@ from time import time
 from openvino.inference_engine import IENetwork, IECore
 import data_utils
 from six.moves import xrange
-import tensorflow as tf
 from perplexity import Calculate_Perplexity
 from unique import Calculate_Unique
 

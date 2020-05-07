@@ -16,10 +16,7 @@
 """A library for loading 1B word benchmark dataset."""
 
 import random
-
 import numpy as np
-import tensorflow as tf
-
 
 class Vocabulary(object):
   """Class that holds a vocabulary for the dataset."""
@@ -37,7 +34,7 @@ class Vocabulary(object):
     self._bos = -1
     self._eos = -1
 
-    with tf.gfile.Open(filename) as f:
+    with open(filename) as f:
       idx = 0
       for line in f:
         word_name = line.strip()
@@ -213,7 +210,7 @@ def get_batch(generator, batch_size, num_steps, max_word_length, pad=False):
       break
     yield inputs, char_inputs, global_word_ids, targets, weights
 
-
+'''
 class LM1BDataset(object):
   """Utility class for 1B word benchmark dataset.
 
@@ -277,3 +274,4 @@ class LM1BDataset(object):
   @property
   def vocab(self):
     return self._vocab
+'''
