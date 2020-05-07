@@ -30,10 +30,10 @@ class Detector(object):
         self._input_layer_name = next(iter(model.inputs))
         self._output_layer_names = sorted(model.outputs)
 
-        # assert model.outputs[self._output_layer_names[0]].shape[0] == \
-        #        model.outputs[self._output_layer_names[1]].shape[0], "Expected the same dimension for boxes and scores"
-        # assert model.outputs[self._output_layer_names[0]].shape[1] == 4, "Expected 4-coordinate boxes"
-        # assert model.outputs[self._output_layer_names[1]].shape[1] == 2, "Expected 2-class scores(background, face)"
+        assert model.outputs[self._output_layer_names[0]].shape[1] == \
+               model.outputs[self._output_layer_names[1]].shape[1], "Expected the same dimension for boxes and scores"
+        assert model.outputs[self._output_layer_names[0]].shape[2] == 4, "Expected 4-coordinate boxes"
+        assert model.outputs[self._output_layer_names[1]].shape[2] == 2, "Expected 2-class scores(background, face)"
 
         self._ie = ie
         self._exec_model = self._ie.load_network(model, device)
