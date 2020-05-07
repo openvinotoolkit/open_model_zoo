@@ -30,10 +30,10 @@ class Detector(object):
         self._input_layer_name = next(iter(model.inputs))
         self._output_layer_names = sorted(model.outputs)
 
-        assert model.outputs[self._output_layer_names[0]].shape[0] == \
-               model.outputs[self._output_layer_names[1]].shape[0], "Expected the same dimension for boxes and scores"
-        assert model.outputs[self._output_layer_names[0]].shape[1] == 4, "Expected 4-coordinate boxes"
-        assert model.outputs[self._output_layer_names[1]].shape[1] == 2, "Expected 2-class scores(background, face)"
+        # assert model.outputs[self._output_layer_names[0]].shape[0] == \
+        #        model.outputs[self._output_layer_names[1]].shape[0], "Expected the same dimension for boxes and scores"
+        # assert model.outputs[self._output_layer_names[0]].shape[1] == 4, "Expected 4-coordinate boxes"
+        # assert model.outputs[self._output_layer_names[1]].shape[1] == 2, "Expected 2-class scores(background, face)"
 
         self._ie = ie
         self._exec_model = self._ie.load_network(model, device)
@@ -122,10 +122,10 @@ class Detector(object):
     @staticmethod
     def resize_boxes(detections, image_size):
         h, w = image_size
-        x_mins = [x_min * w for x_min in detections[2]]
-        x_maxs = [x_max * w for x_max in detections[4]]
-        y_mins = [y_min * h for y_min in detections[3]]
-        y_maxs = [y_max * h for y_max in detections[5]]
+        x_mins = [x_min * w for x_min in detections.x_mins]
+        x_maxs = [x_max * w for x_max in detections.x_maxs]
+        y_mins = [y_min * h for y_min in detections.y_mins]
+        y_maxs = [y_max * h for y_max in detections.y_maxs]
         detections = detections._replace(x_mins=x_mins, y_mins=y_mins,x_maxs=x_maxs,y_maxs=y_maxs)
         return detections
 
@@ -183,12 +183,12 @@ class Detector(object):
                 y_maxs = y_maxs[:self.keep_top_k]
 
             labels = np.full_like(filtered_score, label, dtype=int)
-            dets[0].extend(labels)
-            dets[1].extend(filtered_score)
-            dets[2].extend(x_mins)
-            dets[3].extend(y_mins)
-            dets[4].extend(x_maxs)
-            dets[5].extend(y_maxs)
+            dets.labels.extend(labels)
+            dets.scores.extend(filtered_score)
+            dets.x_mins.extend(x_mins)
+            dets.y_mins.extend(y_mins)
+            dets.x_maxs.extend(x_maxs)
+            dets.y_maxs.extend(y_maxs)
 
         dets = self.resize_boxes(dets, image_sizes)
         return dets
