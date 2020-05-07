@@ -122,11 +122,11 @@ class Detector(object):
     @staticmethod
     def resize_boxes(detections, image_size):
         h, w = image_size
-        x_mins = [x_min * w for x_min in detections.x_mins]
-        x_maxs = [x_max * w for x_max in detections.x_maxs]
-        y_mins = [y_min * h for y_min in detections.y_mins]
-        y_maxs = [y_max * h for y_max in detections.y_maxs]
-        detections = detections._replace(x_mins=x_mins, y_mins=y_mins,x_maxs=x_maxs,y_maxs=y_maxs)
+        for i in range (len(detections)):
+            detections[i] = detections[i]._replace(x_min=detections[i].x_min * w,
+                                                   y_min=detections[i].y_min * h,
+                                                   x_max=detections[i].x_max * w,
+                                                   y_max=detections[i].y_max * h)
         return detections
 
     def preprocess(self, image):
@@ -142,8 +142,8 @@ class Detector(object):
     def postprocess(self, raw_output, image_sizes):
         boxes, scores = raw_output
 
-        detections = namedtuple('detections', 'scores, x_mins, y_mins, x_maxs, y_maxs')
-        dets = detections(scores=[], x_mins=[], y_mins=[], x_maxs=[], y_maxs=[])
+        detection = namedtuple('detection', 'score, x_min, y_min, x_max, y_max')
+        detections = []
         image_info = [self.input_height, self.input_width]
 
         feature_maps = [[math.ceil(image_info[0] / step), math.ceil(image_info[1] / step)] for step in
@@ -181,14 +181,12 @@ class Detector(object):
                 x_maxs = x_maxs[:self.keep_top_k]
                 y_maxs = y_maxs[:self.keep_top_k]
 
-            dets.scores.extend(filtered_score)
-            dets.x_mins.extend(x_mins)
-            dets.y_mins.extend(y_mins)
-            dets.x_maxs.extend(x_maxs)
-            dets.y_maxs.extend(y_maxs)
+            for score, x_min, y_min, x_max, y_max in zip(filtered_score, x_mins, y_mins, x_maxs, y_maxs):
+                det = detection(score=score, x_min=x_min, y_min=y_min, x_max=x_max, y_max=y_max)
+                detections.append(det)
 
-        dets = self.resize_boxes(dets, image_sizes)
-        return dets
+        detections = self.resize_boxes(detections, image_sizes)
+        return detections
 
     def detect(self, image):
         image_sizes = image.shape[:2]
