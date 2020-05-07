@@ -24,7 +24,7 @@ from openvino.inference_engine import IECore  # pylint: disable=import-error,E06
 
 from utils.capture import VideoCapture
 from utils.network_wrappers import MaskRCNN, SemanticSegmentation
-from utils.misc import MouseClick, set_log_config, path_exist, check_pressed_keys
+from utils.misc import MouseClick, set_log_config, check_pressed_keys
 
 sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
 import monitors
@@ -87,7 +87,7 @@ def main():
                         help='Optional. List of monitors to show initially')
     args = parser.parse_args()
 
-    if not path_exist(args.i) and not str.isdigit(args.i):
+    if not osp.isfile(args.i) and not str.isdigit(args.i):
         raise ValueError('File not found or wrong camera id: {}'.format(args.i))
     else:
         capture = VideoCapture(args.i)
@@ -98,9 +98,8 @@ def main():
 
     frame_size, fps = capture.get_source_parameters()
     out_frame_size = (int(frame_size[0]), int(frame_size[1] * 2))
-    presenter = monitors.Presenter(args.utilization_monitors,
-                                   out_frame_size[1] * 2 - out_frame_size[1],
-                                   out_frame_size)
+    presenter = monitors.Presenter(args.utilization_monitors, 20,
+                                   (out_frame_size[0] // 4, out_frame_size[1] // 16))
 
     root_dir = osp.dirname(osp.abspath(__file__))
 
@@ -127,18 +126,13 @@ def main():
                                             args.threshold, args.device, args.cpu_extension)
 
     has_frame = True
-    output_frame = None
     black_board = False
+    output_frame = np.full((frame_size[1], frame_size[0], 3), 255, dtype='uint8')
     frame_number = 0
     key = -1
 
     while has_frame:
         start = time.time()
-        if not args.no_show:
-            key = check_pressed_keys(key)
-            if key == 27:  # 'Esc'
-                break
-
         has_frame, frame = capture.get_frame()
 
         mask = None
@@ -150,7 +144,7 @@ def main():
                 for i in range(1, len(detections[0])):
                     mask = cv2.bitwise_or(mask, detections[0][i][2])
         else:
-            continue
+            break
 
         if mask is not None:
             mask = np.stack([mask, mask, mask], axis=-1)
@@ -159,12 +153,7 @@ def main():
 
         clear_frame = remove_background(frame, invert_colors=not black_board)
 
-        if output_frame is None:
-            fill_value = 0 if black_board else 255
-            white_black = np.full(frame.shape, fill_value, dtype='uint8')
-            output_frame = np.where(mask, white_black, clear_frame)
-        else:
-            output_frame = np.where(mask, output_frame, clear_frame)
+        output_frame = np.where(mask, output_frame, clear_frame)
         merged_frame = np.vstack([frame, output_frame])
         merged_frame = cv2.resize(merged_frame, out_frame_size)
 
@@ -174,7 +163,13 @@ def main():
         presenter.drawGraphs(merged_frame)
         if not args.no_show:
             cv2.imshow(WINNAME, merged_frame)
+            key = check_pressed_keys(key)
             presenter.handleKey(key)
+            if key == 27:  # 'Esc'
+                break
+            elif key == ord('i'):  # catch pressing of key 'i'
+                black_board = not black_board
+                output_frame = 255 - output_frame
 
         if mouse.crop_available:
             x0, x1 = min(mouse.points[0][0], mouse.points[1][0]), \
@@ -186,10 +181,6 @@ def main():
             if board.shape[0] > 0 and board.shape[1] > 0:
                 cv2.namedWindow('Board', cv2.WINDOW_KEEPRATIO)
                 cv2.imshow('Board', board)
-
-        if key == ord('i'):  # catch pressing of key 'i'
-            black_board = not black_board
-            output_frame = 255 - output_frame
             
         end = time.time()
         print('\rProcessing frame: {}, fps = {:.3}' \

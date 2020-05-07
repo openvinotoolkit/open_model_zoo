@@ -41,10 +41,6 @@ def set_log_config():
                     datefmt='%Y-%m-%d %H:%M:%S', level=log.DEBUG)
 
 
-def path_exist(name):
-    return osp.isfile(name)
-
-
 def check_pressed_keys(key):
     if key == SPACE:  # Pause
         while True:

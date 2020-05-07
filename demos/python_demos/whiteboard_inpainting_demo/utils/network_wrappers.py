@@ -25,9 +25,9 @@ class MaskRCNN(IEModel):
     def __init__(self, ie, model_path, labels_file,  conf=.6, device='CPU', ext_path=''):
         super().__init__(ie, model_path, labels_file, conf, device, ext_path)
 
-        required_input_keys = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
+        required_input_keys = {'im_info', 'im_data'}
         current_input_keys = set(self.inputs_info.keys())
-        assert current_input_keys in required_input_keys
+        assert current_input_keys == required_input_keys
         required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks'}
         assert required_output_keys.issubset(self.net.outputs)
 
