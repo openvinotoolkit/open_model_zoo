@@ -190,7 +190,7 @@ int main(int argc, char *argv[]) {
             /** Fill second input tensor with image info **/
             if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {
                 LockedMemory<void> inputMapped = as<MemoryBlob>(input)->wmap();
-                auto data = inputMapped.as<PrecisionTrait<Precision::FP32>::value_type *>();
+                auto data = inputMapped.as<float *>();
                 data[0] = static_cast<float>(netInputHeight);  // height
                 data[1] = static_cast<float>(netInputWidth);  // width
                 data[2] = 1;

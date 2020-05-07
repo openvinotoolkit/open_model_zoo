@@ -71,7 +71,7 @@ void IEWrapper::setInputBlob(const std::string& blobName,
     cv::resize(image, resizedImage, scaledSize, 0, 0, cv::INTER_CUBIC);
 
     auto inputBlob = request.GetBlob(blobName);
-    matU8ToBlob<PrecisionTrait<Precision::U8>::value_type>(resizedImage, inputBlob);
+    matU8ToBlob<uint8_t>(resizedImage, inputBlob);
 }
 
 void IEWrapper::setInputBlob(const std::string& blobName,
@@ -85,7 +85,7 @@ void IEWrapper::setInputBlob(const std::string& blobName,
         throw std::runtime_error("Input data does not match size of the blob");
     }
     LockedMemory<void> blobMapped = as<MemoryBlob>(request.GetBlob(blobName))->wmap();
-    auto buffer = blobMapped.as<PrecisionTrait<Precision::FP32>::value_type *>();
+    auto buffer = blobMapped.as<float *>();
     for (unsigned long int i = 0; i < data.size(); ++i) {
         buffer[i] = data[i];
     }
@@ -101,7 +101,7 @@ void IEWrapper::getOutputBlob(const std::string& blobName,
     }
     
     LockedMemory<const void> blobMapped = as<MemoryBlob>(request.GetBlob(blobName))->rmap();
-    auto buffer = blobMapped.as<PrecisionTrait<Precision::FP32>::value_type *>();
+    auto buffer = blobMapped.as<float *>();
 
     for (int i = 0; i < dataSize; ++i) {
         output.push_back(buffer[i]);

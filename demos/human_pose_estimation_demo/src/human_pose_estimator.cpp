@@ -122,8 +122,7 @@ void HumanPoseEstimator::frameToBlobCurr(const cv::Mat& image) {
     CV_Assert(image.type() == CV_8UC3);
     InferenceEngine::LockedMemory<const void> requestCurrBlobMapped = InferenceEngine::as<
         InferenceEngine::MemoryBlob>(requestCurr->GetBlob(network.getInputsInfo().begin()->first))->rmap();
-    auto buffer = requestCurrBlobMapped.as<
-        InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
+    auto buffer = requestCurrBlobMapped.as<uint8_t *>();
     preprocess(image, buffer);
 }
 
@@ -131,8 +130,7 @@ void HumanPoseEstimator::frameToBlobNext(const cv::Mat& image) {
     CV_Assert(image.type() == CV_8UC3);
     InferenceEngine::LockedMemory<const void> requestNextBlobMapped = InferenceEngine::as<
         InferenceEngine::MemoryBlob>(requestNext->GetBlob(network.getInputsInfo().begin()->first))->rmap();
-    auto buffer = requestNextBlobMapped.as<
-        InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
+    auto buffer = requestNextBlobMapped.as<uint8_t *>();
     preprocess(image, buffer);
 }
 

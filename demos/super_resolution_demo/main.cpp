@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
         // --------------------------- 8. Process output -------------------------------------------------------
         const Blob::Ptr outputBlob = inferRequest.GetBlob(firstOutputName);
         LockedMemory<const void> outputBlobMapped = as<MemoryBlob>(outputBlob)->rmap();
-        const auto outputData = outputBlobMapped.as<PrecisionTrait<Precision::FP32>::value_type*>();
+        const auto outputData = outputBlobMapped.as<float*>();
 
         size_t numOfImages = outputBlob->getTensorDesc().getDims()[0];
         size_t numOfChannels = outputBlob->getTensorDesc().getDims()[1];

@@ -225,7 +225,7 @@ int main(int argc, char *argv[]) {
             auto setImgInfoBlob = [&](const InferRequest::Ptr &inferReq) {
                 auto blob = inferReq->GetBlob(imageInfoInputName);
                 LockedMemory<void> blobMapped = as<MemoryBlob>(blob)->wmap();
-                auto data = blobMapped.as<PrecisionTrait<Precision::FP32>::value_type *>();
+                auto data = blobMapped.as<float *>();
                 data[0] = static_cast<float>(netInputHeight);  // height
                 data[1] = static_cast<float>(netInputWidth);  // width
                 data[2] = 1;
@@ -325,7 +325,7 @@ int main(int argc, char *argv[]) {
                 // Processing results of the CURRENT request
                 LockedMemory<const void> outputMapped = as<MemoryBlob>(
                     async_infer_request_curr->GetBlob(outputName))->rmap();
-                const float *detections = outputMapped.as<PrecisionTrait<Precision::FP32>::value_type*>();
+                const float *detections = outputMapped.as<float*>();
                 for (int i = 0; i < maxProposalCount; i++) {
                     float image_id = detections[i * objectSize + 0];
                     if (image_id < 0) {

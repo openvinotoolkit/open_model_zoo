@@ -85,15 +85,14 @@ cv::Mat resizeImage(cv::Mat& image, int modelInputResolution) {
 }
 
 std::vector<std::vector<unsigned>> topResults(Blob& inputBlob, unsigned numTop) {
-    using currentBlobType = PrecisionTrait<Precision::FP32>::value_type;
-    TBlob<currentBlobType>& tblob = dynamic_cast<TBlob<currentBlobType>&>(inputBlob);
+    TBlob<float>& tblob = dynamic_cast<TBlob<float>&>(inputBlob);
     size_t batchSize =  tblob.getTensorDesc().getDims()[0];
     numTop = static_cast<unsigned>(std::min<size_t>(size_t(numTop), tblob.size()));
     
     std::vector<std::vector<unsigned>> output(batchSize);
     for (size_t i = 0; i < batchSize; i++) {
         size_t offset = i * (tblob.size() / batchSize);
-        currentBlobType *batchData = tblob.data() + offset;
+        float *batchData = tblob.data() + offset;
         std::vector<unsigned> indices(tblob.size() / batchSize);
         std::iota(std::begin(indices), std::end(indices), 0);
         std::partial_sort(std::begin(indices), std::begin(indices) + numTop, std::end(indices),
