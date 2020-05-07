@@ -40,7 +40,7 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
     // --------------------------- Configuring input and output ------------------------------------------
     // ---------------------------   Preparing input blobs -----------------------------------------------
     InputInfo::Ptr input_info = network.getInputsInfo().begin()->second;
-    std::string input_name = network.getInputsInfo().begin()->first;
+    input_name_ = network.getInputsInfo().begin()->first;
 
     input_info->setLayout(Layout::NCHW);
     input_info->setPrecision(Precision::FP32);
@@ -65,18 +65,16 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
     infer_request_ = executable_network.CreateInferRequest();
     // ---------------------------------------------------------------------------------------------------
 
-    // --------------------------- Preparing input -------------------------------------------------------
-
-    /* Resize manually and copy data from the image to the input blob */
-    InferenceEngine::LockedMemory<const void> inputMapped = InferenceEngine::as<
-        InferenceEngine::MemoryBlob>(infer_request_.GetBlob(input_name))->rmap();
-    input_data_ = inputMapped.as<float *>();
-
     is_initialized_ = true;
 }
 
 InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
+    /* Resize manually and copy data from the image to the input blob */
+    InferenceEngine::LockedMemory<void> inputMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_.GetBlob(input_name_))->wmap();
+    input_data_ = inputMapped.as<float *>();
 
     cv::Mat image;
     if (channels_ == 1) {

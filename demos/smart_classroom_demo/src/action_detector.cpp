@@ -131,19 +131,7 @@ DetectedActions ActionDetection::fetchResults() {
     const auto loc_blob_name = new_network_ ? config_.new_loc_blob_name : config_.old_loc_blob_name;
     const auto det_conf_blob_name = new_network_ ? config_.new_det_conf_blob_name : config_.old_det_conf_blob_name;
 
-    cv::Mat priorboxMat;
-    if (new_network_) {
-        priorboxMat = cv::Mat();
-    } else {
-        LockedMemory<const void> priorboxOutBlobMapped =
-            as<MemoryBlob>(request->GetBlob(config_.old_priorbox_blob_name))->rmap();
-        priorboxMat = cv::Mat(ieSizeToVector(request->
-                              GetBlob(config_.old_priorbox_blob_name)->getTensorDesc().getDims()), CV_32F,
-                              priorboxOutBlobMapped.as<float*>());
-    }
-    const cv::Mat priorbox_out = priorboxMat;
-
-    LockedMemory<const void> locBlobMapped = as<MemoryBlob>(request->GetBlob(loc_blob_name))->rmap();
+    LockedMemory<void> locBlobMapped = as<MemoryBlob>(request->GetBlob(loc_blob_name))->rwmap();
     const cv::Mat loc_out(ieSizeToVector(request->GetBlob(loc_blob_name)->getTensorDesc().getDims()),
                           CV_32F, locBlobMapped.as<float*>());
 
@@ -160,6 +148,17 @@ DetectedActions ActionDetection::fetchResults() {
     }
 
     /** Parse detections **/
+    if (new_network_) {
+        const cv::Mat priorbox_out;
+        return GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
+                             cv::Size(static_cast<int>(width_), static_cast<int>(height_)));
+    }
+
+    LockedMemory<void> priorboxOutBlobMapped =
+        as<MemoryBlob>(request->GetBlob(config_.old_priorbox_blob_name))->rwmap();
+    const cv::Mat priorbox_out = cv::Mat(ieSizeToVector(request->
+                                         GetBlob(config_.old_priorbox_blob_name)->getTensorDesc().getDims()), CV_32F,
+                                         priorboxOutBlobMapped);
     return GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
                          cv::Size(static_cast<int>(width_), static_cast<int>(height_)));
 }

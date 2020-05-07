@@ -190,49 +190,52 @@ void FaceDetection::fetchResults() {
     resultsFetched = true;
     LockedMemory<const void> outputMapped = as<MemoryBlob>(request->GetBlob(output))->rmap();
     const float *detections = outputMapped.as<float *>();
-    const int32_t *labels = !labels_output.empty()
-                            ? as<MemoryBlob>(request->GetBlob(labels_output))->rmap().as<int32_t *>() : nullptr;
 
-    for (int i = 0; i < maxProposalCount && objectSize == 5; i++) {
-        Result r;
-        r.label = labels[i];
-        r.confidence = detections[i * objectSize + 4];
+    if (!labels_output.empty()) {
+        LockedMemory<const void> labelsMapped = as<MemoryBlob>(request->GetBlob(labels_output))->rmap();
+        const int32_t *labels = labelsMapped.as<int32_t *>();
 
-        if (r.confidence <= detectionThreshold && !doRawOutputMessages) {
-            continue;
-        }
+        for (int i = 0; i < maxProposalCount && objectSize == 5; i++) {
+            Result r;
+            r.label = labels[i];
+            r.confidence = detections[i * objectSize + 4];
 
-        r.location.x = static_cast<int>(detections[i * objectSize + 0] / network_input_width * width);
-        r.location.y = static_cast<int>(detections[i * objectSize + 1] / network_input_height * height);
-        r.location.width = static_cast<int>(detections[i * objectSize + 2] / network_input_width * width - r.location.x);
-        r.location.height = static_cast<int>(detections[i * objectSize + 3] / network_input_height * height - r.location.y);
+            if (r.confidence <= detectionThreshold && !doRawOutputMessages) {
+                continue;
+            }
 
-        // Make square and enlarge face bounding box for more robust operation of face analytics networks
-        int bb_width = r.location.width;
-        int bb_height = r.location.height;
+            r.location.x = static_cast<int>(detections[i * objectSize + 0] / network_input_width * width);
+            r.location.y = static_cast<int>(detections[i * objectSize + 1] / network_input_height * height);
+            r.location.width = static_cast<int>(detections[i * objectSize + 2] / network_input_width * width - r.location.x);
+            r.location.height = static_cast<int>(detections[i * objectSize + 3] / network_input_height * height - r.location.y);
 
-        int bb_center_x = r.location.x + bb_width / 2;
-        int bb_center_y = r.location.y + bb_height / 2;
+            // Make square and enlarge face bounding box for more robust operation of face analytics networks
+            int bb_width = r.location.width;
+            int bb_height = r.location.height;
 
-        int max_of_sizes = std::max(bb_width, bb_height);
+            int bb_center_x = r.location.x + bb_width / 2;
+            int bb_center_y = r.location.y + bb_height / 2;
 
-        int bb_new_width = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
-        int bb_new_height = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
+            int max_of_sizes = std::max(bb_width, bb_height);
 
-        r.location.x = bb_center_x - static_cast<int>(std::floor(bb_dx_coefficient * bb_new_width / 2));
-        r.location.y = bb_center_y - static_cast<int>(std::floor(bb_dy_coefficient * bb_new_height / 2));
+            int bb_new_width = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
+            int bb_new_height = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
 
-        r.location.width = bb_new_width;
-        r.location.height = bb_new_height;
+            r.location.x = bb_center_x - static_cast<int>(std::floor(bb_dx_coefficient * bb_new_width / 2));
+            r.location.y = bb_center_y - static_cast<int>(std::floor(bb_dy_coefficient * bb_new_height / 2));
 
-        if (doRawOutputMessages) {
-            std::cout << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
-                         "    (" << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
-                      << r.location.height << ")"
-                      << ((r.confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << std::endl;
-        }
-        if (r.confidence > detectionThreshold) {
-            results.push_back(r);
+            r.location.width = bb_new_width;
+            r.location.height = bb_new_height;
+
+            if (doRawOutputMessages) {
+                std::cout << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
+                             "    (" << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
+                          << r.location.height << ")"
+                          << ((r.confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << std::endl;
+            }
+            if (r.confidence > detectionThreshold) {
+                results.push_back(r);
+            }
         }
     }
 
