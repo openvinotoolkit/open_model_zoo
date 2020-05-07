@@ -18,7 +18,6 @@ from __future__ import print_function
 import sys
 import os
 from argparse import ArgumentParser, SUPPRESS
-import cv2
 import numpy as np
 import logging as log
 from time import time
@@ -71,7 +70,7 @@ def main():
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
     prefix_words = args.input
     number_samples = args.number_samples
-    show_perplexity = bool(int(args.perplexity))
+    perplexity_mode = bool(int(args.perplexity))
     
     print("open vocab file: {}".format(args.vocab))
     vocab = data_utils.CharsVocabulary(args.vocab, MAX_WORD_LEN)
@@ -109,7 +108,7 @@ def main():
     prefix = [vocab.word_to_id(w) for w in prefix_words.split()]
     prefix_char_ids = [vocab.word_to_char_ids(w) for w in prefix_words.split()]
 
-    if show_perplexity is True:
+    if perplexity_mode is True:
         sum_num = 0.0
         sum_den = 0.0
         sentence_perplexity = 0.0
@@ -144,10 +143,11 @@ def main():
             if not samples:
                 samples = [sample]
                 char_ids_samples = [sample_char_ids]
+                if perplexity_mode is True and vocab.id_to_word(samples[0]) != '</S>':
+                    break
             sent += vocab.id_to_word(samples[0]) + ' '
-            sys.stderr.write('%s\n' % sent)
 
-            if show_perplexity is True:
+            if perplexity_mode is True:
                 tgts = np.array([[samples[0]]])
                 cal_log_perp = Calculate_Perplexity(tgts, _, softmax_out[0])
                 log_perp = cal_log_perp._log_perplexity_out()
@@ -159,7 +159,11 @@ def main():
             if (vocab.id_to_word(samples[0]) == '</S>' or len(sent) > 100):
                 break
 
-    if show_perplexity is True:
+            if perplexity_mode is not True:
+                sys.stderr.write('%s\n' % sent)
+
+    if perplexity_mode is True:
+        sys.stderr.write('%s\n' % sent)
         sys.stderr.write("Eval sentence perplexity: %f.\n" % sentence_perplexity)
 
 if __name__ == '__main__':
