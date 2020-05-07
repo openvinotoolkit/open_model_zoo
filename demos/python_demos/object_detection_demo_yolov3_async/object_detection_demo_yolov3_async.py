@@ -135,16 +135,16 @@ def entry_index(side, coord, classes, location, entry):
     return int(side_power_2 * (n * (coord + classes + 1) + entry) + loc)
 
 
-def scale_bbox(x, y, h, w, class_id, confidence, im_h, im_w, is_proportional):
+def scale_bbox(x, y, height, width, class_id, confidence, im_h, im_w, is_proportional):
     if is_proportional:
         scale = np.array([min(im_w/im_h, 1), min(im_h/im_w, 1)])
         offset = 0.5*(np.ones(2) - scale)
         x, y = (np.array([x, y]) - offset) / scale
-        w, h = np.array([w, h]) / scale
-    xmin = int((x - w / 2) * im_w)
-    ymin = int((y - h / 2) * im_h)
-    xmax = int(xmin + w * im_w)
-    ymax = int(ymin + h * im_h)
+        width, height = np.array([width, height]) / scale
+    xmin = int((x - width / 2) * im_w)
+    ymin = int((y - height / 2) * im_h)
+    xmax = int(xmin + width * im_w)
+    ymax = int(ymin + height * im_h)
     # Method item() used here to convert NumPy types to native types for compatibility with functions, which don't
     # support Numpy types (e.g., cv2.rectangle doesn't support int64 in color parameter)
     return dict(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, class_id=class_id.item(), confidence=confidence.item())
@@ -180,13 +180,13 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
             y = (row + predictions[box_index + 1 * side_square]) / params.side
             # Value for exp is very big number in some cases so following construction is using here
             try:
-                w_exp = exp(predictions[box_index + 2 * side_square])
-                h_exp = exp(predictions[box_index + 3 * side_square])
+                width = exp(predictions[box_index + 2 * side_square])
+                height = exp(predictions[box_index + 3 * side_square])
             except OverflowError:
                 continue
             # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
-            w = w_exp * params.anchors[2 * n] / size_normalizer[0]
-            h = h_exp * params.anchors[2 * n + 1] / size_normalizer[1]
+            width = width * params.anchors[2 * n] / size_normalizer[0]
+            height = height * params.anchors[2 * n + 1] / size_normalizer[1]
             class_probabilities = []
             for j in range(params.classes):
                 class_index = entry_index(params.side, params.coords, params.classes, n * side_square + i,
@@ -197,7 +197,7 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
             confidence = class_probabilities[class_id]*object_probability
             if confidence < threshold:
                 continue
-            objects.append(scale_bbox(x=x, y=y, h=h, w=w, class_id=class_id, confidence=confidence,
+            objects.append(scale_bbox(x=x, y=y, height=height, width=width, class_id=class_id, confidence=confidence,
                                       im_h=orig_im_h, im_w=orig_im_w, is_proportional=is_proportional))
     return objects
 
@@ -270,18 +270,18 @@ def filter_objects(objects, iou_threshold, prob_threshold):
 def async_callback(status, callback_args):
     request, frame_id, frame_mode, frame, start_time, completed_request_results, empty_requests, \
     mode, event, callback_exceptions = callback_args
-    
+
     try:
         if status != 0:
             raise RuntimeError('Infer Request has returned status code {}'.format(status))
-        
+
         completed_request_results[frame_id] = (frame, request.outputs, start_time, frame_mode == mode.current)
 
         if mode.current == frame_mode:
             empty_requests.append(request)
     except Exception as e:
         callback_exceptions.append(e)
-    
+
     event.set()
 
 
@@ -405,7 +405,7 @@ def main():
           and not callback_exceptions:
         if next_frame_id_to_show in completed_request_results:
             frame, output, start_time, is_same_mode = completed_request_results.pop(next_frame_id_to_show)
-            
+
             next_frame_id_to_show += 1
             if is_same_mode:
                 mode_info[mode.current].frames_count += 1
@@ -453,7 +453,7 @@ def main():
 
                 put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
                 put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
-            
+
             mode_message = "{} mode".format(mode.current.name)
             put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
                                  cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
@@ -467,11 +467,11 @@ def main():
                 if key == 9: # Tab key
                     prev_mode = mode.current
                     mode.next()
-                    
+
                     await_requests_completion(exec_nets[prev_mode].requests)
                     empty_requests.clear()
                     empty_requests.extend(exec_nets[mode.current].requests)
-                    
+
                     mode_info[prev_mode].last_end_time = perf_counter()
                     mode_info[mode.current] = ModeInfo()
                 else:
@@ -509,7 +509,7 @@ def main():
 
         else:
             event.wait()
-    
+
     if callback_exceptions:
         raise callback_exceptions[0]
 
@@ -525,7 +525,7 @@ def main():
         log.info("Latency: {:.1f} ms".format((mode_info[mode_value].latency_sum / \
                                              mode_info[mode_value].frames_count) * 1e3))
     print(presenter.reportMeans())
-        
+
     for exec_net in exec_nets.values():
         await_requests_completion(exec_net.requests)
 
