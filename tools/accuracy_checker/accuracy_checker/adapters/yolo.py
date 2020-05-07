@@ -1,6 +1,6 @@
-import numpy as np
-
 from collections import namedtuple
+
+import numpy as np
 
 from ..adapters import Adapter
 from ..config import BoolField, NumberField, StringField, ConfigValidator, ListField, ConfigError
@@ -12,22 +12,18 @@ DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h", "confidence", "pr
 
 
 class YoloOutputProcessor:
-    def __init__(self, normalizers=[1, 1, 1, 1],
-                 coord_correct=lambda x: x, size_correct=lambda x: np.exp(x),
-                 conf_correct=lambda x: x, prob_correct=lambda x: x):
-        self.reset_normalizers(normalizers)
+    def __init__(self, coord_correct=lambda x: x, size_correct=lambda x: np.exp(x), conf_correct=lambda x: x,
+                 prob_correct=lambda x: x, coord_normalizer=(1, 1), size_normalizer=(1, 1)):
         self.coord_correct = coord_correct
         self.size_correct = size_correct
         self.conf_correct = conf_correct
         self.prob_correct = prob_correct
+        self.x_normalizer, self.y_normalizer = coord_normalizer
+        self.width_normalizer, self.height_normalizer = size_normalizer
 
-    def reset_normalizers(self, normalizers):
-        self.x_normalizer = normalizers[0]
-        self.y_normalizer = normalizers[1]
-        self.width_normalizer = normalizers[2]
-        self.height_normalizer = normalizers[3]
-
-    def __call__(self, bbox, i, j, anchors=[1, 1]):
+    def __call__(self, bbox, i, j, anchors=None):
+        if anchors is None:
+            anchors = [1, 1]
         x = (self.coord_correct(bbox.x) + i) / self.x_normalizer
         y = (self.coord_correct(bbox.y) + j) / self.y_normalizer
 
@@ -197,12 +193,14 @@ class YoloV2Adapter(Adapter):
         self.raw_output = self.get_value_from_config('raw_output')
         self.output_format = self.get_value_from_config('output_format')
         if self.raw_output:
-            self.processor = YoloOutputProcessor(normalizers=4*[self.cells],
-                                                 coord_correct= lambda x: 1./ (1 + np.exp(-x)),
-                                                 conf_correct= lambda x: 1./ (1 + np.exp(-x)),
-                                                 prob_correct= lambda x: np.exp(x) / np.sum(np.exp(x)))
+            self.processor = YoloOutputProcessor(coord_correct=lambda x: 1. / (1 + np.exp(-x)),
+                                                 conf_correct=lambda x: 1. / (1 + np.exp(-x)),
+                                                 prob_correct=lambda x: np.exp(x) / np.sum(np.exp(x)),
+                                                 coord_normalizer=(self.cells, self.cells),
+                                                 size_normalizer=(self.cells, self.cells))
         else:
-            self.processor = YoloOutputProcessor(normalizers=4*[self.cells])
+            self.processor = YoloOutputProcessor(coord_normalizer=(self.cells, self.cells),
+                                                 size_normalizer=(self.cells, self.cells))
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -218,9 +216,11 @@ class YoloV2Adapter(Adapter):
         box_size = self.classes + self.coords + 1
         for identifier, prediction in zip(identifiers, predictions):
             if len(prediction.shape) != 3:
-                new_shape = (self.num * box_size, self.cells, self.cells) if self.output_format == 'BHW' \
-                    else (self.cells, self.cells, self.num * box_size)
-                prediction = np.reshape(prediction,new_shape)
+                if self.output_format == 'BHW':
+                    new_shape = (self.num * box_size, self.cells, self.cells)
+                else:
+                    new_shape = (self.cells, self.cells, self.num * box_size)
+                prediction = np.reshape(prediction, new_shape)
             labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(prediction, self.cells, self.num,
                                                                           box_size, self.anchors,
                                                                           self.processor)
@@ -330,11 +330,10 @@ class YoloV3Adapter(Adapter):
         self.output_format = self.get_value_from_config('output_format')
         if self.raw_output:
             self.processor = YoloOutputProcessor(coord_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
-                                                 size_correct=lambda x: np.exp(x),
                                                  conf_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
                                                  prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
         else:
-            self.processor = YoloOutputProcessor(size_correct=lambda x: np.exp(x))
+            self.processor = YoloOutputProcessor()
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -375,8 +374,10 @@ class YoloV3Adapter(Adapter):
                 self.processor.x_normalizer = cells
                 self.processor.y_normalizer = cells
                 if len(p.shape) != 3:
-                    new_shape = (num * box_size, cells, cells) if self.output_format == 'BHW' \
-                        else (cells, cells, num * box_size)
+                    if self.output_format == 'BHW':
+                        new_shape = (num * box_size, cells, cells)
+                    else:
+                        new_shape = (cells, cells, num * box_size)
                     p = np.reshape(p, new_shape)
                 labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num,
                                                                               box_size, anchors,
