@@ -142,8 +142,8 @@ class Detector(object):
     def postprocess(self, raw_output, image_sizes):
         boxes, scores = raw_output
 
-        detections = namedtuple('detections', 'labels, scores, x_mins, y_mins, x_maxs, y_maxs')
-        dets = detections(labels=[], scores=[], x_mins=[], y_mins=[], x_maxs=[], y_maxs=[])
+        detections = namedtuple('detections', 'scores, x_mins, y_mins, x_maxs, y_maxs')
+        dets = detections(scores=[], x_mins=[], y_mins=[], x_maxs=[], y_maxs=[])
         image_info = [self.input_height, self.input_width]
 
         feature_maps = [[math.ceil(image_info[0] / step), math.ceil(image_info[1] / step)] for step in
@@ -156,7 +156,6 @@ class Detector(object):
         boxes[:, 2:] = np.exp(boxes[:, 2:]) * prior_data[:, 2:]
 
         score = np.transpose(scores)[1]
-        label = 1
 
         mask = score > self.confidence_threshold
         filtered_boxes, filtered_score = boxes[mask, :], score[mask]
@@ -182,8 +181,6 @@ class Detector(object):
                 x_maxs = x_maxs[:self.keep_top_k]
                 y_maxs = y_maxs[:self.keep_top_k]
 
-            labels = np.full_like(filtered_score, label, dtype=int)
-            dets.labels.extend(labels)
             dets.scores.extend(filtered_score)
             dets.x_mins.extend(x_mins)
             dets.y_mins.extend(y_mins)

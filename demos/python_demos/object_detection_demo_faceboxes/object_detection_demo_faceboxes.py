@@ -41,7 +41,6 @@ def build_argparser():
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU", default="CPU", type=str)
-    args.add_argument("--labels", help="Optional. Path to labels mapping file", default=None, type=str)
     args.add_argument("-pt", "--prob_threshold", help="Optional. Probability threshold for detections filtering",
                       default=0.5, type=float)
     args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
@@ -98,25 +97,18 @@ def main():
     img = cv2.imread(args.input[0], cv2.IMREAD_COLOR)
     frames_reader, delay = (VideoReader(args.input), 1) if img is None else (ImageReader(args.input), 0)
 
-    if args.labels:
-        with open(args.labels, 'r') as f:
-            labels_map = [x.strip() for x in f]
-    else:
-        labels_map = None
-
     presenter = monitors.Presenter(args.utilization_monitors, 25)
     for frame in frames_reader:
         detections = detector.detect(frame)
         presenter.drawGraphs(frame)
-        for label, score, x_min, y_min, x_max, y_max in zip(*detections):
+        for score, x_min, y_min, x_max, y_max in zip(*detections):
             x_min = int(max(0, x_min))
             y_min = int(max(0, y_min))
             x_max = int(min(frame.shape[1], x_max))
             y_max = int(min(frame.shape[0], y_max))
-            det_label = labels_map[int(label)] if labels_map else str(int(label))
-            color = (min(label * 12.5, 255), min(label * 7.0, 255), min(label * 3.0, 255))
+            color = (12.5, 7.0, 3.0)
             cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), color, 2)
-            cv2.putText(frame, det_label + ' ' + str(round(score * 100, 1)) + ' %', (x_min, y_min - 7),
+            cv2.putText(frame, str(round(score * 100, 1)) + ' %', (x_min, y_min - 7),
                          cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
         cv2.putText(frame, 'summary: {:.1f} FPS'.format(
