@@ -14,8 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from collections import namedtuple
-
 import numpy as np
 
 from ..representation import QuestionAnsweringAnnotation
@@ -23,7 +21,7 @@ from ..utils import read_json
 from ..config import PathField, NumberField, BoolField
 
 from .format_converter import BaseFormatConverter, ConverterReturn
-from ._nlp_common import get_tokenizer, CLS_ID, SEP_ID
+from ._nlp_common import SquadWordPieseTokenizer
 
 
 class SQUADConverter(BaseFormatConverter):
@@ -35,8 +33,7 @@ class SQUADConverter(BaseFormatConverter):
         configuration_parameters = super().parameters()
         configuration_parameters.update({
             'testing_file': PathField(description="Path to testing file."),
-            'vocab_file': PathField(description='Path to vocabulary file.', optional=True),
-            'sentence_piece_model_file': PathField(description='sentence piece model for tokenization', optional=True),
+            'vocab_file': PathField(description='Path to vocabulary file.'),
             'max_seq_length': NumberField(
                 description='The maximum total input sequence length after WordPiece tokenization.',
                 optional=True, default=128, value_type=int
@@ -60,7 +57,9 @@ class SQUADConverter(BaseFormatConverter):
         self.max_query_length = self.get_value_from_config('max_query_length')
         self.doc_stride = self.get_value_from_config('doc_stride')
         self.lower_case = self.get_value_from_config('lower_case')
-        self.tokenizer = get_tokenizer(self.config, self.lower_case)
+        self.tokenizer = SquadWordPieseTokenizer(
+            self.get_value_from_config('vocab_file'), self.lower_case, self.max_seq_length
+        )
         self.support_vocab = 'vocab_file' in self.config
 
     @staticmethod
@@ -111,84 +110,152 @@ class SQUADConverter(BaseFormatConverter):
         examples, answers = self._load_examples(self.testing_file)
         annotations = []
         unique_id = 1000000000
-        DocSpan = namedtuple("DocSpan", ["start", "length"])
 
         for (example_index, example) in enumerate(examples):
-            query_tokens = self.tokenizer.tokenize(example['question_text'])
-            if len(query_tokens) > self.max_query_length:
-                query_tokens = query_tokens[:self.max_query_length]
-            all_doc_tokens = []
-            for (i, token) in enumerate(example['tokens']):
-                sub_tokens = self.tokenizer.tokenize(token)
-                for sub_token in sub_tokens:
-                    all_doc_tokens.append(sub_token)
-            max_tokens_for_doc = self.max_seq_length - len(query_tokens) - 3
-            doc_spans = []
-            start_offset = 0
-            while start_offset < len(all_doc_tokens):
-                length = len(all_doc_tokens) - start_offset
-                if length > max_tokens_for_doc:
-                    length = max_tokens_for_doc
-                doc_spans.append(DocSpan(start_offset, length))
-                if start_offset + length == len(all_doc_tokens):
+            all_doc_tokens, tok_to_orig_index, _ = self.get_all_doc_tokens(example['tokens'])
+            spans = []
+            truncated_query = self.tokenizer.encode(
+                example['question_text'], add_special_tokens=False, max_length=self.max_query_length
+            )
+            sequence_added_tokens = self.tokenizer.max_len - self.tokenizer.max_len_single_sentence
+            sequence_pair_added_tokens = self.tokenizer.max_len - self.tokenizer.max_len_sentences_pair
+
+            span_doc_tokens = all_doc_tokens
+            while len(spans) * self.doc_stride < len(all_doc_tokens):
+                encoded_dict = self.tokenizer.encode_plus(
+                    truncated_query if self.tokenizer.padding_side == "right" else span_doc_tokens,
+                    span_doc_tokens if self.tokenizer.padding_side == "right" else truncated_query,
+                    max_length=self.max_seq_length,
+                    return_overflowing_tokens=True,
+                    pad_to_max_length=True,
+                    stride=self.max_seq_length - self.doc_stride - len(truncated_query) - sequence_pair_added_tokens,
+                    truncation_strategy="only_second" if self.tokenizer.padding_side == "right" else "only_first",
+                )
+
+                paragraph_len = min(
+                    len(all_doc_tokens) - len(spans) * self.doc_stride,
+                    self.max_seq_length - len(truncated_query) - sequence_pair_added_tokens,
+                )
+
+                if self.tokenizer.pad_token_id in encoded_dict["input_ids"]:
+                    non_padded_ids = encoded_dict["input_ids"][:encoded_dict["input_ids"].index(
+                        self.tokenizer.pad_token_id
+                    )]
+                else:
+                    non_padded_ids = encoded_dict["input_ids"]
+
+                tokens = self.tokenizer.convert_ids_to_tokens(non_padded_ids)
+
+                tr_q_len = len(truncated_query)
+                encoded_dict["paragraph_len"] = paragraph_len
+                encoded_dict["tokens"] = tokens
+                encoded_dict["token_to_orig_map"] = self.get_token_to_orig_map(
+                    paragraph_len, tr_q_len, sequence_added_tokens, spans, tok_to_orig_index
+                )
+                encoded_dict["truncated_query_with_special_tokens_length"] = tr_q_len + sequence_added_tokens
+                encoded_dict["token_is_max_context"] = {}
+                encoded_dict["start"] = len(spans) * self.doc_stride
+                encoded_dict["length"] = paragraph_len
+
+                spans.append(encoded_dict)
+
+                if "overflowing_tokens" not in encoded_dict:
                     break
-                start_offset += min(length, self.doc_stride)
+                span_doc_tokens = encoded_dict["overflowing_tokens"]
 
-            for idx, doc_span in enumerate(doc_spans):
-                tokens = []
-                segment_ids = []
-                tokens.append("[CLS]" if self.support_vocab else CLS_ID)
-                segment_ids.append(0)
-                for token in query_tokens:
-                    tokens.append(token)
-                    segment_ids.append(0)
-                tokens.append("[SEP]" if self.support_vocab else SEP_ID)
-                segment_ids.append(0)
+            self.set_max_context(spans)
 
-                for i in range(doc_span.length):
-                    split_token_index = doc_span.start + i
-                    tokens.append(all_doc_tokens[split_token_index])
-                    segment_ids.append(1)
-                tokens.append("[SEP]" if self.support_vocab else SEP_ID)
-                segment_ids.append(1)
-                input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab else tokens
-                input_mask = [1] * len(input_ids)
+            for span in spans:
+                # Identify the position of the CLS token
+                cls_index = span["input_ids"].index(self.tokenizer.cls_token_id)
 
-                while len(input_ids) < self.max_seq_length:
-                    input_ids.append(0)
-                    input_mask.append(0)
-                    segment_ids.append(0)
+                # p_mask: mask with 1 for token than cannot be in the answer (0 for token which can be in an answer)
+                # Original TF implem also keep the classification token (set to 0)
+                p_mask = np.array(span["token_type_ids"])
 
-                # add index to make identifier unique
+                p_mask = np.minimum(p_mask, 1)
+
+                if self.tokenizer.padding_side == "right":
+                    # Limit positive values to one
+                    p_mask = 1 - p_mask
+
+                p_mask[np.where(np.array(span["input_ids"]) == self.tokenizer.sep_token_id)[0]] = 1
+
+                # Set the CLS index to '0'
+                p_mask[cls_index] = 0
+                idx = example_index
                 identifier = ['input_ids_{}'.format(idx), 'input_mask_{}'.format(idx), 'segment_ids_{}'.format(idx)]
+
                 annotation = QuestionAnsweringAnnotation(
                     identifier,
                     np.array(unique_id),
-                    np.array(input_ids),
-                    np.array(input_mask),
-                    np.array(segment_ids),
-                    tokens,
+                    np.array(span["input_ids"]),
+                    np.array(span["attention_mask"]),
+                    np.array(span["token_type_ids"]),
+                    np.array(cls_index),
+                    p_mask,
                     answers[example_index],
+                    example["context_text"],
+                    example["tokens"],
+                    example['is_impossible'],
+                    span["paragraph_len"],
+                    span["token_is_max_context"],
+                    span["tokens"],
+                    span["token_to_orig_map"],
                 )
+                annotation.metadata['lower_case'] = self.lower_case
                 annotations.append(annotation)
                 unique_id += 1
+
         return ConverterReturn(annotations, None, None)
 
     @staticmethod
     def _is_max_context(doc_spans, cur_span_index, position):
+        """Check if this is the 'max context' doc span for the token."""
         best_score = None
         best_span_index = None
         for (span_index, doc_span) in enumerate(doc_spans):
-            end = doc_span.start + doc_span.length - 1
-            if position < doc_span.start:
+            end = doc_span["start"] + doc_span["length"] - 1
+            if position < doc_span["start"]:
                 continue
             if position > end:
                 continue
-            num_left_context = position - doc_span.start
+            num_left_context = position - doc_span["start"]
             num_right_context = end - position
-            score = min(num_left_context, num_right_context) + 0.01 * doc_span.length
+            score = min(num_left_context, num_right_context) + 0.01 * doc_span["length"]
             if best_score is None or score > best_score:
                 best_score = score
                 best_span_index = span_index
 
         return cur_span_index == best_span_index
+
+
+    def get_all_doc_tokens(self, tokens):
+        all_doc_tokens = []
+        tok_to_orig_index = []
+        orig_to_tok_index = []
+        for (i, token) in enumerate(tokens):
+            orig_to_tok_index.append(len(all_doc_tokens))
+            sub_tokens = self.tokenizer.tokenize(token)
+            for sub_token in sub_tokens:
+                tok_to_orig_index.append(i)
+                all_doc_tokens.append(sub_token)
+        return all_doc_tokens, tok_to_orig_index, orig_to_tok_index
+
+    def get_token_to_orig_map(self, paragraph_len, tr_q_len, sequence_added_tokens, spans, tok_to_orig_index):
+        token_to_orig_map = {}
+        for i in range(paragraph_len):
+            index = tr_q_len + sequence_added_tokens + i if self.tokenizer.padding_side == "right" else i
+            token_to_orig_map[index] = tok_to_orig_index[len(spans) * self.doc_stride + i]
+        return token_to_orig_map
+
+    def set_max_context(self, spans):
+        for doc_span_index, span in enumerate(spans):
+            for j in range(span["paragraph_len"]):
+                is_max_context = self._is_max_context(spans, doc_span_index, doc_span_index * self.doc_stride + j)
+                index = (
+                    j
+                    if self.tokenizer.padding_side == "left"
+                    else span["truncated_query_with_special_tokens_length"] + j
+                )
+                span["token_is_max_context"][index] = is_max_context
