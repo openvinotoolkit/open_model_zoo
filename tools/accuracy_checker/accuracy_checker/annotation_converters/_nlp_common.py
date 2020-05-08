@@ -220,6 +220,8 @@ class WordPieceTokenizer:
     def convert_tokens_to_ids(self, items):
         output = []
         for item in items:
+            if item not in self.vocab:
+                print(item)
             output.append(self.vocab[item])
         return output
 
@@ -407,17 +409,19 @@ class SquadWordPieseTokenizer(WordPieceTokenizer):
 
         return encoded_inputs
 
-    @staticmethod
-    def build_inputs_with_special_tokens(token_ids_0, token_ids_1=None):
+    def build_inputs_with_special_tokens(self, token_ids_0, token_ids_1=None):
         if token_ids_1 is None:
-            return token_ids_0
-        return token_ids_0 + token_ids_1
+            return [self.cls_token_id] + token_ids_0 + [self.sep_token_id]
+        cls = [self.cls_token_id]
+        sep = [self.sep_token_id]
+        return cls + token_ids_0 + sep + token_ids_1 + sep
 
-    @staticmethod
-    def create_token_type_ids_from_sequences(token_ids_0, token_ids_1=None):
+    def create_token_type_ids_from_sequences(self, token_ids_0, token_ids_1=None):
+        sep = [self.sep_token_id]
+        cls = [self.cls_token_id]
         if token_ids_1 is None:
-            return len(token_ids_0) * [0]
-        return [0] * len(token_ids_0) + [1] * len(token_ids_1)
+            return len(cls + token_ids_0 + sep) * [0]
+        return len(cls + token_ids_0 + sep) * [0] + len(token_ids_1 + sep) * [1]
 
     def num_added_tokens(self, pair=False):
         token_ids_0 = []
@@ -472,19 +476,19 @@ class SquadWordPieseTokenizer(WordPieceTokenizer):
 
     @property
     def pad_token_id(self):
-        return self.convert_tokens_to_ids(self.pad_token)
+        return self.vocab[self.pad_token]
 
     @property
     def unk_token_id(self):
-        return self.convert_tokens_to_ids(self.unk_token)
+        return self.vocab[self.unk_token]
 
     @property
     def sep_token_id(self):
-        return self.convert_tokens_to_ids(self.sep_token)
+        return self.vocab[self.sep_token]
 
     @property
     def cls_token_id(self):
-        return self.convert_tokens_to_ids(self.cls_token)
+        return self.vocab[self.cls_token]
 
     @property
     def all_special_ids(self):
