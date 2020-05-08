@@ -18,11 +18,28 @@ class MachineTranslationPrediction(MachineTranslationRepresentation):
         super().__init__(identifier)
         self.translation = translation
 
+class LanguageModeling(BaseRepresentation):
+    def __init__(self, identifier=''):
+        super().__init__(identifier)
+
+class LanguageModelingAnnotation(LanguageModeling):
+    def __init__(self, identifier, unique_id, input_ids, tokens, labels=None):
+        super().__init__(identifier)
+        self.orig_answer_text = orig_answer_text if orig_answer_text is not None else ''
+        self.unique_id = unique_id
+        self.tokens = tokens
+        self.input_ids = input_ids
+        self.labels = labels if labels is not None else []
+
+class LanguageModelingPrediction(LanguageModeling):
+    def __init__(self, identifier, eval_loss, logits):
+        super().__init__(identifier)
+        self.eval_loss = eval_loss
+        self.logits = logits
 
 class QuestionAnswering(BaseRepresentation):
     def __init__(self, identifier=''):
         super().__init__(identifier)
-
 
 class QuestionAnsweringAnnotation(QuestionAnswering):
     def __init__(self, identifier, unique_id, input_ids, input_mask, segment_ids, tokens, orig_answer_text=None):
