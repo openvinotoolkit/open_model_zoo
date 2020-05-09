@@ -1,7 +1,9 @@
 Language Model Python* Demo
 ===============================
 
-This is the demo application for Language model, which predict next word from previous input.
+This is the demo application for Language model, which supports two modes:
+    1. Prediction Mode: Given a prefix sentence, predict next word from previous input.
+    2. Evaluation Mode: Given a intact sentence, calculate its perplexity.
 To download the model for IR conversion, please follow the instruction:
  - For UNIX*-like systems:  
     1.Create new directory to store the model:   
@@ -61,12 +63,12 @@ To generate the Language Model Intermediate Representation (IR), provide TensorF
 
 ```sh
 python3 ./mo_tf.py
---input_model lm_1b/graph-2016-09-10.pbtxt                        \
---input_checkpoint lm_1b/ckpt                                     \
---input_model_is_text                                             \
---output softmax_out,,lstm/lstm_0/concat_2,lstm/lstm_1/concat_2   \
---input_shape [50],[1,9216],[1,9216]                              \
---input 0:char_embedding/Reshape,Variable/read,Variable_1/read    \
+--input_model lm_1b/graph-2016-09-10.pbtxt                                                                             \
+--input_checkpoint lm_1b/ckpt                                                                                          \
+--input_model_is_text                                                                                                  \
+--output softmax_out,lstm/lstm_0/concat_2,lstm/lstm_1/concat_2                                                         \
+--input_shape [50],[50],[1,9216],[1,9216]                                                                              \
+--input char_embedding/EmbeddingLookupUnique:0,char_embedding/EmbeddingLookupUnique:1,Variable/read,Variable_1/read    \
 ```
 
 Running  
@@ -75,7 +77,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: lm_1b_sample.py [-h] -m MODEL -i INPUT -v VOCAB [-l CPU_EXTENSION]
-                    [-d DEVICE] [-n NUMBER_SAMPLES]
+                    [-d DEVICE] [-n NUMBER_SAMPLES] [-p PERPLEXITY]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -96,17 +98,19 @@ Options:
                         specified. Default value is CPU
   -n NUMBER_SAMPLES, --number_samples NUMBER_SAMPLES
                         Optional. Set number of samples. number of samples
+  -p PERPLEXITY,  --perplexity PERPLEXITY
+                        Optional. Calculate perplexity.
 ```
 
 Running Demo
-
+Download the vocabulary file from http://download.tensorflow.org/models/LM_LSTM_CNN/vocab-2016-09-10.txt
+1. Prediction Mode
 ```sh
 python lm_1b_sample.py 
        -m path_to_IR_model/graph-2016-09-10.xml 
        -i 'What is' 
        -v path_to_Vocabulary_file/vocab-2016-09-10.txt 
 ```
-The vocabulary file can be downloaded from http://download.tensorflow.org/models/LM_LSTM_CNN/vocab-2016-09-10.txt
 
 Demo Output
 ------------
@@ -118,4 +122,21 @@ What is your
 What is your relationship
 What is your relationship with the 
 ...(omitted)
+```
+
+2. Evaluation Mode
+```sh
+python lm_1b_sample.py
+       -m path_to_IR_model/graph-2016-09-10.xml
+       -i 'What is your relationship with the old man ?'
+       -v path_to_Vocabulary_file/vocab-2016-09-10.txt
+       -p 1
+```
+
+Demo Output
+------------
+The application shows the evaluation result:
+```
+What is your relationship with the old man ? </S>
+Eval sentence perplexity: 40.140137.
 ```
