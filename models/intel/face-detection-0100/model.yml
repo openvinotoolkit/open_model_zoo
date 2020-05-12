@@ -16,29 +16,16 @@ description: >-
   Face Detection based on MobileNetV2 (SSD).
 task_type: detection
 files:
-  - name: FP32/face-detection-0100.xml
-    size: 167384
-    sha256: 5fe782358d8f21f39855545ffdf3d62a85d1452d97b0ccd4e21cce175e6dfb99
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-detection-0100/FP32/face-detection-0100.xml
-  - name: FP32/face-detection-0100.bin
-    size: 7269188
-    sha256: 1ecaaa422d5f7736fcb1ac953cd2d40b6f6405221772c63c3d786218d0437d50
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-detection-0100/FP32/face-detection-0100.bin
-  - name: FP16/face-detection-0100.xml
-    size: 167321
-    sha256: ad080e9d49157425ad6ffcb453c68b00ca0b682679d4bc0a7cd2c52315f86562
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-detection-0100/FP16/face-detection-0100.xml
-  - name: FP16/face-detection-0100.bin
-    size: 3634646
-    sha256: 3390b216748b83fcc0a1cb5c6cc6cea69fef44aa94467f2479ea984277267c79
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-detection-0100/FP16/face-detection-0100.bin
-  - name: FP16-INT8/face-detection-0100.xml
-    size: 474450
-    sha256: dbbb4e37e5f33e4fba2d9d12349f3d36f8a434d1d578bfc08d5386921db69ac2
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-detection-0100/FP16-INT8/face-detection-0100.xml
-  - name: FP16-INT8/face-detection-0100.bin
-    size: 1921739
-    sha256: f4abd0ff4d6f0bfe664831ffc6c1ddafe6beb6e80fb1de822b1769f0181d3e30
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-detection-0100/FP16-INT8/face-detection-0100.bin
-framework: dldt
+  - name: face-detection-0100.onnx
+    sha256: f446cf3e2b9d6a2370a35fdc5867b77f00c42f4c7f003828fd5d6e8a85d52ac8
+    size: 14326455
+    source: https://download.01.org/opencv/intel_models/face-detection/face-detection-0100.onnx
+framework: onnx
+model_optimizer_args:
+  - --input=image
+  - --input_model=$dl_dir/face-detection-0100.onnx
+  - --input_shape=[1,3,256,256]
+  - --output=detection_out
+  - --reverse_input_channels
+  - --scale_values=image[255.0]
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
