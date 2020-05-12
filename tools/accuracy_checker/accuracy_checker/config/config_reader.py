@@ -389,7 +389,7 @@ class ConfigReader:
     @staticmethod
     def _provide_cmd_arguments(arguments, config, mode):
         def _add_subsample_size_arg(dataset_entry):
-            if 'subsample_size' in arguments:
+            if 'subsample_size' in arguments and arguments.subsample_size is not None:
                 dataset_entry['subsample_size'] = arguments.subsample_size
 
         def merge_models(config, arguments, update_launcher_entry):
