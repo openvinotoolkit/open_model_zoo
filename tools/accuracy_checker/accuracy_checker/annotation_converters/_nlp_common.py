@@ -220,8 +220,6 @@ class WordPieceTokenizer:
     def convert_tokens_to_ids(self, items):
         output = []
         for item in items:
-            if item not in self.vocab:
-                print(item)
             output.append(self.vocab[item])
         return output
 
@@ -532,6 +530,41 @@ class SquadWordPieseTokenizer(WordPieceTokenizer):
         """Converts an index (integer) in a token (string/unicode) using the vocab."""
         return self.ids_to_tokens.get(index, self.unk_token)
 
+    def wordpiece_tokenizer(self, text):
+
+        output_tokens = []
+        for token in whitespace_tokenize(text):
+            chars = list(token)
+            if len(chars) > 100:
+                output_tokens.append(self.unk_token)
+                continue
+
+            is_bad = False
+            start = 0
+            sub_tokens = []
+            while start < len(chars):
+                end = len(chars)
+                cur_substr = None
+                while start < end:
+                    substr = "".join(chars[start:end])
+                    if start > 0:
+                        substr = "##" + substr
+                    if substr in self.vocab:
+                        cur_substr = substr
+                        break
+                    end -= 1
+                if cur_substr is None:
+                    is_bad = True
+                    break
+                sub_tokens.append(cur_substr)
+                start = end
+
+            if is_bad:
+                output_tokens.append(self.unk_token)
+            else:
+                output_tokens.extend(sub_tokens)
+        return output_tokens
+
 def truncate_seq_pair(tokens_a, tokens_b, max_length):
     """Truncates a sequence pair in place to the maximum length."""
 
@@ -599,3 +632,11 @@ class SentencePieceTokenizer:
     def tokenize(self, text):
         text = self.preprocess_text(text)
         return self.encode_ids(text)
+
+def whitespace_tokenize(text):
+    """Runs basic whitespace cleaning and splitting on a piece of text."""
+    text = text.strip()
+    if not text:
+        return []
+    tokens = text.split()
+    return tokens

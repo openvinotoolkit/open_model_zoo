@@ -165,7 +165,7 @@ class SQUADConverter(BaseFormatConverter):
                     break
                 span_doc_tokens = encoded_dict["overflowing_tokens"]
 
-            self.set_max_context(spans)
+            spans = self.set_max_context(spans)
 
             for span in spans:
                 # Identify the position of the CLS token
@@ -178,7 +178,7 @@ class SQUADConverter(BaseFormatConverter):
                 p_mask = np.minimum(p_mask, 1)
 
                 if self.tokenizer.padding_side == "right":
-                    # Limit positive values to one
+                    # Limit positive values to
                     p_mask = 1 - p_mask
 
                 p_mask[np.where(np.array(span["input_ids"]) == self.tokenizer.sep_token_id)[0]] = 1
@@ -187,7 +187,6 @@ class SQUADConverter(BaseFormatConverter):
                 p_mask[cls_index] = 0
                 idx = example_index
                 identifier = ['input_ids_{}'.format(idx), 'input_mask_{}'.format(idx), 'segment_ids_{}'.format(idx)]
-
                 annotation = QuestionAnsweringAnnotation(
                     identifier,
                     np.array(unique_id),
@@ -201,8 +200,8 @@ class SQUADConverter(BaseFormatConverter):
                     example["tokens"],
                     example['is_impossible'],
                     span["paragraph_len"],
-                    span["token_is_max_context"],
                     span["tokens"],
+                    span["token_is_max_context"],
                     span["token_to_orig_map"],
                 )
                 annotation.metadata['lower_case'] = self.lower_case
@@ -261,3 +260,4 @@ class SQUADConverter(BaseFormatConverter):
                     else span["truncated_query_with_special_tokens_length"] + j
                 )
                 span["token_is_max_context"][index] = is_max_context
+        return spans
