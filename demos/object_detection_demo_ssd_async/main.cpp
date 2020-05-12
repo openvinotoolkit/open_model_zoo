@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -7,8 +7,6 @@
 * \file object_detection_demo_ssd_async/main.cpp
 * \example object_detection_demo_ssd_async/main.cpp
 */
-
-#include <gflags/gflags.h>
 
 #include <chrono>
 #include <iostream>
@@ -120,7 +118,7 @@ int main(int argc, char *argv[]) {
         /** Read network model **/
         auto cnnNetwork = ie.ReadNetwork(FLAGS_m);
         /** Set batch size to 1 **/
-        slog::info << "Batch size is forced to  1." << slog::endl;
+        slog::info << "Batch size is forced to 1." << slog::endl;
         cnnNetwork.setBatchSize(1);
         /** Read labels (if any)**/
         std::string labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
@@ -141,7 +139,7 @@ int main(int argc, char *argv[]) {
         size_t netInputHeight, netInputWidth;
 
         for (const auto & inputInfoItem : inputInfo) {
-            if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // first input contains images
+            if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
                 imageInputName = inputInfoItem.first;
                 inputInfoItem.second->setPrecision(Precision::U8);
                 if (FLAGS_auto_resize) {
@@ -153,7 +151,7 @@ int main(int argc, char *argv[]) {
                 const TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
                 netInputHeight = getTensorHeight(inputDesc);
                 netInputWidth = getTensorWidth(inputDesc);
-            } else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // second input contains image info
+            } else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {   // 2nd input contains image info
                 imageInfoInputName = inputInfoItem.first;
                 inputInfoItem.second->setPrecision(Precision::FP32);
             } else {
@@ -193,8 +191,8 @@ int main(int argc, char *argv[]) {
         }
 
         if (static_cast<int>(labels.size()) != num_classes) {
-            if (static_cast<int>(labels.size()) == (num_classes - 1))  // if network assumes default "background" class, having no label
-                labels.insert(labels.begin(), "fake");
+            if (static_cast<int>(labels.size()) == (num_classes - 1))  // if network assumes default "background" class,
+                labels.insert(labels.begin(), "fake");                 // having no label
             else
                 labels.clear();
         }
@@ -246,10 +244,14 @@ int main(int argc, char *argv[]) {
         auto wallclock = std::chrono::high_resolution_clock::now();
         double ocv_render_time = 0;
 
-        std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
+        std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and "
+                     "press ESC key" << std::endl;
         std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
+        
         cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
-        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
+        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10,
+                            graphSize);
+
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
             // Here is the first asynchronous point:
@@ -306,11 +308,14 @@ int main(int argc, char *argv[]) {
                 std::ostringstream out;
                 out << "OpenCV cap/render time: " << std::fixed << std::setprecision(2)
                     << (ocv_decode_time + ocv_render_time) << " ms";
-                cv::putText(curr_frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 255, 0));
+                cv::putText(curr_frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
+                            cv::Scalar(0, 255, 0));
                 out.str("");
                 out << "Wallclock time " << (isAsyncMode ? "(TRUE ASYNC):      " : "(SYNC, press Tab): ");
-                out << std::fixed << std::setprecision(2) << wall.count() << " ms (" << 1000.f / wall.count() << " fps)";
-                cv::putText(curr_frame, out.str(), cv::Point2f(0, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 0, 255));
+                out << std::fixed << std::setprecision(2) << wall.count() << " ms (" << 1000.f / wall.count()
+                    << " fps)";
+                cv::putText(curr_frame, out.str(), cv::Point2f(0, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6,
+                            cv::Scalar(0, 0, 255));
                 if (!isAsyncMode) {  // In the true async mode, there is no way to measure detection time directly
                     out.str("");
                     out << "Detection time  : " << std::fixed << std::setprecision(2) << detection.count()
@@ -322,7 +327,8 @@ int main(int argc, char *argv[]) {
 
                 // ---------------------------Process output blobs--------------------------------------------------
                 // Processing results of the CURRENT request
-                const float *detections = async_infer_request_curr->GetBlob(outputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type*>();
+                const float *detections = async_infer_request_curr->GetBlob(outputName)->buffer()
+                    .as<PrecisionTrait<Precision::FP32>::value_type*>();
                 for (int i = 0; i < maxProposalCount; i++) {
                     float image_id = detections[i * objectSize + 0];
                     if (image_id < 0) {
@@ -351,7 +357,8 @@ int main(int argc, char *argv[]) {
                                     labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
                                     cv::Point2f(xmin, ymin - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
                                     cv::Scalar(0, 0, 255));
-                        cv::rectangle(curr_frame, cv::Point2f(xmin, ymin), cv::Point2f(xmax, ymax), cv::Scalar(0, 0, 255));
+                        cv::rectangle(curr_frame, cv::Point2f(xmin, ymin), cv::Point2f(xmax, ymax),
+                                      cv::Scalar(0, 0, 255));
                     }
                 }
             }
