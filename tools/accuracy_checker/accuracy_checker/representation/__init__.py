@@ -73,6 +73,7 @@ from .nlp_representation import (
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
 
 from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPrediction
+from .image_processing import ImageProcessingAnnotation, ImageProcessingPrediction
 
 __all__ = [
     'BaseRepresentation',
@@ -99,6 +100,7 @@ __all__ = [
 
     'BrainTumorSegmentationAnnotation',
     'BrainTumorSegmentationPrediction',
+    'OAR3DTilingSegmentationAnnotation',
 
     'CoCoInstanceSegmentationAnnotation',
     'CoCocInstanceSegmentationPrediction',
@@ -123,6 +125,10 @@ __all__ = [
 
     'SuperResolutionAnnotation',
     'SuperResolutionPrediction',
+    'ImageInpaintingAnnotation',
+    'ImageInpaintingPrediction',
+    'ImageProcessingAnnotation',
+    'ImageProcessingPrediction',
 
     'TextDetectionAnnotation',
     'TextDetectionPrediction',
@@ -144,8 +150,5 @@ __all__ = [
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',
-    'ImageInpaintingAnnotation',
-    'ImageInpaintingPrediction',
 
-    'OAR3DTilingSegmentationAnnotation',
 ]

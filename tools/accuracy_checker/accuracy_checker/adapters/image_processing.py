@@ -18,7 +18,7 @@ import cv2
 import numpy as np
 
 from ..adapters import Adapter
-from ..representation import SuperResolutionPrediction, ContainerPrediction
+from ..representation import ImageProcessingPrediction, SuperResolutionPrediction, ContainerPrediction
 from ..config import ConfigValidator, BoolField, BaseField, StringField, DictField, ConfigError
 from ..utils import get_or_parse_value
 from ..preprocessor import Normalize
@@ -28,9 +28,10 @@ except ImportError:
     Image = None
 
 
-class SuperResolutionAdapter(Adapter):
-    __provider__ = 'super_resolution'
-    prediction_types = (SuperResolutionPrediction, )
+class ImageProcessingAdapter(Adapter):
+    __provider__ = 'image_processing'
+
+    prediction_types = (ImageProcessingPrediction, )
 
     @classmethod
     def parameters(cls):
@@ -79,17 +80,38 @@ class SuperResolutionAdapter(Adapter):
         if not self.target_out:
             self.target_out = self.output_blob
 
+        for identifier, out_img in zip(identifiers, raw_outputs[self.target_out]):
+            out_img = self._basic_postprocess(out_img)
+            result.append(SuperResolutionPrediction(identifier, out_img))
+
+        return result
+
+    def _basic_postprocess(self, img):
+        img *= self.std
+        img += self.mean
+        img = img.transpose((1, 2, 0)) if img.shape[-1] not in [3, 4, 1] else img
+        if self.cast_to_uint8:
+            img = np.clip(img, 0., 255.)
+            img = img.astype(np.uint8)
+        if self.reverse_channels:
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img = Image.fromarray(img, 'RGB') if Image is not None else img
+            img = np.array(img).astype(np.uint8)
+
+        return img
+
+class SuperResolutionAdapter(ImageProcessingAdapter):
+    __provider__ = 'super_resolution'
+    prediction_types = (SuperResolutionPrediction, )
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.target_out:
+            self.target_out = self.output_blob
+
         for identifier, img_sr in zip(identifiers, raw_outputs[self.target_out]):
-            img_sr *= self.std
-            img_sr += self.mean
-            img_sr = img_sr.transpose((1, 2, 0))
-            if self.cast_to_uint8:
-                img_sr = np.clip(img_sr, 0., 255.)
-                img_sr = img_sr.astype(np.uint8)
-            if self.reverse_channels:
-                img_sr = cv2.cvtColor(img_sr, cv2.COLOR_BGR2RGB)
-                img_sr = Image.fromarray(img_sr, 'RGB') if Image is not None else img_sr
-                img_sr = np.array(img_sr).astype(np.uint8)
+            img_sr = self._basic_postprocess(img_sr)
             result.append(SuperResolutionPrediction(identifier, img_sr))
 
         return result
@@ -116,6 +138,9 @@ class MultiSuperResolutionAdapter(Adapter):
                 description='The value on which prediction pixels should be multiplied for scaling to range '
                             '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
             ),
+            "cast_to_uint8": BoolField(
+                optional=True, default=True, description="Cast prediction values to integer within [0, 255] range"
+            )
             'target_mapping': DictField(allow_empty=False, key_type=str, value_type=str)
         })
         return parameters

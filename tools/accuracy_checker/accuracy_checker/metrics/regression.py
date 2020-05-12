@@ -31,7 +31,9 @@ from ..representation import (
     DepthEstimationAnnotation,
     DepthEstimationPrediction,
     ImageInpaintingAnnotation,
-    ImageInpaintingPrediction
+    ImageInpaintingPrediction,
+    ImageProcessingAnnotation,
+    ImageProcessingPrediction
 )
 
 from .metric import PerImageEvaluationMetric
@@ -370,8 +372,8 @@ def point_regression_differ(annotation_val_x, annotation_val_y, prediction_val_x
 class PeakSignalToNoiseRatio(BaseRegressionMetric):
     __provider__ = 'psnr'
 
-    annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, )
-    prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, )
+    annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, ImageProcessingAnnotation)
+    prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, ImageProcessingPrediction)
 
     @classmethod
     def parameters(cls):
@@ -464,9 +466,8 @@ def _ssim(annotation_image, prediction_image):
 
 class StructuralSimilarity(BaseRegressionMetric):
     __provider__ = 'ssim'
-
-    annotation_types = (ImageInpaintingAnnotation, SuperResolutionAnnotation)
-    prediction_types = (ImageInpaintingPrediction, SuperResolutionPrediction)
+    annotation_types = (ImageInpaintingAnnotation, ImageProcessingAnnotation, SuperResolutionAnnotation)
+    prediction_types = (ImageInpaintingPrediction, ImageProcessingPrediction, SuperResolutionPrediction)
 
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)
