@@ -189,12 +189,25 @@ class TestAutoResize:
         resize = Preprocessor.provide('auto_resize', {'type': 'auto_resize'})
         resize.set_input_shape({'data': (1, 3, 200, 200)})
 
-        input_mock = mocker.Mock()
-        resize(DataRepresentation(input_mock))
+        input_data = np.zeros((100, 100, 3))
+        input_rep = DataRepresentation(input_data)
+        expoected_meta = {
+                    'preferable_width': 200,
+                    'preferable_height':200,
+                    'image_info': [200, 200, 1],
+                    'scale_x': 2.0,
+                    'scale_y': 2.0,
+                    'original_width': 100,
+                    'original_height': 100,
+                }
+        resize(input_rep)
 
         assert resize.dst_width == 200
         assert resize.dst_height == 200
-        cv2_resize_mock.assert_called_once_with(input_mock, (200, 200))
+        cv2_resize_mock.assert_called_once_with(input_data, (200, 200))
+        for key, value in expoected_meta.items():
+            assert key in input_rep.metadata
+            assert input_rep.metadata[key] == value
 
     def test_auto_resize_input_shape_not_provided_raise_config_error(self, mocker):
         input_mock = mocker.Mock()

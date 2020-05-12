@@ -380,6 +380,7 @@ class AutoResize(Preprocessor):
             self.set_input_shape(self.input_shapes)
 
         def process_data(data):
+            image_h, image_w = data.shape[:2]
             data = cv2.resize(data, (self.dst_width, self.dst_height)).astype(np.float32)
             if len(data.shape) == 2:
                 data = np.expand_dims(data, axis=-1)
@@ -389,6 +390,16 @@ class AutoResize(Preprocessor):
                 image.metadata.setdefault('geometric_operations', []).append(
                     GeometricOperationMetadata('auto_resize', {})
                 )
+                resize_meta = {
+                    'preferable_width': self.dst_width,
+                    'preferable_height': self.dst_height,
+                    'image_info': [self.dst_height, self.dst_width, 1],
+                    'scale_x': float(self.dst_width) / image_w,
+                    'scale_y': float(self.dst_height) / image_h,
+                    'original_width': image_w,
+                    'original_height': image_h
+                }
+                image.metadata.update(resize_meta)
 
             return data
 
