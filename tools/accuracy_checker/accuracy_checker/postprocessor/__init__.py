@@ -50,7 +50,6 @@ from .align_prediction_depth_map import AlignDepth
 from .resize_prediction_depth_map import ResizeDepthMap
 from .resize_super_resolution import ResizeSuperResolution
 from .crop_ground_truth_image import CropGTImage
-from .rescale_prediction_box import RescalePredictionBox
 
 
 __all__ = [
@@ -100,7 +99,5 @@ __all__ = [
 
     'ResizeSuperResolution',
 
-    'CropGTImage',
-
-    'RescalePredictionBox'
+    'CropGTImage'
 ]
