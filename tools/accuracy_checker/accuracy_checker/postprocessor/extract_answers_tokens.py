@@ -106,6 +106,9 @@ class ExtractSQUADPrediction(Postprocessor):
             if start_indexes_:
                 tok_tokens = annotation_.tokens[start_indexes_:end_indexes_ + 1]
                 orig_doc_start = annotation_.token_to_orig_map[start_indexes_]
+                if end_indexes_ not in annotation_.token_to_orig_map or start_indexes_ not in annotation_.token_to_orig_map:
+                    print('problem')
+                    continueyuuhuij
                 orig_doc_end = annotation_.token_to_orig_map[end_indexes_]
                 orig_tokens = annotation_.doc_tokens[orig_doc_start:(orig_doc_end + 1)]
                 tok_text = " ".join(tok_tokens)
