@@ -455,5 +455,3 @@ class DicomReader(BaseReader):
     def read(self, data_id):
         dataset = pydicom.dcmread(str(self.data_source / data_id))
         return dataset.pixel_array
-
-

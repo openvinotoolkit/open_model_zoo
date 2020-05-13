@@ -447,8 +447,10 @@ class AngleError(BaseRegressionMetric):
 
 
 def _ssim(annotation_image, prediction_image):
-    prediction = np.asarray(prediction_image).astype(np.uint8)
-    ground_truth = np.asarray(annotation_image).astype(np.uint8)
+    prediction = np.asarray(prediction_image)
+    ground_truth = np.asarray(annotation_image)
+    if len(ground_truth.shape) < len(prediction) and prediction.shape[-1] == 1:
+        prediction = np.squeeze(prediction)
     mu_x = np.mean(prediction)
     mu_y = np.mean(ground_truth)
     var_x = np.var(prediction)

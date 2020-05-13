@@ -49,7 +49,10 @@ class SuperResolutionAdapter(Adapter):
                 description='The value on which prediction pixels should be multiplied for scaling to range '
                             '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
             ),
-            'target_out': StringField(optional=True, description='Target super resolution model output')
+            'target_out': StringField(optional=True, description='Target super resolution model output'),
+            "cast_to_uint8": BoolField(
+                optional=True, default=True, description="Cast output image to [0, 255] diapasone"
+            )
         })
         return parameters
 
@@ -68,6 +71,7 @@ class SuperResolutionAdapter(Adapter):
             raise ConfigError('std should be one value or comma-separated list channel-wise values')
 
         self.target_out = self.get_value_from_config('target_out')
+        self.cast_to_uint8 = self.get_value_from_config('cast_to_uint8')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
@@ -78,8 +82,10 @@ class SuperResolutionAdapter(Adapter):
         for identifier, img_sr in zip(identifiers, raw_outputs[self.target_out]):
             img_sr *= self.std
             img_sr += self.mean
-            img_sr = np.clip(img_sr, 0., 255.)
-            img_sr = img_sr.transpose((1, 2, 0)).astype(np.uint8)
+            if self.cast_to_uint8:
+                img_sr = np.clip(img_sr, 0., 255.)
+                img_sr = img_sr.astype(np.int8)
+            img_sr = img_sr.transpose((1, 2, 0))
             if self.reverse_channels:
                 img_sr = cv2.cvtColor(img_sr, cv2.COLOR_BGR2RGB)
                 img_sr = Image.fromarray(img_sr, 'RGB') if Image is not None else img_sr

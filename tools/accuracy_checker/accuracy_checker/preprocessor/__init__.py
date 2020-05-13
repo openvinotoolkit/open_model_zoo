@@ -36,6 +36,7 @@ from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 from .centernet_preprocessing import CenterNetAffineTransformation
 from .brats_preprocessing import Resize3D, NormalizeBrats, CropBraTS, SwapModalitiesBrats
 from .inpainting_preprocessor import FreeFormMask, RectMask, CustomMask
+from .denoising import GenerateNoiseMap
 
 __all__ = [
     'PreprocessingExecutor',
@@ -80,5 +81,6 @@ __all__ = [
 
     'FreeFormMask',
     'RectMask',
-    'CustomMask'
+    'CustomMask',
+    'GenerateNoiseMap',
 ]
