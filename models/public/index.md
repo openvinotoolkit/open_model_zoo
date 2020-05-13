@@ -127,6 +127,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | SSD lite with MobileNet V2 | [TensorFlow\*](./ssdlite_mobilenet_v2/ssdlite_mobilenet_v2.md)  | ssdlite_mobilenet_v2 | 1.525 | 4.475 |
 | SSD with ResNet-50 V1 FPN | [TensorFlow\*](./ssd_resnet50_v1_fpn_coco/ssd_resnet50_v1_fpn_coco.md) | ssd_resnet50_v1_fpn_coco | 178.6807 | 59.9326 |
 | SSD with ResNet 34 1200x1200 | [PyTorch\*](./ssd-resnet34-1200-onnx/ssd-resnet34-1200-onnx.md)  | ssd-resnet34-1200-onnx | 433.411 | 20.058  |
+| RetinaFace Anti Covid| [MXNet\*](./retinaface-anti-covid/retinaface-anti-covid.md)  | retinaface-anti-covid |  |   |
 | YOLO v1 Tiny              | [TensorFlow.js\*](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | yolo-v1-tiny-tf | 6.9883	 |	15.8587 |
 | YOLO v2 Tiny              | [TensorFlow.js\*](./yolo-v2-tiny-tf/yolo-v2-tiny-tf.md) | yolo-v2-tiny-tf | 5.4236	 |	11.2295 |
 | YOLO v2                   | [Keras\*](./yolo-v2-tf/yolo-v2-tf.md) | yolo-v2-tf | 63.0301	 |	50.9526 |
