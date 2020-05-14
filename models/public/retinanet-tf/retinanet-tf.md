@@ -54,7 +54,7 @@ Image, name: `input_1`, shape: [1x1333x1333x3], format: [BxHxWxC],
     - W - image width
     - C - number of channels
 
-   Expected color order: RGB.
+   Expected color order: BGR.
 Mean values: [103.939, 116.779, 123.68]
 
 ### Converted Model
