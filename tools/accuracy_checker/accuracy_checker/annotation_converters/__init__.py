@@ -63,6 +63,7 @@ from .monocular_depth_perception import ReDWebDatasetConverter
 
 from .fashion_mnist import FashionMnistConverter
 from .inpainting import InpaintingConverter
+from .wikitext2raw import Wikitext2RawConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -117,5 +118,6 @@ __all__ = [
     'MSASLContiniousConverter',
     'ReDWebDatasetConverter',
     'FashionMnistConverter',
-    'InpaintingConverter'
+    'InpaintingConverter',
+    'Wikitext2RawConverter'
 ]
