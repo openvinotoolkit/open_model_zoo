@@ -73,7 +73,6 @@ class ExtractSQUADPrediction(Postprocessor):
                 return False
             return True
 
-        n_best_size = 1
         for annotation_, prediction_ in zip(annotation, prediction):
             start_indexes = _get_best_indexes(prediction_.start_logits, self.n_best_size)
             end_indexes = _get_best_indexes(prediction_.end_logits, self.n_best_size)
@@ -95,7 +94,7 @@ class ExtractSQUADPrediction(Postprocessor):
             prelim_predictions = sorted(prelim_predictions, key=lambda x: (x.start_logit + x.end_logit), reverse=True)
             nbest = []
             for pred in prelim_predictions:
-                if len(nbest) >= n_best_size:
+                if len(nbest) >= self.n_best_size:
                     break
 
                 if pred.start_index > 0:
@@ -115,6 +114,8 @@ class ExtractSQUADPrediction(Postprocessor):
 
                     tokens_ = self.get_final_text(tok_text, orig_text, annotation_.metadata.get('lower_case', False))
                     nbest.append(tokens_)
+                else:
+                    nbest.append('')
 
             prediction_.tokens = nbest
 
