@@ -39,9 +39,15 @@ def build_argparser():
                            'path to a video or a .txt file with a list of ids or video files (one object per line)',
                       required=True, type=str)
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model', required=True, type=str)
-    args.add_argument('-m_de', '--m_decoder',
-                      help="Optional. Path to decoder model. If not specified, "
-                           "simple averaging of encoder's outputs over a time window is applied", default=None, type=str)
+    decoder_args = args.add_mutually_exclusive_group()
+    decoder_args.add_argument('-m_de', '--m_decoder',
+                              help="Optional. Path to decoder model. If not specified, "
+                                   "simple averaging of encoder's outputs over a time window is applied",
+                              default=None, type=str)
+    decoder_args.add_argument('--seq', dest='decoder_seq_size',
+                              help='Optional. Length of sequence that decoder takes as input',
+                              default=16, type=int)
+
     args.add_argument('-l', '--cpu_extension',
                       help='Optional. For CPU custom layers, if any. Absolute path to a shared library with the '
                            'kernels implementation.', type=str, default=None)
@@ -55,8 +61,6 @@ def build_argparser():
     args.add_argument('--no_show', action='store_true', help="Optional. Don't show output")
     args.add_argument('-s', '--smooth', dest='label_smoothing', help='Optional. Number of frames used for output label smoothing',
                       default=30, type=int)
-    args.add_argument('--seq', dest='decoder_seq_size', help='Optional. Length of sequence that decoder takes as input',
-                      default=16, type=int)
     args.add_argument('-u', '--utilization-monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
 
@@ -108,13 +112,15 @@ def main():
         decoder_xml = args.m_decoder
         decoder_bin = args.m_decoder.replace('.xml', '.bin')
         decoder = IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2)
+        decoder_seq_size = decoder.input_size[1]
     else:
-        decoder = DummyDecoder()
+        decoder = DummyDecoder(num_requests=2)
+        decoder_seq_size = args.decoder_seq_size
     
     presenter = monitors.Presenter(args.utilization_monitors, 70)
     result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
-    run_pipeline(videos, encoder, decoder, result_presenter.render_frame, decoder_seq_size=args.decoder_seq_size, fps=args.fps)
+    run_pipeline(videos, encoder, decoder, result_presenter.render_frame, decoder_seq_size=decoder_seq_size, fps=args.fps)
     print(presenter.reportMeans())
 
 
