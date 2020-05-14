@@ -12,12 +12,12 @@ DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h", "confidence", "pr
 
 
 class YoloOutputProcessor:
-    def __init__(self, coord_correct=lambda x: x, size_correct=lambda x: np.exp(x), conf_correct=lambda x: x,
-                 prob_correct=lambda x: x, coord_normalizer=(1, 1), size_normalizer=(1, 1)):
-        self.coord_correct = coord_correct
-        self.size_correct = size_correct
-        self.conf_correct = conf_correct
-        self.prob_correct = prob_correct
+    def __init__(self, coord_correct=None, size_correct=None, conf_correct=None,
+                 prob_correct=None, coord_normalizer=(1, 1), size_normalizer=(1, 1)):
+        self.coord_correct = coord_correct if coord_correct else lambda x: x
+        self.size_correct = size_correct if size_correct else lambda x: np.exp(x)
+        self.conf_correct = conf_correct if conf_correct else lambda x: x
+        self.prob_correct = prob_correct if prob_correct else lambda x: x
         self.x_normalizer, self.y_normalizer = coord_normalizer
         self.width_normalizer, self.height_normalizer = size_normalizer
 
@@ -287,12 +287,18 @@ class YoloV3Adapter(Adapter):
                             " if specified there should be exactly 3 output layers provided."
             ),
             'anchor_masks': ListField(optional=True, description='per layer used anchors mask'),
+            'do_reshape': BoolField(
+                optional=True, default=False,
+                description="Reshapes output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on 'output_format'"
+                            "value ([B,Cy,Cx] by default). You may need to specify 'cells' value."
+            ),
             'cells': ListField(
                 optional=True, default=[13, 26, 52],
-                description="Cell size for each layer, according 'outputs' filed"),
+                description="Grid size for each layer, according 'outputs' filed. Works only with 'do_reshape=True' or "
+                            "when output tensor dimensions not equal 3."),
             'raw_output': BoolField(
                 optional=True, default=False,
-                description="Indicates, that output is in raw format"
+                description="Preprocesses output in the original way."
             ),
             'output_format': StringField(
                 choices=['BHW', 'HWB'], optional=True, default='BHW',
@@ -322,10 +328,12 @@ class YoloV3Adapter(Adapter):
                     layer_anchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
                 per_layer_anchors.append(layer_anchors)
             self.masked_anchors = per_layer_anchors
+        self.do_reshape = self.get_value_from_config('do_reshape')
         self.cells = self.get_value_from_config('cells')
         if self.outputs and len(self.outputs) != len(self.cells):
             raise ConfigError('Incorrect number of output layer ({}) or detection grid size ({})'
                               'Must be equal with each other'.format(len(self.outputs), len(self.cells)))
+
         self.raw_output = self.get_value_from_config('raw_output')
         self.output_format = self.get_value_from_config('output_format')
         if self.raw_output:
@@ -371,14 +379,21 @@ class YoloV3Adapter(Adapter):
             for layer_id, (cells, p) in enumerate(zip(self.cells, prediction)):
                 anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
                 num = len(anchors) // 2 if self.masked_anchors else self.num
-                self.processor.x_normalizer = cells
-                self.processor.y_normalizer = cells
-                if len(p.shape) != 3:
+                if self.do_reshape or len(p.shape) != 3:
                     if self.output_format == 'BHW':
                         new_shape = (num * box_size, cells, cells)
                     else:
                         new_shape = (cells, cells, num * box_size)
                     p = np.reshape(p, new_shape)
+                else:
+                    # Get grid size from output shape - ignore self.cells value.
+                    # N.B.: value p.shape[1] will always contain grid size, but here we use if clause just for
+                    # clarification (works ONLY for square grids).
+                    cells = p.shape[1] if self.output_format == 'BHW' else p.shape[0]
+
+                self.processor.x_normalizer = cells
+                self.processor.y_normalizer = cells
+
                 labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num,
                                                                               box_size, anchors,
                                                                               self.processor, self.threshold)

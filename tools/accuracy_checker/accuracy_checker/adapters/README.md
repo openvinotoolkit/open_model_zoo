@@ -47,7 +47,9 @@ AccuracyChecker supports following set of adapters:
   * `input_width` and `input_height` - network input width and height correspondingly (default 416).
   * `outputs` - the list of output layers names (optional), if specified there should be exactly 3 output layers provided.
   * `raw_output` - enabling additional preprocessing for raw YOLO output format (default `False`).
-  * `output_format` - setting output layer format - boxes first (`BHW`)(default, also default for generated IRs), boxes last (`HWB`). Applicable only if network output not 3D (4D with batch) tensor.  
+  * `output_format` - setting output layer format - boxes first (`BHW`)(default, also default for generated IRs), boxes last (`HWB`). Applicable only if network output not 3D (4D with batch) tensor.
+  * `cells` - sets grid size for each layer, according `outputs` filed. Works only with `do_reshape=True` or when output tensor dimensions not equal 3. 
+  * `do_reshape` - forces reshape output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on `output_format` value ([B,Cy,Cx] by default). You may need to specify `cells` value. 
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
 * `ssd_mxnet` - converting output of SSD-based models from MXNet framework to `DetectionPrediction` representation.
