@@ -368,9 +368,10 @@ class NumPyReader(BaseReader):
                 res = []
                 for k in self.keys:
                     res.append(data[k])
-                data = res
+                return res
             else:
-                data = [v for v in data.values()][0]
+                key = [k for k in data.keys()][0]
+                return data[key]
 
         return data
 
