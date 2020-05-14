@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import os
 from pathlib import Path
 import numpy as np
 
@@ -60,8 +59,8 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
         mask_folder = preprocessed_folder / 'mask'
 
         for folder in [input_folder, mask_folder]:
-            if not os.path.exists(folder):
-                os.mkdir(folder)
+            if not folder.exists():
+                folder.mkdir()
 
         annotations = []
         for src in data_folder.glob('*.npz'):
@@ -70,8 +69,8 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
             src_mask_folder = mask_folder / "{}_{}_{}_{}".format(src.stem, self.wD, self.wH, self.wW)
 
             for folder in [src_input_folder, src_mask_folder]:
-                if not os.path.exists(folder):
-                    os.mkdir(folder)
+                if not folder.exists():
+                    folder.mkdir()
 
             data = np.load(src)
             inputs = data[self.input]
@@ -102,7 +101,7 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
         mask_name = src_mask_folder / "{}_{}_{}.npy".format(cD, cH, cW)
         input_name = src_input_folder / "{}_{}_{}.npy".format(cD, cH, cW)
 
-        if not (os.path.exists(str(mask_name)) and (os.path.exists(str(input_name)))):
+        if not (mask_name.exists() and input_name.exists()):
 
             inp = np.zeros([1, self.wD, self.wH, self.wW], dtype=np.float)
             ref = np.zeros([self.wD, self.wH, self.wW, CLS], dtype=np.float)
