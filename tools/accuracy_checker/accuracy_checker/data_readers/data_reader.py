@@ -358,17 +358,21 @@ class NumPyReader(BaseReader):
             config_validator.validate(self.config)
 
     def configure(self):
-        self.keys  = self.config.get('keys', []) if self.config else []
-        if self.keys:
-            self.keys = self.keys.split(',')
+        self.keys = self.config.get('keys', "") if self.config else ""
+        self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
 
     def read(self, data_id):
         data = np.load(str(self.data_source / data_id))
-        if isinstance(data, NpzFile) and (len(self.keys) > 0):
-            res = []
-            for k in self.keys:
-                res.append(data[k])
-            return res
+        if isinstance(data, NpzFile):
+            if len(self.keys):
+                res = []
+                for k in self.keys:
+                    res.append(data[k])
+                data = res
+            else:
+                values = [v for v in data.values()]
+                data = values[0]
+
         return data
 
 class TensorflowImageReader(BaseReader):
