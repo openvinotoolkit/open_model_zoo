@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 import numpy as np
 
 from .postprocessor import Postprocessor
@@ -22,6 +22,10 @@ from ..representation import QuestionAnsweringAnnotation, QuestionAnsweringPredi
 from ..annotation_converters._nlp_common import WordPieceTokenizer
 from ..config import NumberField
 
+
+PrelimPrediction = namedtuple(
+        "PrelimPrediction", ["start_index", "end_index", "start_logit", "end_logit", 'tokens']
+    )
 
 class ExtractSQUADPrediction(Postprocessor):
     """
@@ -69,63 +73,50 @@ class ExtractSQUADPrediction(Postprocessor):
                 return False
             return True
 
-        cnt = 0
+        n_best_size = 1
         for annotation_, prediction_ in zip(annotation, prediction):
             start_indexes = _get_best_indexes(prediction_.start_logits, self.n_best_size)
             end_indexes = _get_best_indexes(prediction_.end_logits, self.n_best_size)
-            valid_start_indexes = []
-            valid_end_indexes = []
-            tokens = []
+            prelim_predictions = []
 
             for start_index in start_indexes:
                 for end_index in end_indexes:
                     if _extended_check_indexes(start_index, end_index, annotation_, self.max_answer):
-                        valid_start_indexes.append(start_index)
-                        valid_end_indexes.append(end_index)
-                        tokens.append(annotation_.tokens[start_index:(end_index + 1)])
+                        prelim_predictions.append(
+                            PrelimPrediction(
+                                start_index,
+                                end_index,
+                                prediction_.start_logits[start_index],
+                                prediction_.end_logits[end_index],
+                                annotation_.tokens[start_index:(end_index + 1)]
+                            )
+                        )
 
-            start_logits = prediction_.start_logits[valid_start_indexes]
-            end_logits = prediction_.end_logits[valid_end_indexes]
+            prelim_predictions = sorted(prelim_predictions, key=lambda x: (x.start_logit + x.end_logit), reverse=True)
+            nbest = []
+            for pred in prelim_predictions:
+                if len(nbest) >= n_best_size:
+                    break
 
-            start_indexes = [val for _, val in sorted(zip(start_logits + end_logits, start_indexes), reverse=True)]
-            if not start_indexes:
-                continue
-            start_indexes_ = start_indexes[0]
-            end_indexes_ = [val for _, val in sorted(zip(start_logits + end_logits, end_indexes), reverse=True)]
-            end_indexes_ = end_indexes_[0]
+                if pred.start_index > 0:
+                    orig_doc_start = annotation_.token_to_orig_map[pred.start_index]
+                    orig_doc_end = annotation_.token_to_orig_map[pred.end_index]
+                    orig_tokens = annotation_.doc_tokens[orig_doc_start:(orig_doc_end + 1)]
+                    tok_text = " ".join(pred.tokens)
 
-            prediction_.start_index.append(start_indexes_)
-            prediction_.end_index.append(end_indexes_)
+                    # De-tokenize WordPieces that have been split off.
+                    tok_text = tok_text.replace(" ##", "")
+                    tok_text = tok_text.replace("##", "")
 
-            tokens_ = [" ".join(tok) for _, tok in sorted(zip(start_logits + end_logits, tokens), reverse=True)]
-            tokens_ = tokens_[0]
-            tokens_ = tokens_.replace(" ##", "")
-            tokens_ = tokens_.replace("##", "")
-            tokens_ = tokens_.strip()
+                    # Clean whitespace
+                    tok_text = tok_text.strip()
+                    tok_text = " ".join(tok_text.split())
+                    orig_text = " ".join(orig_tokens)
 
-            if start_indexes_:
-                tok_tokens = annotation_.tokens[start_indexes_:end_indexes_ + 1]
-                orig_doc_start = annotation_.token_to_orig_map[start_indexes_]
-                if end_indexes_ not in annotation_.token_to_orig_map or start_indexes_ not in annotation_.token_to_orig_map:
-                    print('problem')
-                    continueyuuhuij
-                orig_doc_end = annotation_.token_to_orig_map[end_indexes_]
-                orig_tokens = annotation_.doc_tokens[orig_doc_start:(orig_doc_end + 1)]
-                tok_text = " ".join(tok_tokens)
+                    tokens_ = self.get_final_text(tok_text, orig_text, annotation_.metadata.get('lower_case', False))
+                    nbest.append(tokens_)
 
-                # De-tokenize WordPieces that have been split off.
-                tok_text = tok_text.replace(" ##", "")
-                tok_text = tok_text.replace("##", "")
-
-                # Clean whitespace
-                tok_text = tok_text.strip()
-                tok_text = " ".join(tok_text.split())
-                orig_text = " ".join(orig_tokens)
-
-                tokens_ = self.get_final_text(tok_text, orig_text, annotation_.metadata.get('lower_case', False))
-
-            prediction_.tokens.append(tokens_)
-            cnt += 1
+            prediction_.tokens = nbest
 
         return annotation, prediction
 
