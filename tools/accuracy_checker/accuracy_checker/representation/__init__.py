@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ from .nlp_representation import (
     TextClassificationAnnotation
 )
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
+from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
 
 from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPrediction
 
@@ -144,5 +145,7 @@ __all__ = [
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',
     'ImageInpaintingAnnotation',
-    'ImageInpaintingPrediction'
+    'ImageInpaintingPrediction',
+    'StyleTransferAnnotation',
+    'StyleTransferPrediction'
 ]
