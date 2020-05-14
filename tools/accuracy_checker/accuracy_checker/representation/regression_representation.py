@@ -83,7 +83,7 @@ class FacialLandmarks3DRepresentation(BaseRepresentation):
         self.z_values = z_values if z_values is not None else []
 
 
-class FacialLandmarks3DAnnotation(FacialLandmarks3DRepresentation):
+class FacialLandmarks3DAnnotation(FacialLandmarks3DRepresentation, FacialLandmarksAnnotation):
     def __init__(self, identifier='', x_values=None, y_values=None, z_values=None, face_mask=None):
         super().__init__(identifier, x_values, y_values, z_values)
         self.face_mask = face_mask

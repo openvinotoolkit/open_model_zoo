@@ -250,8 +250,8 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
 class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
     __provider__ = 'per_point_normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, )
-    prediction_types = (FacialLandmarksPrediction, )
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction)
 
     def configure(self):
         self.meta.update({
@@ -284,8 +284,8 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
     __provider__ = 'normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, )
-    prediction_types = (FacialLandmarksPrediction, )
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction)
 
     @classmethod
     def parameters(cls):

@@ -254,12 +254,13 @@ class PRNetAdapter(Adapter):
                 height, width = input_shape[2], input_shape[3]
             else:
                 height, width = input_shape[1], input_shape[2]
-            pos *= (256 * 1.1)
+            #pos *= (256 * 1.1)
             vertices = np.reshape(pos, [-1, 3]).T
-            z = vertices[2, :].copy() / meta['transform_matrix'][0, 0]
-            vertices[2, :] = 1
-            vertices = np.dot(np.linalg.inv(meta['transform_matrix']), vertices)
-            vertices = np.vstack((vertices[:2, :], z))
+            if 'transform_matrix' in meta:
+                z = vertices[2, :].copy() / meta['transform_matrix'][0, 0]
+                vertices[2, :] = 1
+                vertices = np.dot(np.linalg.inv(meta['transform_matrix']), vertices)
+                vertices = np.vstack((vertices[:2, :], z))
             pos = np.reshape(vertices.T, [height, width, 3])
             kpt = pos[self.landmarks_uv[1], self.landmarks_uv[0], :]
             x_values, y_values, z_values = kpt.T
