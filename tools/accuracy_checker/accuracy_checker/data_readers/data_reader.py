@@ -364,14 +364,13 @@ class NumPyReader(BaseReader):
     def read(self, data_id):
         data = np.load(str(self.data_source / data_id))
         if isinstance(data, NpzFile):
-            if len(self.keys):
+            if len(self.keys) > 0:
                 res = []
                 for k in self.keys:
                     res.append(data[k])
                 data = res
             else:
-                values = [v for v in data.values()]
-                data = values[0]
+                data = [v for v in data.values()][0]
 
         return data
 

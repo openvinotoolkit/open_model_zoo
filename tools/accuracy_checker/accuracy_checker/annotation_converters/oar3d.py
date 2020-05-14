@@ -119,4 +119,3 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
             np.save(mask_name, ref)
 
         return input_name, mask_name
-
