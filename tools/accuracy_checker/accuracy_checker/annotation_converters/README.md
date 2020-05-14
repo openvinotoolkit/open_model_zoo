@@ -140,7 +140,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `data_dir` - path to folder, where images in low and high resolution are located.
   * `lr_suffix` - low resolution file name's suffix (default lr).
   * `hr_suffix` - high resolution file name's suffix (default hr).
-  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `dicon`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
   * `two_streams` - enable 2 input streams where usually first for original image and second for upsampled image. (Optional, default False).
   * `upsample_suffix` - upsample images file name's suffix (default upsample).
 * `multi_frame_super_resolution` - converts dataset for super resolution task with multiple input frames usage.
