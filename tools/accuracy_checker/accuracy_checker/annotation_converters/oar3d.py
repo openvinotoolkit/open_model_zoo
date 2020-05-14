@@ -53,6 +53,7 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
         self.preprocessed_dir = self.get_value_from_config('preprocessed_dir')
 
     def convert(self, check_content=False, **kwargs):
+
         data_folder = Path(self.data_dir)
         preprocessed_folder = Path(self.preprocessed_dir)
         input_folder = preprocessed_folder / 'input'
@@ -87,29 +88,35 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
                 for cH in range(0, H, self.wH):
                     for cW in range(0, W, self.wW):
 
-                        mask_name = src_mask_folder / "{}_{}_{}.npy".format(cD, cH, cW)
-                        input_name = src_input_folder / "{}_{}_{}.npy".format(cD, cH, cW)
-
-                        if not (os.path.exists(str(mask_name)) and (os.path.exists(str(input_name)))):
-
-                            inp = np.zeros([1, self.wD, self.wH, self.wW], dtype=np.float)
-                            ref = np.zeros([self.wD, self.wH, self.wW, CLS], dtype=np.float)
-                            for d in range(self.wD):
-                                for h in range(self.wH):
-                                    for w in range(self.wW):
-                                        inp[0, d, h, w] = inputs[0, 0, cD + d, cH + h, cW + w]
-                                        for c in range(CLS):
-                                            ref[d, h, w, c] = outputs[0, cD + d, cH + h, cW + w, c]
-
-                            ref = ref.reshape([self.wD * self.wW * self.wH, CLS])
-
-                            np.save(input_name, inp)
-                            np.save(mask_name, ref)
+                        input_name, mask_name = self.preprocess(src_mask_folder, src_input_folder, cD, cH, cW,
+                                                                inputs, outputs, CLS)
 
                         annotations.append(OAR3DTilingSegmentationAnnotation(
                             str(input_name),
                             str(mask_name)
                         ))
 
-
         return ConverterReturn(annotations, None, None)
+
+    def preprocess(self, src_mask_folder, src_input_folder, cD, cH, cW, inputs, outputs, CLS):
+        mask_name = src_mask_folder / "{}_{}_{}.npy".format(cD, cH, cW)
+        input_name = src_input_folder / "{}_{}_{}.npy".format(cD, cH, cW)
+
+        if not (os.path.exists(str(mask_name)) and (os.path.exists(str(input_name)))):
+
+            inp = np.zeros([1, self.wD, self.wH, self.wW], dtype=np.float)
+            ref = np.zeros([self.wD, self.wH, self.wW, CLS], dtype=np.float)
+            for d in range(self.wD):
+                for h in range(self.wH):
+                    for w in range(self.wW):
+                        inp[0, d, h, w] = inputs[0, 0, cD + d, cH + h, cW + w]
+                        for c in range(CLS):
+                            ref[d, h, w, c] = outputs[0, cD + d, cH + h, cW + w, c]
+
+            ref = ref.reshape([self.wD * self.wW * self.wH, CLS])
+
+            np.save(input_name, inp)
+            np.save(mask_name, ref)
+
+        return input_name, mask_name
+
