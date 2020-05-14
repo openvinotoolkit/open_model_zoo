@@ -92,7 +92,7 @@ class IEModel:
         self.exec_net = ie_core.load_network(network=self.net, device_name=target_device, num_requests=num_requests)
         self.input_name = next(iter(self.net.inputs))
         self.output_name = next(iter(self.net.outputs))
-        self.input_size = self.net.inputs[self.input_name]
+        self.input_size = self.net.inputs[self.input_name].shape
         self.output_size = self.exec_net.requests[0].outputs[self.output_name].shape
         self.num_requests = num_requests
 
@@ -112,7 +112,7 @@ class IEModel:
 
 
 class DummyDecoder:
-    def __init__(self, *args, num_requests=1, **kwargs):
+    def __init__(self, num_requests=2):
         self.num_requests = num_requests
         self.requests = dict()
 
@@ -128,9 +128,7 @@ class DummyDecoder:
 
     def wait_request(self, req_id):
         assert req_id in self.requests
-        output = self.requests[req_id]
-        del self.requests[req_id]
-        return output
+        return self.requests.pop(req_id)
 
 
 class ActionRecognitionSequential:
