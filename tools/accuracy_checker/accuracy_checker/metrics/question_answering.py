@@ -63,7 +63,7 @@ class ScoreF1(PerImageEvaluationMetric):
         if not gold_answers:
             gold_answers = ['']
         prediction_answer = prediction.tokens[0] if prediction.tokens else ''
-        max_f1_score =  max(self.compute_f1(a, prediction_answer) for a in gold_answers)
+        max_f1_score = max(self.compute_f1(a, prediction_answer) for a in gold_answers)
         self.f1 += max_f1_score
         self.total += 1
         return max_f1_score

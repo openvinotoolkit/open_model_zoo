@@ -58,9 +58,8 @@ class SQUADConverter(BaseFormatConverter):
         self.doc_stride = self.get_value_from_config('doc_stride')
         self.lower_case = self.get_value_from_config('lower_case')
         self.tokenizer = SquadWordPieseTokenizer(
-            self.get_value_from_config('vocab_file'), self.lower_case, max_len=self.max_seq_length
+            self.get_value_from_config('vocab_file'), self.lower_case, max_len=512
         )
-        self.support_vocab = 'vocab_file' in self.config
 
     @staticmethod
     def _load_examples(file):
@@ -95,17 +94,18 @@ class SQUADConverter(BaseFormatConverter):
                     question_text = qa["question"]
                     orig_answer_text = qa["answers"]
                     is_impossible = qa.get('is_impossible', False)
-                    example = {
-                        'id': qas_id,
-                        'question_text': question_text,
-                        'context_text': paragraph_text,
-                        'answer_text': orig_answer_text,
-                        'char_to_word_offset': char_to_word_offset,
-                        'tokens': doc_tokens,
-                        'is_impossible': is_impossible
-                    }
-                    examples.append(example)
-                    answers.append(orig_answer_text)
+                    if not is_impossible:
+                        example = {
+                            'id': qas_id,
+                            'question_text': question_text,
+                            'context_text': paragraph_text,
+                            'answer_text': orig_answer_text,
+                            'char_to_word_offset': char_to_word_offset,
+                            'tokens': doc_tokens,
+                            'is_impossible': is_impossible
+                        }
+                        examples.append(example)
+                        answers.append(orig_answer_text)
         return examples, answers
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
