@@ -96,7 +96,7 @@ AccuracyChecker supports following set of adapters:
   * `detection_threshold` - minimal detection confidences level for valid detections.
   * `actions_scores_threshold` - minimal actions confidences level for valid detections.
   * `action_scale` - scale for correct action score calculation.
-* `imagde_processingn` - converting output of network for single image processing to `ImageProcessingPrediction`.
+* `image_processing` - converting output of network for single image processing to `ImageProcessingPrediction`.
   * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
   * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
   * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
