@@ -56,7 +56,7 @@ class SQUADConverter(BaseFormatConverter):
 
     def configure(self):
         self.testing_file = self.get_value_from_config('testing_file')
-        self.max_seq_length = self.get_value_from_config('max_seq_length')
+        self.max_seq_length = int(self.get_value_from_config('max_seq_length'))
         self.max_query_length = self.get_value_from_config('max_query_length')
         self.doc_stride = self.get_value_from_config('doc_stride')
         self.lower_case = self.get_value_from_config('lower_case')

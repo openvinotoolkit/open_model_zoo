@@ -40,7 +40,8 @@ from .segmentation_representation import (
     BrainTumorSegmentationAnnotation,
     BrainTumorSegmentationPrediction,
     CoCoInstanceSegmentationAnnotation,
-    CoCocInstanceSegmentationPrediction
+    CoCocInstanceSegmentationPrediction,
+    OAR3DTilingSegmentationAnnotation,
 )
 from .character_recognition_representation import (
     CharacterRecognition,
@@ -144,5 +145,7 @@ __all__ = [
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',
     'ImageInpaintingAnnotation',
-    'ImageInpaintingPrediction'
+    'ImageInpaintingPrediction',
+
+    'OAR3DTilingSegmentationAnnotation',
 ]
