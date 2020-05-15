@@ -74,7 +74,7 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     /* Resize manually and copy data from the image to the input blob */
     InferenceEngine::LockedMemory<void> inputMapped =
         InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_.GetBlob(input_name_))->wmap();
-    input_data_ = inputMapped.as<float *>();
+    float* input_data_ = inputMapped.as<float *>();
 
     cv::Mat image;
     if (channels_ == 1) {

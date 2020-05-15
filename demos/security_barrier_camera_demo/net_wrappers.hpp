@@ -278,7 +278,7 @@ public:
             // second input is sequence, which is some relic from the training
             // it should have the leading 0.0f and rest 1.0f
             InferenceEngine::LockedMemory<void> seqBlobMapped =
-                InferenceEngine::as<InferenceEngine::MemoryBlob>(seqBlob)->rwmap();
+                InferenceEngine::as<InferenceEngine::MemoryBlob>(seqBlob)->wmap();
             float* blob_data = seqBlobMapped.as<float*>();
             blob_data[0] = 0.0f;
             std::fill(blob_data + 1, blob_data + seqBlob->getTensorDesc().getDims()[0], 1.0f);
