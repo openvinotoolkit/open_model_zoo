@@ -28,28 +28,13 @@ from pathlib import Path
 
 import common
 
-class JobContext:
-    def printf(self, format, *args, flush=False):
-        raise NotImplementedError
 
-    def subprocess(self, args):
-        raise NotImplementedError
-
-
-class DirectOutputContext(JobContext):
-    def printf(self, format, *args, flush=False):
-        print(format.format(*args), flush=flush)
-
-    def subprocess(self, args):
-        return subprocess.run(args).returncode == 0
-
-
-class QueuedOutputContext(JobContext):
+class QueuedOutputContext(common.JobContext):
     def __init__(self, output_queue):
         self._output_queue = output_queue
 
-    def printf(self, format, *args, flush=False):
-        self._output_queue.put(format.format(*args) + '\n')
+    def print(self, value, *, end='\n', flush=False):
+        self._output_queue.put(value + end)
 
     def subprocess(self, args):
         with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -75,20 +60,20 @@ class JobWithQueuedOutput():
         self._future.cancel()
 
 
-def convert_to_onnx(context, model, output_dir, args):
-    context.printf('========= {}Converting {} to ONNX',
-                   '(DRY RUN) ' if args.dry_run else '', model.name)
+def convert_to_onnx(reporter, model, output_dir, args):
+    reporter.print_section_heading('{}Converting {} to ONNX',
+        '(DRY RUN) ' if args.dry_run else '', model.name)
 
     conversion_to_onnx_args = [string.Template(arg).substitute(conv_dir=output_dir / model.subdirectory,
                                                                dl_dir=args.download_dir / model.subdirectory)
                                for arg in model.conversion_to_onnx_args]
     cmd = [str(args.python), str(Path(__file__).absolute().parent / model.converter_to_onnx), *conversion_to_onnx_args]
 
-    context.printf('Conversion to ONNX command: {}', common.command_string(cmd))
-    context.printf('')
+    reporter.print('Conversion to ONNX command: {}', common.command_string(cmd))
+    reporter.print(flush=True)
 
-    success = True if args.dry_run else context.subprocess(cmd)
-    context.printf('')
+    success = True if args.dry_run else reporter.job_context.subprocess(cmd)
+    reporter.print()
 
     return success
 
@@ -157,22 +142,22 @@ def main():
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
-    def convert(context, model):
+    def convert(reporter, model):
         if model.mo_args is None:
-            context.printf('========= Skipping {} (no conversions defined)', model.name)
-            context.printf('')
+            reporter.print_section_heading('Skipping {} (no conversions defined)', model.name)
+            reporter.print()
             return True
 
         model_precisions = requested_precisions & model.precisions
         if not model_precisions:
-            context.printf('========= Skipping {} (all conversions skipped)', model.name)
-            context.printf('')
+            reporter.print_section_heading('Skipping {} (all conversions skipped)', model.name)
+            reporter.print()
             return True
 
         model_format = model.framework
 
         if model.conversion_to_onnx_args:
-            if not convert_to_onnx(context, model, output_dir, args):
+            if not convert_to_onnx(reporter, model, output_dir, args):
                 return False
             model_format = 'onnx'
 
@@ -191,31 +176,32 @@ def main():
                 '--model_name={}'.format(model.name),
                 *expanded_mo_args, *extra_mo_args]
 
-            context.printf('========= {}Converting {} to IR ({})',
+            reporter.print_section_heading('{}Converting {} to IR ({})',
                 '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
 
-            context.printf('Conversion command: {}', common.command_string(mo_cmd))
+            reporter.print('Conversion command: {}', common.command_string(mo_cmd))
 
             if not args.dry_run:
-                context.printf('', flush=True)
+                reporter.print(flush=True)
 
-                if not context.subprocess(mo_cmd):
+                if not reporter.job_context.subprocess(mo_cmd):
                     return False
 
-            context.printf('')
+            reporter.print()
 
         return True
 
+    reporter = common.Reporter(common.DirectOutputContext())
+
     if args.jobs == 1 or args.dry_run:
-        context = DirectOutputContext()
-        results = [convert(context, model) for model in models]
+        results = [convert(reporter, model) for model in models]
     else:
         with concurrent.futures.ThreadPoolExecutor(args.jobs) as executor:
             def start(model):
                 output_queue = queue.Queue()
+                queued_reporter = common.Reporter(QueuedOutputContext(output_queue))
                 return JobWithQueuedOutput(
-                    output_queue,
-                    executor.submit(convert, QueuedOutputContext(output_queue), model))
+                    output_queue, executor.submit(convert, queued_reporter, model))
 
             jobs = list(map(start, models))
 
@@ -228,8 +214,9 @@ def main():
     failed_models = [model.name for model, successful in zip(models, results) if not successful]
 
     if failed_models:
-        print('FAILED:')
-        print(*sorted(failed_models), sep='\n')
+        reporter.print('FAILED:')
+        for failed_model_name in failed_models:
+            reporter.print(failed_model_name)
         sys.exit(1)
 
 if __name__ == '__main__':
