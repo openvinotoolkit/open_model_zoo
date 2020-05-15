@@ -140,7 +140,7 @@ class MultiSuperResolutionAdapter(Adapter):
             ),
             "cast_to_uint8": BoolField(
                 optional=True, default=True, description="Cast prediction values to integer within [0, 255] range"
-            )
+            ),
             'target_mapping': DictField(allow_empty=False, key_type=str, value_type=str)
         })
         return parameters

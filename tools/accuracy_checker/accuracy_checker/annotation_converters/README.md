@@ -139,7 +139,7 @@ Accuracy Checker supports following list of annotation converters and specific f
 * `image_processing` - converts dataset for common single image processing tasks (e.g. image denoising, style transferring) to `ImageProcessingAnnotation`. This converter is suitable for tasks where model output produced on specific input image should be compared with target image.
   * `data_dir` - path to folder, where images in low and high resolution are located.
   * `input_suffix` - input file name's suffix (default `in`).
-  * `target_suffix` - target ground truth file name's suffix (default out).
+  * `target_suffix` - target ground truth file name's suffix (default `out`).
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
 * `super_resolution` - converts dataset for single image super resolution task to `SuperResolutionAnnotation`.
   * `data_dir` - path to folder, where images in low and high resolution are located.
