@@ -63,6 +63,8 @@ from .monocular_depth_perception import ReDWebDatasetConverter
 
 from .fashion_mnist import FashionMnistConverter
 from .inpainting import InpaintingConverter
+from .oar3d import OAR3DTilingConverter
+
 
 __all__ = [
     'BaseFormatConverter',
@@ -118,5 +120,6 @@ __all__ = [
     'MSASLContiniousConverter',
     'ReDWebDatasetConverter',
     'FashionMnistConverter',
-    'InpaintingConverter'
+    'InpaintingConverter',
+    'OAR3DTilingConverter'
 ]
