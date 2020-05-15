@@ -51,7 +51,7 @@ class SuperResolutionAdapter(Adapter):
             ),
             'target_out': StringField(optional=True, description='Target super resolution model output'),
             "cast_to_uint8": BoolField(
-                optional=True, default=True, description="Cast output image to [0, 255] diapasone"
+                optional=True, default=True, description="Cast prediction values to integer within [0, 255] range"
             )
         })
         return parameters
