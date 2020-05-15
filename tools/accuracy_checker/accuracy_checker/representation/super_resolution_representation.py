@@ -24,6 +24,7 @@ from ..data_readers import BaseReader
 class GTLoader(Enum):
     PILLOW = 0
     OPENCV = 1
+    DICOM = 2
 
 
 class SuperResolutionRepresentation(BaseRepresentation):
@@ -33,7 +34,8 @@ class SuperResolutionRepresentation(BaseRepresentation):
 class SuperResolutionAnnotation(SuperResolutionRepresentation):
     LOADERS = {
         GTLoader.PILLOW: 'pillow_imread',
-        GTLoader.OPENCV: 'opencv_imread'
+        GTLoader.OPENCV: 'opencv_imread',
+        GTLoader.DICOM: 'dicom_reader'
     }
 
     def __init__(self, identifier, path_to_hr, gt_loader=GTLoader.PILLOW):
@@ -52,7 +54,7 @@ class SuperResolutionAnnotation(SuperResolutionRepresentation):
     def value(self):
         loader = BaseReader.provide(self._gt_loader, self.metadata['data_source'])
         gt = loader.read(self._image_path)
-        return gt.astype(np.uint8)
+        return gt.astype(np.uint8) if self._gt_loader != 'dicom_reader' else gt
 
 
 class SuperResolutionPrediction(SuperResolutionRepresentation):

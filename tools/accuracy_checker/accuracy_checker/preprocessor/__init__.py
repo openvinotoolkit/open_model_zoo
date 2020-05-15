@@ -80,5 +80,5 @@ __all__ = [
 
     'FreeFormMask',
     'RectMask',
-    'CustomMask'
+    'CustomMask',
 ]
