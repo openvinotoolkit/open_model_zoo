@@ -71,6 +71,7 @@ from .nlp_representation import (
     TextClassificationAnnotation
 )
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
+from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
 
 from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPrediction
 from .image_processing import ImageProcessingAnnotation, ImageProcessingPrediction
@@ -129,6 +130,8 @@ __all__ = [
     'ImageInpaintingPrediction',
     'ImageProcessingAnnotation',
     'ImageProcessingPrediction',
+    'StyleTransferAnnotation',
+    'StyleTransferPrediction',
 
     'TextDetectionAnnotation',
     'TextDetectionPrediction',

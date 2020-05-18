@@ -21,9 +21,9 @@ The `mosaic` model is one of the style transfer models designed to mix the conte
 
 Accuracy metrics are obtained on MS COCO val2017 dataset. Images were resized to input size.
 
-| Metric | Original model | Converted model |
-| ------ | -------------- | --------------- |
-| PSNR   | 12.02Db        | 12.02Db         |
+| Metric | Original model | Converted model (FP32) | Converted model (FP16) |
+| ------ | -------------- | ---------------------- | ---------------------- |
+| PSNR   | 12.03Db        | 12.03Db                | 12.04Db                |
 
 ## Performance
 
@@ -49,7 +49,7 @@ Image, name - `input1`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Expected color order: RGB.
+Expected color order: BGR.
 
 ## Output
 

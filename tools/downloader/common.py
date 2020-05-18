@@ -61,6 +61,7 @@ KNOWN_TASK_TYPES = {
     'object_attributes',
     'optical_character_recognition',
     'semantic_segmentation',
+    'style_transfer'
 }
 
 KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}

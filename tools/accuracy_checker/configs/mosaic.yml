@@ -9,27 +9,20 @@ models:
         adapter: style_transfer
 
       - framework: dlsdk
-        device: CPU
+        tags:
+          - FP32
         model: public/mosaic/FP32/mosaic.xml
         weights: public/mosaic/FP32/mosaic.bin
+        adapter: style_transfer
+        
+      - framework: dlsdk
+        tags:
+          - FP16
+        model: public/mosaic/FP16/mosaic.xml
+        weights: public/mosaic/FP16/mosaic.bin
         adapter: style_transfer
 
     datasets:
       - name: coco_style_transfer
-        data_source: val2017
-        annotation_conversion:
-          converter: style_transfer
-          images_dir: val2017
-          dst_height: 224
-          dst_width: 224
-        preprocessing:
-          - type: resize
-            size: 224
-        metrics:
-          - type: psnr
-            scale_border: 0
-            presenter: print_vector
-          - type: ssim
-            presenter: print_vector
 
 global_definitions: ../dataset_definitions.yml
