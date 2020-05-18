@@ -49,7 +49,7 @@ class StyleTransferConverter(BaseFormatConverter):
         content_check_errors = [] if check_content else None
         annotations = []
         images = list(im for im in self.image_dir.iterdir())  
-        image in images:
+        for image in images:
             identifiers = image.name
             annotation = StyleTransferAnnotation(identifiers, image.name , self.dst_height, self.dst_width)
             annotations.append(annotation)
