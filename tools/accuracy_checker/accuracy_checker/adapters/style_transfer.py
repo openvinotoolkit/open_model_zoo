@@ -32,4 +32,3 @@ class StyleTransferAdapter(Adapter):
             result.append(StyleTransferPrediction(identifier, img))
 
         return result
-

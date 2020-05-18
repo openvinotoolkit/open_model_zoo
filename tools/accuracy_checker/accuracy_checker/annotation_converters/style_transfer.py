@@ -15,8 +15,6 @@ limitations under the License.
 """
 
 from ..config import PathField, NumberField
-from ..utils import get_path
-from ..logging import warning
 from ..representation import StyleTransferAnnotation
 from .format_converter import BaseFormatConverter, ConverterReturn
 
@@ -38,7 +36,7 @@ class StyleTransferConverter(BaseFormatConverter):
             ),
             'dst_height': NumberField(
                 value_type=int, optional=False, description="Output height."
-            )       
+            )
         })
         return parameters
 
@@ -51,9 +49,10 @@ class StyleTransferConverter(BaseFormatConverter):
         content_check_errors = [] if check_content else None
         annotations = []
         images = list(im for im in self.image_dir.iterdir())  
-        for i, image in enumerate(images):
+        image in images:
             identifiers = image.name
             annotation = StyleTransferAnnotation(identifiers, image.name , self.dst_height, self.dst_width)
             annotations.append(annotation)
-            
-        return ConverterReturn(annotations, {'dst_width' : self.dst_width, 'dst_height' : self.dst_height}, content_check_errors)
+
+        return ConverterReturn(annotations, {'dst_width' : self.dst_width, 'dst_height' : self.dst_height},
+            content_check_errors)
