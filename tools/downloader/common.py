@@ -78,7 +78,7 @@ class JobContext:
     def printf(self, format, *args, flush=False):
         self.print(format.format(*args), flush=flush)
 
-    def subprocess(self, args):
+    def subprocess(self, args, **kwargs):
         raise NotImplementedError
 
 
@@ -86,8 +86,8 @@ class DirectOutputContext(JobContext):
     def print(self, value, *, end='\n', flush=False):
         print(value, end=end, flush=flush)
 
-    def subprocess(self, args):
-        return subprocess.run(args).returncode == 0
+    def subprocess(self, args, **kwargs):
+        return subprocess.run(args, **kwargs).returncode == 0
 
 
 class Reporter:

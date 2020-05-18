@@ -36,9 +36,9 @@ class QueuedOutputContext(common.JobContext):
     def print(self, value, *, end='\n', flush=False):
         self._output_queue.put(value + end)
 
-    def subprocess(self, args):
+    def subprocess(self, args, **kwargs):
         with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                universal_newlines=True) as p:
+                universal_newlines=True, **kwargs) as p:
             for line in p.stdout:
                 self._output_queue.put(line)
             return p.wait() == 0
