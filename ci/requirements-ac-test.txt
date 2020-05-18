@@ -25,3 +25,4 @@ tqdm==4.45.0
 wcwidth==0.1.9            # via pytest
 yamlloader==0.5.5
 zipp==1.2.0               # via importlib-metadata
+pydicom==1.4.2

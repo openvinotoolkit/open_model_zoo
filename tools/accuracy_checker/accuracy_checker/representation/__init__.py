@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020 Intel Corporation
+Copyright (c) 2019 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ from .segmentation_representation import (
     BrainTumorSegmentationAnnotation,
     BrainTumorSegmentationPrediction,
     CoCoInstanceSegmentationAnnotation,
-    CoCocInstanceSegmentationPrediction
+    CoCocInstanceSegmentationPrediction,
+    OAR3DTilingSegmentationAnnotation,
 )
 from .character_recognition_representation import (
     CharacterRecognition,
@@ -70,9 +71,9 @@ from .nlp_representation import (
     TextClassificationAnnotation
 )
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
-from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
 
 from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPrediction
+from .image_processing import ImageProcessingAnnotation, ImageProcessingPrediction
 
 __all__ = [
     'BaseRepresentation',
@@ -99,6 +100,7 @@ __all__ = [
 
     'BrainTumorSegmentationAnnotation',
     'BrainTumorSegmentationPrediction',
+    'OAR3DTilingSegmentationAnnotation',
 
     'CoCoInstanceSegmentationAnnotation',
     'CoCocInstanceSegmentationPrediction',
@@ -123,6 +125,10 @@ __all__ = [
 
     'SuperResolutionAnnotation',
     'SuperResolutionPrediction',
+    'ImageInpaintingAnnotation',
+    'ImageInpaintingPrediction',
+    'ImageProcessingAnnotation',
+    'ImageProcessingPrediction',
 
     'TextDetectionAnnotation',
     'TextDetectionPrediction',
@@ -144,8 +150,5 @@ __all__ = [
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',
-    'ImageInpaintingAnnotation',
-    'ImageInpaintingPrediction',
-    'StyleTransferAnnotation',
-    'StyleTransferPrediction'
+
 ]
