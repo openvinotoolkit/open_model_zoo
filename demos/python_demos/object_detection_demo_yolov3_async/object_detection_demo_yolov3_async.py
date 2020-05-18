@@ -19,7 +19,6 @@ import logging
 import threading
 import os
 import sys
-import numpy as np
 from collections import deque
 from argparse import ArgumentParser, SUPPRESS
 from math import exp as exp
@@ -27,6 +26,7 @@ from time import perf_counter
 from enum import Enum
 
 import cv2
+import numpy as np
 from openvino.inference_engine import IECore
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
@@ -73,6 +73,8 @@ def build_argparser():
     args.add_argument("-no_show", "--no_show", help="Optional. Don't show output", action='store_true')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
+    args.add_argument("--keep_aspect_ratio", action="store_true", default=False,
+                      help='Optional. Keeps aspect ratio on resize.')
     return parser
 
 
@@ -133,15 +135,22 @@ def entry_index(side, coord, classes, location, entry):
     return int(side_power_2 * (n * (coord + classes + 1) + entry) + loc)
 
 
-def scale_bbox(x, y, input_height, input_width, class_id, confidence, h_scale, w_scale):
-    xmin = int((x - input_width / 2) * w_scale)
-    ymin = int((y - input_height / 2) * h_scale)
-    xmax = int(xmin + input_width * w_scale)
-    ymax = int(ymin + input_height * h_scale)
-    return dict(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, class_id=class_id, confidence=confidence)
+def scale_bbox(x, y, height, width, class_id, confidence, im_h, im_w, is_proportional):
+    if is_proportional:
+        scale = np.array([min(im_w/im_h, 1), min(im_h/im_w, 1)])
+        offset = 0.5*(np.ones(2) - scale)
+        x, y = (np.array([x, y]) - offset) / scale
+        width, height = np.array([width, height]) / scale
+    xmin = int((x - width / 2) * im_w)
+    ymin = int((y - height / 2) * im_h)
+    xmax = int(xmin + width * im_w)
+    ymax = int(ymin + height * im_h)
+    # Method item() used here to convert NumPy types to native types for compatibility with functions, which don't
+    # support Numpy types (e.g., cv2.rectangle doesn't support int64 in color parameter)
+    return dict(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, class_id=class_id.item(), confidence=confidence.item())
 
 
-def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, threshold):
+def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, threshold, is_proportional):
     # ------------------------------------------ Validating output parameters ------------------------------------------
     _, _, out_blob_h, out_blob_w = blob.shape
     assert out_blob_w == out_blob_h, "Invalid size of output blob. It sould be in NCHW layout and height should " \
@@ -154,15 +163,15 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
     objects = list()
     predictions = blob.flatten()
     side_square = params.side * params.side
-
+    size_normalizer = (resized_image_w, resized_image_h) if params.isYoloV3 else (params.side, params.side)
     # ------------------------------------------- Parsing YOLO Region output -------------------------------------------
     for i in range(side_square):
         row = i // params.side
         col = i % params.side
         for n in range(params.num):
             obj_index = entry_index(params.side, params.coords, params.classes, n * side_square + i, params.coords)
-            scale = predictions[obj_index]
-            if scale < threshold:
+            object_probability = predictions[obj_index]
+            if object_probability < threshold:
                 continue
             box_index = entry_index(params.side, params.coords, params.classes, n * side_square + i, 0)
             # Network produces location predictions in absolute coordinates of feature maps.
@@ -171,21 +180,25 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
             y = (row + predictions[box_index + 1 * side_square]) / params.side
             # Value for exp is very big number in some cases so following construction is using here
             try:
-                w_exp = exp(predictions[box_index + 2 * side_square])
-                h_exp = exp(predictions[box_index + 3 * side_square])
+                width = exp(predictions[box_index + 2 * side_square])
+                height = exp(predictions[box_index + 3 * side_square])
             except OverflowError:
                 continue
             # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
-            input_width = w_exp * params.anchors[2 * n] / (resized_image_w if params.isYoloV3 else params.side)
-            input_height = h_exp * params.anchors[2 * n + 1] / (resized_image_h if params.isYoloV3 else params.side)
+            width = width * params.anchors[2 * n] / size_normalizer[0]
+            height = height * params.anchors[2 * n + 1] / size_normalizer[1]
+            class_probabilities = []
             for j in range(params.classes):
                 class_index = entry_index(params.side, params.coords, params.classes, n * side_square + i,
                                           params.coords + 1 + j)
-                confidence = scale * predictions[class_index]
-                if confidence < threshold:
-                    continue
-                objects.append(scale_bbox(x=x, y=y, input_height=input_height, input_width=input_width, class_id=j,
-                                          confidence=confidence, h_scale=orig_im_h, w_scale=orig_im_w))
+                class_probabilities.append(predictions[class_index])
+
+            class_id = np.argmax(class_probabilities)
+            confidence = class_probabilities[class_id]*object_probability
+            if confidence < threshold:
+                continue
+            objects.append(scale_bbox(x=x, y=y, height=height, width=width, class_id=class_id, confidence=confidence,
+                                      im_h=orig_im_h, im_w=orig_im_w, is_proportional=is_proportional))
     return objects
 
 
@@ -204,22 +217,39 @@ def intersection_over_union(box_1, box_2):
     return area_of_overlap / area_of_union
 
 
-def preprocess_frame(frame, input_height, input_width, nchw_shape):
-    in_frame = cv2.resize(frame, (input_width, input_height))
+def resize(image, size, keep_aspect_ratio, interpolation=cv2.INTER_LINEAR):
+    if not keep_aspect_ratio:
+        return cv2.resize(image, size, interpolation=interpolation)
+
+    iw, ih = image.shape[0:2][::-1]
+    w, h = size
+    scale = min(w/iw, h/ih)
+    nw = int(iw*scale)
+    nh = int(ih*scale)
+    image = cv2.resize(image, (nw, nh), interpolation=interpolation)
+    new_image = np.full((size[1], size[0], 3), 128, dtype=np.uint8)
+    dx = (w-nw)//2
+    dy = (h-nh)//2
+    new_image[dy:dy+nh, dx:dx+nw, :] = image
+    return new_image
+
+
+def preprocess_frame(frame, input_height, input_width, nchw_shape, keep_aspect_ratio):
+    in_frame = resize(frame, (input_width, input_height), keep_aspect_ratio)
     if nchw_shape:
         in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
     in_frame = np.expand_dims(in_frame, axis=0)
     return in_frame
 
 
-def get_objects(output, net, new_frame_height_width, source_height_width, prob_threshold):
+def get_objects(output, net, new_frame_height_width, source_height_width, prob_threshold, is_proportional):
     objects = list()
 
     for layer_name, out_blob in output.items():
         out_blob = out_blob.reshape(net.layers[net.layers[layer_name].parents[0]].out_data[0].shape)
         layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
         objects += parse_yolo_region(out_blob, new_frame_height_width, source_height_width, layer_params,
-                                     prob_threshold)
+                                     prob_threshold, is_proportional)
 
     return objects
 
@@ -240,18 +270,18 @@ def filter_objects(objects, iou_threshold, prob_threshold):
 def async_callback(status, callback_args):
     request, frame_id, frame_mode, frame, start_time, completed_request_results, empty_requests, \
     mode, event, callback_exceptions = callback_args
-    
+
     try:
         if status != 0:
             raise RuntimeError('Infer Request has returned status code {}'.format(status))
-        
+
         completed_request_results[frame_id] = (frame, request.outputs, start_time, frame_mode == mode.current)
 
         if mode.current == frame_mode:
             empty_requests.append(request)
     except Exception as e:
         callback_exceptions.append(e)
-    
+
     event.set()
 
 
@@ -375,12 +405,13 @@ def main():
           and not callback_exceptions:
         if next_frame_id_to_show in completed_request_results:
             frame, output, start_time, is_same_mode = completed_request_results.pop(next_frame_id_to_show)
-            
+
             next_frame_id_to_show += 1
             if is_same_mode:
                 mode_info[mode.current].frames_count += 1
 
-            objects = get_objects(output, net, (input_height, input_width), frame.shape[:-1], args.prob_threshold)
+            objects = get_objects(output, net, (input_height, input_width), frame.shape[:-1], args.prob_threshold,
+                                  args.keep_aspect_ratio)
             objects = filter_objects(objects, args.iou_threshold, args.prob_threshold)
 
             if len(objects) and args.raw_output_message:
@@ -390,11 +421,13 @@ def main():
             presenter.drawGraphs(frame)
             for obj in objects:
                 # Validation bbox of detected object
-                if obj['xmax'] > origin_im_size[1] or obj['ymax'] > origin_im_size[0] \
-                   or obj['xmin'] < 0 or obj['ymin'] < 0:
-                    continue
-                color = (int(min(obj['class_id'] * 12.5, 255)),
-                         min(obj['class_id'] * 7, 255), min(obj['class_id'] * 5, 255))
+                obj['xmax'] = min(obj['xmax'], origin_im_size[1])
+                obj['ymax'] = min(obj['ymax'], origin_im_size[0])
+                obj['xmin'] = max(obj['xmin'], 0)
+                obj['ymin'] = max(obj['ymin'], 0)
+                color = (min(obj['class_id'] * 12.5, 255),
+                         min(obj['class_id'] * 7, 255),
+                         min(obj['class_id'] * 5, 255))
                 det_label = labels_map[obj['class_id']] if labels_map and len(labels_map) >= obj['class_id'] else \
                     str(obj['class_id'])
 
@@ -420,7 +453,7 @@ def main():
 
                 put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
                 put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
-            
+
             mode_message = "{} mode".format(mode.current.name)
             put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
                                  cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
@@ -434,11 +467,11 @@ def main():
                 if key == 9: # Tab key
                     prev_mode = mode.current
                     mode.next()
-                    
+
                     await_requests_completion(exec_nets[prev_mode].requests)
                     empty_requests.clear()
                     empty_requests.extend(exec_nets[mode.current].requests)
-                    
+
                     mode_info[prev_mode].last_end_time = perf_counter()
                     mode_info[mode.current] = ModeInfo()
                 else:
@@ -457,7 +490,7 @@ def main():
             request = empty_requests.popleft()
 
             # resize input_frame to network size
-            in_frame = preprocess_frame(frame, input_height, input_width, nchw_shape)
+            in_frame = preprocess_frame(frame, input_height, input_width, nchw_shape, args.keep_aspect_ratio)
 
             # Start inference
             request.set_completion_callback(py_callback=async_callback,
@@ -476,7 +509,7 @@ def main():
 
         else:
             event.wait()
-    
+
     if callback_exceptions:
         raise callback_exceptions[0]
 
@@ -492,7 +525,7 @@ def main():
         log.info("Latency: {:.1f} ms".format((mode_info[mode_value].latency_sum / \
                                              mode_info[mode_value].frames_count) * 1e3))
     print(presenter.reportMeans())
-        
+
     for exec_net in exec_nets.values():
         await_requests_completion(exec_net.requests)
 
