@@ -32,6 +32,7 @@ from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter, MSCocoS
 from .cityscapes import CityscapesConverter
 from .ncf_converter import MovieLensConverter
 from .brats import BratsConverter, BratsNumpyConverter
+from .oar3d import OAR3DTilingConverter
 from .cifar import CifarFormatConverter
 from .mnist import MNISTCSVFormatConverter
 from .wmt import WMTConverter
@@ -63,8 +64,8 @@ from .monocular_depth_perception import ReDWebDatasetConverter
 
 from .fashion_mnist import FashionMnistConverter
 from .inpainting import InpaintingConverter
-from .oar3d import OAR3DTilingConverter
 
+from  .image_processing import ImageProcessingConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -94,6 +95,7 @@ __all__ = [
     'MovieLensConverter',
     'BratsConverter',
     'BratsNumpyConverter',
+    'OAR3DTilingConverter',
     'CifarFormatConverter',
     'MNISTCSVFormatConverter',
     'WMTConverter',
@@ -121,5 +123,5 @@ __all__ = [
     'ReDWebDatasetConverter',
     'FashionMnistConverter',
     'InpaintingConverter',
-    'OAR3DTilingConverter'
+    'ImageProcessingConverter'
 ]
