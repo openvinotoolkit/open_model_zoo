@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -24,6 +24,10 @@ static const char custom_cpu_library_message[] = "Required for CPU custom layers
 static const char thresh_output_message[] = "Optional. Probability threshold for detections.";
 static const char raw_output_message[] = "Optional. Inference results as raw values.";
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
+static const char num_inf_req_message[] = "Optional. Number of infer requests.";
+static const char num_threads_message[] = "Optional. Number of threads.";
+static const char num_streams_message[] = "Optional. Number of streams.";
+static const char loop_input_message[] = "Optional. Iterate over input infinitely.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
@@ -37,6 +41,10 @@ DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
+DEFINE_uint32(nireq, 2, num_inf_req_message);
+DEFINE_uint32(nthreads, 0, num_threads_message);
+DEFINE_string(nstreams, "", num_streams_message);
+DEFINE_bool(loop_input, false, loop_input_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
 
@@ -59,6 +67,10 @@ static void showUsage() {
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
+    std::cout << "    -nireq \"<integer>\"        " << num_inf_req_message << std::endl;
+    std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
+    std::cout << "    -nstreams                 " << num_streams_message << std::endl;
+    std::cout << "    -loop_input               " << loop_input_message << std::endl;
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
