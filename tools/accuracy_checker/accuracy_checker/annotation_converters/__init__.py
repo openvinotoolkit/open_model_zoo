@@ -123,6 +123,6 @@ __all__ = [
     'ReDWebDatasetConverter',
     'FashionMnistConverter',
     'InpaintingConverter',
-    'StyleTransferConverter'
+    'StyleTransferConverter',
     'ImageProcessingConverter'
 ]

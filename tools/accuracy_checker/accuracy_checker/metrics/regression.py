@@ -33,7 +33,10 @@ from ..representation import (
     ImageInpaintingAnnotation,
     ImageInpaintingPrediction,
     ImageProcessingAnnotation,
-    ImageProcessingPrediction
+    ImageProcessingPrediction,
+    StyleTransferAnnotation,
+    StyleTransferPrediction
+    
 )
 
 from .metric import PerImageEvaluationMetric
