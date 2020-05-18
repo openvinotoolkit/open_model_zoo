@@ -74,7 +74,7 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     /* Resize manually and copy data from the image to the input blob */
     InferenceEngine::LockedMemory<void> inputMapped =
         InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_.GetBlob(input_name_))->wmap();
-    float* input_data_ = inputMapped.as<float *>();
+    float* input_data = inputMapped.as<float *>();
 
     cv::Mat image;
     if (channels_ == 1) {
@@ -91,12 +91,12 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     if (channels_ == 3) {
         for (int pid = 0; pid < image_size; ++pid) {
             for (int ch = 0; ch < channels_; ++ch) {
-                input_data_[ch * image_size + pid] = image.at<cv::Vec3f>(pid)[ch];
+                input_data[ch * image_size + pid] = image.at<cv::Vec3f>(pid)[ch];
             }
         }
     } else if (channels_ == 1) {
         for (int pid = 0; pid < image_size; ++pid) {
-            input_data_[pid] = image.at<float>(pid);
+            input_data[pid] = image.at<float>(pid);
         }
     }
     // ---------------------------------------------------------------------------------------------------

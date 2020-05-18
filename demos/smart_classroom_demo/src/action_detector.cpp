@@ -139,8 +139,8 @@ DetectedActions ActionDetection::fetchResults() {
     const cv::Mat main_conf_out(ieSizeToVector(request->GetBlob(det_conf_blob_name)->getTensorDesc().getDims()),
                                 CV_32F, detConfBlobMapped.as<float*>());
 
-    std::vector<cv::Mat> add_conf_out;
     std::vector<LockedMemory<const void>> blobsMapped;
+    std::vector<cv::Mat> add_conf_out;
     for (int glob_anchor_id = 0; glob_anchor_id < num_glob_anchors_; ++glob_anchor_id) {
         const auto& blob_name = glob_anchor_names_[glob_anchor_id];
         blobsMapped.push_back(as<MemoryBlob>(request->GetBlob(blob_name))->rmap());
