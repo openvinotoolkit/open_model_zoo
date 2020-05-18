@@ -96,11 +96,22 @@ AccuracyChecker supports following set of adapters:
   * `detection_threshold` - minimal detection confidences level for valid detections.
   * `actions_scores_threshold` - minimal actions confidences level for valid detections.
   * `action_scale` - scale for correct action score calculation.
+* `image_processing` - converting output of network for single image processing to `ImageProcessingPrediction`.
+  * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
+  * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
+  * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
+  The order of actions:
+  1. Multiply on `std`
+  2. Add `mean`
+  3. Reverse channels if this option enabled.
+  * `target_out` - target model output layer name in case when model has several outputs.
 * `super_resolution` - converting output of single image super resolution network to `SuperResolutionPrediction`.
   * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
   * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
   * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
-  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations.
+  * `cast_to_uint8` - perform casting output image pixels to [0, 255] range.
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
   The order of actions:
   1. Multiply on `std`
   2. Add `mean`
@@ -110,6 +121,7 @@ AccuracyChecker supports following set of adapters:
   * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
   * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
   * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
+  * `cast_to_uint8` - perform casting output image pixels to [0, 255] range.
   **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
   The order of actions:
   1. Multiply on `std`

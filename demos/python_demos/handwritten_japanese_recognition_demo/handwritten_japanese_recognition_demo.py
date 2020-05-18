@@ -22,7 +22,7 @@ from argparse import ArgumentParser, SUPPRESS
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 from utils.codec import CTCCodec
 
 
@@ -67,14 +67,12 @@ def preprocess_input(image_name, height, width):
 def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
-    model_xml = args.model
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
     # Plugin initialization
     ie = IECore()
     # Read IR
-    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
-    net = IENetwork(model=model_xml, weights=model_bin)
+    log.info("Loading network")
+    net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
     assert len(net.inputs) == 1, "Demo supports only single input topologies"
     assert len(net.outputs) == 1, "Demo supports only single output topologies"

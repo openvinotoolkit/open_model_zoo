@@ -93,7 +93,7 @@ optional arguments:
 
 General:
   -i PATH, --input PATH
-                        (optional) Path to the input video ('cam' for the
+                        (optional) Path to the input video ('0' for the
                         camera, default)
   -o PATH, --output PATH
                         (optional) Path to save the output video to

@@ -23,7 +23,7 @@ from argparse import ArgumentParser, SUPPRESS
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 
 from text_spotting_demo.tracker import StaticIOUTracker
 from text_spotting_demo.visualizer import Visualizer
@@ -176,29 +176,20 @@ def main():
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    mask_rcnn_model_xml = args.mask_rcnn_model
-    mask_rcnn_model_bin = os.path.splitext(mask_rcnn_model_xml)[0] + '.bin'
-
-    text_enc_model_xml = args.text_enc_model
-    text_enc_model_bin = os.path.splitext(text_enc_model_xml)[0] + '.bin'
-
-    text_dec_model_xml = args.text_dec_model
-    text_dec_model_bin = os.path.splitext(text_dec_model_xml)[0] + '.bin'
-
     # Plugin initialization for specified device and load extensions library if specified.
     log.info('Creating Inference Engine...')
     ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, 'CPU')
     # Read IR
-    log.info('Loading network files:\n\t{}\n\t{}'.format(mask_rcnn_model_xml, mask_rcnn_model_bin))
-    mask_rcnn_net = IENetwork(model=mask_rcnn_model_xml, weights=mask_rcnn_model_bin)
+    log.info('Loading Mask-RCNN network')
+    mask_rcnn_net = ie.read_network(args.mask_rcnn_model, os.path.splitext(args.mask_rcnn_model)[0] + '.bin')
 
-    log.info('Loading network files:\n\t{}\n\t{}'.format(text_enc_model_xml, text_enc_model_bin))
-    text_enc_net = IENetwork(model=text_enc_model_xml, weights=text_enc_model_bin)
+    log.info('Loading encoder part of text recognition network')
+    text_enc_net = ie.read_network(args.text_enc_model, os.path.splitext(args.text_enc_model)[0] + '.bin')
 
-    log.info('Loading network files:\n\t{}\n\t{}'.format(text_dec_model_xml, text_dec_model_bin))
-    text_dec_net = IENetwork(model=text_dec_model_xml, weights=text_dec_model_bin)
+    log.info('Loading decoder part of text recognition network')
+    text_dec_net = ie.read_network(args.text_dec_model, os.path.splitext(args.text_dec_model)[0] + '.bin')
 
     if 'CPU' in args.device:
         supported_layers = ie.query_network(mask_rcnn_net, 'CPU')

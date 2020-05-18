@@ -24,7 +24,6 @@ from argparse import ArgumentParser
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IENetwork
 from ie_module import InferenceContext
 from landmarks_detector import LandmarksDetector
 from face_detector import FaceDetector
@@ -173,14 +172,13 @@ class FrameProcessor:
 
     def load_model(self, model_path):
         model_path = osp.abspath(model_path)
-        model_description_path = model_path
         model_weights_path = osp.splitext(model_path)[0] + ".bin"
-        log.info("Loading the model from '%s'" % (model_description_path))
-        assert osp.isfile(model_description_path), \
-            "Model description is not found at '%s'" % (model_description_path)
+        log.info("Loading the model from '%s'" % (model_path))
+        assert osp.isfile(model_path), \
+            "Model description is not found at '%s'" % (model_path)
         assert osp.isfile(model_weights_path), \
             "Model weights are not found at '%s'" % (model_weights_path)
-        model = IENetwork(model_description_path, model_weights_path)
+        model = self.context.ie_core.read_network(model_path, model_weights_path)
         log.info("Model is loaded")
         return model
 
