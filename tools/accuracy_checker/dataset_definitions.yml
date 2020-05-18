@@ -739,7 +739,7 @@ datasets:
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       masks_dir: free_form_masks/masks_2k
     annotation: inpainting_voc12_masks2k.pickle
-    
+
   - name: style_transfer
     data_source: val2017
     annotation_conversion:

@@ -1,8 +1,6 @@
 models:
   - name: style_transfer
-
     launchers:
-
       - framework: onnx_runtime
         device: CPU
         model: public/mosaic/mosaic.onnx
@@ -14,7 +12,6 @@ models:
         model: public/mosaic/FP32/mosaic.xml
         weights: public/mosaic/FP32/mosaic.bin
         adapter: style_transfer
-        
       - framework: dlsdk
         tags:
           - FP16
