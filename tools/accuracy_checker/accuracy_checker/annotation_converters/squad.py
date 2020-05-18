@@ -21,8 +21,89 @@ from ..utils import read_json
 from ..config import PathField, NumberField, BoolField
 
 from .format_converter import BaseFormatConverter, ConverterReturn
-from ._nlp_common import SquadWordPieseTokenizer
+from ._nlp_common import SquadWordPieseTokenizer, _is_whitespace
 
+
+def _check_is_max_context(doc_spans, cur_span_index, position):
+    """Check if this is the 'max context' doc span for the token."""
+    best_score = None
+    best_span_index = None
+    for (span_index, doc_span) in enumerate(doc_spans):
+        end = doc_span["start"] + doc_span["length"] - 1
+        if position < doc_span["start"]:
+            continue
+        if position > end:
+            continue
+        num_left_context = position - doc_span["start"]
+        num_right_context = end - position
+        score = min(num_left_context, num_right_context) + 0.01 * doc_span["length"]
+        if best_score is None or score > best_score:
+            best_score = score
+            best_span_index = span_index
+
+    return cur_span_index == best_span_index
+
+class SquadExample:
+    """
+    A single training/test example for the Squad dataset, as loaded from disk.
+
+    Args:
+        qas_id: The example's unique identifier
+        question_text: The question string
+        context_text: The context string
+        answer_text: The answer string
+        start_position_character: The character position of the start of the answer
+        title: The title of the example
+        answers: None by default, this is used during evaluation. Holds answers as well as their start positions.
+        is_impossible: False by default, set to True if the example has no possible answer.
+    """
+
+    def __init__(
+            self,
+            qas_id,
+            question_text,
+            context_text,
+            answer_text,
+            start_position_character,
+            title,
+            answers=None,
+            is_impossible=False,
+    ):
+        self.qas_id = qas_id
+        self.question_text = question_text
+        self.context_text = context_text
+        self.answer_text = answer_text
+        self.title = title
+        self.is_impossible = is_impossible
+        self.answers = answers or []
+
+        self.start_position, self.end_position = 0, 0
+
+        doc_tokens = []
+        char_to_word_offset = []
+        prev_is_whitespace = True
+
+        # Split on whitespace so that different tokens may be attributed to their original position.
+        for c in self.context_text:
+            if _is_whitespace(c):
+                prev_is_whitespace = True
+            else:
+                if prev_is_whitespace:
+                    doc_tokens.append(c)
+                else:
+                    doc_tokens[-1] += c
+                prev_is_whitespace = False
+            char_to_word_offset.append(len(doc_tokens) - 1)
+
+        self.doc_tokens = doc_tokens
+        self.char_to_word_offset = char_to_word_offset
+
+        # Start and end positions only has a value during evaluation.
+        if start_position_character is not None and not is_impossible:
+            self.start_position = char_to_word_offset[start_position_character]
+            self.end_position = char_to_word_offset[
+                min(start_position_character + len(answer_text) - 1, len(char_to_word_offset) - 1)
+            ]
 
 class SQUADConverter(BaseFormatConverter):
     __provider__ = "squad"
@@ -63,67 +144,61 @@ class SQUADConverter(BaseFormatConverter):
 
     @staticmethod
     def _load_examples(file):
-        def _is_whitespace(c):
-            if c == " " or c == "\t" or c == "\r" or c == "\n" or ord(c) == 0x202F:
-                return True
-            return False
-
         examples = []
-        answers = []
         data = read_json(file)['data']
 
         for entry in data:
-            for paragraph in entry['paragraphs']:
-                paragraph_text = paragraph["context"]
-                doc_tokens = []
-                char_to_word_offset = []
-                prev_is_whitespace = True
-                for c in paragraph_text:
-                    if _is_whitespace(c):
-                        prev_is_whitespace = True
-                    else:
-                        if prev_is_whitespace:
-                            doc_tokens.append(c)
-                        else:
-                            doc_tokens[-1] += c
-                        prev_is_whitespace = False
-                    char_to_word_offset.append(len(doc_tokens) - 1)
-
+            title = entry["title"]
+            for paragraph in entry["paragraphs"]:
+                context_text = paragraph["context"]
                 for qa in paragraph["qas"]:
                     qas_id = qa["id"]
                     question_text = qa["question"]
-                    orig_answer_text = qa["answers"]
-                    is_impossible = qa.get('is_impossible', False)
+                    start_position_character = None
+                    answer_text = None
+                    answers = []
+
+                    if "is_impossible" in qa:
+                        is_impossible = qa["is_impossible"]
+                    else:
+                        is_impossible = False
+
                     if not is_impossible:
-                        example = {
-                            'id': qas_id,
-                            'question_text': question_text,
-                            'context_text': paragraph_text,
-                            'answer_text': orig_answer_text,
-                            'char_to_word_offset': char_to_word_offset,
-                            'tokens': doc_tokens,
-                            'is_impossible': is_impossible
-                        }
-                        examples.append(example)
-                        answers.append(orig_answer_text)
-        return examples, answers
+                        answers = qa["answers"]
+
+                    example = SquadExample(
+                        qas_id=qas_id,
+                        question_text=question_text,
+                        context_text=context_text,
+                        answer_text=answer_text,
+                        start_position_character=start_position_character,
+                        title=title,
+                        is_impossible=is_impossible,
+                        answers=answers,
+                    )
+
+                    examples.append(example)
+        return examples
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        examples, answers = self._load_examples(self.testing_file)
+        examples = self._load_examples(self.testing_file)
         annotations = []
         unique_id = 1000000000
 
         for (example_index, example) in enumerate(examples):
-            all_doc_tokens, tok_to_orig_index, _ = self.get_all_doc_tokens(example['tokens'])
+            all_doc_tokens, tok_to_orig_index, _ = self.get_all_doc_tokens(example.doc_tokens)
+
             spans = []
+
             truncated_query = self.tokenizer.encode(
-                example['question_text'], add_special_tokens=False, max_length=self.max_query_length
+                example.question_text, add_special_tokens=False, max_length=self.max_query_length
             )
             sequence_added_tokens = self.tokenizer.max_len - self.tokenizer.max_len_single_sentence
             sequence_pair_added_tokens = self.tokenizer.max_len - self.tokenizer.max_len_sentences_pair
 
             span_doc_tokens = all_doc_tokens
             while len(spans) * self.doc_stride < len(all_doc_tokens):
+
                 encoded_dict = self.tokenizer.encode_plus(
                     truncated_query if self.tokenizer.padding_side == "right" else span_doc_tokens,
                     span_doc_tokens if self.tokenizer.padding_side == "right" else truncated_query,
@@ -132,6 +207,7 @@ class SQUADConverter(BaseFormatConverter):
                     pad_to_max_length=True,
                     stride=self.max_seq_length - self.doc_stride - len(truncated_query) - sequence_pair_added_tokens,
                     truncation_strategy="only_second" if self.tokenizer.padding_side == "right" else "only_first",
+                    return_token_type_ids=True,
                 )
 
                 paragraph_len = min(
@@ -140,15 +216,21 @@ class SQUADConverter(BaseFormatConverter):
                 )
 
                 if self.tokenizer.pad_token_id in encoded_dict["input_ids"]:
-                    non_padded_ids = encoded_dict["input_ids"][:encoded_dict["input_ids"].index(
-                        self.tokenizer.pad_token_id
-                    )]
+                    if self.tokenizer.padding_side == "right":
+                        non_padded_ids = (
+                            encoded_dict["input_ids"][:encoded_dict["input_ids"].index(self.tokenizer.pad_token_id)]
+                        )
+                    else:
+                        pos = encoded_dict["input_ids"][::-1].index(self.tokenizer.pad_token_id)
+                        last_padding_id_position = len(encoded_dict["input_ids"]) - 1 - pos
+                        non_padded_ids = encoded_dict["input_ids"][last_padding_id_position + 1:]
+
                 else:
                     non_padded_ids = encoded_dict["input_ids"]
 
                 tokens = self.tokenizer.convert_ids_to_tokens(non_padded_ids)
-
                 tr_q_len = len(truncated_query)
+
                 encoded_dict["paragraph_len"] = paragraph_len
                 encoded_dict["tokens"] = tokens
                 encoded_dict["token_to_orig_map"] = self.get_token_to_orig_map(
@@ -171,34 +253,22 @@ class SQUADConverter(BaseFormatConverter):
                 # Identify the position of the CLS token
                 cls_index = span["input_ids"].index(self.tokenizer.cls_token_id)
 
-                # p_mask: mask with 1 for token than cannot be in the answer (0 for token which can be in an answer)
-                # Original TF implem also keep the classification token (set to 0)
-                p_mask = np.array(span["token_type_ids"])
-
-                p_mask = np.minimum(p_mask, 1)
-
-                if self.tokenizer.padding_side == "right":
-                    # Limit positive values to
-                    p_mask = 1 - p_mask
-
-                p_mask[np.where(np.array(span["input_ids"]) == self.tokenizer.sep_token_id)[0]] = 1
-
-                # Set the CLS index to '0'
-                p_mask[cls_index] = 0
+                p_mask = self.fill_p_mask(span, len(truncated_query), sequence_added_tokens, cls_index)
                 idx = example_index
                 identifier = ['input_ids_{}'.format(idx), 'input_mask_{}'.format(idx), 'segment_ids_{}'.format(idx)]
                 annotation = QuestionAnsweringAnnotation(
                     identifier,
+                    example.qas_id,
                     np.array(unique_id),
                     np.array(span["input_ids"]),
                     np.array(span["attention_mask"]),
                     np.array(span["token_type_ids"]),
                     np.array(cls_index),
                     p_mask,
-                    answers[example_index],
-                    example["context_text"],
-                    example["tokens"],
-                    example['is_impossible'],
+                    example.answers,
+                    example.context_text,
+                    example.doc_tokens,
+                    example.is_impossible,
                     span["paragraph_len"],
                     span["tokens"],
                     span["token_is_max_context"],
@@ -261,3 +331,23 @@ class SQUADConverter(BaseFormatConverter):
                 )
                 span["token_is_max_context"][index] = is_max_context
         return spans
+
+    def fill_p_mask(self, span, tr_q_len, sequence_added_tokens, cls_index):
+        p_mask = np.ones_like(span["token_type_ids"])
+        if self.tokenizer.padding_side == "right":
+            p_mask[tr_q_len + sequence_added_tokens:] = 0
+        else:
+            p_mask[-len(span["tokens"]): -(tr_q_len + sequence_added_tokens)] = 0
+
+        pad_token_indices = np.where(span["input_ids"] == self.tokenizer.pad_token_id)
+        special_token_indices = np.asarray(
+            self.tokenizer.get_special_tokens_mask(span["input_ids"], already_has_special_tokens=True)
+        ).nonzero()
+
+        p_mask[pad_token_indices] = 1
+        p_mask[special_token_indices] = 1
+
+        # Set the cls index to 0: the CLS index can be used for impossible answers
+        p_mask[cls_index] = 0
+
+        return p_mask

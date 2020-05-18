@@ -80,16 +80,11 @@ class WordPieceTokenizer:
         return "".join(output)
 
     @staticmethod
-    def _run_split_on_punc(text):
-        def _is_punctuation(char):
-            punct = set('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~')
-            if char in punct:
-                return True
-            cat = unicodedata.category(char)
-            if cat.startswith("P"):
-                return True
-            return False
+    def _run_split_on_punc(text, never_split=None):
+        """Splits punctuation on a piece of text."""
 
+        if never_split is not None and text in never_split:
+            return [text]
         chars = list(text)
         i = 0
         start_new_word = True
@@ -108,10 +103,13 @@ class WordPieceTokenizer:
 
         return ["".join(x) for x in output]
 
+
     @staticmethod
-    def basic_tokenizer(text, lower_case=True, tokenize_chinese_chars=True):
+    def basic_tokenizer(text, lower_case=True, tokenize_chinese_chars=True, never_split=None):
+        never_split = never_split or []
         if isinstance(text, bytes):
             text = text.decode("utf-8", "ignore")
+        text = _clean_text(text)
 
         if tokenize_chinese_chars:
             text = WordPieceTokenizer._tokenize_chinese_chars(text)
@@ -120,10 +118,10 @@ class WordPieceTokenizer:
         tokens = text.split() if text else []
         split_tokens = []
         for token in tokens:
-            if lower_case:
+            if lower_case and token not in never_split:
                 token = token.lower()
                 token = WordPieceTokenizer._run_strip_accents(token)
-            split_tokens.extend(WordPieceTokenizer._run_split_on_punc(token))
+            split_tokens.extend(WordPieceTokenizer._run_split_on_punc(token, never_split))
 
         output_tokens = " ".join(split_tokens)
         output_tokens = output_tokens.strip()
@@ -158,14 +156,14 @@ class WordPieceTokenizer:
 
         #pylint:disable=chained-comparison
         #pylint:disable=too-many-boolean-expressions
-        if ((cp >= 0x4E00 and cp <= 0x9FFF) or  #
-                (cp >= 0x3400 and cp <= 0x4DBF) or  #
-                (cp >= 0x20000 and cp <= 0x2A6DF) or  #
-                (cp >= 0x2A700 and cp <= 0x2B73F) or  #
-                (cp >= 0x2B740 and cp <= 0x2B81F) or  #
-                (cp >= 0x2B820 and cp <= 0x2CEAF) or
-                (cp >= 0xF900 and cp <= 0xFAFF) or  #
-                (cp >= 0x2F800 and cp <= 0x2FA1F)):  #
+        if ((0x4E00 <= cp <= 0x9FFF) or  #
+                (0x3400 <= cp <= 0x4DBF) or  #
+                (0x20000 <= cp <= 0x2A6DF) or  #
+                (0x2A700 <= cp <= 0x2B73F) or  #
+                (0x2B740 <= cp <= 0x2B81F) or  #
+                (0x2B820 <= cp <= 0x2CEAF) or
+                (0xF900 <= cp <= 0xFAFF) or  #
+                (0x2F800 <= cp <= 0x2FA1F)):  #
             return True
 
         return False
@@ -209,9 +207,13 @@ class WordPieceTokenizer:
                 output_tokens.extend(sub_tokens)
         return output_tokens
 
+    @property
+    def all_special_tokens(self):
+        return []
+
     def tokenize(self, text):
         tokens = []
-        for token in self.basic_tokenizer(text, self.lower_case):
+        for token in self.basic_tokenizer(text, self.lower_case, never_split=self.all_special_tokens):
             for sub_token in self.wordpiece_tokenizer(token):
                 tokens.append(sub_token)
 
@@ -243,8 +245,6 @@ class WordPieceTokenizer:
 class SquadWordPieseTokenizer(WordPieceTokenizer):
     def __init__(self, vocab_file, lower_case=True, tokenize_chinese_chars=True, max_len=None):
         super().__init__(vocab_file, lower_case, tokenize_chinese_chars, max_len)
-        self.max_len_single_sentence = self.max_len - 2  if max_len else None # take into account special tokens
-        self.max_len_sentences_pair = self.max_len - 3  if max_len else None# take into account special tokens
         self.padding_side = "right"
         self.pad_token_type_id = 0
         self.unk_token = "[UNK]"
@@ -368,39 +368,18 @@ class SquadWordPieseTokenizer(WordPieceTokenizer):
             if return_special_tokens_mask:
                 encoded_inputs["special_tokens_mask"] = encoded_inputs["special_tokens_mask"][:max_length]
 
-        needs_to_be_padded = pad_to_max_length and (
-            max_length and len(encoded_inputs["input_ids"]) < max_length
-            or
-            max_length is None and len(encoded_inputs["input_ids"]) < self.max_len and self.max_len <= 10000
-        )
-
-        def pad_right(encoded_inputs, difference):
-            if return_attention_mask:
-                encoded_inputs["attention_mask"] = [1] * len(encoded_inputs["input_ids"]) + [0] * difference
-            if return_token_type_ids:
-                encoded_inputs["token_type_ids"] = encoded_inputs["token_type_ids"] + [
-                    self.pad_token_type_id] * difference
-            if return_special_tokens_mask:
-                encoded_inputs["special_tokens_mask"] = encoded_inputs["special_tokens_mask"] + [1] * difference
-            encoded_inputs["input_ids"] = encoded_inputs["input_ids"] + [self.pad_token_id] * difference
-            return encoded_inputs
-
-        def pad_left(encoded_inputs, difference):
-            if return_attention_mask:
-                encoded_inputs["attention_mask"] = [0] * difference + [1] * len(encoded_inputs["input_ids"])
-            if return_token_type_ids:
-                encoded_inputs["token_type_ids"] = [self.pad_token_type_id] * difference + encoded_inputs[
-                    "token_type_ids"]
-            if return_special_tokens_mask:
-                encoded_inputs["special_tokens_mask"] = [1] * difference + encoded_inputs["special_tokens_mask"]
-            encoded_inputs["input_ids"] = [self.pad_token_id] * difference + encoded_inputs["input_ids"]
-            return encoded_inputs
+        check_len = max_length and len(encoded_inputs["input_ids"]) < max_length
+        check_len2 = max_length is None and len(encoded_inputs["input_ids"]) < self.max_len <= 10000
+        needs_to_be_padded = pad_to_max_length and (check_len or check_len2)
 
         pad_strategy = {'left': pad_left, 'right': pad_right}
 
         if needs_to_be_padded:
             difference = (max_length if max_length is not None else self.max_len) - len(encoded_inputs["input_ids"])
-            encoded_inputs = pad_strategy[self.padding_side](encoded_inputs, difference)
+            encoded_inputs = pad_strategy[self.padding_side](
+                encoded_inputs, difference, return_attention_mask, return_token_type_ids, return_special_tokens_mask,
+                self.pad_token_id, self.pad_token_type_id
+            )
 
         elif return_attention_mask:
             encoded_inputs["attention_mask"] = [1] * len(encoded_inputs["input_ids"])
@@ -531,7 +510,6 @@ class SquadWordPieseTokenizer(WordPieceTokenizer):
         return self.ids_to_tokens.get(index, self.unk_token)
 
     def wordpiece_tokenizer(self, text):
-
         output_tokens = []
         for token in whitespace_tokenize(text):
             chars = list(token)
@@ -564,6 +542,21 @@ class SquadWordPieseTokenizer(WordPieceTokenizer):
             else:
                 output_tokens.extend(sub_tokens)
         return output_tokens
+
+
+    @property
+    def max_len_single_sentence(self):
+        return self.max_len - self.num_special_tokens_to_add(pair=False)
+
+    @property
+    def max_len_sentences_pair(self):
+        return self.max_len - self.num_special_tokens_to_add(pair=True)
+
+    def num_special_tokens_to_add(self, pair=False):
+        token_ids_0 = []
+        token_ids_1 = []
+        return len(self.build_inputs_with_special_tokens(token_ids_0, token_ids_1 if pair else None))
+
 
 def truncate_seq_pair(tokens_a, tokens_b, max_length):
     """Truncates a sequence pair in place to the maximum length."""
@@ -640,3 +633,80 @@ def whitespace_tokenize(text):
         return []
     tokens = text.split()
     return tokens
+
+def _clean_text(text):
+    """Performs invalid character removal and whitespace cleanup on text."""
+    output = []
+    for char in text:
+        cp = ord(char)
+        if cp == 0 or cp == 0xFFFD or _is_control(char):
+            continue
+        if _is_whitespace(char):
+            output.append(" ")
+        else:
+            output.append(char)
+    return "".join(output)
+
+
+def _is_control(char):
+    """Checks whether `chars` is a control character."""
+    # These are technically control characters but we count them as whitespace
+    # characters.
+    if char in ["\t", "\n", "\r"]:
+        return False
+    cat = unicodedata.category(char)
+    if cat.startswith("C"):
+        return True
+    return False
+
+def _is_whitespace(char):
+    """Checks whether `chars` is a whitespace character."""
+    # \t, \n, and \r are technically control characters but we treat them
+    # as whitespace since they are generally considered as such.
+    if char in [" ", "\t", "\n", "\r"]:
+        return True
+    cat = unicodedata.category(char)
+    if cat == "Zs":
+        return True
+    return False
+
+def _is_punctuation(char):
+    """Checks whether `chars` is a punctuation character."""
+    cp = ord(char)
+    if (33 <= cp <= 47) or (58 <= cp <= 64) or (91 <= cp <= 96) or (123 <= cp <= 126):
+        return True
+    cat = unicodedata.category(char)
+    if cat.startswith("P"):
+        return True
+    return False
+
+
+def pad_right(
+        encoded_inputs, difference,
+        return_attention_mask, return_token_type_ids, return_special_tokens_mask,
+        pad_token_id, pad_token_type_id
+):
+    if return_attention_mask:
+        encoded_inputs["attention_mask"] = [1] * len(encoded_inputs["input_ids"]) + [0] * difference
+    if return_token_type_ids:
+        encoded_inputs["token_type_ids"] = encoded_inputs["token_type_ids"] + [pad_token_type_id] * difference
+    if return_special_tokens_mask:
+        encoded_inputs["special_tokens_mask"] = encoded_inputs["special_tokens_mask"] + [1] * difference
+    encoded_inputs["input_ids"] = encoded_inputs["input_ids"] + [pad_token_id] * difference
+    return encoded_inputs
+
+
+def pad_left(
+        encoded_inputs, difference,
+        return_attention_mask, return_token_type_ids, return_special_tokens_mask,
+        pad_token_id, pad_token_type_id
+):
+    if return_attention_mask:
+        encoded_inputs["attention_mask"] = [0] * difference + [1] * len(encoded_inputs["input_ids"])
+    if return_token_type_ids:
+        encoded_inputs["token_type_ids"] = [pad_token_type_id] * difference + encoded_inputs[
+            "token_type_ids"]
+    if return_special_tokens_mask:
+        encoded_inputs["special_tokens_mask"] = [1] * difference + encoded_inputs["special_tokens_mask"]
+    encoded_inputs["input_ids"] = [pad_token_id] * difference + encoded_inputs["input_ids"]
+    return encoded_inputs

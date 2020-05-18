@@ -15,8 +15,6 @@ limitations under the License.
 """
 
 from collections import OrderedDict, namedtuple
-import numpy as np
-
 from .postprocessor import Postprocessor
 from ..representation import QuestionAnsweringAnnotation, QuestionAnsweringPrediction
 from ..annotation_converters._nlp_common import WordPieceTokenizer
@@ -56,10 +54,14 @@ class ExtractSQUADPrediction(Postprocessor):
 
     def process_image(self, annotation, prediction):
         def _get_best_indexes(logits, n_best_size):
-            indexes = np.argsort(logits)[::-1]
-            score = np.array(logits)[indexes]
-            best_indexes_mask = np.arange(len(score)) < n_best_size
-            best_indexes = indexes[best_indexes_mask]
+            """Get the n-best logits from a list."""
+            index_and_score = sorted(enumerate(logits), key=lambda x: x[1], reverse=True)
+
+            best_indexes = []
+            for i, _ in enumerate(index_and_score):
+                if i >= n_best_size:
+                    break
+                best_indexes.append(index_and_score[i][0])
             return best_indexes
 
         def _extended_check_indexes(start, end, annotation, max_answer):
@@ -69,9 +71,12 @@ class ExtractSQUADPrediction(Postprocessor):
                 return False
             if not annotation.token_is_max_context.get(start, False):
                 return False
-            if end < start or end - start + 1 > max_answer:
+            if end < start:
+                return False
+            if end - start + 1 > max_answer:
                 return False
             return True
+
 
         for annotation_, prediction_ in zip(annotation, prediction):
             start_indexes = _get_best_indexes(prediction_.start_logits, self.n_best_size)
@@ -93,6 +98,7 @@ class ExtractSQUADPrediction(Postprocessor):
 
             prelim_predictions = sorted(prelim_predictions, key=lambda x: (x.start_logit + x.end_logit), reverse=True)
             nbest = []
+            seen_predictions = set()
             for pred in prelim_predictions:
                 if len(nbest) >= self.n_best_size:
                     break
@@ -101,21 +107,23 @@ class ExtractSQUADPrediction(Postprocessor):
                     orig_doc_start = annotation_.token_to_orig_map[pred.start_index]
                     orig_doc_end = annotation_.token_to_orig_map[pred.end_index]
                     orig_tokens = annotation_.doc_tokens[orig_doc_start:(orig_doc_end + 1)]
-                    tok_text = " ".join(pred.tokens)
-
-                    # De-tokenize WordPieces that have been split off.
-                    tok_text = tok_text.replace(" ##", "")
-                    tok_text = tok_text.replace("##", "")
-
+                    tok_text = " ".join(pred.tokens).replace(" ##", "").strip()
                     # Clean whitespace
                     tok_text = tok_text.strip()
                     tok_text = " ".join(tok_text.split())
                     orig_text = " ".join(orig_tokens)
 
                     tokens_ = self.get_final_text(tok_text, orig_text, annotation_.metadata.get('lower_case', False))
+                    if tokens_ in seen_predictions:
+                        continue
                     nbest.append(tokens_)
+                    seen_predictions.add(tokens_)
                 else:
                     nbest.append('')
+                    seen_predictions.add('')
+
+            if not nbest:
+                nbest.append("")
 
             prediction_.tokens = nbest
 

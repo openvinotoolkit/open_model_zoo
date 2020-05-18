@@ -25,11 +25,12 @@ class QuestionAnswering(BaseRepresentation):
 
 
 class QuestionAnsweringAnnotation(QuestionAnswering):
-    def __init__(self, identifier, unique_id, input_ids, input_mask, segment_ids, cls_index, p_mask,
+    def __init__(self, identifier, question_id, unique_id, input_ids, input_mask, segment_ids, cls_index, p_mask,
                  orig_answer_text=None, paragraph_text=None, doc_tokens=None, is_impossible=False, paragraph_len=None,
                  tokens=None, token_is_max_context=None, token_to_orig_map=None):
         super().__init__(identifier)
         self.orig_answer_text = orig_answer_text if orig_answer_text is not None else ''
+        self.question_id = question_id
         self.unique_id = unique_id
         self.input_ids = input_ids
         self.input_mask = input_mask
