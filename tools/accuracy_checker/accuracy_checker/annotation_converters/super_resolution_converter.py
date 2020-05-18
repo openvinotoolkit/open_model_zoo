@@ -20,7 +20,7 @@ import cv2
 import numpy as np
 from ..config import PathField, StringField, BoolField, ConfigError, NumberField, DictField
 from ..representation import SuperResolutionAnnotation, ContainerAnnotation
-from ..representation.super_resolution_representation import GTLoader
+from ..representation.image_processing import GTLoader
 from ..utils import check_file_existence
 from ..data_readers import MultiFramesInputIdentifier
 from .format_converter import BaseFormatConverter, ConverterReturn
