@@ -48,11 +48,11 @@ class StyleTransferConverter(BaseFormatConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_check_errors = [] if check_content else None
         annotations = []
-        images = list(im for im in self.image_dir.iterdir())  
+        images = list(im for im in self.image_dir.iterdir())
         for image in images:
             identifiers = image.name
-            annotation = StyleTransferAnnotation(identifiers, image.name , self.dst_height, self.dst_width)
+            annotation = StyleTransferAnnotation(identifiers, image.name, self.dst_height, self.dst_width)
             annotations.append(annotation)
 
         return ConverterReturn(annotations, {'dst_width' : self.dst_width, 'dst_height' : self.dst_height},
-            content_check_errors)
+                               content_check_errors)
