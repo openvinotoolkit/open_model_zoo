@@ -82,10 +82,10 @@ class SuperResolutionAdapter(Adapter):
         for identifier, img_sr in zip(identifiers, raw_outputs[self.target_out]):
             img_sr *= self.std
             img_sr += self.mean
+            img_sr = img_sr.transpose((1, 2, 0))
             if self.cast_to_uint8:
                 img_sr = np.clip(img_sr, 0., 255.)
-                img_sr = img_sr.astype(np.int8)
-            img_sr = img_sr.transpose((1, 2, 0))
+                img_sr = img_sr.astype(np.uint8)
             if self.reverse_channels:
                 img_sr = cv2.cvtColor(img_sr, cv2.COLOR_BGR2RGB)
                 img_sr = Image.fromarray(img_sr, 'RGB') if Image is not None else img_sr
