@@ -45,115 +45,47 @@ Image, name - `data` , shape - [1x3x640x640], format [BxCxHxW],
 
 ### Original model
 Model outputs are floating points tensors:
+1. name: `face_rpn_cls_prob_reshape_stride32`, shape: `1,4, 20, 20`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 32 for 2 classes: background and face.
 
-1. name: `face_rpn_cls_prob_reshape_stride32`, shape: `1,4, 20, 20`, format: `[B, Ax2, H, W]`, where
-   - `B` - batch size
-   - `A` - number of anchors
-   - `H` - feature height
-   - `W` - feature width
+2. name: `face_rpn_bbox_stride32`,  shape: `1,8,20,20`, format: `[B, Ax4, H, W]`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 32
 
-   represents detection scores from Feature Pyramid Network (FPN) level with stride 32 for 2 classes: background and face.
-2. name: `face_rpn_bbox_stride32`,  shape: `1,8,20,20`, format: `[B, Ax4, H, W]`, where
-   - `B` - batch size
-   - `A` - number of anchors
-   - `H` - feature height
-   - `W` - feature width
+3. name: `face_rpn_landmark_pred_stride32`, shape: `1,20,20,20`, format: `[B, Ax10, H, W]`, represents *facial landmarks* from Feature Pyramid Network (FPN) level with stride 32.
 
-   represents detection box deltas from Feature Pyramid Network (FPN) level with stride 32
-
-   Box deltas format `[dx, dy, dh, dw]`, where `(dx, dy)` - regression for left-upper corner of bounding box,
-   `(dh, dw)` - regression by height and width of bounding box.
-3. name: `face_rpn_landmark_pred_stride32`, shape: `1,20,20,20`, format: `[B, Ax10, H, W]`
-   - `B` - batch size
-   - `A` - number of anchors
-   - `H` - feature height
-   - `W` - feature width
-
-   represents facial landmarks from Feature Pyramid Network (FPN) level with stride 32.
-
-   Output landmarks format `[(x1, y1), (x2, y2), (x3, y3), (x4, y4), (x5, y5)]`, where
-   - `x1, y1` - coordinates of left eye
-   - `x2, y2` - coordinates of rights eye
-   - `x3, y3` - coordinates of nose
-   - `x4, y4` - coordinates of left mouth corner
-   - `x5, y5` - coordinates of right mouth corner
 4. name: `face_rpn_type_prob_reshape_stride32`, shape: `1,6,20,20`, format: `[B, Ax3, H, W]`
-   - `B` - batch size
-   - `A` - number of anchors
-   - `H` - feature height
-   - `W` - feature width
-5. name: `face_rpn_cls_prob_reshape_stride16`, shape: `1,4,40,40`, format: `[B, Ax2, H, W]`, where
-   - `B` - batch size
-   - `A` - number of anchors
-   - `H` - feature height
-   - `W` - feature width
 
-   represents detection scores from Feature Pyramid Network (FPN) level with stride 16 for 2 classes: background and face
-6. name: `face_rpn_bbox_stride16`,  shape: `1,8,40,40`, format: `[B, Ax4, H, W]`, where
-   - `B` - batch size
-   - `A` - number of anchors
-   - `H` - feature height
-   - `W` - feature width
+5. name: `face_rpn_cls_prob_reshape_stride16`, shape: `1,4,40,40`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 16 for 2 classes: background and face.
 
-   represents detection box deltas from Feature Pyramid Network (FPN) level with stride 16.
+6. name: `face_rpn_bbox_stride16`,  shape: `1,8,40,40`, format: `[B, Ax4, H, W]`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 16.
 
-   Box deltas format `[dx, dy, dh, dw]`, where `(dx, dy)` - regression for left-upper corner of bounding box,
-   `(dh, dw)` - regression by height and width of bounding box.
-7. name: `face_rpn_landmark_pred_stride16`, shape: `1,20,40,40`, format: `[B, Ax10, H, W]`
-   - `B` - batch size
-   - `A` - number of anchors
-   - `H` - feature height
-   - `W` - feature width
+7. name: `face_rpn_landmark_pred_stride16`, shape: `1,20,40,40`, format: `[B, Ax10, H, W]`, represents facial landmarks from Feature Pyramid Network (FPN) level with stride 16.
 
-   represents facial landmarks from Feature Pyramid Network (FPN) level with stride 16.
-
-   Output landmarks format `[(x1, y1), (x2, y2), (x3, y3), (x4, y4), (x5, y5)]`, where
-   - `x1, y1` - coordinates of left eye
-   - `x2, y2` - coordinates of rights eye
-   - `x3, y3` - coordinates of nose
-   - `x4, y4` - coordinates of left mouth corner
-   - `x5, y5` - coordinates of right mouth corner
 8. name: `face_rpn_type_prob_reshape_stride16`, shape: `1,6,40,40`, format: `[B, Ax3, H, W]`
-   - `B` - batch size
-   - `A` - number of anchors
-   - `H` - feature height
-   - `W` - feature width
-9. name: `face_rpn_cls_prob_reshape_stride8`, shape: `1,4,80,80`, format: `[B, Ax2, H, W]`, where
-   - `B` - batch size
-   - `A` - number of anchors
-   - `H` - feature height
-   - `W` - feature width
 
-   represents detection scores from Feature Pyramid Network (FPN) level with stride 8 for 2 classes: background and face.
-10. name: `face_rpn_bbox_stride8`,  shape: `1,8,80,80`, format: `[B, Ax4, H, W]`, where
-    - `B` - batch size
-    - `A` - number of anchors
-    - `H` - feature height
-    - `W` - feature width
+9. name: `face_rpn_cls_prob_reshape_stride16`, shape: `1,4,80,80`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 8 for 2 classes: background and face.
 
-    represents detection box deltas from Feature Pyramid Network (FPN) level with stride 8.
+10. name: `face_rpn_bbox_stride16`,  shape: `1,8,80,80`, format: `[B, Ax4, H, W]`, represents detection box deltas from Feature Pyramid Network (FPN) level with stride 8.
 
-    Box deltas format `[dx, dy, dh, dw]`, where `(dx, dy)` - regression for left-upper corner of bounding box,
-   `(dh, dw)` - regression by height and width of bounding box.
-11. name: `face_rpn_landmark_pred_stride8`, shape: `1,20,80,80`, format: `[B, Ax10, H, W]`
-    - `B` - batch size
-    - `A` - number of anchors
-    - `H` - feature height
-    - `W` - feature width
+11. name: `face_rpn_landmark_pred_stride16`, shape: `1,20,80,80`, format: `[B, Ax10, H, W]`, represents facial landmarks from Feature Pyramid Network (FPN) level with stride 8.
 
-    represents facial landmarks from Feature Pyramid Network (FPN) level with stride 8.
-
-    Output landmarks format `[(x1, y1), (x2, y2), (x3, y3), (x4, y4), (x5, y5)]`, where
-    - `x1, y1` - coordinates of left eye
-    - `x2, y2` - coordinates of rights eye
-    - `x3, y3` - coordinates of nose
-    - `x4, y4` - coordinates of left mouth corner
-    - `x5, y5` - coordinates of right mouth corner
 12. name: `face_rpn_type_prob_reshape_stride8`, shape: `1,6,80,80`, format: `[B, Ax3, H, W]`
-    - `B` - batch size
-    - `A` - number of anchors
-    - `H` - feature height
-    - `W` - feature width
+
+For each output format:
+- `B` - batch size
+- `A` - number of anchors
+- `H` - feature height
+- `W` - feature width
+
+Detection box deltas have format `[dx, dy, dh, dw]`, where:
+- `(dx, dy)` - regression for left-upper corner of bounding box,
+- `(dh, dw)` - regression by height and width of bounding box.
+
+Facial landmarks have format `[x1, y1, x2, y2, x3, y3, x4, y4, x5, y5]`, where:
+- `(x1, y1)` - coordinates of left eye
+- `(x2, y2)` - coordinates of rights eye
+- `(x3, y3)` - coordinates of nose
+- `(x4, y4)` - coordinates of left mouth corner
+- `(x5, y5)` - coordinates of right mouth corner
+
 ### Converted model
 The converted model has the same parameters as the original model.
 
