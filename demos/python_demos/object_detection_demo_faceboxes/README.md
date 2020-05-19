@@ -13,7 +13,7 @@ Running the application with the <code>-h</code> option yields the following usa
 
 ```
 usage: object_detection_demo_faceboxes.py [-h] -m MODEL [-i INPUT [INPUT ...]]
-                                          [-d DEVICE] [--labels LABELS]
+                                          [-d DEVICE] [-pt PROB_THRESHOLD]
                                           [--no_show]
                                           [-u UTILIZATION_MONITORS]
 
@@ -28,7 +28,9 @@ Options:
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
                         look for a suitable plugin for device specified.
                         Default value is CPU
-  --labels LABELS       Optional. Path to labels mapping file
+  -pt PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
+                        Optional. Probability threshold for detections
+                        filtering
   --no_show             Optional. Don't show output
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
