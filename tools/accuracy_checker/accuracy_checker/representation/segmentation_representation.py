@@ -235,7 +235,7 @@ class CoCocInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation
 class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
     def __init__(self, identifier, path_to_mask):
         super().__init__(identifier, path_to_mask, GTMaskLoader.NUMPY)
-        
+
     def _load_mask(self):
         if self._mask is None:
             loader_config = self.LOADERS.get(self._mask_loader)
