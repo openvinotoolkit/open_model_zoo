@@ -29,7 +29,7 @@ from .text_recognition import (
     LPRAdapter
 )
 
-from .image_processing import SuperResolutionAdapter, MultiSuperResolutionAdapter
+from .image_processing import ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter
 from .attributes_recognition import (
     HeadPoseEstimatorAdapter,
     VehicleAttributesRecognitionAdapter,
@@ -97,6 +97,7 @@ __all__ = [
 
     'ReidAdapter',
 
+    'ImageProcessingAdapter',
     'SuperResolutionAdapter',
     'MultiSuperResolutionAdapter',
 

@@ -27,6 +27,7 @@ from .data_reader import (
     TensorflowImageReader,
     AnnotationFeaturesReader,
     WavReader,
+    DicomReader,
 
     DataRepresentation,
     ClipIdentifier,
@@ -49,6 +50,7 @@ __all__ = [
     'TensorflowImageReader',
     'AnnotationFeaturesReader',
     'WavReader',
+    'DicomReader',
 
     'DataRepresentation',
     'ClipIdentifier',

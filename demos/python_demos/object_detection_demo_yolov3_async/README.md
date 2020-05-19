@@ -80,6 +80,7 @@ Options:
   -no_show, --no_show   Optional. Don't show output
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+  --keep_aspect_ratio   Optional. Keeps aspect ratio on resize.
 ```
 
 The number of InferRequests is specified by -nireq flag. An increase of this number usually leads to an increase of performance, since in this case several InferRequests can be processed simultaneously if the device supports parallelization. However, a large number of InferRequests increases the latency because each frame still has to wait before being sent for inference.

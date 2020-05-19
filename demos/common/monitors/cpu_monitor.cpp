@@ -129,6 +129,7 @@ public:
                 cpuLoad[i] = 1.0
                     - idleDiff / clockTicks / std::chrono::duration_cast<Sec>(timePoint - prevTimePoint).count();
             }
+            prevIdleCpuStat = std::move(idleCpuStat);
             prevTimePoint = timePoint;
             return cpuLoad;
         }
