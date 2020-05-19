@@ -34,7 +34,10 @@ AccuracyChecker supports following set of adapters:
   * `num` - num parameter from DarkNet configuration file (default 5).
   * `cells` - number of cells across width and height (default 13).
   * `raw_output` - enabling additional preprocessing for raw YOLO output format (default `False`).
-  * `output_format` - setting output layer format - boxes first (`BHW`)(default, also default for generated IRs), boxes last (`HWB`). Applicable only if network output not 3D (4D with batch) tensor.
+  * `output_format` - setting output layer format:
+      - `BHW` - boxes first (default, also default for generated IRs).
+      - `HWB` - boxes last. 
+      Applicable only if network output not 3D (4D with batch) tensor.
 * `yolo_v3` - converting output of YOLO v3 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 80).
   * `anchors` - anchor values provided as comma-separited list or precomputed:
