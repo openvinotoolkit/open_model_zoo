@@ -63,7 +63,7 @@ class SegmentationAnnotation(SegmentationRepresentation):
         GTMaskLoader.NUMPY: 'numpy_reader'
     }
 
-    def __init__(self, identifier, path_to_mask, mask_loader=GTMaskLoader.PILLOW, mask_uint8=True):
+    def __init__(self, identifier, path_to_mask, mask_loader=GTMaskLoader.PILLOW):
         """
         Args:
             identifier: object identifier (e.g. image name).
@@ -74,7 +74,6 @@ class SegmentationAnnotation(SegmentationRepresentation):
         super().__init__(identifier)
         self._mask_path = path_to_mask
         self._mask_loader = mask_loader
-        self.mask_uint8 = mask_uint8
         self._mask = None
 
     @property
@@ -98,7 +97,7 @@ class SegmentationAnnotation(SegmentationRepresentation):
             if self._mask_loader == GTMaskLoader.PILLOW:
                 loader.convert_to_rgb = False
             mask = loader.read(self._mask_path)
-            return mask.astype(np.uint8) if self.mask_uint8 else mask
+            return mask.astype(np.uint8)
 
         return self._mask
 
@@ -235,4 +234,16 @@ class CoCocInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation
 
 class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
     def __init__(self, identifier, path_to_mask):
-        super().__init__(identifier, path_to_mask, GTMaskLoader.NUMPY, False)
+        super().__init__(identifier, path_to_mask, GTMaskLoader.NUMPY)
+        
+    def _load_mask(self):
+        if self._mask is None:
+            loader_config = self.LOADERS.get(self._mask_loader)
+            data_source = self.metadata.get('segmentation_masks_source')
+            if data_source is None:
+                data_source = self.metadata['data_source']
+            loader = BaseReader.provide(loader_config, data_source)
+            mask = loader.read(self._mask_path)
+            return mask
+
+        return self._mask
