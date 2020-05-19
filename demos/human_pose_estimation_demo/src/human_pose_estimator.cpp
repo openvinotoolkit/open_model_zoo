@@ -121,8 +121,8 @@ void HumanPoseEstimator::reshape(const cv::Mat& image){
 void HumanPoseEstimator::frameToBlobCurr(const cv::Mat& image) {
     CV_Assert(image.type() == CV_8UC3);
     InferenceEngine::Blob::Ptr input = requestCurr->GetBlob(network.getInputsInfo().begin()->first);
-    InferenceEngine::LockedMemory<const void> requestCurrBlobMapped =
-        InferenceEngine::as<InferenceEngine::MemoryBlob>(input)->rmap();
+    InferenceEngine::LockedMemory<void> requestCurrBlobMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(input)->wmap();
     auto buffer = requestCurrBlobMapped.as<uint8_t *>();
     preprocess(image, buffer);
 }
@@ -130,8 +130,8 @@ void HumanPoseEstimator::frameToBlobCurr(const cv::Mat& image) {
 void HumanPoseEstimator::frameToBlobNext(const cv::Mat& image) {
     CV_Assert(image.type() == CV_8UC3);
     InferenceEngine::Blob::Ptr input = requestNext->GetBlob(network.getInputsInfo().begin()->first);
-    InferenceEngine::LockedMemory<const void> requestNextBlobMapped =
-        InferenceEngine::as<InferenceEngine::MemoryBlob>(input)->rmap();
+    InferenceEngine::LockedMemory<void> requestNextBlobMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(input)->wmap();
     auto buffer = requestNextBlobMapped.as<uint8_t *>();
     preprocess(image, buffer);
 }
