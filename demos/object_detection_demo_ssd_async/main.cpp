@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
         }
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 1. Load inference engine -------------------------------------
+        // --------------------------- 1. Load inference engine ------------------------------------------------
         slog::info << "Loading Inference Engine" << slog::endl;
         Core ie;
 
@@ -97,7 +97,6 @@ int main(int argc, char *argv[]) {
         std::cout << ie.GetVersions(FLAGS_d);
 
         /** Load extensions for the plugin **/
-
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
             IExtensionPtr extension_ptr = make_so_pointer<IExtension>(FLAGS_l.c_str());
@@ -180,7 +179,6 @@ int main(int argc, char *argv[]) {
                   std::back_inserter(labels));
         // -----------------------------------------------------------------------------------------------------
 
-        /** SSD-based network should have one input and one output **/
         // --------------------------- 3. Configure input & output ---------------------------------------------
         // --------------------------- Prepare input blobs -----------------------------------------------------
         slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
@@ -262,16 +260,11 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 4. Loading model to the device ------------------------------------------
         slog::info << "Loading model to the device" << slog::endl;
-        std::map<bool, ExecutableNetwork&> execNets;
-
         ExecutableNetwork userSpecifiedExecNetwork = ie.LoadNetwork(cnnNetwork, FLAGS_d, userSpecifiedConfig);
-        execNets.insert({true, userSpecifiedExecNetwork});
-
         ExecutableNetwork minLatencyExecNetwork = ie.LoadNetwork(cnnNetwork, FLAGS_d, minLatencyConfig);
-        execNets.insert({false, minLatencyExecNetwork});
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 5. Create infer request -------------------------------------------------
+        // --------------------------- 5. Create infer requests ------------------------------------------------
         std::vector<InferRequest::Ptr> userSpecifiedInferRequests;
         for (unsigned infReqId = 0; infReqId < FLAGS_nireq; ++infReqId) {
             userSpecifiedInferRequests.push_back(userSpecifiedExecNetwork.CreateInferRequestPtr());
@@ -300,10 +293,14 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 6. Init variables -------------------------------------------------------
+        typedef std::chrono::duration<double, std::chrono::milliseconds::period> ms;
+        typedef std::chrono::duration<double, std::chrono::seconds::period> sec;
+        
         struct RequestResult {
             cv::Mat frame;
             const float* output;
             std::chrono::high_resolution_clock::time_point startTime;
+            ms wallclockTime;
             bool isSameMode;
         };
 
@@ -316,13 +313,10 @@ int main(int argc, char *argv[]) {
 
         bool isUserSpecifiedMode = true;  // execution always starts in USER_SPECIFIED mode
 
-        typedef std::chrono::duration<double, std::chrono::milliseconds::period> ms;
-        typedef std::chrono::duration<double, std::chrono::seconds::period> sec;
-        auto total_t0 = std::chrono::high_resolution_clock::now();
-        auto prev_wallclock = std::chrono::high_resolution_clock::now();
-        ms wallclock_time;
-        double ocv_render_time = 0;
-        double ocv_decode_time = 0;
+        auto totalT0 = std::chrono::high_resolution_clock::now();
+        auto prevWallclockTime = std::chrono::high_resolution_clock::now();
+        double ocvRenderTime = 0;
+        double ocvDecodeTime = 0;
 
         std::queue<InferRequest::Ptr> emptyRequests;
         if (isUserSpecifiedMode) {
@@ -331,7 +325,7 @@ int main(int argc, char *argv[]) {
             }
         } else emptyRequests.push(minLatencyInferRequest);
 
-        std::map<int, RequestResult> completedRequestResults;
+        std::unordered_map<int, RequestResult> completedRequestResults;
         int nextFrameId = 0;
         int nextFrameIdToShow = 0;
         std::exception_ptr callbackException = nullptr;
@@ -355,10 +349,9 @@ int main(int argc, char *argv[]) {
         while ((cap.isOpened()
                 || !completedRequestResults.empty()
                 || ((isUserSpecifiedMode && emptyRequests.size() < FLAGS_nireq)
-                    || (!isUserSpecifiedMode && emptyRequests.size() == 0)))
+                    || (!isUserSpecifiedMode && emptyRequests.size() < 1)))
                && callbackException == nullptr) {
             if (callbackException) std::rethrow_exception(callbackException);
-            std::cout << "Loop" << std::endl;
 
             RequestResult requestResult;
             {
@@ -372,9 +365,7 @@ int main(int argc, char *argv[]) {
             }
 
             if (requestResult.output != nullptr) {
-                std::cout << "Proc completed, total count " << completedRequestResults.size() << std::endl;
                 const float *detections = requestResult.output;
-                std::cout << "Get outputs" << std::endl;
 
                 nextFrameIdToShow++;
                 if (requestResult.isSameMode) {
@@ -414,54 +405,49 @@ int main(int argc, char *argv[]) {
                                       cv::Scalar(0, 0, 255));
                     }
                 }
-                std::cout << "Finished processing detections" << std::endl;
 
                 presenter.drawGraphs(requestResult.frame);
-                std::cout << "Draw graphs" << std::endl;
 
                 std::ostringstream out;
                 out << "OpenCV cap/render time: " << std::fixed << std::setprecision(2)
-                    << (ocv_decode_time + ocv_render_time) << " ms";
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
-                            cv::Scalar(255, 255, 255), 2);
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
+                    << (ocvDecodeTime + ocvRenderTime) << " ms";
+                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
+                            cv::Scalar(255, 255, 255), 2); // make text distinguishable from background
+                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
                             cv::Scalar(0, 255, 0), 1);
                 out.str("");
                 out << "Wallclock time " << (isUserSpecifiedMode ? "(USER SPECIFIED):      " : "(MIN LATENCY, "
                        "press Tab): ");
-                out << std::fixed << std::setprecision(2) << wallclock_time.count()
-                    << " ms (" << 1000.f / wallclock_time.count() << " fps)";
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(0, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6,
-                            cv::Scalar(255, 255, 255), 2);
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(0, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6,
+                out << std::fixed << std::setprecision(2) << requestResult.wallclockTime.count()
+                    << " ms (" << 1000.f / requestResult.wallclockTime.count() << " fps)";
+                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6,
+                            cv::Scalar(255, 255, 255), 2); // make text distinguishable from background
+                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6,
                             cv::Scalar(0, 0, 255), 1);
                 out.str("");
                 out << "FPS: " << std::fixed << std::setprecision(2) << modeInfo[isUserSpecifiedMode].framesCount / 
                     std::chrono::duration_cast<sec>(std::chrono::high_resolution_clock::now() -
                                                     modeInfo[isUserSpecifiedMode].lastStartTime).count();
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(0, 75), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
-                            cv::Scalar(255, 255, 255), 2);
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(0, 75), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
+                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 75), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
+                            cv::Scalar(255, 255, 255), 2); // make text distinguishable from background
+                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 75), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
                             cv::Scalar(255, 0, 0), 1);
                 out.str("");
                 modeInfo[isUserSpecifiedMode].latencySum += std::chrono::duration_cast<sec>(
                     std::chrono::high_resolution_clock::now() - requestResult.startTime).count();
                 out << "Latency: " << std::fixed << std::setprecision(2) << (modeInfo[isUserSpecifiedMode].latencySum /
                     modeInfo[isUserSpecifiedMode].framesCount) * 1e3 << " ms";
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(0, 100), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
-                            cv::Scalar(255, 255, 255), 2);
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(0, 100), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
+                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 100), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
+                            cv::Scalar(255, 255, 255), 2); // make text distinguishable from background
+                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 100), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
                             cv::Scalar(255, 0, 255), 1);
-                std::cout << "Finished puttext" << std::endl;
 
                 if (!FLAGS_no_show) {
                     cv::imshow("Detection Results", requestResult.frame);
                     auto t1 = std::chrono::high_resolution_clock::now();
-                    ocv_render_time = std::chrono::duration_cast<ms>(t1 - t0).count();
-                    std::cout << "dine Imshow" << std::endl;
+                    ocvRenderTime = std::chrono::duration_cast<ms>(t1 - t0).count();
                     
                     const int key = cv::waitKey(1);
-                    std::cout << "Done waitkey" << std::endl;
 
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                         break;
@@ -486,16 +472,12 @@ int main(int argc, char *argv[]) {
 
                         modeInfo[prevMode].lastEndTime = std::chrono::high_resolution_clock::now();
                         modeInfo[isUserSpecifiedMode] = ModeInfo();
-                        std::cout << "done processing tab" << std::endl;
                     } else {
                         presenter.handleKey(key);
                     }
-                    std::cout << "Show completed" << std::endl;
                 }
-                std::cout << "Output proc completed successfully" << std::endl;
             }
             else if (!emptyRequests.empty() && cap.isOpened()) {
-                std::cout << "Start new, total count " << emptyRequests.size() << std::endl;
                 auto startTime = std::chrono::high_resolution_clock::now();
                 
                 auto t0 = std::chrono::high_resolution_clock::now();
@@ -503,9 +485,7 @@ int main(int argc, char *argv[]) {
                 if (!cap.read(frame)) {
                     if (frame.empty()) {
                         if (FLAGS_loop_input) {
-                            if (FLAGS_i == "cam") {
-                                cap.open(0);
-                            } else cap.open(FLAGS_i.c_str());
+                            cap.open((FLAGS_i == "cam") ? 0 : FLAGS_i.c_str());
                         } else cap.release();
                         continue;
                     } else {
@@ -513,45 +493,48 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                InferRequest::Ptr request = emptyRequests.front();
-                emptyRequests.pop();
+                InferRequest::Ptr request;
+                {
+                    std::lock_guard<std::mutex> lock(mutex);
+
+                    request = emptyRequests.front();
+                    emptyRequests.pop();
+                }
                 frameToBlob(frame, request, imageInputName);
                 auto t1 = std::chrono::high_resolution_clock::now();
-                ocv_decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
+                ocvDecodeTime = std::chrono::duration_cast<ms>(t1 - t0).count();
                 
                 bool frameMode = isUserSpecifiedMode;
-                request->SetCompletionCallback([request,
-                                                nextFrameId,
-                                                outputName,
-                                                &isUserSpecifiedMode,
-                                                frameMode,
-                                                frame,
-                                                startTime,
-                                                &wallclock_time,
-                                                &prev_wallclock,
+                request->SetCompletionCallback([&mutex,
                                                 &completedRequestResults,
+                                                nextFrameId,
+                                                frame,
+                                                request,
+                                                outputName,
+                                                startTime,
+                                                &prevWallclockTime,
+                                                frameMode,
+                                                &isUserSpecifiedMode,
                                                 &emptyRequests,
-                                                &mutex,
-                                                &condVar,
-                                                &callbackException] {
-                    std::cout << "Got callback for #" << nextFrameId << std::endl;
+                                                &callbackException,
+                                                &condVar] {
                     {
                         std::lock_guard<std::mutex> callbackLock(mutex);
                     
                         try {
                             auto t0 = std::chrono::high_resolution_clock::now();
-                            wallclock_time = std::chrono::duration_cast<ms>(t0 - prev_wallclock);
-                            prev_wallclock = t0;
-
-                            completedRequestResults.insert(std::pair<int, RequestResult>(nextFrameId,
-                                RequestResult{frame, request->GetBlob(outputName)->buffer().as<float*>(),
-                                startTime, frameMode == isUserSpecifiedMode}));
+                            completedRequestResults.insert(
+                                std::pair<int, RequestResult>(nextFrameId, RequestResult{
+                                    frame, request->GetBlob(outputName)->buffer().as<float*>(),
+                                    startTime, std::chrono::duration_cast<ms>(t0 - prevWallclockTime),
+                                    frameMode == isUserSpecifiedMode}));
+                            prevWallclockTime = t0;
                             
                             if (isUserSpecifiedMode == frameMode) {
                                 emptyRequests.push(request);
                             }
                         }
-                        catch(...) {
+                        catch (...) {
                             if (!callbackException) {
                                 callbackException = std::current_exception();
                             }
@@ -567,25 +550,24 @@ int main(int argc, char *argv[]) {
                 std::unique_lock<std::mutex> lock(mutex);
 
                 while (callbackException == nullptr && emptyRequests.empty() && completedRequestResults.empty()) {
-                    std::cout << "Wait" << std::endl;
                     condVar.wait(lock);
                 }
             }
         }
-        // -----------------------------------------------------------------------------------------------------
-        
-        // --------------------------- 8. Report metrics -------------------------------------------------------
-        slog::info << slog::endl << "Metric reports:" << slog::endl;
-
-        auto total_t1 = std::chrono::high_resolution_clock::now();
-        ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
-        std::cout << std::endl << "Total Inference time: " << total.count() << std::endl;
 
         if (isUserSpecifiedMode) {
             for (const auto& request: userSpecifiedInferRequests) {
                 request->Wait(IInferRequest::WaitMode::RESULT_READY);
             }
         } else minLatencyInferRequest->Wait(IInferRequest::WaitMode::RESULT_READY);
+        // -----------------------------------------------------------------------------------------------------
+        
+        // --------------------------- 8. Report metrics -------------------------------------------------------
+        slog::info << slog::endl << "Metric reports:" << slog::endl;
+
+        auto totalT1 = std::chrono::high_resolution_clock::now();
+        ms total = std::chrono::duration_cast<ms>(totalT1 - totalT0);
+        std::cout << std::endl << "Total Inference time: " << total.count() << std::endl;
 
         /** Show performace results **/
         if (FLAGS_pc) {
@@ -597,7 +579,6 @@ int main(int argc, char *argv[]) {
         }
 
         std::chrono::high_resolution_clock::time_point endTime;
-        
         if (modeInfo[true].framesCount) {
             std::cout << std::endl;
             std::cout << "USER_SPECIFIED mode:" << std::endl;
