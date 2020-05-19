@@ -31,9 +31,8 @@ class LanguageModelingAnnotation(LanguageModeling):
         self.labels = labels if labels is not None else []
 
 class LanguageModelingPrediction(LanguageModeling):
-    def __init__(self, identifier, eval_loss, logits):
+    def __init__(self, identifier, logits):
         super().__init__(identifier)
-        self.eval_loss = eval_loss
         self.logits = logits
 
 class QuestionAnswering(BaseRepresentation):

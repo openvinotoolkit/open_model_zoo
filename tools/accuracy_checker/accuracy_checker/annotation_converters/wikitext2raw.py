@@ -70,7 +70,7 @@ class Wikitext2RawConverter(BaseFormatConverter):
             annotation = LanguageModelingAnnotation(
                 identifier,
                 np.array(unique_id),
-                np.array(ids),
+                np.array([ids]),
                 tokens,
                 labels=np.array(ids),
             )
