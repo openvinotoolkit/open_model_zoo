@@ -399,7 +399,8 @@ PYTHON_DEMOS = [
             ModelArg('person-detection-retail-0013'),
             ModelArg('vehicle-detection-adas-0002'),
             ModelArg('vehicle-detection-adas-binary-0001', "FP32-INT1"),
-            ModelArg('vehicle-license-plate-detection-barrier-0106')),
+            ModelArg('vehicle-license-plate-detection-barrier-0106'),
+            ModelArg('ssd-resnet34-1200-onnx')),
     )),
 
     PythonDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
@@ -410,7 +411,8 @@ PYTHON_DEMOS = [
             ModelArg('yolo-v1-tiny-tf'),
             ModelArg('yolo-v2-tiny-tf'),
             ModelArg('yolo-v2-tf'),
-            ModelArg('yolo-v3-tf')),
+            ModelArg('yolo-v3-tf'),
+            ModelArg('mobilefacedet-v1-mxnet')),
     )),
 
     PythonDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(

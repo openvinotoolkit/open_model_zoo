@@ -1,6 +1,6 @@
 # person-detection-asl-0001
 
-## Use case and High-level description
+## Use Case and High-Level Description
 
 This is a person detector for the ASL Recognition scenario. It is based on ShuffleNetV2-like backbone that includes depth-wise convolutions to reduce the amount of computation for the 3x3 convolution block and FCOS  head.
 
@@ -24,7 +24,7 @@ Average Precision (AP) is defined as an area under the [precision/recall](https:
 
 ## Inputs
 
-Name: "input" , shape: [1x3x320x320] - An input image in the format [1xCxHxW], where:
+Name: `input`, shape: [1x3x320x320] - An input image in the format [1xCxHxW], where:
  - C - number of channels
  - H - image height
  - W - image width

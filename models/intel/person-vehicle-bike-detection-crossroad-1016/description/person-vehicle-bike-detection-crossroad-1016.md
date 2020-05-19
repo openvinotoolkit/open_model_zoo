@@ -1,6 +1,6 @@
 # person-vehicle-bike-detection-crossroad-1016
 
-## Use case and High-level description
+## Use Case and High-Level Description
 
 MobileNetV2 + SSD-based network is for Person/Vehicle/Bike detection in security
 surveillance applications. Works in a variety of scenes and weather/lighting
@@ -53,7 +53,7 @@ Similarly, training dataset has 219,181 images with:
     - H - image height
     - W - image width
 
-   Expected color order - BGR.
+   Expected color order: BGR.
 
 ## Outputs
 

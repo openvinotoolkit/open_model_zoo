@@ -1,6 +1,6 @@
 # instance-segmentation-security-0050
 
-## Use case and High-level description
+## Use Case and High-Level Description
 
 This model is an instance segmentation network for 80 classes of objects.
 It is a Mask R-CNN with ResNet50 backbone, FPN and Bottom-Up Augmentation blocks

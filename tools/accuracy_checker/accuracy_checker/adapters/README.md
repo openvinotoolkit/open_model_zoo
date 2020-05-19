@@ -96,16 +96,37 @@ AccuracyChecker supports following set of adapters:
   * `detection_threshold` - minimal detection confidences level for valid detections.
   * `actions_scores_threshold` - minimal actions confidences level for valid detections.
   * `action_scale` - scale for correct action score calculation.
+* `image_processing` - converting output of network for single image processing to `ImageProcessingPrediction`.
+  * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
+  * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
+  * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
+  The order of actions:
+  1. Multiply on `std`
+  2. Add `mean`
+  3. Reverse channels if this option enabled.
+  * `target_out` - target model output layer name in case when model has several outputs.
 * `super_resolution` - converting output of single image super resolution network to `SuperResolutionPrediction`.
   * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
   * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
   * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
-  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations.
+  * `cast_to_uint8` - perform casting output image pixels to [0, 255] range.
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
   The order of actions:
   1. Multiply on `std`
   2. Add `mean`
   3. Reverse channels if this option enabled.
   * `target_out` - super resolution model output layer name in case when model has several outputs.
+* `multi_target_super_resolution` - converting output super resolution network with multiple outputs to `ContainerPrediction` with `SuperResolutionPrediction` for each output.
+  * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
+  * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
+  * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
+  The order of actions:
+  1. Multiply on `std`
+  2. Add `mean`
+  3. Reverse channels if this option enabled.
+  * `target_mapping` - dictionary where keys are meaningful name for solved task which will be used as keys inside `ConverterPrediction`,  values - output layer names.
 * `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.

@@ -27,13 +27,13 @@ Tested on a COCO validation subset from the original paper [Realtime Multi-Perso
 
 ## Inputs
 
-1. Name: `input` , shape: [1x3x256x456]. An input image in the [BxCxHxW] format ,
-  where:
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width.
-  Expected color order is BGR.
+Name: `input`, shape: [1x3x256x456]. An input image in the [BxCxHxW] format ,
+where:
+  - B - batch size
+  - C - number of channels
+  - H - image height
+  - W - image width
+Expected color order is BGR.
 
 ## Outputs
 

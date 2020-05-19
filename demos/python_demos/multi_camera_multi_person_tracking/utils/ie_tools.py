@@ -16,7 +16,6 @@ import os
 
 import logging as log
 import numpy as np
-from openvino.inference_engine import IENetwork, IECore # pylint: disable=import-error,E0611
 import cv2 as cv
 
 
@@ -61,15 +60,14 @@ class IEModel:
 
 def load_ie_model(ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=1):
     """Loads a model in the Inference Engine format"""
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
     # Plugin initialization for specified device and load extensions library if specified
     log.info("Initializing Inference Engine plugin for %s ", device)
 
     if cpu_extension and 'CPU' in device:
         ie.add_extension(cpu_extension, 'CPU')
     # Read IR
-    log.info("Loading network files:\n\t%s\n\t%s", model_xml, model_bin)
-    net = IENetwork(model=model_xml, weights=model_bin)
+    log.info("Loading network")
+    net = ie.read_network(model_xml, os.path.splitext(model_xml)[0] + ".bin")
 
     if "CPU" in device:
         supported_layers = ie.query_network(net, "CPU")

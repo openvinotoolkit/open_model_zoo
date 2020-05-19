@@ -14,7 +14,7 @@
  limitations under the License.
 """
 
-from openvino.inference_engine import IENetwork, IECore  # pylint: disable=no-name-in-module
+from openvino.inference_engine import IECore  # pylint: disable=no-name-in-module
 
 
 def load_ie_core(device, cpu_extension=None):
@@ -34,9 +34,7 @@ class IEModel:  # pylint: disable=too-few-public-methods
         """Constructor"""
         if model_path.endswith((".xml", ".bin")):
             model_path = model_path[:-4]
-        model_xml = model_path + ".xml"
-        model_bin = model_path + ".bin"
-        self.net = IENetwork(model=model_xml, weights=model_bin)
+        self.net = ie_core.read_network(model_path + ".xml", model_path + ".bin")
         assert len(self.net.inputs.keys()) == 1, "One input is expected"
 
         supported_layers = ie_core.query_network(self.net, device)
