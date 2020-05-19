@@ -15,7 +15,7 @@ class YoloOutputProcessor:
     def __init__(self, coord_correct=None, size_correct=None, conf_correct=None,
                  prob_correct=None, coord_normalizer=(1, 1), size_normalizer=(1, 1)):
         self.coord_correct = coord_correct if coord_correct else lambda x: x
-        self.size_correct = size_correct if size_correct else lambda x: np.exp(x)
+        self.size_correct = size_correct if size_correct else np.exp
         self.conf_correct = conf_correct if conf_correct else lambda x: x
         self.prob_correct = prob_correct if prob_correct else lambda x: x
         self.x_normalizer, self.y_normalizer = coord_normalizer
