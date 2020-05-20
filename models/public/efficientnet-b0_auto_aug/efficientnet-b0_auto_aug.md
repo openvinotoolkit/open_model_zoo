@@ -33,7 +33,7 @@ For details about this family of models, check out the [TensorFlow Cloud TPU rep
 
 ### Original Model
 
-Image, name - `image`,  shape - `[1x224x224x3]`, format is `[BxHxWxC]` where:
+Image, name - `image`,  shape - `[1x224x224x3]`, format is `[BxHxWxC]`, where:
 
 - `B` - batch size
 - `H` - height
@@ -44,12 +44,12 @@ Channel order is `RGB`.
 
 ### Converted Model
 
-Image, name - `sub/placeholder_port_0`,  shape - `[1x224x224x3]`, format is `[BxHxWxC]` where:
+Image, name - `sub/placeholder_port_0`,  shape - `[1x3x224x224]`, format is `[BxCxHxW]`, where:
 
 - `B` - batch size
+- `C` - channel
 - `H` - height
 - `W` - width
-- `C` - channel
 
 Channel order is `BGR`.
 

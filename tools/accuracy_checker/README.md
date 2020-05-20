@@ -96,6 +96,7 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 - `--async_mode` allows run the tool in async mode if launcher support it.
 - `--num_requests` number requests for async execution. Allows override provided in config info. Default is `AUTO`
 - `--model_attributes` directory with additional models attributes.
+- `--subsample_size` dataset subsample size.
 
 You are also able to replace some command line arguments with environment variables for path prefixing. Supported following list of variables:
 * `DATA_DIR` -  equivalent of `-s`, `--source`.

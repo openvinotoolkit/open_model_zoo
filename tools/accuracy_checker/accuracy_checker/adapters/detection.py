@@ -780,7 +780,6 @@ class RFCNCaffe(Adapter):
             identifiers[0], detections['labels'], detections['scores'], detections['x_mins'],
             detections['y_mins'], detections['x_maxs'], detections['y_maxs']
         )]
-
     @staticmethod
     def bbox_transform_inv(boxes, deltas):
         if boxes.shape[0] == 0:

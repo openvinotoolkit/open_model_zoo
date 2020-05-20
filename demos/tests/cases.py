@@ -411,7 +411,8 @@ PYTHON_DEMOS = [
             ModelArg('yolo-v1-tiny-tf'),
             ModelArg('yolo-v2-tiny-tf'),
             ModelArg('yolo-v2-tf'),
-            ModelArg('yolo-v3-tf')),
+            ModelArg('yolo-v3-tf'),
+            ModelArg('mobilefacedet-v1-mxnet')),
     )),
 
     PythonDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(

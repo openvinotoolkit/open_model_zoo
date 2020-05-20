@@ -196,7 +196,7 @@ class Dataset:
         set_image_metadata(annotation, image)
         annotation.set_data_source(data_source)
         segmentation_mask_source = self.config.get('segmentation_masks_source')
-        annotation.metadata['segmentation_masks_source'] = segmentation_mask_source
+        annotation.set_segmentation_mask_source(segmentation_mask_source)
 
     def _load_meta(self):
         meta_data_file = self._config.get('dataset_meta')
@@ -291,9 +291,9 @@ class DatasetWrapper:
             batch_input = [self.data_reader(identifier=identifier) for identifier in batch_identifiers]
             for annotation, input_data in zip(batch_annotation, batch_input):
                 set_image_metadata(annotation, input_data)
-                annotation.metadata['data_source'] = self.data_reader.data_source
+                annotation.set_data_source(self.data_reader.data_source)
                 segmentation_mask_source = self.annotation_reader.config.get('segmentation_masks_source')
-                annotation.metadata['segmentation_masks_source'] = segmentation_mask_source
+                annotation.set_segmentation_mask_source(segmentation_mask_source)
             return batch_annotation_ids, batch_annotation, batch_input, batch_identifiers
         batch_start = item * self.batch
         batch_end = min(self.size, batch_start + self.batch)

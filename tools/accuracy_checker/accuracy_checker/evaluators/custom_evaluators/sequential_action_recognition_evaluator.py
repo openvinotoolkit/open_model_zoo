@@ -374,7 +374,6 @@ class EncoderDLSDKModel(BaseModel):
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
 
-
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(self.fit_to_input(input_data))
 
