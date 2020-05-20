@@ -29,7 +29,7 @@ from .text_recognition import (
     LPRAdapter
 )
 
-from .image_processing import SuperResolutionAdapter, MultiSuperResolutionAdapter
+from .image_processing import ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter
 from .attributes_recognition import (
     HeadPoseEstimatorAdapter,
     VehicleAttributesRecognitionAdapter,
@@ -49,8 +49,9 @@ from .detection import (
     SSDONNXAdapter,
     MTCNNPAdapter,
     RetinaNetAdapter,
-    ClassAgnosticDetectionAdapter
+    ClassAgnosticDetectionAdapter,
 )
+from .retinaface import RetinaFaceAdapter
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
@@ -91,12 +92,14 @@ __all__ = [
     'CTDETAdapter',
     'RetinaNetAdapter',
     'ClassAgnosticDetectionAdapter',
+    'RetinaFaceAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
 
     'ReidAdapter',
 
+    'ImageProcessingAdapter',
     'SuperResolutionAdapter',
     'MultiSuperResolutionAdapter',
 
