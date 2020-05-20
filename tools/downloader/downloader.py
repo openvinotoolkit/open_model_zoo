@@ -216,7 +216,7 @@ def main():
 
     args = parser.parse_args()
 
-    reporter = common.Reporter(
+    reporter = common.Reporter(common.DirectOutputContext(),
         enable_human_output=args.progress_format == 'text',
         enable_json_output=args.progress_format == 'json')
 
