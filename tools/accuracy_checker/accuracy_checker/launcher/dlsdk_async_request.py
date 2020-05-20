@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from collections import OrderedDict
 
 
 class AsyncInferRequestWrapper:
@@ -22,6 +23,7 @@ class AsyncInferRequestWrapper:
         if completion_callback:
             self.request.set_completion_callback(completion_callback, self.request_id)
         self.context = None
+        self._contains_blob = hasattr(self.request, 'output_blobs')
 
     def infer(self, inputs, meta, context=None):
         if context:
@@ -30,7 +32,12 @@ class AsyncInferRequestWrapper:
         self.request.async_infer(inputs=inputs)
 
     def get_result(self):
-        return self.context, self.meta, self.request.outputs
+        if not self._contains_blob:
+            return self.context, self.meta, self.request.outputs
+        outputs = OrderedDict()
+        for output_name, output_blob in self.request.output_blobs.items():
+            outputs[output_name] = output_blob.buffer
+        return self.context, self.meta, outputs
 
     def set_completion_callback(self, callback):
         self.request.set_completion_callback(callback, self.request_id)

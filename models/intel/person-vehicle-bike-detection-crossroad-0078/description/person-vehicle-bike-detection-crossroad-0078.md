@@ -47,7 +47,7 @@ Similarly, training dataset has 160,297 images with:
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x1024x1024] - An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x1024x1024] - An input image in the format [BxCxHxW],
    where:
     - B - batch size
     - C - number of channels

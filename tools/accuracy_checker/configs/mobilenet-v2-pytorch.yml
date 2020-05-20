@@ -57,6 +57,20 @@ models:
         weights: public/mobilenet-v2-pytorch/FP16/mobilenet-v2-pytorch.bin
         adapter: classification
 
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   public/mobilenet-v2-pytorch/FP32-INT8/mobilenet-v2-pytorch.xml
+        weights: public/mobilenet-v2-pytorch/FP32-INT8/mobilenet-v2-pytorch.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   public/mobilenet-v2-pytorch/FP16-INT8/mobilenet-v2-pytorch.xml
+        weights: public/mobilenet-v2-pytorch/FP16-INT8/mobilenet-v2-pytorch.bin
+        adapter: classification
+
     datasets:
       - name: imagenet_1000_classes
         reader: pillow_imread

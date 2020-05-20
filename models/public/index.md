@@ -35,6 +35,7 @@ The models can be downloaded via Model Downloader
 | MobileNet V2 1.4 224 | [TensorFlow\*](./mobilenet-v2-1.4-224/mobilenet-v2-1.4-224.md)  | mobilenet-v2-1.4-224 | | 1.183  | 6.087 |
 | MobileNet V3 Small 1.0 | [TensorFlow\*](./mobilenet-v3-small-1.0-224-tf/mobilenet-v3-small-1.0-224-tf.md) | mobilenet-v3-small-1.0-224-tf | 67.36/87.45 | 0.121 | 2.537 |
 | MobileNet V3 Large 1.0 | [TensorFlow\*](./mobilenet-v3-large-1.0-224-tf/mobilenet-v3-large-1.0-224-tf.md) | mobilenet-v3-large-1.0-224-tf | 75.70/92.76 | 0.4536 | 5.4721 |
+| ResNet 34            | [PyTorch\*](./resnet-34-pytorch/resnet-34-pytorch.md) | resnet-34-pytorch | 73.30/91.42 | 7.3409 | 21.7892 |
 | ResNet 50            | [Caffe\*](./resnet-50/resnet-50.md) <br> [PyTorch\*](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[Caffe2\*](./resnet-50-caffe2/resnet-50-caffe2.md)<br>[TensorFlow\*](./resnet-50-tf/resnet-50-tf.md) | resnet-50 <br> resnet-50-pytorch<br>resnet-50-caffe2<br>resnet-50-tf | | 6.996~8.216 | 25.53 |
 | ResNet 101           | [Caffe\*](./resnet-101/resnet-101.md) | resnet-101 | | 14.441 | 44.496 |
 | ResNet 152           | [Caffe\*](./resnet-152/resnet-152.md) | resnet-152 | | 21.89 | 60.117 |
@@ -126,6 +127,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | SSD lite with MobileNet V2 | [TensorFlow\*](./ssdlite_mobilenet_v2/ssdlite_mobilenet_v2.md)  | ssdlite_mobilenet_v2 | 1.525 | 4.475 |
 | SSD with ResNet-50 V1 FPN | [TensorFlow\*](./ssd_resnet50_v1_fpn_coco/ssd_resnet50_v1_fpn_coco.md) | ssd_resnet50_v1_fpn_coco | 178.6807 | 59.9326 |
 | SSD with ResNet 34 1200x1200 | [PyTorch\*](./ssd-resnet34-1200-onnx/ssd-resnet34-1200-onnx.md)  | ssd-resnet34-1200-onnx | 433.411 | 20.058  |
+| RetinaFace-R50            | [MXNet\*](./retinaface-resnet50/retinaface-resnet50.md) | retinaface-resnet50 | 100.8478 | 29.427 |
 | YOLO v1 Tiny              | [TensorFlow.js\*](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | yolo-v1-tiny-tf | 6.9883	 |	15.8587 |
 | YOLO v2 Tiny              | [TensorFlow.js\*](./yolo-v2-tiny-tf/yolo-v2-tiny-tf.md) | yolo-v2-tiny-tf | 5.4236	 |	11.2295 |
 | YOLO v2                   | [Keras\*](./yolo-v2-tf/yolo-v2-tf.md) | yolo-v2-tf | 63.0301	 |	50.9526 |
