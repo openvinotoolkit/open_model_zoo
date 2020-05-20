@@ -46,28 +46,26 @@ converted to TensorFlow\* protobuf format. For details, see [paper](https://arxi
 
 ### Original Model
 
-Image, name: `input_1`, shape: [1x1333x1333x3], format: [BxHxWxC],
-   where:
+Image, name: `input_1`, shape: [1x1333x1333x3], format: [BxHxWxC], where:
 
     - B - batch size
     - H - image height
     - W - image width
     - C - number of channels
 
-   Expected color order: BGR.
+Expected color order: BGR.
 Mean values: [103.939, 116.779, 123.68]
 
 ### Converted Model
 
-Image, name: `input_1`, shape: [1x3x1333x1333], format: [BxCxHxW],
-   where:
+Image, name: `input_1`, shape: [1x3x1333x1333], format: [BxCxHxW], where:
 
     - B - batch size
     - C - number of channels
     - H - image height
     - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 
