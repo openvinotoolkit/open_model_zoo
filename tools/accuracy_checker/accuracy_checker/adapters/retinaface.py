@@ -71,16 +71,11 @@ class RetinaFaceAdapter(Adapter):
                 proposals_list.extend(proposals[keep])
                 scores_list.extend(scores[keep])
                 if self.type_scores_output:
-                    type_scores = raw_predictions[self.type_scores_output[_idx]][batch_id]
-                    mask_scores = type_scores[anchor_num * 2:, :, :]
-                    mask_scores = mask_scores.transpose((1, 2, 0)).reshape(-1)
-                    mask_scores_list.extend(mask_scores[keep])
+                    mask_scores_list.extend(self._get_mask_scores(
+                        raw_predictions[self.type_scores_output[_idx]][batch_id], anchor_num)[keep])
                 if self.landmarks_output:
-                    landmark_deltas = raw_predictions[self.landmarks_output[_idx]][batch_id]
-                    landmark_pred_len = landmark_deltas.shape[0] // anchor_num
-                    landmark_deltas = landmark_deltas.transpose((1, 2, 0)).reshape((-1, 5, landmark_pred_len // 5))
-                    landmarks = self.landmark_pred(anchors, landmark_deltas)
-                    landmarks = landmarks[keep, :]
+                    landmarks = self._get_landmarks(raw_predictions[self.landmarks_output[_idx]][batch_id],
+                                                    anchor_num, anchors)[keep, :]
                     landmarks_list.extend(landmarks)
             scores = np.reshape(scores_list, -1)
             mask_scores = np.reshape(mask_scores_list, -1)
@@ -106,6 +101,18 @@ class RetinaFaceAdapter(Adapter):
             }))
 
         return results
+
+    @staticmethod
+    def _get_mask_scores(type_scores, anchor_num):
+        mask_scores = type_scores[anchor_num * 2:, :, :]
+        mask_scores = mask_scores.transpose((1, 2, 0)).reshape(-1)
+        return mask_scores
+
+    def _get_landmarks(self, landmark_deltas, anchor_num, anchors):
+        landmark_pred_len = landmark_deltas.shape[0] // anchor_num
+        landmark_deltas = landmark_deltas.transpose((1, 2, 0)).reshape((-1, 5, landmark_pred_len // 5))
+        landmarks = self.landmark_pred(anchors, landmark_deltas)
+        return landmarks
 
     @staticmethod
     def bbox_pred(boxes, box_deltas):
