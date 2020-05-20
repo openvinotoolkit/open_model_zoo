@@ -196,8 +196,8 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
     def load_network(self, network=None):
         self.model.load_network(network, self.launcher)
 
-    def load_network_from_ir(self, models_dict):
-        self.model.load_model(models_dict, self.launcher)
+    def load_network_from_ir(self, models_list):
+        self.model.load_model(models_list, self.launcher)
 
     def get_network(self):
         return self.model.get_network()
@@ -297,6 +297,7 @@ class SequentialModel(BaseModel):
         self.decoder = create_decoder(network_info['decoder'], launcher, delayed_model_loading)
         self.store_encoder_predictions = network_info['encoder'].get('store_predictions', False)
         self._encoder_predictions = [] if self.store_encoder_predictions else None
+        self._part_by_name = {'encoder': self.encoder, 'decoder': self.decoder}
 
     def predict(self, identifiers, input_data, encoder_callback=None):
         raw_outputs = []
@@ -333,13 +334,13 @@ class SequentialModel(BaseModel):
             with prediction_file.open('wb') as file:
                 pickle.dump(self._encoder_predictions, file)
 
-    def load_network(self, network_dict, launcher):
-        self.encoder.load_network(network_dict['encoder'], launcher)
-        self.decoder.load_network(network_dict['decoder'], launcher)
+    def load_network(self, network_list, launcher):
+        for network_dict in network_list:
+            self._part_by_name[network_dict['name']].load_network(network_dict['model'], launcher)
 
-    def load_model(self, network_dict, launcher):
-        self.encoder.load_model(network_dict['encoder'], launcher)
-        self.decoder.load_model(network_dict['decoder'], launcher)
+    def load_model(self, network_list, launcher):
+        for network_dict in network_list:
+            self._part_by_name[network_dict['name']].load_model(network_dict, launcher)
 
     def _add_raw_encoder_predictions(self, encoder_prediction):
         for key, output in encoder_prediction.items():
@@ -348,7 +349,7 @@ class SequentialModel(BaseModel):
             self._raw_outs[key].append(output)
 
     def get_network(self):
-        return {'encoder': self.encoder.network, 'decoder': self.decoder.network}
+        return [{'name': 'encoder', 'model': self.encoder.network}, {'name': 'decoder', 'model': self.decoder.network}]
 
 
 class EncoderDLSDKModel(BaseModel):

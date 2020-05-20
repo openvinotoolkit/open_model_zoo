@@ -722,15 +722,22 @@ class MTCNNEvaluator(BaseEvaluator):
             stage.reset()
 
     def load_network(self, network=None):
-        for stage_name, stage in self.stages.items():
-            stage.load_network(network[stage_name], self.launcher, stage_name + '_')
+        if network is None:
+            for stage_name, stage in self.stages.items():
+                stage.load_network(network, self.launcher, stage_name + '_')
+        else:
+            for net_dict in network:
+                stage_name = net_dict['name']
+                network_ = net_dict['model']
+                self.stages[stage_name].load_network(network_, self.launcher, stage_name+'_')
 
-    def load_network_from_ir(self, models_dict):
-        for stage_name, stage in self.stages.items():
-            stage.load_model(models_dict[stage_name], self.launcher, stage_name+'_')
+    def load_network_from_ir(self, models_list):
+        for models_dict in models_list:
+            stage_name = models_dict['name']
+            self.stages[stage_name].load_model(models_dict, self.launcher, stage_name+'_')
 
     def get_network(self):
-        return {stage_name: stage.network for stage_name, stage in self.stages.items()}
+        return [{'name': stage_name, 'model': stage.network} for stage_name, stage in self.stages.items()]
 
     def get_metrics_attributes(self):
         if not self.metric_executor:

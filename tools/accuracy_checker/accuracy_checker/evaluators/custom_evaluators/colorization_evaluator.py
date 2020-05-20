@@ -38,6 +38,10 @@ class ColorizationEvaluator(BaseEvaluator):
         self.test_model = test_model
         self.check_model = check_model
         self._metrics_results = []
+        self._part_by_name = {
+            'colorization_network': self.test_model,
+            'verification_network': self.check_model
+        }
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False):
@@ -204,16 +208,19 @@ class ColorizationEvaluator(BaseEvaluator):
 
         return extracted_results, extracted_meta
 
-    def load_network(self, network=None):
-        self.test_model.load_network(network['colorization_network'], self.launcher)
-        self.check_model.load_network(network['verification_network'], self.launcher)
+    def load_model(self, network_list, launcher):
+        for network_dict in network_list:
+            self._part_by_name[network_dict['name']].load_network(network_dict, launcher)
 
-    def load_network_from_ir(self, models_dict):
-        self.test_model.load_model(models_dict['colorization_network'], self.launcher)
-        self.check_model.load_model(models_dict['verification_network'], self.launcher)
+    def load_network(self, network_list, launcher):
+        for network_dict in network_list:
+            self._part_by_name[network_dict['name']].load_network(network_dict['model'], launcher)
 
     def get_network(self):
-        return {'colorization_network': self.test_model.network, 'verification_network': self.check_model.network}
+        return [
+            {'name': 'colorization_network', 'model': self.test_model.network},
+            {'name': 'verification_network', 'model': self.check_model.network}
+        ]
 
     def get_metrics_attributes(self):
         if not self.metric_executor:

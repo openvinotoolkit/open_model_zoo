@@ -341,6 +341,11 @@ class SequentialModel:
         self.sos_index = int(network_info['sos_index'])
         self.eos_index = int(network_info['eos_index'])
         self.with_prefix = False
+        self._part_by_name = {
+            'detector': self.detector,
+            'recognizer_encoder': self.recognizer_encoder,
+            'recognizer_decoder': self.recognizer_decoder
+        }
 
     def predict(self, identifiers, input_data, frame_meta, callback):
         assert len(identifiers) == 1
@@ -393,24 +398,22 @@ class SequentialModel:
         self.recognizer_encoder.release()
         self.recognizer_decoder.release()
 
-    def load_model(self, network_dict, launcher):
-        self.detector.load_model(network_dict['detector'], launcher)
-        self.recognizer_encoder.load_model(network_dict['recognizer_encoder'], launcher)
-        self.recognizer_decoder.load_model(network_dict['recognizer_decoder'], launcher)
+    def load_model(self, network_list, launcher):
+        for network_dict in network_list:
+            self._part_by_name[network_dict['name']].load_network(network_dict, launcher)
         self.update_inputs_outputs_info()
 
-    def load_network(self, network_dict, launcher):
-        self.detector.load_network(network_dict['detector'], launcher)
-        self.recognizer_encoder.load_network(network_dict['recognizer_encoder'], launcher)
-        self.recognizer_decoder.load_network(network_dict['recognizer_decoder'], launcher)
+    def load_network(self, network_list, launcher):
+        for network_dict in network_list:
+            self._part_by_name[network_dict['name']].load_network(network_dict['model'], launcher)
         self.update_inputs_outputs_info()
 
     def get_network(self):
-        return {
-            'detector': self.detector.get_network(),
-            'recognizer_encoder': self.recognizer_encoder.get_network(),
-            'recognizer_decoder': self.recognizer_decoder.get_network()
-        }
+        return [
+            {'name': 'detector', 'model': self.detector.get_network()},
+            {'name': 'recognizer_encoder', 'model': self.recognizer_encoder.get_network()},
+            {'name': 'recognizer_decoder', 'model': self.recognizer_decoder.get_network()}
+            ]
 
     def update_inputs_outputs_info(self):
         def generate_name(prefix, with_prefix, layer_name):
