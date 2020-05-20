@@ -86,8 +86,8 @@ class RetinaFaceAdapter(Adapter):
             representations['face_detection'] = detection_representation
             if self.type_scores_output:
                 representations['mask_detection'] = AttributeDetectionPrediction(
-                        identifier, labels, scores, mask_scores, x_mins / x_scale,
-                        y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
+                    identifier, labels, scores, mask_scores, x_mins / x_scale,
+                    y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
                 )
             if self.landmarks_output:
                 landmarks_x_coords = np.array(landmarks_list)[:, :, ::2].reshape(len(landmarks_list), -1) / x_scale
