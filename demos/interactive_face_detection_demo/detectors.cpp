@@ -188,49 +188,54 @@ void FaceDetection::fetchResults() {
     results.clear();
     if (resultsFetched) return;
     resultsFetched = true;
-    const float *detections = request->GetBlob(output)->buffer().as<float *>();
-    const int32_t *labels = !labels_output.empty() ? request->GetBlob(labels_output)->buffer().as<int32_t *>() : nullptr;
+    LockedMemory<const void> outputMapped = as<MemoryBlob>(request->GetBlob(output))->rmap();
+    const float *detections = outputMapped.as<float *>();
 
-    for (int i = 0; i < maxProposalCount && objectSize == 5; i++) {
-        Result r;
-        r.label = labels[i];
-        r.confidence = detections[i * objectSize + 4];
+    if (!labels_output.empty()) {
+        LockedMemory<const void> labelsMapped = as<MemoryBlob>(request->GetBlob(labels_output))->rmap();
+        const int32_t *labels = labelsMapped.as<int32_t *>();
 
-        if (r.confidence <= detectionThreshold && !doRawOutputMessages) {
-            continue;
-        }
+        for (int i = 0; i < maxProposalCount && objectSize == 5; i++) {
+            Result r;
+            r.label = labels[i];
+            r.confidence = detections[i * objectSize + 4];
 
-        r.location.x = static_cast<int>(detections[i * objectSize + 0] / network_input_width * width);
-        r.location.y = static_cast<int>(detections[i * objectSize + 1] / network_input_height * height);
-        r.location.width = static_cast<int>(detections[i * objectSize + 2] / network_input_width * width - r.location.x);
-        r.location.height = static_cast<int>(detections[i * objectSize + 3] / network_input_height * height - r.location.y);
+            if (r.confidence <= detectionThreshold && !doRawOutputMessages) {
+                continue;
+            }
 
-        // Make square and enlarge face bounding box for more robust operation of face analytics networks
-        int bb_width = r.location.width;
-        int bb_height = r.location.height;
+            r.location.x = static_cast<int>(detections[i * objectSize + 0] / network_input_width * width);
+            r.location.y = static_cast<int>(detections[i * objectSize + 1] / network_input_height * height);
+            r.location.width = static_cast<int>(detections[i * objectSize + 2] / network_input_width * width - r.location.x);
+            r.location.height = static_cast<int>(detections[i * objectSize + 3] / network_input_height * height - r.location.y);
 
-        int bb_center_x = r.location.x + bb_width / 2;
-        int bb_center_y = r.location.y + bb_height / 2;
+            // Make square and enlarge face bounding box for more robust operation of face analytics networks
+            int bb_width = r.location.width;
+            int bb_height = r.location.height;
 
-        int max_of_sizes = std::max(bb_width, bb_height);
+            int bb_center_x = r.location.x + bb_width / 2;
+            int bb_center_y = r.location.y + bb_height / 2;
 
-        int bb_new_width = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
-        int bb_new_height = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
+            int max_of_sizes = std::max(bb_width, bb_height);
 
-        r.location.x = bb_center_x - static_cast<int>(std::floor(bb_dx_coefficient * bb_new_width / 2));
-        r.location.y = bb_center_y - static_cast<int>(std::floor(bb_dy_coefficient * bb_new_height / 2));
+            int bb_new_width = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
+            int bb_new_height = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
 
-        r.location.width = bb_new_width;
-        r.location.height = bb_new_height;
+            r.location.x = bb_center_x - static_cast<int>(std::floor(bb_dx_coefficient * bb_new_width / 2));
+            r.location.y = bb_center_y - static_cast<int>(std::floor(bb_dy_coefficient * bb_new_height / 2));
 
-        if (doRawOutputMessages) {
-            std::cout << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
-                         "    (" << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
-                      << r.location.height << ")"
-                      << ((r.confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << std::endl;
-        }
-        if (r.confidence > detectionThreshold) {
-            results.push_back(r);
+            r.location.width = bb_new_width;
+            r.location.height = bb_new_height;
+
+            if (doRawOutputMessages) {
+                std::cout << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
+                             "    (" << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
+                          << r.location.height << ")"
+                          << ((r.confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << std::endl;
+            }
+            if (r.confidence > detectionThreshold) {
+                results.push_back(r);
+            }
         }
     }
 
@@ -323,8 +328,10 @@ AgeGenderDetection::Result AgeGenderDetection::operator[] (int idx) const {
     Blob::Ptr  genderBlob = request->GetBlob(outputGender);
     Blob::Ptr  ageBlob    = request->GetBlob(outputAge);
 
-    AgeGenderDetection::Result r = {ageBlob->buffer().as<float*>()[idx] * 100,
-                                         genderBlob->buffer().as<float*>()[idx * 2 + 1]};
+    LockedMemory<const void> ageBlobMapped = as<MemoryBlob>(ageBlob)->rmap();
+    LockedMemory<const void> genderBlobMapped = as<MemoryBlob>(genderBlob)->rmap();
+    AgeGenderDetection::Result r = {ageBlobMapped.as<float*>()[idx] * 100,
+                                    genderBlobMapped.as<float*>()[idx * 2 + 1]};
     if (doRawOutputMessages) {
         std::cout << "[" << idx << "] element, male prob = " << r.maleProb << ", age = " << r.age << std::endl;
     }
@@ -412,9 +419,12 @@ HeadPoseDetection::Results HeadPoseDetection::operator[] (int idx) const {
     Blob::Ptr  angleP = request->GetBlob(outputAngleP);
     Blob::Ptr  angleY = request->GetBlob(outputAngleY);
 
-    HeadPoseDetection::Results r = {angleR->buffer().as<float*>()[idx],
-                                    angleP->buffer().as<float*>()[idx],
-                                    angleY->buffer().as<float*>()[idx]};
+    LockedMemory<const void> angleRMapped = as<MemoryBlob>(angleR)->rmap();
+    LockedMemory<const void> anglePMapped = as<MemoryBlob>(angleP)->rmap();
+    LockedMemory<const void> angleYMapped = as<MemoryBlob>(angleY)->rmap();
+    HeadPoseDetection::Results r = {angleRMapped.as<float*>()[idx],
+                                    anglePMapped.as<float*>()[idx],
+                                    angleYMapped.as<float*>()[idx]};
 
     if (doRawOutputMessages) {
         std::cout << "[" << idx << "] element, yaw = " << r.angle_y <<
@@ -512,7 +522,8 @@ std::map<std::string, float> EmotionsDetection::operator[] (int idx) const {
                                std::to_string(emotionsVec.size()) + ")");
     }
 
-    auto emotionsValues = emotionsBlob->buffer().as<float *>();
+    LockedMemory<const void> emotionsBlobMapped = as<MemoryBlob>(emotionsBlob)->rmap();
+    auto emotionsValues = emotionsBlobMapped.as<float *>();
     auto outputIdxPos = emotionsValues + idx * emotionsVecSize;
     std::map<std::string, float> emotions;
 
@@ -615,7 +626,9 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
 
     auto landmarksBlob = request->GetBlob(outputFacialLandmarksBlobName);
     auto n_lm = getTensorChannels(landmarksBlob->getTensorDesc());
-    const float *normed_coordinates = request->GetBlob(outputFacialLandmarksBlobName)->buffer().as<float *>();
+    LockedMemory<const void> facialLandmarksBlobMapped =
+        as<MemoryBlob>(request->GetBlob(outputFacialLandmarksBlobName))->rmap();
+    const float *normed_coordinates = facialLandmarksBlobMapped.as<float *>();
 
     if (doRawOutputMessages) {
         std::cout << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << std::endl;
