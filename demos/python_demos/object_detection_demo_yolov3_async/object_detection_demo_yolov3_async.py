@@ -167,9 +167,7 @@ def parse_yolo_region(predictions, resized_image_shape, original_im_shape, param
     for row, col, n in np.ndindex(params.side, params.side, params.num):
         # Getting raw values for each detection bounding box
         bbox = predictions[0, n*bbox_size:(n+1)*bbox_size, row, col]
-        x, y = bbox[0:2]
-        width, height = bbox[2:4]
-        object_probability = bbox[4]
+        x, y, width, height, object_probability = bbox[:5]
         class_probabilities = bbox[5:]
         if object_probability < threshold:
             continue
