@@ -300,7 +300,6 @@ int main(int argc, char *argv[]) {
             cv::Mat frame;
             const float* output;
             std::chrono::high_resolution_clock::time_point startTime;
-            ms wallclockTime;
             bool isSameMode;
         };
 
@@ -314,9 +313,6 @@ int main(int argc, char *argv[]) {
         bool isUserSpecifiedMode = true;  // execution always starts in USER_SPECIFIED mode
 
         auto totalT0 = std::chrono::high_resolution_clock::now();
-        auto prevWallclockTime = std::chrono::high_resolution_clock::now();
-        double ocvRenderTime = 0;
-        double ocvDecodeTime = 0;
 
         std::queue<InferRequest::Ptr> emptyRequests;
         if (isUserSpecifiedMode) {
@@ -372,7 +368,6 @@ int main(int argc, char *argv[]) {
                     modeInfo[isUserSpecifiedMode].framesCount += 1;
                 }
 
-                auto t0 = std::chrono::high_resolution_clock::now();
                 for (int i = 0; i < maxProposalCount; i++) {
                     float image_id = detections[i * objectSize + 0];
                     if (image_id < 0) {
@@ -409,43 +404,21 @@ int main(int argc, char *argv[]) {
                 presenter.drawGraphs(requestResult.frame);
 
                 std::ostringstream out;
-                out << "OpenCV cap/render time: " << std::fixed << std::setprecision(2)
-                    << (ocvDecodeTime + ocvRenderTime) << " ms";
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
-                            cv::Scalar(255, 255, 255), 2); // make text distinguishable from background
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
-                            cv::Scalar(0, 255, 0), 1);
-                out.str("");
-                out << "Wallclock time " << (isUserSpecifiedMode ? "(USER SPECIFIED):      " : "(MIN LATENCY, "
-                       "press Tab): ");
-                out << std::fixed << std::setprecision(2) << requestResult.wallclockTime.count()
-                    << " ms (" << 1000.f / requestResult.wallclockTime.count() << " fps)";
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6,
-                            cv::Scalar(255, 255, 255), 2); // make text distinguishable from background
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6,
-                            cv::Scalar(0, 0, 255), 1);
-                out.str("");
-                out << "FPS: " << std::fixed << std::setprecision(2) << modeInfo[isUserSpecifiedMode].framesCount / 
+                out << "FPS: " << std::fixed << std::setprecision(1) << modeInfo[isUserSpecifiedMode].framesCount / 
                     std::chrono::duration_cast<sec>(std::chrono::high_resolution_clock::now() -
                                                     modeInfo[isUserSpecifiedMode].lastStartTime).count();
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 75), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
-                            cv::Scalar(255, 255, 255), 2); // make text distinguishable from background
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 75), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
-                            cv::Scalar(255, 0, 0), 1);
+                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
+                            cv::Scalar(0, 0, 255), 1);
                 out.str("");
                 modeInfo[isUserSpecifiedMode].latencySum += std::chrono::duration_cast<sec>(
                     std::chrono::high_resolution_clock::now() - requestResult.startTime).count();
-                out << "Latency: " << std::fixed << std::setprecision(2) << (modeInfo[isUserSpecifiedMode].latencySum /
+                out << "Latency: " << std::fixed << std::setprecision(1) << (modeInfo[isUserSpecifiedMode].latencySum /
                     modeInfo[isUserSpecifiedMode].framesCount) * 1e3 << " ms";
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 100), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
-                            cv::Scalar(255, 255, 255), 2); // make text distinguishable from background
-                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 100), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
-                            cv::Scalar(255, 0, 255), 1);
+                cv::putText(requestResult.frame, out.str(), cv::Point2f(10, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6, 
+                            cv::Scalar(0, 255, 0), 1);
 
                 if (!FLAGS_no_show) {
                     cv::imshow("Detection Results", requestResult.frame);
-                    auto t1 = std::chrono::high_resolution_clock::now();
-                    ocvRenderTime = std::chrono::duration_cast<ms>(t1 - t0).count();
                     
                     const int key = cv::waitKey(1);
 
@@ -480,7 +453,6 @@ int main(int argc, char *argv[]) {
             else if (!emptyRequests.empty() && cap.isOpened()) {
                 auto startTime = std::chrono::high_resolution_clock::now();
                 
-                auto t0 = std::chrono::high_resolution_clock::now();
                 cv::Mat frame;
                 if (!cap.read(frame)) {
                     if (frame.empty()) {
@@ -501,8 +473,6 @@ int main(int argc, char *argv[]) {
                     emptyRequests.pop();
                 }
                 frameToBlob(frame, request, imageInputName);
-                auto t1 = std::chrono::high_resolution_clock::now();
-                ocvDecodeTime = std::chrono::duration_cast<ms>(t1 - t0).count();
                 
                 bool frameMode = isUserSpecifiedMode;
                 request->SetCompletionCallback([&mutex,
@@ -512,7 +482,6 @@ int main(int argc, char *argv[]) {
                                                 request,
                                                 outputName,
                                                 startTime,
-                                                &prevWallclockTime,
                                                 frameMode,
                                                 &isUserSpecifiedMode,
                                                 &emptyRequests,
@@ -522,13 +491,10 @@ int main(int argc, char *argv[]) {
                         std::lock_guard<std::mutex> callbackLock(mutex);
                     
                         try {
-                            auto t0 = std::chrono::high_resolution_clock::now();
                             completedRequestResults.insert(
                                 std::pair<int, RequestResult>(nextFrameId, RequestResult{
                                     frame, request->GetBlob(outputName)->buffer().as<float*>(),
-                                    startTime, std::chrono::duration_cast<ms>(t0 - prevWallclockTime),
-                                    frameMode == isUserSpecifiedMode}));
-                            prevWallclockTime = t0;
+                                    startTime, frameMode == isUserSpecifiedMode}));
                             
                             if (isUserSpecifiedMode == frameMode) {
                                 emptyRequests.push(request);
