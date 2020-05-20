@@ -51,7 +51,7 @@ Model outputs are floating points tensors:
 
 3. name: `face_rpn_landmark_pred_stride32`, shape: `1,20,20,20`, format: `[B, Ax10, H, W]`, represents *facial landmarks* from Feature Pyramid Network (FPN) level with stride 32.
 
-4. name: `face_rpn_type_prob_reshape_stride32`, shape: `1,6,20,20`, format: `[B, Ax3, H, W]`
+4. name: `face_rpn_type_prob_reshape_stride32`, shape: `1,6,20,20`, format: `[B, Ax3, H, W]`, represents attributes score, where the third element is responsible for the presence or absence of a mask on a person
 
 5. name: `face_rpn_cls_prob_reshape_stride16`, shape: `1,4,40,40`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 16 for 2 classes: background and face.
 
@@ -59,7 +59,7 @@ Model outputs are floating points tensors:
 
 7. name: `face_rpn_landmark_pred_stride16`, shape: `1,20,40,40`, format: `[B, Ax10, H, W]`, represents facial landmarks from Feature Pyramid Network (FPN) level with stride 16.
 
-8. name: `face_rpn_type_prob_reshape_stride16`, shape: `1,6,40,40`, format: `[B, Ax3, H, W]`
+8. name: `face_rpn_type_prob_reshape_stride16`, shape: `1,6,40,40`, format: `[B, Ax3, H, W]`, represents attributes score, where the third element is responsible for the presence or absence of a mask on a person
 
 9. name: `face_rpn_cls_prob_reshape_stride16`, shape: `1,4,80,80`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 8 for 2 classes: background and face.
 
@@ -67,7 +67,7 @@ Model outputs are floating points tensors:
 
 11. name: `face_rpn_landmark_pred_stride16`, shape: `1,20,80,80`, format: `[B, Ax10, H, W]`, represents facial landmarks from Feature Pyramid Network (FPN) level with stride 8.
 
-12. name: `face_rpn_type_prob_reshape_stride8`, shape: `1,6,80,80`, format: `[B, Ax3, H, W]`
+12. name: `face_rpn_type_prob_reshape_stride8`, shape: `1,6,80,80`, format: `[B, Ax3, H, W]`, represents attributes score, where the third element is responsible for the presence or absence of a mask on a person
 
 For each output format:
 - `B` - batch size
