@@ -52,4 +52,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=prob
   - --input_model=$conv_dir/mobilenet-v2.onnx
+quantizable: yes
 license: https://raw.githubusercontent.com/tonylins/pytorch-mobilenet-v2/master/LICENSE

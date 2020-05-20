@@ -24,7 +24,7 @@ from .wider import WiderFormatConverter
 from .detection_opencv_storage import DetectionOpenCVStorageFormatConverter
 from .lfw import LFWConverter
 from .vgg_face_regression import VGGFaceRegressionConverter
-from .super_resolution_converter import SRConverter, SRMultiFrameConverter
+from .super_resolution_converter import SRConverter, SRMultiFrameConverter, MultiTargetSuperResolutionConverter
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
 from .kondate_nakayosi import KondateNakayosiRecognitionDatasetConverter
@@ -32,6 +32,7 @@ from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter, MSCocoS
 from .cityscapes import CityscapesConverter
 from .ncf_converter import MovieLensConverter
 from .brats import BratsConverter, BratsNumpyConverter
+from .oar3d import OAR3DTilingConverter
 from .cifar import CifarFormatConverter
 from .mnist import MNISTCSVFormatConverter
 from .wmt import WMTConverter
@@ -65,6 +66,8 @@ from .fashion_mnist import FashionMnistConverter
 from .inpainting import InpaintingConverter
 from .wikitext2raw import Wikitext2RawConverter
 
+from  .image_processing import ImageProcessingConverter
+
 __all__ = [
     'BaseFormatConverter',
     'make_subset',
@@ -82,6 +85,7 @@ __all__ = [
     'VGGFaceRegressionConverter',
     'SRConverter',
     'SRMultiFrameConverter',
+    'MultiTargetSuperResolutionConverter',
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
     'KondateNakayosiRecognitionDatasetConverter',
@@ -92,6 +96,7 @@ __all__ = [
     'MovieLensConverter',
     'BratsConverter',
     'BratsNumpyConverter',
+    'OAR3DTilingConverter',
     'CifarFormatConverter',
     'MNISTCSVFormatConverter',
     'WMTConverter',
@@ -119,5 +124,6 @@ __all__ = [
     'ReDWebDatasetConverter',
     'FashionMnistConverter',
     'InpaintingConverter',
-    'Wikitext2RawConverter'
+    'Wikitext2RawConverter',
+    'ImageProcessingConverter'
 ]

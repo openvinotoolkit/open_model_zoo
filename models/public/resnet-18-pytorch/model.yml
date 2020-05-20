@@ -45,4 +45,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=prob
   - --input_model=$conv_dir/resnet-18-pytorch.onnx
+quantizable: yes
 license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE

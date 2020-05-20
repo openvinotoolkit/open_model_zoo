@@ -28,14 +28,14 @@ Mean Average Precision (mAP) is the mean across Average Precision (AP) of all qu
 
 ## Inputs
 
-1. Name: `data` , shape: [1x3x96x48]. An input image in the format [BxCxHxW],
-   where:
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+Name: `data` , shape: [1x3x96x48]. An input image in the format [BxCxHxW],
+where:
+- B - batch size
+- C - number of channels
+- H - image height
+- W - image width
 
-   The expected color order is BGR.
+The expected color order is BGR.
 
 ## Outputs
 

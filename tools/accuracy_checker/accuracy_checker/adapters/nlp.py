@@ -94,10 +94,12 @@ class QuestionAnsweringAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_output = self._extract_predictions(raw, frame_meta)
         result = []
-        for identifier, start_token_logits, end_token_logits in zip(identifiers,
-                                                                    raw_output[self.start_token_logit_out],
-                                                                    raw_output[self.end_token_logit_out]):
-            result.append(QuestionAnsweringPrediction(identifier, start_token_logits, end_token_logits))
+        for identifier, start_token_logits, end_token_logits in zip(
+                identifiers, raw_output[self.start_token_logit_out], raw_output[self.end_token_logit_out]
+        ):
+            result.append(
+                QuestionAnsweringPrediction(identifier, start_token_logits.flatten(), end_token_logits.flatten())
+            )
 
         return result
 

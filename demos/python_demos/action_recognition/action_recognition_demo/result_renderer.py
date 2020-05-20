@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2020 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ TEXT_VERTICAL_INTERVAL = 45
 TEXT_LEFT_MARGIN = 15
 
 
-class ResultRenderer(object):
+class ResultRenderer:
     def __init__(self, no_show, presenter, display_fps=False, display_confidence=True, number_of_predictions=1,
-                 labels=None, output_height=720):
+                 label_smoothing_window=30, labels=None, output_height=720):
         self.no_show = no_show
         self.presenter = presenter
         self.number_of_predictions = number_of_predictions
@@ -41,7 +41,8 @@ class ResultRenderer(object):
         self.lables = labels
         self.output_height = output_height
         self.meters = defaultdict(partial(WindowAverageMeter, 16))
-        self.postprocessing = [LabelPostprocessing(n_frames=30, history_size=100) for _ in range(number_of_predictions)]
+        self.postprocessing = [LabelPostprocessing(n_frames=label_smoothing_window, history_size=label_smoothing_window)
+                               for _ in range(number_of_predictions)]
         print("To close the application, press 'CTRL+C' here or switch to the output window and press Esc or Q")
 
     def update_timers(self, timers):

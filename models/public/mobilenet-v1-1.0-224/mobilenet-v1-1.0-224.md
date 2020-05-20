@@ -28,7 +28,7 @@ Image, name - `input` , shape - `1,3,224,224`, format `B,C,H,W`, where:
     - H - image height
     - W - image width
 
-   Expected color order - BGR.
+   Expected color order: BGR.
    Mean values - [103.94,116.78,123.68], scale factor for each channel - 58.8235294117647
 
 ### Converted model
@@ -40,7 +40,7 @@ Image, name - `input` , shape - `1,3,224,224`, format `B,C,H,W`, where:
     - H - image height
     - W - image width
 
-   Expected color order - BGR.
+   Expected color order: BGR.
 
 ## Output
 

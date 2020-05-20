@@ -5,7 +5,7 @@ to fill holes in images.
 
 ## How It Works
 
-Running the application with the <code>-h</code> option yields the following usage message:
+Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: image_inpainting_demo.py [-h] -m MODEL [-i INPUT] [-d DEVICE]
@@ -34,15 +34,16 @@ Options:
   --no_show             Optional. Don't show output
 ```
 
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md).
+To run the demo, you can use public or pretrained models. You can download the pretrained models with the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting image and image with mask applied and reports performance in the following format: summary inference FPS.
+The demo uses OpenCV to display the resulting image and image with mask applied and reports performance in the format of summary inference FPS.
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Using Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

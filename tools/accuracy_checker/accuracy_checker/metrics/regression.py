@@ -31,7 +31,9 @@ from ..representation import (
     DepthEstimationAnnotation,
     DepthEstimationPrediction,
     ImageInpaintingAnnotation,
-    ImageInpaintingPrediction
+    ImageInpaintingPrediction,
+    ImageProcessingAnnotation,
+    ImageProcessingPrediction
 )
 
 from .metric import PerImageEvaluationMetric
@@ -363,6 +365,9 @@ def find_interval(value, intervals):
 
 
 def point_regression_differ(annotation_val_x, annotation_val_y, prediction_val_x, prediction_val_y):
+    if len(np.shape(prediction_val_x)) == 2:
+        prediction_val_x = prediction_val_x[0]
+        prediction_val_y = prediction_val_y[0]
     loss = np.subtract(list(zip(annotation_val_x, annotation_val_y)), list(zip(prediction_val_x, prediction_val_y)))
     return np.linalg.norm(loss, 2, axis=1)
 
@@ -370,8 +375,8 @@ def point_regression_differ(annotation_val_x, annotation_val_y, prediction_val_x
 class PeakSignalToNoiseRatio(BaseRegressionMetric):
     __provider__ = 'psnr'
 
-    annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, )
-    prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, )
+    annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, ImageProcessingAnnotation)
+    prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, ImageProcessingPrediction)
 
     @classmethod
     def parameters(cls):
@@ -447,8 +452,10 @@ class AngleError(BaseRegressionMetric):
 
 
 def _ssim(annotation_image, prediction_image):
-    prediction = np.asarray(prediction_image).astype(np.uint8)
-    ground_truth = np.asarray(annotation_image).astype(np.uint8)
+    prediction = np.asarray(prediction_image)
+    ground_truth = np.asarray(annotation_image)
+    if len(ground_truth.shape) < len(prediction) and prediction.shape[-1] == 1:
+        prediction = np.squeeze(prediction)
     mu_x = np.mean(prediction)
     mu_y = np.mean(ground_truth)
     var_x = np.var(prediction)
@@ -459,11 +466,11 @@ def _ssim(annotation_image, prediction_image):
     mssim = (2*mu_x*mu_y + c1)*(2*sig_xy + c2)/((mu_x**2 + mu_y**2 + c1)*(var_x + var_y + c2))
     return mssim
 
+
 class StructuralSimilarity(BaseRegressionMetric):
     __provider__ = 'ssim'
-
-    annotation_types = (ImageInpaintingAnnotation, )
-    prediction_types = (ImageInpaintingPrediction, )
+    annotation_types = (ImageInpaintingAnnotation, ImageProcessingAnnotation, SuperResolutionAnnotation)
+    prediction_types = (ImageInpaintingPrediction, ImageProcessingPrediction, SuperResolutionPrediction)
 
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)

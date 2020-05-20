@@ -24,17 +24,6 @@ models:
             name: input
             layout: NCDHW
 
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/asl-recognition-0004/FP16-INT8/asl-recognition-0004.xml
-        weights: intel/asl-recognition-0004/FP16-INT8/asl-recognition-0004.bin
-        adapter: classification
-        inputs:
-          - type: INPUT
-            name: input
-            layout: NCDHW
-
     datasets:
       - name: msasl-100
 

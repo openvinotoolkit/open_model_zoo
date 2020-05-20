@@ -19,8 +19,7 @@ This is a vehicle detection network based on an SSD framework with tuned MobileN
 | MParams                         | 1.079                                     |
 | Source framework                | Caffe*                                    |
 
-Average Precision metric described in: Mark Everingham et al.
-["The PASCAL Visual Object Classes (VOC) Challenge"](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
+For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
 
 Tested on a challenging internal dataset with 3000 images and 12585 vehicles to detect.
 
@@ -28,12 +27,12 @@ Tested on a challenging internal dataset with 3000 images and 12585 vehicles to 
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x384x672] - An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x384x672] - An input image in the format [BxCxHxW],
   where:
     - B - batch size
     - C - number of channels
     - H - image height
-    - W - image width.
+    - W - image width
   Expected color order is BGR.
 
 ## Outputs
