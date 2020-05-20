@@ -18,8 +18,8 @@ import os
 import tempfile
 import json
 import warnings
-import numpy as np
 from pathlib import Path
+import numpy as np
 try:
     from pycocotools.coco import COCO
 except ImportError:
@@ -254,7 +254,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
                 'id': cat,
                 'name': cat_name
             })
-        for key,value in coco_images.items():
+        for value in coco_images.values():
             coco_image_to_store.append(value)
 
         coco_data_to_store = {
@@ -333,25 +333,21 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
         return res
 
+    @property
     def _use_original_coco(self):
         subsample_size = self.dataset.config.get('subsample_size')
-        if subsample_size:
-            return False
-        else:
+        if not subsample_size:
             annotation_conversion_parameters = self.dataset.config.get('annotation_conversion')
             if annotation_conversion_parameters:
                 annotation_file = annotation_conversion_parameters.get('annotation_file')
-                if annotation_file.is_file():
-                    return True
-                else:
-                    return False
-            else:
-                return False
+                return annotation_file.is_file()
+
+        return False
 
     def compute_precision_recall(self, annotations, predictions):
-        if(self._use_original_coco()):
-            coco, map_coco_img_file_name_to_img_id, map_pred_label_id_to_coco_cat_id = \
-                self._prepare_original_coco_structures()
+        if self._use_original_coco:
+            structures = self._prepare_original_coco_structures()
+            coco, map_coco_img_file_name_to_img_id, map_pred_label_id_to_coco_cat_id = structures
 
             coco_data_to_store = self._convert_data_to_original_coco_format(
                 predictions, map_coco_img_file_name_to_img_id, map_pred_label_id_to_coco_cat_id
