@@ -16,6 +16,10 @@ models:
             - face_rpn_cls_prob_reshape_stride32
             - face_rpn_cls_prob_reshape_stride16
             - face_rpn_cls_prob_reshape_stride8
+          type_scores_outputs:
+            - face_rpn_type_prob_reshape_stride32
+            - face_rpn_type_prob_reshape_stride16
+            - face_rpn_type_prob_reshape_stride8
       - framework: dlsdk
         tags:
           - FP16
@@ -31,6 +35,10 @@ models:
             - face_rpn_cls_prob_reshape_stride32
             - face_rpn_cls_prob_reshape_stride16
             - face_rpn_cls_prob_reshape_stride8
+          type_scores_outputs:
+            - face_rpn_type_prob_reshape_stride32
+            - face_rpn_type_prob_reshape_stride16
+            - face_rpn_type_prob_reshape_stride8
     datasets:
       - name: wider
         preprocessing:
