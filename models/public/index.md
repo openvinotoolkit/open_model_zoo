@@ -22,6 +22,9 @@ The models can be downloaded via Model Downloader
 | EfficientNet B5   | [TensorFlow\*](./efficientnet-b5/efficientnet-b5.md)<br>[PyTorch\*](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | efficientnet-b5<br>efficientnet-b5-pytorch | 83.33/96.67<br>83.69/96.71 | 21.252 | 30.303 |
 | EfficientNet B7   | [PyTorch\*](./efficientnet-b7-pytorch/efficientnet-b7-pytorch.md) | efficientnet-b7-pytorch | 84.42/96.91 | 77.618  | 66.193 |
 | EfficientNet B7 AutoAugment  | [TensorFlow\*](./efficientnet-b7_auto_aug/efficientnet-b7_auto_aug.md) | efficientnet-b7_auto_aug | 84.68/97.09 | 77.618  | 66.193 |
+| HBONet 1.0        | [PyTorch\*](./hbonet-1.0/hbonet-1.0.md)   | hbonet-1.0  | 73.1/91.0 | 0.305 |
+| HBONet 0.5        | [PyTorch\*](./hbonet-0.5/hbonet-0.5.md)   | hbonet-0.5  | 67.0/86.9 | 0.096 |
+| HBONet 0.25       | [PyTorch\*](./hbonet-0.25/hbonet-0.25.md) | hbonet-0.25 | 57.3/79.8 | 0.037 |
 | Inception (GoogleNet) V1 | [Caffe\*](./googlenet-v1/googlenet-v1.md)<br>[TensorFlow\*](./googlenet-v1-tf/googlenet-v1-tf.md) | googlenet-v1<br>googlenet-v1-tf | | 3.016~3.266 | 6.619~6.999 |
 | Inception (GoogleNet) V2 | [Caffe\*](./googlenet-v2/googlenet-v2.md)<br>[TensorFlow\*](./googlenet-v2-tf/googlenet-v2-tf.md) | googlenet-v2<br>googlenet-v2-tf | | 4.058 | 11.185 |
 | Inception (GoogleNet) V3 | [TensorFlow\*](./googlenet-v3/googlenet-v3.md)<br>[PyTorch\*](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | googlenet-v3 <br> googlenet-v3-pytorch |  | 11.469 | 23.817 |

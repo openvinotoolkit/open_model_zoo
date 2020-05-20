@@ -16,8 +16,11 @@ The `hbonet-0.25` model is one of the classification models from https://github.
 | Source framework  | PyTorch\*     |
 
 ## Accuracy
-Top-1: 57.3%
-Top-5: 79.8%
+
+| Metric | Original model | Converted model |
+| ------ | -------------- | --------------- |
+| Top 1  | 57.30          |                 |
+| Top 5  | 79.80          |                 |
 
 ## Performance
 
@@ -25,26 +28,24 @@ Top-5: 79.8%
 
 ### Original Model
 
-Image, name: `input`, shape: [1x224x224x3], format: [BxHxWxC],
-   where:
+Image, name: `input`, shape: [1x3x224x224], format: [BxCxHxW], where:
 
-    - B - batch size
-    - H - image height
-    - W - image width
-    - C - number of channels
+- B - batch size
+- H - image height
+- W - image width
+- C - number of channels
 
-   Expected color order: RGB.
-   Mean values: [123.675, 116.28, 103.53], scale factor for each channel: [58.395, 57.12, 57.375] 
+ Expected color order: RGB.
+ Mean values: [123.675, 116.28, 103.53], scale factor for each channel: [58.395, 57.12, 57.375]
 
 ### Converted Model
 
-Image, name: `input`, shape: [1x3x224x224], format: [BxCxHxW],
-where:
+Image, name: `input`, shape: [1x3x224x224], format: [BxCxHxW], where:
 
-   - B - batch size
-   - C - number of channels
-   - H - image height
-   - W - image width
+- B - batch size
+- C - number of channels
+- H - image height
+- W - image width
 
 Expected color order: BGR.
 
@@ -52,8 +53,8 @@ Expected color order: BGR.
 
 Object classifier according to ImageNet classes, shape: [1,1000] in [BxC] format, where:
 
-    - B - batch size
-    - C - vector of probabilities for all dataset classes.
+- B - batch size
+- C - vector of probabilities for all dataset classes.
 
 ## Legal Information
 
