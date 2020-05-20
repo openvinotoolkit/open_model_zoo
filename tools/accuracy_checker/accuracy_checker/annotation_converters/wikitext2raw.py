@@ -14,16 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from collections import namedtuple
-
 import numpy as np
+from tokenizers import Tokenizer, pre_tokenizers, decoders
+from tokenizers.models import BPE
 
 from ..representation import LanguageModelingAnnotation
 from ..config import PathField, NumberField
 
 from .format_converter import BaseFormatConverter, ConverterReturn
-from tokenizers import Tokenizer, pre_tokenizers, decoders
-from tokenizers.models import BPE
 
 
 class Wikitext2RawConverter(BaseFormatConverter):
