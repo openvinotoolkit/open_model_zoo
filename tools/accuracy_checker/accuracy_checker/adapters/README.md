@@ -36,7 +36,7 @@ AccuracyChecker supports following set of adapters:
   * `raw_output` - enabling additional preprocessing for raw YOLO output format (default `False`).
   * `output_format` - setting output layer format:
       - `BHW` - boxes first (default, also default for generated IRs).
-      - `HWB` - boxes last. 
+      - `HWB` - boxes last.
       Applicable only if network output not 3D (4D with batch) tensor.
 * `yolo_v3` - converting output of YOLO v3 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 80).
@@ -51,8 +51,8 @@ AccuracyChecker supports following set of adapters:
   * `outputs` - the list of output layers names (optional), if specified there should be exactly 3 output layers provided.
   * `raw_output` - enabling additional preprocessing for raw YOLO output format (default `False`).
   * `output_format` - setting output layer format - boxes first (`BHW`)(default, also default for generated IRs), boxes last (`HWB`). Applicable only if network output not 3D (4D with batch) tensor.
-  * `cells` - sets grid size for each layer, according `outputs` filed. Works only with `do_reshape=True` or when output tensor dimensions not equal 3. 
-  * `do_reshape` - forces reshape output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on `output_format` value ([B,Cy,Cx] by default). You may need to specify `cells` value. 
+  * `cells` - sets grid size for each layer, according `outputs` filed. Works only with `do_reshape=True` or when output tensor dimensions not equal 3.
+  * `do_reshape` - forces reshape output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on `output_format` value ([B,Cy,Cx] by default). You may need to specify `cells` value.
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
 * `ssd_mxnet` - converting output of SSD-based models from MXNet framework to `DetectionPrediction` representation.
@@ -95,7 +95,7 @@ AccuracyChecker supports following set of adapters:
 * `age_gender` - converting age gender recognition model output to `ContainerPrediction` with `ClassificationPrediction` named `gender` for gender recognition, `ClassificationPrediction` named `age_classification` and `RegressionPrediction` named `age_error` for age recognition.
   * `age_out` - output layer name for age recognition.
   * `gender_out` - output layer name for gender recognition.
-* `action_detection` - converting output of model for person detection and action recognition tasks to `ContainerPrediction` with `DetectionPrdiction` for class agnostic metric calculation and `ActionDetectionPrediction` for action recognition. The representations in container have names `class_agnostic_prediction` and `action_prediction` respectively.
+* `action_detection` - converting output of model for person detection and action recognition tasks to `ContainerPrediction` with `DetectionPrdiction` for class agnostic metric calculation and `AttributeDetectionPrediction` for action recognition. The representations in container have names `class_agnostic_prediction` and `action_prediction` respectively.
   * `priorbox_out` - name of layer containing prior boxes in SSD format.
   * `loc_out` - name of layer containing box coordinates in SSD format.
   * `main_conf_out` - name of layer containing detection confidences.
@@ -109,7 +109,7 @@ AccuracyChecker supports following set of adapters:
   * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
   * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
   * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
-  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations.
   The order of actions:
   1. Multiply on `std`
   2. Add `mean`
@@ -120,7 +120,7 @@ AccuracyChecker supports following set of adapters:
   * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
   * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
   * `cast_to_uint8` - perform casting output image pixels to [0, 255] range.
-  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations.
   The order of actions:
   1. Multiply on `std`
   2. Add `mean`
@@ -131,7 +131,7 @@ AccuracyChecker supports following set of adapters:
   * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
   * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
   * `cast_to_uint8` - perform casting output image pixels to [0, 255] range.
-  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations.
   The order of actions:
   1. Multiply on `std`
   2. Add `mean`

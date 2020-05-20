@@ -2,7 +2,7 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import ListField
 from ..postprocessor import NMS
-from ..representation import DetectionPrediction, FacialLandmarksPrediction, ContainerPrediction, ActionDetectionPrediction
+from ..representation import DetectionPrediction, FacialLandmarksPrediction, ContainerPrediction, AttributeDetectionPrediction
 
 
 class RetinaFaceAdapter(Adapter):
@@ -86,7 +86,7 @@ class RetinaFaceAdapter(Adapter):
                     identifier, labels, scores, x_mins / x_scale, y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
                 )
             else:
-                detection_representation = ActionDetectionPrediction(
+                detection_representation = AttributeDetectionPrediction(
                     identifier, labels, scores, mask_scores, x_mins / x_scale, y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
                 )
             if not self.landmarks_output:

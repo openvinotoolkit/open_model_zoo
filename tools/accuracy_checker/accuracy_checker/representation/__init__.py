@@ -25,8 +25,8 @@ from .detection_representation import (
     Detection,
     DetectionAnnotation,
     DetectionPrediction,
-    ActionDetectionAnnotation,
-    ActionDetectionPrediction
+    AttributeDetectionAnnotation,
+    AttributeDetectionPrediction
 )
 from .reid_representation import (
     ReIdentificationAnnotation,
@@ -87,8 +87,8 @@ __all__ = [
     'DetectionAnnotation',
     'DetectionPrediction',
 
-    'ActionDetectionAnnotation',
-    'ActionDetectionPrediction',
+    'AttributeDetectionAnnotation',
+    'AttributeDetectionPrediction',
 
     'ReIdentificationAnnotation',
     'ReIdentificationClassificationAnnotation',
