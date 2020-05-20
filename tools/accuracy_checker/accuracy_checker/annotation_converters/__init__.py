@@ -64,6 +64,7 @@ from .monocular_depth_perception import ReDWebDatasetConverter
 
 from .fashion_mnist import FashionMnistConverter
 from .inpainting import InpaintingConverter
+from .wikitext2raw import Wikitext2RawConverter
 
 from  .image_processing import ImageProcessingConverter
 
@@ -123,5 +124,6 @@ __all__ = [
     'ReDWebDatasetConverter',
     'FashionMnistConverter',
     'InpaintingConverter',
+    'Wikitext2RawConverter',
     'ImageProcessingConverter'
 ]
