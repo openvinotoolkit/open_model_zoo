@@ -72,6 +72,8 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         if not self.dataset.metadata.get('label_map'):
             raise ConfigError('coco_orig metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerated annotation')
+        if COCO is None:
+            raise ValueError('pycocotools is not installed, please install it')
 
     @staticmethod
     def _iou_type_data_to_coco(data_to_store, data):
@@ -98,8 +100,6 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         if self.dataset.metadata.get('background_label') is not None:
             label_map.pop(self.dataset.metadata.get('background_label'))
 
-        if COCO is None:
-            raise ValueError('pycocotools is not installed, please install it')
         coco_data_to_store = self._prepare_data_for_annotation_file(
             annotations, label_map)
 
@@ -125,8 +125,6 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
         meta = self.dataset.metadata
 
-        if COCO is None:
-            raise ValueError('pycocotools is not installed, please install it')
         coco = COCO(str(annotation_file))
         assert 0 not in coco.cats.keys()
         coco_cat_name_to_id = {v['name']: k for k, v in coco.cats.items()}
