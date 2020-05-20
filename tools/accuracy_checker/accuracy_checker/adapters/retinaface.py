@@ -76,25 +76,25 @@ class RetinaFaceAdapter(Adapter):
             mask_scores = np.reshape(mask_scores_list, -1)
             labels = np.full_like(scores, 1, dtype=int)
             x_mins, y_mins, x_maxs, y_maxs = np.array(proposals_list).T # pylint: disable=E0633
-            if not self.type_scores_output:
-                detection_representation = DetectionPrediction(
-                    identifier, labels, scores, x_mins / x_scale, y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
-                )
-            else:
-                detection_representation = AttributeDetectionPrediction(
-                    identifier, labels, scores, mask_scores, x_mins / x_scale,
-                    y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
-                )
-            if not self.landmarks_output:
+            detection_representation = DetectionPrediction(
+                identifier, labels, scores, x_mins / x_scale, y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
+            )
+            if not self.landmarks_output and not self.type_scores_output:
                 results.append(detection_representation)
                 continue
-            landmarks_x_coords = np.array(landmarks_list)[:, :, ::2].reshape(len(landmarks_list), -1) / x_scale
-            landmarks_y_coords = np.array(landmarks_list)[:, :, 1::2].reshape(len(landmarks_list), -1) / y_scale
-            landmarks_representation = FacialLandmarksPrediction(identifier, landmarks_x_coords, landmarks_y_coords)
-            results.append(ContainerPrediction({
-                'detection': detection_representation, 'landmarks_regression': landmarks_representation
-            }))
-
+            representations = {}
+            representations['detection'] = detection_representation
+            if self.type_scores_output:
+                representations['action_prediction'] = AttributeDetectionPrediction(
+                        identifier, labels, scores, mask_scores, x_mins / x_scale,
+                        y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
+                )
+            if self.landmarks_output:
+                landmarks_x_coords = np.array(landmarks_list)[:, :, ::2].reshape(len(landmarks_list), -1) / x_scale
+                landmarks_y_coords = np.array(landmarks_list)[:, :, 1::2].reshape(len(landmarks_list), -1) / y_scale
+                representations['landmarks_regression'] = FacialLandmarksPrediction(identifier, landmarks_x_coords,
+                                                                                    landmarks_y_coords)
+            results.append(ContainerPrediction(representations))
         return results
 
     def _get_proposals(self, bbox_deltas, anchor_num, anchors):
