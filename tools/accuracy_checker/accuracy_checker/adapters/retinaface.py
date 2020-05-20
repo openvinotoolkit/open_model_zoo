@@ -83,9 +83,9 @@ class RetinaFaceAdapter(Adapter):
                 results.append(detection_representation)
                 continue
             representations = {}
-            representations['detection'] = detection_representation
+            representations['face_detection'] = detection_representation
             if self.type_scores_output:
-                representations['action_prediction'] = AttributeDetectionPrediction(
+                representations['mask_detection'] = AttributeDetectionPrediction(
                         identifier, labels, scores, mask_scores, x_mins / x_scale,
                         y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
                 )
