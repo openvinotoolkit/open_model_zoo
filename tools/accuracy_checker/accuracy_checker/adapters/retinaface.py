@@ -54,18 +54,13 @@ class RetinaFaceAdapter(Adapter):
             x_scale, y_scale = meta['scale_x'], meta['scale_y']
             for _idx, s in enumerate(self._features_stride_fpn):
                 anchor_num = self._num_anchors[s]
-                scores = raw_predictions[self.scores_output[_idx]][batch_id]
-                scores = scores[anchor_num:, :, :]
+                scores = self._get_scores(raw_predictions[self.scores_output[_idx]][batch_id], anchor_num)
                 bbox_deltas = raw_predictions[self.bboxes_output[_idx]][batch_id]
                 height, width = bbox_deltas.shape[1], bbox_deltas.shape[2]
                 anchors_fpn = self._anchors_fpn[s]
                 anchors = self.anchors_plane(height, width, int(s), anchors_fpn)
                 anchors = anchors.reshape((height * width * anchor_num, 4))
-                scores = scores.transpose((1, 2, 0)).reshape(-1)
-                bbox_deltas = bbox_deltas.transpose((1, 2, 0))
-                bbox_pred_len = bbox_deltas.shape[2] // anchor_num
-                bbox_deltas = bbox_deltas.reshape((-1, bbox_pred_len))
-                proposals = self.bbox_pred(anchors, bbox_deltas)
+                proposals = self._get_proposals(bbox_deltas, anchor_num, anchors)
                 x_mins, y_mins, x_maxs, y_maxs = proposals.T
                 keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, scores, 0.5, False)
                 proposals_list.extend(proposals[keep])
@@ -101,6 +96,19 @@ class RetinaFaceAdapter(Adapter):
             }))
 
         return results
+
+    def _get_proposals(self, bbox_deltas, anchor_num, anchors):
+        bbox_deltas = bbox_deltas.transpose((1, 2, 0))
+        bbox_pred_len = bbox_deltas.shape[2] // anchor_num
+        bbox_deltas = bbox_deltas.reshape((-1, bbox_pred_len))
+        proposals = self.bbox_pred(anchors, bbox_deltas)
+        return proposals
+
+    @staticmethod
+    def _get_scores(scores, anchor_num):
+        scores = scores[anchor_num:, :, :]
+        scores = scores.transpose((1, 2, 0)).reshape(-1)
+        return scores
 
     @staticmethod
     def _get_mask_scores(type_scores, anchor_num):
