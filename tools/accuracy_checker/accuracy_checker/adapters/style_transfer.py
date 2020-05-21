@@ -53,9 +53,9 @@ class StyleTransferAdapter(Adapter):
             img = self._basic_postprocess(img)
             result.append(StyleTransferPrediction(identifier, img))
         return result
-    
+
     @classmethod
-    def _basic_postprocess(self, img):
+    def _basic_postprocess(cls, img):
         if img.shape[0] == 3:
             img = np.transpose(img, (1, 2, 0))
         return img
