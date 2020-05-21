@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..config import PathField, NumberField
+from ..config import PathField
 from ..representation import StyleTransferAnnotation
 from .format_converter import BaseFormatConverter, ConverterReturn
 

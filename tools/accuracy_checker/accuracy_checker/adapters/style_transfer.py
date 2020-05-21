@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 import numpy as np
-import cv2
 from ..adapters import Adapter
 from ..representation import StyleTransferPrediction
 from ..config import ConfigValidator, NumberField
@@ -54,8 +53,9 @@ class StyleTransferAdapter(Adapter):
             img = self._basic_postprocess(img)
             result.append(StyleTransferPrediction(identifier, img))
         return result
-
+    
+    @classmethod
     def _basic_postprocess(self, img):
         if img.shape[0] == 3:
-            img = np.transpose(img, (1, 2, 0))    
+            img = np.transpose(img, (1, 2, 0))
         return img

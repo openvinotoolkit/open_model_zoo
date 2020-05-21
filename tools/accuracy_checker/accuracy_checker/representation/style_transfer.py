@@ -16,7 +16,6 @@ limitations under the License.
 
 from enum import Enum
 import numpy as np
-import cv2
 
 from .base_representation import BaseRepresentation
 from ..data_readers import BaseReader
@@ -50,7 +49,7 @@ class StyleTransferAnnotation(StyleTransferRepresentation):
         loader = BaseReader.provide(self._gt_loader, self.metadata['data_source'])
         gt = loader.read(self._image_path)
         return gt.astype(np.uint8)
-    
+
     @value.setter
     def value(self, val):
         self._value = val
