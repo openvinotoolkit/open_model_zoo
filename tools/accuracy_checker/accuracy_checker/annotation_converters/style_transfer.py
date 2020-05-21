@@ -30,20 +30,12 @@ class StyleTransferConverter(BaseFormatConverter):
             'images_dir': PathField(
                 optional=False, is_directory=True,
                 description="Path to directory with images."
-            ),
-            'dst_width': NumberField(
-                value_type=int, optional=False, description="Output width."
-            ),
-            'dst_height': NumberField(
-                value_type=int, optional=False, description="Output height."
             )
         })
         return parameters
 
     def configure(self):
         self.image_dir = self.get_value_from_config('images_dir')
-        self.dst_width = self.get_value_from_config('dst_width')
-        self.dst_height = self.get_value_from_config('dst_height')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_check_errors = [] if check_content else None
@@ -51,8 +43,8 @@ class StyleTransferConverter(BaseFormatConverter):
         images = list(im for im in self.image_dir.iterdir())
         for image in images:
             identifiers = image.name
-            annotation = StyleTransferAnnotation(identifiers, image.name, self.dst_height, self.dst_width)
+            annotation = StyleTransferAnnotation(identifiers, image.name)
             annotations.append(annotation)
 
-        return ConverterReturn(annotations, {'dst_width' : self.dst_width, 'dst_height' : self.dst_height},
+        return ConverterReturn(annotations, None,
                                content_check_errors)

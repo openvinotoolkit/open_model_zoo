@@ -36,26 +36,25 @@ class StyleTransferAnnotation(StyleTransferRepresentation):
         GTLoader.OPENCV: 'opencv_imread'
     }
 
-    def __init__(self, identifier, image_path, dst_height, dst_width, gt_loader=GTLoader.PILLOW):
+    def __init__(self, identifier, image_path, gt_loader=GTLoader.PILLOW):
         super().__init__(identifier)
         self._gt_loader = self.LOADERS.get(gt_loader)
-        self._dst_height = dst_height
-        self._dst_width = dst_width
         self._image_path = image_path
+        self._value = None
 
     @property
     def value(self):
+        if self._value is not None:
+            return self._value
 
         loader = BaseReader.provide(self._gt_loader, self.metadata['data_source'])
         gt = loader.read(self._image_path)
-        gt = cv2.resize(gt, (self._dst_height, self._dst_width))
         return gt.astype(np.uint8)
-
+    
     @value.setter
     def value(self, val):
         self._value = val
         return self._value
-
 
 class StyleTransferPrediction(StyleTransferRepresentation):
     def __init__(self, identifiers, prediction):

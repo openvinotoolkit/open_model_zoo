@@ -745,8 +745,6 @@ datasets:
     annotation_conversion:
       converter: style_transfer
       images_dir: val2017
-      dst_height: 224
-      dst_width: 224
     metrics:
       - type: psnr
         scale_border: 0
