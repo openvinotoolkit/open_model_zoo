@@ -31,12 +31,12 @@ models:
 
     datasets:
       - name: ms_coco_style_transfer
-          preprocessing:
-          - type: resize
-            size: 224
-          postprocessing:
-          - type: resize_style_transfer
-            dst_width: 224
-            dst_height: 224
+        preprocessing:
+        - type: resize
+          size: 224
+        postprocessing:
+        - type: resize_style_transfer
+          dst_width: 224
+          dst_height: 224
 
 global_definitions: ../dataset_definitions.yml
