@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+
 from .base_representation import BaseRepresentation
 from .classification_representation import (
     Classification,
@@ -68,7 +69,9 @@ from .nlp_representation import (
     MachineTranslationPrediction,
     QuestionAnsweringAnnotation,
     QuestionAnsweringPrediction,
-    TextClassificationAnnotation
+    TextClassificationAnnotation,
+    LanguageModelingAnnotation,
+    LanguageModelingPrediction
 )
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
 from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
@@ -150,6 +153,8 @@ __all__ = [
     'QuestionAnsweringAnnotation',
     'QuestionAnsweringPrediction',
     'TextClassificationAnnotation',
+    'LanguageModelingAnnotation',
+    'LanguageModelingPrediction',
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',

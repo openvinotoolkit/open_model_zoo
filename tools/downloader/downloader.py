@@ -47,11 +47,14 @@ def process_download(reporter, chunk_iterable, size, file):
 
                 if duration != 0:
                     speed = int(progress_size / (1024 * duration))
-                    percent = str(progress_size * 100 // size)
+                else:
+                    speed = '?'
 
-                    reporter.print_progress('... {}%, {} KB, {} KB/s, {} seconds passed',
-                        percent, int(progress_size / 1024), speed, int(duration))
-                    reporter.emit_event('model_file_download_progress', size=progress_size)
+                percent = progress_size * 100 // size
+
+                reporter.print_progress('... {}%, {} KB, {} KB/s, {} seconds passed',
+                    percent, progress_size // 1024, speed, int(duration))
+                reporter.emit_event('model_file_download_progress', size=progress_size)
 
                 file.write(chunk)
 
@@ -216,7 +219,7 @@ def main():
 
     args = parser.parse_args()
 
-    reporter = common.Reporter(
+    reporter = common.Reporter(common.DirectOutputContext(),
         enable_human_output=args.progress_format == 'text',
         enable_json_output=args.progress_format == 'json')
 
