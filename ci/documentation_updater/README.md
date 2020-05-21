@@ -20,7 +20,3 @@ To check descriptions of all public models:
 ```
 python documentation_updater.py -d <OMZ dir>/models --mode check
 ```
-OR
-```
-python documentation_updater.py -d <OMZ dir>/models --mode check
-```

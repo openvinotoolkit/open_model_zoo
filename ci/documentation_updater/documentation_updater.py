@@ -42,7 +42,7 @@ LOG_LEVELS = [
 
 def parse():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--model-dir', type=Path, default='../../models',
+    parser.add_argument('-d', '--model-dir', type=Path, default=Path(__file__).resolve().parents[2] / 'models',
                         help='Path to root directory with models documentation and configuration files')
     parser.add_argument('--mode', type=str, choices=MODES, default='check',
                         help='Script work mode: "check" only finds diffs, "update" - updates values')
