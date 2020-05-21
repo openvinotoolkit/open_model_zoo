@@ -128,13 +128,6 @@ class ModeInfo():
         self.latency_sum = 0
 
 
-def entry_index(side, coord, classes, location, entry):
-    side_power_2 = side ** 2
-    n = location // side_power_2
-    loc = location % side_power_2
-    return int(side_power_2 * (n * (coord + classes + 1) + entry) + loc)
-
-
 def scale_bbox(x, y, height, width, class_id, confidence, im_h, im_w, is_proportional):
     if is_proportional:
         scale = np.array([min(im_w/im_h, 1), min(im_h/im_w, 1)])
