@@ -20,6 +20,6 @@ models:
         adapter: style_transfer
 
     datasets:
-      - name: coco_style_transfer
+      - name: ms_coco_style_transfer
 
 global_definitions: ../dataset_definitions.yml
