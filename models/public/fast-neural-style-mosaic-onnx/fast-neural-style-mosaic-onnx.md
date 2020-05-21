@@ -1,8 +1,13 @@
-# mosaic
+# fast-neural-style-mosaic-onnx
 
 ## Use Case and High-Level Description
 
-The `mosaic` model is one of the style transfer models designed to mix the content of an image with the style of another image. The model uses the method described in [Perceptual Losses for Real-Time Style Transfer and Super-Resolution](https://arxiv.org/abs/1603.08155) along with [Instance Normalization](https://arxiv.org/pdf/1607.08022.pdf).
+The `fast-neural-style-mosaic-onnx` model is one of the style transfer models
+designed to mix the content of an image with the style of another image. The 
+model uses the method described in [Perceptual Losses for Real-Time Style
+Transfer and Super-Resolution](https://arxiv.org/abs/1603.08155) along with
+[Instance Normalization](https://arxiv.org/pdf/1607.08022.pdf). Original ONNX
+models are provided in the [repository](https://github.com/onnx/models).
 
 
 ## Example
@@ -13,9 +18,9 @@ The `mosaic` model is one of the style transfer models designed to mix the conte
 | Metric            | Value            |
 |-------------------|------------------|
 | Type              | Style Transfer   |
-| GFLOPs            | -                |
-| MParams           | -                |
-| Source framework  | ONNX\*           |
+| GFLOPs            | 15.518           |
+| MParams           | 1.679            |
+| Source framework  | Pytorch\*        |
 
 ## Accuracy
 
@@ -23,7 +28,7 @@ Accuracy metrics are obtained on MS COCO val2017 dataset. Images were resized to
 
 | Metric | Original model | Converted model (FP32) | Converted model (FP16) |
 | ------ | -------------- | ---------------------- | ---------------------- |
-| PSNR   | 12.03Db        | 12.03Db                | 12.04Db                |
+| PSNR   | 12.03dB        | 12.03dB                | 12.04dB                |
 
 ## Performance
 
@@ -33,23 +38,23 @@ Accuracy metrics are obtained on MS COCO val2017 dataset. Images were resized to
 
 Image, name - `input1`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 
-- `B` - batch size
-- `C` - channel
-- `H` - height
-- `W` - width
+    - `B` - batch size
+    - `C` - channel
+    - `H` - height
+    - `W` - width
 
-Expected color order: RGB.
+    Expected color order: RGB.
 
 ### Converted model
 
 Image, name - `input1`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 
-- `B` - batch size
-- `C` - channel
-- `H` - height
-- `W` - width
+    - `B` - batch size
+    - `C` - channel
+    - `H` - height
+    - `W` - width
 
-Expected color order: BGR.
+    Expected color order: BGR.
 
 ## Output
 
@@ -71,15 +76,14 @@ NumPy float32 array, name - `output1`, shape - `1,3,224,224`, format is `B,C,H,W
 - `H` - height
 - `W` - width
 
-
-
 ## Legal Information
+
 The original model is distributed under the following
 [license](https://raw.githubusercontent.com/onnx/models/master/LICENSE):
 
+```
 MIT License
 
-```
 Copyright (c) ONNX Project Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
