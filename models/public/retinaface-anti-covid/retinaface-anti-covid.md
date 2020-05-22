@@ -7,9 +7,8 @@ RetinaFace-Anti-Cov is a customized one stage face detector to help people prote
 
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
-| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) |                   |
-| GFLOPs                                                        |                |
-| MParams                                                       |                  |
+| GFLOPs                                                        | 2.7781                  |
+| MParams                                                       | 0.5955                  |
 | Source framework                                              | MXNet\*                 |
 
 Average Precision (AP) is defined as an area under the
