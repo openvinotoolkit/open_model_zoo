@@ -28,7 +28,7 @@ Accuracy Checker supports following set of postprocessors:
    - the preprocessing steps contains only two operations changing input image size, and the operations are `resize` and then `padding`.
 * `nms` - non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
   * `overlap` - overlap threshold for merging detections.
-* `soft_nms` - soft non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionetectionPrediction`.
+* `soft_nms` - soft non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
   * `keep_top_k`  - the maximal number of detections which should be kept.
   * `sigma` - sigma-value for updated detection score calculation.
   * `min_score` - break point.
