@@ -17,34 +17,11 @@ limitations under the License.
 import numpy as np
 from ..adapters import Adapter
 from ..representation import StyleTransferPrediction
-from ..config import ConfigValidator, NumberField
 
 
 class StyleTransferAdapter(Adapter):
     __provider__ = 'style_transfer'
     prediction_types = (StyleTransferPrediction, )
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'dst_width': NumberField(
-                optional=False, value_type=int, min_value=1,
-                description='Output width.'
-            ),
-            'dst_height': NumberField(
-                optional=False, value_type=int, min_value=1,
-                description='Output height.'
-            )
-        })
-        return parameters
-
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
-
-    def configure(self):
-        self.dst_width = self.get_value_from_config('dst_width')
-        self.dst_height = self.get_value_from_config('dst_height')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
