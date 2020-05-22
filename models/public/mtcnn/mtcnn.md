@@ -4,7 +4,7 @@
 
 The composite `mtcnn` model is [mtcnn](https://arxiv.org/abs/1604.02878) group of models designed to perform face detection. Short for "Multi-task Cascaded Convolutional Neural Network", it is implemented using the Caffe\* framework.  For details about this family of models, check out the [repository](https://github.com/DuinoDu/mtcnn).
 
-The input for each models is a blob with specific face data. The mean values need to be subtracted as follows: [127.5, 127.5, 127.5] before passing the image blob into the network. In addition, values must be divided by 0.0078125.
+The input for each models is a blob with specific face data. The mean values need to be subtracted as follows: [127.5, 127.5, 127.5] before passing the image blob into the network. In addition, values must be divided by 128.
 
 ## mtcnn-p model specification
 
