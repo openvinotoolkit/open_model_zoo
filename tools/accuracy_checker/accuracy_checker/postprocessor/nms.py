@@ -21,7 +21,7 @@ import numpy as np
 from ..config import BoolField, NumberField
 from .postprocessor import Postprocessor
 from ..representation import (
-    DetectionPrediction, DetectionAnnotation, AttributeDetectionPrediction, AttributeDetectionAnnotation
+    DetectionPrediction, DetectionAnnotation, ActionDetectionPrediction, ActionDetectionAnnotation
 )
 
 
@@ -30,8 +30,8 @@ def get_scores(prediction):
     return prediction.scores
 
 
-@get_scores.register(AttributeDetectionAnnotation)
-@get_scores.register(AttributeDetectionPrediction)
+@get_scores.register(ActionDetectionAnnotation)
+@get_scores.register(ActionDetectionPrediction)
 def get_box_scores(prediction):
     return prediction.bbox_scores
 
@@ -41,8 +41,8 @@ def set_scores(prediction, scores):
     prediction.scores = scores
 
 
-@set_scores.register(AttributeDetectionAnnotation)
-@set_scores.register(AttributeDetectionPrediction)
+@set_scores.register(ActionDetectionAnnotation)
+@set_scores.register(ActionDetectionPrediction)
 def set_box_scores(prediction, scores):
     prediction.bbox_scores = scores
 
@@ -50,8 +50,8 @@ def set_box_scores(prediction, scores):
 class NMS(Postprocessor):
     __provider__ = 'nms'
 
-    prediction_types = (DetectionPrediction, AttributeDetectionPrediction)
-    annotation_types = (DetectionAnnotation, AttributeDetectionPrediction)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionPrediction)
 
     @classmethod
     def parameters(cls):
@@ -123,8 +123,8 @@ class NMS(Postprocessor):
 class SoftNMS(Postprocessor):
     __provider__ = 'soft_nms'
 
-    prediction_types = (DetectionPrediction, AttributeDetectionPrediction)
-    annotation_types = (DetectionAnnotation, AttributeDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
 
     @classmethod
     def parameters(cls):

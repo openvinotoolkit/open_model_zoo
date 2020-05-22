@@ -95,7 +95,7 @@ AccuracyChecker supports following set of adapters:
 * `age_gender` - converting age gender recognition model output to `ContainerPrediction` with `ClassificationPrediction` named `gender` for gender recognition, `ClassificationPrediction` named `age_classification` and `RegressionPrediction` named `age_error` for age recognition.
   * `age_out` - output layer name for age recognition.
   * `gender_out` - output layer name for gender recognition.
-* `action_detection` - converting output of model for person detection and action recognition tasks to `ContainerPrediction` with `DetectionPrdiction` for class agnostic metric calculation and `AttributeDetectionPrediction` for action recognition. The representations in container have names `class_agnostic_prediction` and `action_prediction` respectively.
+* `action_detection` - converting output of model for person detection and action recognition tasks to `ContainerPrediction` with `DetectionPrdiction` for class agnostic metric calculation and `ActionDetectionPrediction` for action recognition. The representations in container have names `class_agnostic_prediction` and `action_prediction` respectively.
   * `priorbox_out` - name of layer containing prior boxes in SSD format.
   * `loc_out` - name of layer containing box coordinates in SSD format.
   * `main_conf_out` - name of layer containing detection confidences.
@@ -211,8 +211,8 @@ AccuracyChecker supports following set of adapters:
   * `scale` - scalar value to normalize bbox coordinates.
 * `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.
 * `inpainting` - converting output of Image Inpainting model to `ImageInpaintingPrediction` representation.
-* `retinaface` - converting output of RetinaFace model to `DetectionPrediction`, `AttributeDetectionPrediction` or representation container with `DetectionPrediction` or `AttributeDetectionPrediction` and `FacialLandmarksPrediction` (depends on provided set of outputs)
+* `retinaface` - converting output of RetinaFace model to `DetectionPrediction` or representation container with `DetectionPrediction`, `AttributeDetectionPrediction`, `FacialLandmarksPrediction` (depends on provided set of outputs)
    * `scores_outputs` - the list of names for output layers with face detection score in order belonging to 32-, 16-, 8-strides.
    * `bboxes_outputs` - the list of names for output layers with face detection boxes in order belonging to 32-, 16-, 8-strides.
    * `landmarks_outputs` - the list of names for output layers with predicted facial landmarks in order belonging to 32-, 16-, 8-strides (optional, if not provided, only `DetectionPrediction` will be generated).
-   * `type_scores_outputs` - the list of names for output layers with attributes detection score in order belonging to 32-, 16-, 8-strides.
+   * `type_scores_outputs` - the list of names for output layers with attributes detection score in order belonging to 32-, 16-, 8-strides (optional, if not provided, only `DetectionPrediction` will be generated).

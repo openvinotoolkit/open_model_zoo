@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from .format_converter import FileBasedAnnotationConverter, ConverterReturn
-from ..representation import DetectionAnnotation, AttributeDetectionAnnotation, ContainerAnnotation
+from ..representation import DetectionAnnotation, ActionDetectionAnnotation, ContainerAnnotation
 from ..topology_types import ObjectDetection
 from ..utils import read_xml, check_file_existence
 from ..config import PathField, ConfigError, StringField
@@ -95,7 +95,7 @@ ACTIONS_BACK = {
 
 class CVATPersonDetectionActionRecognitionConverter(FileBasedAnnotationConverter):
     __provider__ = 'cvat_person_detection_action_recognition'
-    annotation_types = (DetectionAnnotation, AttributeDetectionAnnotation)
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
     topology_types = (ObjectDetection, )
 
     @classmethod
@@ -154,7 +154,7 @@ class CVATPersonDetectionActionRecognitionConverter(FileBasedAnnotationConverter
                 if 'occluded' in bbox.attrib and int(bbox.attrib['occluded']):
                     difficult.append(bbox_id)
             detection_annotation = DetectionAnnotation(identifier, [1]*len(x_mins), x_mins, y_mins, x_maxs, y_maxs)
-            action_annotation = AttributeDetectionAnnotation(identifier, labels_ids, x_mins, y_mins, x_maxs, y_maxs)
+            action_annotation = ActionDetectionAnnotation(identifier, labels_ids, x_mins, y_mins, x_maxs, y_maxs)
             detection_annotation.metadata['difficult_boxes'] = difficult
             action_annotation.metadata['difficult_boxes'] = difficult
             annotations.append(ContainerAnnotation({

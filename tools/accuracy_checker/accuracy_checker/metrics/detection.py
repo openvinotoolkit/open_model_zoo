@@ -26,6 +26,7 @@ from .overlap import Overlap, IOA
 from ..config import BoolField, NumberField, StringField, ConfigError
 from ..representation import (
     DetectionAnnotation, DetectionPrediction,
+    ActionDetectionPrediction, ActionDetectionAnnotation,
     AttributeDetectionPrediction, AttributeDetectionAnnotation
 )
 from .metric import Metric, FullDatasetEvaluationMetric, PerImageEvaluationMetric
@@ -147,8 +148,8 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
 
     __provider__ = 'map'
 
-    annotation_types = (DetectionAnnotation, AttributeDetectionAnnotation)
-    prediction_types = (DetectionPrediction, AttributeDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation, AttributeDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction, AttributeDetectionPrediction)
 
     @classmethod
     def parameters(cls):
@@ -204,8 +205,8 @@ class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEv
 
     __provider__ = 'miss_rate'
 
-    annotation_types = (DetectionAnnotation, AttributeDetectionAnnotation)
-    prediction_types = (DetectionPrediction, AttributeDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
     @classmethod
     def parameters(cls):
@@ -258,8 +259,8 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEval
 
     __provider__ = 'recall'
 
-    annotation_types = (DetectionAnnotation, AttributeDetectionAnnotation)
-    prediction_types = (DetectionPrediction, AttributeDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
     def update(self, annotation, prediction):
         return self._calculate_recall([annotation], [prediction])
@@ -292,8 +293,8 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEval
 class DetectionAccuracyMetric(BaseDetectionMetricMixin, PerImageEvaluationMetric):
     __provider__ = 'detection_accuracy'
 
-    annotation_types = (DetectionAnnotation, AttributeDetectionAnnotation)
-    prediction_types = (DetectionPrediction, AttributeDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
     @classmethod
     def parameters(cls):

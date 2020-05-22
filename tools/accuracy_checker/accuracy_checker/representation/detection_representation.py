@@ -122,3 +122,10 @@ class AttributeDetectionPrediction(DetectionPrediction):
         return AttributeDetectionAnnotation(
             self.identifier, self.labels, self.x_mins, self.y_mins, self.x_maxs, self.y_maxs, self.metadata
         )
+
+class ActionDetectionAnnotation(AttributeDetectionAnnotation):
+    pass
+
+
+class ActionDetectionPrediction(AttributeDetectionPrediction):
+    pass

@@ -19,15 +19,15 @@ import numpy as np
 from ..config import BoolField
 from ..postprocessor.postprocessor import Postprocessor
 from ..representation import (
-    DetectionPrediction, DetectionAnnotation, AttributeDetectionPrediction, AttributeDetectionAnnotation
+    DetectionPrediction, DetectionAnnotation, ActionDetectionPrediction, ActionDetectionAnnotation
 )
 
 
 class NormalizeBoxes(Postprocessor):
     __provider__ = 'normalize_boxes'
 
-    annotation_types = (DetectionAnnotation, AttributeDetectionAnnotation)
-    prediction_types = (DetectionPrediction, AttributeDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
     @classmethod
     def parameters(cls):

@@ -19,13 +19,13 @@ import numpy as np
 
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, NumberField, BoolField, ListField
-from ..representation import DetectionPrediction, AttributeDetectionPrediction, ContainerPrediction
+from ..representation import DetectionPrediction, ActionDetectionPrediction, ContainerPrediction
 from ..utils import contains_all
 
 
 class ActionDetection(Adapter):
     __provider__ = 'action_detection'
-    prediction_types = (AttributeDetectionPrediction, DetectionPrediction, )
+    prediction_types = (ActionDetectionPrediction, DetectionPrediction, )
 
     @classmethod
     def parameters(cls):
@@ -151,7 +151,7 @@ class ActionDetection(Adapter):
             labels, class_scores, x_mins, y_mins, x_maxs, y_maxs, main_scores = self.prepare_detection_for_id(
                 batch_id, raw_outputs, prior_boxes, prior_variances, head_shifts
             )
-            action_prediction = AttributeDetectionPrediction(
+            action_prediction = ActionDetectionPrediction(
                 identifier, labels, class_scores, main_scores, x_mins, y_mins, x_maxs, y_maxs
             )
             person_prediction = DetectionPrediction(

@@ -17,7 +17,7 @@ Accuracy Checker supports following set of postprocessors:
   * `dst_width` and `dst_height` - destination width and height for box clipping respectively. You can also use `size` instead in case when destination sizes are equal. If not provided, image size will be used.
   * `apply_to` - option which determines target boxes for processing (`annotation` for ground truth boxes and `prediction` for detection results, `all` for both).
   * `bboxes_normalized` is flag which says that target bounding boxes are in normalized format.
-* `normalize_boxes` - normalizing ground truth detection bounding boxes (cast to range [0, 1]). Supported representations: `DetectionAnotation`, `DetectionPrediction`, `AttributeDetectionAnotation`, `AttributeDetectionPrediction`
+* `normalize_boxes` - normalizing ground truth detection bounding boxes (cast to range [0, 1]). Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnotation`, `ActionDetectionPrediction`
 * `correct_yolo_v2_boxes` - resizing detection prediction bbox coordinates using specific for Yolo v2 approach. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
   * `dst_width` and `dst_height` - destination width and height respectively. You can also use `size` instead in case when destination sizes are equal.
 * `resize_prediction_boxes` - resizing normalized detection prediction boxes according to image size. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
@@ -26,9 +26,9 @@ Accuracy Checker supports following set of postprocessors:
     At the moment works in the following cases only:
    - the preprocessing steps contains only one operation changing input image size, and the operation is `resize`
    - the preprocessing steps contains only two operations changing input image size, and the operations are `resize` and then `padding`.
-* `nms` - non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `AttributeDetectionAnnotation`, `AttributeDetectionPrediction`.
+* `nms` - non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
   * `overlap` - overlap threshold for merging detections.
-* `soft_nms` - soft non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `AttributeDetectionAnnotation`, `AttributeDetectionPrediction`.
+* `soft_nms` - soft non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionetectionPrediction`.
   * `keep_top_k`  - the maximal number of detections which should be kept.
   * `sigma` - sigma-value for updated detection score calculation.
   * `min_score` - break point.
