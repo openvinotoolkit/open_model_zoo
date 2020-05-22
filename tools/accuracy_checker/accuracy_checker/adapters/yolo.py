@@ -282,10 +282,7 @@ class YoloV3Adapter(Adapter):
                             "{}.".format(', '.join(YoloV3Adapter.PRECOMPUTED_ANCHORS.keys()))),
             'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
                                      description="Minimal objectiveness score value for valid detections."),
-            'outputs': ListField(
-                optional=False,
-                description="The list of output layers names."
-            ),
+            'outputs': ListField(description="The list of output layers names."),
             'anchor_masks': ListField(optional=True, description='per layer used anchors mask'),
             'do_reshape': BoolField(
                 optional=True, default=False,
