@@ -20,7 +20,7 @@ Symbols set is alphanumeric: `0123456789abcdefghijklmnopqrstuvwxyz`.
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| Word spotting hmean ICDAR2015, without a dictionary | 59.04% |
+| Word spotting hmean ICDAR2015, without a dictionary | 61.01% |
 | Source framework                              | PyTorch\* |
 
 
