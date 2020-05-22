@@ -31,7 +31,7 @@ models:
             height_range: 100
             aspect_ratio: 0.666, 5
             is_empty: True
-            min_visibility: partially occludedsssssssssssssssssssss
+            min_visibility: partially occluded
           - type: filter
             apply_to: prediction
             height_range: 100
