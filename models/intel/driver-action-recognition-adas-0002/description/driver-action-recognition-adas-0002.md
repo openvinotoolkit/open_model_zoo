@@ -8,6 +8,13 @@ This is an action recognition composite model for the driver monitoring use case
 
 ![](./action-recognition-kelly.png)
 
+## Composite model specification
+
+| Metric                          | Value                                     |
+|---------------------------------|-------------------------------------------|
+| Source framework                | PyTorch*                                  |
+
+
 ## Encoder model specification
 
 The driver-action-recognition-adas-0002-encoder model accepts video frame and produces embedding.
@@ -15,7 +22,6 @@ Video frames should be sampled to cover ~1 second fragment (i.e. skip every seco
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Source framework                | PyTorch*                                  |
 | GFlops                          | 0.676                                     |
 | MParams                         | 2.863                                     |
 
@@ -44,7 +50,6 @@ The driver-action-recognition-adas-0002-decoder model accepts stack of frame emb
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Source framework                | PyTorch*                                  |
 | GFlops                          | 0.147                                     |
 | MParams                         | 4.205                                     |
 

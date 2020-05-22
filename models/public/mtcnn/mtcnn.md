@@ -6,6 +6,14 @@ The composite `mtcnn` model is [mtcnn](https://arxiv.org/abs/1604.02878) group o
 
 The input for each models is a blob with specific face data. The mean values need to be subtracted as follows: [127.5, 127.5, 127.5] before passing the image blob into the network. In addition, values must be divided by 128.
 
+## Composite model specification
+
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Detection     |
+| Source framework  | Caffe\*       |
+
+
 ## mtcnn-p model specification
 
 The "p" designation indicates that the `mtcnn-p` model is the "proposal" network intended to find the initial set of faces.
@@ -16,10 +24,8 @@ The model output is a blob with a vector containing the first pass of face data.
 
 | Metric            | Value         |
 |-------------------|---------------|
-| Type              | Detection     |
 | GFLOPs            | 3.366         |
 | MParams           | 0.007         |
-| Source framework  | Caffe\*       |
 
 
 ### Performance
@@ -72,10 +78,8 @@ The model output is a blob with a vector containing the refined face data. If th
 
 | Metric            | Value         |
 |-------------------|---------------|
-| Type              | Detection     |
 | GFLOPs            | 0.003         |
 | MParams           | 0.1           |
-| Source framework  | Caffe\*         |
 
 
 ### Performance
@@ -128,10 +132,8 @@ The model output is a blob with a vector containing the output face data.
 
 | Metric            | Value         |
 |-------------------|---------------|
-| Type              | Detection     |
 | GFLOPs            | 0.026         |
 | MParams           | 0.389         |
-| Source framework  | Caffe\*       |
 
 
 ### Performance

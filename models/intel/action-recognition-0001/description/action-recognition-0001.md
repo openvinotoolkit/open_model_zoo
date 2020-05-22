@@ -9,6 +9,13 @@ Please refer to the [kinetics](https://deepmind.com/research/open-source/open-so
 
 ![](./demo.png)
 
+## Composite model specification
+
+| Metric                          | Value                                     |
+|---------------------------------|-------------------------------------------|
+| Source framework                | PyTorch*                                  |
+
+
 ## Encoder model specification
 
 The action-recognition-0001-encoder model accepts video frame and produces embedding.
@@ -16,7 +23,6 @@ Video frames should be sampled to cover ~1 second fragment (i.e. skip every seco
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Source framework                | PyTorch*                                  |
 | GFlops                          | 7.340                                     |
 | MParams                         | 21.276                                    |
 
@@ -45,7 +51,6 @@ The action-recognition-0001-decoder model accepts stack of frame embeddings, com
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Source framework                | PyTorch*                                  |
 | GFlops                          | 0.147                                     |
 | MParams                         | 4.405                                     |
 

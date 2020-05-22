@@ -16,16 +16,22 @@ Symbols set is alphanumeric: `0123456789abcdefghijklmnopqrstuvwxyz`.
 
 ![](./text-spotting-0002.png)
 
+## Composite model specification
+
+| Metric                                        | Value     |
+|-----------------------------------------------|-----------|
+| Word spotting hmean ICDAR2015, without a dictionary | 59.04% |
+| Source framework                              | PyTorch\* |
+
+
 ## Detector model specification
 
 The text-spotting-0002-detector model is a Mask-RCNN-based text detector with ResNet50 backbone and additional text features output.
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| Word spotting hmean ICDAR2015, without a dictionary | 61.01%    |
 | GFlops                                        | 185.169   |
 | MParams                                       | 26.497    |
-| Source framework                              | PyTorch\* |
 
 
 ### Performance
@@ -56,10 +62,8 @@ The text-spotting-0002-recognizer-encoder model is a fully-convolutional encoder
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| Word spotting hmean ICDAR2015, without a dictionary | 59.04%    |
 | GFlops                                        | 2.082     |
 | MParams                                       | 1.328     |
-| Source framework                              | PyTorch\* |
 
 
 ### Performance
@@ -77,10 +81,8 @@ Name: `output`, shape: [1x256x28x28]. Encoded text recognition features.
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| Word spotting hmean ICDAR2015, without a dictionary | 59.04%    |
 | GFlops                                        | 0.002     |
 | MParams                                       | 0.273     |
-| Source framework                              | PyTorch\* |
 
 
 ### Performance
