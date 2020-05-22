@@ -21,7 +21,7 @@ prior boxes for 256x256 resolution.
 | Min pedestrian height           | 100 pixels (on 1080p)                     |
 | GFlops                          | 0.786                                     |
 | MParams                         | 1.817                                     |
-| Source framework                | Caffe*                                    |
+| Source framework                | Pytorch*                                    |
 
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
