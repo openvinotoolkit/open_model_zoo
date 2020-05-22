@@ -21,7 +21,7 @@ prior boxes for 384x384 resolution.
 | Min person height               | 100 pixels (on 1080p)                     |
 | GFlops                          | 1.768                                     |
 | MParams                         | 1.817                                     |
-| Source framework                | Pytorch*                                    |
+| Source framework                | Pytorch\*                                 |
 
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
