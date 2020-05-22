@@ -24,6 +24,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import threading
 import traceback
 
 from pathlib import Path
@@ -74,19 +75,19 @@ RE_SHA256SUM = re.compile(r'[0-9a-fA-F]{64}')
 
 
 class JobContext:
-    def print(self, value, *, end='\n', flush=False):
+    def print(self, value, *, end='\n', file=sys.stdout, flush=False):
         raise NotImplementedError
 
-    def printf(self, format, *args, flush=False):
-        self.print(format.format(*args), flush=flush)
+    def printf(self, format, *args, file=sys.stdout, flush=False):
+        self.print(format.format(*args), file=file, flush=flush)
 
     def subprocess(self, args, **kwargs):
         raise NotImplementedError
 
 
 class DirectOutputContext(JobContext):
-    def print(self, value, *, end='\n', flush=False):
-        print(value, end=end, flush=flush)
+    def print(self, value, *, end='\n', file=sys.stdout, flush=False):
+        print(value, end=end, file=file, flush=flush)
 
     def subprocess(self, args, **kwargs):
         return subprocess.run(args, **kwargs).returncode == 0
@@ -96,14 +97,14 @@ class QueuedOutputContext(JobContext):
     def __init__(self, output_queue):
         self._output_queue = output_queue
 
-    def print(self, value, *, end='\n', flush=False):
-        self._output_queue.put(value + end)
+    def print(self, value, *, end='\n', file=sys.stdout, flush=False):
+        self._output_queue.put((file, value + end))
 
     def subprocess(self, args, **kwargs):
         with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 universal_newlines=True, **kwargs) as p:
             for line in p.stdout:
-                self._output_queue.put(line)
+                self._output_queue.put((sys.stdout, line))
             return p.wait() == 0
 
 
@@ -114,8 +115,8 @@ class JobWithQueuedOutput():
         self._future.add_done_callback(lambda future: self._output_queue.put(None))
 
     def complete(self):
-        for fragment in iter(self._output_queue.get, None):
-            print(fragment, end='', flush=True) # for simplicity, flush every fragment
+        for file, fragment in iter(self._output_queue.get, None):
+            print(fragment, end='', file=file, flush=True) # for simplicity, flush every fragment
 
         return self._future.result()
 
@@ -138,6 +139,7 @@ def run_in_parallel(num_jobs, f, work_items):
             for job in jobs: job.cancel()
             raise
 
+EVENT_EMISSION_LOCK = threading.Lock()
 
 class Reporter:
     GROUP_DECORATION = '#' * 16 + '||'
@@ -175,21 +177,28 @@ class Reporter:
 
     def log_warning(self, format, *args, exc_info=False):
         if exc_info:
-            traceback.print_exc(file=sys.stderr)
-        print(self.ERROR_DECORATION, "Warning:", format.format(*args), file=sys.stderr)
+            self.job_context.print(traceback.format_exc(), file=sys.stderr, end='')
+        self.job_context.printf("{} Warning: {}", self.ERROR_DECORATION, format.format(*args), file=sys.stderr)
 
     def log_error(self, format, *args, exc_info=False):
         if exc_info:
-            traceback.print_exc(file=sys.stderr)
-        print(self.ERROR_DECORATION, "Error:", format.format(*args), file=sys.stderr)
+            self.job_context.print(traceback.format_exc(), file=sys.stderr, end='')
+        self.job_context.printf("{} Error: {}", self.ERROR_DECORATION, format.format(*args), file=sys.stderr)
 
     def log_details(self, format, *args):
         print(self.ERROR_DECORATION, '    ', format.format(*args), file=sys.stderr)
 
     def emit_event(self, type, **kwargs):
         if not self.enable_json_output: return
-        json.dump({'$type': type, **self.event_context, **kwargs}, sys.stdout, indent=None)
-        print()
+
+        # We don't print machine-readable output through the job context, because
+        # we don't want it to be serialized. If we serialize it, then the consumer
+        # will lose information about the order of events, and we don't want that to happen.
+        # Instead, we emit events directly to stdout, but use a lock to ensure that
+        # JSON texts don't get interleaved.
+        with EVENT_EMISSION_LOCK:
+            json.dump({'$type': type, **self.event_context, **kwargs}, sys.stdout, indent=None)
+            print()
 
     def with_event_context(self, **kwargs):
         return Reporter(
