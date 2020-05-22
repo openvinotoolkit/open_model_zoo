@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a pedestrian detector for the Retail scenario. It is based on MobileNetV2
+This is a person detector that is based on MobileNetV2
 backbone with two SSD heads from 1/16 and 1/8 scale feature maps and clustered
 prior boxes for 256x256 resolution.
 
@@ -14,14 +14,14 @@ prior boxes for 256x256 resolution.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP                              | 82.52%                                    |
+| AP                              | 82.52% (internal test set)                |
 | Pose coverage                   | Standing upright, parallel to image plane |
-| Support of occluded pedestrians | YES                                       |
+| Support of occluded persons     | YES                                       |
 | Occlusion coverage              | <50%                                      |
-| Min pedestrian height           | 100 pixels (on 1080p)                     |
+| Min person height               | 100 pixels (on 1080p)                     |
 | GFlops                          | 0.786                                     |
 | MParams                         | 1.817                                     |
-| Source framework                | Pytorch*                                    |
+| Source framework                | Pytorch*                                  |
 
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
