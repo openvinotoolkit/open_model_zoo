@@ -284,8 +284,7 @@ class YoloV3Adapter(Adapter):
                                      description="Minimal objectiveness score value for valid detections."),
             'outputs': ListField(
                 optional=False,
-                description="The list of output layers names (optional),"
-                            " if specified there should be exactly 3 output layers provided."
+                description="The list of output layers names."
             ),
             'anchor_masks': ListField(optional=True, description='per layer used anchors mask'),
             'do_reshape': BoolField(
