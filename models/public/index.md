@@ -178,6 +178,14 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | GMCNN Inpainting          | [TensorFlow\*](./gmcnn-places2-tf/gmcnn-places2-tf.md) | gmcnn-places2-tf | 33.47Db | | |
 
+## Style Transfer
+
+Style transfer task is to transfer the style of one image to another.
+
+| Model Name                     | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
+| ------------------------------ | ---------------| -------------- | -------- | ------ | ------- |
+| fast-neural-style-mosaic-onnx  | [ONNX\*](./fast-neural-style-mosaic-onnx/fast-neural-style-mosaic-onnx.md) | fast-neural-style-mosaic-onnx | 12.04dB | 15.518 | 1.679 |
+
 ## Action Recognition
 
 The task of action recognition is to predict action that is being performed on a short video clip

@@ -20,7 +20,7 @@ models are provided in the [repository](https://github.com/onnx/models).
 | Type              | Style Transfer   |
 | GFLOPs            | 15.518           |
 | MParams           | 1.679            |
-| Source framework  | Pytorch\*        |
+| Source framework  | PyTorch\*        |
 
 ## Accuracy
 
@@ -38,43 +38,47 @@ Accuracy metrics are obtained on MS COCO val2017 dataset. Images were resized to
 
 Image, name - `input1`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 
-    - `B` - batch size
-    - `C` - channel
-    - `H` - height
-    - `W` - width
+- `B` - batch size
+- `C` - channel
+- `H` - height
+- `W` - width
 
-    Expected color order: RGB.
+Expected color order: RGB.
 
 ### Converted model
 
 Image, name - `input1`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 
-    - `B` - batch size
-    - `C` - channel
-    - `H` - height
-    - `W` - width
+- `B` - batch size
+- `C` - channel
+- `H` - height
+- `W` - width
 
-    Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 
 ### Original model
 
-NumPy float32 array, name - `output1`, shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `output1`, shape - `1,3,224,224`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
+
+Expected color order: RGB.
 
 ### Converted model
 
-NumPy float32 array, name - `output1`, shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `output1`, shape - `1,3,224,224`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
+
+Expected color order: BGR.
 
 ## Legal Information
 
