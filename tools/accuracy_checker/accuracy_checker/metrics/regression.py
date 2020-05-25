@@ -365,6 +365,9 @@ def find_interval(value, intervals):
 
 
 def point_regression_differ(annotation_val_x, annotation_val_y, prediction_val_x, prediction_val_y):
+    if len(np.shape(prediction_val_x)) == 2:
+        prediction_val_x = prediction_val_x[0]
+        prediction_val_y = prediction_val_y[0]
     loss = np.subtract(list(zip(annotation_val_x, annotation_val_y)), list(zip(prediction_val_x, prediction_val_y)))
     return np.linalg.norm(loss, 2, axis=1)
 

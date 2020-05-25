@@ -215,7 +215,8 @@ struct PersonDetection : BaseDetection{
         results.clear();
         if (resultsFetched) return;
         resultsFetched = true;
-        const float *detections = request.GetBlob(outputName)->buffer().as<float *>();
+        LockedMemory<const void> outputMapped = as<MemoryBlob>(request.GetBlob(outputName))->rmap();
+        const float *detections = outputMapped.as<float *>();
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
             float image_id = detections[i * objectSize + 0];  // in case of batch
@@ -313,9 +314,12 @@ struct PersonAttribsDetection : BaseDetection {
                                    "Person Attributes Recognition network is not equal to point coordinates (2)");
         }
 
-        auto outputAttrValues = attribsBlob->buffer().as<float*>();
-        auto outputTCPointValues = topColorPointBlob->buffer().as<float*>();
-        auto outputBCPointValues = bottomColorPointBlob->buffer().as<float*>();
+        LockedMemory<const void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rmap();
+        auto outputAttrValues = attribsBlobMapped.as<float*>();
+        LockedMemory<const void> topColorPointBlobMapped = as<MemoryBlob>(topColorPointBlob)->rmap();
+        auto outputTCPointValues = topColorPointBlobMapped.as<float*>();
+        LockedMemory<const void> bottomColorPointBlobMapped = as<MemoryBlob>(bottomColorPointBlob)->rmap();
+        auto outputBCPointValues = bottomColorPointBlobMapped.as<float*>();
 
         AttributesAndColorPoints returnValue;
 
@@ -405,7 +409,8 @@ struct PersonReIdentification : BaseDetection {
         Blob::Ptr attribsBlob = request.GetBlob(outputName);
 
         auto numOfChannels = attribsBlob->getTensorDesc().getDims().at(1);
-        auto outputValues = attribsBlob->buffer().as<float*>();
+        LockedMemory<const void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rmap();
+        auto outputValues = attribsBlobMapped.as<float*>();
         return std::vector<float>(outputValues, outputValues + numOfChannels);
     }
 

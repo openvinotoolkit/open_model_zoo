@@ -85,7 +85,8 @@ def load_model(model_name, weights, model_path, module_name, model_params):
     try:
         model.load_state_dict(torch.load(weights, map_location='cpu'))
     except RuntimeError as err:
-        print('ERROR: Weights from \n{}\n cannot be loaded for model {}! Check matching between model and weights')
+        print('ERROR: Weights from {} cannot be loaded for model {}! Check matching between model and weights'.format(
+            weights, model_name))
         sys.exit(err)
     return model
 
