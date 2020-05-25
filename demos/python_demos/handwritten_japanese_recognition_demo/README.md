@@ -34,7 +34,7 @@ pip install -r requirements.txt
 usage: handwritten_japanese_recognition_demo.py [-h] -m MODEL -i INPUT
                                                 [-d DEVICE] [-ni NUMBER_ITER]
                                                 [-cl CHARLIST]
-                                                [-dc DESIGNATED_CHARACTER]
+                                                [-dc DESIGNATED_CHARACTERS]
                                                 [-tk TOP_K]
 
 Options:
@@ -52,11 +52,11 @@ Options:
                         Optional. Number of inference iterations
   -cl CHARLIST, --charlist CHARLIST
                         Path to the decoding char list file
-  -dc DESIGNATED_CHARACTER, --designated_character DESIGNATED_CHARACTER
-                        Path to the designated character file
+  -dc DESIGNATED_CHARACTERS, --designated_characters DESIGNATED_CHARACTERS
+                        Optional. Path to the designated character file
   -tk TOP_K, --top_k TOP_K
-                        Top k steps in looking up the decoded character, until
-                        a designated one is found
+                        Optional. Top k steps in looking up the decoded
+                        character, until a designated one is found
 ```
 
 
