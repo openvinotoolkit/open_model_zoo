@@ -1,4 +1,4 @@
-# RetinaFace-Anti-Covid
+# retinaface-anti-cov
 
 ## Use Case and High-Level Description
 RetinaFace-Anti-Cov is a customized one stage face detector to help people protect themselves from CovID-19. More details provided in the [paper](https://arxiv.org/abs/1905.00641) and [repository](https://github.com/deepinsight/insightface/tree/master/RetinaFaceAntiCov)

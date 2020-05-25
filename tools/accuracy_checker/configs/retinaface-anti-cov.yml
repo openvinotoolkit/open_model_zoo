@@ -1,11 +1,11 @@
 models:
-  - name: retinaface-anti-covid
+  - name: retinaface-anti-cov
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/retinaface-anti-covid/FP32/retinaface-anti-covid.xml
-        weights: public/retinaface-anti-covid/FP32/retinaface-anti-covid.bin
+        model:   public/retinaface-anti-cov/FP32/retinaface-anti-cov.xml
+        weights: public/retinaface-anti-cov/FP32/retinaface-anti-cov.bin
         adapter:
           type: retinaface
           bboxes_outputs:
@@ -23,8 +23,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/retinaface-anti-covid/FP16/retinaface-anti-covid.xml
-        weights: public/retinaface-anti-covid/FP16/retinaface-anti-covid.bin
+        model:   public/retinaface-anti-cov/FP16/retinaface-anti-cov.xml
+        weights: public/retinaface-anti-cov/FP16/retinaface-anti-cov.bin
         adapter:
           type: retinaface
           bboxes_outputs:
