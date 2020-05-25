@@ -5,16 +5,12 @@ RetinaFace-Anti-Cov is a customized one stage face detector to help people prote
 
 ## Specification
 
-| Metric                                                        | Value                   |
-|---------------------------------------------------------------|-------------------------|
-| GFLOPs                                                        | 2.7781                  |
-| MParams                                                       | 0.5955                  |
-| Source framework                                              | MXNet\*                 |
-
-Average Precision (AP) is defined as an area under the
-[precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
-curve. All numbers were evaluated by taking into account only faces bigger than
-64 x 64 pixels.
+| Metric                                                        | Value                                                |
+|---------------------------------------------------------------|------------------------------------------------------|
+| Type                                                          | Object detection, object attributes, facial landmarks|
+| GFLOPs                                                        | 2.7781                                               |
+| MParams                                                       | 0.5955                                               |
+| Source framework                                              | MXNet\*                                              |
 
 ## Input
 
@@ -46,11 +42,11 @@ Image, name - `data` , shape - [1x3x640x640], format [BxCxHxW],
 Model outputs are floating points tensors:
 1. name: `face_rpn_cls_prob_reshape_stride32`, shape: `1,4, 20, 20`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 32 for 2 classes: background and face.
 
-2. name: `face_rpn_bbox_stride32`,  shape: `1,8,20,20`, format: `[B, Ax4, H, W]`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 32
+2. name: `face_rpn_bbox_stride32`,  shape: `1,8,20,20`, format: `[B, Ax4, H, W]`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 32.
 
 3. name: `face_rpn_landmark_pred_stride32`, shape: `1,20,20,20`, format: `[B, Ax10, H, W]`, represents *facial landmarks* from Feature Pyramid Network (FPN) level with stride 32.
 
-4. name: `face_rpn_type_prob_reshape_stride32`, shape: `1,6,20,20`, format: `[B, Ax3, H, W]`, represents attributes score, where the third element is responsible for the presence or absence of a mask on a person
+4. name: `face_rpn_type_prob_reshape_stride32`, shape: `1,6,20,20`, format: `[B, Ax3, H, W]`, represents *attributes score*.
 
 5. name: `face_rpn_cls_prob_reshape_stride16`, shape: `1,4,40,40`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 16 for 2 classes: background and face.
 
@@ -58,7 +54,7 @@ Model outputs are floating points tensors:
 
 7. name: `face_rpn_landmark_pred_stride16`, shape: `1,20,40,40`, format: `[B, Ax10, H, W]`, represents facial landmarks from Feature Pyramid Network (FPN) level with stride 16.
 
-8. name: `face_rpn_type_prob_reshape_stride16`, shape: `1,6,40,40`, format: `[B, Ax3, H, W]`, represents attributes score, where the third element is responsible for the presence or absence of a mask on a person
+8. name: `face_rpn_type_prob_reshape_stride16`, shape: `1,6,40,40`, format: `[B, Ax3, H, W]`, represents *attributes score*.
 
 9. name: `face_rpn_cls_prob_reshape_stride16`, shape: `1,4,80,80`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 8 for 2 classes: background and face.
 
@@ -66,7 +62,7 @@ Model outputs are floating points tensors:
 
 11. name: `face_rpn_landmark_pred_stride16`, shape: `1,20,80,80`, format: `[B, Ax10, H, W]`, represents facial landmarks from Feature Pyramid Network (FPN) level with stride 8.
 
-12. name: `face_rpn_type_prob_reshape_stride8`, shape: `1,6,80,80`, format: `[B, Ax3, H, W]`, represents attributes score, where the third element is responsible for the presence or absence of a mask on a person
+12. name: `face_rpn_type_prob_reshape_stride8`, shape: `1,6,80,80`, format: `[B, Ax3, H, W]`, represents *attributes score*.
 
 For each output format:
 - `B` - batch size
@@ -84,6 +80,8 @@ Facial landmarks have format `[x1, y1, x2, y2, x3, y3, x4, y4, x5, y5]`, where:
 - `(x3, y3)` - coordinates of nose
 - `(x4, y4)` - coordinates of left mouth corner
 - `(x5, y5)` - coordinates of right mouth corner
+
+The third element in attributes score is a mask attribute. This score determines the presence or absence of a mask on a person.
 
 ### Converted model
 The converted model has the same parameters as the original model.
