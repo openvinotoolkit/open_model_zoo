@@ -84,7 +84,7 @@ def main():
     out_blob = next(iter(net.outputs))
 
     characters = get_characters(args)
-    codec = CTCCodec(characters, args)
+    codec = CTCCodec(characters, args.designated_characters, args.top_k)
     assert len(codec.characters) == net.outputs[out_blob].shape[2], "The text recognition model does not correspond to decoding character list"
 
     input_batch_size, input_channel, input_height, input_width= net.inputs[input_blob].shape

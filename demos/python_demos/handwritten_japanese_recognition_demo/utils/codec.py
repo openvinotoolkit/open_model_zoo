@@ -3,9 +3,10 @@ import numpy as np
 
 class CTCCodec(object):
     """ Convert between text-label and text-index """
-    def __init__(self, characters, args):
+    def __init__(self, characters, designated_characters, top_k):
         # characters (str): set of the possible characters.
-        self.args = args
+        self.designated_characters = designated_characters
+        self.top_k = top_k
         dict_character = list(characters)
 
         self.dict = {}
@@ -26,9 +27,9 @@ class CTCCodec(object):
         preds_index_reshape = preds_index.reshape(-1) # B*W
 
         char_list = []
-        if self.args.designated_characters != None:
+        if self.designated_characters != None:
             designated_character_list = []
-            with open(self.args.designated_characters, encoding='utf-8') as f:
+            with open(self.designated_characters, encoding='utf-8') as f:
                 lines = f.readlines()
                 for line in lines:
                     designated_character_list.append(line.strip())
@@ -36,10 +37,10 @@ class CTCCodec(object):
             # Store the top k indices in each time step in a 2D matrix
             preds_index_filter = preds.transpose(1, 0, 2) # WBD -> BWD  B=1
             preds_index_filter = np.squeeze(preds_index_filter) # WD
-            preds_top_k_index_matrix = np.zeros((preds_index_filter.shape[0], self.args.top_k))
+            preds_top_k_index_matrix = np.zeros((preds_index_filter.shape[0], self.top_k))
             for i in range(preds_index_filter.shape[0]):
                 row = preds_index_filter[i, :]
-                top_k_idx = row.argsort()[::-1][0:self.args.top_k]
+                top_k_idx = row.argsort()[::-1][0:self.top_k]
                 preds_top_k_index_matrix[i, :] = top_k_idx
 
             for i in range(len(preds_index_reshape)):
