@@ -26,7 +26,9 @@ static const char raw_output_message[] = "Optional. Inference results as raw val
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 static const char num_inf_req_message[] = "Optional. Number of infer requests.";
 static const char num_threads_message[] = "Optional. Number of threads.";
-static const char num_streams_message[] = "Optional. Number of streams.";
+static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
+                                          "throughput mode (for HETERO and MULTI device cases use format "
+                                          "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 static const char loop_input_message[] = "Optional. Iterate over input infinitely.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
