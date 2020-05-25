@@ -48,7 +48,7 @@ AccuracyChecker supports following set of adapters:
   * `anchor_mask` - mask for used anchors for each output layer (Optional, if not provided default way for selecting anchors will be used.)
   * `threshold` - minimal objectness score value for valid detections (default 0.001).
   * `input_width` and `input_height` - network input width and height correspondingly (default 416).
-  * `outputs` - the list of output layers names (optional), if specified there should be exactly 3 output layers provided.
+  * `outputs` - the list of output layers names.
   * `raw_output` - enabling additional preprocessing for raw YOLO output format (default `False`).
   * `output_format` - setting output layer format - boxes first (`BHW`)(default, also default for generated IRs), boxes last (`HWB`). Applicable only if network output not 3D (4D with batch) tensor.
   * `cells` - sets grid size for each layer, according `outputs` filed. Works only with `do_reshape=True` or when output tensor dimensions not equal 3. 
