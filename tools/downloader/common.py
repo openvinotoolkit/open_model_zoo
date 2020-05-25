@@ -75,6 +75,9 @@ RE_SHA256SUM = re.compile(r'[0-9a-fA-F]{64}')
 
 
 class JobContext:
+    def __init__(self):
+        self._interrupted = False
+
     def print(self, value, *, end='\n', file=sys.stdout, flush=False):
         raise NotImplementedError
 
@@ -83,6 +86,13 @@ class JobContext:
 
     def subprocess(self, args, **kwargs):
         raise NotImplementedError
+
+    def check_interrupted(self):
+        if self._interrupted:
+            raise RuntimeError("job interrupted")
+
+    def interrupt(self):
+        self._interrupted = True
 
 
 class DirectOutputContext(JobContext):
@@ -95,6 +105,7 @@ class DirectOutputContext(JobContext):
 
 class QueuedOutputContext(JobContext):
     def __init__(self, output_queue):
+        super().__init__()
         self._output_queue = output_queue
 
     def print(self, value, *, end='\n', file=sys.stdout, flush=False):
@@ -109,7 +120,8 @@ class QueuedOutputContext(JobContext):
 
 
 class JobWithQueuedOutput():
-    def __init__(self, output_queue, future):
+    def __init__(self, context, output_queue, future):
+        self._context = context
         self._output_queue = output_queue
         self._future = future
         self._future.add_done_callback(lambda future: self._output_queue.put(None))
@@ -121,6 +133,7 @@ class JobWithQueuedOutput():
         return self._future.result()
 
     def cancel(self):
+        self._context.interrupt()
         self._future.cancel()
 
 
@@ -128,8 +141,9 @@ def run_in_parallel(num_jobs, f, work_items):
     with concurrent.futures.ThreadPoolExecutor(num_jobs) as executor:
         def start(work_item):
             output_queue = queue.Queue()
+            context = QueuedOutputContext(output_queue)
             return JobWithQueuedOutput(
-                output_queue, executor.submit(f, QueuedOutputContext(output_queue), work_item))
+                context, output_queue, executor.submit(f, context, work_item))
 
         jobs = list(map(start, work_items))
 

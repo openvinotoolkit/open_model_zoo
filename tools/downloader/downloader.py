@@ -43,6 +43,8 @@ def process_download(reporter, chunk_iterable, size, file):
 
     try:
         for chunk in chunk_iterable:
+            reporter.job_context.check_interrupted()
+
             if chunk:
                 duration = time.monotonic() - start_time
                 progress_size += len(chunk)
@@ -77,7 +79,9 @@ def try_download(reporter, file, num_attempts, start_download, size):
             time.sleep(retry_delay)
 
         try:
+            reporter.job_context.check_interrupted()
             chunk_iterable = start_download()
+
             file.seek(0)
             file.truncate()
             actual_size, hash = process_download(reporter, chunk_iterable, size, file)
@@ -150,6 +154,8 @@ def try_retrieve_from_cache(reporter, cache, files):
     try:
         if all(cache.has(file[0]) for file in files):
             for hash, destination in files:
+                reporter.job_context.check_interrupted()
+
                 reporter.print_section_heading('Retrieving {} from the cache', destination)
                 cache.get(hash, destination)
             reporter.print()
