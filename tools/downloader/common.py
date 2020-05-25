@@ -13,10 +13,12 @@
 # limitations under the License.
 
 import collections
+import concurrent.futures
 import contextlib
 import fnmatch
 import json
 import platform
+import queue
 import re
 import shlex
 import shutil
@@ -88,6 +90,53 @@ class DirectOutputContext(JobContext):
 
     def subprocess(self, args, **kwargs):
         return subprocess.run(args, **kwargs).returncode == 0
+
+
+class QueuedOutputContext(JobContext):
+    def __init__(self, output_queue):
+        self._output_queue = output_queue
+
+    def print(self, value, *, end='\n', flush=False):
+        self._output_queue.put(value + end)
+
+    def subprocess(self, args, **kwargs):
+        with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                universal_newlines=True, **kwargs) as p:
+            for line in p.stdout:
+                self._output_queue.put(line)
+            return p.wait() == 0
+
+
+class JobWithQueuedOutput():
+    def __init__(self, output_queue, future):
+        self._output_queue = output_queue
+        self._future = future
+        self._future.add_done_callback(lambda future: self._output_queue.put(None))
+
+    def complete(self):
+        for fragment in iter(self._output_queue.get, None):
+            print(fragment, end='', flush=True) # for simplicity, flush every fragment
+
+        return self._future.result()
+
+    def cancel(self):
+        self._future.cancel()
+
+
+def run_in_parallel(num_jobs, f, work_items):
+    with concurrent.futures.ThreadPoolExecutor(num_jobs) as executor:
+        def start(work_item):
+            output_queue = queue.Queue()
+            return JobWithQueuedOutput(
+                output_queue, executor.submit(f, QueuedOutputContext(output_queue), work_item))
+
+        jobs = list(map(start, work_items))
+
+        try:
+            return [job.complete() for job in jobs]
+        except:
+            for job in jobs: job.cancel()
+            raise
 
 
 class Reporter:
