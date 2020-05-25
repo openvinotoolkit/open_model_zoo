@@ -33,12 +33,12 @@ set_log_config()
 WINNAME = 'Whiteboard_inpainting_demo'
 
 
-def expand_mask(detection):
+def expand_mask(detection, d):
     for i in range(len(detection[0])):
-        detection[0][i][2] = extend_mask(detection[0][i][2])
+        detection[0][i][2] = extend_mask(detection[0][i][2], d)
 
 
-def extend_mask(mask, d=35):
+def extend_mask(mask, d=70):
     contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for contour in contours:
         for c in contour:
@@ -137,7 +137,8 @@ def main():
         mask = None
         if frame is not None:
             detections = segmentation.get_detections([frame])
-            expand_mask(detections)
+            print(frame_size[0])
+            expand_mask(detections, frame_size[0] // 27)
             if len(detections[0]) > 0:
                 mask = detections[0][0][2]
                 for i in range(1, len(detections[0])):
