@@ -5,7 +5,7 @@ For enabling ONNX Runtime launcher you need to add `framework: onnx_runtime` in 
 * `device` - specifies which device will be used for infer (`cpu`, `gpu` and so on). Optional, cpu used as default or can depend on used executable provider.
 * `model`- path to the network file in ONNX format.
 * `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
-* `execution_providers` - list of execution providers for evaluation, e.g. [OpenVINO Execution Provider](https://github.com/microsoft/onnxruntime/blob/master/docs/execution_providers/OpenVINO-ExecutionProvider.md). Default [`CPUExecutionProvider`] used. 
+* `execution_providers` - list of execution providers for evaluation, e.g. <a href="https://github.com/microsoft/onnxruntime/blob/master/docs/execution_providers/OpenVINO-ExecutionProvider.md">OpenVINO Execution Provider</a>. Default [`CPUExecutionProvider`] used. 
 
 **Note: execution providers available only with newest versions of ONNXRuntime, if your installed version does not support such API, please update or does not specify this field.**
 
