@@ -7,11 +7,8 @@ class CTCCodec(object):
         # characters (str): set of the possible characters.
         self.designated_character_list = None
         if designated_characters != None:
-            self.designated_character_list = []
             with open(designated_characters, encoding='utf-8') as f:
-                lines = f.readlines()
-                for line in lines:
-                    self.designated_character_list.append(line.strip())
+                self.designated_character_list = [line.strip() for line in f]
 
         self.top_k = top_k
         dict_character = list(characters)
