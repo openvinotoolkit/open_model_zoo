@@ -28,12 +28,9 @@ from .overlap import Overlap
 from .metric import PerImageEvaluationMetric
 
 COCO_THRESHOLDS = {
-    '.50': [0.5],
-    '0.50': [0.5],
-    '.75': [0.75],
+    '0.5': [0.5],
     '0.75': [0.75],
-    '.50:.05:.95': np.linspace(.5, 0.95, np.round((0.95 - .5) / .05).astype(int) + 1, endpoint=True),
-    '0.50:0.05:0.95': np.linspace(.5, 0.95, np.round((0.95 - .5) / .05).astype(int) + 1, endpoint=True)
+    '0.5:0.05:0.95': np.linspace(.5, 0.95, np.round((0.95 - .5) / .05).astype(int) + 1, endpoint=True)
 }
 
 
@@ -62,7 +59,8 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
 
     def configure(self):
         self.max_detections = self.get_value_from_config('max_detections')
-        self.thresholds = get_or_parse_value(self.get_value_from_config('threshold'), COCO_THRESHOLDS)
+        threshold = process_threshold(self.get_value_from_config('threshold'))
+        self.thresholds = get_or_parse_value(threshold, COCO_THRESHOLDS)
         if not self.dataset.metadata:
             raise ConfigError('coco metrics require dataset metadata providing in dataset_meta'
                               'Please provide dataset meta file or regenerate annotation')
@@ -458,3 +456,12 @@ def evaluate_image(ground_truth, gt_difficult, iscrowd, detections, dt_difficult
         'dt_ignore': np.logical_or(dt_ignored, dt_difficult),
         'scores': scores
     }
+
+
+def process_threshold(threshold):
+    if isinstance(threshold, str):
+        float_values = [float(value) for value in threshold.split(":")]
+        threshold = str(float_values[0])
+        for elem in float_values[1:]:
+            threshold += ":" + str(elem)
+    return threshold
