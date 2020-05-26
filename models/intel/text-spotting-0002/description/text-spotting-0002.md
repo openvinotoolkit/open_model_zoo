@@ -1,4 +1,4 @@
-# Composite model name: text-spotting-0002
+# text-spotting-0002 (composite)
 
 ## Use Case and High-Level Description
 
@@ -8,9 +8,6 @@ recognition without a dictionary. The model is built on top of the Mask-RCNN
 framework with additional attention-based text recognition head.
 
 Symbols set is alphanumeric: `0123456789abcdefghijklmnopqrstuvwxyz`.
-
-*Hmean Word spotting* is defined and measured according to the
-[Incidental Scene Text (ICDAR2015) challenge](https://rrc.cvc.uab.es/?ch=4&com=introduction).
 
 ## Example
 
@@ -23,6 +20,8 @@ Symbols set is alphanumeric: `0123456789abcdefghijklmnopqrstuvwxyz`.
 | Word spotting hmean ICDAR2015, without a dictionary | 61.01% |
 | Source framework                              | PyTorch\* |
 
+*Hmean Word spotting* is defined and measured according to the
+[Incidental Scene Text (ICDAR2015) challenge](https://rrc.cvc.uab.es/?ch=4&com=introduction).
 
 ## Detector model specification
 

@@ -1,8 +1,8 @@
-# Composite model name: driver-action-recognition-adas-0002
+# driver-action-recognition-adas-0002 (composite)
 
 ## Use Case and High-Level Description
 
-This is an action recognition composite model for the driver monitoring use case, consisting from encoder and decoder parts. The encoder model uses Video Transformer approach with MobileNetv2 encoder. It is able to recognize the following actions: drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting.
+This is an action recognition composite model for the driver monitoring use case, consisting of encoder and decoder parts. The encoder model uses Video Transformer approach with MobileNetv2 encoder. It is able to recognize the following actions: drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting.
 
 ## Example
 

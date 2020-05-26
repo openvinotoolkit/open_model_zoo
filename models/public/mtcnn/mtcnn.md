@@ -1,4 +1,4 @@
-# Composite model name: mtcnn
+# mtcnn (composite)
 
 ## Use Case and High-Level Description
 

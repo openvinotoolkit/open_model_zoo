@@ -1,8 +1,8 @@
-# Composite model name: action-recognition-0001
+# action-recognition-0001 (composite)
 
 ## Use Case and High-Level Description
 
-This is a general-purpose action recognition composite model, consisting from encoder and decoder parts, trained on Kinetics-400 dataset. The encoder model uses Video Transformer approach with ResNet34 encoder.
+This is a general-purpose action recognition composite model, consisting of encoder and decoder parts, trained on Kinetics-400 dataset. The encoder model uses Video Transformer approach with ResNet34 encoder.
 Please refer to the [kinetics](https://deepmind.com/research/open-source/open-source-datasets/kinetics/) dataset specification to see list of action that are recognised by this composite model.
 
 ## Example
