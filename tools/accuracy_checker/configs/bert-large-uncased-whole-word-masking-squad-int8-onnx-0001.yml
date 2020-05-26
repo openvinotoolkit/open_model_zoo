@@ -1,19 +1,19 @@
 models:
-  - name: bert-small-uncased-whole-word-masking-squad-0001
+  - name: bert-large-uncased-whole-word-masking-squad-int8-onnx-0001
     launchers:
       - framework: dlsdk
         adapter:
           type: bert_question_answering
-          start_token_logits_output: "output_s"
-          end_token_logits_output: "output_e"
+          start_token_logits_output: "5211"
+          end_token_logits_output: "5212"
         inputs:
-          - name: "input_ids"
+          - name: "result.1"
             type: INPUT
             value: "input_ids"
-          - name: "attention_mask"
+          - name: "result.2"
             type: INPUT
             value: 'input_mask'
-          - name: 'token_type_ids'
+          - name: "result.3"
             type: INPUT
             value: 'segment_ids'
 
