@@ -20,7 +20,6 @@ class CTCCodec(object):
     def decode(self, preds):
         """ convert text-index into text-label. """
         texts = []
-        index = 0
         # Select max probabilty (greedy decoding) then decode index to character
         preds_index = np.argmax(preds, 2) # WBD - > WB
         preds_index = preds_index.transpose(1, 0) # WB -> BW
