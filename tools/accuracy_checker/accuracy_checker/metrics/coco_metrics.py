@@ -460,8 +460,6 @@ def evaluate_image(ground_truth, gt_difficult, iscrowd, detections, dt_difficult
 
 def process_threshold(threshold):
     if isinstance(threshold, str):
-        float_values = [float(value) for value in threshold.split(":")]
-        threshold = str(float_values[0])
-        for elem in float_values[1:]:
-            threshold += ":" + str(elem)
+        threshold_values = [str(float(value)) for value in threshold.split(":")]
+        threshold = ":".join(threshold_values)
     return threshold
