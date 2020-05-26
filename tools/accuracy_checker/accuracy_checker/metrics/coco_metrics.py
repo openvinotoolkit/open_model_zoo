@@ -29,8 +29,11 @@ from .metric import PerImageEvaluationMetric
 
 COCO_THRESHOLDS = {
     '.50': [0.5],
+    '0.50': [0.5],
     '.75': [0.75],
-    '.50:.05:.95': np.linspace(.5, 0.95, np.round((0.95 - .5) / .05).astype(int) + 1, endpoint=True)
+    '0.75': [0.75],
+    '.50:.05:.95': np.linspace(.5, 0.95, np.round((0.95 - .5) / .05).astype(int) + 1, endpoint=True),
+    '0.50:0.05:0.95': np.linspace(.5, 0.95, np.round((0.95 - .5) / .05).astype(int) + 1, endpoint=True)
 }
 
 
