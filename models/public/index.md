@@ -111,12 +111,13 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | CTPN                      | [TensorFlow\*](./ctpn/ctpn.md) | ctpn | 55.813 | 17.237 | |
 | CenterNet (CTDET with DLAV0) 384x384 | [ONNX\*](./ctdet_coco_dlav0_384/ctdet_coco_dlav0_384.md) | ctdet_coco_dlav0_384| 34.994 | 17.911 | |
 | CenterNet (CTDET with DLAV0) 512x512 | [ONNX\*](./ctdet_coco_dlav0_512/ctdet_coco_dlav0_512.md) | ctdet_coco_dlav0_512| 62.211 | 17.911 | |
+| FaceBoxes | [PyTorch\*](./faceboxes-pytorch/faceboxes-pytorch.md) | faceboxes-pytorch| 1.8975 | 1.0059 |
 | Faster R-CNN with Inception-ResNet v2 | [TensorFlow\*](./faster_rcnn_inception_resnet_v2_atrous_coco/faster_rcnn_inception_resnet_v2_atrous_coco.md) | faster_rcnn_inception_resnet_v2_atrous_coco| 30.687 | 13.307 |
 | Faster R-CNN with Inception v2 | [TensorFlow\*](./faster_rcnn_inception_v2_coco/faster_rcnn_inception_v2_coco.md) | faster_rcnn_inception_v2_coco | 30.687 | 13.307 |
 | Faster R-CNN with ResNet 50    | [TensorFlow\*](./faster_rcnn_resnet50_coco/faster_rcnn_resnet50_coco.md) | faster_rcnn_resnet50_coco | 57.203 | 29.162 |
 | Faster R-CNN with ResNet 101   | [TensorFlow\*](./faster_rcnn_resnet101_coco/faster_rcnn_resnet101_coco.md) |faster_rcnn_resnet101_coco | 112.052 | 48.128 |
 | MobileFace Detection V1  | [MXNet\*](./mobilefacedet-v1-mxnet/mobilefacedet-v1-mxnet.md) | mobilefacedet-v1-mxnet| 3.5456 | 7.6828 |
-| MTCNN                     | Caffe\*: <br>[proposal](./mtcnn-p/mtcnn-p.md) <br>[refine](./mtcnn-r/mtcnn-r.md) <br> [output](./mtcnn-o/mtcnn-o.md) | <br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| | |
+| MTCNN                     | [Caffe\*](./mtcnn/mtcnn.md) | mtcnn-p <br>mtcnn-r <br>mtcnn-o| | |
 | Pelee                     | [Caffe\*](./pelee-coco/pelee-coco.md) | pelee-coco | 1.290 | 5.98 |
 | RetinaNet with Resnet 50  | [TensorFlow\*](./retinanet-tf/retinanet-tf.md) | retinanet-tf | 238.9469 | 64.9706 |
 | R-FCN with Resnet-101     | [TensorFlow\*](./rfcn-resnet101-coco-tf/rfcn-resnet101-coco-tf.md) | rfcn-resnet101-coco-tf | 53.462 | 171.85 |

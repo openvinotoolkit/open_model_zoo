@@ -50,6 +50,7 @@ from .detection import (
     MTCNNPAdapter,
     RetinaNetAdapter,
     ClassAgnosticDetectionAdapter,
+    FaceBoxesAdapter
 )
 from .retinaface import RetinaFaceAdapter
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
@@ -94,6 +95,7 @@ __all__ = [
     'RetinaNetAdapter',
     'ClassAgnosticDetectionAdapter',
     'RetinaFaceAdapter',
+    'FaceBoxesAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',

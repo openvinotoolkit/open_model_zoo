@@ -216,3 +216,6 @@ AccuracyChecker supports following set of adapters:
    * `scores_outputs` - the list of names for output layers with face detection score in order belonging to 32-, 16-, 8-strides.
    * `bboxes_outputs` - the list of names for output layers with face detection boxes in order belonging to 32-, 16-, 8-strides.
    * `landmarks_outputs` - the list of names for output layers with predicted facial landmarks in order belonging to 32-, 16-, 8-strides (optional, if not provided, only `DetectionPrediction` will be generated).
+* `faceboxes` - converting output of FaceBoxes model to `DetectionPrediction` representation.
+  * `scores_out` - name of output layer with bounding boxes scores.
+  * `boxes_out` - name of output layer with bounding boxes coordinates.
