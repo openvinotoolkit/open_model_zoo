@@ -6,6 +6,13 @@ class CTCCodec(object):
     def __init__(self, characters, designated_characters, top_k):
         # characters (str): set of the possible characters.
         self.designated_characters = designated_characters
+        if self.designated_characters != None:
+            self.designated_character_list = []
+            with open(self.designated_characters, encoding='utf-8') as f:
+                lines = f.readlines()
+                for line in lines:
+                    self.designated_character_list.append(line.strip())
+
         self.top_k = top_k
         dict_character = list(characters)
 
@@ -27,12 +34,6 @@ class CTCCodec(object):
 
         char_list = []
         if self.designated_characters != None:
-            designated_character_list = []
-            with open(self.designated_characters, encoding='utf-8') as f:
-                lines = f.readlines()
-                for line in lines:
-                    designated_character_list.append(line.strip())
-
             # Store the top k indices in each time step in a 2D matrix
             preds_index_filter = preds.transpose(1, 0, 2) # WBD -> BWD  B=1
             preds_index_filter = np.squeeze(preds_index_filter) # WD
@@ -46,9 +47,9 @@ class CTCCodec(object):
                 if preds_index_reshape[i] != 0 and (not (i > 0 and preds_index_reshape[i - 1] == preds_index_reshape[i])):
                     append_char = self.characters[preds_index_reshape[i]]
                     # Traverse the top k index array until a designated character is found
-                    if not append_char in designated_character_list:
+                    if not append_char in self.designated_character_list:
                         for index in preds_top_k_index_matrix[i, :]:
-                            if self.characters[int(index)] in designated_character_list:
+                            if self.characters[int(index)] in self.designated_character_list:
                                 append_char = self.characters[int(index)]
                                 break
                     char_list.append(append_char)
