@@ -228,5 +228,13 @@ Deep Learning compressed models
 | [resnet50-binary-0001](./resnet50-binary-0001/description/resnet50-binary-0001.md)                                                             | 1.002                | 7.446      |
 | [resnet18-xnor-binary-onnx-0001](./resnet18-xnor-binary-onnx-0001/description/resnet18-xnor-binary-onnx-0001.md)                               | -                    | -          |
 
+## Question Answering
+
+| Model Name| Complexity (GFLOPs)|Size (Mp)|
+|-----------|--------------------|---------|
+| [bert-small-uncased-whole-word-masking-squad-0001](./bert-small-uncased-whole-word-masking-squad-0001/description/bert-small-uncased-whole-word-masking-squad-0001.md) | 23.9 | 57.94 |
+
+
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
