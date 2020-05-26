@@ -5,10 +5,10 @@ class CTCCodec(object):
     """ Convert between text-label and text-index """
     def __init__(self, characters, designated_characters, top_k):
         # characters (str): set of the possible characters.
-        self.designated_characters = designated_characters
-        if self.designated_characters != None:
+        self.designated_character_list = None
+        if designated_characters != None:
             self.designated_character_list = []
-            with open(self.designated_characters, encoding='utf-8') as f:
+            with open(designated_characters, encoding='utf-8') as f:
                 lines = f.readlines()
                 for line in lines:
                     self.designated_character_list.append(line.strip())
@@ -33,7 +33,7 @@ class CTCCodec(object):
         preds_index_reshape = preds_index.reshape(-1) # B*W
 
         char_list = []
-        if self.designated_characters != None:
+        if self.designated_character_list != None:
             # Store the top k indices in each time step in a 2D matrix
             preds_index_filter = preds.transpose(1, 0, 2) # WBD -> BWD  B=1
             preds_index_filter = np.squeeze(preds_index_filter) # WD
