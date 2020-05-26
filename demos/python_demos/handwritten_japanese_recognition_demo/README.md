@@ -68,7 +68,7 @@ python handwritten_japanese_recognition_demo.py -i data/test.png -m path/to/ir_x
 
 When the `designated_characters` argument is provided, the script will check Top k steps in looking up the decoded character, until a designated one is found. By doing so, the output character will be restricted to a designated region. K is set to 20 by default.
 
-For example, if we want to restrict the output charater to a digit and hyphen circumstance, we need to provide the path to the designated character file, then the command line will be like:
+For example, if we want to restrict the output character to a digit and hyphen circumstance, we need to provide the path to the designated character file, then the command line will be like:
 
 ```
 python handwritten_japanese_recognition_demo.py -i data/test.png -m path/to/ir_xml/model.xml -dc data/digit_hyphen.txt
