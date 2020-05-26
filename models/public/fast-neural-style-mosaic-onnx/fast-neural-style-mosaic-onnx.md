@@ -78,7 +78,7 @@ Image, name - `output1`, shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Expected color order: BGR.
+Expected color order: RGB.
 
 ## Legal Information
 
