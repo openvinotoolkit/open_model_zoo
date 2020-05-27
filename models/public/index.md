@@ -136,6 +136,15 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | YOLO v2                   | [Keras\*](./yolo-v2-tf/yolo-v2-tf.md) | yolo-v2-tf | 63.0301	 |	50.9526 |
 | YOLO v3                   | [Keras\*](./yolo-v3-tf/yolo-v3-tf.md) | yolo-v3-tf | 65.9843	 |	61.9221 |
 
+## Object attributes
+
+### Facial Landmarks
+
+| Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
+| ------------------------- | -------------- | -------------- | ------ | ------- |
+| RetinaFace-R50            | [MXNet\*](./retinaface-resnet50/retinaface-resnet50.md) | retinaface-resnet50 | 100.8478 | 29.427 |
+| RetinaFace-Anti-Cov     | [MXNet\*](./retinaface-anti-cov/retinaface-anti-cov.md)  | retinaface-anti-cov | 2.7781 | 0.5955 |
+
 ## Face Recognition
 
 | Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
