@@ -57,9 +57,9 @@ def parse():
     return args
 
 
-def collect_readme(directory, ignored_files ):
+def collect_readme(directory, ignored_files):
     files = {file.stem: file for file in directory.glob('**/*.md') if file.name not in ignored_files}
-    logging.info('Collected {} readme files'.format(len(files)))
+    logging.info('Collected {} description files'.format(len(files)))
     if not files:
         logging.error("No markdown file found in {}. Exceptions - {}. Ensure, that you set right directory."
                       .format(directory, ignored_files))
@@ -68,13 +68,6 @@ def collect_readme(directory, ignored_files ):
 
 
 def convert(lines):
-    def flatten_links(s):
-        links = re.findall(r"\[.*?\]\(.*?\)", s)
-        for link in links:
-            plain_link = re.sub('[\[\]]', '', link.replace('](', ' (').replace('(', '<').replace(')', '>'))
-            s = s.replace(link, plain_link)
-        return s
-
     result = ''
     list_signs = ['-', '*']
     for line in lines:
@@ -82,10 +75,10 @@ def convert(lines):
             result += '\n'
         elif line.lstrip()[0] in list_signs:
             result += '\n'
-        if len(result) > 0 and result[len(result)-1] != '\n':
+        if len(result) > 0 and not result.endswith('\n'):
             result += ' '
         result += line.rstrip('\n')
-    result = flatten_links(result)
+    result = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1 <\2>", result) # Links transformation
     result = result.replace("`", "\"").replace("\*", "*")
     return result.strip()
 
@@ -176,7 +169,6 @@ def update_model_configs(models, descriptions, mode):
             yaml.width = 80
             with model[0].open("w", encoding="utf-8") as file:
                 yaml.dump(model[1], file)
-    return len(diffs)
 
 
 def main():
@@ -186,9 +178,7 @@ def main():
     ignored_files = ('index.md',)
     descriptions = collect_descriptions(collect_readme(args.model_dir, ignored_files))
     models = get_models_from_configs(args.model_dir)
-    diffs = update_model_configs(models, descriptions, args.mode)
-
-    return diffs
+    update_model_configs(models, descriptions, args.mode)
 
 
 if __name__ == '__main__':
