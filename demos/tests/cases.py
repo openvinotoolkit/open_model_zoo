@@ -212,7 +212,12 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    # TODO: object_detection_demo_yolov3_async: no models.lst
+    NativeDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('object-detection-demo-ssd-async')}),
+        TestCase(options={'-m': ModelArg('yolo-v3-tf')})
+    )),
 
     NativeDemo('pedestrian_tracker_demo', device_keys=['-d_det', '-d_reid'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
