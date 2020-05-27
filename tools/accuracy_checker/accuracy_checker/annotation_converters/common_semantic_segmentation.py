@@ -18,7 +18,7 @@ class CommonSegmentationConverter(BaseFormatConverter):
                 'masks_dir': PathField(description='path to gt masks directory', is_directory=True),
                 'image_prefix': StringField(optional=True, default='', description='prefix for images'),
                 'mask_prefix': StringField(optional=True, default='', description='prefix for gt masks'),
-                'image_postfix': StringField(optional=True, default='.png', description='prefix for images'),
+                'image_postfix': StringField(optional=True, default='', description='prefix for images'),
                 'mask_postfix': StringField(optional=True, default='.png', description='prefix for gt masks'),
                 'mask_loader': StringField(
                     optional=True, choices=LOADERS_MAPPING,
@@ -56,8 +56,8 @@ class CommonSegmentationConverter(BaseFormatConverter):
         num_iterations = len(images_list)
         content_errors = None if not check_content else []
         for idx, image in enumerate(images_list):
-            base_name = image.name
-            identifier = base_name
+            base_name = image.stem
+            identifier = image.name
             if self.images_prefix:
                 base_name = base_name.split(self.images_prefix)[-1]
             if self.images_postfix:
