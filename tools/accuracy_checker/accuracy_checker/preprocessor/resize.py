@@ -387,9 +387,6 @@ class AutoResize(Preprocessor):
 
             if is_simple_case:
                 # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
-                image.metadata.setdefault('geometric_operations', []).append(
-                    GeometricOperationMetadata('auto_resize', {})
-                )
                 resize_meta = {
                     'preferable_width': self.dst_width,
                     'preferable_height': self.dst_height,
@@ -399,6 +396,9 @@ class AutoResize(Preprocessor):
                     'original_width': image_w,
                     'original_height': image_h
                 }
+                image.metadata.setdefault('geometric_operations', []).append(
+                    GeometricOperationMetadata('resize', resize_meta)
+                )
                 image.metadata.update(resize_meta)
 
             return data
