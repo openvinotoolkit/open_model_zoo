@@ -40,7 +40,7 @@ from ..logging import print_info
 from ..config import BaseField, ConfigError
 from ..utils import get_or_parse_value
 from .metric import FullDatasetEvaluationMetric
-from .coco_metrics import COCO_THRESHOLDS
+from .coco_metrics import COCO_THRESHOLDS, process_threshold
 
 SHOULD_SHOW_PREDICTIONS = False
 SHOULD_DISPLAY_DEBUG_IMAGES = False
@@ -64,7 +64,8 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         return parameters
 
     def configure(self):
-        self.threshold = get_or_parse_value(self.get_value_from_config('threshold'), COCO_THRESHOLDS)
+        threshold = process_threshold(self.get_value_from_config('threshold'))
+        self.threshold = get_or_parse_value(threshold, COCO_THRESHOLDS)
         if not self.dataset.metadata:
             raise ConfigError('coco orig metrics require dataset_meta'
                               'Please provide dataset meta file or regenerate annotation')
