@@ -12,3 +12,4 @@ shapely==1.7.0
 tqdm==4.45.0
 yamlloader==0.5.5
 pydicom==1.4.2
+tokenizers==0.7

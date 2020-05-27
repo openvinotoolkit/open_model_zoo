@@ -28,6 +28,15 @@ from ..adapters import create_adapter
 from ..config import ConfigError
 from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS
 from ..progress_reporters import ProgressReporter
+from .module_evaluator import ModuleEvaluator
+
+
+def create_model_evaluator(config):
+    cascade = 'evaluations' in config
+    if not cascade:
+        return ModelEvaluator.from_configs(config)
+
+    return ModuleEvaluator.from_configs(config['evaluations'][0], delayed_model_loading=True)
 
 
 class ModelEvaluator:
@@ -378,7 +387,8 @@ class ModelEvaluator:
         computed_metrics = copy.deepcopy(self._metrics_results)
         return computed_metrics
 
-    def load_network(self, network=None):
+    def load_network(self, network_list=None):
+        network = next(iter(network_list))['model'] if network_list is not None else None
         self.launcher.load_network(network)
         self.input_feeder = InputFeeder(
             self.launcher.config.get('inputs', []), self.launcher.inputs,
@@ -387,7 +397,9 @@ class ModelEvaluator:
         if self.adapter:
             self.adapter.output_blob = self.launcher.output_blob
 
-    def load_network_from_ir(self, xml_path, bin_path):
+    def load_network_from_ir(self, models_list):
+        model_paths = next(iter(models_list))
+        xml_path, bin_path = model_paths['model'], model_paths['weights']
         self.launcher.load_ir(xml_path, bin_path)
         self.input_feeder = InputFeeder(
             self.launcher.config.get('inputs', []), self.launcher.inputs,
@@ -397,7 +409,7 @@ class ModelEvaluator:
             self.adapter.output_blob = self.launcher.output_blob
 
     def get_network(self):
-        return self.launcher.network
+        return [{'model': self.launcher.network}]
 
     def get_metrics_attributes(self):
         if not self.metric_executor:

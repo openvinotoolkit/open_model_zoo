@@ -1,4 +1,5 @@
 from collections import namedtuple
+import warnings
 
 import numpy as np
 
@@ -281,11 +282,7 @@ class YoloV3Adapter(Adapter):
                             "{}.".format(', '.join(YoloV3Adapter.PRECOMPUTED_ANCHORS.keys()))),
             'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
                                      description="Minimal objectiveness score value for valid detections."),
-            'outputs': ListField(
-                optional=True, default=[],
-                description="The list of output layers names (optional),"
-                            " if specified there should be exactly 3 output layers provided."
-            ),
+            'outputs': ListField(description="The list of output layers names."),
             'anchor_masks': ListField(optional=True, description='per layer used anchors mask'),
             'do_reshape': BoolField(
                 optional=True, default=False,
@@ -330,9 +327,17 @@ class YoloV3Adapter(Adapter):
             self.masked_anchors = per_layer_anchors
         self.do_reshape = self.get_value_from_config('do_reshape')
         self.cells = self.get_value_from_config('cells')
-        if self.outputs and len(self.outputs) != len(self.cells):
-            raise ConfigError('Incorrect number of output layer ({}) or detection grid size ({})'
-                              'Must be equal with each other'.format(len(self.outputs), len(self.cells)))
+        if len(self.outputs) != len(self.cells):
+            if self.do_reshape:
+                raise ConfigError('Incorrect number of output layer ({}) or detection grid size ({}). '
+                                  'Must be equal with each other, check "cells" or "outputs" option'
+                                  .format(len(self.outputs), len(self.cells)))
+            warnings.warn('Number of output layers ({}) not equal to detection grid size ({}). '
+                          'Must be equal with each other, if output tensor resize is required'
+                          .format(len(self.outputs), len(self.cells)))
+
+        if self.masked_anchors and len(self.masked_anchors) != len(self.outputs):
+            raise ConfigError('anchor mask should be specified for all output layers')
 
         self.raw_output = self.get_value_from_config('raw_output')
         self.output_format = self.get_value_from_config('output_format')
@@ -355,17 +360,9 @@ class YoloV3Adapter(Adapter):
         result = []
 
         raw_outputs = self._extract_predictions(raw, frame_meta)
-
-        if self.outputs:
-            outputs = self.outputs
-        else:
-            outputs = raw_outputs.keys()
-
-        if self.masked_anchors and len(self.masked_anchors) != len(outputs):
-            raise ConfigError('anchor mask should be specified for all output layers')
         batch = len(identifiers)
         predictions = [[] for _ in range(batch)]
-        for blob in outputs:
+        for blob in self.outputs:
             for b in range(batch):
                 predictions[b].append(raw_outputs[blob][b])
 
@@ -376,10 +373,15 @@ class YoloV3Adapter(Adapter):
             nchw_layout = input_shape[1] == 3
             self.processor.width_normalizer = input_shape[3 if nchw_layout else 2]
             self.processor.height_normalizer = input_shape[2 if nchw_layout else 1]
-            for layer_id, (cells, p) in enumerate(zip(self.cells, prediction)):
+            for layer_id, p in enumerate(prediction):
                 anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
                 num = len(anchors) // 2 if self.masked_anchors else self.num
                 if self.do_reshape or len(p.shape) != 3:
+                    try:
+                        cells = self.cells[layer_id]
+                    except IndexError:
+                        raise ConfigError('Number of output layers ({}) is more than detection grid size ({}). '
+                                          'Check "cells" option.'.format(len(outputs), len(self.cells)))
                     if self.output_format == 'BHW':
                         new_shape = (num * box_size, cells, cells)
                     else:
