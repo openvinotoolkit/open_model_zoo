@@ -42,7 +42,7 @@ Expected color order: BGR.
 ## Outputs
 
 The net outputs blob with shape: [1, 1, N, 7], where N is the number of detected
-bounding boxes. Each detection has a format
+bounding boxes. Each detection has the format
   [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
   - `image_id` - ID of the image in the batch
   - `label` - predicted class ID
