@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import NumberField
+from ..config import NumberField, ConfigError
 from ..preprocessor import Preprocessor
 
 
@@ -65,19 +65,40 @@ class ClipAudio(Preprocessor):
         parameters = super().parameters()
         parameters.update({
             'duration': NumberField(
-                value_type=int, min_value=0,
+                value_type=float, min_value=0, optional=True, default=None,
                 description="Length of audio clip in seconds."
             ),
+            'duration_in_samples': NumberField(
+                value_type=int, min_value=0, optional=True, default=None,
+                description="Length of audio clip in samples."
+            ),
             'max_clips': NumberField(
-                value_type=int, min_value=1, default=1,
+                value_type=int, min_value=1, default=999, optional=True,
                 description="Maximum number of clips per audiofile."
             ),
+            'overlap': NumberField(
+                value_type=float, min_value=0.0, max_value=1.0, optional=True,
+                description="Overlapping part for each clip."
+            ),
+            'overlap_in_samples': NumberField(
+                value_type=int, min_value=0, optional=True,
+                description="Overlapping part for each clip in samples."
+            )
         })
         return parameters
 
     def configure(self):
         self.duration = self.get_value_from_config('duration')
+        self.duration_in_samples = self.get_value_from_config('duration_in_samples')
+        if not self.duration and not self.duration_in_samples:
+            raise ConfigError("Preprocessor {}: clip duration didn\'t set.".format(self.__provider__))
+        if self.duration and self.duration_in_samples:
+            raise ConfigError("Preprocessor {}: clip duration is set in multiple way.".format(self.__provider__))
         self.max_clips = self.get_value_from_config('max_clips')
+        self.overlap = self.get_value_from_config('overlap')
+        self.overlap_in_samples = self.get_value_from_config('overlap_in_samples')
+        if self.overlap and self.overlap_in_samples:
+            raise ConfigError("Preprocessor {}: clip overlapping is set in multiple way.".format(self.__provider__))
 
     def process(self, image, annotation_meta=None):
         data = image.data
@@ -86,13 +107,23 @@ class ClipAudio(Preprocessor):
             raise RuntimeError('Operation "{}" failed: required "sample rate" in metadata.'.
                                format(self.__provider__))
         audio_duration = data.shape[1]
-        clip_duration = self.duration * sample_rate
+        clip_duration = self.duration * sample_rate if self.duration else self.duration_in_samples
         clipped_data = []
-        for i in range(self.max_clips):
-            if (i + 1) * clip_duration > audio_duration:
+        hop = clip_duration
+        if self.overlap is not None:
+            hop = int((1 - self.overlap) * hop)
+        elif self.overlap_in_samples is not None:
+            hop = hop - self.overlap_in_samples
+
+        if hop > clip_duration:
+            raise ConfigError("Preprocessor {}: clip overlapping exceeds clip length.".format(self.__provider__))
+
+        for clip_no, clip_start in enumerate(range(0, audio_duration, hop)):
+            if clip_start + clip_duration > audio_duration or clip_no >= self.max_clips:
                 break
-            clip = data[:, i * clip_duration: (i+1) * clip_duration]
+            clip = data[:, clip_start: clip_start + clip_duration]
             clipped_data.append(clip)
+
         image.data = clipped_data
         image.metadata['multi_infer'] = True
 
