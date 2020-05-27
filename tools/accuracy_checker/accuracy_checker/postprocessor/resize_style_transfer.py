@@ -21,14 +21,10 @@ class ResizeStyleTransfer(Postprocessor):
         parameters = super().parameters()
         parameters.update({
             'dst_width': NumberField(
-                value_type=int, optional=True, min_value=1, description="Destination width for resizing."
+                value_type=int, optional=False, min_value=1, description="Destination width for resizing."
             ),
             'dst_height': NumberField(
-                value_type=int, optional=True, min_value=1, description="Destination height for resizing."
-            ),
-            'size': NumberField(
-                value_type=int, optional=True, min_value=1,
-                description="Destination size for resizing for both dimensions (height, width)."
+                value_type=int, optional=False, min_value=1, description="Destination height for resizing."
             )
         })
         return parameters
