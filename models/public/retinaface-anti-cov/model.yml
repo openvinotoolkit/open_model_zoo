@@ -30,7 +30,6 @@ model_optimizer_args:
   - --input_shape=[1,3,640,640]
   - --input=data
   - --input_model=$dl_dir/mnet_cov2-0000.params
-  - --input_symbol=$dl_dir/mnet_cov2-symbol.json
   - --reverse_input_channels
 framework: mxnet
 license: https://raw.githubusercontent.com/deepinsight/insightface/master/LICENSE
