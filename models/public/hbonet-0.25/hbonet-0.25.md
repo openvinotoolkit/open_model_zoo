@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `hbonet-0.25` model is one of the classification models from https://github.com/d-li14/HBONet with `width_mult=0.25`
+The `hbonet-0.25` model is one of the classification models from [repository](https://github.com/d-li14/HBONet) with `width_mult=0.25`
 
 ## Example
 
@@ -12,15 +12,15 @@ The `hbonet-0.25` model is one of the classification models from https://github.
 |-------------------|---------------|
 | Type              | Classification|
 | GFLOPs            | 0.037         |
-| MParams           |               |
+| MParams           | 1.9300        |
 | Source framework  | PyTorch\*     |
 
 ## Accuracy
 
-| Metric | Original model | Converted model |
-| ------ | -------------- | --------------- |
-| Top 1  | 57.30          |                 |
-| Top 5  | 79.80          |                 |
+| Metric | Original model |
+| ------ | -------------- |
+| Top 1  | 57.30          |
+| Top 5  | 79.80          |
 
 ## Performance
 
@@ -31,9 +31,9 @@ The `hbonet-0.25` model is one of the classification models from https://github.
 Image, name: `input`, shape: [1x3x224x224], format: [BxCxHxW], where:
 
 - B - batch size
+- C - number of channels
 - H - image height
 - W - image width
-- C - number of channels
 
  Expected color order: RGB.
  Mean values: [123.675, 116.28, 103.53], scale factor for each channel: [58.395, 57.12, 57.375]
