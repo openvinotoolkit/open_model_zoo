@@ -26,6 +26,8 @@ from .detection_representation import (
     Detection,
     DetectionAnnotation,
     DetectionPrediction,
+    AttributeDetectionAnnotation,
+    AttributeDetectionPrediction,
     ActionDetectionAnnotation,
     ActionDetectionPrediction
 )
@@ -91,6 +93,8 @@ __all__ = [
     'DetectionAnnotation',
     'DetectionPrediction',
 
+    'AttributeDetectionAnnotation',
+    'AttributeDetectionPrediction',
     'ActionDetectionAnnotation',
     'ActionDetectionPrediction',
 
