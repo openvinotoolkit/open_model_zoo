@@ -85,10 +85,8 @@ class FacialLandmarksPostprocessor(object):
         return anchors
 
     @staticmethod
-    def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True):
-        b = 1 if include_boundaries else 0
-
-        areas = (x2 - x1 + b) * (y2 - y1 + b)
+    def nms(x1, y1, x2, y2, scores, thresh):
+        areas = (x2 - x1) * (y2 - y1)
         order = scores.argsort()[::-1]
 
         keep = []
@@ -101,8 +99,8 @@ class FacialLandmarksPostprocessor(object):
             xx2 = np.minimum(x2[i], x2[order[1:]])
             yy2 = np.minimum(y2[i], y2[order[1:]])
 
-            w = np.maximum(0.0, xx2 - xx1 + b)
-            h = np.maximum(0.0, yy2 - yy1 + b)
+            w = np.maximum(0.0, xx2 - xx1)
+            h = np.maximum(0.0, yy2 - yy1)
             intersection = w * h
 
             union = (areas[i] + areas[order[1:]] - intersection)
@@ -139,7 +137,7 @@ class FacialLandmarksPostprocessor(object):
             anchors = anchors.reshape((height * width * anchor_num, 4))
             proposals = self._get_proposals(bbox_deltas, anchor_num, anchors)
             x_mins, y_mins, x_maxs, y_maxs = proposals.T
-            keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, scores, 0.5, False)
+            keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, scores, 0.5)
             proposals_list.extend(proposals[keep])
             scores_list.extend(scores[keep])
             landmarks = self._get_landmarks(landmarks_outputs[idx], anchor_num, anchors)[keep, :]
@@ -148,15 +146,14 @@ class FacialLandmarksPostprocessor(object):
                 mask_scores_list.extend(self._get_mask_scores(type_scores_outputs[idx], anchor_num)[keep])
         scores = np.reshape(scores_list, -1)
         mask_scores = np.reshape(mask_scores_list, -1)
-        labels = np.full_like(scores, 1, dtype=int)
         x_mins, y_mins, x_maxs, y_maxs = np.array(proposals_list).T # pylint: disable=E0633
-        detections = [labels, scores, x_mins / scale_x, y_mins / scale_y, x_maxs / scale_x, y_maxs / scale_y]
+        detections = [scores, x_mins / scale_x, y_mins / scale_y, x_maxs / scale_x, y_maxs / scale_y]
 
         output = {}
         output['face_detection'] = detections
         if self._detect_masks:
             output['mask_detection'] = [
-                labels, scores, mask_scores, x_mins / scale_x,
+                scores, mask_scores, x_mins / scale_x,
                 y_mins / scale_y, x_maxs / scale_x, y_maxs / scale_y
             ]
 

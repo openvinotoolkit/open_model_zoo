@@ -99,14 +99,14 @@ def main():
     for frame in frames_reader:
         detections, detect_masks = detector.detect(frame)
         presenter.drawGraphs(frame)
-        for i, (score, xmin, ymin, xmax, ymax) in enumerate(zip(*detections['face_detection'][1:])):
+        for i, (score, xmin, ymin, xmax, ymax) in enumerate(zip(*detections['face_detection'])):
             xmin = max(0, xmin).astype(np.int)
             ymin = max(0, ymin).astype(np.int)
             xmax = min(frame.shape[1], xmax).astype(np.int)
             ymax = min(frame.shape[0], ymax).astype(np.int)
             color = (255, 0, 0)
             if detect_masks:
-                if detections['mask_detection'][2][i] >= args.mask_prob_threshold:
+                if detections['mask_detection'][1][i] >= args.mask_prob_threshold:
                     color = (0, 255, 0)
                 else:
                     color = (0, 0, 255)

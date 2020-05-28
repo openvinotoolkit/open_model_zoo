@@ -58,7 +58,7 @@ class Detector(object):
         postprocessor = FacialLandmarksPostprocessor(self._detect_masks)
         detections = postprocessor.process_output(output, scale_x, scale_y)
 
-        keep = detections['face_detection'][1] >= self.face_prob_threshold
+        keep = detections['face_detection'][0] >= self.face_prob_threshold
         detections['face_detection'] = [item[keep] for item in detections['face_detection']]
         detections['landmarks_regression'] = [item[keep] for item in detections['landmarks_regression']]
         if self._detect_masks:
