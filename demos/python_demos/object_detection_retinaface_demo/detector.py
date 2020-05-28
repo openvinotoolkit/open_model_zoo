@@ -28,11 +28,11 @@ class Detector(object):
         assert len(model.outputs) == 12 or len(model.outputs) == 9, "Expected 12 or 9 output blobs"
 
         self._input_layer_name = next(iter(model.inputs))
-        self._output_layer_names = sorted(model.outputs)
+        self._output_layer_names = model.outputs
         _, channels, self.input_height, self.input_width = model.inputs[self._input_layer_name].shape
         assert channels == 3, "Expected 3-channel input"
 
-        self._anti_cov = True if len(model.outputs) == 12 else False
+        self._detect_masks = True if len(model.outputs) == 12 else False
         self.face_prob_threshold = face_prob_threshold
         self.mask_prob_threshold = mask_prob_threshold
 
@@ -55,13 +55,13 @@ class Detector(object):
         output = self.infer(image)
         scale_x = self.input_width/width
         scale_y = self.input_height/height
-        postprocessor = FacialLandmarksPostprocessor(self._anti_cov)
+        postprocessor = FacialLandmarksPostprocessor(self._detect_masks)
         detections = postprocessor.process_output(output, scale_x, scale_y)
 
         keep = detections['face_detection'][1] >= self.face_prob_threshold
         detections['face_detection'] = [item[keep] for item in detections['face_detection']]
         detections['landmarks_regression'] = [item[keep] for item in detections['landmarks_regression']]
-        if self._anti_cov:
+        if self._detect_masks:
             detections['mask_detection'] = [item[keep] for item in detections['mask_detection']]
-        return detections, self._anti_cov
+        return detections, self._detect_masks
 

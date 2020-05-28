@@ -18,8 +18,8 @@ import numpy as np
 import re
 
 class FacialLandmarksPostprocessor(object):
-    def __init__(self, anti_cov=False):
-        self._anti_cov = anti_cov
+    def __init__(self, detect_masks=False):
+        self._detect_masks = detect_masks
         _ratio = (1.,)
         self._anchor_cfg = {
             32: {'SCALES': (32, 16), 'BASE_SIZE': 16, 'RATIOS': _ratio},
@@ -31,7 +31,7 @@ class FacialLandmarksPostprocessor(object):
         self._num_anchors = dict(zip(
             self._features_stride_fpn, [anchors.shape[0] for anchors in self._anchors_fpn.values()]
         ))
-        self.landmark_std = 0.2 if anti_cov else 1.0
+        self.landmark_std = 0.2 if detect_masks else 1.0
 
     @staticmethod
     def generate_anchors_fpn(cfg):
@@ -121,7 +121,7 @@ class FacialLandmarksPostprocessor(object):
 
         landmarks_outputs = [raw_output[name][0] for name in raw_output if re.search('.landmark.', name)]
         landmarks_outputs.sort(key=lambda x: x.shape[1])
-        if self._anti_cov:
+        if self._detect_masks:
             type_scores_outputs = [raw_output[name][0] for name in raw_output if re.search('.type.', name)]
             type_scores_outputs.sort(key=lambda x: x.shape[1])
 
@@ -144,7 +144,7 @@ class FacialLandmarksPostprocessor(object):
             scores_list.extend(scores[keep])
             landmarks = self._get_landmarks(landmarks_outputs[idx], anchor_num, anchors)[keep, :]
             landmarks_list.extend(landmarks)
-            if self._anti_cov:
+            if self._detect_masks:
                 mask_scores_list.extend(self._get_mask_scores(type_scores_outputs[idx], anchor_num)[keep])
         scores = np.reshape(scores_list, -1)
         mask_scores = np.reshape(mask_scores_list, -1)
@@ -154,7 +154,7 @@ class FacialLandmarksPostprocessor(object):
 
         output = {}
         output['face_detection'] = detections
-        if self._anti_cov:
+        if self._detect_masks:
             output['mask_detection'] = [
                 labels, scores, mask_scores, x_mins / scale_x,
                 y_mins / scale_y, x_maxs / scale_x, y_maxs / scale_y

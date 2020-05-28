@@ -97,7 +97,7 @@ def main():
     frames_reader, delay = (VideoReader(args.input), 1) if img is None else (ImageReader(args.input), 0)
     presenter = monitors.Presenter(args.utilization_monitors, 25)
     for frame in frames_reader:
-        detections, is_anti_cov = detector.detect(frame)
+        detections, detect_masks = detector.detect(frame)
         presenter.drawGraphs(frame)
         for i, (score, xmin, ymin, xmax, ymax) in enumerate(zip(*detections['face_detection'][1:])):
             xmin = max(0, xmin).astype(np.int)
@@ -105,7 +105,7 @@ def main():
             xmax = min(frame.shape[1], xmax).astype(np.int)
             ymax = min(frame.shape[0], ymax).astype(np.int)
             color = (255, 0, 0)
-            if is_anti_cov:
+            if detect_masks:
                 if detections['mask_detection'][2][i] >= args.mask_prob_threshold:
                     color = (0, 255, 0)
                 else:
