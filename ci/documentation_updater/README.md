@@ -13,10 +13,10 @@ pip install ruamel.yaml
 
 To update description of single model:
 ```
-python documentation_updater.py -d <OMZ dir>/models/public/<model dir>
+python documentation_updater.py -d <OMZ dir>/models/public/<model dir> --mode update
 ```
 
 To check descriptions of all public models:
 ```
-python documentation_updater.py -d <OMZ dir>/models/public --mode check
+python documentation_updater.py -d <OMZ dir>/models/public
 ```
