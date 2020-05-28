@@ -126,6 +126,13 @@ human-readable format.
 You can also set this option to `text` to explicitly request the default text
 format.
 
+The script can download files for multiple models concurrently. To enable this,
+use the `-j`/`--jobs` option:
+
+```sh
+./downloader.py --all -j8 # download up to 8 models at a time
+```
+
 See the "Shared options" section for information on other options accepted by
 the script.
 
@@ -209,8 +216,9 @@ In particular:
   (unless specified otherwise above) or will only occur once.
 
 * Tools should not assume that events will occur in a certain order beyond
-  the ordering constraints specified above. Note that future versions of the script
-  may interleave the downloading of different files or models.
+  the ordering constraints specified above. In particular, when the `--jobs` option
+  is set to a value greater than 1, event sequences for different files or models
+  may get interleaved.
 
 Model converter usage
 ---------------------
@@ -455,6 +463,7 @@ describing a single model. Each such object has the following keys:
   * `object_attributes`
   * `optical_character_recognition`
   * `semantic_segmentation`
+  * `style_transfer`
 
   Additional possible values might be added in the future.
 

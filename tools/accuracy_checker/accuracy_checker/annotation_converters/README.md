@@ -302,6 +302,8 @@ Accuracy Checker supports following list of annotation converters and specific f
 * `inpainting` - converts images to `ImageInpaintingAnnotation`.
   * `images_dir` - path to images directory.
   * `masks_dir` - path to mask dataset to be used for inpainting (Optional).
+* `style_transfer` - converts images to `StyleTransferAnnotation`.
+  * `images_dir` - path to images directory.
 
 ### Customizing dataset meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
