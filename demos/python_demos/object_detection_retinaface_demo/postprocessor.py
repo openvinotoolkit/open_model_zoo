@@ -17,7 +17,7 @@
 import numpy as np
 import re
 
-class FacialLandmarksPostprocessor(object):
+class RetinaFacePostprocessor(object):
     def __init__(self, detect_masks=False):
         self._detect_masks = detect_masks
         _ratio = (1.,)
@@ -152,10 +152,7 @@ class FacialLandmarksPostprocessor(object):
         output = {}
         output['face_detection'] = detections
         if self._detect_masks:
-            output['mask_detection'] = [
-                scores, mask_scores, x_mins / scale_x,
-                y_mins / scale_y, x_maxs / scale_x, y_maxs / scale_y
-            ]
+            output['mask_detection'] = mask_scores
 
         landmarks_x_coords = np.array(landmarks_list)[:, :, ::2].reshape(len(landmarks_list), -1) / scale_x
         landmarks_y_coords = np.array(landmarks_list)[:, :, 1::2].reshape(len(landmarks_list), -1) / scale_y

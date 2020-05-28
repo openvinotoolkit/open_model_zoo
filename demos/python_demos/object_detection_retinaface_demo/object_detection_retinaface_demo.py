@@ -91,7 +91,7 @@ def main():
     args = build_argparser().parse_args()
 
     ie = IECore()
-    detector = Detector(ie, args.model, args.face_prob_threshold, args.mask_prob_threshold, args.device)
+    detector = Detector(ie, args.model, args.face_prob_threshold, args.device)
 
     img = cv2.imread(args.input[0], cv2.IMREAD_COLOR)
     frames_reader, delay = (VideoReader(args.input), 1) if img is None else (ImageReader(args.input), 0)
@@ -106,7 +106,7 @@ def main():
             ymax = min(frame.shape[0], ymax).astype(np.int)
             color = (255, 0, 0)
             if detect_masks:
-                if detections['mask_detection'][1][i] >= args.mask_prob_threshold:
+                if detections['mask_detection'][i] >= args.mask_prob_threshold:
                     color = (0, 255, 0)
                 else:
                     color = (0, 0, 255)

@@ -18,10 +18,10 @@ import cv2
 import os
 import numpy as np
 
-from postprocessor import FacialLandmarksPostprocessor
+from postprocessor import RetinaFacePostprocessor
 
 class Detector(object):
-    def __init__(self, ie, model_path, face_prob_threshold, mask_prob_threshold, device='CPU'):
+    def __init__(self, ie, model_path, face_prob_threshold, device='CPU'):
         model = ie.read_network(model_path, os.path.splitext(model_path)[0] + '.bin')
 
         assert len(model.inputs) == 1, "Expected 1 input blob"
@@ -34,7 +34,6 @@ class Detector(object):
 
         self._detect_masks = True if len(model.outputs) == 12 else False
         self.face_prob_threshold = face_prob_threshold
-        self.mask_prob_threshold = mask_prob_threshold
 
         self._ie = ie
         self._exec_model = self._ie.load_network(model, device)
@@ -55,13 +54,13 @@ class Detector(object):
         output = self.infer(image)
         scale_x = self.input_width/width
         scale_y = self.input_height/height
-        postprocessor = FacialLandmarksPostprocessor(self._detect_masks)
+        postprocessor = RetinaFacePostprocessor(self._detect_masks)
         detections = postprocessor.process_output(output, scale_x, scale_y)
 
         keep = detections['face_detection'][0] >= self.face_prob_threshold
         detections['face_detection'] = [item[keep] for item in detections['face_detection']]
         detections['landmarks_regression'] = [item[keep] for item in detections['landmarks_regression']]
         if self._detect_masks:
-            detections['mask_detection'] = [item[keep] for item in detections['mask_detection']]
+            detections['mask_detection'] = detections['mask_detection'][keep]
         return detections, self._detect_masks
 
