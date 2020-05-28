@@ -99,7 +99,7 @@ class ClipAudio(Preprocessor):
         return image
 
 
-class NormalizeAuudio(Preprocessor):
+class NormalizeAudio(Preprocessor):
     __provider__ = 'audio_normalization'
 
     def process(self, image, annotation_meta=None):
