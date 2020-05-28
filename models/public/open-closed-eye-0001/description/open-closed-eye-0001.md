@@ -17,7 +17,11 @@ Fully convolutional network for recognition of eye state ('open', 'closed').
 | Source framework                | PyTorch*                                  |
 | GFlops                          | 0.001                                     |
 | MParams                         | 0.01125                                   |
+| Accuracy                        | 0.959                                     |
 
+## Dataset
+
+[MRL Eye Dataset](http://mrl.cs.vsb.cz/eyedataset) is used for training and validation (each 10th image is used for test). 
 
 ## Performance
 
