@@ -64,13 +64,12 @@ from .monocular_depth_perception import ReDWebDatasetConverter
 
 from .fashion_mnist import FashionMnistConverter
 from .inpainting import InpaintingConverter
-<<<<<<< 0e03c7866502bcf54177626308a8c69d7dea75f4
+
 from .wikitext2raw import Wikitext2RawConverter
 
 from  .image_processing import ImageProcessingConverter
-=======
+
 from .aflw2000_3d import AFLW20003DConverter
->>>>>>> AC: support PRNet
 
 __all__ = [
     'BaseFormatConverter',
@@ -129,6 +128,6 @@ __all__ = [
     'FashionMnistConverter',
     'InpaintingConverter',
     'Wikitext2RawConverter',
-    'ImageProcessingConverter'
+    'ImageProcessingConverter',
     'AFLW20003DConverter'
 ]

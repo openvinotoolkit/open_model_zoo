@@ -14,7 +14,9 @@ class AFLW20003DConverter(DirectoryBasedAnnotationConverter):
 
     def __init__(self, config=None):
         if scipy_io is None:
-            raise ConfigError('{} converter require scipy installation. Please install it before usage.')
+            raise ConfigError(
+                '{} converter require scipy installation. Please install it before usage.'.format(self.__provider__)
+            )
         super().__init__(config)
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):

@@ -375,12 +375,12 @@ class NormalizedMeanError(PerImageEvaluationMetric):
         pred = np.array([prediction.x_values, prediction.y_values, prediction.z_values]).T
 
         diff = np.square(gt - pred)
-        dist = np.sqrt(np.sum(diff[:, 0:2])) if self.only_2d else np.sqrt(np.sum(diff))
-        dist /= len(gt)
+        dist = np.sqrt(np.sum(diff[:, 0:2], axis=1)) if self.only_2d else np.sqrt(np.sum(diff, axis=1))
+        #dist /= len(gt)
         normalized_result = dist / annotation.normalization_coef(self.only_2d)
-        self.magnitude.append(normalized_result)
+        self.magnitude.append(np.mean(normalized_result))
 
-        return normalized_result
+        return np.mean(normalized_result)
 
     def evaluate(self, annotations, predictions):
         self.meta['names'] = ['mean']

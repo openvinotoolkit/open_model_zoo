@@ -734,7 +734,7 @@ class SimilarityTransfom(Preprocessor):
         self.dst_height, self.dst_width = get_size_from_config(self.config)
 
     def process(self, image, annotation_meta=None):
-        left, top, right, bottom = annotation_meta.get('bbox', [0, 0, image.data.shape[0], image.data.shape[1]])
+        left, top, right, bottom = annotation_meta.get('rect', [0, 0, image.data.shape[0], image.data.shape[1]])
         old_size = (right - left + bottom - top) / 2
         center = np.array([right - (right - left) / 2.0, bottom - (bottom - top) / 2.0])
         size = int(old_size * self.box_scale)
@@ -743,6 +743,7 @@ class SimilarityTransfom(Preprocessor):
         dst_pts = np.array([[0, 0], [0, self.dst_height - 1], [self.dst_width - 1, 0]])
         tform = estimate_transform('similarity', src_pts, dst_pts)
         image.data = warp(image.data / 255, tform.inverse, output_shape=(self.dst_width, self.dst_height))
+        image.data *= 255
 
         image.metadata['transform_matrix'] = tform.params
         image.metadata['roi_box'] = [left, top, right, bottom]
