@@ -17,20 +17,20 @@ RetinaFace-Anti-Cov is a customized one stage face detector to help people prote
 ### Original model:
 Image, name - `data` , shape - [1x3x640x640], format [BxCxHxW], where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+- B - batch size
+- C - number of channels
+- H - image height
+- W - image width
 
 Expected color order - RGB.
 
 ### Converted model:
 Image, name - `data` , shape - [1x3x640x640], format [BxCxHxW], where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+- B - batch size
+- C - number of channels
+- H - image height
+- W - image width
 
 Expected color order - BGR.
 
