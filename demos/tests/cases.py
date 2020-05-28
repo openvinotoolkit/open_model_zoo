@@ -244,10 +244,7 @@ NATIVE_DEMOS = [
             None,
             ModelArg('license-plate-recognition-barrier-0001'),
             ModelArg('license-plate-recognition-barrier-0007')),
-        single_option_cases('-m_va',
-            None,
-            ModelArg('vehicle-attributes-recognition-barrier-0039'),
-            ModelArg('vehicle-attributes-recognition-barrier-0042')),
+        single_option_cases('-m_va', None, ModelArg('vehicle-attributes-recognition-barrier-0039')),
     )),
 
     NativeDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
