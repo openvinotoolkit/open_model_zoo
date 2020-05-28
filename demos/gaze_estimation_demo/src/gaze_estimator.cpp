@@ -63,7 +63,6 @@ void GazeEstimator::rotateImageAroundCenter(const cv::Mat& srcImage,
 
 void GazeEstimator::estimate(const cv::Mat& image,
                              FaceInferenceResults& outputResults) {
-
     if (!outputResults.leftEyeState && !outputResults.rightEyeState)
         return;
     std::vector<float> headPoseAngles(3);
