@@ -47,7 +47,7 @@ Image, name: `image_tensor`, shape: [1x600x1024x3], format: [BxHxWxC],
    where:
 
     - B - batch size
-    - C - vector of 3 values in format [H,W,S], where H - image height, W - image width, S - image scale factor (usually 1)
+    - C - vector of 3 values in format [H,W,S], where H - image height, W - imahe width, S - image scale factor (usually 1)
 
 ## Output
 
