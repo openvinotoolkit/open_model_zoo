@@ -42,6 +42,10 @@ class RetinaFaceAdapter(Adapter):
         self._num_anchors = dict(zip(
             self._features_stride_fpn, [anchors.shape[0] for anchors in self._anchors_fpn.values()]
         ))
+        if self.type_scores_output:
+            self.landmark_std = 0.2
+        else:
+            self.landmark_std = 1.0
 
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_predictions = self._extract_predictions(raw, frame_meta)
@@ -119,6 +123,7 @@ class RetinaFaceAdapter(Adapter):
     def _get_landmarks(self, landmark_deltas, anchor_num, anchors):
         landmark_pred_len = landmark_deltas.shape[0] // anchor_num
         landmark_deltas = landmark_deltas.transpose((1, 2, 0)).reshape((-1, 5, landmark_pred_len // 5))
+        landmark_deltas *= self.landmark_std
         landmarks = self.landmark_pred(anchors, landmark_deltas)
         return landmarks
 
