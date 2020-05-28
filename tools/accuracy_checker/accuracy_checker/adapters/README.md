@@ -211,6 +211,7 @@ AccuracyChecker supports following set of adapters:
   * `scale` - scalar value to normalize bbox coordinates.
 * `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.
 * `inpainting` - converting output of Image Inpainting model to `ImageInpaintingPrediction` representation.
+* `style_transfer` - converting output of Style Transfer model to `StyleTransferPrediction` representation.
 * `retinaface` - converting output of RetinaFace model to `DetectionPrediction` or representation container with `DetectionPrediction` and `FacialLandmarksPrediction` (depends on provided set of outputs)
    * `scores_outputs` - the list of names for output layers with face detection score in order belonging to 32-, 16-, 8-strides.
    * `bboxes_outputs` - the list of names for output layers with face detection boxes in order belonging to 32-, 16-, 8-strides.

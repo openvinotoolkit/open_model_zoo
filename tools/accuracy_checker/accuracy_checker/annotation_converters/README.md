@@ -304,6 +304,8 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `masks_dir` - path to mask dataset to be used for inpainting (Optional).
 * `aflw2000_3d` - converts [AFLW2000-3D](http://www.cbsr.ia.ac.cn/users/xiangyuzhu/projects/3DDFA/main.htm) dataset for 3d facial landmarks regression task to `FacialLandmarks3DAnnotation`.
    * `data_dir` - directory, where input images and annotation files in matlab format stored.
+* `style_transfer` - converts images to `StyleTransferAnnotation`.
+  * `images_dir` - path to images directory.
 
 ### Customizing dataset meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)

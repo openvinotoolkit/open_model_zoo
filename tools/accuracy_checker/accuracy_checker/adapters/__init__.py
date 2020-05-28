@@ -74,6 +74,7 @@ from .centernet import CTDETAdapter
 from .mono_depth import MonoDepthAdapter
 
 from .image_inpainting import ImageInpaintingAdapter
+from .style_transfer import StyleTransferAdapter
 
 __all__ = [
     'Adapter',
@@ -137,5 +138,6 @@ __all__ = [
 
     'MonoDepthAdapter',
 
-    'ImageInpaintingAdapter'
+    'ImageInpaintingAdapter',
+    'StyleTransferAdapter'
 ]
