@@ -101,6 +101,7 @@ The table below shows the correlation between models, demos, and supported plugi
 | road-segmentation-adas-0001                      | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
 | vehicle-detection-adas-binary-0001               | any demo that supports SSD\*-based models, above                                                               | Supported | Supported |             |                 |
 | vehicle-detection-adas-0002                      | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
+| yolo-v2-tiny-vehicle-detection-0001              | [Object Detection for YOLO V3 C++ Demo](./python_demos/object_detection_demo_yolov3_async/README.md) | Supported |           |             |                 |
 
 
 Notice that the FPGA support comes through a [heterogeneous execution](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_HETERO.html), for example, when the post-processing is happening on the CPU.

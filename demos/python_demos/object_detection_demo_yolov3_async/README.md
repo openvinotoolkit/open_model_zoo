@@ -1,11 +1,11 @@
-# Object Detection YOLO* V3 Python* Demo, Async API Performance Showcase
+# Object Detection YOLO\* V3 Python\* Demo, Async API Performance Showcase
 
-This demo showcases Object Detection with YOLO* V3 and Async API.
+This demo showcases Object Detection with Async API and one of YOLO\* V2, Tiny YOLO\* V2, or YOLO\* V3 model.
 
 To learn more about Async API features, please refer to [Object Detection for SSD Demo, Async API Performance Showcase](../../object_detection_demo_ssd_async/README.md).
 
 Other demo objectives are:
-* Video as input support via OpenCV*
+* Video as input support via OpenCV\*
 * Visualization of the resulting bounding boxes and text labels (from the `.labels` file) or class number (if no file is provided)
 * OpenCV provides resulting bounding boxes, labels, and other information.
 You can copy and paste this code without pulling Open Model Zoo demos helpers into your application
