@@ -31,12 +31,17 @@ def build_argparser():
                       default="1.2", required=False, type=str)
     args.add_argument("-i", "--input", help="Required. Url to a page with context",
                       required=True, type=str)
+    args.add_argument("-q", "--max_question_token_num", help="Optional. Maximum number of tokens in question",
+                      default=8, required=False, type=int)
     args.add_argument("-a", "--max_answer_token_num", help="Optional. Maximum number of tokens in answer",
                       default=15, required=False, type=int)
     args.add_argument("-d", "--device",
                       help="Optional. Target device to perform inference on."
                            "Default value is CPU",
                       default="CPU", type=str)
+    args.add_argument('-r', '--reshape', action='store_true',
+                      help="Optional. Auto reshape sequence length to the "
+                           "input context + max question len (to improve the speed)")
     return parser
 
 
@@ -135,6 +140,17 @@ def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
+    # load vocabulary file for model
+    log.info("Loading vocab file:\t{}".format(args.vocab))
+    with open(args.vocab, "r", encoding="utf-8") as r:
+        vocab = dict((t.rstrip("\n"), i) for i, t in enumerate(r.readlines()))
+    log.info("{} tokens loaded".format(len(vocab)))
+
+    # get context as a string (as we might need it's length for the sequence reshape)
+    context = get_context(args)
+    # encode context into token ids list
+    c_tokens_id, c_tokens_se = text_to_tokens(context, vocab)
+
     log.info("Initializing Inference Engine")
     ie = IECore()
     log.info("Device is {}".format(args.device))
@@ -148,6 +164,31 @@ def main():
     log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
     ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
 
+    if args.reshape:
+        # reshape the sequence length to the context + maximum question length (in tokens)
+        first_input_layer = next(iter(ie_encoder.inputs))
+        c = ie_encoder.inputs[first_input_layer].shape[1]
+        # find the closest multiple of 64
+        seq = min(c, round((len(c_tokens_id) + args.max_question_token_num) / 64) * 64)
+        if seq < c:
+            input_info = list(ie_encoder.inputs)
+            new_shapes = dict([])
+            for i in input_info:
+                n, c = ie_encoder.inputs[i].shape
+                new_shapes[i] = [n, seq]
+                log.info("Reshaped input {} from {} to the {}".format(i, ie_encoder.inputs[i].shape, new_shapes[i]))
+            log.info("Attempting to reshape the network to the modified inputs...")
+            try:
+                ie_encoder.reshape(new_shapes)
+                log.info("Successful!")
+            except:
+                log.info("Failed...reloading the network")
+                ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
+                log.info("Done")
+        else:
+            log.info("Skipping network reshaping,"
+                     " as (context length + max question length) exceeds the current (input) network sequence length")
+
     # check input and output names
     input_names_model = list(ie_encoder.inputs.keys())
     output_names_model = list(ie_encoder.outputs.keys())
@@ -155,24 +196,14 @@ def main():
     output_names = eval(args.output_names)
 
     if set(input_names_model) != set(input_names) or set(output_names_model) != set(output_names):
-        log.error("Input or Output names don't match")
-        log.error("     Network input->output names: {}->{}".format(input_names_model, output_names_model))
-        log.error("     Expected (from the demo cmd-line) input->output names: {}->{}".format(input_names, output_names))
+        log.error("Input or Output names do not match")
+        log.error("    Network input->output names: {}->{}".format(input_names_model, output_names_model))
+        log.error("    Expected (from the demo cmd-line) input->output names: {}->{}".format(input_names, output_names))
         raise Exception("Unexpected network input or output names")
 
     # load model to the device
     log.info("Loading model to the {}".format(args.device))
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
-
-    # load vocabulary file for model
-    log.info("Loading vocab file:\t{}".format(args.vocab))
-    with open(args.vocab, "r", encoding="utf-8") as r:
-        vocab = dict((t.rstrip("\n"), i) for i, t in enumerate(r.readlines()))
-    log.info("{} tokens loaded".format(len(vocab)))
-
-    # get context as a string and encode that  into token id list
-    context = get_context(args)
-    c_tokens_id, c_tokens_se = text_to_tokens(context, vocab)
 
     # loop on user's questions
     while True:

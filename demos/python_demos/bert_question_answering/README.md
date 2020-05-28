@@ -4,8 +4,9 @@ This README describes the Question Answering demo application that uses Squad-tu
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network to Inference engine and
-an url to the "context" text to search answers for user-provided questions.
+Upon the start-up the demo application reads command line parameters and loads a network to Inference engine.
+It also fetch data from the user-provided url to populate the "context" text.
+The text is then used to search answers for user-provided questions.
 
 
 ## Running
@@ -37,6 +38,11 @@ Options:
                         Optional. SQUAD version used for model fine tuning
   -i INPUT, --input INPUT
                         Required. Url to a page with context
+  -q MAX_QUESTION_TOKEN_NUM, --max_question_token_num MAX_QUESTION_TOKEN_NUM
+                        Optional. Maximum number of tokens in question (used with the reshape option)
+  -r, --reshape
+                        Optional. Auto reshape sequence length
+                                  to the input context + max question len (to improve the speed)
   -a MAX_ANSWER_TOKEN_NUM, --max_answer_token_num MAX_ANSWER_TOKEN_NUM
                         Optional. Maximum number of tokens in answer
   -d DEVICE, --device DEVICE
@@ -52,13 +58,19 @@ Options:
 > When using the pre-trained BERT from the model zoo (please see [Model Downloader](../../../tools/downloader/README.md)),
 > the model is already converted to the IR.
 
-## Demo Input
+## Demo Inputs
 
 The application reads text from the html page by the given url and then answers questions typed from the console.
+The model and it's parameters (inputs and outputs) is another important demo arguments.
 Notice that since order of inputs for the model does matter, the demo script checks that the inputs specified
 from the command-line match the actual network inputs.
+When reshape ('-r') reshape option is specified, the script also attempts to reshape the network to the
+length of the context plus length of the question (both in tokens), if the resulting value is smaller than the original
+sequence length that the network expects. This is performance (speed) option. Since some networks are not-reshapable the
+demo would automatically fall back to the original network if the reshaping failed.
+Please see general ['reshape intro and limitations'](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_ShapeInference.html)
 
-## Demo Output
+## Demo Outputs
 
 The application outputs found answers to the same console.
 
