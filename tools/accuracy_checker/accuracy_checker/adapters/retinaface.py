@@ -2,7 +2,12 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import ListField
 from ..postprocessor import NMS
-from ..representation import DetectionPrediction, FacialLandmarksPrediction, ContainerPrediction
+from ..representation import (
+    DetectionPrediction,
+    FacialLandmarksPrediction,
+    ContainerPrediction,
+    AttributeDetectionPrediction
+)
 
 
 class RetinaFaceAdapter(Adapter):
@@ -15,7 +20,8 @@ class RetinaFaceAdapter(Adapter):
             {
                 'bboxes_outputs': ListField(),
                 'scores_outputs': ListField(),
-                'landmarks_outputs': ListField(optional=True)
+                'landmarks_outputs': ListField(optional=True),
+                'type_scores_outputs': ListField(optional=True)
             }
         )
         return params
@@ -24,6 +30,7 @@ class RetinaFaceAdapter(Adapter):
         self.bboxes_output = self.get_value_from_config('bboxes_outputs')
         self.scores_output = self.get_value_from_config('scores_outputs')
         self.landmarks_output = self.get_value_from_config('landmarks_outputs') or []
+        self.type_scores_output = self.get_value_from_config('type_scores_outputs') or []
         _ratio = (1.,)
         self.anchor_cfg = {
             32: {'SCALES': (32, 16), 'BASE_SIZE': 16, 'RATIOS': _ratio},
@@ -35,6 +42,10 @@ class RetinaFaceAdapter(Adapter):
         self._num_anchors = dict(zip(
             self._features_stride_fpn, [anchors.shape[0] for anchors in self._anchors_fpn.values()]
         ))
+        if self.type_scores_output:
+            self.landmark_std = 0.2
+        else:
+            self.landmark_std = 1.0
 
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_predictions = self._extract_predictions(raw, frame_meta)
@@ -43,49 +54,78 @@ class RetinaFaceAdapter(Adapter):
             proposals_list = []
             scores_list = []
             landmarks_list = []
+            mask_scores_list = []
             x_scale, y_scale = meta['scale_x'], meta['scale_y']
             for _idx, s in enumerate(self._features_stride_fpn):
-                scores = raw_predictions[self.scores_output[_idx]][batch_id]
-                scores = scores[self._num_anchors[s]:, :, :]
+                anchor_num = self._num_anchors[s]
+                scores = self._get_scores(raw_predictions[self.scores_output[_idx]][batch_id], anchor_num)
                 bbox_deltas = raw_predictions[self.bboxes_output[_idx]][batch_id]
                 height, width = bbox_deltas.shape[1], bbox_deltas.shape[2]
-                anchor_num = self._num_anchors[s]
                 anchors_fpn = self._anchors_fpn[s]
                 anchors = self.anchors_plane(height, width, int(s), anchors_fpn)
                 anchors = anchors.reshape((height * width * anchor_num, 4))
-                scores = scores.transpose((1, 2, 0)).reshape(-1)
-                bbox_deltas = bbox_deltas.transpose((1, 2, 0))
-                bbox_pred_len = bbox_deltas.shape[2] // anchor_num
-                bbox_deltas = bbox_deltas.reshape((-1, bbox_pred_len))
-                proposals = self.bbox_pred(anchors, bbox_deltas)
+                proposals = self._get_proposals(bbox_deltas, anchor_num, anchors)
                 x_mins, y_mins, x_maxs, y_maxs = proposals.T
                 keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, scores, 0.5, False)
                 proposals_list.extend(proposals[keep])
                 scores_list.extend(scores[keep])
+                if self.type_scores_output:
+                    mask_scores_list.extend(self._get_mask_scores(
+                        raw_predictions[self.type_scores_output[_idx]][batch_id], anchor_num)[keep])
                 if self.landmarks_output:
-                    landmark_deltas = raw_predictions[self.landmarks_output[_idx]][batch_id]
-                    landmark_pred_len = landmark_deltas.shape[0] // anchor_num
-                    landmark_deltas = landmark_deltas.transpose((1, 2, 0)).reshape((-1, 5, landmark_pred_len // 5))
-                    landmarks = self.landmark_pred(anchors, landmark_deltas)
-                    landmarks = landmarks[keep, :]
+                    landmarks = self._get_landmarks(raw_predictions[self.landmarks_output[_idx]][batch_id],
+                                                    anchor_num, anchors)[keep, :]
                     landmarks_list.extend(landmarks)
             scores = np.reshape(scores_list, -1)
+            mask_scores = np.reshape(mask_scores_list, -1)
             labels = np.full_like(scores, 1, dtype=int)
             x_mins, y_mins, x_maxs, y_maxs = np.array(proposals_list).T # pylint: disable=E0633
             detection_representation = DetectionPrediction(
                 identifier, labels, scores, x_mins / x_scale, y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
             )
-            if not self.landmarks_output:
+            if not self.landmarks_output and not self.type_scores_output:
                 results.append(detection_representation)
                 continue
-            landmarks_x_coords = np.array(landmarks_list)[:, :, ::2].reshape(len(landmarks_list), -1) / x_scale
-            landmarks_y_coords = np.array(landmarks_list)[:, :, 1::2].reshape(len(landmarks_list), -1) / y_scale
-            landmarks_representation = FacialLandmarksPrediction(identifier, landmarks_x_coords, landmarks_y_coords)
-            results.append(ContainerPrediction({
-                'detection': detection_representation, 'landmarks_regression': landmarks_representation
-            }))
-
+            representations = {}
+            representations['face_detection'] = detection_representation
+            if self.type_scores_output:
+                representations['mask_detection'] = AttributeDetectionPrediction(
+                    identifier, labels, scores, mask_scores, x_mins / x_scale,
+                    y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
+                )
+            if self.landmarks_output:
+                landmarks_x_coords = np.array(landmarks_list)[:, :, ::2].reshape(len(landmarks_list), -1) / x_scale
+                landmarks_y_coords = np.array(landmarks_list)[:, :, 1::2].reshape(len(landmarks_list), -1) / y_scale
+                representations['landmarks_regression'] = FacialLandmarksPrediction(identifier, landmarks_x_coords,
+                                                                                    landmarks_y_coords)
+            results.append(ContainerPrediction(representations))
         return results
+
+    def _get_proposals(self, bbox_deltas, anchor_num, anchors):
+        bbox_deltas = bbox_deltas.transpose((1, 2, 0))
+        bbox_pred_len = bbox_deltas.shape[2] // anchor_num
+        bbox_deltas = bbox_deltas.reshape((-1, bbox_pred_len))
+        proposals = self.bbox_pred(anchors, bbox_deltas)
+        return proposals
+
+    @staticmethod
+    def _get_scores(scores, anchor_num):
+        scores = scores[anchor_num:, :, :]
+        scores = scores.transpose((1, 2, 0)).reshape(-1)
+        return scores
+
+    @staticmethod
+    def _get_mask_scores(type_scores, anchor_num):
+        mask_scores = type_scores[anchor_num * 2:, :, :]
+        mask_scores = mask_scores.transpose((1, 2, 0)).reshape(-1)
+        return mask_scores
+
+    def _get_landmarks(self, landmark_deltas, anchor_num, anchors):
+        landmark_pred_len = landmark_deltas.shape[0] // anchor_num
+        landmark_deltas = landmark_deltas.transpose((1, 2, 0)).reshape((-1, 5, landmark_pred_len // 5))
+        landmark_deltas *= self.landmark_std
+        landmarks = self.landmark_pred(anchors, landmark_deltas)
+        return landmarks
 
     @staticmethod
     def bbox_pred(boxes, box_deltas):

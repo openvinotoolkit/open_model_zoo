@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2019-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ from .monocular_depth_perception import ReDWebDatasetConverter
 
 from .fashion_mnist import FashionMnistConverter
 from .inpainting import InpaintingConverter
+from .style_transfer import StyleTransferConverter
 from .wikitext2raw import Wikitext2RawConverter
 
 from  .image_processing import ImageProcessingConverter
@@ -126,6 +127,7 @@ __all__ = [
     'FashionMnistConverter',
     'InpaintingConverter',
     'mrlEyes_2018_01_Converter',
+    'StyleTransferConverter',
     'Wikitext2RawConverter',
     'ImageProcessingConverter'
 ]

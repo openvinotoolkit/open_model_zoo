@@ -747,3 +747,15 @@ datasets:
     annotation: mrlEyes_2018_01.pickle
     dataset_meta: mrlEyes_2018_01.json
     data_source: mrlEyes_2018_01
+  - name: ms_coco_style_transfer
+    data_source: val2017
+    annotation_conversion:
+      converter: style_transfer
+      images_dir: val2017
+    metrics:
+      - type: psnr
+        scale_border: 0
+        presenter: print_vector
+      - type: ssim
+        presenter: print_vector
+    annotation: style_trasfer_val2017.pickle

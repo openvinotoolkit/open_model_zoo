@@ -130,10 +130,20 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | SSD with ResNet-50 V1 FPN | [TensorFlow\*](./ssd_resnet50_v1_fpn_coco/ssd_resnet50_v1_fpn_coco.md) | ssd_resnet50_v1_fpn_coco | 178.6807 | 59.9326 |
 | SSD with ResNet 34 1200x1200 | [PyTorch\*](./ssd-resnet34-1200-onnx/ssd-resnet34-1200-onnx.md)  | ssd-resnet34-1200-onnx | 433.411 | 20.058  |
 | RetinaFace-R50            | [MXNet\*](./retinaface-resnet50/retinaface-resnet50.md) | retinaface-resnet50 | 100.8478 | 29.427 |
+| RetinaFace-Anti-Cov     | [MXNet\*](./retinaface-anti-cov/retinaface-anti-cov.md)  | retinaface-anti-cov | 2.7781 | 0.5955 |
 | YOLO v1 Tiny              | [TensorFlow.js\*](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | yolo-v1-tiny-tf | 6.9883	 |	15.8587 |
 | YOLO v2 Tiny              | [TensorFlow.js\*](./yolo-v2-tiny-tf/yolo-v2-tiny-tf.md) | yolo-v2-tiny-tf | 5.4236	 |	11.2295 |
 | YOLO v2                   | [Keras\*](./yolo-v2-tf/yolo-v2-tf.md) | yolo-v2-tf | 63.0301	 |	50.9526 |
 | YOLO v3                   | [Keras\*](./yolo-v3-tf/yolo-v3-tf.md) | yolo-v3-tf | 65.9843	 |	61.9221 |
+
+## Object attributes
+
+### Facial Landmarks
+
+| Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
+| ------------------------- | -------------- | -------------- | ------ | ------- |
+| RetinaFace-R50            | [MXNet\*](./retinaface-resnet50/retinaface-resnet50.md) | retinaface-resnet50 | 100.8478 | 29.427 |
+| RetinaFace-Anti-Cov     | [MXNet\*](./retinaface-anti-cov/retinaface-anti-cov.md)  | retinaface-anti-cov | 2.7781 | 0.5955 |
 
 ## Face Recognition
 
@@ -178,6 +188,14 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | GMCNN Inpainting          | [TensorFlow\*](./gmcnn-places2-tf/gmcnn-places2-tf.md) | gmcnn-places2-tf | 33.47Db | | |
+
+## Style Transfer
+
+Style transfer task is to transfer the style of one image to another.
+
+| Model Name                     | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
+| ------------------------------ | ---------------| -------------- | -------- | ------ | ------- |
+| fast-neural-style-mosaic-onnx  | [ONNX\*](./fast-neural-style-mosaic-onnx/fast-neural-style-mosaic-onnx.md) | fast-neural-style-mosaic-onnx | 12.04dB | 15.518 | 1.679 |
 
 ## Action Recognition
 
