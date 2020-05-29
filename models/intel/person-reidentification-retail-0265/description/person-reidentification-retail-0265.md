@@ -1,28 +1,29 @@
-# person-reidentification-retail-0300
+# person-reidentification-retail-0265
 
 ## Use Case and High-Level Description
 
 This is a person reidentification model for a general scenario. It uses a whole
 body image as an input and outputs an embedding vector to match a pair of images
-by the cosine distance. The model is based on the OmniScaleNet backbone developed for fast inference.
+by the cosine distance. The model is based on the OmniScaleNet backbone with 
+Linear Context Transform (LCT) blocks developed for fast inference. 
 A single reidentification head from the 1/16 scale
-feature map outputs an embedding vector of 512 floats.
+feature map outputs an embedding vector of 256 floats.
 
 ## Example
 
-![](./person-reidentification-retail-0300.jpg)
+![](./person-reidentification-retail-0265.jpg)
 
 ## Specification
 
 | Metric                            | Value                                     |
 |-----------------------------------|-------------------------------------------|
-| Market-1501 rank@1 accuracy       | 96.3 %                                    |
-| Market-1501 mAP                   | 88.5 %                                    |
+| Market-1501 rank@1 accuracy       | 95.9 %                                    |
+| Market-1501 mAP                   | 87.7 %                                    |
 | Pose coverage                     | Standing upright, parallel to image plane |
 | Support of occluded pedestrians   | YES                                       |
 | Occlusion coverage                | <50%                                      |
-| GFlops                            | 3.5213                                    |
-| MParams                           | 5.2889                                    |
+| GFlops                            | 1.993                                     |
+| MParams                           | 2.103                                     |
 | Source framework                  | PyTorch\*                                 |
 
 The cumulative matching curve (CMC) at rank-1 is accuracy denoting the possibility
@@ -45,7 +46,7 @@ The expected color order is BGR.
 
 ## Outputs
 
-The net outputs a blob with the [1, 512] shape named `descriptor`, which can be
+The net outputs a blob with the [1, 256] shape named `descriptor`, which can be
 compared with other descriptors using the
 [cosine distance](https://en.wikipedia.org/wiki/Cosine_similarity).
 
