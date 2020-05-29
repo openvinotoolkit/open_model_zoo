@@ -19,9 +19,9 @@ This model presents a vehicle attributes classification algorithm for a traffic 
 | Supported types       | Car, van, truck, bus                         |
 | GFlops                | 0.462                                        |
 | MParams               | 11.177                                       |
-| Source framework      | Pytorch\*                                    |
+| Source framework      | PyTorch\*                                    |
 
-## Accuracy (per class)
+## Accuracy
 
 ### Color accuracy, %
 
@@ -48,11 +48,11 @@ This model presents a vehicle attributes classification algorithm for a traffic 
 
 **Type average accuracy: 81.00%**
 
-## Performance (FPS)
+## Performance
 
 ## Inputs
 
-1.	name: `input` , shape: [1x3x72x72] - An input image in following format
+1.	Name: `input` , shape: [1x3x72x72] - an input image in following format
 [1xCxHxW], where:
 
     - C - number of channels
@@ -63,7 +63,7 @@ Expected color order: BGR.
 
 ## Outputs
 
-1.	name: "color", shape: [1, 7, 1, 1] - Softmax output across seven color classes
+1.	Name: `color`, shape: [1, 7, 1, 1] - probabilities across seven color classes
     [white, gray, yellow, red, green, blue, black]
 2.	name: "type", shape: [1, 4, 1, 1] - Softmax output across four type classes
     [car, van, truck, bus]
