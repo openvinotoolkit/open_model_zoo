@@ -3,7 +3,7 @@
 This demo showcases Object Detection with SSD and new Async API.
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the app can continue doing things on the host, while accelerator is busy.
-Specifically, this demo keeps the number of Infer Requests that you have set using input flag. While some of the Infer Requests are processed, the other ones can be filled with new frame data and asynchronously started or the next output can be taken from the Infer Request and displayed.
+Specifically, this demo keeps the number of Infer Requests that you have set using `nireq` flag. While some of the Infer Requests are processed by IE, the other ones can be filled with new frame data and asynchronously started or the next output can be taken from the Infer Request and displayed.
 
 > **NOTE:** This topic describes usage of C++ implementation of the Object Detection SSD Demo Async API. For the Python* implementation, refer to [Object Detection SSD Python* Demo, Async API Performance Showcase](../python_demos/object_detection_demo_ssd_async/README.md).
 

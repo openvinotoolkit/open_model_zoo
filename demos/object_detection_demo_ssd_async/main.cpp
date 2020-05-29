@@ -307,7 +307,7 @@ int main(int argc, char *argv[]) {
         
         struct RequestResult {
             cv::Mat frame;
-            const float* output;
+            std::unique_ptr<LockedMemory<const void>> output;
             std::chrono::steady_clock::time_point startTime;
             bool isSameMode;
         };
@@ -362,13 +362,13 @@ int main(int argc, char *argv[]) {
 
                 auto requestResultItr = completedRequestResults.find(nextFrameIdToShow);
                 if (requestResultItr != completedRequestResults.end()) {
-                    requestResult = requestResultItr->second;
+                    requestResult = std::move(requestResultItr->second);
                     completedRequestResults.erase(requestResultItr);
-                } else requestResult.output = nullptr;
+                };
             }
 
-            if (requestResult.output != nullptr) {
-                const float *detections = requestResult.output;
+            if (requestResult.output) {
+                const float *detections = requestResult.output.get()->as<float*>();
 
                 nextFrameIdToShow++;
                 if (requestResult.isSameMode) {
@@ -498,12 +498,14 @@ int main(int argc, char *argv[]) {
                         std::lock_guard<std::mutex> callbackLock(mutex);
                     
                         try {
-                            LockedMemory<const void> outputMapped =
-                                as<MemoryBlob>(request->GetBlob(outputName))->rmap();
-                            
                             completedRequestResults.insert(
                                 std::pair<int, RequestResult>(nextFrameId, RequestResult{
-                                    frame, outputMapped.as<float*>(), startTime, frameMode == isUserSpecifiedMode}));
+                                    frame,
+                                    std::unique_ptr<LockedMemory<const void>>(new
+                                        LockedMemory<const void>(as<MemoryBlob>(request->GetBlob(outputName))->rmap())),
+                                    startTime,
+                                    frameMode == isUserSpecifiedMode
+                                }));
                             
                             if (isUserSpecifiedMode == frameMode) {
                                 emptyRequests.push_back(std::move(request));
