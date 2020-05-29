@@ -4,8 +4,8 @@ evaluations:
     module_config:
       network_info:
         pnet:
-          model:   public/mtcnn-p/mtcnn-p.prototxt
-          weights: public/mtcnn-p/mtcnn-p.caffemodel
+          model:   public/mtcnn/mtcnn-p/mtcnn-p.prototxt
+          weights: public/mtcnn/mtcnn-p/mtcnn-p.caffemodel
           outputs:
             probability_out: prob1
             region_out: conv4-2
@@ -25,8 +25,8 @@ evaluations:
             regions_format: hw
 
         rnet:
-          model:   public/mtcnn-r/mtcnn-r.prototxt
-          weights: public/mtcnn-r/mtcnn-r.caffemodel
+          model:   public/mtcnn/mtcnn-r/mtcnn-r.prototxt
+          weights: public/mtcnn/mtcnn-r/mtcnn-r.caffemodel
           outputs:
             probability_out: prob1
             region_out: conv5-2
@@ -37,8 +37,8 @@ evaluations:
           preprocessing:
             - type: bgr_to_rgb
         onet:
-          model:   public/mtcnn-o/mtcnn-o.prototxt
-          weights: public/mtcnn-o/mtcnn-o.caffemodel
+          model:   public/mtcnn/mtcnn-o/mtcnn-o.prototxt
+          weights: public/mtcnn/mtcnn-o/mtcnn-o.caffemodel
           outputs:
             probability_out: prob1
             region_out: conv6-2
@@ -86,8 +86,8 @@ evaluations:
     module_config:
       network_info:
         pnet:
-          model:   public/mtcnn-p/FP32/mtcnn-p.xml
-          weights: public/mtcnn-p/FP32/mtcnn-p.bin
+          model:   public/mtcnn/mtcnn-p/FP32/mtcnn-p.xml
+          weights: public/mtcnn/mtcnn-p/FP32/mtcnn-p.bin
           outputs:
             probability_out: prob1
             region_out: conv4-2
@@ -102,8 +102,8 @@ evaluations:
               factor: 0.79
 
         rnet:
-          model:   public/mtcnn-r/FP32/mtcnn-r.xml
-          weights: public/mtcnn-r/FP32/mtcnn-r.bin
+          model:   public/mtcnn/mtcnn-r/FP32/mtcnn-r.xml
+          weights: public/mtcnn/mtcnn-r/FP32/mtcnn-r.bin
           outputs:
             probability_out: prob1
             region_out: conv5-2
@@ -115,8 +115,8 @@ evaluations:
             - type: bgr_to_rgb
 
         onet:
-          model:   public/mtcnn-o/FP32/mtcnn-o.xml
-          weights: public/mtcnn-o/FP32/mtcnn-o.bin
+          model:   public/mtcnn/mtcnn-o/FP32/mtcnn-o.xml
+          weights: public/mtcnn/mtcnn-o/FP32/mtcnn-o.bin
           outputs:
             probability_out: prob1
             region_out: conv6-2
@@ -161,8 +161,8 @@ evaluations:
     module_config:
       network_info:
         pnet:
-          model:   public/mtcnn-p/FP16/mtcnn-p.xml
-          weights: public/mtcnn-p/FP16/mtcnn-p.bin
+          model:   public/mtcnn/mtcnn-p/FP16/mtcnn-p.xml
+          weights: public/mtcnn/mtcnn-p/FP16/mtcnn-p.bin
           outputs:
             probability_out: prob1
             region_out: conv4-2
@@ -177,8 +177,8 @@ evaluations:
               factor: 0.79
 
         rnet:
-          model:   public/mtcnn-r/FP16/mtcnn-r.xml
-          weights: public/mtcnn-r/FP16/mtcnn-r.bin
+          model:   public/mtcnn/mtcnn-r/FP16/mtcnn-r.xml
+          weights: public/mtcnn/mtcnn-r/FP16/mtcnn-r.bin
           outputs:
             probability_out: prob1
             region_out: conv5-2
@@ -190,8 +190,8 @@ evaluations:
             - type: bgr_to_rgb
 
         onet:
-          model:   public/mtcnn-o/FP16/mtcnn-o.xml
-          weights: public/mtcnn-o/FP16/mtcnn-o.bin
+          model:   public/mtcnn/mtcnn-o/FP16/mtcnn-o.xml
+          weights: public/mtcnn/mtcnn-o/FP16/mtcnn-o.bin
           outputs:
             probability_out: prob1
             region_out: conv6-2
