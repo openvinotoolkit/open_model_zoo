@@ -390,7 +390,7 @@ class ConfigReader:
     @staticmethod
     def _provide_cmd_arguments(arguments, config, mode):
         def _add_subset_specific_arg(dataset_entry):
-            if 'shuffle' in arguments:
+            if 'shuffle' in arguments and arguments.shuffle is not None:
                 dataset_entry['shuffle'] = arguments.shuffle
 
             if 'subsample_size' in arguments and arguments.subsample_size is not None:

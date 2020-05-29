@@ -56,7 +56,7 @@ def build_argparser():
     return parser
 
 
-def make_subset(annotation, size, seed=666):
+def make_subset(annotation, size, seed=666, shuffle=True):
     def make_subset_pairwise(annotation, size):
         def get_pairs(pairs_list):
             pairs_set = OrderedSet()
@@ -100,7 +100,10 @@ def make_subset(annotation, size, seed=666):
     if isinstance(annotation[-1], ReIdentificationClassificationAnnotation):
         return make_subset_pairwise(annotation, size)
 
-    return list(np.random.choice(annotation, size=size, replace=False))
+    if shuffle:
+        return list(np.random.choice(annotation, size=size, replace=False))
+    else:
+        return annotation[:size]
 
 
 def main():
