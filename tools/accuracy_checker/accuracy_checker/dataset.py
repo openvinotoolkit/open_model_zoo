@@ -72,9 +72,9 @@ class Dataset:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
 
         subsample_size = self._config.get('subsample_size')
-        shuffle = self._config.get('shuffle', True)
         if subsample_size is not None:
             subsample_seed = self._config.get('subsample_seed', 666)
+            shuffle = self._config.get('shuffle', True)
 
             annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
 
