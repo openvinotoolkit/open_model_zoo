@@ -19,7 +19,10 @@ from pathlib import Path
 import warnings
 
 from .annotation_converters import BaseFormatConverter, save_annotation, make_subset, analyze_dataset
-from .config import ConfigValidator, StringField, PathField, ListField, DictField, BaseField, NumberField, ConfigError, BoolField
+from .config import (
+    ConfigValidator, StringField, PathField, ListField,
+    DictField, BaseField, NumberField, ConfigError, BoolField
+)
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
 from .representation import BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
 from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS
