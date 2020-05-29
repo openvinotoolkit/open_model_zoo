@@ -54,10 +54,9 @@ This model presents a vehicle attributes classification algorithm for a traffic 
 
 1.	Name: `input` , shape: [1x3x72x72] - an input image in following format
 [1xCxHxW], where:
-
-    - C - number of channels
-    - H - image height
-    - W - image width
+- C - number of channels
+- H - image height
+- W - image width
 
 Expected color order: BGR.
 
