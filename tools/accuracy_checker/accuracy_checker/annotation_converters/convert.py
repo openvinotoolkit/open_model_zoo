@@ -73,10 +73,9 @@ def make_subset(annotation, size, seed=666, shuffle=True):
             return pairs_set
 
         subsample_set = OrderedSet()
-        if shuffle:
-            potential_ann_ind = np.random.choice(len(annotation), size, replace=False)
-        else:
-            potential_ann_ind = np.arange(size)
+
+        potential_ann_ind = np.random.choice(len(annotation), size, replace=False) if shuffle else np.arange(size)
+
         for ann_ind in potential_ann_ind: # pylint: disable=E1133
             annotation_for_subset = annotation[ann_ind]
             positive_pairs = annotation_for_subset.positive_pairs
@@ -105,10 +104,8 @@ def make_subset(annotation, size, seed=666, shuffle=True):
     if isinstance(annotation[-1], ReIdentificationClassificationAnnotation):
         return make_subset_pairwise(annotation, size, shuffle)
 
-    if shuffle:
-        return list(np.random.choice(annotation, size=size, replace=False))
-    else:
-        return annotation[:size]
+    result_annotation = list(np.random.choice(annotation, size=size, replace=False)) if shuffle else annotation[:size]
+    return result_annotation
 
 
 def main():
