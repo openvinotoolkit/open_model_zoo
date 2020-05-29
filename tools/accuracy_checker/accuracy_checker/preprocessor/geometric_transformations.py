@@ -700,3 +700,53 @@ class ImagePyramid(Preprocessor):
         image.metadata.update({'multi_infer': True, 'scales': scales})
 
         return image
+
+class WarpAffine(Preprocessor):
+    __provider__ = 'warp_affine'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'src_landmarks': ListField(
+                description='Source landmark points',
+                value_type=ListField(value_type=int)
+            ),
+            'dst_landmarks': ListField(
+                description='Destination landmark points',
+                value_type=ListField(value_type=int)
+            )
+        })
+        return parameters
+    
+    def configure(self):
+        self.src_landmarks = self.get_value_from_config('src_landmarks')
+        self.dst_landmarks = self.get_value_from_config('dst_landmarks')
+        self.validate(self.src_landmarks, self.dst_landmarks)
+    
+    def validate(self, point1, point2):
+        if len(self.src_landmarks) != len(self.dst_landmarks):
+            raise Exception('To align points, number of src landmarks and dst landmarks must match')
+        if len(self.src_landmarks) <= 0:
+            raise Exception('One or more landmark points are required')
+        if not all(len(c) == 2 for c in self.src_landmarks) or \
+            not all(len(c) == 2 for c in self.dst_landmarks):
+            raise Exception('Coordinate values must be a list of size 2')
+
+    def process(self, image, annotation_meta=None):
+        is_simple_case = not isinstance(image.data, list)
+        
+        def process_data(data):
+            height, width, _ = data.shape
+            src = np.array(self.src_landmarks, dtype=np.float32)
+            dst = np.array(self.dst_landmarks, dtype=np.float32)
+            M = cv2.estimateAffinePartial2D(src, dst, method=cv2.LMEDS)[0]
+            data = cv2.warpAffine(data, M, (height, width), borderValue=0.0).copy()
+            return data
+
+        if is_simple_case:
+            image.data = process_data(image.data)
+            return image
+        
+        image.data = [process_data(images) for images in image.data]
+        return image

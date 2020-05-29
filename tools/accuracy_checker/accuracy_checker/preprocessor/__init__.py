@@ -28,7 +28,8 @@ from .geometric_transformations import (
     Tiling,
     Crop3D,
     TransformedCropWithAutoScale,
-    ImagePyramid
+    ImagePyramid,
+    WarpAffine
 )
 from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
@@ -55,6 +56,7 @@ __all__ = [
     'CropBraTS',
     'TransformedCropWithAutoScale',
     'ImagePyramid',
+    'WarpAffine',
 
     'BgrToGray',
     'BgrToRgb',
