@@ -162,7 +162,7 @@ class TestAnnotationConversion:
             'accuracy_checker.dataset.make_subset'
         )
         Dataset(config)
-        subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666)
+        subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666, True)
 
     def test_annoation_conversion_subset_more_than_dataset_size(self, mocker):
         addition_options = {
@@ -288,7 +288,7 @@ class TestAnnotationConversion:
             'accuracy_checker.dataset.make_subset'
         )
         Dataset(config)
-        subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666)
+        subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666, True)
 
     def test_annotation_conversion_subset_with_seed(self, mocker):
         addition_options = {
