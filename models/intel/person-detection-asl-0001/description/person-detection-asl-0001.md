@@ -36,8 +36,8 @@ Expected color order is BGR.
 The net outputs blob with shape: [N, 5], where N is the number of detected
 bounding boxes. For each detection, the description has the format:
 [`x_min`, `y_min`, `x_max`, `y_max`, `conf`]
- - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
- - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
+ - (`x_min`, `y_min`) - coordinates of the bottom left bounding box corner
+ - (`x_max`, `y_max`) - coordinates of the top right bounding box corner.
  - `conf` - confidence for the predicted class
 
 ## Legal Information
