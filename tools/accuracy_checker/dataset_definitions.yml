@@ -726,7 +726,7 @@ datasets:
   - name: Kondate_nakayosi
     data_source: Kondate_nakayosi/test_data
     annotation_conversion:
-      converter: kondate_nakayosi_recognition
+      converter: unicode_character_recognition
       decoding_char_file: Kondate_nakayosi/kondate_nakayosi_char_list.txt
       annotation_file: Kondate_nakayosi/test_img_id_gt.txt
     annotation: kondate_nakayosi_recognition.pickle
@@ -752,3 +752,12 @@ datasets:
       - type: ssim
         presenter: print_vector
     annotation: style_trasfer_val2017.pickle
+
+  - name: SCUT_EPT
+    data_source: SCUT_EPT/test
+    annotation_conversion:
+      converter: unicode_character_recognition
+      decoding_char_file: SCUT_EPT/scut_ept_char_list.txt
+      annotation_file: SCUT_EPT/test_img_id_gt.txt
+    annotation: scut_ept_recognition.pickle
+    dataset_meta: scut_ept_recognition.json

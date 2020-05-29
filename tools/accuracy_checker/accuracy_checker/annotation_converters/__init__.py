@@ -27,7 +27,7 @@ from .vgg_face_regression import VGGFaceRegressionConverter
 from .super_resolution_converter import SRConverter, SRMultiFrameConverter, MultiTargetSuperResolutionConverter
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
-from .kondate_nakayosi import KondateNakayosiRecognitionDatasetConverter
+from .unicode_character_recognition import UnicodeCharacterRecognitionDatasetConverter
 from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter, MSCocoSingleKeypointsConverter
 from .cityscapes import CityscapesConverter
 from .ncf_converter import MovieLensConverter
@@ -89,7 +89,7 @@ __all__ = [
     'MultiTargetSuperResolutionConverter',
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
-    'KondateNakayosiRecognitionDatasetConverter',
+    'UnicodeCharacterRecognitionDatasetConverter',
     'MSCocoKeypointsConverter',
     'MSCocoSingleKeypointsConverter',
     'MSCocoDetectionConverter',

@@ -32,7 +32,7 @@ The Open Model Zoo includes the following demos:
 - [Super Resolution C++ Demo](./super_resolution_demo/README.md) - Super Resolution demo (the demo supports only images as inputs). It enhances the resolution of the input image.
 - [Text Detection C++ Demo](./text_detection_demo/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
 - [Text Spotting Python* Demo](./python_demos/text_spotting_demo/README.md) - The demo demonstrates how to run Text Spotting models.
-- [Handwritten Japanese Recognition Python* Demo](./python_demos/handwritten_japanese_recognition_demo/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models.
+- [Handwritten Text Recognition Python* Demo](./python_demos/handwritten_text_recognition_demo/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models and Handwritten Simplified Chinese Recognition models.
 
 \* Several C++ demos referenced above have simplified implementation in Python*, located in the `python_demos` directory.
 
@@ -89,7 +89,8 @@ The table below shows the correlation between models, demos, and supported plugi
 | text-detection-0003                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
 | text-detection-0004                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
 | text-recognition-0012                            | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             |                 |
-| handwritten-japanese-recognition-0001            | [Handwritten Japanese Recognition Python* Demo](./python_demos/handwritten_japanese_recognition_demo/README.md)                             | Supported        |        Supported     |        Supported     |                 |
+| handwritten-japanese-recognition-0001            | [Handwritten Text Recognition Python* Demo](./python_demos/handwritten_text_recognition_demo/README.md)                             | Supported        |        Supported     |        Supported     |                 |
+| handwritten-simplified-chinese-recognition-0001  | [Handwritten Text Recognition Python* Demo](./python_demos/handwritten_text_recognition_demo/README.md)                             | Supported        |        Supported     |        Supported     |                 |
 | gaze-estimation-adas-0002                        | [Gaze Estimation Demo](./gaze_estimation_demo/README.md)                              | Supported | Supported | Supported | Supported |
 | head-pose-estimation-adas-0001                   | [Gaze Estimation Demo](./gaze_estimation_demo/README.md)                              | Supported | Supported | Supported | Supported |
 | facial-landmarks-35-adas-0002                    | [Gaze Estimation Demo](./gaze_estimation_demo/README.md)                              | Supported | Supported | Supported | Supported |
