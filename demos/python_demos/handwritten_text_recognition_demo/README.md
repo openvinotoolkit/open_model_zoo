@@ -1,11 +1,13 @@
-# Handwritten Japanese Recognition Demo
-This example demonstrates an approach to recognize handwritten japanese text lines using OpenVINO™. This model supports all the characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html).
+# Handwritten Text Recognition Demo
+This example demonstrates an approach to recognize handwritten Japanese text lines and handwritten simplified Chinese text lines using OpenVINO™. For Japanese, this demo supports all the characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html). For simplified Chinese, it supports the characters in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release)
 
 ## How It Works
 
 The demo expects the following model in the Intermediate Representation (IR) format:
 
    * handwritten-japanese-recognition-0001
+   * handwritten-simplified-chinese-recognition-0001
+
 
 It can be your own models or pre-trained model from OpenVINO Open Model Zoo.
 In the `models.lst` are the list of appropriate models for this demo
@@ -31,11 +33,10 @@ pip install -r requirements.txt
 
 ### Command line arguments
 ```
-usage: handwritten_japanese_recognition_demo.py [-h] -m MODEL -i INPUT
-                                                [-d DEVICE] [-ni NUMBER_ITER]
-                                                [-cl CHARLIST]
-                                                [-dc DESIGNATED_CHARACTERS]
-                                                [-tk TOP_K]
+usage: handwritten_text_recognition_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
+                                            [-ni NUMBER_ITER] [-cl CHARLIST]
+                                            [-dc DESIGNATED_CHARACTERS]
+                                            [-tk TOP_K]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -51,7 +52,8 @@ Options:
   -ni NUMBER_ITER, --number_iter NUMBER_ITER
                         Optional. Number of inference iterations
   -cl CHARLIST, --charlist CHARLIST
-                        Path to the decoding char list file
+                        Path to the decoding char list file. Default is for
+                        Japanese
   -dc DESIGNATED_CHARACTERS, --designated_characters DESIGNATED_CHARACTERS
                         Optional. Path to the designated character file
   -tk TOP_K, --top_k TOP_K
@@ -62,7 +64,7 @@ Options:
 
 For example:
 ```
-python handwritten_japanese_recognition_demo.py -i data/test.png -m path/to/ir_xml/model.xml
+python handwritten_text_recognition_demo.py -i data/handwritten_japanese_test.png -m path/to/ir_xml/model.xml
 
 ```
 When the `designated_characters` argument is provided, if the output character is not included in the designated characters, the script will check Top k steps in looking up the decoded character, until a designated one is found. By doing so, the output character will be restricted to a designated region. K is set to 20 by default.
@@ -72,7 +74,7 @@ For example, if we want to restrict the output characters to only digits and hyp
 The command line:
 
 ```
-python handwritten_japanese_recognition_demo.py -i data/test.png -m path/to/ir_xml/model.xml -dc data/digit_hyphen.txt
+python handwritten_text_recognition_demo.py -i data/handwritten_japanese_test.png -m path/to/ir_xml/model.xml -dc data/digit_hyphen.txt
 
 ```
 ## Demo Output

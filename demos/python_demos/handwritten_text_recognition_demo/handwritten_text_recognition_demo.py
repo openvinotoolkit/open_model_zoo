@@ -41,7 +41,8 @@ def build_argparser():
                            "value is CPU")
     args.add_argument("-ni", "--number_iter", type=int, default=1,
                       help="Optional. Number of inference iterations")
-    args.add_argument("-cl", "--charlist", type=str, default=os.path.join(os.path.dirname(__file__), "data/kondate_nakayosi_char_list.txt"), help="Path to the decoding char list file")
+    args.add_argument("-cl", "--charlist", type=str, default=os.path.join(os.path.dirname(__file__), "data/kondate_nakayosi_char_list.txt"),
+                      help="Path to the decoding char list file. Default is for Japanese")
     args.add_argument("-dc", "--designated_characters", type=str, default=None, help="Optional. Path to the designated character file")
     args.add_argument("-tk", "--top_k", type=int, default=20, help="Optional. Top k steps in looking up the decoded character, until a designated one is found")
     return parser
