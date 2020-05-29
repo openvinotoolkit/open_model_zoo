@@ -26,7 +26,8 @@ from .overlap import Overlap, IOA
 from ..config import BoolField, NumberField, StringField, ConfigError
 from ..representation import (
     DetectionAnnotation, DetectionPrediction,
-    ActionDetectionPrediction, ActionDetectionAnnotation
+    ActionDetectionPrediction, ActionDetectionAnnotation,
+    AttributeDetectionPrediction, AttributeDetectionAnnotation
 )
 from .metric import Metric, FullDatasetEvaluationMetric, PerImageEvaluationMetric
 
@@ -147,8 +148,8 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
 
     __provider__ = 'map'
 
-    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
-    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation, AttributeDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction, AttributeDetectionPrediction)
 
     @classmethod
     def parameters(cls):
