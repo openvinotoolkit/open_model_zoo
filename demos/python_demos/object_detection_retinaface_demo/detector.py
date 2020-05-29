@@ -55,12 +55,6 @@ class Detector(object):
         scale_x = self.input_width/width
         scale_y = self.input_height/height
         postprocessor = RetinaFacePostprocessor(self._detect_masks)
-        detections = postprocessor.process_output(output, scale_x, scale_y)
-
-        keep = detections['face_detection'][0] >= self.face_prob_threshold
-        detections['face_detection'] = [item[keep] for item in detections['face_detection']]
-        detections['landmarks_regression'] = [item[keep] for item in detections['landmarks_regression']]
-        if self._detect_masks:
-            detections['mask_detection'] = detections['mask_detection'][keep]
+        detections = postprocessor.process_output(output, scale_x, scale_y, self.face_prob_threshold)
         return detections, self._detect_masks
 

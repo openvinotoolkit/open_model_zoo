@@ -110,7 +110,7 @@ class RetinaFacePostprocessor(object):
 
         return keep
 
-    def process_output(self, raw_output, scale_x, scale_y):
+    def process_output(self, raw_output, scale_x, scale_y, face_prob_threshold):
         bboxes_outputs = [raw_output[name][0] for name in raw_output if re.search('.bbox.', name)]
         bboxes_outputs.sort(key=lambda x: x.shape[1])
 
@@ -136,27 +136,35 @@ class RetinaFacePostprocessor(object):
             anchors = self.anchors_plane(height, width, int(s), anchors_fpn)
             anchors = anchors.reshape((height * width * anchor_num, 4))
             proposals = self._get_proposals(bbox_deltas, anchor_num, anchors)
-            x_mins, y_mins, x_maxs, y_maxs = proposals.T
-            keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, scores, 0.5)
-            proposals_list.extend(proposals[keep])
-            scores_list.extend(scores[keep])
-            landmarks = self._get_landmarks(landmarks_outputs[idx], anchor_num, anchors)[keep, :]
-            landmarks_list.extend(landmarks)
+            threshold_mask = scores >= face_prob_threshold
+            proposals, scores = proposals[threshold_mask, :], scores[threshold_mask]
+            if scores.size != 0:
+                x_mins, y_mins, x_maxs, y_maxs = proposals.T
+                keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, scores, 0.5)
+                proposals_list.extend(proposals[keep])
+                scores_list.extend(scores[keep])
+                landmarks = self._get_landmarks(landmarks_outputs[idx], anchor_num, anchors)[threshold_mask, :]
+                landmarks_list.extend(landmarks[keep, :])
+                if self._detect_masks:
+                    mask_scores_list.extend(self._get_mask_scores(type_scores_outputs[idx],
+                        anchor_num)[threshold_mask][keep])
+        output = {
+            'face_detection': [],
+            'landmarks_regression': []
+        }
+        if len(scores_list) != 0:
+            scores = np.reshape(scores_list, -1)
+            mask_scores = np.reshape(mask_scores_list, -1)
+            x_mins, y_mins, x_maxs, y_maxs = np.array(proposals_list).T # pylint: disable=E0633
+            detections = [scores, x_mins / scale_x, y_mins / scale_y, x_maxs / scale_x, y_maxs / scale_y]
+
+            output['face_detection'] = detections
             if self._detect_masks:
-                mask_scores_list.extend(self._get_mask_scores(type_scores_outputs[idx], anchor_num)[keep])
-        scores = np.reshape(scores_list, -1)
-        mask_scores = np.reshape(mask_scores_list, -1)
-        x_mins, y_mins, x_maxs, y_maxs = np.array(proposals_list).T # pylint: disable=E0633
-        detections = [scores, x_mins / scale_x, y_mins / scale_y, x_maxs / scale_x, y_maxs / scale_y]
+                output['mask_detection'] = mask_scores
 
-        output = {}
-        output['face_detection'] = detections
-        if self._detect_masks:
-            output['mask_detection'] = mask_scores
-
-        landmarks_x_coords = np.array(landmarks_list)[:, :, ::2].reshape(len(landmarks_list), -1) / scale_x
-        landmarks_y_coords = np.array(landmarks_list)[:, :, 1::2].reshape(len(landmarks_list), -1) / scale_y
-        output['landmarks_regression'] = [landmarks_x_coords, landmarks_y_coords]
+            landmarks_x_coords = np.array(landmarks_list)[:, :, ::2].reshape(len(landmarks_list), -1) / scale_x
+            landmarks_y_coords = np.array(landmarks_list)[:, :, 1::2].reshape(len(landmarks_list), -1) / scale_y
+            output['landmarks_regression'] = [landmarks_x_coords, landmarks_y_coords]
         return output
 
     def _get_proposals(self, bbox_deltas, anchor_num, anchors):
