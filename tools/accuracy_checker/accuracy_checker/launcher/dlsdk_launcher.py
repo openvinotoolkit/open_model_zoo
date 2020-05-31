@@ -45,9 +45,15 @@ except ImportError:
     get_cpu_info = None
 
 try:
-    from openvino.inference_engine import IEBlob, IETensorDesc
+    from openvino.inference_engine import Blob, TensorDesc
 except ImportError:
-    IEBlob, IETensorDesc = None, None
+    try:
+        # old structures names compatibilities
+        from openvino.inference_engine import IEBlob, IETensorDesc
+        Blob = IEBlob
+        TensorDesc = IETensorDesc
+    except ImportError:
+        Blob, TensorDesc = None, None
 
 
 HETERO_KEYWORD = 'HETERO:'
@@ -286,9 +292,10 @@ class DLSDKLauncher(Launcher):
             inputs in NCHW format.
         """
         if self.network is None:
-            return self.exec_network.inputs
-
-        return self.network.inputs
+            has_info = hasattr(self.exec_network, 'input_info')
+            return self.exec_network.inputs if not has_info else self.exec_network.input_info
+        has_info = hasattr(self.network, 'input_info')
+        return self.network.inputs if not has_info else self.network.input_info
 
     @property
     def batch(self):
@@ -312,14 +319,16 @@ class DLSDKLauncher(Launcher):
                 input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
             if self._use_set_blob:
+                has_info = hasattr(self.exec_network, 'input_info')
                 for key, input_data in infer_inputs.items():
-                    layout = self._target_layout_mapping.get(key, self.exec_network.inputs[key].layout)
-                    tensor_desc = IETensorDesc(
-                        self.exec_network.inputs[key].precision,
-                        self.exec_network.inputs[key].shape,
+                    ie_input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+                    layout = self._target_layout_mapping.get(key, ie_input_info[key].layout)
+                    tensor_desc = TensorDesc(
+                        ie_input_info[key].precision,
+                        ie_input_info[key].shape,
                         layout
                     )
-                    self.exec_network.requests[0].set_blob(key, IEBlob(tensor_desc, input_data))
+                    self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data))
             result = self.exec_network.infer(infer_inputs) if not self._use_set_blob else self.exec_network.infer()
             results.append(result)
 
@@ -591,11 +600,13 @@ class DLSDKLauncher(Launcher):
     def _set_batch_size(self, batch_size):
         # in some cases we can not use explicit property for setting batch size, so we need to use reshape instead
         # save const inputs without changes
+        has_info = hasattr(self.network, 'input_info')
+        ie_input_info = self.network.input_info if has_info else self.network.inputs
         const_inputs_shapes = {
-            input_name: self.network.inputs[input_name].shape for input_name in self.const_inputs
+            input_name: ie_input_info[input_name].shape for input_name in self.const_inputs
         }
         new_non_const_input_shapes = {}
-        for layer_name, layer in self.network.inputs.items():
+        for layer_name, layer in ie_input_info.items():
             if layer_name in const_inputs_shapes:
                 continue
             layer_shape = layer.shape
@@ -626,7 +637,7 @@ class DLSDKLauncher(Launcher):
         layout_mismatch = (
             data_layout is not None and len(input_layout) == len(data_layout) and input_layout != data_layout
         )
-        if layout_mismatch and IEBlob is not None and self.network is None:
+        if layout_mismatch and Blob is not None and self.network is None:
             self._target_layout_mapping[input_blob] = data_layout
             self._use_set_blob = True
             return data
@@ -771,8 +782,10 @@ class DLSDKLauncher(Launcher):
             self.network = None
             self.exec_network = self.ie_core.import_network(str(self._model), self._device)
             self.original_outputs = list(self.exec_network.outputs.keys())
-            first_input = next(iter(self.exec_network.inputs))
-            input_info = self.exec_network.inputs[first_input]
+            has_info = hasattr(self.exec_network, 'input_info')
+            ie_input_info = self.exec_network.inputs if not has_info else self.exec_network.input_info
+            first_input = next(iter(ie_input_info))
+            input_info = ie_input_info[first_input]
             batch_pos = input_info.layout.find('N')
             self._batch = input_info.shape[batch_pos] if batch_pos != -1 else 1
             return
@@ -870,13 +883,20 @@ class DLSDKLauncher(Launcher):
         return self._align_data_shape(data, layer_name, layout)
 
     def _set_precision(self):
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
         config_inputs = self.config.get('inputs', [])
         for input_config in config_inputs:
             if 'precision' in input_config:
                 if self.network:
-                    self.network.inputs[input_config['name']].precision = input_config['precision']
+                    if not has_info:
+                        self.network.inputs[input_config['name']].precision = input_config['precision']
+                    else:
+                        self.network.input_info[input_config['name']].precision = input_config['precision']
                 else:
-                    self.exec_network.inputs[input_config['name']].precision = input_config['precision']
+                    if not has_info:
+                        self.exec_network.inputs[input_config['name']].precision = input_config['precision']
+                    else:
+                        self.exec_network.input_info[input_config['name']].precision = input_config['precision']
 
     def _print_input_output_info(self):
         print_info('Input info:')
