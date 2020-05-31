@@ -121,6 +121,7 @@ Accuracy Checker supports following set of preprocessors:
 * `clip_audio` - slices audio into several parts with equal duration
   * `duration` - sets duration in seconds
   * `max_clips` - sets the maximum number of clips (by default `1`)
+* `audio_normalization` - normalize audio record with mean sample subtraction and division on standard deviation of samples.
 * `similarity_transform_box` - apply to image similarity transformation to get rectangle region stored in annotation metadata/
     * `box_scale` - box scale factor (Optional, default 1).
     * `dst_width` and `dst_height` are destination width and height for transformed image respectively.

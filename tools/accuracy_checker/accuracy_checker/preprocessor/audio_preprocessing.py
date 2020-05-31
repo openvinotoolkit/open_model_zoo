@@ -97,3 +97,14 @@ class ClipAudio(Preprocessor):
         image.metadata['multi_infer'] = True
 
         return image
+
+
+class NormalizeAudio(Preprocessor):
+    __provider__ = 'audio_normalization'
+
+    def process(self, image, annotation_meta=None):
+        sound = image.data
+        sound = (sound - np.mean(sound)) / (np.std(sound) + 1e-15)
+        image.data = sound
+
+        return image
