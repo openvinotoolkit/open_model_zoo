@@ -2,9 +2,9 @@
 
 ## Use Case and High-Level Description
 
-This is the UNet model that is designed to perform semantic segmentation. The model has been trained on the CamVid dataset from scratch using PyTorch framework. Training used median frequency balancing for class weighing. For details about the original floating point model, check out the [paper](https://arxiv.org/abs/1505.04597).
+This is a U-Net model that is designed to perform semantic segmentation. The model has been trained on the CamVid dataset from scratch using PyTorch framework. Training used median frequency balancing for class weighing. For details about the original floating-point model, check out [U-Net: Convolutional Networks for Biomedical Image Segmentation](https://arxiv.org/abs/1505.04597).
 
-The model input is a blob that consists of a single image of "1x3x368x480" in BGR order. The pixel values are integers in the [0, 255] range.
+The model input is a blob that consists of a single image of `1x3x368x480` in the BGR order. The pixel values are integers in the [0, 255] range.
 
 The model output for `unet-camvid-onnx-0001` is the per-pixel probabilities of each input pixel belonging to one of the 12 classes of the CamVid dataset.
 
@@ -18,7 +18,7 @@ The model output for `unet-camvid-onnx-0001` is the per-pixel probabilities of e
 
 ## Accuracy
 
-The quality metrics were calculated on the CamVid validation dataset. The 'unlabeled' class had been ignored during metrics calculation.
+The quality metrics were calculated on the CamVid validation dataset. The `unlabeled` class had been ignored during metrics calculation.
 
 | Metric                    | Value         |
 |---------------------------|---------------|
@@ -48,7 +48,7 @@ Channel order is `BGR`
 Semantic segmentation class probabilities map, shape -`1,12,368,480`, output data format is `B,C,H,W` where:
 
 - `B` - batch size
-- `C` - predicted probabilities of input pixel belonging to class `C` in  [0, 1] range
+- `C` - predicted probabilities of input pixel belonging to class `C` in  the [0, 1] range
 - `H` - horizontal coordinate of the input pixel
 - `W` - vertical coordinate of the input pixel
 

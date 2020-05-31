@@ -18,8 +18,11 @@ from pathlib import Path
 from functools import singledispatch
 from collections import OrderedDict, namedtuple
 import re
+import wave
+
 import cv2
 import numpy as np
+from numpy.lib.npyio import NpzFile
 
 try:
     import tensorflow as tf
@@ -35,6 +38,12 @@ try:
     import nibabel as nib
 except ImportError:
     nib = None
+
+try:
+    import pydicom
+except ImportError:
+    pydicom = None
+
 
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
@@ -344,13 +353,36 @@ class NiftiImageReader(BaseReader):
 
         return image
 
+class NumpyReaderConfig(ConfigValidator):
+    type = StringField(optional=True)
+    keys = StringField(optional=True, default="")
 
 class NumPyReader(BaseReader):
     __provider__ = 'numpy_reader'
 
-    def read(self, data_id):
-        return np.load(str(self.data_source / data_id))
+    def validate_config(self):
+        if self.config:
+            config_validator = NumpyReaderConfig('numpy_reader_config')
+            config_validator.validate(self.config)
 
+    def configure(self):
+        self.keys = self.config.get('keys', "") if self.config else ""
+        self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
+
+    def read(self, data_id):
+        data = np.load(str(self.data_source / data_id))
+
+        if not isinstance(data, NpzFile):
+            return data
+
+        if len(self.keys) > 0:
+            res = []
+            for k in self.keys:
+                res.append(data[k])
+            return res
+
+        key = next(iter(data.keys()))
+        return data[key]
 
 class TensorflowImageReader(BaseReader):
     __provider__ = 'tf_imread'
@@ -405,3 +437,45 @@ class AnnotationFeaturesReader(BaseReader):
     def reset(self):
         self.subset = range(len(self.data_source))
         self.counter = 0
+
+
+class WavReader(BaseReader):
+    __provider__ = 'wav_reader'
+
+    _samplewidth_types = {
+        1: np.uint8,
+        2: np.int16
+    }
+
+    def read(self, data_id):
+        with wave.open(str(self.data_source / data_id), "rb") as wav:
+            sample_rate = wav.getframerate()
+            sample_width = wav.getsampwidth()
+            nframes = wav.getnframes()
+            data = wav.readframes(nframes)
+            if self._samplewidth_types.get(sample_width):
+                data = np.frombuffer(data, dtype=self._samplewidth_types[sample_width])
+            else:
+                raise RuntimeError("Reader {} coudn't process file {}: unsupported sample width {}"
+                                   "(reader only supports {})"
+                                   .format(self.__provider__, str(self.data_source / data_id),
+                                           sample_width, [*self._samplewidth_types.keys()]))
+            data = data.reshape(-1, wav.getnchannels()).T
+
+        return data, {'sample_rate': sample_rate}
+
+    def read_item(self, data_id):
+        return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)
+
+
+class DicomReader(BaseReader):
+    __provider__ = 'dicom_reader'
+
+    def __init__(self, data_source, config=None, **kwargs):
+        super().__init__(data_source, config)
+        if pydicom is None:
+            raise ImportError('dicom backend for reading requires pydicom. Please install it before usage.')
+
+    def read(self, data_id):
+        dataset = pydicom.dcmread(str(self.data_source / data_id))
+        return dataset.pixel_array

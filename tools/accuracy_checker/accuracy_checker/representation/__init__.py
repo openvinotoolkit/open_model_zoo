@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+
 from .base_representation import BaseRepresentation
 from .classification_representation import (
     Classification,
@@ -25,6 +26,8 @@ from .detection_representation import (
     Detection,
     DetectionAnnotation,
     DetectionPrediction,
+    AttributeDetectionAnnotation,
+    AttributeDetectionPrediction,
     ActionDetectionAnnotation,
     ActionDetectionPrediction
 )
@@ -40,7 +43,8 @@ from .segmentation_representation import (
     BrainTumorSegmentationAnnotation,
     BrainTumorSegmentationPrediction,
     CoCoInstanceSegmentationAnnotation,
-    CoCocInstanceSegmentationPrediction
+    CoCocInstanceSegmentationPrediction,
+    OAR3DTilingSegmentationAnnotation,
 )
 from .character_recognition_representation import (
     CharacterRecognition,
@@ -67,11 +71,15 @@ from .nlp_representation import (
     MachineTranslationPrediction,
     QuestionAnsweringAnnotation,
     QuestionAnsweringPrediction,
-    TextClassificationAnnotation
+    TextClassificationAnnotation,
+    LanguageModelingAnnotation,
+    LanguageModelingPrediction
 )
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
+from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
 
 from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPrediction
+from .image_processing import ImageProcessingAnnotation, ImageProcessingPrediction
 
 __all__ = [
     'BaseRepresentation',
@@ -85,6 +93,8 @@ __all__ = [
     'DetectionAnnotation',
     'DetectionPrediction',
 
+    'AttributeDetectionAnnotation',
+    'AttributeDetectionPrediction',
     'ActionDetectionAnnotation',
     'ActionDetectionPrediction',
 
@@ -98,6 +108,7 @@ __all__ = [
 
     'BrainTumorSegmentationAnnotation',
     'BrainTumorSegmentationPrediction',
+    'OAR3DTilingSegmentationAnnotation',
 
     'CoCoInstanceSegmentationAnnotation',
     'CoCocInstanceSegmentationPrediction',
@@ -122,6 +133,12 @@ __all__ = [
 
     'SuperResolutionAnnotation',
     'SuperResolutionPrediction',
+    'ImageInpaintingAnnotation',
+    'ImageInpaintingPrediction',
+    'ImageProcessingAnnotation',
+    'ImageProcessingPrediction',
+    'StyleTransferAnnotation',
+    'StyleTransferPrediction',
 
     'TextDetectionAnnotation',
     'TextDetectionPrediction',
@@ -140,9 +157,10 @@ __all__ = [
     'QuestionAnsweringAnnotation',
     'QuestionAnsweringPrediction',
     'TextClassificationAnnotation',
+    'LanguageModelingAnnotation',
+    'LanguageModelingPrediction',
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',
-    'ImageInpaintingAnnotation',
-    'ImageInpaintingPrediction'
+
 ]

@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/face-detection-0104.xml
-    size: 167648
-    sha256: e32e9ad585b0d4b0e1347279dbed12a23c600854cf418fbe706966add763fc33
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-detection-0104/FP32/face-detection-0104.xml
+    size: 167625
+    sha256: 8c187be22cf6793b398b9409f52fedbf20c8dc01ad364c810bf61d51e11d7566
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/face-detection-0104/FP32/face-detection-0104.xml
   - name: FP32/face-detection-0104.bin
     size: 7269188
     sha256: 1fdafd7f403883ccd179a8fd39f23d4b341c6cb4ee45b985114267c071f2a0ec
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-detection-0104/FP32/face-detection-0104.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/face-detection-0104/FP32/face-detection-0104.bin
   - name: FP16/face-detection-0104.xml
-    size: 167585
-    sha256: 7b5e285545a69e0939729851774af06e42eb0779f1e14665278b1a2ea8e19854
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-detection-0104/FP16/face-detection-0104.xml
+    size: 167562
+    sha256: c8ddcd708bd19b4c8672bdbb88e392355c988b02d83ac169cb460e53390c2e0e
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/face-detection-0104/FP16/face-detection-0104.xml
   - name: FP16/face-detection-0104.bin
     size: 3634646
     sha256: 391cf1204e817eed44a5e1cd7ff2b192ccf25db278fb1eb1f25a552247b61c2a
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-detection-0104/FP16/face-detection-0104.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/face-detection-0104/FP16/face-detection-0104.bin
   - name: FP16-INT8/face-detection-0104.xml
     size: 474798
-    sha256: 9c1e7819af832b849ef7778618e3b1fd13b0734434901a4bafcf3e7d059c8f9f
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-detection-0104/FP16-INT8/face-detection-0104.xml
+    sha256: dabb9c352f13449ceaede9be7516bbab3f3403065e06979adffaabfedebd650a
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/face-detection-0104/FP16-INT8/face-detection-0104.xml
   - name: FP16-INT8/face-detection-0104.bin
     size: 1921737
     sha256: 17cffa97734666ebd2c444a76fbfd3304f3f8df6fe0b9792dbd4e31d1b5ae038
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/face-detection-0104/FP16-INT8/face-detection-0104.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/face-detection-0104/FP16-INT8/face-detection-0104.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -55,6 +55,19 @@ models:
         weights: public/resnet-18-pytorch/FP16/resnet-18-pytorch.bin
         adapter: classification
 
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   public/resnet-18-pytorch/FP32-INT8/resnet-18-pytorch.xml
+        weights: public/resnet-18-pytorch/FP32-INT8/resnet-18-pytorch.bin
+        adapter: classification
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   public/resnet-18-pytorch/FP16-INT8/resnet-18-pytorch.xml
+        weights: public/resnet-18-pytorch/FP16-INT8/resnet-18-pytorch.bin
+        adapter: classification
+
     datasets:
       - name: imagenet_1000_classes
         reader: pillow_imread

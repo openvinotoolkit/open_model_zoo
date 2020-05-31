@@ -20,8 +20,12 @@ shapely
 nibabel
 scipy
 
+# dicom images reading
+pydicom
+
 # nlp, tokenization
 sentencepiece
+tokenizers
 
 # editdistance calculation
 editdistance

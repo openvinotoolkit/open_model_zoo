@@ -116,3 +116,9 @@ Accuracy Checker supports following set of preprocessors:
     * `scipy_imread` - read images using similar approach as in `scipy.misc.imread`.
     * `numpy_reader` - read numpy dumped files.
     * `tf_imread`- read images using TensorFlow. Default color space is RGB. Requires TensorFlow installation.
+* `resample_audio` - converts audio to new sample rate
+  * `sample_rate` - sets new sample rate
+* `clip_audio` - slices audio into several parts with equal duration
+  * `duration` - sets duration in seconds
+  * `max_clips` - sets the maximum number of clips (by default `1`)
+* `audio_normalization` - normalize audio record with mean sample subtraction and division on standard deviation of samples.
