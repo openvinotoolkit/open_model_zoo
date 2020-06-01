@@ -314,8 +314,9 @@ class DLSDKModelMixin:
     @property
     def inputs(self):
         has_info = hasattr(self.exec_network, 'input_info')
-        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
-        return input_info
+        if not has_info:
+            return self.exec_network.inputs
+        return OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
 
     def release(self):
         del self.network

@@ -15,6 +15,7 @@ limitations under the License.
 """
 from pathlib import Path
 from functools import partial
+from collections import OrderedDict
 import numpy as np
 
 from ..base_evaluator import BaseEvaluator
@@ -356,7 +357,6 @@ class SequentialModel:
         texts = []
         decoder_exec_net = self.recognizer_decoder.exec_network
         has_info = hasattr(decoder_exec_net, 'input_info')
-        input_info = decoder_exec_net.input_info if has_info else decoder_exec_net.inputs
         for feature in text_features:
             encoder_outputs = self.recognizer_encoder.predict(identifiers, {self.recognizer_encoder_input: feature})
             if callback:
@@ -365,8 +365,12 @@ class SequentialModel:
             feature = encoder_outputs[self.recognizer_encoder_output]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
-
-            hidden_shape = input_info[self.recognizer_decoder_inputs['prev_hidden']].shape
+            if has_info:
+                hidden_shape = decoder_exec_net.input_info[
+                    self.recognizer_decoder_inputs['prev_hidden']
+                ].input_data.shape
+            else:
+                hidden_shape = decoder_exec_net.inputs[self.recognizer_decoder_inputs['prev_hidden']].shape
             hidden = np.zeros(hidden_shape)
             prev_symbol_index = np.ones((1,)) * self.sos_index
 
@@ -456,7 +460,10 @@ class DetectorDLSDKModel(BaseModel):
         if not delayed_model_loading:
             self.load_model(network_info, launcher)
             has_info = hasattr(self.exec_network, 'input_info')
-            input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+            input_info = (
+                OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
+                if has_info else self.exec_network.inputs
+            )
             self.im_info_name = [x for x in input_info if len(input_info[x].shape) == 2][0]
             self.im_data_name = [x for x in input_info if len(input_info[x].shape) == 4][0]
         self.text_feats_out = 'text_features'
@@ -482,8 +489,11 @@ class DetectorDLSDKModel(BaseModel):
     def fit_to_input(self, input_data):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         has_info = hasattr(self.exec_network, 'input_info')
-        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
-        input_data = input_data.reshape(input_info[self.im_data_name].shape)
+        input_info = (
+            self.exec_network.input_info[self.im_data_name].input_data
+            if has_info else self.exec_network.inputs[self.im_data_name]
+        )
+        input_data = input_data.reshape(input_info.shape)
 
         return input_data
 
@@ -495,7 +505,10 @@ class DetectorDLSDKModel(BaseModel):
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         has_info = hasattr(self.exec_network, 'input_info')
-        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        input_info = (
+            OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
+            if has_info else self.exec_network.inputs
+        )
         self.im_info_name = [x for x in input_info if len(input_info[x].shape) == 2][0]
         self.im_data_name = [x for x in input_info if len(input_info[x].shape) == 4][0]
 

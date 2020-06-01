@@ -384,8 +384,11 @@ class EncoderDLSDKModel(BaseModel):
     def fit_to_input(self, input_data):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         has_info = hasattr(self.exec_network, 'input_info')
-        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
-        input_data = input_data.reshape(input_info[self.input_blob].shape)
+        if has_info:
+            input_info = self.exec_network.input_info[self.input_blob].input_data
+        else:
+            input_info = self.exec_network.inputs[self.input_blob]
+        input_data = input_data.reshape(input_info.shape)
 
         return {self.input_blob: input_data}
 
@@ -461,8 +464,11 @@ class DecoderDLSDKModel(BaseModel):
 
     def fit_to_input(self, input_data):
         has_info = hasattr(self.exec_network, 'input_info')
-        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
-        input_data = np.reshape(input_data, input_info[self.input_blob].shape)
+        input_info = (
+            self.exec_network.input_info[self.input_blob].input_data
+            if has_info else self.exec_network.inputs[self.input_blob]
+        )
+        input_data = np.reshape(input_data, input_info.shape)
         return {self.input_blob: input_data}
 
     def automatic_model_search(self, network_info):

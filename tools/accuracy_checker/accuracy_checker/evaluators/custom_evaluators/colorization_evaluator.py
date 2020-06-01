@@ -348,8 +348,11 @@ class ColorizationTestModel(BaseModel):
 
     def fit_to_input(self, input_data):
         has_info = hasattr(self.exec_network, 'input_info')
-        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
-        input_data = np.reshape(input_data, input_info[self.input_blob].shape)
+        input_info = (
+            self.exec_network.input_info[self.input_blob].input_data
+            if has_info else self.exec_network.inputs[self.input_blob]
+        )
+        input_data = np.reshape(input_data, input_info.shape)
         return {self.input_blob: input_data}
 
     def set_input_and_output(self):

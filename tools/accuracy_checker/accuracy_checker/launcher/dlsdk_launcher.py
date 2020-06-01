@@ -20,6 +20,7 @@ from pathlib import Path
 import os
 import platform
 import re
+from collections import OrderedDict
 import numpy as np
 import openvino.inference_engine as ie
 
@@ -293,9 +294,13 @@ class DLSDKLauncher(Launcher):
         """
         if self.network is None:
             has_info = hasattr(self.exec_network, 'input_info')
-            return self.exec_network.inputs if not has_info else self.exec_network.input_info
+            if not has_info:
+                return self.exec_network.input
+            return OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
         has_info = hasattr(self.network, 'input_info')
-        return self.network.inputs if not has_info else self.network.input_info
+        if has_info:
+            return OrderedDict([(name, data.input_data) for name, data in self.network.input_info.items()])
+        return self.network.inputs
 
     @property
     def batch(self):
@@ -321,11 +326,11 @@ class DLSDKLauncher(Launcher):
             if self._use_set_blob:
                 has_info = hasattr(self.exec_network, 'input_info')
                 for key, input_data in infer_inputs.items():
-                    ie_input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+                    ie_input_info = self.exec_network.input_info.input_data if has_info else self.exec_network.inputs
                     layout = self._target_layout_mapping.get(key, ie_input_info[key].layout)
                     tensor_desc = TensorDesc(
                         ie_input_info[key].precision,
-                        ie_input_info[key].shape,
+                        ie_input_info[key].input_data.shape,
                         layout
                     )
                     self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data))
@@ -601,7 +606,10 @@ class DLSDKLauncher(Launcher):
         # in some cases we can not use explicit property for setting batch size, so we need to use reshape instead
         # save const inputs without changes
         has_info = hasattr(self.network, 'input_info')
-        ie_input_info = self.network.input_info if has_info else self.network.inputs
+        if not has_info:
+            ie_input_info = self.network.inputs
+        else:
+            ie_input_info = OrderedDict([(name, data.input_data) for name, data in self.network.input_info.items()])
         const_inputs_shapes = {
             input_name: ie_input_info[input_name].shape for input_name in self.const_inputs
         }
@@ -783,7 +791,10 @@ class DLSDKLauncher(Launcher):
             self.exec_network = self.ie_core.import_network(str(self._model), self._device)
             self.original_outputs = list(self.exec_network.outputs.keys())
             has_info = hasattr(self.exec_network, 'input_info')
-            ie_input_info = self.exec_network.inputs if not has_info else self.exec_network.input_info
+            if has_info:
+                ie_input_info = OrderedDict([(name, data.input_data) for name, data in self.network.input_info.items()])
+            else:
+                ie_input_info = self.exec_network.inputs
             first_input = next(iter(ie_input_info))
             input_info = ie_input_info[first_input]
             batch_pos = input_info.layout.find('N')
@@ -900,8 +911,23 @@ class DLSDKLauncher(Launcher):
 
     def _print_input_output_info(self):
         print_info('Input info:')
-        network_inputs = self.network.inputs if self.network else self.exec_network.inputs
-        network_outputs = self.network.outputs if self.network else self.exec_network.outputs
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
+        if self.network:
+            if has_info:
+                network_inputs = OrderedDict(
+                    [(name, data.input_data) for name, data in self.network.input_info.items()]
+                )
+            else:
+                network_inputs = self.network.inputs
+            network_outputs = self.network.outputs
+        else:
+            if has_info:
+                network_inputs = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
+            else:
+                network_inputs = self.exec_network.inputs
+            network_outputs = self.exec_network.outputs
         for name, input_info in network_inputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(input_info.precision))
