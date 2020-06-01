@@ -46,7 +46,7 @@ Options:
     -nstreams "<integer>"     Optional. Specify count of streams.
     -nireq "<integer>"        Optional. Number of infer requests.
     -nt "<integer>"           Optional. Number of top results. Default value is 5. Must be >= 1.
-    -res "<WxH>"              Optional. Set image grid resolution in format WxH. Default value is 1920x1080.
+    -res "<WxH>"              Optional. Set image grid resolution in format WxH. Default value is 1280x720.
     -no_show                  Optional. Disable showing of processed images.
     -time "<integer>"         Optional. Time in seconds to execute program. Default is -1 (infinite time).
     -u                        Optional. List of monitors to show initially.

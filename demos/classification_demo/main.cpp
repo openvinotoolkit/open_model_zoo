@@ -233,12 +233,13 @@ int main(int argc, char *argv[]) {
 
         // --------------------------------------Configure model output---------------------------------------
         auto outputInfo = network.getOutputsInfo();
-        if (outputInfo.size() != 1) {
-            throw std::logic_error("The network should have only one output.");
+        if (outputInfo.size() < 1 || outputInfo.size() > 3) {
+            throw std::logic_error("The network has an incorrect number of outputs.");
         }
-
-        auto outputName = outputInfo.begin()->first;
-        auto outputLayerData = outputInfo.begin()->second;
+        auto outputIterator = (outputInfo.size() == 1) ? outputInfo.begin()
+                                                       : --outputInfo.end(); // for HBONet support
+        auto outputName = outputIterator->first;
+        auto outputLayerData = outputIterator->second;
         auto layerDataDims = outputLayerData->getTensorDesc().getDims();
         if (layerDataDims.size() != 2 && layerDataDims.size() != 4) {
             throw std::logic_error("Incorrect number of dimensions in model output layer. Must be 2 or 4.");
