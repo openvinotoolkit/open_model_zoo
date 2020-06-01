@@ -24,7 +24,7 @@ feature map outputs an embedding vector of 256 floats.
 | Occlusion coverage                | <50%                                      |
 | GFlops                            | 1.170                                     |
 | MParams                           | 1.234                                     |
-| Source framework                  | Caffe*                                    |
+| Source framework                  | PyTorch\*                                 |
 
 The cumulative matching curve (CMC) at rank-1 is accuracy denoting the possibility
 to locate at least one true positive in the top-1 rank.
