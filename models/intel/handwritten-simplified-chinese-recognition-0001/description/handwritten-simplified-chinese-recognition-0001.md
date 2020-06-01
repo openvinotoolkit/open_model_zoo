@@ -36,10 +36,11 @@ Note that the source image will be converted to grayscale, resized to specific h
 
 ## Outputs
 
-The net outputs a blob with the shape [125, 1, 4059] in the format [WxBxL], where:
+The net outputs a blob with the shape [125x1x4059] in the format [WxBxL], where:
   - W - output sequence length
   - B - batch size
   - L - confidence distribution across the supported symbols in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release).
+
 The network output can be decoded by CTC Greedy Decoder.
 
 ## Legal Information
