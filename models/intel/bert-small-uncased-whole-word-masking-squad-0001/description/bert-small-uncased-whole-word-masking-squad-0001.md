@@ -45,7 +45,9 @@ Input `token_type_ids`: A `1,384` sequence of integer values representing the se
 1) `1` at positions corresponding to the *tokenized premise of the question* + `[SEP]` part of the `input_ids`, and
 2) `0` at all other positions
 
-[CLS] is a special symbol added in front of the question, [SEP] is a special separator token inserted between the question and premise of the question, [PAD] is a special token used to fill the rest of the input to get given input length.
+* `CLS` is a special symbol added in front of the question.
+* `SEP` is a special separator token inserted between the question and premise of the question.
+* `PAD` is a special token used to fill the rest of the input to get given input length.
 
 ## Output
 
