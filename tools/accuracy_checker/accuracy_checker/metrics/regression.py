@@ -24,6 +24,8 @@ from ..representation import (
     RegressionPrediction,
     FacialLandmarksAnnotation,
     FacialLandmarksPrediction,
+    FacialLandmarks3DAnnotation,
+    FacialLandmarks3DPrediction,
     SuperResolutionAnnotation,
     SuperResolutionPrediction,
     GazeVectorAnnotation,
@@ -250,8 +252,8 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
 class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
     __provider__ = 'per_point_normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, )
-    prediction_types = (FacialLandmarksPrediction, )
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction)
 
     def configure(self):
         self.meta.update({
@@ -284,8 +286,8 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
     __provider__ = 'normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, )
-    prediction_types = (FacialLandmarksPrediction, )
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction)
 
     @classmethod
     def parameters(cls):
@@ -339,6 +341,52 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
             self.meta['names'].append('{}th percentile'.format(self.percentile))
 
         return result
+
+    def reset(self):
+        self.magnitude = []
+
+
+class NormalizedMeanError(PerImageEvaluationMetric):
+    __provider__ = 'nme'
+    annotation_types = (FacialLandmarks3DAnnotation, )
+    prediction_types = (FacialLandmarks3DPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'only_2d': BoolField(
+                optional=True, default=False, description="Allows metric calculation only across x and y dimensions"
+            ),
+        })
+
+        return parameters
+
+    def configure(self):
+        self.meta.update({
+            'scale': 1,
+            'postfix': ' ',
+            'data_format': '{:.4f}',
+            'target': 'higher-worse'
+        })
+        self.only_2d = self.get_value_from_config('only_2d')
+        self.magnitude = []
+
+    def update(self, annotation, prediction):
+        gt = np.array([annotation.x_values, annotation.y_values, annotation.z_values]).T
+        pred = np.array([prediction.x_values, prediction.y_values, prediction.z_values]).T
+
+        diff = np.square(gt - pred)
+        dist = np.sqrt(np.sum(diff[:, 0:2], axis=1)) if self.only_2d else np.sqrt(np.sum(diff, axis=1))
+        #dist /= len(gt)
+        normalized_result = dist / annotation.normalization_coef(self.only_2d)
+        self.magnitude.append(np.mean(normalized_result))
+
+        return np.mean(normalized_result)
+
+    def evaluate(self, annotations, predictions):
+        self.meta['names'] = ['mean']
+        return np.mean(self.magnitude)
 
     def reset(self):
         self.magnitude = []

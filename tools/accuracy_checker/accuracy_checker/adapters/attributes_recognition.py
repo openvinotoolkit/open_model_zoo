@@ -17,14 +17,15 @@ limitations under the License.
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, StringField
+from ..config import ConfigValidator, StringField, PathField
 from ..representation import (
     ContainerPrediction,
     RegressionPrediction,
     ClassificationPrediction,
     FacialLandmarksPrediction,
     MultiLabelRecognitionPrediction,
-    GazeVectorPrediction
+    GazeVectorPrediction,
+    FacialLandmarks3DPrediction
 )
 
 
@@ -225,5 +226,57 @@ class GazeEstimationAdapter(Adapter):
         raw_output = self._extract_predictions(raw, frame_meta)
         for identifier, output in zip(identifiers, raw_output[self.output_blob]):
             result.append(GazeVectorPrediction(identifier, output))
+
+        return result
+
+
+class PRNetAdapter(Adapter):
+    __provider__ = 'prnet'
+    landmarks_uv = np.array([
+        [15, 22, 26, 32, 45, 67, 91, 112, 128, 143, 164, 188, 210, 223, 229, 233, 240, 58, 71, 85, 97, 106, 149, 158,
+         170, 184, 197, 128, 128, 128, 128, 117, 122, 128, 133, 138, 78, 86, 95, 102, 96, 87, 153, 160, 169, 177, 168,
+         159, 108, 116, 124, 128, 131, 139, 146, 137, 132, 128, 123, 118, 110, 122, 128, 133, 145, 132, 128, 123],
+        [96, 118, 141, 165, 183, 190, 188, 187, 193, 187, 188, 190, 183, 165, 141, 118, 96, 49, 42, 39, 40, 42, 42, 40,
+         39, 42, 49, 59, 73, 86, 96, 111, 113, 115, 113, 111, 67, 60, 61, 65, 68, 69, 65, 61, 60, 67, 69, 68, 142, 131,
+         127, 128, 127, 131, 142, 148, 150, 150, 150, 148, 141, 135, 134, 135, 142, 143, 142, 143]])
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'landmarks_ids_file': PathField(
+                description='text file with landmarks indexes in 3D face dense pose mask',
+                optional=True
+            )
+        })
+        return params
+
+    def configure(self):
+        self.landmarks_ids_file = self.get_value_from_config('landmarks_ids_file')
+        if self.landmarks_ids_file:
+            self.landmarks_uv = np.loadtxt(str(self.landmarks_ids_file)).astype(int)
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        result = []
+        raw_output = self._extract_predictions(raw, frame_meta)
+        for identifier, pos, meta in zip(identifiers, raw_output[self.output_blob], frame_meta):
+            input_shape = next(iter(meta['input_shape'].values()))
+            if input_shape[1] == 3:
+                height, width = input_shape[2], input_shape[3]
+                pos = np.transpose(pos, (1, 2, 0))
+            else:
+                height, width = input_shape[1], input_shape[2]
+            pos *= (height * 1.1)
+            vertices = np.reshape(pos, [-1, 3]).T
+            if 'transform_matrix' in meta:
+                z = vertices[2, :].copy() / meta['transform_matrix'][0, 0]
+                vertices[2, :] = 1
+                vertices = np.dot(np.linalg.inv(meta['transform_matrix']), vertices)
+                vertices = np.vstack((vertices[:2, :], z))
+            pos = np.reshape(vertices.T, [height, width, 3])
+            kpt = pos[self.landmarks_uv[1], self.landmarks_uv[0], :]
+            x_values, y_values, z_values = kpt.T
+            z_values -= z_values.mean()
+            result.append(FacialLandmarks3DPrediction(identifier, x_values, y_values, z_values))
 
         return result
