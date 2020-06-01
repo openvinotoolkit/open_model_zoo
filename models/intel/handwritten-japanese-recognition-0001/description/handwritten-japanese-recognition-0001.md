@@ -34,7 +34,7 @@ where:
   - H - image height
   - W - image width
 
-> **NOTE:**  the source image should be resized to specific height (such as 96) while keeping aspect ratio, and right-bottom padded.
+> **NOTE:**  the source image should be resized to specific height (such as 96) while keeping aspect ratio, and the width after resizing should be no larger than 2000 and then the width should be right-bottom padded to 2000 with edge values.
 
 ## Outputs
 
