@@ -2,7 +2,14 @@
 
 ## Use Case and High-Level Description
 
-This is a small BERT-large like model distilled on SQuAD v1.1 training set from original BERT-large pretrained on lower-cased English text using Whole-Word-Masking and fine-tuned on the SQuAD v1.1 training set. The model performs question answering for English language; the input is a concatenated premise and question for the premise, and the output is the location of the answer to the question inside the premise. For details about the original model, check out [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805).
+This is a small BERT-large like model distilled on SQuAD v1.1 training set from original
+bert-large-uncased-whole-word-masking-finetuned-squad provided by the transformes library (https://github.com/huggingface/transformers).
+The model performs question answering for English language;
+the input is a concatenated premise and question for the premise,
+and the output is the location of the answer to the question inside the premise.
+For details about the original model, check out
+[BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805).
+[HuggingFace's Transformers: State-of-the-art Natural Language Processing](https://arxiv.org/abs/1910.03771).
 
 Tokenization occurs using the BERT tokenizer (see the demo code for implementation details) and the enclosed `vocab.txt` dictionary file. Input is to be lower-cased before tokenizing.
 
