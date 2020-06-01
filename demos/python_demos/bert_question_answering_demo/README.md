@@ -1,6 +1,6 @@
-# Question Answering Python* Demo
+# BERT Question Answering Python* Demo
 
-This README describes the Question Answering demo application that uses Squad-tuned BERT for inference.
+This README describes the Question Answering demo application that uses a Squad-tuned BERT model for inference.
 
 ## How It Works
 
@@ -66,8 +66,9 @@ Notice that since order of inputs for the model does matter, the demo script che
 from the command-line match the actual network inputs.
 When reshape ('-r') reshape option is specified, the script also attempts to reshape the network to the
 length of the context plus length of the question (both in tokens), if the resulting value is smaller than the original
-sequence length that the network expects. This is performance (speed) option. Since some networks are not-reshapable the
-demo would automatically fall back to the original network if the reshaping failed.
+sequence length that the network expects. This is performance (speed) and memory footprint saving option.
+Since some networks are not-reshapable (due to limitations of the internal layers) the reshaping might fail,
+so you will need to run the demo without it.
 Please see general ['reshape intro and limitations'](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_ShapeInference.html)
 
 ## Demo Outputs
@@ -81,11 +82,11 @@ You can use the following command to try the demo (assuming fp32 model from the 
     python3 question_answering_demo.py
             --vocab=<path_to_model>/vocab.txt
             --model=<path_to_model>/bert-large-uncased-whole-word-masking-squad-fp32-onnx-0001.xml
-            --input_names=['0','1','2']
-            --output_names=['3171','3172']
-            --input=https://en.wikipedia.org/wiki/Bert_(Sesame_Street)
+            --input_names="['0','1','2']"
+            --output_names="['3171','3172']"
+            --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street)"
 ```
-The demo will use a wiki-page about the Bert character to answer your question like "who is Bert", "how old is Bert", etc.
+The demo will use a wiki-page about the Bert character to answer your questions like "who is Bert", "how old is Bert", etc.
 
 ## Classifying Documents with Long Texts
 Notice that when the original "context" (text from the url) together with the question do not fit the model input
@@ -94,9 +95,9 @@ Thus, for the long texts, the network is called multiple times. The results are 
 
 ## Demo Performance
 Even though, the demo reports inference performance (by measuring wall-clock time for individual inference calls),
-it is rather baseline performance, as certain tricks likes batching,
-[throughput mode] (https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Intro_to_Performance.html).
-Please refer to the full-blown [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
+it is rather baseline performance, as certain tricks like batching,
+[throughput mode] (https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Intro_to_Performance.html) can be applied.
+Please use the full-blown [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
 for any actual performance measurements.
 
 
@@ -105,4 +106,3 @@ for any actual performance measurements.
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
 * [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
-
