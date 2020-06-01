@@ -27,22 +27,26 @@ The quality metrics were calculated on the SQuAD v1.1 dataset ("dev" split). Max
 
 ## Input
 
-Input `input_ids`: A `1,384` sequence of tokens (integer values) representing the tokenized premise and question ("input_ids"). The sequence structure is as follows (`[CLS]`, `[SEP]` and `[PAD]` should be replaced by corresponding token IDs as specified by the dictionary):
+Input `input_ids`: A `1,384` sequence of tokens (integer values) representing the tokenized premise and question (`input_ids`). The sequence structure is as follows (`[CLS]`, `[SEP]` and `[PAD]` should be replaced by corresponding token IDs as specified by the dictionary):
 `[CLS]` + *tokenized question* + `[SEP]` + *tokenized premise of the question* + `[SEP]` + (`[PAD]` tokens to pad to the maximum sequence length of 384)
 
-Input 'attention_mask': A `1,384` sequence of integer values representing the mask of valid values in the input ("input_mask"). The values of this input are are equal to:
-1) `1` at positions corresponding to the `[CLS]` + *tokenized question* + `[SEP]` + *tokenized premise of the question* + `[SEP]` part of the Input 0  (i.e. all positions except those containing the `[PAD]` tokens), and
+Input `attention_mask`: A `1,384` sequence of integer values representing the mask of valid values in the input (`input_mask`). The values of this input are are equal to:
+1) `1` at positions corresponding to the `[CLS]` + *tokenized question* + `[SEP]` + *tokenized premise of the question* + `[SEP]` part of the `input_ids`  (i.e. all positions except those containing the `[PAD]` tokens), and
 2) `0` at all other positions
 
-Input 'token_type_ids': A `1,384` sequence of integer values representing the segmentation of the Input 0 into question and premise ("segment_ids"). The values are equal to:
-1) `1` at positions corresponding to the *tokenized premise of the question* + `[SEP]` part of the Input 0, and
+Input `token_type_ids`: A `1,384` sequence of integer values representing the segmentation of the `input_ids` into question and premise (`segment_ids`). The values are equal to:
+1) `1` at positions corresponding to the *tokenized premise of the question* + `[SEP]` part of the `input_ids`, and
 2) `0` at all other positions
+
+[CLS] is a special symbol added in front of the question, [SEP] is a special separator token inserted between the question and premise of the question, [PAD] is a special token used to fill the rest of the input to get given input length.
 
 ## Output
 
-Output 'output_s': The `1, 384` floating point-valued logit scores, where i-th value (after softmax operation) corresponds to the probability of the answer to the question starting at the i-th token position of the input.
+The outputs of the net are two `1, 384` floating point-valued logit scores vectors that after soft-max operation are probabilities for start and end positions of answer in the premise of the question.
 
-Output 'output_e': Same as 'output_s', but represents the probability (after softmax operation) of the answer ending at i-th token position.
+Output `output_s`: The `1, 384` floating point-valued logit scores for start postition.
+
+Output `output_e`: The `1, 384` floating point-valued logit scores for end postition.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
