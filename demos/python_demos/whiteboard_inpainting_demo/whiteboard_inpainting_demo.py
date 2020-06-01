@@ -87,10 +87,7 @@ def main():
                         help='Optional. List of monitors to show initially')
     args = parser.parse_args()
 
-    if not osp.isfile(args.i) and not str.isdigit(args.i):
-        raise ValueError('File not found or wrong camera id: {}'.format(args.i))
-    else:
-        capture = VideoCapture(args.i)
+    capture = VideoCapture(args.i)
 
     if bool(args.m_instance_segmentation) == bool(args.m_semantic_segmentation):
         raise ValueError('Set up exactly one of segmentation models: '\
@@ -137,7 +134,6 @@ def main():
         mask = None
         if frame is not None:
             detections = segmentation.get_detections([frame])
-            print(frame_size[0])
             expand_mask(detections, frame_size[0] // 27)
             if len(detections[0]) > 0:
                 mask = detections[0][0][2]
@@ -187,6 +183,7 @@ def main():
         print('\rProcessing frame: {}, fps = {:.3}' \
             .format(frame_number, 1. / (end - start)), end="")
         frame_number += 1
+    print('')
 
     log.info(presenter.reportMeans())
     

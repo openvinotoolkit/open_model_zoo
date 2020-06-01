@@ -8,8 +8,8 @@ video so that all text on a whiteboard is visible.
 
 The demo expects one of the following models in the Intermediate Representation (IR) format:
 
-    * Instance segmentation model
-    * Semantic segmentation model
+* Instance segmentation model
+* Semantic segmentation model
 
 Use your own model or a pretrained model from the OpenVINO<sup>TM</sup> Open Model Zoo.
 Find the list of models suitable for this demo in `models.lst`. Use the
@@ -17,8 +17,8 @@ Find the list of models suitable for this demo in `models.lst`. Use the
 
 As an input, the demo application takes:
 
-    * Path to a video file
-    * Index of a web camera
+* Path to a video file
+* Index of a web camera
 
 ## Running
 
@@ -80,6 +80,6 @@ python whiteboard_inpainting_demo.py \
 
 The demo outputs original video with the processed one. Usage:
 
-    * Invert colors on the resulting frame by pressing the `i` key.
-    * Select a part of the frame to be shown in a separate window by using your left mouse button.
-    * Exit the demo by pressing `Esc`.
+* Invert colors on the resulting frame by pressing the `i` key.
+* Select a part of the frame to be shown in a separate window by using your left mouse button.
+* Exit the demo by pressing `Esc`.
