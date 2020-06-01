@@ -40,9 +40,9 @@ def build_argparser():
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU", default="CPU", type=str)
-    args.add_argument("-f_pt", "--face_prob_threshold", help="Optional. Probability threshold for face detections filtering",
+    args.add_argument("-pt_f", "--face_prob_threshold", help="Optional. Probability threshold for face detections filtering",
                       default=0.8, type=float)
-    args.add_argument("-m_pt", "--mask_prob_threshold", help="Optional. Probability threshold for mask detections filtering",
+    args.add_argument("-pt_m", "--mask_prob_threshold", help="Optional. Probability threshold for mask detections filtering",
                       default=0.2, type=float)
     args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
     args.add_argument("-u", "--utilization_monitors", default="", type=str,
