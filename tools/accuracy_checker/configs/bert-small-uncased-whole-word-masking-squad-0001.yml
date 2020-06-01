@@ -18,16 +18,7 @@ models:
             value: 'segment_ids'
 
     datasets:
-      - name: squad
-        data_source: squad_v1.1
-        annotation_conversion:
-          converter: squad
-          testing_file: squad_v1.1/dev-v1.1.json
-          vocab_file: bert-large-uncased-whole-word-masking-squad-onnx/vocab.txt
-          max_seq_length: 384
-          max_query_length: 64
-          doc_stride: 128
-          lower_case: true
+      - name: squad1_bert_uncased
         reader:
           type: annotation_features_extractor
           features:
