@@ -40,6 +40,7 @@ The net outputs a blob with the shape [125, 1, 4059] in the format [WxBxL], wher
   - W - output sequence length
   - B - batch size
   - L - confidence distribution across the supported symbols in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release).
+
 The network output can be decoded by CTC Greedy Decoder.
 
 ## Legal Information
