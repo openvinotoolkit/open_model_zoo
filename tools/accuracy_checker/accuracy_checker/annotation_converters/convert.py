@@ -53,8 +53,12 @@ def build_argparser():
         "--subsample_seed", help="Seed for generation dataset subsample", type=int, required=False, default=666
     )
     parser.add_argument('--analyze_dataset', required=False, action='store_true')
-    parser.add_argument('--shuffle', help="Allow shuffle annotation during creation a subset", required=False,
-        type=cast_to_bool, default=True
+    parser.add_argument(
+        "--shuffle",
+        help="Allow shuffle annotation during creation a subset",
+        required=False,
+        type=cast_to_bool,
+        default=True
     )
 
     return parser
