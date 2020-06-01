@@ -25,14 +25,16 @@ The network is able to recognize simplified Chinese text consisting of character
 This demo adopts [label error rate](https://dl.acm.org/doi/abs/10.1145/1143844.1143891) as the metric for accuracy.
 
 ## Inputs
-Shape: [1x1x96x2000] - An input image in the format [BxCxHxW],
+
+Grayscale image, name - `actual_input`, shape - [1x1x96x2000], format is [BxCxHxW],
+
 where:
   - B - batch size
   - C - number of channels
   - H - image height
   - W - image width
 
-Note that the source image will be converted to grayscale, resized to specific height (such as 96) while keeping aspect ratio, and right-bottom padded.
+> **NOTE:**  the source image should be resized to specific height (such as 96) while keeping aspect ratio, and right-bottom padded.
 
 ## Outputs
 
