@@ -15,8 +15,8 @@ Running the application with the <code>-h</code> option yields the following usa
 ```
 usage: object_detection_retinaface_demo.py [-h] -m MODEL
                                            [-i INPUT [INPUT ...]] [-d DEVICE]
-                                           [-f_pt FACE_PROB_THRESHOLD]
-                                           [-m_pt MASK_PROB_THRESHOLD]
+                                           [-pt_f FACE_PROB_THRESHOLD]
+                                           [-pt_m MASK_PROB_THRESHOLD]
                                            [--no_show]
                                            [-u UTILIZATION_MONITORS]
 
@@ -31,10 +31,10 @@ Options:
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
                         look for a suitable plugin for device specified.
                         Default value is CPU
-  -f_pt FACE_PROB_THRESHOLD, --face_prob_threshold FACE_PROB_THRESHOLD
+  -pt_f FACE_PROB_THRESHOLD, --face_prob_threshold FACE_PROB_THRESHOLD
                         Optional. Probability threshold for face detections
                         filtering
-  -m_pt MASK_PROB_THRESHOLD, --mask_prob_threshold MASK_PROB_THRESHOLD
+  -pt_m MASK_PROB_THRESHOLD, --mask_prob_threshold MASK_PROB_THRESHOLD
                         Optional. Probability threshold for mask detections
                         filtering
   --no_show             Optional. Don't show output
