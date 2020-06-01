@@ -97,7 +97,7 @@ class SegmentationAccuracy(SegmentationMetric):
         cm = super().update(annotation, prediction)
         result = np.diag(cm).sum() / cm.sum()
         if self.profiler:
-            self.profiler.update(annotation.identifier, result)
+            self.profiler.update(annotation.identifier, result, prediction.mask)
         return result
 
     def evaluate(self, annotations, predictions):
@@ -118,7 +118,7 @@ class SegmentationIOU(SegmentationMetric):
         if self.ignore_label is not None:
             iou = np.delete(iou, self.ignore_label)
         if self.profiler:
-            self.profiler.update(annotation.identifier, iou)
+            self.profiler.update(annotation.identifier, iou, prediction.mask)
 
         return iou
 
@@ -150,7 +150,7 @@ class SegmentationMeanAccuracy(SegmentationMetric):
         per_class_count = cm.sum(axis=1)
         acc_cls = np.divide(diagonal, per_class_count, out=np.full_like(diagonal, np.nan), where=per_class_count != 0)
         if self.profiler:
-            self.profiler.update(annotation.identifier, acc_cls)
+            self.profiler.update(annotation.identifier, acc_cls, prediction.mask)
         return acc_cls
 
     def evaluate(self, annotations, predictions):
@@ -180,7 +180,7 @@ class SegmentationFWAcc(SegmentationMetric):
         result = (freq[freq > 0] * iou[freq > 0]).sum()
 
         if self.profiler:
-            self.profiler.update(annotation.identifier, result)
+            self.profiler.update(annotation.identifier, result, prediction.mask)
 
         return result
 
