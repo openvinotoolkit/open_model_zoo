@@ -28,6 +28,7 @@ from ..representation import ReIdentificationClassificationAnnotation
 from ..utils import get_path, OrderedSet
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
+from ..utils import cast_to_bool
 
 
 def build_argparser():
@@ -52,6 +53,9 @@ def build_argparser():
         "--subsample_seed", help="Seed for generation dataset subsample", type=int, required=False, default=666
     )
     parser.add_argument('--analyze_dataset', required=False, action='store_true')
+    parser.add_argument('--shuffle', help="Allow shuffle annotation during creation a subset", required=False,
+        type=cast_to_bool, default=True
+    )
 
     return parser
 
@@ -135,7 +139,7 @@ def main():
         else:
             subsample_size = int(args.subsample)
 
-        converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed)
+        converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed, args.shuffle)
 
     if args.analyze_dataset:
         analyze_dataset(converted_annotation, meta)
