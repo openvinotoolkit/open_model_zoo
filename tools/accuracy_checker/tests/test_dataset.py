@@ -327,3 +327,19 @@ class TestAnnotationConversion:
         Dataset(config)
         annotation_saver_mock.assert_called_once_with([converted_annotation[1]], None, Path('custom'), None)
 
+    def test_annotation_conversion_subset_with_disabled_shuffle(self, mocker):
+        addition_options = {
+            'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
+            'subsample_size': 1,
+            'shuffle': False
+        }
+        config = copy_dataset_config(self.dataset_config)
+        config.update(addition_options)
+        converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
+        mocker.patch(
+            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            return_value=ConverterReturn(converted_annotation, None, None)
+        )
+        dataset = Dataset(config)
+        annotation = dataset.annotation
+        assert annotation == [converted_annotation[0]]
