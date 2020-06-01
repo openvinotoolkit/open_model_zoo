@@ -16,7 +16,7 @@ Tokenization occurs using the BERT tokenizer (see the demo code for implementati
 
 ## Accuracy
 
-The quality metrics were calculatedl on the SQuAD v1.1 dataset ("dev" split). Maximum sequence length is 384, input is lower-cased.
+The quality metrics were calculated on the SQuAD v1.1 dataset ("dev" split). Maximum sequence length is 384, input is lower-cased.
 
 | Metric                    | Value         |
 |---------------------------|---------------|
