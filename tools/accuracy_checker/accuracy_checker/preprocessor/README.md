@@ -121,3 +121,4 @@ Accuracy Checker supports following set of preprocessors:
 * `clip_audio` - slices audio into several parts with equal duration
   * `duration` - sets duration in seconds
   * `max_clips` - sets the maximum number of clips (by default `1`)
+* `audio_normalization` - normalize audio record with mean sample subtraction and division on standard deviation of samples.
