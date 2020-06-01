@@ -319,6 +319,7 @@ class DLSDKModelMixin:
         return OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
 
     def release(self):
+        self.input_feeder.release()
         del self.network
         del self.exec_network
         self.launcher.release()
