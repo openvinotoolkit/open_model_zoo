@@ -97,16 +97,16 @@ def main():
     frames_reader, delay = (VideoReader(args.input), 1) if img is None else (ImageReader(args.input), 0)
     presenter = monitors.Presenter(args.utilization_monitors, 25)
     for frame in frames_reader:
-        detections, detect_masks = detector.detect(frame)
+        detection, detect_masks = detector.detect(frame)
         presenter.drawGraphs(frame)
-        for i, (score, xmin, ymin, xmax, ymax) in enumerate(zip(*detections['face_detection'])):
-            xmin = max(0, xmin).astype(np.int)
-            ymin = max(0, ymin).astype(np.int)
-            xmax = min(frame.shape[1], xmax).astype(np.int)
-            ymax = min(frame.shape[0], ymax).astype(np.int)
+        for i, (score, xmin, ymin, xmax, ymax) in enumerate(zip(*detection.face_detection)):
+            xmin = int(max(0, xmin))
+            ymin = int(max(0, ymin))
+            xmax = int(min(frame.shape[1], xmax))
+            ymax = int(min(frame.shape[0], ymax))
             color = (255, 0, 0)
             if detect_masks:
-                if detections['mask_detection'][i] >= args.mask_prob_threshold:
+                if detection.mask_detection[i] >= args.mask_prob_threshold:
                     color = (0, 255, 0)
                 else:
                     color = (0, 0, 255)
@@ -114,8 +114,8 @@ def main():
             cv2.putText(frame, str(round(score * 100, 1)) + ' %', (xmin, ymin - 7),
                          cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
             for j in range(5):
-                x = detections['landmarks_regression'][0][i, j].astype(np.int)
-                y = detections['landmarks_regression'][1][i, j].astype(np.int)
+                x = detection.landmarks_regression[0][i, j].astype(np.int)
+                y = detection.landmarks_regression[1][i, j].astype(np.int)
                 cv2.circle(frame, (x, y), 2, (0, 255, 255), 2)
 
         cv2.putText(frame, 'summary: {:.1f} FPS'.format(

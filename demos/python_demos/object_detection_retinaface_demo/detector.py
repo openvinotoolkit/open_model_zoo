@@ -57,4 +57,3 @@ class Detector(object):
         postprocessor = RetinaFacePostprocessor(self._detect_masks)
         detections = postprocessor.process_output(output, scale_x, scale_y, self.face_prob_threshold)
         return detections, self._detect_masks
-
