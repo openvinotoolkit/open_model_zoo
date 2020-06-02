@@ -33,7 +33,6 @@ except ImportError:
 
 PairDesc = namedtuple('PairDesc', 'image1 image2 same')
 
-
 def _average_binary_score(binary_metric, y_true, y_score):
     def binary_target(y):
         return not (len(np.unique(y)) > 2) or (y.ndim >= 2 and len(y[0]) > 1)
@@ -292,14 +291,14 @@ class FaceRecognitionTAFAPairMetric(FullDatasetEvaluationMetric):
         parameters = super().parameters()
         parameters.update({
             'threshold': NumberField(
-                value_type=float, 
-                min_value=0, 
+                value_type=float,
+                min_value=0,
                 optional=False,
                 description='Threshold value to identify pair of faces as matched'
             )
         })
         return parameters
-
+    
     def regroup_pairs(self, annotations, predictions):
         image_indexes = {}
 
@@ -321,8 +320,6 @@ class FaceRecognitionTAFAPairMetric(FullDatasetEvaluationMetric):
         self.threshold = self.get_value_from_config('threshold')
 
     def submit_all(self, annotations, predictions):
-        if len(predictions) > 0 and type(predictions[0]) == str:
-            return 0   
         return self.evaluate(annotations, predictions)
 
     def evaluate(self, annotations, predictions):
