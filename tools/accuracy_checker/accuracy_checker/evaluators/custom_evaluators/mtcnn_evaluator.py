@@ -302,7 +302,7 @@ class DLSDKModelMixin:
             self._reshape_input(input_shapes)
             results.append(self.exec_network.infer(feed_dict))
             for meta in batch_meta:
-                meta['input_shape'].append(self.inputs)
+                meta['input_shape'].append(input_shapes)
 
         return results
 
@@ -313,9 +313,13 @@ class DLSDKModelMixin:
 
     @property
     def inputs(self):
-        return self.network.inputs
+        has_info = hasattr(self.exec_network, 'input_info')
+        if not has_info:
+            return self.exec_network.inputs
+        return OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
 
     def release(self):
+        self.input_feeder.release()
         del self.network
         del self.exec_network
         self.launcher.release()

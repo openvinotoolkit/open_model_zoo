@@ -28,6 +28,7 @@ from ..representation import ReIdentificationClassificationAnnotation
 from ..utils import get_path, OrderedSet
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
+from ..utils import cast_to_bool
 
 
 def build_argparser():
@@ -52,12 +53,19 @@ def build_argparser():
         "--subsample_seed", help="Seed for generation dataset subsample", type=int, required=False, default=666
     )
     parser.add_argument('--analyze_dataset', required=False, action='store_true')
+    parser.add_argument(
+        "--shuffle",
+        help="Allow shuffle annotation during creation a subset",
+        required=False,
+        type=cast_to_bool,
+        default=True
+    )
 
     return parser
 
 
-def make_subset(annotation, size, seed=666):
-    def make_subset_pairwise(annotation, size):
+def make_subset(annotation, size, seed=666, shuffle=True):
+    def make_subset_pairwise(annotation, size, shuffle=True):
         def get_pairs(pairs_list):
             pairs_set = OrderedSet()
             for identifier in pairs_list:
@@ -73,7 +81,9 @@ def make_subset(annotation, size, seed=666):
             return pairs_set
 
         subsample_set = OrderedSet()
-        potential_ann_ind = np.random.choice(len(annotation), size, replace=False)
+
+        potential_ann_ind = np.random.choice(len(annotation), size, replace=False) if shuffle else np.arange(size)
+
         for ann_ind in potential_ann_ind: # pylint: disable=E1133
             annotation_for_subset = annotation[ann_ind]
             positive_pairs = annotation_for_subset.positive_pairs
@@ -84,11 +94,13 @@ def make_subset(annotation, size, seed=666):
             updated_pairs.add(annotation_for_subset)
             updated_pairs |= get_pairs(positive_pairs)
             updated_pairs |= get_pairs(negative_pairs)
+            intersection = subsample_set & updated_pairs
             subsample_set |= updated_pairs
             if len(subsample_set) == size:
                 break
             if len(subsample_set) > size:
-                subsample_set -= updated_pairs
+                to_delete = updated_pairs - intersection
+                subsample_set -= to_delete
 
         return list(subsample_set)
 
@@ -98,9 +110,10 @@ def make_subset(annotation, size, seed=666):
         warnings.warn('Dataset size {} less than subset size {}'.format(dataset_size, size))
         return annotation
     if isinstance(annotation[-1], ReIdentificationClassificationAnnotation):
-        return make_subset_pairwise(annotation, size)
+        return make_subset_pairwise(annotation, size, shuffle)
 
-    return list(np.random.choice(annotation, size=size, replace=False))
+    result_annotation = list(np.random.choice(annotation, size=size, replace=False)) if shuffle else annotation[:size]
+    return result_annotation
 
 
 def main():
@@ -130,7 +143,7 @@ def main():
         else:
             subsample_size = int(args.subsample)
 
-        converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed)
+        converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed, args.shuffle)
 
     if args.analyze_dataset:
         analyze_dataset(converted_annotation, meta)
