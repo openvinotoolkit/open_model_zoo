@@ -30,6 +30,11 @@ try:
 except ImportError:
     Image = None
 
+try:
+    from skimage.transform import estimate_transform, warp
+except ImportError:
+    estimate_transform, warp = None, None
+
 # The field .type should be string, the field .parameters should be dict
 GeometricOperationMetadata = namedtuple('GeometricOperationMetadata', ['type', 'parameters'])
 
@@ -750,3 +755,87 @@ class WarpAffine(Preprocessor):
         
         image.data = [process_data(images) for images in image.data]
         return image
+
+class SimilarityTransfom(Preprocessor):
+    __provider__ = 'similarity_transform_box'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'box_scale': NumberField(value_type=float, min_value=0, description='Scale factor for box', default=1.),
+            'size': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination sizes for both dimensions."
+            ),
+            'dst_width': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination width for image resizing."
+            ),
+            'dst_height': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination height for image resizing."
+            )
+        })
+        return params
+
+    def configure(self):
+        if estimate_transform is None:
+            raise ConfigError('similarity_transform_box requires skimage installation. Please install it before usage.')
+        self.box_scale = self.get_value_from_config('box_scale')
+        self.dst_height, self.dst_width = get_size_from_config(self.config)
+
+    def process(self, image, annotation_meta=None):
+        left, top, right, bottom = annotation_meta.get('rect', [0, 0, image.data.shape[0], image.data.shape[1]])
+        old_size = (right - left + bottom - top) / 2
+        center = np.array([right - (right - left) / 2.0, bottom - (bottom - top) / 2.0])
+        size = int(old_size * self.box_scale)
+        src_pts = np.array([[center[0] - size / 2, center[1] - size / 2], [center[0] - size / 2, center[1] + size / 2],
+                            [center[0] + size / 2, center[1] - size / 2]])
+        dst_pts = np.array([[0, 0], [0, self.dst_height - 1], [self.dst_width - 1, 0]])
+        tform = estimate_transform('similarity', src_pts, dst_pts)
+        image.data = warp(image.data / 255, tform.inverse, output_shape=(self.dst_width, self.dst_height))
+        image.data *= 255
+
+        image.metadata['transform_matrix'] = tform.params
+        image.metadata['roi_box'] = [left, top, right, bottom]
+
+        return image
+
+    @staticmethod
+    def estimate_transform(src, dst):
+        num = src.shape[0]
+        dim = src.shape[1]
+
+        src_mean = src.mean(axis=0)
+        dst_mean = dst.mean(axis=0)
+
+        src_demean = src - src_mean
+        dst_demean = dst - dst_mean
+        A = dst_demean.T @ src_demean / num
+
+        d = np.ones((dim,), dtype=np.double)
+        if np.linalg.det(A) < 0:
+            d[dim - 1] = -1
+
+        T = np.eye(dim + 1, dtype=np.double)
+
+        U, S, V = np.linalg.svd(A)
+
+        rank = np.linalg.matrix_rank(A)
+        if rank == 0:
+            return np.nan * T
+        if rank == dim - 1:
+            if np.linalg.det(U) * np.linalg.det(V) > 0:
+                T[:dim, :dim] = U @ V
+            else:
+                s = d[dim - 1]
+                d[dim - 1] = -1
+                T[:dim, :dim] = U @ np.diag(d) @ V
+                d[dim - 1] = s
+        else:
+            T[:dim, :dim] = U @ np.diag(d) @ V
+
+        scale = 1.0 / src_demean.var(axis=0).sum() * (S @ d)
+
+        T[:dim, dim] = dst_mean - scale * (T[:dim, :dim] @ src_mean.T)
+        T[:dim, :dim] *= scale
+
+        return T
