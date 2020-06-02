@@ -18,7 +18,7 @@ import numpy as np
 
 from ..topology_types import ImageClassification
 from ..adapters import Adapter
-from ..config import BoolField
+from ..config import BoolField, StringField
 from ..representation import ClassificationPrediction, ArgMaxClassificationPrediction
 
 
@@ -37,12 +37,14 @@ class ClassificationAdapter(Adapter):
             'argmax_output': BoolField(
                 optional=True, default=False, description="identifier that model output is ArgMax layer"
             ),
+            'classification_output': StringField(optional=True, description='otarget output layer name')
         })
 
         return parameters
 
     def configure(self):
         self.argmax_output = self.get_value_from_config('argmax_output')
+        self.classification_out = self.get_value_from_config('classification_output')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -53,6 +55,8 @@ class ClassificationAdapter(Adapter):
         Returns:
             list of ClassificationPrediction objects
         """
+        if self.classification_out is not None:
+            self.output_blob = self.classification_out
         multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
         prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
         if multi_infer:
