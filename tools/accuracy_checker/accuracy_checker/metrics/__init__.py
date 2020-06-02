@@ -90,6 +90,7 @@ __all__ = [
     'ReidMAP',
     'PairwiseAccuracy',
     'PairwiseAccuracySubsets',
+    'FaceRecognitionTAFAPairMetric',
 
     'SegmentationAccuracy',
     'SegmentationIOU',
