@@ -347,11 +347,18 @@ class ColorizationTestModel(BaseModel):
         del self.exec_network
 
     def fit_to_input(self, input_data):
-        input_data = np.reshape(input_data, self.exec_network.inputs[self.input_blob].shape)
+        has_info = hasattr(self.exec_network, 'input_info')
+        input_info = (
+            self.exec_network.input_info[self.input_blob].input_data
+            if has_info else self.exec_network.inputs[self.input_blob]
+        )
+        input_data = np.reshape(input_data, input_info.shape)
         return {self.input_blob: input_data}
 
     def set_input_and_output(self):
-        input_blob = next(iter(self.exec_network.inputs))
+        has_info = hasattr(self.exec_network, 'input_info')
+        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        input_blob = next(iter(input_info))
         with_prefix = input_blob.startswith('colorization_network_')
         if self.input_blob is None or with_prefix != self.with_prefix:
             if self.input_blob is None:
@@ -361,7 +368,7 @@ class ColorizationTestModel(BaseModel):
                     '_'.join(['colorization_network', self.output_blob])
                     if with_prefix else self.output_blob.split('colorization_network_')[-1]
                 )
-            self.input_blob = next(iter(self.exec_network.inputs))
+            self.input_blob = input_blob
             self.output_blob = output_blob
             self.with_prefix = with_prefix
 
@@ -388,7 +395,9 @@ class ColorizationCheckModel(BaseModel):
         return {self.input_blob: input_data}
 
     def set_input_and_output(self):
-        input_blob = next(iter(self.exec_network.inputs))
+        has_info = hasattr(self.exec_network, 'input_info')
+        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        input_blob = next(iter(input_info))
         with_prefix = input_blob.startswith('verification_network_')
         if self.input_blob is None or with_prefix != self.with_prefix:
             if self.input_blob is None:
@@ -398,7 +407,7 @@ class ColorizationCheckModel(BaseModel):
                     '_'.join(['verification_network', self.output_blob])
                     if with_prefix else self.output_blob.split('verification_network_')[-1]
                 )
-            self.input_blob = next(iter(self.exec_network.inputs))
+            self.input_blob = input_blob
             self.output_blob = output_blob
             self.with_prefix = with_prefix
             self.adapter.output_blob = output_blob
