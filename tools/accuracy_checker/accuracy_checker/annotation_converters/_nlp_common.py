@@ -229,7 +229,7 @@ class WordPieceTokenizer:
     def load_vocab(file):
         vocab = {}
         index = 0
-        with open(str(file), 'r') as reader:
+        with open(str(file), 'r', encoding="utf-8") as reader:
             while True:
                 token = reader.readline()
                 if isinstance(token, bytes):
