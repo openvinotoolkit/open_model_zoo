@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import NumberField, ConfigError
+from ..config import BaseField, NumberField, ConfigError
 from ..preprocessor import Preprocessor
 
 
@@ -64,41 +64,76 @@ class ClipAudio(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'duration': NumberField(
-                value_type=float, min_value=0, optional=True, default=None,
-                description="Length of audio clip in seconds."
-            ),
-            'duration_in_samples': NumberField(
-                value_type=int, min_value=0, optional=True, default=None,
-                description="Length of audio clip in samples."
+            'duration': BaseField(
+                description="Length of audio clip in seconds or samples (with 'samples' suffix)."
             ),
             'max_clips': NumberField(
-                value_type=int, min_value=1, default=999, optional=True,
+                value_type=int, min_value=1, optional=True,
                 description="Maximum number of clips per audiofile."
             ),
-            'overlap': NumberField(
-                value_type=float, min_value=0.0, max_value=1.0, optional=True,
+            'overlap': BaseField(
+                optional=True,
                 description="Overlapping part for each clip."
             ),
-            'overlap_in_samples': NumberField(
-                value_type=int, min_value=0, optional=True,
-                description="Overlapping part for each clip in samples."
-            )
         })
         return parameters
 
     def configure(self):
-        self.duration = self.get_value_from_config('duration')
-        self.duration_in_samples = self.get_value_from_config('duration_in_samples')
-        if not self.duration and not self.duration_in_samples:
-            raise ConfigError("Preprocessor {}: clip duration didn\'t set.".format(self.__provider__))
-        if self.duration and self.duration_in_samples:
-            raise ConfigError("Preprocessor {}: clip duration is set in multiple way.".format(self.__provider__))
-        self.max_clips = self.get_value_from_config('max_clips')
-        self.overlap = self.get_value_from_config('overlap')
-        self.overlap_in_samples = self.get_value_from_config('overlap_in_samples')
-        if self.overlap and self.overlap_in_samples:
-            raise ConfigError("Preprocessor {}: clip overlapping is set in multiple way.".format(self.__provider__))
+        duration = self.get_value_from_config('duration')
+        if isinstance(duration, str):
+            if duration.endswith('samples'):
+                try:
+                    self.duration_in_samples = int(duration[:-7])
+                except ValueError:
+                    raise ConfigError("Preprocessor {}: invalid value for duration - {}."
+                                      .format(self.__provider__, duration))
+                if self.duration_in_samples <= 1:
+                    raise ConfigError("Preprocessor {}: duration should be positive value - {}."
+                                      .format(self.__provider__, self.duration_in_samples))
+            else:
+                raise ConfigError("Preprocessor {}: invalid value for duration - {}.".
+                                  format(self.__provider__, duration))
+        else:
+            try:
+                self.duration = float(duration)
+            except ValueError:
+                raise ConfigError("Preprocessor {}: invalid value for duration - {}."
+                                  .format(self.__provider__, duration))
+            if self.duration <= 0:
+                raise ConfigError("Preprocessor {}: duration should be positive value - {}."
+                                  .format(self.__provider__, self.duration))
+
+        self.max_clips = self.get_value_from_config('max_clips') or np.inf
+
+        overlap = self.get_value_from_config('overlap')
+        if isinstance(overlap, str):
+            if overlap.endswith('%'):
+                try:
+                    self.overlap = float(overlap[:-1]) / 100
+                except ValueError:
+                    raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
+                                      .format(self.__provider__, overlap))
+            elif overlap.endswith('samples'):
+                try:
+                    self.overlap_in_samples = int(overlap[:-7])
+                except ValueError:
+                    raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
+                                      .format(self.__provider__, overlap))
+                if self.overlap_in_samples < 1:
+                    raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
+                                      .format(self.__provider__, overlap))
+            else:
+                raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
+                                  .format(self.__provider__, overlap))
+        else:
+            try:
+                self.overlap = float(overlap)
+            except ValueError:
+                raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
+                                  .format(self.__provider__, overlap))
+            if self.overlap <= 0 or self.overlap >= 1:
+                raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
+                                  .format(self.__provider__, overlap))
 
     def process(self, image, annotation_meta=None):
         data = image.data
@@ -107,7 +142,7 @@ class ClipAudio(Preprocessor):
             raise RuntimeError('Operation "{}" failed: required "sample rate" in metadata.'.
                                format(self.__provider__))
         audio_duration = data.shape[1]
-        clip_duration = self.duration * sample_rate if self.duration else self.duration_in_samples
+        clip_duration = int(self.duration * sample_rate) if self.duration else self.duration_in_samples
         clipped_data = []
         hop = clip_duration
         if self.overlap is not None:
