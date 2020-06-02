@@ -49,6 +49,9 @@ Options:
                         Optional. Specify the target device to infer on; CPU
                         is acceptable. Sample will look for a suitable plugin
                         for device specified. Default value is CPU
+  -c, --colors
+                        Optional. Nice coloring of the questions/answers.
+                        Might not work on some terminals (like Windows* cmd console)
 
 ```
 

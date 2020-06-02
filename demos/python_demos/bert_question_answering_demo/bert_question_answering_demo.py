@@ -58,6 +58,9 @@ def build_argparser():
     args.add_argument('-r', '--reshape', action='store_true',
                       help="Optional. Auto reshape sequence length to the "
                            "input context + max question len (to improve the speed)")
+    args.add_argument('-c', '--colors', action='store_true',
+                      help="Optional. Nice coloring of the questions/answers. "
+                           "Might not work on some terminals (like Windows* cmd console)")
     return parser
 
 
@@ -147,14 +150,19 @@ def get_context(url):
     paragraphs = html.select("p")
     log.info("Article title: '{}'".format(title))
     context = '\n'.join([par.text for par in paragraphs])
-    log.info("Size: {} chars".format(len(context)))
-    log.info("Context: \033[91m {} \033[0m".format(context))
     return context
 
 
 def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
+
+    if args.colors:
+        COLOR_RED = "\033[91m"
+        COLOR_RESET = "\033[0m"
+    else:
+        COLOR_RED = ""
+        COLOR_RESET = ""
 
     # load vocabulary file for model
     log.info("Loading vocab file:\t{}".format(args.vocab))
@@ -164,6 +172,8 @@ def main():
 
     # get context as a string (as we might need it's length for the sequence reshape)
     context = get_context(args.input)
+    log.info("Size: {} chars".format(len(context)))
+    log.info("Context: " + COLOR_RED + context + COLOR_RESET)
     # encode context into token ids list
     c_tokens_id, c_tokens_se = text_to_tokens(context, vocab)
 
@@ -347,7 +357,7 @@ def main():
         for score, s, e in answers[:3]:
             log.info("---answer: {:0.2f} {}".format(score, context[s:e]))
             c_s, c_e = find_sentence_range(context, s, e)
-            log.info("   " + context[c_s:s] + "\033[91m" + context[s:e] + '\033[0m' + context[e:c_e])
+            log.info("   " + context[c_s:s] + COLOR_RED + context[s:e] + COLOR_RESET + context[e:c_e])
 
 
 if __name__ == '__main__':
