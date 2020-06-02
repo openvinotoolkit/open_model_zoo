@@ -116,6 +116,9 @@ Accuracy Checker supports following set of preprocessors:
     * `scipy_imread` - read images using similar approach as in `scipy.misc.imread`.
     * `numpy_reader` - read numpy dumped files.
     * `tf_imread`- read images using TensorFlow. Default color space is RGB. Requires TensorFlow installation.
+* `warp_affine` - warp affine transformation. (supported only with OpenCV)
+  * `src_landmarks` - source landmarks to set as markers for the warp affine transformation.
+  * `dst_landmarks` - destination and target landmarks to transform `src_landmarks` to.
 * `resample_audio` - converts audio to new sample rate
   * `sample_rate` - sets new sample rate
 * `clip_audio` - slices audio into several parts with equal duration
