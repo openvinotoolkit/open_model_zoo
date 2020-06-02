@@ -38,7 +38,7 @@ where:
 
 ## Outputs
 
-The net outputs a blob with the shape [125x1x4059] in the format [WxBxL], where:
+Name - `outpput`, shape - [125x1x4059], format is [WxBxL], where:
   - W - output sequence length
   - B - batch size
   - L - confidence distribution across the supported symbols in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release).
