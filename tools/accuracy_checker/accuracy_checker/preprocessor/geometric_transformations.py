@@ -20,7 +20,7 @@ from collections import namedtuple
 import cv2
 import numpy as np
 
-from ..config import ConfigError, NumberField, StringField, BoolField
+from ..config import ConfigError, NumberField, StringField, BoolField, ListField
 from ..preprocessor import Preprocessor
 from ..utils import get_size_from_config, string_to_tuple, get_size_3d_from_config
 from ..logging import warning
@@ -718,7 +718,7 @@ class WarpAffine(Preprocessor):
             )
         })
         return parameters
-    
+
     def configure(self):
         self.src_landmarks = self.get_value_from_config('src_landmarks')
         self.dst_landmarks = self.get_value_from_config('dst_landmarks')
@@ -726,12 +726,12 @@ class WarpAffine(Preprocessor):
     
     def validate(self, point1, point2):
         if len(self.src_landmarks) != len(self.dst_landmarks):
-            raise Exception('To align points, number of src landmarks and dst landmarks must match')
+            raise ConfigError('To align points, number of src landmarks and dst landmarks must match')
         if len(self.src_landmarks) <= 0:
-            raise Exception('One or more landmark points are required')
+            raise ConfigError('One or more landmark points are required')
         if not all(len(c) == 2 for c in self.src_landmarks) or \
             not all(len(c) == 2 for c in self.dst_landmarks):
-            raise Exception('Coordinate values must be a list of size 2')
+            raise ConfigError('Coordinate values must be a list of size 2')
 
     def process(self, image, annotation_meta=None):
         is_simple_case = not isinstance(image.data, list)
