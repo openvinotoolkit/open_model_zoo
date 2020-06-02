@@ -26,9 +26,7 @@ This demo adopts [label error rate](https://dl.acm.org/doi/abs/10.1145/1143844.1
 
 ## Inputs
 
-Grayscale image, name - `actual_input`, shape - [1x1x96x2000], format is [BxCxHxW],
-
-where:
+Grayscale image, name - `actual_input`, shape - [1x1x96x2000], format is [BxCxHxW], where:
   - B - batch size
   - C - number of channels
   - H - image height
