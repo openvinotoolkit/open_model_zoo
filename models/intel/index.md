@@ -55,6 +55,7 @@ network to detect objects of the same type better.
 | [yolo-v2-tiny-ava-0001](./yolo-v2-tiny-ava-0001/description/yolo-v2-tiny-ava-0001.md)                                                                                               | 6.975                | 15.12      |       |      X  | X        | X     |                |         |
 | [yolo-v2-tiny-ava-sparse-30-0001](./yolo-v2-tiny-ava-sparse-30-0001/description/yolo-v2-tiny-ava-sparse-30-0001.md)                                                                 | 6.975                | 15.12      |       |      X  | X        | X     |                |         |
 | [yolo-v2-tiny-ava-sparse-60-0001](./yolo-v2-tiny-ava-sparse-60-0001/description/yolo-v2-tiny-ava-sparse-60-0001.md)                                                                 | 6.975                | 15.12      |       |      X  | X        | X     |                |         |
+| [yolo-v2-tiny-vehicle-detection-0001](./yolo-v2-tiny-vehicle-detection-0001/description/yolo-v2-tiny-vehicle-detection-0001.md)                                                     | 5.424                | 11.229     |       |         | X        |       |                |         |
 
 
 ## Object Recognition Models
