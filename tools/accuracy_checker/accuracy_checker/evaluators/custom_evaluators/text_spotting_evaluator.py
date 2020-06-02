@@ -405,7 +405,7 @@ class SequentialModel:
 
     def load_model(self, network_list, launcher):
         for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_network(network_dict, launcher)
+            self._part_by_name[network_dict['name']].load_model(network_dict, launcher)
         self.update_inputs_outputs_info()
 
     def load_network(self, network_list, launcher):
