@@ -72,7 +72,7 @@ The detailed descriptions of file entries provided below.
 
 **`description`**
 
-Description of the model. Must match with the description from the model [documentation](#documentation).
+Description of the model. Must match with the description from the model [documentation](#documentation). Use [this](./ci/description_updater/documentation_updater.py) script for easy update.
 
 **`task_type`**
 

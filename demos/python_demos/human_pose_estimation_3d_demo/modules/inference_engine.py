@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
  Copyright (c) 2019 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +15,7 @@ import os
 
 import numpy as np
 
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 
 
 class InferenceEngine:
@@ -24,8 +23,9 @@ class InferenceEngine:
         self.device = device
         self.stride = stride
 
-        net_model_bin_path = os.path.splitext(net_model_xml_path)[0] + '.bin'
-        self.net = IENetwork(model=net_model_xml_path, weights=net_model_bin_path)
+        self.ie = IECore()
+
+        self.net = self.ie.read_network(net_model_xml_path, os.path.splitext(net_model_xml_path)[0] + '.bin')
         required_input_key = {'data'}
         assert required_input_key == set(self.net.inputs.keys()), \
             'Demo supports only topologies with the following input key: {}'.format(', '.join(required_input_key))
@@ -33,7 +33,6 @@ class InferenceEngine:
         assert required_output_keys.issubset(self.net.outputs.keys()), \
             'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
 
-        self.ie = IECore()
         self.exec_net = self.ie.load_network(network=self.net, num_requests=1, device_name=device)
 
     def infer(self, img):

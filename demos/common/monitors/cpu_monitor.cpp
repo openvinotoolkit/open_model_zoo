@@ -52,8 +52,12 @@ public:
         for (std::size_t i = 0; i < coreTimeCounters.size(); ++i) {
             status = PdhGetFormattedCounterValue(coreTimeCounters[i], PDH_FMT_DOUBLE, NULL,
                 &displayValue);
-            if (ERROR_SUCCESS != status) {
-                throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
+            switch (status) {
+                case ERROR_SUCCESS: break;
+                // PdhGetFormattedCounterValue() can sometimes return PDH_CALC_NEGATIVE_DENOMINATOR for some reason
+                case PDH_CALC_NEGATIVE_DENOMINATOR: return {};
+                default:
+                    throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
             }
             if (PDH_CSTATUS_VALID_DATA != displayValue.CStatus && PDH_CSTATUS_NEW_DATA != displayValue.CStatus) {
                 throw std::runtime_error("Error in counter data");
@@ -125,6 +129,8 @@ public:
                 cpuLoad[i] = 1.0
                     - idleDiff / clockTicks / std::chrono::duration_cast<Sec>(timePoint - prevTimePoint).count();
             }
+            prevIdleCpuStat = std::move(idleCpuStat);
+            prevTimePoint = timePoint;
             return cpuLoad;
         }
         return {};

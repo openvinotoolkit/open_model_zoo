@@ -1,13 +1,15 @@
 editdistance==0.5.3
 joblib==0.14.1            # via scikit-learn
-nibabel==3.0.1
-numpy==1.17.5             # via nibabel, scikit-learn, scipy
-pillow==7.0.0
+nibabel==3.0.2
+numpy==1.17.5
+pillow==7.1.1
 py-cpuinfo==4.0.0
-pyyaml==5.3               # via yamlloader
-scikit-learn==0.22.1
+pyyaml==5.3.1
+scikit-learn==0.22.2.post1
 scipy==1.4.1
 sentencepiece==0.1.85
 shapely==1.7.0
-tqdm==4.42.1
+tqdm==4.45.0
 yamlloader==0.5.5
+pydicom==1.4.2
+tokenizers==0.7

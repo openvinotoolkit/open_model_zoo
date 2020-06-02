@@ -44,3 +44,5 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
 * `numpy_reader` - read numpy dumped files
 * `nifti_reader` - read NifTI data format
   * `channels_first` - allows read nifti files and transpose in order where channels first (Optional, default False)
+* `wav_reader` - read WAV file into NumPy array. Also gets the samplerate.
+* `dicom_reader` - read images stored in DICOM format.

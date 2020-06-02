@@ -38,7 +38,7 @@ only the images containing five aforementioned emotions is chosen. The total amo
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x64x64] - An input image in [1xCxHxW] format. Expected color order is BGR.
+Name: `input`, shape: [1x3x64x64] - An input image in [1xCxHxW] format. Expected color order is BGR.
 
 ## Outputs
 

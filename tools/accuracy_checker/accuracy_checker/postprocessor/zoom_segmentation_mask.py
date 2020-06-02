@@ -53,9 +53,10 @@ class ZoomSegMask(Postprocessor):
                 )
                 prob = prob[np.newaxis, :, :]
             channels, prediction_height, prediction_width = prob.shape
-            height, width = (
-                annotation_.mask.shape[:2] if annotation_ is not None else prediction_height, prediction_width
-            )
+            if annotation is not None:
+                height, width = annotation_.mask.shape[:2]
+            else:
+                height, width = prediction_height, prediction_width
             zoom_prob = np.zeros((channels, height, width), dtype=np.float32)
             for c in range(channels):
                 for h in range(height):

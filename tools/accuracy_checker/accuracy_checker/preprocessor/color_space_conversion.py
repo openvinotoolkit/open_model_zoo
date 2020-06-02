@@ -69,8 +69,8 @@ class RgbToGray(Preprocessor):
 class TfConvertImageDType(Preprocessor):
     __provider__ = 'tf_convert_image_dtype'
 
-    def __init__(self, config, name, input_shapes=None):
-        super().__init__(config, name, input_shapes)
+    def __init__(self, config, name):
+        super().__init__(config, name)
         if tf is None:
             raise ImportError('*tf_convert_image_dtype* operation requires TensorFlow. Please install it before usage')
         tf.enable_eager_execution()

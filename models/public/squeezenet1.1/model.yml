@@ -48,4 +48,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/squeezenet1.1.caffemodel
   - --input_proto=$dl_dir/squeezenet1.1.prototxt
 framework: caffe
+quantizable: yes
 license: https://raw.githubusercontent.com/forresti/SqueezeNet/master/LICENSE
