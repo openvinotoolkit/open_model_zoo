@@ -17,20 +17,20 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/asl-recognition-0004.xml
-    size: 275896
-    sha256: 71a091404721551b5fd3603f048378f0b0e8451efe4d8db77f0364691262cd2b
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/asl-recognition-0004/FP32/asl-recognition-0004.xml
+    size: 275873
+    sha256: 372cfb5a43f4f79c0a1233a4f9ccac53ace7c3c82cc433cd7b0af59bfc3c9fa0
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/asl-recognition-0004/FP32/asl-recognition-0004.xml
   - name: FP32/asl-recognition-0004.bin
     size: 16530600
     sha256: 0fb8a3f15377f9961940e3391d781bd68051441e8a634699dc83739bafadf4a3
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/asl-recognition-0004/FP32/asl-recognition-0004.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/asl-recognition-0004/FP32/asl-recognition-0004.bin
   - name: FP16/asl-recognition-0004.xml
-    size: 275745
-    sha256: 805148a552d8087c90e3eee74e11953fd134cbb7a42c2edfdb75aa45a236427e
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/asl-recognition-0004/FP16/asl-recognition-0004.xml
+    size: 275722
+    sha256: 5afb08c87d079292da6a2eb5b29bb6611cea19541f689dd0bc817d1623aba176
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/asl-recognition-0004/FP16/asl-recognition-0004.xml
   - name: FP16/asl-recognition-0004.bin
     size: 8265312
     sha256: 698ee599c9869c9b759eb52b2229fd29a5845f763a420668d914e973ce762fee
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/3/asl-recognition-0004/FP16/asl-recognition-0004.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/asl-recognition-0004/FP16/asl-recognition-0004.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

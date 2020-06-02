@@ -26,7 +26,7 @@ models:
             - conv2d_74/BiasAdd
 
     datasets:
-      - name: ms_coco_detection_80_class_without_backgound
+      - name: ms_coco_detection_80_class_without_background
 
         preprocessing:
           - type: bgr_to_rgb
@@ -93,7 +93,7 @@ models:
             - conv2d_74/Conv2D/YoloRegion
 
     datasets:
-      - name: ms_coco_detection_80_class_without_backgound
+      - name: ms_coco_detection_80_class_without_background
 
         preprocessing:
           - type: resize

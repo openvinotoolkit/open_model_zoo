@@ -28,14 +28,14 @@ where N is the number of landmarks, _p_-hat and _p_ are, correspondingly, the pr
 
 ## Inputs
 
-1. Name: "data" , shape: [1x3x48x48] - An input image in the format [BxCxHxW],
-   where:
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+Name: "data" , shape: [1x3x48x48] - An input image in the format [BxCxHxW],
+where:
+- B - batch size
+- C - number of channels
+- H - image height
+- W - image width
 
-   The expected color order is BGR.
+The expected color order is BGR.
 
 ## Outputs
 

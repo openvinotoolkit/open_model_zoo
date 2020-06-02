@@ -5,7 +5,7 @@ evaluations:
       network_info:
         pnet:
           model:   public/mtcnn-p/mtcnn-p.prototxt
-          weights: public/mtcnn-p/mtcnn-p.prototxt
+          weights: public/mtcnn-p/mtcnn-p.caffemodel
           outputs:
             probability_out: prob1
             region_out: conv4-2
@@ -24,30 +24,30 @@ evaluations:
             region_out: conv4-2
             regions_format: hw
 
-          rnet:
-            model:   public/mtcnn-r/mtcnn-r.prototxt
-            weights: public/mtcnn-r/mtcnn-r.prototxt
-            outputs:
-              probability_out: prob1
-              region_out: conv5-2
-            inputs:
-              - name: data
-                type: INPUT
-                layout: NCWH
-            preprocessing:
-              - type: bgr_to_rgb
-          onet:
-            model:   public/mtcnn-o/mtcnn-o.prototxt
-            weights: public/mtcnn-o/mtcnn-o.prototxt
-            outputs:
-              probability_out: prob1
-              region_out: conv6-2
-            inputs:
-              - name: data
-                type: INPUT
-                layout: NCWH
-            preprocessing:
-              - type: bgr_to_rgb
+        rnet:
+          model:   public/mtcnn-r/mtcnn-r.prototxt
+          weights: public/mtcnn-r/mtcnn-r.caffemodel
+          outputs:
+            probability_out: prob1
+            region_out: conv5-2
+          inputs:
+            - name: data
+              type: INPUT
+              layout: NCWH
+          preprocessing:
+            - type: bgr_to_rgb
+        onet:
+          model:   public/mtcnn-o/mtcnn-o.prototxt
+          weights: public/mtcnn-o/mtcnn-o.caffemodel
+          outputs:
+            probability_out: prob1
+            region_out: conv6-2
+          inputs:
+            - name: data
+              type: INPUT
+              layout: NCWH
+          preprocessing:
+            - type: bgr_to_rgb
 
       launchers:
         - framework: caffe

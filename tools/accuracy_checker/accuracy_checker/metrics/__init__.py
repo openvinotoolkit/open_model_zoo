@@ -69,7 +69,7 @@ from .hit_ratio import HitRatioMetric, NDSGMetric
 from .machine_translation import BilingualEvaluationUnderstudy
 from .question_answering import ExactMatchScore, ScoreF1
 from .mpjpe_multiperson import MpjpeMultiperson
-from .vas_metrics import VASFRLFWMetric
+from .language_modeling import ScorePerplexity
 
 __all__ = [
     'Metric',
@@ -143,5 +143,5 @@ __all__ = [
 
     'MpjpeMultiperson',
 
-    'VASFRLFWMetric'
+    'ScorePerplexity',
 ]

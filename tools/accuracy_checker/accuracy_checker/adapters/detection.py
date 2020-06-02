@@ -516,9 +516,7 @@ class MTCNNPAdapter(Adapter):
         return bounding_box_out.T
 
     def _extract_predictions(self, outputs_list, meta):
-        if not meta[0] or 'scales' not in meta[0]:
-            return outputs_list[0]
-        scales = meta[0]['scales']
+        scales = [1] if not meta[0] or 'scales' not in meta[0] else meta[0]['scales']
         total_boxes = np.zeros((0, 9), np.float)
         for idx, outputs in enumerate(outputs_list):
             scale = scales[idx]
@@ -717,3 +715,249 @@ class ClassAgnosticDetectionAdapter(Adapter):
                 'If you need to use another layer, please specify it explicitly'
             )
         return filter_outputs[0]
+
+
+class RFCNCaffe(Adapter):
+    __provider__ = 'rfcn_class_agnostic'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update(
+            {
+                'cls_out': StringField(description='bboxes predicted classes score out'),
+                'bbox_out': StringField(
+                    description='bboxes output with shape [N, 8]'
+                ),
+                'rois_out': StringField(description='rois features output')
+            }
+        )
+        return params
+
+    def configure(self):
+        self.cls_out = self.get_value_from_config('cls_out')
+        self.bbox_out = self.get_value_from_config('bbox_out')
+        self.rois_out = self.get_value_from_config('rois_out')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        raw_out = self._extract_predictions(raw, frame_meta)
+        predicted_classes = raw_out[self.cls_out]
+        predicted_deltas = raw_out[self.bbox_out]
+        predicted_proposals = raw_out[self.rois_out]
+        x_scale = frame_meta[0]['scale_x']
+        y_scale = frame_meta[0]['scale_y']
+        real_det_num = np.argwhere(predicted_proposals[:, 0] == -1)
+        if np.size(real_det_num) != 0:
+            real_det_num = real_det_num[0, 0]
+            predicted_proposals = predicted_proposals[:real_det_num]
+            predicted_deltas = predicted_deltas[:real_det_num]
+            predicted_classes = predicted_classes[:real_det_num]
+        predicted_proposals[:, 1::2] /= x_scale
+        predicted_proposals[:, 2::2] /= y_scale
+        assert len(predicted_classes.shape) == 2
+        assert predicted_deltas.shape[-1] == 8
+        predicted_boxes = self.bbox_transform_inv(predicted_proposals, predicted_deltas)
+        num_classes = predicted_classes.shape[-1] - 1 # skip background
+        x_mins, y_mins, x_maxs, y_maxs = predicted_boxes[:, 4:].T
+        detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+        for cls_id in range(num_classes):
+            cls_scores = predicted_classes[:, cls_id+1]
+            keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, cls_scores, 0.3, include_boundaries=False)
+            filtered_score = cls_scores[keep]
+            x_cls_mins = x_mins[keep]
+            y_cls_mins = y_mins[keep]
+            x_cls_maxs = x_maxs[keep]
+            y_cls_maxs = y_maxs[keep]
+            # Save detections
+            labels = np.full_like(filtered_score, cls_id+1)
+            detections['labels'].extend(labels)
+            detections['scores'].extend(filtered_score)
+            detections['x_mins'].extend(x_cls_mins)
+            detections['y_mins'].extend(y_cls_mins)
+            detections['x_maxs'].extend(x_cls_maxs)
+            detections['y_maxs'].extend(y_cls_maxs)
+        return [DetectionPrediction(
+            identifiers[0], detections['labels'], detections['scores'], detections['x_mins'],
+            detections['y_mins'], detections['x_maxs'], detections['y_maxs']
+        )]
+    @staticmethod
+    def bbox_transform_inv(boxes, deltas):
+        if boxes.shape[0] == 0:
+            return np.zeros((0, deltas.shape[1]), dtype=deltas.dtype)
+        boxes = boxes.astype(deltas.dtype, copy=False)
+        widths = boxes[:, 3] - boxes[:, 1] + 1.0
+        heights = boxes[:, 4] - boxes[:, 2] + 1.0
+        ctr_x = boxes[:, 1] + 0.5 * widths
+        ctr_y = boxes[:, 2] + 0.5 * heights
+        dx = deltas[:, 0::4]
+        dy = deltas[:, 1::4]
+        dw = deltas[:, 2::4]
+        dh = deltas[:, 3::4]
+        pred_ctr_x = dx * widths[:, np.newaxis] + ctr_x[:, np.newaxis]
+        pred_ctr_y = dy * heights[:, np.newaxis] + ctr_y[:, np.newaxis]
+        pred_w = np.exp(dw) * widths[:, np.newaxis]
+        pred_h = np.exp(dh) * heights[:, np.newaxis]
+        pred_boxes = np.zeros(deltas.shape, dtype=deltas.dtype)
+        pred_boxes[:, 0::4] = pred_ctr_x - 0.5 * pred_w
+        pred_boxes[:, 1::4] = pred_ctr_y - 0.5 * pred_h
+        pred_boxes[:, 2::4] = pred_ctr_x + 0.5 * pred_w
+        pred_boxes[:, 3::4] = pred_ctr_y + 0.5 * pred_h
+
+        return pred_boxes
+
+
+class FaceBoxesAdapter(Adapter):
+    """
+    Class for converting output of FaceBoxes models to DetectionPrediction representation
+    """
+    __provider__ = 'faceboxes'
+
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'scores_out': StringField(description="Scores output layer name."),
+            'boxes_out': StringField(description="Boxes output layer name."),
+        })
+
+        return parameters
+
+    def configure(self):
+        self.scores_out = self.get_value_from_config('scores_out')
+        self.boxes_out = self.get_value_from_config('boxes_out')
+
+        # Set default values
+        self.min_sizes = [[32, 64, 128], [256], [512]]
+        self.steps = [32, 64, 128]
+        self.variance = [0.1, 0.2]
+        self.confidence_threshold = 0.05
+        self.nms_threshold = 0.3
+        self.keep_top_k = 750
+
+    @staticmethod
+    def calculate_anchors(list_x, list_y, min_size, image_size, step):
+        anchors = []
+        s_kx = min_size / image_size[1]
+        s_ky = min_size / image_size[0]
+        dense_cx = [x * step / image_size[1] for x in list_x]
+        dense_cy = [y * step / image_size[0] for y in list_y]
+        for cy, cx in itertools.product(dense_cy, dense_cx):
+            anchors.append([cx, cy, s_kx, s_ky])
+        return anchors
+
+    def calculate_anchors_zero_level(self, f_x, f_y, min_sizes, image_size, step):
+        anchors = []
+        for min_size in min_sizes:
+            if min_size == 32:
+                list_x = [f_x + 0, f_x + 0.25, f_x + 0.5, f_x + 0.75]
+                list_y = [f_y + 0, f_y + 0.25, f_y + 0.5, f_y + 0.75]
+            elif min_size == 64:
+                list_x = [f_x + 0, f_x + 0.5]
+                list_y = [f_y + 0, f_y + 0.5]
+            else:
+                list_x = [f_x + 0.5]
+                list_y = [f_y + 0.5]
+            anchors.extend(self.calculate_anchors(list_x, list_y, min_size, image_size, step))
+        return anchors
+
+    def prior_boxes(self, feature_maps, image_size):
+        anchors = []
+        for k, f in enumerate(feature_maps):
+            for i, j in itertools.product(range(f[0]), range(f[1])):
+                if k == 0:
+                    anchors.extend(self.calculate_anchors_zero_level(j, i, self.min_sizes[k],
+                                                                     image_size, self.steps[k]))
+                else:
+                    anchors.extend(self.calculate_anchors([j + 0.5], [i + 0.5], self.min_sizes[k][0],
+                                                          image_size, self.steps[k]))
+        anchors = np.clip(anchors, 0, 1)
+
+        return anchors
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        """
+        Args:
+            identifiers: list of input data identifiers
+            raw: output of model
+        Returns:
+            list of DetectionPrediction objects
+        """
+
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+
+        batch_scores = raw_outputs[self.scores_out]
+        batch_boxes = raw_outputs[self.boxes_out]
+
+        result = []
+        for identifier, scores, boxes, meta in zip(identifiers, batch_scores, batch_boxes, frame_meta):
+            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+            image_info = meta.get("image_info")[0:2]
+
+            # Prior boxes
+            feature_maps = [[math.ceil(image_info[0] / step), math.ceil(image_info[1] / step)] for step in
+                            self.steps]
+            prior_data = self.prior_boxes(feature_maps, image_info)
+
+             # Boxes
+            boxes[:, :2] = self.variance[0] * boxes[:, :2]
+            boxes[:, 2:] = self.variance[1] * boxes[:, 2:]
+            boxes[:, :2] = boxes[:, :2] * prior_data[:, 2:] + prior_data[:, :2]
+            boxes[:, 2:] = np.exp(boxes[:, 2:]) * prior_data[:, 2:]
+
+            for label, score in enumerate(np.transpose(scores)):
+
+                # Skip background label
+                if label == 0:
+                    continue
+
+                # Filter out detections with score < confidence_threshold
+                mask = score > self.confidence_threshold
+                filtered_boxes, filtered_score = boxes[mask, :], score[mask]
+                if filtered_score.size == 0:
+                    continue
+
+                # Transform to format (x_min, y_min, x_max, y_max)
+                x_mins = (filtered_boxes[:, 0] - 0.5 * filtered_boxes[:, 2])
+                y_mins = (filtered_boxes[:, 1] - 0.5 * filtered_boxes[:, 3])
+                x_maxs = (filtered_boxes[:, 0] + 0.5 * filtered_boxes[:, 2])
+                y_maxs = (filtered_boxes[:, 1] + 0.5 * filtered_boxes[:, 3])
+
+                # Apply NMS
+                keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.nms_threshold,
+                               include_boundaries=False, keep_top_k=self.keep_top_k)
+
+                filtered_score = filtered_score[keep]
+                x_mins = x_mins[keep]
+                y_mins = y_mins[keep]
+                x_maxs = x_maxs[keep]
+                y_maxs = y_maxs[keep]
+
+                # Keep topK
+                # Applied just after NMS - no additional sorting is required for filtered_score array
+                if filtered_score.size > self.keep_top_k:
+                    filtered_score = filtered_score[:self.keep_top_k]
+                    x_mins = x_mins[:self.keep_top_k]
+                    y_mins = y_mins[:self.keep_top_k]
+                    x_maxs = x_maxs[:self.keep_top_k]
+                    y_maxs = y_maxs[:self.keep_top_k]
+
+                # Save detections
+                labels = np.full_like(filtered_score, label, dtype=int)
+                detections['labels'].extend(labels)
+                detections['scores'].extend(filtered_score)
+                detections['x_mins'].extend(x_mins)
+                detections['y_mins'].extend(y_mins)
+                detections['x_maxs'].extend(x_maxs)
+                detections['y_maxs'].extend(y_maxs)
+
+            result.append(
+                DetectionPrediction(
+                    identifier, detections['labels'], detections['scores'], detections['x_mins'],
+                    detections['y_mins'], detections['x_maxs'], detections['y_maxs']
+                )
+            )
+
+        return result
