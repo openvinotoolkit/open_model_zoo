@@ -305,7 +305,10 @@ class IMDBConverter(BaseGLUETextClassificationConverter):
                 description='The maximum total input sequence length after tokenization.',
                 optional=True, default=128, value_type=int
             ),
-            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
+            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register'),
+            'class_token_first': BoolField(
+                optional=True, default=True,
+                description='Add [CLS] token to the begin of sequence. If False, will be added as the last token.')
         })
 
         return params
@@ -319,6 +322,7 @@ class IMDBConverter(BaseGLUETextClassificationConverter):
         self.label_map = dict(enumerate(imdb_labels))
         self.reversed_label_map = {value: key for key, value in self.label_map.items()}
         self.support_vocab = 'vocab_file' in self.config
+        self.class_token_first = self.get_value_from_config('class_token_first')
 
     def _create_examples(self):
         examples = []

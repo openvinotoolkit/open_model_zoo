@@ -203,8 +203,9 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, 
 
     auto link_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
     size_t link_data_size = link_shape[0] * link_shape[1] * link_shape[2] * link_shape[3];
-    float *link_data_pointer =
-            blobs.at(kLocOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+    InferenceEngine::LockedMemory<const void> locOutputMapped = InferenceEngine::as<
+        InferenceEngine::MemoryBlob>(blobs.at(kLocOutputName))->rmap();
+    float *link_data_pointer = locOutputMapped.as<float *>();
     std::vector<float> link_data(link_data_pointer, link_data_pointer + link_data_size);
     link_data = transpose4d(link_data, ieSizeToVector(link_shape), {0, 2, 3, 1});
     softmax(&link_data);
@@ -217,8 +218,9 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, 
 
     auto cls_shape = blobs.at(kClsOutputName)->getTensorDesc().getDims();
     size_t cls_data_size = cls_shape[0] * cls_shape[1] * cls_shape[2] * cls_shape[3];
-    float *cls_data_pointer =
-            blobs.at(kClsOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+    InferenceEngine::LockedMemory<const void> clsOutputMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
+        blobs.at(kClsOutputName))->rmap();
+    float *cls_data_pointer = clsOutputMapped.as<float *>();
     std::vector<float> cls_data(cls_data_pointer, cls_data_pointer + cls_data_size);
     cls_data = transpose4d(cls_data, ieSizeToVector(cls_shape), {0, 2, 3, 1});
     softmax(&cls_data);

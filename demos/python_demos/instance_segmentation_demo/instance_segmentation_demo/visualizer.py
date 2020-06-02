@@ -14,8 +14,6 @@
  limitations under the License.
 """
 
-from __future__ import print_function
-
 import cv2
 import numpy as np
 
@@ -112,7 +110,7 @@ class Visualizer(object):
         self.show_boxes = show_boxes
         self.show_scores = show_scores
 
-    def __call__(self, image, boxes, classes, scores, segms=None, ids=None):
+    def __call__(self, image, boxes, classes, scores, presenter, segms=None, ids=None):
         result = image.copy()
 
         # Filter out detections with low confidence.
@@ -120,6 +118,8 @@ class Visualizer(object):
         scores = scores[filter_mask]
         classes = classes[filter_mask]
         boxes = boxes[filter_mask]
+
+        presenter.drawGraphs(result)
 
         if self.show_masks and segms is not None:
             segms = list(segm for segm, show in zip(segms, filter_mask) if show)

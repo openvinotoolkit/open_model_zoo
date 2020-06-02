@@ -3,8 +3,8 @@
 ## Use Case and High-Level Description
 
 Face detector based on MobileNetV2 as a backbone with a
-multiple SSD head for indoor/outdoor scenes shot by a front-facing camera.
-During training of this model training images were resized to 256x256.
+multiple SSD head for indoor and outdoor scenes shot by a front-facing camera.
+During the training of this model, training images were resized to 256x256.
 
 ## Example
 
@@ -28,7 +28,7 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 
 ## Inputs
 
-Name: "input" , shape: [1x3x256x256] - An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x256x256] - An input image in the format [BxCxHxW],
 where:
 
 - B - batch size
@@ -36,20 +36,18 @@ where:
 - H - image height
 - W - image width
 
-Expected color order - BGR.
+Expected color order: BGR.
 
 ## Outputs
 
-The net outputs a blob with shape: [1, 1, N, 7], where N is the number of detected
-   bounding boxes. For each detection, the description has the format:
-   [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
-   where:
-
-    - `image_id` - ID of the image in the batch
-    - `label` - predicted class ID
-    - `conf` - confidence for the predicted class
-    - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
-    - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
+The net outputs blob with shape: [1, 1, N, 7], where N is the number of detected
+bounding boxes. Each detection has the format
+  [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
+  - `image_id` - ID of the image in the batch
+  - `label` - predicted class ID
+  - `conf` - confidence for the predicted class
+  - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
+  - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

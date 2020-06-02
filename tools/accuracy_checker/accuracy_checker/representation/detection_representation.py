@@ -92,11 +92,11 @@ class DetectionPrediction(Detection):
         )
 
 
-class ActionDetectionAnnotation(DetectionAnnotation):
+class AttributeDetectionAnnotation(DetectionAnnotation):
     pass
 
 
-class ActionDetectionPrediction(DetectionPrediction):
+class AttributeDetectionPrediction(DetectionPrediction):
     def __init__(
             self,
             identifier='',
@@ -119,6 +119,13 @@ class ActionDetectionPrediction(DetectionPrediction):
         return np.array_equal(self.bbox_scores, other.bbox_scores) if super().__eq__(other) else False
 
     def to_annotation(self, **kwargs):
-        return ActionDetectionAnnotation(
+        return AttributeDetectionAnnotation(
             self.identifier, self.labels, self.x_mins, self.y_mins, self.x_maxs, self.y_maxs, self.metadata
         )
+
+class ActionDetectionAnnotation(AttributeDetectionAnnotation):
+    pass
+
+
+class ActionDetectionPrediction(AttributeDetectionPrediction):
+    pass

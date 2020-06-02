@@ -2,9 +2,9 @@
 
 ## Use Case and High-Level Description
 
-A trained model of ICNet for fast semantic segmentation, trained on the CamVid\* dataset from scratch using the TensorFlow\* framework. The trained model has 30% sparsity (ratio of 0's within all the convolution kernel weights). For more details about the original floating point model, check out the [paper](https://arxiv.org/abs/1704.08545).
+A trained model of ICNet for fast semantic segmentation, trained on the CamVid\* dataset from scratch using the TensorFlow\* framework. The trained model has 30% sparsity (ratio of zeros within all the convolution kernel weights). For details about the original floating-point model, check out the [ICNet for Real-Time Semantic Segmentation on High-Resolution Images](https://arxiv.org/abs/1704.08545).
 
-The model input is a blob that consists of a single image of "1x3x720x960" in BGR order. The pixel values are integers in the [0, 255] range.
+The model input is a blob that consists of a single image of `1x3x720x960` in the BGR order. The pixel values are integers in the [0, 255] range.
 
 The model output for `icnet-camvid-ava-sparse-30-0001` is the predicted class index of each input pixel belonging to one of the 12 classes of the CamVid dataset.
 
@@ -18,7 +18,7 @@ The model output for `icnet-camvid-ava-sparse-30-0001` is the predicted class in
 
 ## Accuracy
 
-The quality metrics were calculated on the CamVid\* validation dataset. The 'unlabeled' class had been ignored during metrics calculation.
+The quality metrics were calculated on the CamVid\* validation dataset. The `unlabeled` class had been ignored during metrics calculation.
 
 | Metric                    | Value         |
 |---------------------------|---------------|
@@ -51,7 +51,7 @@ Semantic segmentation class prediction map, shape - `1,720,960`, output data for
 - `H` - horizontal coordinate of the input pixel
 - `W` - vertical coordinate of the input pixel
 
-containing the class prediction result of each pixel.
+Output contains the class prediction result of each pixel.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

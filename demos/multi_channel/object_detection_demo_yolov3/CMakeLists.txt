@@ -42,9 +42,7 @@ source_group("include" FILES ${MAIN_HEADERS})
 # Create library file from sources.
 add_executable(${TARGET_NAME} ${MAIN_SRC} ${MAIN_HEADERS})
 
-set_target_properties(${TARGET_NAME} PROPERTIES
-    POSITION_INDEPENDENT_CODE ON
-    COMPILE_PDB_NAME ${TARGET_NAME})
+set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_PDB_NAME ${TARGET_NAME})
 
 if(MULTICHANNEL_DEMO_USE_TBB)
     find_package(TBB REQUIRED tbb)

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
  Copyright (c) 2020 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,7 +13,6 @@
  limitations under the License.
 """
 
-from __future__ import print_function
 import os
 import sys
 import time
@@ -21,7 +22,7 @@ from argparse import ArgumentParser, SUPPRESS
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 from utils.codec import CTCCodec
 
 
@@ -41,6 +42,8 @@ def build_argparser():
     args.add_argument("-ni", "--number_iter", type=int, default=1,
                       help="Optional. Number of inference iterations")
     args.add_argument("-cl", "--charlist", type=str, default=os.path.join(os.path.dirname(__file__), "data/kondate_nakayosi_char_list.txt"), help="Path to the decoding char list file")
+    args.add_argument("-dc", "--designated_characters", type=str, default=None, help="Optional. Path to the designated character file")
+    args.add_argument("-tk", "--top_k", type=int, default=20, help="Optional. Top k steps in looking up the decoded character, until a designated one is found")
     return parser
 
 
@@ -66,14 +69,12 @@ def preprocess_input(image_name, height, width):
 def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
-    model_xml = args.model
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
     # Plugin initialization
     ie = IECore()
     # Read IR
-    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
-    net = IENetwork(model=model_xml, weights=model_bin)
+    log.info("Loading network")
+    net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
     assert len(net.inputs) == 1, "Demo supports only single input topologies"
     assert len(net.outputs) == 1, "Demo supports only single output topologies"
@@ -83,7 +84,7 @@ def main():
     out_blob = next(iter(net.outputs))
 
     characters = get_characters(args)
-    codec = CTCCodec(characters)
+    codec = CTCCodec(characters, args.designated_characters, args.top_k)
     assert len(codec.characters) == net.outputs[out_blob].shape[2], "The text recognition model does not correspond to decoding character list"
 
     input_batch_size, input_channel, input_height, input_width= net.inputs[input_blob].shape
