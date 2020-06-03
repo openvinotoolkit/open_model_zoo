@@ -62,9 +62,9 @@ Expected color order: BGR.
 
 ## Outputs
 
-1.	Name: `color`, shape: [1, 7, 1, 1] - probabilities across seven color classes
+1.	Name: `color`, shape: [1, 7] - probabilities across seven color classes
     [`white`, `gray`, `yellow`, `red`, `green`, `blue`, `black`]
-2.	name: `type`, shape: [1, 4, 1, 1] - Softmax output across four type classes
+2.	name: `type`, shape: [1, 4] - probabilities across four type classes
     [`car`, `van`, `truck`, `bus`]
 
 ## Legal Information
