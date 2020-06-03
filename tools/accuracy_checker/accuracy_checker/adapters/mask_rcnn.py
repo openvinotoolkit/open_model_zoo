@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import warnings
+
 import cv2
 import numpy as np
 
@@ -153,19 +155,18 @@ class MaskRCNNAdapter(Adapter):
             return results
 
     def _process_pytorch_outputs(self, raw_outputs, identifiers, frame_meta):
-        classes = raw_outputs.get(self.classes_out, None)
-        boxes = raw_outputs.get(self.boxes_out, None)
+        if self.boxes_out not in raw_outputs:
+            self.boxes_out = self._find_output(raw_outputs)
+            warnings.warn(
+                'Using auto-detected output {} with bounding boxes.'.format(self.boxes_out)
+            )
+
+        boxes = raw_outputs[self.boxes_out]
         scores = raw_outputs.get(self.scores_out, None)
+        classes = raw_outputs.get(self.classes_out, None)
         raw_masks = raw_outputs.get(self.raw_masks_out, None)
 
-        if boxes is None:
-            for v in raw_outputs.values():
-                if v.ndim == 2 and v.shape[1] == 5:
-                    boxes = v
-                    break
-            if boxes is None:
-                raise ValueError("Failed to find suitable network's output. "
-                                 "Please specify those manually in config file.")
+        if scores is None and boxes.ndim == 2 and boxes.shape[1] == 5:
             scores = boxes[:, 4]
             boxes = boxes[:, :4]
 
@@ -209,6 +210,21 @@ class MaskRCNNAdapter(Adapter):
             }))
 
             return results
+
+    @staticmethod
+    def _find_output(predictions):
+        filter_outputs = [
+            output_name for output_name, out_data in predictions.items()
+            if len(np.shape(out_data)) == 2 and np.shape(out_data)[-1] == 5
+        ]
+        if not filter_outputs:
+            raise ConfigError('Suitable output layer not found')
+        if len(filter_outputs) > 1:
+            warnings.warn(
+                'There are several suitable outputs {}. The first will be used. '.format(', '.join(filter_outputs)) +
+                'If you need to use another layer, please specify it explicitly.'
+            )
+        return filter_outputs[0]
 
     def _process_masks_pytorch(self, boxes, raw_masks, identifiers, original_image_size):
         masks = []
