@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -236,12 +236,36 @@ int main(int argc, char *argv[]) {
         /** Reading network model **/
         auto cnnNetwork = ie.ReadNetwork(FLAGS_m);
         /** Reading labels (if specified) **/
-        std::string labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
         std::vector<std::string> labels;
-        std::ifstream inputFile(labelFileName);
-        std::copy(std::istream_iterator<std::string>(inputFile),
-                  std::istream_iterator<std::string>(),
-                  std::back_inserter(labels));
+        std::string labelFileName;
+        if (!FLAGS_labels.empty())
+        {
+            labelFileName = FLAGS_labels;
+            std::ifstream inputFile(labelFileName);
+            std::string label; 
+            while (std::getline(inputFile, label))
+            {
+                labels.push_back(label);
+            }
+        }
+        else
+        {
+            std::string labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
+            std::ifstream inputFile(labelFileName);
+            std::string label;
+            while (std::getline(inputFile, label))
+            {
+                labels.push_back(label);
+            }
+        }
+        if (!labels.empty())
+        {
+            slog::info << "Loaded " << labels.size() << " labels" << slog::endl;
+        }
+        else
+        {
+            slog::info << "File " << labelFileName << " empty or not found. Labels are omitted." << slog::endl;
+        }
         // -----------------------------------------------------------------------------------------------------
 
         /** YOLOV3-based network should have one input and three output **/
@@ -290,6 +314,14 @@ int main(int argc, char *argv[]) {
         }
         else {
             throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
+        }
+
+        if (!labels.empty() && labels.size() != yoloParams.begin()->second.classes)
+        {
+            slog::info << "The number of labels (" << labels.size() << ") "
+                << "is different from numbers of model classes (" << yoloParams.begin()->second.classes << "). "
+                << "Labels are omitted." << slog::endl;
+            labels.clear();
         }
         // -----------------------------------------------------------------------------------------------------
 
@@ -423,8 +455,7 @@ int main(int argc, char *argv[]) {
                         std::ostringstream conf;
                         conf << ":" << std::fixed << std::setprecision(3) << confidence;
                         cv::putText(frame,
-                                (label < static_cast<int>(labels.size()) ?
-                                        labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
+                                    (!labels.empty() ? labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
                                     cv::Point2f(static_cast<float>(object.xmin), static_cast<float>(object.ymin - 5)), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
                                     cv::Scalar(0, 0, 255));
                         cv::rectangle(frame, cv::Point2f(static_cast<float>(object.xmin), static_cast<float>(object.ymin)),

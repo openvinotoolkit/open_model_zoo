@@ -8,7 +8,7 @@ To learn more about Async API features, please refer to [Object Detection for SS
 
 Other demo objectives are:
 * Video as input support via OpenCV*
-* Visualization of the resulting bounding boxes and text labels (from the `.labels` file) or class number (if no file is provided)
+* Visualization of the resulting bounding boxes and text labels (from the labels file, see `-labels` option) or class number (if no file is provided)
 * OpenCV provides resulting bounding boxes, labels, and other information.
 You can copy and paste this code without pulling Open Model Zoo demos helpers into your application
 * Demonstration of the Async API in action. For this, the demo features two modes toggled by the **Tab** key:
@@ -41,6 +41,7 @@ Options:
           Or
       -c "<absolute_path>"    Optional. Required for GPU custom kernels. Absolute path to the .xml file with the kernels description.
     -d "<device>"             Optional. Specify a target device to infer on (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for the specified device
+    -labels "<path>"          Optional. Path to a file with labels mapping.
     -pc                       Optional. Enable per-layer performance report.
     -r                        Optional. Output inference results raw values showing.
     -t                        Optional. Probability threshold for detections.

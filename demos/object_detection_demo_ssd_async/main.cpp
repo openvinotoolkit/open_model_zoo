@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -123,12 +123,36 @@ int main(int argc, char *argv[]) {
         slog::info << "Batch size is forced to  1." << slog::endl;
         cnnNetwork.setBatchSize(1);
         /** Read labels (if any)**/
-        std::string labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
         std::vector<std::string> labels;
-        std::ifstream inputFile(labelFileName);
-        std::copy(std::istream_iterator<std::string>(inputFile),
-                  std::istream_iterator<std::string>(),
-                  std::back_inserter(labels));
+        std::string labelFileName;
+        if (!FLAGS_labels.empty())
+        {
+            labelFileName = FLAGS_labels;
+            std::ifstream inputFile(labelFileName);
+            std::string label;
+            while (std::getline(inputFile, label))
+            {
+                labels.push_back(label);
+            }
+        }
+        else
+        {
+            labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
+            std::ifstream inputFile(labelFileName);
+            std::string label;
+            while (std::getline(inputFile, label))
+            {
+                labels.push_back(label);
+            }
+        }
+        if (!labels.empty())
+        {
+            slog::info << "Loaded " << labels.size() << " labels" << slog::endl;
+        }
+        else
+        {
+            slog::info << "File " << labelFileName << " empty or not found. Labels are omitted." << slog::endl;
+        }
         // -----------------------------------------------------------------------------------------------------
 
         /** SSD-based network should have one input and one output **/
@@ -195,8 +219,12 @@ int main(int argc, char *argv[]) {
         if (static_cast<int>(labels.size()) != num_classes) {
             if (static_cast<int>(labels.size()) == (num_classes - 1))  // if network assumes default "background" class, having no label
                 labels.insert(labels.begin(), "fake");
-            else
+            else {
+                slog::info << "The number of labels (" << labels.size() << ") "
+                    << "is different from numbers of model classes (" << num_classes << "). "
+                    << "Labels are omitted." << slog::endl;
                 labels.clear();
+            }                
         }
         const SizeVector outputDims = output->getTensorDesc().getDims();
         const int maxProposalCount = outputDims[2];
@@ -350,8 +378,7 @@ int main(int argc, char *argv[]) {
                         std::ostringstream conf;
                         conf << ":" << std::fixed << std::setprecision(3) << confidence;
                         cv::putText(curr_frame,
-                                    (static_cast<size_t>(label) < labels.size() ?
-                                    labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
+                                    (!labels.empty() ? labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
                                     cv::Point2f(xmin, ymin - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
                                     cv::Scalar(0, 0, 255));
                         cv::rectangle(curr_frame, cv::Point2f(xmin, ymin), cv::Point2f(xmax, ymax), cv::Scalar(0, 0, 255));
