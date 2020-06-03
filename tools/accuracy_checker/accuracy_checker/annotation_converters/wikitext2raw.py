@@ -53,7 +53,7 @@ class Wikitext2RawConverter(BaseFormatConverter):
         self.tokenizer.decoder = decoders.ByteLevel()
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        with open(self.testing_file, encoding="utf-8") as f:
+        with open(str(self.testing_file), encoding="utf-8") as f:
             text = f.read()
 
         tokens = self.tokenizer.encode_batch([text])
