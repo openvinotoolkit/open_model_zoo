@@ -312,8 +312,8 @@ Model quantizer usage
 
 Before you run the model quantizer, you must prepare a directory with
 the datasets required for the quantization process. This directory will be
-referred to as `<DATASET_DIR>` below. See the "Dataset directory layout"
-section for information on the expected contents of that directory.
+referred to as `<DATASET_DIR>` below. More detailed information about datasets
+preparation you can find in [Dataset Preparation Guide](./datasets_preparation.md).
 
 The basic usage is to run the script like this:
 
@@ -388,18 +388,6 @@ Toolkit will still be created, so that you can inspect it.
 
 See the "Shared options" section for information on other options accepted by
 the script.
-
-### Dataset directory layout
-
-Currently, all models for which quantization is supported require the
-[ILSVRC 2012](http://image-net.org/challenges/LSVRC/2012/index) validation
-dataset. This means that `<DATASET_DIR>` must contain the following entries:
-
-* A subdirectory named `ILSVRC2012_img_val` containing the ILSVRC 2012
-  validation images. To obtain these images, follow the
-  [instructions at the ILSVRC 2012 website](http://image-net.org/challenges/LSVRC/2012/signup).
-
-* `val.txt` from <http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz>.
 
 Model information dumper usage
 ------------------------------
