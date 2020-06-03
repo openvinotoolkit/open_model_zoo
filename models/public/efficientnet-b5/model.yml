@@ -35,4 +35,5 @@ model_optimizer_args:
   - --input_meta_graph=$dl_dir/efficientnet-b5/model.ckpt.meta
   - --reverse_input_channels
 framework: tf
+quantizable: yes
 license: https://raw.githubusercontent.com/tensorflow/tpu/master/LICENSE
