@@ -204,6 +204,8 @@ example of dataset definition:
     - type: accuracy
 ```
 
+If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about datasets preparation you can find in [Dataset Preparation Guide](./datasets_preparation.md).
+
 ### Preprocessing, Metrics, Postprocessing
 
 Each entry of preprocessing, metrics, postprocessing must have `type` field,
