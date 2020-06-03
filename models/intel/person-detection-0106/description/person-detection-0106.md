@@ -31,13 +31,14 @@ curve. Intersection over union threshold of 0.5 is used for matching.
 ## Inputs
 
 Name: `input`, shape: [1x3x800x1344] - An input image in the format [BxCxHxW],
-   where:
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+where:
 
-   Expected color order is BGR.
+- B - batch size
+- C - number of channels
+- H - image height
+- W - image width
+
+Expected color order is BGR.
 
 ## Outputs
 
