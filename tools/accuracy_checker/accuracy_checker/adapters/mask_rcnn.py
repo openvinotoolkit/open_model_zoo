@@ -56,7 +56,8 @@ class MaskRCNNAdapter(Adapter):
                 optional=True
             ),
             'raw_masks_out': StringField(
-                description='Name of output layer with raw instances masks'
+                description='Name of output layer with raw instances masks',
+                optional=True
             ),
             'num_detections_out': StringField(
                 optional=True, description='Name of output layer with number valid detections '
@@ -92,14 +93,14 @@ class MaskRCNNAdapter(Adapter):
             self.detection_out = self.get_value_from_config('detection_out')
             self.realisation = self._process_detection_output
         else:
-            if not is_box_outputs(self.launcher_config, box_outputs):
-                raise ConfigError('all related outputs should be specified: {}'.format(', '.join(box_outputs)))
             self.classes_out = self.get_value_from_config('classes_out')
             self.scores_out = self.get_value_from_config('scores_out')
             self.boxes_out = self.get_value_from_config('boxes_out')
             self.num_detections_out = self.get_value_from_config('num_detections_out')
 
             if self.num_detections_out:
+                if not is_box_outputs(self.launcher_config, box_outputs):
+                    raise ConfigError('all related outputs should be specified: {}'.format(', '.join(box_outputs)))
                 self.realisation = self._process_tf_obj_detection_api_outputs
                 return
 
@@ -152,12 +153,31 @@ class MaskRCNNAdapter(Adapter):
             return results
 
     def _process_pytorch_outputs(self, raw_outputs, identifiers, frame_meta):
-        classes = raw_outputs[self.classes_out]
+        classes = raw_outputs.get(self.classes_out, None)
+        boxes = raw_outputs.get(self.boxes_out, None)
+        scores = raw_outputs.get(self.scores_out, None)
+        raw_masks = raw_outputs.get(self.raw_masks_out, None)
+
+        if boxes is None:
+            for k, v in raw_outputs.items():
+                if v.ndim == 2 and v.shape[1] == 5:
+                    boxes = v
+                    break
+            if boxes is None:
+                raise ValueError("Failed to find suitable network's output. "
+                                 "Please specify those manually in config file.")
+            scores = boxes[:, 4]
+            boxes = boxes[:, :4]
+
+        if classes is None:
+            classes = np.ones(len(boxes), np.uint32)
+
         valid_detections_mask = classes > 0
         classes = classes[valid_detections_mask]
-        boxes = raw_outputs[self.boxes_out][valid_detections_mask]
-        scores = raw_outputs[self.scores_out][valid_detections_mask]
-        raw_masks = raw_outputs[self.raw_masks_out][valid_detections_mask]
+        boxes = boxes[valid_detections_mask]
+        scores = scores[valid_detections_mask]
+        if raw_masks is not None:
+            raw_masks = raw_masks[valid_detections_mask]
 
         results = []
 
@@ -175,17 +195,18 @@ class MaskRCNNAdapter(Adapter):
             boxes[:, 1::2] /= im_scale_y
             classes = classes.astype(np.uint32)
             masks = []
-            raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
-            if raw_mask_for_all_classes:
-                per_obj_raw_masks = []
-                for cls, raw_mask in zip(classes, raw_masks):
-                    per_obj_raw_masks.append(raw_mask[cls, ...])
-            else:
-                per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
+            if raw_masks is not None:
+                raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
+                if raw_mask_for_all_classes:
+                    per_obj_raw_masks = []
+                    for cls, raw_mask in zip(classes, raw_masks):
+                        per_obj_raw_masks.append(raw_mask[cls, ...])
+                else:
+                    per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
 
-            for box, raw_cls_mask in zip(boxes, per_obj_raw_masks):
-                mask = self.segm_postprocess(box, raw_cls_mask, *original_image_size, True, True)
-                masks.append(mask)
+                for box, raw_cls_mask in zip(boxes, per_obj_raw_masks):
+                    mask = self.segm_postprocess(box, raw_cls_mask, *original_image_size, True, True)
+                    masks.append(mask)
 
             x_mins, y_mins, x_maxs, y_maxs = boxes.T
             detection_prediction = DetectionPrediction(identifier, classes, scores, x_mins, y_mins, x_maxs, y_maxs)
