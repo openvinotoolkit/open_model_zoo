@@ -27,9 +27,10 @@ from ..quantization_model_evaluator import  create_dataset_attributes
 from ...adapters import create_adapter, MTCNNPAdapter
 from ...launcher import create_launcher, InputFeeder
 from ...preprocessor import PreprocessingExecutor
-from ...utils import extract_image_representations, read_pickle, contains_any
+from ...utils import extract_image_representations, read_pickle, contains_any, get_path
 from ...config import ConfigError
 from ...progress_reporters import ProgressReporter
+from ...logging import print_info
 
 
 def build_stages(models_info, preprocessors_config, launcher, model_args, delayed_model_loading=False):
@@ -382,6 +383,7 @@ class DLSDKModelMixin:
             if len(models_list) != 1:
                 raise ConfigError('Several suitable models found, please specify required model')
             model = models_list[0]
+            print_info('{} - Found model: {}'.format(self.default_model_name, model))
             if weights is None or Path(weights).is_dir():
                 weights_dir = weights or model.parent
                 weights = Path(weights_dir) / model.name.replace('xml', 'bin')
@@ -393,6 +395,7 @@ class DLSDKModelMixin:
                         raise ConfigError('Several suitable weights found, please specify required explicitly')
                     weights = weights_list[0]
             weights = Path(weights)
+            print_info('{} - Found weights: {}'.format(self.default_model_name, get_path(weights)))
         return model, weights
 
     def load_network(self, network, launcher, model_prefix):
