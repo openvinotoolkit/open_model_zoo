@@ -39,4 +39,5 @@ model_optimizer_args:
   - --input=data
   - --mean_values=data[103.96,116.78,123.68]
   - --input_model=$conv_dir/squeezenet1.1-caffe2.onnx
+quantizable: yes
 license: https://raw.githubusercontent.com/caffe2/models/master/LICENSE

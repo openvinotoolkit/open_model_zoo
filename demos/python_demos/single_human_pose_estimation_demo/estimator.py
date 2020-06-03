@@ -2,7 +2,6 @@ import os
 import numpy as np
 
 import cv2
-from openvino.inference_engine import IENetwork
 
 def preprocess_bbox(bbox, image):
     aspect_ratio = 0.75
@@ -85,7 +84,7 @@ class TransformedCrop(object):
 
 class HumanPoseEstimator(object):
     def __init__(self, ie, path_to_model_xml, scale=None, thr=-100, device='CPU'):
-        self.model = IENetwork(model=path_to_model_xml, weights=os.path.splitext(path_to_model_xml)[0] + '.bin')
+        self.model = ie.read_network(path_to_model_xml, os.path.splitext(path_to_model_xml)[0] + '.bin')
 
         assert len(self.model.inputs) == 1, "Expected 1 input blob"
 

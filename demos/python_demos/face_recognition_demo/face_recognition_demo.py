@@ -24,7 +24,6 @@ from argparse import ArgumentParser
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IENetwork
 from ie_module import InferenceContext
 from landmarks_detector import LandmarksDetector
 from face_detector import FaceDetector
@@ -167,14 +166,13 @@ class FrameProcessor:
 
     def load_model(self, model_path):
         model_path = osp.abspath(model_path)
-        model_description_path = model_path
         model_weights_path = osp.splitext(model_path)[0] + ".bin"
-        log.info("Loading the model from '%s'" % (model_description_path))
-        assert osp.isfile(model_description_path), \
-            "Model description is not found at '%s'" % (model_description_path)
+        log.info("Loading the model from '%s'" % (model_path))
+        assert osp.isfile(model_path), \
+            "Model description is not found at '%s'" % (model_path)
         assert osp.isfile(model_weights_path), \
             "Model weights are not found at '%s'" % (model_weights_path)
-        model = IENetwork(model_description_path, model_weights_path)
+        model = self.context.ie_core.read_network(model_path, model_weights_path)
         log.info("Model is loaded")
         return model
 
@@ -242,7 +240,7 @@ class Visualizer:
         self.print_perf_stats = args.perf_stats
 
         self.frame_time = 0
-        self.frame_start_time = 0
+        self.frame_start_time = time.perf_counter()
         self.fps = 0
         self.frame_num = 0
         self.frame_count = -1
@@ -254,8 +252,8 @@ class Visualizer:
         self.frame_timeout = 0 if args.timelapse else 1
 
     def update_fps(self):
-        now = time.time()
-        self.frame_time = now - self.frame_start_time
+        now = time.perf_counter()
+        self.frame_time = max(now - self.frame_start_time, sys.float_info.epsilon)
         self.fps = 1.0 / self.frame_time
         self.frame_start_time = now
 
