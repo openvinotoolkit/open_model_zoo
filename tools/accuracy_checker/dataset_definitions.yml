@@ -264,6 +264,15 @@ datasets:
     annotation: vehicle_attributes.pickle
     dataset_meta: vehicle_attributes.json
 
+  - name: vehicle_attributes_0042
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_attributes_recognition
+      annotation_file: 3634_OMZ_task8_vehicle_attributes_recognition_barrier_0039.xml
+      label: vehicle
+    annotation: vehicle_attributes.pickle
+    dataset_meta: vehicle_attributes.json
+
   - name: person_8_attributes
     data_source: ILSVRC2012_img_val
     annotation_conversion:
@@ -381,6 +390,16 @@ datasets:
     dataset_meta: pedestrian_detection.json
 
   - name: vehicle_detection_dataset
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3636_OMZ_task11_pedestrian_and_vehicle_detector_adas_0001.xml
+      labels_file: vehicle-detection-labels.json
+      has_background: True
+    annotation: vehicle_detection.pickle
+    dataset_meta: vehicle_detection.json
+
+  - name: barrier_vehicle_detection_dataset_index_class_2
     data_source: val2017
     annotation_conversion:
       converter: cvat_object_detection
