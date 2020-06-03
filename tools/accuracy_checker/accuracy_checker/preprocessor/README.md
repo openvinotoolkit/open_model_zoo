@@ -122,8 +122,9 @@ Accuracy Checker supports following set of preprocessors:
 * `resample_audio` - converts audio to new sample rate
   * `sample_rate` - sets new sample rate
 * `clip_audio` - slices audio into several parts with equal duration
-  * `duration` - sets duration in seconds
-  * `max_clips` - sets the maximum number of clips (by default `1`)
+  * `duration` - sets duration of each clip in seconds or samples (use `samples` suffix), e.g. `1.5`, `16000samples`
+  * `overlap` - sets overlapping for clips in percents or samples (use `%` or `samples` suffixes respectively) (no overlapping by default), e.g. `25%`, `4000samples`
+  * `max_clips` - sets the maximum number of clips (clips all record by default)
 * `audio_normalization` - normalize audio record with mean sample subtraction and division on standard deviation of samples.
 * `similarity_transform_box` - apply to image similarity transformation to get rectangle region stored in annotation metadata/
     * `box_scale` - box scale factor (Optional, default 1).
