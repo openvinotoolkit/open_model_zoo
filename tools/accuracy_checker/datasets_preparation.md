@@ -13,6 +13,7 @@ To download images from ImageNet, you need to have an account and agree to the T
 4. Select `Download Original Images`
 5. You will be redirected to the Terms of Access page. If you agree to the Terms, continue by clicking Agree and Sign
 6. Click one of the links in the Download as one tar file section to select it
+7. Unpack archive
 
 ### Structure of directory with dataset
 
@@ -20,7 +21,7 @@ This section describes what structure of directory dataset must have to run the 
 `<DATASET_DIR>` must contain the following entries:
 * A subdirectory named `ILSVRC2012_img_val` containing the ILSVRC 2012 validation images. How to download them is described above.
 * One of the annotation files:
-    * `val.txt` from <http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz>.
+    * `val.txt` from unpacked archive <http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz>.
     * `ILSVRC2017_val.txt` from <https://raw.githubusercontent.com/hujie-frank/SENet/master/ILSVRC2017_val.txt> which must be renamed to `val15.txt`
 
 ## [Common Objects in Context (COCO)](http://cocodataset.org/#home)
@@ -51,6 +52,7 @@ To download WIDER Face dataset, you need to follow the steps below:
 2. Go to the `Download` section
 3. Select `WIDER Face Validation images` and download them from [Google Drive](https://drive.google.com/file/d/0B6eKvaijfFUDd3dIRmpvSk8tLUk/view) or [Tencent Drive](https://share.weiyun.com/5ot9Qv1)
 4. Select and download `Face annotations`
+5. Unpack archives
 
 ### Structure of directory with dataset
 
