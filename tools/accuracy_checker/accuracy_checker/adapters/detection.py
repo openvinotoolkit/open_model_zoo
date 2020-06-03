@@ -17,8 +17,8 @@ limitations under the License.
 import itertools
 import math
 import warnings
-import numpy as np
 from collections import namedtuple
+import numpy as np
 
 from ..adapters import Adapter
 from ..config import ConfigValidator, NumberField, StringField, ListField, ConfigError
@@ -791,53 +791,68 @@ class FaceDetectionAdapter(Adapter):
         parameters.update({
             'score_threshold': NumberField(
                 value_type=float, min_value=0, max_value=1, default=0.35, optional=True,
-                description='A score threshold to discern whether a face is valid'),
+                description='Score threshold value used to discern whether a face is valid'),
+            'layer_names': ListField(
+                value_type=str, optional=False,
+                description='Target output layer base names'),
+            'anchor_sizes': ListField(
+                value_type=int, optional=False,
+                description='Anchor sizes for each base output layer'),
+            'window_scales': ListField(
+                value_type=int, optional=False,
+                description='Window scales for each base output layer'),
+            'window_lengths': ListField(
+                value_type=int, optional=False,
+                description='Window lenghts for each base output layer'),
         })
         return parameters
 
     def configure(self):
         self.score_threshold = self.get_value_from_config('score_threshold')
-        self.output_layers = []
-        self.generate_output_layer_info()
+        self.layer_info = {
+            'layer_names': self.get_value_from_config('layer_names'),
+            'anchor_sizes': self.get_value_from_config('anchor_sizes'),
+            'window_scales': self.get_value_from_config('window_scales'),
+            'window_lengths': self.get_value_from_config('window_lengths')
+        }
+        if len({len(x) for x in self.layer_info.values()}) != 1:
+            raise ConfigError('There must be equal number of layer names, anchor sizes, '
+                              'window scales, and window sizes')
+        self.output_layers = self.generate_output_layer_info()
 
     def generate_output_layer_info(self):
         """
         Generates face detection layer information,
         which is referenced in process function
         """
-        stage1_out_layers = [
-            FaceDetectionLayerInfo('b12', 4, 8, 12),
-            FaceDetectionLayerInfo('b16', 3, 8, 16),
-            FaceDetectionLayerInfo('b24', 2, 8, 24),
-            FaceDetectionLayerInfo('b32', 3, 16, 32),
-            FaceDetectionLayerInfo('b48', 2, 16, 48),
-            FaceDetectionLayerInfo('b64', 3, 32, 64),
-            FaceDetectionLayerInfo('b96', 2, 32, 96),
-            FaceDetectionLayerInfo('b128', 3, 64, 128),
-            FaceDetectionLayerInfo('b192', 2, 64, 192)
-        ]
+        output_layers = []
 
-        for layer in stage1_out_layers:
+        for i in range(len(self.layer_info['layer_names'])):
             start = 1.5
-            if layer.num % 3 == 0:
-                start = -layer.num / 3.0
-            elif layer.num % 2 == 0:
-                start = -layer.num / 2.0 + 0.5
+            anchor_size = self.layer_info['anchor_sizes'][i]
+            layer_name = self.layer_info['layer_names'][i]
+            window_scale = self.layer_info['window_scales'][i]
+            window_length = self.layer_info['window_lengths'][i]
+            if anchor_size % 3 == 0:
+                start = -anchor_size / 3.0
+            elif anchor_size % 2 == 0:
+                start = -anchor_size / 2.0 + 0.5
             k = 1
-            for row in range(layer.num):
-                for col in range(layer.num):
+            for row in range(anchor_size):
+                for col in range(anchor_size):
                     out_layer = FaceDetectionLayerOutput(
-                        prob_name=layer.name + '/prob',
-                        reg_name=layer.name + '/bb',
+                        prob_name=layer_name + '/prob',
+                        reg_name=layer_name + '/bb',
                         anchor_index=k - 1,
-                        anchor_size=layer.num * layer.num,
-                        win_scale=layer.scale,
-                        win_length=layer.length,
-                        win_trans_x=float((start + col) / layer.num),
-                        win_trans_y=float((start + row) / layer.num)
+                        anchor_size=anchor_size * anchor_size,
+                        win_scale=window_scale,
+                        win_length=window_length,
+                        win_trans_x=float((start + col) / anchor_size),
+                        win_trans_y=float((start + row) / anchor_size)
                     )
-                    self.output_layers.append(out_layer)
+                    output_layers.append(out_layer)
                     k += 1
+        return output_layers
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []

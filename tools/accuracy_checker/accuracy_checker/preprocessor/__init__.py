@@ -30,6 +30,7 @@ from .geometric_transformations import (
     Crop3D,
     TransformedCropWithAutoScale,
     ImagePyramid,
+    FaceDetectionImagePyramid,
     WarpAffine
 )
 from .resize import Resize, AutoResize
@@ -61,6 +62,7 @@ __all__ = [
     'CropBraTS',
     'TransformedCropWithAutoScale',
     'ImagePyramid',
+    'FaceDetectionImagePyramid',
     'WarpAffine',
 
     'BgrToGray',
