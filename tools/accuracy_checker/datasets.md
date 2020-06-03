@@ -1,6 +1,8 @@
 # Datasets decription
 
-## [ImageNet](http://image-net.org/challenges/LSVRC/2012/index)
+If you want to use prepared configs to run the Accuracy Checker tool and the Model quantizer, you need to organize folders with validation datasets in a certain way.  Instructions for preparing validation data are described in this document.
+
+## [ImageNet](http://image-net.org)
 
 ### How download dataset
 
@@ -17,7 +19,9 @@ To download images from ImageNet, you need to have an account and agree to the T
 This section describes what structure of directory dataset must have to run the Accuracy Checker tool.
 `<DATASET_DIR>` must contain the following entries:
 * A subdirectory named `ILSVRC2012_img_val` containing the ILSVRC 2012 validation images. How to download them is described above.
-* `val.txt` from <http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz>.
+* One of the annotation files:
+    * `val.txt` from <http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz>.
+    * `ILSVRC2017_val.txt` from <https://raw.githubusercontent.com/hujie-frank/SENet/master/ILSVRC2017_val.txt> which must be renamed to `val15.txt`
 
 ## [Common Objects in Context (COCO)](http://cocodataset.org/#home)
 
@@ -38,8 +42,6 @@ This section describes what structure of directory dataset must have to run the 
     * `person_keypoints_val2017.json`
     * `captions_val2017.json`
 
-Instruction how to download images and annotation files can be found above.
-
 ## [WIDER Face](http://shuoyang1213.me/WIDERFACE/)
 
 ### How download dataset
@@ -56,5 +58,3 @@ This section describes what structure of directory dataset must have to run the 
 `<DATASET_DIR>` must contain the following entries:
 * A subdirectories named `WIDER_val/images` containing the WIDER Face validation images.
 * A subdirectory `wider_face_split` with annotation file `wider_face_val_bbx_gt.txt`
-
-Instruction how to download images and annotation file can be found above.
