@@ -30,7 +30,8 @@ This section describes what structure of directory dataset must have to run the 
 To download COCO dataset, you need to follow the steps below:
 1. Go to the [COCO](http://cocodataset.org/#home) website
 2. Go to the `Dataset-> Download` tab
-3. Select `2017 Val images` and `2017 Train/Val annotations` and download these archives
+3. Select [`2017 Val images`](http://images.cocodataset.org/zips/val2017.zip) and [`2017 Train/Val annotations`](http://images.cocodataset.org/annotations/annotations_trainval2017.zip) and download these archives
+4. Unpack archives
 
 ### Structure of directory with dataset
 
@@ -38,9 +39,8 @@ This section describes what structure of directory dataset must have to run the 
 `<DATASET_DIR>` must contain the following entries:
 * A subdirectory named `val2017` containing the COCO 2017 validation images.
 * One or set of annotation files:
-    * `instances_val2017.json`
-    * `person_keypoints_val2017.json`
-    * `captions_val2017.json`
+    * `instances_val2017.json` which used for object detection and instance segmentation tasks
+    * `person_keypoints_val2017.json` which used for human pose estimation tasks
 
 ## [WIDER Face](http://shuoyang1213.me/WIDERFACE/)
 
