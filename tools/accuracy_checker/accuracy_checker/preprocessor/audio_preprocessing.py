@@ -80,32 +80,44 @@ class ClipAudio(Preprocessor):
 
     def configure(self):
         duration = self.get_value_from_config('duration')
-        if isinstance(duration, str):
-            if duration.endswith('samples'):
-                try:
-                    self.duration_in_samples = int(duration[:-7])
-                except ValueError:
-                    raise ConfigError("Preprocessor {}: invalid value for duration - {}."
-                                      .format(self.__provider__, duration))
-                if self.duration_in_samples <= 1:
-                    raise ConfigError("Preprocessor {}: duration should be positive value - {}."
-                                      .format(self.__provider__, self.duration_in_samples))
-            else:
-                raise ConfigError("Preprocessor {}: invalid value for duration - {}.".
-                                  format(self.__provider__, duration))
-        else:
-            try:
-                self.duration = float(duration)
-            except ValueError:
-                raise ConfigError("Preprocessor {}: invalid value for duration - {}."
-                                  .format(self.__provider__, duration))
-            if self.duration <= 0:
-                raise ConfigError("Preprocessor {}: duration should be positive value - {}."
-                                  .format(self.__provider__, self.duration))
+        self._parse_duration(duration)
 
         self.max_clips = self.get_value_from_config('max_clips') or np.inf
 
         overlap = self.get_value_from_config('overlap')
+        self._parse_overlap(overlap)
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        sample_rate = image.metadata.get('sample_rate')
+        if sample_rate is None:
+            raise RuntimeError('Operation "{}" failed: required "sample rate" in metadata.'.
+                               format(self.__provider__))
+        audio_duration = data.shape[1]
+        clip_duration = self.duration if self.is_duration_in_samples else int(self.duration * sample_rate)
+        clipped_data = []
+        if self.is_overlap_in_samples:
+            hop = clip_duration - self.overlap_in_samples
+        else:
+            hop = int((1 - self.overlap) * clip_duration)
+
+        if hop > clip_duration:
+            raise ConfigError("Preprocessor {}: clip overlapping exceeds clip length.".format(self.__provider__))
+
+        for clip_no, clip_start in enumerate(range(0, audio_duration, hop)):
+            if clip_start + clip_duration > audio_duration or clip_no >= self.max_clips:
+                break
+            clip = data[:, clip_start: clip_start + clip_duration]
+            clipped_data.append(clip)
+
+        image.data = clipped_data
+        image.metadata['multi_infer'] = True
+
+        return image
+
+    def _parse_overlap(self, overlap):
+        self.is_overlap_in_samples = False
+        self.overlap = 0
         if isinstance(overlap, str):
             if overlap.endswith('%'):
                 try:
@@ -122,6 +134,7 @@ class ClipAudio(Preprocessor):
                 if self.overlap_in_samples < 1:
                     raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
                                       .format(self.__provider__, overlap))
+                self.is_overlap_in_samples = True
             else:
                 raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
                                   .format(self.__provider__, overlap))
@@ -135,34 +148,31 @@ class ClipAudio(Preprocessor):
                 raise ConfigError("Preprocessor {}: invalid value for 'overlap' - {}."
                                   .format(self.__provider__, overlap))
 
-    def process(self, image, annotation_meta=None):
-        data = image.data
-        sample_rate = image.metadata.get('sample_rate')
-        if sample_rate is None:
-            raise RuntimeError('Operation "{}" failed: required "sample rate" in metadata.'.
-                               format(self.__provider__))
-        audio_duration = data.shape[1]
-        clip_duration = int(self.duration * sample_rate) if self.duration else self.duration_in_samples
-        clipped_data = []
-        hop = clip_duration
-        if self.overlap is not None:
-            hop = int((1 - self.overlap) * hop)
-        elif self.overlap_in_samples is not None:
-            hop = hop - self.overlap_in_samples
-
-        if hop > clip_duration:
-            raise ConfigError("Preprocessor {}: clip overlapping exceeds clip length.".format(self.__provider__))
-
-        for clip_no, clip_start in enumerate(range(0, audio_duration, hop)):
-            if clip_start + clip_duration > audio_duration or clip_no >= self.max_clips:
-                break
-            clip = data[:, clip_start: clip_start + clip_duration]
-            clipped_data.append(clip)
-
-        image.data = clipped_data
-        image.metadata['multi_infer'] = True
-
-        return image
+    def _parse_duration(self, duration):
+        self.is_duration_in_samples = False
+        if isinstance(duration, str):
+            if duration.endswith('samples'):
+                try:
+                    self.duration = int(duration[:-7])
+                except ValueError:
+                    raise ConfigError("Preprocessor {}: invalid value for duration - {}."
+                                      .format(self.__provider__, duration))
+                if self.duration <= 1:
+                    raise ConfigError("Preprocessor {}: duration should be positive value - {}."
+                                      .format(self.__provider__, self.duration))
+                self.is_duration_in_samples = True
+            else:
+                raise ConfigError("Preprocessor {}: invalid value for duration - {}.".
+                                  format(self.__provider__, duration))
+        else:
+            try:
+                self.duration = float(duration)
+            except ValueError:
+                raise ConfigError("Preprocessor {}: invalid value for duration - {}."
+                                  .format(self.__provider__, duration))
+            if self.duration <= 0:
+                raise ConfigError("Preprocessor {}: duration should be positive value - {}."
+                                  .format(self.__provider__, self.duration))
 
 
 class NormalizeAudio(Preprocessor):
