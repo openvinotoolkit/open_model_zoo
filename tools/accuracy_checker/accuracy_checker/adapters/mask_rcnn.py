@@ -159,7 +159,7 @@ class MaskRCNNAdapter(Adapter):
         raw_masks = raw_outputs.get(self.raw_masks_out, None)
 
         if boxes is None:
-            for k, v in raw_outputs.items():
+            for v in raw_outputs.values():
                 if v.ndim == 2 and v.shape[1] == 5:
                     boxes = v
                     break
@@ -194,19 +194,7 @@ class MaskRCNNAdapter(Adapter):
             boxes[:, 0::2] /= im_scale_x
             boxes[:, 1::2] /= im_scale_y
             classes = classes.astype(np.uint32)
-            masks = []
-            if raw_masks is not None:
-                raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
-                if raw_mask_for_all_classes:
-                    per_obj_raw_masks = []
-                    for cls, raw_mask in zip(classes, raw_masks):
-                        per_obj_raw_masks.append(raw_mask[cls, ...])
-                else:
-                    per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
-
-                for box, raw_cls_mask in zip(boxes, per_obj_raw_masks):
-                    mask = self.segm_postprocess(box, raw_cls_mask, *original_image_size, True, True)
-                    masks.append(mask)
+            masks = self._process_masks_pytorch(boxes, raw_masks, identifiers, original_image_size)
 
             x_mins, y_mins, x_maxs, y_maxs = boxes.T
             detection_prediction = DetectionPrediction(identifier, classes, scores, x_mins, y_mins, x_maxs, y_maxs)
@@ -219,6 +207,22 @@ class MaskRCNNAdapter(Adapter):
             }))
 
             return results
+
+    def _process_masks_pytorch(self, boxes, raw_masks, identifiers, original_image_size):
+        masks = []
+        if raw_masks is not None:
+            raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
+            if raw_mask_for_all_classes:
+                per_obj_raw_masks = []
+                for cls, raw_mask in zip(classes, raw_masks):
+                    per_obj_raw_masks.append(raw_mask[cls, ...])
+            else:
+                per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
+
+            for box, raw_cls_mask in zip(boxes, per_obj_raw_masks):
+                mask = self.segm_postprocess(box, raw_cls_mask, *original_image_size, True, True)
+                masks.append(mask)
+        return masks
 
     def _process_detection_output(self, raw_outputs, identifiers, frame_meta):
         raw_masks = raw_outputs[self.raw_masks_out]
