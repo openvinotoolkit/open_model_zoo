@@ -313,7 +313,7 @@ Model quantizer usage
 Before you run the model quantizer, you must prepare a directory with
 the datasets required for the quantization process. This directory will be
 referred to as `<DATASET_DIR>` below. More detailed information about datasets
-preparation you can find in [Dataset Preparation Guide](../accuracy_checker/datasets_preparation.md).
+preparation you can find in [Dataset Preparation Guide](../../datasets.md).
 
 The basic usage is to run the script like this:
 

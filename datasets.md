@@ -1,4 +1,4 @@
-# Datasets preparation
+# Dataset Preparation Guide
 
 If you want to use prepared configs to run the Accuracy Checker tool and the Model quantizer, you need to organize folders with validation datasets in a certain way.  Instructions for preparing validation data are described in this document.
 
