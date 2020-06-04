@@ -17,11 +17,11 @@ To download images from ImageNet, you need to have an account and agree to the T
 
 To download annotation files, you need to follow the steps below:
 * `val.txt`
-1. Download arhive <http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz>
-2. Unpack archive
+  1. Download arhive <http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz>
+  2. Unpack archive
 * `val15.txt`
-1. Download annotation file <https://raw.githubusercontent.com/hujie-frank/SENet/master/ILSVRC2017_val.txt>
-2. Rename `ILSVRC2017_val.txt` to `val15.txt`
+  1. Download annotation file <https://raw.githubusercontent.com/hujie-frank/SENet/master/ILSVRC2017_val.txt>
+  2. Rename `ILSVRC2017_val.txt` to `val15.txt`
 
 ### Structure of directory with dataset
 
@@ -31,7 +31,7 @@ This section describes what structure of directory dataset must have to run the 
     * `val.txt` - annotation file used for ILSVRC 2012
     * `val15.txt` - annotation file used for ILSVRC 2015
 
-### Datasets names in datasets_definitions.yml
+### Datasets in datasets_definitions.yml
 * imagenet_1000_classes
 * imagenet_1000_classes_2015
 * imagenet_1001_classes
@@ -54,7 +54,7 @@ This section describes what structure of directory dataset must have to run the 
     * `instances_val2017.json` - annotation file which used for object detection and instance segmentation tasks
     * `person_keypoints_val2017.json` - annotation file which used for human pose estimation tasks
 
-### Datasets names in datasets_definitions.yml
+### Datasets in datasets_definitions.yml
 * ms_coco_mask_rcnn
 * ms_coco_detection_91_classes
 * ms_coco_detection_80_class_with_background
@@ -84,6 +84,6 @@ This section describes what structure of directory dataset must have to run the 
     * `wider_face_split` - directory with annotation file
         * `wider_face_val_bbx_gt.txt` - annotation file
 
-### Datasets names in datasets_definitions.yml
+### Datasets in datasets_definitions.yml
 * wider
 * wider_without_bkgr
