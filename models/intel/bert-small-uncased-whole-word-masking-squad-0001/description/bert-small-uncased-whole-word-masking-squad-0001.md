@@ -46,7 +46,7 @@ The values of this input are equal to:
     * `1` at positions corresponding to the `[CLS]` + *tokenized question* + `[SEP]` + *tokenized premise of the question* + `[SEP]` part of the `input_ids`  (i.e. all positions except those containing the `[PAD]` tokens), and
     * `0` at all other positions
 
-3. Token types,  name:`token_type_ids`, shape: [1x384].
+3. Token types,  name: `token_type_ids`, shape: [1x384].
 Token types is sequence of integer values representing the segmentation of the `input_ids` into question and premise.
 The values are equal to:
     * `1` at positions corresponding to the *tokenized premise of the question* + `[SEP]` part of the `input_ids`, and
