@@ -237,19 +237,14 @@ int main(int argc, char *argv[]) {
         auto cnnNetwork = ie.ReadNetwork(FLAGS_m);
         /** Reading labels (if specified) **/
         std::vector<std::string> labels;
-        std::string labelFileName;
         if (!FLAGS_labels.empty()) {
-            labelFileName = FLAGS_labels;
-            std::ifstream inputFile(labelFileName);
+            std::ifstream inputFile(FLAGS_labels);
             std::string label; 
             while (std::getline(inputFile, label)) {
                 labels.push_back(label);
             }
-        }
-        if (!labels.empty()) {
-            slog::info << "Loaded " << labels.size() << " labels" << slog::endl;
-        } else {
-            slog::info << "File " << labelFileName << " empty or not found. Labels are omitted." << slog::endl;
+            if (labels.empty())
+                throw std::logic_error("File empty or not found: " + FLAGS_labels);
         }
         // -----------------------------------------------------------------------------------------------------
 
@@ -302,10 +297,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (!labels.empty() && static_cast<int>(labels.size()) != yoloParams.begin()->second.classes) {
-            slog::info << "The number of labels (" << labels.size() << ") "
-                << "is different from numbers of model classes (" << yoloParams.begin()->second.classes << "). "
-                << "Labels are omitted." << slog::endl;
-            labels.clear();
+            throw std::runtime_error("The number of labels is different from numbers of model classes");
         }
         // -----------------------------------------------------------------------------------------------------
 

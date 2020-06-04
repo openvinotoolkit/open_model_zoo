@@ -124,19 +124,14 @@ int main(int argc, char *argv[]) {
         cnnNetwork.setBatchSize(1);
         /** Read labels (if any)**/
         std::vector<std::string> labels;
-        std::string labelFileName;
         if (!FLAGS_labels.empty()) {
-            labelFileName = FLAGS_labels;
-            std::ifstream inputFile(labelFileName);
+            std::ifstream inputFile(FLAGS_labels);
             std::string label;
             while (std::getline(inputFile, label)) {
                 labels.push_back(label);
             }
-        }
-        if (!labels.empty()) {
-            slog::info << "Loaded " << labels.size() << " labels" << slog::endl;
-        } else {
-            slog::info << "File " << labelFileName << " empty or not found. Labels are omitted." << slog::endl;
+            if (labels.empty())
+                throw std::logic_error("File empty or not found: " + FLAGS_labels);
         }
         // -----------------------------------------------------------------------------------------------------
 
@@ -201,14 +196,11 @@ int main(int argc, char *argv[]) {
             throw std::logic_error("Class labels are not supported with IR version older than 10");
         }
 
-        if (static_cast<int>(labels.size()) != num_classes) {
+        if (!labels.empty() && static_cast<int>(labels.size()) != num_classes) {
             if (static_cast<int>(labels.size()) == (num_classes - 1))  // if network assumes default "background" class, having no label
                 labels.insert(labels.begin(), "fake");
             else {
-                slog::info << "The number of labels (" << labels.size() << ") "
-                    << "is different from numbers of model classes (" << num_classes << "). "
-                    << "Labels are omitted." << slog::endl;
-                labels.clear();
+                throw std::runtime_error("The number of labels is different from numbers of model classes");
             }                
         }
         const SizeVector outputDims = output->getTensorDesc().getDims();
