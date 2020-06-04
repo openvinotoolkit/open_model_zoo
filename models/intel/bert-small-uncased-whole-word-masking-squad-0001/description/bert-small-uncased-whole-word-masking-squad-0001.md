@@ -40,7 +40,7 @@ The sequence structure is as follows (`[CLS]`, `[SEP]` and `[PAD]` should be rep
 as specified by the dictionary):
 `[CLS]` + *tokenized question* + `[SEP]` + *tokenized premise of the question* + `[SEP]` + (`[PAD]` tokens to pad to the maximum sequence length of 384)
 
-2. Input mask, name:`attention_mask`, shape: [1x384].
+2. Input mask, name: `attention_mask`, shape: [1x384].
 Input mask is a sequence of integer values representing the mask of valid values in the input.
 The values of this input are equal to:
     * `1` at positions corresponding to the `[CLS]` + *tokenized question* + `[SEP]` + *tokenized premise of the question* + `[SEP]` part of the `input_ids`  (i.e. all positions except those containing the `[PAD]` tokens), and
