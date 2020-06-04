@@ -238,32 +238,17 @@ int main(int argc, char *argv[]) {
         /** Reading labels (if specified) **/
         std::vector<std::string> labels;
         std::string labelFileName;
-        if (!FLAGS_labels.empty())
-        {
+        if (!FLAGS_labels.empty()) {
             labelFileName = FLAGS_labels;
             std::ifstream inputFile(labelFileName);
             std::string label; 
-            while (std::getline(inputFile, label))
-            {
+            while (std::getline(inputFile, label)) {
                 labels.push_back(label);
             }
         }
-        else
-        {
-            std::string labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
-            std::ifstream inputFile(labelFileName);
-            std::string label;
-            while (std::getline(inputFile, label))
-            {
-                labels.push_back(label);
-            }
-        }
-        if (!labels.empty())
-        {
+        if (!labels.empty()) {
             slog::info << "Loaded " << labels.size() << " labels" << slog::endl;
-        }
-        else
-        {
+        } else {
             slog::info << "File " << labelFileName << " empty or not found. Labels are omitted." << slog::endl;
         }
         // -----------------------------------------------------------------------------------------------------
@@ -316,8 +301,7 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
         }
 
-        if (!labels.empty() && labels.size() != yoloParams.begin()->second.classes)
-        {
+        if (!labels.empty() && labels.size() != yoloParams.begin()->second.classes) {
             slog::info << "The number of labels (" << labels.size() << ") "
                 << "is different from numbers of model classes (" << yoloParams.begin()->second.classes << "). "
                 << "Labels are omitted." << slog::endl;

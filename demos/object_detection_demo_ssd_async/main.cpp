@@ -125,32 +125,17 @@ int main(int argc, char *argv[]) {
         /** Read labels (if any)**/
         std::vector<std::string> labels;
         std::string labelFileName;
-        if (!FLAGS_labels.empty())
-        {
+        if (!FLAGS_labels.empty()) {
             labelFileName = FLAGS_labels;
             std::ifstream inputFile(labelFileName);
             std::string label;
-            while (std::getline(inputFile, label))
-            {
+            while (std::getline(inputFile, label)) {
                 labels.push_back(label);
             }
         }
-        else
-        {
-            labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
-            std::ifstream inputFile(labelFileName);
-            std::string label;
-            while (std::getline(inputFile, label))
-            {
-                labels.push_back(label);
-            }
-        }
-        if (!labels.empty())
-        {
+        if (!labels.empty()) {
             slog::info << "Loaded " << labels.size() << " labels" << slog::endl;
-        }
-        else
-        {
+        } else {
             slog::info << "File " << labelFileName << " empty or not found. Labels are omitted." << slog::endl;
         }
         // -----------------------------------------------------------------------------------------------------
