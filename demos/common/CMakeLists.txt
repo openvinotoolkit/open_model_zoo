@@ -3,3 +3,4 @@
 #
 
 add_subdirectory(monitors)
+add_subdirectory(performance_metrics)
