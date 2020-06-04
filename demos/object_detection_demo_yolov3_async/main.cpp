@@ -301,7 +301,7 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
         }
 
-        if (!labels.empty() && labels.size() != yoloParams.begin()->second.classes) {
+        if (!labels.empty() && static_cast<int>(labels.size()) != yoloParams.begin()->second.classes) {
             slog::info << "The number of labels (" << labels.size() << ") "
                 << "is different from numbers of model classes (" << yoloParams.begin()->second.classes << "). "
                 << "Labels are omitted." << slog::endl;
