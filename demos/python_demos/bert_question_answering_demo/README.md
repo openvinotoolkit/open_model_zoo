@@ -75,19 +75,38 @@ so you will need to run the demo without it.
 Please see general ['reshape intro and limitations'](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_ShapeInference.html)
 
 ## Demo Outputs
-
 The application outputs found answers to the same console.
 
-## Example Cmd-Line
-You can use the following command to try the demo (assuming fp32 model from the Open Model Zoo, downloaded with the
-[Model Downloader](../../../tools/downloader/README.md)):
+## Supported Models
+[Open Model Zoo](https://github.com/opencv/open_model_zoo) comes with example BERT-large trained on the Squad*.
+One specific flavor of that is so called "distilled" model (for that reason it comes with "small" in its name,
+but don't get confused as it is still originated from the BERT Large) that is indeed substantially smaller and faster.
+
+The demo also works fine with [official MLPerf* BERT ONNX models fine-tuned on the Squad dataset](
+https://github.com/mlperf/inference/tree/master/v0.7/language/bert).
+Unlike [Open Model Zoo](https://github.com/opencv/open_model_zoo) models that come directly as the
+Intermediate Representation (IR), the MLPerf models should be explicitly converted with
+[OpenVINO Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
+Specifically the example command-line (for the int8 model) is as follows:
 ```
-    python3 question_answering_demo.py
+    python3 mo.py
+            -m <path_to_model>/bert_large_v1_1_fake_quant.onnx
+            --input "input_ids,attention_mask,token_type_ids"
+            --input_shape "[1,384],[1,384],[1,384]"
+            --keep_shape_ops
+```
+
+## Example Demo Cmd-Line
+You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
+[Model Downloader](../../../tools/downloader/README.md) executed with "--name bert*"):
+```
+    python3 bert_question_answering_demo.py
             --vocab=<path_to_model>/vocab.txt
-            --model=<path_to_model>/bert-large-uncased-whole-word-masking-squad-fp32-onnx-0001.xml
-            --input_names="['0','1','2']"
-            --output_names="['3171','3172']"
+            --model=<path_to_model>/bert-small-uncased-whole-word-masking-squad-0001.xml
+            --input_names="['input_ids','attention_mask','token_type_ids']"
+            --output_names="['output_s','output_e']"
             --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street)"
+            -c
 ```
 The demo will use a wiki-page about the Bert character to answer your questions like "who is Bert", "how old is Bert", etc.
 
