@@ -36,7 +36,7 @@ Grayscale image, name - `actual_input`, shape - [1x1x96x2000], format is [BxCxHx
 
 ## Outputs
 
-Name - `outpput`, shape - [125x1x4059], format is [WxBxL], where:
+Name - `output`, shape - [125x1x4059], format is [WxBxL], where:
   - W - output sequence length
   - B - batch size
   - L - confidence distribution across the supported symbols in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release).
