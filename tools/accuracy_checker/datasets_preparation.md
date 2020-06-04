@@ -31,10 +31,10 @@ This section describes what structure of directory dataset must have to run the 
     * `val.txt` - annotation file used for ILSVRC 2012
     * `val15.txt` - annotation file used for ILSVRC 2015
 
-### Datasets in datasets_definitions.yml
-* imagenet_1000_classes
-* imagenet_1000_classes_2015
-* imagenet_1001_classes
+### Datasets in dataset_definitions.yml
+* `imagenet_1000_classes` used for evaluation models trained on ILSVRC 2012 dataset for 1000 classes
+* `imagenet_1000_classes_2015` used for evaluation models trained on ILSVRC 2015 dataset for 1000 classes
+* `imagenet_1001_classes` used for evaluation models trained on ILSVRC 2012 dataset for 1001 classes (background label + original labels)
 
 ## [Common Objects in Context (COCO)](http://cocodataset.org/#home)
 
@@ -54,15 +54,15 @@ This section describes what structure of directory dataset must have to run the 
     * `instances_val2017.json` - annotation file which used for object detection and instance segmentation tasks
     * `person_keypoints_val2017.json` - annotation file which used for human pose estimation tasks
 
-### Datasets in datasets_definitions.yml
-* ms_coco_mask_rcnn
-* ms_coco_detection_91_classes
-* ms_coco_detection_80_class_with_background
-* ms_coco_detection_80_class_without_background
-* ms_coco_keypoints
-* person_detection
-* mscoco_person_detection
-* ms_coco_single_keypoints
+### Datasets in dataset_definitions.yml
+* `ms_coco_mask_rcnn` used for evaluation models trained on COCO dataset for object detection and instance segmentation tasks. Background label + label map with 80 public available object categories are used. Annotations are saved in image id ascend order
+* `ms_coco_detection_91_classes` used for evaluation models trained on COCO dataset for object detection tasks. Background label + original label map with 91 object categories are used (public available 80 categories). Annotations are saved in image id ascend order
+* `ms_coco_detection_80_class_with_background` used for evaluation models trained on COCO dataset for object detection tasks. Background label + label map with 80 public available object categories are used. Annotations are saved in image id ascend order
+* `ms_coco_detection_80_class_without_background` used for evaluation models trained on COCO dataset for object detection tasks. Label map with 80 public available object categories is used. Annotations are saved in image id ascend order
+* `ms_coco_keypoints` used for evaluation models trained on COCO dataset for human pose estimation tasks. Each annotation stores multiple keypoints for one image
+* `person_detection` used for evaluation models trained on COCO dataset for object detection tasks. Background label + original label map with 91 object categories are used (public available 80 categories). Annotations are saved in image id ascend order
+* `mscoco_person_detection` used for evaluation models trained on COCO dataset for object detection tasks. Background label + original label map with 91 object categories are used (public available 80 categories). Annotations are saved in image id ascend order
+* `ms_coco_single_keypoints` used for evaluation models trained on COCO dataset for human pose estimation tasks. Each annotation stores single keypoints for image, so several annotation can be associated to one image
 
 ## [WIDER Face](http://shuoyang1213.me/WIDERFACE/)
 
@@ -84,6 +84,6 @@ This section describes what structure of directory dataset must have to run the 
     * `wider_face_split` - directory with annotation file
         * `wider_face_val_bbx_gt.txt` - annotation file
 
-### Datasets in datasets_definitions.yml
-* wider
-* wider_without_bkgr
+### Datasets in dataset_definitions.yml
+* `wider` used for evaluation models on WIDER Face dataset where the face is the first class
+* `wider_without_bkgr` used for evaluation models on WIDER Face dataset where the face is class zero
