@@ -4,7 +4,7 @@
 
 This is a network for handwritten simplified Chinese text recognition scenario. It consists of a VGG16-like backbone,
 reshape layer and a fully connected layer.
-The network is able to recognize simplified Chinese text consisting of characters in the [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release).
+The network is able to recognize simplified Chinese text consisting of characters in the [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release) dataset.
 
 ## Example
 
