@@ -22,8 +22,9 @@ from ..quantization_model_evaluator import create_dataset_attributes
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...launcher import create_launcher
-from ...utils import extract_image_representations, contains_all
+from ...utils import extract_image_representations, contains_all, get_path
 from ...progress_reporters import ProgressReporter
+from ...logging import print_info
 
 
 class ColorizationEvaluator(BaseEvaluator):
@@ -54,6 +55,14 @@ class ColorizationEvaluator(BaseEvaluator):
             launcher_settings['device'] = 'CPU'
         launcher = create_launcher(launcher_settings, delayed_model_loading=True)
         network_info = config.get('network_info', {})
+        colorization_network = network_info.get('colorization_network', {})
+        verification_network = network_info.get('verification_network', {})
+        colorization_network['net_type'] = 'colorization_network'
+        verification_network['net_type'] = 'verification_network'
+        network_info.update({
+            'colorization_network': colorization_network,
+            'verification_network': verification_network
+        })
         if not delayed_model_loading:
             colorization_network = network_info.get('colorization_network', {})
             verification_network = network_info.get('verification_network', {})
@@ -280,9 +289,11 @@ class BaseModel:
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models found')
             model = model_list[0]
+            print_info('{} - Found model: {}'.format(network_info.get('net_type'), model))
         if model.suffix == '.blob':
             return model, None
         weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
+        print_info('{} - Found weights: {}'.format(network_info.get('net_type'), get_path(weights)))
 
         return model, weights
 
