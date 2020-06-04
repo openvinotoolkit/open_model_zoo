@@ -120,14 +120,15 @@ def main():
 
         cv2.putText(frame, 'summary: {:.1f} FPS'.format(
             1.0 / detector.infer_time), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+        print(presenter.reportMeans())
         if args.no_show:
+            cv2.imwrite('./out.png', frame)
             continue
         cv2.imshow('Facial Landmarks Demo', frame)
         key = cv2.waitKey(delay)
         if key == 27:
             return
         presenter.handleKey(key)
-    print(presenter.reportMeans())
 
 
 if __name__ == '__main__':

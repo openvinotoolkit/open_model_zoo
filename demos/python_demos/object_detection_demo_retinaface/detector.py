@@ -32,7 +32,7 @@ class Detector(object):
         _, channels, self.input_height, self.input_width = model.inputs[self._input_layer_name].shape
         assert channels == 3, "Expected 3-channel input"
 
-        self._detect_masks = True if len(model.outputs) == 12 else False
+        self._detect_masks = len(model.outputs) == 12
         self.face_prob_threshold = face_prob_threshold
 
         self._ie = ie

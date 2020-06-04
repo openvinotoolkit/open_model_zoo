@@ -18,6 +18,8 @@ from collections import namedtuple
 import numpy as np
 import re
 
+Detection = namedtuple('Detection', 'face_detection, landmarks_regression, mask_detection')
+
 class RetinaFacePostprocessor(object):
     def __init__(self, detect_masks=False):
         self._detect_masks = detect_masks
@@ -149,21 +151,18 @@ class RetinaFacePostprocessor(object):
                 if self._detect_masks:
                     mask_scores_list.extend(self._get_mask_scores(type_scores_outputs[idx],
                         anchor_num)[threshold_mask][keep])
-        output = namedtuple('detection', 'face_detection, landmarks_regression, mask_detection')
+        detections = []
+        landmarks_regression = []
         if len(scores_list) != 0:
             scores = np.reshape(scores_list, -1)
-            mask_scores = np.reshape(mask_scores_list, -1)
+            mask_scores_list = np.reshape(mask_scores_list, -1)
             x_mins, y_mins, x_maxs, y_maxs = np.array(proposals_list).T # pylint: disable=E0633
             detections = [scores, x_mins / scale_x, y_mins / scale_y, x_maxs / scale_x, y_maxs / scale_y]
 
-            output.face_detection = detections
-            if self._detect_masks:
-                output.mask_detection = mask_scores
-
             landmarks_x_coords = np.array(landmarks_list)[:, :, ::2].reshape(len(landmarks_list), -1) / scale_x
             landmarks_y_coords = np.array(landmarks_list)[:, :, 1::2].reshape(len(landmarks_list), -1) / scale_y
-            output.landmarks_regression = [landmarks_x_coords, landmarks_y_coords]
-        return output
+            landmarks_regression = [landmarks_x_coords, landmarks_y_coords]
+        return Detection(detections, landmarks_regression, mask_scores_list)
 
     def _get_proposals(self, bbox_deltas, anchor_num, anchors):
         bbox_deltas = bbox_deltas.transpose((1, 2, 0))

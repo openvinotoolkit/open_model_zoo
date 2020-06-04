@@ -13,7 +13,7 @@ Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference
 Running the application with the <code>-h</code> option yields the following usage message:
 
 ```
-usage: object_detection_retinaface_demo.py [-h] -m MODEL
+usage: object_detection_demo_retinaface.py [-h] -m MODEL
                                            [-i INPUT [INPUT ...]] [-d DEVICE]
                                            [-pt_f FACE_PROB_THRESHOLD]
                                            [-pt_m MASK_PROB_THRESHOLD]
