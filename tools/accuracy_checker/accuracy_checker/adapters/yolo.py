@@ -1,5 +1,5 @@
 from collections import namedtuple
-import warnings
+import math
 
 import numpy as np
 
@@ -282,25 +282,13 @@ class YoloV3Adapter(Adapter):
                             "{}.".format(', '.join(YoloV3Adapter.PRECOMPUTED_ANCHORS.keys()))),
             'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
                                      description="Minimal objectiveness score value for valid detections."),
-            'outputs': ListField(description="The list of output layers names."),
+            'outputs': ListField(
+                optional=True, default=[],
+                description="The list of output layers names (optional),"
+                            " if specified there should be exactly 3 output layers provided."
+            ),
             'anchor_masks': ListField(optional=True, description='per layer used anchors mask'),
-            'do_reshape': BoolField(
-                optional=True, default=False,
-                description="Reshapes output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on 'output_format'"
-                            "value ([B,Cy,Cx] by default). You may need to specify 'cells' value."
-            ),
-            'cells': ListField(
-                optional=True, default=[13, 26, 52],
-                description="Grid size for each layer, according 'outputs' filed. Works only with 'do_reshape=True' or "
-                            "when output tensor dimensions not equal 3."),
-            'raw_output': BoolField(
-                optional=True, default=False,
-                description="Preprocesses output in the original way."
-            ),
-            'output_format': StringField(
-                choices=['BHW', 'HWB'], optional=True, default='BHW',
-                description="Set output layer format"
-            )
+            'cells': ListField(description="Number of cells across width and height per output ", default=[13, 26, 54])
         })
 
         return parameters
@@ -325,28 +313,7 @@ class YoloV3Adapter(Adapter):
                     layer_anchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
                 per_layer_anchors.append(layer_anchors)
             self.masked_anchors = per_layer_anchors
-        self.do_reshape = self.get_value_from_config('do_reshape')
         self.cells = self.get_value_from_config('cells')
-        if len(self.outputs) != len(self.cells):
-            if self.do_reshape:
-                raise ConfigError('Incorrect number of output layer ({}) or detection grid size ({}). '
-                                  'Must be equal with each other, check "cells" or "outputs" option'
-                                  .format(len(self.outputs), len(self.cells)))
-            warnings.warn('Number of output layers ({}) not equal to detection grid size ({}). '
-                          'Must be equal with each other, if output tensor resize is required'
-                          .format(len(self.outputs), len(self.cells)))
-
-        if self.masked_anchors and len(self.masked_anchors) != len(self.outputs):
-            raise ConfigError('anchor mask should be specified for all output layers')
-
-        self.raw_output = self.get_value_from_config('raw_output')
-        self.output_format = self.get_value_from_config('output_format')
-        if self.raw_output:
-            self.processor = YoloOutputProcessor(coord_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
-                                                 conf_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
-                                                 prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
-        else:
-            self.processor = YoloOutputProcessor()
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -357,54 +324,70 @@ class YoloV3Adapter(Adapter):
             list of DetectionPrediction objects
         """
 
+        def get_anchors_offset(x, num, anchors):
+            return int((num * 2) * (len(anchors) / (num * 2) - 1 - math.log2(x / 13)))
+
+        def parse_yolo_v3_results(prediction, threshold, w, h, det, layer_id):
+            if len(prediction.shape) > 2:
+                cells_y, cells_x = prediction.shape[1:]
+            else:
+                cells_y, cells_x = self.cells[layer_id]
+            anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
+            num = len(anchors) // 2 if self.masked_anchors else self.num
+            prediction = prediction.flatten()
+            for y, x, n in np.ndindex((cells_y, cells_x, num)):
+                index = n * cells_y * cells_x + y * cells_x + x
+                anchors_offset = get_anchors_offset(cells_x, num, anchors) if not self.masked_anchors else 0
+
+                box_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, 0)
+                obj_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, self.coords)
+                scale = prediction[obj_index]
+                if scale < threshold:
+                    continue
+
+                box = [
+                    (x + prediction[box_index + 0 * (cells_y * cells_x)]) / cells_x,
+                    (y + prediction[box_index + 1 * (cells_y * cells_x)]) / cells_y,
+                    np.exp(prediction[box_index + 2 * (cells_y * cells_x)]) * anchors[anchors_offset + 2 * n + 0] / w,
+                    np.exp(prediction[box_index + 3 * (cells_y * cells_x)]) * anchors[anchors_offset + 2 * n + 1] / h
+                ]
+
+                classes_prob = np.empty(self.classes)
+                for cls in range(self.classes):
+                    cls_index = entry_index(cells_x, cells_y, self.coords, self.classes, index,
+                                            self.coords + 1 + cls)
+                    classes_prob[cls] = prediction[cls_index] * scale
+
+                    det['labels'].append(cls)
+                    det['scores'].append(classes_prob[cls])
+                    det['x_mins'].append(box[0] - box[2] / 2.0)
+                    det['y_mins'].append(box[1] - box[3] / 2.0)
+                    det['x_maxs'].append(box[0] + box[2] / 2.0)
+                    det['y_maxs'].append(box[1] + box[3] / 2.0)
+
+            return det
+
         result = []
 
         raw_outputs = self._extract_predictions(raw, frame_meta)
+
+        if self.masked_anchors and len(self.masked_anchors) != len(outputs):
+            raise ConfigError('anchor mask should be specified for all output layers')
         batch = len(identifiers)
         predictions = [[] for _ in range(batch)]
         for blob in self.outputs:
             for b in range(batch):
                 predictions[b].append(raw_outputs[blob][b])
 
-        box_size = self.coords + 1 + self.classes
         for identifier, prediction, meta in zip(identifiers, predictions, frame_meta):
             detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
             input_shape = list(meta.get('input_shape', {'data': (1, 3, 416, 416)}).values())[0]
             nchw_layout = input_shape[1] == 3
-            self.processor.width_normalizer = input_shape[3 if nchw_layout else 2]
-            self.processor.height_normalizer = input_shape[2 if nchw_layout else 1]
+            self.input_width = input_shape[3 if nchw_layout else 2]
+            self.input_height = input_shape[2 if nchw_layout else 1]
+
             for layer_id, p in enumerate(prediction):
-                anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
-                num = len(anchors) // 2 if self.masked_anchors else self.num
-                if self.do_reshape or len(p.shape) != 3:
-                    try:
-                        cells = self.cells[layer_id]
-                    except IndexError:
-                        raise ConfigError('Number of output layers ({}) is more than detection grid size ({}). '
-                                          'Check "cells" option.'.format(len(outputs), len(self.cells)))
-                    if self.output_format == 'BHW':
-                        new_shape = (num * box_size, cells, cells)
-                    else:
-                        new_shape = (cells, cells, num * box_size)
-                    p = np.reshape(p, new_shape)
-                else:
-                    # Get grid size from output shape - ignore self.cells value.
-                    # N.B.: value p.shape[1] will always contain grid size, but here we use if clause just for
-                    # clarification (works ONLY for square grids).
-                    cells = p.shape[1] if self.output_format == 'BHW' else p.shape[0]
-
-                self.processor.x_normalizer = cells
-                self.processor.y_normalizer = cells
-
-                labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num,
-                                                                              box_size, anchors,
-                                                                              self.processor, self.threshold)
-                detections['labels'].extend(labels)
-                detections['scores'].extend(scores)
-                detections['x_mins'].extend(x_mins)
-                detections['y_mins'].extend(y_mins)
-                detections['x_maxs'].extend(x_maxs)
-                detections['y_maxs'].extend(y_maxs)
+                parse_yolo_v3_results(p, self.threshold, self.input_width, self.input_height, detections, layer_id)
 
             result.append(DetectionPrediction(
                 identifier, detections['labels'], detections['scores'], detections['x_mins'], detections['y_mins'],
