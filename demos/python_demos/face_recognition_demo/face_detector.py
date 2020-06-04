@@ -49,11 +49,11 @@ class FaceDetector(Module):
     def __init__(self, model, confidence_threshold=0.5, roi_scale_factor=1.15):
         super(FaceDetector, self).__init__(model)
 
-        assert len(model.inputs) == 1, "Expected 1 input blob"
+        assert len(model.input_info) == 1, "Expected 1 input blob"
         assert len(model.outputs) == 1, "Expected 1 output blob"
-        self.input_blob = next(iter(model.inputs))
+        self.input_blob = next(iter(model.input_info))
         self.output_blob = next(iter(model.outputs))
-        self.input_shape = model.inputs[self.input_blob].shape
+        self.input_shape = model.input_info[self.input_blob].shape
         self.output_shape = model.outputs[self.output_blob].shape
 
         assert len(self.output_shape) == 4 and \

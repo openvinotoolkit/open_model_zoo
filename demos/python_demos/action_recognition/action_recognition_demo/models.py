@@ -85,14 +85,14 @@ class IEModel:
         print("Reading IR...")
         self.net = ie_core.read_network(model_xml, model_bin)
         self.net.batch_size = batch_size
-        assert len(self.net.inputs.keys()) == 1, "One input is expected"
+        assert len(self.net.input_info.keys()) == 1, "One input is expected"
         assert len(self.net.outputs) == 1, "One output is expected"
 
         print("Loading IR to the plugin...")
         self.exec_net = ie_core.load_network(network=self.net, device_name=target_device, num_requests=num_requests)
-        self.input_name = next(iter(self.net.inputs))
+        self.input_name = next(iter(self.net.input_info))
         self.output_name = next(iter(self.net.outputs))
-        self.input_size = self.net.inputs[self.input_name].shape
+        self.input_size = self.net.input_info[self.input_name].input_data.shape
         self.output_size = self.exec_net.requests[0].outputs[self.output_name].shape
         self.num_requests = num_requests
 

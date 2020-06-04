@@ -79,18 +79,18 @@ def load_ie_model(ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=
                       "or --cpu_extension command line argument")
             sys.exit(1)
 
-    assert len(net.inputs.keys()) == 1 or len(net.inputs.keys()) == 2, \
+    assert len(net.input_info.keys()) == 1 or len(net.input_info.keys()) == 2, \
         "Supports topologies with only 1 or 2 inputs"
     assert len(net.outputs) == 1 or len(net.outputs) == 4 or len(net.outputs) == 5, \
         "Supports topologies with only 1, 4 or 5 outputs"
 
     log.info("Preparing input blobs")
-    input_blob = next(iter(net.inputs))
+    input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
     net.batch_size = 1
 
     # Loading model to the plugin
     log.info("Loading model to the plugin")
     exec_net = ie.load_network(network=net, device_name=device, num_requests=num_reqs)
-    model = IEModel(exec_net, net.inputs, input_blob, out_blob)
+    model = IEModel(exec_net, net.input_info, input_blob, out_blob)
     return model
