@@ -27,26 +27,26 @@ This model presents a vehicle attributes classification algorithm for a traffic 
 
 | Color    | Accuracy   |
 |:--------:|:----------:|
-| white    | 85.61%     |
+| white    | 84.20%     |
 | gray     | 77.47%     |
-| yellow   | 49.73%     |
-| red      | 97.62%     |
-| green    | 74.24%     |
-| blue     | 80.02%     |
-| black    | 97.55%     |
+| yellow   | 61.50%     |
+| red      | 94.65%     |
+| green    | 81.82%     |
+| blue     | 82.49%     |
+| black    | 96.84%     |
 
-**Color average accuracy: 80.32%**
+**Color average accuracy: 82.71%**
 
 ### Type accuracy, %
 
 | Type  | Accuracy |
 |:-----:|:--------:|
-| car   | 97.96%   |
-| van   | 86.08%   |
-| truck | 97.47%   |
-| bus   | 42.49%   |
+| car   | 97.44%   |
+| van   | 86.41%   |
+| truck | 96.95%   |
+| bus   | 68.57%   |
 
-**Type average accuracy: 81.00%**
+**Type average accuracy: 87.34%**
 
 ## Performance
 
