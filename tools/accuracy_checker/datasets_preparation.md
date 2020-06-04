@@ -15,14 +15,21 @@ To download images from ImageNet, you need to have an account and agree to the T
 6. Click one of the links in the Download as one tar file section to select it
 7. Unpack archive
 
+To download annotation files, you need to follow the steps below:
+* `val.txt`
+1. Download arhive <http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz>
+2. Unpack archive
+* `val15.txt`
+1. Download annotation file <https://raw.githubusercontent.com/hujie-frank/SENet/master/ILSVRC2017_val.txt>
+2. Rename `ILSVRC2017_val.txt` to `val15.txt`
+
 ### Structure of directory with dataset
 
 This section describes what structure of directory dataset must have to run the Accuracy Checker tool.
-`<DATASET_DIR>` must contain the following entries:
-* A subdirectory named `ILSVRC2012_img_val` containing the ILSVRC 2012 validation images. How to download them is described above.
-* One of the annotation files:
-    * `val.txt` from unpacked archive <http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz>.
-    * `ILSVRC2017_val.txt` from <https://raw.githubusercontent.com/hujie-frank/SENet/master/ILSVRC2017_val.txt> which must be renamed to `val15.txt`
+* `<DATASET_DIR>` - root directory
+    * `ILSVRC2012_img_val` - directory containing the ILSVRC 2012 validation images
+    * `val.txt` - annotation file used for ILSVRC 2012
+    * `val15.txt` - annotation file used for ILSVRC 2015
 
 ## [Common Objects in Context (COCO)](http://cocodataset.org/#home)
 
@@ -37,11 +44,10 @@ To download COCO dataset, you need to follow the steps below:
 ### Structure of directory with dataset
 
 This section describes what structure of directory dataset must have to run the Accuracy Checker tool.
-`<DATASET_DIR>` must contain the following entries:
-* A subdirectory named `val2017` containing the COCO 2017 validation images.
-* One or set of annotation files:
-    * `instances_val2017.json` which used for object detection and instance segmentation tasks
-    * `person_keypoints_val2017.json` which used for human pose estimation tasks
+* `<DATASET_DIR>` - root directory
+    * `val2017` - directory containing the COCO 2017 validation images
+    * `instances_val2017.json` - annotation file which used for object detection and instance segmentation tasks
+    * `person_keypoints_val2017.json` - annotation file which used for human pose estimation tasks
 
 ## [WIDER Face](http://shuoyang1213.me/WIDERFACE/)
 
@@ -57,6 +63,8 @@ To download WIDER Face dataset, you need to follow the steps below:
 ### Structure of directory with dataset
 
 This section describes what structure of directory dataset must have to run the Accuracy Checker tool.
-`<DATASET_DIR>` must contain the following entries:
-* A subdirectories named `WIDER_val/images` containing the WIDER Face validation images.
-* A subdirectory `wider_face_split` with annotation file `wider_face_val_bbx_gt.txt`
+* `<DATASET_DIR>` - root directory
+    * `WIDER_val` - directory containing images directory
+        * `images` - directory containing the WIDER Face validation images
+    * `wider_face_split` - directory with annotation file
+        * `wider_face_val_bbx_gt.txt` - annotation file
