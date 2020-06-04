@@ -92,17 +92,6 @@ datasets:
     annotation:  mscoco_det_80.pickle
     dataset_meta:  mscoco_det_80.json
 
-  - name: ms_coco_detection_80_class_with_background
-    data_source: val2017
-    annotation_conversion:
-      converter: mscoco_detection
-      annotation_file: instances_val2017.json
-      has_background: True
-      sort_annotations: True
-      use_full_label_map: False
-    annotation: mscoco_det_80_bkgr.pickle
-    dataset_meta:  mscoco_det_80_bkgr.json
-
   - name: ms_coco_keypoints
     data_source: val2017
     annotation_conversion:

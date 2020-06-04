@@ -60,8 +60,6 @@ This section describes what structure of directory dataset must have to run the 
 * `ms_coco_detection_80_class_with_background` used for evaluation models trained on COCO dataset for object detection tasks. Background label + label map with 80 public available object categories are used. Annotations are saved in image id ascend order
 * `ms_coco_detection_80_class_without_background` used for evaluation models trained on COCO dataset for object detection tasks. Label map with 80 public available object categories is used. Annotations are saved in image id ascend order
 * `ms_coco_keypoints` used for evaluation models trained on COCO dataset for human pose estimation tasks. Each annotation stores multiple keypoints for one image
-* `person_detection` used for evaluation models trained on COCO dataset for object detection tasks. Background label + original label map with 91 object categories are used (public available 80 categories). Annotations are saved in image id ascend order
-* `mscoco_person_detection` used for evaluation models trained on COCO dataset for object detection tasks. Background label + original label map with 91 object categories are used (public available 80 categories). Annotations are saved in image id ascend order
 * `ms_coco_single_keypoints` used for evaluation models trained on COCO dataset for human pose estimation tasks. Each annotation stores single keypoints for image, so several annotation can be associated to one image
 
 ## [WIDER Face](http://shuoyang1213.me/WIDERFACE/)
