@@ -24,8 +24,9 @@ from ..quantization_model_evaluator import create_dataset_attributes
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...launcher import create_launcher
-from ...utils import contains_all, contains_any, extract_image_representations, read_pickle
+from ...utils import contains_all, contains_any, extract_image_representations, read_pickle, get_path
 from ...progress_reporters import ProgressReporter
+from ...logging import print_info
 
 
 class SequentialActionRecognitionEvaluator(BaseEvaluator):
@@ -413,10 +414,11 @@ class EncoderDLSDKModel(BaseModel):
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
+            print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
         if model.suffix == '.blob':
             return model, None
-        weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
-
+        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
         return model, weights
 
     def load_network(self, network, launcher):
@@ -492,9 +494,11 @@ class DecoderDLSDKModel(BaseModel):
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
+            print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
         if model.suffix == '.blob':
             return model, None
-        weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
+        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
         return model, weights
 
     def load_model(self, network_info, launcher):
