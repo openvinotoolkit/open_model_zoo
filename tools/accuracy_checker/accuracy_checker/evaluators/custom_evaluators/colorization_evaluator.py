@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from pathlib import Path
+from collections import OrderedDict
 import numpy as np
 import cv2
-from collections import OrderedDict
 
 from ..base_evaluator import BaseEvaluator
 from ..quantization_model_evaluator import create_dataset_attributes

@@ -17,8 +17,8 @@ limitations under the License.
 from pathlib import Path
 import pickle
 from functools import partial
-import numpy as np
 from collections import OrderedDict
+import numpy as np
 
 from ..base_evaluator import BaseEvaluator
 from ..quantization_model_evaluator import create_dataset_attributes
