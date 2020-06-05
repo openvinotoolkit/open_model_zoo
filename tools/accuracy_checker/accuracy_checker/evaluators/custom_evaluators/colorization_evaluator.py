@@ -258,12 +258,12 @@ class ColorizationEvaluator(BaseEvaluator):
 
 
 class BaseModel:
-    def __init__(self, network_info, launcher, net_type, delayed_model_loading=False):
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.input_blob = None
         self.output_blob = None
         self.with_prefix = False
         if not delayed_model_loading:
-            self.load_model(network_info, launcher, net_type)
+            self.load_model(network_info, launcher)
 
     @staticmethod
     def auto_model_search(network_info, net_type):
@@ -295,8 +295,8 @@ class BaseModel:
     def release(self):
         pass
 
-    def load_model(self, network_info, launcher, net_type):
-        model, weights = self.auto_model_search(network_info, net_type)
+    def load_model(self, network_info, launcher):
+        model, weights = self.auto_model_search(network_info, self.net_type)
         if weights:
             self.network = launcher.read_network(str(model), str(weights))
             self.network.batch_size = 1
@@ -317,7 +317,8 @@ class BaseModel:
 
 class ColorizationTestModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
-        super().__init__(network_info, launcher, 'colorization_network', delayed_model_loading)
+        self.net_type = 'colorization_network'
+        super().__init__(network_info, launcher, delayed_model_loading)
         self.color_coeff = np.load(network_info['color_coeff'])
 
     @staticmethod
@@ -378,7 +379,8 @@ class ColorizationTestModel(BaseModel):
 
 class ColorizationCheckModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
-        super().__init__(network_info, launcher, 'verification_network', delayed_model_loading)
+        self.net_type = 'verification_network'
+        super().__init__(network_info, launcher, delayed_model_loading)
         self.adapter = create_adapter(network_info['adapter'])
         self.adapter.output_blob = self.output_blob
 
