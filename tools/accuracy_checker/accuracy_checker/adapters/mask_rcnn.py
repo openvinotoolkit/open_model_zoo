@@ -197,7 +197,7 @@ class MaskRCNNAdapter(Adapter):
             classes = classes.astype(np.uint32)
             masks = []
             if raw_masks is not None:
-                masks = self._process_masks_pytorch(boxes, raw_masks, identifiers, original_image_size)
+                masks = self._process_masks_pytorch(boxes, raw_masks, identifiers, original_image_size, classes)
 
             x_mins, y_mins, x_maxs, y_maxs = boxes.T
             detection_prediction = DetectionPrediction(identifier, classes, scores, x_mins, y_mins, x_maxs, y_maxs)
@@ -226,7 +226,7 @@ class MaskRCNNAdapter(Adapter):
             )
         return filter_outputs[0]
 
-    def _process_masks_pytorch(self, boxes, raw_masks, identifiers, original_image_size):
+    def _process_masks_pytorch(self, boxes, raw_masks, identifiers, original_image_size, classes):
         masks = []
         raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
         if raw_mask_for_all_classes:
