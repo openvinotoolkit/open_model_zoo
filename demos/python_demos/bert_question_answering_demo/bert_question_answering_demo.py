@@ -26,7 +26,7 @@ from argparse import ArgumentParser, SUPPRESS
 import bs4
 import numpy as np
 import requests
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 
 
 def build_argparser():
@@ -169,7 +169,7 @@ def main():
     # load vocabulary file for model
     log.info("Loading vocab file:\t{}".format(args.vocab))
     with open(args.vocab, "r", encoding="utf-8") as r:
-        vocab = dict((t.rstrip("\n"), i) for i, t in enumerate(r.readlines()))
+        vocab = {t.rstrip("\n"): i for i, t in enumerate(r.readlines())}
     log.info("{} tokens loaded".format(len(vocab)))
 
     # get context as a string (as we might need it's length for the sequence reshape)

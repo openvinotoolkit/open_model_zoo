@@ -117,9 +117,9 @@ Notice that when the original "context" (text from the url) together with the qu
 Thus, for the long texts, the network is called multiple times. The results are then sorted by the probabilities.
 
 ## Demo Performance
-Even though, the demo reports inference performance (by measuring wall-clock time for individual inference calls),
-it is rather baseline performance, as certain tricks like batching,
-[throughput mode] (https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Intro_to_Performance.html) can be applied.
+Even though the demo reports inference performance (by measuring wall-clock time for individual inference calls),
+it is only baseline performance, as certain tricks like batching,
+[throughput mode](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Intro_to_Performance.html) can be applied.
 Please use the full-blown [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
 for any actual performance measurements.
 
