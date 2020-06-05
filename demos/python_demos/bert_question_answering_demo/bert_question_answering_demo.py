@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
  Copyright (c) 2020 Intel Corporation
@@ -37,16 +37,18 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
                       required=True, type=str)
+    args.add_argument("-i", "--input", help="Required. URL to a page with context",
+                      required=True, type=str)
     args.add_argument("--input_names",
-                      help="Required. Input names for the network. For example ['input_ids','attention_mask','token_type_ids']",
-                      required=True, type=str)
+                      help="Optional. Inputs names for the network. "
+                           "Default values are ['input_ids','attention_mask','token_type_ids']",
+                      required=False, type=str, default="['input_ids','attention_mask','token_type_ids']")
     args.add_argument("--output_names",
-                      help="Required. Output names for the network. For example ['output_s','output_e']",
-                      required=True, type=str)
+                      help="Optional. Outputs names for the network. "
+                           "Default values are ['output_s','output_e']",
+                      required=False, type=str, default="['output_s','output_e']")
     args.add_argument("--model_squad_ver", help="Optional. SQUAD version used for model fine tuning",
                       default="1.2", required=False, type=str)
-    args.add_argument("-i", "--input", help="Required. Url to a page with context",
-                      required=True, type=str)
     args.add_argument("-q", "--max_question_token_num", help="Optional. Maximum number of tokens in question",
                       default=8, required=False, type=int)
     args.add_argument("-a", "--max_answer_token_num", help="Optional. Maximum number of tokens in answer",
@@ -221,8 +223,10 @@ def main():
 
     if set(input_names_model) != set(input_names) or set(output_names_model) != set(output_names):
         log.error("Input or Output names do not match")
-        log.error("    Network input->output names: {}->{}".format(input_names_model, output_names_model))
-        log.error("    Expected (from the demo cmd-line) input->output names: {}->{}".format(input_names, output_names))
+        log.error("    By default, the demo expects input->output names: {}->{}. "
+                  "Please use the --input_names and --output_names to specify the right names "
+                  "(see actual values below)".format(input_names, output_names))
+        log.error("    Actual network input->output names: {}->{}".format(input_names_model, output_names_model))
         raise Exception("Unexpected network input or output names")
 
     # load model to the device

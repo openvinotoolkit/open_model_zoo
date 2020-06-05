@@ -28,16 +28,16 @@ Options:
                         Required. path to vocabulary file with tokens
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model
-  --input_names INPUT_NAMES
-                        Required. Names for inputs in networks. For example
-                        ['input_ids','attention_mask','token_type_ids']
-  --output_names OUTPUT_NAMES
-                        Required. Names for outputs in networks. For example
-                        ['output_s','output_e']
-  --model_squad_ver MODEL_SQUAD_VER
-                        Optional. SQUAD version used for model fine tuning
   -i INPUT, --input INPUT
                         Required. Url to a page with context
+  --input_names INPUT_NAMES
+                        Optional. Inputs names for the  network.
+                        Default values are ['input_ids','attention_mask','token_type_ids']
+  --output_names OUTPUT_NAMES
+                        Required. Outputs names for the network.
+                        Default values are ['output_s','output_e']
+  --model_squad_ver MODEL_SQUAD_VER
+                        Optional. SQUAD version used for model fine tuning
   -q MAX_QUESTION_TOKEN_NUM, --max_question_token_num MAX_QUESTION_TOKEN_NUM
                         Optional. Maximum number of tokens in question (used with the reshape option)
   -r, --reshape
@@ -63,22 +63,23 @@ Options:
 
 ## Demo Inputs
 
-The application reads text from the html page by the given url and then answers questions typed from the console.
-The model and it's parameters (inputs and outputs) is another important demo arguments.
+The application reads text from the HTML page at the given url and then answers questions typed from the console.
+The model and its parameters (inputs and outputs) are also important demo arguments.
 Notice that since order of inputs for the model does matter, the demo script checks that the inputs specified
 from the command-line match the actual network inputs.
-When reshape ('-r') reshape option is specified, the script also attempts to reshape the network to the
+When the reshape option ('-r')  is specified, the script also attempts to reshape the network to the
 length of the context plus length of the question (both in tokens), if the resulting value is smaller than the original
 sequence length that the network expects. This is performance (speed) and memory footprint saving option.
 Since some networks are not-reshapable (due to limitations of the internal layers) the reshaping might fail,
 so you will need to run the demo without it.
-Please see general ['reshape intro and limitations'](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_ShapeInference.html)
+Please see general [reshape intro and limitations](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_ShapeInference.html)
 
 ## Demo Outputs
 The application outputs found answers to the same console.
 
 ## Supported Models
-[Open Model Zoo](https://github.com/opencv/open_model_zoo) comes with example BERT-large trained on the Squad*.
+[Open Model Zoo Models](https://github.com/opencv/open_model_zoo/tree/master/models/intel) feature
+example BERT-large trained on the Squad*.
 One specific flavor of that is so called "distilled" model (for that reason it comes with "small" in its name,
 but don't get confused as it is still originated from the BERT Large) that is indeed substantially smaller and faster.
 
