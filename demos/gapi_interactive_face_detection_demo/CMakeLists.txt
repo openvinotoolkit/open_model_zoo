@@ -1,0 +1,12 @@
+# Copyright (C) 2018-2019 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#
+
+file (GLOB MAIN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file (GLOB MAIN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h*)
+
+ie_add_sample(NAME gapi_interactive_face_detection_demo
+              SOURCES ${MAIN_SRC}
+              HEADERS ${MAIN_HEADERS}
+              OPENCV_DEPENDENCIES gapi
+              OPENCV_DEPENDENCIES highgui)
