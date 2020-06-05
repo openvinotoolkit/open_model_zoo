@@ -330,7 +330,7 @@ def main():
                       "or --cpu_extension command line argument")
             sys.exit(1)
 
-    assert len(net.input_info.keys()) == 1, "Sample supports only YOLO V3 based single input topologies"
+    assert len(net.input_info) == 1, "Sample supports only YOLO V3 based single input topologies"
 
     # ---------------------------------------------- 4. Preparing inputs -----------------------------------------------
     log.info("Preparing inputs")

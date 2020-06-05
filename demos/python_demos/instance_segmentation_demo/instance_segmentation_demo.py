@@ -144,7 +144,7 @@ def main():
             sys.exit(1)
 
     required_input_keys = {'im_data', 'im_info'}
-    assert required_input_keys == set(net.input_info.keys()), \
+    assert required_input_keys == set(net.input_info), \
         'Demo supports only topologies with the following input keys: {}'.format(', '.join(required_input_keys))
     required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks'}
     assert required_output_keys.issubset(net.outputs.keys()), \

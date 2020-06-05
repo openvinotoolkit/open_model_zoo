@@ -50,7 +50,7 @@ def main():
                       "using -l or --cpu_extension command line argument")
             sys.exit(1)
 
-    assert len(net.input_info.keys()) == 1, "Sample supports only single input topologies"
+    assert len(net.input_info) == 1, "Sample supports only single input topologies"
     assert len(net.outputs) == 1, "Sample supports only single output topologies"
 
     log.info("preparing input blobs")

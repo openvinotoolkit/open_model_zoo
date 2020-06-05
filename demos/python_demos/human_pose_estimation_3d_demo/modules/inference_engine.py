@@ -27,7 +27,7 @@ class InferenceEngine:
 
         self.net = self.ie.read_network(net_model_xml_path, os.path.splitext(net_model_xml_path)[0] + '.bin')
         required_input_key = {'data'}
-        assert required_input_key == set(self.net.input_info.keys()), \
+        assert required_input_key == set(self.net.input_info), \
             'Demo supports only topologies with the following input key: {}'.format(', '.join(required_input_key))
         required_output_keys = {'features', 'heatmaps', 'pafs'}
         assert required_output_keys.issubset(self.net.outputs.keys()), \

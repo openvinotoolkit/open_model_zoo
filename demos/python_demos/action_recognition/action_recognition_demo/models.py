@@ -85,7 +85,7 @@ class IEModel:
         print("Reading IR...")
         self.net = ie_core.read_network(model_xml, model_bin)
         self.net.batch_size = batch_size
-        assert len(self.net.input_info.keys()) == 1, "One input is expected"
+        assert len(self.net.input_info) == 1, "One input is expected"
         assert len(self.net.outputs) == 1, "One output is expected"
 
         print("Loading IR to the plugin...")
