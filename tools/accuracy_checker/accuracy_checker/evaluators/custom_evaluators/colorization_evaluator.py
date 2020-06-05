@@ -284,8 +284,8 @@ class BaseModel:
             print_info('{} - Found model: {}'.format(net_type, model))
         if model.suffix == '.blob':
             return model, None
-        weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
-        print_info('{} - Found weights: {}'.format(net_type, get_path(weights)))
+        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        print_info('{} - Found weights: {}'.format(net_type, weights))
 
         return model, weights
 

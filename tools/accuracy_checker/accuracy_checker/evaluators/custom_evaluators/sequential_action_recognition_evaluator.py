@@ -417,8 +417,8 @@ class EncoderDLSDKModel(BaseModel):
             print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
         if model.suffix == '.blob':
             return model, None
-        weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
-        print_info('{} - Found weights: {}'.format(self.default_model_suffix, get_path(weights)))
+        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
         return model, weights
 
     def load_network(self, network, launcher):
@@ -497,8 +497,8 @@ class DecoderDLSDKModel(BaseModel):
             print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
         if model.suffix == '.blob':
             return model, None
-        weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
-        print_info('{} - Found weights: {}'.format(self.default_model_suffix, get_path(weights)))
+        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
         return model, weights
 
     def load_model(self, network_info, launcher):
