@@ -32,9 +32,9 @@ This section describes what structure of directory dataset must have to run the 
     * `val15.txt` - annotation file used for ILSVRC 2015
 
 ### Datasets in dataset_definitions.yml
-* `imagenet_1000_classes` used for evaluation models trained on ILSVRC 2012 dataset for 1000 classes. (model examples: alexnet, colorization-v2)
-* `imagenet_1000_classes_2015` used for evaluation models trained on ILSVRC 2015 dataset for 1000 classes. (model examples: se-resnet-152, se-resnext-50)
-* `imagenet_1001_classes` used for evaluation models trained on ILSVRC 2012 dataset for 1001 classes (background label + original labels). (model examples: googlenet-v2-tf, resnet-50-tf)
+* `imagenet_1000_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1000 classes. (model examples: alexnet, vgg16)
+* `imagenet_1000_classes_2015` used for evaluation models trained on ILSVRC 2015 dataset with 1000 classes. (model examples: se-resnet-152, se-resnext-50)
+* `imagenet_1001_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1001 classes (background label + original labels). (model examples: googlenet-v2-tf, resnet-50-tf)
 
 ## [Common Objects in Context (COCO)](http://cocodataset.org/#home)
 
@@ -58,8 +58,8 @@ This section describes what structure of directory dataset must have to run the 
 * `ms_coco_mask_rcnn` used for evaluation models trained on COCO dataset for object detection and instance segmentation tasks. Background label + label map with 80 public available object categories are used. Annotations are saved in image id ascend order.
 * `ms_coco_detection_91_classes` used for evaluation models trained on COCO dataset for object detection tasks. Background label + original label map with 91 object categories are used (public available 80 categories). Annotations are saved in image id ascend order. (model examples: faster_rcnn_resnet50_coco, ssd_resnet50_v1_fpn_coco)
 * `ms_coco_detection_80_class_with_background` used for evaluation models trained on COCO dataset for object detection tasks. Background label + label map with 80 public available object categories are used. Annotations are saved in image id ascend order. (model examples: faster-rcnn-resnet101-coco-sparse-60-0001, ssd-resnet34-1200-onnx)
-* `ms_coco_detection_80_class_without_background` used for evaluation models trained on COCO dataset for object detection tasks. Label map with 80 public available object categories is used. Annotations are saved in image id ascend order. (model examples: ctdet_coco_dlav0_384, pelee-coco)
-* `ms_coco_keypoints` used for evaluation models trained on COCO dataset for human pose estimation tasks. Each annotation stores multiple keypoints for one image. (model examples: human-pose-estimation-0001, openpose-pose-caffe)
+* `ms_coco_detection_80_class_without_background` used for evaluation models trained on COCO dataset for object detection tasks. Label map with 80 public available object categories is used. Annotations are saved in image id ascend order. (model examples: ctdet_coco_dlav0_384, yolo-v3-tf)
+* `ms_coco_keypoints` used for evaluation models trained on COCO dataset for human pose estimation tasks. Each annotation stores multiple keypoints for one image. (model examples: human-pose-estimation-0001)
 * `ms_coco_single_keypoints` used for evaluation models trained on COCO dataset for human pose estimation tasks. Each annotation stores single keypoints for image, so several annotation can be associated to one image. (model examples: single-human-pose-estimation-0001)
 
 ## [WIDER Face](http://shuoyang1213.me/WIDERFACE/)
