@@ -79,7 +79,7 @@ def build_argparser():
                       required=True, type=str, metavar='"<path>"')
     args.add_argument('-i',
                       dest='input_source',
-                      help='Required. Path to an image, video file or a numeric camera ID.',
+                      help='Required. Input to process.',
                       required=True, type=str, metavar='"<path>"')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
