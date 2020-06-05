@@ -394,8 +394,8 @@ class DLSDKModelMixin:
                     if len(weights_list) != 1:
                         raise ConfigError('Several suitable weights found, please specify required explicitly')
                     weights = weights_list[0]
-            weights = Path(weights)
-            print_info('{} - Found weights: {}'.format(self.default_model_name, get_path(weights)))
+            weights = get_path(weights)
+            print_info('{} - Found weights: {}'.format(self.default_model_name, weights))
         return model, weights
 
     def load_network(self, network, launcher, model_prefix):
