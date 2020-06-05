@@ -144,7 +144,6 @@ int main(int argc, char *argv[]) {
 
         // Put pointers to all estimators in an array so that they could be processed uniformly in a loop
         BaseEstimator* estimators[] = {&headPoseEstimator, &landmarksEstimator, &eyeStateEstimator, &gazeEstimator};
-         
         // Each element of the vector contains inference results on one face
         std::vector<FaceInferenceResults> inferenceResults;
 
