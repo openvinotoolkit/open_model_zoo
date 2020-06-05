@@ -16,6 +16,7 @@ limitations under the License.
 from pathlib import Path
 import numpy as np
 import cv2
+from collections import OrderedDict
 
 from ..base_evaluator import BaseEvaluator
 from ..quantization_model_evaluator import create_dataset_attributes
@@ -305,6 +306,7 @@ class BaseModel:
             self.network = None
             launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
+        self.print_input_output_info()
 
     def load_network(self, network, launcher):
         self.network = network
@@ -313,6 +315,35 @@ class BaseModel:
 
     def set_input_and_output(self):
         pass
+
+    def print_input_output_info(self):
+        print_info('{} - Input info:'.format(self.net_type))
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
+        if self.network:
+            if has_info:
+                network_inputs = OrderedDict(
+                    [(name, data.input_data) for name, data in self.network.input_info.items()]
+                )
+            else:
+                network_inputs = self.network.inputs
+            network_outputs = self.network.outputs
+        else:
+            if has_info:
+                network_inputs = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
+            else:
+                network_inputs = self.exec_network.inputs
+            network_outputs = self.exec_network.outputs
+        for name, input_info in network_inputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(input_info.precision))
+            print_info('\tshape {}\n'.format(input_info.shape))
+        print_info('{} - Output info'.format(self.net_type))
+        for name, output_info in network_outputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(output_info.precision))
+            print_info('\tshape: {}\n'.format(output_info.shape))
 
 
 class ColorizationTestModel(BaseModel):
@@ -380,8 +411,8 @@ class ColorizationTestModel(BaseModel):
 class ColorizationCheckModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.net_type = 'verification_network'
-        super().__init__(network_info, launcher, delayed_model_loading)
         self.adapter = create_adapter(network_info['adapter'])
+        super().__init__(network_info, launcher, delayed_model_loading)
         self.adapter.output_blob = self.output_blob
 
     def predict(self, identifiers, input_data):

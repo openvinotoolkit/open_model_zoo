@@ -18,6 +18,7 @@ from pathlib import Path
 import pickle
 from functools import partial
 import numpy as np
+from collections import OrderedDict
 
 from ..base_evaluator import BaseEvaluator
 from ..quantization_model_evaluator import create_dataset_attributes
@@ -247,6 +248,35 @@ class BaseModel:
     def release(self):
         pass
 
+    def print_input_output_info(self):
+        print_info('{} - Input info:'.format(self.default_model_suffix))
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
+        if self.network:
+            if has_info:
+                network_inputs = OrderedDict(
+                    [(name, data.input_data) for name, data in self.network.input_info.items()]
+                )
+            else:
+                network_inputs = self.network.inputs
+            network_outputs = self.network.outputs
+        else:
+            if has_info:
+                network_inputs = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
+            else:
+                network_inputs = self.exec_network.inputs
+            network_outputs = self.exec_network.outputs
+        for name, input_info in network_inputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(input_info.precision))
+            print_info('\tshape {}\n'.format(input_info.shape))
+        print_info('{} - Output info'.format(self.default_model_suffix))
+        for name, output_info in network_outputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(output_info.precision))
+            print_info('\tshape: {}\n'.format(output_info.shape))
+
 
 def create_encoder(model_config, launcher, delayed_model_loading=False):
     launcher_model_mapping = {
@@ -375,6 +405,7 @@ class EncoderDLSDKModel(BaseModel):
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
+        self.print_input_output_info()
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(self.fit_to_input(input_data))
@@ -514,6 +545,7 @@ class DecoderDLSDKModel(BaseModel):
             self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
+        self.print_input_output_info()
 
     def load_network(self, network, launcher):
         self.network = network

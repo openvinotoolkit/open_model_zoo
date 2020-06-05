@@ -410,6 +410,36 @@ class DLSDKModelMixin:
         self.launcher = launcher
         self.update_input_output_info(model_prefix)
         self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.print_input_output_info()
+
+    def print_input_output_info(self):
+        print_info('{} - Input info:'.format(self.default_model_name))
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
+        if self.network:
+            if has_info:
+                network_inputs = OrderedDict(
+                    [(name, data.input_data) for name, data in self.network.input_info.items()]
+                )
+            else:
+                network_inputs = self.network.inputs
+            network_outputs = self.network.outputs
+        else:
+            if has_info:
+                network_inputs = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
+            else:
+                network_inputs = self.exec_network.inputs
+            network_outputs = self.exec_network.outputs
+        for name, input_info in network_inputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(input_info.precision))
+            print_info('\tshape {}\n'.format(input_info.shape))
+        print_info('{} - Output info'.format(self.default_model_name))
+        for name, output_info in network_outputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(output_info.precision))
+            print_info('\tshape: {}\n'.format(output_info.shape))
 
     def update_input_output_info(self, model_prefix):
         def generate_name(prefix, with_prefix, layer_name):
@@ -491,6 +521,7 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         pnet_outs = self.model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         self.adapter = create_adapter(pnet_adapter_config)
+        self.print_input_output_info()
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
         raw_outputs = self._infer(input_blobs, batch_meta)
