@@ -490,7 +490,7 @@ class DetectorDLSDKModel(BaseModel):
         self.im_info_name = None
         self.im_data_name = None
         if not delayed_model_loading:
-            self.load_model(network_info, launcher)
+            self.load_model(network_info, launcher, log=True)
             has_info = hasattr(self.exec_network, 'input_info')
             input_info = (
                 OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
@@ -529,7 +529,7 @@ class DetectorDLSDKModel(BaseModel):
 
         return input_data
 
-    def load_model(self, network_info, launcher):
+    def load_model(self, network_info, launcher, log=False):
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
@@ -543,14 +543,15 @@ class DetectorDLSDKModel(BaseModel):
         )
         self.im_info_name = [x for x in input_info if len(input_info[x].shape) == 2][0]
         self.im_data_name = [x for x in input_info if len(input_info[x].shape) == 4][0]
-        self.print_input_output_info()
+        if log:
+            self.print_input_output_info()
 
 
 class RecognizerDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
         super().__init__(network_info, launcher, suffix)
         if not delayed_model_loading:
-            self.load_model(network_info, launcher)
+            self.load_model(network_info, launcher, log=True)
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(input_data)
@@ -559,11 +560,12 @@ class RecognizerDLSDKModel(BaseModel):
         del self.network
         del self.exec_network
 
-    def load_model(self, network_info, launcher):
+    def load_model(self, network_info, launcher, log=False):
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
-        self.print_input_output_info()
+        if log:
+            self.print_input_output_info()

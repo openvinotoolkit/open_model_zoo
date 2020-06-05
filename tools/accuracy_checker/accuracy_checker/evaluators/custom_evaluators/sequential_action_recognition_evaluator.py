@@ -391,9 +391,9 @@ class EncoderDLSDKModel(BaseModel):
         self.input_blob, self.output_blob = None, None
         self.with_prefix = None
         if not delayed_model_loading:
-            self.load_model(network_info, launcher)
+            self.load_model(network_info, launcher, log=True)
 
-    def load_model(self, network_info, launcher):
+    def load_model(self, network_info, launcher, log=False):
         if 'onnx_model' in network_info:
             network_info.update(launcher.config)
             model, weights = launcher.convert_model(network_info)
@@ -405,7 +405,8 @@ class EncoderDLSDKModel(BaseModel):
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
-        self.print_input_output_info()
+        if log:
+            self.print_input_output_info()
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(self.fit_to_input(input_data))
@@ -483,7 +484,7 @@ class DecoderDLSDKModel(BaseModel):
         self.adapter = create_adapter('classification')
         self.num_processing_frames = network_info.get('num_processing_frames', 16)
         if not delayed_model_loading:
-            self.load_model(network_info, launcher)
+            self.load_model(network_info, launcher, log=True)
         self.with_prefix = False
 
     def predict(self, identifiers, input_data):
@@ -532,7 +533,7 @@ class DecoderDLSDKModel(BaseModel):
         print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
         return model, weights
 
-    def load_model(self, network_info, launcher):
+    def load_model(self, network_info, launcher, log=False):
         if 'onnx_model' in network_info:
             network_info.update(launcher.config)
             model, weights = launcher.convert_model(network_info)
@@ -545,7 +546,8 @@ class DecoderDLSDKModel(BaseModel):
             self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
-        self.print_input_output_info()
+        if log:
+            self.print_input_output_info()
 
     def load_network(self, network, launcher):
         self.network = network

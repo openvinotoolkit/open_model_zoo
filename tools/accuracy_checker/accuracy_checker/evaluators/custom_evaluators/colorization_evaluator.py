@@ -264,7 +264,7 @@ class BaseModel:
         self.output_blob = None
         self.with_prefix = False
         if not delayed_model_loading:
-            self.load_model(network_info, launcher)
+            self.load_model(network_info, launcher, log=True)
 
     @staticmethod
     def auto_model_search(network_info, net_type):
@@ -296,7 +296,7 @@ class BaseModel:
     def release(self):
         pass
 
-    def load_model(self, network_info, launcher):
+    def load_model(self, network_info, launcher, log=False):
         model, weights = self.auto_model_search(network_info, self.net_type)
         if weights:
             self.network = launcher.read_network(str(model), str(weights))
@@ -306,7 +306,8 @@ class BaseModel:
             self.network = None
             launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
-        self.print_input_output_info()
+        if log:
+            self.print_input_output_info()
 
     def load_network(self, network, launcher):
         self.network = network
