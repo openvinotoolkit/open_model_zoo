@@ -50,7 +50,6 @@ void EyeStateEstimator::rotateImageAroundCenter(const cv::Mat& srcImage,
 }
 
 void EyeStateEstimator::estimate(const cv::Mat& image, FaceInferenceResults& outputResults) {
-
     auto roll = outputResults.headPoseAngles.z;
 
     auto leftEyeBoundingBox = createEyeBoundingBox(outputResults.faceLandmarks[0],
