@@ -74,10 +74,10 @@ class ColorizationEvaluator(BaseEvaluator):
                 raise ConfigError('configuration for colorization_network/verification_network does not exist')
 
         test_model = ColorizationTestModel(
-            network_info.get('colorization_network', {}), launcher, 'colorization_network', delayed_model_loading
+            network_info.get('colorization_network', {}), launcher, delayed_model_loading
         )
         check_model = ColorizationCheckModel(
-            network_info.get('verification_network', {}), launcher, 'verification_network', delayed_model_loading
+            network_info.get('verification_network', {}), launcher, delayed_model_loading
         )
         return cls(dataset_config, launcher, test_model, check_model)
 
@@ -316,8 +316,8 @@ class BaseModel:
 
 
 class ColorizationTestModel(BaseModel):
-    def __init__(self, network_info, launcher, net_type, delayed_model_loading=False):
-        super().__init__(network_info, launcher, net_type, delayed_model_loading)
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
+        super().__init__(network_info, launcher, 'colorization_network', delayed_model_loading)
         self.color_coeff = np.load(network_info['color_coeff'])
 
     @staticmethod
@@ -377,8 +377,8 @@ class ColorizationTestModel(BaseModel):
 
 
 class ColorizationCheckModel(BaseModel):
-    def __init__(self, network_info, launcher, net_type, delayed_model_loading=False):
-        super().__init__(network_info, launcher, net_type, delayed_model_loading)
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
+        super().__init__(network_info, launcher, 'verification_network', delayed_model_loading)
         self.adapter = create_adapter(network_info['adapter'])
         self.adapter.output_blob = self.output_blob
 
