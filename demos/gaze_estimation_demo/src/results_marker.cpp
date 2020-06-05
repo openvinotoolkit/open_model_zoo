@@ -25,7 +25,7 @@ ResultsMarker::ResultsMarker(bool showFaceBoundingBox,
                              showHeadPoseAxes(showHeadPoseAxes),
                              showLandmarks(showLandmarks),
                              showGaze(showGaze),
-                             showEyeState(showEyeState){
+                             showEyeState(showEyeState) {
 }
 
 void ResultsMarker::mark(cv::Mat& image,
