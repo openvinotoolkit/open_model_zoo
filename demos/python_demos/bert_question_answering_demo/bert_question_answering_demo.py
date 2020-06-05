@@ -25,7 +25,7 @@ from argparse import ArgumentParser, SUPPRESS
 
 import bs4
 import numpy as np
-import requests
+import urllib.request
 from openvino.inference_engine import IECore
 
 
@@ -143,10 +143,12 @@ def find_sentence_range(context, s, e):
 # return context as one big string by given input arguments
 def get_context(url):
     log.info("Get context from {}".format(url))
-    response = requests.get(url)
-    if response.status_code == 404:
-        raise Exception('URL is invalid')
-    html = bs4.BeautifulSoup(response.text, 'html.parser')
+    try:
+        response = urllib.request.urlopen(url)
+    except urllib.error.HTTPError as e:
+        log.error("Invalid URL, error code is {}".format(e.code))
+        sys.exit(-1)
+    html = bs4.BeautifulSoup(response.read(), 'html.parser')
     heads = html.select("#firstHeading")
     title = heads[0].text if heads else "no title"
     paragraphs = html.select("p")
