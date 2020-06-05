@@ -21,8 +21,8 @@ EyeStateEstimator::EyeStateEstimator(InferenceEngine::Core& ie,
 cv::Rect EyeStateEstimator::createEyeBoundingBox(const cv::Point2i& p1,
                                                  const cv::Point2i& p2,
                                                  float scale) const {
-        cv::Rect result;
-        float size = static_cast<float>(cv::norm(p1 - p2));
+    cv::Rect result;
+    float size = static_cast<float>(cv::norm(p1 - p2));
 
     result.width = static_cast<int>(scale * size);
     result.height = result.width;
