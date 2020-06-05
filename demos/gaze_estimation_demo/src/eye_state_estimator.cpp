@@ -19,10 +19,10 @@ EyeStateEstimator::EyeStateEstimator(InferenceEngine::Core& ie,
 }
 
 cv::Rect EyeStateEstimator::createEyeBoundingBox(const cv::Point2i& p1,
-    const cv::Point2i& p2,
-    float scale) const {
-    cv::Rect result;
-    float size = static_cast<float>(cv::norm(p1 - p2));
+                                                 const cv::Point2i& p2,
+                                                 float scale) const {
+        cv::Rect result;
+        float size = static_cast<float>(cv::norm(p1 - p2));
 
     result.width = static_cast<int>(scale * size);
     result.height = result.width;
@@ -36,8 +36,8 @@ cv::Rect EyeStateEstimator::createEyeBoundingBox(const cv::Point2i& p1,
 }
 
 void EyeStateEstimator::rotateImageAroundCenter(const cv::Mat& srcImage,
-    cv::Mat& dstImage,
-    float angle) const {
+                                                cv::Mat& dstImage,
+                                                float angle) const {
     auto w = srcImage.cols;
     auto h = srcImage.rows;
 
