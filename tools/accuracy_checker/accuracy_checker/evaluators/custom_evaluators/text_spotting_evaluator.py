@@ -276,6 +276,35 @@ class BaseModel:
 
         return model, weights
 
+    def print_input_output_info(self):
+        print_info('{} - Input info:'.format(self.default_model_suffix))
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
+        if self.network:
+            if has_info:
+                network_inputs = OrderedDict(
+                    [(name, data.input_data) for name, data in self.network.input_info.items()]
+                )
+            else:
+                network_inputs = self.network.inputs
+            network_outputs = self.network.outputs
+        else:
+            if has_info:
+                network_inputs = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
+            else:
+                network_inputs = self.exec_network.inputs
+            network_outputs = self.exec_network.outputs
+        for name, input_info in network_inputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(input_info.precision))
+            print_info('\tshape {}\n'.format(input_info.shape))
+        print_info('{} - Output info'.format(self.default_model_suffix))
+        for name, output_info in network_outputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(output_info.precision))
+            print_info('\tshape: {}\n'.format(output_info.shape))
+
     def load_network(self, network, launcher):
         self.network = network
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
@@ -461,7 +490,7 @@ class DetectorDLSDKModel(BaseModel):
         self.im_info_name = None
         self.im_data_name = None
         if not delayed_model_loading:
-            self.load_model(network_info, launcher)
+            self.load_model(network_info, launcher, log=True)
             has_info = hasattr(self.exec_network, 'input_info')
             input_info = (
                 OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
@@ -500,7 +529,7 @@ class DetectorDLSDKModel(BaseModel):
 
         return input_data
 
-    def load_model(self, network_info, launcher):
+    def load_model(self, network_info, launcher, log=False):
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
@@ -514,13 +543,15 @@ class DetectorDLSDKModel(BaseModel):
         )
         self.im_info_name = [x for x in input_info if len(input_info[x].shape) == 2][0]
         self.im_data_name = [x for x in input_info if len(input_info[x].shape) == 4][0]
+        if log:
+            self.print_input_output_info()
 
 
 class RecognizerDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher, suffix, delayed_model_loading=False):
         super().__init__(network_info, launcher, suffix)
         if not delayed_model_loading:
-            self.load_model(network_info, launcher)
+            self.load_model(network_info, launcher, log=True)
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(input_data)
@@ -529,10 +560,12 @@ class RecognizerDLSDKModel(BaseModel):
         del self.network
         del self.exec_network
 
-    def load_model(self, network_info, launcher):
+    def load_model(self, network_info, launcher, log=False):
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
+        if log:
+            self.print_input_output_info()
