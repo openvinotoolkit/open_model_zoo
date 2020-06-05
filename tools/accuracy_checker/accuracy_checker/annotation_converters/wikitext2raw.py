@@ -15,11 +15,14 @@ limitations under the License.
 """
 
 import numpy as np
-from tokenizers import Tokenizer, pre_tokenizers, decoders
-from tokenizers.models import BPE
+try:
+    from tokenizers import Tokenizer, pre_tokenizers, decoders
+    from tokenizers.models import BPE
+except ImportError:
+    Tokenizer, pre_tokenizers, decoders, BPE = None, None, None, None
 
 from ..representation import LanguageModelingAnnotation
-from ..config import PathField, NumberField
+from ..config import PathField, NumberField, ConfigError
 
 from .format_converter import BaseFormatConverter, ConverterReturn
 
@@ -44,6 +47,11 @@ class Wikitext2RawConverter(BaseFormatConverter):
         return configuration_parameters
 
     def configure(self):
+        if Tokenizer is None:
+            raise ConfigError(
+                "Annotation converter: wikitext2raw required tokenizers package installation. "
+                "Please install it before usage."
+            )
         self.testing_file = self.get_value_from_config('testing_file')
         self.vocab_file = self.get_value_from_config('vocab_file')
         self.merges_file = self.get_value_from_config('merges_file')
