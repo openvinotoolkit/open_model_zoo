@@ -161,8 +161,7 @@ void ResultsMarker::toggle(char key) {
         showHeadPoseAxes = false;
         showLandmarks = false;
         showGaze = false;
-    }
-    else if (key == 'e') {
+    } else if (key == 'e') {
         showEyeState = !showEyeState;
     }
 }
