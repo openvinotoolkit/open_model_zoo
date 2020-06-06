@@ -295,7 +295,7 @@ class DLSDKLauncher(Launcher):
         if self.network is None:
             has_info = hasattr(self.exec_network, 'input_info')
             if not has_info:
-                return self.exec_network.input
+                return self.exec_network.inputs
             return OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
         has_info = hasattr(self.network, 'input_info')
         if has_info:
@@ -326,11 +326,16 @@ class DLSDKLauncher(Launcher):
             if self._use_set_blob:
                 has_info = hasattr(self.exec_network, 'input_info')
                 for key, input_data in infer_inputs.items():
-                    ie_input_info = self.exec_network.input_info.input_data if has_info else self.exec_network.inputs
+                    if has_info:
+                        ie_input_info = OrderedDict([
+                            (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                        ])
+                    else:
+                        ie_input_info = self.exec_network.inputs
                     layout = self._target_layout_mapping.get(key, ie_input_info[key].layout)
                     tensor_desc = TensorDesc(
                         ie_input_info[key].precision,
-                        ie_input_info[key].input_data.shape,
+                        ie_input_info[key].shape,
                         layout
                     )
                     self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data))
