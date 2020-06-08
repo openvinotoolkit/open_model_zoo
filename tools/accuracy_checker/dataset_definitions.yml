@@ -748,6 +748,13 @@ datasets:
       masks_dir: free_form_masks/masks_2k
     annotation: inpainting_voc12_masks2k.pickle
 
+  - name: mrlEyes_2018_01
+    annotation_conversion:
+      converter: mrlEyes_2018_01
+      data_dir: mrlEyes_2018_01
+    annotation: mrlEyes_2018_01.pickle
+    dataset_meta: mrlEyes_2018_01.json
+    data_source: mrlEyes_2018_01
   - name: ms_coco_style_transfer
     data_source: val2017
     annotation_conversion:

@@ -47,23 +47,6 @@ GazeEstimator::GazeEstimator(InferenceEngine::Core& ie,
     expectAngles(outputBlobName, outputInfo.at(outputBlobName));
 }
 
-cv::Rect GazeEstimator::createEyeBoundingBox(const cv::Point2i& p1,
-                                             const cv::Point2i& p2,
-                                             float scale) const {
-    cv::Rect result;
-    float size = static_cast<float>(cv::norm(p1-p2));
-
-    result.width = static_cast<int>(scale * size);
-    result.height = result.width;
-
-    auto midpoint = (p1 + p2) / 2;
-
-    result.x = midpoint.x - (result.width / 2);
-    result.y = midpoint.y - (result.height / 2);
-
-    return result;
-}
-
 void GazeEstimator::rotateImageAroundCenter(const cv::Mat& srcImage,
                                               cv::Mat& dstImage,
                                               float angle) const {
@@ -78,31 +61,18 @@ void GazeEstimator::rotateImageAroundCenter(const cv::Mat& srcImage,
     cv::warpAffine(srcImage, dstImage, rotMatrix, size, 1, cv::BORDER_REPLICATE);
 }
 
-
 void GazeEstimator::estimate(const cv::Mat& image,
                              FaceInferenceResults& outputResults) {
+    if (!outputResults.leftEyeState && !outputResults.rightEyeState)
+        return;
     std::vector<float> headPoseAngles(3);
     auto roll = outputResults.headPoseAngles.z;
     headPoseAngles[0] = outputResults.headPoseAngles.x;
     headPoseAngles[1] = outputResults.headPoseAngles.y;
     headPoseAngles[2] = roll;
 
-    auto leftEyeBoundingBox = createEyeBoundingBox(outputResults.faceLandmarks[0],
-                                                     outputResults.faceLandmarks[1]);
-    auto rightEyeBoundingBox = createEyeBoundingBox(outputResults.faceLandmarks[2],
-                                                      outputResults.faceLandmarks[3]);
-
-    auto leftEyeMidpoint = (outputResults.faceLandmarks[0] + outputResults.faceLandmarks[1]) / 2;
-    auto rightEyeMidpoint = (outputResults.faceLandmarks[2] + outputResults.faceLandmarks[3]) / 2;
-
-    outputResults.leftEyeBoundingBox = leftEyeBoundingBox;
-    outputResults.rightEyeBoundingBox = rightEyeBoundingBox;
-
-    outputResults.leftEyeMidpoint = leftEyeMidpoint;
-    outputResults.rightEyeMidpoint = rightEyeMidpoint;
-
-    cv::Mat leftEyeImage(image, leftEyeBoundingBox);
-    cv::Mat rightEyeImage(image, rightEyeBoundingBox);
+    cv::Mat leftEyeImage(image, outputResults.leftEyeBoundingBox);
+    cv::Mat rightEyeImage(image, outputResults.rightEyeBoundingBox);
 
     if (rollAlign) {
         headPoseAngles[2] = 0;
