@@ -26,7 +26,7 @@ Examples of valid inputs to specify with a command-line argument `-i` are a vide
 
 The demo workflow is the following:
 
-1. The demo application reads frames from the povided input, resizes them to fit into the input image blob of the network (`im_data`).
+1. The demo application reads frames from the provided input, resizes them to fit into the input image blob of the network (`im_data`).
 2. The `im_info` input blob passes resulting resolution and scale of a pre-processed image to the network to perform inference of Mask-RCNN-like text detector.
 3. The Text Recognition Encoder takes input from the text detector and produces output.
 4. The Text Recognition Decoder takes output from the Text Recognition Encoder output as input and produces output.
