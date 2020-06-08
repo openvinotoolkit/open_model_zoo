@@ -25,20 +25,21 @@ prior boxes for 384x384 resolution.
 
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
-curve.
+curve. Intersection over union threshold of 0.5 is used for matching.
 
 ## Performance
 
 ## Inputs
 
 Name: `input`, shape: [1x3x384x384] - An input image in the format [BxCxHxW],
-   where:
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+where:
 
-   Expected color order is BGR.
+- B - batch size
+- C - number of channels
+- H - image height
+- W - image width
+
+Expected color order is BGR.
 
 ## Outputs
 

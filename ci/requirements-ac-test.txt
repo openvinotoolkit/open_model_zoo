@@ -27,3 +27,4 @@ yamlloader==0.5.5
 zipp==1.2.0               # via importlib-metadata
 pydicom==1.4.2
 tokenizers==0.7
+scikit-image==0.15.0

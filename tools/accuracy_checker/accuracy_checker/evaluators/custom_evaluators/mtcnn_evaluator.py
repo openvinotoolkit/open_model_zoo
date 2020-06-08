@@ -27,9 +27,10 @@ from ..quantization_model_evaluator import  create_dataset_attributes
 from ...adapters import create_adapter, MTCNNPAdapter
 from ...launcher import create_launcher, InputFeeder
 from ...preprocessor import PreprocessingExecutor
-from ...utils import extract_image_representations, read_pickle, contains_any
+from ...utils import extract_image_representations, read_pickle, contains_any, get_path
 from ...config import ConfigError
 from ...progress_reporters import ProgressReporter
+from ...logging import print_info
 
 
 def build_stages(models_info, preprocessors_config, launcher, model_args, delayed_model_loading=False):
@@ -382,6 +383,7 @@ class DLSDKModelMixin:
             if len(models_list) != 1:
                 raise ConfigError('Several suitable models found, please specify required model')
             model = models_list[0]
+            print_info('{} - Found model: {}'.format(self.default_model_name, model))
             if weights is None or Path(weights).is_dir():
                 weights_dir = weights or model.parent
                 weights = Path(weights_dir) / model.name.replace('xml', 'bin')
@@ -392,7 +394,8 @@ class DLSDKModelMixin:
                     if len(weights_list) != 1:
                         raise ConfigError('Several suitable weights found, please specify required explicitly')
                     weights = weights_list[0]
-            weights = Path(weights)
+            weights = get_path(weights)
+            print_info('{} - Found weights: {}'.format(self.default_model_name, weights))
         return model, weights
 
     def load_network(self, network, launcher, model_prefix):
@@ -401,12 +404,43 @@ class DLSDKModelMixin:
         self.update_input_output_info(model_prefix)
         self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
 
-    def load_model(self, network_info, launcher, model_prefix=None):
+    def load_model(self, network_info, launcher, model_prefix=None, log=False):
         self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.update_input_output_info(model_prefix)
         self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        if log:
+            self.print_input_output_info()
+
+    def print_input_output_info(self):
+        print_info('{} - Input info:'.format(self.default_model_name))
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
+        if self.network:
+            if has_info:
+                network_inputs = OrderedDict(
+                    [(name, data.input_data) for name, data in self.network.input_info.items()]
+                )
+            else:
+                network_inputs = self.network.inputs
+            network_outputs = self.network.outputs
+        else:
+            if has_info:
+                network_inputs = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
+            else:
+                network_inputs = self.exec_network.inputs
+            network_outputs = self.exec_network.outputs
+        for name, input_info in network_inputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(input_info.precision))
+            print_info('\tshape {}\n'.format(input_info.shape))
+        print_info('{} - Output info'.format(self.default_model_name))
+        for name, output_info in network_outputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(output_info.precision))
+            print_info('\tshape: {}\n'.format(output_info.shape))
 
     def update_input_output_info(self, model_prefix):
         def generate_name(prefix, with_prefix, layer_name):
@@ -464,7 +498,7 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         self.adapter = None
         if not delayed_model_loading:
             model_xml, model_bin = self.prepare_model(launcher)
-            self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'pnet_')
+            self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'pnet_', log=True)
             pnet_outs = model_info['outputs']
             pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
             # pnet_adapter_config.update({'regions_format': 'hw'})
@@ -479,7 +513,7 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         self.adapter = create_adapter(pnet_adapter_config)
 
-    def load_model(self, network_info, launcher, model_prefix=None):
+    def load_model(self, network_info, launcher, model_prefix=None, log=False):
         self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
@@ -488,6 +522,8 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         pnet_outs = self.model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         self.adapter = create_adapter(pnet_adapter_config)
+        if log:
+            self.print_input_output_info()
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
         raw_outputs = self._infer(input_blobs, batch_meta)
@@ -504,7 +540,7 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         if not delayed_model_loading:
             model_xml, model_bin = self.prepare_model(launcher)
-            self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'rnet_')
+            self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'rnet_', log=True)
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
         raw_outputs = self._infer(input_blobs, batch_meta)
@@ -540,7 +576,7 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         if not delayed_model_loading:
             model_xml, model_bin = self.prepare_model(launcher)
-            self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'onet_')
+            self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'onet_', log=True)
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
         raw_outputs = self._infer(input_blobs, batch_meta)
