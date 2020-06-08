@@ -1,4 +1,4 @@
-# Model name: open-closed-eye-0001
+# open-closed-eye-0001
 
 ## Use Case and High-Level Description
 
