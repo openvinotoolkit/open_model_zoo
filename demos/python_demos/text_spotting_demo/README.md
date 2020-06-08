@@ -22,7 +22,7 @@ Second model is Text Recognition Encoder that takes `text_features` as input and
 
 Third model is Text Recognition Decoder that takes `encoded text` from Text Recognition Encoder ,`previous symbol` and `hidden state`. On the first step special `Start Of Sequence (SOS)` symbol and zero `hidden state` are fed to Text Recognition Decoder. The decoder produces `symbols distribution`, `current hidden state` each step until `End Of Sequence (EOS)` symbol is generated.
 
-Examples of valid inputs to specify with a command-line argument `-i` are a video file or a numeric ID of a web camera.
+Examples of valid inputs to specify with a command-line argument `-i` are a path to a video file or a numeric ID of a web camera.
 
 The demo workflow is the following:
 

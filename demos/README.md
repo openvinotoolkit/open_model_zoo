@@ -248,7 +248,7 @@ list above.
 ### Get Ready for Running the Demo Applications on Windows*
 
 Before running compiled binary files, make sure your application can find the Inference Engine and OpenCV libraries.
-Optionally download OpenCV community FFmpeg plugin. There is a downloader script in the OpenVINO package: `opencv\ffmpeg-download.ps1`.
+Optionally download OpenCV community FFmpeg plugin. There is a downloader script in the OpenVINO package: `<INSTALL_DIR>\opencv\ffmpeg-download.ps1`.
 If you use a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
 run the `setupvars` script to set all necessary environment variables:
 ```bat
