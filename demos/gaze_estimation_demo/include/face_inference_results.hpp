@@ -16,11 +16,12 @@ struct FaceInferenceResults {
     std::vector<cv::Point2i> faceLandmarks;
 
     cv::Point3f headPoseAngles;
-
     cv::Rect leftEyeBoundingBox;
     cv::Rect rightEyeBoundingBox;
     cv::Point2f leftEyeMidpoint;
     cv::Point2f rightEyeMidpoint;
+    bool leftEyeState;
+    bool rightEyeState;
 
     cv::Point3f gazeVector;
 

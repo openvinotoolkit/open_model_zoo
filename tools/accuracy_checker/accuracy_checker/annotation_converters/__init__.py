@@ -48,6 +48,7 @@ from .cvat_text_recognition import CVATTextRecognitionConverter
 from .cvat_multilabel_recognition import CVATMultilabelAttributesRecognitionConverter
 from .cvat_human_pose import CVATPoseEstimationConverter
 from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
+from .mrlEyes_2018_01 import mrlEyes_2018_01_Converter
 from .squad import SQUADConverter
 from .text_classification import (
     XNLIDatasetConverter,
@@ -127,6 +128,7 @@ __all__ = [
     'ReDWebDatasetConverter',
     'FashionMnistConverter',
     'InpaintingConverter',
+    'mrlEyes_2018_01_Converter',
     'StyleTransferConverter',
     'Wikitext2RawConverter',
     'ImageProcessingConverter',
