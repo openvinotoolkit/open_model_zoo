@@ -68,3 +68,5 @@ End position is floating point-valued logit scores for end postition.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
+
+The original `bert-large-uncased-whole-word-masking-finetuned-squad` model is taken from [Transformers](https://github.com/huggingface/transformers) library.
