@@ -671,11 +671,11 @@ class YoutubeFacesAccuracy(FullDatasetEvaluationMetric):
                 iou = self.calc_iou(gt_face, dt_face)
                 if iou:
                     intersect_area, dt_area, gt_area = iou
-                if intersect_area / dt_area < self.overlap:
-                    continue
-                if dt_area / gt_area >= self.relative_size:
-                    found = True
-                    break
+                    if intersect_area / dt_area < self.overlap:
+                        continue
+                    if dt_area / gt_area >= self.relative_size:
+                        found = True
+                        break
             if found:
                 true_positive += 1
             else:
