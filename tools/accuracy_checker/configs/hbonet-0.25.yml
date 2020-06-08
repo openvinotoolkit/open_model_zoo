@@ -21,6 +21,7 @@ models:
             size: 256
             aspect_ratio_scale: greater
             interpolation: BILINEAR
+            use_pillow: True
 
           - type: crop
             size: 224
@@ -40,14 +41,18 @@ models:
           - FP32
         model:   public/hbonet-0.25/FP32/hbonet-0.25.xml
         weights: public/hbonet-0.25/FP32/hbonet-0.25.bin
-        adapter: classification
+        adapter:
+          type: classification
+          classification_output: output
 
       - framework: dlsdk
         tags:
           - FP16
         model:   public/hbonet-0.25/FP16/hbonet-0.25.xml
         weights: public/hbonet-0.25/FP16/hbonet-0.25.bin
-        adapter: classification
+        adapter:
+          type: classification
+          classification_output: output
 
     datasets:
       - name: imagenet_1000_classes
@@ -58,6 +63,7 @@ models:
             size: 256
             aspect_ratio_scale: greater
             interpolation: BILINEAR
+            use_pillow: True
 
           - type: crop
             size: 224

@@ -69,6 +69,8 @@ from .wikitext2raw import Wikitext2RawConverter
 
 from  .image_processing import ImageProcessingConverter
 
+from .aflw2000_3d import AFLW20003DConverter
+
 __all__ = [
     'BaseFormatConverter',
     'make_subset',
@@ -127,5 +129,6 @@ __all__ = [
     'InpaintingConverter',
     'StyleTransferConverter',
     'Wikitext2RawConverter',
-    'ImageProcessingConverter'
+    'ImageProcessingConverter',
+    'AFLW20003DConverter'
 ]

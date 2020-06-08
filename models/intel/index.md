@@ -39,6 +39,7 @@ network to detect objects of the same type better.
 | [person-detection-0100](./person-detection-0100/description/person-detection-0100.md)                                                                                               | 0.786                | 1.817      |       | X       |          |       |                |         |
 | [person-detection-0101](./person-detection-0101/description/person-detection-0101.md)                                                                                               | 1.768                | 1.817      |       | X       |          |       |                |         |
 | [person-detection-0102](./person-detection-0102/description/person-detection-0102.md)                                                                                               | 3.143                | 1.817      |       | X       |          |       |                |         |
+| [person-detection-0106](./person-detection-0106/description/person-detection-0106.md)                                                                                               | 404.264              | 71.565     |       | X       |          |       |                |         |
 | [pedestrian-detection-adas-0002](./pedestrian-detection-adas-0002/description/pedestrian-detection-adas-0002.md)                                                                    | 2.836                | 1.165      |       | X       |          |       |                |         |
 | [pedestrian-detection-adas-binary-0001](./pedestrian-detection-adas-binary-0001/description/pedestrian-detection-adas-binary-0001.md)                                               | 0.945                | 1.165      |       | X       |          |       |                |         |
 | [pedestrian-and-vehicle-detector-adas-0001](./pedestrian-and-vehicle-detector-adas-0001/description/pedestrian-and-vehicle-detector-adas-0001.md)                                   | 3.974                | 1.650      |       | X       | X        |       |                |         |
@@ -55,6 +56,7 @@ network to detect objects of the same type better.
 | [yolo-v2-tiny-ava-0001](./yolo-v2-tiny-ava-0001/description/yolo-v2-tiny-ava-0001.md)                                                                                               | 6.975                | 15.12      |       |      X  | X        | X     |                |         |
 | [yolo-v2-tiny-ava-sparse-30-0001](./yolo-v2-tiny-ava-sparse-30-0001/description/yolo-v2-tiny-ava-sparse-30-0001.md)                                                                 | 6.975                | 15.12      |       |      X  | X        | X     |                |         |
 | [yolo-v2-tiny-ava-sparse-60-0001](./yolo-v2-tiny-ava-sparse-60-0001/description/yolo-v2-tiny-ava-sparse-60-0001.md)                                                                 | 6.975                | 15.12      |       |      X  | X        | X     |                |         |
+| [yolo-v2-tiny-vehicle-detection-0001](./yolo-v2-tiny-vehicle-detection-0001/description/yolo-v2-tiny-vehicle-detection-0001.md)                                                     | 5.424                | 11.229     |       |         | X        |       |                |         |
 
 
 ## Object Recognition Models
@@ -69,6 +71,7 @@ Age/Gender recognition after Face Detection).
 | [head-pose-estimation-adas-0001](./head-pose-estimation-adas-0001/description/head-pose-estimation-adas-0001.md)                                            | 0.105                | 1.911      |
 | [license-plate-recognition-barrier-0001](./license-plate-recognition-barrier-0001/description/license-plate-recognition-barrier-0001.md)                    | 0.328                | 1.218      |
 | [vehicle-attributes-recognition-barrier-0039](./vehicle-attributes-recognition-barrier-0039/description/vehicle-attributes-recognition-barrier-0039.md)     | 0.126                | 0.626      |
+| [vehicle-attributes-recognition-barrier-0042](./vehicle-attributes-recognition-barrier-0042/description/vehicle-attributes-recognition-barrier-0042.md)     | 0.462                | 11.177     |
 | [emotions-recognition-retail-0003](./emotions-recognition-retail-0003/description/emotions-recognition-retail-0003.md)                                      | 0.126                | 2.483      |
 | [landmarks-regression-retail-0009](./landmarks-regression-retail-0009/description/landmarks-regression-retail-0009.md)                                      | 0.021                | 0.191      |
 | [facial-landmarks-35-adas-0002](./facial-landmarks-35-adas-0002/description/facial-landmarks-35-adas-0002.md)                                               | 0.042                | 4.595      |
@@ -96,9 +99,12 @@ and accuracy (expect a bigger model to perform better).
 | Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Rank-1 on Market-1501 |
 |-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
 | [person-reidentification-retail-0031](./person-reidentification-retail-0031/description/person-reidentification-retail-0031.md)   | 0.028                | 0.280      | 92.11%            |
-| [person-reidentification-retail-0248](./person-reidentification-retail-0248/description/person-reidentification-retail-0248.md)   | 0.174                | 0.183      | 84.3%             |
 | [person-reidentification-retail-0249](./person-reidentification-retail-0249/description/person-reidentification-retail-0249.md)   | 0.564                | 0.597      | 92.9%             |
 | [person-reidentification-retail-0300](./person-reidentification-retail-0300/description/person-reidentification-retail-0300.md)   | 3.521                | 5.289      | 96.3%             |
+| [person-reidentification-retail-0248](./person-reidentification-retail-0248/description/person-reidentification-retail-0248.md)   | 0.174                | 0.183      | 84.3%             |
+| [person-reidentification-retail-0267](./person-reidentification-retail-0267/description/person-reidentification-retail-0267.md)   | 0.564                | 0.595      | 92.7%             |
+| [person-reidentification-retail-0270](./person-reidentification-retail-0270/description/person-reidentification-retail-0270.md)   | 1.170                | 1.234      | 94.7%             |
+| [person-reidentification-retail-0265](./person-reidentification-retail-0265/description/person-reidentification-retail-0265.md)   | 1.993                | 2.103      | 95.9%             |
 
 | Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Pairwise accuracy on LFW |
 |-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
