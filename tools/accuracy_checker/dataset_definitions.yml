@@ -767,3 +767,14 @@ datasets:
       - type: ssim
         presenter: print_vector
     annotation: style_trasfer_val2017.pickle
+
+  - name: squad1_bert_uncased
+    data_source: squad_v1.1
+    annotation_conversion:
+      converter: squad
+      testing_file: squad_v1.1/dev-v1.1.json
+      vocab_file: bert-large-uncased-whole-word-masking-squad-0001/vocab.txt
+      max_seq_length: 384
+      max_query_length: 64
+      doc_stride: 128
+      lower_case: true
