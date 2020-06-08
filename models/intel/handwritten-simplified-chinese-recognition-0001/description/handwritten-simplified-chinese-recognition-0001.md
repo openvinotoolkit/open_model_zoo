@@ -14,10 +14,10 @@ The network is able to recognize simplified Chinese text consisting of character
 
 | Metric                                         | Value              |
 |------------------------------------------------|--------------------|
-| GFlops                                         |                    |
-| MParams                                        |                    |
+| GFlops                                         |   120.251          |
+| MParams                                        |   27.19            |
 | Accuracy on partial SCUT-EPT test set          |   75.58%           |
-| Source framework                               | PyTorch\*          |
+| Source framework                               |   PyTorch\*        |
 
 
 ## Accuracy Values
