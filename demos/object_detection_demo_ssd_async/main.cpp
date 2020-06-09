@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) {
             if (static_cast<int>(labels.size()) == (num_classes - 1))  // if network assumes default "background" class, having no label
                 labels.insert(labels.begin(), "fake");
             else {
-                throw std::runtime_error("The number of labels is different from numbers of model classes");
+                throw std::logic_error("The number of labels is different from numbers of model classes");
             }                
         }
         const SizeVector outputDims = output->getTensorDesc().getDims();
