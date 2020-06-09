@@ -32,10 +32,10 @@ Options:
                         Required. Url to a page with context
   --input_names INPUT_NAMES
                         Optional. Inputs names for the  network.
-                        Default values are ['input_ids','attention_mask','token_type_ids']
+                        Default values are "input_ids,attention_mask,token_type_ids"
   --output_names OUTPUT_NAMES
                         Required. Outputs names for the network.
-                        Default values are ['output_s','output_e']
+                        Default values are "output_s,output_e"
   --model_squad_ver MODEL_SQUAD_VER
                         Optional. SQUAD version used for model fine tuning
   -q MAX_QUESTION_TOKEN_NUM, --max_question_token_num MAX_QUESTION_TOKEN_NUM
@@ -104,8 +104,8 @@ You can use the following command to try the demo (assuming the model from the O
     python3 bert_question_answering_demo.py
             --vocab=<path_to_model>/vocab.txt
             --model=<path_to_model>/bert-small-uncased-whole-word-masking-squad-0001.xml
-            --input_names="['input_ids','attention_mask','token_type_ids']"
-            --output_names="['output_s','output_e']"
+            --input_names="input_ids,attention_mask,token_type_ids"
+            --output_names="output_s,output_e"
             --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street)"
             -c
 ```

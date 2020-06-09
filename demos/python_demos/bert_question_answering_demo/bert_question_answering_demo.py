@@ -41,12 +41,12 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument("--input_names",
                       help="Optional. Inputs names for the network. "
-                           "Default values are ['input_ids','attention_mask','token_type_ids']",
-                      required=False, type=str, default="['input_ids','attention_mask','token_type_ids']")
+                           "Default values are \"input_ids,attention_mask,token_type_ids\" ",
+                      required=False, type=str, default="input_ids,attention_mask,token_type_ids")
     args.add_argument("--output_names",
                       help="Optional. Outputs names for the network. "
-                           "Default values are ['output_s','output_e']",
-                      required=False, type=str, default="['output_s','output_e']")
+                           "Default values are \"output_s,output_e\" ",
+                      required=False, type=str, default="output_s,output_e")
     args.add_argument("--model_squad_ver", help="Optional. SQUAD version used for model fine tuning",
                       default="1.2", required=False, type=str)
     args.add_argument("-q", "--max_question_token_num", help="Optional. Maximum number of tokens in question",
@@ -191,7 +191,7 @@ def main():
         first_input_layer = next(iter(ie_encoder.inputs))
         c = ie_encoder.inputs[first_input_layer].shape[1]
         # find the closest multiple of 64, if it is smaller than current network's sequence length, let' use that
-        seq = min(c, np.ceil((len(c_tokens_id) + args.max_question_token_num) / 64) * 64)
+        seq = min(c, int(np.ceil((len(c_tokens_id) + args.max_question_token_num) / 64) * 64))
         if seq < c:
             input_info = list(ie_encoder.inputs)
             new_shapes = dict([])
@@ -211,15 +211,15 @@ def main():
                      " as (context length + max question length) exceeds the current (input) network sequence length")
 
     # check input and output names
-    input_names = set(eval(args.input_names))
-    output_names = set(eval(args.output_names))
-    if ie_encoder.inputs.keys() != input_names or ie_encoder.outputs.keys() != output_names:
+    input_names = list(i.strip() for i in args.input_names.split(','))
+    output_names = list(o.strip() for o in args.output_names.split(','))
+    if set(ie_encoder.inputs.keys()) != set(input_names) or set(ie_encoder.outputs.keys()) != set(output_names):
         log.error("Input or Output names do not match")
-        log.error("    By default, the demo expects input->output names: {}->{}. "
+        log.error("    The demo expects input->output names: {}->{}. "
                   "Please use the --input_names and --output_names to specify the right names "
                   "(see actual values below)".format(input_names, output_names))
-        log.error("    Actual network input->output names: {}->{}".format(set(ie_encoder.inputs.keys()),
-                                                                          set(ie_encoder.outputs.keys())))
+        log.error("    Actual network input->output names: {}->{}".format(list(ie_encoder.inputs.keys()),
+                                                                          list(ie_encoder.outputs.keys())))
         raise Exception("Unexpected network input or output names")
 
     # load model to the device
