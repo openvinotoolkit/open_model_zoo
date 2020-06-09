@@ -143,17 +143,10 @@ def find_sentence_range(context, s, e):
 # return context as one big string by given input arguments
 def get_context(url):
     log.info("Get context from {}".format(url))
-    try:
-        response = urllib.request.urlopen(url)
-    except urllib.error.HTTPError as e:
-        log.error("Invalid URL, error code is {}".format(e.code))
-        sys.exit(-1)
-    html = bs4.BeautifulSoup(response.read(), 'html.parser')
-    heads = html.select("#firstHeading")
-    title = heads[0].text if heads else "no title"
+    with urllib.request.urlopen(url) as response:
+        html = bs4.BeautifulSoup(response.read(), 'html.parser')
     paragraphs = html.select("p")
-    log.info("Article title: '{}'".format(title))
-    context = '\n'.join([par.text for par in paragraphs])
+    context = '\n'.join(par.text for par in paragraphs)
     return context
 
 
@@ -218,17 +211,15 @@ def main():
                      " as (context length + max question length) exceeds the current (input) network sequence length")
 
     # check input and output names
-    input_names_model = list(ie_encoder.inputs.keys())
-    output_names_model = list(ie_encoder.outputs.keys())
-    input_names = eval(args.input_names)
-    output_names = eval(args.output_names)
-
-    if set(input_names_model) != set(input_names) or set(output_names_model) != set(output_names):
+    input_names = set(eval(args.input_names))
+    output_names = set(eval(args.output_names))
+    if ie_encoder.inputs.keys() != input_names or ie_encoder.outputs.keys() != output_names:
         log.error("Input or Output names do not match")
         log.error("    By default, the demo expects input->output names: {}->{}. "
                   "Please use the --input_names and --output_names to specify the right names "
                   "(see actual values below)".format(input_names, output_names))
-        log.error("    Actual network input->output names: {}->{}".format(input_names_model, output_names_model))
+        log.error("    Actual network input->output names: {}->{}".format(set(ie_encoder.inputs.keys()),
+                                                                          set(ie_encoder.outputs.keys())))
         raise Exception("Unexpected network input or output names")
 
     # load model to the device
@@ -237,7 +228,7 @@ def main():
 
     # loop on user's questions
     while True:
-        question = input('Type question (enter to exit):')
+        question = input('Type question (empty string to exit):')
         if not question:
             break
 
@@ -359,7 +350,7 @@ def main():
         ))
 
         # print top 3 results
-        answers = list(sorted(answers, key=lambda x: -x[0]))
+        answers = sorted(answers, key=lambda x: -x[0])
         for score, s, e in answers[:3]:
             log.info("---answer: {:0.2f} {}".format(score, context[s:e]))
             c_s, c_e = find_sentence_range(context, s, e)
