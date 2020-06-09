@@ -1,0 +1,4 @@
+no weld
+normal weld
+porosity
+
