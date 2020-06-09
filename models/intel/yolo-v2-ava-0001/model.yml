@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/yolo-v2-ava-0001.xml
     size: 75882
-    sha256: eabffa27c86f71a06e5264e5a9a463065b60bf20fead4cf954031aecc9857a95
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.xml
+    sha256: d92cdcb17ddae060e8f6d1a5fb91ed7cde5df42dc94e891bf94d9d91850daa82
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.xml
   - name: FP32/yolo-v2-ava-0001.bin
     size: 202580240
     sha256: ec32cd3d02e629685dc818a8af5734630c1f778a8a715cef93444aeb1bc88132
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.bin
   - name: FP16/yolo-v2-ava-0001.xml
     size: 75853
-    sha256: c4fb7e88faf7c148211afbd303718af3aefa894a3b8de7219d4c21947c3f4f4e
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.xml
+    sha256: 511de7da9b4da64131732e263a8bcaaea6d11f3b12e7511a33b8ab0b1a70898f
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.xml
   - name: FP16/yolo-v2-ava-0001.bin
     size: 101290122
     sha256: 3d64e39d4c0378eaf870834a072725bc9e7320a5cc4ffa3422f13d0dcd170ddf
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.bin
   - name: FP16-INT8/yolo-v2-ava-0001.xml
     size: 183915
-    sha256: 6f82bcc82f59fcefdff2334077b9e3b7d59d895e18626feb8780dc403d83cad3
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.xml
+    sha256: 5a83abeba6f767ad5690263ec185646fd5ed6b8c3d6deaa1b881558c7becdf0c
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.xml
   - name: FP16-INT8/yolo-v2-ava-0001.bin
     size: 50697468
     sha256: 8340a0433a6fa888bde2c2ea3004324d8ca71b772bde93fe3388ee0652e7a3d8
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

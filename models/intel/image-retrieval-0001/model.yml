@@ -18,28 +18,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/image-retrieval-0001.xml
-    size: 142455
-    sha256: 8a4575bcd389761c5213e331e827f94abcd9479dd2d594e8c8b226886f58d445
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/image-retrieval-0001/FP32/image-retrieval-0001.xml
+    size: 142367
+    sha256: 96d7404b08a400dcd5d878a3f86042049585b201eceec7dc2c7f43b87d9046db
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/image-retrieval-0001/FP32/image-retrieval-0001.xml
   - name: FP32/image-retrieval-0001.bin
     size: 10139176
     sha256: 193674816f857bd7143667e6330b9171057048deadf933d81633c7e68db5b4fe
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/image-retrieval-0001/FP32/image-retrieval-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/image-retrieval-0001/FP32/image-retrieval-0001.bin
   - name: FP16/image-retrieval-0001.xml
-    size: 142388
-    sha256: 41dbe06e3eea137d0ddd8001c8a9f79a7bc4e0050b97f277f525231396808cb2
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/image-retrieval-0001/FP16/image-retrieval-0001.xml
+    size: 142300
+    sha256: 4d909061ea9bba928077335f912282a5cb55fc31f1e0441f9ad10b5b6f9a9c1f
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/image-retrieval-0001/FP16/image-retrieval-0001.xml
   - name: FP16/image-retrieval-0001.bin
     size: 5069656
     sha256: bc1ea805f260ee74ad9c1ce7e344848188d089d03be5d1ffb95e9d9380c53d45
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/image-retrieval-0001/FP16/image-retrieval-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/image-retrieval-0001/FP16/image-retrieval-0001.bin
   - name: FP16-INT8/image-retrieval-0001.xml
-    size: 428119
-    sha256: eb01525e5fd679f608b143ca7df1da6b970efb0ea2f2390d3adaeff67a9c74fb
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/image-retrieval-0001/FP16-INT8/image-retrieval-0001.xml
+    size: 408696
+    sha256: db80c94dadb83adc5183fcff444624e259c7ec47eadc4626685aff23216b79a7
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/image-retrieval-0001/FP16-INT8/image-retrieval-0001.xml
   - name: FP16-INT8/image-retrieval-0001.bin
-    size: 2640993
-    sha256: 80dda5cb068a60e10f16d7f82bc36464cbd83e7a8b9ae639cb065c15cfb9a0a1
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/image-retrieval-0001/FP16-INT8/image-retrieval-0001.bin
+    size: 2643089
+    sha256: 11ab3a8f85279be1b08e32822d982fe58be12822c4e3efa289565a0058172a77
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/image-retrieval-0001/FP16-INT8/image-retrieval-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
