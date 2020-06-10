@@ -36,4 +36,5 @@ model_optimizer_args:
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssd_mobilenet_v1_coco_2018_01_28/pipeline.config
   - --input_model=$dl_dir/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb
 framework: tf
+quantizable: yes
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
