@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a porosity weld detection model. It runs on a video stream capturing welding tip and reports whether no welding is happening, produced weld is good or weld is porous.
+This is a porosity weld recognition model. It runs on a video stream capturing welding tip and reports whether no welding is happening, produced weld is good or weld is porous.
 
 ## Example
 
