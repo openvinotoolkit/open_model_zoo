@@ -38,4 +38,4 @@ Expected color order is BGR.
 The `features` is a blob with the shape [1, 3] containing logits for three output classes ("no weld", "normal weld" and "porosity").
 
 ## Legal Information
-[*] Other names and brands may be claimed as the property of others.
+[\*] Other names and brands may be claimed as the property of others.
