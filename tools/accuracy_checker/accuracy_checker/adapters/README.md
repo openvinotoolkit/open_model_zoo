@@ -59,7 +59,7 @@ AccuracyChecker supports following set of adapters:
 * `pytorch_ssd_decoder` - converts output of SSD model from PyTorch without embedded decoder.
   * `scores_out` - name of output layer with bounding boxes scores.
   * `boxes_out` - name of output layer with bounding boxes coordinates.
-  * `confidence_threshold` - lower ,bound for valid boxes scores (optional, default 0.05).
+  * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.05).
   * `nms_threshold` - overlap threshold for NMS (optional, default 0.5).
   * `keep_top_k ` - maximal number of boxes which should be kept (optional, default 200).
   * `feat_size` - features size in format [[feature_width, feature_height], ...] (Optional, default values got from [MLPerf](https://github.com/mlperf/inference/blob/0691366473fd4fbbc4eb432fad990683a5a87099/v0.5/classification_and_detection/python/models/ssd_r34.py#L208))
