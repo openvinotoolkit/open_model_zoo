@@ -34,7 +34,7 @@ class Detector(object):
         self._exec_model = self._ie.load_network(model, device)
         self._threshold = threshold
         self.infer_time = -1
-        _, channels, self.input_height, self.input_width = model.input_info[self._input_layer_name].shape
+        _, channels, self.input_height, self.input_width = model.input_info[self._input_layer_name].input_data.shape
         assert channels == 3, "Expected 3-channel input"
 
     @staticmethod

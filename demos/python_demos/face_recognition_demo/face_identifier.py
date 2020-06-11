@@ -47,7 +47,7 @@ class FaceIdentifier(Module):
 
         self.input_blob = next(iter(model.input_info))
         self.output_blob = next(iter(model.outputs))
-        self.input_shape = model.input_info[self.input_blob].shape
+        self.input_shape = model.input_info[self.input_blob].input_data.shape
 
         assert len(model.outputs[self.output_blob].shape) == 4 or \
             len(model.outputs[self.output_blob].shape) == 2, \

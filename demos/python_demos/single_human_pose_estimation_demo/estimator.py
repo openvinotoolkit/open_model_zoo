@@ -95,8 +95,8 @@ class HumanPoseEstimator(object):
         self.CHANNELS_SIZE = 3
         self.OUTPUT_CHANNELS_SIZE = 17
 
-        assert len(self.model.input_info[self._input_layer_name].shape) == 4 and \
-               self.model.input_info[self._input_layer_name].shape[1] == self.CHANNELS_SIZE,\
+        assert len(self.model.input_info[self._input_layer_name].input_data.shape) == 4 and \
+               self.model.input_info[self._input_layer_name].input_data.shape[1] == self.CHANNELS_SIZE,\
                "Expected model input blob with shape [1, 3, H, W]"
 
         assert len(self.model.outputs[self._output_layer_name].shape) == 4 and \
@@ -108,7 +108,7 @@ class HumanPoseEstimator(object):
         self._scale = scale
         self._thr = thr
 
-        _, _, self.input_h, self.input_w = self.model.input_info[self._input_layer_name].shape
+        _, _, self.input_h, self.input_w = self.model.input_info[self._input_layer_name].input_data.shape
         _, _, self.output_h, self.output_w = self.model.outputs[self._output_layer_name].shape
         self._transform = TransformedCrop(self.input_h, self.input_w, self.output_h, self.output_w)
         self.infer_time = -1

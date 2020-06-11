@@ -30,10 +30,10 @@ class ImageInpainting(object):
         self._exec_model = self._ie.load_network(model, device)
         self.infer_time = -1
 
-        _, channels, input_height, input_width = model.input_info[self._input_layer_names[0]].shape
+        _, channels, input_height, input_width = model.input_info[self._input_layer_names[0]].input_data.shape
         assert channels == 3, "Expected 3-channel input"
 
-        _, channels, mask_height, mask_width = model.input_info[self._input_layer_names[1]].shape
+        _, channels, mask_height, mask_width = model.input_info[self._input_layer_names[1]].input_data.shape
         assert channels == 1, "Expected 1-channel input"
 
         assert mask_height == input_height and mask_width == input_width, "Mask size expected to be equal to image size"

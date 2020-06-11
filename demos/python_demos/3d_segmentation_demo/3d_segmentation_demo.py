@@ -281,17 +281,17 @@ def main():
     out_name = next(iter(ie_network.outputs))
 
     if args.shape:
-        logger.info("Reshape of network from {} to {}".format(input_info[input_name].shape, args.shape))
+        logger.info("Reshape of network from {} to {}".format(input_info[input_name].input_data.shape, args.shape))
         ie_network.reshape({input_name: args.shape})
         input_info = ie_network.input_info
 
     # ---------------------------------------- 4. Preparing input data ----------------------------------------
     logger.info("Preparing inputs")
 
-    if len(input_info[input_name].shape) != 5:
+    if len(input_info[input_name].input_data.shape) != 5:
         raise AttributeError("Incorrect shape {} for 3d convolution network".format(args.shape))
 
-    n, c, d, h, w = input_info[input_name].shape
+    n, c, d, h, w = input_info[input_name].input_data.shape
     ie_network.batch_size = n
 
     if not os.path.exists(args.path_to_input_data):

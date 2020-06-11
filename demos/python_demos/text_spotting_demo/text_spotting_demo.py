@@ -208,7 +208,7 @@ def main():
     assert required_output_keys.issubset(mask_rcnn_net.outputs.keys()), \
         'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
 
-    n, c, h, w = mask_rcnn_net.input_info['im_data'].shape
+    n, c, h, w = mask_rcnn_net.input_info['im_data'].input_data.shape
     assert n == 1, 'Only batch 1 is supported by the demo application'
 
     log.info('Loading IR to the plugin...')

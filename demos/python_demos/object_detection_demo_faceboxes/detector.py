@@ -38,7 +38,7 @@ class Detector(object):
         self._ie = ie
         self._exec_model = self._ie.load_network(model, device)
         self.infer_time = -1
-        _, channels, self.input_height, self.input_width = model.input_info[self._input_layer_name].shape
+        _, channels, self.input_height, self.input_width = model.input_info[self._input_layer_name].input_data.shape
         assert channels == 3, "Expected 3-channel input"
 
         self.min_sizes = [[32, 64, 128], [256], [512]]
