@@ -30,4 +30,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/resnet_v1-50.pb
   - --reverse_input_channels
 framework: tf
+quantizable: yes
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

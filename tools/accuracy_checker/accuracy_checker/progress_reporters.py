@@ -94,9 +94,9 @@ class TQDMReporter(ProgressReporter):
         if tqdm is None:
             warnings.warn('tqdm is not available, progress switched to print')
             self.tqdm_reporter = None
+            self.progress_printer = PrintProgressReporter(dataset_size, print_interval=1)
         else:
-            self.tqdm_reporter = tqdm()
-        self.progress_printer = PrintProgressReporter(dataset_size, print_interval=1)
+            self.tqdm_reporter = tqdm
 
     def update(self, batch_id, batch_size):
         self.current += batch_size

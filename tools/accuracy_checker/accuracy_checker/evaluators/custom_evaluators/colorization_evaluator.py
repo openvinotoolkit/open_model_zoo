@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from pathlib import Path
+from collections import OrderedDict
 import numpy as np
 import cv2
 
@@ -263,7 +264,7 @@ class BaseModel:
         self.output_blob = None
         self.with_prefix = False
         if not delayed_model_loading:
-            self.load_model(network_info, launcher)
+            self.load_model(network_info, launcher, log=True)
 
     @staticmethod
     def auto_model_search(network_info, net_type):
@@ -295,7 +296,7 @@ class BaseModel:
     def release(self):
         pass
 
-    def load_model(self, network_info, launcher):
+    def load_model(self, network_info, launcher, log=False):
         model, weights = self.auto_model_search(network_info, self.net_type)
         if weights:
             self.network = launcher.read_network(str(model), str(weights))
@@ -305,6 +306,8 @@ class BaseModel:
             self.network = None
             launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
+        if log:
+            self.print_input_output_info()
 
     def load_network(self, network, launcher):
         self.network = network
@@ -313,6 +316,35 @@ class BaseModel:
 
     def set_input_and_output(self):
         pass
+
+    def print_input_output_info(self):
+        print_info('{} - Input info:'.format(self.net_type))
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
+        if self.network:
+            if has_info:
+                network_inputs = OrderedDict(
+                    [(name, data.input_data) for name, data in self.network.input_info.items()]
+                )
+            else:
+                network_inputs = self.network.inputs
+            network_outputs = self.network.outputs
+        else:
+            if has_info:
+                network_inputs = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
+            else:
+                network_inputs = self.exec_network.inputs
+            network_outputs = self.exec_network.outputs
+        for name, input_info in network_inputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(input_info.precision))
+            print_info('\tshape {}\n'.format(input_info.shape))
+        print_info('{} - Output info'.format(self.net_type))
+        for name, output_info in network_outputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(output_info.precision))
+            print_info('\tshape: {}\n'.format(output_info.shape))
 
 
 class ColorizationTestModel(BaseModel):
@@ -380,8 +412,8 @@ class ColorizationTestModel(BaseModel):
 class ColorizationCheckModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.net_type = 'verification_network'
-        super().__init__(network_info, launcher, delayed_model_loading)
         self.adapter = create_adapter(network_info['adapter'])
+        super().__init__(network_info, launcher, delayed_model_loading)
         self.adapter.output_blob = self.output_blob
 
     def predict(self, identifiers, input_data):

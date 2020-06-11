@@ -97,7 +97,8 @@ class PyTorchLauncher(Launcher):
             model_cls = importlib.import_module(model_path).__getattribute__(model_cls)
             module = model_cls(*module_args, **module_kwargs)
             if checkpoint:
-                checkpoint = self._torch.load(checkpoint)
+                checkpoint = self._torch.load(checkpoint,
+                                              map_location=None if self.cuda else self._torch.device('cpu'))
                 state = checkpoint if not state_key else checkpoint[state_key]
                 module.load_state_dict(state, strict=False)
             if self.cuda:
