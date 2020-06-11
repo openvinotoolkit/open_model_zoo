@@ -29,7 +29,7 @@ class IEModel:
         self.reqs_ids = []
 
     def _preprocess(self, img):
-        _, _, h, w = self.get_input_shape().shape
+        _, _, h, w = self.get_input_shape()
         img = np.expand_dims(cv.resize(img, (w, h)).transpose(2, 0, 1), axis=0)
         return img
 
@@ -55,7 +55,7 @@ class IEModel:
 
     def get_input_shape(self):
         """Returns an input shape of the wrapped IE model"""
-        return self.inputs_info[self.input_key]
+        return self.inputs_info[self.input_key].input_data.shape
 
 
 def load_ie_model(ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=1):
