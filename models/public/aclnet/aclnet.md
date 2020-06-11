@@ -1,4 +1,4 @@
-# AclNet
+# aclnet
 
 ## Use Case and High-Level Description
 
@@ -17,6 +17,7 @@ The model output for `AclNet` is the sound classifier output for the 53 differen
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Classification|
+| GFLOPs            |            |
 | MParams           | 2.7           |
 | Source framework  | PyTorch\*     |
 
@@ -28,7 +29,18 @@ See this [publication](http://dcase.community/documents/workshop2019/proceedings
 
 ## Input
 
-Audio, name - `data`, shape - `1,1,1,16000`, format is `N,C,H,W` where:
+### Original Model
+
+Audio, name - `0`, shape - `1,1,1,16000`, format is `N,C,H,W` where:
+
+- `N` - number of samples
+- `C` - channel
+- `H` - height
+- `W` - width
+
+### Converted Model
+
+Audio, name - `0`, shape - `1,1,1,16000`, format is `N,C,H,W` where:
 
 - `N` - number of samples
 - `C` - channel
@@ -37,7 +49,16 @@ Audio, name - `data`, shape - `1,1,1,16000`, format is `N,C,H,W` where:
 
 ## Output
 
-Sound classifier according to DES-53 classes, name - `softmax`, shape - `1,53`, output data format is `N,C` where:
+### Original Model
+
+Sound classifier according to DES-53 classes, name - `203`, shape - `1,53`, output data format is `N,C` where:
+
+- `N` - number of samples classified
+- `C` - Predicted softmax scores for each class in [0, 1] range
+
+### Converted Model
+
+Sound classifier according to DES-53 classes, name - `203`, shape - `1,53`, output data format is `N,C` where:
 
 - `N` - number of samples classified
 - `C` - Predicted softmax scores for each class in [0, 1] range

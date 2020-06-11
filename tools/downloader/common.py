@@ -51,6 +51,7 @@ KNOWN_PRECISIONS = {
 }
 KNOWN_TASK_TYPES = {
     'action_recognition',
+    'audio_classification',
     'classification',
     'colorization',
     'detection',
