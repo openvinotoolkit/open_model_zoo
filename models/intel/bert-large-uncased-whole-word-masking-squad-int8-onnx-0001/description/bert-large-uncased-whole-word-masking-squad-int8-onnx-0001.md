@@ -12,7 +12,7 @@ The model has been further quantized to INT8 precision using quantization-aware 
 
 | Metric            | Value                 |
 |-------------------|-----------------------|
-| GOps              | 16.25                 |
+| GOps              | 246.93                |
 | MParams           | 333.96                |
 | Source framework  | PyTorch\*             |
 
