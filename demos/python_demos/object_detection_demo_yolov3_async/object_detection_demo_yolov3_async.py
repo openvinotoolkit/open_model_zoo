@@ -334,18 +334,18 @@ def main():
                       "or --cpu_extension command line argument")
             sys.exit(1)
 
-    assert len(net.inputs.keys()) == 1, "Sample supports only YOLO V3 based single input topologies"
+    assert len(net.input_info) == 1, "Sample supports only YOLO V3 based single input topologies"
 
     # ---------------------------------------------- 4. Preparing inputs -----------------------------------------------
     log.info("Preparing inputs")
-    input_blob = next(iter(net.inputs))
+    input_blob = next(iter(net.input_info))
 
     # Read and pre-process input images
-    if net.inputs[input_blob].shape[1] == 3:
-        input_height, input_width = net.inputs[input_blob].shape[2:]
+    if net.input_info[input_blob].input_data.shape[1] == 3:
+        input_height, input_width = net.input_info[input_blob].input_data.shape[2:]
         nchw_shape = True
     else:
-        input_height, input_width = net.inputs[input_blob].shape[1:3]
+        input_height, input_width = net.input_info[input_blob].input_data.shape[1:3]
         nchw_shape = False
 
     if args.labels:

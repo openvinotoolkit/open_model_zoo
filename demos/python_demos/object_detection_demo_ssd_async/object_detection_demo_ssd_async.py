@@ -123,21 +123,21 @@ def main():
 
     img_info_input_blob = None
     feed_dict = {}
-    for blob_name in net.inputs:
-        if len(net.inputs[blob_name].shape) == 4:
+    for blob_name in net.input_info:
+        if len(net.input_info[blob_name].input_data.shape) == 4:
             input_blob = blob_name
-        elif len(net.inputs[blob_name].shape) == 2:
+        elif len(net.input_info[blob_name].input_data.shape) == 2:
             img_info_input_blob = blob_name
         else:
             raise RuntimeError("Unsupported {}D input layer '{}'. Only 2D and 4D input layers are supported"
-                               .format(len(net.inputs[blob_name].shape), blob_name))
+                               .format(len(net.input_info[blob_name].input_data.shape), blob_name))
 
     output_postprocessor = get_output_postprocessor(net)
 
     log.info("Loading IR to the plugin...")
     exec_net = ie.load_network(network=net, num_requests=2, device_name=args.device)
     # Read and pre-process input image
-    n, c, h, w = net.inputs[input_blob].shape
+    n, c, h, w = net.input_info[input_blob].input_data.shape
     if img_info_input_blob:
         feed_dict[img_info_input_blob] = [h, w, 1]
 

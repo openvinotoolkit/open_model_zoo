@@ -50,16 +50,16 @@ def main():
                       "using -l or --cpu_extension command line argument")
             sys.exit(1)
 
-    assert len(net.inputs.keys()) == 1, "Sample supports only single input topologies"
+    assert len(net.input_info) == 1, "Sample supports only single input topologies"
     assert len(net.outputs) == 1, "Sample supports only single output topologies"
 
     log.info("preparing input blobs")
-    input_blob = next(iter(net.inputs))
+    input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
     net.batch_size = 1
 
     # read and pre-process input image
-    _, _, height, width = net.inputs[input_blob].shape
+    _, _, height, width = net.input_info[input_blob].input_data.shape
 
     image = cv2.imread(args.input, cv2.IMREAD_COLOR)
     (input_height, input_width) = image.shape[:-1]

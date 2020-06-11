@@ -24,17 +24,17 @@ class Detector(object):
     def __init__(self, ie, model_path, threshold=0.3, device='CPU'):
         model = ie.read_network(model_path, os.path.splitext(model_path)[0] + '.bin')
 
-        assert len(model.inputs) == 1, "Expected 1 input blob"
+        assert len(model.input_info) == 1, "Expected 1 input blob"
         assert len(model.outputs) == 3, "Expected 3 output blobs"
 
-        self._input_layer_name = next(iter(model.inputs))
+        self._input_layer_name = next(iter(model.input_info))
         self._output_layer_names = sorted(model.outputs)
 
         self._ie = ie
         self._exec_model = self._ie.load_network(model, device)
         self._threshold = threshold
         self.infer_time = -1
-        _, channels, self.input_height, self.input_width = model.inputs[self._input_layer_name].shape
+        _, channels, self.input_height, self.input_width = model.input_info[self._input_layer_name].input_data.shape
         assert channels == 3, "Expected 3-channel input"
 
     @staticmethod
