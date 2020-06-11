@@ -10,7 +10,7 @@ Tokenization occurs using the BERT tokenizer (see the demo code for implementati
 
 | Metric            | Value                 |
 |-------------------|-----------------------|
-| GOps              | 16.25                 |
+| GOps              | 246.93                |
 | MParams           | 333.96                |
 | Source framework  | PyTorch\*             |
 
