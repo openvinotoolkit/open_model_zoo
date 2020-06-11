@@ -185,6 +185,7 @@ class ReaderCombiner(BaseReader):
             reading_scheme[pattern] = reader
 
         self.reading_scheme = reading_scheme
+        self.multi_infer = self.config.get('multi_infer', False)
 
     def read(self, data_id):
         for pattern, reader in self.reading_scheme.items():
@@ -379,6 +380,7 @@ class NumPyReader(BaseReader):
         self.multi_infer = self.config.get('multi_infer', False)
         self.keys = self.config.get('keys', "") if self.config else ""
         self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
+        self.multi_infer = self.config.get('multi_infer', False)
 
     def read(self, data_id):
         data = np.load(str(self.data_source / data_id))
