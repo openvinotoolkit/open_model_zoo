@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2019-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ from .cvat_text_recognition import CVATTextRecognitionConverter
 from .cvat_multilabel_recognition import CVATMultilabelAttributesRecognitionConverter
 from .cvat_human_pose import CVATPoseEstimationConverter
 from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
+from .mrlEyes_2018_01 import mrlEyes_2018_01_Converter
 from .squad import SQUADConverter
 from .text_classification import (
     XNLIDatasetConverter,
@@ -64,9 +65,12 @@ from .monocular_depth_perception import ReDWebDatasetConverter
 
 from .fashion_mnist import FashionMnistConverter
 from .inpainting import InpaintingConverter
+from .style_transfer import StyleTransferConverter
 from .wikitext2raw import Wikitext2RawConverter
 
 from  .image_processing import ImageProcessingConverter
+
+from .aflw2000_3d import AFLW20003DConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -124,6 +128,9 @@ __all__ = [
     'ReDWebDatasetConverter',
     'FashionMnistConverter',
     'InpaintingConverter',
+    'mrlEyes_2018_01_Converter',
+    'StyleTransferConverter',
     'Wikitext2RawConverter',
-    'ImageProcessingConverter'
+    'ImageProcessingConverter',
+    'AFLW20003DConverter'
 ]

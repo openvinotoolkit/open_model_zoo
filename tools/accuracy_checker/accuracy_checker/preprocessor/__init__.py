@@ -16,7 +16,7 @@ limitations under the License.
 
 from .preprocessing_executor import PreprocessingExecutor
 from .preprocessor import Preprocessor
-from .audio_preprocessing import ResampleAudio, ClipAudio
+from .audio_preprocessing import ResampleAudio, ClipAudio, NormalizeAudio
 from .color_space_conversion import BgrToRgb, RgbToBgr, BgrToGray, RgbToGray, TfConvertImageDType, SelectInputChannel
 from .normalization import Normalize, Normalize3d
 from .geometric_transformations import (
@@ -29,7 +29,8 @@ from .geometric_transformations import (
     Tiling,
     Crop3D,
     TransformedCropWithAutoScale,
-    ImagePyramid
+    ImagePyramid,
+    WarpAffine
 )
 from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
@@ -45,6 +46,7 @@ __all__ = [
 
     'ResampleAudio',
     'ClipAudio',
+    'NormalizeAudio',
 
     'Resize',
     'Resize3D',
@@ -59,6 +61,7 @@ __all__ = [
     'CropBraTS',
     'TransformedCropWithAutoScale',
     'ImagePyramid',
+    'WarpAffine',
 
     'BgrToGray',
     'BgrToRgb',

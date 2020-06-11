@@ -89,22 +89,20 @@ private:
 };
 
 struct Context {  // stores all global data for tasks
-    Context(const std::vector<std::shared_ptr<InputChannel>>& inputChannels, const std::weak_ptr<Worker>& readersWorker,
-            const Detector& detector, const std::weak_ptr<Worker>& inferTasksWorker,
-            const VehicleAttributesClassifier& vehicleAttributesClassifier, const Lpr& lpr, const std::weak_ptr<Worker>& detectionsProcessorsWorker,
+    Context(const std::vector<std::shared_ptr<InputChannel>>& inputChannels,
+            const Detector& detector,
+            const VehicleAttributesClassifier& vehicleAttributesClassifier, const Lpr& lpr,
             int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
-                const std::weak_ptr<Worker>& drawersWorker, const std::string& monitorsStr,
+                const std::string& monitorsStr,
             uint64_t lastFrameId,
-            const std::weak_ptr<Worker> resAggregatorsWorker,
             uint64_t nireq,
             bool isVideo,
             std::size_t nclassifiersireq, std::size_t nrecognizersireq):
-        readersContext{inputChannels, readersWorker, std::vector<int64_t>(inputChannels.size(), -1), std::vector<std::mutex>(inputChannels.size())},
-        inferTasksContext{detector, inferTasksWorker},
-        detectionsProcessorsContext{vehicleAttributesClassifier, lpr, detectionsProcessorsWorker},
-        drawersContext{pause, gridParam, displayResolution, showPeriod, drawersWorker, monitorsStr},
+        readersContext{inputChannels, std::vector<int64_t>(inputChannels.size(), -1), std::vector<std::mutex>(inputChannels.size())},
+        inferTasksContext{detector},
+        detectionsProcessorsContext{vehicleAttributesClassifier, lpr},
+        drawersContext{pause, gridParam, displayResolution, showPeriod, monitorsStr},
         videoFramesContext{std::vector<uint64_t>(inputChannels.size(), lastFrameId), std::vector<std::mutex>(inputChannels.size())},
-        resAggregatorsWorker{resAggregatorsWorker},
         nireq{nireq},
         isVideo{isVideo},
         t0{std::chrono::steady_clock::time_point()},
@@ -130,9 +128,9 @@ struct Context {  // stores all global data for tasks
     }
     struct {
         std::vector<std::shared_ptr<InputChannel>> inputChannels;
-        std::weak_ptr<Worker> readersWorker;
         std::vector<int64_t> lastCapturedFrameIds;
         std::vector<std::mutex> lastCapturedFrameIdsMutexes;
+        std::weak_ptr<Worker> readersWorker;
     } readersContext;
     struct {
         Detector detector;
@@ -145,8 +143,8 @@ struct Context {  // stores all global data for tasks
     } detectionsProcessorsContext;
     struct DrawersContext {
         DrawersContext(int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
-                       const std::weak_ptr<Worker>& drawersWorker, const std::string& monitorsStr):
-            pause{pause}, gridParam{gridParam}, displayResolution{displayResolution}, showPeriod{showPeriod}, drawersWorker{drawersWorker},
+                       const std::string& monitorsStr):
+            pause{pause}, gridParam{gridParam}, displayResolution{displayResolution}, showPeriod{showPeriod},
             lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()}, framesAfterUpdate{0}, updateTime{std::chrono::steady_clock::time_point()},
             presenter{monitorsStr,
                 GridMat(gridParam, displayResolution).outimg.rows - 70,
@@ -785,7 +783,6 @@ int main(int argc, char* argv[]) {
             lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));
             nrecognizersireq = nireq * 3;
         }
-        std::shared_ptr<Worker> worker = std::make_shared<Worker>(FLAGS_n_wt - 1);
         bool isVideo = imageSourcess.empty() ? true : false;
         int pause = imageSourcess.empty() ? 1 : 0;
         std::chrono::steady_clock::duration showPeriod = 0 == FLAGS_fps ? std::chrono::steady_clock::duration::zero()
@@ -812,15 +809,22 @@ int main(int argc, char* argv[]) {
         }
         slog::info << "Display resolution: " << FLAGS_display_resolution << slog::endl;
 
-        Context context{inputChannels, worker,
-                        detector, worker,
-                        vehicleAttributesClassifier, lpr, worker,
-                        pause, gridParam, displayResolution, showPeriod, worker, FLAGS_u,
+        Context context{inputChannels,
+                        detector,
+                        vehicleAttributesClassifier, lpr,
+                        pause, gridParam, displayResolution, showPeriod, FLAGS_u,
                         FLAGS_n_iqs - 1,
-                        worker,
                         nireq,
                         isVideo,
                         nclassifiersireq, nrecognizersireq};
+        // Create a worker after a context because the context has only weak_ptr<Worker>, but the worker is going to
+        // indirectly store ReborningVideoFrames which have a reference to the context. So there won't be a situation
+        // when the context is destroyed and the worker still lives with its ReborningVideoFrames referring to the
+        // destroyed context.
+        std::shared_ptr<Worker> worker = std::make_shared<Worker>(FLAGS_n_wt - 1);
+        context.readersContext.readersWorker = context.inferTasksContext.inferTasksWorker
+            = context.detectionsProcessorsContext.detectionsProcessorsWorker = context.drawersContext.drawersWorker
+            = context.resAggregatorsWorker = worker;
 
         for (uint64_t i = 0; i < FLAGS_n_iqs; i++) {
             for (unsigned sourceID = 0; sourceID < inputChannels.size(); sourceID++) {

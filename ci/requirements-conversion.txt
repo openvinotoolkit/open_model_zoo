@@ -1,10 +1,12 @@
+# use update-requirements.py to update this file
+
 absl-py==0.9.0            # via tensorboard, tensorflow
 astor==0.8.1              # via tensorflow
 certifi==2020.4.5.1       # via requests
 chardet==3.0.4            # via requests
 decorator==4.4.2          # via networkx
-defusedxml==0.6.0
-future==0.18.2
+defusedxml==0.6.0         # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
+future==0.18.2            # via -r tools/downloader/requirements-caffe2.in
 gast==0.2.2               # via tensorflow
 google-pasta==0.2.0       # via tensorflow
 graphviz==0.8.4           # via mxnet
@@ -14,22 +16,23 @@ idna==2.9                 # via requests
 keras-applications==1.0.8  # via tensorflow
 keras-preprocessing==1.1.0  # via tensorflow
 markdown==3.2.1           # via tensorboard
-mxnet==1.5.1
-networkx==2.4
-numpy==1.18.2
-onnx==1.6.0
+mxnet==1.5.1              # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
+networkx==2.4             # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
+numpy==1.18.2             # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, h5py, keras-applications, keras-preprocessing, mxnet, onnx, opt-einsum, scipy, tensorboard, tensorflow, torch, torchvision
+onnx==1.6.0               # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, -r tools/downloader/requirements-caffe2.in, -r tools/downloader/requirements-pytorch.in
 opt-einsum==3.2.1         # via tensorflow
 pillow==7.1.1             # via torchvision
-protobuf==3.6.1
+protobuf==3.6.1           # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, onnx, tensorboard, tensorflow
 requests==2.23.0          # via mxnet
-scipy==1.4.1
-six==1.14.0               # via absl-py, google-pasta, grpcio, h5py, keras-preprocessing, onnx, protobuf, tensorboard, tensorflow, torchvision
+scipy==1.4.1              # via -r tools/downloader/requirements-pytorch.in
+six==1.14.0               # via absl-py, google-pasta, grpcio, h5py, keras-preprocessing, onnx, protobuf, tensorboard, tensorflow, test-generator, torchvision
 tensorboard==1.15.0       # via tensorflow
 tensorflow-estimator==1.15.1  # via tensorflow
-tensorflow==1.15.2
+tensorflow==1.15.2        # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
 termcolor==1.1.0          # via tensorflow
-torch==1.4.0
-torchvision==0.5.0
+test-generator==0.1.1     # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
+torch==1.4.0              # via -r tools/downloader/requirements-caffe2.in, -r tools/downloader/requirements-pytorch.in, torchvision
+torchvision==0.5.0        # via -r tools/downloader/requirements-pytorch.in
 typing-extensions==3.7.4.2  # via onnx
 urllib3==1.25.8           # via requests
 werkzeug==1.0.1           # via tensorboard

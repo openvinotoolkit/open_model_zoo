@@ -33,7 +33,6 @@ except ImportError:
 
 PairDesc = namedtuple('PairDesc', 'image1 image2 same')
 
-
 def _average_binary_score(binary_metric, y_true, y_score):
     def binary_target(y):
         return not (len(np.unique(y)) > 2) or (y.ndim >= 2 and len(y[0]) > 1)
@@ -281,11 +280,76 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
 
         return subset
 
+class FaceRecognitionTAFAPairMetric(FullDatasetEvaluationMetric):
+    __provider__ = 'face_recognition_tafa_pair_metric'
+
+    annotation_types = (ReIdentificationAnnotation, )
+    prediction_types = (ReIdentificationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'threshold': NumberField(
+                value_type=float,
+                min_value=0,
+                optional=False,
+                description='Threshold value to identify pair of faces as matched'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.threshold = self.get_value_from_config('threshold')
+
+    def submit_all(self, annotations, predictions):
+        return self.evaluate(annotations, predictions)
+
+    def evaluate(self, annotations, predictions):
+        tp = fp = tn = fn = 0
+        pairs = regroup_pairs(annotations, predictions)
+
+        for pair in pairs:
+            # Dot product of embeddings
+            prediction = np.dot(predictions[pair.image1].embedding, predictions[pair.image2].embedding)
+
+            # Similarity scale-shift
+            prediction = (prediction + 1) / 2
+
+            # Calculate metrics
+            if pair.same: # Pairs that match
+                if prediction > self.threshold:
+                    tp += 1
+                else:
+                    fp += 1
+            else:
+                if prediction < self.threshold:
+                    tn += 1
+                else:
+                    fn += 1
+
+        return [(tp+tn) / (tp+fp+tn+fn)]
+
+def regroup_pairs(annotations, predictions):
+    image_indexes = {}
+
+    for i, pred in enumerate(predictions):
+        image_indexes[pred.identifier] = i
+        pairs = []
+
+    for image1 in annotations:
+        for image2 in image1.positive_pairs:
+            if image2 in image_indexes:
+                pairs.append(PairDesc(image_indexes[image1.identifier], image_indexes[image2], True))
+        for image2 in image1.negative_pairs:
+            if image2 in image_indexes:
+                pairs.append(PairDesc(image_indexes[image1.identifier], image_indexes[image2], False))
+
+    return pairs
 
 def extract_embeddings(annotation, prediction, query):
     embeddings = [pred.embedding for pred, ann in zip(prediction, annotation) if ann.query == query]
     return np.stack(embeddings) if embeddings else embeddings
-
 
 def get_gallery_query_pids(annotation):
     gallery_pids = np.asarray([ann.person_id for ann in annotation if not ann.query])

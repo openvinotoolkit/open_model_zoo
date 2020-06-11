@@ -19,7 +19,10 @@ from pathlib import Path
 import warnings
 
 from .annotation_converters import BaseFormatConverter, save_annotation, make_subset, analyze_dataset
-from .config import ConfigValidator, StringField, PathField, ListField, DictField, BaseField, NumberField, ConfigError
+from .config import (
+    ConfigValidator, StringField, PathField, ListField,
+    DictField, BaseField, NumberField, ConfigError, BoolField
+)
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
 from .representation import BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
 from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS
@@ -39,6 +42,7 @@ class DatasetConfig(ConfigValidator):
     reader = DataReaderField(optional=True)
     annotation_conversion = DictField(optional=True)
     subsample_size = BaseField(optional=True)
+    shuffle = BoolField(optional=True)
     subsample_seed = NumberField(value_type=int, min_value=0, optional=True)
     analyze_dataset = BaseField(optional=True)
     segmentation_masks_source = PathField(is_directory=True, optional=True)
@@ -73,8 +77,9 @@ class Dataset:
         subsample_size = self._config.get('subsample_size')
         if subsample_size is not None:
             subsample_seed = self._config.get('subsample_seed', 666)
+            shuffle = self._config.get('shuffle', True)
 
-            annotation = create_subset(annotation, subsample_size, subsample_seed)
+            annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
 
         if self._config.get('analyze_dataset', False):
             analyze_dataset(annotation, meta)
@@ -249,7 +254,7 @@ def read_annotation(annotation_file: Path):
     return result
 
 
-def create_subset(annotation, subsample_size, subsample_seed):
+def create_subset(annotation, subsample_size, subsample_seed, shuffle=True):
     if isinstance(subsample_size, str):
         if subsample_size.endswith('%'):
             try:
@@ -266,7 +271,8 @@ def create_subset(annotation, subsample_size, subsample_seed):
         raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size))
     if subsample_size < 1:
         raise ConfigError('subsample_size should be > 0')
-    return make_subset(annotation, subsample_size, subsample_seed)
+    return make_subset(annotation, subsample_size, subsample_seed, shuffle)
+
 
 class DatasetWrapper:
     def __init__(self, data_reader, annotation_reader=None, tag='', dataset_config=None):
@@ -348,3 +354,7 @@ class DatasetWrapper:
     @property
     def size(self):
         return self.__len__()
+
+    @property
+    def multi_infer(self):
+        return getattr(self.data_reader, 'multi_infer', False)
