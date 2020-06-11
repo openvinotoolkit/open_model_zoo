@@ -91,8 +91,8 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
                                                                 inputs, outputs, CLS)
 
                         annotations.append(OAR3DTilingSegmentationAnnotation(
-                            str(input_name),
-                            str(mask_name)
+                            str(input_name.relative_to(preprocessed_folder)),
+                            str(mask_name.relative_to(preprocessed_folder))
                         ))
 
         return ConverterReturn(annotations, None, None)
