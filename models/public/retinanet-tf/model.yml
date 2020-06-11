@@ -1,0 +1,33 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  RetinaNet is the dense object detection model with ResNet50 backbone, originally
+  trained on Keras*, then converted to TensorFlow* protobuf format. For details, see
+  paper <https://arxiv.org/abs/1708.02002>, repository <https://github.com/fizyr/keras-retinanet>.
+task_type: detection
+files:
+  - name: retinanet_resnet50_coco_best_v2.1.0.pb
+    size: 152890076
+    sha256: 0bc291e3217afac2aaafc0801d9e9dba02c292f01d6298ce04ba3cdd13dd3490
+    source: https://download.01.org/opencv/public_models/052020/retinanet-tf/retinanet_resnet50_coco_best_v2.1.0.pb
+model_optimizer_args:
+  - --input_shape=[1,1333,1333,3]
+  - --input=input_1
+  - --mean_values=[103.939,116.779,123.68]
+  - --output=filtered_detections/map/TensorArrayStack/TensorArrayGatherV3,filtered_detections/map/TensorArrayStack_1/TensorArrayGatherV3,filtered_detections/map/TensorArrayStack_2/TensorArrayGatherV3
+  - --transformations_config=$mo_dir/extensions/front/tf/retinanet.json
+  - --input_model=$dl_dir/retinanet_resnet50_coco_best_v2.1.0.pb
+framework: tf
+license: https://raw.githubusercontent.com/fizyr/keras-retinanet/master/LICENSE

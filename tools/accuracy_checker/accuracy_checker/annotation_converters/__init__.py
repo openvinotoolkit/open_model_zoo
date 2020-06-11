@@ -24,7 +24,7 @@ from .wider import WiderFormatConverter
 from .detection_opencv_storage import DetectionOpenCVStorageFormatConverter
 from .lfw import LFWConverter
 from .vgg_face_regression import VGGFaceRegressionConverter
-from .super_resolution_converter import SRConverter, SRMultiFrameConverter,  MultiTargetSuperResolutionConverter
+from .super_resolution_converter import SRConverter, SRMultiFrameConverter, MultiTargetSuperResolutionConverter
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
 from .kondate_nakayosi import KondateNakayosiRecognitionDatasetConverter

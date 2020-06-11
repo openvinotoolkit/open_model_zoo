@@ -31,8 +31,8 @@ class ScorePerplexity(PerImageEvaluationMetric):
         self.total = 0
 
     def update(self, annotation, prediction):
-        def cross_entropy(input, target):
-            return nll_loss(log_softmax(input, 1), target)
+        def cross_entropy(logits, target):
+            return nll_loss(log_softmax(logits, 1), target)
 
         def log_softmax(x, dim):
             e_x = np.exp(x - np.max(x, axis=-1, keepdims=True))
@@ -52,4 +52,6 @@ class ScorePerplexity(PerImageEvaluationMetric):
     def evaluate(self, annotation, prediction):
         return np.exp(self.loss / self.total) / 100
 
-
+    def reset(self):
+        self.loss = 0
+        self.total = 0
