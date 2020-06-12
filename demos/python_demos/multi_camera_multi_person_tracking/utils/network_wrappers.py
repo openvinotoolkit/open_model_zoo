@@ -127,12 +127,12 @@ class MaskRCNN(DetectorInterface):
         self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
 
         required_input_keys = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
-        current_input_keys = set(self.net.inputs_info.keys())
+        current_input_keys = set(self.net.input_info)
         assert current_input_keys in required_input_keys
         required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks'}
         assert required_output_keys.issubset(self.net.net.outputs)
 
-        self.n, self.c, self.h, self.w = self.net.inputs_info['im_data'].shape
+        self.n, self.c, self.h, self.w = self.net.input_info['im_data'].input_data.shape
         assert self.n == 1, 'Only batch 1 is supported.'
 
     def preprocess(self, frame):

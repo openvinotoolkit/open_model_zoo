@@ -30,7 +30,7 @@ class MaskRCNN(IEModel):
         required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks'}
         assert required_output_keys.issubset(self.net.outputs)
 
-        self.n, self.c, self.h, self.w = self.inputs_info['im_data'].shape
+        self.n, self.c, self.h, self.w = self.inputs_info['im_data'].input_data.shape
 
     def get_allowed_inputs_len(self):
         return (2, )
