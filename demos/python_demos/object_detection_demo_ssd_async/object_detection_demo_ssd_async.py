@@ -59,7 +59,7 @@ class SingleOutputPostprocessor:
         self.output_layer = output_layer
 
     def __call__(self, outputs):
-        return outputs[self.output_layer][0][0]
+        return outputs[self.output_layer].buffer[0][0]
 
 
 class MultipleOutputPostprocessor:
@@ -69,9 +69,9 @@ class MultipleOutputPostprocessor:
         self.labels_layer = labels_layer
 
     def __call__(self, outputs):
-        bboxes = outputs[self.bboxes_layer][0]
-        scores = outputs[self.scores_layer][0]
-        labels = outputs[self.labels_layer][0]
+        bboxes = np.array(map(lambda blob: blob.buffer, outputs[self.bboxes_layer]))[0]
+        scores = np.array(map(lambda blob: blob.buffer, outputs[self.scores_layer]))[0]
+        labels = np.array(map(lambda blob: blob.buffer, outputs[self.labels_layer]))[0]
         return [[0, label, score, *bbox] for label, score, bbox in zip(labels, scores, bboxes)]
 
 
@@ -200,7 +200,7 @@ def main():
             det_time = inf_end - inf_start
 
             # Parse detection results of the current request
-            for obj in output_postprocessor(exec_net.requests[cur_request_id].outputs):
+            for obj in output_postprocessor(exec_net.requests[cur_request_id].output_blobs):
                 # Draw only objects when probability more than specified threshold
                 if obj[2] > args.prob_threshold:
                     xmin = int(obj[3] * frame_w)

@@ -16,6 +16,7 @@
 
 import logging as log
 import os.path as osp
+import numpy as np
 
 from openvino.inference_engine import IECore
 
@@ -94,7 +95,7 @@ class Module(object):
         self.outputs = [None, ] * self.active_requests
         for i in range(self.active_requests):
             self.device_model.requests[i].wait()
-            self.outputs[i] = self.device_model.requests[i].outputs
+            self.outputs[i] = np.array(map(lambda blob: blob.buffer, self.device_model.requests[i].output_blobs))
             self.perf_stats[i] = self.device_model.requests[i].get_perf_counts()
 
         self.active_requests = 0

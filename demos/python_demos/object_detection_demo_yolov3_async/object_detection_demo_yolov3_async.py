@@ -230,7 +230,7 @@ def get_objects(output, net, new_frame_height_width, source_height_width, prob_t
     objects = list()
 
     for layer_name, out_blob in output.items():
-        out_blob = out_blob.reshape(net.layers[net.layers[layer_name].parents[0]].out_data[0].shape)
+        out_blob = out_blob.buffer.reshape(net.layers[net.layers[layer_name].parents[0]].out_data[0].shape)
         layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
         objects += parse_yolo_region(out_blob, new_frame_height_width, source_height_width, layer_params,
                                      prob_threshold, is_proportional)
@@ -259,7 +259,7 @@ def async_callback(status, callback_args):
         if status != 0:
             raise RuntimeError('Infer Request has returned status code {}'.format(status))
 
-        completed_request_results[frame_id] = (frame, request.outputs, start_time, frame_mode == mode.current)
+        completed_request_results[frame_id] = (frame, request.output_blobs, start_time, frame_mode == mode.current)
 
         if mode.current == frame_mode:
             empty_requests.append(request)
