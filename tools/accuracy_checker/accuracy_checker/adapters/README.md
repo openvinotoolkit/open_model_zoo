@@ -222,3 +222,5 @@ AccuracyChecker supports following set of adapters:
   * `boxes_out` - name of output layer with bounding boxes coordinates.
 * `prnet` - converting output of PRNet model for 3D landmarks regression task to `FacialLandmarks3DPrediction`
     * `landmarks_ids_file` - the file with indeces for landmarks extraction from position heatmap. (Optional, default values defined [here](https://github.com/YadiraF/PRNet/blob/master/Data/uv-data/uv_kpt_ind.txt))
+* `person_vehicle_detection` - converts output of person vehicle detection model to `DetectionPrediction` representation. Adapter merges scores, groups predictions into people and vehicles, and assignes labels accordingly.
+    * `iou_threshold` - IOU threshold value for NMS operation.
