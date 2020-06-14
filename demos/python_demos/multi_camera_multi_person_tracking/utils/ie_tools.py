@@ -16,7 +16,6 @@ import os
 
 import logging as log
 import numpy as np
-from openvino.inference_engine import IENetwork, IECore # pylint: disable=import-error,E0611
 import cv2 as cv
 
 
@@ -30,7 +29,7 @@ class IEModel:
         self.reqs_ids = []
 
     def _preprocess(self, img):
-        _, _, h, w = self.get_input_shape().shape
+        _, _, h, w = self.get_input_shape()
         img = np.expand_dims(cv.resize(img, (w, h)).transpose(2, 0, 1), axis=0)
         return img
 
@@ -56,20 +55,19 @@ class IEModel:
 
     def get_input_shape(self):
         """Returns an input shape of the wrapped IE model"""
-        return self.inputs_info[self.input_key]
+        return self.inputs_info[self.input_key].input_data.shape
 
 
 def load_ie_model(ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=1):
     """Loads a model in the Inference Engine format"""
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
     # Plugin initialization for specified device and load extensions library if specified
     log.info("Initializing Inference Engine plugin for %s ", device)
 
     if cpu_extension and 'CPU' in device:
         ie.add_extension(cpu_extension, 'CPU')
     # Read IR
-    log.info("Loading network files:\n\t%s\n\t%s", model_xml, model_bin)
-    net = IENetwork(model=model_xml, weights=model_bin)
+    log.info("Loading network")
+    net = ie.read_network(model_xml, os.path.splitext(model_xml)[0] + ".bin")
 
     if "CPU" in device:
         supported_layers = ie.query_network(net, "CPU")
@@ -81,18 +79,18 @@ def load_ie_model(ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=
                       "or --cpu_extension command line argument")
             sys.exit(1)
 
-    assert len(net.inputs.keys()) == 1 or len(net.inputs.keys()) == 2, \
+    assert len(net.input_info) == 1 or len(net.input_info) == 2, \
         "Supports topologies with only 1 or 2 inputs"
     assert len(net.outputs) == 1 or len(net.outputs) == 4 or len(net.outputs) == 5, \
         "Supports topologies with only 1, 4 or 5 outputs"
 
     log.info("Preparing input blobs")
-    input_blob = next(iter(net.inputs))
+    input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
     net.batch_size = 1
 
     # Loading model to the plugin
     log.info("Loading model to the plugin")
     exec_net = ie.load_network(network=net, device_name=device, num_requests=num_reqs)
-    model = IEModel(exec_net, net.inputs, input_blob, out_blob)
+    model = IEModel(exec_net, net.input_info, input_blob, out_blob)
     return model

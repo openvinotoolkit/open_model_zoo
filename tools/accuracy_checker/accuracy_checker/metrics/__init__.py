@@ -25,7 +25,7 @@ from .classification import (
     MetthewsCorrelation
 )
 from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric)
-from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets
+from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets, FaceRecognitionTAFAPairMetric
 from .semantic_segmentation import SegmentationAccuracy, SegmentationIOU, SegmentationMeanAccuracy, SegmentationFWAcc
 from .character_recognition import CharacterRecognitionAccuracy, LabelLevelRecognitionAccuracy
 from .regression import (
@@ -69,7 +69,7 @@ from .hit_ratio import HitRatioMetric, NDSGMetric
 from .machine_translation import BilingualEvaluationUnderstudy
 from .question_answering import ExactMatchScore, ScoreF1
 from .mpjpe_multiperson import MpjpeMultiperson
-
+from .language_modeling import ScorePerplexity
 
 __all__ = [
     'Metric',
@@ -90,6 +90,7 @@ __all__ = [
     'ReidMAP',
     'PairwiseAccuracy',
     'PairwiseAccuracySubsets',
+    'FaceRecognitionTAFAPairMetric',
 
     'SegmentationAccuracy',
     'SegmentationIOU',
@@ -141,5 +142,7 @@ __all__ = [
     'ScoreF1',
     'ExactMatchScore',
 
-    'MpjpeMultiperson'
+    'MpjpeMultiperson',
+
+    'ScorePerplexity',
 ]

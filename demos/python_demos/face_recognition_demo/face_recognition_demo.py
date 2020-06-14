@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (c) 2018 Intel Corporation
 
@@ -24,12 +24,15 @@ from argparse import ArgumentParser
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IENetwork
 from ie_module import InferenceContext
 from landmarks_detector import LandmarksDetector
 from face_detector import FaceDetector
 from faces_database import FacesDatabase
 from face_identifier import FaceIdentifier
+
+sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
+import monitors
+
 
 DEVICE_KINDS = ['CPU', 'GPU', 'FPGA', 'MYRIAD', 'HETERO', 'HDDL']
 MATCH_ALGO = ['HUNGARIAN', 'MIN_DIST']
@@ -58,6 +61,8 @@ def build_argparser():
                          "should be specified to use crop.")
     general.add_argument('--match_algo', default='HUNGARIAN', choices=MATCH_ALGO,
                          help="(optional)algorithm for face matching(default: %(default)s)")
+    general.add_argument("-u", "--utilization_monitors", default='', type=str,
+                         help="Optional. List of monitors to show initially.")
 
     gallery = parser.add_argument_group('Faces database')
     gallery.add_argument('-fg', metavar="PATH", required=True,
@@ -167,14 +172,13 @@ class FrameProcessor:
 
     def load_model(self, model_path):
         model_path = osp.abspath(model_path)
-        model_description_path = model_path
         model_weights_path = osp.splitext(model_path)[0] + ".bin"
-        log.info("Loading the model from '%s'" % (model_description_path))
-        assert osp.isfile(model_description_path), \
-            "Model description is not found at '%s'" % (model_description_path)
+        log.info("Loading the model from '%s'" % (model_path))
+        assert osp.isfile(model_path), \
+            "Model description is not found at '%s'" % (model_path)
         assert osp.isfile(model_weights_path), \
             "Model weights are not found at '%s'" % (model_weights_path)
-        model = IENetwork(model_description_path, model_weights_path)
+        model = self.context.ie_core.read_network(model_path, model_weights_path)
         log.info("Model is loaded")
         return model
 
@@ -242,7 +246,7 @@ class Visualizer:
         self.print_perf_stats = args.perf_stats
 
         self.frame_time = 0
-        self.frame_start_time = 0
+        self.frame_start_time = time.perf_counter()
         self.fps = 0
         self.frame_num = 0
         self.frame_count = -1
@@ -252,10 +256,11 @@ class Visualizer:
             self.input_crop = np.array((args.crop_width, args.crop_height))
 
         self.frame_timeout = 0 if args.timelapse else 1
+        self.utilization_monitors = args.utilization_monitors
 
     def update_fps(self):
-        now = time.time()
-        self.frame_time = now - self.frame_start_time
+        now = time.perf_counter()
+        self.frame_time = max(now - self.frame_start_time, sys.float_info.epsilon)
         self.fps = 1.0 / self.frame_time
         self.frame_start_time = now
 
@@ -345,6 +350,7 @@ class Visualizer:
 
     def should_stop_display(self):
         key = cv2.waitKey(self.frame_timeout) & 0xFF
+        self.presenter.handleKey(key)
         return key in self.BREAK_KEYS
 
     def process(self, input_stream, output_stream):
@@ -360,6 +366,7 @@ class Visualizer:
                 frame = Visualizer.center_crop(frame, self.input_crop)
             detections = self.frame_processor.process(frame)
 
+            self.presenter.drawGraphs(frame)
             self.draw_detections(frame, detections)
             self.draw_status(frame, detections)
 
@@ -397,7 +404,11 @@ class Visualizer:
             (frame_size[0], frame_size[1], fps))
         output_stream = Visualizer.open_output_stream(args.output, fps, frame_size)
 
+        graphSize = (frame_size[0] // 4, frame_size[1] // 8)
+        self.presenter = monitors.Presenter(self.utilization_monitors, frame_size[1] - graphSize[1], graphSize)
+
         self.process(input_stream, output_stream)
+        print(self.presenter.reportMeans())
 
         # Release resources
         if output_stream:

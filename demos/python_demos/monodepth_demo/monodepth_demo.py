@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 import os
 from argparse import ArgumentParser
 import cv2
 import numpy as np
 import logging as log
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 import matplotlib.pyplot as plt
 
 
@@ -30,17 +30,13 @@ def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s",
                     level=log.INFO, stream=sys.stdout)
 
-    # load and prepare net
-    model_xml = args.model
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
-
     log.info("creating inference engine")
     ie = IECore()
     if args.cpu_extension and "CPU" in args.device:
         ie.add_extension(args.cpu_extension, "CPU")
 
-    log.info("loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
-    net = IENetwork(model=model_xml, weights=model_bin)
+    log.info("Loading network")
+    net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
     if "CPU" in args.device:
         supported_layers = ie.query_network(net, "CPU")
@@ -54,16 +50,16 @@ def main():
                       "using -l or --cpu_extension command line argument")
             sys.exit(1)
 
-    assert len(net.inputs.keys()) == 1, "Sample supports only single input topologies"
+    assert len(net.input_info) == 1, "Sample supports only single input topologies"
     assert len(net.outputs) == 1, "Sample supports only single output topologies"
 
     log.info("preparing input blobs")
-    input_blob = next(iter(net.inputs))
+    input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
     net.batch_size = 1
 
     # read and pre-process input image
-    _, _, height, width = net.inputs[input_blob].shape
+    _, _, height, width = net.input_info[input_blob].input_data.shape
 
     image = cv2.imread(args.input, cv2.IMREAD_COLOR)
     (input_height, input_width) = image.shape[:-1]

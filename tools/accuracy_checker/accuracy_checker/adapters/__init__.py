@@ -29,28 +29,27 @@ from .text_recognition import (
     LPRAdapter
 )
 
-from .image_processing import SuperResolutionAdapter
+from .image_processing import ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter
 from .attributes_recognition import (
     HeadPoseEstimatorAdapter,
     VehicleAttributesRecognitionAdapter,
     PersonAttributesAdapter,
     AgeGenderAdapter,
     LandmarksRegressionAdapter,
-    GazeEstimationAdapter
+    GazeEstimationAdapter,
+    PRNetAdapter
 )
 
 from .reidentification import ReidAdapter
 from .detection import (
-    SSDAdapter,
-    FacePersonAdapter,
     TFObjectDetectionAPIAdapter,
-    SSDAdapterMxNet,
-    PyTorchSSDDecoder,
-    SSDONNXAdapter,
     MTCNNPAdapter,
     RetinaNetAdapter,
-    ClassAgnosticDetectionAdapter
+    ClassAgnosticDetectionAdapter,
+    FaceBoxesAdapter
 )
+from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
+from .retinaface import RetinaFaceAdapter
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
@@ -71,6 +70,7 @@ from .centernet import CTDETAdapter
 from .mono_depth import MonoDepthAdapter
 
 from .image_inpainting import ImageInpaintingAdapter
+from .style_transfer import StyleTransferAdapter
 
 __all__ = [
     'Adapter',
@@ -81,23 +81,22 @@ __all__ = [
 
     'ClassificationAdapter',
 
-    'SSDAdapter',
-    'FacePersonAdapter',
     'TFObjectDetectionAPIAdapter',
-    'SSDAdapterMxNet',
-    'SSDONNXAdapter',
-    'PyTorchSSDDecoder',
     'MTCNNPAdapter',
     'CTDETAdapter',
     'RetinaNetAdapter',
     'ClassAgnosticDetectionAdapter',
+    'RetinaFaceAdapter',
+    'FaceBoxesAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
 
     'ReidAdapter',
 
+    'ImageProcessingAdapter',
     'SuperResolutionAdapter',
+    'MultiSuperResolutionAdapter',
 
     'HeadPoseEstimatorAdapter',
     'VehicleAttributesRecognitionAdapter',
@@ -105,6 +104,7 @@ __all__ = [
     'AgeGenderAdapter',
     'LandmarksRegressionAdapter',
     'GazeEstimationAdapter',
+    'PRNetAdapter',
 
     'TextDetectionAdapter',
     'TextProposalsDetectionAdapter',
@@ -129,5 +129,6 @@ __all__ = [
 
     'MonoDepthAdapter',
 
-    'ImageInpaintingAdapter'
+    'ImageInpaintingAdapter',
+    'StyleTransferAdapter'
 ]

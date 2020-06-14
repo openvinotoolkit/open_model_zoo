@@ -1,0 +1,46 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The Pelee <https://arxiv.org/pdf/1804.06882.pdf> is a Real-Time Object Detection
+  System on Mobile Devices based on Single Shot Detection approach. The model is implemented
+  using the Caffe* framework and trained on MSCOCO* dataset. For details about this
+  model, check out the repository <https://github.com/Robert-JunWang/Pelee>.
+task_type: detection
+files:
+  - name: pelee_coco.tar.gz
+    size: 22501897
+    sha256: 7718e47fd0838faad6db5c79d7480cd20b9e80b1f6be39b8fcfb10c64c814122
+    source:
+      $type: google_drive
+      id: 1NXfmytr_55Njg8h6MXVflo3-tvhxYdm8
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: pelee_coco.tar.gz
+  - $type: regex_replace
+    file: pelee_coco/deploy.prototxt
+    pattern: ' +save_output_param \{\n.*\n.*\n.*\n.*\n.*\n.*\n+.*\}'
+    replacement: ''
+model_optimizer_args:
+  - --input_shape=[1,3,304,304]
+  - --input=data
+  - --mean_values=data[103.94,116.78,123.68]
+  - --scale=58.8235
+  - --output=detection_out
+  - --input_model=$dl_dir/pelee_coco/pelee_coco_304x304_acc3889.caffemodel
+  - --input_proto=$dl_dir/pelee_coco/deploy.prototxt
+framework: caffe
+quantizable: yes
+license: https://raw.githubusercontent.com/Robert-JunWang/Pelee/master/LICENSE

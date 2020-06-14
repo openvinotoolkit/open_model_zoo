@@ -1,0 +1,36 @@
+models:
+  - name: style_transfer
+    launchers:
+      - framework: onnx_runtime
+        device: CPU
+        model: public/fast-neural-style-mosaic-onnx/fast-neural-style-mosaic-onnx.onnx
+        adapter:
+          type: style_transfer
+
+      - framework: dlsdk
+        tags:
+          - FP32
+        model: public/fast-neural-style-mosaic-onnx/FP32/fast-neural-style-mosaic-onnx.xml
+        weights: public/fast-neural-style-mosaic-onnx/FP32/fast-neural-style-mosaic-onnx.bin
+        adapter:
+          type: style_transfer
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model: public/fast-neural-style-mosaic-onnx/FP16/fast-neural-style-mosaic-onnx.xml
+        weights: public/fast-neural-style-mosaic-onnx/FP16/fast-neural-style-mosaic-onnx.bin
+        adapter:
+          type: style_transfer
+
+    datasets:
+      - name: ms_coco_style_transfer
+        preprocessing:
+          - type: resize
+            size: 224
+        postprocessing:
+          - type: resize_style_transfer
+            dst_width: 224
+            dst_height: 224
+
+global_definitions: ../dataset_definitions.yml

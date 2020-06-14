@@ -24,6 +24,8 @@ from ..representation import (
     RegressionPrediction,
     FacialLandmarksAnnotation,
     FacialLandmarksPrediction,
+    FacialLandmarks3DAnnotation,
+    FacialLandmarks3DPrediction,
     SuperResolutionAnnotation,
     SuperResolutionPrediction,
     GazeVectorAnnotation,
@@ -31,7 +33,11 @@ from ..representation import (
     DepthEstimationAnnotation,
     DepthEstimationPrediction,
     ImageInpaintingAnnotation,
-    ImageInpaintingPrediction
+    ImageInpaintingPrediction,
+    ImageProcessingAnnotation,
+    ImageProcessingPrediction,
+    StyleTransferAnnotation,
+    StyleTransferPrediction
 )
 
 from .metric import PerImageEvaluationMetric
@@ -246,8 +252,8 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
 class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
     __provider__ = 'per_point_normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, )
-    prediction_types = (FacialLandmarksPrediction, )
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction)
 
     def configure(self):
         self.meta.update({
@@ -280,8 +286,8 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
     __provider__ = 'normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, )
-    prediction_types = (FacialLandmarksPrediction, )
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction)
 
     @classmethod
     def parameters(cls):
@@ -340,6 +346,52 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
         self.magnitude = []
 
 
+class NormalizedMeanError(PerImageEvaluationMetric):
+    __provider__ = 'nme'
+    annotation_types = (FacialLandmarks3DAnnotation, )
+    prediction_types = (FacialLandmarks3DPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'only_2d': BoolField(
+                optional=True, default=False, description="Allows metric calculation only across x and y dimensions"
+            ),
+        })
+
+        return parameters
+
+    def configure(self):
+        self.meta.update({
+            'scale': 1,
+            'postfix': ' ',
+            'data_format': '{:.4f}',
+            'target': 'higher-worse'
+        })
+        self.only_2d = self.get_value_from_config('only_2d')
+        self.magnitude = []
+
+    def update(self, annotation, prediction):
+        gt = np.array([annotation.x_values, annotation.y_values, annotation.z_values]).T
+        pred = np.array([prediction.x_values, prediction.y_values, prediction.z_values]).T
+
+        diff = np.square(gt - pred)
+        dist = np.sqrt(np.sum(diff[:, 0:2], axis=1)) if self.only_2d else np.sqrt(np.sum(diff, axis=1))
+        #dist /= len(gt)
+        normalized_result = dist / annotation.normalization_coef(self.only_2d)
+        self.magnitude.append(np.mean(normalized_result))
+
+        return np.mean(normalized_result)
+
+    def evaluate(self, annotations, predictions):
+        self.meta['names'] = ['mean']
+        return np.mean(self.magnitude)
+
+    def reset(self):
+        self.magnitude = []
+
+
 def calculate_distance(x_coords, y_coords, selected_points):
     first_point = [x_coords[selected_points[0]], y_coords[selected_points[0]]]
     second_point = [x_coords[selected_points[1]], y_coords[selected_points[1]]]
@@ -363,6 +415,9 @@ def find_interval(value, intervals):
 
 
 def point_regression_differ(annotation_val_x, annotation_val_y, prediction_val_x, prediction_val_y):
+    if len(np.shape(prediction_val_x)) == 2:
+        prediction_val_x = prediction_val_x[0]
+        prediction_val_y = prediction_val_y[0]
     loss = np.subtract(list(zip(annotation_val_x, annotation_val_y)), list(zip(prediction_val_x, prediction_val_y)))
     return np.linalg.norm(loss, 2, axis=1)
 
@@ -370,8 +425,10 @@ def point_regression_differ(annotation_val_x, annotation_val_y, prediction_val_x
 class PeakSignalToNoiseRatio(BaseRegressionMetric):
     __provider__ = 'psnr'
 
-    annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, )
-    prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, )
+    annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, ImageProcessingAnnotation,
+                        StyleTransferAnnotation)
+    prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, ImageProcessingPrediction,
+                        StyleTransferPrediction)
 
     @classmethod
     def parameters(cls):
@@ -447,8 +504,10 @@ class AngleError(BaseRegressionMetric):
 
 
 def _ssim(annotation_image, prediction_image):
-    prediction = np.asarray(prediction_image).astype(np.uint8)
-    ground_truth = np.asarray(annotation_image).astype(np.uint8)
+    prediction = np.asarray(prediction_image)
+    ground_truth = np.asarray(annotation_image)
+    if len(ground_truth.shape) < len(prediction) and prediction.shape[-1] == 1:
+        prediction = np.squeeze(prediction)
     mu_x = np.mean(prediction)
     mu_y = np.mean(ground_truth)
     var_x = np.var(prediction)
@@ -459,11 +518,13 @@ def _ssim(annotation_image, prediction_image):
     mssim = (2*mu_x*mu_y + c1)*(2*sig_xy + c2)/((mu_x**2 + mu_y**2 + c1)*(var_x + var_y + c2))
     return mssim
 
+
 class StructuralSimilarity(BaseRegressionMetric):
     __provider__ = 'ssim'
-
-    annotation_types = (ImageInpaintingAnnotation, )
-    prediction_types = (ImageInpaintingPrediction, )
+    annotation_types = (ImageInpaintingAnnotation, ImageProcessingAnnotation, SuperResolutionAnnotation,
+                        StyleTransferAnnotation)
+    prediction_types = (ImageInpaintingPrediction, ImageProcessingPrediction, SuperResolutionPrediction,
+                        StyleTransferPrediction)
 
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)

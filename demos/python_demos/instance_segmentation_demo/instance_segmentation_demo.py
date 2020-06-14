@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (c) 2019 Intel Corporation
 
@@ -15,8 +15,6 @@
  limitations under the License.
 """
 
-from __future__ import print_function
-
 import logging as log
 import os
 import sys
@@ -25,10 +23,13 @@ from argparse import ArgumentParser, SUPPRESS
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 
 from instance_segmentation_demo.tracker import StaticIOUTracker
 from instance_segmentation_demo.visualizer import Visualizer
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
 
 
 def build_argparser():
@@ -82,6 +83,8 @@ def build_argparser():
     args.add_argument("--no_show",
                       help="Optional. Don't show output",
                       action='store_true')
+    args.add_argument('-u', '--utilization_monitors', default='', type=str,
+                      help='Optional. List of monitors to show initially.')
     return parser
 
 
@@ -121,17 +124,14 @@ def main():
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    model_xml = args.model
-    model_bin = os.path.splitext(model_xml)[0] + '.bin'
-
     # Plugin initialization for specified device and load extensions library if specified.
     log.info('Creating Inference Engine...')
     ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, 'CPU')
     # Read IR
-    log.info('Loading network files:\n\t{}\n\t{}'.format(model_xml, model_bin))
-    net = IENetwork(model=model_xml, weights=model_bin)
+    log.info('Loading network')
+    net = ie.read_network(args.model, os.path.splitext(args.model)[0] + '.bin')
 
     if 'CPU' in args.device:
         supported_layers = ie.query_network(net, 'CPU')
@@ -144,13 +144,13 @@ def main():
             sys.exit(1)
 
     required_input_keys = {'im_data', 'im_info'}
-    assert required_input_keys == set(net.inputs.keys()), \
+    assert required_input_keys == set(net.input_info), \
         'Demo supports only topologies with the following input keys: {}'.format(', '.join(required_input_keys))
     required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks'}
     assert required_output_keys.issubset(net.outputs.keys()), \
         'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
 
-    n, c, h, w = net.inputs['im_data'].shape
+    n, c, h, w = net.input_info['im_data'].input_data.shape
     assert n == 1, 'Only batch 1 is supported by the demo application'
 
     log.info('Loading IR to the plugin...')
@@ -173,6 +173,8 @@ def main():
     with open(args.labels, 'rt') as labels_file:
         class_labels = labels_file.read().splitlines()
 
+    presenter = monitors.Presenter(args.utilization_monitors, 45,
+        (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
 
     render_time = 0
@@ -243,7 +245,7 @@ def main():
             masks_tracks_ids = tracker(masks, classes)
 
         # Visualize masks.
-        frame = visualizer(frame, boxes, classes, scores, masks, masks_tracks_ids)
+        frame = visualizer(frame, boxes, classes, scores, presenter, masks, masks_tracks_ids)
 
         # Draw performance stats.
         inf_time_message = 'Inference time: {:.3f} ms'.format(det_time * 1000)
@@ -272,7 +274,9 @@ def main():
             esc_code = 27
             if key == esc_code:
                 break
+            presenter.handleKey(key)
 
+    print(presenter.reportMeans())
     cv2.destroyAllWindows()
     cap.release()
 

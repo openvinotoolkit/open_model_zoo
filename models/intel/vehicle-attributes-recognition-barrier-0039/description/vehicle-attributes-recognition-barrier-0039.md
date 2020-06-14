@@ -19,7 +19,7 @@ This model presents a vehicle attributes classification algorithm for a traffic 
 | Supported types       | Car, bus, truck, van                         |
 | GFlops                | 0.126                                        |
 | MParams               | 0.626                                        |
-| Source framework      | Caffe*                                       |
+| Source framework      | Caffe\*                                      |
 
 ## Accuracy - Confusion Matrix
 
@@ -52,14 +52,14 @@ This model presents a vehicle attributes classification algorithm for a traffic 
 
 ## Inputs
 
-1.	name: "input" , shape: [1x3x72x72] - An input image in following format
+1.	name: `input` , shape: [1x3x72x72] - An input image in following format
 [1xCxHxW], where:
 
     - C - number of channels
     - H - image height
-    - W - image width.
+    - W - image width
 
-Expected color order - BGR.
+Expected color order: BGR.
 
 ## Outputs
 
@@ -69,4 +69,4 @@ Expected color order - BGR.
     [car, bus, truck, van]
 
 ## Legal Information
-[*] Other names and brands may be claimed as the property of others.
+[\*] Other names and brands may be claimed as the property of others.

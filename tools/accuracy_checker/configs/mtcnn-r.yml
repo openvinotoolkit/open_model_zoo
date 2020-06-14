@@ -7,8 +7,8 @@ evaluations:
           predictions: pnet_predictions.pickle
 
         rnet:
-          model:   public/mtcnn-r/mtcnn-r.prototxt
-          weights: public/mtcnn-r/mtcnn-r.caffemodel
+          model:   public/mtcnn/mtcnn-r/mtcnn-r.prototxt
+          weights: public/mtcnn/mtcnn-r/mtcnn-r.caffemodel
           outputs:
             probability_out: prob1
             region_out: conv5-2
@@ -59,8 +59,8 @@ evaluations:
           predictions: pnet_predictions.pickle
 
         rnet:
-          model:   public/mtcnn-r/FP32/mtcnn-r.xml
-          weights: public/mtcnn-r/FP32/mtcnn-r.xml
+          model:   public/mtcnn/mtcnn-r/FP32/mtcnn-r.xml
+          weights: public/mtcnn/mtcnn-r/FP32/mtcnn-r.xml
           outputs:
             probability_out: prob1
             region_out: conv5-2
@@ -108,8 +108,8 @@ evaluations:
           predictions: pnet_predictions.pickle
 
         rnet:
-          model:   public/mtcnn-r/FP16/mtcnn-r.xml
-          weights: public/mtcnn-r/FP16/mtcnn-r.xml
+          model:   public/mtcnn/mtcnn-r/FP16/mtcnn-r.xml
+          weights: public/mtcnn/mtcnn-r/FP16/mtcnn-r.xml
           outputs:
             probability_out: prob1
             region_out: conv5-2
@@ -149,4 +149,4 @@ evaluations:
               allow_multiple_matches_per_ignored: True
               distinct_conf: False
 
-global_definitions: ../dataset_dfinitions.yml
+global_definitions: ../dataset_definitions.yml

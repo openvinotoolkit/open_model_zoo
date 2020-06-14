@@ -32,6 +32,7 @@ else()
     set (IE_MAIN_SAMPLES_DIR ${IE_MAIN_SOURCE_DIR})
 endif()
 
+set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(NOT(UNIX))
     set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
     set (CMAKE_LIBRARY_PATH ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
@@ -217,5 +218,15 @@ if(ENABLE_PYTHON)
     find_package(PythonInterp 3.5 REQUIRED)
     find_package(PythonLibs "${PYTHON_VERSION_STRING}" EXACT REQUIRED)
 
+    execute_process(
+    COMMAND "${PYTHON_EXECUTABLE}" -c "import numpy; print(numpy.get_include())"
+    OUTPUT_VARIABLE NUMPY_INCLUDE_DIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE NUMPY_NOT_FOUND)
+    if(NUMPY_NOT_FOUND)
+        message(FATAL_ERROR "NumPy headers not found")
+    endif()
+
     add_subdirectory(python_demos/human_pose_estimation_3d_demo/pose_extractor)
+    add_subdirectory(python_demos/common/monitors_extension)
 endif()

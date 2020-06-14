@@ -39,7 +39,7 @@ models:
 
             # Using accuracy metric, achieved result of public model - 71.8
 
-  - name: mobilenet_v2_pytorch
+  - name: mobilenet-v2-pytorch
 
     # list of launchers for MobileNetV2.
     launchers:
@@ -55,6 +55,20 @@ models:
           - FP16
         model:   public/mobilenet-v2-pytorch/FP16/mobilenet-v2-pytorch.xml
         weights: public/mobilenet-v2-pytorch/FP16/mobilenet-v2-pytorch.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   public/mobilenet-v2-pytorch/FP32-INT8/mobilenet-v2-pytorch.xml
+        weights: public/mobilenet-v2-pytorch/FP32-INT8/mobilenet-v2-pytorch.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   public/mobilenet-v2-pytorch/FP16-INT8/mobilenet-v2-pytorch.xml
+        weights: public/mobilenet-v2-pytorch/FP16-INT8/mobilenet-v2-pytorch.bin
         adapter: classification
 
     datasets:

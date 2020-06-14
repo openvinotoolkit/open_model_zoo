@@ -4,16 +4,16 @@ evaluations:
     module_config:
       network_info:
         detector:
-          model:   intel/text-spotting-0002-detector/FP32/text-spotting-0002-detector.xml
-          weights: intel/text-spotting-0002-detector/FP32/text-spotting-0002-detector.bin
+          model:   intel/text-spotting-0002/text-spotting-0002-detector/FP32/text-spotting-0002-detector.xml
+          weights: intel/text-spotting-0002/text-spotting-0002-detector/FP32/text-spotting-0002-detector.bin
 
         recognizer_encoder:
-          model:   intel/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.xml
-          weights: intel/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.bin
+          model:   intel/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.xml
+          weights: intel/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.bin
 
         recognizer_decoder:
-          model:   intel/text-spotting-0002-recognizer-decoder/FP32/text-spotting-0002-recognizer-decoder.xml
-          weights: intel/text-spotting-0002-recognizer-decoder/FP32/text-spotting-0002-recognizer-decoder.bin
+          model:   intel/text-spotting-0002/text-spotting-0002-recognizer-decoder/FP32/text-spotting-0002-recognizer-decoder.xml
+          weights: intel/text-spotting-0002/text-spotting-0002-recognizer-decoder/FP32/text-spotting-0002-recognizer-decoder.bin
 
         recognizer_decoder_inputs:
           prev_symbol: prev_symbol
@@ -63,16 +63,16 @@ evaluations:
     module_config:
       network_info:
         detector:
-          model:   intel/text-spotting-0002-detector/FP16/text-spotting-0002-detector.xml
-          weights: intel/text-spotting-0002-detector/FP16/text-spotting-0002-detector.bin
+          model:   intel/text-spotting-0002/text-spotting-0002-detector/FP16/text-spotting-0002-detector.xml
+          weights: intel/text-spotting-0002/text-spotting-0002-detector/FP16/text-spotting-0002-detector.bin
 
         recognizer_encoder:
-          model:   intel/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.xml
-          weights: intel/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.bin
+          model:   intel/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.xml
+          weights: intel/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.bin
 
         recognizer_decoder:
-          model:   intel/text-spotting-0002-recognizer-decoder/FP16/text-spotting-0002-recognizer-decoder.xml
-          weights: intel/text-spotting-0002-recognizer-decoder/FP16/text-spotting-0002-recognizer-decoder.bin
+          model:   intel/text-spotting-0002/text-spotting-0002-recognizer-decoder/FP16/text-spotting-0002-recognizer-decoder.xml
+          weights: intel/text-spotting-0002/text-spotting-0002-recognizer-decoder/FP16/text-spotting-0002-recognizer-decoder.bin
 
         recognizer_decoder_inputs:
           prev_symbol: prev_symbol
