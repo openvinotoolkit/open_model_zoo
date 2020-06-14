@@ -46,7 +46,8 @@ from .detection import (
     MTCNNPAdapter,
     RetinaNetAdapter,
     ClassAgnosticDetectionAdapter,
-    FaceBoxesAdapter
+    FaceBoxesAdapter,
+    PersonVehicleDetectionAdapter
 )
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
