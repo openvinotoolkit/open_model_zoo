@@ -17,7 +17,7 @@ The model output for `AclNet` is the sound classifier output for the 53 differen
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Classification|
-| GFLOPs            |            |
+| GFLOPs            | 1.4           |
 | MParams           | 2.7           |
 | Source framework  | PyTorch\*     |
 
