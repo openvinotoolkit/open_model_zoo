@@ -137,7 +137,7 @@ class Model:
             if not isinstance(inputs, (list, tuple)):
                 inputs = [inputs]
             if len(inputs) == 1:
-                inputs_dict = {next(iter(self.net.inputs.keys())): inputs[0]}
+                inputs_dict = {next(iter(self.net.input_info)): inputs[0]}
             else:
                 raise ValueError
         else:
@@ -159,7 +159,7 @@ class Model:
 
     def get_output(self, request_id=0):
         if self.exec_net.requests[request_id].wait(-1) == 0:
-            outputs = self.exec_net.requests[request_id].outputs
+            outputs = {k: v.buffer for k, v in self.exec_net.requests[request_id].output_blobs.items()}
             outputs = self.postprocess(outputs, self.meta[request_id])
             return outputs
         raise RuntimeError
@@ -172,7 +172,7 @@ class Detector(Model):
         self.labels_map = labels_map
 
         self.image_blob_name, self.image_info_blob_name = self._get_inputs(self.net)
-        self.n, self.c, self.h, self.w = self.net.inputs[self.image_blob_name].shape
+        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
         assert self.n == 1, 'Only batch size == 1 is supported.'
 
         self.output_parser = self._get_output_parser(self.net, self.image_blob_name)
@@ -180,14 +180,14 @@ class Detector(Model):
     def _get_inputs(self, net):
         image_blob_name = None
         image_info_blob_name = None
-        for blob_name, blob in net.inputs.items():
-            if len(blob.shape) == 4:
+        for blob_name, blob in net.input_info.items():
+            if len(blob.input_data.shape) == 4:
                 image_blob_name = blob_name
-            elif len(blob.shape) == 2:
+            elif len(blob.input_data.shape) == 2:
                 image_info_blob_name = blob_name
             else:
                 raise RuntimeError("Unsupported {}D input layer '{}'. Only 2D and 4D input layers are supported"
-                                   .format(len(blob.shape), blob_name))
+                                   .format(len(blob.input_data.shape), blob_name))
         assert image_blob_name is not None
         return image_blob_name, image_info_blob_name
 
@@ -199,7 +199,7 @@ class Detector(Model):
             try:
                 parser = MultipleOutputParser(net.outputs, bboxes, scores, labels)
             except ValueError:
-                h, w = net.inputs[image_blob_name].shape[2:]
+                h, w = net.input_info[image_blob_name].input_data.shape[2:]
                 parser = OTEParser([w, h], net.outputs)
             return parser
         raise RuntimeError('Unsupported model outputs')
