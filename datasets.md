@@ -1,6 +1,6 @@
 # Dataset Preparation Guide
 
-If you want to use prepared configs to run the Accuracy Checker tool and the Model Quantizer, you need to organize folders with validation datasets in a certain way.  Instructions for preparing validation data are described in this document.
+If you want to use prepared configs to run the Accuracy Checker tool and the Model Quantizer, you need to organize `<DATASET_DIR>` folder with validation datasets in a certain way. Instructions for preparing validation data are described in this document.
 
 ## [ImageNet](http://image-net.org)
 
@@ -18,18 +18,18 @@ To download images from ImageNet, you need to have an account and agree to the T
 To download annotation files, you need to follow the steps below:
 * `val.txt`
   1. Download [arhive](http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz)
-  2. Unpack archive
+  2. Unpack `val.txt` from the archive `caffe_ilsvrc12.tar.gz`
 * `val15.txt`
   1. Download [annotation file](https://raw.githubusercontent.com/hujie-frank/SENet/master/ILSVRC2017_val.txt)
   2. Rename `ILSVRC2017_val.txt` to `val15.txt`
 
-### Structure of directory with dataset
+### Files layout
 
-This section describes what structure of directory dataset must have to run the Accuracy Checker tool.
-* `<DATASET_DIR>` - root directory
-    * `ILSVRC2012_img_val` - directory containing the ILSVRC 2012 validation images
-    * `val.txt` - annotation file used for ILSVRC 2012
-    * `val15.txt` - annotation file used for ILSVRC 2015
+To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the following:
+
+* `ILSVRC2012_img_val` - directory containing the ILSVRC 2012 validation images
+* `val.txt` - annotation file used for ILSVRC 2012
+* `val15.txt` - annotation file used for ILSVRC 2015
 
 ### Datasets in dataset_definitions.yml
 * `imagenet_1000_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1000 classes. (model examples: [`alexnet`](models/public/alexnet/alexnet.md), [`vgg16`](models/public/vgg16/vgg16.md))
@@ -41,22 +41,20 @@ This section describes what structure of directory dataset must have to run the 
 ### How download dataset
 
 To download COCO dataset, you need to follow the steps below:
-1. Go to the [COCO](http://cocodataset.org/#home) website
-2. Go to the `Dataset-> Download` tab
-3. Select [`2017 Val images`](http://images.cocodataset.org/zips/val2017.zip) and [`2017 Train/Val annotations`](http://images.cocodataset.org/annotations/annotations_trainval2017.zip) and download these archives
-4. Unpack archives
+1. Download [`2017 Val images`](http://images.cocodataset.org/zips/val2017.zip) and [`2017 Train/Val annotations`](http://images.cocodataset.org/annotations/annotations_trainval2017.zip)
+2. Unpack archives
 
-### Structure of directory with dataset
+### Files layout
 
-This section describes what structure of directory dataset must have to run the Accuracy Checker tool.
-* `<DATASET_DIR>` - root directory
-    * `val2017` - directory containing the COCO 2017 validation images
-    * `instances_val2017.json` - annotation file which used for object detection and instance segmentation tasks
-    * `person_keypoints_val2017.json` - annotation file which used for human pose estimation tasks
+To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the following:
+
+* `val2017` - directory containing the COCO 2017 validation images
+* `instances_val2017.json` - annotation file which used for object detection and instance segmentation tasks
+* `person_keypoints_val2017.json` - annotation file which used for human pose estimation tasks
 
 ### Datasets in dataset_definitions.yml
 * `ms_coco_mask_rcnn` used for evaluation models trained on COCO dataset for object detection and instance segmentation tasks. Background label + label map with 80 public available object categories are used. Annotations are saved in order of ascending image ID.
-* `ms_coco_detection_91_classes` used for evaluation models trained on COCO dataset for object detection tasks. Background label + original label map with 91 object categories are used (public available 80 categories). Annotations are saved in order of ascending image ID. (model examples: [`faster_rcnn_resnet50_coco`](models/public/faster_rcnn_resnet50_coco/faster_rcnn_resnet50_coco.md), [`ssd_resnet50_v1_fpn_coco`](models/public/ssd_resnet50_v1_fpn_coco/ssd_resnet50_v1_fpn_coco.md))
+* `ms_coco_detection_91_classes` used for evaluation models trained on COCO dataset for object detection tasks. Background label + label map with 80 public available object categories are used (original indexing to 91 categories is preserved. You can find more information about object categories labels [here](https://tech.amikelive.com/node-718/what-object-categories-labels-are-in-coco-dataset/)). Annotations are saved in order of ascending image ID. (model examples: [`faster_rcnn_resnet50_coco`](models/public/faster_rcnn_resnet50_coco/faster_rcnn_resnet50_coco.md), [`ssd_resnet50_v1_fpn_coco`](models/public/ssd_resnet50_v1_fpn_coco/ssd_resnet50_v1_fpn_coco.md))
 * `ms_coco_detection_80_class_with_background` used for evaluation models trained on COCO dataset for object detection tasks. Background label + label map with 80 public available object categories are used. Annotations are saved in order of ascending image ID. (model examples: [`faster-rcnn-resnet101-coco-sparse-60-0001`](models/intel/faster-rcnn-resnet101-coco-sparse-60-0001/description/faster-rcnn-resnet101-coco-sparse-60-0001.md), [`ssd-resnet34-1200-onnx`](models/public/ssd-resnet34-1200-onnx/ssd-resnet34-1200-onnx.md))
 * `ms_coco_detection_80_class_without_background` used for evaluation models trained on COCO dataset for object detection tasks. Label map with 80 public available object categories is used. Annotations are saved in order of ascending image ID. (model examples: [`ctdet_coco_dlav0_384`](models/public/ctdet_coco_dlav0_384/ctdet_coco_dlav0_384.md), [`yolo-v3-tf`](models/public/yolo-v3-tf/yolo-v3-tf.md))
 * `ms_coco_keypoints` used for evaluation models trained on COCO dataset for human pose estimation tasks. Each annotation stores multiple keypoints for one image. (model examples: [`human-pose-estimation-0001`](models/intel/human-pose-estimation-0001/description/human-pose-estimation-0001.md))
@@ -73,14 +71,14 @@ To download WIDER Face dataset, you need to follow the steps below:
 4. Select and download `Face annotations`
 5. Unpack archives
 
-### Structure of directory with dataset
+### Files layout
 
-This section describes what structure of directory dataset must have to run the Accuracy Checker tool.
-* `<DATASET_DIR>` - root directory
-    * `WIDER_val` - directory containing images directory
-        * `images` - directory containing the WIDER Face validation images
-    * `wider_face_split` - directory with annotation file
-        * `wider_face_val_bbx_gt.txt` - annotation file
+To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the following:
+
+* `WIDER_val` - directory containing images directory
+    * `images` - directory containing the WIDER Face validation images
+* `wider_face_split` - directory with annotation file
+    * `wider_face_val_bbx_gt.txt` - annotation file
 
 ### Datasets in dataset_definitions.yml
 * `wider` used for evaluation models on WIDER Face dataset where the face is the first class. (model examples: [`mtcnn`](models/public/mtcnn/mtcnn.md), [`retinaface-resnet50`](models/public/retinaface-resnet50/retinaface-resnet50.md))
