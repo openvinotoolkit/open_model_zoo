@@ -17,9 +17,10 @@ python3 question_answering_demo.py -h
 ```
 The command yields the following usage message:
 ```
-usage: question_answering_demo.py [-h] -v VOCAB -m MODEL --input_names
-                                  INPUT_NAMES --output_names OUTPUT_NAMES
-                                  [--model_squad_ver MODEL_SQUAD_VER] -i INPUT
+usage: question_answering_demo.py [-h] -v VOCAB -m MODEL -i INPUT
+                                  [--input_names INPUT_NAMES]
+                                  [--output_names OUTPUT_NAMES]
+                                  [--model_squad_ver MODEL_SQUAD_VER]
                                   [-a MAX_ANSWER_TOKEN_NUM] [-d DEVICE]
 
 Options:

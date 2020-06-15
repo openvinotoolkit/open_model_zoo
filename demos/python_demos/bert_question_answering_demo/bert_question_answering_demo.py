@@ -213,7 +213,7 @@ def main():
     # check input and output names
     input_names = list(i.strip() for i in args.input_names.split(','))
     output_names = list(o.strip() for o in args.output_names.split(','))
-    if set(ie_encoder.inputs.keys()) != set(input_names) or set(ie_encoder.outputs.keys()) != set(output_names):
+    if ie_encoder.inputs.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
         log.error("Input or Output names do not match")
         log.error("    The demo expects input->output names: {}->{}. "
                   "Please use the --input_names and --output_names to specify the right names "
