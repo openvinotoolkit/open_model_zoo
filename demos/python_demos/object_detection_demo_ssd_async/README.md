@@ -107,21 +107,20 @@ python3 object_detection_demo_ssd_async.py -h
 ```
 The command yields the following usage message:
 ```
-usage: object_detection_demo_ssd_async.py [-h] -m MODEL -i INPUT
-                                          [-l CPU_EXTENSION] [-d DEVICE] 
-                                          [--labels LABELS] [-pt PROB_THRESHOLD]
+usage: object_detection_demo_ssd_async.py [-h] -m MODEL -i INPUT [-d DEVICE]
+                                          [--labels LABELS]
+                                          [-pt PROB_THRESHOLD] [--no_show]
+                                          [-u UTILIZATION_MONITORS]
+                                          [--keep_aspect_ratio]
+                                          [--delay DELAY]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
-                        Required. Path to video file or image. 'cam' for
-                        capturing video stream from camera
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        path to a shared library with the kernels
-                        implementations.
+                        Required. Path to image or video file or index of
+                        camera.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
@@ -134,6 +133,9 @@ Options:
   --no_show             Optional. Don't show output
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+  --keep_aspect_ratio   Optional. Force image resize to keep aspect ratio.
+  --delay DELAY         Optional. Interval in milliseconds of waiting for a
+                        key to be pressed.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
