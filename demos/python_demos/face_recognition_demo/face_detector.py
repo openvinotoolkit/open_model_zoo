@@ -83,7 +83,7 @@ class FaceDetector(Module):
         return super(FaceDetector, self).enqueue({self.input_blob: input})
 
     def get_roi_proposals(self, frame):
-        outputs = self.get_outputs()[0][self.output_blob]
+        outputs = self.get_outputs()[0][self.output_blob].buffer
         # outputs shape is [N_requests, 1, 1, N_max_faces, 7]
 
         frame_width = frame.shape[-1]

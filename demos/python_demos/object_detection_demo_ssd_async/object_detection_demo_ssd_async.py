@@ -69,9 +69,9 @@ class MultipleOutputPostprocessor:
         self.labels_layer = labels_layer
 
     def __call__(self, outputs):
-        bboxes = np.array(map(lambda blob: blob.buffer, outputs[self.bboxes_layer]))[0]
-        scores = np.array(map(lambda blob: blob.buffer, outputs[self.scores_layer]))[0]
-        labels = np.array(map(lambda blob: blob.buffer, outputs[self.labels_layer]))[0]
+        bboxes = outputs[self.bboxes_layer].buffer[0]
+        scores = outputs[self.scores_layer].buffer[0]
+        labels = outputs[self.labels_layer].buffer[0]
         return [[0, label, score, *bbox] for label, score, bbox in zip(labels, scores, bboxes)]
 
 
