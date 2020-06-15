@@ -112,6 +112,8 @@ class InputFeeder:
         if self.image_info_inputs:
             image_info_inputs = self._fill_image_info_inputs(data_representation_batch)
             filled_inputs = {**image_info_inputs}
+        input_layer_num = 0
+        num_of_non_constant_inputs = len(self.non_constant_inputs)
         for input_layer in self.non_constant_inputs:
             input_regex = None
             input_batch = []
@@ -122,7 +124,7 @@ class InputFeeder:
                 identifiers = data_representation.identifier
                 data = data_representation.data
                 if not isinstance(identifiers, list) and input_regex is None:
-                    input_data = data
+                    input_data = data if num_of_non_constant_inputs <= 1 else data[input_layer_num]
                     input_batch.append(input_data)
                     continue
 
@@ -146,6 +148,7 @@ class InputFeeder:
                 input_batch.append(input_data)
 
             filled_inputs[input_layer] = input_batch
+            input_layer_num += 1
 
         return self._transform_batch(filled_inputs, extract_image_representations(data_representation_batch)[1])
 
