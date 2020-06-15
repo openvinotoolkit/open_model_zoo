@@ -14,59 +14,73 @@
  limitations under the License.
 """
 
-from collections import deque
 from time import perf_counter
+import cv2
+from helpers import put_highlighted_text
 
-class Measurement:
-    def __init__(self, latency, time_point):
-        self.latency = latency
-        self.time_point = time_point
+
+class Sum:
+    def __init__(self):
+        self.latency = 0.0
+        self.time = 0.0
+        self.frame_count = 0
+
 
 class PerformanceMetrics:
-    def __init__(self, time_window=1):      # defines the length of the timespan used for 'current fps' calculation,
+    def __init__(self, time_window=1.0):    # defines the length of the timespan used for 'current fps' calculation,
         self.time_window_size = time_window # set to '1 second' by default
-        self.measurements = deque()
-        self.reinitialize()
+        self.last_moving_sum = Sum()
+        self.current_moving_sum = Sum()
+        self.total_sum = Sum()
+        self.last_update_time = perf_counter()
     
-    def recalculate(self, last_request_start_time):
+    def update(self, last_request_start_time):
         current_time = perf_counter()
-        while self.measurements:
-            first_in_window = self.measurements[0]
-            if current_time - first_in_window.time_point > self.time_window_size:
-                self.latency_sum -= first_in_window.latency
-                self.measurements.popleft()
-            else:
-                break
 
         last_request_latency = current_time - last_request_start_time
-        self.measurements.append(Measurement(last_request_latency, current_time))
-        self.latency_sum += last_request_latency
-        self.latency_total_sum += last_request_latency
-        self.latency = (1000 * self.latency_sum) / len(self.measurements)
+        self.current_moving_sum.latency += last_request_latency
+        self.current_moving_sum.frame_count += 1
+        if self.current_moving_sum.frame_count == 1 and self.total_sum.frame_count == 0:
+            self.last_moving_sum.latency = last_request_latency
+            self.last_moving_sum.frame_count = 1
 
-        spf_sum = self.measurements[-1].time_point - self.measurements[0].time_point
-        if spf_sum > 0:
-            self.fps = len(self.measurements) / spf_sum
+        if current_time - self.last_update_time > self.time_window_size:
+            self.current_moving_sum.time = current_time - self.last_update_time
+            self.last_update_time = current_time
+            self.last_moving_sum = self.current_moving_sum
+            self.current_moving_sum = Sum()
+            self.total_sum.latency += self.last_moving_sum.latency
+            self.total_sum.time += self.last_moving_sum.time
+            self.total_sum.frame_count += self.last_moving_sum.frame_count
 
-        self.num_frames_processed += 1
+    def get_current_fps(self):
+        return self.last_moving_sum.frame_count / self.last_moving_sum.time
+
+    def get_current_latency(self):
+        return (1000 * self.last_moving_sum.latency) / self.last_moving_sum.frame_count
 
     def get_total_fps(self):
-        return self.num_frames_processed / (self.stop_time - self.start_time)
+        return (self.total_sum.frame_count + self.current_moving_sum.frame_count) / \
+               (self.total_sum.time + self.current_moving_sum.time)
         
     def get_total_latency(self):
-        return (1000 * self.latency_total_sum) / self.num_frames_processed
+        return (1000 * (self.total_sum.latency + self.current_moving_sum.latency)) / \
+               (self.total_sum.frame_count + self.current_moving_sum.frame_count)
 
-    def stop(self):
-        self.stop_time = perf_counter()
+    def show_current_fps(self, frame, position=(15, 50), font_scale=0.75, color=(200, 10, 10), thickness=2):
+        if self.last_moving_sum.frame_count > 1:
+            put_highlighted_text(frame, "FPS: {:.1f}".format(self.get_current_fps()),
+                                 position, cv2.FONT_HERSHEY_COMPLEX, font_scale, color, thickness)
+    
+    def show_current_latency(self, frame, position=(15, 20), font_scale=0.75, color=(200, 10, 10), thickness=2):
+        if self.last_moving_sum.frame_count != 0:
+            put_highlighted_text(frame, "Latency: {:.1f} ms".format(self.get_current_latency()),
+                                 position, cv2.FONT_HERSHEY_COMPLEX, font_scale, color, thickness)
+    
+    def print_total_fps(self, log):
+        if self.total_sum.frame_count + self.current_moving_sum.frame_count > 1:
+            log.info("FPS: {:.1f}".format(self.get_total_fps()))
 
-    def reinitialize(self):
-        self.measurements.clear()
-        self.fps = 0
-        self.latency = 0
-        self.latency_sum = 0
-        self.start_time = perf_counter()
-        self.num_frames_processed = 0
-        self.latency_total_sum = 0
-
-    def has_started(self):
-        return self.num_frames_processed > 0
+    def print_total_latency(self, log):
+        if self.total_sum.frame_count + self.current_moving_sum.frame_count != 0:
+            log.info("Latency: {:.1f} ms".format(self.get_total_latency()))

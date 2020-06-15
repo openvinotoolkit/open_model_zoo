@@ -30,6 +30,7 @@ import numpy as np
 from openvino.inference_engine import IECore
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import helpers
 import monitors
 from performance_metrics import PerformanceMetrics
 
@@ -262,11 +263,6 @@ def async_callback(status, callback_args):
     event.set()
 
 
-def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
-    cv2.putText(frame, message, position, font_face, font_scale, (255, 255, 255), thickness + 1) # white border
-    cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
-
-
 def await_requests_completion(requests):
     for request in requests:
         request.wait()
@@ -364,7 +360,7 @@ def main():
     completed_request_results = {}
     next_frame_id = 0
     next_frame_id_to_show = 0
-    mode_metrics = {mode_name: PerformanceMetrics() for mode_name in Modes}
+    mode_metrics = {}
     event = threading.Event()
     callback_exceptions = []
 
@@ -376,7 +372,7 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, 55,
         (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
-    mode_metrics[mode.current].start_time = perf_counter()
+    mode_metrics[mode.current] = PerformanceMetrics()
     while (cap.isOpened() \
            or completed_request_results \
            or len(empty_requests) < len(exec_nets[mode.current].requests)) \
@@ -386,7 +382,7 @@ def main():
 
             next_frame_id_to_show += 1
             if is_same_mode:
-                mode_metrics[mode.current].recalculate(start_time)
+                mode_metrics[mode.current].update(start_time)
 
             objects = get_objects(output, net, (input_height, input_width), frame.shape[:-1], args.prob_threshold,
                                   args.keep_aspect_ratio)
@@ -422,14 +418,12 @@ def main():
                             (obj['xmin'], obj['ymin'] - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
             # Draw performance stats over frame
-            fps_message = "FPS: {:.1f}".format(mode_metrics[mode.current].fps)
-            latency_message = "Latency: {:.1f} ms".format(mode_metrics[mode.current].latency)
-            put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
-            put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
+            mode_metrics[mode.current].show_current_fps(frame)
+            mode_metrics[mode.current].show_current_latency(frame)
 
             mode_message = "{} mode".format(mode.current.name)
-            put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
-                                 cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
+            helpers.put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
+                                         cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
 
             if not args.no_show:
                 cv2.imshow("Detection Results", frame)
@@ -438,7 +432,6 @@ def main():
                 if key in {ord("q"), ord("Q"), 27}: # ESC key
                     break
                 if key == 9: # Tab key
-                    mode_metrics[mode.current].stop()
                     prev_mode = mode.current
                     mode.next()
 
@@ -446,7 +439,7 @@ def main():
                     empty_requests.clear()
                     empty_requests.extend(exec_nets[mode.current].requests)
 
-                    mode_metrics[mode.current].reinitialize()
+                    mode_metrics[mode.current] = PerformanceMetrics()
                 else:
                     presenter.handleKey(key)
 
@@ -486,15 +479,11 @@ def main():
     if callback_exceptions:
         raise callback_exceptions[0]
 
-    mode_metrics[mode.current].stop()
-
-    for mode_name in Modes:
-        if not mode_metrics[mode_name].has_started():
-            continue
+    for mode_name in mode_metrics.keys():
         log.info("")
         log.info("Mode: {}".format(mode_name.name))
-        log.info("FPS: {:.1f}".format(mode_metrics[mode_name].get_total_fps()))
-        log.info("Latency: {:.1f} ms".format(mode_metrics[mode_name].get_total_latency()))
+        mode_metrics[mode_name].print_total_fps(log)
+        mode_metrics[mode_name].print_total_latency(log)
     print(presenter.reportMeans())
 
 
