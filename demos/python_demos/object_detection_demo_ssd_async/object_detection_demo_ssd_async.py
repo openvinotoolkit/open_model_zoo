@@ -40,10 +40,6 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument('-i', '--input', help='Required. Path to image or video file or index of camera.',
                       required=True, type=str)
-    args.add_argument('-l', '--cpu_extension',
-                      help='Optional. Required for CPU custom layers. Absolute path to a shared library with the '
-                           'kernels implementations.',
-                      type=str, default=None)
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
@@ -326,8 +322,6 @@ def main():
 
     log.info('Initializing Inference Engine...')
     ie = IECore()
-    if args.cpu_extension and 'CPU' in args.device:
-        ie.add_extension(args.cpu_extension, 'CPU')
 
     labels_map = None
     if args.labels:
