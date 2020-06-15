@@ -748,6 +748,13 @@ datasets:
       masks_dir: free_form_masks/masks_2k
     annotation: inpainting_voc12_masks2k.pickle
 
+  - name: mrlEyes_2018_01
+    annotation_conversion:
+      converter: mrlEyes_2018_01
+      data_dir: mrlEyes_2018_01
+    annotation: mrlEyes_2018_01.pickle
+    dataset_meta: mrlEyes_2018_01.json
+    data_source: mrlEyes_2018_01
   - name: ms_coco_style_transfer
     data_source: val2017
     annotation_conversion:
@@ -760,3 +767,12 @@ datasets:
       - type: ssim
         presenter: print_vector
     annotation: style_trasfer_val2017.pickle
+
+  - name: squad_v1_1_msl384_mql64_ds128_lowercase
+    annotation_conversion:
+      converter: squad
+      testing_file: squad_v1.1/dev-v1.1.json
+      max_seq_length: 384
+      max_query_length: 64
+      doc_stride: 128
+      lower_case: true

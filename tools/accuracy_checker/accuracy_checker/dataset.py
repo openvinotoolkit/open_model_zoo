@@ -273,6 +273,7 @@ def create_subset(annotation, subsample_size, subsample_seed, shuffle=True):
         raise ConfigError('subsample_size should be > 0')
     return make_subset(annotation, subsample_size, subsample_seed, shuffle)
 
+
 class DatasetWrapper:
     def __init__(self, data_reader, annotation_reader=None, tag='', dataset_config=None):
         self.tag = tag
@@ -353,3 +354,7 @@ class DatasetWrapper:
     @property
     def size(self):
         return self.__len__()
+
+    @property
+    def multi_infer(self):
+        return getattr(self.data_reader, 'multi_infer', False)

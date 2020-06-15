@@ -1,0 +1,29 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Fully convolutional network for recognition of eye state ('open', 'closed').
+task_type: classification
+files:
+  - name: open-closed-eye.onnx
+    size: 46164
+    sha256: 4daa100034482525a26c9afb9297c16580a531189e66e3d2b2ac7d32becfd593
+    source: https://download.01.org/opencv/openvino_training_extensions/models/open_closed_eye/open_closed_eye.onnx
+framework: onnx
+model_optimizer_args:
+  - --mean_values=[127.0, 127.0, 127.0]
+  - --scale_values=[255, 255, 255]
+  - --output=19
+  - --input_model=$dl_dir/open-closed-eye.onnx
+license: https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE

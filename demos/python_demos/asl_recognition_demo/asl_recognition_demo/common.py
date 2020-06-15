@@ -35,7 +35,7 @@ class IEModel:  # pylint: disable=too-few-public-methods
         if model_path.endswith((".xml", ".bin")):
             model_path = model_path[:-4]
         self.net = ie_core.read_network(model_path + ".xml", model_path + ".bin")
-        assert len(self.net.inputs.keys()) == 1, "One input is expected"
+        assert len(self.net.input_info) == 1, "One input is expected"
 
         supported_layers = ie_core.query_network(self.net, device)
         not_supported_layers = [l for l in self.net.layers.keys() if l not in supported_layers]
@@ -47,7 +47,7 @@ class IEModel:  # pylint: disable=too-few-public-methods
                                              device_name=device,
                                              num_requests=num_requests)
 
-        self.input_name = next(iter(self.net.inputs))
+        self.input_name = next(iter(self.net.input_info))
         if len(self.net.outputs) > 1:
             if output_shape is not None:
                 candidates = []
@@ -70,7 +70,7 @@ class IEModel:  # pylint: disable=too-few-public-methods
         else:
             self.output_name = next(iter(self.net.outputs))
 
-        self.input_size = self.net.inputs[self.input_name].shape
+        self.input_size = self.net.input_info[self.input_name].input_data.shape
         self.output_size = self.exec_net.requests[0].outputs[self.output_name].shape
         self.num_requests = num_requests
 

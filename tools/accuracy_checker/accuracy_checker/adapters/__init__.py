@@ -42,17 +42,13 @@ from .attributes_recognition import (
 
 from .reidentification import ReidAdapter
 from .detection import (
-    SSDAdapter,
-    FacePersonAdapter,
     TFObjectDetectionAPIAdapter,
-    SSDAdapterMxNet,
-    PyTorchSSDDecoder,
-    SSDONNXAdapter,
     MTCNNPAdapter,
     RetinaNetAdapter,
     ClassAgnosticDetectionAdapter,
     FaceBoxesAdapter
 )
+from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
 from .classification import ClassificationAdapter
@@ -85,12 +81,7 @@ __all__ = [
 
     'ClassificationAdapter',
 
-    'SSDAdapter',
-    'FacePersonAdapter',
     'TFObjectDetectionAPIAdapter',
-    'SSDAdapterMxNet',
-    'SSDONNXAdapter',
-    'PyTorchSSDDecoder',
     'MTCNNPAdapter',
     'CTDETAdapter',
     'RetinaNetAdapter',

@@ -112,6 +112,7 @@ NATIVE_DEMOS = [
             '-m_fd': ModelArg('face-detection-adas-0001'),
             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
             '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+            '-m_es': ModelArg('open-closed-eye-0001'),
         }),
     )),
 

@@ -144,13 +144,13 @@ def main():
             sys.exit(1)
 
     required_input_keys = {'im_data', 'im_info'}
-    assert required_input_keys == set(net.inputs.keys()), \
+    assert required_input_keys == set(net.input_info), \
         'Demo supports only topologies with the following input keys: {}'.format(', '.join(required_input_keys))
     required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks'}
     assert required_output_keys.issubset(net.outputs.keys()), \
         'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
 
-    n, c, h, w = net.inputs['im_data'].shape
+    n, c, h, w = net.input_info['im_data'].input_data.shape
     assert n == 1, 'Only batch 1 is supported by the demo application'
 
     log.info('Loading IR to the plugin...')
