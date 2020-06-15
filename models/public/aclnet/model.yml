@@ -26,8 +26,8 @@ task_type: audio_classification
 files:
   - name: aclnet_des_53.onnx
     size: 10972740
-    sha256: 58e2f8210bf4c025c738eacb670d85d8dea677a98773b6ffdac5f83eddf18134
-    source: https://download.01.org/opencv/public_models/062020/aclnet/aclnet_des_53_fp32_03062020.onnx
+    sha256: 33339e960c788907640e67a040ecc5355304a50eb14d22a02187e10c030bf402
+    source: https://download.01.org/opencv/public_models/062020/aclnet/15062020/aclnet_des_53_fp32.onnx
 model_optimizer_args:
   - --input_shape=[1,1,1,16000]
   - --input=0
