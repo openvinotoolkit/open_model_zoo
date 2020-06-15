@@ -1,13 +1,13 @@
-# Multi Camera Multi Person Python* Demo
+# Multi Camera Multi Target Python* Demo
 
-This demo demonstrates how to run Multi Camera Multi Person demo using OpenVINO<sup>TM</sup>.
+This demo demonstrates how to run Multi Camera Multi Target (e.g. person or vehicle) demo using OpenVINO<sup>TM</sup>.
 
 ## How It Works
 
 The demo expects the next models in the Intermediate Representation (IR) format:
 
-   * Person detection model (or person instance segmentation model)
-   * Person re-identification model
+   * Object detection model (or object instance segmentation model)
+   * Object re-identification model
 
 It can be your own models or pre-trained model from OpenVINO Open Model Zoo.
 In the `models.lst` are the list of appropriate models for this demo
@@ -21,7 +21,7 @@ As input, the demo application takes:
 The demo workflow is the following:
 
 1. The demo application reads tuples of frames from web cameras/videos one by one.
-For each frame in tuple it runs person detector
+For each frame in tuple it runs object detector
 and then for each detected object it extracts embeddings using re-identification model.
 2. All embeddings are passed to tracker which assigns an ID to each object.
 3. The demo visualizes the resulting bounding boxes and unique object IDs assigned during tracking.
@@ -41,7 +41,7 @@ pip3 install -r requirements.txt
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: multi_camera_multi_person_tracking.py [-h] -i I [I ...]
+usage: multi_camera_multi_target_tracking.py [-h] -i I [I ...]
                                              [--config CONFIG]
                                              [--detections DETECTIONS]
                                              [-m M_DETECTOR]
@@ -56,7 +56,7 @@ usage: multi_camera_multi_person_tracking.py [-h] -i I [I ...]
                                              [-l CPU_EXTENSION]
                                              [-u UTILIZATION_MONITORS]
 
-Multi camera multi person tracking live demo script
+Multi camera multi target tracking live demo script
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -66,14 +66,14 @@ optional arguments:
   --detections DETECTIONS
                         JSON file with bounding boxes
   -m M_DETECTOR, --m_detector M_DETECTOR
-                        Path to the person detection model
+                        Path to the object detection model
   --t_detector T_DETECTOR
-                        Threshold for the person detection model
+                        Threshold for the object detection model
   --m_segmentation M_SEGMENTATION
-                        Path to the person instance segmentation model
+                        Path to the object instance segmentation model
   --t_segmentation T_SEGMENTATION
-                        Threshold for person instance segmentation model
-  --m_reid M_REID       Path to the person re-identification model
+                        Threshold for object instance segmentation model
+  --m_reid M_REID       Path to the object re-identification model
   --output_video OUTPUT_VIDEO
                         Optional. Path to output video
   --history_file HISTORY_FILE
@@ -90,32 +90,32 @@ optional arguments:
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```
-Minimum command examples to run the demo:
+Minimum command examples to run the demo for person tracking (for vehicle tracking the commands are the same with appropriate vehicle detection/re-identification models):
 
 ```
 # videos
-python multi_camera_multi_person_tracking.py \
+python multi_camera_multi_target_tracking.py \
     -i path/to/video_1.avi path/to/video_2.avi \
     --m_detector path/to/person-detection-retail-0013.xml \
     --m_reid path/to/person-reidentification-retail-0103.xml \
-    --config config.py
+    --config configs/person.py
 
 # videos with instance segmentation model
 python multi_camera_multi_person_tracking.py \
     -i path/to/video_1.avi path/to/video_2.avi \
     --m_segmentation path/to/instance-segmentation-security-0050.xml \
     --m_reid path/to/person-reidentification-retail-0107.xml \
-    --config config.py
+    --config configs/person.py
 
 # web-cameras
 python multi_camera_multi_person_tracking.py \
     -i 0 1 \
     --m_detector path/to/person-detection-retail-0013.xml \
     --m_reid path/to/person-reidentification-retail-0103.xml \
-    --config config.py
+    --config configs/person.py
 ```
 
-The demo can use a JSON file with detections instead of a person detector.
+The demo can use a JSON file with detections instead of an object detector.
 The structure of this file should be as follows:
 ```json
 [
@@ -155,7 +155,7 @@ Such file with detections can be saved from the demo. Specify the argument
 
 The demo displays bounding boxes of tracked objects and unique IDs of those objects.
 To save output video with the result please use the option  `--output_video`,
-to change configuration parameters please open the `config.py` file and edit it.
+to change configuration parameters please open the `configs/person.py` (or `configs/vehicle.py` for vehicle tracking demo) file and edit it.
 
 Visualization can be controlled using the following keys:
  * `space` - pause or next frame
@@ -167,7 +167,7 @@ Also demo can dump resulting tracks to a json file. To specify the file use the
 
 ## Quality measuring
 
-The demo provides tools for measure quality of the multi camera multi person tracker:
+The demo provides tools for measure quality of the multi camera multi target tracker:
 * Evaluation MOT metrics
 * Visualize the demo results from a history file
 
@@ -221,7 +221,7 @@ usage: run_history_visualize.py [-h] [-i I [I ...]] --history_file
                                 [--timeline TIMELINE] [--match_gt_ids]
                                 [--merge_outputs]
 
-Multi camera multi person tracking visualization demo script
+Multi camera multi target tracking visualization demo script
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -249,5 +249,5 @@ To enable the first one please set in configuration file for `analyzer` paramete
 `enable` to `True`, for the second one for `embeddings` specify parameter `path`
 that is a directory where data related to embeddings will be saved
 (if it is an empty string the option is disabled). In `embeddings` is a parameter
-`use_images`. If it is `True` for every embedding will be drawn an image with a person
+`use_images`. If it is `True` for every embedding will be drawn an image with an object
 instead a point.
