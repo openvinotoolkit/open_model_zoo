@@ -99,7 +99,6 @@ class ColorPalette:
         return tuple(self.palette[n % len(self.palette)])
 
 
-
 class Model:
     def __init__(self, ie, xml_file_path, bin_file_path=None,
                  device='CPU', max_num_requests=1):
@@ -164,6 +163,7 @@ class Model:
             outputs = self.postprocess(outputs, self.meta[request_id])
             return outputs
         raise RuntimeError
+
 
 class Detector(Model):
     def __init__(self, *args, labels_map=None, keep_aspect_ratio_resize=False, **kwargs):
@@ -239,12 +239,14 @@ class Detector(Model):
         detections[:, 4:7:2] *= scale_y
         return detections
 
+
 class SingleOutputParser:
     def __init__(self, output_layer):
         self.output_layer = output_layer
 
     def __call__(self, outputs):
         return np.asarray(outputs[self.output_layer][0][0])
+
 
 class MultipleOutputParser:
     def __init__(self, all_outputs, bboxes_layer='bboxes', scores_layer='scores', labels_layer='labels'):
@@ -268,6 +270,7 @@ class MultipleOutputParser:
         scores = outputs[self.scores_layer][0]
         labels = outputs[self.labels_layer][0]
         return np.asarray([[0, label, score, *bbox] for label, score, bbox in zip(labels, scores, bboxes)])
+
 
 class OTEParser:
     def __init__(self, input_size, all_outputs, labels_layer='labels', default_label=1):
@@ -315,6 +318,7 @@ class OTEParser:
         else:
             labels = np.full(len(bboxes), self.default_label, dtype=bboxes.dtype)
         return np.asarray([[0, label, score, *bbox] for label, score, bbox in zip(labels, scores, bboxes)])
+
 
 def main():
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
@@ -395,7 +399,7 @@ def main():
                             cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
         # Draw performance stats
-        inf_time_message = 'Inference time: N\A for async mode' if detector.is_async else \
+        inf_time_message = r'Inference time: N\A for async mode' if detector.is_async else \
             'Inference time: {:.3f} ms'.format(det_time * 1000)
         render_time_message = 'OpenCV rendering time: {:.3f} ms'.format(render_time * 1000)
         async_mode_message = 'Async mode is on. Processing request {}'.format(cur_request_id) if detector.is_async else \
