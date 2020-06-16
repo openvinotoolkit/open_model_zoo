@@ -130,3 +130,6 @@ Accuracy Checker supports following set of preprocessors:
     * `box_scale` - box scale factor (Optional, default 1).
     * `dst_width` and `dst_height` are destination width and height for transformed image respectively.
     You can also use `size` instead in case when destination sizes are equal for both dimensions.
+* `face_detection_image_pyramid` - image pyramid for face detection
+  * `min_face_ratio` - minimum face ratio to image size.
+  * `resize_scale` - scale factor for pyramid layers.

@@ -706,6 +706,98 @@ class ImagePyramid(Preprocessor):
 
         return image
 
+class FaceDetectionImagePyramid(Preprocessor):
+    __provider__ = 'face_detection_image_pyramid'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update(
+            {
+                'min_face_ratio': NumberField(
+                    value_type=float, default=0.05, min_value=0.01, max_value=1,
+                    description='Minimum face ratio to image size'
+                ),
+                'resize_scale': NumberField(
+                    value_type=int, default=2, min_value=1,
+                    description='Scale factor for pyramid layers'
+                )
+            }
+        )
+        return parameters
+
+    def configure(self):
+        self.min_face_ratio = self.get_value_from_config('min_face_ratio')
+        self.resize_scale = self.get_value_from_config('resize_scale')
+        self.min_supported_face_size = 24
+        self.stage1_window_size = [12, 192]
+
+    def perform_scaling(self, initial_width, initial_height, img_width, img_height):
+        width = initial_width
+        height = initial_height
+
+        image_pyramid = []
+        scales = []
+        pyramid_scale = 1
+
+        shorter = min(img_height, img_width)
+        min_face_size = max(int(shorter * self.min_face_ratio), self.min_supported_face_size)
+
+        while width >= self.stage1_window_size[0] and height >= self.stage1_window_size[0]:
+            min_detectable_size = int(img_width / width + 0.5) * self.stage1_window_size[0]
+            if min_detectable_size >= min_face_size:
+                if min_detectable_size > self.min_supported_face_size:
+                    pyramid_scale /= 2
+                    width = int(initial_width / pyramid_scale + 0.5)
+                    height = int(initial_height / pyramid_scale + 0.5)
+
+                image_pyramid.append((int(width), int(height)))
+                scales.append(img_width / int(width))
+
+                max_detectable_size = int(img_width / width + 0.5) * self.stage1_window_size[1]
+                if max_detectable_size < shorter:
+                    while max_detectable_size > min_detectable_size:
+                        pyramid_scale *= self.resize_scale
+                        width = int(initial_height / pyramid_scale + 0.5)
+                        height = int(initial_height / pyramid_scale + 0.5)
+                        min_detectable_size = int(img_width / width + 0.5) * self.stage1_window_size[0]
+                        min_detectable_size *= 2
+                break
+
+            pyramid_scale *= self.resize_scale
+            width = int(initial_width / pyramid_scale + 0.5)
+            height = int(initial_height / pyramid_scale + 0.5)
+
+        return image_pyramid, scales, pyramid_scale
+
+    def process(self, image, annotation_meta=None):
+        img_height, img_width, _ = image.data.shape
+        initial_width = img_width * self.stage1_window_size[0] / self.min_supported_face_size
+        initial_height = img_height * self.stage1_window_size[0] / self.min_supported_face_size
+        image_pyramid, scales, pyramid_scale = self.perform_scaling(
+            initial_width,
+            initial_height,
+            img_width, img_height
+        )
+
+        if len(image_pyramid) == 0:
+            pyramid_scale /= self.resize_scale
+            width = int(initial_width / pyramid_scale + 0.5)
+            height = int(initial_height / pyramid_scale + 0.5)
+            image_pyramid.append((width, height))
+            scales.append(img_width / width)
+
+        scaled_data = []
+        data = image.data
+
+        # perform resizing
+        for dimension in image_pyramid:
+            w, h = dimension
+            scaled_data.append(cv2.resize(data, (w, h)))
+
+        image.data = scaled_data
+        image.metadata.update({'multi_infer': True, 'scales': scales})
+        return image
 
 class WarpAffine(Preprocessor):
     __provider__ = 'warp_affine'

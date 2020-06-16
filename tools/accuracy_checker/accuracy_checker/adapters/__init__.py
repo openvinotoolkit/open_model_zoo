@@ -46,7 +46,8 @@ from .detection import (
     MTCNNPAdapter,
     RetinaNetAdapter,
     ClassAgnosticDetectionAdapter,
-    FaceBoxesAdapter
+    FaceBoxesAdapter,
+    FaceDetectionAdapter
 )
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
@@ -88,6 +89,7 @@ __all__ = [
     'ClassAgnosticDetectionAdapter',
     'RetinaFaceAdapter',
     'FaceBoxesAdapter',
+    'FaceDetectionAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',

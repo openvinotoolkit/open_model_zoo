@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2019-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -78,11 +78,11 @@ class ActionRecognitionConverter(BaseFormatConverter):
                 label_map = verify_label_map(label_map)
             elif 'labels' in dataset_meta:
                 label_map = dict(enumerate(dataset_meta['labels']))
-        video_names, annotation = self.get_video_names_and_annotations(full_annotation['database'], self.subset)
+        video_names, annotations = self.get_video_names_and_annotations(full_annotation['database'], self.subset)
         class_to_idx = {v: k for k, v in label_map.items()}
 
         videos = []
-        for video_name, annotation in zip(video_names, annotation):
+        for video_name, annotation in zip(video_names, annotations):
             video_path = self.data_dir / video_name
             if not video_path.exists():
                 continue
