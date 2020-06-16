@@ -23,7 +23,7 @@ public:
 
     ImgCap(bool loop) : loop{loop} {}
     virtual cv::Mat read() = 0;
-    virtual cv::Size getSize() = 0;
+    virtual cv::Size getSize() = 0;  // TODO mb split on width and height
     virtual ~ImgCap() = default;
 };
 
