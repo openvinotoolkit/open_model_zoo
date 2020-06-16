@@ -17,13 +17,24 @@ limitations under the License.
 import itertools
 import math
 import warnings
+from collections import namedtuple
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, StringField, ConfigError
+from ..config import ConfigValidator, NumberField, StringField, ListField, ConfigError
 from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction
 
+FaceDetectionLayerOutput = namedtuple('FaceDetectionLayerOutput', [
+    'prob_name',
+    'reg_name',
+    'anchor_index',
+    'anchor_size',
+    'win_scale',
+    'win_length',
+    'win_trans_x',
+    'win_trans_y'
+])
 
 class TFObjectDetectionAPIAdapter(Adapter):
     """
@@ -640,282 +651,137 @@ class FaceBoxesAdapter(Adapter):
 
         return result
 
-class PersonVehicleDetectionAdapter(Adapter):
-    __provider__ = 'person_vehicle_detection'
+class FaceDetectionAdapter(Adapter):
+    """
+    Class for converting output of Face Detection model to DetectionPrediction representation
+    """
+    __provider__ = 'face_detection'
     predcition_types = (DetectionPrediction, )
-    class_threshold_ = [0.0, 0.60, 0.85, 0.90, 0.70, 0.75, 0.80, 0.75]
-    kMinObjectSize = 25
 
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'iou_threshold': NumberField(
-                value_type=float, min_value=0, max_value=1, default=0.45, optional=True,
-                description='Iou threshold for NMS'),
+            'score_threshold': NumberField(
+                value_type=float, min_value=0, max_value=1, default=0.35, optional=True,
+                description='Score threshold value used to discern whether a face is valid'),
+            'layer_names': ListField(
+                value_type=str, optional=False,
+                description='Target output layer base names'),
+            'anchor_sizes': ListField(
+                value_type=int, optional=False,
+                description='Anchor sizes for each base output layer'),
+            'window_scales': ListField(
+                value_type=int, optional=False,
+                description='Window scales for each base output layer'),
+            'window_lengths': ListField(
+                value_type=int, optional=False,
+                description='Window lenghts for each base output layer'),
         })
         return parameters
 
     def configure(self):
-        self.iou_threshold = self.get_value_from_config('iou_threshold')
+        self.score_threshold = self.get_value_from_config('score_threshold')
+        self.layer_info = {
+            'layer_names': self.get_value_from_config('layer_names'),
+            'anchor_sizes': self.get_value_from_config('anchor_sizes'),
+            'window_scales': self.get_value_from_config('window_scales'),
+            'window_lengths': self.get_value_from_config('window_lengths')
+        }
+        if len({len(x) for x in self.layer_info.values()}) != 1:
+            raise ConfigError('There must be equal number of layer names, anchor sizes, '
+                              'window scales, and window sizes')
+        self.output_layers = self.generate_output_layer_info()
+
+    def generate_output_layer_info(self):
+        """
+        Generates face detection layer information,
+        which is referenced in process function
+        """
+        output_layers = []
+
+        for i in range(len(self.layer_info['layer_names'])):
+            start = 1.5
+            anchor_size = self.layer_info['anchor_sizes'][i]
+            layer_name = self.layer_info['layer_names'][i]
+            window_scale = self.layer_info['window_scales'][i]
+            window_length = self.layer_info['window_lengths'][i]
+            if anchor_size % 3 == 0:
+                start = -anchor_size / 3.0
+            elif anchor_size % 2 == 0:
+                start = -anchor_size / 2.0 + 0.5
+            k = 1
+            for row in range(anchor_size):
+                for col in range(anchor_size):
+                    out_layer = FaceDetectionLayerOutput(
+                        prob_name=layer_name + '/prob',
+                        reg_name=layer_name + '/bb',
+                        anchor_index=k - 1,
+                        anchor_size=anchor_size * anchor_size,
+                        win_scale=window_scale,
+                        win_length=window_length,
+                        win_trans_x=float((start + col) / anchor_size),
+                        win_trans_y=float((start + row) / anchor_size)
+                    )
+                    output_layers.append(out_layer)
+                    k += 1
+        return output_layers
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
-        if isinstance(raw, dict):
-            bbox_pred = raw['bbox_pred']
-            proposals = raw['proposals']
-            cls_score = raw['cls_score']
-            img_height, img_width, _ = frame_meta[0]['image_size']
-            props_map = self.output_to_proposals(bbox_pred, proposals, cls_score, img_width, img_height)
-            pred_items = self.get_proposals(props_map)
-            result.append(pred_items)
-        else:
-            for batch_index in range(len(identifiers)):
-                bbox_pred = raw[batch_index]['bbox_pred']
-                proposals = raw[batch_index]['proposals']
-                cls_score = raw[batch_index]['cls_score']
-                img_height, img_width, _ = frame_meta[batch_index]['image_size']
-                props_map = self.output_to_proposals(bbox_pred, proposals, cls_score, img_width, img_height)
-                pred_items = self.get_proposals(props_map)
-                result.append(pred_items)
+        for batch_index, identifier in enumerate(identifiers):
+            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+            scale_factor = frame_meta[batch_index]['scales'][0]
+            for layer in self.output_layers:
+                prob_arr = raw[batch_index][layer.prob_name]
+                prob_dims = raw[batch_index][layer.prob_name].shape
+                reg_arr = raw[batch_index][layer.reg_name]
+
+                output_height = prob_dims[2]
+                output_width = prob_dims[3]
+
+                anchor_loc = layer.anchor_size + layer.anchor_index
+                prob_data = prob_arr[0][anchor_loc]
+
+                for row in range(output_height):
+                    for col in range(output_width):
+                        score = prob_data[row][col]
+                        if score >= self.score_threshold:
+                            candidate_x = (col + layer.win_trans_x) * layer.win_scale - 0.5
+                            candidate_y = (row + layer.win_trans_y) * layer.win_scale - 0.5
+                            candidate_width = layer.win_length
+                            candidate_height = layer.win_length
+
+                            reg_x = reg_arr[0][layer.anchor_index*4+0][row][col] * layer.win_length
+                            reg_y = reg_arr[0][layer.anchor_index*4+1][row][col] * layer.win_length
+                            reg_width = reg_arr[0][layer.anchor_index*4+2][row][col] * layer.win_length
+                            reg_height = reg_arr[0][layer.anchor_index*4+3][row][col] * layer.win_length
+
+                            candidate_x += reg_x
+                            candidate_y += reg_y
+                            candidate_width += reg_width
+                            candidate_height += reg_height
+
+                            min_x = scale_factor * (candidate_x) + 0.5
+                            min_y = scale_factor * (candidate_y) + 0.5
+                            width = scale_factor * candidate_width + 0.5
+                            height = scale_factor * candidate_height + 0.5
+
+                            detections['x_mins'].append(min_x)
+                            detections['y_mins'].append(min_y)
+                            detections['x_maxs'].append(min_x + width)
+                            detections['y_maxs'].append(min_y + height)
+                            detections['scores'].append(score)
+
+            result.append(
+                DetectionPrediction(
+                    identifier=identifier,
+                    x_mins=detections['x_mins'],
+                    y_mins=detections['y_mins'],
+                    x_maxs=detections['x_maxs'],
+                    y_maxs=detections['y_maxs'],
+                    scores=detections['scores']
+                )
+            )
+
         return result
-
-    def output_to_proposals(self, bbox_pred, proposals, cls_score, img_width, img_height):
-        ww = img_width
-        hh = img_height
-        sx = 1.0 / (960 / img_width)
-        sy = 1.0 / (540 / img_height)
-        num_rois = 96
-        num_classes = 8
-
-        # merge scores - Car: 3, Truck: 7, Van: 6
-        for r in range(num_rois):
-            indices = [3, 6, 7]
-
-            def get_cls_score(idx, x=r):
-                return cls_score[x][idx]
-
-            indices.sort(key=get_cls_score, reverse=True)
-
-            sum_score = 0.0
-            for it in indices:
-                sum_score += cls_score[r][it]
-                cls_score[r][it] = 0.0
-
-            cls_score[r][indices[0]] = sum_score
-
-        # proposals map [class id, rectangle]
-        props_map = []
-
-        # NMS in tensorpack way
-        for c in range(1, num_classes):
-            scores = []
-            boxes = []
-
-            for r in range(num_rois):
-                # class score
-                scores.append(cls_score[r][c])
-                # regressed bbox
-                reg = bbox_pred[r][4*c:]
-                roi = proposals[r][1:]
-                boxes.append(self.regress_scale_clip_bbox(ww, hh, sx, sy, roi, reg))
-
-            # nms in a class
-            kidx = self.nms_apply(c, scores, boxes)
-
-            # final class and box
-            p_map = []
-            for i in kidx:
-                p_map.append([c, scores[i], boxes[i]])  # class_id, score, box_rectangle
-
-            props_map.append(p_map)
-
-        return props_map
-
-    def get_proposals(self, props_map):
-        vehicles = []
-        detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
-
-        for props in props_map:
-            if len(props) == 0:
-                continue
-
-            for prop in props:
-                class_id = prop[0]
-                rect = prop[2]
-                score = prop[1]
-                if (rect[2] - rect[0]) < self.kMinObjectSize or (rect[3] - rect[1]) < self.kMinObjectSize:
-                    continue
-
-                gt_class_id = self.convert_classid_to_gt_type(class_id)
-
-                # person
-                if gt_class_id == 0:
-                    detections['labels'].append(gt_class_id)
-                    detections['scores'].append(score)
-                    detections['x_mins'].append(rect[0])
-                    detections['y_mins'].append(rect[1])
-                    detections['x_maxs'].append(rect[2])
-                    detections['y_maxs'].append(rect[3])
-
-                # vehicle
-                else:
-                    vehicles.append(prop)
-
-        # sort by score and NMS in 2 wheels, 4 heels
-        vehicles = self.nms_apply_prop(vehicles)
-
-        # Convert to detection representation
-        for vehicle in vehicles:
-            rect = vehicle[2]
-            score = vehicle[1]
-            detections['labels'].append(1)
-            detections['scores'].append(score)
-            detections['x_mins'].append(rect[0])
-            detections['y_mins'].append(rect[1])
-            detections['x_maxs'].append(rect[2])
-            detections['y_maxs'].append(rect[3])
-
-        return DetectionPrediction(
-            labels=detections['labels'],
-            scores=detections['scores'],
-            x_mins=detections['x_mins'],
-            y_mins=detections['y_mins'],
-            x_maxs=detections['x_maxs'],
-            y_maxs=detections['y_maxs']
-        )
-
-    @staticmethod
-    def regress_scale_clip_bbox(ww, hh, sx, sy, roi, reg):
-        cx = (roi[0] + roi[2]) * 0.5
-        cy = (roi[1] + roi[3]) * 0.5
-        aw = (roi[2] - roi[0])
-        ah = (roi[3] - roi[1])
-
-        cx += (reg[0] * 0.1 * aw)
-        cy += (reg[1] * 0.1 * ah)
-        aw *= (math.exp(reg[2] * 0.2) * 0.5)
-        ah *= (math.exp(reg[3] * 0.2) * 0.5)
-
-        res = [min(ww, max(0.0, (cx - aw) * sx)),
-               min(hh, max(0.0, (cy - ah) * sy)),
-               min(ww, max(0.0, (cx + aw) * sx)),
-               min(hh, max(0.0, (cy + ah) * sy))]
-
-        return res
-
-    def nms_apply(self, class_id, scores, boxes):
-        filtered = self.filter_by_score(self.class_threshold_[class_id], scores)
-        idx = filtered[0]
-        is_dead = filtered[1]
-
-        # iou based filter(nms)
-        keep_ids = []
-
-        for i, _ in enumerate(idx):
-            li = idx[i]
-            if is_dead[li]:
-                continue
-
-            keep_ids.append(li)
-
-            for j in range(i + 1, len(idx)):
-                ri = idx[j]
-
-                if is_dead[ri]:
-                    continue
-
-                iou = self.compute_iou(boxes[li], boxes[ri])
-                if iou > self.iou_threshold:
-                    is_dead[ri] = 1
-
-        return keep_ids
-
-    def nms_apply_prop(self, input_props):
-        idx = []
-        keep_ids = []
-        is_dead = []
-
-        for i in range(len(input_props)):
-            idx.append(i)
-            is_dead.append(False)
-
-        def get_score(ii):
-            val = input_props[ii][1]    # body_bbox_score
-            return val
-
-        idx.sort(key=get_score, reverse=True)
-
-        for i in range(len(input_props)):
-            li = idx[i]
-            if is_dead[li]:
-                continue
-
-            keep_ids.append(li)
-
-            for j in range(i+1, len(input_props)):
-                ri = idx[j]
-
-                if is_dead[ri]:
-                    continue
-
-                iou = self.compute_iou_prop(input_props[li], input_props[ri])
-
-                if iou > self.iou_threshold:
-                    is_dead[ri] = True
-
-        output_props = []
-        for it in keep_ids:
-            if is_dead[it]:
-                continue
-            output_props.append(input_props[it])
-
-        return output_props
-
-    @staticmethod
-    def filter_by_score(threshold, scores):
-        # Argsort by score
-        idx = []
-        is_dead = []
-        for i in range(len(scores)):
-            idx.append(i)
-            is_dead.append(True)
-
-        def get_score(ii):
-            val = scores[ii]
-            return val
-
-        idx.sort(key=get_score, reverse=True)
-
-        # Score based filter
-        r_idx = []
-        for i in idx:
-            if scores[i] < threshold:
-                is_dead.append(True)
-                continue
-            r_idx.append(i)
-            is_dead[i] = False
-
-        return [r_idx, is_dead]
-
-    @staticmethod
-    def compute_iou(lhs, rhs):
-        ix = min(lhs[2], rhs[2]) - max(lhs[0], rhs[0])
-        iy = min(lhs[3], rhs[3]) - max(lhs[1], rhs[1])
-        ai = max(0.0, ix) * max(0.0, iy)
-
-        al = (lhs[2] - lhs[0]) * (lhs[3] - lhs[1])
-        ar = (rhs[2] - rhs[0]) * (rhs[3] - rhs[1])
-        uu = al + ar - ai   # Union
-
-        return ai / max(uu, 0.0000001)
-
-    @staticmethod
-    def compute_iou_prop(lhs, rhs):
-        lhs_box = lhs[2]
-        rhs_box = rhs[2]
-        return PersonVehicleDetectionAdapter.compute_iou(lhs_box, rhs_box)
-
-    @staticmethod
-    def convert_classid_to_gt_type(class_id):
-        return 0 if class_id == 5 else 1
