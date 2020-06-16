@@ -8,9 +8,13 @@
 #include <dirent.h>
 #endif
 
+#include <opencv2/core/mat.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/videoio.hpp>
+
 class InvalidInput : public std::invalid_argument {
 public:
-    InvalidInput() : invalid_argument{""} {}
+    InvalidInput() : std::invalid_argument{""} {}
 };
 
 class ImgCap {

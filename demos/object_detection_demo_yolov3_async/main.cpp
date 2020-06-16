@@ -22,12 +22,12 @@
 #include <inference_engine.hpp>
 #include <ngraph/ngraph.hpp>
 
+#include "img_cap.h"
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
 #include "object_detection_demo_yolov3_async.hpp"
-#include "image_capture.hpp"
 
 using namespace InferenceEngine;
 
