@@ -17,6 +17,7 @@ limitations under the License.
 from .format_converter import BaseFormatConverter
 from .convert import make_subset, save_annotation, analyze_dataset
 from .market1501 import Market1501Converter
+from .veri776 import VeRi776Converter
 from .mars import MARSConverter
 from .pascal_voc import PascalVOCDetectionConverter
 from .sample_converter import SampleConverter
@@ -80,6 +81,7 @@ __all__ = [
 
     'ImageNetFormatConverter',
     'Market1501Converter',
+    'VeRi776Converter',
     'SampleConverter',
     'PascalVOCDetectionConverter',
     'WiderFormatConverter',
