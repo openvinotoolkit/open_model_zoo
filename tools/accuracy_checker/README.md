@@ -160,6 +160,8 @@ If your dataset data is a well-known competition problem (COCO, Pascal VOC, ...)
 it is reasonable to declare it in some global configuration file (*definition* file). This way in your local configuration file you can provide only
 `name` and all required steps will be picked from global one. To pass path to this global configuration use `--definition` argument of CLI.
 
+If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about dataset preparation you can find in [Dataset Preparation Guide](../../datasets.md).
+
 Each dataset must have:
 
 - `name` - unique identifier of your model/topology.
