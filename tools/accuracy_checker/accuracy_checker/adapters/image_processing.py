@@ -174,7 +174,8 @@ class SuperResolutionYUV(Adapter):
         parameters.update({
             'y_output': StringField(),
             'u_output': StringField(),
-            'v_output': StringField()
+            'v_output': StringField(),
+            'target_color': StringField(optional=True, choices=['bgr', 'rgb'], default='bgr')
         })
         return parameters
 
@@ -182,9 +183,14 @@ class SuperResolutionYUV(Adapter):
         self.y_output = self.get_value_from_config('y_output')
         self.u_output = self.get_value_from_config('u_output')
         self.v_output = self.get_value_from_config('v_output')
+        self.color = cv2.COLOR_YUV2BGR if self.get_value_from_config('target_color') == 'bgr' else cv2.COLOR_YUV2RGB
 
-    @staticmethod
-    def get_bgr(y, u, v):
+    def get_image(self, y, u, v):
+        is_hwc = u.shape[-1] == 1
+        if not is_hwc:
+            y = np.transpose(y, (1, 2, 0))
+            u = np.transpose(u, (1, 2, 0))
+            v = np.transpose(v, (1, 2, 0))
         h, w, __ = u.shape
         u = u.reshape(h, w, 1)
         v = v.reshape(h, w, 1)
@@ -195,8 +201,8 @@ class SuperResolutionYUV(Adapter):
         u = u.reshape(2 * h, 2 * w, 1)
         v = v.reshape(2 * h, 2 * w, 1)
         yuv = np.concatenate([y, u, v], axis=2)
-        bgr = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR)
-        return bgr
+        image = cv2.cvtColor(yuv, self.color)
+        return image
 
     def process(self, raw, identifiers=None, frame_meta=None):
         outs = self._extract_predictions(raw, frame_meta)
@@ -204,7 +210,7 @@ class SuperResolutionYUV(Adapter):
         for identifier, yres, ures, vres in zip(
                 identifiers, outs[self.y_output], outs[self.u_output], outs[self.v_output]
         ):
-            sr_img = self.get_bgr(yres, ures, vres)
+            sr_img = self.get_image(yres, ures, vres)
             results.append(SuperResolutionPrediction(identifier, sr_img))
 
         return results

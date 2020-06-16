@@ -111,6 +111,7 @@ class SelectInputChannel(Preprocessor):
 
 class BGR2YUVConverter(Preprocessor):
     __provider__ = 'bgr_to_yuv'
+    color = cv2.COLOR_BGR2YUV
 
     @classmethod
     def parameters(cls):
@@ -127,15 +128,20 @@ class BGR2YUVConverter(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         data = image.data
-        yuvdata = cv2.cvtColor(data, cv2.COLOR_BGR2YUV)
+        yuvdata = cv2.cvtColor(data, self.color)
         if self.split_channels:
             y = yuvdata[:, :, 0]
             u = yuvdata[:, :, 1]
             v = yuvdata[:, :, 2]
             identifier = image.data
             new_identifier = ['{}_y'.format(identifier), '{}_u'.format(identifier), '{}_v'.format(identifier)]
-            yuvdata = [y, u, v]
+            yuvdata = [np.expand_dims(y, -1), np.expand_dims(u, -1), np.expand_dims(v, -1)]
             image.identifier = new_identifier
         image.data = yuvdata
 
         return image
+
+
+class RGB2YUVConverter(BGR2YUVConverter):
+    __provider__ = 'rgb_to_yuv'
+    color = cv2.COLOR_RGB2YUV
