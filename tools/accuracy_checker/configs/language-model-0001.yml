@@ -1,0 +1,35 @@
+models:
+  - name: lm-1b
+    launchers:
+      - framework: dlsdk
+        model: public/language-model-0001/FP32/language-model-0001.xml
+        weights: public/language-model-0001/FP32/language-model-0001.bin
+        adapter:
+          type: language_modeling
+          softmax_out: softmax_out
+        inputs:
+          - name: char_embedding/EmbeddingLookupUnique/Unique/placeholder_out_port_0
+            type: INPUT
+          - name: char_embedding/EmbeddingLookupUnique/Unique/placeholder_out_port_1
+            type: INPUT
+          - name: Variable/read/placeholder_port_0
+            type: LSTM_INPUT
+            value: lstm/lstm_0/concat_2
+          - name: Variable_1/read/placeholder_port_0
+            type: LSTM_INPUT
+            value: lstm/lstm_1/concat_2
+    datasets:
+      - name: lm_b1_test
+        reader:
+          type: annotation_features_extractor
+          features:
+            - input_unique_y
+            - input_unique_idx
+        annotation_conversion:
+          converter: lm_1b
+          input_file: public/language-model-0001/language-model-0001-dataset
+          vocab_file: public/language-model-0001/language-model-0001-vocab.txt
+          chars_encoding: True
+          max_word_length: 50
+        metrics:
+          - type: perplexity

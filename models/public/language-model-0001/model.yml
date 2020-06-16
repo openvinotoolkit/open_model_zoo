@@ -1,0 +1,100 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The `language-model-0001` model is used to language prediction.
+  It's a model hybrid between character CNN, a large and deep LSTM, and a specific
+  Softmax architecture. The `language-model-0001` model is pretrained
+  on the One Billion Word Benchmark dataset, and get the best perplexity thus far.
+  For details about this model, check out the paper (http://arxiv.org/abs/1602.02410).
+
+  The model inputs include embeded characters whose shape is [50] and placeholders
+  whose shape is [1,9216].
+
+  The model output for `language-model-0001` is the language pridiction
+  and its perplexity.
+
+  For more details see repository <https://github.com/tensorflow/models/tree/master/
+  research/lm_1b>
+task_type: language_prediction
+files:
+  - name: language-model-0001.pbtxt
+    size: 1215758
+    sha256: 223aa0872bc0a7d36fc3b3a6d2050f6c04e27dd67e9a670a0a9422c7d7ccb257
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/graph-2016-09-10.pbtxt
+  - name: language-model-0001-vocab.txt
+    size: 7430450
+    sha256: 64e359cbfdaa68a4a45a7a7024b9d5807c3ef1e9384d1bcff71eb1539c9bcc7b
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/vocab-2016-09-10.txt
+  - name: language-model-0001-dataset
+    size: 829492
+    sha256: 265dccd51762253e20425c21ff6ddf09e6da2e11a365da399b0390eebb2d52c8
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/test/news.en.heldout-00000-of-00050
+  - name: language-model-0001-ckpt-base
+    size: 166
+    sha256: 96112c45500adcbbb6abc02bd851ebe4b389b18c23aba7f5d3772342ea2f8de5
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/all_shards-2016-09-10/ckpt-base
+  - name: language-model-0001-ckpt-char-embedding
+    size: 287032987
+    sha256: ae314350150eead8765f1e8c53b17995d501a0116d7706cd1ac0b3b6a6b1efa2
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/all_shards-2016-09-10/ckpt-char-embedding
+  - name: language-model-0001-ckpt-lstm
+    size: 604444769
+    sha256: d82c921d74b32d93808accc84472a398f48c59ace260c787f3852c78673093a2
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/all_shards-2016-09-10/ckpt-lstm
+  - name: language-model-0001-ckpt-softmax0
+    size: 409600228
+    sha256: 38ede85adaa27375d11bdae0a75001d487ce1912403e11a884df9ca7f492d0f7
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/all_shards-2016-09-10/ckpt-softmax0
+  - name: language-model-0001-ckpt-softmax1
+    size: 409600228
+    sha256: b339e0694070ecb9897fbac0e04cacb90751dacbdb2faf5cf809f9bcba2fea89
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/all_shards-2016-09-10/ckpt-softmax1
+  - name: language-model-0001-ckpt-softmax2
+    size: 409600228
+    sha256: f5a6bbc6528a5b1ee562787d4f7e446897449d900e302aac2b8cbd2f4e2c7108
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/all_shards-2016-09-10/ckpt-softmax2
+  - name: language-model-0001-ckpt-softmax3
+    size: 409600228
+    sha256: 31c3d611e363309e9ef7d32f9135fd8fb78970395103cd7a8dfbebced565a9dc
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/all_shards-2016-09-10/ckpt-softmax3
+  - name: language-model-0001-ckpt-softmax4
+    size: 409600228
+    sha256: d7c6c65d8898ec423c0d743bb712e3305e01b983e2704e083256c49efc5291e0
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/all_shards-2016-09-10/ckpt-softmax4
+  - name: language-model-0001-ckpt-softmax5
+    size: 409600228
+    sha256: d0de77a0c62612972a61bb030eae1b87d802bc8fc94650102fda977f6cce13fb
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/all_shards-2016-09-10/ckpt-softmax5
+  - name: language-model-0001-ckpt-softmax6
+    size: 409600228
+    sha256: 92c2d8e98f66bfa19aa4b22736c1836760b9f9eb3a97a607ce1fa73eef0d1302
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/all_shards-2016-09-10/ckpt-softmax6
+  - name: language-model-0001-ckpt-softmax7
+    size: 409600228
+    sha256: a96f0e035ba6901812e55dca415b3b40949372e9dd6e009f04da56816eb594d3
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/all_shards-2016-09-10/ckpt-softmax7
+  - name: language-model-0001-ckpt-softmax8
+    size: 3200206
+    sha256: fd65afd5520c054d74b16570f2bfb8454bc1296d5cfb816d70659e61664b6cb1
+    source: http://download.tensorflow.org/models/LM_LSTM_CNN/all_shards-2016-09-10/ckpt-softmax8
+model_optimizer_args:
+  - --input_model=$dl_dir/language-model-0001.pbtxt
+  - --input_checkpoint=$dl_dir_ckpt
+  - --input_model_is_text
+  - --input_shape=[50],[50],[1,9216],[1,9216]
+  - --input=char_embedding/EmbeddingLookupUnique/Unique:0,char_embedding/EmbeddingLookupUnique/Unique:1,Variable/read,Variable_1/read
+  - --output=softmax_out,lstm/lstm_0/concat_2,lstm/lstm_1/concat_2
+framework: tf
+license: https://github.com/tensorflow/models/blob/master/research/lm_1b/README.md
