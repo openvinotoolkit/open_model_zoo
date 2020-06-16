@@ -69,6 +69,6 @@ class LandmarksDetector(Module):
 
     def get_landmarks(self):
         outputs = self.get_outputs()
-        results = [LandmarksDetector.Result(out[self.output_blob].reshape((-1, 2))) \
+        results = [LandmarksDetector.Result(out[self.output_blob].buffer.reshape((-1, 2))) \
                       for out in outputs]
         return results

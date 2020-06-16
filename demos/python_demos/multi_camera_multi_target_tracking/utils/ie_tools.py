@@ -48,7 +48,7 @@ class IEModel:
         outputs = []
         for id in self.reqs_ids:
             self.net.requests[id].wait(-1)
-            res = self.net.requests[id].outputs[self.output_key]
+            res = self.net.requests[id].output_blobs[self.output_key].buffer
             outputs.append(np.copy(res))
         self.reqs_ids = []
         return outputs

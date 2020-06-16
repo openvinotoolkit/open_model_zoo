@@ -24,12 +24,12 @@ class Detector(object):
     def __init__(self, ie, model_path, face_prob_threshold, device='CPU'):
         model = ie.read_network(model_path, os.path.splitext(model_path)[0] + '.bin')
 
-        assert len(model.inputs) == 1, "Expected 1 input blob"
+        assert len(model.input_info) == 1, "Expected 1 input blob"
         assert len(model.outputs) == 12 or len(model.outputs) == 9, "Expected 12 or 9 output blobs"
 
-        self._input_layer_name = next(iter(model.inputs))
+        self._input_layer_name = next(iter(model.input_info))
         self._output_layer_names = model.outputs
-        _, channels, self.input_height, self.input_width = model.inputs[self._input_layer_name].shape
+        _, channels, self.input_height, self.input_width = model.input_info[self._input_layer_name].input_data.shape
         assert channels == 3, "Expected 3-channel input"
 
         self._detect_masks = len(model.outputs) == 12
