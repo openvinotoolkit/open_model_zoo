@@ -33,7 +33,7 @@ classification_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -i "<path>"               Required. Path to a folder with images or path to an image file.
+    -i "<path>"               Required. Input to process.
     -m "<path>"               Required. Path to an .xml file with a trained model.
       -l "<absolute_path>"    Required for CPU custom layers.Absolute path to a shared library with the kernels implementation.
           Or

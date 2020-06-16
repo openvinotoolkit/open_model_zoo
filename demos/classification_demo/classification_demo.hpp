@@ -10,7 +10,7 @@
 #include <iostream>
 
 static const char help_message[] = "Print a usage message.";
-static const char image_message[] = "Required. Path to a folder with images or path to an image file.";
+static const char image_message[] = "Required. Input to process.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char labels_message[] = "Required. Path to .txt file with labels.";
 static const char gt_message[] = "Optional. Path to ground truth .txt file.";

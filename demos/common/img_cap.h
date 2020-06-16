@@ -50,28 +50,42 @@ public:
 };
 
 class DirReader : public ImgCap {
+    std::vector<std::string> names;
     std::vector<cv::Mat> imgs;
-    std::size_t id;
+    size_t imgId;
 
 public:
-    DirReader(const std::string &input, bool loop) : ImgCap{loop}, id{0} {
+    DirReader(const std::string &input, bool loop) : ImgCap{loop}, imgId{0} {
         DIR *dir = opendir(input.c_str());
         if (!dir) throw InvalidInput{};
-        for (struct dirent *ent = readdir(dir); ent != nullptr; ent = readdir(dir)) {
-            if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, "..")) continue;
-            std::string fileName = input + '/' + ent->d_name;
+        for (struct dirent *ent = readdir(dir); ent != nullptr; ent = readdir(dir))
+            if (strcmp(ent->d_name, ".") && strcmp(ent->d_name, ".."))
+                names.emplace_back(ent->d_name);
+        closedir(dir);
+        sort(names.begin(), names.end());
+        for (size_t i = 0; i < names.size(); ++i) {
+            std::string fileName = input + '/' + names[i];
             cv::Mat img = cv::imread(fileName);
-            if (img.data) imgs.push_back(img);
-            else std::cerr << "Can't read " << fileName << '\n';
+            if (img.data) {
+                imgs.push_back(img);
+            } else {
+                std::cerr << "Can't read " << names[i] << '\n';
+                names.erase(names.begin() + i);
+                --i;
+            }
         }
         if (imgs.empty()) throw InvalidInput{};
     }
 
+    std::vector<std::string> getNames() {return names;}
+
+    size_t getImgId() {return imgId;}
+
     cv::Mat read() override {
-        if (id < imgs.size()) return imgs[id++].clone();
+        if (imgId < imgs.size()) return imgs[imgId++].clone();
         if (loop) {
-            id -= imgs.size();
-            imgs[id++].clone();
+            imgId -= imgs.size();
+            return imgs[imgId++].clone();
         }
         return cv::Mat{};
     }
@@ -82,10 +96,11 @@ public:
 };
 
 class VideoCapWrapper : public ImgCap {
-public:
     cv::VideoCapture cap;
+    size_t posFrames;
 
-    VideoCapWrapper(const std::string &input, bool loop) : ImgCap{loop} {
+public:
+    VideoCapWrapper(const std::string &input, bool loop) : ImgCap{loop}, posFrames{0} {
         try {
             cap.open(std::stoi(input));
         } catch (const std::invalid_argument&) {
@@ -98,8 +113,12 @@ public:
 
     cv::Mat read() override {
         cv::Mat img;
-        if (!cap.read(img) && loop && cap.set(cv::CAP_PROP_POS_FRAMES, 0.0))  // TODO first and last pos
+        if (!cap.read(img) && loop && cap.set(cv::CAP_PROP_POS_FRAMES, 0.0)) { // TODO first and last pos
+            posFrames = 0;
             cap.read(img);
+        } else {
+            ++posFrames;
+        }
         return img;
     }
 
