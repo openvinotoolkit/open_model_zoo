@@ -39,4 +39,5 @@ model_optimizer_args:
   - --input_meta_graph=$dl_dir/tf-densenet161.ckpt.meta
   - --keep_shape_ops
 framework: tf
+quantizable: yes
 license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE

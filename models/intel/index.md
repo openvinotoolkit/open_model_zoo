@@ -217,6 +217,7 @@ that predict an actual labels are called *decoder*.
 |   action-recognition-0001-encoder                                                                                                                       | 7.340                | 21.276     |
 |   action-recognition-0001-decoder                                                                                                                       | 0.147                | 4.405      |
 | [asl-recognition-0004](./asl-recognition-0004/description/asl-recognition-0004.md)                                                                      | 6.660                | 4.133      |
+| [weld-porosity-detection-0001](./weld-porosity-detection-0001/description/weld-porosity-detection-0001.md)                                                                      | 3.636                | 11.173      |
 
 ## Image Retrieval
 
@@ -239,8 +240,9 @@ Deep Learning compressed models
 
 | Model Name| Complexity (GFLOPs)|Size (Mp)|
 |-----------|--------------------|---------|
+| [bert-large-uncased-whole-word-masking-squad-fp32-onnx-0001](./bert-large-uncased-whole-word-masking-squad-fp32-onnx-0001/description/bert-large-uncased-whole-word-masking-squad-fp32-onnx-0001.md) | 246.93 | 333.96 |
+| [bert-large-uncased-whole-word-masking-squad-int8-onnx-0001](./bert-large-uncased-whole-word-masking-squad-int8-onnx-0001/description/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001.md) | 246.93 | 333.96 |
 | [bert-small-uncased-whole-word-masking-squad-0001](./bert-small-uncased-whole-word-masking-squad-0001/description/bert-small-uncased-whole-word-masking-squad-0001.md) | 23.9 | 57.94 |
-
 
 
 ## Legal Information
