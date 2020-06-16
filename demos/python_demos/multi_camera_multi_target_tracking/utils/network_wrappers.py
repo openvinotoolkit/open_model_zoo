@@ -135,7 +135,7 @@ class MaskRCNN(DetectorInterface):
         self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
 
         required_input_keys = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
-        current_input_keys = set(self.net.input_info)
+        current_input_keys = self.net.input_info.keys()
         assert current_input_keys in required_input_keys
         required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks'}
         assert required_output_keys.issubset(self.net.net.outputs)
