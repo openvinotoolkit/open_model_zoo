@@ -142,27 +142,35 @@ void ResultsMarker::mark(cv::Mat& image,
     }
 }
 
-void ResultsMarker::toggle(char key) {
-    if (key == 'l') {
-        showLandmarks = !showLandmarks;
-    } else if (key == 'h') {
-        showHeadPoseAxes = !showHeadPoseAxes;
-    } else if (key == 'g') {
-        showGaze = !showGaze;
-    } else if (key == 'd') {
-        showFaceBoundingBox = !showFaceBoundingBox;
-    } else if (key == 'a') {
-        showFaceBoundingBox = true;
-        showHeadPoseAxes = true;
-        showLandmarks = true;
-        showGaze = true;
-    } else if (key == 'n') {
-        showFaceBoundingBox = false;
-        showHeadPoseAxes = false;
-        showLandmarks = false;
-        showGaze = false;
-    } else if (key == 'e') {
-        showEyeState = !showEyeState;
+void ResultsMarker::toggle(int key) {
+    switch (std::toupper(key)) {
+        case 'L':
+            showLandmarks = !showLandmarks;
+            break;
+        case 'O':
+            showHeadPoseAxes = !showHeadPoseAxes;
+            break;
+        case 'G':
+            showGaze = !showGaze;
+            break;
+        case 'B':
+            showFaceBoundingBox = !showFaceBoundingBox;
+            break;
+        case 'A':
+            showFaceBoundingBox = true;
+            showHeadPoseAxes = true;
+            showLandmarks = true;
+            showGaze = true;
+            break;
+        case 'N':
+            showFaceBoundingBox = false;
+            showHeadPoseAxes = false;
+            showLandmarks = false;
+            showGaze = false;
+            break;
+        case 'E':
+            showEyeState = !showEyeState;
+            break;
     }
 }
 }  // namespace gaze_estimation

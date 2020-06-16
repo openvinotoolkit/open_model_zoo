@@ -112,7 +112,7 @@ def run_demo(args):
         cv2.imshow('Human Pose Estimation Demo', frame)
         key = cv2.waitKey(delay)
         if key == 27:
-            return
+            break
         presenter.handleKey(key)
     print(presenter.reportMeans())
 
