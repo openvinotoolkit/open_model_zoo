@@ -19,6 +19,7 @@ import numpy as np
 from ..representation import LanguageModelingAnnotation, LanguageModelingPrediction
 from .metric import PerImageEvaluationMetric
 
+
 class ScorePerplexity(PerImageEvaluationMetric):
     __provider__ = 'perplexity'
 

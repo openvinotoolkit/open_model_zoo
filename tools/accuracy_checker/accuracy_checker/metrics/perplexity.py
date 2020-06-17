@@ -1,12 +1,13 @@
 import numpy as np
 from .metric import FullDatasetEvaluationMetric
-from ..representation import LMAnnotation, LMPrediction
+from ..representation import LMAnnotation, LanguageModelingPrediction
+from ..config import ConfigError
 
 
 class Perplexity(FullDatasetEvaluationMetric):
-    __provider__ = 'perplexity'
+    __provider__ = 'softmax_perplexity'
     annotation_types = (LMAnnotation, )
-    prediction_types = (LMPrediction, )
+    prediction_types = (LanguageModelingPrediction, )
 
     def configure(self):
         self.sentences_perplexity = []
@@ -19,29 +20,24 @@ class Perplexity(FullDatasetEvaluationMetric):
         sum_num = 0.0
         sum_den = 0.0
         sentence_perplexity = 0.0
-        sentence_char_ids = 0
         target_weights_in = np.ones([1, 1], np.float32)
         for idx, (target_in, softmax) in enumerate(zip(annotation.target_ids, sentences_softmax)):
             tgts = np.array([[target_in]])
-            cal_log_perp = Caculate_Perplexity(tgts, softmax, softmax)
+            cal_log_perp = CaculatePerplexity(tgts, softmax, softmax)
             log_perp = cal_log_perp._log_perplexity_out()
 
             sum_num += log_perp * target_weights_in.mean()
             sum_den += target_weights_in.mean()
             if sum_den > 0:
                 sentence_perplexity = np.exp(sum_num / sum_den)
-                sentence_char_idx = idx
-        #print("Eval Step: %d, Average Perplexity: %f.\n" % (sentence_char_idx, sentence_perplexity))
         self.sentences_perplexity.append(sentence_perplexity) #only get the last character's perplexity of one sentence
         return sentence_perplexity
 
     def evaluate(self, annotations, predictions):
-        print(len(self.sentences_perplexity))
-        print(self.sentences_perplexity)
-        print(np.mean(self.sentences_perplexity))
         return np.mean(self.sentences_perplexity)
 
-class Caculate_Perplexity(object):
+
+class CaculatePerplexity:
   def __init__(self, targets, biasadd, softmax_out=None):
     self._targets_in = targets
     self._biasadd = biasadd
@@ -89,8 +85,6 @@ class Caculate_Perplexity(object):
     dst = np.zeros(out_shape, dtype=np.float)
     dst[:] = default_value
     src = np.asarray(cast_1)
-    #src_dims = src.ndim
-    #src_shape = src.shape
     dst[src.T[0], src.T[1]] = ones
     return dst
 

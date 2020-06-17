@@ -18,9 +18,11 @@ class MachineTranslationPrediction(MachineTranslationRepresentation):
         super().__init__(identifier)
         self.translation = translation
 
+
 class LanguageModeling(BaseRepresentation):
     def __init__(self, identifier=''):
         super().__init__(identifier)
+
 
 class LanguageModelingAnnotation(LanguageModeling):
     def __init__(self, identifier, unique_id, input_ids, tokens, labels=None):
@@ -30,14 +32,37 @@ class LanguageModelingAnnotation(LanguageModeling):
         self.input_ids = input_ids
         self.labels = labels if labels is not None else []
 
+
 class LanguageModelingPrediction(LanguageModeling):
     def __init__(self, identifier, logits):
         super().__init__(identifier)
         self.logits = logits
 
+
+class LMRepresentation(BaseRepresentation):
+    pass
+
+
+class LMAnnotation(LMRepresentation):
+    def __init__(
+            self, identifier, input_ids, target_ids,
+            input_char_ids=None, input_unique_y=None, input_unique_idx=None,
+            input_words=None, target_words=None, metadata=None
+    ):
+        super().__init__(identifier, metadata)
+        self.input_ids = input_ids
+        self.target_ids = target_ids
+        self.input_words = input_words or []
+        self.target_words = target_words or []
+        self.input_char_ids = input_char_ids or []
+        self.input_unique_y = input_unique_y or []
+        self.input_unique_idx = input_unique_idx or []
+
+
 class QuestionAnswering(BaseRepresentation):
     def __init__(self, identifier=''):
         super().__init__(identifier)
+
 
 class QuestionAnsweringAnnotation(QuestionAnswering):
     def __init__(self, identifier, question_id, unique_id, input_ids, input_mask, segment_ids, cls_index, p_mask,
@@ -59,6 +84,7 @@ class QuestionAnsweringAnnotation(QuestionAnswering):
         self.paragraph_len = paragraph_len
         self.token_is_max_context = token_is_max_context
         self.token_to_orig_map = token_to_orig_map
+
 
 class QuestionAnsweringPrediction(QuestionAnswering):
     def __init__(self, identifier, start_logits, end_logits, start_index=None, end_index=None, tokens=None):

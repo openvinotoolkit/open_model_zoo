@@ -901,7 +901,7 @@ class DLSDKLauncher(Launcher):
                         return np.resize(data, layer_shape)
                 return np.transpose(data, layout)
 
-            if len(layer_shape) == 2
+            if len(layer_shape) == 2:
                 if len(data_shape) == 1:
                     return np.transpose([data])
                 if len(layout) == 2:

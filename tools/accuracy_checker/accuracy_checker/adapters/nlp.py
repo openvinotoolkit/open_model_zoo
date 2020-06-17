@@ -169,7 +169,7 @@ class BertTextClassification(Adapter):
 
 
 class LMN1BAdapter(Adapter):
-    __provider__ = 'language_modeling'
+    __provider__ = 'lm_1b'
 
     @classmethod
     def parameters(cls):
