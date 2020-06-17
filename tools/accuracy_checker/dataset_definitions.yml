@@ -784,3 +784,4 @@ datasets:
       max_query_length: 64
       doc_stride: 128
       lower_case: true
+      vocab_file: vocab.txt
