@@ -33,4 +33,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/face-detection-retail-0044.caffemodel
   - --input_proto=$dl_dir/face-detection-retail-0044.prototxt
 framework: caffe
+quantizable: yes
 license: https://raw.githubusercontent.com/opencv/training_toolbox_caffe/develop/LICENSE

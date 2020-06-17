@@ -16,7 +16,7 @@ models:
         adapter: ssd
 
     datasets:
-      - name: ms_coco_detection_80_class_without_backgound
+      - name: ms_coco_detection_80_class_without_background
         preprocessing:
           - type: resize
             aspect_ratio_scale: frcnn_keep_aspect_ratio

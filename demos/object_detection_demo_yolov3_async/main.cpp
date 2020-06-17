@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -236,12 +236,16 @@ int main(int argc, char *argv[]) {
         /** Reading network model **/
         auto cnnNetwork = ie.ReadNetwork(FLAGS_m);
         /** Reading labels (if specified) **/
-        std::string labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
         std::vector<std::string> labels;
-        std::ifstream inputFile(labelFileName);
-        std::copy(std::istream_iterator<std::string>(inputFile),
-                  std::istream_iterator<std::string>(),
-                  std::back_inserter(labels));
+        if (!FLAGS_labels.empty()) {
+            std::ifstream inputFile(FLAGS_labels);
+            std::string label; 
+            while (std::getline(inputFile, label)) {
+                labels.push_back(label);
+            }
+            if (labels.empty())
+                throw std::logic_error("File empty or not found: " + FLAGS_labels);
+        }
         // -----------------------------------------------------------------------------------------------------
 
         /** YOLOV3-based network should have one input and three output **/
@@ -290,6 +294,10 @@ int main(int argc, char *argv[]) {
         }
         else {
             throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
+        }
+
+        if (!labels.empty() && static_cast<int>(labels.size()) != yoloParams.begin()->second.classes) {
+            throw std::runtime_error("The number of labels is different from numbers of model classes");
         }
         // -----------------------------------------------------------------------------------------------------
 
@@ -423,8 +431,7 @@ int main(int argc, char *argv[]) {
                         std::ostringstream conf;
                         conf << ":" << std::fixed << std::setprecision(3) << confidence;
                         cv::putText(frame,
-                                (label < static_cast<int>(labels.size()) ?
-                                        labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
+                                    (!labels.empty() ? labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
                                     cv::Point2f(static_cast<float>(object.xmin), static_cast<float>(object.ymin - 5)), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
                                     cv::Scalar(0, 0, 255));
                         cv::rectangle(frame, cv::Point2f(static_cast<float>(object.xmin), static_cast<float>(object.ymin)),

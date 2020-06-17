@@ -30,6 +30,7 @@ LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
     'NDCHW': [0, 1, 4, 2, 3],
     'NDHWC': [0, 1, 2, 3, 4],
     'NDCWH': [0, 1, 4, 3, 2],
+    'NCHWD': [0, 2, 3, 4, 1],
     'NC': [0, 1],
     'CN': [1, 0]
 }

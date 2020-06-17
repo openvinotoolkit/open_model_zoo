@@ -49,4 +49,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/densenet-201.caffemodel
   - --input_proto=$dl_dir/densenet-201.prototxt
 framework: caffe
+quantizable: yes
 license: https://raw.githubusercontent.com/liuzhuang13/DenseNet/master/LICENSE

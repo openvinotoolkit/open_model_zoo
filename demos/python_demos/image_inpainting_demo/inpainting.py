@@ -20,20 +20,20 @@ class ImageInpainting(object):
     def __init__(self, ie, model_path, parts, max_brush_width, max_length, max_vertex, device='CPU'):
         model = ie.read_network(model_path, os.path.splitext(model_path)[0] + '.bin')
 
-        assert len(model.inputs) == 2, "Expected 2 input blob"
+        assert len(model.input_info) == 2, "Expected 2 input blob"
         assert len(model.outputs) == 1, "Expected 1 output blobs"
 
-        self._input_layer_names = sorted(model.inputs)
+        self._input_layer_names = sorted(model.input_info)
         self._output_layer_name = next(iter(model.outputs))
 
         self._ie = ie
         self._exec_model = self._ie.load_network(model, device)
         self.infer_time = -1
 
-        _, channels, input_height, input_width = model.inputs[self._input_layer_names[0]].shape
+        _, channels, input_height, input_width = model.input_info[self._input_layer_names[0]].input_data.shape
         assert channels == 3, "Expected 3-channel input"
 
-        _, channels, mask_height, mask_width = model.inputs[self._input_layer_names[1]].shape
+        _, channels, mask_height, mask_width = model.input_info[self._input_layer_names[1]].input_data.shape
         assert channels == 1, "Expected 1-channel input"
 
         assert mask_height == input_height and mask_width == input_width, "Mask size expected to be equal to image size"

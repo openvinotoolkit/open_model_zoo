@@ -3,8 +3,8 @@ models:
 
     launchers:
       - framework: caffe
-        model:   public/mtcnn-p/mtcnn-p.prototxt
-        weights: public/mtcnn-p/mtcnn-p.caffemodel
+        model:   public/mtcnn/mtcnn-p/mtcnn-p.prototxt
+        weights: public/mtcnn/mtcnn-p/mtcnn-p.caffemodel
         inputs:
           - name: data
             type: INPUT
@@ -51,8 +51,8 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/mtcnn-p/FP32/mtcnn-p.xml
-        weights: public/mtcnn-p/FP32/mtcnn-p.bin
+        model:   public/mtcnn/mtcnn-p/FP32/mtcnn-p.xml
+        weights: public/mtcnn/mtcnn-p/FP32/mtcnn-p.bin
         inputs:
           - name: data
             type: INPUT
@@ -66,8 +66,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/mtcnn-p/FP16/mtcnn-p.xml
-        weights: public/mtcnn-p/FP16/mtcnn-p.bin
+        model:   public/mtcnn/mtcnn-p/FP16/mtcnn-p.xml
+        weights: public/mtcnn/mtcnn-p/FP16/mtcnn-p.bin
         inputs:
           - name: data
             type: INPUT

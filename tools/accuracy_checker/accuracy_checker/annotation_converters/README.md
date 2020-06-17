@@ -136,6 +136,8 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `data_dir` - path to data directory, where gallery (`bbox_test`) and `query` subdirectories are located.
 * `market1501_reid` - converts Market1501 person reidentification dataset to `ReidentificationAnnotation`.
   * `data_dir` - path to data directory, where gallery (`bounding_box_test`) and `query` subdirectories are located.
+* `veri776_reid` - converts VeRi776 vehicle reidentification dataset to `ReidentificationAnnotation`.
+  * `data_dir` - path to data directory, where gallery (`image_test`) and `image_query` subdirectories are located.
 * `image_processing` - converts dataset for common single image processing tasks (e.g. image denoising, style transferring) to `ImageProcessingAnnotation`. This converter is suitable for tasks where model output produced on specific input image should be compared with target image.
   * `data_dir` - path to folder, where images in low and high resolution are located.
   * `input_suffix` - input file name's suffix (default `in`).
@@ -302,6 +304,10 @@ Accuracy Checker supports following list of annotation converters and specific f
 * `inpainting` - converts images to `ImageInpaintingAnnotation`.
   * `images_dir` - path to images directory.
   * `masks_dir` - path to mask dataset to be used for inpainting (Optional).
+* `aflw2000_3d` - converts [AFLW2000-3D](http://www.cbsr.ia.ac.cn/users/xiangyuzhu/projects/3DDFA/main.htm) dataset for 3d facial landmarks regression task to `FacialLandmarks3DAnnotation`.
+   * `data_dir` - directory, where input images and annotation files in matlab format stored.
+* `style_transfer` - converts images to `StyleTransferAnnotation`.
+  * `images_dir` - path to images directory.
 
 ### Customizing dataset meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)

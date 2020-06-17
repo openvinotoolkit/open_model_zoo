@@ -245,6 +245,11 @@ def build_arguments_parser():
         required=False,
         type=str
     )
+    parser.add_argument(
+        '--shuffle', help="Allow shuffle annotation during creation a subset",
+        required=False,
+        type=cast_to_bool
+    )
 
     return parser
 

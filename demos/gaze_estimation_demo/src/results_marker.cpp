@@ -19,11 +19,13 @@ namespace gaze_estimation {
 ResultsMarker::ResultsMarker(bool showFaceBoundingBox,
                              bool showHeadPoseAxes,
                              bool showLandmarks,
-                             bool showGaze):
+                             bool showGaze,
+                             bool showEyeState):
                              showFaceBoundingBox(showFaceBoundingBox),
                              showHeadPoseAxes(showHeadPoseAxes),
                              showLandmarks(showLandmarks),
-                             showGaze(showGaze) {
+                             showGaze(showGaze),
+                             showEyeState(showEyeState) {
 }
 
 void ResultsMarker::mark(cv::Mat& image,
@@ -104,47 +106,71 @@ void ResultsMarker::mark(cv::Mat& image,
         cv::rectangle(image, faceInferenceResults.leftEyeBoundingBox, cv::Scalar::all(255), 1);
         cv::rectangle(image, faceInferenceResults.rightEyeBoundingBox, cv::Scalar::all(255), 1);
 
-        cv::arrowedLine(image,
-            faceInferenceResults.leftEyeMidpoint,
-            faceInferenceResults.leftEyeMidpoint + gazeArrow, cv::Scalar(255, 0, 0), 2);
+        if (faceInferenceResults.leftEyeState)
+            cv::arrowedLine(image,
+                faceInferenceResults.leftEyeMidpoint,
+                faceInferenceResults.leftEyeMidpoint + gazeArrow, cv::Scalar(255, 0, 0), 2);
 
-        cv::arrowedLine(image,
-            faceInferenceResults.rightEyeMidpoint,
-            faceInferenceResults.rightEyeMidpoint + gazeArrow, cv::Scalar(255, 0, 0), 2);
+        if (faceInferenceResults.rightEyeState)
+            cv::arrowedLine(image,
+                faceInferenceResults.rightEyeMidpoint,
+                faceInferenceResults.rightEyeMidpoint + gazeArrow, cv::Scalar(255, 0, 0), 2);
 
         cv::Point2f gazeAngles;
+        if (faceInferenceResults.leftEyeState && faceInferenceResults.rightEyeState) {
+            gazeVectorToGazeAngles(faceInferenceResults.gazeVector, gazeAngles);
 
-        gazeVectorToGazeAngles(faceInferenceResults.gazeVector, gazeAngles);
+            cv::putText(image,
+                cv::format("gaze angles: (h=%0.0f, v=%0.0f)",
+                    static_cast<double>(std::round(gazeAngles.x)),
+                    static_cast<double>(std::round(gazeAngles.y))),
+                cv::Point(static_cast<int>(faceBoundingBox.tl().x),
+                    static_cast<int>(faceBoundingBox.br().y + 12. * faceBoundingBoxWidth / 100.)),
+                cv::FONT_HERSHEY_PLAIN, scale * 2, cv::Scalar::all(255), 1);
+        }
+    }
+    if (showEyeState) {
+        if (faceInferenceResults.leftEyeState)
+            cv::rectangle(image, faceInferenceResults.leftEyeBoundingBox, cv::Scalar(0, 255, 0), 1);
+        else
+            cv::rectangle(image, faceInferenceResults.leftEyeBoundingBox, cv::Scalar(0, 0, 255), 1);
 
-        cv::putText(image,
-                    cv::format("gaze angles: (h=%0.0f, v=%0.0f)",
-                               static_cast<double>(std::round(gazeAngles.x)),
-                               static_cast<double>(std::round(gazeAngles.y))),
-                    cv::Point(static_cast<int>(faceBoundingBox.tl().x),
-                              static_cast<int>(faceBoundingBox.br().y + 12. * faceBoundingBoxWidth / 100.)),
-                    cv::FONT_HERSHEY_PLAIN, scale * 2, cv::Scalar::all(255), 1);
+        if (faceInferenceResults.rightEyeState)
+            cv::rectangle(image, faceInferenceResults.rightEyeBoundingBox, cv::Scalar(0, 255, 0), 1);
+        else
+            cv::rectangle(image, faceInferenceResults.rightEyeBoundingBox, cv::Scalar(0, 0, 255), 1);
     }
 }
 
-void ResultsMarker::toggle(char key) {
-    if (key == 'l') {
-        showLandmarks = !showLandmarks;
-    } else if (key == 'h') {
-        showHeadPoseAxes = !showHeadPoseAxes;
-    } else if (key == 'g') {
-        showGaze = !showGaze;
-    } else if (key == 'd') {
-        showFaceBoundingBox = !showFaceBoundingBox;
-    } else if (key == 'a') {
-        showFaceBoundingBox = true;
-        showHeadPoseAxes = true;
-        showLandmarks = true;
-        showGaze = true;
-    } else if (key == 'n') {
-        showFaceBoundingBox = false;
-        showHeadPoseAxes = false;
-        showLandmarks = false;
-        showGaze = false;
+void ResultsMarker::toggle(int key) {
+    switch (std::toupper(key)) {
+        case 'L':
+            showLandmarks = !showLandmarks;
+            break;
+        case 'O':
+            showHeadPoseAxes = !showHeadPoseAxes;
+            break;
+        case 'G':
+            showGaze = !showGaze;
+            break;
+        case 'B':
+            showFaceBoundingBox = !showFaceBoundingBox;
+            break;
+        case 'A':
+            showFaceBoundingBox = true;
+            showHeadPoseAxes = true;
+            showLandmarks = true;
+            showGaze = true;
+            break;
+        case 'N':
+            showFaceBoundingBox = false;
+            showHeadPoseAxes = false;
+            showLandmarks = false;
+            showGaze = false;
+            break;
+        case 'E':
+            showEyeState = !showEyeState;
+            break;
     }
 }
 }  // namespace gaze_estimation

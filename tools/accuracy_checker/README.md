@@ -97,6 +97,7 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 - `--num_requests` number requests for async execution. Allows override provided in config info. Default is `AUTO`
 - `--model_attributes` directory with additional models attributes.
 - `--subsample_size` dataset subsample size.
+- `--shuffle` allow shuffle annotation during creation a subset if subsample_size argument is provided. Default is `True`.
 
 You are also able to replace some command line arguments with environment variables for path prefixing. Supported following list of variables:
 * `DATA_DIR` -  equivalent of `-s`, `--source`.
@@ -158,6 +159,8 @@ and metrics that will be used for evaluation.
 If your dataset data is a well-known competition problem (COCO, Pascal VOC, ...) and/or can be potentially reused for other models
 it is reasonable to declare it in some global configuration file (*definition* file). This way in your local configuration file you can provide only
 `name` and all required steps will be picked from global one. To pass path to this global configuration use `--definition` argument of CLI.
+
+If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about dataset preparation you can find in [Dataset Preparation Guide](../../datasets.md).
 
 Each dataset must have:
 

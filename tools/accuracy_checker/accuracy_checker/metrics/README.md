@@ -95,10 +95,12 @@ More detailed information about calculation segmentation metrics you can find [h
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start`, `step`, `end` - generate range of intervals from `start` to `end` with length `step`.
-* `per_point_normed_error` - Normed Error for measurement the quality of landmarks' positions. Estimated results for each point independently. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`.
-* `normed_error` - Normed Error for measurement the quality of landmarks' positions. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`.
+* `per_point_normed_error` - Normed Error for measurement the quality of landmarks' positions. Estimated results for each point independently. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`, `FacialLandmarks3DAnnotation`, `FacialLandmarks3DPrediction`.
+* `normed_error` - Normed Error for measurement the quality of landmarks' positions. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`, `FacialLandmarks3DAnnotation`, `FacialLandmarks3DPrediction`.
   * `calculate_std` - allows calculation of standard deviation (default value: `False`)
   * `percentile` - calculate error rate for given percentile.
+* `nme` - Mean Normed Error for measurement quality of landmarks positions. Supported representations: `FacialLandmarks3DAnnotation`, `FacialLandwarks3DPrediction`.
+  `only_2d` - evaluate metric only for 2d case.
 * `psnr` - [Peak signal to noise ratio](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
   * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB).
 * `ssim` - [Structural similarity](https://en.wikipedia.org/wiki/Structural_similarity). Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`, `SuperResolutionAnnotation`, `SuperResolutionPrediction`.
@@ -177,3 +179,8 @@ More detailed information about calculation segmentation metrics you can find [h
 * `f1` - F1-score for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
 * `exact_match` - Exact matching (EM) metric for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
 * `mpjpe_multiperson` - [Mean Per Joint Position Error](http://vision.imar.ro/human3.6m/pami-h36m.pdf) extended for multi-person case. Supported representations: `PoseEstimation3dAnnotation`, `PoseEstimation3dPrediction`. As the first step, correspondence between ground truth and prediction skeletons is established for each image. Then MPJPE is computed for each ground truth and prediction pair. The error is averaged over poses in each frame, then over all frames.
+* `face_recognition_tafa_pair_metric` - accuracy for face recognition models based on dot product of embedding values. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
+  * `threshold` - minimal dot product value of embeddings to identify as matched face pair.
+* `youtube_faces_accuracy` - accuracy for face detection models calculated based on IOU values of ground truth bounding boxes and model-detected bounding boxes. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
+  * `overlap` - minimum IOU threshold to consider as a true positive candidate face.
+  * `relative_size` - size of detected face candidate\'s area in proportion to the size of ground truth\'s face size. This value is set to filter candidates that have high IOU but have a relatively smaller face size than ground truth face size.

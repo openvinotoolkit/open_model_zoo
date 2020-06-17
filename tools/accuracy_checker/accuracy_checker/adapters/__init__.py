@@ -36,21 +36,21 @@ from .attributes_recognition import (
     PersonAttributesAdapter,
     AgeGenderAdapter,
     LandmarksRegressionAdapter,
-    GazeEstimationAdapter
+    GazeEstimationAdapter,
+    PRNetAdapter
 )
 
 from .reidentification import ReidAdapter
 from .detection import (
-    SSDAdapter,
-    FacePersonAdapter,
     TFObjectDetectionAPIAdapter,
-    SSDAdapterMxNet,
-    PyTorchSSDDecoder,
-    SSDONNXAdapter,
     MTCNNPAdapter,
     RetinaNetAdapter,
     ClassAgnosticDetectionAdapter,
+    FaceBoxesAdapter,
+    FaceDetectionAdapter
 )
+from .detection_person_vehicle import PersonVehicleDetectionAdapter
+from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
 from .classification import ClassificationAdapter
@@ -72,6 +72,7 @@ from .centernet import CTDETAdapter
 from .mono_depth import MonoDepthAdapter
 
 from .image_inpainting import ImageInpaintingAdapter
+from .style_transfer import StyleTransferAdapter
 
 __all__ = [
     'Adapter',
@@ -82,17 +83,15 @@ __all__ = [
 
     'ClassificationAdapter',
 
-    'SSDAdapter',
-    'FacePersonAdapter',
     'TFObjectDetectionAPIAdapter',
-    'SSDAdapterMxNet',
-    'SSDONNXAdapter',
-    'PyTorchSSDDecoder',
     'MTCNNPAdapter',
     'CTDETAdapter',
     'RetinaNetAdapter',
     'ClassAgnosticDetectionAdapter',
     'RetinaFaceAdapter',
+    'FaceBoxesAdapter',
+    'FaceDetectionAdapter',
+    'PersonVehicleDetectionAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
@@ -109,6 +108,7 @@ __all__ = [
     'AgeGenderAdapter',
     'LandmarksRegressionAdapter',
     'GazeEstimationAdapter',
+    'PRNetAdapter',
 
     'TextDetectionAdapter',
     'TextProposalsDetectionAdapter',
@@ -133,5 +133,6 @@ __all__ = [
 
     'MonoDepthAdapter',
 
-    'ImageInpaintingAdapter'
+    'ImageInpaintingAdapter',
+    'StyleTransferAdapter'
 ]

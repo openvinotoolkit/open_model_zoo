@@ -42,12 +42,12 @@ class FaceIdentifier(Module):
     def __init__(self, model, match_threshold=0.5, match_algo='HUNGARIAN'):
         super(FaceIdentifier, self).__init__(model)
 
-        assert len(model.inputs) == 1, "Expected 1 input blob"
+        assert len(model.input_info) == 1, "Expected 1 input blob"
         assert len(model.outputs) == 1, "Expected 1 output blob"
 
-        self.input_blob = next(iter(model.inputs))
+        self.input_blob = next(iter(model.input_info))
         self.output_blob = next(iter(model.outputs))
-        self.input_shape = model.inputs[self.input_blob].shape
+        self.input_shape = model.input_info[self.input_blob].input_data.shape
 
         assert len(model.outputs[self.output_blob].shape) == 4 or \
             len(model.outputs[self.output_blob].shape) == 2, \
@@ -105,7 +105,7 @@ class FaceIdentifier(Module):
         return results, unknowns_list
 
     def get_descriptors(self):
-        return [out[self.output_blob].flatten() for out in self.get_outputs()]
+        return [out[self.output_blob].buffer.flatten() for out in self.get_outputs()]
 
     @staticmethod
     def normalize(array, axis):

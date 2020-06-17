@@ -28,7 +28,7 @@ private:
     IEWrapper ieWrapper;
     std::string outputBlobName;
     bool rollAlign;
-    cv::Rect createEyeBoundingBox(const cv::Point2i& p1, const cv::Point2i& p2, float scale = 1.8) const;
+   
     void rotateImageAroundCenter(const cv::Mat& srcImage, cv::Mat& dstImage, float angle) const;
 };
 }  // namespace gaze_estimation

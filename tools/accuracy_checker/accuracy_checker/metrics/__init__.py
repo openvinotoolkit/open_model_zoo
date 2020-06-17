@@ -24,8 +24,8 @@ from .classification import (
     ClassificationF1Score,
     MetthewsCorrelation
 )
-from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric)
-from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets
+from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric, YoutubeFacesAccuracy)
+from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets, FaceRecognitionTAFAPairMetric
 from .semantic_segmentation import SegmentationAccuracy, SegmentationIOU, SegmentationMeanAccuracy, SegmentationFWAcc
 from .character_recognition import CharacterRecognitionAccuracy, LabelLevelRecognitionAccuracy
 from .regression import (
@@ -85,11 +85,13 @@ __all__ = [
     'MissRate',
     'Recall',
     'DetectionAccuracyMetric',
+    'YoutubeFacesAccuracy',
 
     'CMCScore',
     'ReidMAP',
     'PairwiseAccuracy',
     'PairwiseAccuracySubsets',
+    'FaceRecognitionTAFAPairMetric',
 
     'SegmentationAccuracy',
     'SegmentationIOU',

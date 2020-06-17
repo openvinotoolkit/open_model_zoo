@@ -42,6 +42,8 @@ def build_argparser():
     args.add_argument("-ni", "--number_iter", type=int, default=1,
                       help="Optional. Number of inference iterations")
     args.add_argument("-cl", "--charlist", type=str, default=os.path.join(os.path.dirname(__file__), "data/kondate_nakayosi_char_list.txt"), help="Path to the decoding char list file")
+    args.add_argument("-dc", "--designated_characters", type=str, default=None, help="Optional. Path to the designated character file")
+    args.add_argument("-tk", "--top_k", type=int, default=20, help="Optional. Top k steps in looking up the decoded character, until a designated one is found")
     return parser
 
 
@@ -74,18 +76,18 @@ def main():
     log.info("Loading network")
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
-    assert len(net.inputs) == 1, "Demo supports only single input topologies"
+    assert len(net.input_info) == 1, "Demo supports only single input topologies"
     assert len(net.outputs) == 1, "Demo supports only single output topologies"
 
     log.info("Preparing input/output blobs")
-    input_blob = next(iter(net.inputs))
+    input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
 
     characters = get_characters(args)
-    codec = CTCCodec(characters)
+    codec = CTCCodec(characters, args.designated_characters, args.top_k)
     assert len(codec.characters) == net.outputs[out_blob].shape[2], "The text recognition model does not correspond to decoding character list"
 
-    input_batch_size, input_channel, input_height, input_width= net.inputs[input_blob].shape
+    input_batch_size, input_channel, input_height, input_width= net.input_info[input_blob].input_data.shape
 
     # Read and pre-process input image (NOTE: one image only)
     input_image = preprocess_input(args.input, height=input_height, width=input_width)[None,:,:,:]

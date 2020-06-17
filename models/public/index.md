@@ -22,6 +22,9 @@ The models can be downloaded via Model Downloader
 | EfficientNet B5   | [TensorFlow\*](./efficientnet-b5/efficientnet-b5.md)<br>[PyTorch\*](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | efficientnet-b5<br>efficientnet-b5-pytorch | 83.33/96.67<br>83.69/96.71 | 21.252 | 30.303 |
 | EfficientNet B7   | [PyTorch\*](./efficientnet-b7-pytorch/efficientnet-b7-pytorch.md) | efficientnet-b7-pytorch | 84.42/96.91 | 77.618  | 66.193 |
 | EfficientNet B7 AutoAugment  | [TensorFlow\*](./efficientnet-b7_auto_aug/efficientnet-b7_auto_aug.md) | efficientnet-b7_auto_aug | 84.68/97.09 | 77.618  | 66.193 |
+| HBONet 1.0        | [PyTorch\*](./hbonet-1.0/hbonet-1.0.md)   | hbonet-1.0  | 73.1/91.0 | 0.305 |
+| HBONet 0.5        | [PyTorch\*](./hbonet-0.5/hbonet-0.5.md)   | hbonet-0.5  | 67.0/86.9 | 0.096 |
+| HBONet 0.25       | [PyTorch\*](./hbonet-0.25/hbonet-0.25.md) | hbonet-0.25 | 57.3/79.8 | 0.037 |
 | Inception (GoogleNet) V1 | [Caffe\*](./googlenet-v1/googlenet-v1.md)<br>[TensorFlow\*](./googlenet-v1-tf/googlenet-v1-tf.md) | googlenet-v1<br>googlenet-v1-tf | | 3.016~3.266 | 6.619~6.999 |
 | Inception (GoogleNet) V2 | [Caffe\*](./googlenet-v2/googlenet-v2.md)<br>[TensorFlow\*](./googlenet-v2-tf/googlenet-v2-tf.md) | googlenet-v2<br>googlenet-v2-tf | | 4.058 | 11.185 |
 | Inception (GoogleNet) V3 | [TensorFlow\*](./googlenet-v3/googlenet-v3.md)<br>[PyTorch\*](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | googlenet-v3 <br> googlenet-v3-pytorch |  | 11.469 | 23.817 |
@@ -111,12 +114,13 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | CTPN                      | [TensorFlow\*](./ctpn/ctpn.md) | ctpn | 55.813 | 17.237 | |
 | CenterNet (CTDET with DLAV0) 384x384 | [ONNX\*](./ctdet_coco_dlav0_384/ctdet_coco_dlav0_384.md) | ctdet_coco_dlav0_384| 34.994 | 17.911 | |
 | CenterNet (CTDET with DLAV0) 512x512 | [ONNX\*](./ctdet_coco_dlav0_512/ctdet_coco_dlav0_512.md) | ctdet_coco_dlav0_512| 62.211 | 17.911 | |
+| FaceBoxes | [PyTorch\*](./faceboxes-pytorch/faceboxes-pytorch.md) | faceboxes-pytorch| 1.8975 | 1.0059 |
 | Faster R-CNN with Inception-ResNet v2 | [TensorFlow\*](./faster_rcnn_inception_resnet_v2_atrous_coco/faster_rcnn_inception_resnet_v2_atrous_coco.md) | faster_rcnn_inception_resnet_v2_atrous_coco| 30.687 | 13.307 |
 | Faster R-CNN with Inception v2 | [TensorFlow\*](./faster_rcnn_inception_v2_coco/faster_rcnn_inception_v2_coco.md) | faster_rcnn_inception_v2_coco | 30.687 | 13.307 |
 | Faster R-CNN with ResNet 50    | [TensorFlow\*](./faster_rcnn_resnet50_coco/faster_rcnn_resnet50_coco.md) | faster_rcnn_resnet50_coco | 57.203 | 29.162 |
 | Faster R-CNN with ResNet 101   | [TensorFlow\*](./faster_rcnn_resnet101_coco/faster_rcnn_resnet101_coco.md) |faster_rcnn_resnet101_coco | 112.052 | 48.128 |
 | MobileFace Detection V1  | [MXNet\*](./mobilefacedet-v1-mxnet/mobilefacedet-v1-mxnet.md) | mobilefacedet-v1-mxnet| 3.5456 | 7.6828 |
-| MTCNN                     | Caffe\*: <br>[proposal](./mtcnn-p/mtcnn-p.md) <br>[refine](./mtcnn-r/mtcnn-r.md) <br> [output](./mtcnn-o/mtcnn-o.md) | <br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| | |
+| MTCNN                     | [Caffe\*](./mtcnn/mtcnn.md) | mtcnn-p <br>mtcnn-r <br>mtcnn-o| | |
 | Pelee                     | [Caffe\*](./pelee-coco/pelee-coco.md) | pelee-coco | 1.290 | 5.98 |
 | RetinaNet with Resnet 50  | [TensorFlow\*](./retinanet-tf/retinanet-tf.md) | retinanet-tf | 238.9469 | 64.9706 |
 | R-FCN with Resnet-101     | [TensorFlow\*](./rfcn-resnet101-coco-tf/rfcn-resnet101-coco-tf.md) | rfcn-resnet101-coco-tf | 53.462 | 171.85 |
@@ -129,10 +133,20 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | SSD with ResNet-50 V1 FPN | [TensorFlow\*](./ssd_resnet50_v1_fpn_coco/ssd_resnet50_v1_fpn_coco.md) | ssd_resnet50_v1_fpn_coco | 178.6807 | 59.9326 |
 | SSD with ResNet 34 1200x1200 | [PyTorch\*](./ssd-resnet34-1200-onnx/ssd-resnet34-1200-onnx.md)  | ssd-resnet34-1200-onnx | 433.411 | 20.058  |
 | RetinaFace-R50            | [MXNet\*](./retinaface-resnet50/retinaface-resnet50.md) | retinaface-resnet50 | 100.8478 | 29.427 |
+| RetinaFace-Anti-Cov     | [MXNet\*](./retinaface-anti-cov/retinaface-anti-cov.md)  | retinaface-anti-cov | 2.7781 | 0.5955 |
 | YOLO v1 Tiny              | [TensorFlow.js\*](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | yolo-v1-tiny-tf | 6.9883	 |	15.8587 |
 | YOLO v2 Tiny              | [TensorFlow.js\*](./yolo-v2-tiny-tf/yolo-v2-tiny-tf.md) | yolo-v2-tiny-tf | 5.4236	 |	11.2295 |
 | YOLO v2                   | [Keras\*](./yolo-v2-tf/yolo-v2-tf.md) | yolo-v2-tf | 63.0301	 |	50.9526 |
 | YOLO v3                   | [Keras\*](./yolo-v3-tf/yolo-v3-tf.md) | yolo-v3-tf | 65.9843	 |	61.9221 |
+
+## Object attributes
+
+### Facial Landmarks
+
+| Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
+| ------------------------- | -------------- | -------------- | ------ | ------- |
+| RetinaFace-R50            | [MXNet\*](./retinaface-resnet50/retinaface-resnet50.md) | retinaface-resnet50 | 100.8478 | 29.427 |
+| RetinaFace-Anti-Cov     | [MXNet\*](./retinaface-anti-cov/retinaface-anti-cov.md)  | retinaface-anti-cov | 2.7781 | 0.5955 |
 
 ## Face Recognition
 
@@ -177,6 +191,14 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | GMCNN Inpainting          | [TensorFlow\*](./gmcnn-places2-tf/gmcnn-places2-tf.md) | gmcnn-places2-tf | 33.47Db | | |
+
+## Style Transfer
+
+Style transfer task is to transfer the style of one image to another.
+
+| Model Name                     | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
+| ------------------------------ | ---------------| -------------- | -------- | ------ | ------- |
+| fast-neural-style-mosaic-onnx  | [ONNX\*](./fast-neural-style-mosaic-onnx/fast-neural-style-mosaic-onnx.md) | fast-neural-style-mosaic-onnx | 12.04dB | 15.518 | 1.679 |
 
 ## Action Recognition
 

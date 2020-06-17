@@ -26,7 +26,8 @@ from .overlap import Overlap, IOA
 from ..config import BoolField, NumberField, StringField, ConfigError
 from ..representation import (
     DetectionAnnotation, DetectionPrediction,
-    ActionDetectionPrediction, ActionDetectionAnnotation
+    ActionDetectionPrediction, ActionDetectionAnnotation,
+    AttributeDetectionPrediction, AttributeDetectionAnnotation
 )
 from .metric import Metric, FullDatasetEvaluationMetric, PerImageEvaluationMetric
 
@@ -147,8 +148,8 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
 
     __provider__ = 'map'
 
-    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
-    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation, AttributeDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction, AttributeDetectionPrediction)
 
     @classmethod
     def parameters(cls):
@@ -617,3 +618,87 @@ def _prepare_prediction_boxes(label, predictions, ignore_difficult):
 
 def get_valid_labels(labels, background):
     return list(filter(lambda label: label != background, labels))
+
+class YoutubeFacesAccuracy(FullDatasetEvaluationMetric):
+
+    __provider__ = 'youtube_faces_accuracy'
+    annotation_types = (DetectionAnnotation, )
+    prediction_types = (DetectionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'overlap': NumberField(
+                value_type=float, min_value=0, max_value=1, default=0.40, optional=True,
+                description='Specifies the IOU threshold to consider as a true positive candidate face.'
+            ),
+            'relative_size': NumberField(
+                value_type=float, min_value=0, max_value=1, default=0.25, optional=True,
+                description='Specifies the size of detected face candidate\'s area in proportion to the size '
+                'of ground truth\'s face size. This value is set to filter candidates that have high IOU '
+                'but have a relatively smaller face size than ground truth face size.'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.overlap = self.get_value_from_config('overlap')
+        self.relative_size = self.get_value_from_config('relative_size')
+
+    def submit_all(self, annotations, predictions):
+        return self.evaluate(annotations, predictions)
+
+    def evaluate(self, annotations, predictions):
+        true_positive = 0
+        false_positive = 0
+
+        for (annotation, prediction) in zip(annotations, predictions):
+            gt_face = [
+                annotation.x_mins[0],
+                annotation.y_mins[0],
+                annotation.x_maxs[0],
+                annotation.y_maxs[0]
+            ]
+            for i in range(prediction.scores.size):
+                found = False
+                dt_face = [
+                    prediction.x_mins[i],
+                    prediction.y_mins[i],
+                    prediction.x_maxs[i],
+                    prediction.y_maxs[i]
+                ]
+                iou = self.calc_iou(gt_face, dt_face)
+                if iou:
+                    intersect_area, dt_area, gt_area = iou
+                    if intersect_area / dt_area < self.overlap:
+                        continue
+                    if dt_area / gt_area >= self.relative_size:
+                        found = True
+                        break
+            if found:
+                true_positive += 1
+            else:
+                false_positive += 1
+        accuracy = true_positive / (true_positive + false_positive)
+        return [accuracy]
+
+    @staticmethod
+    def calc_iou(gt_box, dt_box):
+        # Convert detected face rectangle to integer point form
+        gt_box = list(map(lambda x: int(round(x, 0)), gt_box))
+        dt_box = list(map(lambda x: int(round(x, 0)), dt_box))
+
+        # Calculate overlapping width and height of two boxes
+        inter_width = min(gt_box[2], dt_box[2]) - max(gt_box[0], dt_box[0])
+        inter_height = min(gt_box[3], dt_box[3]) - max(gt_box[1], dt_box[1])
+
+        if inter_width <= 0 or inter_height <= 0:
+            return None
+
+        intersect_area = inter_width * inter_height
+
+        gt_area = (gt_box[2] - gt_box[0]) * (gt_box[3] - gt_box[1])
+        dt_area = (dt_box[2] - dt_box[0]) * (dt_box[3] - dt_box[1])
+
+        return [intersect_area, dt_area, gt_area]
