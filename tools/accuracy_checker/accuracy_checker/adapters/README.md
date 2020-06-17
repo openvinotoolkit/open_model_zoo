@@ -137,6 +137,11 @@ AccuracyChecker supports following set of adapters:
   2. Add `mean`
   3. Reverse channels if this option enabled.
   * `target_mapping` - dictionary where keys are meaningful name for solved task which will be used as keys inside `ConverterPrediction`,  values - output layer names.
+* `super_resolution_yuv` - converts output of super resolution model, which return output in YUV format, to `SuperResolutionPrediction`. Each output layer contains only 1 channel.
+  * `y_output` - Y channel output layer.
+  * `u_output` - U channel output layer.
+  * `v_output` - V channel output layer.
+  * `target_color` - taret color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `bgr`).
 * `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.
