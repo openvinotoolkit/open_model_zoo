@@ -59,6 +59,10 @@ Accuracy Checker supports following set of preprocessors:
 * `bgr_to_gray` - converting image in BGR to gray scale color space.
 * `rgb_to_bgr` - reversing image channels. Convert image in RGB format to BGR.
 * `rgb_to_gray` - converting image in RGB to gray scale color space.
+* `bgr_to_yuv` - converting image in BGR to YUV.
+  * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+* `rgb_to_yuv` - converting image in RGB to YUV.
+  * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
 * `select_channel` - select channel only one specified channel from multichannel image.
   * `channel` - channel id in image (e.g. if you read image in RGB and want to select green channel, you need to specify 1 as channel)
 * `flip` - image mirroring around specified axis.
