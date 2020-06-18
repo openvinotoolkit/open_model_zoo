@@ -179,7 +179,7 @@ class Model:
             if status != 0:
                 raise RuntimeError('Infer Request has returned status code {}'.format(status))
             raw_outputs = {key: blob.buffer for key, blob in request.output_blobs.items()}
-            outputs = self.postprocess(raw_outputs, frame_meta)
+            outputs = None
             self.completed_request_results[frame_id] = (frame_meta, raw_outputs, outputs)
             self.empty_requests.append(request)
         except Exception as e:
@@ -483,7 +483,8 @@ def main():
            or len(exec_nets[mode].empty_requests) < len(exec_nets[mode].requests)) \
           and not exceptions:
         if next_frame_id_to_show in completed_request_results:
-            frame_meta, _, objects = completed_request_results.pop(next_frame_id_to_show)
+            frame_meta, raw_outputs, _ = completed_request_results.pop(next_frame_id_to_show)
+            objects = exec_nets[mode].postprocess(raw_outputs, frame_meta)
 
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
