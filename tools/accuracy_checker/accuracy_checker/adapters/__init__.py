@@ -49,7 +49,8 @@ from .detection import (
     RetinaNetAdapter,
     ClassAgnosticDetectionAdapter,
     FaceBoxesAdapter,
-    FaceDetectionAdapter
+    FaceDetectionAdapter,
+    FaceDetectionRefinementAdapter
 )
 from .detection_person_vehicle import PersonVehicleDetectionAdapter
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
@@ -93,6 +94,7 @@ __all__ = [
     'RetinaFaceAdapter',
     'FaceBoxesAdapter',
     'FaceDetectionAdapter',
+    'FaceDetectionRefinementAdapter',
     'PersonVehicleDetectionAdapter',
 
     'SegmentationAdapter',

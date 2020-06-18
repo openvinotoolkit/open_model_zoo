@@ -235,3 +235,5 @@ AccuracyChecker supports following set of adapters:
     * `anchor_sizes` - Anchor sizes for each base output layer.
     * `window_scales` - Window scales for each base output layer.
     * `window_lengths` - Window lengths for each base output layer.
+* `face_detection_refinement` - converts output of face detection refinement model to `DetectionPrediction` representation. Adapter refines candidates generated in previous stage model.
+    * `threshold` - Score threshold to determine as valid face candidate.
