@@ -1,0 +1,14 @@
+compression:
+  algorithms:
+    - name: DefaultQuantization
+      params:
+        preset: performance
+        stat_subset_size: 300
+        ignored:
+          scope:
+            - proposals/conv
+        activations:
+          range_estimator:
+            max:
+              aggregator: max
+              type: abs_max
