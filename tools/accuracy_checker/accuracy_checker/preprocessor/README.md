@@ -137,3 +137,6 @@ Accuracy Checker supports following set of preprocessors:
 * `face_detection_image_pyramid` - image pyramid for face detection
   * `min_face_ratio` - minimum face ratio to image size.
   * `resize_scale` - scale factor for pyramid layers.
+* `face_patch` - crops faces detected in previous stage model from input image with vertical and horizontal scaling.
+  * `scale_width` - value to scale width relative to the original candidate width.
+  * `scale_height` - value to scale height relative to the original candidate height.

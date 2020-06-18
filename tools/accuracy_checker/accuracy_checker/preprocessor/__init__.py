@@ -33,7 +33,8 @@ from .geometric_transformations import (
     TransformedCropWithAutoScale,
     ImagePyramid,
     FaceDetectionImagePyramid,
-    WarpAffine
+    WarpAffine,
+    FacePatch
 )
 from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
@@ -66,6 +67,7 @@ __all__ = [
     'ImagePyramid',
     'FaceDetectionImagePyramid',
     'WarpAffine',
+    'FacePatch',
 
     'BgrToGray',
     'BgrToRgb',
