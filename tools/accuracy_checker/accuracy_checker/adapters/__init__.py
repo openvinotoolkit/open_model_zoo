@@ -29,7 +29,9 @@ from .text_recognition import (
     LPRAdapter
 )
 
-from .image_processing import ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter
+from .image_processing import (
+    ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter, SuperResolutionYUV
+)
 from .attributes_recognition import (
     HeadPoseEstimatorAdapter,
     VehicleAttributesRecognitionAdapter,
@@ -46,8 +48,10 @@ from .detection import (
     MTCNNPAdapter,
     RetinaNetAdapter,
     ClassAgnosticDetectionAdapter,
-    FaceBoxesAdapter
+    FaceBoxesAdapter,
+    FaceDetectionAdapter
 )
+from .detection_person_vehicle import PersonVehicleDetectionAdapter
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
@@ -88,6 +92,8 @@ __all__ = [
     'ClassAgnosticDetectionAdapter',
     'RetinaFaceAdapter',
     'FaceBoxesAdapter',
+    'FaceDetectionAdapter',
+    'PersonVehicleDetectionAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
@@ -97,6 +103,7 @@ __all__ = [
     'ImageProcessingAdapter',
     'SuperResolutionAdapter',
     'MultiSuperResolutionAdapter',
+    'SuperResolutionYUV',
 
     'HeadPoseEstimatorAdapter',
     'VehicleAttributesRecognitionAdapter',

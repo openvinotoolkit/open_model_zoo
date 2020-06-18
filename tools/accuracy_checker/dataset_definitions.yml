@@ -468,6 +468,13 @@ datasets:
       data_dir: Market-1501-v15.09.15
     annotation: market1501_reid.pickle
 
+  - name: veri776
+    data_source: VeRi-776
+    annotation_conversion:
+      converter: veri776_reid
+      data_dir: VeRi-776
+    annotation: veri776_reid.pickle
+
   - name: reid_dataset
     data_source: Market-1501-v15.09.15
     annotation_conversion:
@@ -755,6 +762,7 @@ datasets:
     annotation: mrlEyes_2018_01.pickle
     dataset_meta: mrlEyes_2018_01.json
     data_source: mrlEyes_2018_01
+
   - name: ms_coco_style_transfer
     data_source: val2017
     annotation_conversion:
@@ -776,3 +784,4 @@ datasets:
       max_query_length: 64
       doc_stride: 128
       lower_case: true
+      vocab_file: vocab.txt

@@ -105,7 +105,7 @@ class FaceIdentifier(Module):
         return results, unknowns_list
 
     def get_descriptors(self):
-        return [out[self.output_blob].flatten() for out in self.get_outputs()]
+        return [out[self.output_blob].buffer.flatten() for out in self.get_outputs()]
 
     @staticmethod
     def normalize(array, axis):

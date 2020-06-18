@@ -1,24 +1,32 @@
 random_seed = 100
 
+obj_det = dict(
+    trg_classes=(1,)
+)
+
+obj_segm = dict(
+    trg_classes=(3, 6, 8)
+)
+
 mct_config = dict(
-    time_window=20,
+    time_window=5,
     global_match_thresh=0.2,
-    bbox_min_aspect_ratio=1.2
+    bbox_min_aspect_ratio=0.1
 )
 
 sct_config = dict(
-    time_window=10,
-    continue_time_thresh=2,
+    time_window=4,
+    continue_time_thresh=3,
     track_clear_thresh=3000,
-    match_threshold=0.25,
+    match_threshold=0.3,
     merge_thresh=0.15,
-    n_clusters=4,
-    max_bbox_velocity=0.2,
+    n_clusters=2,
+    max_bbox_velocity=2.0,
     detection_occlusion_thresh=0.7,
-    track_detection_iou_thresh=0.5,
+    track_detection_iou_thresh=0.1,
     process_curr_features_number=0,
     interpolate_time_thresh=10,
-    detection_filter_speed=0.6,
+    detection_filter_speed=0.9,
     rectify_thresh=0.1
 )
 

@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2020 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -36,8 +36,10 @@ class DetectorInterface(ABC):
 class Detector(DetectorInterface):
     """Wrapper class for detector"""
 
-    def __init__(self, ie, model_path, conf=.6, device='CPU', ext_path='', max_num_frames=1):
+    def __init__(self, ie, model_path, trg_classes, conf=.6,
+                 device='CPU', ext_path='', max_num_frames=1):
         self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=max_num_frames)
+        self.trg_classes = trg_classes
         self.confidence = conf
         self.expand_ratio = (1., 1.)
         self.max_num_frames = max_num_frames
@@ -49,11 +51,11 @@ class Detector(DetectorInterface):
             self.shapes.append(frames[i].shape)
             self.net.forward_async(frames[i])
 
-    def wait_and_grab(self):
+    def wait_and_grab(self, only_target_class=True):
         all_detections = []
         outputs = self.net.grab_all_async()
         for i, out in enumerate(outputs):
-            detections = self.__decode_detections(out, self.shapes[i])
+            detections = self.__decode_detections(out, self.shapes[i], only_target_class)
             all_detections.append(detections)
         return all_detections
 
@@ -62,28 +64,33 @@ class Detector(DetectorInterface):
         self.run_async(frames)
         return self.wait_and_grab()
 
-    def __decode_detections(self, out, frame_shape):
+    def __decode_detections(self, out, frame_shape, only_target_class):
         """Decodes raw SSD output"""
         detections = []
 
         for detection in out[0, 0]:
-            confidence = detection[2]
-            if confidence > self.confidence:
-                left = int(max(detection[3], 0) * frame_shape[1])
-                top = int(max(detection[4], 0) * frame_shape[0])
-                right = int(max(detection[5], 0) * frame_shape[1])
-                bottom = int(max(detection[6], 0) * frame_shape[0])
-                if self.expand_ratio != (1., 1.):
-                    w = (right - left)
-                    h = (bottom - top)
-                    dw = w * (self.expand_ratio[0] - 1.) / 2
-                    dh = h * (self.expand_ratio[1] - 1.) / 2
-                    left = max(int(left - dw), 0)
-                    right = int(right + dw)
-                    top = max(int(top - dh), 0)
-                    bottom = int(bottom + dh)
+            if only_target_class and detection[1] not in self.trg_classes:
+                continue
 
-                detections.append(((left, top, right, bottom), confidence))
+            confidence = detection[2]
+            if confidence < self.confidence:
+                continue
+
+            left = int(max(detection[3], 0) * frame_shape[1])
+            top = int(max(detection[4], 0) * frame_shape[0])
+            right = int(max(detection[5], 0) * frame_shape[1])
+            bottom = int(max(detection[6], 0) * frame_shape[0])
+            if self.expand_ratio != (1., 1.):
+                w = (right - left)
+                h = (bottom - top)
+                dw = w * (self.expand_ratio[0] - 1.) / 2
+                dh = h * (self.expand_ratio[1] - 1.) / 2
+                left = max(int(left - dw), 0)
+                right = int(right + dw)
+                top = max(int(top - dh), 0)
+                bottom = int(bottom + dh)
+
+            detections.append(((left, top, right, bottom), confidence))
 
         if len(detections) > 1:
             detections.sort(key=lambda x: x[1], reverse=True)
@@ -120,19 +127,20 @@ class VectorCNN:
 class MaskRCNN(DetectorInterface):
     """Wrapper class for a network returning masks of objects"""
 
-    def __init__(self, ie, model_path, conf=.6, device='CPU', ext_path='',
-                 max_reqs=100):
+    def __init__(self, ie, model_path, trg_classes, conf=.6,
+                 device='CPU', ext_path='', max_reqs=100):
+        self.trg_classes = trg_classes
         self.max_reqs = max_reqs
         self.confidence = conf
         self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
 
         required_input_keys = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
-        current_input_keys = set(self.net.inputs_info.keys())
+        current_input_keys = self.net.input_info.keys()
         assert current_input_keys in required_input_keys
         required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks'}
         assert required_output_keys.issubset(self.net.net.outputs)
 
-        self.n, self.c, self.h, self.w = self.net.inputs_info['im_data'].shape
+        self.n, self.c, self.h, self.w = self.net.input_info['im_data'].input_data.shape
         assert self.n == 1, 'Only batch 1 is supported.'
 
     def preprocess(self, frame):
@@ -167,7 +175,7 @@ class MaskRCNN(DetectorInterface):
         masks = output['raw_masks'][valid_detections_mask]
         return boxes, classes, scores, np.full(len(classes), 0, dtype=np.int32), masks
 
-    def get_detections(self, frames, return_cropped_masks=True, only_class_person=True):
+    def get_detections(self, frames, return_cropped_masks=True, only_target_class=True):
         outputs = []
         for frame in frames:
             data_batch = self.preprocess(frame)
@@ -185,16 +193,20 @@ class MaskRCNN(DetectorInterface):
                                                         confidence_threshold=self.confidence)
             frame_output = []
             for i in range(len(scores)):
-                if only_class_person and classes[i] != 1:
+                if only_target_class and classes[i] not in self.trg_classes:
                     continue
+
                 bbox = [int(value) for value in boxes[i]]
                 if return_cropped_masks:
                     left, top, right, bottom = bbox
                     mask = masks[i][top:bottom, left:right]
                 else:
                     mask = masks[i]
+
                 frame_output.append([bbox, scores[i], mask])
+
             outputs.append(frame_output)
+
         return outputs
 
     def run_async(self, frames, index):

@@ -137,6 +137,11 @@ AccuracyChecker supports following set of adapters:
   2. Add `mean`
   3. Reverse channels if this option enabled.
   * `target_mapping` - dictionary where keys are meaningful name for solved task which will be used as keys inside `ConverterPrediction`,  values - output layer names.
+* `super_resolution_yuv` - converts output of super resolution model, which return output in YUV format, to `SuperResolutionPrediction`. Each output layer contains only 1 channel.
+  * `y_output` - Y channel output layer.
+  * `u_output` - U channel output layer.
+  * `v_output` - V channel output layer.
+  * `target_color` - taret color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `bgr`).
 * `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.
@@ -222,3 +227,11 @@ AccuracyChecker supports following set of adapters:
   * `boxes_out` - name of output layer with bounding boxes coordinates.
 * `prnet` - converting output of PRNet model for 3D landmarks regression task to `FacialLandmarks3DPrediction`
     * `landmarks_ids_file` - the file with indeces for landmarks extraction from position heatmap. (Optional, default values defined [here](https://github.com/YadiraF/PRNet/blob/master/Data/uv-data/uv_kpt_ind.txt))
+* `person_vehicle_detection` - converts output of person vehicle detection model to `DetectionPrediction` representation. Adapter merges scores, groups predictions into people and vehicles, and assignes labels accordingly.
+    * `iou_threshold` - IOU threshold value for NMS operation.
+* `face_detection` - converts output of face detection model to `DetectionPrediction ` representation. Operation is performed by mapping model output to the defined anchors, window scales, window translates, and window lengths to generate a list of face candidates.
+    * `score_threshold` - Score threshold value used to discern whether a face is valid.
+    * `layer_names` - Target output layer base names.
+    * `anchor_sizes` - Anchor sizes for each base output layer.
+    * `window_scales` - Window scales for each base output layer.
+    * `window_lengths` - Window lengths for each base output layer.

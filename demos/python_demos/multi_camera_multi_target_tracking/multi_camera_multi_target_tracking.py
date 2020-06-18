@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2020 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -192,28 +192,28 @@ def run(params, config, capture, detector, reid):
 
 def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    """Prepares data for the person recognition demo"""
-    parser = argparse.ArgumentParser(description='Multi camera multi person \
+    """Prepares data for the object tracking demo"""
+    parser = argparse.ArgumentParser(description='Multi camera multi object \
                                                   tracking live demo script')
     parser.add_argument('-i', type=str, nargs='+', help='Input sources (indexes \
                         of cameras or paths to video files)', required=True)
-    parser.add_argument('--config', type=str, default=os.path.join(current_dir, 'config.py'), required=False,
+    parser.add_argument('--config', type=str, default=os.path.join(current_dir, 'configs/person.py'), required=False,
                         help='Configuration file')
 
     parser.add_argument('--detections', type=str, help='JSON file with bounding boxes')
 
     parser.add_argument('-m', '--m_detector', type=str, required=False,
-                        help='Path to the person detection model')
+                        help='Path to the object detection model')
     parser.add_argument('--t_detector', type=float, default=0.6,
-                        help='Threshold for the person detection model')
+                        help='Threshold for the object detection model')
 
     parser.add_argument('--m_segmentation', type=str, required=False,
-                        help='Path to the person instance segmentation model')
+                        help='Path to the object instance segmentation model')
     parser.add_argument('--t_segmentation', type=float, default=0.6,
-                        help='Threshold for person instance segmentation model')
+                        help='Threshold for object instance segmentation model')
 
     parser.add_argument('--m_reid', type=str, required=True,
-                        help='Path to the person re-identification model')
+                        help='Path to the object re-identification model')
 
     parser.add_argument('--output_video', type=str, default='', required=False,
                         help='Optional. Path to output video')
@@ -249,22 +249,26 @@ def main():
     ie = IECore()
 
     if args.detections:
-        person_detector = DetectionsFromFileReader(args.detections, args.t_detector)
+        object_detector = DetectionsFromFileReader(args.detections, args.t_detector)
     elif args.m_segmentation:
-        person_detector = MaskRCNN(ie, args.m_segmentation, args.t_segmentation,
+        object_detector = MaskRCNN(ie, args.m_segmentation,
+                                   config['obj_segm']['trg_classes'],
+                                   args.t_segmentation,
                                    args.device, args.cpu_extension,
                                    capture.get_num_sources())
     else:
-        person_detector = Detector(ie, args.m_detector, args.t_detector,
+        object_detector = Detector(ie, args.m_detector,
+                                   config['obj_det']['trg_classes'],
+                                   args.t_detector,
                                    args.device, args.cpu_extension,
                                    capture.get_num_sources())
 
     if args.m_reid:
-        person_recognizer = VectorCNN(ie, args.m_reid, args.device, args.cpu_extension)
+        object_recognizer = VectorCNN(ie, args.m_reid, args.device, args.cpu_extension)
     else:
-        person_recognizer = None
+        object_recognizer = None
 
-    run(args, config, capture, person_detector, person_recognizer)
+    run(args, config, capture, object_detector, object_recognizer)
     log.info('Demo finished successfully')
 
 

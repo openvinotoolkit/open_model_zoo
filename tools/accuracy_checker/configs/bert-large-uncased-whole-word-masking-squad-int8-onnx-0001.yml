@@ -2,6 +2,30 @@ models:
   - name: bert-large-uncased-whole-word-masking-squad-int8-onnx-0001
     launchers:
       - framework: dlsdk
+        tags:
+          - FP32-INT8
+        models: intel/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001/FP32-INT8/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001.xml
+        weights: intel/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001/FP32-INT8/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001.bin
+        adapter:
+          type: bert_question_answering
+          start_token_logits_output: "5211"
+          end_token_logits_output: "5212"
+        inputs:
+          - name: "result.1"
+            type: INPUT
+            value: "input_ids"
+          - name: "result.2"
+            type: INPUT
+            value: 'input_mask'
+          - name: "result.3"
+            type: INPUT
+            value: 'segment_ids'
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        models: intel/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001/FP16-INT8/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001.xml
+        weights: intel/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001/FP16-INT8/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001.bin
         adapter:
           type: bert_question_answering
           start_token_logits_output: "5211"
@@ -19,8 +43,6 @@ models:
 
     datasets:
       - name: squad_v1_1_msl384_mql64_ds128_lowercase
-        annotation_conversion:
-          vocab_file: vocab.txt
         reader:
           type: annotation_features_extractor
           features:
@@ -36,3 +58,6 @@ models:
             type: 'f1'
           - name: 'EM'
             type: 'exact_match'
+
+
+global_definitions: ../dataset_definitions.yml

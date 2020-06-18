@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
             cv::imshow(windowName, frame);
 
             // Controls the information being displayed while demo runs
-            char key = static_cast<char>(cv::waitKey(delay));
+            int key = cv::waitKey(delay);
             resultsMarker.toggle(key);
 
             // Press 'Esc' to quit, 'f' to flip the video horizontally

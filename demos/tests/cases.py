@@ -376,11 +376,11 @@ PYTHON_DEMOS = [
             ModelArg('instance-segmentation-security-1025')),
     )),
 
-    PythonDemo(subdirectory='multi_camera_multi_person_tracking', device_keys=['-d'], test_cases=combine_cases(
+    PythonDemo(subdirectory='multi_camera_multi_target_tracking', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
-            '-i': [DataPatternArg('multi-camera-multi-person-tracking'),
-                DataPatternArg('multi-camera-multi-person-tracking/repeated')],
+            '-i': [DataPatternArg('multi-camera-multi-target-tracking'),
+                DataPatternArg('multi-camera-multi-target-tracking/repeated')],
             '-m': ModelArg('person-detection-retail-0013')}),
         single_option_cases('--m_reid',
             ModelArg('person-reidentification-retail-0031'),
