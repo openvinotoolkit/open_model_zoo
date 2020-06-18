@@ -774,7 +774,7 @@ class DLSDKLauncher(Launcher):
                 print_info('    {} - {}'.format(device, nreq))
 
     def _set_device_config(self, device_config):
-        device_specific_configuration = read_yaml(device_config, ordered=False)
+        device_specific_configuration = read_yaml(device_config)
         if not isinstance(device_specific_configuration, dict):
             raise ConfigError('device configuration should be a dict-like')
         self.ie_core.set_config(device_specific_configuration, self.device)
