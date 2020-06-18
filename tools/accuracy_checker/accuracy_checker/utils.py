@@ -40,11 +40,6 @@ try:
 except ImportError:
     Polygon = None
 
-try:
-    from yamlloader.ordereddict import Loader as orddict_loader
-except ImportError:
-    orddict_loader = None
-
 
 def concat_lists(*lists):
     return list(itertools.chain(*lists))
@@ -296,9 +291,7 @@ def read_pickle(file: Union[str, Path], *args, **kwargs):
 
 def read_yaml(file: Union[str, Path], *args, ordered=True, **kwargs):
     with get_path(file).open() as content:
-        loader = orddict_loader or yaml.SafeLoader if ordered else yaml.SafeLoader
-        if not orddict_loader and ordered:
-            warn('yamlloader is not installed. YAML files order is not preserved. it can be sufficient for some cases')
+        loader = yaml.SafeLoader
         return yaml.load(content, *args, Loader=loader, **kwargs)
 
 
