@@ -319,10 +319,6 @@ def main():
     log.info("Loading network")
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
-    # Workaround for a bug in the GPU plugin: if we don't access this now,
-    # it won't be accessible after the network is loaded to the device.
-    getattr(net, 'layers')
-
     # ---------------------------------- 3. Load CPU extension for support specific layer ------------------------------
     if "CPU" in args.device:
         supported_layers = ie.query_network(net, "CPU")
