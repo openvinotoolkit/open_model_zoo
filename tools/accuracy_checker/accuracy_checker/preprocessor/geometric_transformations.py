@@ -932,3 +932,59 @@ class SimilarityTransfom(Preprocessor):
         T[:dim, :dim] *= scale
 
         return T
+
+class FacePatch(Preprocessor):
+    __provider__ = 'face_patch'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'scale_width': NumberField(
+                value_type=float, min_value=0, default=1, optional=True,
+                description='Value to scale width relative to the original candidate width'
+            ),
+            'scale_height': NumberField(
+                value_type=float, min_value=0, default=1, optional=True,
+                description='Value to scale height relative to the original candidate height'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.scale_width = self.get_value_from_config('scale_width')
+        self.scale_height = self.get_value_from_config('scale_height')
+
+    def process(self, image, annotation_meta=None):
+        candidates = annotation_meta['candidate_info']
+        face_patches = []
+        data = image.data
+        img_height, img_width, _ = data.shape
+        for i in range(candidates.x_mins.size):
+            x_min = int(round(candidates.x_mins[i]))
+            y_min = int(round(candidates.y_mins[i]))
+
+            width = int(round(candidates.x_maxs[i] - candidates.x_mins[i]))
+            height = int(round(candidates.y_maxs[i] - candidates.y_mins[i]))
+
+            x_min -= int(round(width * (self.scale_width -1) / 2))
+            y_min -= int(round(height * (self.scale_height - 1) / 2))
+            width = int(round(width * self.scale_width))
+            height = int(round(height * self.scale_height))
+
+            face_patch = np.zeros((height, width, 3), dtype=image.data.dtype)
+
+            dst_rect = data[max(0, y_min):min(y_min+height, img_height), max(0, x_min):min(x_min+width, img_width)]
+            face_patch[
+                max(-y_min, 0):max(-y_min, 0) + dst_rect.shape[0],
+                max(-x_min, 0):max(-x_min, 0) + dst_rect.shape[1]
+            ] = dst_rect
+            face_patches.append(face_patch)
+
+        image.data = face_patches
+        image.metadata.update({
+            'multi_infer': True,
+            'candidates': candidates
+        })
+
+        return image
