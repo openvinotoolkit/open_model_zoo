@@ -37,13 +37,6 @@ class Adapter(ClassProvider):
         self.validate_config()
         self.configure()
 
-    def __call__(self, context=None, outputs=None, **kwargs):
-        if outputs is not None:
-            return self.process(outputs, **kwargs)
-        predictions = self.process(context.prediction_batch, context.identifiers_batch, **kwargs)
-        context.prediction_batch = predictions
-        return context
-
     def get_value_from_config(self, key):
         return get_parameter_value_from_config(self.launcher_config, self.parameters(), key)
 

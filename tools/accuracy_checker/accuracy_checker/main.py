@@ -24,13 +24,12 @@ import cv2
 
 from .config import ConfigReader
 from .logging import print_info, add_file_handler, exception
-from .evaluators import ModelEvaluator, PipeLineEvaluator, ModuleEvaluator
+from .evaluators import ModelEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
 from .utils import get_path, cast_to_bool, check_file_existence
 
 EVALUATION_MODE = {
     'models': ModelEvaluator,
-    'pipelines': PipeLineEvaluator,
     'evaluations': ModuleEvaluator
 }
 

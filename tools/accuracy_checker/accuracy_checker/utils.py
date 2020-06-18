@@ -289,10 +289,9 @@ def read_pickle(file: Union[str, Path], *args, **kwargs):
         return pickle.load(content, *args, **kwargs)
 
 
-def read_yaml(file: Union[str, Path], *args, ordered=True, **kwargs):
+def read_yaml(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open() as content:
-        loader = yaml.SafeLoader
-        return yaml.load(content, *args, Loader=loader, **kwargs)
+        return yaml.safe_load(content, *args, **kwargs)
 
 
 def read_csv(file: Union[str, Path], *args, **kwargs):
