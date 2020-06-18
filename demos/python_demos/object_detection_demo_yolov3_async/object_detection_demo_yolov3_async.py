@@ -360,7 +360,8 @@ def main():
     completed_request_results = {}
     next_frame_id = 0
     next_frame_id_to_show = 0
-    mode_metrics = {}
+    mode_metrics = {mode.current: PerformanceMetrics()}
+    prev_mode_active_request_count = 0
     event = threading.Event()
     callback_exceptions = []
 
@@ -372,7 +373,6 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, 55,
         (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
-    mode_metrics[mode.current] = PerformanceMetrics()
     while (cap.isOpened() \
            or completed_request_results \
            or len(empty_requests) < len(exec_nets[mode.current].requests)) \
@@ -381,8 +381,6 @@ def main():
             frame, output, start_time, is_same_mode = completed_request_results.pop(next_frame_id_to_show)
 
             next_frame_id_to_show += 1
-            if is_same_mode:
-                mode_metrics[mode.current].update(start_time)
 
             objects = get_objects(output, net, (input_height, input_width), frame.shape[:-1], args.prob_threshold,
                                   args.keep_aspect_ratio)
@@ -417,13 +415,19 @@ def main():
                             "#" + det_label + ' ' + str(round(obj['confidence'] * 100, 1)) + ' %',
                             (obj['xmin'], obj['ymin'] - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
-            # Draw performance stats over frame
-            mode_metrics[mode.current].show_current_fps(frame)
-            mode_metrics[mode.current].show_current_latency(frame)
-
-            mode_message = "{} mode".format(mode.current.name)
-            helpers.put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
+            helpers.put_highlighted_text(frame, "{} mode".format(mode.current.name), (10, int(origin_im_size[0] - 20)),
                                          cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
+            
+            if is_same_mode and prev_mode_active_request_count == 0:
+                mode_metrics[mode.current].update(start_time, frame)
+            else:
+                mode_metrics[Modes.MIN_LATENCY
+                             if mode.current == Modes.USER_SPECIFIED
+                             else Modes.USER_SPECIFIED].update(start_time, frame)
+                prev_mode_active_request_count -= 1
+                helpers.put_highlighted_text(frame, "Switching modes, please wait...",
+                                             (10, int(origin_im_size[0] - 50)), cv2.FONT_HERSHEY_COMPLEX, 0.75,
+                                             (10, 200, 10), 2)
 
             if not args.no_show:
                 cv2.imshow("Detection Results", frame)
@@ -432,18 +436,19 @@ def main():
                 if key in {ord("q"), ord("Q"), 27}: # ESC key
                     break
                 if key == 9: # Tab key
-                    prev_mode = mode.current
-                    mode.next()
+                    if prev_mode_active_request_count == 0:
+                        prev_mode = mode.current
+                        mode.next()
 
-                    await_requests_completion(exec_nets[prev_mode].requests)
-                    empty_requests.clear()
-                    empty_requests.extend(exec_nets[mode.current].requests)
+                        prev_mode_active_request_count = len(exec_nets[prev_mode].requests) - len(empty_requests)
+                        empty_requests.clear()
+                        empty_requests.extend(exec_nets[mode.current].requests)
 
-                    mode_metrics[mode.current] = PerformanceMetrics()
+                        mode_metrics[mode.current] = PerformanceMetrics()
                 else:
                     presenter.handleKey(key)
 
-        elif empty_requests and cap.isOpened():
+        elif empty_requests and prev_mode_active_request_count == 0 and cap.isOpened():
             start_time = perf_counter()
             ret, frame = cap.read()
             if not ret:
@@ -480,12 +485,12 @@ def main():
         raise callback_exceptions[0]
 
     for mode_name in mode_metrics.keys():
-        log.info("")
-        log.info("Mode: {}".format(mode_name.name))
-        mode_metrics[mode_name].print_total_fps(log)
-        mode_metrics[mode_name].print_total_latency(log)
+        print("\nMode: {}".format(mode_name.name))
+        mode_metrics[mode_name].print_total()
     print(presenter.reportMeans())
 
+    for exec_net in exec_nets.values():
+        await_requests_completion(exec_net.requests)
 
 if __name__ == '__main__':
     sys.exit(main() or 0)

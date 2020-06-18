@@ -19,3 +19,4 @@ import cv2
 def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
     cv2.putText(frame, message, position, font_face, font_scale, (255, 255, 255), thickness + 1) # white border
     cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
+    
