@@ -140,31 +140,30 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
         sentence_rep = [self._bos_char_ids]
         for word_id in encoded_sentence[1:-1]:
             sentence_rep.append(self._word_to_char_ids[word_id])
-        #sentence_rep.append(self._eos_char_ids)   #google lm-1b does not evaluate the last terminal symbol
-
         return sentence_rep
 
-    def encode_unique_by_chars(self, char_input):
-        def _Unique_(x):
-            y = []
-            idx = []
-            for i in range(len(x)):
-                if x[i] not in y:
-                    y.append(x[i])
-            for i in range(len(x)):
-                for index, result in enumerate(x[i] == y):
-                    if result == True:
-                        idx.append(index)
+    @staticmethod
+    def encode_unique_by_chars(char_input):
+        def _unique_(x):
+            y_ = []
+            idx_ = []
+            for xi in x:
+                if xi not in y_:
+                    y_.append(xi)
+            for xi in x:
+                for index, result in enumerate(xi == y_):
+                    if result:
+                        idx_.append(index)
                         break
-            return y, idx
+            return y_, idx_
 
         x = char_input.reshape(np.array([-1]))
-        y, idx = _Unique_(x)
+        y, idx = _unique_(x)
         shape = len(x)
         if len(y) >= shape:
             return y, idx
         _y = []
         _y.extend(y)
-        for j in range(shape-len(y)):
+        for _ in range(shape-len(y)):
             _y.append(y[len(y)-1])
         return _y, idx
