@@ -172,8 +172,9 @@ class ConfigReader:
         eval_mode = get_mode(config)
         config_checker_func = config_checkers.get(eval_mode)
         if config_checker_func is None:
-            raise ConfigError('Accuracy Checker {} mode is not supported. Please select between {} and {}.'. format(
-                eval_mode, 'evaluations', 'models'))
+            raise ConfigError(
+                'Accuracy Checker {} mode is not supported. Please select between evaluations and models.'. format(
+                    eval_mode))
         config_checker_func(config)
 
         return eval_mode
