@@ -8,6 +8,9 @@ scikit-image
 # reid
 scikit-learn
 
+# pipelining mode
+yamlloader
+
 # cpu extension usage
 py-cpuinfo<=4.0
 
