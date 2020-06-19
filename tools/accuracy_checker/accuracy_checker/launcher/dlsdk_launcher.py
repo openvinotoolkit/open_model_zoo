@@ -24,6 +24,7 @@ from collections import OrderedDict
 import numpy as np
 import openvino.inference_engine as ie
 
+from .dlsdk_cpu_extension import CPUExtensionPathField
 from .dlsdk_async_request import AsyncInferRequestWrapper
 from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField, BaseField
 from ..logging import warning
@@ -63,34 +64,6 @@ FPGA_COMPILER_MODE_VAR = 'CL_CONTEXT_COMPILER_MODE_INTELFPGA'
 NIREQ_REGEX = r"(\(\d+\))"
 VPU_PLUGINS = ('HDDL', "MYRIAD")
 VPU_LOG_LEVELS = ('LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG')
-
-
-class CPUExtensionPathField(PathField):
-    def __init__(self, **kwargs):
-        super().__init__(is_directory=False, **kwargs)
-
-    def validate(self, entry, field_uri=None):
-        if entry is None:
-            return
-
-        field_uri = field_uri or self.field_uri
-        validation_entry = ''
-        try:
-            validation_entry = Path(entry)
-        except TypeError:
-            self.raise_error(entry, field_uri, "values is expected to be path-like")
-        is_directory = False
-        if validation_entry.parts[-1] == 'AUTO':
-            validation_entry = validation_entry.parent
-            is_directory = True
-        try:
-            get_path(validation_entry, is_directory)
-        except FileNotFoundError:
-            self.raise_error(validation_entry, field_uri, "path does not exist")
-        except NotADirectoryError:
-            self.raise_error(validation_entry, field_uri, "path is not a directory")
-        except IsADirectoryError:
-            self.raise_error(validation_entry, field_uri, "path is a directory, regular file expected")
 
 
 class DLSDKLauncherConfigValidator(LauncherConfigValidator):
@@ -891,22 +864,27 @@ class DLSDKLauncher(Launcher):
 
     def fit_to_input(self, data, layer_name, layout, precision):
         def data_to_blob(layer_shape, data):
-            data_shape = np.shape(data)
-            if len(layer_shape) == 4:
+            def process_4d(data, data_shape, layer_shape):
                 if len(data_shape) == 5:
                     data = data[0]
 
                 if len(data_shape) < 4:
                     if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                         return np.resize(data, layer_shape)
-                if len(layout) == 4:
-                    return np.transpose(data, layout)
+                return np.transpose(data, layout)
 
-            if len(layer_shape) == 2:
+            def process_2d(data, data_shape, layer_shape):
                 if len(data_shape) == 1:
                     return np.transpose([data])
                 if len(layout) == 2:
                     return np.transpose(data, layout)
+                return np.array(data)
+
+            data_shape = np.shape(data)
+            if len(layer_shape) == 4:
+                return process_4d(data, data_shape, layer_shape)
+            if len(layer_shape) == 2:
+                return process_2d(data, data_shape, layer_shape)
             if len(layer_shape) == 1 and len(data_shape) == 2:
                 return np.array(data[0])
             if len(layer_shape) == 5 and len(layout) == 5:
