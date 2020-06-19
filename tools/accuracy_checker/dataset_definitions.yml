@@ -518,7 +518,7 @@ datasets:
         dst_width: 2048
 
   - name: road_segmentation
-    data_source: segmentation
+    data_source: segmentation/images
     segmentation_masks_source: segmentation/mask_road_segmentation
     annotation_conversion:
       converter: common_semantic_segmentation
