@@ -19,6 +19,7 @@
 import argparse
 import concurrent.futures
 import contextlib
+import functools
 import hashlib
 import re
 import requests
@@ -29,6 +30,7 @@ import sys
 import tempfile
 import threading
 import time
+import types
 
 from pathlib import Path
 
@@ -36,10 +38,8 @@ import common
 
 CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 
-def process_download(reporter, chunk_iterable, size, file):
+def process_download(reporter, chunk_iterable, size, progress, file):
     start_time = time.monotonic()
-    progress_size = 0
-    hasher = hashlib.sha256()
 
     try:
         for chunk in chunk_iterable:
@@ -47,31 +47,31 @@ def process_download(reporter, chunk_iterable, size, file):
 
             if chunk:
                 duration = time.monotonic() - start_time
-                progress_size += len(chunk)
-                hasher.update(chunk)
+                progress.size += len(chunk)
+                progress.hasher.update(chunk)
 
                 if duration != 0:
-                    speed = int(progress_size / (1024 * duration))
+                    speed = int(progress.size / (1024 * duration))
                 else:
                     speed = '?'
 
-                percent = progress_size * 100 // size
+                percent = progress.size * 100 // size
 
                 reporter.print_progress('... {}%, {} KB, {} KB/s, {} seconds passed',
-                    percent, progress_size // 1024, speed, int(duration))
-                reporter.emit_event('model_file_download_progress', size=progress_size)
+                    percent, progress.size // 1024, speed, int(duration))
+                reporter.emit_event('model_file_download_progress', size=progress.size)
 
                 file.write(chunk)
 
                 # don't attempt to finish a file if it's bigger than expected
-                if progress_size > size:
+                if progress.size > size:
                     break
-
-        return progress_size, hasher.digest()
     finally:
         reporter.end_progress()
 
 def try_download(reporter, file, num_attempts, start_download, size):
+    progress = types.SimpleNamespace(size=0)
+
     for attempt in range(num_attempts):
         if attempt != 0:
             retry_delay = 10
@@ -80,23 +80,35 @@ def try_download(reporter, file, num_attempts, start_download, size):
 
         try:
             reporter.job_context.check_interrupted()
-            chunk_iterable = start_download()
+            chunk_iterable, continue_offset = start_download(offset=progress.size)
 
-            file.seek(0)
-            file.truncate()
-            actual_size, hash = process_download(reporter, chunk_iterable, size, file)
+            if continue_offset not in {0, progress.size}:
+                # Somehow we neither restarted nor continued from where we left off.
+                # Try to restart.
+                chunk_iterable, continue_offset = start_download(offset=0)
+                if continue_offset != 0:
+                    reporter.log_error("Remote server refuses to send whole file, aborting")
+                    return None
 
-            if actual_size > size:
+            if continue_offset == 0:
+                file.seek(0)
+                file.truncate()
+                progress.size = 0
+                progress.hasher = hashlib.sha256()
+
+            process_download(reporter, chunk_iterable, size, progress, file)
+
+            if progress.size > size:
                 reporter.log_error("Remote file is longer than expected ({} B), download aborted", size)
                 # no sense in retrying - if the file is longer, there's no way it'll fix itself
                 return None
-            elif actual_size < size:
+            elif progress.size < size:
                 reporter.log_error("Downloaded file is shorter ({} B) than expected ({} B)",
-                    actual_size, size)
+                    progress.size, size)
                 # it's possible that we got disconnected before receiving the full file,
                 # so try again
             else:
-                return hash
+                return progress.hasher.digest()
         except (requests.exceptions.RequestException, ssl.SSLError):
             reporter.log_error("Download failed", exc_info=True)
 
@@ -211,7 +223,7 @@ def download_model(reporter, args, cache, session_factory, requested_precisions,
         destination = output / model_file.name
 
         if not try_retrieve(model_file_reporter, destination, model_file, cache, args.num_attempts,
-                lambda: model_file.source.start_download(session, CHUNK_SIZE)):
+                functools.partial(model_file.source.start_download, session, CHUNK_SIZE)):
             shutil.rmtree(str(output))
             model_file_reporter.emit_event('model_file_download_end', successful=False)
             reporter.emit_event('model_download_end', model=model.name, successful=False)
