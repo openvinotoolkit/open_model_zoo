@@ -44,6 +44,11 @@ try:
 except ImportError:
     Polygon = None
 
+try:
+    from yamlloader.ordereddict import Loader as orddict_loader
+except ImportError:
+    orddict_loader = None
+
 
 def concat_lists(*lists):
     return list(itertools.chain(*lists))
