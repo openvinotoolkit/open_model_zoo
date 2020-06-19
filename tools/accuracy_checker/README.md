@@ -172,6 +172,7 @@ And optionally:
 - `preprocessing`: list of preprocessing steps applied to input data. If you want calculated metrics to match reported, you must reproduce preprocessing from canonical paper of your topology or ask topology author about required steps.
 - `postprocessing`: list of postprocessing steps.
 - `reader`: approach for data reading. Default reader is `opencv_imread`.
+- `segmentation_masks_source` - path to directory where gt masks for semantic segmentation task stored.
 
 Also it must contain data related to annotation.
 You can convert annotation inplace using:
