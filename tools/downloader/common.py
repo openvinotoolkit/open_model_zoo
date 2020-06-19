@@ -64,6 +64,7 @@ KNOWN_TASK_TYPES = {
     'monocular_depth_estimation',
     'object_attributes',
     'optical_character_recognition',
+    'question_answering',
     'semantic_segmentation',
     'style_transfer',
 }

@@ -18,28 +18,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-vehicle-bike-detection-crossroad-1016.xml
-    size: 194361
-    sha256: c697c4791c681ae6833ab7f94b8491304e551ac00896952fbd665a5138784434
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.xml
+    size: 192020
+    sha256: 800bb875940d6c96dc028faa149626c415156ea633bb56190ec9a1a5b6a2a26e
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.xml
   - name: FP32/person-vehicle-bike-detection-crossroad-1016.bin
-    size: 11548004
-    sha256: 61c9deaca903bb107aecfc31faeb402c894e0d43ab3817db8d9d05d43dfa68cf
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.bin
+    size: 11548044
+    sha256: 50d7ecad9439c021a3a76c7367b3a63bb0023ea3fa1601d357bfd74688afc8e3
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.bin
   - name: FP16/person-vehicle-bike-detection-crossroad-1016.xml
-    size: 194246
-    sha256: def76d8ff22f500f6f0a38f377b8aff4c2f93b872fe9f5f7b9af6e29f203c1c7
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.xml
+    size: 191903
+    sha256: eae4f88ccdf7da8365f308d64bc4a4a5190843fe2d5f49f8da500021d2892f19
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.xml
   - name: FP16/person-vehicle-bike-detection-crossroad-1016.bin
-    size: 5774054
-    sha256: a0ba3bc9ca17330c731b395153651c22a666050cd06413c01059070681dc79a7
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.bin
+    size: 5774094
+    sha256: cd8b513c4c9c655e3a141e1c3fdf6b88e1523d14f0534885575972c264a704b7
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.bin
   - name: FP16-INT8/person-vehicle-bike-detection-crossroad-1016.xml
-    size: 536023
-    sha256: 410894b8a24efef1706a4beb8718f090b7cee9381189dd49b4deccdbf720380f
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/person-vehicle-bike-detection-crossroad-1016/FP16-INT8/person-vehicle-bike-detection-crossroad-1016.xml
+    size: 533098
+    sha256: e4fd7f8e09ec650da302b23173a06eb1f47619f974d4242703addbd63c0d60d0
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP16-INT8/person-vehicle-bike-detection-crossroad-1016.xml
   - name: FP16-INT8/person-vehicle-bike-detection-crossroad-1016.bin
-    size: 3025033
-    sha256: 1af7cf80e2443373a4fda050d39cbd8c852933355febb968426c512b1b927dcc
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/person-vehicle-bike-detection-crossroad-1016/FP16-INT8/person-vehicle-bike-detection-crossroad-1016.bin
+    size: 3024967
+    sha256: 2cc45b5f6acfc4f1634c3330a98a115abc386b2b2ca7506441faa17d13e59ba4
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-vehicle-bike-detection-crossroad-1016/FP16-INT8/person-vehicle-bike-detection-crossroad-1016.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
