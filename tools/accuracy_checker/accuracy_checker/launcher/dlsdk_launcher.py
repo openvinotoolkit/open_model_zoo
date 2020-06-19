@@ -899,7 +899,8 @@ class DLSDKLauncher(Launcher):
                 if len(data_shape) < 4:
                     if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                         return np.resize(data, layer_shape)
-                return np.transpose(data, layout)
+                if len(layout) == 4:
+                    return np.transpose(data, layout)
 
             if len(layer_shape) == 2:
                 if len(data_shape) == 1:
