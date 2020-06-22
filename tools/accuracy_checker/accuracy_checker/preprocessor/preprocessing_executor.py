@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import warnings
 from ..config import ConfigValidator, StringField
 from .preprocessor import Preprocessor, MULTI_INFER_PREPROCESSORS
-from .ie_preprocessor import IEPreprocessor
+from .ie_preprocessor import IEPreprocessor, ie_preprocess_available
 
 
 class PreprocessingExecutor:
@@ -30,8 +31,14 @@ class PreprocessingExecutor:
         self._multi_infer_transformations = False
         self.ie_processor = None
         if enable_ie_preprocessing:
-            self.ie_processor = IEPreprocessor(processors)
-            processors = self.ie_processor.keep_preprocessing_info
+            if not ie_preprocess_available():
+               warnings.warn(
+                   'PreProcessInfo is not available in your InferenceEngine version or openvino is not installed'
+                   '--ie_preprocessing key will be ignored'
+               )
+            else:
+                self.ie_processor = IEPreprocessor(processors)
+                processors = self.ie_processor.keep_preprocessing_info
 
         if not processors:
             return

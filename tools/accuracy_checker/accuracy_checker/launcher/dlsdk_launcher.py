@@ -954,6 +954,8 @@ class DLSDKLauncher(Launcher):
             print_info('\tshape: {}\n'.format(output_info.shape))
 
     def set_preprocess(self, preprocess):
+        if preprocess.ie_processor is None:
+            return
         if self.network is not None:
             self.disable_resize_to_input = False
             preprocess_steps = preprocess.ie_preprocess_steps

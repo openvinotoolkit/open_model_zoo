@@ -1,9 +1,18 @@
 from copy import deepcopy
 from collections import namedtuple
 import warnings
-from openvino.inference_engine import ResizeAlgorithm, PreProcessInfo
+try:
+    from openvino.inference_engine import ResizeAlgorithm, PreProcessInfo
+except ImportError:
+    ResizeAlgorithm, PreProcessInfo = None, None
+
+
+def ie_preprocess_available():
+    return PreProcessInfo is not None
+
 
 PreprocessingOp = namedtuple('PreprocessingOp', ['name', 'value'])
+
 
 def get_resize_op(config):
     supported_interpolations = {
@@ -18,7 +27,9 @@ def get_resize_op(config):
         return None
     return PreprocessingOp('resize_algorithm', supported_interpolations[interpolation])
 
+
 SUPPORTED_PREPROCESSING_OPS = {'resize': get_resize_op}
+
 
 class IEPreprocessor:
     def __init__(self, config):
