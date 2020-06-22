@@ -173,7 +173,7 @@ class Model:
     def postprocess(self, outputs, meta):
         return outputs
 
-    def request_completion_callback(self, status, callback_args):
+    def inference_completion_callback(self, status, callback_args):
         request, frame_id, frame_meta = callback_args
         try:
             if status != 0:
@@ -191,7 +191,7 @@ class Model:
         inputs, preprocessing_meta = self.preprocess(inputs)
         meta.update(preprocessing_meta)
         request.async_infer(inputs=inputs)
-        request.set_completion_callback(py_callback=self.request_completion_callback,
+        request.set_completion_callback(py_callback=self.inference_completion_callback,
                                         py_data=(request, id, meta))
 
     def await_all(self):
@@ -482,7 +482,6 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, 55,
         (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
-    overall_start_time = perf_counter()
     while (cap.isOpened() \
            or completed_request_results \
            or len(exec_nets[mode].empty_requests) < len(exec_nets[mode].requests)) \
@@ -583,8 +582,6 @@ def main():
 
     for exec_net in exec_nets.values():
         exec_net.await_all()
-
-    print('Overall time spent processing the video {:3.3f} s'.format(perf_counter() - overall_start_time))
 
     for mode_value, mode_stats in mode_info.items():
         log.info('')
