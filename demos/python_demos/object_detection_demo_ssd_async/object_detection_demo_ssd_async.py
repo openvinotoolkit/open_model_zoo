@@ -239,24 +239,27 @@ class Detector(Model):
         return image_blob_name, image_info_blob_name
 
     def _get_output_parser(self, net, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):
-        if len(net.outputs) == 1:
-            output_blob = next(iter(net.outputs))
+        try:
+            parser = SingleOutputParser(net.outputs)
             log.info('Use SingleOutputParser')
-            return SingleOutputParser(output_blob)
-        else:
-            try:
-                parser = MultipleOutputParser(net.outputs, bboxes, scores, labels)
-                log.info('Use MultipleOutputParser')
-                return parser
-            except ValueError:
-                pass
-            try:
-                h, w = net.input_info[image_blob_name].input_data.shape[2:]
-                parser = OTEParser([w, h], net.outputs)
-                log.info('Use OTEParser')
-                return parser
-            except ValueError:
-                pass
+            return parser
+        except ValueError:
+            pass
+
+        try:
+            parser = MultipleOutputParser(net.outputs, bboxes, scores, labels)
+            log.info('Use MultipleOutputParser')
+            return parser
+        except ValueError:
+            pass
+
+        try:
+            h, w = net.input_info[image_blob_name].input_data.shape[2:]
+            parser = OTEParser([w, h], net.outputs)
+            log.info('Use OTEParser')
+            return parser
+        except ValueError:
+            pass
         raise RuntimeError('Unsupported model outputs')
 
     @staticmethod
@@ -299,12 +302,18 @@ class Detector(Model):
 
 
 class SingleOutputParser:
-    def __init__(self, output_layer):
-        self.output_layer = output_layer
+    def __init__(self, all_outputs):
+        if len(all_outputs) != 1:
+            raise ValueError('Network must have only one output.')
+        self.output_name, output_data = next(iter(all_outputs.items()))
+        last_dim = np.shape(output_data)[-1]
+        if last_dim != 7:
+            raise ValueError('The last dimension of the output blob must be equal to 7, '
+                             'got {} instead.'.format(last_dim))
 
     def __call__(self, outputs):
         return [Detector.Detection(xmin, ymin, xmax, ymax, score, label)
-                for _, label, score, xmin, ymin, xmax, ymax in outputs[self.output_layer][0][0]]
+                for _, label, score, xmin, ymin, xmax, ymax in outputs[self.output_name][0][0]]
 
 
 class MultipleOutputParser:
