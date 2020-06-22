@@ -103,11 +103,6 @@ and accuracy (expect a bigger model to perform better).
 | [person-reidentification-retail-0270](./person-reidentification-retail-0270/description/person-reidentification-retail-0270.md)   | 1.170                | 1.234      | 94.7%             |
 | [person-reidentification-retail-0265](./person-reidentification-retail-0265/description/person-reidentification-retail-0265.md)   | 1.993                | 2.103      | 95.9%             |
 
-| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Pairwise accuracy on LFW |
-|-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
-| [face-reidentification-retail-0095](./face-reidentification-retail-0095/description/face-reidentification-retail-0095.md)         | 0.588                | 1.107      | 99.33%            |
-
-
 ## Semantic Segmentation Models
 
 Semantic segmentation is an extension of object detection problem. Instead of
