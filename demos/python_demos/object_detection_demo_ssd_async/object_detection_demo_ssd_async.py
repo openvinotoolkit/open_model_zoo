@@ -62,7 +62,7 @@ def build_argparser():
                            '(for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> '
                            'or just <nstreams>)',
                       default='', type=str)
-    args.add_argument('-nthreads', '--number_threads',
+    args.add_argument('-nthreads', '--num_threads',
                       help='Optional. Number of threads to use for inference on CPU (including HETERO cases)',
                       default=None, type=int)
     args.add_argument('-loop_input', '--loop_input', help='Optional. Number of times to repeat the input.',
@@ -173,14 +173,13 @@ class Model:
     def postprocess(self, outputs, meta):
         return outputs
 
-    def request_callback(self, status, callback_args):
+    def request_completion_callback(self, status, callback_args):
         request, frame_id, frame_meta = callback_args
         try:
             if status != 0:
                 raise RuntimeError('Infer Request has returned status code {}'.format(status))
             raw_outputs = {key: blob.buffer for key, blob in request.output_blobs.items()}
-            outputs = None
-            self.completed_request_results[frame_id] = (frame_meta, raw_outputs, outputs)
+            self.completed_request_results[frame_id] = (frame_meta, raw_outputs)
             self.empty_requests.append(request)
         except Exception as e:
             self.callback_exceptions.append(e)
@@ -192,7 +191,7 @@ class Model:
         inputs, preprocessing_meta = self.preprocess(inputs)
         meta.update(preprocessing_meta)
         request.async_infer(inputs=inputs)
-        request.set_completion_callback(py_callback=self.request_callback,
+        request.set_completion_callback(py_callback=self.request_completion_callback,
                                         py_data=(request, id, meta))
 
     def await_all(self):
@@ -248,11 +247,16 @@ class Detector(Model):
             try:
                 parser = MultipleOutputParser(net.outputs, bboxes, scores, labels)
                 log.info('Use MultipleOutputParser')
+                return parser
             except ValueError:
+                pass
+            try:
                 h, w = net.input_info[image_blob_name].input_data.shape[2:]
                 parser = OTEParser([w, h], net.outputs)
                 log.info('Use OTEParser')
-            return parser
+                return parser
+            except ValueError:
+                pass
         raise RuntimeError('Unsupported model outputs')
 
     @staticmethod
@@ -339,7 +343,6 @@ class OTEParser:
                         .format(labels_layer, default_label))
             self.labels_layer = None
             self.default_label = default_label
-            log.info('Treating detector as a class-agnostic one with output label {}.'.format(self.default_label))
 
         self.input_size = input_size
         self.bboxes_layer = self.find_layer_bboxes_output(all_outputs)
@@ -395,19 +398,19 @@ def put_highlighted_text(frame, message, position, font_face, font_scale, color,
     cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
 
 
-def get_plugin_configs(args):
+def get_plugin_configs(device, num_streams, num_threads):
     config_user_specified = {}
     config_min_latency = {}
 
     devices_nstreams = {}
-    if args.num_streams:
-        devices_nstreams = {device: args.num_streams for device in ['CPU', 'GPU'] if device in args.device} \
-                           if args.num_streams.isdigit() \
-                           else dict([device.split(':') for device in args.num_streams.split(',')])
+    if num_streams:
+        devices_nstreams = {device: num_streams for device in ['CPU', 'GPU'] if device in device} \
+                           if num_streams.isdigit() \
+                           else dict([device.split(':') for device in num_streams.split(',')])
 
-    if 'CPU' in args.device:
-        if args.number_threads is not None:
-            config_user_specified['CPU_THREADS_NUM'] = str(args.number_threads)
+    if 'CPU' in device:
+        if num_threads is not None:
+            config_user_specified['CPU_THREADS_NUM'] = str(num_threads)
         if 'CPU' in devices_nstreams:
             config_user_specified['CPU_THROUGHPUT_STREAMS'] = devices_nstreams['CPU'] \
                                                               if int(devices_nstreams['CPU']) > 0 \
@@ -415,7 +418,7 @@ def get_plugin_configs(args):
 
         config_min_latency['CPU_THROUGHPUT_STREAMS'] = '1'
 
-    if 'GPU' in args.device:
+    if 'GPU' in device:
         if 'GPU' in devices_nstreams:
             config_user_specified['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] \
                                                               if int(devices_nstreams['GPU']) > 0 \
@@ -432,7 +435,7 @@ def main():
     log.info('Initializing Inference Engine...')
     ie = IECore()
 
-    config_user_specified, config_min_latency = get_plugin_configs(args)
+    config_user_specified, config_min_latency = get_plugin_configs(args.device, args.num_streams, args.num_threads)
 
     labels_map = None
     if args.labels:
@@ -443,6 +446,7 @@ def main():
     completed_request_results = {}
     modes = cycle(Modes)
     prev_mode = mode = next(modes)
+    log.info('Using {} mode'.format(mode.name))
     mode_info = {mode: ModeInfo()}
     exceptions = []
 
@@ -478,12 +482,13 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, 55,
         (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
+    overall_start_time = perf_counter()
     while (cap.isOpened() \
            or completed_request_results \
            or len(exec_nets[mode].empty_requests) < len(exec_nets[mode].requests)) \
           and not exceptions:
         if next_frame_id_to_show in completed_request_results:
-            frame_meta, raw_outputs, _ = completed_request_results.pop(next_frame_id_to_show)
+            frame_meta, raw_outputs = completed_request_results.pop(next_frame_id_to_show)
             objects = exec_nets[mode].postprocess(raw_outputs, frame_meta)
 
             frame = frame_meta['frame']
@@ -552,6 +557,7 @@ def main():
                     exec_nets[prev_mode].await_all()
                     mode_info[prev_mode].last_end_time = perf_counter()
                     mode_info[mode] = ModeInfo()
+                    log.info('Using {} mode'.format(mode.name))
                 else:
                     presenter.handleKey(key)
 
@@ -575,6 +581,11 @@ def main():
     if exceptions:
         raise exceptions[0]
 
+    for exec_net in exec_nets.values():
+        exec_net.await_all()
+
+    print('Overall time spent processing the video {:3.3f} s'.format(perf_counter() - overall_start_time))
+
     for mode_value, mode_stats in mode_info.items():
         log.info('')
         log.info('Mode: {}'.format(mode_value.name))
@@ -586,9 +597,6 @@ def main():
         log.info('Latency: {:.1f} ms'.format((mode_stats.latency_sum / \
                                              mode_stats.frames_count) * 1e3))
     print(presenter.reportMeans())
-
-    for exec_net in exec_nets.values():
-        exec_net.await_all()
 
 
 if __name__ == '__main__':
