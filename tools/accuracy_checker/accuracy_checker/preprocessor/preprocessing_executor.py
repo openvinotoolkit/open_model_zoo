@@ -16,13 +16,22 @@ limitations under the License.
 
 from ..config import ConfigValidator, StringField
 from .preprocessor import Preprocessor, MULTI_INFER_PREPROCESSORS
+from .ie_preprocessor import IEPreprocessor
 
 
 class PreprocessingExecutor:
-    def __init__(self, processors=None, dataset_name='custom', dataset_meta=None, input_shapes=None):
+    def __init__(
+            self, processors=None, dataset_name='custom', dataset_meta=None,
+            input_shapes=None,
+            enable_ie_preprocessing=False
+    ):
         self.processors = []
         self.dataset_meta = dataset_meta
         self._multi_infer_transformations = False
+        self.ie_processor = None
+        if enable_ie_preprocessing:
+            self.ie_processor = IEPreprocessor(processors)
+            processors = self.ie_processor.keep_preprocessing_info
 
         if not processors:
             return
@@ -73,6 +82,18 @@ class PreprocessingExecutor:
         self._input_shapes = input_shapes
         for preprocessor in self.processors:
             preprocessor.set_input_shape(input_shapes)
+
+    @property
+    def preprocess_info(self):
+        if not self.ie_processor:
+            return None
+        return self.ie_processor.preprocess_info
+
+    @property
+    def ie_preprocess_steps(self):
+        if not self.ie_processor:
+            return []
+        return self.ie_processor.steps
 
 
 class PreprocessorConfig(ConfigValidator):

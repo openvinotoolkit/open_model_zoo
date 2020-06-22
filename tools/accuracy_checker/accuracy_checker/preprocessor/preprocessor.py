@@ -17,6 +17,7 @@ limitations under the License.
 from ..config import ConfigValidator, StringField
 from ..dependency import ClassProvider
 from ..utils import get_parameter_value_from_config
+from .ie_preprocessor import IEPreprocessor
 
 
 MULTI_INFER_PREPROCESSORS = ['tiling', 'normalize3d', 'image_pyramid', 'clip_audio']

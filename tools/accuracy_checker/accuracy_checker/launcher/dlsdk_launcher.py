@@ -281,6 +281,9 @@ class DLSDKLauncher(Launcher):
         self._do_reshape = False
         self._use_set_blob = False
         self._target_layout_mapping = {}
+        self._preprocess_info = {}
+        self._preprocess_steps = []
+        self.disable_resize_to_input = False
 
     @property
     def device(self):
@@ -650,12 +653,12 @@ class DLSDKLauncher(Launcher):
         layout_mismatch = (
             data_layout is not None and len(input_layout) == len(data_layout) and input_layout != data_layout
         )
-        if layout_mismatch and Blob is not None and self.network is None:
+        if layout_mismatch and Blob is not None and self.network is None or input_blob in self._preprocess_info:
             self._target_layout_mapping[input_blob] = data_layout
             self._use_set_blob = True
             return data
 
-        return data.reshape(input_shape)
+        return data.reshape(input_shape) if not self.disable_resize_to_input else data
 
     def _prepare_ie(self, log=True):
         if log:
@@ -948,6 +951,31 @@ class DLSDKLauncher(Launcher):
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
             print_info('\tshape: {}\n'.format(output_info.shape))
+
+    def set_preprocess(self, preprocess):
+        if self.network is not None:
+            self.disable_resize_to_input = False
+            preprocess_steps = preprocess.ie_preprocess_steps
+            if not preprocess_steps:
+                return
+            for input_name, input_info in self.network.input_info.items():
+                if input_name in self.const_inputs + self.image_info_inputs:
+                    continue
+                for (name, value) in preprocess_steps:
+                    if name == 'resize_algorithm' and not self.disable_resize_to_input:
+                        self.disable_resize_to_input = True
+                    setattr(input_info.preprocess_info, name, value)
+            self.load_network(self.network)
+            self._preprocess_steps = preprocess_steps
+            return
+        preprocess_info_by_input = OrderedDict()
+        preprocess_info = preprocess.preprocess_info
+        for input_name in self.inputs:
+            if input_name in self.const_inputs + self.image_info_inputs:
+                continue
+            preprocess_info_by_input[input_name] = preprocess_info
+        self._preprocess_info = preprocess_info_by_input
+        self.disable_resize_to_input = preprocess.ie_processor.has_resize
 
     def release(self):
         if 'network' in self.__dict__:
