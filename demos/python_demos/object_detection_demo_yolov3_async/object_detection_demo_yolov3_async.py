@@ -246,7 +246,8 @@ def filter_objects(objects, iou_threshold, prob_threshold):
             continue
         for j in range(i + 1, len(objects)):
             # We perform IOU only on objects of same class 
-            if(objects[i]['class_id'] != objects[j]['class_id']): continue
+            if objects[i]['class_id'] != objects[j]['class_id']: 
+                continue
 
             if intersection_over_union(objects[i], objects[j]) > iou_threshold:
                 objects[j]['confidence'] = 0
