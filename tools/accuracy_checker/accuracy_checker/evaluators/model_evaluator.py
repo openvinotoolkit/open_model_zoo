@@ -78,8 +78,8 @@ class ModelEvaluator(BaseEvaluator):
             launcher.config.get('inputs', []), launcher.inputs, launcher.fit_to_input, launcher.default_layout
         )
         enable_ie_preprocessing = (
-                                      dataset_config.get('_ie_preprocessing', False)
-                                      if launcher_config['framework'] == 'dlsdk' else False
+            dataset_config.get('_ie_preprocessing', False)
+            if launcher_config['framework'] == 'dlsdk' else False
         )
         preprocessor = PreprocessingExecutor(
             dataset_config.get('preprocessing'), dataset_name, dataset.metadata, launcher.inputs_info_for_meta(),

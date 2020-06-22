@@ -188,6 +188,7 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         return specified[0]
 
 
+# pylint: disable=R0904
 class DLSDKLauncher(Launcher):
     """
     Class for infer model using DLSDK framework.
