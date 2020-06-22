@@ -19,14 +19,12 @@ than it can take little gain to do the (resulting video) encoding on the same GP
 because the device is already busy.
 
 This and other performance implications and tips for the Async API are covered in the
-[Optimization Guide](https://docs.openvinotoolkit.org/latest/_docs_optimization_guide_dldt_optimization_guide.html)
+[Optimization Guide](https://docs.openvinotoolkit.org/latest/_docs_optimization_guide_dldt_optimization_guide.html).
 
 Other demo objectives are:
 * Video as input support via OpenCV\*
 * Visualization of the resulting bounding boxes and text labels (from the `.labels` file)
   or class number (if no file is provided)
-* OpenCV provides resulting bounding boxes, labels, and other information.
-  You can copy and paste this code without pulling Open Model Zoo demos helpers into your application
 * Demonstration of the Async API in action. For this, the demo features two modes toggled by the **Tab** key:
     - "User specified" mode, where you can set the number of Infer Requests, throughput streams and threads.
       Inference, starting new requests and displaying the results of completed requests are all performed asynchronously.
@@ -42,7 +40,7 @@ Async API operates with a notion of the "Infer Request" that encapsulates the in
 *scheduling and waiting for result*.
 
 The pipeline is the same for both modes. The difference is in the number of Infer Requests used.
-```python
+```
 while True:
     if (Infer Request containing the next video frame has completed):
         get inference results
@@ -224,8 +222,8 @@ To run the demo, you can use public or pre-trained models. You can download the 
 format (\*.xml + \*.bin) using the
 [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
-The only GUI knob is to use **Tab** to switch between the synchronized execution ("MIN_LATENCY" mode)
-and the asynchronous mode configured with provided command-line parameters.
+The only GUI knob is to use **Tab** to switch between the synchronized execution ("Min latency" mode)
+and the asynchronous mode configured with provided command-line parameters ("User specified" mode).
 
 ## Demo Output
 
