@@ -75,9 +75,7 @@ models:
       - name: imagenet_1000_classes
         reader: pillow_imread
 
-        # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
         preprocessing:
-          - type: bgr_to_rgb
 
           - type: resize
             size: 256
@@ -88,6 +86,9 @@ models:
           - type: crop
             size: 224
             use_pillow: true
+
+          # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
+          - type: rgb_to_bgr
 
             # Using accuracy metric, achieved result of public model - 71.8
 
