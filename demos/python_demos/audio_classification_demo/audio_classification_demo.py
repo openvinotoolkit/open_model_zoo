@@ -1,3 +1,4 @@
+from datetime import datetime
 from argparse import ArgumentParser, ArgumentError, SUPPRESS
 import logging
 import sys
@@ -72,14 +73,18 @@ class AudioSource:
 
         self.audio = audio
 
-    def chunks(self, size, hop=None):
+    def chunks(self, size, hop=None, num_chunks=1):
         if not hop:
             hop = size
         pos = 0
 
-        while pos + size <= self.audio.shape[1]:
-            yield self.audio[:, pos: pos+size]
-            pos += hop
+        while pos + (num_chunks-1)*hop + size <= self.audio.shape[1]:
+            yield np.array([self.audio[:, pos+n*hop: pos+n*hop+size] for n in range(num_chunks)])
+            pos += hop*num_chunks
+
+        # while pos + size <= self.audio.shape[1]:
+        #     yield self.audio[:, pos: pos+size]
+        #     pos += hop
 
 
 def resample(audio, sample_rate, new_sample_rate):
@@ -162,7 +167,7 @@ def main():
         with open(args.labels, "r") as file:
             labels = [l.rstrip() for l in file.readlines()]
 
-    _, channels, _, length = input_shape
+    batch_size, channels, _, length = input_shape
 
     audio = AudioSource(args.input, channels=channels, framerate=args.framerate)
     audio.load()
@@ -174,23 +179,33 @@ def main():
 
     log.info("Starting inference")
     outputs = []
-    for id, chunk in enumerate(audio.chunks(length, hop)):
+    clips = 0
+    infer_time = []
+    for id, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
         if len(chunk.shape) != len(input_shape):
             chunk = np.reshape(chunk, newshape=input_shape)
+        infer_start_time = datetime.now()
         output = exec_net.infer(inputs={input_blob: chunk})
+        infer_time.append(datetime.now() - infer_start_time)
+        clips += batch_size
         output = output[output_blob]
-        start_time = id*hop / audio.framerate
-        end_time = (id*hop + length) / audio.framerate
-        outputs.append(output)
-        label = np.argmax(output)
-        log.info("[{:.2f}:{:.2f}] - {:s}: {:.2f}%".format(start_time, end_time,
-                                                          labels[label] if labels else "Class {}".format(label),
-                                                          output[0, label]*100))
+        for batch, data in enumerate(output):
+            start_time = (id*batch_size + batch)*hop / audio.framerate
+            end_time = ((id*batch_size + batch)*hop + length) / audio.framerate
+            outputs.append(data)
+            label = np.argmax(data)
+            log.info("[{:.2f}:{:.2f}] - {:s}: {:.2f}%".format(start_time, end_time,
+                                                              labels[label] if labels else "Class {}".format(label),
+                                                              data[label] * 100))
 
+    if clips == 0:
+        log.error("Audio too short for inference by that model")
+        sys.exit(1)
     total = np.mean(outputs, axis=0)
     label = np.argmax(total)
     log.info("Total over audio - {:s}: {:.2f}%".format(labels[label] if labels else "Class {}".format(label),
-                                                       total[0, label]*100))
+                                                       total[label]*100))
+    logging.info("Average infer time - {:.3f}s per clip".format((np.array(infer_time).sum() / clips).total_seconds()))
 
 
 if __name__ == '__main__':
