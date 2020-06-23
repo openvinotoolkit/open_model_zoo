@@ -127,7 +127,7 @@ class BaseReader(ClassProvider):
 
     def configure(self):
         if not self.data_source:
-            raise ConfigError('data_source parameter is required to create data reader and read data')
+            raise ConfigError('data_source parameter is required to create "{}" data reader and read data'.format(self.__provider__))
         self.data_source = get_path(self.data_source, is_directory=True)
         self.multi_infer = self.config.get('multi_infer', False)
 
@@ -288,7 +288,7 @@ class OpenCVFrameReader(BaseReader):
 
     def configure(self):
         if not self.data_source:
-            raise ConfigError('data_source parameter is required to create data reader and read data')
+            raise ConfigError('data_source parameter is required to create "{}" data reader and read data'.format(self.__provider__))
         self.data_source = get_path(self.data_source)
         self.videocap = cv2.VideoCapture(str(self.data_source))
         self.multi_infer = self.config.get('multi_infer', False)
@@ -314,7 +314,7 @@ class JSONReader(BaseReader):
         self.key = self.config.get('key')
         self.multi_infer = self.config.get('multi_infer', False)
         if not self.data_source:
-            raise ConfigError('data_source parameter is required to create data reader and read data')
+            raise ConfigError('data_source parameter is required to create "{}" data reader and read data'.format(self.__provider__))
 
     def read(self, data_id):
         data = read_json(str(self.data_source / data_id))
@@ -359,7 +359,7 @@ class NiftiImageReader(BaseReader):
         self.channels_first = self.config.get('channels_first', False) if self.config else False
         self.multi_infer = self.config.get('multi_infer', False)
         if not self.data_source:
-            raise ConfigError('data_source parameter is required to create data reader and read data')
+            raise ConfigError('data_source parameter is required to create "{}" data reader and read data'.format(self.__provider__))
 
     def read(self, data_id):
         nib_image = nib.load(str(get_path(self.data_source / data_id)))
@@ -390,7 +390,7 @@ class NumPyReader(BaseReader):
         self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
         self.multi_infer = self.config.get('multi_infer', False)
         if not self.data_source:
-            raise ConfigError('data_source parameter is required to create data reader and read data')
+            raise ConfigError('data_source parameter is required to create "{}" data reader and read data'.format(self.__provider__))
 
     def read(self, data_id):
         data = np.load(str(self.data_source / data_id))
@@ -439,8 +439,6 @@ class AnnotationFeaturesReader(BaseReader):
 
     def configure(self):
         self.feature_list = self.config['features']
-        if not self.data_source:
-            raise ConfigError('data_source parameter is required to create data reader and read data')
         if not contains_all(self.data_source[0].__dict__, self.feature_list):
             raise ConfigError(
                 'annotation_class prototype does not contain provided features {}'.format(', '.join(self.feature_list))
