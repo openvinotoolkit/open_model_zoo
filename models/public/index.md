@@ -211,7 +211,7 @@ The task of action recognition is to predict action that is being performed on a
 
 ## Colorization
 
-Colorization task is to predict colors of scane from grayscale image.
+Colorization task is to predict colors of scene from grayscale image.
 
 | Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | ------ | ------- |
