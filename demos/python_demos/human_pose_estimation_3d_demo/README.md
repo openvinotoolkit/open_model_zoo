@@ -4,7 +4,7 @@ This demo demonstrates how to run 3D Human Pose Estimation models using OpenVINO
 
 * `human-pose-estimation-3d-0001`.
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
 
 > **NOTE**: Only batch size of 1 is supported.
 ## How It Works
