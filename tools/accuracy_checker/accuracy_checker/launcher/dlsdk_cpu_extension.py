@@ -1,5 +1,6 @@
 from ..config import PathField
 from ..utils import get_path
+from pathlib import Path
 
 
 class CPUExtensionPathField(PathField):

@@ -5,7 +5,7 @@ models:
         model: public/language-model-0001/FP32/language-model-0001.xml
         weights: public/language-model-0001/FP32/language-model-0001.bin
         adapter:
-          type: language_modeling
+          type: lm_1b
           softmax_out: softmax_out
         inputs:
           - name: char_embedding/EmbeddingLookupUnique/Unique/placeholder_out_port_0
@@ -32,4 +32,4 @@ models:
           chars_encoding: True
           max_word_length: 50
         metrics:
-          - type: perplexity
+          - type: softmax_perplexity

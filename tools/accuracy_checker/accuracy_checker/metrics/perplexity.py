@@ -13,7 +13,7 @@ class Perplexity(FullDatasetEvaluationMetric):
         self.sentences_perplexity = []
 
     def update(self, annotation, prediction):
-        sentences_softmax = prediction.scores
+        sentences_softmax = prediction.logits
         tgts = np.array([[annotation.target_ids[0]]])
         if len(annotation.target_ids) != len(sentences_softmax):
             raise ConfigError("The number of annotation.target_ids is not equal to predictions")
@@ -23,7 +23,7 @@ class Perplexity(FullDatasetEvaluationMetric):
         target_weights_in = np.ones([1, 1], np.float32)
         for idx, (target_in, softmax) in enumerate(zip(annotation.target_ids, sentences_softmax)):
             tgts = np.array([[target_in]])
-            cal_log_perp = CaculatePerplexity(tgts, softmax, softmax)
+            cal_log_perp = CalculatePerplexity(tgts, softmax, softmax)
             log_perp = cal_log_perp._log_perplexity_out()
 
             sum_num += log_perp * target_weights_in.mean()
@@ -37,7 +37,7 @@ class Perplexity(FullDatasetEvaluationMetric):
         return np.mean(self.sentences_perplexity)
 
 
-class CaculatePerplexity:
+class CalculatePerplexity:
   def __init__(self, targets, biasadd, softmax_out=None):
     self._targets_in = targets
     self._biasadd = biasadd
