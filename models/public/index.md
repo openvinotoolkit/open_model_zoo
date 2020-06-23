@@ -209,6 +209,15 @@ The task of action recognition is to predict action that is being performed on a
 | ------------------------- | ---------------| -------------- | ------ | ------- |
 | RGB-I3D, pretrained on ImageNet\* | [TensorFlow\*](./i3d-rgb-tf/i3d-rgb-tf.md) | i3d-rgb-tf | | |
 
+## Colorization
+
+Colorization task is to predict colors of scane from grayscale image.
+
+| Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
+| ------------------------- | ---------------| -------------- | ------ | ------- |
+| colorization-v2           | [Caffe*](./colorization-v2/colorization-v2.md) | colorization-v2 | | |
+| colorization-v2-norebal   | [Caffe*](./colorization-v2-norebal/colorization-v2-norebal.md) | colorization-v2-norebal | | |
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.
