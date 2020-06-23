@@ -32,10 +32,10 @@ class PreprocessingExecutor:
         self.ie_processor = None
         if enable_ie_preprocessing:
             if not ie_preprocess_available():
-               warnings.warn(
-                   'PreProcessInfo is not available in your InferenceEngine version or openvino is not installed'
-                   '--ie_preprocessing key will be ignored'
-               )
+                warnings.warn(
+                    'PreProcessInfo is not available in your InferenceEngine version or openvino is not installed'
+                    '--ie_preprocessing key will be ignored'
+                )
             else:
                 self.ie_processor = IEPreprocessor(processors)
                 processors = self.ie_processor.keep_preprocessing_info

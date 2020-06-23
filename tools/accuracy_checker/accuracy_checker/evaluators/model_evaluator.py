@@ -70,23 +70,25 @@ class ModelEvaluator(BaseEvaluator):
         if data_reader_type in REQUIRES_ANNOTATIONS:
             data_source = dataset.annotation
         data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
-        launcher = create_launcher(launcher_config, model_name)
+        enable_ie_preprocessing = (
+            dataset_config.get('_ie_preprocessing', False)
+            if launcher_config['framework'] == 'dlsdk' else False
+        )
+        preprocessor = PreprocessingExecutor(
+            dataset_config.get('preprocessing'), dataset_name, dataset.metadata,
+            enable_ie_preprocessing=enable_ie_preprocessing
+        )
+        launcher = (
+            create_launcher(launcher_config, model_name)
+            if not enable_ie_preprocessing else create_launcher(launcher_config, model_name, preprocessor=preprocessor)
+        )
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)
         input_feeder = InputFeeder(
             launcher.config.get('inputs', []), launcher.inputs, launcher.fit_to_input, launcher.default_layout
         )
-        enable_ie_preprocessing = (
-            dataset_config.get('_ie_preprocessing', False)
-            if launcher_config['framework'] == 'dlsdk' else False
-        )
-        preprocessor = PreprocessingExecutor(
-            dataset_config.get('preprocessing'), dataset_name, dataset.metadata, launcher.inputs_info_for_meta(),
-            enable_ie_preprocessing=enable_ie_preprocessing
-        )
-        if enable_ie_preprocessing:
-            launcher.set_preprocess(preprocessor)
+        preprocessor.input_shapes = launcher.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
         metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
 

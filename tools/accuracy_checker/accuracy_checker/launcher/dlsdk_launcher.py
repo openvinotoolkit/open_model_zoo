@@ -250,7 +250,7 @@ class DLSDKLauncher(Launcher):
 
         return parameters
 
-    def __init__(self, config_entry, model_name='', delayed_model_loading=False):
+    def __init__(self, config_entry, model_name='', delayed_model_loading=False, preprocessor=None):
         super().__init__(config_entry, model_name)
 
         self._set_variable = False
@@ -268,6 +268,9 @@ class DLSDKLauncher(Launcher):
         self._prepare_bitstream_firmware(self.config)
         self._prepare_ie()
         self._delayed_model_loading = delayed_model_loading
+        self._preprocess_info = {}
+        self._preprocess_steps = []
+        self.disable_resize_to_input = False
 
         if not delayed_model_loading:
             if dlsdk_launcher_config.need_conversion:
@@ -275,16 +278,13 @@ class DLSDKLauncher(Launcher):
             else:
                 self._model, self._weights = self.automatic_model_search()
 
-            self.load_network(log=True)
+            self.load_network(log=True, preprocessing=preprocessor)
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
         else:
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
         self._do_reshape = False
         self._use_set_blob = False
         self._target_layout_mapping = {}
-        self._preprocess_info = {}
-        self._preprocess_steps = []
-        self.disable_resize_to_input = False
 
     @property
     def device(self):
@@ -838,7 +838,7 @@ class DLSDKLauncher(Launcher):
         elif affinity_map_path:
             warning('affinity_map config is applicable only for HETERO device')
 
-    def load_network(self, network=None, log=False):
+    def load_network(self, network=None, log=False, preprocessing=None):
         if hasattr(self, 'exec_network'):
             del self.exec_network
         if network is None:
@@ -848,6 +848,8 @@ class DLSDKLauncher(Launcher):
         self._set_precision()
         if log:
             self._print_input_output_info()
+        if preprocessing:
+            self.set_preprocess(preprocessing)
 
         if self.network:
             self.exec_network = self.ie_core.load_network(self.network, self._device, num_requests=self.num_requests)

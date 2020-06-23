@@ -177,7 +177,7 @@ def unsupported_launcher(name, error_message=None):
     return UnsupportedLauncher
 
 
-def create_launcher(launcher_config, model_name='', delayed_model_loading=False):
+def create_launcher(launcher_config, model_name='', delayed_model_loading=False, **kwargs):
     """
     Args:
         launcher_config: launcher configuration file entry.
@@ -197,5 +197,5 @@ def create_launcher(launcher_config, model_name='', delayed_model_loading=False)
 
     return Launcher.provide(
         config_framework, launcher_config,
-        model_name=model_name, delayed_model_loading=delayed_model_loading
+        model_name=model_name, delayed_model_loading=delayed_model_loading, **kwargs
     )
