@@ -1,5 +1,6 @@
+#!/usr/bin/env python3
+from argparse import ArgumentParser, SUPPRESS
 from datetime import datetime
-from argparse import ArgumentParser, ArgumentError, SUPPRESS
 import logging
 import sys
 import wave
@@ -8,23 +9,12 @@ import numpy as np
 from openvino.inference_engine import IECore
 
 
-def type_overlap(val):
-    if isinstance(val, str):
-        if val.endswith('%'):
-            try:
-                res = float(val[:-1]) / 100
-            except FloatingPointError:
-                raise ArgumentError("Wrong value for '--overlap' argument")
-        else:
-            try:
-                res = int(val)
-            except ValueError:
-                raise ArgumentError("Wrong value for '--overlap' argument")
+def type_overlap(arg):
+    if arg.endswith('%'):
+        res = float(arg[:-1]) / 100
     else:
-        try:
-            res = int(val)
-        except ValueError:
-            raise ArgumentError("Wrong value for '--overlap' argument")
+        res = int(arg)
+
     return res
 
 
@@ -64,7 +54,7 @@ class AudioSource:
         framerate, audio = read_wav(self.source, as_float=True)
         audio = audio.T
         if audio.shape[0] != self.channels:
-            raise RuntimeError("Audio channels incorrect")
+            raise RuntimeError("Audio has unsupported number of channels")
         if self.framerate:
             if self.framerate != framerate:
                 audio = resample(audio, framerate, self.framerate)
@@ -81,10 +71,6 @@ class AudioSource:
         while pos + (num_chunks-1)*hop + size <= self.audio.shape[1]:
             yield np.array([self.audio[:, pos+n*hop: pos+n*hop+size] for n in range(num_chunks)])
             pos += hop*num_chunks
-
-        # while pos + size <= self.audio.shape[1]:
-        #     yield self.audio[:, pos: pos+size]
-        #     pos += hop
 
 
 def resample(audio, sample_rate, new_sample_rate):
@@ -174,14 +160,14 @@ def main():
 
     hop = length - args.overlap if isinstance(args.overlap, int) else int(length * (1.0 - args.overlap))
     if hop < 0:
-        log.error("Wrong value for '--overlap' argument - overlapping more than clip length")
+        log.error("Wrong value for '-ol/--overlap' argument - overlapping more than clip length")
         sys.exit(1)
 
     log.info("Starting inference")
     outputs = []
     clips = 0
     infer_time = []
-    for id, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
+    for idx, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
         if len(chunk.shape) != len(input_shape):
             chunk = np.reshape(chunk, newshape=input_shape)
         infer_start_time = datetime.now()
@@ -190,8 +176,8 @@ def main():
         clips += batch_size
         output = output[output_blob]
         for batch, data in enumerate(output):
-            start_time = (id*batch_size + batch)*hop / audio.framerate
-            end_time = ((id*batch_size + batch)*hop + length) / audio.framerate
+            start_time = (idx*batch_size + batch)*hop / audio.framerate
+            end_time = ((idx*batch_size + batch)*hop + length) / audio.framerate
             outputs.append(data)
             label = np.argmax(data)
             log.info("[{:.2f}:{:.2f}] - {:s}: {:.2f}%".format(start_time, end_time,
