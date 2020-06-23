@@ -58,6 +58,8 @@ class ModelEvaluator(BaseEvaluator):
         dataset_name = dataset_config['name']
         data_reader_config = dataset_config.get('reader', 'opencv_imread')
         data_source = dataset_config.get('data_source')
+        if not data_source:
+            raise ConfigError('data_source parameter is required to convert annotation')
 
         dataset = Dataset(dataset_config)
         if isinstance(data_reader_config, str):
