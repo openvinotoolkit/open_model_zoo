@@ -1,4 +1,4 @@
-# Overview of OpenVINO&trade; Toolkit Intel Pre-Trained Models
+# Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models
 
 OpenVINO&trade; toolkit provides a set of pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
