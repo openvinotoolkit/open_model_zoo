@@ -21,6 +21,11 @@ The model output for `googlenet-v1` is the typical object classifier output for 
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 68.928|
+| Top 5  | 89.144|
+
 See [https://github.com/BVLC/caffe/tree/master/models/bvlc_googlenet](https://github.com/BVLC/caffe/tree/master/models/bvlc_googlenet).
 
 ## Performance
