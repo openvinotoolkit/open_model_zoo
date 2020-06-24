@@ -93,6 +93,11 @@ class AttributeClassificationMetric(FullDatasetEvaluationMetric):
         meta['names'] = self.attributes
         return meta
 
+    def reset(self):
+        self.is_annotation_prediction_dict_computed = False
+        self.annotation_prediction_dict = {}
+
+
 class AttributeClassificationAccuracy(AttributeClassificationMetric):
     """
     Class for evaluating accuracy for classification attribute models.
