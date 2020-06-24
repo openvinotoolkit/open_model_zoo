@@ -492,5 +492,6 @@ def main():
     for exec_net in exec_nets.values():
         await_requests_completion(exec_net.requests)
 
+
 if __name__ == '__main__':
     sys.exit(main() or 0)

@@ -22,7 +22,7 @@ from helpers import put_highlighted_text
 class Statistic:
     def __init__(self):
         self.latency = 0.0
-        self.duration = 0.0
+        self.period = 0.0
         self.frame_count = 0
 
 
@@ -32,17 +32,18 @@ class PerformanceMetrics:
         self.last_moving_statistic = Statistic()
         self.current_moving_statistic = Statistic()
         self.total_statistic = Statistic()
+        self.last_update_time = None
     
     def update(self, last_request_start_time, frame, position=(15, 30),
                font_scale=0.75, color=(200, 10, 10), thickness=2):
         current_time = perf_counter()
-        if not hasattr(self, 'last_update_time'):
+        if self.last_update_time is None:
             self.last_update_time = current_time
 
         last_request_latency = current_time - last_request_start_time
-        if self.current_moving_statistic.frame_count != 1 or self.total_statistic.frame_count != 0:
+        if self.total_statistic.frame_count != 0:
             self.current_moving_statistic.latency += last_request_latency
-            self.current_moving_statistic.duration = current_time - self.last_update_time
+            self.current_moving_statistic.period = current_time - self.last_update_time
             self.current_moving_statistic.frame_count += 1
         else:
             # for 1st frame
@@ -53,10 +54,10 @@ class PerformanceMetrics:
 
         if current_time - self.last_update_time > self.time_window_size:
             self.last_moving_statistic.latency = self.current_moving_statistic.latency
-            self.last_moving_statistic.duration = current_time - self.last_update_time
+            self.last_moving_statistic.period = current_time - self.last_update_time
             self.last_moving_statistic.frame_count = self.current_moving_statistic.frame_count
             self.total_statistic.latency += self.last_moving_statistic.latency
-            self.total_statistic.duration += self.last_moving_statistic.duration
+            self.total_statistic.period += self.last_moving_statistic.period
             self.total_statistic.frame_count += self.last_moving_statistic.frame_count
             self.current_moving_statistic.latency = 0.0
             self.current_moving_statistic.frame_count = 0
@@ -76,8 +77,8 @@ class PerformanceMetrics:
         return (1000 * self.last_moving_statistic.latency / self.last_moving_statistic.frame_count
                 if self.last_moving_statistic.frame_count != 0
                 else None,
-                self.last_moving_statistic.frame_count / self.last_moving_statistic.duration
-                if self.last_moving_statistic.duration != 0.0
+                self.last_moving_statistic.frame_count / self.last_moving_statistic.period
+                if self.last_moving_statistic.period != 0.0
                 else None)
 
     def get_total(self):
@@ -86,7 +87,7 @@ class PerformanceMetrics:
                 if self.total_statistic.frame_count + self.current_moving_statistic.frame_count != 0
                 else None,
                 ((self.total_statistic.frame_count + self.current_moving_statistic.frame_count)
-                / (self.total_statistic.duration + self.current_moving_statistic.duration))
+                / (self.total_statistic.period + self.current_moving_statistic.period))
                 if self.total_statistic.frame_count + self.current_moving_statistic.frame_count >= 2
                 else None)
     
