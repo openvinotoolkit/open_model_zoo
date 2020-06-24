@@ -19,7 +19,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 from accuracy_checker.config import BoolField, ListField
 from accuracy_checker.metrics.metric import FullDatasetEvaluationMetric
-from accuracy_checker.representation import ClassificationAnnotation, ClassificationPrediction
+from accuracy_checker.representation import ContainerAnnotation, ContainerPrediction
 
 
 class AttributeClassificationMetric(FullDatasetEvaluationMetric):
@@ -27,8 +27,8 @@ class AttributeClassificationMetric(FullDatasetEvaluationMetric):
     Base metric class for evaluating metrics of attribute classification models.
     """
 
-    annotation_types = (ClassificationAnnotation, )
-    prediction_types = (ClassificationPrediction, )
+    annotation_types = (ContainerAnnotation, )
+    prediction_types = (ContainerPrediction, )
 
     is_annotation_prediction_dict_computed = False
     annotation_prediction_dict = {}
