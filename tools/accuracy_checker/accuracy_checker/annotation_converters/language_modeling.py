@@ -19,6 +19,7 @@ from .format_converter import BaseFormatConverter, ConverterReturn
 from ..config import PathField, BoolField, NumberField
 from ..utils import read_txt
 from ..representation import LMAnnotation
+from ..data_readers import MultiFramesInputIdentifier
 
 
 class LanguageModelDatasetConverter(BaseFormatConverter):
@@ -35,7 +36,7 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
                     optional=True, default=False, description='include encoding words by chars'
                 ),
                 'max_word_length': NumberField(optional=True, value_type=int, default=50, min_value=1),
-                'pad_word_length': BoolField(optional=True, default=True)
+                'multi_inputs': NumberField(optional=True, value_type=int, default=2, min_value=1)
             }
         )
         return params
@@ -45,6 +46,7 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
         self.chars_encoding = self.get_value_from_config('chars_encoding')
         self.max_word_length = self.get_value_from_config('max_word_length')
         self.load_vocab(self.get_value_from_config('vocab_file'))
+        self.multi_inputs = self.get_value_from_config('multi_inputs')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         sentences = read_txt(self.input_file)
@@ -68,13 +70,15 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
                 unique_idx.append(encoded_idx)
         annotations = []
         num_iters = len(encoded_sentences)
+        unique_input_ids = list(range(self.multi_inputs))
         for sentence_id, sentence in enumerate(encoded_sentences):
             if progress_callback and sentence_id % progress_interval == 0:
                 progress_callback(sentence_id / num_iters * 100)
             targets = sentence[1:]
+            unique_input_identifier = ['sentence_{}_{}'.format(sentence_id, unique_ids) for unique_ids in unique_input_ids]
             annotations.append(
                 LMAnnotation(
-                    'sentence_{}'.format(sentence_id), sentence, targets,
+                    MultiFramesInputIdentifier(unique_input_ids, unique_input_identifier), sentence, targets,
                     encoded_by_chars_sentences[sentence_id] if self.chars_encoding else None,
                     unique_y[sentence_id] if self.chars_encoding else None,
                     unique_idx[sentence_id] if self.chars_encoding else None)
