@@ -215,8 +215,8 @@ Colorization task is to predict colors of scene from grayscale image.
 
 | Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | ------ | ------- |
-| colorization-v2           | Caffe*         | [colorization-v2](./colorization-v2/colorization-v2.md) | | |
-| colorization-v2-norebal   | Caffe*         | [colorization-v2-norebal](./colorization-v2-norebal/colorization-v2-norebal.md) | | |
+| colorization-v2           | Caffe*         | [colorization-v2](./colorization-v2/colorization-v2.md) | 64.0047 |  32.2354 |
+| colorization-v2-norebal   | Caffe*         | [colorization-v2-norebal](./colorization-v2-norebal/colorization-v2-norebal.md) | 64.0047 |  32.2354 |
 
 ## Legal Information
 
