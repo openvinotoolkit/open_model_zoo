@@ -17,9 +17,9 @@ limitations under the License.
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
-from accuracy_checker.config import BoolField, ListField
-from accuracy_checker.metrics.metric import FullDatasetEvaluationMetric
-from accuracy_checker.representation import ContainerAnnotation, ContainerPrediction
+from ..config import BoolField, ListField
+from .metrics import FullDatasetEvaluationMetric
+from ..representation import ContainerAnnotation, ContainerPrediction
 
 
 class AttributeClassificationMetric(FullDatasetEvaluationMetric):
