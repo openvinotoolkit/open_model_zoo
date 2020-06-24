@@ -336,7 +336,7 @@ class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
     """
     __provider__ = 'normalized_embedding_accuracy'
 
-    annotation_types = (ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, )
+    annotation_types = (ReIdentificationAnnotation, )
     prediction_types = (ReIdentificationPrediction, )
 
     def submit_all(self, annotations, predictions):
