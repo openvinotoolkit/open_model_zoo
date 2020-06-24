@@ -77,6 +77,8 @@ from .mono_depth import MonoDepthAdapter
 from .image_inpainting import ImageInpaintingAdapter
 from .style_transfer import StyleTransferAdapter
 
+from .attribute_classification import AttributeClassificationAdapter
+
 __all__ = [
     'Adapter',
     'AdapterField',
@@ -139,5 +141,7 @@ __all__ = [
     'MonoDepthAdapter',
 
     'ImageInpaintingAdapter',
-    'StyleTransferAdapter'
+    'StyleTransferAdapter',
+
+    'AttributeClassificationAdapter'
 ]
