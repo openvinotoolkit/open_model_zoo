@@ -22,11 +22,11 @@ The models can be downloaded via Model Downloader
 | EfficientNet B5             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b5](./efficientnet-b5/efficientnet-b5.md)<br>[efficientnet-b5-pytorch](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | 83.33/96.67<br>83.69/96.71 | 21.252 | 30.303 |
 | EfficientNet B7             | PyTorch\*                          | [efficientnet-b7-pytorch](./efficientnet-b7-pytorch/efficientnet-b7-pytorch.md) | 84.42/96.91 | 77.618  | 66.193 |
 | EfficientNet B7 AutoAugment | TensorFlow\*                       | [efficientnet-b7_auto_aug](./efficientnet-b7_auto_aug/efficientnet-b7_auto_aug.md) | 84.68/97.09 | 77.618  | 66.193 |
-| HBONet 1.0                  | PyTorch\*                          | [hbonet-1.0](./hbonet-1.0/hbonet-1.0.md)  | 73.1/91.0 | 0.305 |
-| HBONet 0.5                  | PyTorch\*                          | [hbonet-0.5](./hbonet-0.5/hbonet-0.5.md)  | 67.0/86.9 | 0.096 |
-| HBONet 0.25                 | PyTorch\*                          | [hbonet-0.25](./hbonet-0.25/hbonet-0.25.md) | 57.3/79.8 | 0.037 |
+| HBONet 1.0                  | PyTorch\*                          | [hbonet-1.0](./hbonet-1.0/hbonet-1.0.md)  | 73.1/91.0 | 0.6208 | 4.5443 |
+| HBONet 0.5                  | PyTorch\*                          | [hbonet-0.5](./hbonet-0.5/hbonet-0.5.md)  | 67.0/86.9 | 0.1977 | 2.5287 |
+| HBONet 0.25                 | PyTorch\*                          | [hbonet-0.25](./hbonet-0.25/hbonet-0.25.md) | 57.3/79.8 | 0.0758 | 1.9299 |
 | Inception (GoogleNet) V1    | Caffe\*<br>TensorFlow\*            | [googlenet-v1](./googlenet-v1/googlenet-v1.md)<br>[googlenet-v1-tf](./googlenet-v1-tf/googlenet-v1-tf.md) | | 3.016~3.266 | 6.619~6.999 |
-| Inception (GoogleNet) V2    | Caffe\*<br>TensorFlow\*            | [googlenet-v2](./googlenet-v2/googlenet-v2.md)<br[>googlenet-v2-tf](./googlenet-v2-tf/googlenet-v2-tf.md) | | 4.058 | 11.185 |
+| Inception (GoogleNet) V2    | Caffe\*<br>TensorFlow\*            | [googlenet-v2](./googlenet-v2/googlenet-v2.md)<br>[googlenet-v2-tf](./googlenet-v2-tf/googlenet-v2-tf.md) | | 4.058 | 11.185 |
 | Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/googlenet-v3.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) |  | 11.469 | 23.817 |
 | Inception (GoogleNet) V4    | TensorFlow\*                       | [googlenet-v4-tf](./googlenet-v4-tf/googlenet-v4-tf.md) | | 24.584 | 42.648 |
 | Inception-ResNet V2         | TensorFlow\*                       | [inception-resnet-v2-tf](./inception-resnet-v2-tf/inception-resnet-v2-tf.md) | | 22.227 | 30.223 |
@@ -120,7 +120,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Faster R-CNN with ResNet 50          | TensorFlow\*             | [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/faster_rcnn_resnet50_coco.md) | 57.203 | 29.162 |
 | Faster R-CNN with ResNet 101         | TensorFlow\*             | [faster_rcnn_resnet101_coco](./faster_rcnn_resnet101_coco/faster_rcnn_resnet101_coco.md) | 112.052 | 48.128 |
 | MobileFace Detection V1              | MXNet\*                  | [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/mobilefacedet-v1-mxnet.md)| 3.5456 | 7.6828 |
-| MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/mtcnn.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| | |
+| MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/mtcnn.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| <br>3.3715<br>0.0031<br>0.0263|<br>0.0066<br>0.1002<br>0.3890|
 | Pelee                                | Caffe\*                  | [pelee-coco](./pelee-coco/pelee-coco.md) | 1.290 | 5.98 |
 | RetinaNet with Resnet 50             | TensorFlow\*             | [retinanet-tf](./retinanet-tf/retinanet-tf.md) | 238.9469 | 64.9706 |
 | R-FCN with Resnet-101                | TensorFlow\*             | [rfcn-resnet101-coco-tf](./rfcn-resnet101-coco-tf/rfcn-resnet101-coco-tf.md) | 53.462 | 171.85 |
@@ -182,7 +182,7 @@ Since this task contains - in the general setting - some ambiguity, the resultin
 
 | Model Name                  | Implementation | OMZ Model Name                | GFlops    | mParams |
 | --------------------------- | -------------- | ----------------------------- | --------- | ------- |
-| midasnet                    | PyTorch\*      | [midasnet](./midasnet/midasnet.md)| 207.4915  |         |
+| midasnet                    | PyTorch\*      | [midasnet](./midasnet/midasnet.md)| 207.4915  |    104.0814     |
 
 ## Image Inpainting
 
@@ -190,7 +190,7 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
-| GMCNN Inpainting          | TensorFlow\*   | [gmcnn-places2-tf](./gmcnn-places2-tf/gmcnn-places2-tf.md) | 33.47Db | | |
+| GMCNN Inpainting          | TensorFlow\*   | [gmcnn-places2-tf](./gmcnn-places2-tf/gmcnn-places2-tf.md) | 33.47Db | 691.1589 | 12.7773|
 
 ## Style Transfer
 
@@ -207,7 +207,7 @@ The task of action recognition is to predict action that is being performed on a
 
 | Model Name                        | Implementation | OMZ Model Name | GFlops | mParams |
 | --------------------------------- | ---------------| -------------- | ------ | ------- |
-| RGB-I3D, pretrained on ImageNet\* | TensorFlow\*   | [i3d-rgb-tf](./i3d-rgb-tf/i3d-rgb-tf.md) | | |
+| RGB-I3D, pretrained on ImageNet\* | TensorFlow\*   | [i3d-rgb-tf](./i3d-rgb-tf/i3d-rgb-tf.md) | 278.9815 | 12.6900|
 
 ## Colorization
 
