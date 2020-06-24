@@ -71,6 +71,12 @@ from .question_answering import ExactMatchScore, ScoreF1
 from .mpjpe_multiperson import MpjpeMultiperson
 from .language_modeling import ScorePerplexity
 
+from .attribute_classification import (
+    AttributeClassificationRecall,
+    AttributeClassificationPrecision,
+    AttributeClassificationAccuracy
+)
+
 __all__ = [
     'Metric',
     'MetricsExecutor',
@@ -146,4 +152,8 @@ __all__ = [
     'MpjpeMultiperson',
 
     'ScorePerplexity',
+
+    'AttributeClassificationRecall',
+    'AttributeClassificationPrecision',
+    'AttributeClassificationAccuracy'
 ]
