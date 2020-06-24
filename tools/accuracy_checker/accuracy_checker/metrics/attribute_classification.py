@@ -18,7 +18,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 from ..config import BoolField, ListField
-from .metrics import FullDatasetEvaluationMetric
+from .metric import FullDatasetEvaluationMetric
 from ..representation import ContainerAnnotation, ContainerPrediction
 
 
