@@ -4,7 +4,7 @@ This Readme describes Audio Classification demo application that uses audio clas
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network to Inference engine. It uses only audiofiles in `wav` format. Audio could be converted to different framerate using `-fr/--framerate` option, if necessary for the model. After reading the audio, audio sliced into clips to fit model input (clips could overlap each other with `-ol/--overlap` option) and each clip is processed separately with its own prediction. 
+Upon the start-up the demo application reads command line parameters and loads a network to Inference engine. It uses only audiofiles in `wav` format. Audio could be converted to different samplerate using `-sr/--samplerate` option, if necessary for the model. After reading the audio, it is sliced into clips to fit model input (clips are allowed to overlap with `-ol/--overlap` option) and each clip is processed separately with its own prediction. 
 
 ## Running
 
@@ -16,7 +16,7 @@ The command yields the following usage message:
 ```
 usage: audio_classification_demo.py [-h] -i INPUT -m MODEL [-l CPU_EXTENSION]
                                     [-d DEVICE] [--labels LABELS]
-                                    [-fr FRAMERATE] [-ol OVERLAP]
+                                    [-fr SAMPLERATE] [-ol OVERLAP]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -34,16 +34,16 @@ Options:
                         will look for a suitable plugin for device specified.
                         Default value is CPU
   --labels LABELS       Optional. Labels mapping file
-  -fr FRAMERATE, --framerate FRAMERATE
-                        Optional. Set framerate for audio input
+  -sr SAMPLERATE, --samplerate SAMPLERATE
+                        Optional. Set samplerate for audio input
   -ol OVERLAP, --overlap OVERLAP
                         Optional. Set the overlapping between audio clip in
                         samples or percent
 ```
 Running the application with the empty list of options yields the usage message given above and an error message.
-You can use the following command to do inference on GPU with a pre-trained audio classification model and conversion input audio to framerate of 16000:
+You can use the following command to do inference on GPU with a pre-trained audio classification model and conversion input audio to samplerate of 16000:
 ```
-    python3 audio_classification_demo.py -i <path_to_wav>/input_audio.wav -m <path_to_model>/aclnet.xml -d GPU --framerate 16000
+    python3 audio_classification_demo.py -i <path_to_wav>/input_audio.wav -m <path_to_model>/aclnet.xml -d GPU --samplerate 16000
 ```
 
 To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).

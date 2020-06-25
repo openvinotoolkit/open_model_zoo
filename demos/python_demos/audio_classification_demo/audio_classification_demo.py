@@ -16,9 +16,9 @@
 """
 
 from argparse import ArgumentParser, SUPPRESS
-from datetime import datetime
 import logging
 import sys
+import time
 import wave
 
 import numpy as np
@@ -52,8 +52,8 @@ def build_argparser():
                            "Default value is CPU")
     args.add_argument('--labels', type=str, default=None,
                       help="Optional. Labels mapping file")
-    args.add_argument('-fr', '--framerate', type=int,
-                      help="Optional. Set framerate for audio input")
+    args.add_argument('-sr', '--samplerate', type=int,
+                      help="Optional. Set samplerate for audio input")
     args.add_argument('-ol', '--overlap', type=type_overlap, default=0,
                       help='Optional. Set the overlapping between audio clip in samples or percent')
 
@@ -61,21 +61,21 @@ def build_argparser():
 
 
 class AudioSource:
-    def __init__(self, source, channels=2, framerate=None):
+    def __init__(self, source, channels=2, samplerate=None):
         self.source = source
-        self.framerate = framerate
+        self.samplerate = samplerate
         self.channels = channels
 
     def load(self):
-        framerate, audio = read_wav(self.source, as_float=True)
+        samplerate, audio = read_wav(self.source, as_float=True)
         audio = audio.T
         if audio.shape[0] != self.channels:
             raise RuntimeError("Audio has unsupported number of channels")
-        if self.framerate:
-            if self.framerate != framerate:
-                audio = resample(audio, framerate, self.framerate)
+        if self.samplerate:
+            if self.samplerate != samplerate:
+                audio = resample(audio, samplerate, self.samplerate)
         else:
-            self.framerate = framerate
+            self.samplerate = samplerate
 
         self.audio = audio
 
@@ -139,15 +139,17 @@ def main():
         ie.add_extension(args.cpu_extension, 'CPU')
 
     log.info("Loading model {}".format(args.model))
-    model_path = args.model[:-4]
-    net = ie.read_network(model_path + ".xml", model_path + ".bin")
+    net = ie.read_network(args.model, args.model[:-4] + ".bin")
 
     if args.device == "CPU":
         supported_layers = ie.query_network(net, args.device)
         not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
         if len(not_supported_layers) > 0:
-            raise RuntimeError("Following layers are not supported by the {} plugin:\n {}"
-                               .format(args.device, ', '.join(not_supported_layers)))
+            log.error("Following layers are not supported by the {} plugin:\n {}"
+                      .format(args.device, ', '.join(not_supported_layers)))
+            log.error("Please try to specify cpu extensions library path in sample's command line parameters using "
+                      "-l/--cpu_extension command line argument")
+            sys.exit(1)
 
     if len(net.inputs) != 1:
         log.error("Demo supports only models with 1 input layer")
@@ -171,7 +173,7 @@ def main():
 
     batch_size, channels, _, length = input_shape
 
-    audio = AudioSource(args.input, channels=channels, framerate=args.framerate)
+    audio = AudioSource(args.input, channels=channels, samplerate=args.samplerate)
     audio.load()
 
     hop = length - args.overlap if isinstance(args.overlap, int) else int(length * (1.0 - args.overlap))
@@ -182,18 +184,18 @@ def main():
     log.info("Starting inference")
     outputs = []
     clips = 0
-    infer_time = []
+    infer_time = 0
     for idx, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
         if len(chunk.shape) != len(input_shape):
             chunk = np.reshape(chunk, newshape=input_shape)
-        infer_start_time = datetime.now()
+        infer_start_time = time.perf_counter()
         output = exec_net.infer(inputs={input_blob: chunk})
-        infer_time.append(datetime.now() - infer_start_time)
+        infer_time += time.perf_counter() - infer_start_time
         clips += batch_size
         output = output[output_blob]
         for batch, data in enumerate(output):
-            start_time = (idx*batch_size + batch)*hop / audio.framerate
-            end_time = ((idx*batch_size + batch)*hop + length) / audio.framerate
+            start_time = (idx*batch_size + batch)*hop / audio.samplerate
+            end_time = ((idx*batch_size + batch)*hop + length) / audio.samplerate
             outputs.append(data)
             label = np.argmax(data)
             log.info("[{:.2f}:{:.2f}] - {:s}: {:.2f}%".format(start_time, end_time,
@@ -205,9 +207,9 @@ def main():
         sys.exit(1)
     total = np.mean(outputs, axis=0)
     label = np.argmax(total)
-    log.info("Total over audio - {:s}: {:.2f}%".format(labels[label] if labels else "Class {}".format(label),
-                                                       total[label]*100))
-    logging.info("Average infer time - {:.3f}s per clip".format((np.array(infer_time).sum() / clips).total_seconds()))
+    log.info("Averaged over the audio prediction - {:s}: {:.2f}%"
+             .format(labels[label] if labels else "Class {}".format(label), total[label]*100))
+    logging.info("Average infer time - {:.1f} ms per clip".format(infer_time / clips * 1000))
 
 
 if __name__ == '__main__':
