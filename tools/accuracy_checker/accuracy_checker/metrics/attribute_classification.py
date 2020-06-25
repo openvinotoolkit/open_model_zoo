@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 import numpy as np
-from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 from ..config import BoolField, ListField
 from .metric import FullDatasetEvaluationMetric
@@ -30,8 +29,8 @@ class AttributeClassificationMetric(FullDatasetEvaluationMetric):
     annotation_types = (ContainerAnnotation, )
     prediction_types = (ContainerPrediction, )
 
-    is_annotation_prediction_dict_computed = False
-    annotation_prediction_dict = {}
+    is_cm_computed = False
+    cm_dict = {}
 
     @classmethod
     def parameters(cls):
@@ -59,32 +58,37 @@ class AttributeClassificationMetric(FullDatasetEvaluationMetric):
     def submit_all(self, annotations, predictions):
         return self.evaluate(annotations, predictions)
 
-    def compute_annotation_prediction_dict(self, annotations, predictions):
-        if self.is_annotation_prediction_dict_computed:
+    def compute_cm(self, annotations, predictions):
+        if self.is_cm_computed:
             return
-        self.is_annotation_prediction_dict_computed = True
         if len(annotations) != len(predictions):
             raise ValueError(
                 "different lengths of annotations and predictions")
-        ret = {}
+        label_list_dict = {}
         for attr in self.attributes:
-            ret[attr] = {
+            label_list_dict[attr] = {
                 'annotation': np.zeros_like(annotations),
                 'prediction': np.zeros_like(predictions)
             }
+        # Create label lists
         for i, (annotation, prediction) in enumerate(zip(annotations, predictions)):
             for attr in self.attributes:
-                ret[attr]['prediction'][i] = prediction[attr].label
-                if isinstance(annotation[attr], int):
-                    ret[attr]['annotation'][i] = annotation[attr].label
+                label_list_dict[attr]['prediction'][i] = prediction[attr].label
+                if isinstance(annotation[attr].label, int):
+                    label_list_dict[attr]['annotation'][i] = annotation[attr].label
                 elif hasattr(annotation[attr].label, '__contains__'):
                     if prediction[attr].label in annotation[attr].label:
-                        ret[attr]['annotation'][i] = prediction[attr].label
+                        label_list_dict[attr]['annotation'][i] = prediction[attr].label
                     else:
-                        ret[attr]['annotation'][i] = annotation[attr].label[0]
-        self.annotation_prediction_dict = ret
-        self.is_annotation_prediction_dict_computed = True
-
+                        label_list_dict[attr]['annotation'][i] = annotation[attr].label[0]
+        # Create confusion matrix for each attribute
+        cm_dict = {}
+        for attr, label_list in label_list_dict.items():
+            cm_dict[attr] = self.confusion_matrix(
+                label_list['annotation'], label_list['prediction']
+            )
+        self.cm_dict = cm_dict
+        self.is_cm_computed = True
 
     def __create_meta(self):
         meta = {
@@ -94,8 +98,16 @@ class AttributeClassificationMetric(FullDatasetEvaluationMetric):
         return meta
 
     def reset(self):
-        self.is_annotation_prediction_dict_computed = False
-        self.annotation_prediction_dict = {}
+        self.is_cm_computed = False
+        self.cm_dict = {}
+
+    @staticmethod
+    def confusion_matrix(annotation_labels: np.ndarray, prediction_labels: np.ndarray):
+        num_unique = max(annotation_labels.max(), prediction_labels.max()) + 1
+        confusion_matrix = np.zeros((num_unique, num_unique), dtype=np.int32)
+        for annotation_label, prediction_label in zip(annotation_labels, prediction_labels):
+            confusion_matrix[annotation_label, prediction_label] += 1
+        return confusion_matrix
 
 
 class AttributeClassificationAccuracy(AttributeClassificationMetric):
@@ -106,14 +118,11 @@ class AttributeClassificationAccuracy(AttributeClassificationMetric):
     __provider__ = 'attribute_accuracy'
 
     def evaluate(self, annotations, predictions):
-        self.compute_annotation_prediction_dict(annotations, predictions)
+        self.compute_cm(annotations, predictions)
         per_attr_accuracy = []
         for attr in self.attributes:
-            per_attr_accuracy.append(
-                accuracy_score(
-                    self.annotation_prediction_dict[attr]['annotation'].astype(
-                        np.int32),
-                    self.annotation_prediction_dict[attr]['prediction'].astype(np.int32)))
+            cmat = self.cm_dict[attr]
+            per_attr_accuracy.append(np.diag(cmat).sum() / cmat.sum())
         return per_attr_accuracy
 
 
@@ -125,17 +134,19 @@ class AttributeClassificationRecall(AttributeClassificationMetric):
     __provider__ = 'attribute_recall'
 
     def evaluate(self, annotations, predictions):
-        self.compute_annotation_prediction_dict(annotations, predictions)
+        self.compute_cm(annotations, predictions)
         per_attr_recall = []
         for attr in self.attributes:
-            per_attr_recall.append(
-                recall_score(
-                    self.annotation_prediction_dict[attr]['annotation'].astype(
-                        np.int32),
-                    self.annotation_prediction_dict[attr]['prediction'].astype(
-                        np.int32),
-                    average='macro'))
+            per_attr_recall.append(self.recall_score(attr))
         return per_attr_recall
+
+    def recall_score(self, attribute: str):
+        cmat = self.cm_dict[attribute]
+        num_attribute = cmat.shape[0]
+        recall = []
+        for i in range(num_attribute):
+            recall.append(cmat[i, i] / cmat[i, :].sum())
+        return np.nanmean(recall)
 
 
 class AttributeClassificationPrecision(AttributeClassificationMetric):
@@ -146,14 +157,16 @@ class AttributeClassificationPrecision(AttributeClassificationMetric):
     __provider__ = 'attribute_precision'
 
     def evaluate(self, annotations, predictions):
-        self.compute_annotation_prediction_dict(annotations, predictions)
+        self.compute_cm(annotations, predictions)
         per_attr_precision = []
         for attr in self.attributes:
-            per_attr_precision.append(
-                precision_score(
-                    self.annotation_prediction_dict[attr]['annotation'].astype(
-                        np.int32),
-                    self.annotation_prediction_dict[attr]['prediction'].astype(
-                        np.int32),
-                    average='macro'))
+            per_attr_precision.append(self.precision_score(attr))
         return per_attr_precision
+
+    def precision_score(self, attribute: str):
+        cmat = self.cm_dict[attribute]
+        num_attribute = cmat.shape[0]
+        precision = []
+        for i in range(num_attribute):
+            precision.append(cmat[i, i] / cmat[:, i].sum())
+        return np.nanmean(precision)
