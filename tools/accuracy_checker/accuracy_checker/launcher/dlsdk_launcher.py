@@ -797,7 +797,9 @@ class DLSDKLauncher(Launcher):
             self.original_outputs = list(self.exec_network.outputs.keys())
             has_info = hasattr(self.exec_network, 'input_info')
             if has_info:
-                ie_input_info = OrderedDict([(name, data.input_data) for name, data in self.network.input_info.items()])
+                ie_input_info = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
             else:
                 ie_input_info = self.exec_network.inputs
             first_input = next(iter(ie_input_info))
