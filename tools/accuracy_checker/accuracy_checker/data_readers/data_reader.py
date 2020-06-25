@@ -105,6 +105,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(list, self._read_list)
         self.read_dispatcher.register(ClipIdentifier, self._read_clip)
         self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
+        self.multi_infer = False
 
         self.validate_config()
         self.configure()

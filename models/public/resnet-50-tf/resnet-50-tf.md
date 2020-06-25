@@ -6,7 +6,7 @@
 pretrained on the ImageNet dataset. Originally redistributed in Saved model format,
 converted to frozen graph using `tf.graph_util` module.
 For details see [paper](https://arxiv.org/abs/1512.03385),
-[repository](https://github.com/tensorflow/models/tree/master/official/r1/resnet).
+[repository](https://github.com/tensorflow/models/tree/v2.2.0/official/r1/resnet).
 
 ### Steps to Reproduce Conversion to Frozen Graph
 

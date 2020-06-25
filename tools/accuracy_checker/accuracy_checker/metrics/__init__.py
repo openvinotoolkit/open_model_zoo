@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2019-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -78,6 +78,12 @@ from .question_answering import ExactMatchScore, ScoreF1
 from .mpjpe_multiperson import MpjpeMultiperson
 from .language_modeling import ScorePerplexity
 
+from .attribute_classification import (
+    AttributeClassificationRecall,
+    AttributeClassificationPrecision,
+    AttributeClassificationAccuracy
+)
+
 __all__ = [
     'Metric',
     'MetricsExecutor',
@@ -154,4 +160,8 @@ __all__ = [
     'MpjpeMultiperson',
 
     'ScorePerplexity',
+
+    'AttributeClassificationRecall',
+    'AttributeClassificationPrecision',
+    'AttributeClassificationAccuracy'
 ]
