@@ -1,6 +1,6 @@
 # Audio Classification Python\* Demo
 
-This Readme describes Audio Classification demo application that uses audio classification models. 
+Demo application for audio classification algorithm.
 
 ## How It Works
 
