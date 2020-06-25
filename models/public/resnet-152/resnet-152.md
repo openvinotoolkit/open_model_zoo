@@ -17,6 +17,11 @@
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 76.802%|
+| Top 5  | 93.192%|
+
 See [the original repository](https://github.com/KaimingHe/deep-residual-networks).
 
 ## Performance
