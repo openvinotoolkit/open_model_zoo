@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2019-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -77,6 +77,8 @@ from .mono_depth import MonoDepthAdapter
 from .image_inpainting import ImageInpaintingAdapter
 from .style_transfer import StyleTransferAdapter
 
+from .attribute_classification import AttributeClassificationAdapter
+
 __all__ = [
     'Adapter',
     'AdapterField',
@@ -139,5 +141,7 @@ __all__ = [
     'MonoDepthAdapter',
 
     'ImageInpaintingAdapter',
-    'StyleTransferAdapter'
+    'StyleTransferAdapter',
+
+    'AttributeClassificationAdapter'
 ]
