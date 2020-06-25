@@ -415,7 +415,7 @@ def get_plugin_configs(device, num_streams, num_threads):
     if num_streams:
         devices_nstreams = {device: num_streams for device in ['CPU', 'GPU'] if device in device} \
                            if num_streams.isdigit() \
-                           else dict([device.split(':') for device in num_streams.split(',')])
+                           else dict(device.split(':', 1) for device in num_streams.split(','))
 
     if 'CPU' in device:
         if num_threads is not None:
