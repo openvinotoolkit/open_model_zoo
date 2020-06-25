@@ -660,8 +660,8 @@ class YoutubeFacesAccuracy(FullDatasetEvaluationMetric):
                 annotation.x_maxs[0],
                 annotation.y_maxs[0]
             ]
+            found = False
             for i in range(prediction.scores.size):
-                found = False
                 dt_face = [
                     prediction.x_mins[i],
                     prediction.y_mins[i],

@@ -981,6 +981,9 @@ class FacePatch(Preprocessor):
             ] = dst_rect
             face_patches.append(face_patch)
 
+        if candidates.x_mins.size == 0:
+            face_patches.append(data)
+
         image.data = face_patches
         image.metadata.update({
             'multi_infer': True,
