@@ -23,7 +23,7 @@ The model output is a typical vector containing the tracked object data, as prev
 
 | Metric | Value |
 | ------ | ----- |
-|  MAP | 79.8377 |
+|  mAP | 79.8377% |
 
 See [the original repository](https://github.com/chuanqi305/MobileNet-SSD).
 

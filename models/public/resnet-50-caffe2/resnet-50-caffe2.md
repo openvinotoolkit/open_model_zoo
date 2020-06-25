@@ -22,8 +22,8 @@ paper <https://arxiv.org/abs/1512.03385>.
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 76.38 |
-| Top 5  | 93.188|
+| Top 1  | 76.38% |
+| Top 5  | 93.188%|
 
 ## Performance
 

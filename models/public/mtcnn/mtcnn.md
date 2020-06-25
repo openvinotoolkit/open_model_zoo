@@ -17,8 +17,8 @@ The input for each models is a blob with specific face data. The mean values nee
 
 | Metric | Value |
 | ------ | ----- |
-| MAP | 48.1308|
-| Recall | 62.2625|
+| mAP | 48.1308%|
+| Recall | 62.2625%|
 
 ## mtcnn-p model specification
 

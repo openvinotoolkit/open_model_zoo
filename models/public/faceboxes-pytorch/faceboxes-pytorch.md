@@ -20,7 +20,7 @@ the [repository](https://github.com/zisianw/FaceBoxes.PyTorch), [paper](https://
 
 | Metric | Value |
 | ------ | ----- |
-| MAP   | 83.565|
+| mAP   | 83.565%|
 
 ## Performance
 

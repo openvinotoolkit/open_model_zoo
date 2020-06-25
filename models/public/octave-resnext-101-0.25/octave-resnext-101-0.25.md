@@ -19,8 +19,8 @@ The `octave-resnext-101-0.25` model is a modification of [`resnext-101`](https:/
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 79.556|
-| Top 5  | 94.444|
+| Top 1  | 79.556%|
+| Top 5  | 94.444%|
 
 ## Performance
 

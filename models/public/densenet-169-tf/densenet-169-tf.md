@@ -20,8 +20,8 @@ group of models designed to perform image classification. The weights were conve
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 75.76 |
-| Top 5  | 92.81|
+| Top 1  | 75.76% |
+| Top 5  | 92.81%|
 
 ## Performance
 

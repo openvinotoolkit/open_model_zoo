@@ -28,8 +28,8 @@ matching with those in the ImageNet database.
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 76.128|
-| Top 5  | 92.858|
+| Top 1  | 76.128%|
+| Top 5  | 92.858%|
 
 ## Performance
 

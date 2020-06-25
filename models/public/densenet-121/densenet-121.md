@@ -24,8 +24,8 @@ models, check out the [repository](https://github.com/shicai/DenseNet-Caffe).
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 74.42 |
-| Top 5  | 92.136|
+| Top 1  | 74.42% |
+| Top 5  | 92.136%|
 
 See [the original repository](https://github.com/shicai/DenseNet-Caffe).
 

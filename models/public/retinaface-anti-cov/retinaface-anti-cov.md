@@ -16,7 +16,7 @@ RetinaFace-Anti-Cov is a customized one stage face detector to help people prote
 
 | Metric | Value |
 | ------ | ----- |
-| MAP | 77.1531|
+| mAP | 77.1531%|
 
 ## Input
 

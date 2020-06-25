@@ -20,8 +20,8 @@ The `octave-densenet-121-0.125` model is a modification of [`densenet-121`](http
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 76.066|
-| Top 5  | 93.044|
+| Top 1  | 76.066%|
+| Top 5  | 93.044%|
 
 ## Performance
 

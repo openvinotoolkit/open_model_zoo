@@ -20,8 +20,8 @@ The `octave-resnet-26-0.25` model is a modification of [`resnet-26`](https://arx
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 76.076|
-| Top 5  | 92.584|
+| Top 1  | 76.076%|
+| Top 5  | 92.584%|
 
 ## Performance
 

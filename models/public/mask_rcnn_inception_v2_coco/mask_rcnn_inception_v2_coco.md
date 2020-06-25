@@ -20,8 +20,8 @@ For details, see a [paper](https://arxiv.org/abs/1703.06870).
 
 | Metric | Value |
 | ------ | ----- |
-| coco_orig_precision | 27.1199|
-| coco_orig_segm_precision | 21.4805|
+| coco_orig_precision | 27.1199%|
+| coco_orig_segm_precision | 21.4805%|
 
 ## Performance
 

@@ -52,7 +52,7 @@ Accuracy metric obtained on VOC2012\* validation dataset for converted model.
 
 | Metric | Value |
 | ------ | ------|
-| mAP    | 72.17 |
+| mAP    | 72.17% |
 
 ## Input
 

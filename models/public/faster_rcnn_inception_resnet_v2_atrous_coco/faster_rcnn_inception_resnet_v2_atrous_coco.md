@@ -19,9 +19,8 @@ Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection.
 
 | Metric | Value |
 | ------ | ----- |
-| coco_orig_precision | 36.24|
-| coco_precision | 36.76 |
-| MAP| 52.41|
+| coco_precision | 36.76% |
+| mAP| 52.41%|
 
 ## Performance
 

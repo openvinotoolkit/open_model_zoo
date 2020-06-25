@@ -23,8 +23,8 @@ The model output for `googlenet-v1` is the typical object classifier output for 
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 68.928|
-| Top 5  | 89.144|
+| Top 1  | 68.928%|
+| Top 5  | 89.144%|
 
 See [the original repository](https://github.com/BVLC/caffe/tree/master/models/bvlc_googlenet).
 

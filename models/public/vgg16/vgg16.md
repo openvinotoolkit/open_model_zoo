@@ -23,8 +23,8 @@ The model output for `vgg16` is the typical object classifier output for the 100
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 70.968|
-| Top 5  | 89.878|
+| Top 1  | 70.968%|
+| Top 5  | 89.878%|
 
 ## Performance
 

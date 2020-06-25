@@ -20,8 +20,8 @@ The `octave-resnet-101-0.125` model is a modification of [`resnet-101`](https://
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 79.182|
-| Top 5  | 94.42|
+| Top 1  | 79.182%|
+| Top 5  | 94.42%|
 
 ## Performance
 

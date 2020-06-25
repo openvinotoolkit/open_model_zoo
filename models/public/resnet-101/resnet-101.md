@@ -19,8 +19,8 @@
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 76.364|
-| Top 5  | 92.902|
+| Top 1  | 76.364%|
+| Top 5  | 92.902%|
 
 See [the original repository](https://github.com/KaimingHe/deep-residual-networks).
 

@@ -19,8 +19,8 @@ The `octave-resnext-50-0.25` model is a modification of [`resnext-50`](https://a
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 78.772|
-| Top 5  | 94.18|
+| Top 1  | 78.772%|
+| Top 5  | 94.18%|
 
 ## Performance
 

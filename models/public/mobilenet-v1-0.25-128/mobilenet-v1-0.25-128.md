@@ -19,8 +19,8 @@
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 40.54|
-| Top 5  | 65   |
+| Top 1  | 40.54%|
+| Top 5  | 65%   |
 
 ## Performance
 

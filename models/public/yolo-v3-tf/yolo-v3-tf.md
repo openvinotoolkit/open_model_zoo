@@ -53,8 +53,8 @@ Accuracy metrics obtained on COCO\* validation dataset for converted model.
 
 | Metric | Value |
 | ------ | ------|
-| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 67.7 |
-| mAP    | 62.27 |
+| mAP    | 62.27% |
+| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 67.7% |
 
 ## Input
 

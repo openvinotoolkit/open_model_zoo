@@ -19,9 +19,8 @@ Faster R-CNN Resnet-101 model. Used for object detection. For details, see the [
 
 | Metric | Value |
 | ------ | ----- |
-| coco_orig_precision | 30.53|
-| coco_precision | 30.95|
-| MAP| 47.21|
+| coco_precision | 30.95%|
+| mAP| 47.21%|
 
 ## Performance
 

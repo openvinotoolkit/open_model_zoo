@@ -21,7 +21,7 @@ The original name of the model is [LResNet50E-IR,ArcFace@ms1m-refine-v1](https:/
 
 | Metric | Value |
 | ------ | ----- |
-| pairwise_accuracy_subsets | 98.8835|
+| LFW accuracy | 98.8835%|
 
 ## Performance
 

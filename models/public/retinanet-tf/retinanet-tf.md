@@ -44,7 +44,7 @@ converted to TensorFlow\* protobuf format. For details, see [paper](https://arxi
 
 | Metric | Value |
 | ------ | ----- |
-| coco_precision | 33.15|
+| coco_precision | 33.15%|
 
 ## Performance
 

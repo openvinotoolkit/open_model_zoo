@@ -19,8 +19,8 @@ CaffeNet\* model is used for classification. For details see [paper](https://arx
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 56.714|
-| Top 5  | 79.916|
+| Top 1  | 56.714%|
+| Top 5  | 79.916%|
 
 ## Performance
 

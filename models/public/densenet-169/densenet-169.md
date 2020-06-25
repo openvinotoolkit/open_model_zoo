@@ -33,8 +33,8 @@ the 1000 different classifications matching those in the ImageNet database.
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 76.106 |
-| Top 5  | 93.106 |
+| Top 1  | 76.106% |
+| Top 5  | 93.106% |
 
 See [the original repository](https://github.com/shicai/DenseNet-Caffe).
 

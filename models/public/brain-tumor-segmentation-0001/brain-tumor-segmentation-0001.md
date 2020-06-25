@@ -22,16 +22,16 @@ Each input modality has its own encoder which are later fused together to produc
 The following accuracy metrics are measured on a `brain tumor` training subset of the [Medical Decathlon](http://medicaldecathlon.com/) dataset.
 
 **Mean**:
-- Dice index for "overall": 0.924003
-- Dice index for "necrotic core / non-enhancing tumor": 0.71467
-- Dice index for "edema": 0.820533
-- Dice index for "enhancing tumor": 0.727001
+- Dice index for "overall": 92.4003%
+- Dice index for "necrotic core / non-enhancing tumor": 71.467%
+- Dice index for "edema": 82.0533%
+- Dice index for "enhancing tumor": 72.7001%
 
 **Median**:
-- Dice index for "overall": 0.931653
-- Dice index for "necrotic core / non-enhancing tumor": 0.771611
-- Dice index for "edema": 0.853434
-- Dice index for "enhancing tumor": 0.845571
+- Dice index for "overall": 93.1653%
+- Dice index for "necrotic core / non-enhancing tumor": 77.1611%
+- Dice index for "edema": 85.3434%
+- Dice index for "enhancing tumor": 84.5571%
 
 See [the original repository](https://github.com/lachinov/brats2018-graphlabunn).
 

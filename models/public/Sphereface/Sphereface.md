@@ -19,7 +19,7 @@
 
 | Metric | Value |
 | ------ | ----- |
-| pairwise_accuracy_subsets | 98.8321|
+| LFW accuracy | 98.8321%|
 
 ## Performance
 

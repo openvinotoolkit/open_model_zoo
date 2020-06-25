@@ -23,8 +23,7 @@ The model output is a typical vector containing the tracked object data, as prev
 
 | Metric | Value |
 | ------ | ----- |
-| coco_orig_precision | 24.823|
-| coco_precision | 24.9452|
+| coco_precision | 24.9452%|
 
 ## Performance
 

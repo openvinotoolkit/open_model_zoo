@@ -22,7 +22,7 @@ and [paper](https://arxiv.org/abs/1708.02002).
 
 | Metric | Value |
 | ------ | ----- |
-| coco_precision | 38.4557 |
+| coco_precision | 38.4557% |
 
 ## Performance
 

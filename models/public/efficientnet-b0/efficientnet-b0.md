@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `efficientnet-b0` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946) models 
+The `efficientnet-b0` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946) models
 designed to perform image classification.
 This model was pretrained in TensorFlow\*.
 All the EfficientNet models have been pretrained on the ImageNet\* image database.
@@ -23,8 +23,8 @@ For details about this family of models, check out the [TensorFlow Cloud TPU rep
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 75.70          | 75.70           |
-| Top 5  | 92.76          | 92.76           | 
+| Top 1  | 75.70%          | 75.70%           |
+| Top 5  | 92.76%          | 92.76%           |
 
 ## Performance
 

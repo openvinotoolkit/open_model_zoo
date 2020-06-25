@@ -19,8 +19,7 @@ The `ssd_mobilenet_v1_coco` model is a [Single-Shot multibox Detection (SSD)](ht
 
 | Metric | Value |
 | ------ | ----- |
-| coco_orig_precision | 23.1576|
-| coco_precision | 23.3212|
+| coco_precision | 23.3212%|
 
 ## Performance
 
