@@ -38,6 +38,15 @@ The models can be downloaded via Model Downloader
 | MobileNet V2 1.4 224        | TensorFlow\*                       | [mobilenet-v2-1.4-224](./mobilenet-v2-1.4-224/mobilenet-v2-1.4-224.md) | 74.09/91.97 | 1.183  | 6.087 |
 | MobileNet V3 Small 1.0      | TensorFlow\*                       | [mobilenet-v3-small-1.0-224-tf](./mobilenet-v3-small-1.0-224-tf/mobilenet-v3-small-1.0-224-tf.md) | 67.36/87.45 | 0.121 | 2.537 |
 | MobileNet V3 Large 1.0      | TensorFlow\*                       | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/mobilenet-v3-large-1.0-224-tf.md) | 75.70/92.76 | 0.4536 | 5.4721 |
+| DenseNet 121, alpha=0.125   | MXNet\*                            | [octave-densenet-121-0.125](./octave-densenet-121-0.125/octave-densenet-121-0.125.md) | 76.066/93.044 | 4.883 | 7.977 |
+| ResNet 26, alpha=0.25       | MXNet\*                            | [octave-resnet-26-0.25](./octave-resnet-26-0.25/octave-resnet-26-0.25.md)     | 76.076/ 92.584| 3.768 | 15.99 |
+| ResNet 50, alpha=0.125      | MXNet\*                            | [octave-resnet-50-0.125](./octave-resnet-50-0.125/octave-resnet-50-0.125.md)    | 78.19/93.862 | 7.221 | 25.551 |
+| ResNet 101, alpha=0.125     | MXNet\*                            | [octave-resnet-101-0.125](./octave-resnet-101-0.125/octave-resnet-101-0.125.md)   | 79.182/94.42 | 13.387 | 44.543 |
+| ResNet 200, alpha=0.125     | MXNet\*                            | [octave-resnet-200-0.125](./octave-resnet-200-0.125/octave-resnet-200-0.125.md)   | 79.99/ 94.866| 25.407 | 64.667 |
+| ResNeXt 50, alpha=0.25      | MXNet\*                            | [octave-resnext-50-0.25](./octave-resnext-50-0.25/octave-resnext-50-0.25.md)    | 78.772/94.18 | 6.444 | 25.02 |
+| ResNeXt 101, alpha=0.25     | MXNet\*                            | [octave-resnext-101-0.25](./octave-resnext-101-0.25/octave-resnext-101-0.25.md)   | 79.556/94.444 | 11.521 | 44.169 |
+| SE-ResNet 50, alpha=0.125   | MXNet\*                            | [octave-se-resnet-50-0.125](./octave-se-resnet-50-0.125/octave-se-resnet-50-0.125.md) | 78.706/94.09 | 7.246 | 28.082 |
+| ResNet 18                   | PyTorch\*                          | [resnet-18-pytorch](./resnet-18-pytorch/resnet-18-pytorch.md) | 69.754/89.088 | 3.637 |  11.68 |
 | ResNet 34                   | PyTorch\*                          | [resnet-34-pytorch](./resnet-34-pytorch/resnet-34-pytorch.md) | 73.30/91.42 | 7.3409 | 21.7892 |
 | ResNet 50                   | Caffe\*<br>PyTorch\*<br>Caffe2\*<br>TensorFlow\*| [resnet-50](./resnet-50/resnet-50.md) <br> [resnet-50-pytorch](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[resnet-50-caffe2](./resnet-50-caffe2/resnet-50-caffe2.md)<br>[resnet-50-tf](./resnet-50-tf/resnet-50-tf.md)| 75.168/92.212<br>76.128/92.858<br>76.38/93.188<br>76.438/93.074 | 6.996~8.216 | 25.53 |
 | ResNet 101                  | Caffe\*                            | [resnet-101](./resnet-101/resnet-101.md) | 76.364/92.902 | 14.441 | 44.496 |
@@ -52,21 +61,6 @@ The models can be downloaded via Model Downloader
 | SqueezeNet v1.1             | Caffe\*<br>Caffe2\*                | [squeezenet1.1](./squeezenet1.1/squeezenet1.1.md)<br>[squeezenet1.1-caffe2](./squeezenet1.1-caffe2/squeezenet1.1-caffe2.md)| 58.382/81<br>56.502/79.576 | 0.785 | 1.236 |
 | VGG 16                      | Caffe\*                            | [vgg16](./vgg16/vgg16.md) | 70.968/89.878 | 30.974 | 138.358 |
 | VGG 19                      | Caffe\*<br>Caffe2\*                | [vgg19](./vgg19/vgg19.md)<br>[vgg19-caffe2](./vgg19-caffe2/vgg19-caffe2.md) | 71.062/89.832<br>71.062/89.832 | 39.3 | 143.667  |
-
-**Octave Convolutions Networks**
-
-This is are modifications of networks using Octave Convolutions. More details can be found [here](https://arxiv.org/abs/1904.05049).
-
-| Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
-| ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
-| DenseNet 121, alpha=0.125 | MXNet\*        | [octave-densenet-121-0.125](./octave-densenet-121-0.125/octave-densenet-121-0.125.md) | 76.066/93.044 | 4.883 | 7.977 |
-| ResNet 26, alpha=0.25     | MXNet\*        | [octave-resnet-26-0.25](./octave-resnet-26-0.25/octave-resnet-26-0.25.md)     | 76.076/ 92.584| 3.768 | 15.99 |
-| ResNet 50, alpha=0.125    | MXNet\*        | [octave-resnet-50-0.125](./octave-resnet-50-0.125/octave-resnet-50-0.125.md)    | 78.19/93.862 | 7.221 | 25.551 |
-| ResNet 101, alpha=0.125   | MXNet\*        | [octave-resnet-101-0.125](./octave-resnet-101-0.125/octave-resnet-101-0.125.md)   | 79.182/94.42 | 13.387 | 44.543 |
-| ResNet 200, alpha=0.125   | MXNet\*        | [octave-resnet-200-0.125](./octave-resnet-200-0.125/octave-resnet-200-0.125.md)   | 79.99/ 94.866| 25.407 | 64.667 |
-| ResNeXt 50, alpha=0.25    | MXNet\*        | [octave-resnext-50-0.25](./octave-resnext-50-0.25/octave-resnext-50-0.25.md)    | 78.772/94.18 | 6.444 | 25.02 |
-| ResNeXt 101, alpha=0.25   | MXNet\*        | [octave-resnext-101-0.25](./octave-resnext-101-0.25/octave-resnext-101-0.25.md)   | 79.556/94.444 | 11.521 | 44.169 |
-| SE-ResNet 50, alpha=0.125 | MXNet\*        | [octave-se-resnet-50-0.125](./octave-se-resnet-50-0.125/octave-se-resnet-50-0.125.md) | 78.706/94.09 | 7.246 | 28.082 |
 
 ## Segmentation
 
@@ -111,7 +105,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 
 | Model Name                           | Implementation           | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------------ | ------------------------ | -------------- | -------- | ------ | ------- |
-| CTPN                                 | TensorFlow\*             | [ctpn](./ctpn/ctpn.md) | 1.3481/0.9098/1.0864 | 55.813 | 17.237 | |
+| CTPN                                 | TensorFlow\*             | [ctpn](./ctpn/ctpn.md) | 1.0864 | 55.813 | 17.237 | |
 | CenterNet (CTDET with DLAV0) 384x384 | ONNX\*                   | [ctdet_coco_dlav0_384](./ctdet_coco_dlav0_384/ctdet_coco_dlav0_384.md)| 41.6105| 34.994 | 17.911 | |
 | CenterNet (CTDET with DLAV0) 512x512 | ONNX\*                   | [ctdet_coco_dlav0_512](./ctdet_coco_dlav0_512/ctdet_coco_dlav0_512.md)| 44.2756| 62.211 | 17.911 | |
 | FaceBoxes                            | PyTorch\*                | [faceboxes-pytorch](./faceboxes-pytorch/faceboxes-pytorch.md)|83.565 | 1.8975 | 1.0059 |
