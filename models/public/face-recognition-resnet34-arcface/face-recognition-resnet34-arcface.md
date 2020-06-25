@@ -19,6 +19,10 @@ The original name of the model is [LResNet34E-IR,ArcFace@ms1m-refine-v1](https:/
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| pairwise_accuracy_subsets| 98.7488|
+
 ## Performance
 
 ## Input

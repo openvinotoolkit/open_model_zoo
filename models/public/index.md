@@ -46,6 +46,7 @@ The models can be downloaded via Model Downloader
 | ResNeXt 50, alpha=0.25      | MXNet\*                            | [octave-resnext-50-0.25](./octave-resnext-50-0.25/octave-resnext-50-0.25.md)    | 78.772/94.18 | 6.444 | 25.02 |
 | ResNeXt 101, alpha=0.25     | MXNet\*                            | [octave-resnext-101-0.25](./octave-resnext-101-0.25/octave-resnext-101-0.25.md)   | 79.556/94.444 | 11.521 | 44.169 |
 | SE-ResNet 50, alpha=0.125   | MXNet\*                            | [octave-se-resnet-50-0.125](./octave-se-resnet-50-0.125/octave-se-resnet-50-0.125.md) | 78.706/94.09 | 7.246 | 28.082 |
+| open-closed-eye-0001        | PyTorch\*                          | [open-closed-eye-0001](./open-closed-eye-0001/description/open-closed-eye-0001.md) |  95.84   | 0.0014 | 0.0113|
 | ResNet 18                   | PyTorch\*                          | [resnet-18-pytorch](./resnet-18-pytorch/resnet-18-pytorch.md) | 69.754/89.088 | 3.637 |  11.68 |
 | ResNet 34                   | PyTorch\*                          | [resnet-34-pytorch](./resnet-34-pytorch/resnet-34-pytorch.md) | 73.30/91.42 | 7.3409 | 21.7892 |
 | ResNet 50                   | Caffe\*<br>PyTorch\*<br>Caffe2\*<br>TensorFlow\*| [resnet-50](./resnet-50/resnet-50.md) <br> [resnet-50-pytorch](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[resnet-50-caffe2](./resnet-50-caffe2/resnet-50-caffe2.md)<br>[resnet-50-tf](./resnet-50-tf/resnet-50-tf.md)| 75.168/92.212<br>76.128/92.858<br>76.38/93.188<br>76.17/92.98 | 6.996~8.216 | 25.53 |
@@ -133,15 +134,6 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/yolo-v2-tf.md) | 56.483/53.1453 | 63.0301	 |	50.9526 |
 | YOLO v3                              | Keras\*                  | [yolo-v3-tf](./yolo-v3-tf/yolo-v3-tf.md) | 67.7221/62.2759 | 65.9843	 |	61.9221 |
 
-## Object attributes
-
-### Facial Landmarks
-
-| Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
-| ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
-| RetinaFace-R50            | MXNet\*        | [retinaface-resnet50](./retinaface-resnet50/retinaface-resnet50.md) | 87.2902 | 100.8478 | 29.427 |
-| RetinaFace-Anti-Cov       | MXNet\*        | [retinaface-anti-cov](./retinaface-anti-cov/retinaface-anti-cov.md) | 77.1531 | 2.7781 | 0.5955 |
-
 ## Face Recognition
 
 | Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
@@ -166,7 +158,7 @@ instances, thus faster than previous, because network runs once.
 
 | Model Name                       | Implementation | OMZ Model Name                | Accuracy | GFlops | mParams |
 |--------------------------------- | ---------------| ----------------------------- | -------- | ------ | ------- |
-| human-pose-estimation-3d-0001    | PyTorch\*      | [human-pose-estimation-3d-0001](./human-pose-estimation-3d-0001/description/human-pose-estimation-3d-0001.md) | 10.044437 | 18.998 |  5.074  |
+| human-pose-estimation-3d-0001    | PyTorch\*      | [human-pose-estimation-3d-0001](./human-pose-estimation-3d-0001/description/human-pose-estimation-3d-0001.md) | 100.44437 | 18.998 |  5.074  |
 | single-human-pose-estimation-0001| PyTorch\*      | [single-human-pose-estimation-0001](./single-human-pose-estimation-0001/description/single-human-pose-estimation-0001.md) | 69.0491 | 60.125 | 33.165 |
 
 ## Monocular Depth Estimation
@@ -201,7 +193,7 @@ The task of action recognition is to predict action that is being performed on a
 
 | Model Name                        | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------------- | ---------------| -------------- | -------- | ------ | ------- |
-| RGB-I3D, pretrained on ImageNet\* | TensorFlow\*   | [i3d-rgb-tf](./i3d-rgb-tf/i3d-rgb-tf.md) | 59.8333/83.1667 | 278.9815 | 12.6900|
+| RGB-I3D, pretrained on ImageNet\* | TensorFlow\*   | [i3d-rgb-tf](./i3d-rgb-tf/i3d-rgb-tf.md) | 65.96/86.01 | 278.9815 | 12.6900|
 
 ## Colorization
 

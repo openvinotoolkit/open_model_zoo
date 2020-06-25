@@ -17,6 +17,10 @@
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| pairwise_accuracy_subsets | 98.8321|
+
 ## Performance
 
 ## Input
