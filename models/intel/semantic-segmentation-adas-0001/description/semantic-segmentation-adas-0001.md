@@ -35,7 +35,7 @@ This is a segmentation network to classify each pixel into 20 classes:
 | Image size      | 2048x1024 |
 | GFlops          | 58.572    |
 | MParams         | 6.686     |
-| Source framework| PyTorch*  |
+| Source framework| Caffe*    |
 
 ## Accuracy
 
