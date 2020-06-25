@@ -76,17 +76,16 @@ def build_argparser():
 
 
 class ColorPalette:
-    def __init__(self, n, seed=0xACE):
-        n = int(n)
+    def __init__(self, n, rng=None):
         assert n > 0
 
-        if seed is not None:
-            random.seed(seed)
+        if rng is None:
+            rng = random.Random(0xACE)
 
         candidates_num = 100
         hsv_colors = [(1.0, 1.0, 1.0)]
         for _ in range(1, n):
-            colors_candidates = [(random.random(), random.uniform(0.8, 1.0), random.uniform(0.5, 1.0)) 
+            colors_candidates = [(rng.random(), rng.uniform(0.8, 1.0), rng.uniform(0.5, 1.0)) 
                                 for _ in range(candidates_num)]
             min_distances = [self.min_distance(hsv_colors, c) for c in colors_candidates]
             arg_max = np.argmax(min_distances)
@@ -111,7 +110,7 @@ class ColorPalette:
         return tuple(round(c * 255) for c in colorsys.hsv_to_rgb(h, s, v))
 
     def __getitem__(self, n):
-        return tuple(self.palette[n % len(self.palette)])
+        return self.palette[n % len(self.palette)]
 
     def __len__(self):
         return len(self.palette)
@@ -120,7 +119,7 @@ class ColorPalette:
 class Model:
     def __init__(self, ie, xml_file_path, bin_file_path=None,
                  device='CPU', plugin_config={}, max_num_requests=1,
-                 results={}, caught_exceptions=[]):
+                 results=None, caught_exceptions=None):
         self.ie = ie
         log.info('Reading network from IR...')
         if bin_file_path is None:
@@ -135,8 +134,8 @@ class Model:
 
         self.requests = self.exec_net.requests
         self.empty_requests = deque(self.requests)
-        self.completed_request_results = results
-        self.callback_exceptions = caught_exceptions
+        self.completed_request_results = results if results is not None else []
+        self.callback_exceptions = caught_exceptions if caught_exceptions is not None else {}
         self.event = threading.Event()
 
     @staticmethod
@@ -190,15 +189,16 @@ class Model:
         inputs = self.unify_inputs(inputs)
         inputs, preprocessing_meta = self.preprocess(inputs)
         meta.update(preprocessing_meta)
-        request.async_infer(inputs=inputs)
         request.set_completion_callback(py_callback=self.inference_completion_callback,
                                         py_data=(request, id, meta))
+        request.async_infer(inputs=inputs)
 
     def await_all(self):
         for request in self.exec_net.requests:
             request.wait()
 
     def await_any(self):
+        self.event.clear()
         self.event.wait()
 
 
@@ -235,7 +235,8 @@ class Detector(Model):
             else:
                 raise RuntimeError('Unsupported {}D input layer "{}". Only 2D and 4D input layers are supported'
                                    .format(len(blob.shape), blob_name))
-        assert image_blob_name is not None
+        if image_blob_name is None:
+            raise RuntimeError('Failed to identify the input for the image.')
         return image_blob_name, image_info_blob_name
 
     def _get_output_parser(self, net, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):
@@ -316,22 +317,22 @@ class SingleOutputParser:
                 for _, label, score, xmin, ymin, xmax, ymax in outputs[self.output_name][0][0]]
 
 
+def find_layer_by_name(name, all_outputs):
+    suitable_layers = [layer_name for layer_name in all_outputs if name in layer_name]
+    if not suitable_layers:
+        raise ValueError('Suitable layer for "{}" output is not found'.format(name))
+
+    if len(suitable_layers) > 1:
+        raise ValueError('More than 1 layer matched to "{}" output'.format(name))
+
+    return suitable_layers[0]
+
+
 class MultipleOutputParser:
     def __init__(self, all_outputs, bboxes_layer='bboxes', scores_layer='scores', labels_layer='labels'):
-        self.labels_layer = self.find_layer(labels_layer, all_outputs)
-        self.scores_layer = self.find_layer(scores_layer, all_outputs)
-        self.bboxes_layer = self.find_layer(bboxes_layer, all_outputs)
-
-    @staticmethod
-    def find_layer(name, all_outputs):
-        suitable_layers = [layer_name for layer_name in all_outputs if name in layer_name]
-        if not suitable_layers:
-            raise ValueError('Suitable layer for "{}" output is not found'.format(name))
-
-        if len(suitable_layers) > 1:
-            raise ValueError('More than 1 layer matched to "{}" output'.format(name))
-
-        return suitable_layers[0]
+        self.labels_layer = find_layer_by_name(labels_layer, all_outputs)
+        self.scores_layer = find_layer_by_name(scores_layer, all_outputs)
+        self.bboxes_layer = find_layer_by_name(bboxes_layer, all_outputs)
 
     def __call__(self, outputs):
         bboxes = outputs[self.bboxes_layer][0]
@@ -343,7 +344,7 @@ class MultipleOutputParser:
 class OTEParser:
     def __init__(self, input_size, all_outputs, labels_layer='labels', default_label=1):
         try:
-            self.labels_layer = self.find_layer_by_name(labels_layer, all_outputs)
+            self.labels_layer = find_layer_by_name(labels_layer, all_outputs)
             log.info('Use output "{}" as the one containing labels of detected objects.'
                      .format(self.labels_layer))
         except ValueError:
@@ -369,10 +370,6 @@ class OTEParser:
         if len(filter_outputs) > 1:
             raise ValueError('More than 1 candidate for output with bounding boxes.')
         return filter_outputs[0]
-
-    @staticmethod
-    def find_layer_by_name(name, all_outputs):
-        return MultipleOutputParser.find_layer(name, all_outputs)
 
     def __call__(self, outputs):
         bboxes = outputs[self.bboxes_layer]
@@ -459,7 +456,7 @@ def main():
     mode_info = {mode: ModeInfo()}
     exceptions = []
 
-    exec_nets = {
+    detectors = {
         Modes.USER_SPECIFIED:
             Detector(ie, args.model, device=args.device, plugin_config=config_user_specified,
                      results=completed_request_results, max_num_requests=args.num_infer_requests,
@@ -493,11 +490,11 @@ def main():
 
     while (cap.isOpened() \
            or completed_request_results \
-           or len(exec_nets[mode].empty_requests) < len(exec_nets[mode].requests)) \
+           or len(detectors[mode].empty_requests) < len(detectors[mode].requests)) \
           and not exceptions:
         if next_frame_id_to_show in completed_request_results:
             frame_meta, raw_outputs = completed_request_results.pop(next_frame_id_to_show)
-            objects = exec_nets[mode].postprocess(raw_outputs, frame_meta)
+            objects = detectors[mode].postprocess(raw_outputs, frame_meta)
 
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
@@ -562,14 +559,14 @@ def main():
                 # Disable mode switch if the previous switch has not been finished yet.
                 if key == TAB_KEY and mode_info[mode].frames_count > 0:
                     mode = next(modes)
-                    exec_nets[prev_mode].await_all()
+                    detectors[prev_mode].await_all()
                     mode_info[prev_mode].last_end_time = perf_counter()
                     mode_info[mode] = ModeInfo()
                     log.info('Using {} mode'.format(mode.name))
                 else:
                     presenter.handleKey(key)
 
-        elif exec_nets[mode].empty_requests and cap.isOpened():
+        elif detectors[mode].empty_requests and cap.isOpened():
             start_time = perf_counter()
             ret, frame = cap.read()
             if not ret:
@@ -580,16 +577,16 @@ def main():
                     cap.release()
                 continue
 
-            exec_nets[mode](frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+            detectors[mode](frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
 
         else:
-            exec_nets[mode].await_any()
+            detectors[mode].await_any()
 
     if exceptions:
         raise exceptions[0]
 
-    for exec_net in exec_nets.values():
+    for exec_net in detectors.values():
         exec_net.await_all()
 
     for mode_value, mode_stats in mode_info.items():
