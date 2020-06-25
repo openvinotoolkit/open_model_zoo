@@ -330,6 +330,55 @@ class FaceRecognitionTAFAPairMetric(FullDatasetEvaluationMetric):
 
         return [(tp+tn) / (tp+fp+tn+fn)]
 
+class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
+    """
+    Accuracy score calculated with normalized embedding dot products
+    """
+    __provider__ = 'normalized_embedding_accuracy'
+
+    annotation_types = (ReIdentificationAnnotation, )
+    prediction_types = (ReIdentificationPrediction, )
+
+    def submit_all(self, annotations, predictions):
+        return self.evaluate(annotations, predictions)
+
+    def evaluate(self, annotations, predictions):
+        true_positive = false_positive = 0
+        gallery_embeddings = extract_embeddings(annotations, predictions, query=False)
+        query_start_idx = len(gallery_embeddings)
+
+        for ann, pred in zip(annotations[query_start_idx:], predictions[query_start_idx:]):
+            best_sim = 0
+            pred_person_id = -1
+
+            person_id = ann.person_id
+            camera_id = ann.camera_id
+
+            for j, gallery_embedding in enumerate(gallery_embeddings):
+                gallery_person_id = annotations[j].person_id
+                gallery_camera_id = annotations[j].camera_id
+
+                if person_id == gallery_person_id and camera_id == gallery_camera_id:
+                    continue
+
+                normalized_dot = np.linalg.norm(gallery_embedding) * np.linalg.norm(pred.embedding)
+                sim = np.dot(gallery_embedding, pred.embedding) / normalized_dot
+
+                if best_sim < sim:
+                    best_sim = sim
+                    pred_person_id = gallery_person_id
+
+            if pred_person_id == ann.person_id:
+                true_positive += 1
+            else:
+                false_positive += 1
+
+        if (true_positive + false_positive) == 0:
+            return [0]
+
+        accuracy = true_positive / (true_positive + false_positive)
+        return [accuracy]
+
 def regroup_pairs(annotations, predictions):
     image_indexes = {}
 
