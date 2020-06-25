@@ -15,6 +15,14 @@ Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection.
 | MParams                         | 13.307                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_orig_precision | 36.24|
+| coco_precision | 36.76 |
+| MAP| 52.41|
+
 ## Performance
 
 ## Input

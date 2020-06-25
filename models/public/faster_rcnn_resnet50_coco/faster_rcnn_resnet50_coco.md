@@ -15,6 +15,14 @@ Faster R-CNN Resnet-50 model. Used for object detection. For details, see the [p
 | MParams                         | 29.162                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_orig_precision | 26.61|
+| coco_precision | 27.47|
+| MAP| 42.87|
+
 ## Performance
 
 ## Input

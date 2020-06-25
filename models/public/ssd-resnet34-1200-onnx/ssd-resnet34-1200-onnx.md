@@ -17,6 +17,12 @@ The `ssd-resnet-34-1200-onnx` model is a multiscale SSD based on ResNet-34 backb
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| coco_orig_precision | 19.8393|
+| coco_precision | 20.7198|
+| MAP | 39.2752	|
+
 ## Performance
 
 ## Input

@@ -48,7 +48,7 @@ The models can be downloaded via Model Downloader
 | SE-ResNet 50, alpha=0.125   | MXNet\*                            | [octave-se-resnet-50-0.125](./octave-se-resnet-50-0.125/octave-se-resnet-50-0.125.md) | 78.706/94.09 | 7.246 | 28.082 |
 | ResNet 18                   | PyTorch\*                          | [resnet-18-pytorch](./resnet-18-pytorch/resnet-18-pytorch.md) | 69.754/89.088 | 3.637 |  11.68 |
 | ResNet 34                   | PyTorch\*                          | [resnet-34-pytorch](./resnet-34-pytorch/resnet-34-pytorch.md) | 73.30/91.42 | 7.3409 | 21.7892 |
-| ResNet 50                   | Caffe\*<br>PyTorch\*<br>Caffe2\*<br>TensorFlow\*| [resnet-50](./resnet-50/resnet-50.md) <br> [resnet-50-pytorch](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[resnet-50-caffe2](./resnet-50-caffe2/resnet-50-caffe2.md)<br>[resnet-50-tf](./resnet-50-tf/resnet-50-tf.md)| 75.168/92.212<br>76.128/92.858<br>76.38/93.188<br>76.438/93.074 | 6.996~8.216 | 25.53 |
+| ResNet 50                   | Caffe\*<br>PyTorch\*<br>Caffe2\*<br>TensorFlow\*| [resnet-50](./resnet-50/resnet-50.md) <br> [resnet-50-pytorch](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[resnet-50-caffe2](./resnet-50-caffe2/resnet-50-caffe2.md)<br>[resnet-50-tf](./resnet-50-tf/resnet-50-tf.md)| 75.168/92.212<br>76.128/92.858<br>76.38/93.188<br>76.17/92.98 | 6.996~8.216 | 25.53 |
 | ResNet 101                  | Caffe\*                            | [resnet-101](./resnet-101/resnet-101.md) | 76.364/92.902 | 14.441 | 44.496 |
 | ResNet 152                  | Caffe\*                            | [resnet-152](./resnet-152/resnet-152.md) | 76.802/93.192 | 21.89 | 60.117 |
 | SE-Inception                | Caffe\*                            | [se-inception](./se-inception/se-inception.md) | 75.996/92.964 | 4.091 | 11.922 |
@@ -88,14 +88,14 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | Mask R-CNN Inception ResNet V2 | TensorFlow\*   | [mask_rcnn_inception_resnet_v2_atrous_coco](./mask_rcnn_inception_resnet_v2_atrous_coco/mask_rcnn_inception_resnet_v2_atrous_coco.md) | 39.8619/35.3628 | 675.314 | 92.368 |
 | Mask R-CNN Inception V2        | TensorFlow\*   | [mask_rcnn_inception_v2_coco](./mask_rcnn_inception_v2_coco/mask_rcnn_inception_v2_coco.md) | 27.1199/21.4805 | 54.926 | 21.772 |
 | Mask R-CNN ResNet 50           | TensorFlow\*   | [mask_rcnn_resnet50_atrous_coco](./mask_rcnn_resnet50_atrous_coco/mask_rcnn_resnet50_atrous_coco.md)| 	29.7512/27.4597 | 294.738 | 50.222 |
-| Mask R-CNN ResNet 101          | TensorFlow\*   | [mask_rcnn_resnet101_atrous_coco](./mask_rcnn_resnet101_atrous_coco/mask_rcnn_resnet101_atrous_coco.md) | 36.54/32.61/52.92| 674.58 | 69.188 |
+| Mask R-CNN ResNet 101          | TensorFlow\*   | [mask_rcnn_resnet101_atrous_coco](./mask_rcnn_resnet101_atrous_coco/mask_rcnn_resnet101_atrous_coco.md) | 34.9191/31.301 | 674.58 | 69.188 |
 
 ### 3D Semantic Segmentation
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
 | Brain Tumor Segmentation  | MXNet\*        | [brain-tumor-segmentation-0001](./brain-tumor-segmentation-0001/brain-tumor-segmentation-0001.md) | 92.4003 | 409.996 | 38.192 |
-| Brain Tumor Segmentation 2| PyTorch\*      | [brain-tumor-segmentation-0002](./brain-tumor-segmentation-0002/brain-tumor-segmentation-0002.md) | 91.826 | 300.801 | 4.51  |
+| Brain Tumor Segmentation 2| PyTorch\*      | [brain-tumor-segmentation-0002](./brain-tumor-segmentation-0002/brain-tumor-segmentation-0002.md) | 91.4826 | 300.801 | 4.51  |
 
 ## Object Detection
 
@@ -120,7 +120,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | R-FCN with Resnet-101                | TensorFlow\*             | [rfcn-resnet101-coco-tf](./rfcn-resnet101-coco-tf/rfcn-resnet101-coco-tf.md) | 27.89/28.40/45.02 | 53.462 | 171.85 |
 | SSD 300                              | Caffe\*                  | [ssd300](./ssd300/ssd300.md)  | 85.0791 | 62.815 | 26.285 |
 | SSD 512                              | Caffe\*                  | [ssd512](./ssd512/ssd512.md) | 90.3845 | 180.611 | 27.189 |
-| SSD with MobileNet                   | Caffe\* <br>TensorFlow\* | [mobilenet-ssd](./mobilenet-ssd/mobilenet-ssd.md) <br>[ssd_mobilenet_v1_coco](./ssd_mobilenet_v1_coco/ssd_mobilenet_v1_coco.md) | 79.8377<br>23.17/23.33/36.29| 2.316~2.494 | 5.783~6.807 |
+| SSD with MobileNet                   | Caffe\* <br>TensorFlow\* | [mobilenet-ssd](./mobilenet-ssd/mobilenet-ssd.md) <br>[ssd_mobilenet_v1_coco](./ssd_mobilenet_v1_coco/ssd_mobilenet_v1_coco.md) | 79.8377<br>23.15/23.32| 2.316~2.494 | 5.783~6.807 |
 | SSD with MobileNet FPN               | TensorFlow\*             | [ssd_mobilenet_v1_fpn_coco](./ssd_mobilenet_v1_fpn_coco/ssd_mobilenet_v1_fpn_coco.md) | 34.7068/35.5453 | 123.309 | 36.188 |
 | SSD with MobileNet V2                | TensorFlow\*             | [ssd_mobilenet_v2_coco](./ssd_mobilenet_v2_coco/ssd_mobilenet_v2_coco.md) | 	24.823/24.9452 | 3.775 | 16.818 |
 | SSD lite with MobileNet V2           | TensorFlow\*             | [ssdlite_mobilenet_v2](./ssdlite_mobilenet_v2/ssdlite_mobilenet_v2.md) | 24.1412/24.2946 | 1.525 | 4.475 |

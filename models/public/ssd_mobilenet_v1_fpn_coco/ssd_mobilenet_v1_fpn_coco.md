@@ -17,6 +17,11 @@ MobileNetV1 FPN is used for object detection. For details, see the [paper](https
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| coco_orig_precision | 34.7068|
+| coco_precision | 35.5453|
+
 ## Performance
 
 ## Input
@@ -57,7 +62,7 @@ Expected color order: BGR.
 ### Converted Model
 
 The array of summary detection information, name: `DetectionOutput`, shape: [1, 1, N, 7], where N is the number of detected
-bounding boxes.   
+bounding boxes.
 
 For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
