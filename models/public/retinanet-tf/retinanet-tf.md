@@ -40,6 +40,12 @@ converted to TensorFlow\* protobuf format. For details, see [paper](https://arxi
 | MParams                         | 64.9706                                   |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 33.15%|
+
 ## Performance
 
 ## Input

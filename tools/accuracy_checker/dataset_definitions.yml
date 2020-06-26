@@ -492,7 +492,8 @@ datasets:
     dataset_meta: vggfaces2.json
 
   - name: semantic_segmentation_adas
-    data_source: segmentation
+    data_source: segmentation/images
+    segmentation_masks_source: segmentation/mask_segmentation_adas
     annotation_conversion:
       converter: common_semantic_segmentation
       images_dir: segmentation/images
@@ -517,7 +518,8 @@ datasets:
         dst_width: 2048
 
   - name: road_segmentation
-    data_source: segmentation
+    data_source: segmentation/images
+    segmentation_masks_source: segmentation/mask_road_segmentation
     annotation_conversion:
       converter: common_semantic_segmentation
       images_dir: segmentation/images

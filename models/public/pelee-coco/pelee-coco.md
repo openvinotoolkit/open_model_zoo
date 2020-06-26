@@ -17,6 +17,10 @@ For details about this model, check out the [repository](https://github.com/Robe
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 21.9761% |
+
 See [here](https://github.com/Robert-JunWang/Pelee).
 
 ## Performance

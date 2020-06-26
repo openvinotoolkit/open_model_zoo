@@ -74,10 +74,8 @@ models:
       - name: imagenet_1000_classes
         reader: pillow_imread
 
-        # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
-        preprocessing:
-          - type: bgr_to_rgb
 
+        preprocessing:
           - type: resize
             size: 256
             aspect_ratio_scale: greater
@@ -86,6 +84,8 @@ models:
           - type: crop
             size: 224
             use_pillow: True
-            # Reference metric from PyTorch (pytorch v1.0.1, torchvision v0.2.2) top-1 76.13% top-5 92.862%
+          # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
+          - type: rgb_to_bgr
+          # Reference metric from PyTorch (pytorch v1.0.1, torchvision v0.2.2) top-1 76.13% top-5 92.862%
 
 global_definitions: ../dataset_definitions.yml

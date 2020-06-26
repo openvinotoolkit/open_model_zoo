@@ -18,28 +18,28 @@ description: >-
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-0050.xml
-    size: 270458
-    sha256: d8bb7e8c42586701b35bb35dd3ae41c46a2b3bc660c0e7b10e113e65914135de
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/instance-segmentation-security-0050/FP32/instance-segmentation-security-0050.xml
+    size: 289772
+    sha256: 9f53e5f9a87622f01cdccf010e0a49bd904b70ddb22650fd86d13a11fe92b3a1
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/instance-segmentation-security-0050/FP32/instance-segmentation-security-0050.xml
   - name: FP32/instance-segmentation-security-0050.bin
-    size: 121497384
-    sha256: 763f3503dc5f5fabd2021fa915783827929eb6b75555ddd95307e2226ec9325b
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/instance-segmentation-security-0050/FP32/instance-segmentation-security-0050.bin
+    size: 121497432
+    sha256: d19d52955a973c5210b7b8cf9170fadf4c812329740f04733ae200cd62a8a175
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/instance-segmentation-security-0050/FP32/instance-segmentation-security-0050.bin
   - name: FP16/instance-segmentation-security-0050.xml
-    size: 270349
-    sha256: 707485c3f6bdecf3604df1397db964630d30ca89d4c33aa47d1607b60bd4d4e9
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/instance-segmentation-security-0050/FP16/instance-segmentation-security-0050.xml
+    size: 289662
+    sha256: b262b3bf38d467652dc6c66fcd477423a476f996ceefb6805c1f806a369c8ddf
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/instance-segmentation-security-0050/FP16/instance-segmentation-security-0050.xml
   - name: FP16/instance-segmentation-security-0050.bin
-    size: 60748730
-    sha256: 07a471da43c24d183feb048cf823e87e8add9952f43ad3da97b9425b38906e4b
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/instance-segmentation-security-0050/FP16/instance-segmentation-security-0050.bin
+    size: 60748778
+    sha256: 52e0aa71864aae1ff9277c692476383b208526031464adb661751263752122df
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/instance-segmentation-security-0050/FP16/instance-segmentation-security-0050.bin
   - name: FP16-INT8/instance-segmentation-security-0050.xml
-    size: 706037
-    sha256: 382e06cb15cf7dedd288f252ad92c69efdb4f9e42499672d1e2dbfe165b354fc
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/instance-segmentation-security-0050/FP16-INT8/instance-segmentation-security-0050.xml
+    size: 724832
+    sha256: 3d993375c2d5323f7cc783fdf2a5e8df4df4e6be2e7e9c55601477cd3a89c460
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/instance-segmentation-security-0050/FP16-INT8/instance-segmentation-security-0050.xml
   - name: FP16-INT8/instance-segmentation-security-0050.bin
-    size: 30598174
-    sha256: 2d3a4a38195eeef93be1f400b57341e1f3939389d06d0bf26f44599c1d93c335
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/instance-segmentation-security-0050/FP16-INT8/instance-segmentation-security-0050.bin
+    size: 30597942
+    sha256: 74f7be4f151234d05d689dfaa432aa253071c16db26d4c9ab5387af08950d193
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/instance-segmentation-security-0050/FP16-INT8/instance-segmentation-security-0050.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

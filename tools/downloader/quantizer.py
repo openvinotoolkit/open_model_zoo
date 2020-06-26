@@ -25,25 +25,38 @@ import tempfile
 
 from pathlib import Path
 
+import yaml
+
 import common
 
 OMZ_ROOT = Path(__file__).resolve().parents[2]
 
+DEFAULT_POT_CONFIG_BASE = {
+    'compression': {
+        'algorithms': [
+            {
+                'name': 'DefaultQuantization',
+                'params': {
+                    'preset': 'performance',
+                    'stat_subset_size': 300,
+                },
+            },
+        ],
+    },
+}
+
 def quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
     input_precision = common.KNOWN_QUANTIZED_PRECISIONS[precision]
 
-    pot_config = {
-        'compression': {
-            'algorithms': [
-                {
-                    'name': 'DefaultQuantization',
-                    'params': {
-                        'preset': 'performance',
-                        'stat_subset_size': 300,
-                    },
-                },
-            ],
-        },
+    pot_config_base_path = common.MODEL_ROOT / model.subdirectory / 'quantization.yml'
+
+    try:
+        with pot_config_base_path.open('rb') as pot_config_base_file:
+            pot_config_base = yaml.safe_load(pot_config_base_file)
+    except FileNotFoundError:
+        pot_config_base = DEFAULT_POT_CONFIG_BASE
+
+    pot_config_paths = {
         'engine': {
             'config': str(OMZ_ROOT / 'tools/accuracy_checker/configs' / (model.name + '.yml')),
         },
@@ -53,6 +66,8 @@ def quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
             'model_name': model.name,
         }
     }
+
+    pot_config = {**pot_config_base, **pot_config_paths}
 
     if args.target_device:
         pot_config['compression']['target_device'] = args.target_device

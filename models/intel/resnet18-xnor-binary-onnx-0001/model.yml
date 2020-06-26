@@ -18,19 +18,19 @@ task_type: classification
 files:
   - name: FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
     size: 93520
-    sha256: b088d296bd50f1a0c48c3a1ee44c8c3cbbf75a829ed946212cf7ac1bc1a73d90
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
+    sha256: b651bdec378e83d03677530a0c2600dfe0fb8b4bf2dbba625db2334b2c23a153
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
   - name: FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
     size: 4190944
     sha256: e73467a8a6c5dcd1e8a3715c6be1bc39196da1a35cd1f92b144187abc3824a91
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
   - name: FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
     size: 93494
-    sha256: ec1245a62d99c62a5d2e947a8c28eaa3c6ed5d40fb0c3c88d2c2ee8c3e897e50
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
+    sha256: dead20fe824e9079e0193baabf7c53586ed3469cc5aec51d1674629a16005e68
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
   - name: FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
     size: 2782080
     sha256: 57a2767a0dd7eddb59830b93a01ce5f6ef0906abb252602f89f7dd28071a6dd5
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

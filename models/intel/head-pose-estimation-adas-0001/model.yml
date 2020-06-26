@@ -18,27 +18,27 @@ task_type: head_pose_estimation
 files:
   - name: FP32/head-pose-estimation-adas-0001.xml
     size: 50594
-    sha256: 4b5e4ea2d286e884af2543820ae7de09afede43dcf8dcca9c274594ad0c9fb83
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
+    sha256: 853774342fa03b9213d28108766a797b0c5f65576bd425b82ee4522e39380d31
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
   - name: FP32/head-pose-estimation-adas-0001.bin
     size: 7647604
     sha256: ccab5d2be86f29e5be616aca68e6584cf07bc39f46d189f4794e20f8080dc10c
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
   - name: FP16/head-pose-estimation-adas-0001.xml
-    size: 50582
-    sha256: e0d5d81eb47e1c5e89c43f7cd6c40c4eb14b122015e49d6e36eb88e11571f684
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
+    size: 50581
+    sha256: 6eb84138062abc71ffc77b8976f85402f160d255bc605bf857eea28b5038d171
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
   - name: FP16/head-pose-estimation-adas-0001.bin
     size: 3823810
     sha256: 3616849b370b235e54b88798c053fc482cd5665faa569ee0c0d6435405d476be
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
   - name: FP16-INT8/head-pose-estimation-adas-0001.xml
-    size: 83279
-    sha256: a190fa7f78d1fb3417407e0985b4a1bed0624bbd619585f34b2295bcc542f5ba
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml
+    size: 83281
+    sha256: 6e2f347ccc8f5b46ce0e720fb09d54f06143efe28a393497b3a4250cf12c77c2
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml
   - name: FP16-INT8/head-pose-estimation-adas-0001.bin
     size: 2075098
     sha256: 54e8d3aa1828e0a6ea242eaaf88b4a3b131d3e62120a6dddfa286fec7fc7916f
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

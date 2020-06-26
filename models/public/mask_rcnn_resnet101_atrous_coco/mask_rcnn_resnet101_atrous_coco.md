@@ -15,6 +15,13 @@ Mask R-CNN Resnet101 Atrous is trained on COCO dataset and used for object insta
 | MParams                         | 69.188                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_orig_precision | 34.9191%|
+| coco_orig_segm_precision | 31.301%|
+
 ## Performance
 
 ## Input

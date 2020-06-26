@@ -1,12 +1,10 @@
-# bert-large-uncased-whole-word-masking-squad-int8-onnx-0001
+# bert-large-uncased-whole-word-masking-squad-fp32-0001
 
 ## Use Case and High-Level Description
 
-This is a BERT-large model pretrained on lower-cased English text using Whole-Word-Masking and fine-tuned on the SQuAD v1.1 training set. The model performs question answering for English language; the input is a concatenated premise and question for the premise, and the output is the location of the answer to the question inside the premise. For details about the original floating-point model, check out [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805).
+This is a BERT-large model pretrained on lower-cased English text using Whole-Word-Masking and fine-tuned on the SQuAD v1.1 training set (93.21% F1, 87.2% EM on the v1.1 dev set). The model performs question answering for English language; the input is a concatenated premise and question for the premise, and the output is the location of the answer to the question inside the premise. For details about the original floating-point model, check out [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805).
 
 Tokenization occurs using the BERT tokenizer (see the demo code for implementation details) and the enclosed `vocab.txt` dictionary file. Input is to be lower-cased before tokenizing.
-
-The model has been further quantized to INT8 precision using quantization-aware finetuning with [NNCF](https://github.com/openvinotoolkit/nncf_pytorch).
 
 ## Specification
 
@@ -23,8 +21,8 @@ The quality metrics were calculated on the SQuAD v1.1 dataset ("dev" split). Max
 
 | Metric                    | Value         |
 |---------------------------|---------------|
-| F1                        |        92.60% |
-| Exact match (EM)          |        86.36% |
+| F1                        |        93.21% |
+| Exact match (EM)          |        87.20% |
 
 
 ## Performance

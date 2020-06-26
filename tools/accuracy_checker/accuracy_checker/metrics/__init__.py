@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2019-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,14 @@ from .classification import (
     MetthewsCorrelation
 )
 from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric, YoutubeFacesAccuracy)
-from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets, FaceRecognitionTAFAPairMetric
+from .reid import (
+    CMCScore,
+    ReidMAP,
+    PairwiseAccuracy,
+    PairwiseAccuracySubsets,
+    FaceRecognitionTAFAPairMetric,
+    NormalizedEmbeddingAccuracy
+)
 from .semantic_segmentation import SegmentationAccuracy, SegmentationIOU, SegmentationMeanAccuracy, SegmentationFWAcc
 from .character_recognition import CharacterRecognitionAccuracy, LabelLevelRecognitionAccuracy
 from .regression import (
@@ -71,6 +78,12 @@ from .question_answering import ExactMatchScore, ScoreF1
 from .mpjpe_multiperson import MpjpeMultiperson
 from .language_modeling import ScorePerplexity
 
+from .attribute_classification import (
+    AttributeClassificationRecall,
+    AttributeClassificationPrecision,
+    AttributeClassificationAccuracy
+)
+
 __all__ = [
     'Metric',
     'MetricsExecutor',
@@ -92,6 +105,7 @@ __all__ = [
     'PairwiseAccuracy',
     'PairwiseAccuracySubsets',
     'FaceRecognitionTAFAPairMetric',
+    'NormalizedEmbeddingAccuracy',
 
     'SegmentationAccuracy',
     'SegmentationIOU',
@@ -146,4 +160,8 @@ __all__ = [
     'MpjpeMultiperson',
 
     'ScorePerplexity',
+
+    'AttributeClassificationRecall',
+    'AttributeClassificationPrecision',
+    'AttributeClassificationAccuracy'
 ]

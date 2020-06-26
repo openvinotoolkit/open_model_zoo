@@ -1,0 +1,36 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  ResNet18 based network for porosity weld recognition.
+task_type: action_recognition
+files:
+  - name: FP32/weld-porosity-detection-0001.xml
+    size: 59101
+    sha256: e1257399302579e72398540dae191a6ea25adcfd3b791ea8c6788211a0083405
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/weld-porosity-detection-0001/FP32/weld-porosity-detection-0001.xml
+  - name: FP32/weld-porosity-detection-0001.bin
+    size: 44693044
+    sha256: 91fd5057ce1213c705518648dbf62e16a59061e8f2dcd02b83a9137d66ba6327
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/weld-porosity-detection-0001/FP32/weld-porosity-detection-0001.bin
+  - name: FP16/weld-porosity-detection-0001.xml
+    size: 59076
+    sha256: cc78e649be19a3ce9925b590bb5c191a98c4703f5290e1436e524b303a53ba24
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/weld-porosity-detection-0001/FP16/weld-porosity-detection-0001.xml
+  - name: FP16/weld-porosity-detection-0001.bin
+    size: 22346530
+    sha256: 157c06cd80929fc4abec9ffa760345e0dae536a98034e0f45a3b247d285d13cf
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/weld-porosity-detection-0001/FP16/weld-porosity-detection-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

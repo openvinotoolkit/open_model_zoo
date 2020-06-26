@@ -18,27 +18,27 @@ task_type: semantic_segmentation
 files:
   - name: FP32/unet-camvid-onnx-0001.xml
     size: 64393
-    sha256: 52f5aa07c9c0df4ccb6fdd0cde3643dd692b15b15042d156b248e34a6cbd9d56
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.xml
+    sha256: 6023ebc1248ee20305f2e60549a521907befb9b636acfdeabebb14d017a8606f
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.xml
   - name: FP32/unet-camvid-onnx-0001.bin
     size: 124129876
     sha256: cf996b45dadfa397f16aad5a7264787e3666a7645eba3653e5c48d42076e86d7
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.bin
   - name: FP16/unet-camvid-onnx-0001.xml
     size: 64347
-    sha256: 00619ddddb48957c45e556398397ac02c5294ef9f978f06ed7d68d39de65a14d
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.xml
+    sha256: 85a70eafc74b43326073144ad036758e8f8a10f35990b36711cee560bc348af3
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.xml
   - name: FP16/unet-camvid-onnx-0001.bin
     size: 62064942
     sha256: 0c8dda21bc6ad71f6e78dea15d228f1bb293efeb2e97dff8d91ea91d357ca080
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.bin
   - name: FP16-INT8/unet-camvid-onnx-0001.xml
-    size: 151918
-    sha256: 29869b8efd21254888a1dd7eeb1550fd0a8f9e850240a35eb54b38a01ca897d7
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.xml
+    size: 151778
+    sha256: 1e2854a5fd54e036534c5820460da5e33dc4246b631d4f0e9b0f0d8df9d0a2e6
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.xml
   - name: FP16-INT8/unet-camvid-onnx-0001.bin
-    size: 33848330
-    sha256: 0f4e805b829d185d404ea70d9e009a1508577f55e3f82fca3aefd7d23d53e0a8
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.bin
+    size: 33848274
+    sha256: 82fccb97fa269ac5c7960844327222ca0741443ebcf99918fde3584121bee459
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/faster-rcnn-resnet101-coco-sparse-60-0001.xml
     size: 307498
-    sha256: 21193015d75b27522ae5f996a1dfe51fcda2ab642a0c4a542209cea9ad46d073
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/faster-rcnn-resnet101-coco-sparse-60-0001/FP32/faster-rcnn-resnet101-coco-sparse-60-0001.xml
+    sha256: badf97bea61d3486aae35bfc1e3e8f506b55712fbcc099f0ef19a74fb35b5757
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/faster-rcnn-resnet101-coco-sparse-60-0001/FP32/faster-rcnn-resnet101-coco-sparse-60-0001.xml
   - name: FP32/faster-rcnn-resnet101-coco-sparse-60-0001.bin
     size: 211169860
     sha256: 8e87058055b98323c4c824049f2a156250318615219968d6e4186ab9662ca3b4
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/faster-rcnn-resnet101-coco-sparse-60-0001/FP32/faster-rcnn-resnet101-coco-sparse-60-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/faster-rcnn-resnet101-coco-sparse-60-0001/FP32/faster-rcnn-resnet101-coco-sparse-60-0001.bin
   - name: FP16/faster-rcnn-resnet101-coco-sparse-60-0001.xml
     size: 307337
-    sha256: 5493320ef669b9a7d9a1d2ac6455607ccd26eb3cca9e1ffee92bec0adac70c4c
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/faster-rcnn-resnet101-coco-sparse-60-0001/FP16/faster-rcnn-resnet101-coco-sparse-60-0001.xml
+    sha256: 4c96cee5156593516246e5918d4c9c388d19dcef2574d0d0b6925ac1ffb7c18c
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/faster-rcnn-resnet101-coco-sparse-60-0001/FP16/faster-rcnn-resnet101-coco-sparse-60-0001.xml
   - name: FP16/faster-rcnn-resnet101-coco-sparse-60-0001.bin
     size: 105585006
     sha256: 93aa4a2d9a446d1f750f575358d29c70c1dc9edc64db74751ebc44967d24460a
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/faster-rcnn-resnet101-coco-sparse-60-0001/FP16/faster-rcnn-resnet101-coco-sparse-60-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/faster-rcnn-resnet101-coco-sparse-60-0001/FP16/faster-rcnn-resnet101-coco-sparse-60-0001.bin
   - name: FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.xml
-    size: 858239
-    sha256: 7fe90dc42c5821624e17c8bab258e4070a36df41235e4d082f01085e90ebbf58
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/faster-rcnn-resnet101-coco-sparse-60-0001/FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.xml
+    size: 857169
+    sha256: b18b31657601bda23d06a8ae368e6e45feb9a180158970cbf5013e8f6220d4fa
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/faster-rcnn-resnet101-coco-sparse-60-0001/FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.xml
   - name: FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.bin
-    size: 53064249
-    sha256: 89922ce1527b89f359d15be7b0bef535c83b221fdbc53eb6a5d6091211cec59a
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.3/open_model_zoo/models_bin/1/faster-rcnn-resnet101-coco-sparse-60-0001/FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.bin
+    size: 53063839
+    sha256: 4d839335c33b3d15ac3cef22087bb8e15223ecd7e47b46c6ba5da9573bf2afa9
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/faster-rcnn-resnet101-coco-sparse-60-0001/FP16-INT8/faster-rcnn-resnet101-coco-sparse-60-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

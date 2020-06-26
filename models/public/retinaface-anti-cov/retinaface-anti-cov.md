@@ -12,6 +12,12 @@ RetinaFace-Anti-Cov is a customized one stage face detector to help people prote
 | MParams                                                       | 0.5955                                               |
 | Source framework                                              | MXNet\*                                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| mAP | 77.1531%|
+
 ## Input
 
 ### Original model:

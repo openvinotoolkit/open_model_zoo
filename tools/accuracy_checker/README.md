@@ -48,7 +48,7 @@ In order to evaluate some models required frameworks have to be installed. Accur
 - [MXNet](https://mxnet.apache.org/).
 - [OpenCV DNN](https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html).
 - [TensorFlow](https://www.tensorflow.org/).
-- [ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/master/README.md).
+- <a href="https://github.com/microsoft/onnxruntime/blob/master/README.md">ONNX Runtime</a>.
 - [PyTorch](https://pytorch.org/)
 
 You can use any of them or several at a time. For correct work, Accuracy Checker requires at least one. You are able postpone installation of other frameworks and install them when they will be necessary.
@@ -172,6 +172,7 @@ And optionally:
 - `preprocessing`: list of preprocessing steps applied to input data. If you want calculated metrics to match reported, you must reproduce preprocessing from canonical paper of your topology or ask topology author about required steps.
 - `postprocessing`: list of postprocessing steps.
 - `reader`: approach for data reading. Default reader is `opencv_imread`.
+- `segmentation_masks_source` - path to directory where gt masks for semantic segmentation task stored.
 
 Also it must contain data related to annotation.
 You can convert annotation inplace using:

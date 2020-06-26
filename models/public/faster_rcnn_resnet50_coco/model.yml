@@ -34,4 +34,5 @@ model_optimizer_args:
   - --output=detection_scores,detection_boxes,num_detections
   - --input_model=$dl_dir/faster_rcnn_resnet50_coco_2018_01_28/frozen_inference_graph.pb
 framework: tf
+quantizable: yes
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

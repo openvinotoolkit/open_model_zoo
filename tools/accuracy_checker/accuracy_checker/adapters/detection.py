@@ -785,3 +785,81 @@ class FaceDetectionAdapter(Adapter):
             )
 
         return result
+
+class FaceDetectionRefinementAdapter(Adapter):
+
+    __provider__ = 'face_detection_refinement'
+    prediction_types = (DetectionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'threshold': NumberField(
+                value_type=float, min_value=0, default=0.5, optional=False,
+                description='Score threshold to determine as valid face candidate'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.threshold = self.get_value_from_config('threshold')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        result = []
+
+        if isinstance(raw, dict):
+            candidates = frame_meta[0]['candidates']
+            self.refine_candidates(candidates.identifier, raw, candidates, result)
+        else:
+            for batch_index, identifier in enumerate(identifiers):
+                candidates = frame_meta[batch_index]['candidates']
+                self.refine_candidates(identifier, raw[batch_index], candidates, result)
+
+        return result
+
+    def refine_candidates(self, identifier, prediction, candidates, result):
+        prob_name = 'prob_fd'
+        reg_name = 'fc_bb'
+        detections = {'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+        prob_arr = prediction[prob_name]
+        reg_arr = prediction[reg_name]
+
+        for i in range(candidates.x_mins.size):
+            score = prob_arr[0, 1, 0, 0]
+            if score < self.threshold:
+                continue
+            width = candidates.x_maxs[i] - candidates.x_mins[i]
+            height = candidates.y_maxs[i] - candidates.y_mins[i]
+
+            center_x = candidates.x_mins[i] + (width - 1) / 2
+            center_y = candidates.y_mins[i] + (height - 1) / 2
+
+            regression = reg_arr[0, 0, 0, 0]
+
+            reg_x = regression * width
+            reg_y = reg_arr[0, 1, 0, 0] * height
+            reg_width = reg_arr[0, 2, 0, 0] * width
+            reg_height = reg_arr[0, 3, 0, 0] * height
+
+            width += reg_width
+            height += reg_height
+            x = (center_x + reg_x) - width / 2.0
+            y = (center_y + reg_y) - height / 2.0
+
+            detections['scores'].append(score)
+            detections['x_mins'].append(x)
+            detections['y_mins'].append(y)
+            detections['x_maxs'].append(x+width)
+            detections['y_maxs'].append(y+height)
+
+        result.append(
+            DetectionPrediction(
+                identifier=identifier,
+                x_mins=detections['x_mins'],
+                y_mins=detections['y_mins'],
+                x_maxs=detections['x_maxs'],
+                y_maxs=detections['y_maxs'],
+                scores=detections['scores']
+            )
+        )
