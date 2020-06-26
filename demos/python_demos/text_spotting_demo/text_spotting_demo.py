@@ -85,7 +85,7 @@ def build_argparser():
                       help='Optional. Specify the target device to infer on, i.e : CPU, GPU. '
                            'The demo will look for a suitable plugin for device specified '
                            '(by default, it is CPU). Please refer to OpenVINO documentation '
-                           'for the list of devices supported be the model. ',
+                           'for the list of devices supported be the model.',
                       default='CPU', type=str, metavar='"<device>"')
     args.add_argument('-l', '--cpu_extension',
                       help='Required for CPU custom layers. '
