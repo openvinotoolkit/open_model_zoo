@@ -82,9 +82,10 @@ def build_argparser():
                       help='Required. Input to process.',
                       required=True, type=str, metavar='"<path>"')
     args.add_argument('-d', '--device',
-                      help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
+                      help='Optional. Specify the target device to infer on, i.e : CPU, GPU. '
                            'The demo will look for a suitable plugin for device specified '
-                           '(by default, it is CPU).',
+                           '(by default, it is CPU). Please refer to OpenVINO documentation '
+                           'for the list of devices supported by the model.',
                       default='CPU', type=str, metavar='"<device>"')
     args.add_argument('-l', '--cpu_extension',
                       help='Required for CPU custom layers. '
