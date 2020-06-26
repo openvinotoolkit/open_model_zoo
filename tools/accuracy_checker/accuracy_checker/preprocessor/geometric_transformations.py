@@ -991,3 +991,76 @@ class FacePatch(Preprocessor):
         })
 
         return image
+
+class PersonVehicleDetectionPatch(Preprocessor):
+    __provider__ = 'person_vehicle_detection_patch'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'scale_width': NumberField(
+                value_type=float, min_value=0, default=1, optional=True,
+                description='Value to scale width relative to the original candidate width'
+            ),
+            'scale_height': NumberField(
+                value_type=float, min_value=0, default=1, optional=True,
+                description='Value to scale height relative to the original candidate height'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.scale_width = self.get_value_from_config('scale_width')
+        self.scale_height = self.get_value_from_config('scale_height')
+
+    def process(self, image, annotation_meta=None):
+        candidates = annotation_meta['candidate_info']
+        patches = []
+        data = image.data
+        image_height, image_width, _ = data.shape
+        for i in range(candidates.x_mins.size):
+            x_min = candidates.x_mins[i]
+            y_min = candidates.y_mins[i]
+            x_max = candidates.x_maxs[i]
+            y_max = candidates.y_maxs[i]
+            ctrx = int((x_min + x_max) / 2)
+            ctry = int((y_min + y_max) / 2)
+            delx = int((x_max - x_min) / 2 * (self.scale_width + 1))
+            dely = int((y_max - y_min) / 2 * (self.scale_height + 1))
+            bbox = [
+                ctrx - delx,
+                ctry - dely,
+                ctrx + delx,
+                ctry + dely
+            ]
+            ext_bbox = [bbox[0], bbox[1], bbox[2], bbox[3]]
+
+            bbox[0] = max(0, bbox[0])
+            bbox[1] = max(0, bbox[1])
+            bbox[2] = min(image_width, bbox[2])
+            bbox[3] = min(image_height, bbox[3])
+
+            crop_image = data[bbox[1]:bbox[3], bbox[0]:bbox[2]]
+
+            # padding for turncated region
+            if bbox[0] == 0 or bbox[1] == 0 or bbox[2] == image_width or bbox[3] == image_height:
+                crop_image = cv2.copyMakeBorder(
+                    crop_image,
+                    bbox[1] - ext_bbox[1],
+                    ext_bbox[3] - bbox[3],
+                    bbox[0] - ext_bbox[0],
+                    ext_bbox[2] - bbox[2],
+                    cv2.BORDER_CONSTANT
+                )
+            patches.append(crop_image)
+
+        if candidates.x_mins.size == 0:
+            patches.append(data)
+        image.data = patches
+
+        image.metadata.update({
+            'multi_infer': True,
+            'candidate_info': candidates
+        })
+        return image

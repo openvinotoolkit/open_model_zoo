@@ -140,3 +140,6 @@ Accuracy Checker supports following set of preprocessors:
 * `face_patch` - crops faces detected in previous stage model from input image with vertical and horizontal scaling.
   * `scale_width` - value to scale width relative to the original candidate width.
   * `scale_height` - value to scale height relative to the original candidate height.
+* `person_vehicle_detection_patch` - crops detected person and vehicle objects in previous stage model from input image with vertical and horizontal scaling.
+  * `scale_width` - value to scale width relative to the original candidate width.
+  * `scale_height` - value to scale height relative to the original candidate height.
