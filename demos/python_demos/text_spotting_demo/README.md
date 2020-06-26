@@ -68,10 +68,10 @@ Options:
                         recognition model (decoder part).
   -i "<path>"           Required. Input to process.
   -d "<device>", --device "<device>"
-                        Optional. Specify the target device to infer on: CPU,
-                        GPU, FPGA, HDDL or MYRIAD. The demo will look for a
-                        suitable plugin for device specified (by default, it
-                        is CPU).
+                        Optional. Specify the target device to infer on, i.e. CPU, GPU.
+                        The demo will look for a suitable plugin for device specified
+                        (by default, it is CPU). Please refer to OpenVINO documentation
+                        for the list of devices supported by the model.
   -l "<absolute_path>", --cpu_extension "<absolute_path>"
                         Required for CPU custom layers. Absolute path to a
                         shared library with the kernels implementation.
