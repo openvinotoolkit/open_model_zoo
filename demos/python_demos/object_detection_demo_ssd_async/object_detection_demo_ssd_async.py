@@ -500,7 +500,7 @@ def main():
             start_time = frame_meta['start_time']
 
             if len(objects) and args.raw_output_message:
-                log.info(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX | COLOR ')
+                log.info(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
 
             origin_im_size = frame.shape[:-1]
             presenter.drawGraphs(frame)
@@ -516,9 +516,8 @@ def main():
 
                     if args.raw_output_message:
                         log.info(
-                            '{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} | {} '.format(det_label, obj.score,
-                                                                                      xmin, ymin, xmax, ymax,
-                                                                                      color))
+                            '{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '.format(det_label, obj.score,
+                                                                                 xmin, ymin, xmax, ymax))
 
                     cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
                     cv2.putText(frame, '#{} {:.1%}'.format(det_label, obj.score),
