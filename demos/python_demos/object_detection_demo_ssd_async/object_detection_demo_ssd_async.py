@@ -191,6 +191,7 @@ class Model:
         meta.update(preprocessing_meta)
         request.set_completion_callback(py_callback=self.inference_completion_callback,
                                         py_data=(request, id, meta))
+        self.event.clear()
         request.async_infer(inputs=inputs)
 
     def await_all(self):
@@ -198,7 +199,6 @@ class Model:
             request.wait()
 
     def await_any(self):
-        self.event.clear()
         self.event.wait()
 
 
