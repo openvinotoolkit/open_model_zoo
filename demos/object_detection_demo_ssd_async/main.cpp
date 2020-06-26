@@ -321,13 +321,13 @@ int main(int argc, char *argv[]) {
         auto totalT0 = std::chrono::steady_clock::now();
 
         // execution always starts in USER_SPECIFIED mode
-        enum class ExecutionMode {userSpecified, minLatency};
-        ExecutionMode currentMode = ExecutionMode::userSpecified;
+        enum class ExecutionMode {USER_SPECIFIED, MIN_LATENCY};
+        ExecutionMode currentMode = ExecutionMode::USER_SPECIFIED;
 
-        std::deque<InferRequest::Ptr> currentModeEmptyRequests;
-        if (currentMode == ExecutionMode::userSpecified) {
-            currentModeEmptyRequests.assign(userSpecifiedInferRequests.begin(), userSpecifiedInferRequests.end());
-        } else currentModeEmptyRequests = {minLatencyInferRequest};
+        std::deque<InferRequest::Ptr> emptyRequests;
+        if (currentMode == ExecutionMode::USER_SPECIFIED) {
+            emptyRequests.assign(userSpecifiedInferRequests.begin(), userSpecifiedInferRequests.end());
+        } else emptyRequests = {minLatencyInferRequest};
 
         std::unordered_map<int, RequestResult> completedRequestResults;
         int nextFrameId = 0;
@@ -335,8 +335,8 @@ int main(int argc, char *argv[]) {
         std::exception_ptr callbackException = nullptr;
         std::mutex mutex;
         std::condition_variable condVar;
-        std::map<ExecutionMode, ModeInfo> modeInfo = {{ExecutionMode::userSpecified, ModeInfo()},
-                                                      {ExecutionMode::minLatency, ModeInfo()}};
+        std::map<ExecutionMode, ModeInfo> modeInfo = {{ExecutionMode::USER_SPECIFIED, ModeInfo()},
+                                                      {ExecutionMode::MIN_LATENCY, ModeInfo()}};
 
         cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
         Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10,
@@ -359,8 +359,8 @@ int main(int argc, char *argv[]) {
 
                 if (!cap.isOpened()
                     && completedRequestResults.empty()
-                    && ((currentMode == ExecutionMode::userSpecified && currentModeEmptyRequests.size() == FLAGS_nireq)
-                        || (currentMode == ExecutionMode::minLatency && currentModeEmptyRequests.size() == 1))) break;
+                    && ((currentMode == ExecutionMode::USER_SPECIFIED && emptyRequests.size() == FLAGS_nireq)
+                        || (currentMode == ExecutionMode::MIN_LATENCY && emptyRequests.size() == 1))) break;
 
                 auto requestResultItr = completedRequestResults.find(nextFrameIdToShow);
                 if (requestResultItr != completedRequestResults.end()) {
@@ -414,7 +414,7 @@ int main(int argc, char *argv[]) {
 
                 auto currentTime = std::chrono::steady_clock::now();
                 std::ostringstream out;
-                out << (currentMode == ExecutionMode::userSpecified ? "USER SPECIFIED" : "MIN LATENCY")
+                out << (currentMode == ExecutionMode::USER_SPECIFIED ? "USER SPECIFIED" : "MIN LATENCY")
                     << " mode (press Tab to switch)";
                 putHighlightedText(requestResult.frame, out.str(), cv::Point2f(10, 30), cv::FONT_HERSHEY_TRIPLEX, 0.75, 
                                    cv::Scalar(10, 10, 200), 2);
@@ -440,19 +440,18 @@ int main(int argc, char *argv[]) {
                         break;
                     } else if (9 == key) {  // Tab
                         ExecutionMode prevMode = currentMode;
-                        currentMode = (currentMode == ExecutionMode::userSpecified ? ExecutionMode::minLatency
-                                                                                   : ExecutionMode::userSpecified);
-
-                        if (currentMode == ExecutionMode::userSpecified) {
+                        currentMode = (currentMode == ExecutionMode::USER_SPECIFIED ? ExecutionMode::MIN_LATENCY
+                                                                                    : ExecutionMode::USER_SPECIFIED);
+                        if (prevMode == ExecutionMode::USER_SPECIFIED) {
                             for (const auto& request: userSpecifiedInferRequests) {
                                 request->Wait(IInferRequest::WaitMode::RESULT_READY);
                             }
                         } else minLatencyInferRequest->Wait(IInferRequest::WaitMode::RESULT_READY);
                         
-                        if (currentMode == ExecutionMode::userSpecified) {
-                            currentModeEmptyRequests.assign(userSpecifiedInferRequests.begin(),
-                                                            userSpecifiedInferRequests.end());
-                        } else currentModeEmptyRequests = {minLatencyInferRequest};
+                        if (currentMode == ExecutionMode::USER_SPECIFIED) {
+                            emptyRequests.assign(userSpecifiedInferRequests.begin(),
+                                                 userSpecifiedInferRequests.end());
+                        } else emptyRequests = {minLatencyInferRequest};
 
                         modeInfo[currentMode] = ModeInfo();
                         auto switchTime = std::chrono::steady_clock::now();
@@ -462,7 +461,7 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
-            } else if (!currentModeEmptyRequests.empty() && cap.isOpened()) {
+            } else if (!emptyRequests.empty() && cap.isOpened()) {
                 auto startTime = std::chrono::steady_clock::now();
                 
                 cv::Mat frame;
@@ -481,8 +480,8 @@ int main(int argc, char *argv[]) {
                 {
                     std::lock_guard<std::mutex> lock(mutex);
 
-                    request = std::move(currentModeEmptyRequests.front());
-                    currentModeEmptyRequests.pop_front();
+                    request = std::move(emptyRequests.front());
+                    emptyRequests.pop_front();
                 }
                 frameToBlob(frame, request, imageInputName);
                 
@@ -496,7 +495,7 @@ int main(int argc, char *argv[]) {
                                                 startTime,
                                                 frameMode,
                                                 &currentMode,
-                                                &currentModeEmptyRequests,
+                                                &emptyRequests,
                                                 &callbackException,
                                                 &condVar] {
                     {
@@ -506,14 +505,12 @@ int main(int argc, char *argv[]) {
                             completedRequestResults.insert(
                                 std::pair<int, RequestResult>(nextFrameId, RequestResult{
                                     frame,
-                                    request->GetBlob(outputName),
+                                    std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outputName))),
                                     startTime,
                                     frameMode == currentMode
                                 }));
                             
-                            if (currentMode == frameMode) {
-                                currentModeEmptyRequests.push_back(std::move(request));
-                            }
+                            emptyRequests.push_back(std::move(request));
                         }
                         catch (...) {
                             if (!callbackException) {
@@ -527,10 +524,13 @@ int main(int argc, char *argv[]) {
                 request->StartAsync();
                 nextFrameId++;
             } else {
-                std::unique_lock<std::mutex> lock(mutex);
+                while (true) {
+                    std::unique_lock<std::mutex> lock(mutex);
 
-                if (callbackException == nullptr
-                    && currentModeEmptyRequests.empty() && completedRequestResults.empty()) {
+                    if (callbackException != nullptr || !emptyRequests.empty() || !completedRequestResults.empty()) {
+                        break;
+                    }
+
                     condVar.wait(lock);
                 }
             }
@@ -546,7 +546,7 @@ int main(int argc, char *argv[]) {
 
         /** Show performace results **/
         if (FLAGS_pc) {
-            if (currentMode == ExecutionMode::userSpecified) {
+            if (currentMode == ExecutionMode::USER_SPECIFIED) {
                 for (const auto& request: userSpecifiedInferRequests) {
                     printPerformanceCounts(*request, std::cout, getFullDeviceName(ie, FLAGS_d));
                 }
@@ -554,39 +554,39 @@ int main(int argc, char *argv[]) {
         }
 
         std::chrono::steady_clock::time_point endTime;
-        if (modeInfo[ExecutionMode::userSpecified].framesCount) {
+        if (modeInfo[ExecutionMode::USER_SPECIFIED].framesCount) {
             std::cout << std::endl;
             std::cout << "USER_SPECIFIED mode:" << std::endl;
-            endTime = (modeInfo[ExecutionMode::userSpecified].lastEndTime.time_since_epoch().count() != 0)
-                      ? modeInfo[ExecutionMode::userSpecified].lastEndTime
+            endTime = (modeInfo[ExecutionMode::USER_SPECIFIED].lastEndTime.time_since_epoch().count() != 0)
+                      ? modeInfo[ExecutionMode::USER_SPECIFIED].lastEndTime
                       : totalT1;
             std::cout << "FPS: " << std::fixed << std::setprecision(1)
-                << modeInfo[ExecutionMode::userSpecified].framesCount / std::chrono::duration_cast<Sec>(
-                    endTime - modeInfo[ExecutionMode::userSpecified].lastStartTime).count() << std::endl;
+                << modeInfo[ExecutionMode::USER_SPECIFIED].framesCount / std::chrono::duration_cast<Sec>(
+                    endTime - modeInfo[ExecutionMode::USER_SPECIFIED].lastStartTime).count() << std::endl;
             std::cout << "Latency: " << std::fixed << std::setprecision(1)
-                << ((std::chrono::duration_cast<Ms>(modeInfo[ExecutionMode::userSpecified].latencySum).count() /
-                     modeInfo[ExecutionMode::userSpecified].framesCount)) << " ms" << std::endl;
+                << ((std::chrono::duration_cast<Ms>(modeInfo[ExecutionMode::USER_SPECIFIED].latencySum).count() /
+                     modeInfo[ExecutionMode::USER_SPECIFIED].framesCount)) << " ms" << std::endl;
         }
 
-        if (modeInfo[ExecutionMode::minLatency].framesCount) {
+        if (modeInfo[ExecutionMode::MIN_LATENCY].framesCount) {
             std::cout << std::endl;
             std::cout << "MIN_LATENCY mode:" << std::endl;
-            endTime = (modeInfo[ExecutionMode::minLatency].lastEndTime.time_since_epoch().count() != 0)
-                      ? modeInfo[ExecutionMode::minLatency].lastEndTime
+            endTime = (modeInfo[ExecutionMode::MIN_LATENCY].lastEndTime.time_since_epoch().count() != 0)
+                      ? modeInfo[ExecutionMode::MIN_LATENCY].lastEndTime
                       : totalT1;
             std::cout << "FPS: " << std::fixed << std::setprecision(1)
-                << modeInfo[ExecutionMode::minLatency].framesCount / std::chrono::duration_cast<Sec>(
-                    endTime - modeInfo[ExecutionMode::minLatency].lastStartTime).count() << std::endl;
+                << modeInfo[ExecutionMode::MIN_LATENCY].framesCount / std::chrono::duration_cast<Sec>(
+                    endTime - modeInfo[ExecutionMode::MIN_LATENCY].lastStartTime).count() << std::endl;
             std::cout << "Latency: " << std::fixed << std::setprecision(1)
-                << ((std::chrono::duration_cast<Ms>(modeInfo[ExecutionMode::minLatency].latencySum).count() /
-                     modeInfo[ExecutionMode::minLatency].framesCount)) << " ms" << std::endl;
+                << ((std::chrono::duration_cast<Ms>(modeInfo[ExecutionMode::MIN_LATENCY].latencySum).count() /
+                     modeInfo[ExecutionMode::MIN_LATENCY].framesCount)) << " ms" << std::endl;
         }
 
         std::cout << std::endl << presenter.reportMeans() << '\n';
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 9. Wait for running Infer Requests --------------------------------------
-        if (currentMode == ExecutionMode::userSpecified) {
+        if (currentMode == ExecutionMode::USER_SPECIFIED) {
             for (const auto& request: userSpecifiedInferRequests) {
                 request->Wait(IInferRequest::WaitMode::RESULT_READY);
             }
