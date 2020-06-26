@@ -131,7 +131,9 @@ class _OpenCVResizer(_Resizer):
     _supported_interpolations = {
         'NEAREST': cv2.INTER_NEAREST,
         'LINEAR': cv2.INTER_LINEAR,
+        'BILINEAR': cv2.INTER_LINEAR,
         'CUBIC': cv2.INTER_CUBIC,
+        'BICUBIC': cv2.INTER_CUBIC,
         'AREA': cv2.INTER_AREA,
         'MAX': cv2.INTER_MAX,
         'BITS': cv2.INTER_BITS,
