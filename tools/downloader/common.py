@@ -29,6 +29,7 @@ import traceback
 
 from pathlib import Path
 
+import requests
 import yaml
 
 DOWNLOAD_TIMEOUT = 5 * 60
@@ -280,6 +281,8 @@ class FileSource(TaggedBase):
         return super().deserialize(source)
 
 class FileSourceHttp(FileSource):
+    RE_CONTENT_RANGE_VALUE = re.compile(r'bytes (\d+)-\d+/(?:\d+|\*)')
+
     def __init__(self, url):
         self.url = url
 
@@ -287,11 +290,30 @@ class FileSourceHttp(FileSource):
     def deserialize(cls, source):
         return cls(validate_string('"url"', source['url']))
 
-    def start_download(self, session, chunk_size):
-        response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT)
+    def start_download(self, session, chunk_size, offset):
+        headers = {}
+        if offset != 0:
+            headers['Range'] = 'bytes={}-'.format(offset)
+
+        response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT, headers=headers)
         response.raise_for_status()
 
-        return response.iter_content(chunk_size=chunk_size)
+        if response.status_code == requests.codes.partial_content:
+            match = self.RE_CONTENT_RANGE_VALUE.fullmatch(response.headers.get('Content-Range', ''))
+            if not match:
+                # invalid range reply; return a negative offset to make
+                # the download logic restart the download.
+                return None, -1
+
+            return response.iter_content(chunk_size=chunk_size), int(match.group(1))
+
+        # either we didn't ask for a range, or the server doesn't support ranges
+
+        if 'Content-Range' in response.headers:
+            # non-partial responses aren't supposed to have range information
+            return None, -1
+
+        return response.iter_content(chunk_size=chunk_size), 0
 
 FileSource.types['http'] = FileSourceHttp
 
@@ -303,7 +325,8 @@ class FileSourceGoogleDrive(FileSource):
     def deserialize(cls, source):
         return cls(validate_string('"id"', source['id']))
 
-    def start_download(self, session, chunk_size):
+    def start_download(self, session, chunk_size, offset):
+        # for now the offset is ignored; TODO: try to implement resumption
         URL = 'https://docs.google.com/uc?export=download'
         response = session.get(URL, params={'id' : self.id}, stream=True, timeout=DOWNLOAD_TIMEOUT)
         response.raise_for_status()
@@ -314,7 +337,7 @@ class FileSourceGoogleDrive(FileSource):
                 response = session.get(URL, params=params, stream=True, timeout=DOWNLOAD_TIMEOUT)
                 response.raise_for_status()
 
-        return response.iter_content(chunk_size=chunk_size)
+        return response.iter_content(chunk_size=chunk_size), 0
 
 FileSource.types['google_drive'] = FileSourceGoogleDrive
 
