@@ -82,7 +82,7 @@ def build_argparser():
                       help='Required. Input to process.',
                       required=True, type=str, metavar='"<path>"')
     args.add_argument('-d', '--device',
-                      help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
+                      help='Optional. Specify the target device to infer on, i.e : CPU, GPU. '
                            'The demo will look for a suitable plugin for device specified '
                            '(by default, it is CPU).',
                       default='CPU', type=str, metavar='"<device>"')
