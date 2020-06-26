@@ -52,7 +52,7 @@ from .detection import (
     FaceDetectionAdapter,
     FaceDetectionRefinementAdapter
 )
-from .detection_person_vehicle import PersonVehicleDetectionAdapter
+from .detection_person_vehicle import PersonVehicleDetectionAdapter, PersonVehicleDetectionRefinementAdapter
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
@@ -98,6 +98,7 @@ __all__ = [
     'FaceDetectionAdapter',
     'FaceDetectionRefinementAdapter',
     'PersonVehicleDetectionAdapter',
+    'PersonVehicleDetectionRefinementAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
