@@ -49,7 +49,7 @@ class AttributeClassificationMetric(FullDatasetEvaluationMetric):
     def configure(self):
         self.attributes = self.get_value_from_config('attributes')
         self.calculate_average = self.get_value_from_config('calculate_average')
-        self.meta = self.__create_meta()
+        self.meta.update(self.__create_meta())
         super().configure()
 
     def evaluate(self, annotations, predictions):
