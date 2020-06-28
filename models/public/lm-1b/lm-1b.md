@@ -1,12 +1,12 @@
-# language-model-0001
+# lm-1b
 
 ## Use Case and High-Level Description
 
-The `language-model-0001` model is used to language prediction. It's a model hybrid between character CNN, a large and deep LSTM, and a specific Softmax architecture. The `language-model-0001` model is pretrained on the One Billion Word Benchmark dataset, and get the best perplexity thus far. For details about this model, check out the paper (http://arxiv.org/abs/1602.02410).
+The `lm-1b` model is used to language prediction. It's a model hybrid between character CNN, a large and deep LSTM, and a specific Softmax architecture. The `lm-1b` model is pretrained on the One Billion Word Benchmark dataset, and get the best perplexity thus far. For details about this model, check out the paper (http://arxiv.org/abs/1602.02410).
 
 The model inputs include embeded characters whose shape is [50] and placeholders whose shape is [1,9216].
 
-The model output for `language-model-0001` is the language pridiction and its perplexity.
+The model output for `lm-1b` is the language prediction and its perplexity.
 
 For more details see repository <https://github.com/tensorflow/models/tree/master/research/lm_1b>
 
@@ -21,7 +21,7 @@ For more details see repository <https://github.com/tensorflow/models/tree/maste
 
 ## Accuracy
 
-Test on the test dataset `language-model-0001-dataset`, At convergence, the perplexity should be around 30.
+Test on the test dataset `lm-1b-dataset`, At convergence, the perplexity should be around 30.
 See [https://github.com/tensorflow/models/tree/master/research/lm_1b]
 
 ## Performance

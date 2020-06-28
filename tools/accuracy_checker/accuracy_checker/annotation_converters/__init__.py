@@ -61,7 +61,7 @@ from .text_classification import (
 from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
 from .ms_asl_continuous import MSASLContiniousConverter
-from .language_modeling import LanguageModelDatasetConverter
+from .lm_1b import LM1BDatasetConverter
 
 from .monocular_depth_perception import ReDWebDatasetConverter
 
@@ -136,5 +136,5 @@ __all__ = [
     'Wikitext2RawConverter',
     'ImageProcessingConverter',
     'AFLW20003DConverter',
-    'LanguageModelDatasetConverter'
+    'LM1BDatasetConverter'
 ]

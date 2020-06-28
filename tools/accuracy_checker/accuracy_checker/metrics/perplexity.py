@@ -1,12 +1,12 @@
 import numpy as np
 from .metric import FullDatasetEvaluationMetric
-from ..representation import LMAnnotation, LanguageModelingPrediction
+from ..representation import LM1BAnnotation, LanguageModelingPrediction
 from ..config import ConfigError
 
 
 class Perplexity(FullDatasetEvaluationMetric):
     __provider__ = 'softmax_perplexity'
-    annotation_types = (LMAnnotation, )
+    annotation_types = (LM1BAnnotation, )
     prediction_types = (LanguageModelingPrediction, )
 
     def configure(self):

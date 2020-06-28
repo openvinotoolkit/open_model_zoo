@@ -39,11 +39,11 @@ class LanguageModelingPrediction(LanguageModeling):
         self.logits = logits
 
 
-class LMRepresentation(BaseRepresentation):
+class LM1BRepresentation(BaseRepresentation):
     pass
 
 
-class LMAnnotation(LMRepresentation):
+class LM1BAnnotation(LM1BRepresentation):
     def __init__(
             self, identifier, input_ids, target_ids,
             input_char_ids=None, input_unique_y=None, input_unique_idx=None,

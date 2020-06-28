@@ -18,11 +18,11 @@ import numpy as np
 from .format_converter import BaseFormatConverter, ConverterReturn
 from ..config import PathField, BoolField, NumberField
 from ..utils import read_txt
-from ..representation import LMAnnotation
+from ..representation import LM1BAnnotation
 from ..data_readers import MultiFramesInputIdentifier
 
 
-class LanguageModelDatasetConverter(BaseFormatConverter):
+class LM1BDatasetConverter(BaseFormatConverter):
     __provider__ = 'lm_1b'
 
     @classmethod
@@ -77,7 +77,7 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
             targets = sentence[1:]
             unique_input_identifier = ['sentence_{}_{}'.format(sentence_id, unique_ids) for unique_ids in unique_input_ids]
             annotations.append(
-                LMAnnotation(
+                LM1BAnnotation(
                     MultiFramesInputIdentifier(unique_input_ids, unique_input_identifier), sentence, targets,
                     encoded_by_chars_sentences[sentence_id] if self.chars_encoding else None,
                     unique_y[sentence_id] if self.chars_encoding else None,
