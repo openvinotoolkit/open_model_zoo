@@ -10,8 +10,10 @@ models:
         inputs:
           - name: char_embedding/EmbeddingLookupUnique/Unique/placeholder_out_port_0
             type: INPUT
+            value: 0
           - name: char_embedding/EmbeddingLookupUnique/Unique/placeholder_out_port_1
             type: INPUT
+            value: 1
           - name: Variable/read/placeholder_port_0
             type: LSTM_INPUT
             value: lstm/lstm_0/concat_2
@@ -31,5 +33,6 @@ models:
           vocab_file: public/language-model-0001/language-model-0001-vocab.txt
           chars_encoding: True
           max_word_length: 50
+          multi_inputs: 2
         metrics:
           - type: softmax_perplexity
