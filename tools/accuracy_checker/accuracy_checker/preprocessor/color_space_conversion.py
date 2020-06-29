@@ -152,7 +152,7 @@ class BGRtoNV12Converter(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         data = image.data
-        height, width, _  = data.shape
+        height, width, _ = data.shape
         y, u, v = cv2.cvtColor(data, cv2.COLOR_BGR2YUV)
 
         shrunk_u = cv2.resize(u, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
