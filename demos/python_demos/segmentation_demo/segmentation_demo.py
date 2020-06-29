@@ -103,10 +103,6 @@ def main():
     #     this requires additional operation and more memory.
     net.input_info[input_blob].precision = "U8"
 
-    # Work around a bug in the IE GPU plugin. Without this,
-    # load_network fails for semantic-segmentation-adas-0001.
-    net.outputs[out_blob].precision = "FP32"
-
     # Read and pre-process input images
     n, c, h, w = net.input_info[input_blob].input_data.shape
     images = np.ndarray(shape=(n, c, h, w))
