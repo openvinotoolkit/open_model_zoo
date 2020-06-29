@@ -342,7 +342,11 @@ class DLSDKLauncher(Launcher):
                         ie_input_info[key].shape,
                         layout
                     )
-                    self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data))
+                    preprocess_info = self._preprocess_info.get(key)
+                    if preprocess_info is not None:
+                        self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data), preprocess_info)
+                    else:
+                        self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data))
             result = self.exec_network.infer(infer_inputs) if not self._use_set_blob else self.exec_network.infer()
             results.append(result)
 
@@ -967,9 +971,13 @@ class DLSDKLauncher(Launcher):
                 if input_name in self.const_inputs + self.image_info_inputs:
                     continue
                 for (name, value) in preprocess_steps:
-                    if name == 'resize_algorithm' and not self.disable_resize_to_input:
-                        self.disable_resize_to_input = True
                     setattr(input_info.preprocess_info, name, value)
+                if preprocess.ie_processor.has_normalization():
+                    channel_id = input_info.layout.find('C')
+                    if channel_id != -1:
+                        num_channels = input_info.input_data.shape[channel_id]
+                        preprocess.ie_processor.set_normalization(num_channels, input_info.preprocess_info)
+            self.disable_resize_to_input = preprocess.ie_processor.has_resize()
             self.load_network(self.network)
             self._preprocess_steps = preprocess_steps
             return
@@ -978,9 +986,14 @@ class DLSDKLauncher(Launcher):
         for input_name in self.inputs:
             if input_name in self.const_inputs + self.image_info_inputs:
                 continue
+            if preprocess.ie_processor.has_normalization():
+                channel_id = self.inputs[input_name].layout.find('C')
+                if channel_id != -1:
+                    num_channels = self.inputs[input_name].shape[channel_id]
+                    preprocess.ie_processor.set_normalization(num_channels, preprocess_info)
             preprocess_info_by_input[input_name] = preprocess_info
         self._preprocess_info = preprocess_info_by_input
-        self.disable_resize_to_input = preprocess.ie_processor.has_resize
+        self.disable_resize_to_input = preprocess.ie_processor.has_resize()
 
     def release(self):
         if 'network' in self.__dict__:

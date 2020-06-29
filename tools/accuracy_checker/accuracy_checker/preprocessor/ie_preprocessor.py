@@ -2,9 +2,11 @@ from copy import deepcopy
 from collections import namedtuple
 import warnings
 try:
-    from openvino.inference_engine import ResizeAlgorithm, PreProcessInfo, ColorFormat
+    from openvino.inference_engine import ResizeAlgorithm, PreProcessInfo, ColorFormat, MeanVariant
 except ImportError:
-    ResizeAlgorithm, PreProcessInfo, ColorFormat = None, None, None
+    ResizeAlgorithm, PreProcessInfo, ColorFormat, MeanVariant = None, None, None, None
+from .normalization import Normalize
+from ..utils import get_or_parse_value
 
 
 def ie_preprocess_available():
@@ -14,41 +16,19 @@ def ie_preprocess_available():
 PreprocessingOp = namedtuple('PreprocessingOp', ['name', 'value'])
 
 
-def get_resize_op(config):
-    supported_interpolations = {
-        'LINEAR': ResizeAlgorithm.RESIZE_BILINEAR,
-        'BILINEAR': ResizeAlgorithm.RESIZE_BILINEAR,
-        'AREA': ResizeAlgorithm.RESIZE_AREA
-    }
-    if 'aspect_ratio' in config:
-        return None
-    interpolation = config.get('interpolation', 'BILINEAR').upper()
-    if interpolation not in supported_interpolations:
-        return None
-    return PreprocessingOp('resize_algorithm', supported_interpolations[interpolation])
-
-
-def get_color_format_op(config):
-    source_color = config['type'].split('_')[0].upper()
-    try:
-        ie_color_format = ColorFormat[source_color]
-    except KeyError:
-        return None
-    return PreprocessingOp('color_format', ie_color_format)
-
-
-SUPPORTED_PREPROCESSING_OPS = {
-    'resize': get_resize_op,
-    'auto_resize': get_resize_op,
-    'bgr_to_rgb': get_color_format_op,
-    'rgb_to_bgr': get_color_format_op,
-    'nv12_to_bgr': get_color_format_op,
-    'nv12_to_rgb': get_color_format_op
-}
-
-
 class IEPreprocessor:
     def __init__(self, config):
+        self.SUPPORTED_PREPROCESSING_OPS = {
+            'resize': self.get_resize_op,
+            'auto_resize': self.get_resize_op,
+            'bgr_to_rgb': self.get_color_format_op,
+            'rgb_to_bgr': self.get_color_format_op,
+            'nv12_to_bgr': self.get_color_format_op,
+            'nv12_to_rgb': self.get_color_format_op,
+            'normalization': self.get_normalization_op
+        }
+        self.mean_values = None
+        self.std_values = None
         self.config = config
         self.configure()
 
@@ -57,7 +37,7 @@ class IEPreprocessor:
         step_names = set()
         keep_preprocessing_config = deepcopy(self.config)
         for preprocessor in reversed(self.config):
-            if preprocessor['type'] not in SUPPORTED_PREPROCESSING_OPS:
+            if preprocessor['type'] not in self.SUPPORTED_PREPROCESSING_OPS:
                 break
             ie_ops = self.get_op(preprocessor)
             if not ie_ops:
@@ -72,9 +52,8 @@ class IEPreprocessor:
         if not steps:
             warnings.warn('no preprocessing steps for transition to PreProcessInfo')
 
-    @staticmethod
-    def get_op(preprocessing_config):
-        preprocessing_getter = SUPPORTED_PREPROCESSING_OPS[preprocessing_config['type']]
+    def get_op(self, preprocessing_config):
+        preprocessing_getter = self.SUPPORTED_PREPROCESSING_OPS[preprocessing_config['type']]
         return preprocessing_getter(preprocessing_config)
 
     @property
@@ -83,3 +62,57 @@ class IEPreprocessor:
         for (name, value) in self.steps:
             setattr(preprocess_info, name, value)
         return preprocess_info
+
+    @staticmethod
+    def get_resize_op(config):
+        supported_interpolations = {
+            'LINEAR': ResizeAlgorithm.RESIZE_BILINEAR,
+            'BILINEAR': ResizeAlgorithm.RESIZE_BILINEAR,
+            'AREA': ResizeAlgorithm.RESIZE_AREA
+        }
+        if 'aspect_ratio' in config:
+            return None
+        interpolation = config.get('interpolation', 'BILINEAR').upper()
+        if interpolation not in supported_interpolations:
+            return None
+        return PreprocessingOp('resize_algorithm', supported_interpolations[interpolation])
+
+    @staticmethod
+    def get_color_format_op(config):
+        source_color = config['type'].split('_')[0].upper()
+        try:
+            ie_color_format = ColorFormat[source_color]
+        except KeyError:
+            return None
+        return PreprocessingOp('color_format', ie_color_format)
+
+    def get_normalization_op(self, config):
+        self.mean_values = get_or_parse_value(config.get('mean'), Normalize.PRECOMPUTED_MEANS)
+        self.std_values = get_or_parse_value(config.get('std'), Normalize.PRECOMPUTED_STDS)
+        return PreprocessingOp('mean_variant', MeanVariant.MEAN_VALUE)
+
+    def set_mean_scale(self, num_channels, preprocess_info):
+        preprocess_info.init(num_channels)
+        if self.mean_values is None:
+            self.mean_values = [0] * num_channels
+        if self.std_values is None:
+            self.std_values = [1] * num_channels
+        if isinstance(self.mean_values, tuple) and len(self.mean_values) == 1:
+            self.mean_values = list(self.mean_values) * num_channels
+        if isinstance(self.std_values, tuple) and len(self.std_values) == 1:
+            self.std_values = list(self.std_values) * num_channels
+        assert (
+            len(self.mean_values) == num_channels and len(self.std_values) == num_channels,
+            'mean and std should be specified for all channels'
+        )
+        for channel in range(num_channels):
+            preprocess_info[channel].mean_value = self.mean_values[channel]
+            preprocess_info[channel].std_scale = self.std_values[channel]
+
+    def has_resize(self):
+        preprocessor_names = [step.name for step in self.steps]
+        return 'resize_algorithm' in preprocessor_names
+
+    def has_normalization(self):
+        preprocessor_names = [step.name for step in self.steps]
+        return 'mean_variant' in preprocessor_names
