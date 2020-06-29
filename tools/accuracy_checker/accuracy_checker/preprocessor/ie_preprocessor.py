@@ -5,7 +5,6 @@ try:
     from openvino.inference_engine import ResizeAlgorithm, PreProcessInfo, ColorFormat, MeanVariant
 except ImportError:
     ResizeAlgorithm, PreProcessInfo, ColorFormat, MeanVariant = None, None, None, None
-from .normalization import Normalize
 from ..utils import get_or_parse_value
 
 
@@ -17,6 +16,16 @@ PreprocessingOp = namedtuple('PreprocessingOp', ['name', 'value'])
 
 
 class IEPreprocessor:
+    PRECOMPUTED_MEANS = {
+        'imagenet': (104.00698793, 116.66876762, 122.67891434),
+        'cifar10': (125.307, 122.961, 113.8575),
+    }
+
+    PRECOMPUTED_STDS = {
+        'imagenet': (104.00698793, 116.66876762, 122.67891434),
+        'cifar10': (125.307, 122.961, 113.8575),
+    }
+
     def __init__(self, config):
         self.SUPPORTED_PREPROCESSING_OPS = {
             'resize': self.get_resize_op,
@@ -87,8 +96,8 @@ class IEPreprocessor:
         return PreprocessingOp('color_format', ie_color_format)
 
     def get_normalization_op(self, config):
-        self.mean_values = get_or_parse_value(config.get('mean'), Normalize.PRECOMPUTED_MEANS)
-        self.std_values = get_or_parse_value(config.get('std'), Normalize.PRECOMPUTED_STDS)
+        self.mean_values = get_or_parse_value(config.get('mean'), self.PRECOMPUTED_MEANS)
+        self.std_values = get_or_parse_value(config.get('std'), self.PRECOMPUTED_STDS)
         return PreprocessingOp('mean_variant', MeanVariant.MEAN_VALUE)
 
     def set_mean_scale(self, num_channels, preprocess_info):
