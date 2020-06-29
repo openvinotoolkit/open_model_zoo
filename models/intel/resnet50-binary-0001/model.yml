@@ -18,19 +18,19 @@ task_type: classification
 files:
   - name: FP32-INT1/resnet50-binary-0001.xml
     size: 228267
-    sha256: e58f3c1dce046b8f8a9930c73c140a2e9a254038cc8e649e60deff8a654e6380
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
+    sha256: 54cef9acbd162947951712555b3263e48d05cbae1ae24b64917492d5a3396df9
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
   - name: FP32-INT1/resnet50-binary-0001.bin
     size: 22112976
     sha256: 4990997515b220ea4f1e16609b93646a99d73c08af1b997b4f6dbc6a528fb834
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
   - name: FP16-INT1/resnet50-binary-0001.xml
     size: 228173
-    sha256: e10ff431e7fa095e0c28ce1d24028d6baf594b30e03ca6ea50a83796c5f8d7da
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.xml
+    sha256: 48886d94a762b039fa00dba6b474f3e88be2beade0350bdf6253997c109d09c2
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.xml
   - name: FP16-INT1/resnet50-binary-0001.bin
     size: 12348784
     sha256: cb98ba6a96cc46d1eae9786e964b1fad2b41d74470c2032a1961fb66ece91332
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

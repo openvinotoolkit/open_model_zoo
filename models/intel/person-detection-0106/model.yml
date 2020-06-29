@@ -18,19 +18,19 @@ task_type: detection
 files:
   - name: FP32/person-detection-0106.xml
     size: 926028
-    sha256: 761092e41e37689c2b781b6c8c6f9ea93f2911a290a805b1f211e04ef6f44a29
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-detection-0106/FP32/person-detection-0106.xml
+    sha256: 9fb9534f9bc3a123ae5167c1b04f4279c09f2e775c19501a873f765d93758414
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-0106/FP32/person-detection-0106.xml
   - name: FP32/person-detection-0106.bin
     size: 276524288
     sha256: bbe4d3e579f013dd45e98c5d1b71bf24b8e0a707e50e6a8f0e3180f47c53b27e
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-detection-0106/FP32/person-detection-0106.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-0106/FP32/person-detection-0106.bin
   - name: FP16/person-detection-0106.xml
     size: 925013
-    sha256: 3869ae645b4110d7a44761948dffaeb234663fc4313d20dfd1c11dbab326f9db
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-detection-0106/FP16/person-detection-0106.xml
+    sha256: d58f01ffe089dd7b472037e8280ffd6cc9d86116d1800a4122e52809c033d250
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-0106/FP16/person-detection-0106.xml
   - name: FP16/person-detection-0106.bin
     size: 138262516
     sha256: be2fd576c4818126d33a08f6cc3f56b23f10ac049c6cca7961a89ebfe5441b27
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-detection-0106/FP16/person-detection-0106.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-0106/FP16/person-detection-0106.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

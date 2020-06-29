@@ -19,20 +19,20 @@ description: >-
 task_type: question_answering
 files:
   - name: FP32-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.xml
-    size: 1721691
-    sha256: a63e40018700cd6368bca74c596d260fc1225920e41cee0520d5d71c128b77fe
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001/FP32-INT8/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001.xml
+    size: 1721676
+    sha256: cea1d22e94eceb6b0e1d66d443fb962b09a6bec0db329890091bff0dfa6c2f1e
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/bert-large-uncased-whole-word-masking-squad-int8-0001/FP32-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.xml
   - name: FP32-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.bin
     size: 429880400
     sha256: 46ac59b544cb493a82c53403b99221d9846ed02576bbe396626d08f71e6cd9bb
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001/FP32-INT8/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/bert-large-uncased-whole-word-masking-squad-int8-0001/FP32-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.bin
   - name: FP16-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.xml
-    size: 1720819
-    sha256: daf0272dc864e7c60654cfb3e49091f24b356194a1c5aad84f1dedfed372dccd
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001/FP16-INT8/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001.xml
+    size: 1720804
+    sha256: 36ee8876b6ba91f01957d35eb5edf3e2e28bbfe10af94d8c5e09fcb399f7bc10
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/bert-large-uncased-whole-word-masking-squad-int8-0001/FP16-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.xml
   - name: FP16-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.bin
     size: 365936426
     sha256: 3aaf68028a346ddab9ceab754a21d37dd140f2bb667e3810a7e673bca773ecf7
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001/FP16-INT8/bert-large-uncased-whole-word-masking-squad-int8-onnx-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/bert-large-uncased-whole-word-masking-squad-int8-0001/FP16-INT8/bert-large-uncased-whole-word-masking-squad-int8-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
