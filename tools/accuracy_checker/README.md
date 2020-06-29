@@ -175,7 +175,7 @@ And optionally:
 - `segmentation_masks_source` - path to directory where gt masks for semantic segmentation task stored.
 
 Also it must contain data related to annotation.
-You can convert annotation inplace using:
+You can convert annotation in-place using:
 - `annotation_conversion`: parameters for annotation conversion
 
 
@@ -216,8 +216,8 @@ will be picked from *definitions* file.
 You can find useful following instructions:
 
 - [how to convert annotations](accuracy_checker/annotation_converters/README.md)
-- [how to use preprocessings](accuracy_checker/preprocessor/README.md).
-- [how to use postprocessings](accuracy_checker/postprocessor/README.md).
+- [how to use preprocessing](accuracy_checker/preprocessor/README.md).
+- [how to use postprocessing](accuracy_checker/postprocessor/README.md).
 - [how to use metrics](accuracy_checker/metrics/README.md).
 - [how to use readers](accuracy_checker/data_readers/README.md).
 
