@@ -9,15 +9,15 @@ Process of conversion can be implemented in two ways:
 * via configuration file
 * via command line
 
-### Describing annotation conversion in configuration file.
+## Describing Annotation Conversion in Configuration File
 
-Annotation conversion can be provided in `dataset` section your configuration file to convert annotation inplace before every evaluation.
+Annotation conversion can be provided in `dataset` section your configuration file to convert annotation in-place before every evaluation.
 Each conversion configuration should contain `converter` field filled selected converter name and provide converter specific parameters (more details in supported converters section). All paths can be prefixed via command line with `-s, --source` argument.
 
 You can additionally use optional parameters like:
 * `subsample_size` - Dataset subsample size. You can specify the number of ground truth objects or dataset ratio in percentage. Please, be careful to use this option, some datasets does not support subsampling. You can also specify `subsample_seed` if you want to generate subsample with specific random seed.
 * `annotation` - path to store converted annotation pickle file. You can use this parameter if you need to reuse converted annotation to avoid subsequent conversions.
-* `dataset_meta` - path to store mata information about converted annotation if it is provided.
+* `dataset_meta` - path to store meta information about converted annotation if it is provided.
 * `analyze_dataset` - flag which allow to get statistics about converted dataset. Supported annotations: `ClassificationAnnotation`, `DetectionAnnotation`, `MultiLabelRecognitionAnnotation`, `RegressionAnnotation`. Default value is False.
 
 Example of usage:
@@ -35,7 +35,7 @@ Example of usage:
    dataset_meta: sample_dataset.json
 ```
 
-### Conversing process via command line.
+## Conversing Process via Command Line
 
 The command line for annotation conversion looks like:
 
@@ -49,7 +49,7 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 * `-a, --annotation_name` - annotation file name.
 * `-m, --meta_name` - meta info file name.
 
-### Supported converters
+## Supported Converters
 
 Accuracy Checker supports following list of annotation converters and specific for them parameters:
 * `cifar` - converts [CIFAR](https://www.cs.toronto.edu/~kriz/cifar.html) classification dataset to `ClassificationAnnotation`
@@ -86,7 +86,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `images_dir` - path to directory with images related to devkit root (default JPEGImages).
   * `mask_dir` - path to directory with ground truth segmentation masks related to devkit root (default SegmentationClass).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
-**Note: since OpenVINO 2020.4 converter behaviour changed. `data_source` parameter of dataset should contains directory for images only, if you have segmentation mask in separated location, please use `segmentation_masks_source` for specifying gt masks location.**
+>**NOTE**: Since OpenVINO 2020.4 the converter behaviour changed. `data_source` parameter of dataset should contains directory for images only, if you have segmentation mask in separated location, please use `segmentation_masks_source` for specifying gt masks location.
 * `mscoco_detection` - converts MS COCO dataset for object detection task to `DetectionAnnotation`.
   * `annotation_file` - path ot annotation file in json format.
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is False).
@@ -307,11 +307,11 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `images_dir` - path to images directory.
   * `masks_dir` - path to mask dataset to be used for inpainting (Optional).
 * `aflw2000_3d` - converts [AFLW2000-3D](http://www.cbsr.ia.ac.cn/users/xiangyuzhu/projects/3DDFA/main.htm) dataset for 3d facial landmarks regression task to `FacialLandmarks3DAnnotation`.
-   * `data_dir` - directory, where input images and annotation files in matlab format stored.
+   * `data_dir` - directory, where input images and annotation files in MATLAB format stored.
 * `style_transfer` - converts images to `StyleTransferAnnotation`.
   * `images_dir` - path to images directory.
 
-### Customizing dataset meta
+## Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `backgound_label` using `dataset_meta_file` argument.
 dataset meta file is JSON file, which can contains following parameters:
