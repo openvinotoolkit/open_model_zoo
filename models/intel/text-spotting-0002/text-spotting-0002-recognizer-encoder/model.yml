@@ -20,26 +20,26 @@ files:
   - name: FP32/text-spotting-0002-recognizer-encoder.xml
     size: 9872
     sha256: 64bf0782840b07deb70af126f60d1e66b57f661e478faec9ad59fc2c67b9dc37
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.xml
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.xml
   - name: FP32/text-spotting-0002-recognizer-encoder.bin
     size: 5311488
     sha256: 018e69d5571190031105fe558684ecafb15699002cc3ffc02e125cf8857f818a
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.bin
   - name: FP16/text-spotting-0002-recognizer-encoder.xml
     size: 9869
     sha256: abfbdc39629f81f57a7e1a08f6421dc8a69c02765cfda17239fcb11273bfc22f
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.xml
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.xml
   - name: FP16/text-spotting-0002-recognizer-encoder.bin
     size: 2655744
     sha256: 1675893bc936c1af5a03b02380212a68fe9391e2b6d563527e75c100b75f12ca
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.bin
   - name: FP16-INT8/text-spotting-0002-recognizer-encoder.xml
     size: 15945
-    sha256: 213385a63962c487a4a909dd13a8cda1dc7f92306b7f89c703a6dffba7051d43
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16-INT8/text-spotting-0002-recognizer-encoder.xml
+    sha256: 69952b2a65bab4eba2ccd52a91124b954adb70905e94070a2e2c3eed0dd8ea7a
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16-INT8/text-spotting-0002-recognizer-encoder.xml
   - name: FP16-INT8/text-spotting-0002-recognizer-encoder.bin
     size: 2655744
     sha256: 1675893bc936c1af5a03b02380212a68fe9391e2b6d563527e75c100b75f12ca
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16-INT8/text-spotting-0002-recognizer-encoder.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16-INT8/text-spotting-0002-recognizer-encoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

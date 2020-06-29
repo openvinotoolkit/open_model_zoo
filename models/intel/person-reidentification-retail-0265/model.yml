@@ -18,27 +18,27 @@ task_type: object_attributes
 files:
   - name: FP32/person-reidentification-retail-0265.xml
     size: 434572
-    sha256: 82d12890bfe1e26f539f849276b5a8fe529eb6d11c468b7b92872488266ee178
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-reidentification-retail-0265/FP32/person-reidentification-retail-0265.xml
+    sha256: 506011e6956448b66d559db4f34f54a51ca89e1622588703de77a1e3272a8b61
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-reidentification-retail-0265/FP32/person-reidentification-retail-0265.xml
   - name: FP32/person-reidentification-retail-0265.bin
     size: 8357596
     sha256: 76d28f4a95fc53d0f7859b7d8312d20c473573cd42b41722d136961a0c6254e9
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-reidentification-retail-0265/FP32/person-reidentification-retail-0265.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-reidentification-retail-0265/FP32/person-reidentification-retail-0265.bin
   - name: FP16/person-reidentification-retail-0265.xml
     size: 434454
-    sha256: a5e43f04b162ffd351a203ba262c56aaf4e04ec6d393c0c5290f577f4895d479
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-reidentification-retail-0265/FP16/person-reidentification-retail-0265.xml
+    sha256: bc0b9e59b2985f04d4f30ecbc0e6f721f6471ccb2567bcafd3c16b535d5f4eaa
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-reidentification-retail-0265/FP16/person-reidentification-retail-0265.xml
   - name: FP16/person-reidentification-retail-0265.bin
     size: 4178912
     sha256: 9cae831102140a9f96e4fff03ac7febb364819677a429c177ad5619eaefa3e31
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-reidentification-retail-0265/FP16/person-reidentification-retail-0265.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-reidentification-retail-0265/FP16/person-reidentification-retail-0265.bin
   - name: FP16-INT8/person-reidentification-retail-0265.xml
     size: 1360415
-    sha256: 334092db96b2804aa0c07f8bcc6e94d0d1b5e4e1ae21f7509fcfcf16bd22a891
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-reidentification-retail-0265/FP16-INT8/person-reidentification-retail-0265.xml
+    sha256: c4faed7907baec9149fef7e5954b3d294ce21f3cfda18dd0511858ecf75033bd
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-reidentification-retail-0265/FP16-INT8/person-reidentification-retail-0265.xml
   - name: FP16-INT8/person-reidentification-retail-0265.bin
     size: 2202906
-    sha256: d82a1c9ba023d45d37b3b0b959495004c3557a654605dd28f416f4365adb4604
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-reidentification-retail-0265/FP16-INT8/person-reidentification-retail-0265.bin
+    sha256: eaf97b4cc6d15d5afa5b5610a3a5b9a40d3aee7aaa57c1d390390713cf7986c0
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-reidentification-retail-0265/FP16-INT8/person-reidentification-retail-0265.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

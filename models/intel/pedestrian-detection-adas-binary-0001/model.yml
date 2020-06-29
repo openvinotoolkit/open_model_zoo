@@ -20,10 +20,10 @@ files:
   - name: FP32-INT1/pedestrian-detection-adas-binary-0001.xml
     size: 114635
     sha256: e64e7ce32c87e1c698b50abb8f2cf1d96c7651d45fc20bac09c417e046afa7f4
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/pedestrian-detection-adas-binary-0001/FP32-INT1/pedestrian-detection-adas-binary-0001.xml
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/pedestrian-detection-adas-binary-0001/FP32-INT1/pedestrian-detection-adas-binary-0001.xml
   - name: FP32-INT1/pedestrian-detection-adas-binary-0001.bin
     size: 2338004
     sha256: 7c2761ca3859ef55a80d9ed924225df7ba363fcb151e4ec2f7d1061b70bdb374
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/pedestrian-detection-adas-binary-0001/FP32-INT1/pedestrian-detection-adas-binary-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/pedestrian-detection-adas-binary-0001/FP32-INT1/pedestrian-detection-adas-binary-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

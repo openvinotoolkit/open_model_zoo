@@ -18,27 +18,27 @@ task_type: detection
 files:
   - name: FP32/yolo-v2-ava-sparse-35-0001.xml
     size: 75902
-    sha256: 91b48281275bed31a0a165b2580dca3d5046352741480fc8dc8d1b11a0566e0f
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/yolo-v2-ava-sparse-35-0001/FP32/yolo-v2-ava-sparse-35-0001.xml
+    sha256: ef565ff57dd58bfa5d19934b2c405371264e3c58c0ed7624acffc3e858b8d328
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/yolo-v2-ava-sparse-35-0001/FP32/yolo-v2-ava-sparse-35-0001.xml
   - name: FP32/yolo-v2-ava-sparse-35-0001.bin
     size: 202580240
     sha256: 3ba29689fd746d99e758ba15e6285d4d6e10e06616ca3113f2f7fbb2c0f85511
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/yolo-v2-ava-sparse-35-0001/FP32/yolo-v2-ava-sparse-35-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/yolo-v2-ava-sparse-35-0001/FP32/yolo-v2-ava-sparse-35-0001.bin
   - name: FP16/yolo-v2-ava-sparse-35-0001.xml
     size: 75873
-    sha256: 930d046f3005aab08ef6112103310c5b8ce868bee1dd3b5b87ef156949c62927
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/yolo-v2-ava-sparse-35-0001/FP16/yolo-v2-ava-sparse-35-0001.xml
+    sha256: 43288a2b447e9a38ed43d2c9122ec5ddd1de2c81c7c40418bda27f48ef67d12d
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/yolo-v2-ava-sparse-35-0001/FP16/yolo-v2-ava-sparse-35-0001.xml
   - name: FP16/yolo-v2-ava-sparse-35-0001.bin
     size: 101290122
     sha256: 70b6f76b11edb38761d707555ed50183b36eece352bd01af5d10fdcda7a6ff3b
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/yolo-v2-ava-sparse-35-0001/FP16/yolo-v2-ava-sparse-35-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/yolo-v2-ava-sparse-35-0001/FP16/yolo-v2-ava-sparse-35-0001.bin
   - name: FP16-INT8/yolo-v2-ava-sparse-35-0001.xml
     size: 183967
-    sha256: 58c52789229eccc75915e2ede1bbdfd329ef1c95e8de10e44b9b0c3248d2e9ff
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/yolo-v2-ava-sparse-35-0001/FP16-INT8/yolo-v2-ava-sparse-35-0001.xml
+    sha256: ff6d19acef1b7881078237eb48020d68a5a226f6ab556bbd266ad453695a7a66
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/yolo-v2-ava-sparse-35-0001/FP16-INT8/yolo-v2-ava-sparse-35-0001.xml
   - name: FP16-INT8/yolo-v2-ava-sparse-35-0001.bin
     size: 50697470
     sha256: 5723b98a3bb935aab353f18bf9ce68f1e24c0feb513adebbf668ccf612ae761e
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/yolo-v2-ava-sparse-35-0001/FP16-INT8/yolo-v2-ava-sparse-35-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/yolo-v2-ava-sparse-35-0001/FP16-INT8/yolo-v2-ava-sparse-35-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

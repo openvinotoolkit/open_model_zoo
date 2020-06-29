@@ -20,10 +20,10 @@ files:
   - name: FP32-INT1/face-detection-adas-binary-0001.xml
     size: 116647
     sha256: fde8c465a5e3f3425fb567d31b9591ff8be589930c8488639f8feddf7f0301f2
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/face-detection-adas-binary-0001/FP32-INT1/face-detection-adas-binary-0001.xml
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/face-detection-adas-binary-0001/FP32-INT1/face-detection-adas-binary-0001.xml
   - name: FP32-INT1/face-detection-adas-binary-0001.bin
     size: 1840444
     sha256: 0e0742b61fb924e937a8974da8a2e15cc6afc15630afa3f220676ee7a3a99700
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/face-detection-adas-binary-0001/FP32-INT1/face-detection-adas-binary-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/face-detection-adas-binary-0001/FP32-INT1/face-detection-adas-binary-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

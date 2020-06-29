@@ -19,27 +19,27 @@ task_type: optical_character_recognition
 files:
   - name: FP32/text-recognition-0012.xml
     size: 98164
-    sha256: 757d32483da9f6760d0683468fb583f1dea329210120d8e128c212c05c2a4769
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/text-recognition-0012/FP32/text-recognition-0012.xml
+    sha256: 42ac45d8104d9c6f717623dbfde4e81d460e492779398d2cd73416e7a18ab7ef
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-recognition-0012/FP32/text-recognition-0012.xml
   - name: FP32/text-recognition-0012.bin
     size: 47470852
     sha256: b0d99549692baeea3e83709a671844a365b15bd40e36d9a5d3ef5368a69d2897
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/text-recognition-0012/FP32/text-recognition-0012.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-recognition-0012/FP32/text-recognition-0012.bin
   - name: FP16/text-recognition-0012.xml
     size: 98132
-    sha256: 82a7df605a5e36d81885c53e90d3f81357c8ba3cd87a91f483e57aeba0c80a18
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/text-recognition-0012/FP16/text-recognition-0012.xml
+    sha256: 961e7d3bfc0722746a6f6f57ae998fcab9e61ba5f6a52670bfb46f3a933cfd99
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-recognition-0012/FP16/text-recognition-0012.xml
   - name: FP16/text-recognition-0012.bin
     size: 23735478
     sha256: 33294d251264f6913f0cc1f8a6463318becb5b70757984b461e5a865921b8d65
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/text-recognition-0012/FP16/text-recognition-0012.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-recognition-0012/FP16/text-recognition-0012.bin
   - name: FP16-INT8/text-recognition-0012.xml
     size: 138140
-    sha256: a69734c4cea663810f1b2701e97627981bbd3c1ba007bf14e3193701211e47a9
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/text-recognition-0012/FP16-INT8/text-recognition-0012.xml
+    sha256: 3fc75308c91d838aee3bbb27776f929b95ec2ae3e995e6206bc8b243944ea737
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-recognition-0012/FP16-INT8/text-recognition-0012.xml
   - name: FP16-INT8/text-recognition-0012.bin
     size: 18179110
     sha256: 4219d1198dc4a9ee32445e1fbd04beed4c0124f031a42613f79436808e69d1a2
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/text-recognition-0012/FP16-INT8/text-recognition-0012.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-recognition-0012/FP16-INT8/text-recognition-0012.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

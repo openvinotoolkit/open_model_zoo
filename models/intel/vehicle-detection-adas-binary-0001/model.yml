@@ -20,10 +20,10 @@ files:
   - name: FP32-INT1/vehicle-detection-adas-binary-0001.xml
     size: 105969
     sha256: c98bf5984895b1309861597ec36181446877407cd985bb490e14461f41312670
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/vehicle-detection-adas-binary-0001/FP32-INT1/vehicle-detection-adas-binary-0001.xml
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/vehicle-detection-adas-binary-0001/FP32-INT1/vehicle-detection-adas-binary-0001.xml
   - name: FP32-INT1/vehicle-detection-adas-binary-0001.bin
     size: 2160500
     sha256: afdd8a2f175b2f19c07083ff23b2e28105f3d1c7dc06a4b1a1d5c2c42b98294f
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/vehicle-detection-adas-binary-0001/FP32-INT1/vehicle-detection-adas-binary-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/vehicle-detection-adas-binary-0001/FP32-INT1/vehicle-detection-adas-binary-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

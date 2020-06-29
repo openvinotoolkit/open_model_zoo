@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-raisinghand-recognition-0001.xml
-    size: 657376
-    sha256: 96e419072878940b0df830ca357079532fad00884db6e25942311f8e8f6de104
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.xml
+    size: 657377
+    sha256: e07dab419caa4a13fe792c037b180cb4698290df14dff63bbd70ddb18cad4769
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.xml
   - name: FP32/person-detection-raisinghand-recognition-0001.bin
     size: 7799848
     sha256: 5183cc9d4d71e208a2cc70db9ea98bf14657d07b2bfafd050aeae9687e4359c4
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
   - name: FP16/person-detection-raisinghand-recognition-0001.xml
     size: 657133
-    sha256: 85b1ab13a4d08d5673c43bdaf8599eb02a3f9cd48b88a0cccd4969f17763abe2
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.xml
+    sha256: fc626268b09ed4c60c18090b2cb20213f6d8c2e7b169fe04334f75b1e176e13a
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.xml
   - name: FP16/person-detection-raisinghand-recognition-0001.bin
     size: 3899978
     sha256: 601543473374722d45eb56b3aa8f7f250f33e1bb548d63e392332441e97c87d8
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
   - name: FP16-INT8/person-detection-raisinghand-recognition-0001.xml
-    size: 1812272
-    sha256: 955df45881504886894f13e2d7572947dec9d638424f89fb22541ffaeb4a4134
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-detection-raisinghand-recognition-0001/FP16-INT8/person-detection-raisinghand-recognition-0001.xml
+    size: 1812255
+    sha256: 7d5f2a5877d30ef848e3ca50fffd619979b1df1beb139e8c52b1bbc8e712275e
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-raisinghand-recognition-0001/FP16-INT8/person-detection-raisinghand-recognition-0001.xml
   - name: FP16-INT8/person-detection-raisinghand-recognition-0001.bin
     size: 2054948
     sha256: 495844e53b0680750535abf5fb754647b0e5d6013b6493417471bd12b641f732
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/2/person-detection-raisinghand-recognition-0001/FP16-INT8/person-detection-raisinghand-recognition-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-raisinghand-recognition-0001/FP16-INT8/person-detection-raisinghand-recognition-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
