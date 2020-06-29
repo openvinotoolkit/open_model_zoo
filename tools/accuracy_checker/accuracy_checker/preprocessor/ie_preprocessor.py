@@ -6,6 +6,7 @@ try:
 except ImportError:
     ResizeAlgorithm, PreProcessInfo, ColorFormat, MeanVariant = None, None, None, None
 from ..utils import get_or_parse_value
+from ..config import ConfigError
 
 
 def ie_preprocess_available():
@@ -110,10 +111,8 @@ class IEPreprocessor:
             self.mean_values = list(self.mean_values) * num_channels
         if isinstance(self.std_values, tuple) and len(self.std_values) == 1:
             self.std_values = list(self.std_values) * num_channels
-        assert (
-            len(self.mean_values) == num_channels and len(self.std_values) == num_channels,
-            'mean and std should be specified for all channels'
-        )
+        if len(self.mean_values) != num_channels or len(self.std_values) != num_channels:
+            raise ConfigError('mean and std should be specified for all channels')
         for channel in range(num_channels):
             preprocess_info[channel].mean_value = self.mean_values[channel]
             preprocess_info[channel].std_scale = self.std_values[channel]
