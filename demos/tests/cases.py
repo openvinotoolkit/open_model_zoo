@@ -285,7 +285,7 @@ NATIVE_DEMOS = [
                     TestCase(options={}),
                     TestCase(options={
                         '-m_lm': ModelArg('landmarks-regression-retail-0009'),
-                        '-m_reid': ModelArg('face-reidentification-retail-0095'),
+                        '-m_reid': ModelArg('face-recognition-mobilefacenet-arcface'),
                     }),
                 ],
             ),
@@ -328,23 +328,6 @@ PYTHON_DEMOS = [
                 '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
             }),
         ],
-    )),
-
-    PythonDemo(subdirectory='face_recognition_demo', device_keys=['-d_fd', '-d_lm', '-d_reid'],
-               test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-                          **MONITORS,
-                          '-i': DataPatternArg('face-detection-adas'),
-                          '-fg': DataDirectoryArg('face-recognition-gallery')
-                          }),
-        single_option_cases('-m_fd',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-adas-binary-0001', "FP32-INT1"),
-            ModelArg('face-detection-retail-0004'),
-            ModelArg('face-detection-retail-0005'),
-            ModelArg('face-detection-retail-0044')),
-        TestCase(options={'-m_lm': ModelArg('landmarks-regression-retail-0009')}),
-        TestCase(options={'-m_reid': ModelArg('face-reidentification-retail-0095')}),
     )),
 
     PythonDemo(subdirectory='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
