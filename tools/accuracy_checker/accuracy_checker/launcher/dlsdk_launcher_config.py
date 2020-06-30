@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import openvino.inference_engine as ie
 from ..config import PathField, ConfigError
 from .launcher import LauncherConfigValidator
 from .model_conversion import FrameworkParameters
