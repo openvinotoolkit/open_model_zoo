@@ -933,8 +933,8 @@ class SimilarityTransfom(Preprocessor):
 
         return T
 
-class FacePatch(Preprocessor):
-    __provider__ = 'face_patch'
+class CandidateCrop(Preprocessor):
+    __provider__ = 'candidate_crop'
 
     @classmethod
     def parameters(cls):
@@ -957,37 +957,48 @@ class FacePatch(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         candidates = annotation_meta['candidate_info']
-        face_patches = []
+        patches = []
         data = image.data
         img_height, img_width, _ = data.shape
         for i in range(candidates.x_mins.size):
             x_min = int(round(candidates.x_mins[i]))
             y_min = int(round(candidates.y_mins[i]))
-
             width = int(round(candidates.x_maxs[i] - candidates.x_mins[i]))
             height = int(round(candidates.y_maxs[i] - candidates.y_mins[i]))
-
-            x_min -= int(round(width * (self.scale_width -1) / 2))
+            x_min -= int(round(width * (self.scale_width - 1) / 2))
             y_min -= int(round(height * (self.scale_height - 1) / 2))
             width = int(round(width * self.scale_width))
             height = int(round(height * self.scale_height))
-
-            face_patch = np.zeros((height, width, 3), dtype=image.data.dtype)
-
-            dst_rect = data[max(0, y_min):min(y_min+height, img_height), max(0, x_min):min(x_min+width, img_width)]
-            face_patch[
-                max(-y_min, 0):max(-y_min, 0) + dst_rect.shape[0],
-                max(-x_min, 0):max(-x_min, 0) + dst_rect.shape[1]
-            ] = dst_rect
-            face_patches.append(face_patch)
+            bbox = [
+                x_min,
+                y_min,
+                x_min + width,
+                y_min + height
+            ]
+            ext_bbox = [bbox[0], bbox[1], bbox[2], bbox[3]]
+            bbox[0] = max(0, bbox[0])
+            bbox[1] = max(0, bbox[1])
+            bbox[2] = min(img_width, bbox[2])
+            bbox[3] = min(img_height, bbox[3])
+            crop_image = data[bbox[1]:bbox[3], bbox[0]:bbox[2]]
+            # padding for turncated region
+            if bbox[0] == 0 or bbox[1] == 0 or bbox[2] == img_width or bbox[3] == img_height:
+                crop_image = cv2.copyMakeBorder(
+                    crop_image,
+                    bbox[1] - ext_bbox[1],
+                    ext_bbox[3] - bbox[3],
+                    bbox[0] - ext_bbox[0],
+                    ext_bbox[2] - bbox[2],
+                    cv2.BORDER_CONSTANT
+                )
+            patches.append(crop_image)
 
         if candidates.x_mins.size == 0:
-            face_patches.append(data)
+            patches.append(data)
 
-        image.data = face_patches
+        image.data = patches
         image.metadata.update({
             'multi_infer': True,
             'candidates': candidates
         })
-
         return image

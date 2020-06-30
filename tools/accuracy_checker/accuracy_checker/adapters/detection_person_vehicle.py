@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import math
+import numpy as np
 
 from ..adapters import Adapter
 from ..config import NumberField
@@ -305,7 +306,6 @@ class PersonVehicleDetectionRefinementAdapter(Adapter):
     predcition_types = (DetectionPrediction, )
 
     def process(self, raw, identifiers=None, frame_meta=None):
-        cls_names = ["bg", "bicycle", "bus", "car", "motorbike", "person", "van", "truck"]
         thresholds = {1: 0.5, 2: 0.4, 3: 0.4, 4: 0.3, 5: 0.6, 6: 0.5, 7: 0.3}
         kBoxNormalize = [10.0, 10.0, 5.0, 5.0]
 
@@ -315,18 +315,14 @@ class PersonVehicleDetectionRefinementAdapter(Adapter):
         identifier = identifiers[0]
 
         if proposals.x_mins.size == 0:
-            return [DetectionPrediction()]
+            return [DetectionPrediction(identifier=identifier)]
 
         for batch_index, prediction in enumerate(raw):
             cls_prob = prediction['final_prob'][0]
             bbox_pred = prediction['final_boxes'][0]
-            max_cls_prob = 0
-            max_cls_index = 0
-            for i in range(len(cls_names)):
-                if max_cls_prob > cls_prob[i]:
-                    continue
-                max_cls_prob = cls_prob[i]
-                max_cls_index = i
+
+            max_cls_index = np.argmax(cls_prob)
+            max_cls_prob = cls_prob[max_cls_index]
 
             if max_cls_index != 0:
                 bbox_pred_index = max_cls_index
