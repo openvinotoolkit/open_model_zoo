@@ -155,12 +155,7 @@ class Model:
 
     def unify_inputs(self, inputs):
         if not isinstance(inputs, dict):
-            if not isinstance(inputs, (list, tuple)):
-                inputs = [inputs]
-            if len(inputs) == 1:
-                inputs_dict = {next(iter(self.net.input_info)): inputs[0]}
-            else:
-                raise ValueError
+            inputs_dict = {next(iter(self.net.input_info)): inputs}
         else:
             inputs_dict = inputs
         return inputs_dict
@@ -256,8 +251,8 @@ class Detector(Model):
 
         try:
             h, w = net.input_info[image_blob_name].input_data.shape[2:]
-            parser = OTEParser([w, h], net.outputs)
-            log.info('Use OTEParser')
+            parser = BoxesLabelsParser([w, h], net.outputs)
+            log.info('Use BoxesLabelsParser')
             return parser
         except ValueError:
             pass
@@ -341,7 +336,7 @@ class MultipleOutputParser:
         return [Detector.Detection(*bbox, score, label) for label, score, bbox in zip(labels, scores, bboxes)]
 
 
-class OTEParser:
+class BoxesLabelsParser:
     def __init__(self, input_size, all_outputs, labels_layer='labels', default_label=1):
         try:
             self.labels_layer = find_layer_by_name(labels_layer, all_outputs)
