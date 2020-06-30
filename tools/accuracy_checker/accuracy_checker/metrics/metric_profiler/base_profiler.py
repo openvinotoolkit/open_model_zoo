@@ -38,6 +38,7 @@ class MetricProfiler(ClassProvider):
 
     def __init__(self, metric_name, dump_iterations=100):
         self.report_file = '{}.csv'.format(metric_name)
+        self.out_dir = Path()
         self.dump_iterations = dump_iterations
         self.storage = []
 
@@ -59,13 +60,19 @@ class MetricProfiler(ClassProvider):
         self.storage = []
 
     def write_result(self):
-        new_file = not Path(self.report_file).exists()
+        out_path = self.out_dir / self.report_file
+        new_file = not out_path.exists()
 
-        with open(self.report_file, 'a+', newline='') as f:
+        with open(str(out_path), 'a+', newline='') as f:
             writer = DictWriter(f, fieldnames=self.fields)
             if new_file:
                 writer.writeheader()
             writer.writerows(self.storage)
+
+    def set_output_dir(self, out_dir):
+        self.out_dir = out_dir
+        if not out_dir.exists():
+            self.out_dir.mkdir(parents=True)
 
 
 def create_profiler(metric_type, metric_name):

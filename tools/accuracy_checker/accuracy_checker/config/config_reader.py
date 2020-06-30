@@ -329,6 +329,7 @@ class ConfigReader:
 
     @staticmethod
     def _provide_cmd_arguments(arguments, config, mode):
+        profile_dataset = 'profile' in arguments and arguments.profile
         def _add_subset_specific_arg(dataset_entry):
             if 'shuffle' in arguments and arguments.shuffle is not None:
                 dataset_entry['shuffle'] = arguments.shuffle
@@ -370,7 +371,6 @@ class ConfigReader:
                         dataset_entry['_profile'] = arguments.profile
 
         def merge_modules(config, arguments, update_launcher_entry):
-            profile_dataset = 'profile' in arguments and arguments.profile
             for evaluation in config['evaluations']:
                 module_config = evaluation.get('module_config')
                 if not module_config:

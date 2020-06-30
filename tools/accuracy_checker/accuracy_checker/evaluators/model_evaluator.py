@@ -361,6 +361,9 @@ class ModelEvaluator(BaseEvaluator):
         computed_metrics = copy.deepcopy(self._metrics_results)
         return computed_metrics
 
+    def set_profiling_dir(self, profiler_dir):
+        self.metric_executor.set_profiling_dir(profiler_dir)
+
     @staticmethod
     def store_predictions(stored_predictions, predictions):
         # since at the first time file does not exist and then created we can not use it as a pathlib.Path object

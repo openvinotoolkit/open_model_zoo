@@ -1,4 +1,3 @@
-from pathlib import Path
 import numpy as np
 from .base_profiler import MetricProfiler
 
@@ -10,13 +9,13 @@ class SegmentationMetricProfiler(MetricProfiler):
     def __init__(self, metric_name, dump_iterations=100):
         self.updated_fields = False
         self.names = []
-        self.dumped_data_dir = Path('dumped')
-        if not self.dumped_data_dir.exists():
-            self.dumped_data_dir.mkdir()
 
         super().__init__(metric_name, dump_iterations)
 
     def generate_profiling_data(self, identifier, metric_result, predicted_mask):
+        dumping_dir = self.out_dir / 'dumped'
+        if not dumping_dir.exists():
+            dumping_dir.mkdir(parents=True)
         if not self.updated_fields:
             self._create_fields(metric_result)
         report = {'identifier': identifier}
@@ -29,7 +28,7 @@ class SegmentationMetricProfiler(MetricProfiler):
             metrics_results = dict(zip(self.names, metric_result))
         report.update(metrics_results)
         dumped_file_name = identifier.split('.')[0] + '.npy'
-        predicted_mask.dump(str(self.dumped_data_dir / dumped_file_name))
+        predicted_mask.dump(str(dumping_dir / dumped_file_name))
 
         return report
 

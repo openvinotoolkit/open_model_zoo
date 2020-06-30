@@ -43,6 +43,7 @@ class MetricsExecutor:
         profile_metrics = False if dataset is None else dataset.config.get('_profile', False)
 
         self.metrics = []
+        self._profilers = []
         self.need_store_predictions = False
         for metric_config_entry in metrics_config:
             self.register_metric(metric_config_entry, profile_metrics)
@@ -132,6 +133,8 @@ class MetricsExecutor:
         metric_kwargs = {}
         if profile:
             profiler = create_profiler(metric_type, metric_identifier)
+            if profiler is not None:
+                self._profilers.append(profiler)
             metric_kwargs['profiler'] = profiler
 
         metric_fn = Metric.provide(
@@ -163,6 +166,10 @@ class MetricsExecutor:
                 'type': metric.metric_type
             } for metric in self.metrics
         }
+
+    def set_profiling_dir(self, profiler_dir):
+        for profiler in self._profilers:
+            profiler.set_output_dir(profiler_dir)
 
     def reset(self):
         for metric in self.metrics:
