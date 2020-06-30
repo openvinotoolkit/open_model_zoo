@@ -258,6 +258,9 @@ class ColorizationEvaluator(BaseEvaluator):
 
         return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
 
+    def set_profiling_dir(self, profiler_dir):
+        self.metric_executor.set_profiling_dir(profiler_dir)
+
 
 class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):

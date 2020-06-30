@@ -740,6 +740,9 @@ class MTCNNEvaluator(BaseEvaluator):
             dataset_config['name']
         )
 
+    def set_profiling_dir(self, profiler_dir):
+        self.metric_executor.set_profiling_dir(profiler_dir)
+
     def release(self):
         for _, stage in self.stages.items():
             stage.release()

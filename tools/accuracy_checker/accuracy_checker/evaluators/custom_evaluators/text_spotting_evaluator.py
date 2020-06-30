@@ -150,6 +150,9 @@ class TextSpottingEvaluator(BaseEvaluator):
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
             presenter.write_result(metric_result, ignore_results_formatting)
 
+    def set_profiling_dir(self, profiler_dir):
+        self.metric_executor.set_profiling_dir(profiler_dir)
+
     def release(self):
         self.model.release()
         self.launcher.release()
