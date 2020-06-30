@@ -304,11 +304,13 @@ int main(int argc, char *argv[]) {
         typedef std::chrono::duration<double, std::chrono::milliseconds::period> Ms;
         typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
 
+        enum class ExecutionMode {USER_SPECIFIED, MIN_LATENCY};
+        
         struct RequestResult {
             cv::Mat frame;
             Blob::Ptr output;
             std::chrono::steady_clock::time_point startTime;
-            bool isSameMode;
+            ExecutionMode frameMode;
         };
 
         struct ModeInfo {
@@ -319,11 +321,7 @@ int main(int argc, char *argv[]) {
         };
 
         auto totalT0 = std::chrono::steady_clock::now();
-
-        // execution always starts in USER_SPECIFIED mode
-        enum class ExecutionMode {USER_SPECIFIED, MIN_LATENCY};
         ExecutionMode currentMode = ExecutionMode::USER_SPECIFIED;
-
         std::deque<InferRequest::Ptr> emptyRequests;
         if (currentMode == ExecutionMode::USER_SPECIFIED) {
             emptyRequests.assign(userSpecifiedInferRequests.begin(), userSpecifiedInferRequests.end());
@@ -351,16 +349,19 @@ int main(int argc, char *argv[]) {
 
         modeInfo[currentMode].lastStartTime = std::chrono::steady_clock::now();
         while (true) {
-            if (callbackException) std::rethrow_exception(callbackException);
-
-            RequestResult requestResult;
             {
                 std::lock_guard<std::mutex> lock(mutex);
 
+                if (callbackException) std::rethrow_exception(callbackException);
                 if (!cap.isOpened()
                     && completedRequestResults.empty()
                     && ((currentMode == ExecutionMode::USER_SPECIFIED && emptyRequests.size() == FLAGS_nireq)
                         || (currentMode == ExecutionMode::MIN_LATENCY && emptyRequests.size() == 1))) break;
+            }
+
+            RequestResult requestResult;
+            {
+                std::lock_guard<std::mutex> lock(mutex);
 
                 auto requestResultItr = completedRequestResults.find(nextFrameIdToShow);
                 if (requestResultItr != completedRequestResults.end()) {
@@ -374,7 +375,7 @@ int main(int argc, char *argv[]) {
                 const float *detections = outputMapped.as<float*>();
 
                 nextFrameIdToShow++;
-                if (requestResult.isSameMode) {
+                if (requestResult.frameMode == currentMode) {
                     modeInfo[currentMode].framesCount += 1;
                 }
 
@@ -448,10 +449,14 @@ int main(int argc, char *argv[]) {
                             }
                         } else minLatencyInferRequest->Wait(IInferRequest::WaitMode::RESULT_READY);
                         
-                        if (currentMode == ExecutionMode::USER_SPECIFIED) {
-                            emptyRequests.assign(userSpecifiedInferRequests.begin(),
-                                                 userSpecifiedInferRequests.end());
-                        } else emptyRequests = {minLatencyInferRequest};
+                        {
+                            std::lock_guard<std::mutex> lock(mutex);
+
+                            if (currentMode == ExecutionMode::USER_SPECIFIED) {
+                                emptyRequests.assign(userSpecifiedInferRequests.begin(),
+                                                     userSpecifiedInferRequests.end());
+                            } else emptyRequests = {minLatencyInferRequest};
+                        }
 
                         modeInfo[currentMode] = ModeInfo();
                         auto switchTime = std::chrono::steady_clock::now();
@@ -461,79 +466,82 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
-            } else if (!emptyRequests.empty() && cap.isOpened()) {
-                auto startTime = std::chrono::steady_clock::now();
-                
-                cv::Mat frame;
-                if (!cap.read(frame)) {
-                    if (frame.empty()) {
-                        if (FLAGS_loop_input) {
-                            cap.open((FLAGS_i == "cam") ? 0 : FLAGS_i.c_str());
-                        } else cap.release();
-                        continue;
-                    } else {
-                        throw std::logic_error("Failed to get frame from cv::VideoCapture");
-                    }
-                }
 
-                InferRequest::Ptr request;
-                {
-                    std::lock_guard<std::mutex> lock(mutex);
+                continue;
+            }
 
-                    request = std::move(emptyRequests.front());
-                    emptyRequests.pop_front();
-                }
-                frameToBlob(frame, request, imageInputName);
-                
-                ExecutionMode frameMode = currentMode;
-                request->SetCompletionCallback([&mutex,
-                                                &completedRequestResults,
-                                                nextFrameId,
-                                                frame,
-                                                request,
-                                                &outputName,
-                                                startTime,
-                                                frameMode,
-                                                &currentMode,
-                                                &emptyRequests,
-                                                &callbackException,
-                                                &condVar] {
-                    {
-                        std::lock_guard<std::mutex> callbackLock(mutex);
-                    
-                        try {
-                            completedRequestResults.insert(
-                                std::pair<int, RequestResult>(nextFrameId, RequestResult{
-                                    frame,
-                                    std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outputName))),
-                                    startTime,
-                                    frameMode == currentMode
-                                }));
-                            
-                            emptyRequests.push_back(std::move(request));
-                        }
-                        catch (...) {
-                            if (!callbackException) {
-                                callbackException = std::current_exception();
-                            }
-                        }
-                    }
-                    condVar.notify_one();
-                });
+            {
+                std::unique_lock<std::mutex> lock(mutex);
 
-                request->StartAsync();
-                nextFrameId++;
-            } else {
-                while (true) {
-                    std::unique_lock<std::mutex> lock(mutex);
-
-                    if (callbackException != nullptr || !emptyRequests.empty() || !completedRequestResults.empty()) {
-                        break;
+                if (emptyRequests.empty() || !cap.isOpened()) {
+                    while (callbackException == nullptr && emptyRequests.empty() && completedRequestResults.empty()) {
+                        condVar.wait(lock);
                     }
 
-                    condVar.wait(lock);
+                    continue;
                 }
             }
+            
+            auto startTime = std::chrono::steady_clock::now();
+                
+            cv::Mat frame;
+            if (!cap.read(frame)) {
+                if (frame.empty()) {
+                    if (FLAGS_loop_input) {
+                        cap.open((FLAGS_i == "cam") ? 0 : FLAGS_i.c_str());
+                    } else cap.release();
+                    continue;
+                } else {
+                    throw std::logic_error("Failed to get frame from cv::VideoCapture");
+                }
+            }
+
+            InferRequest::Ptr request;
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+
+                request = std::move(emptyRequests.front());
+                emptyRequests.pop_front();
+            }
+            frameToBlob(frame, request, imageInputName);
+                
+            ExecutionMode frameMode = currentMode;
+            request->SetCompletionCallback([&mutex,
+                                            &completedRequestResults,
+                                            nextFrameId,
+                                            frame,
+                                            request,
+                                            &outputName,
+                                            startTime,
+                                            frameMode,
+                                            &emptyRequests,
+                                            &callbackException,
+                                            &condVar] {
+                {
+                    std::lock_guard<std::mutex> callbackLock(mutex);
+                
+                    try {
+                        completedRequestResults.insert(
+                            std::pair<int, RequestResult>(nextFrameId, RequestResult{
+                                frame,
+                                std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outputName))),
+                                startTime,
+                                frameMode
+                            }));
+                        
+                        emptyRequests.push_back(std::move(request));
+                    }
+                    catch (...) {
+                        if (!callbackException) {
+                            callbackException = std::current_exception();
+                        }
+                    }
+                }
+                condVar.notify_one();
+            });
+
+            request->StartAsync();
+            nextFrameId++;
         }
         // -----------------------------------------------------------------------------------------------------
         
