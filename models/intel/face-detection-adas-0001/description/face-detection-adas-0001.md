@@ -44,7 +44,7 @@ Name: `input`, shape: [1x3x384x672] - An input image in the format [BxCxHxW],
 ## Outputs
 
 The net outputs blob with shape: [1, 1, N, 7], where N is the number of detected
-bounding boxes. Each detection has the format
+bounding boxes. The results are sorted by confidence in decreasing order. Each detection has the format
   [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
   - `image_id` - ID of the image in the batch
   - `label` - predicted class ID
