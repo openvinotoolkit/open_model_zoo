@@ -8,8 +8,8 @@ evaluations:
 
 
         decoder:
-          model:   intel/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
-          weights: intel/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
+          model:   intel/action-recognition-0001/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
+          weights: intel/action-recognition-0001/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
           num_processing_frames: 16
           adapter: classification
 
@@ -40,8 +40,8 @@ evaluations:
           predictions: kinetics/action-recognition-0001-encoder-predictions.pickle
 
         decoder:
-          model:   intel/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
-          weights: intel/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
+          model:   intel/action-recognition-0001/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
+          weights: intel/action-recognition-0001/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
           num_processing_frames: 16
           adapter: classification
 

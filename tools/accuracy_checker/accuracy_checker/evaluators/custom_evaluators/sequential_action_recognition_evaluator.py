@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2019-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ limitations under the License.
 from pathlib import Path
 import pickle
 from functools import partial
+from collections import OrderedDict
 import numpy as np
 
 from ..base_evaluator import BaseEvaluator
@@ -24,8 +25,9 @@ from ..quantization_model_evaluator import create_dataset_attributes
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...launcher import create_launcher
-from ...utils import contains_all, contains_any, extract_image_representations, read_pickle
+from ...utils import contains_all, contains_any, extract_image_representations, read_pickle, get_path
 from ...progress_reporters import ProgressReporter
+from ...logging import print_info
 
 
 class SequentialActionRecognitionEvaluator(BaseEvaluator):
@@ -246,6 +248,35 @@ class BaseModel:
     def release(self):
         pass
 
+    def print_input_output_info(self):
+        print_info('{} - Input info:'.format(self.default_model_suffix))
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
+        if self.network:
+            if has_info:
+                network_inputs = OrderedDict(
+                    [(name, data.input_data) for name, data in self.network.input_info.items()]
+                )
+            else:
+                network_inputs = self.network.inputs
+            network_outputs = self.network.outputs
+        else:
+            if has_info:
+                network_inputs = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
+            else:
+                network_inputs = self.exec_network.inputs
+            network_outputs = self.exec_network.outputs
+        for name, input_info in network_inputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(input_info.precision))
+            print_info('\tshape {}\n'.format(input_info.shape))
+        print_info('{} - Output info'.format(self.default_model_suffix))
+        for name, output_info in network_outputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(output_info.precision))
+            print_info('\tshape: {}\n'.format(output_info.shape))
+
 
 def create_encoder(model_config, launcher, delayed_model_loading=False):
     launcher_model_mapping = {
@@ -267,7 +298,7 @@ def create_decoder(model_config, launcher, delayed_model_loading):
     launcher_model_mapping = {
         'dlsdk': DecoderDLSDKModel,
         'onnx_runtime': DecoderONNXModel,
-        'opencv': DecoderOpenCVModel,
+        'opencv': DecoderOpenCVModel
     }
     framework = launcher.config['framework']
     model_class = launcher_model_mapping.get(framework)
@@ -290,7 +321,7 @@ class SequentialModel(BaseModel):
                 decoder['_model_is_blob'] = is_blob
             network_info.update({'encoder': encoder, 'decoder': decoder})
         if not contains_all(network_info, ['encoder', 'decoder']) and not delayed_model_loading:
-            raise ConfigError('network_info should contains encoder and decoder fields')
+            raise ConfigError('network_info should contain encoder and decoder fields')
         self.num_processing_frames = network_info['decoder'].get('num_processing_frames', 16)
         self.processing_frames_buffer = []
         self.encoder = create_encoder(network_info['encoder'], launcher, delayed_model_loading)
@@ -360,9 +391,9 @@ class EncoderDLSDKModel(BaseModel):
         self.input_blob, self.output_blob = None, None
         self.with_prefix = None
         if not delayed_model_loading:
-            self.load_model(network_info, launcher)
+            self.load_model(network_info, launcher, log=True)
 
-    def load_model(self, network_info, launcher):
+    def load_model(self, network_info, launcher, log=False):
         if 'onnx_model' in network_info:
             network_info.update(launcher.config)
             model, weights = launcher.convert_model(network_info)
@@ -374,6 +405,8 @@ class EncoderDLSDKModel(BaseModel):
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
+        if log:
+            self.print_input_output_info()
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(self.fit_to_input(input_data))
@@ -383,7 +416,12 @@ class EncoderDLSDKModel(BaseModel):
 
     def fit_to_input(self, input_data):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
-        input_data = input_data.reshape(self.exec_network.inputs[self.input_blob].shape)
+        has_info = hasattr(self.exec_network, 'input_info')
+        if has_info:
+            input_info = self.exec_network.input_info[self.input_blob].input_data
+        else:
+            input_info = self.exec_network.inputs[self.input_blob]
+        input_data = input_data.reshape(input_info.shape)
 
         return {self.input_blob: input_data}
 
@@ -408,10 +446,11 @@ class EncoderDLSDKModel(BaseModel):
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
+            print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
         if model.suffix == '.blob':
             return model, None
-        weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
-
+        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
         return model, weights
 
     def load_network(self, network, launcher):
@@ -419,7 +458,9 @@ class EncoderDLSDKModel(BaseModel):
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
 
     def set_input_and_output(self):
-        input_blob = next(iter(self.exec_network.inputs))
+        has_info = hasattr(self.exec_network, 'input_info')
+        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        input_blob = next(iter(input_info))
         with_prefix = input_blob.startswith(self.default_model_suffix)
         if self.input_blob is None or with_prefix != self.with_prefix:
             if self.input_blob is None:
@@ -429,7 +470,7 @@ class EncoderDLSDKModel(BaseModel):
                     '_'.join([self.default_model_suffix, self.output_blob])
                     if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
                 )
-            self.input_blob = next(iter(self.exec_network.inputs))
+            self.input_blob = input_blob
             self.output_blob = output_blob
             self.with_prefix = with_prefix
 
@@ -440,10 +481,10 @@ class DecoderDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         self.input_blob, self.output_blob = None, None
-        self.adapter = create_adapter('classification')
+        self.adapter = create_adapter(network_info.get('adapter', 'classification'))
         self.num_processing_frames = network_info.get('num_processing_frames', 16)
         if not delayed_model_loading:
-            self.load_model(network_info, launcher)
+            self.load_model(network_info, launcher, log=True)
         self.with_prefix = False
 
     def predict(self, identifiers, input_data):
@@ -456,7 +497,12 @@ class DecoderDLSDKModel(BaseModel):
         del self.exec_network
 
     def fit_to_input(self, input_data):
-        input_data = np.reshape(input_data, self.exec_network.inputs[self.input_blob].shape)
+        has_info = hasattr(self.exec_network, 'input_info')
+        input_info = (
+            self.exec_network.input_info[self.input_blob].input_data
+            if has_info else self.exec_network.inputs[self.input_blob]
+        )
+        input_data = np.reshape(input_data, input_info.shape)
         return {self.input_blob: input_data}
 
     def automatic_model_search(self, network_info):
@@ -480,12 +526,14 @@ class DecoderDLSDKModel(BaseModel):
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
+            print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
         if model.suffix == '.blob':
             return model, None
-        weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
+        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
         return model, weights
 
-    def load_model(self, network_info, launcher):
+    def load_model(self, network_info, launcher, log=False):
         if 'onnx_model' in network_info:
             network_info.update(launcher.config)
             model, weights = launcher.convert_model(network_info)
@@ -498,13 +546,17 @@ class DecoderDLSDKModel(BaseModel):
             self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
+        if log:
+            self.print_input_output_info()
 
     def load_network(self, network, launcher):
         self.network = network
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
 
     def set_input_and_output(self):
-        input_blob = next(iter(self.exec_network.inputs))
+        has_info = hasattr(self.exec_network, 'input_info')
+        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        input_blob = next(iter(input_info))
         with_prefix = input_blob.startswith(self.default_model_suffix)
         if self.input_blob is None or with_prefix != self.with_prefix:
             if self.input_blob is None:
@@ -514,7 +566,7 @@ class DecoderDLSDKModel(BaseModel):
                     '_'.join([self.default_model_suffix, self.output_blob])
                     if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
                 )
-            self.input_blob = next(iter(self.exec_network.inputs))
+            self.input_blob = input_blob
             self.output_blob = output_blob
             self.with_prefix = with_prefix
             self.adapter.output_blob = self.output_blob
@@ -542,8 +594,8 @@ class EncoderONNXModel(BaseModel):
     def release(self):
         del self.inference_session
 
-    def automatic_model_search(self, metwork_info):
-        model = Path(metwork_info['model'])
+    def automatic_model_search(self, network_info):
+        model = Path(network_info['model'])
         if model.is_dir():
             model_list = list(model.glob('*{}.onnx'.format(self.default_model_suffix)))
             if not model_list:
@@ -580,8 +632,8 @@ class DecoderONNXModel(BaseModel):
     def release(self):
         del self.inference_session
 
-    def automatic_model_search(self, metwork_info):
-        model = Path(metwork_info['model'])
+    def automatic_model_search(self, network_info):
+        model = Path(network_info['model'])
         if model.is_dir():
             model_list = list(model.glob('*{}.onnx'.format(self.default_model_suffix)))
             if not model_list:
@@ -603,7 +655,7 @@ class DummyEncoder(BaseModel):
         self._predictions = read_pickle(network_info['predictions'])
         self.iterator = 0
 
-    def predict(self, idenitifers, input_data):
+    def predict(self, identifiers, input_data):
         result = self._predictions[self.iterator]
         self.iterator += 1
         return result

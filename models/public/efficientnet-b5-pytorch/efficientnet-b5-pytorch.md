@@ -29,8 +29,8 @@ the 1000 different classifications matching those in the ImageNet database.
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 83.69          | 83.69           |
-| Top 5  | 96.71          | 96.71           | 
+| Top 1  | 83.69%          | 83.69%           |
+| Top 5  | 96.71%          | 96.71%           |
 
 ## Performance
 

@@ -65,6 +65,10 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
 
         @resize_segmentation_mask.register(SegmentationPrediction)
         def _(entry, height, width):
+            if len(entry.mask.shape) == 2:
+                entry.mask = self.resize(entry.mask, width, height)
+                return entry
+
             entry_mask = []
             for class_mask in entry.mask:
                 resized_mask = self.resize(class_mask, width, height)

@@ -34,6 +34,8 @@ pip install -r requirements.txt
 usage: handwritten_japanese_recognition_demo.py [-h] -m MODEL -i INPUT
                                                 [-d DEVICE] [-ni NUMBER_ITER]
                                                 [-cl CHARLIST]
+                                                [-dc DESIGNATED_CHARACTERS]
+                                                [-tk TOP_K]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -50,12 +52,27 @@ Options:
                         Optional. Number of inference iterations
   -cl CHARLIST, --charlist CHARLIST
                         Path to the decoding char list file
+  -dc DESIGNATED_CHARACTERS, --designated_characters DESIGNATED_CHARACTERS
+                        Optional. Path to the designated character file
+  -tk TOP_K, --top_k TOP_K
+                        Optional. Top k steps in looking up the decoded
+                        character, until a designated one is found
 ```
 
 
 For example:
 ```
 python handwritten_japanese_recognition_demo.py -i data/test.png -m path/to/ir_xml/model.xml
+
+```
+When the `designated_characters` argument is provided, if the output character is not included in the designated characters, the script will check Top k steps in looking up the decoded character, until a designated one is found. By doing so, the output character will be restricted to a designated region. K is set to 20 by default.
+
+For example, if we want to restrict the output characters to only digits and hyphens, we need to provide the path to the designated character file, e.g. `digit_hyphen.txt`. Then the script will perform a post-filtering processing on the ouptut characters, but please note that it is possible that other characters are still allowed if none of `digit_hyphen.txt` is in first K chosen elements.
+
+The command line:
+
+```
+python handwritten_japanese_recognition_demo.py -i data/test.png -m path/to/ir_xml/model.xml -dc data/digit_hyphen.txt
 
 ```
 ## Demo Output

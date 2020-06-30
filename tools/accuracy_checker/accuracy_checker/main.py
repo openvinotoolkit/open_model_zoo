@@ -27,6 +27,7 @@ from .logging import print_info, add_file_handler, exception
 from .evaluators import ModelEvaluator, PipeLineEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
 from .utils import get_path, cast_to_bool, check_file_existence
+from . import __version__
 
 EVALUATION_MODE = {
     'models': ModelEvaluator,
@@ -244,6 +245,15 @@ def build_arguments_parser():
         '-ss', '--subsample_size', help="dataset subsample size",
         required=False,
         type=str
+    )
+    parser.add_argument(
+        '--shuffle', help="Allow shuffle annotation during creation a subset",
+        required=False,
+        type=cast_to_bool
+    )
+    parser.add_argument(
+        '--version', action='version', version='%(prog)s {version}'.format(version=__version__),
+        help='show tool version and exit'
     )
 
     return parser

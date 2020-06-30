@@ -15,14 +15,16 @@ public:
     ResultsMarker(bool showFaceBoundingBox,
                   bool showHeadPoseAxes,
                   bool showLandmarks,
-                  bool showGaze);
+                  bool showGaze,
+                  bool showEyeState);
     void mark(cv::Mat& image, const FaceInferenceResults& faceInferenceResults) const;
-    void toggle(char key);
+    void toggle(int key);
 
 private:
     bool showFaceBoundingBox;
     bool showHeadPoseAxes;
     bool showLandmarks;
     bool showGaze;
+    bool showEyeState;
 };
 }  // namespace gaze_estimation

@@ -30,10 +30,10 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 Name: `input`, shape: [1x3x416x416] - An input image in the format [BxCxHxW],
 where:
 
-   - B - batch size
-   - C - number of channels
-   - H - image height
-   - W - image width
+- B - batch size
+- C - number of channels
+- H - image height
+- W - image width
 
 Expected color order: BGR.
 

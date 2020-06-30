@@ -67,9 +67,7 @@ models:
         # images read with Pillow
         reader: pillow_imread
 
-        # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
         preprocessing:
-          - type: bgr_to_rgb
           - type: resize
             size: 320
             aspect_ratio_scale: greater
@@ -78,6 +76,8 @@ models:
           - type: crop
             size: 299
             use_pillow: true
+          # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
+          - type: rgb_to_bgr
 
             # Using accuracy metric, achieved result of public model - 77.45% and 93.56% (top 1 and top 5 respectively)
 

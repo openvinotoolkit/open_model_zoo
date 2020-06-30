@@ -157,6 +157,7 @@ class TestModelEvaluatorAsync:
 
         self.dataset = MagicMock()
         self.dataset.__iter__.return_value = [(range(1), self.annotations[0]), (range(1), self.annotations[1])]
+        self.data_reader.multi_infer = False
 
         self.postprocessor.process_batch = Mock(side_effect=[
             ([annotation_container_0], [annotation_container_0]), ([annotation_container_1], [annotation_container_1])
@@ -238,10 +239,24 @@ class TestModelEvaluatorAsync:
         assert not self.launcher.predict_async.called
         assert self.metric.update_metrics_on_batch.call_count == len(self.annotations)
 
-    def test_switch_to_sync_predict_if_need_multi_infer(self):
+    def test_switch_to_sync_predict_if_need_multi_infer_after_preprocessing(self):
         self.postprocessor.has_dataset_processors = False
         self.launcher.allow_reshape_input = False
         self.preprocessor.has_multi_infer_transformations = True
+
+        self.evaluator.process_dataset(None, None)
+
+        assert not self.evaluator.store_predictions.called
+        assert not self.evaluator.load.called
+        assert self.launcher.predict.called
+        assert not self.launcher.predict_async.called
+        assert self.metric.update_metrics_on_batch.call_count == len(self.annotations)
+
+    def test_switch_to_sync_predict_if_need_multi_infer(self):
+        self.postprocessor.has_dataset_processors = False
+        self.launcher.allow_reshape_input = False
+        self.preprocessor.has_multi_infer_transformations = False
+        self.data_reader.multi_infer = True
 
         self.evaluator.process_dataset(None, None)
 

@@ -1,6 +1,8 @@
+# use update-requirements.py to update this file
+
 certifi==2020.4.5.1       # via requests
 chardet==3.0.4            # via requests
 idna==2.9                 # via requests
-pyyaml==5.3.1
-requests==2.23.0
+pyyaml==5.3.1             # via -r tools/downloader/requirements.in
+requests==2.23.0          # via -r tools/downloader/requirements.in
 urllib3==1.25.8           # via requests

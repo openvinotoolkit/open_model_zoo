@@ -31,6 +31,11 @@ the 1000 different classifications matching those in the ImageNet database.
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 76.106% |
+| Top 5  | 93.106% |
+
 See [the original repository](https://github.com/shicai/DenseNet-Caffe).
 
 ## Performance

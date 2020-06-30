@@ -59,6 +59,10 @@ Accuracy Checker supports following set of preprocessors:
 * `bgr_to_gray` - converting image in BGR to gray scale color space.
 * `rgb_to_bgr` - reversing image channels. Convert image in RGB format to BGR.
 * `rgb_to_gray` - converting image in RGB to gray scale color space.
+* `bgr_to_yuv` - converting image in BGR to YUV.
+  * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+* `rgb_to_yuv` - converting image in RGB to YUV.
+  * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
 * `select_channel` - select channel only one specified channel from multichannel image.
   * `channel` - channel id in image (e.g. if you read image in RGB and want to select green channel, you need to specify 1 as channel)
 * `flip` - image mirroring around specified axis.
@@ -116,8 +120,23 @@ Accuracy Checker supports following set of preprocessors:
     * `scipy_imread` - read images using similar approach as in `scipy.misc.imread`.
     * `numpy_reader` - read numpy dumped files.
     * `tf_imread`- read images using TensorFlow. Default color space is RGB. Requires TensorFlow installation.
+* `warp_affine` - warp affine transformation. (supported only with OpenCV)
+  * `src_landmarks` - source landmarks to set as markers for the warp affine transformation.
+  * `dst_landmarks` - destination and target landmarks to transform `src_landmarks` to.
 * `resample_audio` - converts audio to new sample rate
   * `sample_rate` - sets new sample rate
 * `clip_audio` - slices audio into several parts with equal duration
-  * `duration` - sets duration in seconds
-  * `max_clips` - sets the maximum number of clips (by default `1`)
+  * `duration` - sets duration of each clip in seconds or samples (use `samples` suffix), e.g. `1.5`, `16000samples`
+  * `overlap` - sets overlapping for clips in percents or samples (use `%` or `samples` suffixes respectively) (no overlapping by default), e.g. `25%`, `4000samples`
+  * `max_clips` - sets the maximum number of clips (clips all record by default)
+* `audio_normalization` - normalize audio record with mean sample subtraction and division on standard deviation of samples.
+* `similarity_transform_box` - apply to image similarity transformation to get rectangle region stored in annotation metadata/
+    * `box_scale` - box scale factor (Optional, default 1).
+    * `dst_width` and `dst_height` are destination width and height for transformed image respectively.
+    You can also use `size` instead in case when destination sizes are equal for both dimensions.
+* `face_detection_image_pyramid` - image pyramid for face detection
+  * `min_face_ratio` - minimum face ratio to image size.
+  * `resize_scale` - scale factor for pyramid layers.
+* `face_patch` - crops faces detected in previous stage model from input image with vertical and horizontal scaling.
+  * `scale_width` - value to scale width relative to the original candidate width.
+  * `scale_height` - value to scale height relative to the original candidate height.

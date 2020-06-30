@@ -32,4 +32,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/bvlc_reference_caffenet.caffemodel
   - --input_proto=$dl_dir/deploy.prototxt
 framework: caffe
+quantizable: yes
 license: https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_reference_caffenet/readme.md

@@ -95,7 +95,7 @@ class SegmentationOneClassAdapter(Adapter):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
             output = output > self.threshold
-            result.append(SegmentationPrediction(identifier, output))
+            result.append(SegmentationPrediction(identifier, output.astype(np.uint8)))
 
         return result
 

@@ -16,6 +16,13 @@ group of models designed to perform image classification. The weights were conve
 | MParams                         | 14.139                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 75.76% |
+| Top 5  | 92.81%|
+
 ## Performance
 
 ## Input

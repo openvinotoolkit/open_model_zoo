@@ -15,6 +15,13 @@
 | MParams                         | 4.221                                     |
 | Source framework                | Caffe\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 69.496%|
+| Top 5  | 89.224%|
+
 ## Performance
 
 ## Input

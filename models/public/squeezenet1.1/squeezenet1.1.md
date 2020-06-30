@@ -21,6 +21,11 @@ The model output for `squeezenet1.1` is the typical object classifier output for
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 58.382%|
+| Top 5  | 81%    |
+
 ## Performance
 
 ## Input

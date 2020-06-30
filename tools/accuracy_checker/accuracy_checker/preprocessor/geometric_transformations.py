@@ -20,7 +20,7 @@ from collections import namedtuple
 import cv2
 import numpy as np
 
-from ..config import ConfigError, NumberField, StringField, BoolField
+from ..config import ConfigError, NumberField, StringField, BoolField, ListField
 from ..preprocessor import Preprocessor
 from ..utils import get_size_from_config, string_to_tuple, get_size_3d_from_config
 from ..logging import warning
@@ -29,6 +29,11 @@ try:
     from PIL import Image
 except ImportError:
     Image = None
+
+try:
+    from skimage.transform import estimate_transform, warp
+except ImportError:
+    estimate_transform, warp = None, None
 
 # The field .type should be string, the field .parameters should be dict
 GeometricOperationMetadata = namedtuple('GeometricOperationMetadata', ['type', 'parameters'])
@@ -698,5 +703,291 @@ class ImagePyramid(Preprocessor):
 
         image.data = scaled_data
         image.metadata.update({'multi_infer': True, 'scales': scales})
+
+        return image
+
+class FaceDetectionImagePyramid(Preprocessor):
+    __provider__ = 'face_detection_image_pyramid'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update(
+            {
+                'min_face_ratio': NumberField(
+                    value_type=float, default=0.05, min_value=0.01, max_value=1,
+                    description='Minimum face ratio to image size'
+                ),
+                'resize_scale': NumberField(
+                    value_type=int, default=2, min_value=1,
+                    description='Scale factor for pyramid layers'
+                )
+            }
+        )
+        return parameters
+
+    def configure(self):
+        self.min_face_ratio = self.get_value_from_config('min_face_ratio')
+        self.resize_scale = self.get_value_from_config('resize_scale')
+        self.min_supported_face_size = 24
+        self.stage1_window_size = [12, 192]
+
+    def perform_scaling(self, initial_width, initial_height, img_width, img_height):
+        width = initial_width
+        height = initial_height
+
+        image_pyramid = []
+        scales = []
+        pyramid_scale = 1
+
+        shorter = min(img_height, img_width)
+        min_face_size = max(int(shorter * self.min_face_ratio), self.min_supported_face_size)
+
+        while width >= self.stage1_window_size[0] and height >= self.stage1_window_size[0]:
+            min_detectable_size = int(img_width / width + 0.5) * self.stage1_window_size[0]
+            if min_detectable_size >= min_face_size:
+                if min_detectable_size > self.min_supported_face_size:
+                    pyramid_scale /= 2
+                    width = int(initial_width / pyramid_scale + 0.5)
+                    height = int(initial_height / pyramid_scale + 0.5)
+
+                image_pyramid.append((int(width), int(height)))
+                scales.append(img_width / int(width))
+
+                max_detectable_size = int(img_width / width + 0.5) * self.stage1_window_size[1]
+                if max_detectable_size < shorter:
+                    while max_detectable_size > min_detectable_size:
+                        pyramid_scale *= self.resize_scale
+                        width = int(initial_height / pyramid_scale + 0.5)
+                        height = int(initial_height / pyramid_scale + 0.5)
+                        min_detectable_size = int(img_width / width + 0.5) * self.stage1_window_size[0]
+                        min_detectable_size *= 2
+                break
+
+            pyramid_scale *= self.resize_scale
+            width = int(initial_width / pyramid_scale + 0.5)
+            height = int(initial_height / pyramid_scale + 0.5)
+
+        return image_pyramid, scales, pyramid_scale
+
+    def process(self, image, annotation_meta=None):
+        img_height, img_width, _ = image.data.shape
+        initial_width = img_width * self.stage1_window_size[0] / self.min_supported_face_size
+        initial_height = img_height * self.stage1_window_size[0] / self.min_supported_face_size
+        image_pyramid, scales, pyramid_scale = self.perform_scaling(
+            initial_width,
+            initial_height,
+            img_width, img_height
+        )
+
+        if len(image_pyramid) == 0:
+            pyramid_scale /= self.resize_scale
+            width = int(initial_width / pyramid_scale + 0.5)
+            height = int(initial_height / pyramid_scale + 0.5)
+            image_pyramid.append((width, height))
+            scales.append(img_width / width)
+
+        scaled_data = []
+        data = image.data
+
+        # perform resizing
+        for dimension in image_pyramid:
+            w, h = dimension
+            scaled_data.append(cv2.resize(data, (w, h)))
+
+        image.data = scaled_data
+        image.metadata.update({'multi_infer': True, 'scales': scales})
+        return image
+
+class WarpAffine(Preprocessor):
+    __provider__ = 'warp_affine'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'src_landmarks': ListField(
+                description='Source landmark points',
+                value_type=ListField(value_type=int)
+            ),
+            'dst_landmarks': ListField(
+                description='Destination landmark points',
+                value_type=ListField(value_type=int)
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.src_landmarks = self.get_value_from_config('src_landmarks')
+        self.dst_landmarks = self.get_value_from_config('dst_landmarks')
+        self.validate(self.src_landmarks, self.dst_landmarks)
+
+    def validate(self, point1, point2):
+        if len(self.src_landmarks) != len(self.dst_landmarks):
+            raise ConfigError('To align points, number of src landmarks and dst landmarks must match')
+        if len(self.src_landmarks) <= 0:
+            raise ConfigError('One or more landmark points are required')
+        if not all(len(c) == 2 for c in self.src_landmarks) or not all(len(c) == 2 for c in self.dst_landmarks):
+            raise ConfigError('Coordinate values must be a list of size 2')
+
+    def process(self, image, annotation_meta=None):
+        is_simple_case = not isinstance(image.data, list)
+
+        def process_data(data):
+            height, width, _ = data.shape
+            src = np.array(self.src_landmarks, dtype=np.float32)
+            dst = np.array(self.dst_landmarks, dtype=np.float32)
+            M = cv2.estimateAffinePartial2D(src, dst, method=cv2.LMEDS)[0]
+            data = cv2.warpAffine(data, M, (height, width), borderValue=0.0).copy()
+            return data
+
+        if is_simple_case:
+            image.data = process_data(image.data)
+            return image
+
+        image.data = [process_data(images) for images in image.data]
+        return image
+
+
+class SimilarityTransfom(Preprocessor):
+    __provider__ = 'similarity_transform_box'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'box_scale': NumberField(value_type=float, min_value=0, description='Scale factor for box', default=1.),
+            'size': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination sizes for both dimensions."
+            ),
+            'dst_width': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination width for image resizing."
+            ),
+            'dst_height': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination height for image resizing."
+            )
+        })
+        return params
+
+    def configure(self):
+        if estimate_transform is None:
+            raise ConfigError('similarity_transform_box requires skimage installation. Please install it before usage.')
+        self.box_scale = self.get_value_from_config('box_scale')
+        self.dst_height, self.dst_width = get_size_from_config(self.config)
+
+    def process(self, image, annotation_meta=None):
+        left, top, right, bottom = annotation_meta.get('rect', [0, 0, image.data.shape[0], image.data.shape[1]])
+        old_size = (right - left + bottom - top) / 2
+        center = np.array([right - (right - left) / 2.0, bottom - (bottom - top) / 2.0])
+        size = int(old_size * self.box_scale)
+        src_pts = np.array([[center[0] - size / 2, center[1] - size / 2], [center[0] - size / 2, center[1] + size / 2],
+                            [center[0] + size / 2, center[1] - size / 2]])
+        dst_pts = np.array([[0, 0], [0, self.dst_height - 1], [self.dst_width - 1, 0]])
+        tform = estimate_transform('similarity', src_pts, dst_pts)
+        image.data = warp(image.data / 255, tform.inverse, output_shape=(self.dst_width, self.dst_height))
+        image.data *= 255
+
+        image.metadata['transform_matrix'] = tform.params
+        image.metadata['roi_box'] = [left, top, right, bottom]
+
+        return image
+
+    @staticmethod
+    def estimate_transform(src, dst):
+        num = src.shape[0]
+        dim = src.shape[1]
+
+        src_mean = src.mean(axis=0)
+        dst_mean = dst.mean(axis=0)
+
+        src_demean = src - src_mean
+        dst_demean = dst - dst_mean
+        A = dst_demean.T @ src_demean / num
+
+        d = np.ones((dim,), dtype=np.double)
+        if np.linalg.det(A) < 0:
+            d[dim - 1] = -1
+
+        T = np.eye(dim + 1, dtype=np.double)
+
+        U, S, V = np.linalg.svd(A)
+
+        rank = np.linalg.matrix_rank(A)
+        if rank == 0:
+            return np.nan * T
+        if rank == dim - 1:
+            if np.linalg.det(U) * np.linalg.det(V) > 0:
+                T[:dim, :dim] = U @ V
+            else:
+                s = d[dim - 1]
+                d[dim - 1] = -1
+                T[:dim, :dim] = U @ np.diag(d) @ V
+                d[dim - 1] = s
+        else:
+            T[:dim, :dim] = U @ np.diag(d) @ V
+
+        scale = 1.0 / src_demean.var(axis=0).sum() * (S @ d)
+
+        T[:dim, dim] = dst_mean - scale * (T[:dim, :dim] @ src_mean.T)
+        T[:dim, :dim] *= scale
+
+        return T
+
+class FacePatch(Preprocessor):
+    __provider__ = 'face_patch'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'scale_width': NumberField(
+                value_type=float, min_value=0, default=1, optional=True,
+                description='Value to scale width relative to the original candidate width'
+            ),
+            'scale_height': NumberField(
+                value_type=float, min_value=0, default=1, optional=True,
+                description='Value to scale height relative to the original candidate height'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.scale_width = self.get_value_from_config('scale_width')
+        self.scale_height = self.get_value_from_config('scale_height')
+
+    def process(self, image, annotation_meta=None):
+        candidates = annotation_meta['candidate_info']
+        face_patches = []
+        data = image.data
+        img_height, img_width, _ = data.shape
+        for i in range(candidates.x_mins.size):
+            x_min = int(round(candidates.x_mins[i]))
+            y_min = int(round(candidates.y_mins[i]))
+
+            width = int(round(candidates.x_maxs[i] - candidates.x_mins[i]))
+            height = int(round(candidates.y_maxs[i] - candidates.y_mins[i]))
+
+            x_min -= int(round(width * (self.scale_width -1) / 2))
+            y_min -= int(round(height * (self.scale_height - 1) / 2))
+            width = int(round(width * self.scale_width))
+            height = int(round(height * self.scale_height))
+
+            face_patch = np.zeros((height, width, 3), dtype=image.data.dtype)
+
+            dst_rect = data[max(0, y_min):min(y_min+height, img_height), max(0, x_min):min(x_min+width, img_width)]
+            face_patch[
+                max(-y_min, 0):max(-y_min, 0) + dst_rect.shape[0],
+                max(-x_min, 0):max(-x_min, 0) + dst_rect.shape[1]
+            ] = dst_rect
+            face_patches.append(face_patch)
+
+        if candidates.x_mins.size == 0:
+            face_patches.append(data)
+
+        image.data = face_patches
+        image.metadata.update({
+            'multi_infer': True,
+            'candidates': candidates
+        })
 
         return image

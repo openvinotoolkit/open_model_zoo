@@ -24,6 +24,8 @@ from ..representation import (
     RegressionPrediction,
     FacialLandmarksAnnotation,
     FacialLandmarksPrediction,
+    FacialLandmarks3DAnnotation,
+    FacialLandmarks3DPrediction,
     SuperResolutionAnnotation,
     SuperResolutionPrediction,
     GazeVectorAnnotation,
@@ -33,7 +35,9 @@ from ..representation import (
     ImageInpaintingAnnotation,
     ImageInpaintingPrediction,
     ImageProcessingAnnotation,
-    ImageProcessingPrediction
+    ImageProcessingPrediction,
+    StyleTransferAnnotation,
+    StyleTransferPrediction
 )
 
 from .metric import PerImageEvaluationMetric
@@ -248,8 +252,8 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
 class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
     __provider__ = 'per_point_normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, )
-    prediction_types = (FacialLandmarksPrediction, )
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction)
 
     def configure(self):
         self.meta.update({
@@ -282,8 +286,8 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
     __provider__ = 'normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, )
-    prediction_types = (FacialLandmarksPrediction, )
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction)
 
     @classmethod
     def parameters(cls):
@@ -342,6 +346,52 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
         self.magnitude = []
 
 
+class NormalizedMeanError(PerImageEvaluationMetric):
+    __provider__ = 'nme'
+    annotation_types = (FacialLandmarks3DAnnotation, )
+    prediction_types = (FacialLandmarks3DPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'only_2d': BoolField(
+                optional=True, default=False, description="Allows metric calculation only across x and y dimensions"
+            ),
+        })
+
+        return parameters
+
+    def configure(self):
+        self.meta.update({
+            'scale': 1,
+            'postfix': ' ',
+            'data_format': '{:.4f}',
+            'target': 'higher-worse'
+        })
+        self.only_2d = self.get_value_from_config('only_2d')
+        self.magnitude = []
+
+    def update(self, annotation, prediction):
+        gt = np.array([annotation.x_values, annotation.y_values, annotation.z_values]).T
+        pred = np.array([prediction.x_values, prediction.y_values, prediction.z_values]).T
+
+        diff = np.square(gt - pred)
+        dist = np.sqrt(np.sum(diff[:, 0:2], axis=1)) if self.only_2d else np.sqrt(np.sum(diff, axis=1))
+        #dist /= len(gt)
+        normalized_result = dist / annotation.normalization_coef(self.only_2d)
+        self.magnitude.append(np.mean(normalized_result))
+
+        return np.mean(normalized_result)
+
+    def evaluate(self, annotations, predictions):
+        self.meta['names'] = ['mean']
+        return np.mean(self.magnitude)
+
+    def reset(self):
+        self.magnitude = []
+
+
 def calculate_distance(x_coords, y_coords, selected_points):
     first_point = [x_coords[selected_points[0]], y_coords[selected_points[0]]]
     second_point = [x_coords[selected_points[1]], y_coords[selected_points[1]]]
@@ -375,8 +425,10 @@ def point_regression_differ(annotation_val_x, annotation_val_y, prediction_val_x
 class PeakSignalToNoiseRatio(BaseRegressionMetric):
     __provider__ = 'psnr'
 
-    annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, ImageProcessingAnnotation)
-    prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, ImageProcessingPrediction)
+    annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, ImageProcessingAnnotation,
+                        StyleTransferAnnotation)
+    prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, ImageProcessingPrediction,
+                        StyleTransferPrediction)
 
     @classmethod
     def parameters(cls):
@@ -469,8 +521,10 @@ def _ssim(annotation_image, prediction_image):
 
 class StructuralSimilarity(BaseRegressionMetric):
     __provider__ = 'ssim'
-    annotation_types = (ImageInpaintingAnnotation, ImageProcessingAnnotation, SuperResolutionAnnotation)
-    prediction_types = (ImageInpaintingPrediction, ImageProcessingPrediction, SuperResolutionPrediction)
+    annotation_types = (ImageInpaintingAnnotation, ImageProcessingAnnotation, SuperResolutionAnnotation,
+                        StyleTransferAnnotation)
+    prediction_types = (ImageInpaintingPrediction, ImageProcessingPrediction, SuperResolutionPrediction,
+                        StyleTransferPrediction)
 
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)

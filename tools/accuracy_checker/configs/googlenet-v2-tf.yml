@@ -30,3 +30,5 @@ models:
           - name: acciracy@top5
             type: accuracy
             top_k: 5
+
+global_definitions: ../dataset_definitions.yml

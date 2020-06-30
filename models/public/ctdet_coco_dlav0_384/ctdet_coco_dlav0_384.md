@@ -45,7 +45,7 @@ python convert.py ctdet --load_model /path/to/downloaded/weights.pth --exp_id co
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| MAP    | 41.81          | 41.5            |
+| mAP    | 41.81%          | 41.61%            |
 
 ## Performance
 

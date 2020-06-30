@@ -22,6 +22,9 @@ googlenet-v2
 googlenet-v3
 googlenet-v3-pytorch
 googlenet-v4-tf
+hbonet-0.25
+hbonet-0.5
+hbonet-1.0
 inception-resnet-v2-tf
 mobilenet-v1-0.25-128
 mobilenet-v1-0.50-160

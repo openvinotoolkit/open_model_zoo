@@ -17,7 +17,7 @@ limitations under the License.
 
 import cv2
 import numpy as np
-from ..config import NumberField
+from ..config import NumberField, BoolField
 
 try:
     import tensorflow as tf
@@ -45,6 +45,7 @@ class BgrToGray(Preprocessor):
     def process(self, image, annotation_meta=None):
         image.data = np.expand_dims(cv2.cvtColor(image.data, cv2.COLOR_BGR2GRAY).astype(np.float32), -1)
         return image
+
 
 class RgbToBgr(Preprocessor):
     __provider__ = 'rgb_to_bgr'
@@ -106,3 +107,41 @@ class SelectInputChannel(Preprocessor):
             image.data = process_data(image.data)
 
         return image
+
+
+class BGR2YUVConverter(Preprocessor):
+    __provider__ = 'bgr_to_yuv'
+    color = cv2.COLOR_BGR2YUV
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'split_channels': BoolField(
+                optional=True, default=False, description='Allow treat channels as independent input'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.split_channels = self.get_value_from_config('split_channels')
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        yuvdata = cv2.cvtColor(data, self.color)
+        if self.split_channels:
+            y = yuvdata[:, :, 0]
+            u = yuvdata[:, :, 1]
+            v = yuvdata[:, :, 2]
+            identifier = image.data
+            new_identifier = ['{}_y'.format(identifier), '{}_u'.format(identifier), '{}_v'.format(identifier)]
+            yuvdata = [np.expand_dims(y, -1), np.expand_dims(u, -1), np.expand_dims(v, -1)]
+            image.identifier = new_identifier
+        image.data = yuvdata
+
+        return image
+
+
+class RGB2YUVConverter(BGR2YUVConverter):
+    __provider__ = 'rgb_to_yuv'
+    color = cv2.COLOR_RGB2YUV

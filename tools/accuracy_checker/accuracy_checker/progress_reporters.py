@@ -93,18 +93,20 @@ class TQDMReporter(ProgressReporter):
         super().__init__(dataset_size)
         if tqdm is None:
             warnings.warn('tqdm is not available, progress switched to print')
-        self.tqdm_reporter = tqdm
-        self.progress_printer = PrintProgressReporter(dataset_size, print_interval=1)
+            self.tqdm_reporter = None
+            self.progress_printer = PrintProgressReporter(dataset_size, print_interval=1)
+        else:
+            self.tqdm_reporter = tqdm
 
     def update(self, batch_id, batch_size):
         self.current += batch_size
-        if self.tqdm_reporter:
+        if self.tqdm_reporter is not None:
             self.tqdm_reporter.update(batch_size)
         else:
             self.progress_printer.update(batch_id, batch_size)
 
     def finish(self, objects_processed=True):
-        if self.tqdm_reporter:
+        if self.tqdm_reporter is not None:
             self.tqdm_reporter.close() #pylint: disable=E1120
             super().finish(objects_processed)
         else:
@@ -112,7 +114,7 @@ class TQDMReporter(ProgressReporter):
 
     def reset(self, dataset_size):
         super().reset(dataset_size)
-        if self.tqdm_reporter:
+        if self.tqdm_reporter is not None:
             self.tqdm_reporter = tqdm(
                 total=self.dataset_size, unit='frames', leave=False,
                 bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]'

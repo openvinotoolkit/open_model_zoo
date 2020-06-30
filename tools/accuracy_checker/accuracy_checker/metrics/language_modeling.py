@@ -50,6 +50,8 @@ class ScorePerplexity(PerImageEvaluationMetric):
         return step_loss
 
     def evaluate(self, annotation, prediction):
+        if self.total == 0:
+            return 0
         return np.exp(self.loss / self.total) / 100
 
     def reset(self):

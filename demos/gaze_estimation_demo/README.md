@@ -7,6 +7,7 @@ The demo also relies on the following auxiliary networks:
 * `face-detection-retail-0004` or `face-detection-adas-0001` detection networks for finding faces
 * `head-pose-estimation-adas-0001`, which estimates head pose in Tait-Bryan angles, serving as an input for gaze estimation model
 * `facial-landmarks-35-adas-0002`, which estimates coordinates of facial landmarks for detected faces. The keypoints at the corners of eyes are used to locate eyes regions required for the gaze estimation model
+* `open-closed-eye-0001`, which estimates eyes state of detected faces.  
 
 For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
@@ -42,10 +43,12 @@ Options:
     -m_fd "<path>"           Required. Path to an .xml file with a trained Face Detection model.
     -m_hp "<path>"           Required. Path to an .xml file with a trained Head Pose Estimation model.
     -m_lm "<path>"           Required. Path to an .xml file with a trained Facial Landmarks Estimation model.
+    -m_es "<path>"           Required. Path to an .xml file with a trained Open/Closed Eye Estimation model.
     -d "<device>"            Optional. Target device for Gaze Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
     -d_fd "<device>"         Optional. Target device for Face Detection network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
     -d_hp "<device>"         Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
     -d_lm "<device>"         Optional. Target device for Facial Landmarks Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
+    -d_es "<device>"         Optional. Target device for Open/Closed Eye Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
     -res "<WxH>"             Optional. Set camera resolution in format WxH.
     -fd_reshape              Optional. Reshape Face Detector network so that its input resolution has the same aspect ratio as the input frame.
     -no_show                 Optional. Do not show processed video.
@@ -77,9 +80,10 @@ By default, it shows only gaze estimation results. To see inference results of a
 The demo allows you to control what information is displayed in run-time.
 The following keys are supported:
 * G - to toggle displaying gaze vector
-* D - to toggle displaying face detector bounding boxes 
-* H - to toggle displaying head pose information
+* B - to toggle displaying face detector bounding boxes
+* O - to toggle displaying head pose information
 * L - to toggle displaying facial landmarks 
+* E - to toggle displaying eyes state
 * A - to switch on displaying all inference results
 * N - to switch off displaying all inference results
 * F - to flip frames horizontally
@@ -91,6 +95,7 @@ The following keys are supported:
 >* `facial-landmarks-35-adas-0002`
 >* `gaze-estimation-adas-0002`
 >* `head-pose-estimation-adas-0001`
+>* `open-closed-eye-0001`
 > Other models may produce unexpected results on these devices.
 
 ## See Also
