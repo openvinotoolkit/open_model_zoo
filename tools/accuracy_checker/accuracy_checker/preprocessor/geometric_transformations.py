@@ -969,12 +969,7 @@ class CandidateCrop(Preprocessor):
             y_min -= int(round(height * (self.scale_height - 1) / 2))
             width = int(round(width * self.scale_width))
             height = int(round(height * self.scale_height))
-            bbox = [
-                x_min,
-                y_min,
-                x_min + width,
-                y_min + height
-            ]
+            bbox = [x_min, y_min, x_min + width, y_min + height]
             ext_bbox = [bbox[0], bbox[1], bbox[2], bbox[3]]
             bbox[0] = max(0, bbox[0])
             bbox[1] = max(0, bbox[1])
