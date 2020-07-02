@@ -79,6 +79,8 @@ class ConfigValidator(BaseValidator):
         if fields:
             for name in fields.keys():
                 self.fields[name] = fields[name]
+                if fields[name].field_uri is None:
+                    fields[name].field_uri = "{}.{}".format(config_uri, name)
         else:
             for name in dir(self):
                 value = getattr(self, name)
