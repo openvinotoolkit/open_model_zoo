@@ -28,7 +28,8 @@ PROFILERS_MAPPING = {
     ): 'regression',
     ('psnr', 'ssim'): 'complex_regression',
     ('normed_error', 'per_point_normed_error'): 'point_regression',
-    ('segmentation_accuracy', 'mean_iou', 'mean_accuracy', 'frequency_weighted_accuracy'): 'segmentation'
+    ('segmentation_accuracy', 'mean_iou', 'mean_accuracy', 'frequency_weighted_accuracy'): 'segmentation',
+    ('coco_precision', ): 'detection'
 }
 
 
@@ -47,7 +48,10 @@ class MetricProfiler(ClassProvider):
 
     def update(self, *args, **kwargs):
         profiling_data = self.generate_profiling_data(*args, **kwargs)
-        self.storage.append(profiling_data)
+        if isinstance(profiling_data, list):
+            self.storage.extend(profiling_data)
+        else:
+            self.storage.append(profiling_data)
         if len(self.storage) % self.dump_iterations == 0:
             self.write_result()
             self.storage = []
