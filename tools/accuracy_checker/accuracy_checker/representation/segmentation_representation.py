@@ -25,9 +25,16 @@ try:
 except ImportError:
     maskUtils = None
 
+try:
+    import PIL
+    pillow_available = True
+except ImportError:
+    pillow_available = False
+
 from .base_representation import BaseRepresentation
 from ..data_readers import BaseReader
 from ..utils import remove_difficult
+
 
 
 class GTMaskLoader(Enum):
@@ -56,14 +63,16 @@ class SegmentationRepresentation(BaseRepresentation):
 class SegmentationAnnotation(SegmentationRepresentation):
     LOADERS = {
         GTMaskLoader.PILLOW: 'pillow_imread',
-        GTMaskLoader.OPENCV: 'opencv_imread',
+        GTMaskLoader.OPENCV: {'type': 'opencv_imread', 'reading_flag': 'unchanged'},
         GTMaskLoader.SCIPY: 'scipy_imread',
         GTMaskLoader.NIFTI: 'nifti_reader',
         GTMaskLoader.NIFTI_CHANNELS_FIRST: {'type': 'nifti_reader', 'channels_first': True},
         GTMaskLoader.NUMPY: 'numpy_reader'
     }
 
-    def __init__(self, identifier, path_to_mask, mask_loader=GTMaskLoader.PILLOW):
+    def __init__(
+            self, identifier, path_to_mask, mask_loader=GTMaskLoader.PILLOW if pillow_available else GTMaskLoader.OPENCV
+    ):
         """
         Args:
             identifier: object identifier (e.g. image name).
