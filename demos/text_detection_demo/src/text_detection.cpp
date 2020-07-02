@@ -100,6 +100,34 @@ std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area, fl
     return bboxes;
   }
 
+std::vector<cv::RotatedRect> coordToBoxes(const std::vector<float> &coords, float min_area, float min_height,
+                                         cv::Size image_size) {
+    std::vector<cv::RotatedRect> bboxes;
+    int max_bbox_idx = coords.size() / 5;
+    float x_scale = image_size.width / 704.0;
+    float y_scale = image_size.height / 704.0;
+    //TODO: Find a way not to hardcode the certain input_shape (704, 704)
+    for (int i = 1; i < max_bbox_idx; i++) {
+
+        std::vector<float> prediction(coords.begin() + (i-1) * 5, coords.begin() + i*5);
+        float confidence = prediction[4];
+
+        if (confidence < std::numeric_limits<float>::epsilon())
+            break; //predictions are sorted the way that all insignificant boxes are grouped together
+
+        cv::Point2f center = cv::Point2f((prediction[0] + prediction[2])/2 * x_scale,
+                                        (prediction[1] + prediction[3])/2 * y_scale);
+        cv::Size2f size = cv::Size2f((prediction[2] - prediction[0]) * x_scale,
+                                        (prediction[3] - prediction[1]) * y_scale);
+        cv::RotatedRect rect = cv::RotatedRect(center, size, 0);
+
+        if (rect.size.area() < min_area)
+            continue;
+        bboxes.push_back(rect);
+    }
+    return bboxes;
+  }
+
 int findRoot(int point, std::unordered_map<int, int> *group_mask) {
     int root = point;
     bool update_parent = false;
@@ -191,6 +219,8 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, 
     std::string kLocOutputName;
     std::string kClsOutputName;
 
+    std::vector<cv::RotatedRect> rects;
+
     for (const auto& blob : blobs) {
         if (blob.second->getTensorDesc().getDims()[1] == 2)
             kClsOutputName = blob.first;
@@ -198,40 +228,64 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, 
             kLocOutputName = blob.first;
     }
 
-    if (kLocOutputName.empty() || kClsOutputName.empty())
-        throw std::runtime_error("Failed to determine output blob names");
+    if (!kLocOutputName.empty() && !kClsOutputName.empty()) {
+//     PostProcessing for PixelLink Text Detection model
+        auto link_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
+        size_t link_data_size = link_shape[0] * link_shape[1] * link_shape[2] * link_shape[3];
+        float *link_data_pointer =
+                blobs.at(kLocOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+        std::vector<float> link_data(link_data_pointer, link_data_pointer + link_data_size);
+        link_data = transpose4d(link_data, ieSizeToVector(link_shape), {0, 2, 3, 1});
+        softmax(&link_data);
+        link_data = sliceAndGetSecondChannel(link_data);
+        std::vector<int> new_link_data_shape(4);
+        new_link_data_shape[0] = static_cast<int>(link_shape[0]);
+        new_link_data_shape[1] = static_cast<int>(link_shape[2]);
+        new_link_data_shape[2] = static_cast<int>(link_shape[3]);
+        new_link_data_shape[3] = static_cast<int>(link_shape[1]) / 2;
 
-    auto link_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
-    size_t link_data_size = link_shape[0] * link_shape[1] * link_shape[2] * link_shape[3];
-    float *link_data_pointer =
-            blobs.at(kLocOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-    std::vector<float> link_data(link_data_pointer, link_data_pointer + link_data_size);
-    link_data = transpose4d(link_data, ieSizeToVector(link_shape), {0, 2, 3, 1});
-    softmax(&link_data);
-    link_data = sliceAndGetSecondChannel(link_data);
-    std::vector<int> new_link_data_shape(4);
-    new_link_data_shape[0] = static_cast<int>(link_shape[0]);
-    new_link_data_shape[1] = static_cast<int>(link_shape[2]);
-    new_link_data_shape[2] = static_cast<int>(link_shape[3]);
-    new_link_data_shape[3] = static_cast<int>(link_shape[1]) / 2;
+        auto cls_shape = blobs.at(kClsOutputName)->getTensorDesc().getDims();
+        size_t cls_data_size = cls_shape[0] * cls_shape[1] * cls_shape[2] * cls_shape[3];
+        float *cls_data_pointer =
+                blobs.at(kClsOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+        std::vector<float> cls_data(cls_data_pointer, cls_data_pointer + cls_data_size);
+        cls_data = transpose4d(cls_data, ieSizeToVector(cls_shape), {0, 2, 3, 1});
+        softmax(&cls_data);
+        cls_data = sliceAndGetSecondChannel(cls_data);
+        std::vector<int> new_cls_data_shape(4);
+        new_cls_data_shape[0] = static_cast<int>(cls_shape[0]);
+        new_cls_data_shape[1] = static_cast<int>(cls_shape[2]);
+        new_cls_data_shape[2] = static_cast<int>(cls_shape[3]);
+        new_cls_data_shape[3] = static_cast<int>(cls_shape[1]) / 2;
 
-    auto cls_shape = blobs.at(kClsOutputName)->getTensorDesc().getDims();
-    size_t cls_data_size = cls_shape[0] * cls_shape[1] * cls_shape[2] * cls_shape[3];
-    float *cls_data_pointer =
-            blobs.at(kClsOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-    std::vector<float> cls_data(cls_data_pointer, cls_data_pointer + cls_data_size);
-    cls_data = transpose4d(cls_data, ieSizeToVector(cls_shape), {0, 2, 3, 1});
-    softmax(&cls_data);
-    cls_data = sliceAndGetSecondChannel(cls_data);
-    std::vector<int> new_cls_data_shape(4);
-    new_cls_data_shape[0] = static_cast<int>(cls_shape[0]);
-    new_cls_data_shape[1] = static_cast<int>(cls_shape[2]);
-    new_cls_data_shape[2] = static_cast<int>(cls_shape[3]);
-    new_cls_data_shape[3] = static_cast<int>(cls_shape[1]) / 2;
+        cv::Mat mask = decodeImageByJoin(cls_data, new_cls_data_shape,
+                       link_data, new_link_data_shape, cls_conf_threshold, link_conf_threshold);
+        rects = maskToBoxes(mask, static_cast<float>(kMinArea),
+                                                         static_cast<float>(kMinHeight), image_size);
 
-    cv::Mat mask = decodeImageByJoin(cls_data, new_cls_data_shape, link_data, new_link_data_shape, cls_conf_threshold, link_conf_threshold);
-    std::vector<cv::RotatedRect> rects = maskToBoxes(mask, static_cast<float>(kMinArea),
-                                                     static_cast<float>(kMinHeight), image_size);
+    }
+    else {
+        // PostProcessing for Horizontal Text Detection model
+        for (const auto& blob : blobs) {
+            if (blob.second->getTensorDesc().getDims()[0] == 100)
+                kClsOutputName = blob.first;
+            if (blob.second->getTensorDesc().getDims()[1] == 5)
+                kLocOutputName = blob.first;
+                }
+        if (kLocOutputName.empty() || kClsOutputName.empty())
+            throw std::runtime_error("Failed to determine output blob names");
+
+        else {
+                auto boxes_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
+                size_t boxes_data_size = boxes_shape[0] * boxes_shape[1];
+                float *boxes_data_pointer =
+                    blobs.at(kLocOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+                std::vector<float> boxes_data(boxes_data_pointer, boxes_data_pointer + boxes_data_size);
+
+                rects = coordToBoxes(boxes_data, static_cast<float>(kMinArea),
+                                                         static_cast<float>(kMinHeight), image_size);
+        }
+    }
 
     return rects;
 }

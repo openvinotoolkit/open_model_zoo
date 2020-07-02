@@ -292,9 +292,9 @@ int main(int argc, char *argv[]) {
           std::cout << "text detection model inference (ms) (fps): "
                     << text_detection.time_elapsed() / text_detection.ncalls() << " "
                     << text_detection.ncalls() * 1000 / text_detection.time_elapsed() << std::endl;
-        if (std::fabs(text_detection_postproc_time) < std::numeric_limits<double>::epsilon()) {
-            throw std::logic_error("text_detection_postproc_time can't be equal to zero");
-        }
+        if (std::fabs(text_detection_postproc_time) < std::numeric_limits<double>::epsilon())
+            std::cout << "text detection postprocessing: took no time " << std::endl;
+        else
           std::cout << "text detection postprocessing (ms) (fps): "
                     << text_detection_postproc_time / text_detection.ncalls() << " "
                     << text_detection.ncalls() * 1000 / text_detection_postproc_time << std::endl << std::endl;
