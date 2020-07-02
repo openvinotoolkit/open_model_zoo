@@ -25,10 +25,16 @@ class Statistic:
         self.period = 0.0
         self.frame_count = 0
 
+    def combine(self, other):
+        self.latency += other.latency
+        self.period += other.period
+        self.frame_count += other.frame_count
+
 
 class PerformanceMetrics:
-    def __init__(self, time_window=1.0):    # defines the length of the timespan used for 'current fps' calculation,
-        self.time_window_size = time_window # set to '1 second' by default
+    def __init__(self, time_window=1.0):
+        # 'time_window' defines the length of the timespan over which the 'current fps' value is calculated
+        self.time_window_size = time_window
         self.last_moving_statistic = Statistic()
         self.current_moving_statistic = Statistic()
         self.total_statistic = Statistic()
@@ -56,25 +62,22 @@ class PerformanceMetrics:
             self.last_moving_statistic.latency = self.current_moving_statistic.latency
             self.last_moving_statistic.period = current_time - self.last_update_time
             self.last_moving_statistic.frame_count = self.current_moving_statistic.frame_count
-            self.total_statistic.latency += self.last_moving_statistic.latency
-            self.total_statistic.period += self.last_moving_statistic.period
-            self.total_statistic.frame_count += self.last_moving_statistic.frame_count
-            self.current_moving_statistic.latency = 0.0
-            self.current_moving_statistic.frame_count = 0
+            self.total_statistic.combine(self.last_moving_statistic)
+            self.current_moving_statistic = Statistic()
 
             self.last_update_time = current_time
 
         # Draw performance stats over frame
-        current_latency, current_fps = self.get_current()
+        current_latency, current_fps = self.get_last()
         if current_latency is not None:
-            put_highlighted_text(frame, "Latency: {:.1f} ms".format(current_latency),
+            put_highlighted_text(frame, "Latency: {:.1f} ms".format(current_latency * 1e3),
                                  position, cv2.FONT_HERSHEY_COMPLEX, font_scale, color, thickness)
         if current_fps is not None:
             put_highlighted_text(frame, "FPS: {:.1f}".format(current_fps),
                                  (position[0], position[1]+30), cv2.FONT_HERSHEY_COMPLEX, font_scale, color, thickness)
 
-    def get_current(self):
-        return (1000 * self.last_moving_statistic.latency / self.last_moving_statistic.frame_count
+    def get_last(self):
+        return (self.last_moving_statistic.latency / self.last_moving_statistic.frame_count
                 if self.last_moving_statistic.frame_count != 0
                 else None,
                 self.last_moving_statistic.frame_count / self.last_moving_statistic.period
@@ -82,16 +85,15 @@ class PerformanceMetrics:
                 else None)
 
     def get_total(self):
-        return ((1000 * (self.total_statistic.latency + self.current_moving_statistic.latency)
-                        / (self.total_statistic.frame_count + self.current_moving_statistic.frame_count))
-                if self.total_statistic.frame_count + self.current_moving_statistic.frame_count != 0
+        frame_count = self.total_statistic.frame_count + self.current_moving_statistic.frame_count
+        return (((self.total_statistic.latency + self.current_moving_statistic.latency) / frame_count)
+                if frame_count != 0
                 else None,
-                ((self.total_statistic.frame_count + self.current_moving_statistic.frame_count)
-                / (self.total_statistic.period + self.current_moving_statistic.period))
-                if self.total_statistic.frame_count + self.current_moving_statistic.frame_count >= 2
+                (frame_count / (self.total_statistic.period + self.current_moving_statistic.period))
+                if frame_count >= 2
                 else None)
     
     def print_total(self):
         total_latency, total_fps = self.get_total()
-        print("Latency: {:.1f} ms".format(total_latency) if total_latency is not None else "Latency: N/A")
+        print("Latency: {:.1f} ms".format(total_latency * 1e3) if total_latency is not None else "Latency: N/A")
         print("FPS: {:.1f}".format(total_fps) if total_fps is not None else "FPS: N/A")

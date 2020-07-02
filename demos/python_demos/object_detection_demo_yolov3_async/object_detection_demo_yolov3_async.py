@@ -115,11 +115,12 @@ class Mode():
     def __init__(self, value):
         self.current = value
 
-    def next(self):
-        if self.current.value + 1 < len(Modes):
-            self.current = Modes(self.current.value + 1)
-        else:
-            self.current = Modes(0)
+    def get_other(self):
+        return Modes.MIN_LATENCY if self.current == Modes.USER_SPECIFIED \
+                                 else Modes.USER_SPECIFIED
+
+    def switch(self):
+        self.current = self.get_other()
 
 
 def scale_bbox(x, y, height, width, class_id, confidence, im_h, im_w, is_proportional):
@@ -421,9 +422,7 @@ def main():
             if is_same_mode and prev_mode_active_request_count == 0:
                 mode_metrics[mode.current].update(start_time, frame)
             else:
-                mode_metrics[Modes.MIN_LATENCY
-                             if mode.current == Modes.USER_SPECIFIED
-                             else Modes.USER_SPECIFIED].update(start_time, frame)
+                mode_metrics[mode.get_other()].update(start_time, frame)
                 prev_mode_active_request_count -= 1
                 helpers.put_highlighted_text(frame, "Switching modes, please wait...",
                                              (10, int(origin_im_size[0] - 50)), cv2.FONT_HERSHEY_COMPLEX, 0.75,
@@ -438,7 +437,7 @@ def main():
                 if key == 9: # Tab key
                     if prev_mode_active_request_count == 0:
                         prev_mode = mode.current
-                        mode.next()
+                        mode.switch()
 
                         prev_mode_active_request_count = len(exec_nets[prev_mode].requests) - len(empty_requests)
                         empty_requests.clear()
@@ -484,9 +483,9 @@ def main():
     if callback_exceptions:
         raise callback_exceptions[0]
 
-    for mode_name in mode_metrics.keys():
-        print("\nMode: {}".format(mode_name.name))
-        mode_metrics[mode_name].print_total()
+    for mode, metrics in mode_metrics.items():
+        print("\nMode: {}".format(mode.name))
+        metrics.print_total()
     print(presenter.reportMeans())
 
     for exec_net in exec_nets.values():
