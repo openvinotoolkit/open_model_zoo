@@ -43,7 +43,6 @@ try:
     ispy2 = True
 except ImportError:
     izip = zip
-    basestring = str
     ispy2 = False
 from io import BytesIO
 
@@ -538,8 +537,8 @@ def softmax(x):
 
 
 # encode a string to bytes and vice versa
-asbytes = lambda s: s.encode('latin1')
 asstr = lambda b: b.decode('latin1')
+
 
 # array element data types
 etypes = {
@@ -560,8 +559,10 @@ etypes = {
     'miUTF32': {'n': 18, 'fmt': 's'}
 }
 
+
 # inverse mapping of etypes
 inv_etypes = dict((v['n'], k) for k, v in etypes.items())
+
 
 # matrix array classes
 mclasses = {
@@ -585,6 +586,7 @@ mclasses = {
     'mxOBJECT_CLASS_FROM_MATRIX_H': 18
 }
 
+
 # map of numeric array classes to data types
 numeric_class_etypes = {
     'mxDOUBLE_CLASS': 'miDOUBLE',
@@ -599,24 +601,13 @@ numeric_class_etypes = {
     'mxUINT64_CLASS': 'miUINT64'
 }
 
+
 inv_mclasses = dict((v, k) for k, v in mclasses.items())
+
 
 # data types that may be used when writing numeric data
 compressed_numeric = ['miINT32', 'miUINT16', 'miINT16', 'miUINT8']
 
-
-def diff(iterable):
-    """Diff elements of a sequence:
-    s -> s0 - s1, s1 - s2, s2 - s3, ...
-    """
-    a, b = itertools.tee(iterable)
-    next(b, None)
-    return (i - j for i, j in izip(a, b))
-
-
-#
-# Uitlity functions
-#
 
 def unpack(endian, fmt, data):
     """Unpack a byte string to the given format. If the byte string
@@ -826,7 +817,7 @@ def read_struct_array(fd, endian, header):
 
     # read field names
     fields = read_elements(fd, endian, ['miINT8'], is_name=True)
-    if isinstance(fields, basestring):
+    if isinstance(fields, str):
         fields = [fields]
 
     # read rows and columns of each field
@@ -902,11 +893,6 @@ class ParseError(Exception):
     pass
 
 
-#
-# Read from MAT file
-#
-
-
 def loadmat(filename, meta=False):
     """Load data from MAT-file:
     data = loadmat(filename, meta=False)
@@ -920,7 +906,7 @@ def loadmat(filename, meta=False):
     contains a data type that cannot be parsed.
     """
 
-    if isinstance(filename, basestring):
+    if isinstance(filename, str):
         fd = open(filename, 'rb')
     else:
         fd = filename
