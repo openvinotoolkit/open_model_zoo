@@ -247,7 +247,7 @@ class ConfigReader:
                     )
             if 'datasets' in global_configs:
                 datasets_iterator = (
-                    model['datasets'].items() if isinstance(model['datasets'],dict)
+                    model['datasets'].items() if isinstance(model['datasets'], dict)
                     else enumerate(model['datasets'])
                 )
                 for i, dataset in datasets_iterator:
@@ -763,8 +763,6 @@ def process_config(
         launchers_identifier='launchers', identifers_mapping=None, pipeline=False
 ):
     def process_dataset(datasets_configs):
-        if not isinstance(datasets_configs, list):
-            datasets_configs = [datasets_configs]
         for datasets_config in datasets_configs:
             annotation_conversion_config = datasets_config.get('annotation_conversion')
             if annotation_conversion_config:
@@ -815,9 +813,16 @@ def process_config(
 
         if entry_id == dataset_identifier:
             datasets_config = config_item[entry_id]
-            process_dataset(list(datasets_config.values())
-                            if isinstance(datasets_config, dict) and len(datasets_config) > 1
-                            else datasets_config)
+            dataset_processing_config = (
+                list(datasets_config.values()) if isinstance(datasets_config, dict) and not pipeline
+                else datasets_config
+            )
+            if not isinstance(dataset_processing_config, list):
+                dataset_processing_config = [dataset_processing_config]
+            process_dataset(dataset_processing_config)
+            for config_entry in dataset_processing_config:
+                merge_entry_paths(command_line_arg, config_entry, args)
+            continue
 
         if entry_id == launchers_identifier:
             launchers_configs = config_item[entry_id]
@@ -826,7 +831,7 @@ def process_config(
 
         config_entries = config_item[entry_id]
         if not isinstance(config_entries, list):
-            config_entries = [config_entries] if len(config_entries) <= 1 else list(config_entries.values())
+            config_entries = [config_entries]
         for config_entry in config_entries:
             merge_entry_paths(command_line_arg, config_entry, args)
 
