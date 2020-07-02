@@ -70,7 +70,7 @@ class KondateNakayosiRecognitionDatasetConverter(FileBasedAnnotationConverter):
         return ConverterReturn(annotations, meta, content_errors)
 
     @staticmethod
-    def read_decoding_char_file(file: Union[str, Path], **kwargs):
+    def read_decoding_char_file(file, **kwargs):
         with get_path(file).open(**kwargs) as content:
             lines = content.readlines()
             total_symbol = []
