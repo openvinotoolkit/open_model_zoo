@@ -20,6 +20,7 @@ from argparse import ArgumentParser
 from functools import partial
 from csv import DictWriter
 
+
 import cv2
 
 from .config import ConfigReader
