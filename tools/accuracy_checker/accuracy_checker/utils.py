@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Union
 from warnings import warn
 from collections.abc import MutableSet
+from io import BytesIO
 
 try:
     from collections.abc import Sequence
@@ -44,7 +45,6 @@ try:
 except ImportError:
     izip = zip
     ispy2 = False
-from io import BytesIO
 
 try:
     import lxml.etree as et
@@ -535,8 +535,10 @@ def color_format(s, color=Color.PASSED):
 def softmax(x):
     return np.exp(x) / sum(np.exp(x))
 
+
 class ParseError(Exception):
     pass
+
 
 class MatlabDataReader():
     def __init__(self):
@@ -608,7 +610,7 @@ class MatlabDataReader():
         hdict['description'] = hdict['description'].strip()
         v_major = hdict['version'] >> 8
         v_minor = hdict['version'] & 0xFF
-        hdict['__version__'] = '%d.%d' % (v_major, v_minor)
+        hdict['__version__'] = '%d.%d'.format(v_major, v_minor)
         return hdict
 
     def read_var_header(self, fd, endian):
@@ -639,19 +641,19 @@ class MatlabDataReader():
                 fd, endian, header,
                 set(self.compressed_numeric).union([self.numeric_class_etypes[mc]])
             )
-        elif mc == 'mxSPARSE_CLASS':
+        if mc == 'mxSPARSE_CLASS':
             raise ParseError('Sparse matrices not supported')
-        elif mc == 'mxCHAR_CLASS':
+        if mc == 'mxCHAR_CLASS':
             return self._read_char_array(fd, endian, header)
-        elif mc == 'mxCELL_CLASS':
+        if mc == 'mxCELL_CLASS':
             return self._read_cell_array(fd, endian, header)
-        elif mc == 'mxSTRUCT_CLASS':
+        if mc == 'mxSTRUCT_CLASS':
             return self._read_struct_array(fd, endian, header)
-        elif mc == 'mxOBJECT_CLASS':
+        if mc == 'mxOBJECT_CLASS':
             raise ParseError('Object classes not supported')
-        elif mc == 'mxFUNCTION_CLASS':
+        if mc == 'mxFUNCTION_CLASS':
             raise ParseError('Function classes not supported')
-        elif mc == 'mxOPAQUE_CLASS':
+        if mc == 'mxOPAQUE_CLASS':
             raise ParseError('Anonymous function classes not supported')
 
     def _read_element_tag(self, fd, endian):
@@ -808,8 +810,7 @@ def loadmat(filename, meta=False):
     tst_str = fd.read(4)
     little_endian = (tst_str[2:4] == b'IM')
     endian = ''
-    if (sys.byteorder == 'little' and little_endian) or \
-       (sys.byteorder == 'big' and not little_endian):
+    if (sys.byteorder == 'little' and little_endian) or (sys.byteorder == 'big' and not little_endian):
         pass
     elif sys.byteorder == 'little':
         endian = '>'
