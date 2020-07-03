@@ -717,7 +717,7 @@ class MatlabDataReader():
     def _read_cell_array(self, fd, endian, header):
         array = [list() for i in range(header['dims'][0])]
         for row in range(header['dims'][0]):
-            for col in range(header['dims'][1]):
+            for _col in range(header['dims'][1]):
                 vheader, next_pos, fd_var = self.read_var_header(fd, endian)
                 varray = self.read_var_array(fd_var, endian, vheader)
                 array[row].append(varray)
@@ -739,7 +739,7 @@ class MatlabDataReader():
         empty = lambda: [list() for i in range(header['dims'][0])]
         array = {}
         for row in range(header['dims'][0]):
-            for col in range(header['dims'][1]):
+            for _col in range(header['dims'][1]):
                 for field in fields:
                     vheader, next_pos, fd_var = self.read_var_header(fd, endian)
                     data = self.read_var_array(fd_var, endian, vheader)
