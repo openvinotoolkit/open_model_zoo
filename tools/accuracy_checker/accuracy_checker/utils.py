@@ -584,23 +584,6 @@ class MatlabDataReader():
         self.inv_mclasses = dict((v, k) for k, v in self.mclasses.items())
         self.compressed_numeric = ['miINT32', 'miUINT16', 'miINT16', 'miUINT8']
 
-    def read_file_header(self, fd, endian):
-        fields = [
-            ('description', 's', 116),
-            ('subsystem_offset', 's', 8),
-            ('version', 'H', 2),
-            ('endian_test', 's', 2)
-        ]
-        hdict = {}
-        for name, fmt, num_bytes in fields:
-            data = fd.read(num_bytes)
-            hdict[name] = self._unpack(endian, fmt, data)
-        hdict['description'] = hdict['description'].strip()
-        v_major = hdict['version'] >> 8
-        v_minor = hdict['version'] & 0xFF
-        hdict['__version__'] = '{}.{}'.format(v_major, v_minor)
-        return hdict
-
     def read_var_header(self, fd, endian):
         mtpn, num_bytes = self._unpack(endian, 'II', fd.read(8))
         next_pos = fd.tell() + num_bytes
@@ -624,25 +607,26 @@ class MatlabDataReader():
     def read_var_array(self, fd, endian, header):
         mc = self.inv_mclasses[header['mclass']]
 
-        if mc in self.numeric_class_etypes:
-            return self._read_numeric_array(
-                fd, endian, header,
-                set(self.compressed_numeric).union([self.numeric_class_etypes[mc]])
-            )
         if mc == 'mxSPARSE_CLASS':
             raise ParseError('Sparse matrices not supported')
-        if mc == 'mxCHAR_CLASS':
-            return self._read_char_array(fd, endian, header)
-        if mc == 'mxCELL_CLASS':
-            return self._read_cell_array(fd, endian, header)
-        if mc == 'mxSTRUCT_CLASS':
-            return self._read_struct_array(fd, endian, header)
         if mc == 'mxOBJECT_CLASS':
             raise ParseError('Object classes not supported')
         if mc == 'mxFUNCTION_CLASS':
             raise ParseError('Function classes not supported')
         if mc == 'mxOPAQUE_CLASS':
             raise ParseError('Anonymous function classes not supported')
+
+        if mc in self.numeric_class_etypes:
+            return self._read_numeric_array(
+                fd, endian, header,
+                set(self.compressed_numeric).union([self.numeric_class_etypes[mc]])
+            )
+        if mc == 'mxCHAR_CLASS':
+            return self._read_char_array(fd, endian, header)
+        if mc == 'mxCELL_CLASS':
+            return self._read_cell_array(fd, endian, header)
+        if mc == 'mxSTRUCT_CLASS':
+            return self._read_struct_array(fd, endian, header)
 
         return None
 
@@ -798,11 +782,9 @@ def loadmat(filename, meta=False):
     tst_str = fd.read(4)
     little_endian = (tst_str[2:4] == b'IM')
     endian = ''
-    if (sys.byteorder == 'little' and little_endian) or (sys.byteorder == 'big' and not little_endian):
-        pass
-    elif sys.byteorder == 'little':
+    if sys.byteorder == 'little' and not little_endian:
         endian = '>'
-    else:
+    if sys.byteorder == 'big' and little_endian:
         endian = '<'
     maj_ind = int(little_endian)
     maj_val = tst_str[maj_ind]
@@ -810,10 +792,7 @@ def loadmat(filename, meta=False):
         raise ParseError('Can only read from Matlab level 5 MAT-files')
     mdict = {}
     reader = MatlabDataReader()
-    if meta:
-        fd.seek(0)
-        mdict['__header__'] = reader.read_file_header(fd, endian)
-        mdict['__globals__'] = []
+
     while not eof(fd):
         hdr, next_position, fd_var = reader.read_var_header(fd, endian)
         name = hdr['name']
@@ -821,8 +800,6 @@ def loadmat(filename, meta=False):
             raise ParseError('Duplicate variable name "{}" in mat file.'
                              .format(name))
         mdict[name] = reader.read_var_array(fd_var, endian, hdr)
-        if meta and hdr['is_global']:
-            mdict['__globals__'].append(name)
         fd.seek(next_position)
     fd.close()
     return mdict
