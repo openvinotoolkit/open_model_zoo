@@ -644,6 +644,8 @@ class MatlabDataReader():
         if mc == 'mxOPAQUE_CLASS':
             raise ParseError('Anonymous function classes not supported')
 
+        return None
+
     def _read_element_tag(self, fd, endian):
         data = fd.read(8)
         mtpn = self._unpack(endian, 'I', data[:4])
