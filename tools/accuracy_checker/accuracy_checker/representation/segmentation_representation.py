@@ -26,7 +26,7 @@ except ImportError:
     maskUtils = None
 
 try:
-    import PIL
+    import PIL # pylint: disable=W0611
     pillow_available = True
 except ImportError:
     pillow_available = False
@@ -34,7 +34,6 @@ except ImportError:
 from .base_representation import BaseRepresentation
 from ..data_readers import BaseReader
 from ..utils import remove_difficult
-
 
 
 class GTMaskLoader(Enum):
