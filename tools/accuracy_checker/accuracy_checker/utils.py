@@ -767,7 +767,7 @@ class MatlabDataReader():
         return val
 
 
-def loadmat(filename, meta=False):
+def loadmat(filename):
     def eof(fd):
         b = fd.read(1)
         end = len(b) == 0
