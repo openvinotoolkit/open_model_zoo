@@ -28,23 +28,11 @@ from enum import Enum
 from pathlib import Path
 from typing import Union
 from warnings import warn
-from collections.abc import MutableSet
+from collections.abc import MutableSet, Sequence
 from io import BytesIO
-
-try:
-    from collections.abc import Sequence
-except ImportError:
-    from collections import Sequence
 
 import numpy as np
 import yaml
-
-try:
-    from itertools import izip
-    ispy2 = True
-except ImportError:
-    izip = zip
-    ispy2 = False
 
 try:
     import lxml.etree as et
@@ -610,7 +598,7 @@ class MatlabDataReader():
         hdict['description'] = hdict['description'].strip()
         v_major = hdict['version'] >> 8
         v_minor = hdict['version'] & 0xFF
-        hdict['__version__'] = '%d.%d'.format(v_major, v_minor)
+        hdict['__version__'] = '{}.{}'.format(v_major, v_minor)
         return hdict
 
     def read_var_header(self, fd, endian):
@@ -802,10 +790,8 @@ def loadmat(filename, meta=False):
             fd.seek(curpos - 1)
         return end
 
-    if isinstance(filename, str):
-        fd = open(filename, 'rb')
-    else:
-        fd = filename
+    fd = open(filename, 'rb')
+
     fd.seek(124)
     tst_str = fd.read(4)
     little_endian = (tst_str[2:4] == b'IM')
@@ -817,7 +803,7 @@ def loadmat(filename, meta=False):
     else:
         endian = '<'
     maj_ind = int(little_endian)
-    maj_val = ord(tst_str[maj_ind]) if ispy2 else tst_str[maj_ind]
+    maj_val = tst_str[maj_ind]
     if maj_val != 1:
         raise ParseError('Can only read from Matlab level 5 MAT-files')
     mdict = {}
