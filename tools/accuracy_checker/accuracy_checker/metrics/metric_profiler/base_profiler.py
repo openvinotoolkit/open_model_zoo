@@ -1,3 +1,4 @@
+import json
 from csv import DictWriter
 from pathlib import Path
 from ...dependency import ClassProvider
@@ -84,6 +85,26 @@ class MetricProfiler(ClassProvider):
             if new_file:
                 writer.writeheader()
             writer.writerows(self.storage)
+
+    def write_json_result(self):
+        out_path = self.out_dir / self.report_file
+        new_file = not out_path.exists()
+        if not new_file:
+            with open(out_path, 'r') as f:
+                out_dict = json.load(f)
+            out_dict['report'].extend(self.storage)
+        else:
+            out_dict = {'processing_info': {
+                'model': self.model_name,
+                'dataset': self.dataset,
+                'framework': self.framework,
+                'device': self.device,
+                'tags': self.tags
+            },
+                'report': self.storage
+            }
+        with open(str(out_path), 'w') as f:
+            json.dump(out_dict, f)
 
     def set_output_dir(self, out_dir):
         self.out_dir = out_dir
