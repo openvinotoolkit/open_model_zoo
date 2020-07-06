@@ -43,6 +43,15 @@ Additionally you can provide device specific parameters:
 * `gpu_extensions` (path to extension *.xml file with OpenCL kernel description for gpu).
 * `bitstream` for running on FPGA.
 
+For setting device specific flags, you are able to use `-dc` or `--device_config` command line option. Device config should be represented as YML file with dictionary, where keys are plugin configuration keys and values are their values respectively.
+Each supported device has own set of supported configuration parameters which can be found on device page in [Inference Engine development guide](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_Supported_Devices.html)
+
+**Note:** Since OpenVINO 2020.4 on platforms with native bfloat16 support models will be executed on this precision by default. For disabling this behaviour, you need to use device_config with following configuration:
+```yml
+ENFORCE_BF16: "NO"
+```
+Device config example can be found <a href="https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/sample/disable_bfloat16_device_config.yml">here</a>()
+
 Beside that, you can launch model in `async_mode`, enable this option and optionally provide the number of infer requests (`num_requests`), which will be used in evaluation process. By default, if `num_requests` not provided or used value `AUTO`, automatic number request assignment for specific device will be performed
 For multi device configuration async mode used always. You can provide number requests for each device as part device specification: `MULTI:device_1(num_req_1),device_2(num_req_2)` or in `num_requests` config section (for this case comma-separated list of integer numbers or one value if number requests for all devices equal can be used).
 
