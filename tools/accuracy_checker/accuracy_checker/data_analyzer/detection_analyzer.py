@@ -60,35 +60,35 @@ class DetectionDataAnalyzer(BaseDataAnalyzer):
                 data_analyze['class_' + key] = counter[key]
 
         if size > 0:
-            diff_avg = diff_objects/size
-            objects_avg = all_boxes/size
-            width_avg = width/all_boxes
-            height_avg = height/all_boxes
+            avg_num_diff_objects = diff_objects/size
+            avg_num_all_objects = all_boxes/size
+            avg_width = width/all_boxes
+            avg_height = height/all_boxes
 
             print_info(
-                'Average number of difficult objects (boxes) per image: {average}'.format(average=diff_avg)
+                'Average number of difficult objects (boxes) per image: {average}'.format(average=avg_num_diff_objects)
             )
             print_info(
-                'Average number of objects (boxes) per image: {average}'.format(average=objects_avg)
+                'Average number of objects (boxes) per image: {average}'.format(average=avg_num_all_objects)
             )
             print_info(
                 'Average size detection object: width: {width}, '
-                'height: {height}'.format(width=width_avg, height=height_avg)
+                'height: {height}'.format(width=avg_width, height=avg_height)
             )
 
-            data_analyze['diff_avg'] = diff_avg
-            data_analyze['objects_avg'] = objects_avg
-            data_analyze['width_avg'] = width_avg
-            data_analyze['height_avg'] = height_avg
+            data_analyze['average_num_diff_objects'] = avg_num_diff_objects
+            data_analyze['average_num_all_objects'] = avg_num_all_objects
+            data_analyze['average_width'] = avg_width
+            data_analyze['average_height'] = avg_height
 
             if diff_objects > 0:
-                diff_width_avg = width_diff/diff_objects
-                diff_height_avg = height_diff / diff_objects
+                avg_width_diff_objects = width_diff/diff_objects
+                avg_height_diff_objects = height_diff / diff_objects
                 print_info(
                     'Average size difficult object: width: {width}, '
-                    'height: {height}\n'.format(width= diff_width_avg, height=diff_height_avg)
+                    'height: {height}\n'.format(width=avg_width_diff_objects, height=avg_height_diff_objects)
                 )
-                data_analyze['diff_width_avg'] = diff_width_avg
-                data_analyze['diff_height_avg'] = diff_height_avg
+                data_analyze['average_width_diff_objects'] = avg_width_diff_objects
+                data_analyze['average_height_diff_objects'] = avg_height_diff_objects
 
         return data_analyze
