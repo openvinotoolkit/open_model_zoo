@@ -268,6 +268,7 @@ def build_arguments_parser():
     parser.add_argument(
         '--profiler_logs_dir', required=False, type=partial(get_path, is_directory=True), default=Path.cwd()
     )
+    parser.add_argument('--profile_report_type', required=False, choices=['csv', 'json'], default='csv')
 
     return parser
 

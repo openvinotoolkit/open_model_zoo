@@ -367,8 +367,9 @@ class ConfigReader:
                     if 'ie_preprocessing' in arguments and arguments.ie_preprocessing:
                         dataset_entry['_ie_preprocessing'] = arguments.ie_preprocessing
 
-                    if 'profile' in arguments and arguments.profile:
-                        dataset_entry['_profile'] = arguments.profile
+                    if profile_dataset:
+                        dataset_entry['_profile'] = profile_dataset
+                        dataset_entry['_report_type'] = arguments.profile_report_type if 'profile_report_type' in arguments else 'csv'
 
         def merge_modules(config, arguments, update_launcher_entry):
             for evaluation in config['evaluations']:

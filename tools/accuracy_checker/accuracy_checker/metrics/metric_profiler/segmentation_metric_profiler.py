@@ -27,7 +27,9 @@ class SegmentationMetricProfiler(MetricProfiler):
             predicted_mask.dump(str(dumping_dir / dumped_file_name))
             if not self.updated_fields:
                 self._create_fields(metric_result, metric_name)
-            report = {'identifier': identifier}
+            report = {'identifier': identifier, 'predicted_mask': str(dumping_dir / dumped_file_name)}
+            if self.report_type == 'json':
+                report['confusion_matrix'] = cm
         if np.isscalar(metric_result) or np.size(metric_result) == 1:
             report['{}_result'.format(metric_name)] = np.mean(metric_result)
             return report
@@ -37,7 +39,7 @@ class SegmentationMetricProfiler(MetricProfiler):
             }
         else:
             metrics_results = {}
-            for name in zip(self.names, metric_result:
+            for name, result in zip(self.names, metric_result):
                 metrics_results['{} ({})'.format(name, metric_name)] = result
         report.update(metrics_results)
 

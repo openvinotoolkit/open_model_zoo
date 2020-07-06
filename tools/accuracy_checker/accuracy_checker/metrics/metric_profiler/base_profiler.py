@@ -40,11 +40,11 @@ class MetricProfiler(ClassProvider):
 
     def __init__(self, dump_iterations=100, report_type='csv'):
         self.report_type = report_type
-        self.report_file = '{}.{]'.format(self.__provider__, report_type)
+        self.report_file = '{}.{}'.format(self.__provider__, report_type)
         self.out_dir = Path()
         self.dump_iterations = dump_iterations
         self.storage = []
-        self.write_result = self.write_csv_result
+        self.write_result = self.write_csv_result if report_type == 'csv' else self.write_json_result
         self._last_profile = None
 
     def register_metric(self, metric_name):

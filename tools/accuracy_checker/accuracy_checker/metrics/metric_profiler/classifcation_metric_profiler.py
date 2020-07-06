@@ -4,12 +4,13 @@ from .base_profiler import MetricProfiler
 
 def preprocess_prediction_label(prediction_label):
     if np.isscalar(prediction_label):
-        pred_label = prediction_label
+        pred_label = int(prediction_label)
     else:
         if np.shape(prediction_label):
-            pred_label = prediction_label if len(np.shape(prediction_label)) > 1 else prediction_label[0]
+            pred_label = prediction_label.astype(int).tolist() if len(np.shape(prediction_label)) > 1 else int(prediction_label[0])
         else:
-            pred_label = prediction_label.tolist() if isinstance(prediction_label, np.array) else ''
+            pred_label = prediction_label.astype(int)
+            pred_label = pred_label.tolist() if isinstance(prediction_label, np.array) else ''
     return pred_label
 
 
@@ -19,13 +20,13 @@ class ClassificationMetricProfiler(MetricProfiler):
 
     def generate_profiling_data(self, identifier, annotation_label, prediction_label, metric_name, metric_result):
         if self._last_profile and self._last_profile['identifier'] == identifier:
-            self._last_profile['{}_result'.format(metric_name)] = metric_result
+            self._last_profile['{}_result'.format(metric_name)] = metric_result.tolist()
             return self._last_profile
         return {
             'identifier': identifier,
-            'annotation_label': annotation_label,
+            'annotation_label': int(annotation_label),
             'prediction_label': preprocess_prediction_label(prediction_label),
-            '{}_result'.format(metric_result): metric_result
+            '{}_result'.format(metric_name): metric_result.tolist()
         }
 
 
@@ -35,13 +36,13 @@ class CharRecognitionMetricProfiler(MetricProfiler):
 
     def generate_profiling_data(self, identifier, annotation_label, prediction_label, metric_name, metric_result):
         if self._last_profile and self._last_profile['identifier'] == identifier:
-            self._last_profile['{}_result'.format(metric_name)] = metric_result
+            self._last_profile['{}_result'.format(metric_name)] = metric_result.tolist()
             return self._last_profile
         return {
             'identifier': identifier,
-            'annotation_label': annotation_label,
+            'annotation_label': int(annotation_label),
             'prediction_label': preprocess_prediction_label(prediction_label),
-            '{}_result'.format(metric_name): metric_result
+            '{}_result'.format(metric_name): metric_result.tolist()
         }
 
 
@@ -53,7 +54,7 @@ class ClipAccuracyProfiler(MetricProfiler):
 
     def generate_profiling_data(self, identifier, annotation_label, prediction_label, metric_name, metric_result):
         if self._last_profile and self._last_profile['identifier'] == identifier:
-            self._last_profile['{}_result'.format(metric_name)] = metric_result
+            self._last_profile['{}_result'.format(metric_name)] = metric_result.tolist()
             return self._last_profile
         return {
             'identifier': identifier,

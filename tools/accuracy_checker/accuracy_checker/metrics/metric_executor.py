@@ -41,7 +41,8 @@ class MetricsExecutor:
 
         self._dataset = dataset
         self.profile_metrics = False if dataset is None else dataset.config.get('_profile', False)
-        self.profiler = ProfilingExecutor()
+        profiler_type = dataset.config.get('_report_type', 'csv')
+        self.profiler = ProfilingExecutor(profile_report_type=profiler_type)
 
         self.metrics = []
         self.need_store_predictions = False
@@ -63,12 +64,6 @@ class MetricsExecutor:
     @dataset.setter
     def _set_dataset(self, dataset):
         self._dataset = dataset
-        profile = dataset.config.get('_profile')
-        for metric in self.metrics:
-            metric.metric_fn.dataset = dataset
-            if profile:
-                profiler = create_profiler(metric.metric_type, metric.name)
-                metric.metric_fn.profiler = profiler
 
     def __call__(self, context, *args, **kwargs):
         self.update_metrics_on_batch(
@@ -169,6 +164,7 @@ class MetricsExecutor:
         self.profiler.set_profiling_dir(profiler_dir)
 
     def set_processing_info(self, processing_info):
+        self.profiler.set_executing_info(processing_info)
 
     def reset(self):
         for metric in self.metrics:
