@@ -1,0 +1,10 @@
+# Device config example
+
+# Contains device specific options which should be set to Inference Engine.
+# Set of supported keys can be found on device related page in Inference Engine Development guide.
+# Device config should be provided via -dc or --device_config commandline option.
+
+# This config example shows how to disable bfloat16 optimizations for CPU.
+# Note: on platforms with native bfloat16 support, ENFORCE_BF16 parameter by default set as "YES",
+# for disabling this behavior you need to specify following configuration.
+ENFORCE_BF16: "NO"
