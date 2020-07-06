@@ -35,7 +35,7 @@ PROFILERS_MAPPING = {
 
 class MetricProfiler(ClassProvider):
     __provider_class__ = 'metric_profiler'
-    fields = ['identifier', 'result']
+    fields = ['identifier']
 
     def __init__(self, dump_iterations=100, report_type='csv'):
         self.report_type = report_type
@@ -44,17 +44,27 @@ class MetricProfiler(ClassProvider):
         self.dump_iterations = dump_iterations
         self.storage = []
         self.write_result = self.write_csv_result
+        self._last_profile = None
+
+    def register_metric(self, metric_name):
+        self.fields.append('{}_result'.format(metric_name))
 
     def generate_profiling_data(self, *args, **kwargs):
         raise NotImplementedError
 
     def update(self, *args, **kwargs):
         profiling_data = self.generate_profiling_data(*args, **kwargs)
+        self._last_profile = profiling_data
         if isinstance(profiling_data, list):
-            self.storage.extend(profiling_data)
+            finished = len(profiling_data[0]) == len(self.fields)
+            if finished:
+                self.storage.extend(profiling_data)
         else:
-            self.storage.append(profiling_data)
-        if len(self.storage) % self.dump_iterations == 0:
+            finished = len(profiling_data) == len(self.fields)
+            if finished:
+                self.storage.append(profiling_data)
+
+        if len(self.storage) % self.dump_iterations == 0 and finished:
             self.write_result()
             self.storage = []
 
