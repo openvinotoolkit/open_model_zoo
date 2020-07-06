@@ -23,8 +23,9 @@ class MultiLabelRecognitionDataAnalyzer(BaseDataAnalyzer):
     __provider__ = 'MultiLabelRecognitionAnnotation'
 
     def analyze(self, result: list, meta, count_objects=True):
+        data_analyze = {}
         if count_objects:
-            self.object_count(result)
+            data_analyze['annotations_size'] = self.object_count(result)
         count = np.zeros_like(result[0].multi_label)
         ignored_objects = np.zeros_like(result[0].multi_label)
         label_map = None
@@ -37,5 +38,9 @@ class MultiLabelRecognitionDataAnalyzer(BaseDataAnalyzer):
             ignored_objects += data.multi_label == -1
         for key in label_map:
             print_info('{name}: {value}'.format(name=label_map[key], value=count[key]))
+            data_analyze[label_map[key]] = count[key]
         for key in label_map:
             print_info('ignored instances {name}: {value}'.format(name=label_map[key], value=ignored_objects[key]))
+            data_analyze['ignored_instances_' + label_map[key]] = ignored_objects[key]
+
+        return data_analyze

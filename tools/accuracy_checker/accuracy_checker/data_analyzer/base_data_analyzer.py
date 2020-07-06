@@ -32,7 +32,12 @@ class BaseDataAnalyzer(ClassProvider):
 
     @staticmethod
     def object_count(annotations):
-        print_info('Total annotation objects: {size}'.format(size=len(annotations)))
+        annotations_size = len(annotations)
+        print_info('Total annotation objects: {size}'.format(size=annotations_size))
+        return annotations_size
+
 
     def analyze(self, result: list, meta, count_objects=True):
-        self.object_count(result)
+        data_analyze = {}
+        data_analyze['annotations_size'] = self.object_count(result)
+        return data_analyze
