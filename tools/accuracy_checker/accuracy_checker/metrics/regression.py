@@ -67,9 +67,9 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         if self.profiler:
             if isinstance(annotation, RegressionAnnotation):
                 ann_value, pred_value = annotation.value, prediction.value
-                self.profiler.update(annotation.identifier, diff, ann_value, pred_value)
+                self.profiler.update(annotation.identifier, self.name, diff, ann_value, pred_value)
             else:
-                self.profiler.update(annotation.identifier, '', '', diff)
+                self.profiler.update(annotation.identifier, self.name, '', '', diff)
         self.magnitude.append(diff)
         if np.ndim(diff) > 1:
             return np.mean(diff)
@@ -157,7 +157,7 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         diff = self.value_differ(annotation.value, prediction.value)
         self.magnitude[index].append(diff)
         if self.profiler:
-            self.profiler.update(annotation.identifier, diff, annotation.value, prediction.value)
+            self.profiler.update(annotation.identifier, self.name, diff, annotation.value, prediction.value)
 
         return diff
 
@@ -222,9 +222,9 @@ class RootMeanSquaredError(BaseRegressionMetric):
         if self.profiler:
             if isinstance(annotation, RegressionAnnotation):
                 ann_value, pred_value = annotation.value, prediction.value
-                self.profiler.update(annotation.identifier, rmse, ann_value, pred_value)
+                self.profiler.update(annotation.identifier, self.name, rmse, ann_value, pred_value)
             else:
-                self.profiler.update(annotation.identifier, rmse)
+                self.profiler.update(annotation.identifier, self.name, rmse)
         self.magnitude.append(rmse)
         return rmse
 
@@ -294,6 +294,7 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         if self.profiler:
             self.profiler.update(
                 annotation.identifier,
+                self.name,
                 annotation.x_values, annotation.y_values,
                 prediction.x_values, prediction.y_values,
                 result
@@ -360,6 +361,7 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
         if self.profiler:
             self.profiler.update(
                 annotation.identifier,
+                self.name,
                 annotation.x_values, annotation.y_values,
                 prediction.x_values, prediction.y_values,
                 avg_result
@@ -425,7 +427,6 @@ class NormalizedMeanError(PerImageEvaluationMetric):
 
         diff = np.square(gt - pred)
         dist = np.sqrt(np.sum(diff[:, 0:2], axis=1)) if self.only_2d else np.sqrt(np.sum(diff, axis=1))
-        #dist /= len(gt)
         normalized_result = dist / annotation.normalization_coef(self.only_2d)
         self.magnitude.append(np.mean(normalized_result))
 

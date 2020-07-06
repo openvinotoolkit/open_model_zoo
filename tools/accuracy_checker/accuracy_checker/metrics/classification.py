@@ -159,7 +159,9 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         result = self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
         if self.profiler:
-            self.profiler.update(annotation.identifier, annotation.label, prediction.top_k(self.top_k), result)
+            self.profiler.update(
+                annotation.identifier, annotation.label, prediction.top_k(self.top_k), self.name, result
+            )
 
         return result
 
@@ -211,7 +213,7 @@ class ClipAccuracy(PerImageEvaluationMetric):
         self.previous_video_id = video_id
         self.previous_video_label = annotation.label
         if self.profiler:
-            self.profiler.update(annotation.identifier, prediction.label, clip_accuracy)
+            self.profiler.update(annotation.identifier, prediction.label, self.name, clip_accuracy)
 
         return clip_accuracy
 
@@ -258,7 +260,7 @@ class ClassificationF1Score(PerImageEvaluationMetric):
         self.cm[prediction.label] += 1
         result = annotation.label == prediction.label
         if self.profiler:
-            self.profiler.update(annotation.identifier, annotation.label, prediction.label, result, prediction.scores)
+            self.profiler.update(annotation.identifier, annotation.label, prediction.label, self.name, result)
         return result
 
     def evaluate(self, annotations, predictions):

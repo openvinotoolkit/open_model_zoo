@@ -6,7 +6,7 @@ class RegressionMetricProfiler(MetricProfiler):
     __provider__ = 'regression'
     fields = ['identifier', 'annotation_value', 'prediction_value', 'diff']
 
-    def generate_profiling_data(self, identifier, diff, metric_name, annotation_value=None, prediction_value=None):
+    def generate_profiling_data(self, identifier,metric_name,  diff, annotation_value=None, prediction_value=None):
         if self._last_profile and self._last_profile['identifier'] == identifier:
             self._last_profile['{}_result'.format(metric_name)] = diff
             return self._last_profile
@@ -22,7 +22,7 @@ class ComplexRegressionMetricProfiler(MetricProfiler):
     __provider__ = 'complex_regression'
     fields = ['identifier', 'diff']
 
-    def generate_profiling_data(self, identifier, diff, metric_name, *args, **kwargs):
+    def generate_profiling_data(self, identifier, metric_name, diff, *args, **kwargs):
         if self._last_profile and self._last_profile['identifier'] == identifier:
             self._last_profile['{}_result'.format(metric_name)] = diff
             return self._last_profile
@@ -44,7 +44,7 @@ class PointRegression(MetricProfiler):
         self.metric_names.append(metric_name)
 
     def generate_profiling_data(
-            self, identifier,metric_name, annotation_x, annotation_y, prediction_x, prediction_y, error
+            self, identifier, metric_name, annotation_x, annotation_y, prediction_x, prediction_y, error
     ):
         if not self.updated_fields:
             self._construct_field_names(len(annotation_x), error)

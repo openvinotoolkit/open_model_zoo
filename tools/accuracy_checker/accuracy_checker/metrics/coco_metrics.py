@@ -109,11 +109,14 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
 
     def update(self, annotation, prediction):
         per_class_matching = super().update(annotation, prediction)
-        if self.profiler:
-            self.profiler.update(annotation.identifier, per_class_matching)
-        return [
+        per_class_result = [
             compute_precision_recall(self.thresholds, [per_class_matching[i]])[0] for i, _ in enumerate(self.labels)
         ]
+        for class_match, class_metric in zip(per_class_matching, per_class_result):
+            class_match['result'] = per_class_result
+        if self.profiler:
+            self.profiler.update(annotation.identifier, per_class_matching, self.name)
+        return per_class_result
 
     def evaluate(self, annotations, predictions):
         if self.profiler:
