@@ -23,9 +23,9 @@ class RegressionDataAnalyzer(BaseDataAnalyzer):
     __provider__ = 'RegressionAnnotation'
 
     def analyze(self, result: list, meta, count_objects=True):
-        data_analyze = {}
+        data_analysis = {}
         if count_objects:
-            data_analyze['annotations_size'] = self.object_count(result)
+            data_analysis['annotations_size'] = self.object_count(result)
         min_value = sys.float_info.max
         max_value = sys.float_info.min
         average = 0.0
@@ -37,7 +37,7 @@ class RegressionDataAnalyzer(BaseDataAnalyzer):
         print_info('min_value: {value}'.format(value=min_value))
         print_info('max_value: {value}'.format(value=max_value))
         print_info('average: {value}'.format(value=average))
-        data_analyze['min_value'] = min_value
-        data_analyze['max_value'] = max_value
-        data_analyze['average'] = average
-        return data_analyze
+        data_analysis['min_value'] = min_value
+        data_analysis['max_value'] = max_value
+        data_analysis['average'] = average
+        return data_analysis

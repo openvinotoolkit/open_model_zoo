@@ -22,9 +22,9 @@ class ContainerDataAnalyzer(BaseDataAnalyzer):
     __provider__ = 'ContainerAnnotation'
 
     def analyze(self, result: list, meta, count_objects=True):
-        data_analyze = {}
+        data_analysis = {}
         if count_objects:
-            data_analyze['annotations_size'] = self.object_count(result)
+            data_analysis['annotations_size'] = self.object_count(result)
         dict_annotations = {}
         for container in result:
             for label_annotation in container.representations:
@@ -50,8 +50,9 @@ class ContainerDataAnalyzer(BaseDataAnalyzer):
                 annotation_specific_meta = {
                     key.split('{}_'.format(name_annotation))[-1]: meta[key] for key in specific_keys
                 }
-                data_analyze.update(analyzer.analyze(dict_annotations[label_annotation], annotation_specific_meta, False))
+                data_analysis.update(analyzer.analyze(dict_annotations[label_annotation],
+                                                      annotation_specific_meta, False))
             else:
-                data_analyze.update(analyzer.analyze(dict_annotations[label_annotation], meta, False))
+                data_analysis.update(analyzer.analyze(dict_annotations[label_annotation], meta, False))
 
-        return data_analyze
+        return data_analysis

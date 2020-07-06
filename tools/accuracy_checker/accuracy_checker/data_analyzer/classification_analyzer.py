@@ -26,9 +26,9 @@ class ClassificationDataAnalyzer(BaseDataAnalyzer):
         counter = Counter()
         class_dict = {}
         label_map = (meta or {}).get('label_map', {})
-        data_analyze = {}
+        data_analysis = {}
         if count_objects:
-            data_analyze['annotations_size'] = self.object_count(result)
+            data_analysis['annotations_size'] = self.object_count(result)
         print_info('Total objects per class:')
         for data in result:
             counter.update([data.label])
@@ -38,6 +38,6 @@ class ClassificationDataAnalyzer(BaseDataAnalyzer):
             else:
                 class_dict[key] = 'class {key}'.format(key=key)
             print_info('{class_name}: {value}'.format(class_name=class_dict[key], value=counter[key]))
-            data_analyze[class_dict[key]] = counter[key]
+            data_analysis[class_dict[key]] = counter[key]
 
-        return data_analyze
+        return data_analysis

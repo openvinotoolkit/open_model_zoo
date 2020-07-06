@@ -24,7 +24,7 @@ class DetectionDataAnalyzer(BaseDataAnalyzer):
     __provider__ = 'DetectionAnnotation'
 
     def analyze(self, result: list, meta, count_objects=True):
-        data_analyze = {}
+        data_analysis = {}
         counter = Counter()
         all_boxes = 0
         diff_objects = 0
@@ -45,19 +45,19 @@ class DetectionDataAnalyzer(BaseDataAnalyzer):
             counter.update(data.labels)
 
         if count_objects:
-            data_analyze['annotations_size'] = self.object_count(result)
+            data_analysis['annotations_size'] = self.object_count(result)
 
         print_info('Total boxes {}'.format(all_boxes))
-        data_analyze['all_boxes'] = all_boxes
+        data_analysis['all_boxes'] = all_boxes
         label_map = meta.get('label_map', {})
 
         for key in counter:
             if key in label_map:
                 print_info('{name}: {value}'.format(name=label_map[key], value=counter[key]))
-                data_analyze[label_map[key]] = counter[key]
+                data_analysis[label_map[key]] = counter[key]
             else:
                 print_info('class_{key}: {value}'.format(key=key, value=counter[key]))
-                data_analyze['class_' + key] = counter[key]
+                data_analysis['class_' + key] = counter[key]
 
         if size > 0:
             avg_num_diff_objects = diff_objects/size
@@ -76,10 +76,10 @@ class DetectionDataAnalyzer(BaseDataAnalyzer):
                 'height: {height}'.format(width=avg_width, height=avg_height)
             )
 
-            data_analyze['average_num_diff_objects'] = avg_num_diff_objects
-            data_analyze['average_num_all_objects'] = avg_num_all_objects
-            data_analyze['average_width'] = avg_width
-            data_analyze['average_height'] = avg_height
+            data_analysis['average_num_difficult_objects'] = avg_num_diff_objects
+            data_analysis['average_num_all_objects'] = avg_num_all_objects
+            data_analysis['average_width'] = avg_width
+            data_analysis['average_height'] = avg_height
 
             if diff_objects > 0:
                 avg_width_diff_objects = width_diff/diff_objects
@@ -88,7 +88,7 @@ class DetectionDataAnalyzer(BaseDataAnalyzer):
                     'Average size difficult object: width: {width}, '
                     'height: {height}\n'.format(width=avg_width_diff_objects, height=avg_height_diff_objects)
                 )
-                data_analyze['average_width_diff_objects'] = avg_width_diff_objects
-                data_analyze['average_height_diff_objects'] = avg_height_diff_objects
+                data_analysis['average_width_difficult_objects'] = avg_width_diff_objects
+                data_analysis['average_height_difficult_objects'] = avg_height_diff_objects
 
-        return data_analyze
+        return data_analysis
