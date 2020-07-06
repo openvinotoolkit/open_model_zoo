@@ -57,7 +57,7 @@ class DetectionDataAnalyzer(BaseDataAnalyzer):
                 data_analysis[label_map[key]] = counter[key]
             else:
                 print_info('class_{key}: {value}'.format(key=key, value=counter[key]))
-                data_analysis['class_' + key] = counter[key]
+                data_analysis['class_{}'.format(key)] = counter[key]
 
         if size > 0:
             avg_num_diff_objects = diff_objects/size

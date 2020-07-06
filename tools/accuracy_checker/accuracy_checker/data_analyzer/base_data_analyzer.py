@@ -40,5 +40,5 @@ class BaseDataAnalyzer(ClassProvider):
     def analyze(self, result: list, meta, count_objects=True):
         if count_objects:
             return {'annotations_size': self.object_count(result)}
-        else:
-            return {}
+        
+        return {}
