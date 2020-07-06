@@ -19,7 +19,7 @@ from collections import namedtuple, OrderedDict
 from ..presenters import BasePresenter, EvaluationResult
 from ..config import StringField
 from .metric import Metric, FullDatasetEvaluationMetric
-from .metric_profiler  import create_profiler
+from .metric_profiler import ProfilingExecutor
 from ..config import ConfigValidator, ConfigError
 
 MetricInstance = namedtuple(
@@ -40,13 +40,13 @@ class MetricsExecutor:
             raise ConfigError('{} dataset config must specify "{}"'.format(message_prefix, 'metrics'))
 
         self._dataset = dataset
-        profile_metrics = False if dataset is None else dataset.config.get('_profile', False)
+        self.profile_metrics = False if dataset is None else dataset.config.get('_profile', False)
+        self.profiler = ProfilingExecutor()
 
         self.metrics = []
-        self._profilers = []
         self.need_store_predictions = False
         for metric_config_entry in metrics_config:
-            self.register_metric(metric_config_entry, profile_metrics)
+            self.register_metric(metric_config_entry)
 
     @classmethod
     def parameters(cls):
@@ -116,7 +116,7 @@ class MetricsExecutor:
                 meta=functor.meta,
             )
 
-    def register_metric(self, metric_config_entry, profile=False):
+    def register_metric(self, metric_config_entry):
         type_ = 'type'
         identifier = 'name'
         reference = 'reference'
@@ -131,10 +131,8 @@ class MetricsExecutor:
 
         metric_identifier = metric_config_entry.get(identifier, metric_type)
         metric_kwargs = {}
-        if profile:
-            profiler = create_profiler(metric_type, metric_identifier)
-            if profiler is not None:
-                self._profilers.append(profiler)
+        if self.profile_metrics:
+            profiler = self.profiler.register_profiler_for_metric(metric_type, metric_identifier)
             metric_kwargs['profiler'] = profiler
 
         metric_fn = Metric.provide(
@@ -168,8 +166,9 @@ class MetricsExecutor:
         }
 
     def set_profiling_dir(self, profiler_dir):
-        for profiler in self._profilers:
-            profiler.set_output_dir(profiler_dir)
+        self.profiler.set_profiling_dir(profiler_dir)
+
+    def set_processing_info(self, processing_info):
 
     def reset(self):
         for metric in self.metrics:

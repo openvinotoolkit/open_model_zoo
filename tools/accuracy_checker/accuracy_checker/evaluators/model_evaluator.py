@@ -94,6 +94,8 @@ class ModelEvaluator(BaseEvaluator):
         preprocessor.input_shapes = launcher.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
         metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
+        if metric_dispatcher.profile_metrics:
+            metric_dispatcher.set_processing_info(ModelEvaluator.get_processing_info(model_config))
 
         return cls(
             launcher, input_feeder, adapter, data_reader,

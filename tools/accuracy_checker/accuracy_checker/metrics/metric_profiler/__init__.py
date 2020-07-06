@@ -8,6 +8,7 @@ from .regression_metric_profiler import RegressionMetricProfiler, PointRegressio
 from .segmentation_metric_profiler import SegmentationMetricProfiler
 from .object_detection_metric_profiler import DetectionProfiler
 from .base_profiler import create_profiler
+from .profiling_executor import ProfilingExecutor
 
 __all__ = [
     'ClipAccuracyProfiler',
@@ -21,5 +22,5 @@ __all__ = [
 
     'SegmentationMetricProfiler',
 
-    'create_profiler'
+    'ProfilingExecutor'
 ]

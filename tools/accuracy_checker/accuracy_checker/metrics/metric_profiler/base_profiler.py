@@ -37,11 +37,13 @@ class MetricProfiler(ClassProvider):
     __provider_class__ = 'metric_profiler'
     fields = ['identifier', 'result']
 
-    def __init__(self, metric_name, dump_iterations=100):
-        self.report_file = '{}.csv'.format(metric_name)
+    def __init__(self, dump_iterations=100, report_type='csv'):
+        self.report_type = report_type
+        self.report_file = '{}.{]'.format(self.__provider__, report_type)
         self.out_dir = Path()
         self.dump_iterations = dump_iterations
         self.storage = []
+        self.write_result = self.write_csv_result
 
     def generate_profiling_data(self, *args, **kwargs):
         raise NotImplementedError
@@ -63,7 +65,7 @@ class MetricProfiler(ClassProvider):
     def reset(self):
         self.storage = []
 
-    def write_result(self):
+    def write_csv_result(self):
         out_path = self.out_dir / self.report_file
         new_file = not out_path.exists()
 
@@ -77,6 +79,12 @@ class MetricProfiler(ClassProvider):
         self.out_dir = out_dir
         if not out_dir.exists():
             self.out_dir.mkdir(parents=True)
+
+    def set_processing_info(self, processing_info):
+        self.model_name, self.framework, self.device, self.tags, self.dataset = processing_info
+        self.report_file = '{}_{}_{}_{}_{}_{}'.format(
+            self.model_name, self.framework, self.device, '_'.join(self.tags or []), self.dataset, self.report_file
+        )
 
 
 def create_profiler(metric_type, metric_name):
