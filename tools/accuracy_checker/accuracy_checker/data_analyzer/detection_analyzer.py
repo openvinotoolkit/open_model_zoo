@@ -47,28 +47,39 @@ class DetectionDataAnalyzer(BaseDataAnalyzer):
             self.object_count(result)
 
         print_info('Total boxes {}'.format(all_boxes))
+        meta.update({'all_boxes': all_boxes})
         label_map = meta.get('label_map', {})
 
         for key in counter:
             if key in label_map:
                 print_info('{name}: {value}'.format(name=label_map[key], value=counter[key]))
+                meta.update({label_map[key]: counter[key]})
             else:
                 print_info('class_{key}: {value}'.format(key=key, value=counter[key]))
+                meta.update({'class_' + key: counter[key]})
 
         if size > 0:
             print_info(
                 'Average number of difficult objects (boxes) per image: {average}'.format(average=diff_objects/size)
             )
+            meta.update({'diff_avg': diff_objects/size})
             print_info(
                 'Average number of objects (boxes) per image: {average}'.format(average=all_boxes/size)
             )
+            meta.update({'obj_avg': all_boxes/size})
             print_info(
                 'Average size detection object: width: {width}, '
                 'height: {height}'.format(width=width/all_boxes, height=height/all_boxes)
             )
+            meta.update({'width_avg': width/all_boxes})
+            meta.update({'height_avg': height/all_boxes})
 
             if diff_objects > 0:
                 print_info(
                     'Average size difficult object: width: {width}, '
                     'height: {height}\n'.format(width=width_diff/diff_objects, height=height_diff/diff_objects)
                 )
+                meta.update({'diff_width_avg': width_diff/diff_objects})
+                meta.update({'diff_height_avg': height_diff/diff_objects})
+
+        return meta
