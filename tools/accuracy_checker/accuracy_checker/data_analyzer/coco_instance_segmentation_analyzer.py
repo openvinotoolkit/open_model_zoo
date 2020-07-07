@@ -29,46 +29,44 @@ class CoCoInstanceSegmentationDataAnalyzer(BaseDataAnalyzer):
 
         counter = Counter()
         total_instances = 0
-        areas = {}
+        characteristics = {}
         for data in result:
             total_instances += data.size
             counter.update(data.labels)
-            for label, rect in zip(data.labels, data.metadata['rects']):
-                if areas.get(label):
-                    areas[label]['area'].append(float(rect[2] * rect[3]))
-                    areas[label]['width'].append(float(rect[2]))
-                    areas[label]['height'].append(float(rect[3]))
+            for label, rect, area in zip(data.labels, data.metadata['rects'], data.areas):
+                if characteristics.get(label):
+                    characteristics[label]['area'].append(float(rect[2] * rect[3]))
+                    characteristics[label]['width'].append(float(rect[2]))
+                    characteristics[label]['height'].append(float(rect[3]))
                 else:
-                    areas[label]={'area': [float(rect[2] * rect[3])], 'width': [float(rect[2])], 'height': [float(rect[3])]}
+                    characteristics[label] = {'area': [float(rect[2] * rect[3])],
+                                              'width': [float(rect[2])], 'height': [float(rect[3])]}
 
-        for key in areas:
+        for key in characteristics:
             size = counter[key]
-            areas[key]['area'] = sum(areas[key]['area']) / size
-            areas[key]['width'] = sum(areas[key]['width']) / size
-            areas[key]['height'] = sum(areas[key]['height']) / size
+            characteristics[key]['area'] = {'average': sum(characteristics[key]['area']) / size,
+                                            'min': min(characteristics[key]['area']),
+                                            'max': max(characteristics[key]['area'])}
+            characteristics[key]['width'] = {'average': sum(characteristics[key]['width']) / size,
+                                             'min': min(characteristics[key]['width']),
+                                             'max': max(characteristics[key]['width'])}
+            characteristics[key]['height'] = {'average': sum(characteristics[key]['height']) / size,
+                                              'min': min(characteristics[key]['height']),
+                                              'max': max(characteristics[key]['height'])}
 
         print_info('Total instances: {value}'.format(value=total_instances))
         data_analysis['total_instances'] = total_instances
         label_map = meta.get('label_map', {})
 
         for key in counter:
-            if key in label_map:
-                print_info('{name}: count = {count}, average area = {area}, '
-                           'average width = {width}, average height = {height}'.format(name=label_map[key],
-                                                                                       count=counter[key],
-                                                                                       area=areas[key]['area'],
-                                                                                       width=areas[key]['width'],
-                                                                                       height=areas[key]['height'],))
-                data_analysis[label_map[key]] = {'count': counter[key], 'average_area': areas[key]['area'],
-                           'average_width': areas[key]['width'], 'average_height': areas[key]['height']}
-            else:
-                print_info('class_{key}: count = {count}, average area = {area}, '
-                           'average width = {width}, average height = {height}'.format(key=key,
-                                                                                       count=counter[key],
-                                                                                       area=areas[key]['area'],
-                                                                                       width=areas[key]['width'],
-                                                                                       height=areas[key]['height'],))
-                data_analysis['class_{key}'.format(key=key)] = {'count': counter[key], 'average_area': areas[key]['area'],
-                           'average_width': areas[key]['width'], 'average_height': areas[key]['height']}
+            class_name = label_map.get(key, 'class_{key}'.format(key=key))
+            print_info('{class_name}: count = {count}, area = {area}, width = {width}, height = {height}'.format(
+                class_name=class_name,
+                count=counter[key],
+                area=characteristics[key]['area'],
+                width=characteristics[key]['width'],
+                height=characteristics[key]['height'],))
+            data_analysis[class_name] = {'count': counter[key], 'area': characteristics[key]['area'],
+                'width': characteristics[key]['width'], 'height': characteristics[key]['height']}
 
         return data_analysis
