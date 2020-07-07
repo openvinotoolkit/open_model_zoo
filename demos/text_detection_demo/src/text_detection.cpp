@@ -101,19 +101,17 @@ std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area, fl
   }
 
 std::vector<cv::RotatedRect> coordToBoxes(const std::vector<float> &coords, float min_area, float min_height,
-                                         cv::Size image_size) {
+                                          cv::Size input_shape, cv::Size image_size) {
     std::vector<cv::RotatedRect> bboxes;
     int max_bbox_idx = coords.size() / 5;
-    float x_scale = image_size.width / 704.0;
-    float y_scale = image_size.height / 704.0;
-    //TODO: Find a way not to hardcode the certain input_shape (704, 704)
+    float x_scale = image_size.width / float(input_shape.width);
+    float y_scale = image_size.height / float(input_shape.height);
     for (int i = 1; i < max_bbox_idx; i++) {
-
-        std::vector<float> prediction(coords.begin() + (i-1) * 5, coords.begin() + i*5);
+        std::vector<float> prediction(coords.begin()+(i-1)*5, coords.begin()+i*5);
         float confidence = prediction[4];
 
         if (confidence < std::numeric_limits<float>::epsilon())
-            break; //predictions are sorted the way that all insignificant boxes are grouped together
+        break; //predictions are sorted the way that all insignificant boxes are grouped together
 
         cv::Point2f center = cv::Point2f((prediction[0] + prediction[2])/2 * x_scale,
                                         (prediction[1] + prediction[3])/2 * y_scale);
@@ -212,7 +210,8 @@ cv::Mat decodeImageByJoin(const std::vector<float> &cls_data, const std::vector<
 }  // namespace
 
 std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, const cv::Size& image_size,
-                                         float cls_conf_threshold, float link_conf_threshold) {
+                                         const cv::Size& input_shape,  float cls_conf_threshold,
+                                         float link_conf_threshold) {
     const int kMinArea = 300;
     const int kMinHeight = 10;
 
@@ -229,7 +228,7 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, 
     }
 
     if (!kLocOutputName.empty() && !kClsOutputName.empty()) {
-//     PostProcessing for PixelLink Text Detection model
+        //PostProcessing for PixelLink Text Detection model
         auto link_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
         size_t link_data_size = link_shape[0] * link_shape[1] * link_shape[2] * link_shape[3];
         float *link_data_pointer =
@@ -266,9 +265,8 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, 
     }
     else {
         // PostProcessing for Horizontal Text Detection model
+        kClsOutputName = "labels";
         for (const auto& blob : blobs) {
-            if (blob.second->getTensorDesc().getDims()[0] == 100)
-                kClsOutputName = blob.first;
             if (blob.second->getTensorDesc().getDims()[1] == 5)
                 kLocOutputName = blob.first;
                 }
@@ -283,7 +281,7 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, 
                 std::vector<float> boxes_data(boxes_data_pointer, boxes_data_pointer + boxes_data_size);
 
                 rects = coordToBoxes(boxes_data, static_cast<float>(kMinArea),
-                                                         static_cast<float>(kMinHeight), image_size);
+                                     static_cast<float>(kMinHeight), input_shape, image_size);
         }
     }
 
