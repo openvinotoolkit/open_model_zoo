@@ -144,6 +144,8 @@ class DLSDKLauncher(Launcher):
         self._preprocess_info = {}
         self._preprocess_steps = []
         self.disable_resize_to_input = False
+        self._do_reshape = False
+        self._use_set_blob = False
 
         if not delayed_model_loading:
             if dlsdk_launcher_config.need_conversion:
@@ -155,8 +157,6 @@ class DLSDKLauncher(Launcher):
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
         else:
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
-        self._do_reshape = False
-        self._use_set_blob = False
         self._target_layout_mapping = {}
 
     @property
@@ -212,7 +212,7 @@ class DLSDKLauncher(Launcher):
                     layout = self._target_layout_mapping.get(key, ie_input_info[key].layout)
                     tensor_desc = TensorDesc(
                         ie_input_info[key].precision,
-                        ie_input_info[key].shape,
+                        input_data.shape,
                         layout
                     )
                     preprocess_info = self._preprocess_info.get(key)
@@ -227,7 +227,7 @@ class DLSDKLauncher(Launcher):
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
         self._do_reshape = False
-        self._use_set_blob = False
+        self._use_set_blob = self.disable_resize_to_input
 
         return results
 
@@ -851,6 +851,7 @@ class DLSDKLauncher(Launcher):
                         num_channels = input_info.input_data.shape[channel_id]
                         preprocess.ie_processor.set_normalization(num_channels, input_info.preprocess_info)
             self.disable_resize_to_input = preprocess.ie_processor.has_resize()
+            self._use_set_blob = self.disable_resize_to_input
             self.load_network(self.network)
             self._preprocess_steps = preprocess_steps
             return
