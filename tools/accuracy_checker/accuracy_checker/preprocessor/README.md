@@ -63,6 +63,10 @@ Accuracy Checker supports following set of preprocessors:
   * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
 * `rgb_to_yuv` - converting image in RGB to YUV.
   * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+* `bgr_to_nv12` - converting BGR image to NV12 format.
+* `rgb_to_nv12` - converting RGB image to NV12 format.
+* `nv12_to_bgr` - converting NV12 data to BGR format.
+* `nv12_to_rgb` - converting NV12 data to RGB format.
 * `select_channel` - select channel only one specified channel from multichannel image.
   * `channel` - channel id in image (e.g. if you read image in RGB and want to select green channel, you need to specify 1 as channel)
 * `flip` - image mirroring around specified axis.
@@ -140,3 +144,12 @@ Accuracy Checker supports following set of preprocessors:
 * `face_patch` - crops faces detected in previous stage model from input image with vertical and horizontal scaling.
   * `scale_width` - value to scale width relative to the original candidate width.
   * `scale_height` - value to scale height relative to the original candidate height.
+
+## Optimized preprocessing via OpenVINO Inference Engine
+OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`. 
+When this option turn on, specified in config preprocessing will be translated to Inference Engine PreProcessInfo API.
+**Note**: This option is available only for `dlsdk` launcher and not all preprocessing operations can be ported to Inference Engine.
+Supported preprocessing:
+* Resizing: `resize` without aspect_ratio_scale and with `BILINEAR` or `AREA` interpolation. Destination size is model input shape. (`auto_resize` is also can be used for resize with bilinear interpolation.)
+* Color conversion: `bgr_to_rgb`, `rgb_to_bgr`, `nv12_to_bgr`, `nv12_to_rgb`
+* Normalization:  `normalization` with per channel `mean` and `std`
