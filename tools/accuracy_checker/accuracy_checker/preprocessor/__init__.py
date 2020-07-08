@@ -16,7 +16,6 @@ limitations under the License.
 
 from .preprocessing_executor import PreprocessingExecutor
 from .preprocessor import Preprocessor
-from .audio_preprocessing import ResampleAudio, ClipAudio, NormalizeAudio
 from .color_space_conversion import (
     BgrToRgb, RgbToBgr,
     BgrToGray, RgbToGray,
@@ -26,6 +25,17 @@ from .color_space_conversion import (
     BGRtoNV12Converter, RGBtoNV12Converter,
     NV12toBGRConverter, NV12toRGBConverter
 )
+from .audio_preprocessing import (
+    ResampleAudio,
+    ClipAudio,
+    NormalizeAudio,
+    HanningWindow,
+    AudioSpectrogram,
+    TriangleFiltering,
+    DCT,
+    ClipCepstrum
+)
+
 from .normalization import Normalize, Normalize3d
 from .geometric_transformations import (
     GeometricOperationMetadata,
@@ -57,6 +67,11 @@ __all__ = [
     'ResampleAudio',
     'ClipAudio',
     'NormalizeAudio',
+    'HanningWindow',
+    'AudioSpectrogram',
+    'TriangleFiltering',
+    'DCT',
+    'ClipCepstrum',
 
     'Resize',
     'Resize3D',
