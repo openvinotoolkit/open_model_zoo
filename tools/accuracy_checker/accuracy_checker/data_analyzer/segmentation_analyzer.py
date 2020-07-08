@@ -15,12 +15,28 @@ limitations under the License.
 """
 
 from collections import Counter
+from copy import deepcopy
+import numpy as np
 from .base_data_analyzer import BaseDataAnalyzer
 from ..logging import print_info
 
 
 class SegmentationDataAnalyzer(BaseDataAnalyzer):
     __provider__ = 'SegmentationAnnotation'
+
+    @staticmethod
+    def _encode_mask(annotation, segmentation_colors):
+        for annotation_ in annotation:
+            mask = annotation_.mask.astype(int)
+            num_channels = len(mask.shape)
+            encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.int16)
+            for label, color in enumerate(segmentation_colors):
+                encoded_mask[np.where(
+                    np.all(mask == color, axis=-1) if num_channels >= 3 else mask == color
+                )[:2]] = label
+            annotation_.mask = encoded_mask.astype(np.int8)
+
+        return annotation
 
     def analyze(self, result: list, meta, count_objects=True):
         data_analysis = {}
@@ -29,11 +45,18 @@ class SegmentationDataAnalyzer(BaseDataAnalyzer):
 
         counter = Counter()
 
-        for data in result:
+        annotations = deepcopy(result)
+
+        for data in annotations:
             data.set_segmentation_mask_source(meta['segmentation_masks_source'])
+
+        segmentation_colors = meta.get('segmentation_colors')
+        if segmentation_colors:
+            annotations = self._encode_mask(annotations, segmentation_colors)
+
+        for data in annotations:
             for elem in data.mask:
                 counter.update(elem)
-            del data.metadata['segmentation_masks_source']
 
         label_map = meta.get('label_map', {})
         for key in counter:
