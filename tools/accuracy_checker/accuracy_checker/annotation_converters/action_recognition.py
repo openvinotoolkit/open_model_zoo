@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from collections import OrderedDict
+
 from ..utils import read_json, read_txt, check_file_existence
 from ..representation import ClassificationAnnotation
 from ..data_readers import ClipIdentifier
@@ -68,7 +70,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
         self.num_samples = self.get_value_from_config('num_samples')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        full_annotation = read_json(self.annotation_file)
+        full_annotation = read_json(self.annotation_file, object_pairs_hook=OrderedDict)
         data_ext = 'jpg' if not self.numpy_input else 'npy'
         label_map = dict(enumerate(full_annotation['labels']))
         if self.dataset_meta:
