@@ -26,15 +26,14 @@ class SegmentationDataAnalyzer(BaseDataAnalyzer):
 
     @staticmethod
     def _encode_mask(annotation, segmentation_colors):
-        for annotation_ in annotation:
-            mask = annotation_.mask.astype(int)
-            num_channels = len(mask.shape)
-            encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.int16)
-            for label, color in enumerate(segmentation_colors):
-                encoded_mask[np.where(
-                    np.all(mask == color, axis=-1) if num_channels >= 3 else mask == color
-                )[:2]] = label
-            annotation_.mask = encoded_mask.astype(np.int8)
+        mask = annotation.mask.astype(int)
+        num_channels = len(mask.shape)
+        encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.int16)
+        for label, color in enumerate(segmentation_colors):
+            encoded_mask[np.where(
+                np.all(mask == color, axis=-1) if num_channels >= 3 else mask == color
+            )[:2]] = label
+        annotation.mask = encoded_mask.astype(np.int8)
 
         return annotation
 
@@ -43,20 +42,21 @@ class SegmentationDataAnalyzer(BaseDataAnalyzer):
         if count_objects:
             data_analysis['annotations_size'] = self.object_count(result)
 
-        counter = Counter()
-
-        annotations = deepcopy(result)
-
-        for data in annotations:
-            data.set_segmentation_mask_source(meta['segmentation_masks_source'])
+        counter = {}
 
         segmentation_colors = meta.get('segmentation_colors')
-        if segmentation_colors:
-            annotations = self._encode_mask(annotations, segmentation_colors)
 
-        for data in annotations:
-            for elem in data.mask:
-                counter.update(elem)
+        for data in result:
+            annotation = deepcopy(data)
+            annotation.set_segmentation_mask_source(meta['segmentation_masks_source'])
+            if segmentation_colors:
+                annotation = self._encode_mask(annotation, segmentation_colors)
+            unique, count = np.unique(annotation.mask, return_counts=True)
+            for elem, count_ in zip(unique,count):
+                if counter.get(elem):
+                    counter[elem] += int(count_)
+                else:
+                    counter[elem] = int(count_)
 
         label_map = meta.get('label_map', {})
         for key in counter:
