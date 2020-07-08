@@ -4,7 +4,7 @@ The demo shows an example of using neural networks to detect and recognize print
 
 * `text-detection-0003`, which is a detection network for finding text.
 * `text-detection-0004`, which is a lightweight detection network for finding text.
-* `horizontal-text-detection-0001`, which is a detection network that works much faster than models above, but is applicable for funding more or less horizontal text only.
+* `horizontal-text-detection-0001`, which is a detection network that works much faster than models above, but it is applicable for funding more or less horizontal text only.
 * `text-recognition-0012`, which is a recognition network for recognizing text.
 * `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
 
