@@ -1,4 +1,6 @@
 onnx
 scipy           # via torchvision
-torch>=1.4
-torchvision
+
+# can't use higher versions because of https://github.com/pytorch/vision/issues/2132
+torch==1.4.*
+torchvision==0.5.*
