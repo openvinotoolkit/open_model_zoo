@@ -241,4 +241,4 @@ AccuracyChecker supports following set of adapters:
     * `output_layer_map` - dictionary where keys are output layer names of attribute classification model and values are the names of attributes.
 * `regression` - converting output of regression model to `RegressionPrediction` representation.
 * `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions. 
-    * `adapters` - List of adapter config including `layer_map` map where key is layer name and value is output name. Each entry in `layer_map` will have separate adapter instance.
+    * `adapters` - Dict where key is output name and value is adapter config map including `output_blob` key to associate the output of model and this adapter.

@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from .adapter import Adapter, create_adapter
-from ..config import ListField
+from ..config import DictField
 from ..representation import ContainerPrediction
 
 
@@ -29,10 +29,10 @@ class MixedAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'adapters': ListField(
+            'adapters': DictField(
                 allow_empty=False,
-                description='List of adapter config map including'
-                            '"layer_map"(key: layer name, value: output name)')
+                description='Dict where key is output name and value is adapter config map including'
+                            'key "output_blob" to indicating output layer of model')
         })
         return parameters
 
@@ -43,16 +43,13 @@ class MixedAdapter(Adapter):
         return adapter
 
     def configure(self):
-        layers = self.get_value_from_config('adapters')
+        adapters = self.get_value_from_config('adapters')
         self.adapters = {}
-        self.output_names = {}
-        for adapter_config in layers:
-            layer_map = adapter_config.pop('layer_map')
-            self.output_names.update(layer_map)
-            for layer in layer_map:
-                self.adapters[layer] = self.__create_adapter(adapter_config, layer)
+        for output_name, adapter_config in adapters.items():
+            layer_name = adapter_config.pop('output_blob')
+            self.adapters[layer_name] = (output_name, self.__create_adapter(adapter_config, layer_name))
         prediction_types = set()
-        for adapter in self.adapters.values():
+        for _, adapter in self.adapters.values():
             prediction_types.update(adapter.prediction_types)
         self.prediction_types = tuple(prediction_types)
 
@@ -73,8 +70,8 @@ class MixedAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = {}
 
-        for layer in self.adapters:
-            result[layer] = self.adapters[layer].process(raw, identifiers, frame_meta)
+        for layer, (_, adapter) in self.adapters.items():
+            result[layer] = adapter.process(raw, identifiers, frame_meta)
 
         if not self.is_result_valid(result):
             raise RuntimeError("length of predictions from each adapter should be same")
@@ -83,8 +80,7 @@ class MixedAdapter(Adapter):
 
         for i in range(len(identifiers)):
             container_args = {}
-            for layer in self.adapters:
-                name = self.output_names[layer]
+            for layer, (name, _) in self.adapters.items():
                 if isinstance(result[layer][i], ContainerPrediction):
                     container_args.update(result[layer][i].representations)
                 else:
