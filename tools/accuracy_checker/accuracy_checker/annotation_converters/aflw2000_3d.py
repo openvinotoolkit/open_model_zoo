@@ -1,23 +1,11 @@
 import numpy as np
-from ..config import ConfigError
 from ..representation import FacialLandmarks3DAnnotation
 from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
-
-try:
-    import scipy.io as scipy_io
-except ImportError:
-    scipy_io = None
+from ..utils import loadmat
 
 
 class AFLW20003DConverter(DirectoryBasedAnnotationConverter):
     __provider__ = 'aflw2000_3d'
-
-    def __init__(self, config=None):
-        if scipy_io is None:
-            raise ConfigError(
-                '{} converter require scipy installation. Please install it before usage.'.format(self.__provider__)
-            )
-        super().__init__(config)
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         images_list = list(self.data_dir.glob('*.jpg'))
@@ -31,7 +19,7 @@ class AFLW20003DConverter(DirectoryBasedAnnotationConverter):
                     content_errors.append('{}: does not exists'.format(str(annotation_file)))
                 continue
 
-            image_info = scipy_io.loadmat(str(annotation_file))
+            image_info = loadmat(annotation_file)
             x_values, y_values, z_values = image_info['pt3d_68']
             x_min, y_min = np.min(x_values), np.min(y_values)
             x_max, y_max = np.max(x_values), np.max(y_values)

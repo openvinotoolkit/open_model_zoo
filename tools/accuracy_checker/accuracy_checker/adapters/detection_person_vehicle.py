@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import math
+import numpy as np
 
 from ..adapters import Adapter
 from ..config import NumberField
@@ -295,6 +296,121 @@ class PersonVehicleDetectionAdapter(Adapter):
         lhs_box = lhs[2]
         rhs_box = rhs[2]
         return PersonVehicleDetectionAdapter.compute_iou(lhs_box, rhs_box)
+
+    @staticmethod
+    def convert_classid_to_gt_type(class_id):
+        return 0 if class_id == 5 else 1
+
+class PersonVehicleDetectionRefinementAdapter(Adapter):
+    __provider__ = 'person_vehilce_detection_refinement'
+    predcition_types = (DetectionPrediction, )
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        thresholds = {1: 0.5, 2: 0.4, 3: 0.4, 4: 0.3, 5: 0.6, 6: 0.5, 7: 0.3}
+        kBoxNormalize = [10.0, 10.0, 5.0, 5.0]
+
+        detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+        proposals = frame_meta[0]['candidates']
+        img_height, img_width, _ = frame_meta[0]['image_size']
+        identifier = identifiers[0]
+
+        if proposals.x_mins.size == 0:
+            return [DetectionPrediction(identifier=identifier)]
+
+        for batch_index, prediction in enumerate(raw):
+            cls_prob = prediction['final_prob'][0]
+            bbox_pred = prediction['final_boxes'][0]
+
+            max_cls_index = np.argmax(cls_prob)
+            max_cls_prob = cls_prob[max_cls_index]
+
+            if max_cls_index != 0:
+                bbox_pred_index = max_cls_index
+                x_min = proposals.x_mins[batch_index]
+                y_min = proposals.y_mins[batch_index]
+                x_max = proposals.x_maxs[batch_index]
+                y_max = proposals.y_maxs[batch_index]
+
+                x_min, y_min, x_max, y_max = self.transform_bbox_inv(
+                    bbox_pred[bbox_pred_index][0] / kBoxNormalize[0], bbox_pred[bbox_pred_index][1] / kBoxNormalize[1],
+                    bbox_pred[bbox_pred_index][2] / kBoxNormalize[2], bbox_pred[bbox_pred_index][3] / kBoxNormalize[3],
+                    x_min, y_min, x_max, y_max,
+                    img_width, img_height
+                )
+                self.update_by_roi(proposals, batch_index, x_min, y_min, x_max, y_max)
+                if max_cls_prob > thresholds[proposals.labels[batch_index]]:
+                    detections['scores'].append(max_cls_prob)
+                    detections['labels'].append(max_cls_index)
+                    detections['x_mins'].append(proposals.x_mins[batch_index])
+                    detections['y_mins'].append(proposals.y_mins[batch_index])
+                    detections['x_maxs'].append(proposals.x_maxs[batch_index])
+                    detections['y_maxs'].append(proposals.y_maxs[batch_index])
+
+        detections['labels'] = list(map(self.convert_classid_to_gt_type, detections['labels']))
+        return [
+            DetectionPrediction(
+                identifier=identifier,
+                labels=detections['labels'],
+                scores=detections['scores'],
+                x_mins=detections['x_mins'],
+                y_mins=detections['y_mins'],
+                x_maxs=detections['x_maxs'],
+                y_maxs=detections['y_maxs']
+            )
+        ]
+
+    @staticmethod
+    def update_by_roi(proposals, batch_index, x_min, y_min, x_max, y_max):
+
+        cx1 = (x_min + x_max) * 0.5
+        cy1 = (y_min + y_max) * 0.5
+        w1 = (x_max - x_min)
+        h1 = (y_max - y_min)
+
+        cx0 = (proposals.x_maxs[batch_index] + proposals.x_mins[batch_index]) * 0.5
+        cy0 = (proposals.y_maxs[batch_index] + proposals.y_mins[batch_index]) * 0.5
+        w0 = proposals.x_maxs[batch_index] - proposals.x_mins[batch_index]
+        h0 = proposals.y_maxs[batch_index] - proposals.y_mins[batch_index]
+
+        wx = w1/w0
+        wy = h1/h0
+
+        proposals.x_mins[batch_index] = int((proposals.x_mins[batch_index] - cx0) * wx + cx1)
+        proposals.y_mins[batch_index] = int((proposals.y_mins[batch_index] - cy0) * wy + cy1)
+        proposals.x_maxs[batch_index] = int((proposals.x_maxs[batch_index] - cx0) * wx + cx1)
+        proposals.y_maxs[batch_index] = int((proposals.y_maxs[batch_index] - cy0) * wy + cy1)
+
+    @staticmethod
+    def transform_bbox_inv(dx, dy, d_log_w, d_log_h, x1, y1, x2, y2, img_w, img_h):
+        # width & height of box
+        w = x2 - x1 + 1.0
+        h = y2 - y1 + 1.0
+        ctr_x = x1 + 0.5 * w
+        ctr_y = y1 + 0.5 * h
+
+        # new center location according to gradient (dx, dy)
+        pred_ctr_x = dx * w + ctr_x
+        pred_ctr_y = dy * h + ctr_y
+
+        # new width & height according to gradient d(log w), d(log h)
+        pred_w = math.exp(d_log_w) * w
+        pred_h = math.exp(d_log_h) * h
+
+        # update upper-left corner location
+        x1 = pred_ctr_x - 0.5 * pred_w
+        y1 = pred_ctr_y - 0.5 * pred_h
+
+        # update lower-right corner location
+        x2 = pred_ctr_x + 0.5 * pred_w
+        y2 = pred_ctr_y + 0.5 * pred_h
+
+        # adjust new corner locations to be within the image region,
+        x1 = max(0, min(x1, img_w - 1.0))
+        y1 = max(0, min(y1, img_h - 1.0))
+        x2 = max(0, min(x2, img_w - 1.0))
+        y2 = max(0, min(y2, img_h - 1.0))
+
+        return x1, y1, x2, y2
 
     @staticmethod
     def convert_classid_to_gt_type(class_id):

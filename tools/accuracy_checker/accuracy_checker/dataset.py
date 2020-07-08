@@ -83,7 +83,7 @@ class Dataset:
 
         if self._config.get('analyze_dataset', False):
             meta['segmentation_masks_source'] = self._config.get('segmentation_masks_source')
-            analyze_dataset(annotation, meta)
+            meta = analyze_dataset(annotation, meta)
             del meta['segmentation_masks_source']
 
         if use_converted_annotation and contains_all(self._config, ['annotation', 'annotation_conversion']):
@@ -235,7 +235,9 @@ class Dataset:
             annotation = create_subset(annotation, subsample_size, subsample_seed)
 
         if self._config.get('analyze_dataset', False):
-            analyze_dataset(annotation, self.metadata)
+            self.metadata['segmentation_masks_source'] = self._config.get('segmentation_masks_source')
+            self.metadata = analyze_dataset(annotation, self.metadata)
+            del self.metadata['segmentation_masks_source']
 
         self._annotation = annotation
         self.name = self._config.get('name')
