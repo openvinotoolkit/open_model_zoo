@@ -26,6 +26,8 @@ from .data_reader import (
     NiftiImageReader,
     TensorflowImageReader,
     AnnotationFeaturesReader,
+    WavReader,
+    DicomReader,
 
     DataRepresentation,
     ClipIdentifier,
@@ -47,6 +49,8 @@ __all__ = [
     'NiftiImageReader',
     'TensorflowImageReader',
     'AnnotationFeaturesReader',
+    'WavReader',
+    'DicomReader',
 
     'DataRepresentation',
     'ClipIdentifier',

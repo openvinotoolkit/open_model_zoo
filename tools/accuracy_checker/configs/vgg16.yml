@@ -32,6 +32,20 @@ models:
         weights: public/vgg16/FP16/vgg16.bin
         adapter: classification
 
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   public/vgg16/FP32-INT8/vgg16.xml
+        weights: public/vgg16/FP32-INT8/vgg16.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   public/vgg16/FP16-INT8/vgg16.xml
+        weights: public/vgg16/FP16-INT8/vgg16.bin
+        adapter: classification
+
     datasets:
       - name: imagenet_1000_classes
         preprocessing:

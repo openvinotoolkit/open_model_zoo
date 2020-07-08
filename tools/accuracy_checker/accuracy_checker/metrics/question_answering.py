@@ -16,24 +16,36 @@ limitations under the License.
 
 import re
 from collections import Counter
+import string
 
 from ..representation import QuestionAnsweringAnnotation, QuestionAnsweringPrediction
 from .metric import PerImageEvaluationMetric
 
 
 def normalize_answer(s):
+    """Lower text and remove punctuation, articles and extra whitespace."""
+
     def remove_articles(text):
-        return re.sub(r'\b(a|an|the)\b', ' ', text)
+        regex = re.compile(r"\b(a|an|the)\b", re.UNICODE)
+        return re.sub(regex, " ", text)
 
     def white_space_fix(text):
-        return ' '.join(text.split())
+        return " ".join(text.split())
 
     def remove_punc(text):
-        exclude = set('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~')
-        return ''.join(ch for ch in text if ch not in exclude)
+        exclude = set(string.punctuation)
+        return "".join(ch for ch in text if ch not in exclude)
 
-    return white_space_fix(remove_articles(remove_punc(s.lower())))
+    def lower(text):
+        return text.lower()
 
+    return white_space_fix(remove_articles(remove_punc(lower(s))))
+
+
+def get_tokens(s):
+    if not s:
+        return []
+    return normalize_answer(s).split()
 
 class ScoreF1(PerImageEvaluationMetric):
     __provider__ = 'f1'
@@ -43,29 +55,40 @@ class ScoreF1(PerImageEvaluationMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.f1 = 0
-        self.total = 0
+        self.per_question_results = {}
 
     def update(self, annotation, prediction):
-        max_f1_score = 0
-        for gt_answer in annotation.orig_answer_text:
-            for pred_answer in prediction.tokens:
-                prediction_tokens = normalize_answer(pred_answer).split()
-                annotation_tokens = normalize_answer(gt_answer['text']).split()
-                common = Counter(prediction_tokens) & Counter(annotation_tokens)
-                same = sum(common.values())
-                if same == 0:
-                    continue
-                precision = 1.0 * same / len(prediction_tokens)
-                recall = 1.0 * same / len(annotation_tokens)
-                f1 = (2 * precision * recall) / (precision + recall)
-                max_f1_score = f1 if f1 > max_f1_score else max_f1_score
-        self.f1 += max_f1_score
-        self.total += 1
+        gold_answers = [answer["text"] for answer in annotation.orig_answer_text if normalize_answer(answer["text"])]
+        if not gold_answers:
+            gold_answers = ['']
+        prediction_answer = prediction.tokens[0] if prediction.tokens else ''
+        max_f1_score = max(self.compute_f1(a, prediction_answer) for a in gold_answers)
+        current_max_f1_score = self.per_question_results.get(annotation.question_id, 0)
+        self.per_question_results[annotation.question_id] = max(max_f1_score, current_max_f1_score)
         return max_f1_score
 
+    @staticmethod
+    def compute_f1(a_gold, a_pred):
+        gold_toks = get_tokens(a_gold)
+        pred_toks = get_tokens(a_pred)
+        common = Counter(gold_toks) & Counter(pred_toks)
+        num_same = sum(common.values())
+        if len(gold_toks) == 0 or len(pred_toks) == 0:
+            # If either is no-answer, then F1 is 1 if they agree, 0 otherwise
+            return int(gold_toks == pred_toks)
+        if num_same == 0:
+            return 0
+        precision = 1.0 * num_same / len(pred_toks)
+        recall = 1.0 * num_same / len(gold_toks)
+        f1 = (2 * precision * recall) / (precision + recall)
+        return f1
+
     def evaluate(self, annotation, prediction):
-        return self.f1 / self.total
+        return sum(self.per_question_results.values()) / len(self.per_question_results)
+
+    def reset(self):
+        del self.per_question_results
+        self.per_question_results = {}
 
 
 class ExactMatchScore(PerImageEvaluationMetric):
@@ -76,18 +99,26 @@ class ExactMatchScore(PerImageEvaluationMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.exact_match = 0
-        self.total = 0
+        self.per_question_results = {}
 
     def update(self, annotation, prediction):
-        max_exact_match = 0
-        for gt_answer in annotation.orig_answer_text:
-            for pred_answer in prediction.tokens:
-                exact_match = normalize_answer(gt_answer['text']) == normalize_answer(pred_answer)
-                max_exact_match = exact_match if exact_match > max_exact_match else max_exact_match
-        self.exact_match += max_exact_match
-        self.total += 1
+        gold_answers = [answer["text"] for answer in annotation.orig_answer_text if normalize_answer(answer["text"])]
+        if not gold_answers:
+            gold_answers = ['']
+        pred_answer = prediction.tokens[0] if prediction.tokens else ''
+        max_exact_match = max(self.compute_exact(a_gold, pred_answer) for a_gold in gold_answers)
+        self.per_question_results[annotation.question_id] = max(
+            max_exact_match, self.per_question_results.get(annotation.question_id, 0)
+        )
         return max_exact_match
 
+    @staticmethod
+    def compute_exact(a_gold, a_pred):
+        return int(normalize_answer(a_gold) == normalize_answer(a_pred))
+
     def evaluate(self, annotation, prediction):
-        return self.exact_match / self.total
+        return sum(self.per_question_results.values()) / len(self.per_question_results)
+
+    def reset(self):
+        del self.per_question_results
+        self.per_question_results = {}

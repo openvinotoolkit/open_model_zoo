@@ -15,6 +15,13 @@
 | MParams                         | 1.327                                     |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 59.86%|
+| Top 5  | 82.04%|
+
 ## Performance
 
 ## Input
@@ -35,14 +42,14 @@ Image, name: `input`, shape: [1x160x160x3], format: [BxHxWxC],
 ### Converted Model
 
 Image, name: `input` , shape: [1x3x160x160], format: [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 

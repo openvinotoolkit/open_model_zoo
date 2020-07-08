@@ -76,4 +76,5 @@ model_optimizer_args:
   - --output=prob
   - --input_model=$conv_dir/efficientnet-b5.onnx
 framework: pytorch
+quantizable: yes
 license: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/LICENSE

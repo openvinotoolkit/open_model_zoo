@@ -15,6 +15,13 @@ Faster R-CNN with Inception v2. Used for object detection. For details, see the 
 | MParams                         | 13.307                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 25.65%|
+| mAP| 40.04%|
+
 ## Performance
 
 ## Input
@@ -34,20 +41,20 @@ Image, name: `image_tensor`, shape: [1x600x1024x3], format: [BxHxWxC],
 ### Converted Model
 
 1. Image, name: `image_tensor`, shape: [1x3x600x1024], format: [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 2. Information of input image size, name: `image_info`, shape: [1x3], format: [BxC],
    where:
 
     - B - batch size
-    - C - vector of 3 values in format [H,W,S], where H - image height, W - imahe width, S - image scale factor (usually 1)
+    - C - vector of 3 values in format [H,W,S], where H - image height, W - image width, S - image scale factor (usually 1)
 
 ## Output
 

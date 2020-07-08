@@ -189,7 +189,8 @@ int main(int argc, char *argv[]) {
 
             /** Fill second input tensor with image info **/
             if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {
-                auto data = input->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+                LockedMemory<void> inputMapped = as<MemoryBlob>(input)->wmap();
+                auto data = inputMapped.as<float *>();
                 data[0] = static_cast<float>(netInputHeight);  // height
                 data[1] = static_cast<float>(netInputWidth);  // width
                 data[2] = 1;
@@ -208,10 +209,12 @@ int main(int argc, char *argv[]) {
         slog::info << "Processing output blobs" << slog::endl;
 
         const auto do_blob = infer_request.GetBlob(FLAGS_detection_output_name.c_str());
-        const auto do_data = do_blob->buffer().as<float*>();
+        LockedMemory<const void> doBlobMapped = as<MemoryBlob>(do_blob)->rmap();
+        const auto do_data  = doBlobMapped.as<float*>();
 
         const auto masks_blob = infer_request.GetBlob(FLAGS_masks_name.c_str());
-        const auto masks_data = masks_blob->buffer().as<float*>();
+        LockedMemory<const void> masksBlobMapped = as<MemoryBlob>(masks_blob)->rmap();
+        const auto masks_data = masksBlobMapped.as<float*>();
 
         const float PROBABILITY_THRESHOLD = 0.2f;
         const float MASK_THRESHOLD = 0.5f;  // threshold used to determine whether mask pixel corresponds to object or to background

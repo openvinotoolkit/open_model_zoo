@@ -17,6 +17,10 @@ The `ssd_mobilenet_v1_coco` model is a [Single-Shot multibox Detection (SSD)](ht
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 23.3212%|
+
 ## Performance
 
 ## Input
@@ -36,14 +40,14 @@ Image, name - `image_tensor`, shape - [1x300x300x3], format [BxHxWxC],
 ### Converted model
 
 Image, name - `image_tensor`, shape - [1x3x300x300], format [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order - BGR.
+Expected color order: BGR.
 
 ## Output
 

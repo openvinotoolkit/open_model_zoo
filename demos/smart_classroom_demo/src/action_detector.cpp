@@ -131,26 +131,35 @@ DetectedActions ActionDetection::fetchResults() {
     const auto loc_blob_name = new_network_ ? config_.new_loc_blob_name : config_.old_loc_blob_name;
     const auto det_conf_blob_name = new_network_ ? config_.new_det_conf_blob_name : config_.old_det_conf_blob_name;
 
-    const cv::Mat priorbox_out =
-        new_network_
-          ? cv::Mat()
-          : cv::Mat(ieSizeToVector(request->GetBlob(config_.old_priorbox_blob_name)->getTensorDesc().getDims()),
-                    CV_32F, request->GetBlob(config_.old_priorbox_blob_name)->buffer());
-
+    LockedMemory<const void> locBlobMapped = as<MemoryBlob>(request->GetBlob(loc_blob_name))->rmap();
     const cv::Mat loc_out(ieSizeToVector(request->GetBlob(loc_blob_name)->getTensorDesc().getDims()),
-                          CV_32F, request->GetBlob(loc_blob_name)->buffer());
+                          CV_32F, locBlobMapped.as<float*>());
 
+    LockedMemory<const void> detConfBlobMapped = as<MemoryBlob>(request->GetBlob(det_conf_blob_name))->rmap();
     const cv::Mat main_conf_out(ieSizeToVector(request->GetBlob(det_conf_blob_name)->getTensorDesc().getDims()),
-                                CV_32F, request->GetBlob(det_conf_blob_name)->buffer());
+                                CV_32F, detConfBlobMapped.as<float*>());
 
+    std::vector<LockedMemory<const void>> blobsMapped;
     std::vector<cv::Mat> add_conf_out;
     for (int glob_anchor_id = 0; glob_anchor_id < num_glob_anchors_; ++glob_anchor_id) {
         const auto& blob_name = glob_anchor_names_[glob_anchor_id];
+        blobsMapped.push_back(as<MemoryBlob>(request->GetBlob(blob_name))->rmap());
         add_conf_out.emplace_back(ieSizeToVector(request->GetBlob(blob_name)->getTensorDesc().getDims()),
-                                  CV_32F, request->GetBlob(blob_name)->buffer());
+                                  CV_32F, blobsMapped[glob_anchor_id].as<float*>());
     }
 
     /** Parse detections **/
+    if (new_network_) {
+        const cv::Mat priorbox_out;
+        return GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
+                             cv::Size(static_cast<int>(width_), static_cast<int>(height_)));
+    }
+
+    LockedMemory<const void> priorboxOutBlobMapped =
+        as<MemoryBlob>(request->GetBlob(config_.old_priorbox_blob_name))->rmap();
+    const cv::Mat priorbox_out = cv::Mat(ieSizeToVector(request->
+                                         GetBlob(config_.old_priorbox_blob_name)->getTensorDesc().getDims()), CV_32F,
+                                         priorboxOutBlobMapped.as<float*>());
     return GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
                          cv::Size(static_cast<int>(width_), static_cast<int>(height_)));
 }

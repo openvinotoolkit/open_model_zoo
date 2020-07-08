@@ -32,6 +32,20 @@ models:
         weights: public/mobilenet-v2/FP16/mobilenet-v2.bin
         adapter: classification
 
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   public/mobilenet-v2/FP32-INT8/mobilenet-v2.xml
+        weights: public/mobilenet-v2/FP32-INT8/mobilenet-v2.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   public/mobilenet-v2/FP16-INT8/mobilenet-v2.xml
+        weights: public/mobilenet-v2/FP16-INT8/mobilenet-v2.bin
+        adapter: classification
+
     datasets:
       - name: imagenet_1000_classes
         preprocessing:

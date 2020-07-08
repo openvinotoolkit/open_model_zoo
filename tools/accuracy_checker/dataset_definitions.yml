@@ -70,7 +70,7 @@ datasets:
         dst_height: 600
         dst_width: 1024
 
-  - name: ms_coco_detection_80_class_without_backgound
+  - name: ms_coco_detection_80_class_without_background
     data_source: val2017
     annotation_conversion:
       converter: mscoco_detection
@@ -80,6 +80,17 @@ datasets:
       use_full_label_map: False
     annotation:  mscoco_det_80.pickle
     dataset_meta:  mscoco_det_80.json
+
+  - name: ms_coco_detection_80_class_with_background
+    data_source: val2017
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: instances_val2017.json
+      has_background: True
+      sort_annotations: True
+      use_full_label_map: False
+    annotation: mscoco_det_80_bkgr.pickle
+    dataset_meta:  mscoco_det_80_bkgr.json
 
   - name: ms_coco_keypoints
     data_source: val2017
@@ -189,6 +200,15 @@ datasets:
     annotation: wider.pickle
     dataset_meta: wider.json
 
+  - name: wider_without_bkgr
+    data_source: WIDER_val/images
+    annotation_conversion:
+      converter: wider
+      annotation_file: wider_face_split/wider_face_val_bbx_gt.txt
+      label_start: 0
+    annotation: wider_0.pickle
+    dataset_meta: wider_0.json
+
   - name: facial_landmarks_35
     data_source: VOCdevkit/VOC2012/JPEGImages
     annotation_conversion:
@@ -225,6 +245,15 @@ datasets:
     dataset_meta: age_gender.json
 
   - name: vehicle_attributes
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_attributes_recognition
+      annotation_file: 3634_OMZ_task8_vehicle_attributes_recognition_barrier_0039.xml
+      label: vehicle
+    annotation: vehicle_attributes.pickle
+    dataset_meta: vehicle_attributes.json
+
+  - name: vehicle_attributes_0042
     data_source: val2017
     annotation_conversion:
       converter: cvat_attributes_recognition
@@ -359,6 +388,16 @@ datasets:
     annotation: vehicle_detection.pickle
     dataset_meta: vehicle_detection.json
 
+  - name: barrier_vehicle_detection_dataset_index_class_2
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3636_OMZ_task11_pedestrian_and_vehicle_detector_adas_0001.xml
+      labels_file: vehicle-detection-labels.json
+      has_background: True
+    annotation: vehicle_detection.pickle
+    dataset_meta: vehicle_detection.json
+
   - name: synthetic_chinese_license_plates
     data_source: Synthetic_Chinese_License_Plates
     annotation_conversion:
@@ -429,6 +468,13 @@ datasets:
       data_dir: Market-1501-v15.09.15
     annotation: market1501_reid.pickle
 
+  - name: veri776
+    data_source: VeRi-776
+    annotation_conversion:
+      converter: veri776_reid
+      data_dir: VeRi-776
+    annotation: veri776_reid.pickle
+
   - name: reid_dataset
     data_source: Market-1501-v15.09.15
     annotation_conversion:
@@ -446,7 +492,8 @@ datasets:
     dataset_meta: vggfaces2.json
 
   - name: semantic_segmentation_adas
-    data_source: segmentation
+    data_source: segmentation/images
+    segmentation_masks_source: segmentation/mask_segmentation_adas
     annotation_conversion:
       converter: common_semantic_segmentation
       images_dir: segmentation/images
@@ -471,7 +518,8 @@ datasets:
         dst_width: 2048
 
   - name: road_segmentation
-    data_source: segmentation
+    data_source: segmentation/images
+    segmentation_masks_source: segmentation/mask_road_segmentation
     annotation_conversion:
       converter: common_semantic_segmentation
       images_dir: segmentation/images
@@ -682,7 +730,7 @@ datasets:
       data_dir: msasl/global_crops
       out_fps: 15
       clip_length: 16
-    annotation: msasl/msasl_action_recognition.pickle
+    annotation: msasl_action_recognition.pickle
 
   - name: ReDWeb_V1
     data_source: ReDWeb_V1
@@ -693,11 +741,11 @@ datasets:
     annotation: mono_depth.pickle
 
   - name: Kondate_nakayosi
-    data_source: Kondate_nakayosi/test_data
+    data_source: Kondate/test_data
     annotation_conversion:
       converter: kondate_nakayosi_recognition
-      decoding_char_file: Kondate_nakayosi/kondate_nakayosi_char_list.txt
-      annotation_file: Kondate_nakayosi/test_img_id_gt.txt
+      decoding_char_file: Kondate/kondate_nakayosi_char_list.txt
+      annotation_file: Kondate/test_img_id_gt.txt
     annotation: kondate_nakayosi_recognition.pickle
     dataset_meta: kondate_nakayosi_recognition.json
 
@@ -708,3 +756,34 @@ datasets:
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       masks_dir: free_form_masks/masks_2k
     annotation: inpainting_voc12_masks2k.pickle
+
+  - name: mrlEyes_2018_01
+    annotation_conversion:
+      converter: mrlEyes_2018_01
+      data_dir: mrlEyes_2018_01
+    annotation: mrlEyes_2018_01.pickle
+    dataset_meta: mrlEyes_2018_01.json
+    data_source: mrlEyes_2018_01
+
+  - name: ms_coco_style_transfer
+    data_source: val2017
+    annotation_conversion:
+      converter: style_transfer
+      images_dir: val2017
+    metrics:
+      - type: psnr
+        scale_border: 0
+        presenter: print_vector
+      - type: ssim
+        presenter: print_vector
+    annotation: style_trasfer_val2017.pickle
+
+  - name: squad_v1_1_msl384_mql64_ds128_lowercase
+    annotation_conversion:
+      converter: squad
+      testing_file: squad_v1.1/dev-v1.1.json
+      max_seq_length: 384
+      max_query_length: 64
+      doc_stride: 128
+      lower_case: true
+      vocab_file: vocab.txt

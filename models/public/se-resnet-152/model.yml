@@ -34,4 +34,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/se-resnet-152.caffemodel
   - --input_proto=$dl_dir/se-resnet-152.prototxt
 framework: caffe
+quantizable: yes
 license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE

@@ -16,222 +16,25 @@ limitations under the License.
 
 import itertools
 import math
-import re
 import warnings
+from collections import namedtuple
 import numpy as np
 
-from ..topology_types import SSD, FasterRCNN
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, StringField, ConfigError, ListField, BoolField
+from ..config import ConfigValidator, NumberField, StringField, ListField, ConfigError
 from ..postprocessor.nms import NMS
-from ..representation import DetectionPrediction, ContainerPrediction
+from ..representation import DetectionPrediction
 
-
-class SSDAdapter(Adapter):
-    """
-    Class for converting output of SSD model to DetectionPrediction representation
-    """
-    __provider__ = 'ssd'
-    prediction_types = (DetectionPrediction, )
-    topology_types = (SSD, FasterRCNN, )
-
-    def process(self, raw, identifiers=None, frame_meta=None):
-        """
-        Args:
-            identifiers: list of input data identifiers
-            raw: output of model
-        Returns:
-            list of DetectionPrediction objects
-        """
-        prediction_batch = self._extract_predictions(raw, frame_meta)[self.output_blob]
-        prediction_count = prediction_batch.shape[2] if len(prediction_batch.shape) > 2 else prediction_batch.shape[0]
-        prediction_batch = prediction_batch.reshape(prediction_count, -1)
-        prediction_batch = self.remove_empty_detections(prediction_batch)
-
-        result = []
-        for batch_index, identifier in enumerate(identifiers):
-            prediction_mask = np.where(prediction_batch[:, 0] == batch_index)
-            detections = prediction_batch[prediction_mask]
-            detections = detections[:, 1::]
-            result.append(DetectionPrediction(identifier, *zip(*detections)))
-
-        return result
-
-    @staticmethod
-    def remove_empty_detections(prediction_blob):
-        ind = prediction_blob[:, 0]
-        ind_ = np.where(ind == -1)[0]
-        m = ind_[0] if ind_.size else prediction_blob.shape[0]
-
-        return prediction_blob[:m, :]
-
-
-class PyTorchSSDDecoder(Adapter):
-    """
-    Class for converting output of PyTorch SSD models to DetectionPrediction representation
-    """
-    __provider__ = 'pytorch_ssd_decoder'
-
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'scores_out': StringField(description="Scores output layer name."),
-            'boxes_out': StringField(description="Boxes output layer name."),
-            'confidence_threshold': NumberField(optional=True, default=0.05, description="Confidence threshold."),
-            'nms_threshold': NumberField(optional=True, default=0.5, description="NMS threshold."),
-            'keep_top_k': NumberField(optional=True, value_type=int, default=200, description="Keep top K."),
-            'feat_size': ListField(
-                optional=True, description='Feature sizes list',
-                value_type=ListField(value_type=NumberField(min_value=1, value_type=int))
-            ),
-            'do_softmax': BoolField(
-                optional=True, default=True, description='Softmax operation should be applied to scores or not'
-            )
-        })
-
-        return parameters
-
-    def configure(self):
-        self.scores_out = self.get_value_from_config('scores_out')
-        self.boxes_out = self.get_value_from_config('boxes_out')
-        self.confidence_threshold = self.get_value_from_config('confidence_threshold')
-        self.nms_threshold = self.get_value_from_config('nms_threshold')
-        self.keep_top_k = self.get_value_from_config('keep_top_k')
-        self.do_softmax = self.get_value_from_config('do_softmax')
-        feat_size = self.get_value_from_config('feat_size')
-
-        # Set default values according to:
-        # https://github.com/mlperf/inference/tree/master/cloud/single_stage_detector
-        self.aspect_ratios = [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
-        self.feat_size = [[50, 50], [25, 25], [13, 13], [7, 7], [3, 3], [3, 3]] if feat_size is None else feat_size
-        self.scales = [21, 45, 99, 153, 207, 261, 315]
-        self.strides = [3, 3, 2, 2, 2, 2]
-        self.scale_xy = 0.1
-        self.scale_wh = 0.2
-
-    @staticmethod
-    def softmax(x, axis=0):
-        return np.transpose(np.transpose(np.exp(x)) * np.reciprocal(np.sum(np.exp(x), axis=axis)))
-
-    @staticmethod
-    def default_boxes(fig_size, feat_size, scales, aspect_ratios):
-
-        fig_size_w, fig_size_h = fig_size
-        scales = [(int(s * fig_size_w / 300), int(s * fig_size_h / 300)) for s in scales]
-        fkw, fkh = np.transpose(feat_size)
-
-        default_boxes = []
-        for idx, sfeat in enumerate(feat_size):
-            sfeat_w, sfeat_h = sfeat
-            sk1 = scales[idx][0] / fig_size_w
-            sk2 = scales[idx + 1][1] / fig_size_h
-            sk3 = math.sqrt(sk1 * sk2)
-            all_sizes = [(sk1, sk1), (sk3, sk3)]
-            for alpha in aspect_ratios[idx]:
-                w, h = sk1 * math.sqrt(alpha), sk1 / math.sqrt(alpha)
-                all_sizes.append((w, h))
-                all_sizes.append((h, w))
-            for w, h in all_sizes:
-                for i, j in itertools.product(range(sfeat_w), range(sfeat_h)):
-                    cx, cy = (j + 0.5) / fkh[idx], (i + 0.5) / fkw[idx]
-                    default_boxes.append((cx, cy, w, h))
-        default_boxes = np.clip(default_boxes, 0, 1)
-
-        return default_boxes
-
-    def process(self, raw, identifiers=None, frame_meta=None):
-        """
-        Args:
-            identifiers: list of input data identifiers
-            raw: output of model
-        Returns:
-            list of DetectionPrediction objects
-        """
-
-        raw_outputs = self._extract_predictions(raw, frame_meta)
-
-        batch_scores = raw_outputs[self.scores_out]
-        batch_boxes = raw_outputs[self.boxes_out]
-        need_transpose = np.shape(batch_boxes)[-1] != 4
-
-        result = []
-        for identifier, scores, boxes, meta in zip(identifiers, batch_scores, batch_boxes, frame_meta):
-            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
-            image_info = meta.get("image_info")[0:2]
-
-            # Default boxes
-            dboxes = self.default_boxes(image_info, self.feat_size, self.scales, self.aspect_ratios)
-
-            # Scores
-            scores = np.transpose(scores) if need_transpose else scores
-            if self.do_softmax:
-                scores = self.softmax(scores, axis=1)
-
-            # Boxes
-            boxes = np.transpose(boxes) if need_transpose else boxes
-            boxes[:, :2] = self.scale_xy * boxes[:, :2]
-            boxes[:, 2:] = self.scale_wh * boxes[:, 2:]
-            boxes[:, :2] = boxes[:, :2] * dboxes[:, 2:] + dboxes[:, :2]
-            boxes[:, 2:] = np.exp(boxes[:, 2:]) * dboxes[:, 2:]
-
-            for label, score in enumerate(np.transpose(scores)):
-
-                # Skip background label
-                if label == 0:
-                    continue
-
-                # Filter out detections with score < confidence_threshold
-                mask = score > self.confidence_threshold
-                filtered_boxes, filtered_score = boxes[mask, :], score[mask]
-                if filtered_score.size == 0:
-                    continue
-
-                # Transform to format (x_min, y_min, x_max, y_max)
-                x_mins = (filtered_boxes[:, 0] - 0.5 * filtered_boxes[:, 2])
-                y_mins = (filtered_boxes[:, 1] - 0.5 * filtered_boxes[:, 3])
-                x_maxs = (filtered_boxes[:, 0] + 0.5 * filtered_boxes[:, 2])
-                y_maxs = (filtered_boxes[:, 1] + 0.5 * filtered_boxes[:, 3])
-
-                # Apply NMS
-                keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.nms_threshold,
-                               include_boundaries=False, keep_top_k=self.keep_top_k)
-
-                filtered_score = filtered_score[keep]
-                x_mins = x_mins[keep]
-                y_mins = y_mins[keep]
-                x_maxs = x_maxs[keep]
-                y_maxs = y_maxs[keep]
-
-                # Keep topK
-                # Applied just after NMS - no additional sorting is required for filtered_score array
-                filtered_score = filtered_score[:self.keep_top_k]
-                x_mins = x_mins[:self.keep_top_k]
-                y_mins = y_mins[:self.keep_top_k]
-                x_maxs = x_maxs[:self.keep_top_k]
-                y_maxs = y_maxs[:self.keep_top_k]
-
-                # Save detections
-                labels = np.full_like(filtered_score, label)
-                detections['labels'].extend(labels)
-                detections['scores'].extend(filtered_score)
-                detections['x_mins'].extend(x_mins)
-                detections['y_mins'].extend(y_mins)
-                detections['x_maxs'].extend(x_maxs)
-                detections['y_maxs'].extend(y_maxs)
-
-            result.append(
-                DetectionPrediction(
-                    identifier, detections['labels'], detections['scores'], detections['x_mins'],
-                    detections['y_mins'], detections['x_maxs'], detections['y_maxs']
-                )
-            )
-
-        return result
-
+FaceDetectionLayerOutput = namedtuple('FaceDetectionLayerOutput', [
+    'prob_name',
+    'reg_name',
+    'anchor_index',
+    'anchor_size',
+    'win_scale',
+    'win_length',
+    'win_trans_x',
+    'win_trans_y'
+])
 
 class TFObjectDetectionAPIAdapter(Adapter):
     """
@@ -284,120 +87,6 @@ class TFObjectDetectionAPIAdapter(Adapter):
             result.append(DetectionPrediction(identifier, valid_classes, valid_scores, x_mins, y_mins, x_maxs, y_maxs))
 
         return result
-
-
-class FacePersonAdapter(Adapter):
-    __provider__ = 'face_person_detection'
-    prediction_types = (DetectionPrediction, )
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'face_out': StringField(description="Face detection output layer name."),
-            'person_out': StringField(description="Person detection output layer name"),
-        })
-
-        return parameters
-
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
-
-    def configure(self):
-        self.face_detection_out = self.launcher_config['face_out']
-        self.person_detection_out = self.launcher_config['person_out']
-        self.face_adapter = SSDAdapter(self.launcher_config, self.label_map, self.face_detection_out)
-        self.person_adapter = SSDAdapter(self.launcher_config, self.label_map, self.person_detection_out)
-
-    def process(self, raw, identifiers=None, frame_meta=None):
-        face_batch_result = self.face_adapter.process(raw, identifiers)
-        person_batch_result = self.person_adapter.process(raw, identifiers)
-        result = [ContainerPrediction({self.face_detection_out: face_result, self.person_detection_out: person_result})
-                  for face_result, person_result in zip(face_batch_result, person_batch_result)]
-
-        return result
-
-
-class SSDAdapterMxNet(Adapter):
-    """
-    Class for converting output of MXNet SSD model to DetectionPrediction representation
-    """
-    __provider__ = 'ssd_mxnet'
-
-    def process(self, raw, identifiers=None, frame_meta=None):
-        """
-        Args:
-            identifiers: list of input data identifiers
-            raw: output of model which is ndarray of shape (batch, det_count, 6),
-                 each detection is defined by 6 values: class_id, prob, x_min, y_min, x_max, y_max
-        Returns:
-            list of DetectionPrediction objects
-        """
-        raw_outputs = self._extract_predictions(raw, frame_meta)
-        result = []
-        for identifier, prediction_batch in zip(identifiers, raw_outputs[self.output_blob]):
-            # Filter detections (get only detections with class_id >= 0)
-            detections = prediction_batch[np.where(prediction_batch[:, 0] >= 0)]
-            # Append detections to results
-            result.append(DetectionPrediction(identifier, *zip(*detections)))
-
-        return result
-
-
-class SSDONNXAdapter(Adapter):
-    __provider__ = 'ssd_onnx'
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update(
-            {
-                'labels_out': StringField(description='name (or regex for it) of output layer with labels'),
-                'scores_out': StringField(description='name (or regex for it) of output layer with scores'),
-                'bboxes_out': StringField(description='name (or regex for it) of output layer with bboxes')
-            }
-        )
-        return parameters
-
-    def configure(self):
-        self.labels_out = self.get_value_from_config('labels_out')
-        self.scores_out = self.get_value_from_config('scores_out')
-        self.bboxes_out = self.get_value_from_config('bboxes_out')
-        self.outputs_verified = False
-
-    def process(self, raw, identifiers=None, frame_meta=None):
-        raw_outputs = self._extract_predictions(raw, frame_meta)
-        results = []
-        if not self.outputs_verified:
-            self._get_output_names(raw_outputs)
-        for identifier, bboxes, scores, labels in zip(
-                identifiers, raw_outputs[self.bboxes_out], raw_outputs[self.scores_out], raw_outputs[self.labels_out]
-        ):
-            x_mins, y_mins, x_maxs, y_maxs = bboxes.T
-            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
-
-        return results
-
-    def _get_output_names(self, raw_outputs):
-        labels_regex = re.compile(self.labels_out)
-        scores_regex = re.compile(self.scores_out)
-        bboxes_regex = re.compile(self.bboxes_out)
-
-        def find_layer(regex, output_name, all_outputs):
-            suitable_layers = [layer_name for layer_name in all_outputs if regex.match(layer_name)]
-            if not suitable_layers:
-                raise ValueError('suitable layer for {} output is not found'.format(output_name))
-
-            if len(suitable_layers) > 1:
-                raise ValueError('more than 1 layers matched to regular expression, please specify more detailed regex')
-
-            return suitable_layers[0]
-
-        self.labels_out = find_layer(labels_regex, 'labels', raw_outputs)
-        self.scores_out = find_layer(scores_regex, 'scores', raw_outputs)
-        self.bboxes_out = find_layer(bboxes_regex, 'bboxes', raw_outputs)
-
-        self.outputs_verified = True
 
 
 class MTCNNPAdapter(Adapter):
@@ -516,9 +205,7 @@ class MTCNNPAdapter(Adapter):
         return bounding_box_out.T
 
     def _extract_predictions(self, outputs_list, meta):
-        if not meta[0] or 'scales' not in meta[0]:
-            return outputs_list[0]
-        scales = meta[0]['scales']
+        scales = [1] if not meta[0] or 'scales' not in meta[0] else meta[0]['scales']
         total_boxes = np.zeros((0, 9), np.float)
         for idx, outputs in enumerate(outputs_list):
             scale = scales[idx]
@@ -717,3 +404,462 @@ class ClassAgnosticDetectionAdapter(Adapter):
                 'If you need to use another layer, please specify it explicitly'
             )
         return filter_outputs[0]
+
+
+class RFCNCaffe(Adapter):
+    __provider__ = 'rfcn_class_agnostic'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update(
+            {
+                'cls_out': StringField(description='bboxes predicted classes score out'),
+                'bbox_out': StringField(
+                    description='bboxes output with shape [N, 8]'
+                ),
+                'rois_out': StringField(description='rois features output')
+            }
+        )
+        return params
+
+    def configure(self):
+        self.cls_out = self.get_value_from_config('cls_out')
+        self.bbox_out = self.get_value_from_config('bbox_out')
+        self.rois_out = self.get_value_from_config('rois_out')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        raw_out = self._extract_predictions(raw, frame_meta)
+        predicted_classes = raw_out[self.cls_out]
+        predicted_deltas = raw_out[self.bbox_out]
+        predicted_proposals = raw_out[self.rois_out]
+        x_scale = frame_meta[0]['scale_x']
+        y_scale = frame_meta[0]['scale_y']
+        real_det_num = np.argwhere(predicted_proposals[:, 0] == -1)
+        if np.size(real_det_num) != 0:
+            real_det_num = real_det_num[0, 0]
+            predicted_proposals = predicted_proposals[:real_det_num]
+            predicted_deltas = predicted_deltas[:real_det_num]
+            predicted_classes = predicted_classes[:real_det_num]
+        predicted_proposals[:, 1::2] /= x_scale
+        predicted_proposals[:, 2::2] /= y_scale
+        assert len(predicted_classes.shape) == 2
+        assert predicted_deltas.shape[-1] == 8
+        predicted_boxes = self.bbox_transform_inv(predicted_proposals, predicted_deltas)
+        num_classes = predicted_classes.shape[-1] - 1 # skip background
+        x_mins, y_mins, x_maxs, y_maxs = predicted_boxes[:, 4:].T
+        detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+        for cls_id in range(num_classes):
+            cls_scores = predicted_classes[:, cls_id+1]
+            keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, cls_scores, 0.3, include_boundaries=False)
+            filtered_score = cls_scores[keep]
+            x_cls_mins = x_mins[keep]
+            y_cls_mins = y_mins[keep]
+            x_cls_maxs = x_maxs[keep]
+            y_cls_maxs = y_maxs[keep]
+            # Save detections
+            labels = np.full_like(filtered_score, cls_id+1)
+            detections['labels'].extend(labels)
+            detections['scores'].extend(filtered_score)
+            detections['x_mins'].extend(x_cls_mins)
+            detections['y_mins'].extend(y_cls_mins)
+            detections['x_maxs'].extend(x_cls_maxs)
+            detections['y_maxs'].extend(y_cls_maxs)
+        return [DetectionPrediction(
+            identifiers[0], detections['labels'], detections['scores'], detections['x_mins'],
+            detections['y_mins'], detections['x_maxs'], detections['y_maxs']
+        )]
+    @staticmethod
+    def bbox_transform_inv(boxes, deltas):
+        if boxes.shape[0] == 0:
+            return np.zeros((0, deltas.shape[1]), dtype=deltas.dtype)
+        boxes = boxes.astype(deltas.dtype, copy=False)
+        widths = boxes[:, 3] - boxes[:, 1] + 1.0
+        heights = boxes[:, 4] - boxes[:, 2] + 1.0
+        ctr_x = boxes[:, 1] + 0.5 * widths
+        ctr_y = boxes[:, 2] + 0.5 * heights
+        dx = deltas[:, 0::4]
+        dy = deltas[:, 1::4]
+        dw = deltas[:, 2::4]
+        dh = deltas[:, 3::4]
+        pred_ctr_x = dx * widths[:, np.newaxis] + ctr_x[:, np.newaxis]
+        pred_ctr_y = dy * heights[:, np.newaxis] + ctr_y[:, np.newaxis]
+        pred_w = np.exp(dw) * widths[:, np.newaxis]
+        pred_h = np.exp(dh) * heights[:, np.newaxis]
+        pred_boxes = np.zeros(deltas.shape, dtype=deltas.dtype)
+        pred_boxes[:, 0::4] = pred_ctr_x - 0.5 * pred_w
+        pred_boxes[:, 1::4] = pred_ctr_y - 0.5 * pred_h
+        pred_boxes[:, 2::4] = pred_ctr_x + 0.5 * pred_w
+        pred_boxes[:, 3::4] = pred_ctr_y + 0.5 * pred_h
+
+        return pred_boxes
+
+
+class FaceBoxesAdapter(Adapter):
+    """
+    Class for converting output of FaceBoxes models to DetectionPrediction representation
+    """
+    __provider__ = 'faceboxes'
+
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'scores_out': StringField(description="Scores output layer name."),
+            'boxes_out': StringField(description="Boxes output layer name."),
+        })
+
+        return parameters
+
+    def configure(self):
+        self.scores_out = self.get_value_from_config('scores_out')
+        self.boxes_out = self.get_value_from_config('boxes_out')
+
+        # Set default values
+        self.min_sizes = [[32, 64, 128], [256], [512]]
+        self.steps = [32, 64, 128]
+        self.variance = [0.1, 0.2]
+        self.confidence_threshold = 0.05
+        self.nms_threshold = 0.3
+        self.keep_top_k = 750
+
+    @staticmethod
+    def calculate_anchors(list_x, list_y, min_size, image_size, step):
+        anchors = []
+        s_kx = min_size / image_size[1]
+        s_ky = min_size / image_size[0]
+        dense_cx = [x * step / image_size[1] for x in list_x]
+        dense_cy = [y * step / image_size[0] for y in list_y]
+        for cy, cx in itertools.product(dense_cy, dense_cx):
+            anchors.append([cx, cy, s_kx, s_ky])
+        return anchors
+
+    def calculate_anchors_zero_level(self, f_x, f_y, min_sizes, image_size, step):
+        anchors = []
+        for min_size in min_sizes:
+            if min_size == 32:
+                list_x = [f_x + 0, f_x + 0.25, f_x + 0.5, f_x + 0.75]
+                list_y = [f_y + 0, f_y + 0.25, f_y + 0.5, f_y + 0.75]
+            elif min_size == 64:
+                list_x = [f_x + 0, f_x + 0.5]
+                list_y = [f_y + 0, f_y + 0.5]
+            else:
+                list_x = [f_x + 0.5]
+                list_y = [f_y + 0.5]
+            anchors.extend(self.calculate_anchors(list_x, list_y, min_size, image_size, step))
+        return anchors
+
+    def prior_boxes(self, feature_maps, image_size):
+        anchors = []
+        for k, f in enumerate(feature_maps):
+            for i, j in itertools.product(range(f[0]), range(f[1])):
+                if k == 0:
+                    anchors.extend(self.calculate_anchors_zero_level(j, i, self.min_sizes[k],
+                                                                     image_size, self.steps[k]))
+                else:
+                    anchors.extend(self.calculate_anchors([j + 0.5], [i + 0.5], self.min_sizes[k][0],
+                                                          image_size, self.steps[k]))
+        anchors = np.clip(anchors, 0, 1)
+
+        return anchors
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        """
+        Args:
+            identifiers: list of input data identifiers
+            raw: output of model
+        Returns:
+            list of DetectionPrediction objects
+        """
+
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+
+        batch_scores = raw_outputs[self.scores_out]
+        batch_boxes = raw_outputs[self.boxes_out]
+
+        result = []
+        for identifier, scores, boxes, meta in zip(identifiers, batch_scores, batch_boxes, frame_meta):
+            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+            image_info = meta.get("image_info")[0:2]
+
+            # Prior boxes
+            feature_maps = [[math.ceil(image_info[0] / step), math.ceil(image_info[1] / step)] for step in
+                            self.steps]
+            prior_data = self.prior_boxes(feature_maps, image_info)
+
+             # Boxes
+            boxes[:, :2] = self.variance[0] * boxes[:, :2]
+            boxes[:, 2:] = self.variance[1] * boxes[:, 2:]
+            boxes[:, :2] = boxes[:, :2] * prior_data[:, 2:] + prior_data[:, :2]
+            boxes[:, 2:] = np.exp(boxes[:, 2:]) * prior_data[:, 2:]
+
+            for label, score in enumerate(np.transpose(scores)):
+
+                # Skip background label
+                if label == 0:
+                    continue
+
+                # Filter out detections with score < confidence_threshold
+                mask = score > self.confidence_threshold
+                filtered_boxes, filtered_score = boxes[mask, :], score[mask]
+                if filtered_score.size == 0:
+                    continue
+
+                # Transform to format (x_min, y_min, x_max, y_max)
+                x_mins = (filtered_boxes[:, 0] - 0.5 * filtered_boxes[:, 2])
+                y_mins = (filtered_boxes[:, 1] - 0.5 * filtered_boxes[:, 3])
+                x_maxs = (filtered_boxes[:, 0] + 0.5 * filtered_boxes[:, 2])
+                y_maxs = (filtered_boxes[:, 1] + 0.5 * filtered_boxes[:, 3])
+
+                # Apply NMS
+                keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.nms_threshold,
+                               include_boundaries=False, keep_top_k=self.keep_top_k)
+
+                filtered_score = filtered_score[keep]
+                x_mins = x_mins[keep]
+                y_mins = y_mins[keep]
+                x_maxs = x_maxs[keep]
+                y_maxs = y_maxs[keep]
+
+                # Keep topK
+                # Applied just after NMS - no additional sorting is required for filtered_score array
+                if filtered_score.size > self.keep_top_k:
+                    filtered_score = filtered_score[:self.keep_top_k]
+                    x_mins = x_mins[:self.keep_top_k]
+                    y_mins = y_mins[:self.keep_top_k]
+                    x_maxs = x_maxs[:self.keep_top_k]
+                    y_maxs = y_maxs[:self.keep_top_k]
+
+                # Save detections
+                labels = np.full_like(filtered_score, label, dtype=int)
+                detections['labels'].extend(labels)
+                detections['scores'].extend(filtered_score)
+                detections['x_mins'].extend(x_mins)
+                detections['y_mins'].extend(y_mins)
+                detections['x_maxs'].extend(x_maxs)
+                detections['y_maxs'].extend(y_maxs)
+
+            result.append(
+                DetectionPrediction(
+                    identifier, detections['labels'], detections['scores'], detections['x_mins'],
+                    detections['y_mins'], detections['x_maxs'], detections['y_maxs']
+                )
+            )
+
+        return result
+
+class FaceDetectionAdapter(Adapter):
+    """
+    Class for converting output of Face Detection model to DetectionPrediction representation
+    """
+    __provider__ = 'face_detection'
+    predcition_types = (DetectionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'score_threshold': NumberField(
+                value_type=float, min_value=0, max_value=1, default=0.35, optional=True,
+                description='Score threshold value used to discern whether a face is valid'),
+            'layer_names': ListField(
+                value_type=str, optional=False,
+                description='Target output layer base names'),
+            'anchor_sizes': ListField(
+                value_type=int, optional=False,
+                description='Anchor sizes for each base output layer'),
+            'window_scales': ListField(
+                value_type=int, optional=False,
+                description='Window scales for each base output layer'),
+            'window_lengths': ListField(
+                value_type=int, optional=False,
+                description='Window lenghts for each base output layer'),
+        })
+        return parameters
+
+    def configure(self):
+        self.score_threshold = self.get_value_from_config('score_threshold')
+        self.layer_info = {
+            'layer_names': self.get_value_from_config('layer_names'),
+            'anchor_sizes': self.get_value_from_config('anchor_sizes'),
+            'window_scales': self.get_value_from_config('window_scales'),
+            'window_lengths': self.get_value_from_config('window_lengths')
+        }
+        if len({len(x) for x in self.layer_info.values()}) != 1:
+            raise ConfigError('There must be equal number of layer names, anchor sizes, '
+                              'window scales, and window sizes')
+        self.output_layers = self.generate_output_layer_info()
+
+    def generate_output_layer_info(self):
+        """
+        Generates face detection layer information,
+        which is referenced in process function
+        """
+        output_layers = []
+
+        for i in range(len(self.layer_info['layer_names'])):
+            start = 1.5
+            anchor_size = self.layer_info['anchor_sizes'][i]
+            layer_name = self.layer_info['layer_names'][i]
+            window_scale = self.layer_info['window_scales'][i]
+            window_length = self.layer_info['window_lengths'][i]
+            if anchor_size % 3 == 0:
+                start = -anchor_size / 3.0
+            elif anchor_size % 2 == 0:
+                start = -anchor_size / 2.0 + 0.5
+            k = 1
+            for row in range(anchor_size):
+                for col in range(anchor_size):
+                    out_layer = FaceDetectionLayerOutput(
+                        prob_name=layer_name + '/prob',
+                        reg_name=layer_name + '/bb',
+                        anchor_index=k - 1,
+                        anchor_size=anchor_size * anchor_size,
+                        win_scale=window_scale,
+                        win_length=window_length,
+                        win_trans_x=float((start + col) / anchor_size),
+                        win_trans_y=float((start + row) / anchor_size)
+                    )
+                    output_layers.append(out_layer)
+                    k += 1
+        return output_layers
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        result = []
+        for batch_index, identifier in enumerate(identifiers):
+            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+            scale_factor = frame_meta[batch_index]['scales'][0]
+            for layer in self.output_layers:
+                prob_arr = raw[batch_index][layer.prob_name]
+                prob_dims = raw[batch_index][layer.prob_name].shape
+                reg_arr = raw[batch_index][layer.reg_name]
+
+                output_height = prob_dims[2]
+                output_width = prob_dims[3]
+
+                anchor_loc = layer.anchor_size + layer.anchor_index
+                prob_data = prob_arr[0][anchor_loc]
+
+                for row in range(output_height):
+                    for col in range(output_width):
+                        score = prob_data[row][col]
+                        if score >= self.score_threshold:
+                            candidate_x = (col + layer.win_trans_x) * layer.win_scale - 0.5
+                            candidate_y = (row + layer.win_trans_y) * layer.win_scale - 0.5
+                            candidate_width = layer.win_length
+                            candidate_height = layer.win_length
+
+                            reg_x = reg_arr[0][layer.anchor_index*4+0][row][col] * layer.win_length
+                            reg_y = reg_arr[0][layer.anchor_index*4+1][row][col] * layer.win_length
+                            reg_width = reg_arr[0][layer.anchor_index*4+2][row][col] * layer.win_length
+                            reg_height = reg_arr[0][layer.anchor_index*4+3][row][col] * layer.win_length
+
+                            candidate_x += reg_x
+                            candidate_y += reg_y
+                            candidate_width += reg_width
+                            candidate_height += reg_height
+
+                            min_x = scale_factor * (candidate_x) + 0.5
+                            min_y = scale_factor * (candidate_y) + 0.5
+                            width = scale_factor * candidate_width + 0.5
+                            height = scale_factor * candidate_height + 0.5
+
+                            detections['x_mins'].append(min_x)
+                            detections['y_mins'].append(min_y)
+                            detections['x_maxs'].append(min_x + width)
+                            detections['y_maxs'].append(min_y + height)
+                            detections['scores'].append(score)
+
+            result.append(
+                DetectionPrediction(
+                    identifier=identifier,
+                    x_mins=detections['x_mins'],
+                    y_mins=detections['y_mins'],
+                    x_maxs=detections['x_maxs'],
+                    y_maxs=detections['y_maxs'],
+                    scores=detections['scores']
+                )
+            )
+
+        return result
+
+class FaceDetectionRefinementAdapter(Adapter):
+
+    __provider__ = 'face_detection_refinement'
+    prediction_types = (DetectionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'threshold': NumberField(
+                value_type=float, min_value=0, default=0.5, optional=False,
+                description='Score threshold to determine as valid face candidate'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.threshold = self.get_value_from_config('threshold')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        result = []
+
+        if isinstance(raw, dict):
+            candidates = frame_meta[0]['candidates']
+            self.refine_candidates(candidates.identifier, raw, candidates, result)
+        else:
+            for batch_index, identifier in enumerate(identifiers):
+                candidates = frame_meta[batch_index]['candidates']
+                self.refine_candidates(identifier, raw[batch_index], candidates, result)
+
+        return result
+
+    def refine_candidates(self, identifier, prediction, candidates, result):
+        prob_name = 'prob_fd'
+        reg_name = 'fc_bb'
+        detections = {'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+        prob_arr = prediction[prob_name]
+        reg_arr = prediction[reg_name]
+
+        for i in range(candidates.x_mins.size):
+            score = prob_arr[0, 1, 0, 0]
+            if score < self.threshold:
+                continue
+            width = candidates.x_maxs[i] - candidates.x_mins[i]
+            height = candidates.y_maxs[i] - candidates.y_mins[i]
+
+            center_x = candidates.x_mins[i] + (width - 1) / 2
+            center_y = candidates.y_mins[i] + (height - 1) / 2
+
+            regression = reg_arr[0, 0, 0, 0]
+
+            reg_x = regression * width
+            reg_y = reg_arr[0, 1, 0, 0] * height
+            reg_width = reg_arr[0, 2, 0, 0] * width
+            reg_height = reg_arr[0, 3, 0, 0] * height
+
+            width += reg_width
+            height += reg_height
+            x = (center_x + reg_x) - width / 2.0
+            y = (center_y + reg_y) - height / 2.0
+
+            detections['scores'].append(score)
+            detections['x_mins'].append(x)
+            detections['y_mins'].append(y)
+            detections['x_maxs'].append(x+width)
+            detections['y_maxs'].append(y+height)
+
+        result.append(
+            DetectionPrediction(
+                identifier=identifier,
+                x_mins=detections['x_mins'],
+                y_mins=detections['y_mins'],
+                x_maxs=detections['x_maxs'],
+                y_maxs=detections['y_maxs'],
+                scores=detections['scores']
+            )
+        )

@@ -7,7 +7,7 @@ Single human pose estimation model based on https://arxiv.org/abs/1906.04104.
 
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
-| AP(coco orig)                                                 | 68                      |
+| AP(coco orig)                                                 | 69.04%                   |
 | GFlops                                                        | 60.125                  |
 | MParams                                                       | 33.165                  |
 | Source framework                                              | PyTorch\*               |
@@ -30,14 +30,14 @@ Name: "data" , shape: [1x3x384x288] - An input image in the format [BxCxHxW],
 ### Converted model
 
 Name: "data" , shape: [1x3x384x288] - An input image in the format [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order - BGR.
+Expected color order: BGR.
 
 ## Outputs
 

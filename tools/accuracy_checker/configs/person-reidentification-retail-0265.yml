@@ -1,0 +1,43 @@
+models:
+  - name: person-reidentification-retail-0265
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   intel/person-reidentification-retail-0265/FP32/person-reidentification-retail-0265.xml
+        weights: intel/person-reidentification-retail-0265/FP32/person-reidentification-retail-0265.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/person-reidentification-retail-0265/FP16/person-reidentification-retail-0265.xml
+        weights: intel/person-reidentification-retail-0265/FP16/person-reidentification-retail-0265.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   intel/person-reidentification-retail-0265/FP16-INT8/person-reidentification-retail-0265.xml
+        weights: intel/person-reidentification-retail-0265/FP16-INT8/person-reidentification-retail-0265.bin
+        adapter: reid
+
+    datasets:
+      - name: market1501
+
+        preprocessing:
+          - type: resize
+            dst_width: 128
+            dst_height: 256
+            use_pillow: True
+            interpolation: BILINEAR
+
+        metrics:
+          - name: rank@1
+            type: cmc
+            top_k: 1
+
+          - type: reid_map
+
+global_definitions: ../dataset_definitions.yml

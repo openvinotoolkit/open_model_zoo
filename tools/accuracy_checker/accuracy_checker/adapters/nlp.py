@@ -1,7 +1,10 @@
 import re
 import numpy as np
 from .adapter import Adapter
-from ..representation import MachineTranslationPrediction, QuestionAnsweringPrediction, ClassificationPrediction
+from ..representation import (MachineTranslationPrediction,
+                              QuestionAnsweringPrediction,
+                              ClassificationPrediction,
+                              LanguageModelingPrediction)
 from ..config import PathField, NumberField, StringField
 from ..utils import read_txt
 
@@ -91,10 +94,35 @@ class QuestionAnsweringAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_output = self._extract_predictions(raw, frame_meta)
         result = []
-        for identifier, start_token_logits, end_token_logits in zip(identifiers,
-                                                                    raw_output[self.start_token_logit_out],
-                                                                    raw_output[self.end_token_logit_out]):
-            result.append(QuestionAnsweringPrediction(identifier, start_token_logits, end_token_logits))
+        for identifier, start_token_logits, end_token_logits in zip(
+                identifiers, raw_output[self.start_token_logit_out], raw_output[self.end_token_logit_out]
+        ):
+            result.append(
+                QuestionAnsweringPrediction(identifier, start_token_logits.flatten(), end_token_logits.flatten())
+            )
+
+        return result
+
+class LanguageModelingAdapter(Adapter):
+    __provider__ = 'common_language_modeling'
+    prediction_types = (LanguageModelingPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'logits_output': StringField(description="Output layer name for language modeling token logits."),
+        })
+        return parameters
+
+    def configure(self):
+        self.logits_out = self.get_value_from_config('logits_output')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        raw_output = self._extract_predictions(raw, frame_meta)
+        result = []
+        for identifier, token_output in zip(identifiers, raw_output[self.logits_out]):
+            result.append(LanguageModelingPrediction(identifier, token_output))
 
         return result
 

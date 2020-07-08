@@ -129,7 +129,11 @@ class ModelEvaluator(BaseEvaluator):
 
         prepare_dataset()
 
-        if self.launcher.allow_reshape_input or self.preprocessor.has_multi_infer_transformations:
+        if (
+                self.launcher.allow_reshape_input or
+                self.preprocessor.has_multi_infer_transformations or
+                getattr(self.reader, 'multi_infer', False)
+        ):
             warning('Model can not to be processed in async mode. Switched to sync.')
             return self.process_dataset_sync(stored_predictions, progress_reporter, *args, **kwargs)
 

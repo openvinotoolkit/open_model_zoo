@@ -1,0 +1,22 @@
+diff --git a/keras_to_tensorflow.py b/keras_to_tensorflow.py
+index c66cbbd..a887370 100644
+--- a/keras_to_tensorflow.py
++++ b/keras_to_tensorflow.py
+@@ -20,6 +20,8 @@ import keras
+ from keras import backend as K
+ from keras.models import model_from_json, model_from_yaml
+ 
++from keras_retinanet.models.resnet import ResNetBackbone
++
+ K.set_learning_phase(0)
+ FLAGS = flags.FLAGS
+ 
+@@ -60,7 +62,7 @@ def load_model(input_model_path, input_json_path=None, input_yaml_path=None):
+         raise FileNotFoundError(
+             'Model file `{}` does not exist.'.format(input_model_path))
+     try:
+-        model = keras.models.load_model(input_model_path)
++        model = keras.models.load_model(input_model_path, custom_objects=ResNetBackbone("resnet50").custom_objects)
+         return model
+     except FileNotFoundError as err:
+         logging.error('Input mode file (%s) does not exist.', FLAGS.input_model)

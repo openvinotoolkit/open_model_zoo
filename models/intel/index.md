@@ -1,4 +1,4 @@
-# Overview of OpenVINO&trade; Toolkit Pre-Trained Models
+# Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models
 
 OpenVINO&trade; toolkit provides a set of pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
@@ -36,6 +36,10 @@ network to detect objects of the same type better.
 | [person-detection-action-recognition-0006](./person-detection-action-recognition-0006/description/person-detection-action-recognition-0006.md)                                      | 8.225                | 2.001      |       | X       |          |       |                |         |
 | [person-detection-action-recognition-teacher-0002](./person-detection-action-recognition-teacher-0002/description/person-detection-action-recognition-teacher-0002.md)              | 7.140                | 1.951      |       | X       |          |       |                |         |
 | [person-detection-raisinghand-recognition-0001](./person-detection-raisinghand-recognition-0001/description/person-detection-raisinghand-recognition-0001.md)                       | 7.138                | 1.951      |       | X       |          |       |                |         |
+| [person-detection-0100](./person-detection-0100/description/person-detection-0100.md)                                                                                               | 0.786                | 1.817      |       | X       |          |       |                |         |
+| [person-detection-0101](./person-detection-0101/description/person-detection-0101.md)                                                                                               | 1.768                | 1.817      |       | X       |          |       |                |         |
+| [person-detection-0102](./person-detection-0102/description/person-detection-0102.md)                                                                                               | 3.143                | 1.817      |       | X       |          |       |                |         |
+| [person-detection-0106](./person-detection-0106/description/person-detection-0106.md)                                                                                               | 404.264              | 71.565     |       | X       |          |       |                |         |
 | [pedestrian-detection-adas-0002](./pedestrian-detection-adas-0002/description/pedestrian-detection-adas-0002.md)                                                                    | 2.836                | 1.165      |       | X       |          |       |                |         |
 | [pedestrian-detection-adas-binary-0001](./pedestrian-detection-adas-binary-0001/description/pedestrian-detection-adas-binary-0001.md)                                               | 0.945                | 1.165      |       | X       |          |       |                |         |
 | [pedestrian-and-vehicle-detector-adas-0001](./pedestrian-and-vehicle-detector-adas-0001/description/pedestrian-and-vehicle-detector-adas-0001.md)                                   | 3.974                | 1.650      |       | X       | X        |       |                |         |
@@ -52,6 +56,7 @@ network to detect objects of the same type better.
 | [yolo-v2-tiny-ava-0001](./yolo-v2-tiny-ava-0001/description/yolo-v2-tiny-ava-0001.md)                                                                                               | 6.975                | 15.12      |       |      X  | X        | X     |                |         |
 | [yolo-v2-tiny-ava-sparse-30-0001](./yolo-v2-tiny-ava-sparse-30-0001/description/yolo-v2-tiny-ava-sparse-30-0001.md)                                                                 | 6.975                | 15.12      |       |      X  | X        | X     |                |         |
 | [yolo-v2-tiny-ava-sparse-60-0001](./yolo-v2-tiny-ava-sparse-60-0001/description/yolo-v2-tiny-ava-sparse-60-0001.md)                                                                 | 6.975                | 15.12      |       |      X  | X        | X     |                |         |
+| [yolo-v2-tiny-vehicle-detection-0001](./yolo-v2-tiny-vehicle-detection-0001/description/yolo-v2-tiny-vehicle-detection-0001.md)                                                     | 5.424                | 11.229     |       |         | X        |       |                |         |
 
 
 ## Object Recognition Models
@@ -66,6 +71,7 @@ Age/Gender recognition after Face Detection).
 | [head-pose-estimation-adas-0001](./head-pose-estimation-adas-0001/description/head-pose-estimation-adas-0001.md)                                            | 0.105                | 1.911      |
 | [license-plate-recognition-barrier-0001](./license-plate-recognition-barrier-0001/description/license-plate-recognition-barrier-0001.md)                    | 0.328                | 1.218      |
 | [vehicle-attributes-recognition-barrier-0039](./vehicle-attributes-recognition-barrier-0039/description/vehicle-attributes-recognition-barrier-0039.md)     | 0.126                | 0.626      |
+| [vehicle-attributes-recognition-barrier-0042](./vehicle-attributes-recognition-barrier-0042/description/vehicle-attributes-recognition-barrier-0042.md)     | 0.462                | 11.177     |
 | [emotions-recognition-retail-0003](./emotions-recognition-retail-0003/description/emotions-recognition-retail-0003.md)                                      | 0.126                | 2.483      |
 | [landmarks-regression-retail-0009](./landmarks-regression-retail-0009/description/landmarks-regression-retail-0009.md)                                      | 0.021                | 0.191      |
 | [facial-landmarks-35-adas-0002](./facial-landmarks-35-adas-0002/description/facial-landmarks-35-adas-0002.md)                                               | 0.042                | 4.595      |
@@ -92,15 +98,10 @@ and accuracy (expect a bigger model to perform better).
 
 | Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Rank-1 on Market-1501 |
 |-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
-| [person-reidentification-retail-0031](./person-reidentification-retail-0031/description/person-reidentification-retail-0031.md)   | 0.028                | 0.280      | 92.11%            |
 | [person-reidentification-retail-0248](./person-reidentification-retail-0248/description/person-reidentification-retail-0248.md)   | 0.174                | 0.183      | 84.3%             |
-| [person-reidentification-retail-0249](./person-reidentification-retail-0249/description/person-reidentification-retail-0249.md)   | 0.564                | 0.597      | 92.9%             |
-| [person-reidentification-retail-0300](./person-reidentification-retail-0300/description/person-reidentification-retail-0300.md)   | 3.521                | 5.289      | 96.3%             |
-
-| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Pairwise accuracy on LFW |
-|-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
-| [face-reidentification-retail-0095](./face-reidentification-retail-0095/description/face-reidentification-retail-0095.md)         | 0.588                | 1.107      | 99.33%            |
-
+| [person-reidentification-retail-0267](./person-reidentification-retail-0267/description/person-reidentification-retail-0267.md)   | 0.564                | 0.595      | 92.7%             |
+| [person-reidentification-retail-0270](./person-reidentification-retail-0270/description/person-reidentification-retail-0270.md)   | 1.170                | 1.234      | 94.7%             |
+| [person-reidentification-retail-0265](./person-reidentification-retail-0265/description/person-reidentification-retail-0265.md)   | 1.993                | 2.103      | 95.9%             |
 
 ## Semantic Segmentation Models
 
@@ -185,9 +186,10 @@ Deep Learning models for text spotting (simultaneous detection and recognition).
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [text-spotting-0002-detector](./text-spotting-0002-detector/description/text-spotting-0002-detector.md)                                        | 185.169             | 26.497    |
-| [text-spotting-0002-recognizer-encoder](./text-spotting-0002-recognizer-encoder/description/text-spotting-0002-recognizer-encoder.md)          | 2.082                | 1.328      |
-| [text-spotting-0002-recognizer-decoder](./text-spotting-0002-recognizer-decoder/description/text-spotting-0002-recognizer-decoder.md)          | 0.002                | 0.273      |
+| [text-spotting-0002](./text-spotting-0002/description/text-spotting-0002.md)                                                                   |                      |            |
+| text-spotting-0002-detector                                                                                                                    | 185.169              | 26.497     |
+| text-spotting-0002-recognizer-encoder                                                                                                          | 2.082                | 1.328      |
+| text-spotting-0002-recognizer-decoder                                                                                                          | 0.002                | 0.273      |
 
 ## Action Recognition Models
 
@@ -199,11 +201,14 @@ that predict an actual labels are called *decoder*.
 
 | Model Name                                                                                                                                              | Complexity (GFLOPs)  | Size (Mp)  |
 |---------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [driver-action-recognition-adas-0002-encoder](./driver-action-recognition-adas-0002-encoder/description/driver-action-recognition-adas-0002-encoder.md) | 0.676                | 2.863      |
-| [driver-action-recognition-adas-0002-decoder](./driver-action-recognition-adas-0002-decoder/description/driver-action-recognition-adas-0002-decoder.md) | 0.147                | 4.205      |
-| [action-recognition-0001-encoder](./action-recognition-0001-encoder/description/action-recognition-0001-encoder.md)                                     | 7.340                | 21.276     |
-| [action-recognition-0001-decoder](./action-recognition-0001-decoder/description/action-recognition-0001-decoder.md)                                     | 0.147                | 4.405      |
+| [driver-action-recognition-adas-0002](./driver-action-recognition-adas-0002/description/driver-action-recognition-adas-0002.md)                         |                      |            |
+| driver-action-recognition-adas-0002-encoder                                                                                                             | 0.676                | 2.863      |
+| driver-action-recognition-adas-0002-decoder                                                                                                             | 0.147                | 4.205      |
+| [action-recognition-0001](./action-recognition-0001/description/action-recognition-0001.md)                                                             |                      |            |
+|   action-recognition-0001-encoder                                                                                                                       | 7.340                | 21.276     |
+|   action-recognition-0001-decoder                                                                                                                       | 0.147                | 4.405      |
 | [asl-recognition-0004](./asl-recognition-0004/description/asl-recognition-0004.md)                                                                      | 6.660                | 4.133      |
+| [weld-porosity-detection-0001](./weld-porosity-detection-0001/description/weld-porosity-detection-0001.md)                                                                      | 3.636                | 11.173      |
 
 ## Image Retrieval
 
@@ -221,6 +226,15 @@ Deep Learning compressed models
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [resnet50-binary-0001](./resnet50-binary-0001/description/resnet50-binary-0001.md)                                                             | 1.002                | 7.446      |
 | [resnet18-xnor-binary-onnx-0001](./resnet18-xnor-binary-onnx-0001/description/resnet18-xnor-binary-onnx-0001.md)                               | -                    | -          |
+
+## Question Answering
+
+| Model Name| Complexity (GFLOPs)|Size (Mp)|
+|-----------|--------------------|---------|
+| [bert-large-uncased-whole-word-masking-squad-fp32-0001](./bert-large-uncased-whole-word-masking-squad-fp32-0001/description/bert-large-uncased-whole-word-masking-squad-fp32-0001.md) | 246.93 | 333.96 |
+| [bert-large-uncased-whole-word-masking-squad-int8-0001](./bert-large-uncased-whole-word-masking-squad-int8-0001/description/bert-large-uncased-whole-word-masking-squad-int8-0001.md) | 246.93 | 333.96 |
+| [bert-small-uncased-whole-word-masking-squad-0001](./bert-small-uncased-whole-word-masking-squad-0001/description/bert-small-uncased-whole-word-masking-squad-0001.md) | 23.9 | 57.94 |
+
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

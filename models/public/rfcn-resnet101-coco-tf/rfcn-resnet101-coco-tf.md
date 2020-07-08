@@ -15,6 +15,13 @@ R-FCN Resnet-101 model, pretrained on COCO\* dataset. Used for object detection.
 | MParams                         | 171.85                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 28.40%|
+| mAP | 45.02%|
+
 ## Performance
 
 ## Input
@@ -34,14 +41,14 @@ Image, name: `image_tensor`, shape: [1x600x600x3], format: [BxHxWxC],
 ### Converted Model
 
 1. Image, name: `image_tensor`, shape: [1x3x600x600], format: [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 2. Information of input image size, name: `image_info`, shape: [1x3], format: [BxC],
    where:

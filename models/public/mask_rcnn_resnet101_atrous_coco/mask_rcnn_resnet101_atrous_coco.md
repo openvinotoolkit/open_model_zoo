@@ -15,6 +15,13 @@ Mask R-CNN Resnet101 Atrous is trained on COCO dataset and used for object insta
 | MParams                         | 69.188                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_orig_precision | 34.9191%|
+| coco_orig_segm_precision | 31.301%|
+
 ## Performance
 
 ## Input
@@ -34,14 +41,14 @@ Image, name: `image_tensor`, shape: [1x800x1365x3], format: [BxHxWxC],
 ### Converted Model
 
 1. Image, name: `image_tensor`, shape: [1x3x800x1365], format: [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 2. Information of input image size, name: `image_info`, shape: [1x3], format: [BxC],
    where:

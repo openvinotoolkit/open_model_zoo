@@ -32,6 +32,21 @@ models:
           - name: im_info
             type: IMAGE_INFO
 
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   intel/instance-segmentation-security-1025/FP16-INT8/instance-segmentation-security-1025.xml
+        weights: intel/instance-segmentation-security-1025/FP16-INT8/instance-segmentation-security-1025.bin
+        adapter:
+          type: mask_rcnn
+          classes_out: classes
+          scores_out: scores
+          boxes_out: boxes
+          raw_masks_out: raw_masks
+        inputs:
+          - name: im_info
+            type: IMAGE_INFO
+
     datasets:
       - name: ms_coco_mask_rcnn_short_80_classes
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (c) 2018 Intel Corporation
 
@@ -23,6 +23,9 @@ from argparse import ArgumentParser, SUPPRESS
 import logging as log
 import sys
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
+
 
 def build_arg():
     parser = ArgumentParser(add_help=False)
@@ -43,6 +46,8 @@ def build_arg():
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
                          action='store_true', default=False)
+    in_args.add_argument("-u", "--utilization_monitors", default="", type=str,
+                      help="Optional. List of monitors to show initially.")
     return parser
 
 
@@ -60,9 +65,9 @@ if __name__ == '__main__':
     load_net.batch_size = 1
     exec_net = ie.load_network(network=load_net, device_name=args.device)
 
-    assert len(load_net.inputs) == 1, "Expected number of inputs is equal 1"
-    input_blob = next(iter(load_net.inputs))
-    input_shape = load_net.inputs[input_blob].shape
+    assert len(load_net.input_info) == 1, "Expected number of inputs is equal 1"
+    input_blob = next(iter(load_net.input_info))
+    input_shape = load_net.input_info[input_blob].input_data.shape
     assert input_shape[1] == 1, "Expected model input shape with 1 channel"
 
     assert len(load_net.outputs) == 1, "Expected number of outputs is equal 1"
@@ -83,6 +88,10 @@ if __name__ == '__main__':
 
     color_coeff = np.load(coeffs).astype(np.float32)
     assert color_coeff.shape == (313, 2), "Current shape of color coefficients does not match required shape"
+
+    imshowSize = (640, 480)
+    graphSize = (imshowSize[0] // 2, imshowSize[1] // 4)
+    presenter = monitors.Presenter(args.utilization_monitors, imshowSize[1] * 2 - graphSize[1], graphSize)
 
     while True:
         log.debug("#############################")
@@ -112,26 +121,29 @@ if __name__ == '__main__':
         img_lab_out = np.concatenate((img_lab[:, :, 0][:, :, np.newaxis], out), axis=2)
         img_bgr_out = np.clip(cv.cvtColor(img_lab_out, cv.COLOR_Lab2BGR), 0, 1)
 
+        original_image = cv.resize(original_frame, imshowSize)
+        grayscale_image = cv.resize(frame, imshowSize)
+        colorize_image = (cv.resize(img_bgr_out, imshowSize) * 255).astype(np.uint8)
+        lab_image = (cv.resize(img_lab_out, imshowSize)).astype(np.uint8)
+
+        original_image = cv.putText(original_image, 'Original', (25, 50),
+                                    cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        grayscale_image = cv.putText(grayscale_image, 'Grayscale', (25, 50),
+                                     cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        colorize_image = cv.putText(colorize_image, 'Colorize', (25, 50),
+                                    cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        lab_image = cv.putText(lab_image, 'LAB interpetation', (25, 50),
+                               cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+
+        ir_image = [cv.hconcat([original_image, grayscale_image]),
+                    cv.hconcat([lab_image, colorize_image])]
+        final_image = cv.vconcat(ir_image)
+        presenter.drawGraphs(final_image)
         if not args.no_show:
             log.debug("Show results")
-            imshowSize = (640, 480)
-            original_image = cv.resize(original_frame, imshowSize)
-            grayscale_image = cv.resize(frame, imshowSize)
-            colorize_image = (cv.resize(img_bgr_out, imshowSize) * 255).astype(np.uint8)
-            lab_image = (cv.resize(img_lab_out, imshowSize)).astype(np.uint8)
-
-            original_image = cv.putText(original_image, 'Original', (25, 50),
-                                        cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-            grayscale_image = cv.putText(grayscale_image, 'Grayscale', (25, 50),
-                                        cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-            colorize_image = cv.putText(colorize_image, 'Colorize', (25, 50),
-                                        cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-            lab_image = cv.putText(lab_image, 'LAB interpetation', (25, 50),
-                                   cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-
-            ir_image = [cv.hconcat([original_image, grayscale_image]),
-                        cv.hconcat([lab_image, colorize_image])]
-            final_image = cv.vconcat(ir_image)
             cv.imshow('Colorization Demo', final_image)
-            if not cv.waitKey(1) < 0:
+            key = cv.waitKey(1)
+            if key in {ord("q"), ord("Q"), 27}:
                 break
+            presenter.handleKey(key)
+    print(presenter.reportMeans())

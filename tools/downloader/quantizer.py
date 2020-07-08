@@ -25,25 +25,38 @@ import tempfile
 
 from pathlib import Path
 
+import yaml
+
 import common
 
 OMZ_ROOT = Path(__file__).resolve().parents[2]
 
-def quantize(model, precision, args, output_dir, pot_path, pot_env):
+DEFAULT_POT_CONFIG_BASE = {
+    'compression': {
+        'algorithms': [
+            {
+                'name': 'DefaultQuantization',
+                'params': {
+                    'preset': 'performance',
+                    'stat_subset_size': 300,
+                },
+            },
+        ],
+    },
+}
+
+def quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
     input_precision = common.KNOWN_QUANTIZED_PRECISIONS[precision]
 
-    pot_config = {
-        'compression': {
-            'algorithms': [
-                {
-                    'name': 'DefaultQuantization',
-                    'params': {
-                        'preset': 'performance',
-                        'stat_subset_size': 300,
-                    },
-                },
-            ],
-        },
+    pot_config_base_path = common.MODEL_ROOT / model.subdirectory / 'quantization.yml'
+
+    try:
+        with pot_config_base_path.open('rb') as pot_config_base_file:
+            pot_config_base = yaml.safe_load(pot_config_base_file)
+    except FileNotFoundError:
+        pot_config_base = DEFAULT_POT_CONFIG_BASE
+
+    pot_config_paths = {
         'engine': {
             'config': str(OMZ_ROOT / 'tools/accuracy_checker/configs' / (model.name + '.yml')),
         },
@@ -54,16 +67,18 @@ def quantize(model, precision, args, output_dir, pot_path, pot_env):
         }
     }
 
+    pot_config = {**pot_config_base, **pot_config_paths}
+
     if args.target_device:
         pot_config['compression']['target_device'] = args.target_device
 
-    print('========= {}Quantizing {} from {} to {}'.format(
-        '(DRY RUN) ' if args.dry_run else '', model.name, input_precision, precision))
+    reporter.print_section_heading('{}Quantizing {} from {} to {}',
+        '(DRY RUN) ' if args.dry_run else '', model.name, input_precision, precision)
 
     model_output_dir = output_dir / model.subdirectory / precision
     pot_config_path = model_output_dir / 'pot-config.json'
 
-    print('Creating {}...'.format(pot_config_path))
+    reporter.print('Creating {}...', pot_config_path)
     pot_config_path.parent.mkdir(parents=True, exist_ok=True)
     with pot_config_path.open('w') as pot_config_file:
         json.dump(pot_config, pot_config_file, indent=4)
@@ -78,27 +93,27 @@ def quantize(model, precision, args, output_dir, pot_path, pot_env):
         '--output-dir={}'.format(pot_output_dir),
     ]
 
-    print('Quantization command: {}'.format(common.command_string(pot_cmd)))
-    print('Quantization environment: {}'.format(
+    reporter.print('Quantization command: {}', common.command_string(pot_cmd))
+    reporter.print('Quantization environment: {}',
         ' '.join('{}={}'.format(k, common.quote_arg(v))
-            for k, v in sorted(pot_env.items()))))
+            for k, v in sorted(pot_env.items())))
 
     success = True
 
     if not args.dry_run:
-        print('', flush=True)
+        reporter.print(flush=True)
 
-        success = subprocess.run(pot_cmd, env={**os.environ, **pot_env}).returncode == 0
+        success = reporter.job_context.subprocess(pot_cmd, env={**os.environ, **pot_env})
 
-    print('')
+    reporter.print()
     if not success: return False
 
     if not args.dry_run:
-        print('Moving quantized model to {}...'.format(model_output_dir))
+        reporter.print('Moving quantized model to {}...', model_output_dir)
         for ext in ['.xml', '.bin']:
             (pot_output_dir / 'optimized' / (model.name + ext)).replace(
                 model_output_dir / (model.name + ext))
-        print('')
+        reporter.print()
 
     return True
 
@@ -148,6 +163,8 @@ def main():
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
+    reporter = common.Reporter(common.DirectOutputContext())
+
     output_dir = args.output_dir or args.model_dir
 
     failed_models = []
@@ -163,19 +180,20 @@ def main():
 
         for model in models:
             if not model.quantizable:
-                print('========= Skipping {} (quantization not supported)'.format(model.name))
-                print('')
+                reporter.print_section_heading('Skipping {} (quantization not supported)', model.name)
+                reporter.print()
                 continue
 
             for precision in sorted(requested_precisions):
-                if not quantize(model, precision, args, output_dir, pot_path, pot_env):
+                if not quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
                     failed_models.append(model.name)
                     break
 
 
     if failed_models:
-        print('FAILED:')
-        print(*sorted(failed_models), sep='\n')
+        reporter.print('FAILED:')
+        for failed_model_name in failed_models:
+            reporter.print(failed_model_name)
         sys.exit(1)
 
 if __name__ == '__main__':

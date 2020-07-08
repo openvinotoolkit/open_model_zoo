@@ -9,7 +9,6 @@ before running it.
 """
 
 import argparse
-import functools
 import os
 import subprocess
 import sys
@@ -22,6 +21,16 @@ from pathlib import Path
 EXPECTED_PYTHON_VERSION = (3, 5)
 
 repo_root = Path(__file__).resolve().parent.parent
+script_name = Path(__file__).name
+
+def fixup_req_file(req_path, path_placeholders):
+    contents = req_path.read_text()
+
+    for path, placeholder in path_placeholders:
+        contents = contents.replace('-r {}/'.format(path), '-r ${{{}}}/'.format(placeholder))
+
+    contents = "# use {} to update this file\n\n".format(script_name) + contents
+    req_path.write_text(contents)
 
 def pip_compile(target, *sources, upgrade=False):
     print('updating {}...'.format(target), flush=True)
@@ -49,12 +58,15 @@ def main():
 
     openvino_dir = Path(os.environ['INTEL_OPENVINO_DIR'])
 
-    pc = functools.partial(pip_compile, upgrade=args.upgrade)
+    def pc(target, *sources):
+        pip_compile(target, *sources, upgrade=args.upgrade)
+        fixup_req_file(repo_root / target, [(openvino_dir, 'INTEL_OPENVINO_DIR')])
 
     pc('ci/requirements-ac.txt',
-        'tools/accuracy_checker/requirements.in')
+        'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements.in')
     pc('ci/requirements-ac-test.txt',
-        'tools/accuracy_checker/requirements.in', 'tools/accuracy_checker/requirements-test.in')
+        'tools/accuracy_checker/requirements.in', 'tools/accuracy_checker/requirements-test.in', 
+        'tools/accuracy_checker/requirements-core.in')
     pc('ci/requirements-conversion.txt',
         'tools/downloader/requirements-pytorch.in', 'tools/downloader/requirements-caffe2.in',
         openvino_dir / 'deployment_tools/model_optimizer/requirements.txt')

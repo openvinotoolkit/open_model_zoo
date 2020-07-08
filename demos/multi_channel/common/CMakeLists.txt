@@ -27,9 +27,7 @@ source_group("include" FILES ${MAIN_HEADERS})
 # Create library file from sources.
 add_library(${TARGET_NAME} STATIC ${MAIN_SRC} ${MAIN_HEADERS})
 
-set_target_properties(${TARGET_NAME} PROPERTIES
-    POSITION_INDEPENDENT_CODE ON
-    COMPILE_PDB_NAME ${TARGET_NAME})
+set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_PDB_NAME ${TARGET_NAME})
 
 target_include_directories(${TARGET_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../../common")
 

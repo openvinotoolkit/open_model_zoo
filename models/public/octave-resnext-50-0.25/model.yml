@@ -38,4 +38,5 @@ model_optimizer_args:
   - --output=softmax
   - --input_model=$dl_dir/a04_resnext-50_32x4d_alpha-0.250/checkpoint-0-0000.params
 framework: mxnet
+quantizable: yes
 license: https://raw.githubusercontent.com/facebookresearch/OctConv/master/LICENSE

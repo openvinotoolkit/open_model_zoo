@@ -1,6 +1,6 @@
 # instance-segmentation-security-0083
 
-## Use case and High-level description
+## Use Case and High-Level Description
 
 This model is an instance segmentation network for 80 classes of objects.
 It is a Mask R-CNN model with ResNeXt152 backbone and

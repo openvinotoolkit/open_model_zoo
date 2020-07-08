@@ -82,6 +82,24 @@ class DataDirectoryArg:
         return str(Path(pattern).parent)
 
 
+class DataDirectoryOrigFileNamesArg:
+    def __init__(self, sequence_name):
+        self.sequence_name = sequence_name
+
+    def resolve(self, context):
+        seq_dir = context.data_sequence_dir / self.sequence_name
+        seq = [data.resolve(context)
+            for data in context.data_sequences[self.sequence_name]]
+
+        if not seq_dir.is_dir():
+            seq_dir.mkdir(parents=True)
+
+            for seq_item in seq:
+                shutil.copyfile(seq_item, str(seq_dir / Path(seq_item).name))
+
+        return str(seq_dir)
+
+
 class DemoFileArg:
     def __init__(self, file_name):
         self.file_name = file_name

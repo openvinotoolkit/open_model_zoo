@@ -15,6 +15,13 @@ Faster R-CNN Resnet-101 model. Used for object detection. For details, see the [
 | MParams                         | 48.128                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 30.95%|
+| mAP| 47.21%|
+
 ## Performance
 
 ## Input
@@ -34,14 +41,14 @@ Image, name: `image_tensor`, shape: [1x600x1024x3], format: [BxHxWxC],
 ### Converted Model
 
 1. Image, name: `image_tensor`, shape: [1x3x600x1024], format: [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 2. Information of input image size, name: `image_info`, shape: [1x3], format: [BxC],
    where:

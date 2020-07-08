@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (c) 2019 Intel Corporation
 
@@ -16,6 +16,7 @@
 """
 
 import logging as log
+import os
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
@@ -26,6 +27,10 @@ from image_retrieval_demo.image_retrieval import ImageRetrieval
 from image_retrieval_demo.common import central_crop
 from image_retrieval_demo.visualizer import visualize
 from image_retrieval_demo.roi_detector_on_video import RoiDetectorOnVideo
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
+
 
 INPUT_SIZE = 224
 
@@ -60,7 +65,8 @@ def build_argparser():
                       default=None)
     args.add_argument('--no_show', action='store_true',
                       help='Optional. Do not visualize inference results.')
-
+    args.add_argument('-u', '--utilization_monitors', default='', type=str,
+                      help='Optional. List of monitors to show initially.')
     return parser
 
 
@@ -114,6 +120,8 @@ def main():
 
     positions = []
 
+    presenter = monitors.Presenter(args.utilization_monitors, 0)
+
     for image, view_frame in frames:
         position = None
         sorted_indexes = []
@@ -143,10 +151,11 @@ def main():
                         [img_retrieval.impaths[i] for i in sorted_indexes],
                         distances[sorted_indexes] if position is not None else None,
                         img_retrieval.input_size, np.mean(compute_embeddings_times),
-                        np.mean(search_in_gallery_times), imshow_delay=3, no_show=args.no_show)
+                        np.mean(search_in_gallery_times), imshow_delay=3, presenter=presenter, no_show=args.no_show)
 
         if key == 27:
             break
+    print(presenter.reportMeans())
 
     if positions:
         compute_metrics(positions)

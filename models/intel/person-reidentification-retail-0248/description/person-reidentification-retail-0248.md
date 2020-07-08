@@ -35,7 +35,7 @@ AP is defined as the area under the
 
 ## Inputs
 
-The net expects one input image of the shape [1x3x256x128] with the [BxCxHxW] format, where:
+The net expects one input image of the shape [1x3x256x128] in the [BxCxHxW] format, where:
 - B - batch size
 - C - number of channels
 - H - image height

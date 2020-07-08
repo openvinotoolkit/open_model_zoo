@@ -31,6 +31,20 @@ models:
         weights: public/alexnet/FP16/alexnet.bin
         adapter: classification
 
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   public/alexnet/FP32-INT8/alexnet.xml
+        weights: public/alexnet/FP32-INT8/alexnet.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   public/alexnet/FP16-INT8/alexnet.xml
+        weights: public/alexnet/FP16-INT8/alexnet.bin
+        adapter: classification
+
     datasets:
       - name: imagenet_1000_classes
         preprocessing:

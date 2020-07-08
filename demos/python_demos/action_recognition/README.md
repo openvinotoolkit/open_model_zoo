@@ -34,21 +34,25 @@ Running
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: action_recognition.py [-h] -m_en M_ENCODER -m_de M_DECODER -i INPUT
+usage: action_recognition.py [-h] -i INPUT -m_en M_ENCODER [-m_de M_DECODER]
                              [-l CPU_EXTENSION] [-d DEVICE] [--fps FPS]
-                             [-lb LABELS]
+                             [-lb LABELS] [--no_show] [-s LABEL_SMOOTHING]
+                             [--seq DECODER_SEQ_SIZE]
+                             [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
-  -m_en M_ENCODER, --m_encoder M_ENCODER
-                        Required. Path to encoder model
-  -m_de M_DECODER, --m_decoder M_DECODER
-                        Required. Path to decoder model
   -i INPUT, --input INPUT
                         Required. Id of the video capturing device to open (to
                         open default camera just pass 0), path to a video or a
                         .txt file with a list of ids or video files (one
                         object per line)
+  -m_en M_ENCODER, --m_encoder M_ENCODER
+                        Required. Path to encoder model
+  -m_de M_DECODER, --m_decoder M_DECODER
+                        Optional. Path to decoder model. If not specified,
+                        simple averaging of encoder's outputs over a time
+                        window is applied
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         Optional. For CPU custom layers, if any. Absolute path
                         to a shared library with the kernels implementation.
@@ -61,6 +65,14 @@ Options:
   -lb LABELS, --labels LABELS
                         Optional. Path to file with label names
   --no_show             Optional. Don't show output
+  -s LABEL_SMOOTHING, --smooth LABEL_SMOOTHING
+                        Optional. Number of frames used for output label
+                        smoothing
+  --seq DECODER_SEQ_SIZE
+                        Optional. Length of sequence that decoder takes as
+                        input
+  -u UTILIZATION_MONITORS, --utilization-monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.

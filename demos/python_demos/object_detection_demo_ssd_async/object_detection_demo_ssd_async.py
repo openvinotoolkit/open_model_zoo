@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (C) 2018-2019 Intel Corporation
 
@@ -15,7 +15,6 @@
  limitations under the License.
 """
 
-from __future__ import print_function
 import sys
 import os
 from argparse import ArgumentParser, SUPPRESS
@@ -24,6 +23,9 @@ import time
 import logging as log
 
 from openvino.inference_engine import IECore
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
 
 
 def build_argparser():
@@ -46,8 +48,55 @@ def build_argparser():
     args.add_argument("-pt", "--prob_threshold", help="Optional. Probability threshold for detections filtering",
                       default=0.5, type=float)
     args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
+    args.add_argument("-u", "--utilization_monitors", default='', type=str,
+                      help="Optional. List of monitors to show initially.")
 
     return parser
+
+
+class SingleOutputPostprocessor:
+    def __init__(self, output_layer):
+        self.output_layer = output_layer
+
+    def __call__(self, outputs):
+        return outputs[self.output_layer].buffer[0][0]
+
+
+class MultipleOutputPostprocessor:
+    def __init__(self, bboxes_layer='bboxes', scores_layer='scores', labels_layer='labels'):
+        self.bboxes_layer = bboxes_layer
+        self.scores_layer = scores_layer
+        self.labels_layer = labels_layer
+
+    def __call__(self, outputs):
+        bboxes = outputs[self.bboxes_layer].buffer[0]
+        scores = outputs[self.scores_layer].buffer[0]
+        labels = outputs[self.labels_layer].buffer[0]
+        return [[0, label, score, *bbox] for label, score, bbox in zip(labels, scores, bboxes)]
+
+
+def get_output_postprocessor(net, bboxes='bboxes', labels='labels', scores='scores'):
+    if len(net.outputs) == 1:
+        output_blob = next(iter(net.outputs))
+        return SingleOutputPostprocessor(output_blob)
+    elif len(net.outputs) >= 3:
+        def find_layer(name, all_outputs):
+            suitable_layers = [layer_name for layer_name in all_outputs if name in layer_name]
+            if not suitable_layers:
+                raise ValueError('Suitable layer for "{}" output is not found'.format(name))
+
+            if len(suitable_layers) > 1:
+                raise ValueError('More than 1 layer matched to "{}" output'.format(name))
+
+            return suitable_layers[0]
+
+        labels_out = find_layer(labels, net.outputs)
+        scores_out = find_layer(scores, net.outputs)
+        bboxes_out = find_layer(bboxes, net.outputs)
+
+        return MultipleOutputPostprocessor(bboxes_out, scores_out, labels_out)
+
+    raise RuntimeError("Unsupported model outputs")
 
 
 def main():
@@ -74,22 +123,21 @@ def main():
 
     img_info_input_blob = None
     feed_dict = {}
-    for blob_name in net.inputs:
-        if len(net.inputs[blob_name].shape) == 4:
+    for blob_name in net.input_info:
+        if len(net.input_info[blob_name].input_data.shape) == 4:
             input_blob = blob_name
-        elif len(net.inputs[blob_name].shape) == 2:
+        elif len(net.input_info[blob_name].input_data.shape) == 2:
             img_info_input_blob = blob_name
         else:
             raise RuntimeError("Unsupported {}D input layer '{}'. Only 2D and 4D input layers are supported"
-                               .format(len(net.inputs[blob_name].shape), blob_name))
+                               .format(len(net.input_info[blob_name].input_data.shape), blob_name))
 
-    assert len(net.outputs) == 1, "Demo supports only single output topologies"
+    output_postprocessor = get_output_postprocessor(net)
 
-    out_blob = next(iter(net.outputs))
     log.info("Loading IR to the plugin...")
     exec_net = ie.load_network(network=net, num_requests=2, device_name=args.device)
     # Read and pre-process input image
-    n, c, h, w = net.inputs[input_blob].shape
+    n, c, h, w = net.input_info[input_blob].input_data.shape
     if img_info_input_blob:
         feed_dict[img_info_input_blob] = [h, w, 1]
 
@@ -98,7 +146,7 @@ def main():
     else:
         input_stream = args.input
     cap = cv2.VideoCapture(input_stream)
-    assert cap.isOpened(), "Can't open " + input_stream
+    assert cap.isOpened(), "Can't open " + str(input_stream)
 
     if args.labels:
         with open(args.labels, 'r') as f:
@@ -115,6 +163,9 @@ def main():
     if is_async_mode:
         ret, frame = cap.read()
         frame_h, frame_w = frame.shape[:2]
+
+    presenter = monitors.Presenter(args.utilization_monitors, 45,
+        (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between sync/async modes, press TAB key in the output window")
@@ -149,8 +200,7 @@ def main():
             det_time = inf_end - inf_start
 
             # Parse detection results of the current request
-            res = exec_net.requests[cur_request_id].outputs[out_blob]
-            for obj in res[0][0]:
+            for obj in output_postprocessor(exec_net.requests[cur_request_id].output_blobs):
                 # Draw only objects when probability more than specified threshold
                 if obj[2] > args.prob_threshold:
                     xmin = int(obj[3] * frame_w)
@@ -177,7 +227,7 @@ def main():
             cv2.putText(frame, async_mode_message, (10, int(frame_h - 20)), cv2.FONT_HERSHEY_COMPLEX, 0.5,
                         (10, 10, 200), 1)
 
-        #
+        presenter.drawGraphs(frame)
         render_start = time.time()
         if not args.no_show:
             cv2.imshow("Detection Results", frame)
@@ -196,8 +246,9 @@ def main():
             if (9 == key):
                 is_async_mode = not is_async_mode
                 log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
-
-    cv2.destroyAllWindows()
+            else:
+                presenter.handleKey(key)
+    print(presenter.reportMeans())
 
 
 if __name__ == '__main__':

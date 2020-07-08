@@ -1,0 +1,35 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The `googlenet-v2-tf` model is one of the Inception <https://arxiv.org/abs/1602.07261>
+  family, designed to perform image classification. Like the other Inception
+  models, the `googlenet-v2-tf` model has been pretrained on the ImageNet image database.
+  For details about this family of models, check out the paper.
+task_type: classification
+files:
+  - name: inception_v2.frozen.pb
+    size: 45039908
+    sha256: a2a044405ffd222150818e9dfd495dfcaf169bddca84c919aa825696e71b37a0
+    source: https://download.01.org/opencv/public_models/042020/googlenet-v2-tf/inception_v2.frozen.pb
+model_optimizer_args:
+  - --input_shape=[1,224,224,3]
+  - --input=input
+  - --mean_values=input[127.5,127.5,127.5]
+  - --scale_values=input[127.5]
+  - --output=InceptionV2/Predictions/Softmax
+  - --input_model=$dl_dir/inception_v2.frozen.pb
+  - --reverse_input_channels
+framework: tf
+license: https://github.com/tensorflow/models/blob/master/LICENSE

@@ -1,5 +1,5 @@
 models:
-  - name: ssd-mobilenet-cf
+  - name: mobilenet-ssd-cf
     launchers:
       - framework: caffe
         model:   public/mobilenet-ssd/mobilenet-ssd.prototxt
@@ -16,7 +16,7 @@ models:
         postprocessing:
           - type: resize_prediction_boxes
 
-  - name: ssd-mobilenet
+  - name: mobilenet-ssd
     launchers:
       - framework: dlsdk
         tags:

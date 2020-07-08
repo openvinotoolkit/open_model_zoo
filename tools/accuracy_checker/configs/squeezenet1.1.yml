@@ -15,7 +15,7 @@ models:
           - type: normalization
             mean: 104, 117, 123
 
-  - name: squeezenet1.0
+  - name: squeezenet1.1
     launchers:
       - framework: dlsdk
         tags:
@@ -29,6 +29,20 @@ models:
           - FP16
         model:   public/squeezenet1.1/FP16/squeezenet1.1.xml
         weights: public/squeezenet1.1/FP16/squeezenet1.1.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   public/squeezenet1.1/FP32-INT8/squeezenet1.1.xml
+        weights: public/squeezenet1.1/FP32-INT8/squeezenet1.1.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   public/squeezenet1.1/FP16-INT8/squeezenet1.1.xml
+        weights: public/squeezenet1.1/FP16-INT8/squeezenet1.1.bin
         adapter: classification
 
     datasets:
