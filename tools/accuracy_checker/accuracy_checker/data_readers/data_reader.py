@@ -109,7 +109,6 @@ class BaseReader(ClassProvider):
 
         self.validate_config()
         self.configure()
-        
     def __call__(self, identifier):
         return self.read_item(identifier)
 
