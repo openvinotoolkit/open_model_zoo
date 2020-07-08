@@ -293,6 +293,7 @@ class FileSourceHttp(FileSource):
     def start_download(self, session, chunk_size, offset):
         headers = {}
         if offset != 0:
+            headers['Accept-Encoding'] = 'identity'
             headers['Range'] = 'bytes={}-'.format(offset)
 
         response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT, headers=headers)
