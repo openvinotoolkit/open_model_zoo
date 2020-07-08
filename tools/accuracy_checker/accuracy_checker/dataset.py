@@ -233,7 +233,7 @@ class Dataset:
             annotation = create_subset(annotation, subsample_size, subsample_seed)
 
         if self._config.get('analyze_dataset', False):
-            meta = analyze_dataset(annotation, self.metadata)
+            self.metadata = analyze_dataset(annotation, self.metadata)
 
         self._annotation = annotation
         self.name = self._config.get('name')
