@@ -806,29 +806,29 @@ class FaceDetectionRefinementAdapter(Adapter):
         self.threshold = self.get_value_from_config('threshold')
 
     def process(self, raw, identifiers=None, frame_meta=None):
-        result = []
-
         if isinstance(raw, dict):
             candidates = frame_meta[0]['candidates']
-            self.refine_candidates(candidates.identifier, raw, candidates, result)
+            result = self.refine_candidates(candidates.identifier, [raw], candidates, self.threshold)
         else:
-            for batch_index, identifier in enumerate(identifiers):
-                candidates = frame_meta[batch_index]['candidates']
-                self.refine_candidates(identifier, raw[batch_index], candidates, result)
+            candidates = frame_meta[0]['candidates']
+            result = self.refine_candidates(identifiers[0], raw, candidates, self.threshold)
 
         return result
 
-    def refine_candidates(self, identifier, prediction, candidates, result):
+    @staticmethod
+    def refine_candidates(identifier, raw, candidates, threshold):
         prob_name = 'prob_fd'
         reg_name = 'fc_bb'
         detections = {'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
-        prob_arr = prediction[prob_name]
-        reg_arr = prediction[reg_name]
 
-        for i in range(candidates.x_mins.size):
+        for i, prediction in enumerate(raw):
+            prob_arr = prediction[prob_name]
+            reg_arr = prediction[reg_name]
             score = prob_arr[0, 1, 0, 0]
-            if score < self.threshold:
+
+            if score < threshold:
                 continue
+
             width = candidates.x_maxs[i] - candidates.x_mins[i]
             height = candidates.y_maxs[i] - candidates.y_mins[i]
 
@@ -844,16 +844,17 @@ class FaceDetectionRefinementAdapter(Adapter):
 
             width += reg_width
             height += reg_height
-            x = (center_x + reg_x) - width / 2.0
-            y = (center_y + reg_y) - height / 2.0
-
+            x = (center_x + reg_x) - width / 2.0 + 0.5
+            y = (center_y + reg_y) - height / 2.0 + 0.5
+            width += 0.5
+            height += 0.5
             detections['scores'].append(score)
             detections['x_mins'].append(x)
             detections['y_mins'].append(y)
             detections['x_maxs'].append(x+width)
             detections['y_maxs'].append(y+height)
 
-        result.append(
+        return [
             DetectionPrediction(
                 identifier=identifier,
                 x_mins=detections['x_mins'],
@@ -862,4 +863,4 @@ class FaceDetectionRefinementAdapter(Adapter):
                 y_maxs=detections['y_maxs'],
                 scores=detections['scores']
             )
-        )
+        ]
