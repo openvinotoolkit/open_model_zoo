@@ -33,13 +33,13 @@ class CoCoInstanceSegmentationDataAnalyzer(BaseDataAnalyzer):
         for data in result:
             total_instances += data.size
             counter.update(data.labels)
-            for label, rect in zip(data.labels, data.metadata['rects']):
+            for label, rect, area in zip(data.labels, data.metadata['rects'], data.areas):
                 if characteristics.get(label):
-                    characteristics[label]['area'].append(float(rect[2] * rect[3]))
+                    characteristics[label]['area'].append(float(area))
                     characteristics[label]['width'].append(float(rect[2]))
                     characteristics[label]['height'].append(float(rect[3]))
                 else:
-                    characteristics[label] = {'area': [float(rect[2] * rect[3])],
+                    characteristics[label] = {'area': [float(area)],
                                               'width': [float(rect[2])], 'height': [float(rect[3])]}
 
         for key in characteristics:
