@@ -10,20 +10,21 @@
 #include <vector>
 
 namespace {
-void softmax(std::vector<float>* data) {
+void softmax(std::vector<float> *data) {
     auto &rdata = *data;
     const size_t last_dim = 2;
-    for (size_t i = 0 ; i < rdata.size(); i+=last_dim) {
-       float m = std::max(rdata[i], rdata[i+1]);
-       rdata[i] = std::exp(rdata[i] - m);
-       rdata[i + 1] = std::exp(rdata[i + 1] - m);
-       float s = rdata[i] + rdata[i + 1];
-       rdata[i] /= s;
-       rdata[i + 1] /= s;
+    for (size_t i = 0; i < rdata.size(); i += last_dim) {
+        float m = std::max(rdata[i], rdata[i + 1]);
+        rdata[i] = std::exp(rdata[i] - m);
+        rdata[i + 1] = std::exp(rdata[i + 1] - m);
+        float s = rdata[i] + rdata[i + 1];
+        rdata[i] /= s;
+        rdata[i + 1] /= s;
     }
 }
 
-std::vector<float> transpose4d(const std::vector<float>& data, const std::vector<size_t> &shape,
+std::vector<float> transpose4d(const std::vector<float> &data,
+                               const std::vector<size_t> &shape,
                                const std::vector<size_t> &axes) {
     if (shape.size() != axes.size())
         throw std::runtime_error("Shape and axes must have the same dimension.");
@@ -36,7 +37,7 @@ std::vector<float> transpose4d(const std::vector<float>& data, const std::vector
     size_t total_size = shape[0] * shape[1] * shape[2] * shape[3];
 
     std::vector<size_t> steps{shape[axes[1]] * shape[axes[2]] * shape[axes[3]],
-                shape[axes[2]] * shape[axes[3]], shape[axes[3]], 1};
+                        shape[axes[2]] * shape[axes[3]], shape[axes[3]], 1};
 
     size_t source_data_idx = 0;
     std::vector<float> new_data(total_size, 0);
@@ -45,9 +46,10 @@ std::vector<float> transpose4d(const std::vector<float>& data, const std::vector
     for (ids[0] = 0; ids[0] < shape[0]; ids[0]++) {
         for (ids[1] = 0; ids[1] < shape[1]; ids[1]++) {
             for (ids[2] = 0; ids[2] < shape[2]; ids[2]++) {
-                for (ids[3]= 0; ids[3] < shape[3]; ids[3]++) {
-                    size_t new_data_idx = ids[axes[0]] * steps[0] + ids[axes[1]] * steps[1] +
-                            ids[axes[2]] * steps[2] + ids[axes[3]] * steps[3];
+                for (ids[3] = 0; ids[3] < shape[3]; ids[3]++) {
+                    size_t new_data_idx =
+                        ids[axes[0]] * steps[0] + ids[axes[1]] * steps[1] +
+                        ids[axes[2]] * steps[2] + ids[axes[3]] * steps[3];
                     new_data[new_data_idx] = data[source_data_idx++];
                 }
             }
@@ -56,7 +58,7 @@ std::vector<float> transpose4d(const std::vector<float>& data, const std::vector
     return new_data;
 }
 
-std::vector<size_t> ieSizeToVector(const SizeVector& ie_output_dims) {
+std::vector<size_t> ieSizeToVector(const SizeVector &ie_output_dims) {
     std::vector<size_t> blob_sizes(ie_output_dims.size(), 0);
     for (size_t i = 0; i < blob_sizes.size(); ++i) {
         blob_sizes[i] = ie_output_dims[i];
@@ -67,13 +69,14 @@ std::vector<size_t> ieSizeToVector(const SizeVector& ie_output_dims) {
 std::vector<float> sliceAndGetSecondChannel(const std::vector<float> &data) {
     std::vector<float> new_data(data.size() / 2, 0);
     for (size_t i = 0; i < data.size() / 2; i++) {
-      new_data[i] = data[2 * i + 1];
+        new_data[i] = data[2 * i + 1];
     }
     return new_data;
 }
 
-std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area, float min_height,
-                                         cv::Size image_size) {
+std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area,
+                                         float min_height,
+                                         const cv::Size &image_size) {
     std::vector<cv::RotatedRect> bboxes;
     double min_val;
     double max_val;
@@ -86,45 +89,46 @@ std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area, fl
         cv::Mat bbox_mask = resized_mask == i;
         std::vector<std::vector<cv::Point>> contours;
 
-        cv::findContours(bbox_mask, contours, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
-        if (contours.empty())
-            continue;
+        cv::findContours(bbox_mask, contours, cv::RETR_CCOMP,
+                         cv::CHAIN_APPROX_SIMPLE);
+        if (contours.empty()) continue;
         cv::RotatedRect r = cv::minAreaRect(contours[0]);
-        if (std::min(r.size.width, r.size.height) < min_height)
-            continue;
-        if (r.size.area() < min_area)
-            continue;
+        if (std::min(r.size.width, r.size.height) < min_height) continue;
+        if (r.size.area() < min_area) continue;
         bboxes.emplace_back(r);
     }
 
     return bboxes;
-  }
+}
 
-std::vector<cv::RotatedRect> coordToBoxes(const std::vector<float> &coords, float min_area, float min_height,
-                                          cv::Size input_shape, cv::Size image_size) {
+std::vector<cv::RotatedRect> coordToBoxes(const std::vector<float> &coords,
+                                          float min_area, float min_height,
+                                          const cv::Size &input_shape,
+                                          const cv::Size &image_size) {
     std::vector<cv::RotatedRect> bboxes;
     int max_bbox_idx = coords.size() / 5;
     float x_scale = image_size.width / float(input_shape.width);
     float y_scale = image_size.height / float(input_shape.height);
-    for (int i = 1; i < max_bbox_idx; i++) {
-        std::vector<float> prediction(coords.begin()+(i-1)*5, coords.begin()+i*5);
+
+    for (int i = 1; i <= max_bbox_idx; i++) {
+        std::vector<float> prediction(coords.begin() + (i - 1) * 5,
+                                      coords.begin() + i * 5);
         float confidence = prediction[4];
-
-        if (confidence < std::numeric_limits<float>::epsilon())
-        break; //predictions are sorted the way that all insignificant boxes are grouped together
-
-        cv::Point2f center = cv::Point2f((prediction[0] + prediction[2])/2 * x_scale,
-                                        (prediction[1] + prediction[3])/2 * y_scale);
+        if (confidence < std::numeric_limits<float>::epsilon()) break;
+        // predictions are sorted the way that all insignificant boxes are
+        // grouped together
+        cv::Point2f center =
+            cv::Point2f((prediction[0] + prediction[2]) / 2 * x_scale,
+                        (prediction[1] + prediction[3]) / 2 * y_scale);
         cv::Size2f size = cv::Size2f((prediction[2] - prediction[0]) * x_scale,
-                                        (prediction[3] - prediction[1]) * y_scale);
+                                     (prediction[3] - prediction[1]) * y_scale);
         cv::RotatedRect rect = cv::RotatedRect(center, size, 0);
 
-        if (rect.size.area() < min_area)
-            continue;
+        if (rect.size.area() < min_area) continue;
         bboxes.push_back(rect);
     }
     return bboxes;
-  }
+}
 
 int findRoot(int point, std::unordered_map<int, int> *group_mask) {
     int root = point;
@@ -134,7 +138,7 @@ int findRoot(int point, std::unordered_map<int, int> *group_mask) {
         update_parent = true;
     }
     if (update_parent) {
-       (*group_mask)[point] = root;
+        (*group_mask)[point] = root;
     }
     return root;
 }
@@ -150,8 +154,8 @@ void join(int p1, int p2, std::unordered_map<int, int> *group_mask) {
 cv::Mat get_all(const std::vector<cv::Point> &points, int w, int h,
                 std::unordered_map<int, int> *group_mask) {
     std::unordered_map<int, int> root_map;
-
     cv::Mat mask(h, w, CV_32S, cv::Scalar(0));
+
     for (const auto &point : points) {
         int point_root = findRoot(point.x + point.y * w, group_mask);
         if (root_map.find(point_root) == root_map.end()) {
@@ -163,8 +167,10 @@ cv::Mat get_all(const std::vector<cv::Point> &points, int w, int h,
     return mask;
 }
 
-cv::Mat decodeImageByJoin(const std::vector<float> &cls_data, const std::vector<int> & cls_data_shape,
-                          const std::vector<float> &link_data, const std::vector<int> & link_data_shape,
+cv::Mat decodeImageByJoin(const std::vector<float> &cls_data,
+                          const std::vector<int> &cls_data_shape,
+                          const std::vector<float> &link_data,
+                          const std::vector<int> &link_data_shape,
                           float cls_conf_threshold, float link_conf_threshold) {
     int h = cls_data_shape[1];
     int w = cls_data_shape[2];
@@ -190,8 +196,7 @@ cv::Mat decodeImageByJoin(const std::vector<float> &cls_data, const std::vector<
         size_t neighbour = 0;
         for (int ny = point.y - 1; ny <= point.y + 1; ny++) {
             for (int nx = point.x - 1; nx <= point.x + 1; nx++) {
-                if (nx == point.x && ny == point.y)
-                    continue;
+                if (nx == point.x && ny == point.y) continue;
                 if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
                     uchar pixel_value = pixel_mask[size_t(ny) * size_t(w) + size_t(nx)];
                     uchar link_value = link_mask[
@@ -207,10 +212,12 @@ cv::Mat decodeImageByJoin(const std::vector<float> &cls_data, const std::vector<
 
     return get_all(points, w, h, &group_mask);
 }
-}  // namespace
+}    // namespace
 
-std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, const cv::Size& image_size,
-                                         const cv::Size& input_shape,  float cls_conf_threshold,
+std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
+                                         const cv::Size &image_size,
+                                         const cv::Size &input_shape,
+                                         float cls_conf_threshold,
                                          float link_conf_threshold) {
     const int kMinArea = 300;
     const int kMinHeight = 10;
@@ -220,7 +227,7 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, 
 
     std::vector<cv::RotatedRect> rects;
 
-    for (const auto& blob : blobs) {
+    for (const auto &blob : blobs) {
         if (blob.second->getTensorDesc().getDims()[1] == 2)
             kClsOutputName = blob.first;
         else if (blob.second->getTensorDesc().getDims()[1] == 16)
@@ -228,7 +235,7 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, 
     }
 
     if (!kLocOutputName.empty() && !kClsOutputName.empty()) {
-        //PostProcessing for PixelLink Text Detection model
+        // PostProcessing for PixelLink Text Detection model
         auto link_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
         size_t link_data_size = link_shape[0] * link_shape[1] * link_shape[2] * link_shape[3];
         float *link_data_pointer =
@@ -257,33 +264,35 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, 
         new_cls_data_shape[2] = static_cast<int>(cls_shape[3]);
         new_cls_data_shape[3] = static_cast<int>(cls_shape[1]) / 2;
 
-        cv::Mat mask = decodeImageByJoin(cls_data, new_cls_data_shape,
-                       link_data, new_link_data_shape, cls_conf_threshold, link_conf_threshold);
+        cv::Mat mask = decodeImageByJoin(cls_data, new_cls_data_shape, link_data,
+                                         new_link_data_shape, cls_conf_threshold,
+                                         link_conf_threshold);
         rects = maskToBoxes(mask, static_cast<float>(kMinArea),
-                                                         static_cast<float>(kMinHeight), image_size);
+                            static_cast<float>(kMinHeight), image_size);
 
-    }
-    else {
+    } else {
         // PostProcessing for Horizontal Text Detection model
         kClsOutputName = "labels";
-        for (const auto& blob : blobs) {
-            if (blob.second->getTensorDesc().getDims()[1] == 5)
+        for (const auto &blob : blobs) {
+            if (blob.second->getTensorDesc().getDims()[1] == 5) {
                 kLocOutputName = blob.first;
-                }
-        if (kLocOutputName.empty() || kClsOutputName.empty())
+            }
+        }
+        if (kLocOutputName.empty() || kClsOutputName.empty()) {
             throw std::runtime_error("Failed to determine output blob names");
+        } else {
+            auto boxes_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
+            size_t boxes_data_size = boxes_shape[0] * boxes_shape[1];
+            float *boxes_data_pointer =
+                blobs.at(kLocOutputName)->buffer()
+                    .as<PrecisionTrait<Precision::FP32>::value_type *>();
+            std::vector<float> boxes_data(boxes_data_pointer,
+                                          boxes_data_pointer + boxes_data_size);
 
-        else {
-                auto boxes_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
-                size_t boxes_data_size = boxes_shape[0] * boxes_shape[1];
-                float *boxes_data_pointer =
-                    blobs.at(kLocOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-                std::vector<float> boxes_data(boxes_data_pointer, boxes_data_pointer + boxes_data_size);
-
-                rects = coordToBoxes(boxes_data, static_cast<float>(kMinArea),
-                                     static_cast<float>(kMinHeight), input_shape, image_size);
+            rects = coordToBoxes(boxes_data, static_cast<float>(kMinArea),
+                                 static_cast<float>(kMinHeight),
+                                 input_shape, image_size);
         }
     }
-
     return rects;
 }
