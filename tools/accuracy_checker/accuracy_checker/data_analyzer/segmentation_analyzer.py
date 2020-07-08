@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from collections import Counter
 from copy import deepcopy
 import numpy as np
 from .base_data_analyzer import BaseDataAnalyzer
@@ -52,7 +51,7 @@ class SegmentationDataAnalyzer(BaseDataAnalyzer):
             if segmentation_colors:
                 annotation = self._encode_mask(annotation, segmentation_colors)
             unique, count = np.unique(annotation.mask, return_counts=True)
-            for elem, count_ in zip(unique,count):
+            for elem, count_ in zip(unique, count):
                 if counter.get(elem):
                     counter[elem] += int(count_)
                 else:
