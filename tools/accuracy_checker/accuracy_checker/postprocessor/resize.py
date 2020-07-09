@@ -136,7 +136,8 @@ class Resize(PostprocessorWithSpecificTargets):
 
         return annotations, predictions
 
-    def _segm_resize(self, mask, width, height):
+    @staticmethod
+    def _segm_resize(mask, width, height):
         def _to_image(arr):
             data = np.asarray(arr)
             if np.iscomplexobj(data):
