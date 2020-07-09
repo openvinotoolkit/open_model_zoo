@@ -1,4 +1,5 @@
 import cv2
+from PIL import Image
 import numpy as np
 
 from ..config import ConfigError, NumberField, StringField, BoolField
@@ -8,14 +9,10 @@ from ..preprocessor import Preprocessor, GeometricOperationMetadata
 from ..utils import contains_all, get_size_from_config
 
 try:
-    from PIL import Image
-except ImportError:
-    Image = None
-
-try:
     import tensorflow as tf
 except ImportError:
     tf = None
+
 
 def scale_width(dst_width, dst_height, image_width, image_height,):
     return int(dst_width * image_width / image_height), dst_height
@@ -155,10 +152,6 @@ class _PillowResizer(_Resizer):
     default_interpolation = 'BILINEAR'
 
     def __init__(self, interpolation):
-        if Image is None:
-            raise ImportError(
-                'pillow backend for resize operation requires TensorFlow. Please install it before usage.'
-            )
         self._supported_interpolations = {
             'NEAREST': Image.NEAREST,
             'NONE': Image.NONE,

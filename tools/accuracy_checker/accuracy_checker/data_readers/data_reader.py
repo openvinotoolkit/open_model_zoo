@@ -21,6 +21,7 @@ import re
 import wave
 
 import cv2
+from PIL import Image
 import numpy as np
 from numpy.lib.npyio import NpzFile
 
@@ -28,11 +29,6 @@ try:
     import tensorflow as tf
 except ImportError as import_error:
     tf = None
-
-try:
-    from PIL import Image
-except ImportError as import_error:
-    Image = None
 
 try:
     import nibabel as nib
@@ -221,8 +217,6 @@ class PillowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        if Image is None:
-            raise ValueError('Pillow is not installed, please install it')
         self.convert_to_rgb = True
 
     def read(self, data_id):
@@ -234,11 +228,6 @@ class PillowImageReader(BaseReader):
 
 class ScipyImageReader(BaseReader):
     __provider__ = 'scipy_imread'
-
-    def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config)
-        if Image is None:
-            raise ValueError('Pillow is not installed, please install it')
 
     def read(self, data_id):
         # reimplementation scipy.misc.imread
