@@ -51,6 +51,7 @@ from .resize_prediction_depth_map import ResizeDepthMap
 from .resize_super_resolution import ResizeSuperResolution
 from .resize_style_transfer import ResizeStyleTransfer
 from .crop_ground_truth_image import CropGTImage
+from .resize import Resize
 
 
 __all__ = [
@@ -101,5 +102,7 @@ __all__ = [
     'ResizeSuperResolution',
     'ResizeStyleTransfer',
 
-    'CropGTImage'
+    'CropGTImage',
+
+    'Resize'
 ]
