@@ -50,9 +50,9 @@ class ContainerDataAnalyzer(BaseDataAnalyzer):
                 annotation_specific_meta = {
                     key.split('{}_'.format(name_annotation))[-1]: meta[key] for key in specific_keys
                 }
-                data_analysis.update(analyzer.analyze(dict_annotations[label_annotation],
-                                                      annotation_specific_meta, False))
+                data_analysis[label_annotation] = analyzer.analyze(dict_annotations[label_annotation],
+                                                                   annotation_specific_meta, False)
             else:
-                data_analysis.update(analyzer.analyze(dict_annotations[label_annotation], meta, False))
+                data_analysis[label_annotation] = analyzer.analyze(dict_annotations[label_annotation], meta, False)
 
         return data_analysis
