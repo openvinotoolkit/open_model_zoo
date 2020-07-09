@@ -358,6 +358,8 @@ class ConfigReader:
                 model['launchers'] = provide_models(model['launchers'])
                 for dataset_entry in model['datasets']:
                     _add_subset_specific_arg(dataset_entry)
+                    if 'ie_preprocessing' in arguments and arguments.ie_preprocessing:
+                        dataset_entry['_ie_preprocessing'] = arguments.ie_preprocessing
 
         def merge_modules(config, arguments, update_launcher_entry):
             for evaluation in config['evaluations']:

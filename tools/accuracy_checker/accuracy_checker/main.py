@@ -241,6 +241,10 @@ def build_arguments_parser():
         type=partial(get_path, is_directory=True)
     )
     parser.add_argument(
+        '--ie_preprocessing', help='enable preprocessing via Inference Engine. Accepted only for dlsdk launcher.',
+        required=False, default=False, type=cast_to_bool
+    )
+    parser.add_argument(
         '-ss', '--subsample_size', help="dataset subsample size",
         required=False,
         type=str
