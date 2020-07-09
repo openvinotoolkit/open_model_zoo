@@ -1,5 +1,9 @@
 """
+<<<<<<< 2d7f7598dcd544df76f7aae81406d9ffebf235df
 Copyright (c) 2019-2020 Intel Corporation
+=======
+Copyright (c) 2020 Intel Corporation
+>>>>>>> refactor launcher, add condition for switching to sync mode
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,12 +18,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import openvino.inference_engine as ie
+from pathlib import Path
 from ..config import PathField, ConfigError
 from .launcher import LauncherConfigValidator
 from .model_conversion import FrameworkParameters
 from ..logging import warning
 from ..utils import get_path, contains_all
+
+try:
+    from openvino.inference_engine import known_plugins
+except ImportError:
+    known_plugins = []
 
 HETERO_KEYWORD = 'HETERO:'
 MULTI_DEVICE_KEYWORD = 'MULTI:'
@@ -89,7 +98,7 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
             framework_parameters = self.check_model_source(entry)
             self._set_model_source(framework_parameters)
         super().validate(entry, field_uri)
-        self.create_device_regex(ie.known_plugins)
+        self.create_device_regex(known_plugins)
         try:
             self.fields['device'].validate(entry['device'], field_uri)
         except ConfigError as error:

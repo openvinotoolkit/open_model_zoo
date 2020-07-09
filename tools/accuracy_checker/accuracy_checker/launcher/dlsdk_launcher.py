@@ -61,7 +61,6 @@ except ImportError:
         Blob, TensorDesc = None, None
 
 
-# pylint: disable=R0904
 class DLSDKLauncher(Launcher):
     """
     Class for infer model using DLSDK framework.
@@ -158,6 +157,9 @@ class DLSDKLauncher(Launcher):
         else:
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
         self._target_layout_mapping = {}
+        self._lstm_inputs = None
+        if '_list_lstm_inputs' in self.config:
+            self._configure_lstm_inputs()
 
     @property
     def device(self):
@@ -195,6 +197,9 @@ class DLSDKLauncher(Launcher):
         Returns:
             raw data from network.
         """
+        if self._lstm_inputs:
+            return self._predict_sequential(inputs, metadata)
+
         results = []
         for infer_inputs in inputs:
             if self._do_reshape:
@@ -228,6 +233,27 @@ class DLSDKLauncher(Launcher):
                 meta_['input_shape'] = self.inputs_info_for_meta()
         self._do_reshape = False
         self._use_set_blob = self.disable_resize_to_input
+
+        return results
+
+    def _predict_sequential(self, inputs, metadata=None, **kwargs):
+        lstm_inputs_feed = self._fill_lstm_inputs()
+        results = []
+        for feed_dict in inputs:
+            feed_dict.update(lstm_inputs_feed)
+            output_result = self.exec_network.infer(feed_dict)
+            lstm_inputs_feed = self._fill_lstm_inputs(output_result)
+            results.append(output_result)
+
+            if self._do_reshape:
+                input_shapes = {layer_name: data.shape for layer_name, data in feed_dict.items()}
+                self._reshape_input(input_shapes)
+
+        if metadata is not None:
+            for meta_ in metadata:
+                meta_['input_shape'] = self.inputs_info_for_meta()
+
+        self._do_reshape = False
 
         return results
 
@@ -726,7 +752,7 @@ class DLSDKLauncher(Launcher):
         if log:
             self._print_input_output_info()
         if preprocessing:
-            self.set_preprocess(preprocessing)
+            self._set_preprocess(preprocessing)
 
         if self.network:
             self.exec_network = self.ie_core.load_network(self.network, self._device, num_requests=self.num_requests)
@@ -803,6 +829,23 @@ class DLSDKLauncher(Launcher):
                     else:
                         self.exec_network.input_info[input_config['name']].precision = input_config['precision']
 
+    def _configure_lstm_inputs(self):
+        lstm_mapping = {}
+        config_inputs = self.config.get('inputs', [])
+        for input_config in config_inputs:
+            if input_config['type'] == 'LSTM_INPUT':
+                lstm_mapping[input_config['name']] = input_config['value']
+        self._lstm_inputs = lstm_mapping
+
+    def _fill_lstm_inputs(self, infer_outputs=None):
+        feed_dict = {}
+        for lstm_var, output_layer in self._lstm_inputs.items():
+            layer_shape = self.inputs[lstm_var].shape
+            input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(layer_shape)
+            feed_dict[lstm_var] = input_data
+
+        return feed_dict
+
     def _print_input_output_info(self):
         print_info('Input info:')
         has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
@@ -832,7 +875,7 @@ class DLSDKLauncher(Launcher):
             print_info('\tprecision: {}'.format(output_info.precision))
             print_info('\tshape: {}\n'.format(output_info.shape))
 
-    def set_preprocess(self, preprocess):
+    def _set_preprocess(self, preprocess):
         if preprocess.ie_processor is None:
             return
         if self.network is not None:

@@ -139,7 +139,8 @@ class TestModelEvaluatorAsync:
         self.preprocessor.process = Mock(return_value=data)
         self.postprocessor = Mock()
         self.adapter = MagicMock(return_value=[])
-        self.input_feeder = Mock()
+        self.input_feeder = MagicMock()
+        self.input_feeder.lstm_inputs = []
         self.data_reader = Mock(return_value=data)
         self.data_reader.data_source = 'source'
 
