@@ -82,6 +82,9 @@ from .style_transfer import StyleTransferAdapter
 
 from .attribute_classification import AttributeClassificationAdapter
 
+from .regression import RegressionAdapter
+from .mixed_adapter import MixedAdapter
+
 __all__ = [
     'Adapter',
     'AdapterField',
@@ -147,5 +150,8 @@ __all__ = [
     'ImageInpaintingAdapter',
     'StyleTransferAdapter',
 
-    'AttributeClassificationAdapter'
+    'AttributeClassificationAdapter',
+
+    'RegressionAdapter',
+    'MixedAdapter'
 ]
