@@ -80,11 +80,7 @@ void HeadPoseVisualizer::buildCameraMatrix(cv::Mat& cameraMatrix, int cx, int cy
     cameraMatrix.at<float>(8) = 1;
 }
 
-void HeadPoseVisualizer::draw(cv::Mat& frame, cv::Point3f cpoint, HeadPoseResults headPose) {
-    double yaw   = headPose.angle_y;
-    double pitch = headPose.angle_p;
-    double roll  = headPose.angle_r;
-
+void HeadPoseVisualizer::draw(cv::Mat& frame, cv::Point3f cpoint, double yaw, double pitch, double roll) {
     pitch *= CV_PI / 180.0;
     yaw   *= CV_PI / 180.0;
     roll  *= CV_PI / 180.0;
@@ -222,7 +218,7 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
         cv::Point3f center(static_cast<float>(f->_location.x + f->_location.width / 2),
                            static_cast<float>(f->_location.y + f->_location.height / 2),
                            0.0f);
-        headPoseVisualizer->draw(img, center, f->getHeadPose());
+        headPoseVisualizer->draw(img, center, f->_yaw, f->_pitch, f->_roll);
     }
 
     if (_isLandmarksEnabled) {

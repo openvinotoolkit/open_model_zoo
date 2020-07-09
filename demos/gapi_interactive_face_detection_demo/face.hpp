@@ -19,14 +19,13 @@ public:
     void updateAge(float value);
     void updateGender(float value);
     void updateEmotions(std::map<std::string, float> values);
-    void updateHeadPose(HeadPoseResults values);
+    void updateHeadPose(double y, double p, double r);
     void updateLandmarks(std::vector<float> values);
 
     int getAge();
     bool isMale();
     std::map<std::string, float> getEmotions();
     std::pair<std::string, float> getMainEmotion();
-    HeadPoseResults getHeadPose();
     const std::vector<float>& getLandmarks();
     size_t getId();
 
@@ -35,11 +34,13 @@ public:
     float _intensity_mean;
 
     size_t _id;
-    float _age;
-    float _maleScore;
-    float _femaleScore;
+    float  _age;
+    float  _maleScore;
+    float  _femaleScore;
     std::map<std::string, float> _emotions;
-    HeadPoseResults _headPose;
+    double _yaw;
+    double _pitch;
+    double _roll;
     std::vector<float> _landmarks;
 };
 
