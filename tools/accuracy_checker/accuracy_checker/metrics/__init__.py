@@ -78,15 +78,13 @@ from .question_answering import ExactMatchScore, ScoreF1
 from .mpjpe_multiperson import MpjpeMultiperson
 from .language_modeling import ScorePerplexity
 
-<<<<<<< HEAD
 from .attribute_classification import (
     AttributeClassificationRecall,
     AttributeClassificationPrecision,
     AttributeClassificationAccuracy
 )
-=======
+
 from .speech_recognition import SpeechRecognitionWER
->>>>>>> Support for audio features extraction & metric, DeepSpeech model
 
 __all__ = [
     'Metric',
