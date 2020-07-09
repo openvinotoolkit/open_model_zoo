@@ -752,7 +752,7 @@ class DLSDKLauncher(Launcher):
         if log:
             self._print_input_output_info()
         if preprocessing:
-            self.set_preprocess(preprocessing)
+            self._set_preprocess(preprocessing)
 
         if self.network:
             self.exec_network = self.ie_core.load_network(self.network, self._device, num_requests=self.num_requests)
@@ -875,7 +875,7 @@ class DLSDKLauncher(Launcher):
             print_info('\tprecision: {}'.format(output_info.precision))
             print_info('\tshape: {}\n'.format(output_info.shape))
 
-    def set_preprocess(self, preprocess):
+    def _set_preprocess(self, preprocess):
         if preprocess.ie_processor is None:
             return
         if self.network is not None:
