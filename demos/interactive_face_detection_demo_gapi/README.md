@@ -1,9 +1,8 @@
-# Interactive Face Detection C++ Demo
+# G-API Interactive Face Detection Demo
 
 This demo showcases Object Detection task applied for face recognition using sequence of neural networks.
-Async API can improve overall frame-rate of the application, because rather than wait for inference to complete,
-the application can continue operating on the host while accelerator is busy.
-This demo executes four parallel infer requests for the Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, and Facial Landmarks Detection networks that run simultaneously. You can use a set of the following pre-trained models with the demo:
+Main pipeline is creating using G-API framework. This demo executes six [kernels](https://docs.opencv.org/master/d0/d25/gapi_kernel_api.html), five of them executes networks another one is a postprocessing kernel.
+This demo executes the Face Detection, Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, and Facial Landmarks Detection networks that run simultaneously. You can use a set of the following pre-trained models with the demo:
 * `face-detection-adas-0001`, which is a primary detection network for finding faces
 * `age-gender-recognition-retail-0013`, which is executed on top of the results of the first model and reports estimated age and gender for each detected face
 * `head-pose-estimation-adas-0001`, which is executed on top of the results of the first model and reports estimated head pose in Tait-Bryan angles
@@ -24,14 +23,13 @@ OpenCV is used to draw resulting bounding boxes, labels, and other information. 
 
 1.	The application reads command-line parameters and loads up to five networks depending on `-m...` options family to the Inference
 Engine.
-2.	The application gets a frame from the OpenCV VideoCapture.
+2.	G-API [streaming]() gets a video/image/camera like a sourse using the OpenCV VideoCapture.
 3.	The application performs inference on the Face Detection network.
-4.	The application performs four simultaneous inferences, using the Age/Gender, Head Pose, Emotions, and Facial Landmarks detection networks if they are specified in the command line.
-5.	The application displays the results.
+4.	The application application run post processing kernel.
+5.	The application performs four simultaneous inferences, using the Age/Gender, Head Pose, Emotions, and Facial Landmarks detection networks if they are specified in the command line.
+6.	The application displays the results.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
-
-The new Async API operates with a new notion of the Infer Request that encapsulates the inputs/outputs and separates scheduling and waiting for result. For more information about Async API and the difference between Sync and Async modes performance, refer to **How it Works** and **Async API** sections in [Object Detection SSD, Async API Performance Showcase Demo](../object_detection_demo_ssd_async/README.md).
 
 ## Running
 
@@ -39,9 +37,6 @@ Running the application with the `-h` option yields the following usage message:
 
 ```sh
 ./interactive_face_detection_demo -h
-InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
 
 interactive_face_detection_demo [OPTION]
 Options:
@@ -102,7 +97,7 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
 The demo reports total image throughput which includes frame decoding time, inference time, time to render bounding boxes and labels, and time to display the results.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
 >* `age-gender-recognition-retail-0013`
 >* `emotions-recognition-retail-0003`
 >* `face-detection-adas-0001`
