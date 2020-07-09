@@ -16,16 +16,15 @@ pydicom==1.4.2            # via -r tools/accuracy_checker/requirements.in
 pyparsing==2.4.7          # via matplotlib
 python-dateutil==2.8.1    # via matplotlib
 pywavelets==1.1.1         # via scikit-image
-pyyaml==5.3.1             # via -r tools/accuracy_checker/requirements-core.in, yamlloader
+pyyaml==5.3.1             # via -r tools/accuracy_checker/requirements-core.in
 scikit-image==0.15.0      # via -r tools/accuracy_checker/requirements.in
 scikit-learn==0.22.2.post1  # via -r tools/accuracy_checker/requirements.in
 scipy==1.4.1              # via -r tools/accuracy_checker/requirements.in, scikit-image, scikit-learn
 sentencepiece==0.1.85     # via -r tools/accuracy_checker/requirements.in
 shapely==1.7.0            # via -r tools/accuracy_checker/requirements.in
-six==1.15.0               # via python-dateutil
+six==1.15.0               # via cycler, python-dateutil
 tokenizers==0.7           # via -r tools/accuracy_checker/requirements.in
 tqdm==4.45.0              # via -r tools/accuracy_checker/requirements.in
-yamlloader==0.5.5         # via -r tools/accuracy_checker/requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

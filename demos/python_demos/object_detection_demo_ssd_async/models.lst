@@ -1,4 +1,5 @@
 # This file can be used with the --list option of the model downloader.
+face-detection-????
 face-detection-adas-????
 face-detection-adas-binary-????
 face-detection-retail-????
@@ -6,6 +7,8 @@ pedestrian-and-vehicle-detector-adas-????
 pedestrian-detection-adas-????
 pedestrian-detection-adas-binary-????
 pelee-coco
+person-detection-????
+person-detection-asl-????
 person-detection-retail-0013
 retinanet-tf
 vehicle-detection-adas-????

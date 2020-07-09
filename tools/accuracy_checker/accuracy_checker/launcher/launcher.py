@@ -109,9 +109,6 @@ class Launcher(ClassProvider):
 
         raise NotImplementedError
 
-    def __call__(self, context, *args, **kwargs):
-        context.prediction_batch = self.predict(context.input_blobs, context.batch_meta, **kwargs)
-
     def release(self):
         raise NotImplementedError
 

@@ -20,12 +20,16 @@ import itertools
 import json
 import os
 import pickle
+import struct
+import sys
+import zlib
 from enum import Enum
 
 from pathlib import Path
 from typing import Union
 from warnings import warn
-from collections.abc import MutableSet
+from collections.abc import MutableSet, Sequence
+from io import BytesIO
 
 import numpy as np
 import yaml
@@ -39,11 +43,6 @@ try:
     from shapely.geometry.polygon import Polygon
 except ImportError:
     Polygon = None
-
-try:
-    from yamlloader.ordereddict import Loader as orddict_loader
-except ImportError:
-    orddict_loader = None
 
 
 def concat_lists(*lists):
@@ -294,12 +293,9 @@ def read_pickle(file: Union[str, Path], *args, **kwargs):
         return pickle.load(content, *args, **kwargs)
 
 
-def read_yaml(file: Union[str, Path], *args, ordered=True, **kwargs):
+def read_yaml(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open() as content:
-        loader = orddict_loader or yaml.SafeLoader if ordered else yaml.SafeLoader
-        if not orddict_loader and ordered:
-            warn('yamlloader is not installed. YAML files order is not preserved. it can be sufficient for some cases')
-        return yaml.load(content, *args, Loader=loader, **kwargs)
+        return yaml.safe_load(content, *args, **kwargs)
 
 
 def read_csv(file: Union[str, Path], *args, **kwargs):
@@ -518,3 +514,284 @@ def color_format(s, color=Color.PASSED):
 
 def softmax(x):
     return np.exp(x) / sum(np.exp(x))
+
+
+class ParseError(Exception):
+    pass
+
+
+class MatlabDataReader():
+    def __init__(self):
+        self.asstr = lambda b: b.decode('latin1')
+        self.etypes = {
+            'miINT8': {'n': 1, 'fmt': 'b'},
+            'miUINT8': {'n': 2, 'fmt': 'B'},
+            'miINT16': {'n': 3, 'fmt': 'h'},
+            'miUINT16': {'n': 4, 'fmt': 'H'},
+            'miINT32': {'n': 5, 'fmt': 'i'},
+            'miUINT32': {'n': 6, 'fmt': 'I'},
+            'miSINGLE': {'n': 7, 'fmt': 'f'},
+            'miDOUBLE': {'n': 9, 'fmt': 'd'},
+            'miINT64': {'n': 12, 'fmt': 'q'},
+            'miUINT64': {'n': 13, 'fmt': 'Q'},
+            'miMATRIX': {'n': 14},
+            'miCOMPRESSED': {'n': 15},
+            'miUTF8': {'n': 16, 'fmt': 's'},
+            'miUTF16': {'n': 17, 'fmt': 's'},
+            'miUTF32': {'n': 18, 'fmt': 's'}
+        }
+        self.inv_etypes = dict((v['n'], k) for k, v in self.etypes.items())
+        self.mclasses = {
+            'mxCELL_CLASS': 1,
+            'mxSTRUCT_CLASS': 2,
+            'mxOBJECT_CLASS': 3,
+            'mxCHAR_CLASS': 4,
+            'mxSPARSE_CLASS': 5,
+            'mxDOUBLE_CLASS': 6,
+            'mxSINGLE_CLASS': 7,
+            'mxINT8_CLASS': 8,
+            'mxUINT8_CLASS': 9,
+            'mxINT16_CLASS': 10,
+            'mxUINT16_CLASS': 11,
+            'mxINT32_CLASS': 12,
+            'mxUINT32_CLASS': 13,
+            'mxINT64_CLASS': 14,
+            'mxUINT64_CLASS': 15,
+            'mxFUNCTION_CLASS': 16,
+            'mxOPAQUE_CLASS': 17,
+            'mxOBJECT_CLASS_FROM_MATRIX_H': 18
+        }
+        self.numeric_class_etypes = {
+            'mxDOUBLE_CLASS': 'miDOUBLE',
+            'mxSINGLE_CLASS': 'miSINGLE',
+            'mxINT8_CLASS': 'miINT8',
+            'mxUINT8_CLASS': 'miUINT8',
+            'mxINT16_CLASS': 'miINT16',
+            'mxUINT16_CLASS': 'miUINT16',
+            'mxINT32_CLASS': 'miINT32',
+            'mxUINT32_CLASS': 'miUINT32',
+            'mxINT64_CLASS': 'miINT64',
+            'mxUINT64_CLASS': 'miUINT64'
+        }
+        self.inv_mclasses = dict((v, k) for k, v in self.mclasses.items())
+        self.compressed_numeric = ['miINT32', 'miUINT16', 'miINT16', 'miUINT8']
+
+    def read_var_header(self, fd, endian):
+        mtpn, num_bytes = self._unpack(endian, 'II', fd.read(8))
+        next_pos = fd.tell() + num_bytes
+
+        if mtpn == self.etypes['miCOMPRESSED']['n']:
+            data = fd.read(num_bytes)
+            dcor = zlib.decompressobj()
+            fd_var = BytesIO(dcor.decompress(data))
+            del data
+            fd = fd_var
+            if dcor.flush() != b'':
+                raise ParseError('Error in compressed data.')
+            mtpn, num_bytes = self._unpack(endian, 'II', fd.read(8))
+
+        if mtpn != self.etypes['miMATRIX']['n']:
+            raise ParseError('Expecting miMATRIX type number {}, '
+                             'got {}'.format(self.etypes['miMATRIX']['n'], mtpn))
+        header = self._read_header(fd, endian)
+        return header, next_pos, fd
+
+    def read_var_array(self, fd, endian, header):
+        mc = self.inv_mclasses[header['mclass']]
+
+        if mc == 'mxSPARSE_CLASS':
+            raise ParseError('Sparse matrices not supported')
+        if mc == 'mxOBJECT_CLASS':
+            raise ParseError('Object classes not supported')
+        if mc == 'mxFUNCTION_CLASS':
+            raise ParseError('Function classes not supported')
+        if mc == 'mxOPAQUE_CLASS':
+            raise ParseError('Anonymous function classes not supported')
+
+        if mc in self.numeric_class_etypes:
+            return self._read_numeric_array(
+                fd, endian, header,
+                set(self.compressed_numeric).union([self.numeric_class_etypes[mc]])
+            )
+        if mc == 'mxCHAR_CLASS':
+            return self._read_char_array(fd, endian, header)
+        if mc == 'mxCELL_CLASS':
+            return self._read_cell_array(fd, endian, header)
+        if mc == 'mxSTRUCT_CLASS':
+            return self._read_struct_array(fd, endian, header)
+
+        return None
+
+    def _read_element_tag(self, fd, endian):
+        data = fd.read(8)
+        mtpn = self._unpack(endian, 'I', data[:4])
+        num_bytes = mtpn >> 16
+        if num_bytes > 0:
+            mtpn = mtpn & 0xFFFF
+            if num_bytes > 4:
+                raise ParseError('Error parsing Small Data Element (SDE) '
+                                 'formatted data')
+            data = data[4:4 + num_bytes]
+        else:
+            num_bytes = self._unpack(endian, 'I', data[4:])
+            data = None
+        return (mtpn, num_bytes, data)
+
+    def _read_elements(self, fd, endian, mtps, is_name=False):
+        mtpn, num_bytes, data = self._read_element_tag(fd, endian)
+        if mtps and mtpn not in [self.etypes[mtp]['n'] for mtp in mtps]:
+            raise ParseError('Got type {}, expected {}'.format(
+                mtpn, ' / '.join('{} ({})'.format(
+                    self.etypes[mtp]['n'], mtp) for mtp in mtps)))
+        if not data:
+            data = fd.read(num_bytes)
+            mod8 = num_bytes % 8
+            if mod8:
+                fd.seek(8 - mod8, 1)
+
+        if is_name:
+            fmt = 's'
+            val = [self._unpack(endian, fmt, s)
+                   for s in data.split(b'\0') if s]
+            if len(val) == 0:
+                val = ''
+            elif len(val) == 1:
+                val = self.asstr(val[0])
+            else:
+                val = [self.asstr(s) for s in val]
+        else:
+            fmt = self.etypes[self.inv_etypes[mtpn]]['fmt']
+            val = self._unpack(endian, fmt, data)
+        return val
+
+    def _read_header(self, fd, endian):
+        flag_class, nzmax = self._read_elements(fd, endian, ['miUINT32'])
+        header = {
+            'mclass': flag_class & 0x0FF,
+            'is_logical': (flag_class >> 9 & 1) == 1,
+            'is_global': (flag_class >> 10 & 1) == 1,
+            'is_complex': (flag_class >> 11 & 1) == 1,
+            'nzmax': nzmax
+        }
+        header['dims'] = self._read_elements(fd, endian, ['miINT32'])
+        header['n_dims'] = len(header['dims'])
+        if header['n_dims'] != 2:
+            raise ParseError('Only matrices with dimension 2 are supported.')
+        header['name'] = self._read_elements(fd, endian, ['miINT8'], is_name=True)
+        return header
+
+    def _read_numeric_array(self, fd, endian, header, data_etypes):
+        if header['is_complex']:
+            raise ParseError('Complex arrays are not supported')
+        data = self._read_elements(fd, endian, data_etypes)
+        if not isinstance(data, Sequence):
+            return data
+        rowcount = header['dims'][0]
+        colcount = header['dims'][1]
+        array = [list(data[c * rowcount + r] for c in range(colcount))
+                 for r in range(rowcount)]
+        return self._squeeze(array)
+
+    def _read_cell_array(self, fd, endian, header):
+        array = [list() for i in range(header['dims'][0])]
+        for row in range(header['dims'][0]):
+            for _col in range(header['dims'][1]):
+                vheader, next_pos, fd_var = self.read_var_header(fd, endian)
+                varray = self.read_var_array(fd_var, endian, vheader)
+                array[row].append(varray)
+                fd.seek(next_pos)
+        if header['dims'][0] == 1:
+            return self._squeeze(array[0])
+        return self._squeeze(array)
+
+    def _read_struct_array(self, fd, endian, header):
+        field_name_length = self._read_elements(fd, endian, ['miINT32'])
+        if field_name_length > 32:
+            raise ParseError('Unexpected field name length: {}'.format(
+                field_name_length))
+
+        fields = self._read_elements(fd, endian, ['miINT8'], is_name=True)
+        if isinstance(fields, str):
+            fields = [fields]
+
+        empty = lambda: [list() for i in range(header['dims'][0])]
+        array = {}
+        for row in range(header['dims'][0]):
+            for _col in range(header['dims'][1]):
+                for field in fields:
+                    vheader, next_pos, fd_var = self.read_var_header(fd, endian)
+                    data = self.read_var_array(fd_var, endian, vheader)
+                    if field not in array:
+                        array[field] = empty()
+                    array[field][row].append(data)
+                    fd.seek(next_pos)
+        for field in fields:
+            rows = array[field]
+            for i in range(header['dims'][0]):
+                rows[i] = self._squeeze(rows[i])
+            array[field] = self._squeeze(array[field])
+        return array
+
+    def _read_char_array(self, fd, endian, header):
+        array = self._read_numeric_array(fd, endian, header, ['miUTF8'])
+        if header['dims'][0] > 1:
+            array = [self.asstr(bytearray(i)) for i in array]
+        else:
+            array = self.asstr(bytearray(array))
+        return array
+
+    @staticmethod
+    def _squeeze(array):
+        if len(array) == 1:
+            array = array[0]
+        return array
+
+    @staticmethod
+    def _unpack(endian, fmt, data):
+        if fmt == 's':
+            val = struct.unpack(''.join([endian, str(len(data)), 's']),
+                                data)[0]
+        else:
+            num = len(data) // struct.calcsize(fmt)
+            val = struct.unpack(''.join([endian, str(num), fmt]), data)
+            if len(val) == 1:
+                val = val[0]
+        return val
+
+
+def loadmat(filename):
+    def eof(fd):
+        b = fd.read(1)
+        end = len(b) == 0
+        if not end:
+            curpos = fd.tell()
+            fd.seek(curpos - 1)
+        return end
+
+    fd = open(filename, 'rb')
+
+    fd.seek(124)
+    tst_str = fd.read(4)
+    little_endian = (tst_str[2:4] == b'IM')
+    endian = ''
+    if sys.byteorder == 'little' and not little_endian:
+        endian = '>'
+    if sys.byteorder == 'big' and little_endian:
+        endian = '<'
+    maj_ind = int(little_endian)
+    maj_val = tst_str[maj_ind]
+    if maj_val != 1:
+        raise ParseError('Can only read from Matlab level 5 MAT-files')
+    mdict = {}
+    reader = MatlabDataReader()
+
+    while not eof(fd):
+        hdr, next_position, fd_var = reader.read_var_header(fd, endian)
+        name = hdr['name']
+        if name in mdict:
+            raise ParseError('Duplicate variable name "{}" in mat file.'
+                             .format(name))
+        mdict[name] = reader.read_var_array(fd_var, endian, hdr)
+        fd.seek(next_position)
+    fd.close()
+    return mdict

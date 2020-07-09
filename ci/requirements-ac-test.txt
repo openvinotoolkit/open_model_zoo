@@ -26,17 +26,16 @@ pytest-mock==2.0.0        # via -r tools/accuracy_checker/requirements-test.in
 pytest==5.4.1             # via -r tools/accuracy_checker/requirements-test.in, pytest-mock
 python-dateutil==2.8.1    # via matplotlib
 pywavelets==1.1.1         # via scikit-image
-pyyaml==5.3.1             # via -r tools/accuracy_checker/requirements-core.in, yamlloader
+pyyaml==5.3.1             # via -r tools/accuracy_checker/requirements-core.in
 scikit-image==0.15.0      # via -r tools/accuracy_checker/requirements.in
 scikit-learn==0.22.2.post1  # via -r tools/accuracy_checker/requirements.in
 scipy==1.4.1              # via -r tools/accuracy_checker/requirements.in, scikit-image, scikit-learn
 sentencepiece==0.1.85     # via -r tools/accuracy_checker/requirements.in
 shapely==1.7.0            # via -r tools/accuracy_checker/requirements.in
-six==1.14.0               # via packaging, pathlib2, python-dateutil
+six==1.14.0               # via cycler, packaging, pathlib2, python-dateutil
 tokenizers==0.7           # via -r tools/accuracy_checker/requirements.in
 tqdm==4.45.0              # via -r tools/accuracy_checker/requirements.in
 wcwidth==0.1.9            # via pytest
-yamlloader==0.5.5         # via -r tools/accuracy_checker/requirements.in
 zipp==1.2.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:

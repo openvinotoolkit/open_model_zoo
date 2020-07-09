@@ -242,3 +242,4 @@ AccuracyChecker supports following set of adapters:
 * `regression` - converting output of regression model to `RegressionPrediction` representation.
 * `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions. 
     * `adapters` - Dict where key is output name and value is adapter config map including `output_blob` key to associate the output of model and this adapter.
+* `person_vehilce_detection_refinement` - converts output of person vehicle detection refinement model to `DetectionPrediction` representation. Adapter refines proposals generated in previous stage model.
