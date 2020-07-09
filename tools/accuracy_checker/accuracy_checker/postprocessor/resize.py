@@ -18,7 +18,6 @@ from functools import singledispatch
 import cv2
 import numpy as np
 from ..representation import (
-    DetectionPrediction, DetectionAnnotation,
     DepthEstimationAnnotation, DepthEstimationPrediction,
     SegmentationPrediction, SegmentationAnnotation,
     StyleTransferAnnotation, StyleTransferPrediction,
@@ -37,12 +36,10 @@ class Resize(PostprocessorWithSpecificTargets):
 
     __provider__ = 'resize'
 
-    prediction_types = (DetectionPrediction, DepthEstimationPrediction,
-                        StyleTransferPrediction, SegmentationPrediction,
-                        SuperResolutionPrediction, )
-    annotation_types = (DetectionAnnotation, DepthEstimationAnnotation,
-                        StyleTransferAnnotation, SegmentationAnnotation,
-                        SuperResolutionAnnotation, )
+    prediction_types = (DepthEstimationPrediction, StyleTransferPrediction,
+                        SegmentationPrediction, SuperResolutionPrediction, )
+    annotation_types = (DepthEstimationAnnotation, StyleTransferAnnotation,
+                        SegmentationAnnotation, SuperResolutionAnnotation, )
 
     @classmethod
     def parameters(cls):
@@ -76,15 +73,6 @@ class Resize(PostprocessorWithSpecificTargets):
 
         @singledispatch
         def resize(entry, height, width):
-            return entry
-
-        @resize.register(DetectionPrediction)
-        def _(entry, height, width):
-            entry.x_mins *= width
-            entry.x_maxs *= width
-            entry.y_mins *= height
-            entry.y_maxs *= height
-
             return entry
 
         @resize.register(DepthEstimationPrediction)
