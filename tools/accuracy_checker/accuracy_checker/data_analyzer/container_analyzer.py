@@ -51,7 +51,7 @@ class ContainerDataAnalyzer(BaseDataAnalyzer):
                     key.split('{}_'.format(name_annotation))[-1]: meta[key] for key in specific_keys
                 }
                 data_analysis[label_annotation] = analyzer.analyze(dict_annotations[label_annotation],
-                                                      annotation_specific_meta, False)
+                                                                   annotation_specific_meta, False)
             else:
                 data_analysis[label_annotation] = analyzer.analyze(dict_annotations[label_annotation], meta, False)
 
