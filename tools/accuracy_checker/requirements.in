@@ -2,7 +2,6 @@
 tqdm
 
 # image reading and preprocessing
-pillow>=2.6.1
 scikit-image
 
 # reid

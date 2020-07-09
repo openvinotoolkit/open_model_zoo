@@ -1,13 +1,9 @@
 import numpy as np
+from PIL import Image
 from ..postprocessor import Postprocessor
 from ..representation import SuperResolutionPrediction, SuperResolutionAnnotation
 from ..config import NumberField
 from ..utils import get_size_from_config
-
-try:
-    from PIL import Image
-except ImportError:
-    Image = None
 
 
 class ResizeSuperResolution(Postprocessor):

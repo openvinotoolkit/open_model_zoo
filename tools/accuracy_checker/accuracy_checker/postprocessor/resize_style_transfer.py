@@ -1,13 +1,9 @@
 import numpy as np
+from PIL import Image
 from ..postprocessor import Postprocessor
 from ..representation import StyleTransferAnnotation, StyleTransferPrediction
 from ..config import NumberField
 from ..utils import get_size_from_config
-
-try:
-    from PIL import Image
-except ImportError:
-    Image = None
 
 
 class ResizeStyleTransfer(Postprocessor):
@@ -30,8 +26,6 @@ class ResizeStyleTransfer(Postprocessor):
         return parameters
 
     def configure(self):
-        if Image is None:
-            raise ValueError('{} requires pillow, please install it'.format(self.__provider__))
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
 
     def process_image(self, annotation, prediction):
