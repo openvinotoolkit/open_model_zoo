@@ -82,12 +82,9 @@ from .style_transfer import StyleTransferAdapter
 
 from .attribute_classification import AttributeClassificationAdapter
 from .audio_recognition import CTCBeamSearchDecoder
-<<<<<<< HEAD
 
 from .regression import RegressionAdapter
 from .mixed_adapter import MixedAdapter
-=======
->>>>>>> Fix rebase errors
 
 __all__ = [
     'Adapter',
