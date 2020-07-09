@@ -78,7 +78,7 @@ class MixedAdapter(Adapter):
 
         output = []
 
-        for i in range(len(identifiers)):
+        for i , _ in enumerate(identifiers):
             container_args = {}
             for layer, (name, _) in self.adapters.items():
                 if isinstance(result[layer][i], ContainerPrediction):
