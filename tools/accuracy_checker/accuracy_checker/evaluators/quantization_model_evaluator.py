@@ -108,7 +108,7 @@ class ModelEvaluator:
         self._prepare_to_evaluation(dataset_tag, dump_prediction_to_annotation)
 
         if (
-                self.launcher.allow_reshape_input or
+                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
                 self.preprocessor.has_multi_infer_transformations or
                 self.dataset.multi_infer
         ):

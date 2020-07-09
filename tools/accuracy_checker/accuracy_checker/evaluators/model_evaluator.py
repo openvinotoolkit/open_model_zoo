@@ -139,7 +139,7 @@ class ModelEvaluator(BaseEvaluator):
         prepare_dataset()
 
         if (
-                self.launcher.allow_reshape_input or
+                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
                 self.preprocessor.has_multi_infer_transformations or
                 getattr(self.reader, 'multi_infer', False)
         ):

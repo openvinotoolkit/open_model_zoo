@@ -61,7 +61,6 @@ except ImportError:
         Blob, TensorDesc = None, None
 
 
-# pylint: disable=R0904
 class DLSDKLauncher(Launcher):
     """
     Class for infer model using DLSDK framework.
@@ -199,7 +198,7 @@ class DLSDKLauncher(Launcher):
             raw data from network.
         """
         if self._lstm_inputs:
-            return self.predict_sequential(inputs, metadata)
+            return self._predict_sequential(inputs, metadata)
 
         results = []
         for infer_inputs in inputs:
@@ -237,7 +236,7 @@ class DLSDKLauncher(Launcher):
 
         return results
 
-    def predict_sequential(self, inputs, metadata=None, **kwargs):
+    def _predict_sequential(self, inputs, metadata=None, **kwargs):
         lstm_inputs_feed = self._fill_lstm_inputs()
         results = []
         for feed_dict in inputs:
