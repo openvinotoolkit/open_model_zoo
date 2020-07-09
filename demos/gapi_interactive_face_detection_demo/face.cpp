@@ -6,7 +6,7 @@
 
 Face::Face(size_t id, cv::Rect& location):
     _location(location), _intensity_mean(0.f), _id(id), _age(-1),
-    _maleScore(0), _femaleScore(0), _headPose({0.f, 0.f, 0.f}) {}
+    _maleScore(0), _femaleScore(0), _yaw(0.f), _pitch(0.f), _roll(0.f) {}
 
 void Face::updateAge(float value) {
     _age = (_age == -1) ? value : 0.95f * _age + 0.05f * value;
@@ -33,8 +33,10 @@ void Face::updateEmotions(std::map<std::string, float> values) {
     }
 }
 
-void Face::updateHeadPose(HeadPoseResults values) {
-    _headPose = values;
+void Face::updateHeadPose(double y, double p, double r) {
+    _yaw   = y;
+    _pitch = p;
+    _roll  = r;
 }
 
 void Face::updateLandmarks(std::vector<float> values) {
@@ -59,10 +61,6 @@ std::pair<std::string, float> Face::getMainEmotion() {
             return p1.second < p2.second; });
 
     return std::make_pair(x->first, x->second);
-}
-
-HeadPoseResults Face::getHeadPose() {
-    return _headPose;
 }
 
 const std::vector<float>& Face::getLandmarks() {

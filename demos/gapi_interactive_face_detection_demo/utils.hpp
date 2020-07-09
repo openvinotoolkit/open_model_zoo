@@ -4,23 +4,6 @@
 
 # pragma once
 
-struct FaceDetectionResult {
-    int label;
-    float confidence;
-    cv::Rect location;
-};
-
-struct AgeGenderResult {
-    float age;
-    float maleProb;
-};
-
-struct HeadPoseResults {
-    float angle_y;
-    float angle_p;
-    float angle_r;
-};
-
 class CallStat {
 public:
     typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;

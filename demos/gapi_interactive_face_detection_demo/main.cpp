@@ -26,6 +26,12 @@
 #include "face.hpp"
 #include "visualizer.hpp"
 
+static const std::vector<std::string> EMOTION_VECTOR = {"neutral",
+                                                        "happy",
+                                                        "sad",
+                                                        "surprise",
+                                                        "anger"};
+
 using AGInfo = std::tuple<cv::GMat, cv::GMat>;
 using HPInfo = std::tuple<cv::GMat, cv::GMat, cv::GMat>;
 G_API_NET(Faces,          <cv::GMat(cv::GMat)>, "face-detector");
@@ -104,8 +110,8 @@ GAPI_OCV_KERNEL(OCVPostProc, PostProc) {
     }
 };
 
-void rawOutputDetections(const cv::Mat &ssd_result,
-                         const cv::Size upscale,
+void rawOutputDetections(const cv::Mat  &ssd_result,
+                         const cv::Size &upscale,
                          const float detectionThreshold) {
     const auto &in_ssd_dims = ssd_result.size;
     CV_Assert(in_ssd_dims.dims() == 4u);
@@ -194,14 +200,14 @@ void rawOutputEmotions(const int idx, const cv::Mat out_emotion) {
     }
 }
 
-void faceDataUpdate(cv::Mat frame,
+void faceDataUpdate(cv::Mat   &frame,
                     Face::Ptr &face,
-                    cv::Rect face_rect,
+                    cv::Rect  &face_rect,
                     std::list<Face::Ptr> &prev_faces,
                     std::vector<cv::Rect> &face_hub,
                     size_t &id,
                     bool no_smooth) {
-    // Face apdate
+    // Face update
     cv::Rect rect = face_rect & cv::Rect({0, 0}, frame.size());
 
     if (!no_smooth) {
@@ -244,9 +250,7 @@ void headPoseDataUpdate(Face::Ptr &face,
     const float *p_data = out_p_fc.ptr<float>();
     const float *r_data = out_r_fc.ptr<float>();
 
-    face->updateHeadPose({y_data[0],
-                          p_data[0],
-                          r_data[0]});
+    face->updateHeadPose(y_data[0], p_data[0], r_data[0]);
 }
 
 void emotionsDataUpdate(Face::Ptr &face, cv::Mat out_emotion) {
@@ -325,17 +329,15 @@ int main(int argc, char *argv[]) {
                 cv::GMat in;
 
                 cv::GMat frame = cv::gapi::copy(in);
-                cv::GProtoOutputArgs outs = GOut(frame);
 
                 cv::GMat detections = cv::gapi::infer<Faces>(in);
-                outs += GOut(detections);
 
                 cv::GArray<cv::Rect> faces = PostProc::on(detections, in,
                                                           FLAGS_t,
                                                           FLAGS_bb_enlarge_coef,
                                                           FLAGS_dx_coef,
                                                           FLAGS_dy_coef);
-                outs += GOut(faces);
+                auto outs = GOut(frame, detections, faces);
 
                 cv::GArray<cv::GMat> ages, genders;
                 if (!FLAGS_m_ag.empty()) {
@@ -402,15 +404,9 @@ int main(int argc, char *argv[]) {
 
         cv::GStreamingCompiled stream = pipeline.compileStreaming(cv::compile_args(kernels, networks));
 
-        cv::GRunArgsP out_vector;
-        cv::Mat frame;
-        out_vector += cv::gout(frame);
-
-        cv::Mat ssd_res;
-        out_vector += cv::gout(ssd_res);
-
+        cv::Mat frame, ssd_res;
         std::vector<cv::Rect> face_hub;
-        out_vector += cv::gout(face_hub);
+        auto out_vector = cv::gout(frame, ssd_res, face_hub);
 
         std::vector<cv::Mat> out_ages, out_genders;
         if (!FLAGS_m_ag.empty()) out_vector += cv::gout(out_ages, out_genders);
@@ -450,11 +446,7 @@ int main(int argc, char *argv[]) {
 
             if (stream.pull(std::move(out_vector))) {
                 if (!FLAGS_no_show && !FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
-                    visualizer->enableEmotionBar(frame.size(), {"neutral",
-                                                                "happy",
-                                                                "sad",
-                                                                "surprise",
-                                                                "anger"});
+                    visualizer->enableEmotionBar(frame.size(), EMOTION_VECTOR);
                 }
 
                 //  Postprocessing
@@ -533,7 +525,7 @@ int main(int argc, char *argv[]) {
                 framesCounter++;
                 timer.finish("total");
             } else { // End of streaming
-                std::cout<<"End of streaming" << std::endl;
+                std::cout<< "End of streaming" << std::endl;
                 if(FLAGS_loop_video) {
                     stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
                     stream.start();
