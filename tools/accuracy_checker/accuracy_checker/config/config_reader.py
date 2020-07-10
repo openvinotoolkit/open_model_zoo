@@ -216,7 +216,11 @@ class ConfigReader:
                         global_configs['launchers'], launcher_entry, 'framework'
                     )
             if 'datasets' in global_configs:
-                for i, dataset in enumerate(model['datasets']):
+                datasets_iterator = (
+                    model['datasets'].items() if isinstance(model['datasets'], dict)
+                    else enumerate(model['datasets'])
+                )
+                for i, dataset in datasets_iterator:
                     model['datasets'][i] = ConfigReader._merge_configs_by_identifier(
                         global_configs['datasets'], dataset, 'name'
                     )
@@ -241,7 +245,11 @@ class ConfigReader:
                         global_config['launchers'], launcher_entry, 'framework'
                     )
             if 'datasets' in module_config and 'datasets' in global_config:
-                for i, dataset in enumerate(module_config['datasets']):
+                datasets_iterator = (
+                    module_config['datasets'].items() if isinstance(module_config['datasets'], dict)
+                    else enumerate(module_config['datasets'])
+                )
+                for i, dataset in datasets_iterator:
                     module_config['datasets'][i] = ConfigReader._merge_configs_by_identifier(
                         global_config['datasets'], dataset, 'name'
                     )
@@ -350,6 +358,8 @@ class ConfigReader:
                 model['launchers'] = provide_models(model['launchers'])
                 for dataset_entry in model['datasets']:
                     _add_subset_specific_arg(dataset_entry)
+                    if 'ie_preprocessing' in arguments and arguments.ie_preprocessing:
+                        dataset_entry['_ie_preprocessing'] = arguments.ie_preprocessing
 
         def merge_modules(config, arguments, update_launcher_entry):
             for evaluation in config['evaluations']:
@@ -645,11 +655,9 @@ def filter_modules(config, target_devices, args):
 
 def process_config(
         config_item, entries_paths, args, dataset_identifier='datasets',
-        launchers_idenitfier='launchers', identifers_mapping=None, pipeline=False
+        launchers_identifier='launchers', identifers_mapping=None, pipeline=False
 ):
     def process_dataset(datasets_configs):
-        if not isinstance(datasets_configs, list):
-            datasets_configs = [datasets_configs]
         for datasets_config in datasets_configs:
             annotation_conversion_config = datasets_config.get('annotation_conversion')
             if annotation_conversion_config:
@@ -699,9 +707,19 @@ def process_config(
             continue
 
         if entry_id == dataset_identifier:
-            process_dataset(config_item[entry_id])
+            datasets_config = config_item[entry_id]
+            dataset_processing_config = (
+                list(datasets_config.values()) if isinstance(datasets_config, dict) and not pipeline
+                else datasets_config
+            )
+            if not isinstance(dataset_processing_config, list):
+                dataset_processing_config = [dataset_processing_config]
+            process_dataset(dataset_processing_config)
+            for config_entry in dataset_processing_config:
+                merge_entry_paths(command_line_arg, config_entry, args)
+            continue
 
-        if entry_id == launchers_idenitfier:
+        if entry_id == launchers_identifier:
             launchers_configs = config_item[entry_id]
             processed_launcher = process_launchers(launchers_configs)
             config_item[entry_id] = processed_launcher if not pipeline else processed_launcher[0]

@@ -145,3 +145,67 @@ class BGR2YUVConverter(Preprocessor):
 class RGB2YUVConverter(BGR2YUVConverter):
     __provider__ = 'rgb_to_yuv'
     color = cv2.COLOR_RGB2YUV
+
+
+class BGRtoNV12Converter(Preprocessor):
+    __provider__ = 'bgr_to_nv12'
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        height, width, _ = data.shape
+        y, u, v = cv2.cvtColor(data, cv2.COLOR_BGR2YUV)
+
+        shrunk_u = cv2.resize(u, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+        shrunk_v = cv2.resize(v, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+
+        uv = np.zeros((height // 2, width))
+
+        uv[:, 0::2] = shrunk_u
+        uv[:, 1::2] = shrunk_v
+
+        nv12 = np.vstack((y, uv))
+
+        nv12 = np.floor(nv12 + 0.5).astype(np.uint8)
+        image.data = nv12
+
+        return image
+
+
+class RGBtoNV12Converter(Preprocessor):
+    __provider__ = 'rgb_to_nv12'
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        height, width, _ = data.shape
+        y, u, v = cv2.cvtColor(data, cv2.COLOR_RGB2YUV)
+
+        shrunk_u = cv2.resize(u, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+        shrunk_v = cv2.resize(v, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+
+        uv = np.zeros((height // 2, width))
+
+        uv[:, 0::2] = shrunk_u
+        uv[:, 1::2] = shrunk_v
+
+        nv12 = np.vstack((y, uv))
+
+        nv12 = np.floor(nv12 + 0.5).astype(np.uint8)
+        image.data = nv12
+
+        return image
+
+
+class NV12toBGRConverter(Preprocessor):
+    __provider__ = 'nv12_to_bgr'
+
+    def process(self, image, annotation_meta=None):
+        image.data = cv2.cvtColor(image.data, cv2.COLOR_YUV2BGR_NV12)
+        return image
+
+
+class NV12toRGBConverter(Preprocessor):
+    __provider__ = 'nv12_to_rgb'
+
+    def process(self, image, annotation_meta=None):
+        image.data = cv2.cvtColor(image.data, cv2.COLOR_YUV2RGB_NV12)
+        return image

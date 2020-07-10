@@ -13,7 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
 from copy import deepcopy
+from PIL import Image
 import cv2
 import numpy as np
 
@@ -22,10 +24,6 @@ from ..representation import ImageProcessingPrediction, SuperResolutionPredictio
 from ..config import ConfigValidator, BoolField, BaseField, StringField, DictField, ConfigError
 from ..utils import get_or_parse_value
 from ..preprocessor import Normalize
-try:
-    from PIL import Image
-except ImportError:
-    Image = None
 
 
 class ImageProcessingAdapter(Adapter):
@@ -99,6 +97,7 @@ class ImageProcessingAdapter(Adapter):
             img = np.array(img).astype(np.uint8)
 
         return img
+
 
 class SuperResolutionAdapter(ImageProcessingAdapter):
     __provider__ = 'super_resolution'

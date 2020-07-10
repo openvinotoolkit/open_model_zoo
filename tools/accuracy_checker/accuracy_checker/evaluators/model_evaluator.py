@@ -70,16 +70,25 @@ class ModelEvaluator(BaseEvaluator):
         if data_reader_type in REQUIRES_ANNOTATIONS:
             data_source = dataset.annotation
         data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
-        launcher = create_launcher(launcher_config, model_name)
+        enable_ie_preprocessing = (
+            dataset_config.get('_ie_preprocessing', False)
+            if launcher_config['framework'] == 'dlsdk' else False
+        )
+        preprocessor = PreprocessingExecutor(
+            dataset_config.get('preprocessing'), dataset_name, dataset.metadata,
+            enable_ie_preprocessing=enable_ie_preprocessing
+        )
+        launcher = (
+            create_launcher(launcher_config, model_name)
+            if not enable_ie_preprocessing else create_launcher(launcher_config, model_name, preprocessor=preprocessor)
+        )
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)
         input_feeder = InputFeeder(
             launcher.config.get('inputs', []), launcher.inputs, launcher.fit_to_input, launcher.default_layout
         )
-        preprocessor = PreprocessingExecutor(
-            dataset_config.get('preprocessing'), dataset_name, dataset.metadata, launcher.inputs_info_for_meta()
-        )
+        preprocessor.input_shapes = launcher.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
         metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
 
@@ -130,7 +139,7 @@ class ModelEvaluator(BaseEvaluator):
         prepare_dataset()
 
         if (
-                self.launcher.allow_reshape_input or
+                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
                 self.preprocessor.has_multi_infer_transformations or
                 getattr(self.reader, 'multi_infer', False)
         ):
@@ -199,15 +208,12 @@ class ModelEvaluator(BaseEvaluator):
 
         if self.dataset.batch is None:
             self.dataset.batch = self.launcher.batch
-        raw_outputs_callback = kwargs.get('output_callback')
+        output_callback = kwargs.get('output_callback')
         predictions_to_store = []
         for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
-            if raw_outputs_callback:
-                raw_outputs_callback(
-                    batch_predictions, network=self.launcher.network, exec_network=self.launcher.exec_network
-                )
+
             if self.adapter:
                 self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
                 batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
@@ -217,6 +223,8 @@ class ModelEvaluator(BaseEvaluator):
 
             annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
             self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
+            if output_callback:
+                output_callback(annotations, predictions)
 
             if self.metric_executor.need_store_predictions:
                 self._annotations.extend(annotations)

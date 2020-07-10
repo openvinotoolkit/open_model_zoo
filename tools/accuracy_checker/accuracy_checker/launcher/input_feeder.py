@@ -79,8 +79,8 @@ class InputFeeder:
 
     def configure(self, inputs_config):
         parsing_results = self._parse_inputs_config(inputs_config, self.default_layout)
-        self.const_inputs, self.non_constant_inputs = parsing_results[:2]
-        self.inputs_mapping, self.image_info_inputs, self.layouts_mapping, self.precision_mapping = parsing_results[2:]
+        self.const_inputs, self.non_constant_inputs, self.inputs_mapping = parsing_results[:3]
+        self.image_info_inputs, self.lstm_inputs, self.layouts_mapping, self.precision_mapping = parsing_results[3:]
         if not self.non_constant_inputs:
             raise ConfigError('Network should contain at least one layer for setting variable data.')
 
@@ -171,6 +171,7 @@ class InputFeeder:
         layouts = {}
         precisions = {}
         image_info_inputs = []
+        lstm_inputs = []
 
         for input_ in inputs_entry:
             name = input_['name']
@@ -181,6 +182,12 @@ class InputFeeder:
                 image_info_inputs.append(name)
                 get_layer_precision(input_, name)
                 continue
+
+            if input_['type'] == 'LSTM_INPUT':
+                lstm_inputs.append(name)
+                get_layer_precision(input_, name)
+                continue
+
             value = input_.get('value')
 
             if input_['type'] == 'CONST_INPUT':
@@ -198,7 +205,7 @@ class InputFeeder:
                 layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
                 get_layer_precision(input_, name)
 
-        all_config_inputs = config_non_constant_inputs + list(constant_inputs.keys()) + image_info_inputs
+        all_config_inputs = config_non_constant_inputs + list(constant_inputs.keys()) + image_info_inputs + lstm_inputs
         not_config_inputs = [input_layer for input_layer in self.network_inputs if input_layer not in all_config_inputs]
         if config_non_constant_inputs and not_config_inputs:
             raise ConfigError('input value for {} are not presented in config.'.format(','.join(not_config_inputs)))
@@ -209,6 +216,7 @@ class InputFeeder:
             non_constant_inputs,
             non_constant_inputs_mapping or None,
             image_info_inputs,
+            lstm_inputs,
             layouts,
             precisions
         )
