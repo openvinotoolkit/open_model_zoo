@@ -26,6 +26,17 @@
 #include <dirent.h>
 #endif
 
+#define DEFINE_INPUT_FLAGS \
+static const char input_message[] = "Required. An input to process. The input must be a single image, a folder of " \
+    "images or anything that cv::VideoCapture can process."; \
+static const char loop_input_message[] = "Optional. Enable reading the input in a loop."; \
+DEFINE_string(i, "", input_message); \
+DEFINE_bool(loop_input, false, loop_input_message); \
+void showInputUsage() { \
+    std::cout << "    -i \"<path>\"                  " << input_message << std::endl; \
+    std::cout << "    -loop_input                  " << loop_input_message << std::endl; \
+}
+
 /**
 * @brief This function checks input args and existence of specified files in a given folder
 * @param arg path to a file to be checked for existence
@@ -77,7 +88,7 @@ inline void parseInputFilesArguments(std::vector<std::string> &files) {
     std::vector<std::string> args = gflags::GetArgvs();
     bool readArguments = false;
     for (size_t i = 0; i < args.size(); i++) {
-        if (args.at(i) == "-i" || args.at(i) == "--images") {
+        if (args.at(i) == "-i") {
             readArguments = true;
             continue;
         }

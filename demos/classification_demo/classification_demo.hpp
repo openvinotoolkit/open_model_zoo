@@ -10,7 +10,7 @@
 #include <iostream>
 
 static const char help_message[] = "Print a usage message.";
-static const char input_message[] = "Required. Input to process.";
+static const char image_message[] = "Required. Path to a folder with images or path to an image file.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char labels_message[] = "Required. Path to .txt file with labels.";
 static const char gt_message[] = "Optional. Path to ground truth .txt file.";
@@ -37,7 +37,7 @@ static const char execution_time_message[] = "Optional. Time in seconds to execu
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
-DEFINE_string(i, "", input_message);
+DEFINE_string(i, "", image_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(labels, "", labels_message);
 DEFINE_string(gt, "", gt_message);
@@ -60,7 +60,7 @@ static void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
-    std::cout << "    -i \"<path>\"               " << input_message << std::endl;
+    std::cout << "    -i \"<path>\"               " << image_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;

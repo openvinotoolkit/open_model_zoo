@@ -23,7 +23,7 @@
 
 #include <inference_engine.hpp>
 
-#include <img_cap.h>
+#include <image_capture.h>
 #include <monitors/presenter.h>
 #include <samples/slog.hpp>
 #include <samples/ocv_common.hpp>
@@ -284,7 +284,7 @@ struct PersonAttribsDetection : BaseDetection {
             freq[labels.at<int>(i)]++;
         }
 
-        int freqArgmax = static_cast<int>(std::max_element(freq.begin(), freq.end()) - freq.begin());
+        auto freqArgmax = std::max_element(freq.begin(), freq.end()) - freq.begin();
 
         return centers.at<cv::Vec3b>(freqArgmax);
     }
@@ -500,7 +500,7 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        std::unique_ptr<ImgCap> cap = openImgCap(FLAGS_i, FLAGS_p);
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop_input);
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load inference engine -------------------------------------
@@ -571,18 +571,19 @@ int main(int argc, char *argv[]) {
         auto total_t0 = std::chrono::high_resolution_clock::now();
         slog::info << "Start inference " << slog::endl;
 
+        cv::Mat frame = cap->read();
+        if (!frame.data) throw std::logic_error("Can't read an image from the input");
+
+        cv::Size graphSize{frame.cols / 4, 60};
+        Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
+
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
             std::cout << " or switch to the output window and press ESC key";
         }
         std::cout << std::endl;
 
-        cv::Size graphSize{cap->getSize().width / 4, 60};
-        Presenter presenter(FLAGS_u, cap->getSize().height - graphSize.height - 10, graphSize);
-
-        for (;;) {
-            cv::Mat frame = cap->read();
-            if (!frame.data) break;
+        do {
             if (FLAGS_auto_resize) {
                 // just wrap Mat object with Blob::Ptr without additional memory allocation
                 frameBlob = wrapMat2Blob(frame);
@@ -786,13 +787,13 @@ int main(int argc, char *argv[]) {
 
             if (!FLAGS_no_show) {
                 cv::imshow("Detection results", frame);
-                // for still images wait until any key is pressed, for video 1 ms is enough per frame
                 const int key = cv::waitKey(1);
                 if (27 == key)  // Esc
                     break;
                 presenter.handleKey(key);
             }
-        }
+            frame = cap->read();
+        } while (frame.data);
 
         auto total_t1 = std::chrono::high_resolution_clock::now();
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);

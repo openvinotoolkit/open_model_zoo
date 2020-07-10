@@ -22,7 +22,7 @@
 #include <inference_engine.hpp>
 #include <ngraph/ngraph.hpp>
 
-#include <img_cap.h>
+#include <image_capture.h>
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
@@ -188,13 +188,7 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        std::unique_ptr<ImgCap> cap = openImgCap(FLAGS_i, false);
-
-        // read input (video) frame
-        cv::Mat frame = cap->read();
-
-        const int width = frame.cols;
-        const int height = frame.rows;
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop_input);
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load inference engine -------------------------------------
@@ -309,15 +303,19 @@ int main(int argc, char *argv[]) {
         bool isAsyncMode = false;  // execution is always started using SYNC mode
         bool isModeChanged = false;  // set to TRUE when execution mode is changed (SYNC<->ASYNC)
 
+        cv::Mat frame = cap->read();
+        if (!frame.data) throw std::runtime_error("Can't read an image from the input");
+
+        cv::Size graphSize{frame.cols / 4, 60};
+        Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
+
+        std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
+        std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
+
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
         auto total_t0 = std::chrono::high_resolution_clock::now();
         auto wallclock = std::chrono::high_resolution_clock::now();
         double ocv_render_time = 0;
-
-        std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
-        std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
-        cv::Size graphSize{width / 4, 60};
-        Presenter presenter(FLAGS_u, height - graphSize.height - 10, graphSize);
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
             // Here is the first asynchronous point:
@@ -392,7 +390,7 @@ int main(int argc, char *argv[]) {
                 for (auto &output : outputInfo) {
                     auto output_name = output.first;
                     Blob::Ptr blob = async_infer_request_curr->GetBlob(output_name);
-                    ParseYOLOV3Output(yoloParams[output_name], output_name, blob, resized_im_h, resized_im_w, height, width, FLAGS_t, objects);
+                    ParseYOLOV3Output(yoloParams[output_name], output_name, blob, resized_im_h, resized_im_w, frame.rows, frame.cols, FLAGS_t, objects);
                 }
                 // Filtering overlapping boxes
                 std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());

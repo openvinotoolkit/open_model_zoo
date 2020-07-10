@@ -48,6 +48,7 @@ struct dirent {
 };
 
 class DIR {
+    std::string ws;
     WIN32_FIND_DATAA FindFileData;
     HANDLE hFind;
     dirent *next;
@@ -60,8 +61,7 @@ class DIR {
     }
 
 public:
-    explicit DIR(const char *dirPath) : next(nullptr) {
-        std::string ws = dirPath;
+    explicit DIR(const char *dirPath) : ws{dirPath}, next(nullptr) {
         if (endsWith(ws, "\\"))
             ws += "*";
         else
@@ -93,6 +93,15 @@ public:
         FindFileData.dwReserved0 = FindNextFileA(hFind, &FindFileData);
         return next;
     }
+
+    void rewind() {
+        if (!next) delete next;
+        FindClose(hFind);
+        next = nullptr;
+        hFind = FindFirstFileA(ws.c_str(), &FindFileData);
+        FindFileData.dwReserved0 = hFind != INVALID_HANDLE_VALUE;
+        if (!isValid()) throw std::runtime_error("Can't rewind DIR");
+    }
 };
 
 
@@ -111,4 +120,8 @@ static struct dirent *readdir(DIR *dp) {
 
 static void closedir(DIR *dp) {
     delete dp;
+}
+
+static void rewinddir(DIR *dp) {
+    dp->rewind();
 }

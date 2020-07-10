@@ -17,7 +17,6 @@
 
 #include <ie_iextension.h>
 
-#include <img_cap.h>
 #include <samples/common.hpp>
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
@@ -67,7 +66,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-cv::Mat resizeImage(const cv::Mat& image, int modelInputResolution) {
+cv::Mat resizeImage(cv::Mat& image, int modelInputResolution) {
     double scale = static_cast<double>(modelInputResolution) / std::min(image.cols, image.rows);
 
     cv::Mat resizedImage;
@@ -113,13 +112,34 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        std::shared_ptr<ImgCap> cap = openImgCap(FLAGS_i, true);
-        std::shared_ptr<DirReader> dirReader = std::dynamic_pointer_cast<DirReader>(cap);
+        // -----------------------------------------Read input images-----------------------------------------
+        std::vector<std::string> imageNames;
+        std::vector<cv::Mat> inputImages;
+        parseInputFilesArguments(imageNames);
+        if (imageNames.empty()) throw std::runtime_error("No images provided");
+        std::sort(imageNames.begin(), imageNames.end());
+        for (size_t i = 0; i < imageNames.size(); i++) {
+            const std::string& name = imageNames[i];
+            const cv::Mat& tmpImage = cv::imread(name);
+            if (tmpImage.data == nullptr) {
+                std::cerr << "Could not read image " << name << '\n';
+                imageNames.erase(imageNames.begin() + i);
+                i--;
+            } else {
+                inputImages.push_back(tmpImage);
+                size_t lastSlashIdx = name.find_last_of("/\\");
+                if (lastSlashIdx != std::string::npos) {
+                    imageNames[i] = name.substr(lastSlashIdx + 1);
+                } else {
+                    imageNames[i] = name;
+                }
+            }
+        }
+        // ---------------------------------------------------------------------------------------------------
 
         // ----------------------------------------Read image classes-----------------------------------------
         std::vector<unsigned> classIndices;
         if (!FLAGS_gt.empty()) {
-            if (!dirReader) throw std::runtime_error("Ground truth matching is only supported for dir input");
             std::map<std::string, unsigned> classIndicesMap;
             std::ifstream inputGtFile(FLAGS_gt);
             if (!inputGtFile.is_open()) throw std::runtime_error("Can't open the ground truth file.");
@@ -140,17 +160,17 @@ int main(int argc, char *argv[]) {
                 classIndicesMap.insert({imagePath.substr(imagePathEndIdx + 1), classIndex});
             }
 
-            const std::vector<std::string> &names = dirReader->getNames();
-            for (const std::string &name : names) {
-                auto imageSearchResult = classIndicesMap.find(name);
+            for (size_t i = 0; i < imageNames.size(); i++) {
+                auto imageSearchResult = classIndicesMap.find(imageNames[i]);
                 if (imageSearchResult != classIndicesMap.end()) {
                     classIndices.push_back(imageSearchResult->second);
                 } else {
-                    throw std::runtime_error("No class specified for image " + name);
+                    throw std::runtime_error("No class specified for image " + imageNames[i]);
                 }
             }
         } else {
-            classIndices = {0};
+            classIndices.resize(inputImages.size());
+            std::fill(classIndices.begin(), classIndices.end(), 0);
         }
         // ---------------------------------------------------------------------------------------------------
 
@@ -329,6 +349,7 @@ int main(int argc, char *argv[]) {
         double accuracy = 0;
         bool isTestMode = true;
         char key = 0;
+        std::size_t nextImageIndex = 0;
         std::condition_variable condVar;
         std::mutex mutex;
         std::exception_ptr irCallbackException;
@@ -433,12 +454,15 @@ int main(int argc, char *argv[]) {
                 completedInferRequestInfo.reset();
             } else if (!emptyInferRequests.empty()) {
                 auto inferRequestStartTime = std::chrono::steady_clock::now();
-                size_t imgId = FLAGS_gt.empty() ? 0 : dirReader->getImgId();
-                cv::Mat nextImage = resizeImage(cap->read(), modelInputResolution);
+                cv::Mat nextImage = resizeImage(inputImages[nextImageIndex], modelInputResolution);
                 emptyInferRequests.front().images.push_back(
                                                     {nextImage,
-                                                     classIndices[imgId],
+                                                     classIndices[nextImageIndex],
                                                      inferRequestStartTime});
+                nextImageIndex++;
+                if (nextImageIndex == imageNames.size()) {
+                    nextImageIndex = 0;
+                }
                 if (emptyInferRequests.front().images.size() == FLAGS_b) {
                     auto emptyInferRequest = emptyInferRequests.front();
                     emptyInferRequests.pop();
