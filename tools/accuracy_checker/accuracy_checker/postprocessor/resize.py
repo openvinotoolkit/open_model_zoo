@@ -79,12 +79,12 @@ class Resize(PostprocessorWithSpecificTargets):
         @resize.register(SegmentationPrediction)
         def _(entry, height, width):
             if len(entry.mask.shape) == 2:
-                entry.mask = ResizeSegmentationMask(self.config).segm_resize(entry.mask, width, height)
+                entry.mask = ResizeSegmentationMask.segm_resize(entry.mask, width, height)
                 return entry
 
             entry_mask = []
             for class_mask in entry.mask:
-                resized_mask = ResizeSegmentationMask(self.config).segm_resize(class_mask, width, height)
+                resized_mask = ResizeSegmentationMask.segm_resize(class_mask, width, height)
                 entry_mask.append(resized_mask)
             entry.mask = np.array(entry_mask)
 
