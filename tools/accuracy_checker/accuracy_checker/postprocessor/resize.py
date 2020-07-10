@@ -15,14 +15,13 @@ limitations under the License.
 """
 
 from functools import singledispatch
-import cv2
 from PIL import Image
 import numpy as np
 from ..representation import (
-    DepthEstimationAnnotation, DepthEstimationPrediction,
     SegmentationPrediction, SegmentationAnnotation,
     StyleTransferAnnotation, StyleTransferPrediction,
-    SuperResolutionPrediction, SuperResolutionAnnotation)
+    SuperResolutionPrediction, SuperResolutionAnnotation,
+    ImageProcessingPrediction, ImageProcessingAnnotation)
 from ..postprocessor.postprocessor import PostprocessorWithSpecificTargets
 from ..postprocessor import ResizeSegmentationMask
 from ..config import NumberField
@@ -33,9 +32,9 @@ class Resize(PostprocessorWithSpecificTargets):
 
     __provider__ = 'resize'
 
-    prediction_types = (DepthEstimationPrediction, StyleTransferPrediction,
+    prediction_types = (StyleTransferPrediction, ImageProcessingPrediction,
                         SegmentationPrediction, SuperResolutionPrediction, )
-    annotation_types = (DepthEstimationAnnotation, StyleTransferAnnotation,
+    annotation_types = (StyleTransferAnnotation, ImageProcessingAnnotation,
                         SegmentationAnnotation, SuperResolutionAnnotation, )
 
     @classmethod
@@ -63,19 +62,14 @@ class Resize(PostprocessorWithSpecificTargets):
         def resize(entry, height, width):
             return entry
 
-        @resize.register(DepthEstimationPrediction)
-        def _(entry, height, width):
-            if not self.dst_height:
-                height = self.image_size[0]
-            if not self.dst_width:
-                width = self.image_size[1]
-            entry.depth_map = cv2.resize(entry.depth_map, (width, height))
-
-            return entry
-
         @resize.register(StyleTransferAnnotation)
+        @resize.register(StyleTransferPrediction)
+        @resize.register(SuperResolutionAnnotation)
         @resize.register(SuperResolutionPrediction)
+        @resize.register(ImageProcessingAnnotation)
+        @resize.register(ImageProcessingPrediction)
         def _(entry, height, width):
+            entry.value = entry.value.astype(np.uint8)
             data = Image.fromarray(entry.value)
             data = data.resize((width, height), Image.BICUBIC)
             entry.value = np.array(data)
@@ -84,10 +78,6 @@ class Resize(PostprocessorWithSpecificTargets):
 
         @resize.register(SegmentationPrediction)
         def _(entry, height, width):
-            if not self.dst_height:
-                height = self.image_size[0]
-            if not self.dst_width:
-                width = self.image_size[1]
             if len(entry.mask.shape) == 2:
                 entry.mask = ResizeSegmentationMask(self.config).segm_resize(entry.mask, width, height)
                 return entry
@@ -102,19 +92,17 @@ class Resize(PostprocessorWithSpecificTargets):
 
         @resize.register(SegmentationAnnotation)
         def _(entry, height, width):
-            if not self.dst_height:
-                height = self.image_size[0]
-            if not self.dst_width:
-                width = self.image_size[1]
             entry.mask = ResizeSegmentationMask.segm_resize(entry.mask, width, height)
 
             return entry
 
         @singledispatch
         def set_sizes(entry):
-            return self.dst_height, self.dst_width
+            height = self.dst_height if self.dst_height else self.image_size[0]
+            width = self.dst_width if self.dst_width else self.image_size[1]
 
-        @set_sizes.register(StyleTransferAnnotation)
+            return height, width
+
         @set_sizes.register(SuperResolutionAnnotation)
         def _(entry):
             height = self.dst_height if self.dst_height else entry.shape[0]
@@ -122,9 +110,14 @@ class Resize(PostprocessorWithSpecificTargets):
 
             return height, width
 
-        for annotation, prediction in zip(annotations, predictions):
-            height, width = set_sizes(annotation)
-            resize(prediction, height, width)
+        if annotations:
+            for annotation, prediction in zip(annotations, predictions):
+                height, width = set_sizes(annotation)
+                resize(prediction, height, width)
+        else:
+            for prediction in predictions:
+                height, width = set_sizes(None)
+                resize(prediction, height, width)
 
         for annotation in annotations:
             height, width = set_sizes(annotation)
