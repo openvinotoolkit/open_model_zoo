@@ -1,0 +1,44 @@
+models:
+  - name: i3d-rgb-tf
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model: public/i3d-rgb-tf/FP32/i3d-rgb-tf.xml
+        weights: public/i3d-rgb-tf/FP32/i3d-rgb-tf.bin
+        adapter: classification
+        inputs:
+          - name: Placeholder
+            type: INPUT
+            layout: NCDHW
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model: public/i3d-rgb-tf/FP16/i3d-rgb-tf.xml
+        weights: public/i3d-rgb-tf/FP16/i3d-rgb-tf.bin
+        adapter: classification
+        inputs:
+          - name: Placeholder
+            type: INPUT
+            layout: NCDHW
+
+    datasets:
+      - name: kinetics-400-frames-79-400
+        data_source: kinetics/frames_val
+        reader: pillow_imread
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: fit_to_window
+          - type: crop
+            size: 224
+        metrics:
+          - type: clip_accuracy
+            presenter: print_vector
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5

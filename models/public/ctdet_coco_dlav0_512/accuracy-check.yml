@@ -1,0 +1,43 @@
+models:
+  - name: ctdet_coco_dlav0_512
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/ctdet_coco_dlav0_512/FP32/ctdet_coco_dlav0_512.xml
+        weights: public/ctdet_coco_dlav0_512/FP32/ctdet_coco_dlav0_512.bin
+        adapter:
+          type: ctdet
+          center_heatmap_out: "508"
+          width_height_out: "514"
+          regression_out: "511"
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/ctdet_coco_dlav0_512/FP16/ctdet_coco_dlav0_512.xml
+        weights: public/ctdet_coco_dlav0_512/FP16/ctdet_coco_dlav0_512.bin
+        adapter:
+          type: ctdet
+          center_heatmap_out: "508"
+          width_height_out: "514"
+          regression_out: "511"
+
+
+    datasets:
+      - name: ms_coco_detection_80_class_without_background
+        preprocessing:
+          - type: centernet_affine_transform
+            dst_width: 512
+            dst_height: 512
+
+        postprocessing:
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.3
+            remove_filtered: True
+
+        metrics:
+          - type: map
+            integral: 11point
+            presenter: print_scalar

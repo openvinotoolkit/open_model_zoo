@@ -1,0 +1,46 @@
+models:
+  - name:  rfcn-resnet101-coco-tf
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/rfcn-resnet101-coco-tf/FP32/rfcn-resnet101-coco-tf.xml
+        weights: public/rfcn-resnet101-coco-tf/FP32/rfcn-resnet101-coco-tf.bin
+        adapter: ssd
+        inputs:
+          - name: image_info
+            type: CONST_INPUT
+            value: [[600, 600, 1]]
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/rfcn-resnet101-coco-tf/FP16/rfcn-resnet101-coco-tf.xml
+        weights: public/rfcn-resnet101-coco-tf/FP16/rfcn-resnet101-coco-tf.bin
+        adapter: ssd
+        inputs:
+          - name: image_info
+            type: CONST_INPUT
+            value: [[600, 600, 1]]
+
+    datasets:
+      - name: ms_coco_detection_91_classes
+
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: fit_to_window
+            dst_height: 600
+            dst_width: 600
+          - type: padding
+            dst_height: 600
+            dst_width: 600
+            pad_type: right_bottom
+
+        postprocessing:
+          - type: faster_rcnn_postprocessing_resize
+            dst_height: 600
+            dst_width: 600
+
+        metrics:
+          - type: coco_precision
+            max_detections: 100
