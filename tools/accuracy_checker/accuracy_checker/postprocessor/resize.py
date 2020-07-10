@@ -24,6 +24,7 @@ from ..representation import (
     StyleTransferAnnotation, StyleTransferPrediction,
     SuperResolutionPrediction, SuperResolutionAnnotation)
 from ..postprocessor.postprocessor import PostprocessorWithSpecificTargets
+from ..postprocessor import ResizeSegmentationMask
 from ..config import NumberField
 from ..utils import get_size_from_config
 
@@ -58,27 +59,21 @@ class Resize(PostprocessorWithSpecificTargets):
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
 
     def process_image(self, annotations, predictions):
-        if self.dst_width and self.dst_height:
-            height = self.dst_height
-            width = self.dst_width
-        else:
-            height = self.image_size[0]
-            width = self.image_size[1]
-
         @singledispatch
         def resize(entry, height, width):
             return entry
 
         @resize.register(DepthEstimationPrediction)
-        @resize.register(DepthEstimationAnnotation)
         def _(entry, height, width):
+            if not self.dst_height:
+                height = self.image_size[0]
+            if not self.dst_width:
+                width = self.image_size[1]
             entry.depth_map = cv2.resize(entry.depth_map, (width, height))
 
             return entry
 
         @resize.register(StyleTransferAnnotation)
-        @resize.register(StyleTransferPrediction)
-        @resize.register(SuperResolutionAnnotation)
         @resize.register(SuperResolutionPrediction)
         def _(entry, height, width):
             data = Image.fromarray(entry.value)
@@ -89,13 +84,17 @@ class Resize(PostprocessorWithSpecificTargets):
 
         @resize.register(SegmentationPrediction)
         def _(entry, height, width):
+            if not self.dst_height:
+                height = self.image_size[0]
+            if not self.dst_width:
+                width = self.image_size[1]
             if len(entry.mask.shape) == 2:
-                entry.mask = self._segm_resize(entry.mask, width, height)
+                entry.mask = ResizeSegmentationMask(self.config).segm_resize(entry.mask, width, height)
                 return entry
 
             entry_mask = []
             for class_mask in entry.mask:
-                resized_mask = self._segm_resize(class_mask, width, height)
+                resized_mask = ResizeSegmentationMask(self.config).segm_resize(class_mask, width, height)
                 entry_mask.append(resized_mask)
             entry.mask = np.array(entry_mask)
 
@@ -103,60 +102,32 @@ class Resize(PostprocessorWithSpecificTargets):
 
         @resize.register(SegmentationAnnotation)
         def _(entry, height, width):
-            entry.mask = self._segm_resize(entry.mask, width, height)
+            if not self.dst_height:
+                height = self.image_size[0]
+            if not self.dst_width:
+                width = self.image_size[1]
+            entry.mask = ResizeSegmentationMask.segm_resize(entry.mask, width, height)
+
             return entry
 
-        for prediction in predictions:
+        @singledispatch
+        def set_sizes(entry):
+            return self.dst_height, self.dst_width
+
+        @set_sizes.register(StyleTransferAnnotation)
+        @set_sizes.register(SuperResolutionAnnotation)
+        def _(entry):
+            height = self.dst_height if self.dst_height else entry.shape[0]
+            width = self.dst_width if self.dst_width else entry.shape[1]
+
+            return height, width
+
+        for annotation, prediction in zip(annotations, predictions):
+            height, width = set_sizes(annotation)
             resize(prediction, height, width)
 
         for annotation in annotations:
+            height, width = set_sizes(annotation)
             resize(annotation, height, width)
 
         return annotations, predictions
-
-    @staticmethod
-    def _segm_resize(mask, width, height):
-        def _to_image(arr):
-            data = np.asarray(arr)
-            if np.iscomplexobj(data):
-                raise ValueError("Cannot convert a complex-valued array.")
-            shape = list(data.shape)
-            if len(shape) == 2:
-                return _process_2d(data, shape)
-            if len(shape) == 3 and shape[2] in (3, 4):
-                return _process_3d(data, shape)
-            raise ValueError("'arr' does not have a suitable array shape for any mode.")
-
-        def _process_2d(data, shape):
-            height, width = shape
-            bytedata = _bytescale(data)
-            image = Image.frombytes('L', (width, height), bytedata.tostring())
-
-            return image
-
-        def _process_3d(data, shape):
-            bytedata = _bytescale(data)
-            height, width, channels = shape
-            mode = 'RGB' if channels == 3 else 'RGBA'
-            image = Image.frombytes(mode, (width, height), bytedata.tostring())
-
-            return image
-
-        def _bytescale(data):
-            if data.dtype == np.uint8:
-                return data
-            cmin = data.min()
-            cmax = data.max()
-            cscale = cmax - cmin
-            if cscale == 0:
-                cscale = 1
-
-            scale = float(255) / cscale
-            bytedata = (data - cmin) * scale
-
-            return (bytedata.clip(0, 255) + 0.5).astype(np.uint8)
-
-        image = _to_image(mask)
-        image_new = image.resize((width, height), resample=0)
-
-        return np.array(image_new)
