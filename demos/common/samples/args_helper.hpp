@@ -33,8 +33,8 @@ static const char loop_input_message[] = "Optional. Enable reading the input in 
 DEFINE_string(i, "", input_message); \
 DEFINE_bool(loop_input, false, loop_input_message); \
 void showInputUsage() { \
-    std::cout << "    -i \"<path>\"                  " << input_message << std::endl; \
-    std::cout << "    -loop_input                  " << loop_input_message << std::endl; \
+    std::cout << "    -i \"<path>\"               " << input_message << std::endl; \
+    std::cout << "    -loop_input               " << loop_input_message << std::endl; \
 }
 
 /**

@@ -40,25 +40,25 @@ Running the application with the `-h` option yields the following usage message:
 crossroad_camera_demo [OPTION]
 Options:
 
-    -h                           Print a usage message.
-    -i "<path>"                  Required. Input to process.
-    -p                           Optional. Enable reading the input on a loop.
-    -m "<path>"                  Required. Path to the Person/Vehicle/Bike Detection Crossroad model (.xml) file.
-    -m_pa "<path>"               Optional. Path to the Person Attributes Recognition Crossroad model (.xml) file.
-    -m_reid "<path>"             Optional. Path to the Person Reidentification Retail model (.xml) file.
-      -l "<absolute_path>"       Optional. For MKLDNN (CPU)-targeted custom layers, if any. Absolute path to a shared library with the kernels impl.
+    -h                        Print a usage message.
+    -i "<path>"               Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop_input               Optional. Enable reading the input in a loop.
+    -m "<path>"               Required. Path to the Person/Vehicle/Bike Detection Crossroad model (.xml) file.
+    -m_pa "<path>"            Optional. Path to the Person Attributes Recognition Crossroad model (.xml) file.
+    -m_reid "<path>"          Optional. Path to the Person Reidentification Retail model (.xml) file.
+      -l "<absolute_path>"    Optional. For MKLDNN (CPU)-targeted custom layers, if any. Absolute path to a shared library with the kernels impl.
           Or
-      -c "<absolute_path>"       Optional. For clDNN (GPU)-targeted custom kernels, if any. Absolute path to the xml file with the kernels desc.
-    -d "<device>"                Optional. Specify the target device for Person/Vehicle/Bike Detection. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -d_pa "<device>"             Optional. Specify the target device for Person Attributes Recognition. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -d_reid "<device>"           Optional. Specify the target device for Person Reidentification Retail. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -pc                          Optional. Enables per-layer performance statistics.
-    -r                           Optional. Output Inference results as raw values.
-    -t                           Optional. Probability threshold for person/vehicle/bike crossroad detections.
-    -t_reid                      Optional. Cosine similarity threshold between two vectors for person reidentification.
-    -no_show                     Optional. No show processed video.
-    -auto_resize                 Optional. Enables resizable input with support of ROI crop & auto resize.
-    -u                           Optional. List of monitors to show initially.
+      -c "<absolute_path>"    Optional. For clDNN (GPU)-targeted custom kernels, if any. Absolute path to the xml file with the kernels desc.
+    -d "<device>"             Optional. Specify the target device for Person/Vehicle/Bike Detection. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
+    -d_pa "<device>"          Optional. Specify the target device for Person Attributes Recognition. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
+    -d_reid "<device>"        Optional. Specify the target device for Person Reidentification Retail. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
+    -pc                       Optional. Enables per-layer performance statistics.
+    -r                        Optional. Output Inference results as raw values.
+    -t                        Optional. Probability threshold for person/vehicle/bike crossroad detections.
+    -t_reid                   Optional. Cosine similarity threshold between two vectors for person reidentification.
+    -no_show                  Optional. No show processed video.
+    -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
+    -u                        Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.
