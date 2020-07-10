@@ -16,6 +16,7 @@ limitations under the License.
 
 from functools import singledispatch
 import cv2
+from PIL import Image
 import numpy as np
 from ..representation import (
     DepthEstimationAnnotation, DepthEstimationPrediction,
@@ -25,11 +26,6 @@ from ..representation import (
 from ..postprocessor.postprocessor import PostprocessorWithSpecificTargets
 from ..config import NumberField
 from ..utils import get_size_from_config
-
-try:
-    from PIL import Image
-except ImportError:
-    Image = None
 
 
 class Resize(PostprocessorWithSpecificTargets):
@@ -59,8 +55,6 @@ class Resize(PostprocessorWithSpecificTargets):
         return parameters
 
     def configure(self):
-        if Image is None:
-            raise ValueError('{} requires pillow, please install it'.format(self.__provider__))
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
 
     def process_image(self, annotations, predictions):
@@ -76,12 +70,16 @@ class Resize(PostprocessorWithSpecificTargets):
             return entry
 
         @resize.register(DepthEstimationPrediction)
+        @resize.register(DepthEstimationAnnotation)
         def _(entry, height, width):
             entry.depth_map = cv2.resize(entry.depth_map, (width, height))
 
             return entry
 
         @resize.register(StyleTransferAnnotation)
+        @resize.register(StyleTransferPrediction)
+        @resize.register(SuperResolutionAnnotation)
+        @resize.register(SuperResolutionPrediction)
         def _(entry, height, width):
             data = Image.fromarray(entry.value)
             data = data.resize((width, height), Image.BICUBIC)
@@ -106,14 +104,6 @@ class Resize(PostprocessorWithSpecificTargets):
         @resize.register(SegmentationAnnotation)
         def _(entry, height, width):
             entry.mask = self._segm_resize(entry.mask, width, height)
-            return entry
-
-        @resize.register(SuperResolutionPrediction)
-        def _(entry, height, width):
-            data = Image.fromarray(entry.value)
-            data = data.resize((width, height), Image.BICUBIC)
-            entry.value = np.array(data)
-
             return entry
 
         for prediction in predictions:
