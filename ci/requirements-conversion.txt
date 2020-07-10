@@ -1,43 +1,53 @@
 # use update-requirements.py to update this file
 
 absl-py==0.9.0            # via tensorboard, tensorflow
-astor==0.8.1              # via tensorflow
-certifi==2020.4.5.1       # via requests
+astunparse==1.6.3         # via tensorflow
+cachetools==4.1.1         # via google-auth
+certifi==2020.6.20        # via requests
 chardet==3.0.4            # via requests
 decorator==4.4.2          # via networkx
 defusedxml==0.6.0         # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
 future==0.18.2            # via -r tools/downloader/requirements-caffe2.in
-gast==0.2.2               # via tensorflow
+gast==0.3.3               # via tensorflow
+google-auth-oauthlib==0.4.1  # via tensorboard
+google-auth==1.18.0       # via google-auth-oauthlib, tensorboard
 google-pasta==0.2.0       # via tensorflow
 graphviz==0.8.4           # via mxnet
-grpcio==1.28.1            # via tensorboard, tensorflow
-h5py==2.10.0              # via keras-applications
-idna==2.9                 # via requests
-keras-applications==1.0.8  # via tensorflow
-keras-preprocessing==1.1.0  # via tensorflow
-markdown==3.2.1           # via tensorboard
+grpcio==1.30.0            # via tensorboard, tensorflow
+h5py==2.10.0              # via tensorflow
+idna==2.10                # via requests
+importlib-metadata==1.7.0  # via markdown
+keras-preprocessing==1.1.2  # via tensorflow
+markdown==3.2.2           # via tensorboard
 mxnet==1.5.1              # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
 networkx==2.4             # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
-numpy==1.18.2             # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, h5py, keras-applications, keras-preprocessing, mxnet, onnx, opt-einsum, scipy, tensorboard, tensorflow, torch, torchvision
-onnx==1.6.0               # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, -r tools/downloader/requirements-caffe2.in, -r tools/downloader/requirements-pytorch.in
+numpy==1.18.5             # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, h5py, keras-preprocessing, mxnet, onnx, opt-einsum, scipy, tensorboard, tensorflow, torch, torchvision
+oauthlib==3.1.0           # via requests-oauthlib
+onnx==1.7.0               # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, -r tools/downloader/requirements-caffe2.in, -r tools/downloader/requirements-pytorch.in
 opt-einsum==3.2.1         # via tensorflow
-pillow==7.1.1             # via torchvision
-protobuf==3.6.1           # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, onnx, tensorboard, tensorflow
-requests==2.23.0          # via mxnet
-scipy==1.4.1              # via -r tools/downloader/requirements-pytorch.in
-six==1.14.0               # via absl-py, google-pasta, grpcio, h5py, keras-preprocessing, onnx, protobuf, tensorboard, tensorflow, test-generator, torchvision
-tensorboard==1.15.0       # via tensorflow
-tensorflow-estimator==1.15.1  # via tensorflow
-tensorflow==1.15.2        # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
+pillow==7.2.0             # via torchvision
+protobuf==3.12.2          # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, onnx, tensorboard, tensorflow
+pyasn1-modules==0.2.8     # via google-auth
+pyasn1==0.4.8             # via pyasn1-modules, rsa
+requests-oauthlib==1.3.0  # via google-auth-oauthlib
+requests==2.24.0          # via mxnet, requests-oauthlib, tensorboard
+rsa==4.6                  # via google-auth
+scipy==1.4.1              # via -r tools/downloader/requirements-pytorch.in, tensorflow
+six==1.15.0               # via absl-py, astunparse, google-auth, google-pasta, grpcio, h5py, keras-preprocessing, onnx, protobuf, tensorboard, tensorflow, test-generator, torchvision
+tensorboard-plugin-wit==1.7.0  # via tensorboard
+tensorboard==2.2.2        # via tensorflow
+tensorflow-estimator==2.2.0  # via tensorflow
+tensorflow==2.2.0         # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
 termcolor==1.1.0          # via tensorflow
 test-generator==0.1.1     # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
 torch==1.4.0              # via -r tools/downloader/requirements-caffe2.in, -r tools/downloader/requirements-pytorch.in, torchvision
 torchvision==0.5.0        # via -r tools/downloader/requirements-pytorch.in
 typing-extensions==3.7.4.2  # via onnx
-urllib3==1.25.8           # via requests
+urllib3==1.25.9           # via requests
 werkzeug==1.0.1           # via tensorboard
-wheel==0.34.2             # via tensorboard, tensorflow
+wheel==0.34.2             # via astunparse, tensorboard, tensorflow
 wrapt==1.12.1             # via tensorflow
+zipp==1.2.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
