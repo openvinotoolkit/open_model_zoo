@@ -497,6 +497,7 @@ def main():
 
         else:
             event.wait()
+            event.clear()
 
     if callback_exceptions:
         raise callback_exceptions[0]
