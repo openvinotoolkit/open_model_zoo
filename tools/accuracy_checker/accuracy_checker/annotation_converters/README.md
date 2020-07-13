@@ -310,6 +310,10 @@ Accuracy Checker supports following list of annotation converters and specific f
    * `data_dir` - directory, where input images and annotation files in MATLAB format stored.
 * `style_transfer` - converts images to `StyleTransferAnnotation`.
   * `images_dir` - path to images directory.
+* `ade20k` - converts ADE20K dataset to `SegmentationAnnotation`.
+  * `images_dir` - path to directory with images (e.g. `ADEChallengeData2016/images/validation`).
+  * `annotations_dir` - path to directory with annotations (e.g. `ADEChallengeData2016/annotations/validation`).
+  * `object_categories_file` - path to file with labels (e.g. `ADEChallengeData2016/objectInfo150.txt`).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)

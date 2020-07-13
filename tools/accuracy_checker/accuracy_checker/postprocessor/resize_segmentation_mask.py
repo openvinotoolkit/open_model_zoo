@@ -18,7 +18,7 @@ from functools import singledispatch
 import numpy as np
 from PIL import Image
 
-from ..config import NumberField
+from ..config import NumberField, BoolField
 from ..utils import get_size_from_config
 from .postprocessor import PostprocessorWithSpecificTargets
 from ..representation import SegmentationPrediction, SegmentationAnnotation
@@ -43,12 +43,14 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
             'size': NumberField(
                 value_type=int, optional=True, min_value=1,
                 description="Destination size for resize for both dimensions (height and width)."
-            )
+            ),
+            'to_dst_image_size': BoolField(optional=True, default=False)
         })
         return parameters
 
     def configure(self):
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
+        self.to_dst_image_size = self.get_value_from_config('to_dst_image_size')
 
     def process_image(self, annotation, prediction):
         target_height = self.dst_height or self.image_size[0]
@@ -131,3 +133,8 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
         image_new = image.resize((width, height), resample=0)
 
         return np.array(image_new)
+
+    def process_image_with_metadata(self, annotations, predictions, image_metadata=None):
+        if 'image_info' in image_metadata and self.to_dst_image_size:
+            self.image_size = image_metadata['image_info']
+        self.process_image(annotations, predictions)

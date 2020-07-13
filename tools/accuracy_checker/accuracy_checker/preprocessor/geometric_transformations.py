@@ -422,7 +422,7 @@ class Padding(Preprocessor):
         if isinstance(pad_val, int):
             self.pad_value = (pad_val, pad_val, pad_val)
         if isinstance(pad_val, str):
-            self.pad_value = string_to_tuple(pad_val, int)
+            self.pad_value = string_to_tuple(pad_val, float)
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self.pad_func = padding_func[self.get_value_from_config('pad_type')]
         self.use_numpy = self.get_value_from_config('use_numpy')
