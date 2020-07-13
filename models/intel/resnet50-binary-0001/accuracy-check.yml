@@ -29,7 +29,7 @@ models:
           - type: crop
             size: 224
             use_pillow: True
-          - type: bgr_to_rgb
+          - type: rgb_to_bgr
 
         metrics:
           - name: accuracy@top1
