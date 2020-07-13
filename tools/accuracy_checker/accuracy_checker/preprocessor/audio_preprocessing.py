@@ -341,7 +341,7 @@ class TriangleFiltering(Preprocessor):
                 self.weights[i] = 0.0
             else:
                 if channel >= 0:
-                    self.weights[i] = ((center_frequencies[int(channel) + 1] - self.freq2mel(i * hz_per_sbin)) / 
+                    self.weights[i] = ((center_frequencies[int(channel) + 1] - self.freq2mel(i * hz_per_sbin))/
                                        (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
                 else:
                     self.weights[i] = ((center_frequencies[0] - self.freq2mel(i * hz_per_sbin)) /
@@ -471,7 +471,7 @@ class PackCepstrum(Preprocessor):
         if steps % self.step:
             empty_context = np.zeros((self.step - (steps % self.step), context, numceps), dtype=features.dtype)
             features = np.concatenate((features, empty_context))
-            steps, _, _ = features.shape
+            steps, context, numceps = features.shape
 
         features = np.expand_dims(features, 0)
 
