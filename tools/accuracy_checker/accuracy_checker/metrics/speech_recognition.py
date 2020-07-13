@@ -15,13 +15,11 @@ limitations under the License.
 
 import numpy as np
 
-# from ..config import BoolField, NumberField, ConfigError
 from ..representation import (
     CharacterRecognitionAnnotation,
     CharacterRecognitionPrediction,
     )
 from .metric import PerImageEvaluationMetric
-# from ..utils import finalize_metric_result
 
 
 class SpeechRecognitionWER(PerImageEvaluationMetric):
@@ -29,15 +27,12 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
     annotation_types = (CharacterRecognitionAnnotation,)
     prediction_types = (CharacterRecognitionPrediction,)
 
-    overall_metric = []
-
     def configure(self):
         self.overall_metric = []
         self.meta = {'target': 'lower-better'}
 
     def update(self, annotation, prediction):
 
-        # distance = editDistance(annotation, prediction)
         h = prediction.label
         r = annotation.label
 
@@ -56,7 +51,6 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
                     delete = dist[i - 1][j] + 1
                     dist[i][j] = min(substitute, insert, delete)
 
-        # print the result in aligned way
         result = float(dist[len(r)][len(h)]) / len(r)
 
         self.overall_metric.append(result)

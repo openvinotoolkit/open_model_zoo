@@ -13,16 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-# from collections import defaultdict
 import string
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import NumberField, BoolField, StringField #, ConfigValidator, ConfigError
+from ..config import NumberField, BoolField, StringField
 from ..representation import CharacterRecognitionPrediction
-
-
-
 
 class CTCBeamSearchDecoder(Adapter):
     __provider__ = 'ctc_beam_search_decoder'
@@ -66,7 +62,6 @@ class CTCBeamSearchDecoder(Adapter):
 
         raw_output = self._extract_predictions(raw, frame_meta)
         output = raw_output[self.output_blob]
-        # output = np.swapaxes(output, 0, 1)
         if multi_infer:
             steps, _, _, _ = output.shape
             res = []
@@ -75,13 +70,11 @@ class CTCBeamSearchDecoder(Adapter):
             output = np.concatenate(tuple(res))
 
         result = []
-        # for identifier, data in zip(identifiers, output):
         if self.softmaxed_probabilities:
             data = np.log(data)
         seq = self.decode(output, self.beam_size, self.blank_label)
         decoded = ''.join([self.alphabet[t[0]] for t in seq[0]])
         decoded = decoded.upper()
-        # decoded = ''.join(str(self.label_map[char]) for char in seq)
         result.append(CharacterRecognitionPrediction(identifiers[0], decoded))
         return result
 
@@ -103,7 +96,6 @@ class CTCBeamSearchDecoder(Adapter):
         pred = probabilities.squeeze()
 
         t_step = pred.shape[0]
-        # idx_b = text_label.index(blank)
         idx_b = pred.shape[1] - 1
 
         _pB = {}
