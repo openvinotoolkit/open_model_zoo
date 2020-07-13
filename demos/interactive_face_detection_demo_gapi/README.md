@@ -1,8 +1,8 @@
 # G-API Interactive Face Detection Demo
 
 This demo showcases Object Detection task applied for face recognition using sequence of neural networks.
-Main pipeline is creating using G-API framework. This demo executes six [kernels](https://docs.opencv.org/master/d0/d25/gapi_kernel_api.html), five of them executes networks another one is a postprocessing kernel.
-This demo executes the Face Detection, Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, and Facial Landmarks Detection networks that run simultaneously. You can use a set of the following pre-trained models with the demo:
+Main pipeline is creating using [G-API framework](https://docs.opencv.org/master/d0/d1e/gapi.html). This demo executes six [kernels](https://docs.opencv.org/master/d0/d25/gapi_kernel_api.html), five of them executes networks another one is a postprocessing kernel.
+This demo executes the Face Detection, Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, and Facial Landmarks Detection networks. You can use a set of the following pre-trained models with the demo:
 * `face-detection-adas-0001`, which is a primary detection network for finding faces
 * `age-gender-recognition-retail-0013`, which is executed on top of the results of the first model and reports estimated age and gender for each detected face
 * `head-pose-estimation-adas-0001`, which is executed on top of the results of the first model and reports estimated head pose in Tait-Bryan angles
@@ -13,7 +13,6 @@ For more information about the pre-trained models, refer to the [model documenta
 
 Other demo objectives are:
 
-*	Video as input support via OpenCV\*
 *	Visualization of the resulting face bounding boxes from Face Detection network
 *	Visualization of age/gender, head pose, emotion information, and facial landmarks positions for each detected face
 
@@ -23,10 +22,10 @@ OpenCV is used to draw resulting bounding boxes, labels, and other information. 
 
 1.	The application reads command-line parameters and loads up to five networks depending on `-m...` options family to the Inference
 Engine.
-2.	G-API [streaming]() gets a video/image/camera like a sourse using the OpenCV VideoCapture.
-3.	The application performs inference on the Face Detection network.
-4.	The application application run post processing kernel.
-5.	The application performs four simultaneous inferences, using the Age/Gender, Head Pose, Emotions, and Facial Landmarks detection networks if they are specified in the command line.
+2.	G-API pipline gets a video/image/camera like a sourse using the OpenCV VideoCapture.
+3.	G-API pipline performs inference on the Face Detection network.
+4.	G-API pipline run post processing kernel.
+5.	G-API pipline performs four inferences, using the Age/Gender, Head Pose, Emotions, and Facial Landmarks detection networks if they are specified in the command line.
 6.	The application displays the results.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
