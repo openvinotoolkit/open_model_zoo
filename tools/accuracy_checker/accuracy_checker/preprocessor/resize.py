@@ -42,7 +42,6 @@ def frcnn_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
     w1, h1 = scale_greater(min_size, min_size, image_width, image_height)
     if max(w1, h1) <= max_size:
         return w1, h1
-
     return scale_fit_to_window(max_size, max_size, image_width, image_height)
 
 
@@ -235,7 +234,11 @@ class _TFResizer(_Resizer):
     def supported_interpolations(cls):
         if tf is None:
             return {}
-        return cls._supported_interpolations
+        return {
+            'BILINEAR': tf.image.ResizeMethod.BILINEAR,
+            'AREA': tf.image.ResizeMethod.AREA,
+            'BICUBIC': tf.image.ResizeMethod.BICUBIC,
+        }
 
 
 def create_resizer(config):
@@ -305,6 +308,11 @@ class Resize(Preprocessor):
                 optional=True, choices=_Resizer.providers,
                 description="Parameter specifies functionality of which library will be used for resize: "
                             "{}".format(', '.join(_Resizer.providers))
+            ),
+            'factor': NumberField(
+                optional=True, min_value=1,
+                description='destination size must be divisible by a given number without remainder, '
+                            'when aspect ratio resize used', value_type=int
             )
         })
 
@@ -314,6 +322,7 @@ class Resize(Preprocessor):
         self.dst_height, self.dst_width = get_size_from_config(self.config)
         self.resizer = create_resizer(self.config)
         self.scaling_func = ASPECT_RATIO_SCALE.get(self.get_value_from_config('aspect_ratio_scale'))
+        self.factor = self.get_value_from_config('factor')
 
     def process(self, image, annotation_meta=None):
         data = image.data
@@ -326,6 +335,9 @@ class Resize(Preprocessor):
             image_h, image_w = data.shape[:2]
             if scale_func:
                 dst_width, dst_height = scale_func(new_width, new_height, image_w, image_h)
+                if self.factor:
+                    dst_width -= (dst_width - 1) % self.factor
+                    dst_height -= (dst_height - 1) % self.factor
 
             resize_meta = {}
             resize_meta['preferable_width'] = max(dst_width, new_width)

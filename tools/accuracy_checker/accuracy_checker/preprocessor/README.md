@@ -34,6 +34,8 @@ Accuracy Checker supports following set of preprocessors:
     - `east_keep_aspect_ratio` - adaptive resize keeping aspect ratio using this algorithm:
       1. If max image size greater max destination size, make max image size equal to max destination size.
       2. Make image height and width divisible by min destination size without remainder.
+  * `factor` -  destination size for aspect ratio resize must be divisible by a given number without remainder. 
+  Please pay attention that this parameter only works with `aspect_ratio_scale` parameters.
 * `auto_resize` - automatic resizing image to input layer shape. (supported only for one input layer case, use OpenCV for image resize)
 * `normalization` - changing the range of pixel intensity values.
   * `mean` values which will be subtracted from image channels.
