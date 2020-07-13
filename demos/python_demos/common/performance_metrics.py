@@ -43,8 +43,6 @@ class PerformanceMetrics:
     def update(self, last_request_start_time, frame, position=(15, 30),
                font_scale=0.75, color=(200, 10, 10), thickness=2):
         current_time = perf_counter()
-        if self.last_update_time is None:
-            self.last_update_time = current_time
 
         last_request_latency = current_time - last_request_start_time
         if self.total_statistic.frame_count != 0:
@@ -52,16 +50,15 @@ class PerformanceMetrics:
             self.current_moving_statistic.period = current_time - self.last_update_time
             self.current_moving_statistic.frame_count += 1
         else:
-            # for 1st frame
+            # for the 1st frame
+            self.last_update_time = current_time
             self.last_moving_statistic.latency = last_request_latency
             self.last_moving_statistic.frame_count = 1
             self.total_statistic.latency = last_request_latency
             self.total_statistic.frame_count = 1
 
         if current_time - self.last_update_time > self.time_window_size:
-            self.last_moving_statistic.latency = self.current_moving_statistic.latency
-            self.last_moving_statistic.period = current_time - self.last_update_time
-            self.last_moving_statistic.frame_count = self.current_moving_statistic.frame_count
+            self.last_moving_statistic = self.current_moving_statistic
             self.total_statistic.combine(self.last_moving_statistic)
             self.current_moving_statistic = Statistic()
 
