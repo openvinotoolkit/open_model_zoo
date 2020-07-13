@@ -90,8 +90,6 @@ class ClipAudio(Preprocessor):
     def process(self, image, annotation_meta=None):
         data = image.data
 
-        print("Audio shape: {}".format(data.shape))
-
         sample_rate = image.metadata.get('sample_rate')
         if sample_rate is None:
             raise RuntimeError('Operation "{}" failed: required "sample rate" in metadata.'.
@@ -192,7 +190,6 @@ class NormalizeAudio(Preprocessor):
     def configure(self):
 
         self.int16mode = self.get_value_from_config('int16mode')
-        # self.skip_channels = self.get_value_from_config('skip_channels')
 
     def process(self, image, annotation_meta=None):
         sound = image.data
@@ -201,8 +198,6 @@ class NormalizeAudio(Preprocessor):
         else:
             sound = (sound - np.mean(sound)) / (np.std(sound) + 1e-15)
 
-        # if self.skip_channels:
-        #     sound = sound[0, ...]
         image.data = sound
 
         return image
@@ -256,7 +251,6 @@ class AudioSpectrogram(Preprocessor):
         frames = image.data
         if self.skip_channels:
             frames = frames.squeeze()
-        print("Frames shape: {}".format(frames.shape))
 
         pspec = np.absolute(np.fft.rfft(frames, self.fftbase))
         if self.magnutide_squared:
@@ -295,7 +289,6 @@ class TriangleFiltering(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         spectrogram = image.data
-        print("Spectrogram shape: {}".format(spectrogram.shape))
         samples, channels = spectrogram.shape
         kFilterbankFloor = 1e-12
 
@@ -354,8 +347,6 @@ class TriangleFiltering(Preprocessor):
                     self.weights[i] = ((center_frequencies[0] - self.freq2mel(i * hz_per_sbin)) /
                                   (center_frequencies[0] - mel_low))
 
-        # return self.start_index, self.end_index, self.weights, self.band_mapper
-
     def compute(self, mfcc_input):
         output_channels = np.zeros(self.filterbank_channel_count)
         for i in range(self.start_index, (self.end_index + 1)):
@@ -409,8 +400,6 @@ class DCT(Preprocessor):
             for j in range(self.input_length):
                 self.cosine[i][j] = fnorm * np.cos(i * arg * (j + 0.5))
 
-        # return self.cosine
-
     def compute(self, filtered):
 
         output_dct = np.zeros(self.dct_coefficient_count)
@@ -435,14 +424,12 @@ class ClipCepstrum(Preprocessor):
         parameters = super().parameters()
         parameters.update({
             "context": NumberField(default=9, description='number of samples in context window'),
-            # "step": NumberField(default=16, description='Number of contexts in single infer'),
             "numceps": NumberField(default=26, description='Number of input coefficients'),
         })
         return parameters
 
     def configure(self):
         self.n_context = self.get_value_from_config('context')
-        # self.step = self.get_value_from_config('step')
         self.numceps = self.get_value_from_config('numceps')
 
     def process(self, image, annotation_meta=None):
@@ -463,3 +450,36 @@ class ClipCepstrum(Preprocessor):
 
         return image
 
+class PackCepstrum(Preprocessor):
+    __provider__ = 'pack_cepstrum'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            "step": NumberField(default=16, description='number of simultaneously processed contexts'),
+        })
+        return parameters
+
+    def configure(self):
+        self.step = self.get_value_from_config('step')
+
+    def process(self, image, annotation_meta=None):
+        features = image.data
+
+        steps, context, numceps = features.shape
+        if steps % self.step:
+            empty_context = np.zeros((self.step - (steps % self.step), context, numceps), dtype=features.dtype)
+            features = np.concatenate((features, empty_context))
+            steps, _, _ = features.shape
+
+        features = np.expand_dims(features, 0)
+
+        packed = []
+        for i in range(0, steps, self.step):
+            packed.append(features[:, i:i+self.step, ...])
+
+        image.data = packed
+        image.metadata['multi_infer'] = True
+
+        return image

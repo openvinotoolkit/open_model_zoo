@@ -18,8 +18,10 @@ import string
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, BoolField, ConfigError
+from ..config import ConfigValidator, NumberField, BoolField, StringField, ConfigError
 from ..representation import CharacterRecognitionPrediction
+
+
 
 
 class CTCBeamSearchDecoder(Adapter):
@@ -39,30 +41,62 @@ class CTCBeamSearchDecoder(Adapter):
             ),
             'softmaxed_probabilities': BoolField(
                 optional=True, default=False, description="Indicator that model uses softmax for output layer "
+            ),
+            'classification_out': StringField(
+                optional=True, default = None, description="Name of output node"
             )
+
         })
         return parameters
 
     def configure(self):
         self.beam_size = self.get_value_from_config('beam_size')
         self.blank_label = self.launcher_config.get('blank_label')
+        self.softmaxed_probabilities = self.launcher_config.get('softmaxed_probabilities')
+        self.classification_out = self.get_value_from_config('classification_out'
+                                                             '')
         self.alphabet = ' ' + string.ascii_lowercase + '\'-'
         self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
 
 
     def process(self, raw, identifiers=None, frame_meta=None):
+        if self.classification_out is not None:
+            self.output_blob = self.classification_out
+        multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
+
         raw_output = self._extract_predictions(raw, frame_meta)
         output = raw_output[self.output_blob]
-        output = np.swapaxes(output, 0, 1)
+        # output = np.swapaxes(output, 0, 1)
+        if multi_infer:
+            steps, _, _, _ = output.shape
+            res = []
+            for i in range(steps):
+                res.append(output[i, ...])
+            output = np.concatenate(tuple(res))
 
         result = []
-        for identifier, data in zip(identifiers, output):
-            if self.softmaxed_probabilities:
-                data = np.log(data)
-            seq = self.decode(data, self.beam_size, self.blank_label)
-            decoded = ''.join(str(self.label_map[char]) for char in seq)
-            result.append(CharacterRecognitionPrediction(identifier, decoded))
+        # for identifier, data in zip(identifiers, output):
+        if self.softmaxed_probabilities:
+            data = np.log(data)
+        seq = self.decode(output, self.beam_size, self.blank_label)
+        decoded = ''.join([self.alphabet[t[0]] for t in seq[0]])
+        decoded = decoded.upper()
+        # decoded = ''.join(str(self.label_map[char]) for char in seq)
+        result.append(CharacterRecognitionPrediction(identifiers[0], decoded))
         return result
+
+    @staticmethod
+    def _extract_predictions(outputs_list, meta):
+        is_multi_infer = meta[-1].get('multi_infer', False) if meta else False
+        if not is_multi_infer:
+            return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
+
+        output_map = {}
+        for output_key in outputs_list[0].keys():
+            output_data = np.asarray([output[output_key] for output in outputs_list])
+            output_map[output_key] = output_data
+
+        return output_map
 
     @staticmethod
     def decode(probabilities, beamwidth=10, blank_id=None):
@@ -131,8 +165,7 @@ class CTCBeamSearchDecoder(Adapter):
                 _pT['l'][_sent[0]] = _pT['c'][_sent[0]]
 
         res = sorted(_pT['l'].items(), reverse=True, key=lambda item: item[1])[0]
-        decoded = ''.join([self.alphabet[t[0]] for t in res[0]])
 
-        return decoded
+        return res
 
 

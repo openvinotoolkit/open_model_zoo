@@ -33,14 +33,15 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
 
     def configure(self):
         self.overall_metric = []
+        self.meta = {'target': 'lower-better'}
 
     def update(self, annotation, prediction):
 
         # distance = editDistance(annotation, prediction)
-        h = prediction
-        r = annotation
+        h = prediction.label
+        r = annotation.label
 
-        dist = numpy.zeros((len(r) + 1) * (len(h) + 1), dtype=numpy.uint8).reshape((len(r) + 1, len(h) + 1))
+        dist = np.zeros((len(r) + 1, len(h) + 1), dtype=np.uint8)
         for i in range(len(r) + 1):
             dist[i][0] = i
         for j in range(len(h) + 1):
@@ -56,7 +57,7 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
                     dist[i][j] = min(substitute, insert, delete)
 
         # print the result in aligned way
-        result = float(d[len(r)][len(h)]) / len(r)
+        result = float(dist[len(r)][len(h)]) / len(r)
 
         self.overall_metric.append(result)
 
