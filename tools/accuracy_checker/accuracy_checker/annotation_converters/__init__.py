@@ -139,7 +139,7 @@ __all__ = [
     'ImageProcessingConverter',
     'AFLW20003DConverter',
 
-    'ADE20kConverter'
+    'ADE20kConverter',
 
     'LibrispeechConverter',
 ]
