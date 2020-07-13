@@ -33,7 +33,7 @@ models:
             dst_width: 480
             use_pillow: True
             interpolation: BILINEAR
-          - type: bgr_to_rgb
+          - type: rgb_to_bgr
 
         postprocessing:
           - type: resize_segmentation_mask
