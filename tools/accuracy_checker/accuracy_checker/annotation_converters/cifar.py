@@ -188,9 +188,11 @@ class CifarFormatConverter(BaseFormatConverter):
             meta = read_json(self.dataset_meta)
             if 'label_map' in meta:
                 meta['label_map'] = verify_label_map(meta['label_map'])
-                return meta
+                labels = list(meta['label_map'].values())
+                return meta, labels, labels_id
             labels = meta.get('labels', labels)
         meta.update({'label_map': {label_id + labels_offset: label_name for label_id, label_name in enumerate(labels)}})
+
         if self.has_background:
             meta['label_map'][0] = 'background'
             meta['background_label'] = 0
