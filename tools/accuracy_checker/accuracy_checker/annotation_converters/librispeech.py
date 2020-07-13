@@ -45,6 +45,6 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
                     fname = txt.parent / name
                     fname = fname.with_suffix('.wav')
 
-                annotations.append(CharacterRecognitionAnnotation(str(fname), transcript))
+                annotations.append(CharacterRecognitionAnnotation(str(fname.relative_to(data_folder)), transcript))
 
         return ConverterReturn(annotations, None, None)

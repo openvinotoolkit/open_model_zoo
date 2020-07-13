@@ -29,7 +29,7 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
 
     def configure(self):
         self.overall_metric = []
-        self.meta = {'target': 'lower-better'}
+        self.meta = {'target': 'higher-worse'}
 
     def update(self, annotation, prediction):
 

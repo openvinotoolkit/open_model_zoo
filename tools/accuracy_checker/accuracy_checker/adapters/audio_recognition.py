@@ -123,29 +123,27 @@ class CTCBeamSearchDecoder(Adapter):
                 if _candidate != _init:
                     _TpNB = _pNB['l'][_candidate] * pred[_t][_candidate[-1]]
                 _TpB = _pT['l'][_candidate] * pred[_t][idx_b]
-                if _candidate in _pNB['c']:
-                    _pNB['c'][_candidate] += _TpNB
-                else:
-                    _pNB['c'][_candidate] = _TpNB
+
+                _pNB['c'][_candidate] = _TpNB + _pNB['c'][_candidate] if _candidate in _pNB['c'] else _TpNB
+
                 _pB['c'][_candidate] = _TpB
                 _pT['c'][_candidate] = _pNB['c'][_candidate] + _pB['c'][_candidate]
 
-                for i, v in np.ndenumerate(pred[_t]):
-                    if i < (idx_b,):
-                        extand_t = _candidate + (i,)
-                        if len(_candidate) > 0 and _candidate[-1] == i:
-                            _TpNB = v * _pB['l'][_candidate]
+                nonblanks = [(i, v) for i, v in np.ndenumerate(pred[_t]) if i < (idx_b,)]
+                for nb in nonblanks:
+                    i, v = nb
 
-                        else:
-                            _TpNB = v * _pT['l'][_candidate]
+                    extand_t = _candidate + (i,)
+                    _TpNB = v * _pB['l'][_candidate] if len(_candidate) > 0 and _candidate[-1] == i else \
+                            v * _pT['l'][_candidate]
 
-                        if extand_t in _pT['c']:
-                            _pT['c'][extand_t] += _TpNB
-                            _pNB['c'][extand_t] += _TpNB
-                        else:
-                            _pB['c'][extand_t] = 0
-                            _pT['c'][extand_t] = _TpNB
-                            _pNB['c'][extand_t] = _TpNB
+                    if extand_t in _pT['c']:
+                        _pT['c'][extand_t] += _TpNB
+                        _pNB['c'][extand_t] += _TpNB
+                    else:
+                        _pB['c'][extand_t] = 0
+                        _pT['c'][extand_t] = _TpNB
+                        _pNB['c'][extand_t] = _TpNB
 
             sorted_c = sorted(_pT['c'].items(), reverse=True, key=lambda item: item[1])
             _pB['l'] = {}
