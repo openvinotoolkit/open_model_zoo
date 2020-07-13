@@ -66,13 +66,14 @@ public:
         }
         if (loop) {
             rewinddir(dir);
-            for (struct dirent *ent = readdir(dir); ent != nullptr; ent = readdir(dir))
-                if (strcmp(ent->d_name, ".") && strcmp(ent->d_name, ".."))
-                    return cv::imread(input + '/' + ent->d_name);
-            return cv::Mat{};
-        } else {
-            return cv::Mat{};
+            for (struct dirent *ent = readdir(dir); ent != nullptr; ent = readdir(dir)) {
+                if (strcmp(ent->d_name, ".") && strcmp(ent->d_name, "..")) {
+                    cv::Mat img = cv::imread(input + '/' + ent->d_name);
+                    if (img.data) return img;
+                }
+            }
         }
+        return cv::Mat{};
     }
 };
 

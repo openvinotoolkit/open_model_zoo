@@ -23,7 +23,7 @@
 
 #include <inference_engine.hpp>
 
-#include <image_capture.h>
+#include <images_capture.h>
 #include <monitors/presenter.h>
 #include <samples/slog.hpp>
 #include <samples/ocv_common.hpp>
