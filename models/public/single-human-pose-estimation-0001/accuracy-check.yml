@@ -1,0 +1,29 @@
+models:
+  - name: single-human-pose-estimation-0001
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/single-human-pose-estimation-0001/FP32/single-human-pose-estimation-0001.xml
+        weights: public/single-human-pose-estimation-0001/FP32/single-human-pose-estimation-0001.bin
+        adapter:
+          type: single_human_pose_estimation
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/single-human-pose-estimation-0001/FP16/single-human-pose-estimation-0001.xml
+        weights: public/single-human-pose-estimation-0001/FP16/single-human-pose-estimation-0001.bin
+        adapter:
+          type: single_human_pose_estimation
+
+    datasets:
+      - name: ms_coco_single_keypoints
+        preprocessing:
+          - type: transformed_crop_with_auto_scale
+            dst_height: 384
+            dst_width: 288
+            stride: 8
+        metrics:
+          - name: AP
+            type: coco_orig_keypoints_precision

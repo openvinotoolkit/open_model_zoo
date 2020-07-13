@@ -1,0 +1,27 @@
+models:
+  - name: Sphereface
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/Sphereface/FP32/Sphereface.xml
+        weights: public/Sphereface/FP32/Sphereface.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/Sphereface/FP16/Sphereface.xml
+        weights: public/Sphereface/FP16/Sphereface.bin
+        adapter: reid
+
+    datasets:
+      - name: lfw
+
+        preprocessing:
+          - type: point_alignment
+            size: 400
+          - type: resize
+            dst_height: 112
+            dst_width: 96

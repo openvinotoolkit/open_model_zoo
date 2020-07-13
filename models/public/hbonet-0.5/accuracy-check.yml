@@ -1,0 +1,69 @@
+models:
+  - name: hbonet-0.5
+
+    launchers:
+      - framework: onnx_runtime
+        model: public/hbonet-0.5/hbonet-0.5.onnx
+        adapter: classification
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 1,3,224,224
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: opencv_imread
+
+        preprocessing:
+          - type: bgr_to_rgb
+
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            interpolation: BILINEAR
+            use_pillow: True
+
+          - type: crop
+            size: 224
+
+          - type: normalization
+            std: 255
+
+          - type: normalization
+            mean: (0.485, 0.456, 0.406)
+            std: (0.229, 0.224, 0.225)
+
+  - name: hbonet-0.5
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/hbonet-0.5/FP32/hbonet-0.5.xml
+        weights: public/hbonet-0.5/FP32/hbonet-0.5.bin
+        adapter:
+          type: classification
+          classification_output: output
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/hbonet-0.5/FP16/hbonet-0.5.xml
+        weights: public/hbonet-0.5/FP16/hbonet-0.5.bin
+        adapter:
+          type: classification
+          classification_output: output
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: opencv_imread
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            interpolation: BILINEAR
+            use_pillow: True
+
+          - type: crop
+            size: 224

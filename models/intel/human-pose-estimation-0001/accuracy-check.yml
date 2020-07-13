@@ -1,0 +1,60 @@
+models:
+  - name: human-pose-estimation-0001
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   intel/human-pose-estimation-0001/FP32/human-pose-estimation-0001.xml
+        weights: intel/human-pose-estimation-0001/FP32/human-pose-estimation-0001.bin
+        allow_reshape_input: True
+        adapter:
+          type: human_pose_estimation
+          part_affinity_fields_out: Mconv7_stage2_L1
+          keypoints_heatmap_out: Mconv7_stage2_L2
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/human-pose-estimation-0001/FP16/human-pose-estimation-0001.xml
+        weights: intel/human-pose-estimation-0001/FP16/human-pose-estimation-0001.bin
+        allow_reshape_input: True
+        adapter:
+          type: human_pose_estimation
+          part_affinity_fields_out: Mconv7_stage2_L1
+          keypoints_heatmap_out: Mconv7_stage2_L2
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   intel/human-pose-estimation-0001/FP16-INT8/human-pose-estimation-0001.xml
+        weights: intel/human-pose-estimation-0001/FP16-INT8/human-pose-estimation-0001.bin
+        allow_reshape_input: True
+        adapter:
+          type: human_pose_estimation
+          part_affinity_fields_out: Mconv7_stage2_L1
+          keypoints_heatmap_out: Mconv7_stage2_L2
+
+    datasets:
+      - name: ms_coco_keypoints
+
+        preprocessing:
+          - type: resize
+            size: 368
+            interpolation: CUBIC
+            aspect_ratio_scale: width
+          - type: padding
+            stride: 8
+
+        postprocessing:
+          - type: filter
+            apply_to: annotation
+            area_range: 1, 10000000000
+          - type: filter
+            apply_to: prediction
+            area_range: 1, 10000000000
+
+        metrics:
+          - name: AP
+            type: coco_precision
+            max_detections: 20

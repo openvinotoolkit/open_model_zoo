@@ -1,0 +1,32 @@
+models:
+  - name: googlenet-v2-tf
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/googlenet-v2-tf/FP32/googlenet-v2-tf.xml
+        weights: public/googlenet-v2-tf/FP32/googlenet-v2-tf.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/googlenet-v2-tf/FP16/googlenet-v2-tf.xml
+        weights: public/googlenet-v2-tf/FP16/googlenet-v2-tf.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+          - type: crop
+            central_fraction: 0.875
+          - type: resize
+            size: 224
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: acciracy@top5
+            type: accuracy
+            top_k: 5

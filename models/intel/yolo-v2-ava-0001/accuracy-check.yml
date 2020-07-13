@@ -1,0 +1,54 @@
+models:
+  - name: yolo-v2-ava-0001
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model: intel/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.xml
+        weights: intel/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.bin
+        adapter:
+          type: yolo_v2
+          anchors: yolo_v2
+      - framework: dlsdk
+        tags:
+          - FP16
+        model: intel/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.xml
+        weights: intel/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.bin
+        adapter:
+          type: yolo_v2
+          anchors: yolo_v2
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model: intel/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.xml
+        weights: intel/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.bin
+        adapter:
+          type: yolo_v2
+          anchors: yolo_v2
+    datasets:
+      - name: VOC2012_without_background
+
+        preprocessing:
+          - type: resize
+            size: 416
+            interpolation: LINEAR
+
+        postprocessing:
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.01
+            remove_filtered: True
+          - type: nms
+            overlap: 0.5
+            include_boundaries: False
+          - type: resize_prediction_boxes
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: True
+            presenter: print_scalar
+            allow_multiple_matches_per_ignored: True
