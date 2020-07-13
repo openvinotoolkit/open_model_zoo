@@ -18,7 +18,6 @@ models:
     datasets:
       - name: VOC2012_Segmentation
         preprocessing:
-          - type: bgr_to_rgb
           - type: padding
             size: 513
         postprocessing:
