@@ -289,7 +289,7 @@ class TriangleFiltering(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         spectrogram = image.data
-        samples, channels = spectrogram.shape
+        samples, _ = spectrogram.shape
         kFilterbankFloor = 1e-12
 
         mfcc_output = np.zeros((samples, self.filterbank_channel_count))
@@ -340,12 +340,12 @@ class TriangleFiltering(Preprocessor):
             if ((i < self.start_index) or (i > self.end_index)):
                 self.weights[i] = 0.0
             else:
-                if (channel >= 0):
-                    self.weights[i] = ((center_frequencies[int(channel) + 1] - self.freq2mel(i * hz_per_sbin)) /
-                                  (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
+                if channel >= 0:
+                    self.weights[i] = ((center_frequencies[int(channel) + 1] - self.freq2mel(i * hz_per_sbin)) / 
+                                       (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
                 else:
                     self.weights[i] = ((center_frequencies[0] - self.freq2mel(i * hz_per_sbin)) /
-                                  (center_frequencies[0] - mel_low))
+                                       (center_frequencies[0] - mel_low))
 
     def compute(self, mfcc_input):
         output_channels = np.zeros(self.filterbank_channel_count)
@@ -353,10 +353,10 @@ class TriangleFiltering(Preprocessor):
             spec_val = np.sqrt(mfcc_input[i])
             weighted = spec_val * self.weights[i]
             channel = self.band_mapper[i]
-            if (channel >= 0):
+            if channel >= 0:
                 output_channels[int(channel)] += weighted
             channel += 1
-            if (channel < self.filterbank_channel_count):
+            if channel < self.filterbank_channel_count:
                 output_channels[int(channel)] += (spec_val - weighted)
 
         return output_channels
@@ -405,7 +405,7 @@ class DCT(Preprocessor):
         output_dct = np.zeros(self.dct_coefficient_count)
         base = filtered.shape[0]
 
-        if (base > self.input_length):
+        if base > self.input_length:
             base = self.input_length
 
         for i in range(self.dct_coefficient_count):

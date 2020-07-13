@@ -15,15 +15,12 @@ limitations under the License.
 """
 
 from pathlib import Path
-import numpy as np
-import re, math, wave, time, codecs
+import re
 
 from ..representation import CharacterRecognitionAnnotation
-from ..config import NumberField, StringField, PathField, BoolField
+# from ..config import NumberField, StringField, PathField, BoolField
 from .format_converter import DirectoryBasedAnnotationConverter
 from .format_converter import ConverterReturn
-from scipy.fftpack import dct
-from scipy.signal import stft
 
 class LibrispeechConverter(DirectoryBasedAnnotationConverter):
     __provider__ = 'librispeech'
@@ -51,4 +48,3 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
                 annotations.append(CharacterRecognitionAnnotation(str(fname), transcript))
 
         return ConverterReturn(annotations, None, None)
-

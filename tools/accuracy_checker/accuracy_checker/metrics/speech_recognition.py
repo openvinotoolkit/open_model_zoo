@@ -15,13 +15,13 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import BoolField, NumberField, ConfigError
+# from ..config import BoolField, NumberField, ConfigError
 from ..representation import (
     CharacterRecognitionAnnotation,
     CharacterRecognitionPrediction,
     )
 from .metric import PerImageEvaluationMetric
-from ..utils import finalize_metric_result
+# from ..utils import finalize_metric_result
 
 
 class SpeechRecognitionWER(PerImageEvaluationMetric):

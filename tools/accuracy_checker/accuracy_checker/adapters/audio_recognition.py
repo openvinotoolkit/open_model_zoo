@@ -13,12 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from collections import defaultdict
+# from collections import defaultdict
 import string
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, BoolField, StringField, ConfigError
+from ..config import NumberField, BoolField, StringField #, ConfigValidator, ConfigError
 from ..representation import CharacterRecognitionPrediction
 
 
@@ -43,7 +43,7 @@ class CTCBeamSearchDecoder(Adapter):
                 optional=True, default=False, description="Indicator that model uses softmax for output layer "
             ),
             'classification_out': StringField(
-                optional=True, default = None, description="Name of output node"
+                optional=True, default=None, description="Name of output node"
             )
 
         })
@@ -167,5 +167,3 @@ class CTCBeamSearchDecoder(Adapter):
         res = sorted(_pT['l'].items(), reverse=True, key=lambda item: item[1])[0]
 
         return res
-
-
