@@ -20,6 +20,7 @@ import numpy as np
 from .metric import PerImageEvaluationMetric
 from ..config import BoolField, NumberField
 from ..representation import TextDetectionPrediction, TextDetectionAnnotation
+from ..representation import DetectionPrediction
 from ..utils import polygon_from_points
 
 
@@ -97,7 +98,7 @@ def rect_from_points(points):
 
 class FocusedTextLocalizationMetric(PerImageEvaluationMetric):
     annotation_types = (TextDetectionAnnotation, )
-    prediction_types = (TextDetectionPrediction, )
+    prediction_types = (TextDetectionPrediction, DetectionPrediction, )
 
     @classmethod
     def parameters(cls):
@@ -150,7 +151,13 @@ class FocusedTextLocalizationMetric(PerImageEvaluationMetric):
 
     def update(self, annotation, prediction):
         gt_rects = list(map(rect_from_points, annotation.boxes))
-        prediction_rects = list(map(rect_from_points, prediction.boxes))
+        if 'TextDetectionPrediction' in str(type(prediction)):
+            prediction_rects = list(map(rect_from_points, prediction.boxes))
+        elif '.DetectionPrediction' in str(type(prediction)):
+            prediction_rects = list(map(rect_from_points,
+                                        [[x_min, y_min, x_max, y_max] for x_min, y_min, x_max, y_max
+                                         in zip(prediction.x_mins, prediction.y_mins,
+                                                prediction.x_maxs, prediction.y_maxs)]))
         num_gt = len(gt_rects)
         num_det = len(prediction_rects)
         gt_difficult_mask = np.full(num_gt, False)
