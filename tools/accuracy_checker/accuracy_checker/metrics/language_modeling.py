@@ -19,6 +19,7 @@ import numpy as np
 from ..representation import LanguageModelingAnnotation, LanguageModelingPrediction
 from .metric import PerImageEvaluationMetric
 
+
 class ScorePerplexity(PerImageEvaluationMetric):
     __provider__ = 'perplexity'
 
@@ -29,6 +30,7 @@ class ScorePerplexity(PerImageEvaluationMetric):
         super().__init__(*args, **kwargs)
         self.loss = 0
         self.total = 0
+        self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
         def cross_entropy(logits, target):
@@ -49,7 +51,7 @@ class ScorePerplexity(PerImageEvaluationMetric):
         self.total += 1
         return step_loss
 
-    def evaluate(self, annotation, prediction):
+    def evaluate(self, annotations, predictions):
         if self.total == 0:
             return 0
         return np.exp(self.loss / self.total) / 100
