@@ -31,7 +31,7 @@ The key benefit of this model compared to the [base model](../../text-detection-
     - H - image height
     - W - image width
 
-   Expected color order - RGB.
+   Expected color order - BGR.
 
 ## Outputs
 
