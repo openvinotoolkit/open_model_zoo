@@ -491,7 +491,7 @@ int main(int argc, char *argv[]) {
 
                     if (!FLAGS_m_lm.empty()) {
                         landmarksDataUpdate(face, out_landmarks[i]);
-                        if(FLAGS_r)
+                        if (FLAGS_r)
                             rawOutputLandmarks(i, out_landmarks[i]);
                     }
                     // End of face postprocesing
