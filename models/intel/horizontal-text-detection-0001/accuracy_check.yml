@@ -9,7 +9,7 @@ models:
         weights: intel/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.bin
         adapter:
             type: class_agnostic_detection
-            scale: 0.00141
+            scale: 0.0014204
 
       - framework: dlsdk
         tags:
@@ -18,7 +18,7 @@ models:
         weights: intel/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.bin
         adapter:
             type: class_agnostic_detection
-            scale: 0.00141
+            scale: 0.0014204
 
     datasets:
       - name: ICDAR2013_detection
