@@ -525,7 +525,6 @@ int main(int argc, char *argv[]) {
                 framesCounter++;
                 timer.finish("total");
             } else { // End of streaming
-                std::cout<< "End of streaming" << std::endl;
                 if(FLAGS_loop_video) {
                     stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
                     stream.start();
