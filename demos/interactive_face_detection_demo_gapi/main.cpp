@@ -440,8 +440,7 @@ int main(int argc, char *argv[]) {
         stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
         stream.start();
 
-        while (stream.running())
-        {
+        while (stream.running()) {
             timer.start("total");
 
             if (stream.pull(std::move(out_vector))) {
