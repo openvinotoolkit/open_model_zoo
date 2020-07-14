@@ -1,7 +1,7 @@
 # G-API Interactive Face Detection Demo
 
 This demo showcases Object Detection task applied for face recognition using sequence of neural networks.
-Main pipeline is creating using [G-API framework](https://docs.opencv.org/master/d0/d1e/gapi.html). This demo executes six [kernels](https://docs.opencv.org/master/d0/d25/gapi_kernel_api.html), five of them executes networks another one is a postprocessing kernel.
+The pipeline is based on [G-API framework](https://docs.opencv.org/master/d0/d1e/gapi.html). This demo executes six [kernels](https://docs.opencv.org/master/d0/d25/gapi_kernel_api.html), five of them infer networks and another one is a postprocessing kernel.
 This demo executes the Face Detection, Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, and Facial Landmarks Detection networks. You can use a set of the following pre-trained models with the demo:
 * `face-detection-adas-0001`, which is a primary detection network for finding faces
 * `age-gender-recognition-retail-0013`, which is executed on top of the results of the first model and reports estimated age and gender for each detected face
