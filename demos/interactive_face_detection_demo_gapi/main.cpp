@@ -397,7 +397,7 @@ int main(int argc, char *argv[]) {
             FLAGS_d_em                          // device to use
         };
 
-        // Form a kernel package (with a single OpenCV-based implementation of our
+        // Form a kernel package (including an OpenCV-based implementation of our
         // post-processing) and a network package (holding our three networks).x
         auto kernels = cv::gapi::kernels<OCVPostProc>();
         auto networks = cv::gapi::networks(det_net, age_net, hp_net, lm_net, emo_net);
