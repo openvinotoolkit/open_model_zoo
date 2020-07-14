@@ -44,18 +44,13 @@ class PerformanceMetrics:
                font_scale=0.75, color=(200, 10, 10), thickness=2):
         current_time = perf_counter()
 
-        last_request_latency = current_time - last_request_start_time
-        if self.total_statistic.frame_count != 0:
-            self.current_moving_statistic.latency += last_request_latency
-            self.current_moving_statistic.period = current_time - self.last_update_time
-            self.current_moving_statistic.frame_count += 1
-        else:
-            # for the 1st frame
+        if self.last_update_time is None:
             self.last_update_time = current_time
-            self.last_moving_statistic.latency = last_request_latency
-            self.last_moving_statistic.frame_count = 1
-            self.total_statistic.latency = last_request_latency
-            self.total_statistic.frame_count = 1
+            return
+
+        self.current_moving_statistic.latency += current_time - last_request_start_time
+        self.current_moving_statistic.period = current_time - self.last_update_time
+        self.current_moving_statistic.frame_count += 1
 
         if current_time - self.last_update_time > self.time_window_size:
             self.last_moving_statistic = self.current_moving_statistic
@@ -87,7 +82,7 @@ class PerformanceMetrics:
                 if frame_count != 0
                 else None,
                 (frame_count / (self.total_statistic.period + self.current_moving_statistic.period))
-                if frame_count >= 2
+                if frame_count != 0
                 else None)
     
     def print_total(self):
