@@ -256,8 +256,8 @@ int main(int argc, char *argv[]) {
             }                
         }
         const SizeVector outputDims = output->getTensorDesc().getDims();
-        const int maxProposalCount = outputDims[2];
-        const int objectSize = outputDims[3];
+        const size_t maxProposalCount = outputDims[2];
+        const size_t objectSize = outputDims[3];
         if (objectSize != 7) {
             throw std::logic_error("Output should have 7 as a last dimension");
         }
@@ -379,7 +379,7 @@ int main(int argc, char *argv[]) {
                     modeInfo[currentMode].framesCount += 1;
                 }
 
-                for (int i = 0; i < maxProposalCount; i++) {
+                for (size_t i = 0; i < maxProposalCount; i++) {
                     float image_id = detections[i * objectSize + 0];
                     if (image_id < 0) {
                         break;
