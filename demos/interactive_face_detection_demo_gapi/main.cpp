@@ -479,7 +479,7 @@ int main(int argc, char *argv[]) {
 
                     if (!FLAGS_m_em.empty()) {
                         emotionsDataUpdate(face, out_emotions[i]);
-                        if(FLAGS_r)
+                        if (FLAGS_r)
                             rawOutputEmotions(i, out_emotions[i]);
                     }
 
