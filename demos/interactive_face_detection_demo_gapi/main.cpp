@@ -457,7 +457,7 @@ int main(int argc, char *argv[]) {
 
                 faces.clear();
 
-                // Raw output detected faces
+                // Raw output of detected faces
                 if(FLAGS_r)
                     rawOutputDetections(ssd_res, frame.size(), FLAGS_t);
 
