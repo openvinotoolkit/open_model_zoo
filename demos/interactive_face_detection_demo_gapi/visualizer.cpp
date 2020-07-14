@@ -148,21 +148,15 @@ void HeadPoseVisualizer::draw(cv::Mat& frame, cv::Point3f cpoint, double yaw, do
 }
 
 // Visualizer
-Visualizer::Visualizer(int leftPadding, int rightPadding, int topPadding, int bottomPadding):
-        emotionVisualizer(nullptr), photoFrameVisualizer(std::make_shared<PhotoFrameVisualizer>()),
-        headPoseVisualizer(std::make_shared<HeadPoseVisualizer>()),
-        nxcells(0), nycells(0), xstep(0), ystep(0), leftPadding(leftPadding),
-        rightPadding(rightPadding), topPadding(topPadding), bottomPadding(bottomPadding), frameCounter(0),
-        _isAgeGenderEnabled(false), _isEmotionsEnabled(false),
-        _isHeadPoseEnabled(false), _isLandmarksEnabled(false) {}
-
-void Visualizer::enableVisualisations(bool isAgeGenderEnabled, bool isEmotionsEnabled,
-                                      bool isHeadPoseEnabled, bool isLandmarksEnabled) {
-    _isAgeGenderEnabled = isAgeGenderEnabled;
-    _isEmotionsEnabled  = isEmotionsEnabled;
-    _isHeadPoseEnabled  = isHeadPoseEnabled;
-    _isLandmarksEnabled = isLandmarksEnabled;
-}
+Visualizer::Visualizer(bool m_ag, bool m_em, bool m_hp, bool m_lm,
+                       int leftPadding, int rightPadding, int topPadding, int bottomPadding):
+                       emotionVisualizer(nullptr), photoFrameVisualizer(std::make_shared<PhotoFrameVisualizer>()),
+                       headPoseVisualizer(std::make_shared<HeadPoseVisualizer>()),
+                       nxcells(0), nycells(0), xstep(0), ystep(0), leftPadding(leftPadding),
+                       rightPadding(rightPadding), topPadding(topPadding),
+                       bottomPadding(bottomPadding), frameCounter(0),
+                       _isAgeGenderEnabled(m_ag), _isEmotionsEnabled(m_em),
+                       _isHeadPoseEnabled(m_hp), _isLandmarksEnabled(m_lm) {}
 
 void Visualizer::enableEmotionBar(const cv::Size inImgSize, std::vector<std::string> const& emotionNames) {
     if (inImgSize != imgSize) {

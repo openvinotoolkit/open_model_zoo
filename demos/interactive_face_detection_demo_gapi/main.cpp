@@ -21,6 +21,8 @@
 #include <opencv2/gapi/cpu/gcpukernel.hpp>
 #include <opencv2/gapi/streaming/cap.hpp>
 
+#include <monitors/presenter.h>
+
 #include "interactive_face_detection.hpp"
 #include "utils.hpp"
 #include "face.hpp"
@@ -157,9 +159,9 @@ void rawOutputAgeGender(const int idx, const cv::Mat out_ages, const cv::Mat out
 }
 
 void rawOutputHeadpose(const int idx,
-                       const cv::Mat out_y_fc,
-                       const cv::Mat out_p_fc,
-                       const cv::Mat out_r_fc) {
+                       const cv::Mat &out_y_fc,
+                       const cv::Mat &out_p_fc,
+                       const cv::Mat &out_r_fc) {
     const float *y_data = out_y_fc.ptr<float>();
     const float *p_data = out_p_fc.ptr<float>();
     const float *r_data = out_r_fc.ptr<float>();
@@ -169,7 +171,7 @@ void rawOutputHeadpose(const int idx,
                  ", roll = " << r_data[0]  << std::endl;
 }
 
-void rawOutputLandmarks(const int idx, const cv::Mat out_landmark) {
+void rawOutputLandmarks(const int idx, const cv::Mat &out_landmark) {
     const float *lm_data = out_landmark.ptr<float>();
 
     std::cout << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << std::endl;
@@ -183,7 +185,7 @@ void rawOutputLandmarks(const int idx, const cv::Mat out_landmark) {
     }
 }
 
-void rawOutputEmotions(const int idx, const cv::Mat out_emotion) {
+void rawOutputEmotions(const int idx, const cv::Mat &out_emotion) {
     static const std::vector<std::string> emotionsVec = {"neutral", "happy", "sad", "surprise", "anger"};
     size_t emotionsVecSize = emotionsVec.size();
 
@@ -203,7 +205,7 @@ void rawOutputEmotions(const int idx, const cv::Mat out_emotion) {
 void faceDataUpdate(cv::Mat   &frame,
                     Face::Ptr &face,
                     cv::Rect  &face_rect,
-                    std::list<Face::Ptr> &prev_faces,
+                    std::list<Face::Ptr>  &prev_faces,
                     std::vector<cv::Rect> &face_hub,
                     size_t &id,
                     bool no_smooth) {
@@ -230,8 +232,8 @@ void faceDataUpdate(cv::Mat   &frame,
 }
 
 void ageGenderDataUpdate(Face::Ptr &face,
-                         cv::Mat out_age,
-                         cv::Mat out_gender) {
+                         cv::Mat &out_age,
+                         cv::Mat &out_gender) {
     const float *age_data =    out_age.ptr<float>();
     const float *gender_data = out_gender.ptr<float>();
 
@@ -243,9 +245,9 @@ void ageGenderDataUpdate(Face::Ptr &face,
 }
 
 void headPoseDataUpdate(Face::Ptr &face,
-                        cv::Mat out_y_fc,
-                        cv::Mat out_p_fc,
-                        cv::Mat out_r_fc) {
+                        cv::Mat &out_y_fc,
+                        cv::Mat &out_p_fc,
+                        cv::Mat &out_r_fc) {
     const float *y_data = out_y_fc.ptr<float>();
     const float *p_data = out_p_fc.ptr<float>();
     const float *r_data = out_r_fc.ptr<float>();
@@ -253,7 +255,7 @@ void headPoseDataUpdate(Face::Ptr &face,
     face->updateHeadPose(y_data[0], p_data[0], r_data[0]);
 }
 
-void emotionsDataUpdate(Face::Ptr &face, cv::Mat out_emotion) {
+void emotionsDataUpdate(Face::Ptr &face, cv::Mat &out_emotion) {
     const float *em_data = out_emotion.ptr<float>();
 
     face->updateEmotions({
@@ -265,7 +267,7 @@ void emotionsDataUpdate(Face::Ptr &face, cv::Mat out_emotion) {
                           });
 }
 
-void landmarksDataUpdate(Face::Ptr &face, cv::Mat out_landmark) {
+void landmarksDataUpdate(Face::Ptr &face, cv::Mat &out_landmark) {
     const float *lm_data = out_landmark.ptr<float>();
 
     std::vector<float> normedLandmarks;
@@ -421,10 +423,9 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_m_lm.empty()) out_vector += cv::gout(out_landmarks);
 
         Visualizer::Ptr visualizer;
-        if (!FLAGS_no_show) {
+        if (!FLAGS_no_show || !FLAGS_o.empty()) {
             cv::namedWindow("Detection results");
-            visualizer = std::make_shared<Visualizer>();
-            visualizer->enableVisualisations(!FLAGS_m_ag.empty(), !FLAGS_m_em.empty(), !FLAGS_m_hp.empty(), !FLAGS_m_lm.empty());
+            visualizer = std::make_shared<Visualizer>(!FLAGS_m_ag.empty(), !FLAGS_m_em.empty(), !FLAGS_m_hp.empty(), !FLAGS_m_lm.empty());
         } else {
             std::cout<< "To close the application, press 'CTRL+C' here" << std::endl;
         }
@@ -440,12 +441,23 @@ int main(int argc, char *argv[]) {
         stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
         stream.start();
 
+        const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
+        Presenter presenter;
+        bool presenterWasInit = false;
+
         while (stream.running()) {
             timer.start("total");
 
             if (stream.pull(std::move(out_vector))) {
                 if (!FLAGS_no_show && !FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
                     visualizer->enableEmotionBar(frame.size(), EMOTION_VECTOR);
+                }
+
+                // Init presenter
+                if (!presenterWasInit) {
+                    cv::Size graphSize{static_cast<int>(frame.rows / 4), 60};
+                    presenter.setPresenterVars(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, graphSize);
+                    presenterWasInit = true;
                 }
 
                 //  Postprocessing
@@ -498,8 +510,10 @@ int main(int argc, char *argv[]) {
                     faces.push_back(face);
                 }
 
+                presenter.drawGraphs(frame);
+
                 //  Visualizing results
-                if (!FLAGS_no_show) {
+                if (!FLAGS_no_show || !FLAGS_o.empty()) {
                     out.str("");
                     out << "Total image throughput: " << std::fixed << std::setprecision(2)
                         << 1000.f / (timer["total"].getSmoothedDuration()) << " fps";
@@ -511,7 +525,12 @@ int main(int argc, char *argv[]) {
 
                     cv::imshow("Detection results", frame);
 
-                    if (cv::waitKey(1) >= 0) stream.stop();
+                    int key = cv::waitKey(1);
+                    if (27 == key || 'Q' == key || 'q' == key) {
+                        stream.stop();
+                    } else {
+                        presenter.handleKey(key);
+                    }
                 }
 
                 if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
@@ -540,6 +559,8 @@ int main(int argc, char *argv[]) {
 
         slog::info << "Number of processed frames: " << framesCounter << slog::endl;
         slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
+
+        std::cout << presenter.reportMeans() << '\n';
 
         cv::destroyAllWindows();
     }
