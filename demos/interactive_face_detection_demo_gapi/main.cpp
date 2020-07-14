@@ -398,7 +398,7 @@ int main(int argc, char *argv[]) {
         };
 
         // Form a kernel package (including an OpenCV-based implementation of our
-        // post-processing) and a network package (holding our three networks).x
+        // post-processing) and a network package (holding our three networks).
         auto kernels = cv::gapi::kernels<OCVPostProc>();
         auto networks = cv::gapi::networks(det_net, age_net, hp_net, lm_net, emo_net);
 
