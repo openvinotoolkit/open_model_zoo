@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2019-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -298,7 +298,7 @@ def create_decoder(model_config, launcher, delayed_model_loading):
     launcher_model_mapping = {
         'dlsdk': DecoderDLSDKModel,
         'onnx_runtime': DecoderONNXModel,
-        'opencv': DecoderOpenCVModel,
+        'opencv': DecoderOpenCVModel
     }
     framework = launcher.config['framework']
     model_class = launcher_model_mapping.get(framework)
@@ -321,7 +321,7 @@ class SequentialModel(BaseModel):
                 decoder['_model_is_blob'] = is_blob
             network_info.update({'encoder': encoder, 'decoder': decoder})
         if not contains_all(network_info, ['encoder', 'decoder']) and not delayed_model_loading:
-            raise ConfigError('network_info should contains encoder and decoder fields')
+            raise ConfigError('network_info should contain encoder and decoder fields')
         self.num_processing_frames = network_info['decoder'].get('num_processing_frames', 16)
         self.processing_frames_buffer = []
         self.encoder = create_encoder(network_info['encoder'], launcher, delayed_model_loading)
@@ -481,7 +481,7 @@ class DecoderDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         self.input_blob, self.output_blob = None, None
-        self.adapter = create_adapter('classification')
+        self.adapter = create_adapter(network_info.get('adapter', 'classification'))
         self.num_processing_frames = network_info.get('num_processing_frames', 16)
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
@@ -594,8 +594,8 @@ class EncoderONNXModel(BaseModel):
     def release(self):
         del self.inference_session
 
-    def automatic_model_search(self, metwork_info):
-        model = Path(metwork_info['model'])
+    def automatic_model_search(self, network_info):
+        model = Path(network_info['model'])
         if model.is_dir():
             model_list = list(model.glob('*{}.onnx'.format(self.default_model_suffix)))
             if not model_list:
@@ -632,8 +632,8 @@ class DecoderONNXModel(BaseModel):
     def release(self):
         del self.inference_session
 
-    def automatic_model_search(self, metwork_info):
-        model = Path(metwork_info['model'])
+    def automatic_model_search(self, network_info):
+        model = Path(network_info['model'])
         if model.is_dir():
             model_list = list(model.glob('*{}.onnx'.format(self.default_model_suffix)))
             if not model_list:
@@ -655,7 +655,7 @@ class DummyEncoder(BaseModel):
         self._predictions = read_pickle(network_info['predictions'])
         self.iterator = 0
 
-    def predict(self, idenitifers, input_data):
+    def predict(self, identifiers, input_data):
         result = self._predictions[self.iterator]
         self.iterator += 1
         return result

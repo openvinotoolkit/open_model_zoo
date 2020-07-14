@@ -16,6 +16,13 @@ For details, see the [paper](https://arxiv.org/abs/1703.06870).
 | MParams                         | 50.222                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_orig_precision | 29.7512%|
+| coco_orig_segm_precision | 27.4597%|
+
 ## Performance
 
 ## Input

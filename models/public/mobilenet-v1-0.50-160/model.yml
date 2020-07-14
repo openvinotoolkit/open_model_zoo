@@ -36,4 +36,5 @@ model_optimizer_args:
   - --output=MobilenetV1/Predictions/Reshape_1
   - --input_model=$dl_dir/mobilenet_v1_0.5_160_frozen.pb
 framework: tf
+quantizable: yes
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

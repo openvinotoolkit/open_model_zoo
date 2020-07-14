@@ -20,6 +20,8 @@ from .classification_analyzer import ClassificationDataAnalyzer
 from .container_analyzer import ContainerDataAnalyzer
 from .regression_analyzer import RegressionDataAnalyzer
 from .detection_analyzer import DetectionDataAnalyzer
+from .coco_instance_segmentation_analyzer import CoCoInstanceSegmentationDataAnalyzer
+from .segmentation_analyzer import SegmentationDataAnalyzer
 
 __all__ = [
     'BaseDataAnalyzer',
@@ -27,5 +29,7 @@ __all__ = [
     'ClassificationDataAnalyzer',
     'ContainerDataAnalyzer',
     'RegressionDataAnalyzer',
-    'DetectionDataAnalyzer'
+    'DetectionDataAnalyzer',
+    'CoCoInstanceSegmentationDataAnalyzer',
+    'SegmentationDataAnalyzer'
     ]

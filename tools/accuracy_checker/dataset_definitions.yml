@@ -468,6 +468,13 @@ datasets:
       data_dir: Market-1501-v15.09.15
     annotation: market1501_reid.pickle
 
+  - name: veri776
+    data_source: VeRi-776
+    annotation_conversion:
+      converter: veri776_reid
+      data_dir: VeRi-776
+    annotation: veri776_reid.pickle
+
   - name: reid_dataset
     data_source: Market-1501-v15.09.15
     annotation_conversion:
@@ -485,7 +492,8 @@ datasets:
     dataset_meta: vggfaces2.json
 
   - name: semantic_segmentation_adas
-    data_source: segmentation
+    data_source: segmentation/images
+    segmentation_masks_source: segmentation/mask_segmentation_adas
     annotation_conversion:
       converter: common_semantic_segmentation
       images_dir: segmentation/images
@@ -510,7 +518,8 @@ datasets:
         dst_width: 2048
 
   - name: road_segmentation
-    data_source: segmentation
+    data_source: segmentation/images
+    segmentation_masks_source: segmentation/mask_road_segmentation
     annotation_conversion:
       converter: common_semantic_segmentation
       images_dir: segmentation/images
@@ -755,6 +764,7 @@ datasets:
     annotation: mrlEyes_2018_01.pickle
     dataset_meta: mrlEyes_2018_01.json
     data_source: mrlEyes_2018_01
+
   - name: ms_coco_style_transfer
     data_source: val2017
     annotation_conversion:
@@ -768,13 +778,12 @@ datasets:
         presenter: print_vector
     annotation: style_trasfer_val2017.pickle
 
-  - name: squad1_bert_uncased
-    data_source: squad_v1.1
+  - name: squad_v1_1_msl384_mql64_ds128_lowercase
     annotation_conversion:
       converter: squad
       testing_file: squad_v1.1/dev-v1.1.json
-      vocab_file: bert-large-uncased-whole-word-masking-squad-0001/vocab.txt
       max_seq_length: 384
       max_query_length: 64
       doc_stride: 128
       lower_case: true
+      vocab_file: vocab.txt

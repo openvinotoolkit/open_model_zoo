@@ -1,0 +1,65 @@
+models:
+  - name: efficientnet-b0-pytorch
+
+    launchers:
+      - framework: onnx_runtime
+        model: public/efficientnet-b0-pytorch/efficientnet-b0.onnx
+        adapter: classification
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 1,3,224,224
+
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: pillow_imread
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BICUBIC
+
+          - type: crop
+            use_pillow: True
+            size: 224
+
+          - type: normalization
+            mean: (123.675,116.28,103.53)
+            std: (58.395,57.12,57.375)
+
+  - name: efficientnet-b0-pytorch
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/efficientnet-b0-pytorch/FP32/efficientnet-b0-pytorch.xml
+        weights: public/efficientnet-b0-pytorch/FP32/efficientnet-b0-pytorch.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/efficientnet-b0-pytorch/FP16/efficientnet-b0-pytorch.xml
+        weights: public/efficientnet-b0-pytorch/FP16/efficientnet-b0-pytorch.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: pillow_imread
+
+        preprocessing:
+          - type: rgb_to_bgr
+
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BICUBIC
+
+          - type: crop
+            use_pillow: True
+            size: 224

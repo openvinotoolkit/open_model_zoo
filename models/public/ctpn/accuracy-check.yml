@@ -1,0 +1,59 @@
+models:
+  - name: ctpn
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/ctpn/FP32/ctpn.xml
+        weights: public/ctpn/FP32/ctpn.bin
+        adapter:
+          type: ctpn_text_detection
+          cls_prob_out: 'Reshape_2/Transpose'
+          bbox_pred_out: 'rpn_bbox_pred/Reshape_1/Transpose'
+        allow_reshape_input: True
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/ctpn/FP16/ctpn.xml
+        weights: public/ctpn/FP16/ctpn.bin
+        adapter:
+          type: ctpn_text_detection
+          cls_prob_out: 'Reshape_2/Transpose'
+          bbox_pred_out: 'rpn_bbox_pred/Reshape_1/Transpose'
+        allow_reshape_input: True
+
+    datasets:
+      - name: ICDAR2015
+
+        preprocessing:
+          - type: resize
+            dst_width: 1200
+            dst_height: 600
+            aspect_ratio_scale: ctpn_keep_aspect_ratio
+          - type: resize
+            dst_width: 600
+            dst_height: 600
+
+        postprocessing:
+          - type: cast_to_int
+            round_policy: lower
+
+        metrics:
+          - type: focused_text_precision
+            name: precision
+            ignore_difficult: True
+            area_recall_constrain: 0.8
+            area_precision_constrain: 0.4
+
+          - type: focused_text_recall
+            name: recall
+            ignore_difficult: True
+            area_recall_constrain: 0.8
+            area_precision_constrain: 0.4
+
+          - type: focused_text_hmean
+            name: hmean
+            ignore_difficult: True
+            area_recall_constrain: 0.8
+            area_precision_constrain: 0.4

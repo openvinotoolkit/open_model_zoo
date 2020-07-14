@@ -13,7 +13,7 @@ YOLO v3 is a real-time object detection model implemented with Keras\* from this
         ```
         wget -O weights/yolov3.weights https://pjreddie.com/media/files/yolov3.weights
         ```
-   
+
    1. Convert model weights to Keras\*:
         ```
         python tools/convert.py cfg/yolov3.cfg weights/yolov3.weights weights/yolov3.h5
@@ -53,8 +53,8 @@ Accuracy metrics obtained on COCO\* validation dataset for converted model.
 
 | Metric | Value |
 | ------ | ------|
-| mAP    | 62.27 |
-| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 67.7 |
+| mAP    | 62.27% |
+| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 67.7% |
 
 ## Input
 

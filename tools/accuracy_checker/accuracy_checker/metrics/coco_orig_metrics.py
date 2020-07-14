@@ -17,6 +17,7 @@ limitations under the License.
 import os
 import tempfile
 import json
+from copy import deepcopy
 import warnings
 from pathlib import Path
 import numpy as np
@@ -394,7 +395,7 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
         encoded_masks = data.mask
 
         for data_record, segm_mask in zip(data_to_store, encoded_masks):
-            data_record.update({'segmentation': segm_mask})
+            data_record.update({'segmentation': deepcopy(segm_mask)})
 
         return data_to_store
 
@@ -404,10 +405,12 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
         for data_record, area, segm_mask in zip(
                 annotation_data_to_store, annotation.areas, encoded_masks
         ):
-            segm_mask.update({'counts': str(segm_mask.get('counts'), 'utf-8')})
+
+            mask = deepcopy(segm_mask)
+            mask.update({'counts': str(mask.get('counts'), 'utf-8')})
             data_record.update({
                 'area': float(area),
-                'segmentation': segm_mask
+                'segmentation': mask
             })
 
         return annotation_data_to_store
@@ -432,20 +435,19 @@ class MSCOCOorigSegmRecall(MSCOCOorigRecall):
         encoded_masks = data.mask
 
         for data_record, segm_mask in zip(data_to_store, encoded_masks):
-            data_record.update({'segmentation': segm_mask})
+            data_record.update({'segmentation': deepcopy(segm_mask)})
 
         return data_to_store
 
     def _iou_type_specific_coco_annotation(self, annotation_data_to_store, annotation):
-        encoded_masks = annotation.mask
-
         for data_record, area, segm_mask in zip(
-                annotation_data_to_store, annotation.areas, encoded_masks
+                annotation_data_to_store, annotation.areas, annotation.mask
         ):
-            segm_mask.update({'counts': str(segm_mask.get('counts'), 'utf-8')})
+            mask = deepcopy(segm_mask)
+            mask.update({'counts': str(mask.get('counts'), 'utf-8')})
             data_record.update({
                 'area': float(area),
-                'segmentation': segm_mask
+                'segmentation': mask
             })
 
         return annotation_data_to_store

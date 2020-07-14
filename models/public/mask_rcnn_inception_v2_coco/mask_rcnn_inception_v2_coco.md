@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Mask R-CNN Inception V2 trained on the COCO dataset. The model is used for object instance segmentation. 
+Mask R-CNN Inception V2 trained on the COCO dataset. The model is used for object instance segmentation.
 For details, see a [paper](https://arxiv.org/abs/1703.06870).
 
 ## Example
@@ -15,6 +15,13 @@ For details, see a [paper](https://arxiv.org/abs/1703.06870).
 | GFlops                          | 54.926                                    |
 | MParams                         | 21.772                                    |
 | Source framework                | TensorFlow\*                              |
+
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_orig_precision | 27.1199%|
+| coco_orig_segm_precision | 21.4805%|
 
 ## Performance
 
@@ -55,11 +62,11 @@ Expected color order: BGR.
 ### Original Model
 
 1. Classifier, name: `detection_classes`. Contains predicted bounding boxes classes in a range [1, 91].
-The model was trained on the Microsoft\* COCO dataset version with 90 categories of objects, 
+The model was trained on the Microsoft\* COCO dataset version with 90 categories of objects,
 0 class is for background.
 2. Probability, name: `detection_scores`. Contains probability of detected bounding boxes.
-3. Detection box, name: `detection_boxes`. Contains detection boxes coordinates in a format 
-`[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates of the top left corner, 
+3. Detection box, name: `detection_boxes`. Contains detection boxes coordinates in a format
+`[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates of the top left corner,
 (`x_max`, `y_max`) are coordinates of the right bottom corner. Coordinates are rescaled to input image size.
 4. Detections number, name: `num_detections`. Contains the number of predicted detection boxes.
 5. Segmentation mask, name: `detection_masks`. Contains segmentation heatmaps of detected objects for all classes for every output bounding box.
@@ -67,7 +74,7 @@ The model was trained on the Microsoft\* COCO dataset version with 90 categories
 ### Converted Model
 
 1. The array of summary detection information, name: `reshape_do_2d`, shape: [N, 7], where N is the number of detected
-bounding boxes.   
+bounding boxes.
     For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
     where:

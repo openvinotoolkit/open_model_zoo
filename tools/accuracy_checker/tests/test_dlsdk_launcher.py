@@ -27,12 +27,13 @@ from pathlib import Path
 from unittest.mock import PropertyMock
 from accuracy_checker.config import ConfigError
 from accuracy_checker.launcher import DLSDKLauncher
-from accuracy_checker.launcher.dlsdk_launcher import DLSDKLauncherConfigValidator
+from accuracy_checker.launcher.dlsdk_launcher_config import DLSDKLauncherConfigValidator
 from accuracy_checker.launcher.launcher import create_launcher
 from accuracy_checker.launcher.model_conversion import FrameworkParameters
 from tests.common import update_dict
 from accuracy_checker.data_readers import DataRepresentation
 from accuracy_checker.utils import contains_all
+
 
 def no_available_myriad():
     try:

@@ -95,10 +95,10 @@ NATIVE_DEMOS = [
         single_option_cases('-m_pa', None, ModelArg('person-attributes-recognition-crossroad-0230')),
         single_option_cases('-m_reid',
             None,
-            ModelArg('person-reidentification-retail-0031'),
             ModelArg('person-reidentification-retail-0248'),
-            ModelArg('person-reidentification-retail-0249'),
-            ModelArg('person-reidentification-retail-0300')),
+            ModelArg('person-reidentification-retail-0265'),
+            ModelArg('person-reidentification-retail-0267'),
+            ModelArg('person-reidentification-retail-0270')),
     )),
 
     NativeDemo(subdirectory='gaze_estimation_demo',
@@ -228,10 +228,10 @@ NATIVE_DEMOS = [
             TestCase(options={'-m_det': ModelArg('person-detection-retail-0013')}),
         ],
         single_option_cases('-m_reid',
-            ModelArg('person-reidentification-retail-0031'),
             ModelArg('person-reidentification-retail-0248'),
-            ModelArg('person-reidentification-retail-0249'),
-            ModelArg('person-reidentification-retail-0300')),
+            ModelArg('person-reidentification-retail-0265'),
+            ModelArg('person-reidentification-retail-0267'),
+            ModelArg('person-reidentification-retail-0270')),
     )),
 
     NativeDemo(subdirectory='security_barrier_camera_demo',
@@ -285,7 +285,7 @@ NATIVE_DEMOS = [
                     TestCase(options={}),
                     TestCase(options={
                         '-m_lm': ModelArg('landmarks-regression-retail-0009'),
-                        '-m_reid': ModelArg('face-reidentification-retail-0095'),
+                        '-m_reid': ModelArg('face-recognition-mobilefacenet-arcface'),
                     }),
                 ],
             ),
@@ -330,23 +330,6 @@ PYTHON_DEMOS = [
         ],
     )),
 
-    PythonDemo(subdirectory='face_recognition_demo', device_keys=['-d_fd', '-d_lm', '-d_reid'],
-               test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-                          **MONITORS,
-                          '-i': DataPatternArg('face-detection-adas'),
-                          '-fg': DataDirectoryArg('face-recognition-gallery')
-                          }),
-        single_option_cases('-m_fd',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-adas-binary-0001', "FP32-INT1"),
-            ModelArg('face-detection-retail-0004'),
-            ModelArg('face-detection-retail-0005'),
-            ModelArg('face-detection-retail-0044')),
-        TestCase(options={'-m_lm': ModelArg('landmarks-regression-retail-0009')}),
-        TestCase(options={'-m_reid': ModelArg('face-reidentification-retail-0095')}),
-    )),
-
     PythonDemo(subdirectory='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
                           **MONITORS,
@@ -376,17 +359,17 @@ PYTHON_DEMOS = [
             ModelArg('instance-segmentation-security-1025')),
     )),
 
-    PythonDemo(subdirectory='multi_camera_multi_person_tracking', device_keys=['-d'], test_cases=combine_cases(
+    PythonDemo(subdirectory='multi_camera_multi_target_tracking', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
-            '-i': [DataPatternArg('multi-camera-multi-person-tracking'),
-                DataPatternArg('multi-camera-multi-person-tracking/repeated')],
+            '-i': [DataPatternArg('multi-camera-multi-target-tracking'),
+                DataPatternArg('multi-camera-multi-target-tracking/repeated')],
             '-m': ModelArg('person-detection-retail-0013')}),
         single_option_cases('--m_reid',
-            ModelArg('person-reidentification-retail-0031'),
             ModelArg('person-reidentification-retail-0248'),
-            ModelArg('person-reidentification-retail-0249'),
-            ModelArg('person-reidentification-retail-0300')),
+            ModelArg('person-reidentification-retail-0265'),
+            ModelArg('person-reidentification-retail-0267'),
+            ModelArg('person-reidentification-retail-0270')),
     )),
 
     PythonDemo(subdirectory='object_detection_demo_ssd_async', device_keys=['-d'], test_cases=combine_cases(

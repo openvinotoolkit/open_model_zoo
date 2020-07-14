@@ -26,6 +26,7 @@ postprocessing:
     format: gztar
     file: deeplabv3.tar.gz
 model_optimizer_args:
+  - --reverse_input_channels
   - --input_shape=[1,513,513,3]
   - --input=1:mul_1
   - --output=ArgMax

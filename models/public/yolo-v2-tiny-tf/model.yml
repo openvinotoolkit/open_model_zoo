@@ -29,4 +29,5 @@ model_optimizer_args:
   - --transformations_config=$mo_dir/extensions/front/tf/yolo_v2_tiny.json
   - --input_model=$dl_dir/yolo-v2-tiny.pb
 framework: tf
+quantizable: yes
 license: https://raw.githubusercontent.com/shaqian/tfjs-yolo/master/LICENSE

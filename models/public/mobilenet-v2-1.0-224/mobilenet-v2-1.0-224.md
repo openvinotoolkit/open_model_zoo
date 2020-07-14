@@ -15,6 +15,13 @@
 | MParams                         | 3.489                                     |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 70.20%|
+| Top 5  | 89.61%|
+
 ## Performance
 
 ## Input
@@ -47,12 +54,12 @@ Image, name: `input`, shape: [1x3x224x224], format: [BxCxHxW], where:
 ### Original Model
 
 Name: `MobilenetV2/Predictions/Reshape_1`.
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. 
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.
 
 ### Converted Model
 
-Name: `MobilenetV2/Predictions/Softmax`.  
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.   
+Name: `MobilenetV2/Predictions/Softmax`.
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.
 Shape: [1,1001], format: [BxC],
     where:
 

@@ -21,6 +21,11 @@ The model output for `octave-se-resnet-50-0.125` is the typical object classifie
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 78.706%|
+| Top 5  | 94.09% |
+
 ## Performance
 
 ## Input
@@ -34,7 +39,7 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`. 
+Channel order is `RGB`.
 Mean values - [124,117,104], scale value - 59.880239521
 
 ### Converted model

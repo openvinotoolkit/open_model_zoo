@@ -17,6 +17,11 @@
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 78.968%|
+| Top 5  | 94.63% |
+
 ## Performance
 
 ## Input

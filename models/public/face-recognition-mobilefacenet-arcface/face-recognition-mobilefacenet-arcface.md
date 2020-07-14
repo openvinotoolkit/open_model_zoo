@@ -19,6 +19,10 @@ The original name of the model is [MobileFaceNet,ArcFace@ms1m-refine-v1](https:/
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| LFW accuracy | 98.8695%|
+
 ## Performance
 
 ## Input

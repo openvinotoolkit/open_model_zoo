@@ -45,4 +45,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/vgg19.caffemodel
   - --input_proto=$dl_dir/vgg19.prototxt
 framework: caffe
+quantizable: yes
 license: https://creativecommons.org/licenses/by/4.0/legalcode.txt

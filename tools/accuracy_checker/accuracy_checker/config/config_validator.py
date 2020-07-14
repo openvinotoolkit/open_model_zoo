@@ -79,6 +79,8 @@ class ConfigValidator(BaseValidator):
         if fields:
             for name in fields.keys():
                 self.fields[name] = fields[name]
+                if fields[name].field_uri is None:
+                    fields[name].field_uri = "{}.{}".format(config_uri, name)
         else:
             for name in dir(self):
                 value = getattr(self, name)
@@ -273,7 +275,7 @@ class ListField(BaseField):
 
 
 class InputField(BaseField):
-    INPUTS_TYPES = ('CONST_INPUT', 'INPUT', 'IMAGE_INFO')
+    INPUTS_TYPES = ('CONST_INPUT', 'INPUT', 'IMAGE_INFO', 'LSTM_INPUT')
     LAYOUT_TYPES = ('NCHW', 'NHWC', 'NCWH', 'NWHC')
     PRECISIONS = ('FP32', 'FP16', 'U8', 'U16', 'I8', 'I16', 'I32', 'I64')
 
@@ -288,7 +290,7 @@ class InputField(BaseField):
         self.precision = StringField(optional=True, description='Input precision', choices=InputField.PRECISIONS)
 
     def validate(self, entry, field_uri=None):
-        entry['optional'] = entry['type'] != 'CONST_INPUT'
+        entry['optional'] = entry['type'] not in ['CONST_INPUT', 'LSTM_INPUT']
         super().validate(entry, field_uri)
 
 

@@ -19,8 +19,8 @@ The `hbonet-0.25` model is one of the classification models from [repository](ht
 
 | Metric | Original model |
 | ------ | -------------- |
-| Top 1  | 57.30          |
-| Top 5  | 79.80          |
+| Top 1  | 57.30%          |
+| Top 5  | 79.80%          |
 
 ## Performance
 

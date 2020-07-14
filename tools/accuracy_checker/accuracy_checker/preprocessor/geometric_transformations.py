@@ -18,17 +18,13 @@ import math
 from collections import namedtuple
 
 import cv2
+from PIL import Image
 import numpy as np
 
 from ..config import ConfigError, NumberField, StringField, BoolField, ListField
 from ..preprocessor import Preprocessor
 from ..utils import get_size_from_config, string_to_tuple, get_size_3d_from_config
 from ..logging import warning
-
-try:
-    from PIL import Image
-except ImportError:
-    Image = None
 
 try:
     from skimage.transform import estimate_transform, warp
@@ -98,10 +94,6 @@ class Crop(Preprocessor):
 
     def configure(self):
         self.use_pillow = self.get_value_from_config('use_pillow')
-        if self.use_pillow and Image is None:
-            raise ValueError(
-                'Crop operation with pillow backend, requires Pillow. Please install it or select default backend'
-            )
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self.central_fraction = self.get_value_from_config('central_fraction')
         if self.dst_height is None and self.dst_width is None and self.central_fraction is None:
@@ -430,7 +422,7 @@ class Padding(Preprocessor):
         if isinstance(pad_val, int):
             self.pad_value = (pad_val, pad_val, pad_val)
         if isinstance(pad_val, str):
-            self.pad_value = string_to_tuple(pad_val, int)
+            self.pad_value = string_to_tuple(pad_val, float)
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self.pad_func = padding_func[self.get_value_from_config('pad_type')]
         self.use_numpy = self.get_value_from_config('use_numpy')
@@ -706,6 +698,98 @@ class ImagePyramid(Preprocessor):
 
         return image
 
+class FaceDetectionImagePyramid(Preprocessor):
+    __provider__ = 'face_detection_image_pyramid'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update(
+            {
+                'min_face_ratio': NumberField(
+                    value_type=float, default=0.05, min_value=0.01, max_value=1,
+                    description='Minimum face ratio to image size'
+                ),
+                'resize_scale': NumberField(
+                    value_type=int, default=2, min_value=1,
+                    description='Scale factor for pyramid layers'
+                )
+            }
+        )
+        return parameters
+
+    def configure(self):
+        self.min_face_ratio = self.get_value_from_config('min_face_ratio')
+        self.resize_scale = self.get_value_from_config('resize_scale')
+        self.min_supported_face_size = 24
+        self.stage1_window_size = [12, 192]
+
+    def perform_scaling(self, initial_width, initial_height, img_width, img_height):
+        width = initial_width
+        height = initial_height
+
+        image_pyramid = []
+        scales = []
+        pyramid_scale = 1
+
+        shorter = min(img_height, img_width)
+        min_face_size = max(int(shorter * self.min_face_ratio), self.min_supported_face_size)
+
+        while width >= self.stage1_window_size[0] and height >= self.stage1_window_size[0]:
+            min_detectable_size = int(img_width / width + 0.5) * self.stage1_window_size[0]
+            if min_detectable_size >= min_face_size:
+                if min_detectable_size > self.min_supported_face_size:
+                    pyramid_scale /= 2
+                    width = int(initial_width / pyramid_scale + 0.5)
+                    height = int(initial_height / pyramid_scale + 0.5)
+
+                image_pyramid.append((int(width), int(height)))
+                scales.append(img_width / int(width))
+
+                max_detectable_size = int(img_width / width + 0.5) * self.stage1_window_size[1]
+                if max_detectable_size < shorter:
+                    while max_detectable_size > min_detectable_size:
+                        pyramid_scale *= self.resize_scale
+                        width = int(initial_height / pyramid_scale + 0.5)
+                        height = int(initial_height / pyramid_scale + 0.5)
+                        min_detectable_size = int(img_width / width + 0.5) * self.stage1_window_size[0]
+                        min_detectable_size *= 2
+                break
+
+            pyramid_scale *= self.resize_scale
+            width = int(initial_width / pyramid_scale + 0.5)
+            height = int(initial_height / pyramid_scale + 0.5)
+
+        return image_pyramid, scales, pyramid_scale
+
+    def process(self, image, annotation_meta=None):
+        img_height, img_width, _ = image.data.shape
+        initial_width = img_width * self.stage1_window_size[0] / self.min_supported_face_size
+        initial_height = img_height * self.stage1_window_size[0] / self.min_supported_face_size
+        image_pyramid, scales, pyramid_scale = self.perform_scaling(
+            initial_width,
+            initial_height,
+            img_width, img_height
+        )
+
+        if len(image_pyramid) == 0:
+            pyramid_scale /= self.resize_scale
+            width = int(initial_width / pyramid_scale + 0.5)
+            height = int(initial_height / pyramid_scale + 0.5)
+            image_pyramid.append((width, height))
+            scales.append(img_width / width)
+
+        scaled_data = []
+        data = image.data
+
+        # perform resizing
+        for dimension in image_pyramid:
+            w, h = dimension
+            scaled_data.append(cv2.resize(data, (w, h)))
+
+        image.data = scaled_data
+        image.metadata.update({'multi_infer': True, 'scales': scales})
+        return image
 
 class WarpAffine(Preprocessor):
     __provider__ = 'warp_affine'
@@ -840,3 +924,68 @@ class SimilarityTransfom(Preprocessor):
         T[:dim, :dim] *= scale
 
         return T
+
+class CandidateCrop(Preprocessor):
+    __provider__ = 'candidate_crop'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'scale_width': NumberField(
+                value_type=float, min_value=0, default=1, optional=True,
+                description='Value to scale width relative to the original candidate width'
+            ),
+            'scale_height': NumberField(
+                value_type=float, min_value=0, default=1, optional=True,
+                description='Value to scale height relative to the original candidate height'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.scale_width = self.get_value_from_config('scale_width')
+        self.scale_height = self.get_value_from_config('scale_height')
+
+    def process(self, image, annotation_meta=None):
+        candidates = annotation_meta['candidate_info']
+        patches = []
+        data = image.data
+        img_height, img_width, _ = data.shape
+        for i in range(candidates.x_mins.size):
+            x_min = int(round(candidates.x_mins[i]))
+            y_min = int(round(candidates.y_mins[i]))
+            width = int(round(candidates.x_maxs[i] - candidates.x_mins[i]))
+            height = int(round(candidates.y_maxs[i] - candidates.y_mins[i]))
+            x_min -= int(round(width * (self.scale_width - 1) / 2))
+            y_min -= int(round(height * (self.scale_height - 1) / 2))
+            width = int(round(width * self.scale_width))
+            height = int(round(height * self.scale_height))
+            bbox = [x_min, y_min, x_min + width, y_min + height]
+            ext_bbox = [bbox[0], bbox[1], bbox[2], bbox[3]]
+            bbox[0] = max(0, bbox[0])
+            bbox[1] = max(0, bbox[1])
+            bbox[2] = min(img_width, bbox[2])
+            bbox[3] = min(img_height, bbox[3])
+            crop_image = data[bbox[1]:bbox[3], bbox[0]:bbox[2]]
+            # padding for turncated region
+            if bbox[0] == 0 or bbox[1] == 0 or bbox[2] == img_width or bbox[3] == img_height:
+                crop_image = cv2.copyMakeBorder(
+                    crop_image,
+                    bbox[1] - ext_bbox[1],
+                    ext_bbox[3] - bbox[3],
+                    bbox[0] - ext_bbox[0],
+                    ext_bbox[2] - bbox[2],
+                    cv2.BORDER_CONSTANT
+                )
+            patches.append(crop_image)
+
+        if candidates.x_mins.size == 0:
+            patches.append(data)
+
+        image.data = patches
+        image.metadata.update({
+            'multi_infer': True,
+            'candidates': candidates
+        })
+        return image

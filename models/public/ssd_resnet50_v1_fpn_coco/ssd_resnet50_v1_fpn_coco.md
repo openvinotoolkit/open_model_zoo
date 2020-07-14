@@ -20,6 +20,10 @@ and [paper](https://arxiv.org/abs/1708.02002).
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 38.4557% |
+
 ## Performance
 
 ## Input

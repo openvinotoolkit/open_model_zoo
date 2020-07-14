@@ -1,0 +1,43 @@
+models:
+  - name: mobilenet-v1-0.50-224-tf
+    launchers:
+      - framework: tf
+        model: mobilenet_v1_0.5_224_frozen.pb
+        inputs:
+          - name: input
+        adapter: classification
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: crop
+            central_fraction: 0.875
+          - type: resize
+            size: 224
+          - type: normalization
+            mean: 127.5
+            std: 127.5
+
+  - name: mobilenet-v1-0.50-244
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/mobilenet-v1-0.50-224/FP32/mobilenet-v1-0.50-224.xml
+        weights: public/mobilenet-v1-0.50-224/FP32/mobilenet-v1-0.50-224.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/mobilenet-v1-0.50-224/FP16/mobilenet-v1-0.50-224.xml
+        weights: public/mobilenet-v1-0.50-224/FP16/mobilenet-v1-0.50-224.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+          - type: crop
+            central_fraction: 0.875
+          - type: resize
+            size: 224

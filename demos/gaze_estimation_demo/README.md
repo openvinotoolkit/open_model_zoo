@@ -80,8 +80,8 @@ By default, it shows only gaze estimation results. To see inference results of a
 The demo allows you to control what information is displayed in run-time.
 The following keys are supported:
 * G - to toggle displaying gaze vector
-* D - to toggle displaying face detector bounding boxes 
-* H - to toggle displaying head pose information
+* B - to toggle displaying face detector bounding boxes
+* O - to toggle displaying head pose information
 * L - to toggle displaying facial landmarks 
 * E - to toggle displaying eyes state
 * A - to switch on displaying all inference results

@@ -152,35 +152,6 @@ class ConfigReader:
                 if list(filter(lambda entry: _is_requirements_missed(entry, required_dataset_entries), datasets)):
                     raise ConfigError(required_dataset_error.format(model['name'], ', '.join(required_dataset_entries)))
 
-        def _check_pipelines_config(config):
-            def _count_entry(stages, entry):
-                count = 0
-                for stage in stages:
-                    if entry in stage:
-                        count += 1
-                return count
-            required_pipeline_entries = ['name', 'stages']
-            pipelines = config['pipelines']
-            if not pipelines:
-                raise ConfigError('Missed "{}" in local config'.format('pipelines'))
-            for pipeline in pipelines:
-                if _is_requirements_missed(pipeline, required_pipeline_entries):
-                    raise ConfigError('Each pipeline must specify {}'.format(', '.join(required_pipeline_entries)))
-                stages = pipeline['stages']
-                first_stage = stages[0]
-                dataset = first_stage.get('dataset')
-                if not dataset:
-                    raise ConfigError('First stage should contain dataset')
-                count_datasets = _count_entry(stages, 'dataset')
-                if count_datasets != 1:
-                    raise ConfigError('Exactly one dataset per pipeline is supported')
-                count_launchers = _count_entry(stages, 'launcher')
-                if not count_launchers:
-                    raise ConfigError('Launchers are not specified')
-                count_metrics = _count_entry(stages, 'metrics')
-                if not count_metrics:
-                    raise ConfigError('Metrics are not specified')
-
         def _check_module_config(config):
             required_entries = ['name', 'module']
             evaluations = config['evaluations']
@@ -193,7 +164,6 @@ class ConfigReader:
         config_checkers = {
             'evaluations': _check_module_config,
             'models': _check_models_config,
-            'pipelines': _check_pipelines_config,
         }
 
         if not isinstance(config, dict):
@@ -202,9 +172,9 @@ class ConfigReader:
         eval_mode = get_mode(config)
         config_checker_func = config_checkers.get(eval_mode)
         if config_checker_func is None:
-            raise ConfigError('Accuracy Checker {} mode is not supported. Please select between {}'. format(
-                eval_mode, ', '.join(['evaluations', 'models', 'pipelines'])
-            ))
+            raise ConfigError(
+                'Accuracy Checker {} mode is not supported. Please select between evaluations and models.'. format(
+                    eval_mode))
         config_checker_func(config)
 
         return eval_mode
@@ -246,42 +216,16 @@ class ConfigReader:
                         global_configs['launchers'], launcher_entry, 'framework'
                     )
             if 'datasets' in global_configs:
-                for i, dataset in enumerate(model['datasets']):
+                datasets_iterator = (
+                    model['datasets'].items() if isinstance(model['datasets'], dict)
+                    else enumerate(model['datasets'])
+                )
+                for i, dataset in datasets_iterator:
                     model['datasets'][i] = ConfigReader._merge_configs_by_identifier(
                         global_configs['datasets'], dataset, 'name'
                     )
 
         config['models'] = models
-        return config
-
-    @staticmethod
-    def _merge_pipelines_config(global_config, local_config, args):
-        config = copy.deepcopy(local_config)
-        pipelines = []
-        raw_pipelines = local_config['pipelines']
-        for pipeline in raw_pipelines:
-            device_infos = pipeline.get('device_info', [])
-            if not device_infos and 'target_devices' in args and args.target_devices:
-                device_infos = [{'device': device} for device in args.target_devices]
-            per_device_pipelines = []
-            for device_info in device_infos:
-                copy_pipeline = copy.deepcopy(pipeline)
-                for stage in copy_pipeline['stages']:
-                    if 'launcher' in stage:
-                        stage['launcher'].update(device_info)
-                        if global_config and global_config is not None and 'launchers' in global_config:
-                            stage['launcher'] = ConfigReader._merge_configs_by_identifier(
-                                global_config['launchers'], stage['launcher'], 'framework'
-                            )
-                    if 'dataset' in stage and global_config is not None and 'datasets' in global_config:
-                        dataset = stage['dataset']
-                        stage['dataset'] = ConfigReader._merge_configs_by_identifier(
-                            global_config['datasets'], dataset, 'name'
-                        )
-                per_device_pipelines.append(copy_pipeline)
-            pipelines.extend(per_device_pipelines)
-        config['pipelines'] = pipelines
-
         return config
 
     @staticmethod
@@ -301,7 +245,11 @@ class ConfigReader:
                         global_config['launchers'], launcher_entry, 'framework'
                     )
             if 'datasets' in module_config and 'datasets' in global_config:
-                for i, dataset in enumerate(module_config['datasets']):
+                datasets_iterator = (
+                    module_config['datasets'].items() if isinstance(module_config['datasets'], dict)
+                    else enumerate(module_config['datasets'])
+                )
+                for i, dataset in datasets_iterator:
                     module_config['datasets'][i] = ConfigReader._merge_configs_by_identifier(
                         global_config['datasets'], dataset, 'name'
                     )
@@ -312,7 +260,6 @@ class ConfigReader:
     def _merge_configs(global_configs, local_config, arguments, mode='models'):
         functors_by_mode = {
             'models': ConfigReader._merge_models_config,
-            'pipelines': ConfigReader._merge_pipelines_config,
             'evaluations': ConfigReader._merge_module_config
         }
 
@@ -354,15 +301,6 @@ class ConfigReader:
             for model in config['models']:
                 process_config(model, entries_paths, args)
 
-        def process_pipelines(config, entries_paths):
-            identifiers_mapping = {'datasets': 'dataset', 'launchers': 'launcher', 'reader': 'reader'}
-            entries_paths.update({'reader': {'data_source': 'source'}})
-            for pipeline in config['pipelines']:
-                for stage in pipeline['stages']:
-                    process_config(
-                        stage, entries_paths, args, 'dataset', 'launcher', identifiers_mapping, pipeline=True
-                    )
-
         def process_modules(config, entries_paths):
             for evaluation in config['evaluations']:
                 module_config = evaluation.get('module_config')
@@ -380,7 +318,6 @@ class ConfigReader:
 
         functors_by_mode = {
             'models': process_models,
-            'pipelines': process_pipelines,
             'evaluations': process_modules
         }
 
@@ -421,14 +358,8 @@ class ConfigReader:
                 model['launchers'] = provide_models(model['launchers'])
                 for dataset_entry in model['datasets']:
                     _add_subset_specific_arg(dataset_entry)
-
-        def merge_pipelines(config, arguments, update_launcher_entry):
-            for pipeline in config['pipelines']:
-                for stage in pipeline['stages']:
-                    if 'launcher' in stage:
-                        merge_dlsdk_launcher_args(arguments, stage['launcher'], update_launcher_entry)
-                    if 'dataset' in stage:
-                        _add_subset_specific_arg(stage['dataset'])
+                    if 'ie_preprocessing' in arguments and arguments.ie_preprocessing:
+                        dataset_entry['_ie_preprocessing'] = arguments.ie_preprocessing
 
         def merge_modules(config, arguments, update_launcher_entry):
             for evaluation in config['evaluations']:
@@ -448,7 +379,6 @@ class ConfigReader:
 
         functors_by_mode = {
             'models': merge_models,
-            'pipelines': merge_pipelines,
             'evaluations': merge_modules
         }
 
@@ -472,7 +402,6 @@ class ConfigReader:
     def _filter_launchers(config, arguments, mode='models'):
         functors_by_mode = {
             'models': filter_models,
-            'pipelines': filter_pipelines,
             'evaluations': filter_modules
         }
 
@@ -573,20 +502,9 @@ class ConfigReader:
                                 launcher['_prev_{}'.format(parameter)] = shared_params[parameter]
                             shared_params[parameter] = launcher[parameter]
 
-        def _share_params_pipelines(pipelines_config):
-            shared_params = {parameter: None for parameter in CONFIG_SHARED_PARAMETERS}
-            for pipeline in pipelines_config['pipelines']:
-                for stage in pipeline['stages']:
-                    launcher = stage.get('launcher', {})
-                    for parameter in CONFIG_SHARED_PARAMETERS:
-                        if parameter in launcher:
-                            if shared_params[parameter] is not None:
-                                launcher['_prev_{}'.format(parameter)] = shared_params[parameter]
-                            shared_params[parameter] = launcher[parameter]
         mode_func = {
             'models': _share_params_models,
             'evaluations': _share_params_modules,
-            'pipelines': _share_params_pipelines
         }
 
         processor = mode_func.get(mode)
@@ -705,21 +623,6 @@ def filter_models(config, target_devices, args):
     config['models'] = models_after_filtration
 
 
-def filter_pipelines(config, target_devices, args):
-    saved_pipelines = []
-    for pipeline in config['pipelines']:
-        filtered_pipeline = False
-        for stage in pipeline['stages']:
-            if 'launcher' in stage:
-                if filtered(stage['launcher'], target_devices, args):
-                    filtered_pipeline = True
-                break
-        if filtered_pipeline:
-            continue
-        saved_pipelines.append(pipeline)
-    config['pipelines'] = saved_pipelines
-
-
 def filter_modules(config, target_devices, args):
     filtered_evals = []
     for evaluation in config['evaluations']:
@@ -752,11 +655,9 @@ def filter_modules(config, target_devices, args):
 
 def process_config(
         config_item, entries_paths, args, dataset_identifier='datasets',
-        launchers_idenitfier='launchers', identifers_mapping=None, pipeline=False
+        launchers_identifier='launchers', identifers_mapping=None, pipeline=False
 ):
     def process_dataset(datasets_configs):
-        if not isinstance(datasets_configs, list):
-            datasets_configs = [datasets_configs]
         for datasets_config in datasets_configs:
             annotation_conversion_config = datasets_config.get('annotation_conversion')
             if annotation_conversion_config:
@@ -806,9 +707,19 @@ def process_config(
             continue
 
         if entry_id == dataset_identifier:
-            process_dataset(config_item[entry_id])
+            datasets_config = config_item[entry_id]
+            dataset_processing_config = (
+                list(datasets_config.values()) if isinstance(datasets_config, dict) and not pipeline
+                else datasets_config
+            )
+            if not isinstance(dataset_processing_config, list):
+                dataset_processing_config = [dataset_processing_config]
+            process_dataset(dataset_processing_config)
+            for config_entry in dataset_processing_config:
+                merge_entry_paths(command_line_arg, config_entry, args)
+            continue
 
-        if entry_id == launchers_idenitfier:
+        if entry_id == launchers_identifier:
             launchers_configs = config_item[entry_id]
             processed_launcher = process_launchers(launchers_configs)
             config_item[entry_id] = processed_launcher if not pipeline else processed_launcher[0]

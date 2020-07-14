@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import math
 import cv2
 
 from .postprocessor import Postprocessor
 from ..representation import SegmentationAnnotation, SegmentationPrediction
-from ..config import NumberField, ConfigError
+from ..config import NumberField, ConfigError, StringField
+from ..preprocessor.geometric_transformations import padding_func
 
 
 class ExtendSegmentationMask(Postprocessor):
@@ -38,12 +38,15 @@ class ExtendSegmentationMask(Postprocessor):
         parameters.update({
             'filling_label': NumberField(
                 optional=True, value_type=int, default=255, description="Value for filling border."
-            )
+            ),
+            'pad_type': StringField(choices=padding_func.keys(), optional=True, default='center',
+                                    description="Padding space location. Supported: {}".format(', '.join(padding_func)))
         })
         return parameters
 
     def configure(self):
         self.filling_label = self.config.get('filling_label', 255)
+        self.pad_func = padding_func[self.get_value_from_config('pad_type')]
 
     def process_image(self, annotation, prediction):
         for annotation_, prediction_ in zip(annotation, prediction):
@@ -53,12 +56,7 @@ class ExtendSegmentationMask(Postprocessor):
             if dst_width < width or dst_height < height:
                 raise ConfigError('size for extending should be not less current mask size')
 
-            pad = []
-            pad.append(int(math.floor((dst_height - height) / 2.0)))
-            pad.append(int(math.floor((dst_width - width) / 2.0)))
-            pad.append(int(dst_height - height - pad[0]))
-            pad.append(int(dst_width - width - pad[1]))
-
+            pad = self.pad_func(dst_width, dst_height, width, height)
             extended_mask = cv2.copyMakeBorder(
                 annotation_mask, pad[0], pad[2], pad[1], pad[3], cv2.BORDER_CONSTANT, value=self.filling_label
             )

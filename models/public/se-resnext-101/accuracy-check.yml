@@ -1,0 +1,41 @@
+models:
+  - name: se-resnext-101-cf
+    launchers:
+      - framework: caffe
+        model:   public/se-resnext-101/se-resnext-101.prototxt
+        weights: public/se-resnext-101/se-resnext-101.caffemodel
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes_2015
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 104, 117, 123
+
+  - name: se-resnext-101
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/se-resnext-101/FP32/se-resnext-101.xml
+        weights: public/se-resnext-101/FP32/se-resnext-101.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/se-resnext-101/FP16/se-resnext-101.xml
+        weights: public/se-resnext-101/FP16/se-resnext-101.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes_2015
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224

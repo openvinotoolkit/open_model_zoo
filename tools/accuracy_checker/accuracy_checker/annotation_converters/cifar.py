@@ -15,16 +15,13 @@ limitations under the License.
 """
 
 import numpy as np
+from PIL import Image
 from ..config import PathField, BoolField, NumberField
 from ..representation import ClassificationAnnotation
 from ..utils import read_pickle, check_file_existence, read_json
 
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
-try:
-    from PIL import Image
-except ImportError:
-    Image = None
 
 CIFAR10_LABELS_LIST = [
     'airplane', 'automobile', 'bird', 'cat', 'deer',
@@ -112,10 +109,6 @@ class CifarFormatConverter(BaseFormatConverter):
         if not self.converted_images_dir:
             self.converted_images_dir = self.data_batch_file.parent / 'converted_images'
         self.convert_images = self.get_value_from_config('convert_images')
-        if self.convert_images and Image is None:
-            raise ValueError(
-                "conversion cifar images extraction requires Pillow installation, please install it before usage"
-            )
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
@@ -188,9 +181,11 @@ class CifarFormatConverter(BaseFormatConverter):
             meta = read_json(self.dataset_meta)
             if 'label_map' in meta:
                 meta['label_map'] = verify_label_map(meta['label_map'])
-                return meta
+                labels = list(meta['label_map'].values())
+                return meta, labels, labels_id
             labels = meta.get('labels', labels)
         meta.update({'label_map': {label_id + labels_offset: label_name for label_id, label_name in enumerate(labels)}})
+
         if self.has_background:
             meta['label_map'][0] = 'background'
             meta['background_label'] = 0

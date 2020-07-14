@@ -82,7 +82,11 @@ class Dataset:
             annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
 
         if self._config.get('analyze_dataset', False):
-            analyze_dataset(annotation, meta)
+            if self._config.get('segmentation_masks_source'):
+                meta['segmentation_masks_source'] = self._config.get('segmentation_masks_source')
+            meta = analyze_dataset(annotation, meta)
+            if meta.get('segmentation_masks_source'):
+                del meta['segmentation_masks_source']
 
         if use_converted_annotation and contains_all(self._config, ['annotation', 'annotation_conversion']):
             annotation_name = self._config['annotation']
@@ -233,7 +237,11 @@ class Dataset:
             annotation = create_subset(annotation, subsample_size, subsample_seed)
 
         if self._config.get('analyze_dataset', False):
-            analyze_dataset(annotation, self.metadata)
+            if self._config.get('segmentation_masks_source'):
+                self.metadata['segmentation_masks_source'] = self._config.get('segmentation_masks_source')
+            self.metadata = analyze_dataset(annotation, self.metadata)
+            if self.metadata.get('segmentation_masks_source'):
+                del self.metadata['segmentation_masks_source']
 
         self._annotation = annotation
         self.name = self._config.get('name')
@@ -272,6 +280,7 @@ def create_subset(annotation, subsample_size, subsample_seed, shuffle=True):
     if subsample_size < 1:
         raise ConfigError('subsample_size should be > 0')
     return make_subset(annotation, subsample_size, subsample_seed, shuffle)
+
 
 class DatasetWrapper:
     def __init__(self, data_reader, annotation_reader=None, tag='', dataset_config=None):
@@ -353,3 +362,7 @@ class DatasetWrapper:
     @property
     def size(self):
         return self.__len__()
+
+    @property
+    def multi_infer(self):
+        return getattr(self.data_reader, 'multi_infer', False)

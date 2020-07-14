@@ -19,6 +19,10 @@ The original name of the model is [LResNet100E-IR,ArcFace@ms1m-refine-v2](https:
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| LFW accuracy| 99.0218%|
+
 ## Performance
 
 ## Input

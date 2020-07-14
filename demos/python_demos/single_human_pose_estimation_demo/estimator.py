@@ -86,17 +86,17 @@ class HumanPoseEstimator(object):
     def __init__(self, ie, path_to_model_xml, scale=None, thr=-100, device='CPU'):
         self.model = ie.read_network(path_to_model_xml, os.path.splitext(path_to_model_xml)[0] + '.bin')
 
-        assert len(self.model.inputs) == 1, "Expected 1 input blob"
+        assert len(self.model.input_info) == 1, "Expected 1 input blob"
 
         assert len(self.model.outputs) == 1, "Expected 1 output blob"
 
-        self._input_layer_name = next(iter(self.model.inputs))
+        self._input_layer_name = next(iter(self.model.input_info))
         self._output_layer_name = next(iter(self.model.outputs))
         self.CHANNELS_SIZE = 3
         self.OUTPUT_CHANNELS_SIZE = 17
 
-        assert len(self.model.inputs[self._input_layer_name].shape) == 4 and \
-               self.model.inputs[self._input_layer_name].shape[1] == self.CHANNELS_SIZE,\
+        assert len(self.model.input_info[self._input_layer_name].input_data.shape) == 4 and \
+               self.model.input_info[self._input_layer_name].input_data.shape[1] == self.CHANNELS_SIZE,\
                "Expected model input blob with shape [1, 3, H, W]"
 
         assert len(self.model.outputs[self._output_layer_name].shape) == 4 and \
@@ -108,7 +108,7 @@ class HumanPoseEstimator(object):
         self._scale = scale
         self._thr = thr
 
-        _, _, self.input_h, self.input_w = self.model.inputs[self._input_layer_name].shape
+        _, _, self.input_h, self.input_w = self.model.input_info[self._input_layer_name].input_data.shape
         _, _, self.output_h, self.output_w = self.model.outputs[self._output_layer_name].shape
         self._transform = TransformedCrop(self.input_h, self.input_w, self.output_h, self.output_w)
         self.infer_time = -1

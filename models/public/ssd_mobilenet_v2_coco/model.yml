@@ -42,4 +42,5 @@ model_optimizer_args:
   - --output=detection_classes,detection_scores,detection_boxes,num_detections
   - --input_model=$dl_dir/ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.pb
 framework: tf
+quantizable: yes
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

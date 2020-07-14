@@ -135,19 +135,6 @@ public:
 
         computeAnchors(initialAnchors, mask);
     }
-
-    YoloParams(InferenceEngine::CNNLayer::Ptr layer) {
-        if (layer->type != "RegionYolo")
-            throw std::runtime_error("Invalid output type: " + layer->type + ". RegionYolo expected");
-
-        coords = layer->GetParamAsInt("coords");
-        classes = layer->GetParamAsInt("classes");
-        auto initialAnchors = layer->GetParamAsFloats("anchors");
-        auto mask = layer->GetParamAsInts("mask");
-        num = mask.size();
-
-        computeAnchors(initialAnchors, mask);
-    }
 };
 
 struct DetectionObject {

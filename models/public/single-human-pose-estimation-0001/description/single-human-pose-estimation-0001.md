@@ -7,7 +7,7 @@ Single human pose estimation model based on https://arxiv.org/abs/1906.04104.
 
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
-| AP(coco orig)                                                 | 68                      |
+| AP(coco orig)                                                 | 69.04%                   |
 | GFlops                                                        | 60.125                  |
 | MParams                                                       | 33.165                  |
 | Source framework                                              | PyTorch\*               |

@@ -2,14 +2,10 @@
 tqdm
 
 # image reading and preprocessing
-pillow>=2.6.1
 scikit-image
 
 # reid
 scikit-learn
-
-# pipelining mode
-yamlloader
 
 # cpu extension usage
 py-cpuinfo<=4.0
