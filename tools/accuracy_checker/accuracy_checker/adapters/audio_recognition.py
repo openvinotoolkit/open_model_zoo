@@ -134,8 +134,7 @@ class CTCBeamSearchDecoder(Adapter):
                     i, v = nb
 
                     extand_t = _candidate + (i,)
-                    _TpNB = v * _pB['l'][_candidate] if len(_candidate) > 0 and _candidate[-1] == i else \
-                            v * _pT['l'][_candidate]
+                    _TpNB = v * _pB['l'][_candidate] if len(_candidate) > 0 and _candidate[-1] == i else v * _pT['l'][_candidate]
 
                     if extand_t in _pT['c']:
                         _pT['c'][extand_t] += _TpNB
