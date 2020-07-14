@@ -472,7 +472,7 @@ int main(int argc, char *argv[]) {
 
                     if (!FLAGS_m_ag.empty()) {
                         ageGenderDataUpdate(face, out_ages[i], out_genders[i]);
-                        if(FLAGS_r)
+                        if (FLAGS_r)
                             rawOutputAgeGender(i, out_ages[i], out_genders[i]);
                     }
 
