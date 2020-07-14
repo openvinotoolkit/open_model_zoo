@@ -16,7 +16,7 @@ The key benefit of this model compared to the [base model](../../text-detection-
 | F-measure (harmonic mean of precision and recall on ICDAR2013)| 88.45%                 |
 | GFlops                                                        | 7.78                  |
 | MParams                                                       | 2.26                   |
-| Source framework                                              | PyTorch              |
+| Source framework                                              | PyTorch\*              |
 
 
 ## Performance
