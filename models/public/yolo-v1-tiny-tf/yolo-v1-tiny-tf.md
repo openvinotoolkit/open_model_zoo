@@ -52,7 +52,7 @@ Accuracy metric obtained on VOC2012\* validation dataset for converted model.
 
 | Metric | Value |
 | ------ | ------|
-| mAP    | 72.16 |
+| mAP    | 72.17% |
 
 ## Input
 
@@ -89,7 +89,7 @@ The array of detection summary info, name - `conv2d_9/BiasAdd`,  shape - `1,13,1
 - `Cx`, `Cy` - cell index
 
 Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_20`], where:
-- (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get coordinates relative to the cell 
+- (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get coordinates relative to the cell
 - `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get height and width values relative to cell
 - `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
 - `class_no_1`,...,`class_no_20` - probability distribution over the classes in logits format, apply [softmax function](https://en.wikipedia.org/wiki/Softmax_function) and multiply by obtained confidence value to get confidence of each class

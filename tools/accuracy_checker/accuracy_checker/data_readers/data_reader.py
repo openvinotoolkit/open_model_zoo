@@ -21,6 +21,7 @@ import re
 import wave
 
 import cv2
+from PIL import Image
 import numpy as np
 from numpy.lib.npyio import NpzFile
 
@@ -28,11 +29,6 @@ try:
     import tensorflow as tf
 except ImportError as import_error:
     tf = None
-
-try:
-    from PIL import Image
-except ImportError as import_error:
-    Image = None
 
 try:
     import nibabel as nib
@@ -45,7 +41,7 @@ except ImportError:
     pydicom = None
 
 
-from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
+from ..utils import get_path, read_json, contains_all
 from ..dependency import ClassProvider
 from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField
 
@@ -99,34 +95,26 @@ class BaseReader(ClassProvider):
     __provider_type__ = 'reader'
 
     def __init__(self, data_source, config=None, **kwargs):
-        self.config = config
+        self.config = config or {}
         self.data_source = data_source
         self.read_dispatcher = singledispatch(self.read)
         self.read_dispatcher.register(list, self._read_list)
         self.read_dispatcher.register(ClipIdentifier, self._read_clip)
         self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
+        self.multi_infer = False
 
         self.validate_config()
         self.configure()
 
-    def __call__(self, context=None, identifier=None, **kwargs):
-        if identifier is not None:
-            return self.read_item(identifier)
-
-        if not context:
-            raise ValueError('identifier or context should be specified')
-
-        read_data = [self.read_item(identifier) for identifier in context.identifiers_batch]
-        context.data_batch = read_data
-        context.annotation_batch, context.data_batch = zipped_transform(
-            set_image_metadata,
-            context.annotation_batch,
-            context.data_batch
-        )
-        return context
+    def __call__(self, identifier):
+        return self.read_item(identifier)
 
     def configure(self):
+        if not self.data_source:
+            raise ConfigError('data_source parameter is required to create "{}" '
+                              'data reader and read data'.format(self.__provider__))
         self.data_source = get_path(self.data_source, is_directory=True)
+        self.multi_infer = self.config.get('multi_infer', False)
 
     def validate_config(self):
         pass
@@ -146,7 +134,10 @@ class BaseReader(ClassProvider):
         return self.read_dispatcher(data_id.frames)
 
     def read_item(self, data_id):
-        return DataRepresentation(self.read_dispatcher(data_id), identifier=data_id)
+        data_rep = DataRepresentation(self.read_dispatcher(data_id), identifier=data_id)
+        if self.multi_infer:
+            data_rep.metadata['multi_infer'] = True
+        return data_rep
 
     @property
     def name(self):
@@ -181,6 +172,7 @@ class ReaderCombiner(BaseReader):
             reading_scheme[pattern] = reader
 
         self.reading_scheme = reading_scheme
+        self.multi_infer = self.config.get('multi_infer', False)
 
     def read(self, data_id):
         for pattern, reader in self.reading_scheme.items():
@@ -207,13 +199,14 @@ class OpenCVImageReader(BaseReader):
 
     def validate_config(self):
         if self.config:
-            config_validator = OpenCVImageReaderConfig('opencv_imread_config')
+            config_validator = OpenCVImageReaderConfig(
+                'opencv_imread_config', on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
+            )
             config_validator.validate(self.config)
 
     def configure(self):
         super().configure()
         self.flag = OPENCV_IMREAD_FLAGS[self.config.get('reading_flag', 'color') if self.config else 'color']
-
 
     def read(self, data_id):
         return cv2.imread(str(get_path(self.data_source / data_id)), self.flag)
@@ -224,8 +217,6 @@ class PillowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        if Image is None:
-            raise ValueError('Pillow is not installed, please install it')
         self.convert_to_rgb = True
 
     def read(self, data_id):
@@ -237,11 +228,6 @@ class PillowImageReader(BaseReader):
 
 class ScipyImageReader(BaseReader):
     __provider__ = 'scipy_imread'
-
-    def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config)
-        if Image is None:
-            raise ValueError('Pillow is not installed, please install it')
 
     def read(self, data_id):
         # reimplementation scipy.misc.imread
@@ -279,8 +265,12 @@ class OpenCVFrameReader(BaseReader):
         return frame
 
     def configure(self):
+        if not self.data_source:
+            raise ConfigError('data_source parameter is required to create "{}" '
+                              'data reader and read data'.format(self.__provider__))
         self.data_source = get_path(self.data_source)
         self.videocap = cv2.VideoCapture(str(self.data_source))
+        self.multi_infer = self.config.get('multi_infer', False)
 
     def reset(self):
         self.current = -1
@@ -301,6 +291,10 @@ class JSONReader(BaseReader):
 
     def configure(self):
         self.key = self.config.get('key')
+        self.multi_infer = self.config.get('multi_infer', False)
+        if not self.data_source:
+            raise ConfigError('data_source parameter is required to create "{}" '
+                              'data reader and read data'.format(self.__provider__))
 
     def read(self, data_id):
         data = read_json(str(self.data_source / data_id))
@@ -343,6 +337,10 @@ class NiftiImageReader(BaseReader):
         if nib is None:
             raise ImportError('nifty backend for image reading requires nibabel. Please install it before usage.')
         self.channels_first = self.config.get('channels_first', False) if self.config else False
+        self.multi_infer = self.config.get('multi_infer', False)
+        if not self.data_source:
+            raise ConfigError('data_source parameter is required to create "{}" '
+                              'data reader and read data'.format(self.__provider__))
 
     def read(self, data_id):
         nib_image = nib.load(str(get_path(self.data_source / data_id)))
@@ -353,9 +351,11 @@ class NiftiImageReader(BaseReader):
 
         return image
 
+
 class NumpyReaderConfig(ConfigValidator):
     type = StringField(optional=True)
     keys = StringField(optional=True, default="")
+
 
 class NumPyReader(BaseReader):
     __provider__ = 'numpy_reader'
@@ -366,8 +366,13 @@ class NumPyReader(BaseReader):
             config_validator.validate(self.config)
 
     def configure(self):
+        self.multi_infer = self.config.get('multi_infer', False)
         self.keys = self.config.get('keys', "") if self.config else ""
         self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
+        self.multi_infer = self.config.get('multi_infer', False)
+        if not self.data_source:
+            raise ConfigError('data_source parameter is required to create "{}" '
+                              'data reader and read data'.format(self.__provider__))
 
     def read(self, data_id):
         data = np.load(str(self.data_source / data_id))
@@ -383,6 +388,7 @@ class NumPyReader(BaseReader):
 
         key = next(iter(data.keys()))
         return data[key]
+
 
 class TensorflowImageReader(BaseReader):
     __provider__ = 'tf_imread'
@@ -422,6 +428,7 @@ class AnnotationFeaturesReader(BaseReader):
         self.single = len(self.feature_list) == 1
         self.counter = 0
         self.subset = range(len(self.data_source))
+        self.multi_infer = self.config.get('multi_infer', False)
 
     def read(self, data_id):
         relevant_annotation = self.data_source[self.subset[self.counter]]

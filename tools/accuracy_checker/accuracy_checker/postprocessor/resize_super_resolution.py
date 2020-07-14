@@ -1,13 +1,9 @@
 import numpy as np
+from PIL import Image
 from ..postprocessor import Postprocessor
 from ..representation import SuperResolutionPrediction, SuperResolutionAnnotation
 from ..config import NumberField
 from ..utils import get_size_from_config
-
-try:
-    from PIL import Image
-except ImportError:
-    Image = None
 
 
 class ResizeSuperResolution(Postprocessor):
@@ -25,10 +21,6 @@ class ResizeSuperResolution(Postprocessor):
             ),
             'dst_height': NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination height for resizing."
-            ),
-            'size': NumberField(
-                value_type=int, optional=True, min_value=1,
-                description="Destination size for resizing for both dimensions (height, width)."
             )
         })
 

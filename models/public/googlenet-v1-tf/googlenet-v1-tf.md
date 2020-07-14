@@ -47,8 +47,8 @@ python3 freeze.py --ckpt path/to/inception_v1.ckpt --name inception_v1 --num_cla
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 69.81          | 69.81           |
-| Top 5  | 89.61          | 89.61           |
+| Top 1  | 69.81%          | 69.81%           |
+| Top 5  | 89.61%          | 89.61%           |
 
 ## Performance
 

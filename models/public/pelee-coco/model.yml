@@ -42,4 +42,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/pelee_coco/pelee_coco_304x304_acc3889.caffemodel
   - --input_proto=$dl_dir/pelee_coco/deploy.prototxt
 framework: caffe
+quantizable: yes
 license: https://raw.githubusercontent.com/Robert-JunWang/Pelee/master/LICENSE

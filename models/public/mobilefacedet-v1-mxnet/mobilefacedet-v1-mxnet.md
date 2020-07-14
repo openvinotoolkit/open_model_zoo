@@ -13,6 +13,12 @@
 | MParams           | 7.6828        |
 | Source framework  | MXNet\*       |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| mAP  | 78.7488%|
+
 ## Input
 
 ### Original model

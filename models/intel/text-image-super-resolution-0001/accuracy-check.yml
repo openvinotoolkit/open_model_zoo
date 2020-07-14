@@ -1,0 +1,30 @@
+models:
+  - name: text-image-super-resolution-0001
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   intel/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.xml
+        weights: intel/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.bin
+        adapter:
+          type: super_resolution
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.xml
+        weights: intel/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.bin
+        adapter:
+          type: super_resolution
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   intel/text-image-super-resolution-0001/FP16-INT8/text-image-super-resolution-0001.xml
+        weights: intel/text-image-super-resolution-0001/FP16-INT8/text-image-super-resolution-0001.bin
+        adapter:
+          type: super_resolution
+
+    datasets:
+      - name: text_super_resolution_x3

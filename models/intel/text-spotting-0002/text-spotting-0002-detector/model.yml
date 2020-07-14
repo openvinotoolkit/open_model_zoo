@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Mask R-CNN-based text detector.
+task_type: detection
+files:
+  - name: FP32/text-spotting-0002-detector.xml
+    size: 295114
+    sha256: 1a79f422774e6c227f5a2fc0fc5a4487babf951e5b812860d80e3807c227058a
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-detector/FP32/text-spotting-0002-detector.xml
+  - name: FP32/text-spotting-0002-detector.bin
+    size: 105906952
+    sha256: 975d8baa7b01c134f0300474b01bf4ce900cea1e7b86ddf909881adda8a3afa9
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-detector/FP32/text-spotting-0002-detector.bin
+  - name: FP16/text-spotting-0002-detector.xml
+    size: 294998
+    sha256: af5961e0fdcf54a2191b1fd1f52c5ddfd2842d3cbbe5750d47d817255c25fa32
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-detector/FP16/text-spotting-0002-detector.xml
+  - name: FP16/text-spotting-0002-detector.bin
+    size: 52953542
+    sha256: 0e0e92f8d014fc49d0150bc8cd163fcd35889095d347b3a04eb5444cb2ca9519
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-detector/FP16/text-spotting-0002-detector.bin
+  - name: FP16-INT8/text-spotting-0002-detector.xml
+    size: 729598
+    sha256: cf99816d093fd59c158ff448e6034211e5934bf6645ece12dcb83ac0c99e8938
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-detector/FP16-INT8/text-spotting-0002-detector.xml
+  - name: FP16-INT8/text-spotting-0002-detector.bin
+    size: 26678172
+    sha256: 248645278fddd01d5d8900e42fa69390de72f7720f8a60a5a3631f7056edf1dd
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-detector/FP16-INT8/text-spotting-0002-detector.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

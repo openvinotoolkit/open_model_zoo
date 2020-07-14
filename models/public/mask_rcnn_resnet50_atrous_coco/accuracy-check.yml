@@ -1,0 +1,37 @@
+models:
+  - name: mask_rcnn_resnet50_atrous_coco
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/mask_rcnn_resnet50_atrous_coco/FP32/mask_rcnn_resnet50_atrous_coco.xml
+        weights: public/mask_rcnn_resnet50_atrous_coco/FP32/mask_rcnn_resnet50_atrous_coco.bin
+        adapter:
+          type: mask_rcnn
+          detection_out: reshape_do_2d
+          raw_masks_out: masks
+        inputs:
+          - name: image_info
+            type: CONST_INPUT
+            value: [[800, 1365, 1]]
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/mask_rcnn_resnet50_atrous_coco/FP16/mask_rcnn_resnet50_atrous_coco.xml
+        weights: public/mask_rcnn_resnet50_atrous_coco/FP16/mask_rcnn_resnet50_atrous_coco.bin
+        adapter:
+          type: mask_rcnn
+          detection_out: reshape_do_2d
+          raw_masks_out: masks
+        inputs:
+          - name: image_info
+            type: CONST_INPUT
+            value: [[800, 1365, 1]]
+
+    datasets:
+      - name: ms_coco_mask_rcnn_short_91_classes
+        metrics:
+          - type: coco_orig_segm_precision
+          - type: coco_orig_precision

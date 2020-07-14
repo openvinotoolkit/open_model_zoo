@@ -27,8 +27,8 @@ The model output for `efficientnet-b0-pytorch` is the typical object classifier 
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 76.91          | 76.91           |
-| Top 5  | 93.21          | 93.21           | 
+| Top 1  | 76.91%          | 76.91%           |
+| Top 5  | 93.21%          | 93.21%           |
 
 ## Performance
 

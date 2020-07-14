@@ -15,6 +15,13 @@ Faster R-CNN with Inception v2. Used for object detection. For details, see the 
 | MParams                         | 13.307                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 25.65%|
+| mAP| 40.04%|
+
 ## Performance
 
 ## Input
@@ -47,7 +54,7 @@ Expected color order: BGR.
    where:
 
     - B - batch size
-    - C - vector of 3 values in format [H,W,S], where H - image height, W - imahe width, S - image scale factor (usually 1)
+    - C - vector of 3 values in format [H,W,S], where H - image height, W - image width, S - image scale factor (usually 1)
 
 ## Output
 

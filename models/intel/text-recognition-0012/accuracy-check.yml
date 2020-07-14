@@ -1,0 +1,36 @@
+models:
+  - name: text-recognition-0012
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   intel/text-recognition-0012/FP32/text-recognition-0012.xml
+        weights: intel/text-recognition-0012/FP32/text-recognition-0012.bin
+        adapter: beam_search_decoder
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/text-recognition-0012/FP16/text-recognition-0012.xml
+        weights: intel/text-recognition-0012/FP16/text-recognition-0012.bin
+        adapter: beam_search_decoder
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   intel/text-recognition-0012/FP16-INT8/text-recognition-0012.xml
+        weights: intel/text-recognition-0012/FP16-INT8/text-recognition-0012.bin
+        adapter: beam_search_decoder
+
+    datasets:
+      - name: ICDAR2013
+
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            dst_width: 120
+            dst_height: 32
+
+        metrics:
+          - type: character_recognition_accuracy

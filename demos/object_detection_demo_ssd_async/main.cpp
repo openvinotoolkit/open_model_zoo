@@ -152,18 +152,12 @@ int main(int argc, char *argv[]) {
                                                                   : CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) });
 
                 minLatencyConfig.insert({ CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1" });
-
-                deviceNstreams[device] = std::stoi(
-                    ie.GetConfig(device, CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
             } else if (device == "GPU") {
                 userSpecifiedConfig.insert({ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
                                 (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
                                                                   : CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) });
 
                 minLatencyConfig.insert({ CONFIG_KEY(GPU_THROUGHPUT_STREAMS), "1" });
-
-                deviceNstreams[device] = std::stoi(
-                    ie.GetConfig(device, CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
 
                 if (FLAGS_d.find("MULTI") != std::string::npos
                     && devices.find("CPU") != devices.end()) {
@@ -183,12 +177,16 @@ int main(int argc, char *argv[]) {
         slog::info << "Batch size is forced to 1." << slog::endl;
         cnnNetwork.setBatchSize(1);
         /** Read labels (if any)**/
-        std::string labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
         std::vector<std::string> labels;
-        std::ifstream inputFile(labelFileName);
-        std::copy(std::istream_iterator<std::string>(inputFile),
-                  std::istream_iterator<std::string>(),
-                  std::back_inserter(labels));
+        if (!FLAGS_labels.empty()) {
+            std::ifstream inputFile(FLAGS_labels);
+            std::string label;
+            while (std::getline(inputFile, label)) {
+                labels.push_back(label);
+            }
+            if (labels.empty())
+                throw std::logic_error("File empty or not found: " + FLAGS_labels);
+        }
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 3. Configure input & output ---------------------------------------------
@@ -251,11 +249,12 @@ int main(int argc, char *argv[]) {
             throw std::logic_error("Class labels are not supported with IR version older than 10");
         }
 
-        if (static_cast<int>(labels.size()) != num_classes) {
-            if (static_cast<int>(labels.size()) == (num_classes - 1))  // if network assumes default "background" class,
-                labels.insert(labels.begin(), "fake");                 // having no label
-            else
-                labels.clear();
+        if (!labels.empty() && static_cast<int>(labels.size()) != num_classes) {
+            if (static_cast<int>(labels.size()) == (num_classes - 1))  // if network assumes default "background" class, having no label
+                labels.insert(labels.begin(), "fake");
+            else {
+                throw std::logic_error("The number of labels is different from numbers of model classes");
+            }                
         }
         const SizeVector outputDims = output->getTensorDesc().getDims();
         const int maxProposalCount = outputDims[2];
@@ -303,19 +302,19 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 6. Init variables -------------------------------------------------------
+        enum class ExecutionMode {USER_SPECIFIED, MIN_LATENCY};
+        
         struct RequestResult {
             cv::Mat frame;
             std::unique_ptr<LockedMemory<const void>> output;
             PerformanceMetrics::TimePoint requestStartTime;
-            bool isSameMode;
+            ExecutionMode frameMode;
         };
 
-        bool isUserSpecifiedMode = true;  // execution always starts in USER_SPECIFIED mode
-
         auto totalT0 = std::chrono::steady_clock::now();
-
+        ExecutionMode currentMode = ExecutionMode::USER_SPECIFIED;
         std::deque<InferRequest::Ptr> emptyRequests;
-        if (isUserSpecifiedMode) {
+        if (currentMode == ExecutionMode::USER_SPECIFIED) {
             emptyRequests.assign(userSpecifiedInferRequests.begin(), userSpecifiedInferRequests.end());
         } else emptyRequests = {minLatencyInferRequest};
 
@@ -325,6 +324,8 @@ int main(int argc, char *argv[]) {
         std::exception_ptr callbackException = nullptr;
         std::mutex mutex;
         std::condition_variable condVar;
+        std::map<bool, PerformanceMetrics> modeMetrics = {{ExecutionMode::USER_SPECIFIED, PerformanceMetrics()},
+                                                          {ExecutionMode::MIN_LATENCY, PerformanceMetrics()}};
 
         cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
         Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10,
@@ -337,18 +338,20 @@ int main(int argc, char *argv[]) {
         std::cout << "To switch between min_latency/user_specified modes, press TAB key in the output window" 
                   << std::endl;
 
-        std::map<bool, PerformanceMetrics> modeMetrics = {{true, PerformanceMetrics()}, {false, PerformanceMetrics()}};
         while (true) {
-            if (callbackException) std::rethrow_exception(callbackException);
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+
+                if (callbackException) std::rethrow_exception(callbackException);
+                if (!cap.isOpened()
+                    && completedRequestResults.empty()
+                    && ((currentMode == ExecutionMode::USER_SPECIFIED && emptyRequests.size() == FLAGS_nireq)
+                        || (currentMode == ExecutionMode::MIN_LATENCY && emptyRequests.size() == 1))) break;
+            }
 
             RequestResult requestResult;
             {
                 std::lock_guard<std::mutex> lock(mutex);
-
-                if (!cap.isOpened()
-                    && completedRequestResults.empty()
-                    && ((isUserSpecifiedMode && emptyRequests.size() == FLAGS_nireq)
-                        || (!isUserSpecifiedMode && emptyRequests.size() == 1))) break;
 
                 auto requestResultItr = completedRequestResults.find(nextFrameIdToShow);
                 if (requestResultItr != completedRequestResults.end()) {
@@ -358,11 +361,12 @@ int main(int argc, char *argv[]) {
             }
 
             if (requestResult.output) {
-                const float *detections = requestResult.output.get()->as<float*>();
+                LockedMemory<const void> outputMapped = as<MemoryBlob>(requestResult.output)->rmap();
+                const float *detections = outputMapped.as<float*>();
 
                 nextFrameIdToShow++;
-                if (requestResult.isSameMode) {
-                    modeMetrics[isUserSpecifiedMode].recalculate(requestResult.requestStartTime);
+                if (requestResult.frameMode == currentMode) {
+                    modeMetrics[currentMode].recalculate(requestResult.requestStartTime);
                 }
 
                 for (int i = 0; i < maxProposalCount; i++) {
@@ -389,8 +393,7 @@ int main(int argc, char *argv[]) {
                         std::ostringstream conf;
                         conf << ":" << std::fixed << std::setprecision(3) << confidence;
                         cv::putText(requestResult.frame,
-                                    (static_cast<size_t>(label) < labels.size() ?
-                                    labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
+                                    (!labels.empty() ? labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
                                     cv::Point2f(xmin, ymin - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
                                     cv::Scalar(0, 0, 255));
                         cv::rectangle(requestResult.frame, cv::Point2f(xmin, ymin), cv::Point2f(xmax, ymax),
@@ -401,16 +404,17 @@ int main(int argc, char *argv[]) {
                 presenter.drawGraphs(requestResult.frame);
 
                 std::ostringstream out;
-                out << (isUserSpecifiedMode ? "USER SPECIFIED" : "MIN LATENCY") << " mode (press Tab to switch)";
+                out << (currentMode == ExecutionMode::USER_SPECIFIED ? "USER SPECIFIED" : "MIN LATENCY")
+                    << " mode (press Tab to switch)";
                 putHighlightedText(requestResult.frame, out.str(), cv::Point2f(10, 30), cv::FONT_HERSHEY_TRIPLEX, 0.75, 
                                    cv::Scalar(10, 10, 200), 2);
                 out.str("");
-                out << "FPS: " << std::fixed << std::setprecision(1) << modeMetrics[isUserSpecifiedMode].getFps();
+                out << "FPS: " << std::fixed << std::setprecision(1) << modeMetrics[currentMode].getFps();
                 putHighlightedText(requestResult.frame, out.str(), cv::Point2f(10, 60), cv::FONT_HERSHEY_TRIPLEX, 0.75, 
                                    cv::Scalar(10, 200, 10), 2);
                 out.str("");
                 out << "Latency: " << std::fixed << std::setprecision(1)
-                    << modeMetrics[isUserSpecifiedMode].getLatency() << " ms";
+                    << modeMetrics[currentMode].getLatency() << " ms";
                 putHighlightedText(requestResult.frame, out.str(), cv::Point2f(10, 90), cv::FONT_HERSHEY_TRIPLEX, 0.75, 
                                    cv::Scalar(200, 10, 10), 2);
 
@@ -422,96 +426,107 @@ int main(int argc, char *argv[]) {
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                         break;
                     } else if (9 == key) {  // Tab
-                        modeMetrics[isUserSpecifiedMode].stop();
-                        isUserSpecifiedMode = !isUserSpecifiedMode;
+                        modeMetrics[currentMode].stop();
+                        ExecutionMode prevMode = currentMode;
+                        currentMode = (currentMode == ExecutionMode::USER_SPECIFIED ? ExecutionMode::MIN_LATENCY
+                                                                                    : ExecutionMode::USER_SPECIFIED);;
 
-                        if (isUserSpecifiedMode) {
+                        if (prevMode == ExecutionMode::USER_SPECIFIED) {
                             for (const auto& request: userSpecifiedInferRequests) {
                                 request->Wait(IInferRequest::WaitMode::RESULT_READY);
                             }
                         } else minLatencyInferRequest->Wait(IInferRequest::WaitMode::RESULT_READY);
                         
-                        if (isUserSpecifiedMode) {
-                            emptyRequests.assign(userSpecifiedInferRequests.begin(), userSpecifiedInferRequests.end());
-                        } else emptyRequests = {minLatencyInferRequest};
+                        {
+                            std::lock_guard<std::mutex> lock(mutex);
 
-                        modeMetrics[isUserSpecifiedMode].reinitialize();
+                            if (currentMode == ExecutionMode::USER_SPECIFIED) {
+                                emptyRequests.assign(userSpecifiedInferRequests.begin(),
+                                                     userSpecifiedInferRequests.end());
+                            } else emptyRequests = {minLatencyInferRequest};
+                        }
+
+                        modeMetrics[currentMode].reinitialize();
                     } else {
                         presenter.handleKey(key);
                     }
                 }
-            } else if (!emptyRequests.empty() && cap.isOpened()) {
-                auto startTime = std::chrono::steady_clock::now();
-                
-                cv::Mat frame;
-                if (!cap.read(frame)) {
-                    if (frame.empty()) {
-                        if (FLAGS_loop_input) {
-                            cap.open((FLAGS_i == "cam") ? 0 : FLAGS_i.c_str());
-                        } else cap.release();
-                        continue;
-                    } else {
-                        throw std::logic_error("Failed to get frame from cv::VideoCapture");
-                    }
-                }
 
-                InferRequest::Ptr request;
-                {
-                    std::lock_guard<std::mutex> lock(mutex);
+                continue;
+            }
 
-                    request = std::move(emptyRequests.front());
-                    emptyRequests.pop_front();
-                }
-                frameToBlob(frame, request, imageInputName);
-                
-                bool frameMode = isUserSpecifiedMode;
-                request->SetCompletionCallback([&mutex,
-                                                &completedRequestResults,
-                                                nextFrameId,
-                                                frame,
-                                                request,
-                                                &outputName,
-                                                startTime,
-                                                frameMode,
-                                                &isUserSpecifiedMode,
-                                                &emptyRequests,
-                                                &callbackException,
-                                                &condVar] {
-                    {
-                        std::lock_guard<std::mutex> callbackLock(mutex);
-                    
-                        try {
-                            completedRequestResults.insert(
-                                std::pair<int, RequestResult>(nextFrameId, RequestResult{
-                                    frame,
-                                    std::unique_ptr<LockedMemory<const void>>(new
-                                        LockedMemory<const void>(as<MemoryBlob>(request->GetBlob(outputName))->rmap())),
-                                    startTime,
-                                    frameMode == isUserSpecifiedMode
-                                }));
-                            
-                            if (isUserSpecifiedMode == frameMode) {
-                                emptyRequests.push_back(std::move(request));
-                            }
-                        }
-                        catch (...) {
-                            if (!callbackException) {
-                                callbackException = std::current_exception();
-                            }
-                        }
-                    }
-                    condVar.notify_one();
-                });
-
-                request->StartAsync();
-                nextFrameId++;
-            } else {
+            {
                 std::unique_lock<std::mutex> lock(mutex);
 
-                while (callbackException == nullptr && emptyRequests.empty() && completedRequestResults.empty()) {
-                    condVar.wait(lock);
+                if (emptyRequests.empty() || !cap.isOpened()) {
+                    while (callbackException == nullptr && emptyRequests.empty() && completedRequestResults.empty()) {
+                        condVar.wait(lock);
+                    }
+
+                    continue;
                 }
             }
+            
+            auto startTime = std::chrono::steady_clock::now();
+                
+            cv::Mat frame;
+            if (!cap.read(frame)) {
+                if (frame.empty()) {
+                    if (FLAGS_loop_input) {
+                        cap.open((FLAGS_i == "cam") ? 0 : FLAGS_i.c_str());
+                    } else cap.release();
+                    continue;
+                } else {
+                    throw std::logic_error("Failed to get frame from cv::VideoCapture");
+                }
+            }
+
+            InferRequest::Ptr request;
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+
+                request = std::move(emptyRequests.front());
+                emptyRequests.pop_front();
+            }
+            frameToBlob(frame, request, imageInputName);
+                
+            ExecutionMode frameMode = currentMode;
+            request->SetCompletionCallback([&mutex,
+                                            &completedRequestResults,
+                                            nextFrameId,
+                                            frame,
+                                            request,
+                                            &outputName,
+                                            startTime,
+                                            frameMode,
+                                            &emptyRequests,
+                                            &callbackException,
+                                            &condVar] {
+                {
+                    std::lock_guard<std::mutex> callbackLock(mutex);
+                
+                    try {
+                        completedRequestResults.insert(
+                            std::pair<int, RequestResult>(nextFrameId, RequestResult{
+                                frame,
+                                std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outputName))),
+                                startTime,
+                                frameMode
+                            }));
+                        
+                        emptyRequests.push_back(std::move(request));
+                    }
+                    catch (...) {
+                        if (!callbackException) {
+                            callbackException = std::current_exception();
+                        }
+                    }
+                }
+                condVar.notify_one();
+            });
+
+            request->StartAsync();
+            nextFrameId++;
         }
         modeMetrics[isUserSpecifiedMode].stop();
         // -----------------------------------------------------------------------------------------------------
@@ -525,7 +540,7 @@ int main(int argc, char *argv[]) {
 
         /** Show performace results **/
         if (FLAGS_pc) {
-            if (isUserSpecifiedMode) {
+            if (currentMode == ExecutionMode::USER_SPECIFIED) {
                 for (const auto& request: userSpecifiedInferRequests) {
                     printPerformanceCounts(*request, std::cout, getFullDeviceName(ie, FLAGS_d));
                 }
@@ -534,7 +549,7 @@ int main(int argc, char *argv[]) {
 
         for (const auto & mode : modeMetrics) {
             if (mode.second.hasStarted()) {
-                std::cout << std::endl << (mode.first ? "USER_SPECIFIED mode:" : "MIN_LATENCY mode:") << std::endl;
+                std::cout << std::endl << (mode.first == ExecutionMode::USER_SPECIFIED ? "USER_SPECIFIED mode:" : "MIN_LATENCY mode:") << std::endl;
                 std::cout << "FPS: " << std::fixed << std::setprecision(1) << mode.second.getTotalFps() << std::endl;
                 std::cout << "Latency: " << std::fixed << std::setprecision(1) << mode.second.getTotalLatency()
                     << " ms" << std::endl;
@@ -547,7 +562,7 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 9. Wait for running Infer Requests --------------------------------------
-        if (isUserSpecifiedMode) {
+        if (currentMode == ExecutionMode::USER_SPECIFIED) {
             for (const auto& request: userSpecifiedInferRequests) {
                 request->Wait(IInferRequest::WaitMode::RESULT_READY);
             }

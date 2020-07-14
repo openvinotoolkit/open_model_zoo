@@ -1,0 +1,55 @@
+models:
+  - name: mobilenet-v2-cf
+    launchers:
+      - framework: caffe
+        model:   public/mobilenet-v2/mobilenet-v2.prototxt
+        weights: public/mobilenet-v2/mobilenet-v2.caffemodel
+        adapter: classification
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 103.94, 116.78, 123.68
+            std: 58.8235294
+
+  - name: mobilenet-v2
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/mobilenet-v2/FP32/mobilenet-v2.xml
+        weights: public/mobilenet-v2/FP32/mobilenet-v2.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/mobilenet-v2/FP16/mobilenet-v2.xml
+        weights: public/mobilenet-v2/FP16/mobilenet-v2.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   public/mobilenet-v2/FP32-INT8/mobilenet-v2.xml
+        weights: public/mobilenet-v2/FP32-INT8/mobilenet-v2.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   public/mobilenet-v2/FP16-INT8/mobilenet-v2.xml
+        weights: public/mobilenet-v2/FP16-INT8/mobilenet-v2.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224

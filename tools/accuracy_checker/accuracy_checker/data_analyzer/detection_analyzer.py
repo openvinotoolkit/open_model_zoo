@@ -24,6 +24,7 @@ class DetectionDataAnalyzer(BaseDataAnalyzer):
     __provider__ = 'DetectionAnnotation'
 
     def analyze(self, result: list, meta, count_objects=True):
+        data_analysis = {}
         counter = Counter()
         all_boxes = 0
         diff_objects = 0
@@ -44,31 +45,50 @@ class DetectionDataAnalyzer(BaseDataAnalyzer):
             counter.update(data.labels)
 
         if count_objects:
-            self.object_count(result)
+            data_analysis['annotations_size'] = self.object_count(result)
 
         print_info('Total boxes {}'.format(all_boxes))
+        data_analysis['all_boxes'] = all_boxes
         label_map = meta.get('label_map', {})
 
         for key in counter:
             if key in label_map:
                 print_info('{name}: {value}'.format(name=label_map[key], value=counter[key]))
+                data_analysis[label_map[key]] = counter[key]
             else:
                 print_info('class_{key}: {value}'.format(key=key, value=counter[key]))
+                data_analysis['class_{}'.format(key)] = counter[key]
 
         if size > 0:
+            avg_num_diff_objects = diff_objects/size
+            avg_num_all_objects = all_boxes/size
+            avg_width = width/all_boxes
+            avg_height = height/all_boxes
+
             print_info(
-                'Average number of difficult objects (boxes) per image: {average}'.format(average=diff_objects/size)
+                'Average number of difficult objects (boxes) per image: {average}'.format(average=avg_num_diff_objects)
             )
             print_info(
-                'Average number of objects (boxes) per image: {average}'.format(average=all_boxes/size)
+                'Average number of objects (boxes) per image: {average}'.format(average=avg_num_all_objects)
             )
             print_info(
                 'Average size detection object: width: {width}, '
-                'height: {height}'.format(width=width/all_boxes, height=height/all_boxes)
+                'height: {height}'.format(width=avg_width, height=avg_height)
             )
 
+            data_analysis['average_num_difficult_objects'] = avg_num_diff_objects
+            data_analysis['average_num_all_objects'] = avg_num_all_objects
+            data_analysis['average_width'] = avg_width
+            data_analysis['average_height'] = avg_height
+
             if diff_objects > 0:
+                avg_width_diff_objects = width_diff/diff_objects
+                avg_height_diff_objects = height_diff / diff_objects
                 print_info(
                     'Average size difficult object: width: {width}, '
-                    'height: {height}\n'.format(width=width_diff/diff_objects, height=height_diff/diff_objects)
+                    'height: {height}\n'.format(width=avg_width_diff_objects, height=avg_height_diff_objects)
                 )
+                data_analysis['average_width_difficult_objects'] = avg_width_diff_objects
+                data_analysis['average_height_difficult_objects'] = avg_height_diff_objects
+
+        return data_analysis

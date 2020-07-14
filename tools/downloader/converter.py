@@ -15,49 +15,14 @@
 # limitations under the License.
 
 import argparse
-import concurrent.futures
 import os
-import queue
 import re
 import string
-import subprocess
 import sys
-import threading
 
 from pathlib import Path
 
 import common
-
-
-class QueuedOutputContext(common.JobContext):
-    def __init__(self, output_queue):
-        self._output_queue = output_queue
-
-    def print(self, value, *, end='\n', flush=False):
-        self._output_queue.put(value + end)
-
-    def subprocess(self, args, **kwargs):
-        with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                universal_newlines=True, **kwargs) as p:
-            for line in p.stdout:
-                self._output_queue.put(line)
-            return p.wait() == 0
-
-
-class JobWithQueuedOutput():
-    def __init__(self, output_queue, future):
-        self._output_queue = output_queue
-        self._future = future
-        self._future.add_done_callback(lambda future: self._output_queue.put(None))
-
-    def complete(self):
-        for fragment in iter(self._output_queue.get, None):
-            print(fragment, end='', flush=True) # for simplicity, flush every fragment
-
-        return self._future.result()
-
-    def cancel(self):
-        self._future.cancel()
 
 
 def convert_to_onnx(reporter, model, output_dir, args):
@@ -196,20 +161,9 @@ def main():
     if args.jobs == 1 or args.dry_run:
         results = [convert(reporter, model) for model in models]
     else:
-        with concurrent.futures.ThreadPoolExecutor(args.jobs) as executor:
-            def start(model):
-                output_queue = queue.Queue()
-                queued_reporter = common.Reporter(QueuedOutputContext(output_queue))
-                return JobWithQueuedOutput(
-                    output_queue, executor.submit(convert, queued_reporter, model))
-
-            jobs = list(map(start, models))
-
-            try:
-                results = [job.complete() for job in jobs]
-            except:
-                for job in jobs: job.cancel()
-                raise
+        results = common.run_in_parallel(args.jobs,
+            lambda context, model: convert(common.Reporter(context), model),
+            models)
 
     failed_models = [model.name for model, successful in zip(models, results) if not successful]
 

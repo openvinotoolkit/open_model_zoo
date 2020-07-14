@@ -25,7 +25,7 @@ static const char num_threads_message[] = "Optional. Specify count of threads.";
 static const char num_streams_message[] = "Optional. Specify count of streams.";
 static const char num_inf_req_message[] = "Optional. Number of infer requests.";
 static const char image_grid_resolution_message[] = "Optional. Set image grid resolution in format WxH. "
-                                                    "Default value is 1920x1080.";
+                                                    "Default value is 1280x720.";
 static const char ntop_message[] = "Optional. Number of top results. Default value is 5. Must be >= 1.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
                                            "Absolute path to the .xml file with kernels description.";
@@ -47,7 +47,7 @@ DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_uint32(nireq, 0, num_inf_req_message);
 DEFINE_uint32(nt, 5, ntop_message);
-DEFINE_string(res, "1920x1080", image_grid_resolution_message);
+DEFINE_string(res, "1280x720", image_grid_resolution_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(no_show, false, no_show_message);

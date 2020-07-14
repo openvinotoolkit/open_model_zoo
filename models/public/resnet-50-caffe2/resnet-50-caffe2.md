@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 This is a Caffe2\* version of `resnet-50` model, designed to perform image classification.
-This model was converted from Caffe\* to Caffe2\* format. 
+This model was converted from Caffe\* to Caffe2\* format.
 For details see repository <https://github.com/caffe2/models/tree/master/resnet50>,
 paper <https://arxiv.org/abs/1512.03385>.
 
@@ -20,6 +20,11 @@ paper <https://arxiv.org/abs/1512.03385>.
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 76.38% |
+| Top 5  | 93.188%|
+
 ## Performance
 
 ## Input
@@ -33,7 +38,7 @@ Image, name - `gpu_0/data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `BGR`. 
+Channel order is `BGR`.
 Mean values - [103.53,116.28,123.675], scale values - [57.375,57.12,58.395].
 
 ### Converted model

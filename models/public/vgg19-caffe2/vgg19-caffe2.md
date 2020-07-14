@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 This is a Caffe2\* version of `vgg19` model, designed to perform image classification.
-This model was converted from Caffe\* to Caffe2\* format. 
+This model was converted from Caffe\* to Caffe2\* format.
 For details see repository <https://github.com/caffe2/models/tree/master/vgg19>,
 paper <https://arxiv.org/abs/1409.1556>.
 ## Example
@@ -18,6 +18,11 @@ paper <https://arxiv.org/abs/1409.1556>.
 | Source framework  | Caffe2\*      |
 
 ## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 71.062%|
+| Top 5  | 89.832%|
 
 ## Performance
 

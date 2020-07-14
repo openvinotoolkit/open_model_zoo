@@ -6,7 +6,7 @@ You can use the following models with the demo:
 * `colorization-v2`
 * `colorization-v2-norebal`
 
-For more information about pretrained models, refer to the [model documentation](../../../models/public/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
 
 ### How It Works
 
@@ -42,7 +42,7 @@ Options:
                         Optional. List of monitors to show initially.
 ```
 
-To run the demo, you can use public or pretrained models. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md) or go to the [Intel&reg; Open Source Technology Center](https://download.01.org/opencv/).
+To run the demo, you can use public or Intel's pretrained models. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md) or go to the [Intel&reg; Open Source Technology Center](https://download.01.org/opencv/).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

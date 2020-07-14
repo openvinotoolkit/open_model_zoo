@@ -115,7 +115,7 @@ DATA_SEQUENCES = {
         image_net_arg('00000020'),
     ],
 
-    'multi-camera-multi-person-tracking': [
+    'multi-camera-multi-target-tracking': [
         image_net_arg('00000002'),
         image_net_arg('00000032'),
         image_net_arg('00017291'),
@@ -129,7 +129,7 @@ DATA_SEQUENCES = {
         image_net_arg('00000002'),
     ],
 
-    'multi-camera-multi-person-tracking/repeated': [image_net_arg('00000002')] * 11,
+    'multi-camera-multi-target-tracking/repeated': [image_net_arg('00000002')] * 11,
 
     'object-detection-demo-ssd-async': [
         image_net_arg('00000001'),

@@ -15,6 +15,13 @@
 | MParams                         | 1.327                                     |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 63.042%|
+| Top 5  | 84.934%|
+
 ## Performance
 
 ## Input

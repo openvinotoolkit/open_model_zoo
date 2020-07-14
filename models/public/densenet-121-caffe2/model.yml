@@ -28,6 +28,7 @@ files:
     sha256: a3650579bc883a1755750994507c48d84d0f75d193e304eb8caf5031acb5f028
     source: https://s3.amazonaws.com/download.caffe2.ai/models/densenet121/init_net.pb
 framework: caffe2
+quantizable: yes
 conversion_to_onnx_args:
   - --model-path=$dl_dir/predict_net.pb
   - --model-name=densenet-121-caffe2

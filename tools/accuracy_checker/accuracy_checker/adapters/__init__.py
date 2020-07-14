@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2019-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,28 +29,34 @@ from .text_recognition import (
     LPRAdapter
 )
 
-from .image_processing import ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter
+from .image_processing import (
+    ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter, SuperResolutionYUV
+)
 from .attributes_recognition import (
     HeadPoseEstimatorAdapter,
     VehicleAttributesRecognitionAdapter,
     PersonAttributesAdapter,
     AgeGenderAdapter,
     LandmarksRegressionAdapter,
-    GazeEstimationAdapter
+    GazeEstimationAdapter,
+    PRNetAdapter
 )
 
 from .reidentification import ReidAdapter
 from .detection import (
-    SSDAdapter,
-    FacePersonAdapter,
     TFObjectDetectionAPIAdapter,
-    SSDAdapterMxNet,
-    PyTorchSSDDecoder,
-    SSDONNXAdapter,
     MTCNNPAdapter,
     RetinaNetAdapter,
     ClassAgnosticDetectionAdapter,
+    FaceBoxesAdapter,
+    FaceDetectionAdapter,
+    FaceDetectionRefinementAdapter
 )
+from .detection_person_vehicle import (
+    PersonVehicleDetectionAdapter,
+    PersonVehicleDetectionRefinementAdapter
+)
+from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
 from .classification import ClassificationAdapter
@@ -72,6 +78,12 @@ from .centernet import CTDETAdapter
 from .mono_depth import MonoDepthAdapter
 
 from .image_inpainting import ImageInpaintingAdapter
+from .style_transfer import StyleTransferAdapter
+
+from .attribute_classification import AttributeClassificationAdapter
+
+from .regression import RegressionAdapter
+from .mixed_adapter import MixedAdapter
 
 __all__ = [
     'Adapter',
@@ -82,17 +94,17 @@ __all__ = [
 
     'ClassificationAdapter',
 
-    'SSDAdapter',
-    'FacePersonAdapter',
     'TFObjectDetectionAPIAdapter',
-    'SSDAdapterMxNet',
-    'SSDONNXAdapter',
-    'PyTorchSSDDecoder',
     'MTCNNPAdapter',
     'CTDETAdapter',
     'RetinaNetAdapter',
     'ClassAgnosticDetectionAdapter',
     'RetinaFaceAdapter',
+    'FaceBoxesAdapter',
+    'FaceDetectionAdapter',
+    'FaceDetectionRefinementAdapter',
+    'PersonVehicleDetectionAdapter',
+    'PersonVehicleDetectionRefinementAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
@@ -102,6 +114,7 @@ __all__ = [
     'ImageProcessingAdapter',
     'SuperResolutionAdapter',
     'MultiSuperResolutionAdapter',
+    'SuperResolutionYUV',
 
     'HeadPoseEstimatorAdapter',
     'VehicleAttributesRecognitionAdapter',
@@ -109,6 +122,7 @@ __all__ = [
     'AgeGenderAdapter',
     'LandmarksRegressionAdapter',
     'GazeEstimationAdapter',
+    'PRNetAdapter',
 
     'TextDetectionAdapter',
     'TextProposalsDetectionAdapter',
@@ -133,5 +147,11 @@ __all__ = [
 
     'MonoDepthAdapter',
 
-    'ImageInpaintingAdapter'
+    'ImageInpaintingAdapter',
+    'StyleTransferAdapter',
+
+    'AttributeClassificationAdapter',
+
+    'RegressionAdapter',
+    'MixedAdapter'
 ]

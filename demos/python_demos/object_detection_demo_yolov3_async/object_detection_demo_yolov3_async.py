@@ -230,7 +230,7 @@ def get_objects(output, net, new_frame_height_width, source_height_width, prob_t
     objects = list()
 
     for layer_name, out_blob in output.items():
-        out_blob = out_blob.reshape(net.layers[net.layers[layer_name].parents[0]].out_data[0].shape)
+        out_blob = out_blob.buffer.reshape(net.layers[net.layers[layer_name].parents[0]].out_data[0].shape)
         layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
         objects += parse_yolo_region(out_blob, new_frame_height_width, source_height_width, layer_params,
                                      prob_threshold, is_proportional)
@@ -245,6 +245,10 @@ def filter_objects(objects, iou_threshold, prob_threshold):
         if objects[i]['confidence'] == 0:
             continue
         for j in range(i + 1, len(objects)):
+            # We perform IOU only on objects of same class 
+            if objects[i]['class_id'] != objects[j]['class_id']: 
+                continue
+
             if intersection_over_union(objects[i], objects[j]) > iou_threshold:
                 objects[j]['confidence'] = 0
 
@@ -259,7 +263,7 @@ def async_callback(status, callback_args):
         if status != 0:
             raise RuntimeError('Infer Request has returned status code {}'.format(status))
 
-        completed_request_results[frame_id] = (frame, request.outputs, start_time, frame_mode == mode.current)
+        completed_request_results[frame_id] = (frame, request.output_blobs, start_time, frame_mode == mode.current)
 
         if mode.current == frame_mode:
             empty_requests.append(request)
@@ -330,18 +334,18 @@ def main():
                       "or --cpu_extension command line argument")
             sys.exit(1)
 
-    assert len(net.inputs.keys()) == 1, "Sample supports only YOLO V3 based single input topologies"
+    assert len(net.input_info) == 1, "Sample supports only YOLO V3 based single input topologies"
 
     # ---------------------------------------------- 4. Preparing inputs -----------------------------------------------
     log.info("Preparing inputs")
-    input_blob = next(iter(net.inputs))
+    input_blob = next(iter(net.input_info))
 
     # Read and pre-process input images
-    if net.inputs[input_blob].shape[1] == 3:
-        input_height, input_width = net.inputs[input_blob].shape[2:]
+    if net.input_info[input_blob].input_data.shape[1] == 3:
+        input_height, input_width = net.input_info[input_blob].input_data.shape[2:]
         nchw_shape = True
     else:
-        input_height, input_width = net.inputs[input_blob].shape[1:3]
+        input_height, input_width = net.input_info[input_blob].input_data.shape[1:3]
         nchw_shape = False
 
     if args.labels:
@@ -493,6 +497,7 @@ def main():
 
         else:
             event.wait()
+            event.clear()
 
     if callback_exceptions:
         raise callback_exceptions[0]

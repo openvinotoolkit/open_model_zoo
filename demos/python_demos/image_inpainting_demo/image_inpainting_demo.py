@@ -55,9 +55,8 @@ def main():
             float(1 / inpainting_processor.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
     if not args.no_show:
         cv2.imshow('Image Inpainting Demo', concat_imgs)
-        key = cv2.waitKey(0)
-        if key == 27:
-            return
+        cv2.waitKey(0)
+
 
 if __name__ == "__main__":
     sys.exit(main() or 0)

@@ -1,0 +1,73 @@
+models:
+  - name: gmcnn-places2-tf
+    launchers:
+      - framework: tf
+        model: public/gmcnn-places2-tf/frozen_model.pb
+        adapter: inpainting
+        inputs:
+          - name: "Placeholder"
+            type: INPUT
+            value: '.*image'
+          - name: "Placeholder_1"
+            type: INPUT
+            value: '.*mask'
+
+    datasets:
+      - name: inpainting_free_form_masks
+        preprocessing:
+          - type: crop
+            dst_width: 680
+            dst_height: 512
+          - type: custom_mask
+
+  - name: gmcnn-places2-tf
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model: public/gmcnn-places2-tf/FP32/gmcnn-places2-tf.xml
+        weights: public/gmcnn-places2-tf/FP32/gmcnn-places2-tf.xml
+        adapter: inpainting
+        inputs:
+          - name: "Placeholder"
+            type: INPUT
+            value: '.*image'
+          - name: "Placeholder_1"
+            type: INPUT
+            value: '.*mask'
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model: public/gmcnn-places2-tf/FP16/gmcnn-places2-tf.xml
+        weights: public/gmcnn-places2-tf/FP16/gmcnn-places2-tf.xml
+        adapter: inpainting
+        inputs:
+          - name: "Placeholder"
+            type: INPUT
+            value: '.*image'
+          - name: "Placeholder_1"
+            type: INPUT
+            value: '.*mask'
+
+    datasets:
+      - name: inpainting_free_form_masks
+        preprocessing:
+          - type: crop
+            dst_width: 680
+            dst_height: 512
+          - type: custom_mask
+            mask_dir: free_form_masks/masks_2k
+
+        postprocessing:
+          - type: crop_ground_truth_image
+            dst_width: 680
+            dst_height: 512
+
+        metrics:
+          - type: psnr
+            scale_border: 0
+            presenter: print_vector
+          - type: ssim
+            presenter: print_vector
