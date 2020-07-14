@@ -89,10 +89,11 @@ public:
         size_t frameIdx;
     };
 
-    explicit Visualizer(int leftPadding = 10, int rightPadding = 10, int topPadding = 75, int bottomPadding = 10);
+    explicit Visualizer(bool m_ag = false, bool m_em = false,
+                        bool m_hp = false, bool m_lm = false,
+                        int leftPadding = 10, int rightPadding = 10,
+                        int topPadding = 75, int bottomPadding = 10);
 
-    void enableVisualisations(bool isAgeGenderEnabled = false, bool isEmotionsEnabled = false,
-                              bool isHeadPoseEnabled = false, bool isLandmarksEnabled = false);
     void enableEmotionBar(const cv::Size inImgSize, std::vector<std::string> const& emotionNames);
     void draw(cv::Mat img, std::list<Face::Ptr> faces);
 
