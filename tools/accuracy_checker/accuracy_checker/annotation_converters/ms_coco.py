@@ -102,7 +102,8 @@ class MSCocoDetectionConverter(BaseFormatConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         full_annotation = read_json(self.annotation_file)
         image_info = full_annotation['images']
-        image_ids = [(image['id'], image['file_name']) for image in image_info]
+        image_ids = [(image['id'], image['file_name'], np.array([image['height'], image['width'], 3]))
+                     for image in image_info]
         if self.sort_annotations:
             image_ids.sort(key=lambda value: value[0])
         annotations = full_annotation['annotations']
@@ -258,6 +259,7 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
                 if not check_file_existence(image_full_path):
                     content_errors.append('{}: does not exist'.format(image_full_path))
             annotation.metadata['iscrowd'] = is_crowd
+            annotation.metadata['image_size'] = image[2]
             segmentation_annotations.append(annotation)
             if tqdm is None and image_id % progress_interval == 0:
                 print_info('{} / {} processed'.format(image_id, num_iterations))
@@ -294,6 +296,7 @@ class MSCocoMaskRCNNConverter(MSCocoDetectionConverter):
             segmentation_annotation = CoCoInstanceSegmentationAnnotation(image[1], segmentations, image_labels)
             segmentation_annotation.metadata['iscrowd'] = is_crowd
             segmentation_annotation.metadata['rects'] = np.c_[xmins, ymins, xmaxs, ymaxs]
+            segmentation_annotation.metadata['image_size'] = image[2]
             container_annotations.append(ContainerAnnotation({
                 'detection_annotation': detection_annotation,
                 'segmentation_annotation': segmentation_annotation

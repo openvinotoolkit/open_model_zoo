@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  BERT-large pretrained on lower-cased English text using Whole-Word-Masking and fine-tuned
+  on the SQuAD v1.1 training set (93.21% F1 -  87.2% EM on the v1.1 dev set).
+task_type: question_answering
+files:
+  - name: FP32/bert-large-uncased-whole-word-masking-squad-fp32-0001.xml
+    size: 957439
+    sha256: 56a42d02fee9bd7c0186eca5de4b87f0d7910f978819b12c1737bb007a0ab48b
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/bert-large-uncased-whole-word-masking-squad-fp32-0001/FP32/bert-large-uncased-whole-word-masking-squad-fp32-0001.xml
+  - name: FP32/bert-large-uncased-whole-word-masking-squad-fp32-0001.bin
+    size: 1335853368
+    sha256: 1a4b0dfb42daf7f45716100dacaa1c4de76c7b1b8c49c0dc91668b1dcba22534
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/bert-large-uncased-whole-word-masking-squad-fp32-0001/FP32/bert-large-uncased-whole-word-masking-squad-fp32-0001.bin
+  - name: FP16/bert-large-uncased-whole-word-masking-squad-fp32-0001.xml
+    size: 956663
+    sha256: 5239773cfc34e6bdeb128579996a84794bf1ba2cea382c7f54c8662301a3f9e6
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/bert-large-uncased-whole-word-masking-squad-fp32-0001/FP16/bert-large-uncased-whole-word-masking-squad-fp32-0001.xml
+  - name: FP16/bert-large-uncased-whole-word-masking-squad-fp32-0001.bin
+    size: 667926792
+    sha256: 338bb2d6780262bbd2efb34d858ac2972e46aa0261afdda5e2c4c3bdff4c0231
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/bert-large-uncased-whole-word-masking-squad-fp32-0001/FP16/bert-large-uncased-whole-word-masking-squad-fp32-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

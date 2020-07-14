@@ -1,0 +1,59 @@
+models:
+  - name: vehicle-attributes-recognition-barrier-0042
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   intel/vehicle-attributes-recognition-barrier-0042/FP32/vehicle-attributes-recognition-barrier-0042.xml
+        weights: intel/vehicle-attributes-recognition-barrier-0042/FP32/vehicle-attributes-recognition-barrier-0042.bin
+        adapter:
+          type: vehicle_attributes
+          color_out: color
+          type_out: type
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/vehicle-attributes-recognition-barrier-0042/FP16/vehicle-attributes-recognition-barrier-0042.xml
+        weights: intel/vehicle-attributes-recognition-barrier-0042/FP16/vehicle-attributes-recognition-barrier-0042.bin
+        adapter:
+          type: vehicle_attributes
+          color_out: color
+          type_out: type
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   intel/vehicle-attributes-recognition-barrier-0042/FP16-INT8/vehicle-attributes-recognition-barrier-0042.xml
+        weights: intel/vehicle-attributes-recognition-barrier-0042/FP16-INT8/vehicle-attributes-recognition-barrier-0042.bin
+        adapter:
+          type: vehicle_attributes
+          color_out: color
+          type_out: type
+
+    datasets:
+      - name: vehicle_attributes_0042
+
+        preprocessing:
+          - type: extend_around_rect
+            augmentation_param: 0.3
+          - type: crop_rect
+          - type: resize
+            size: 115
+          - type: crop
+            size: 72
+
+        metrics:
+          - name: color_accuracy
+            type: accuracy_per_class
+            presenter: print_vector
+            annotation_source: color
+            prediction_source: color
+            label_map: color_label_map
+          - name: type_accuracy
+            type: accuracy_per_class
+            presenter: print_vector
+            annotation_source: type
+            prediction_source: type
+            label_map: type_label_map

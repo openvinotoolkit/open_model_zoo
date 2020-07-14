@@ -1,0 +1,73 @@
+models:
+  # MXnet inference
+  - name: octave-resnet-26-0.25-mx
+
+    launchers:
+      - framework: mxnet
+        model: public/resnet-26-0.250/checkpoint-0-0000.params
+        adapter: classification
+        cpu_extensions: AUTO
+        inputs:
+          - name: 'data'
+            type: INPUT
+            shape: 3,224,224
+
+    datasets:
+      - name: ImageNet
+        data_source: ImageNet
+        reader: opencv_imread
+
+        annotation_conversion:
+          converter: imagenet
+          annotation_file: ImageNet/val.txt
+          labels_file: ImageNet/synset_words.txt
+
+        preprocessing:
+          - type: bgr_to_rgb
+
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            interpolation: CUBIC
+
+          - type: crop
+            size: 224
+
+          - type: normalization
+            mean: (124,117,104)
+            std: 59.88
+
+            # Using accuracy metric, achieved result of public model - 76.1 / 92.6 (top 1 and top 5 respectively)
+
+  # DLSDK inference
+  - name: octave-resnet-26-0.25
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/octave-resnet-26-0.25/FP32/octave-resnet-26-0.25.xml
+        weights: public/octave-resnet-26-0.25/FP32/octave-resnet-26-0.25.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/octave-resnet-26-0.25/FP16/octave-resnet-26-0.25.xml
+        weights: public/octave-resnet-26-0.25/FP16/octave-resnet-26-0.25.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: opencv_imread
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            interpolation: CUBIC
+
+          - type: crop
+            size: 224
+
+            # Using accuracy metric, achieved result of public model - 76.1 / 92.6 (top 1 and top 5 respectively)

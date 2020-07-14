@@ -137,6 +137,11 @@ AccuracyChecker supports following set of adapters:
   2. Add `mean`
   3. Reverse channels if this option enabled.
   * `target_mapping` - dictionary where keys are meaningful name for solved task which will be used as keys inside `ConverterPrediction`,  values - output layer names.
+* `super_resolution_yuv` - converts output of super resolution model, which return output in YUV format, to `SuperResolutionPrediction`. Each output layer contains only 1 channel.
+  * `y_output` - Y channel output layer.
+  * `u_output` - U channel output layer.
+  * `v_output` - V channel output layer.
+  * `target_color` - taret color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `bgr`).
 * `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.
@@ -230,3 +235,11 @@ AccuracyChecker supports following set of adapters:
     * `anchor_sizes` - Anchor sizes for each base output layer.
     * `window_scales` - Window scales for each base output layer.
     * `window_lengths` - Window lengths for each base output layer.
+* `face_detection_refinement` - converts output of face detection refinement model to `DetectionPrediction` representation. Adapter refines candidates generated in previous stage model.
+    * `threshold` - Score threshold to determine as valid face candidate.
+* `attribute_classification` - converts output of attributes classifcation model to `ContainerPrediction` which contains multiple `ClassificationPrediction` for attributes with their scores.
+    * `output_layer_map` - dictionary where keys are output layer names of attribute classification model and values are the names of attributes.
+* `regression` - converting output of regression model to `RegressionPrediction` representation.
+* `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions. 
+    * `adapters` - Dict where key is output name and value is adapter config map including `output_blob` key to associate the output of model and this adapter.
+* `person_vehilce_detection_refinement` - converts output of person vehicle detection refinement model to `DetectionPrediction` representation. Adapter refines proposals generated in previous stage model.

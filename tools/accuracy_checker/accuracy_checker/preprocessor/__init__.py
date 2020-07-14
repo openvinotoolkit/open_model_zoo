@@ -17,7 +17,15 @@ limitations under the License.
 from .preprocessing_executor import PreprocessingExecutor
 from .preprocessor import Preprocessor
 from .audio_preprocessing import ResampleAudio, ClipAudio, NormalizeAudio
-from .color_space_conversion import BgrToRgb, RgbToBgr, BgrToGray, RgbToGray, TfConvertImageDType, SelectInputChannel
+from .color_space_conversion import (
+    BgrToRgb, RgbToBgr,
+    BgrToGray, RgbToGray,
+    TfConvertImageDType,
+    SelectInputChannel,
+    BGR2YUVConverter, RGB2YUVConverter,
+    BGRtoNV12Converter, RGBtoNV12Converter,
+    NV12toBGRConverter, NV12toRGBConverter
+)
 from .normalization import Normalize, Normalize3d
 from .geometric_transformations import (
     GeometricOperationMetadata,
@@ -31,7 +39,8 @@ from .geometric_transformations import (
     TransformedCropWithAutoScale,
     ImagePyramid,
     FaceDetectionImagePyramid,
-    WarpAffine
+    WarpAffine,
+    CandidateCrop
 )
 from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
@@ -64,11 +73,13 @@ __all__ = [
     'ImagePyramid',
     'FaceDetectionImagePyramid',
     'WarpAffine',
+    'CandidateCrop',
 
     'BgrToGray',
     'BgrToRgb',
     'RgbToGray',
     'RgbToBgr',
+    'BGR2YUVConverter',
     'TfConvertImageDType',
     'SelectInputChannel',
 

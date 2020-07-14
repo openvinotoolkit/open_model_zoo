@@ -17,6 +17,11 @@
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 75.168%|
+| Top 5  | 92.212%|
+
 See [the original repository](https://github.com/KaimingHe/deep-residual-networks).
 
 ## Performance
@@ -32,7 +37,7 @@ Image, name: `data`,  shape: `1,3,224,224`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `BGR`. 
+Channel order is `BGR`.
 Mean values: [104, 117, 123].
 
 ### Converted Model

@@ -3,16 +3,13 @@
 This demo showcases Object Detection with SSD and new Async API.
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the app can continue doing things on the host, while accelerator is busy.
-Specifically, this demo keeps two parallel infer requests and while the current is processed, the input frame for the next
-is being captured. This essentially hides the latency of capturing, so that the overall framerate is rather
-determined by the `MAXIMUM(detection time, input capturing time)` and not the `SUM(detection time, input capturing time)`.
+Specifically, this demo keeps the number of Infer Requests that you have set using `nireq` flag. While some of the Infer Requests are processed by IE, the other ones can be filled with new frame data and asynchronously started or the next output can be taken from the Infer Request and displayed.
 
 > **NOTE:** This topic describes usage of C++ implementation of the Object Detection SSD Demo Async API. For the Python* implementation, refer to [Object Detection SSD Python* Demo, Async API Performance Showcase](../python_demos/object_detection_demo_ssd_async/README.md).
 
 The technique can be generalized to any available parallel slack, for example, doing inference and simultaneously encoding the resulting
 (previous) frames or running further inference, like some emotion detection on top of the face detection results.
-There are important performance
-caveats though, for example the tasks that run in parallel should try to avoid oversubscribing the shared compute resources.
+There are important performance caveats though, for example the tasks that run in parallel should try to avoid oversubscribing the shared compute resources.
 For example, if the inference is performed on the FPGA, and the CPU is essentially idle, than it makes sense to do things on the CPU
 in parallel. But if the inference is performed say on the GPU, than it can take little gain to do the (resulting video) encoding
 on the same GPU in parallel, because the device is already busy.
@@ -25,8 +22,8 @@ Other demo objectives are:
 * OpenCV is used to draw resulting bounding boxes, labels, so you can copy paste this code without
 need to pull Inference Engine demos helpers to your app
 * Demonstration of the Async API in action, so the demo features two modes (toggled by the Tab key)
-    -  Old-style "Sync" way, where the frame capturing with OpenCV executes back to back with the Detection
-    -  "Truly Async" way when the Detection performed on the current frame, while the OpenCV captures the next one.
+    - "User specified" mode, where you can set the number of Infer Requests, throughput streams and threads. Inference, starting new requests and displaying the results of completed requests are all performed asynchronously. The purpose of this mode is to get the higher FPS by fully utilizing all available devices.
+    - "Min latency" mode, which uses only one Infer Request. The purpose of this mode is to get the lowest latency.
 
 ## How It Works
 
@@ -36,31 +33,23 @@ Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 New "Async API" operates with new notion of the "Infer Request" that encapsulates the inputs/outputs and separates *scheduling and waiting for result*,
-next section. And here what makes the performance look different:
-* In the default ("Sync") mode the frame is captured and then immediately processed, below in pseudo-code:
+next section.
+
+The pipeline is the same for both modes. The difference is in the number of Infer Requests used.
 ```cpp
-    while(true) {
-        capture frame
-        populate CURRENT InferRequest
-        start CURRENT InferRequest //this call is async and returns immediately
-        wait for the CURRENT InferRequest
-        display CURRENT result
+    while (true) {
+        if (Infer Request containing the next video frame has completed) {
+            get inference results
+            process inference results
+            display the frame
+        } else if (one of the Infer Requests is idle and it is not the end of the input video) {
+            capture frame
+            populate empty InferRequest
+            set completion callback
+            start InferRequest
+        }
     }
 ```
-So, this is rather reference implementation, where the new Async API is used in the serialized/synch fashion.
-* In the "true" ASync mode the frame is captured and then immediately processed:
-```cpp
-    while(true) {
-            capture frame
-            populate NEXT InferRequest
-            start NEXT InferRequest //this call is async and returns immediately
-                wait for the CURRENT InferRequest (processed in a dedicated thread)
-                display CURRENT result
-            swap CURRENT and NEXT InferRequests
-        }
-```
-In this case, the NEXT request is populated in the main (app) thread, while the CURRENT request is processed
-(this is handled in the dedicated thread, internal to the IE runtime).
 
 ### Async API
 
@@ -77,20 +66,17 @@ auto network = ie.ReadNetwork("Model.xml");
 // populate inputs etc
 auto input = async_infer_request.GetBlob(input_name);
 ...
-// start the async infer request (puts the request to the queue and immediately returns)
+// start the async Infer Request (puts the request to the queue and immediately returns)
 async_infer_request->StartAsync();
 // here you can continue execution on the host until results of the current request are really needed
 //...
 async_infer_request.Wait(IInferRequest::WaitMode::RESULT_READY);
 auto output = async_infer_request.GetBlob(output_name);
 ```
-Notice that there is no direct way to measure execution time of the infer request that is running asynchronously, unless
+Notice that there is no direct way to measure execution time of the Infer Request that is running asynchronously, unless
 you measure the Wait executed immediately after the StartAsync. But this essentially would mean the serialization and synchronous
-execution. This is what demo does for the default "SYNC" mode and reports as the "Detection time/fps" message on the screen.
-In the truly asynchronous ("ASYNC") mode the host continues execution in the master thread, in parallel to the infer request.
-And if the request is completed earlier than the Wait is called in the main thread (i.e. earlier than OpenCV decoded a new frame),
-that reporting the time between StartAsync and Wait would obviously incorrect.
-That is why in the "ASYNC" mode the inference speed is not reported.
+execution.
+That is why the inference speed is not reported. It is recommended to use the [Benchmark App](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html) for measuring inference speed of different models.
 
 
 For more details on the requests-based Inference Engine API, including the Async execution, refer to [Integrate the Inference Engine New Request API with Your Application](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
@@ -120,6 +106,10 @@ Options:
     -r                        Optional. Inference results as raw values.
     -t                        Optional. Probability threshold for detections.
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
+    -nireq "<integer>"        Optional. Number of Infer Requests.
+    -nthreads "<integer>"     Optional. Number of threads.
+    -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
+    -loop_input               Optional. Iterate over input infinitely.
     -no_show                  Optional. Do not show processed video.
     -u                        Optional. List of monitors to show initially.
 ```
@@ -135,15 +125,15 @@ You can use the following command to do inference on GPU with a pre-trained obje
 ./object_detection_demo_ssd_async -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd.xml -d GPU
 ```
 
-The only GUI knob is using **Tab** to switch between the synchronized execution and the true Async mode.
+The only GUI knob is using **Tab** to switch between "User specified" mode and "Min latency" mode.
 
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
-In the default mode the demo reports
-* **OpenCV time**: frame decoding + time to render the bounding boxes, labels, and displaying the results.
-* **Detection time**: inference time for the (object detection) network. It is reported in the "SYNC" mode only.
-* **Wallclock time**, which is combined (application level) performance.
+The demo reports
+* **FPS**: average rate of video frame processing (frames per second)
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results)
+You can use both of these metrics to measure application-level performance.
 
 
 ## See Also

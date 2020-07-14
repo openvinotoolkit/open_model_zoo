@@ -17,6 +17,11 @@
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 71.218%|
+| Top 5  | 90.178%|
+
 ## Performance
 
 ## Input
@@ -51,14 +56,14 @@ Channel order is `BGR`.
 Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`, output data format is `B,C`, where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in a range [0, 1] 
+- `C` - predicted probabilities for each class in a range [0, 1]
 
 ### Converted Model
 
 Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`, output data format is `B,C`, where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in a range [0, 1] 
+- `C` - predicted probabilities for each class in a range [0, 1]
 
 ## Legal Information
 

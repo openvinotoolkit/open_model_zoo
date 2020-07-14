@@ -1,0 +1,30 @@
+models:
+  - name: deeplabv3
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/deeplabv3/FP32/deeplabv3.xml
+        weights: public/deeplabv3/FP32/deeplabv3.bin
+        adapter: segmentation
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/deeplabv3/FP16/deeplabv3.xml
+        weights: public/deeplabv3/FP16/deeplabv3.bin
+        adapter: segmentation
+
+    datasets:
+      - name: VOC2012_Segmentation
+        preprocessing:
+          - type: padding
+            size: 513
+        postprocessing:
+          - type: encode_segmentation_mask
+            apply_to: annotation
+          - type: extend_segmentation_mask
+        metrics:
+          - type: mean_iou
+            use_argmax: false
+            presenter: print_scalar

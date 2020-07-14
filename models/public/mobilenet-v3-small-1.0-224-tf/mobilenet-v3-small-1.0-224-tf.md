@@ -22,8 +22,8 @@ For details see [paper](https://arxiv.org/abs/1905.02244).
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 67.36          | 67.36           |
-| Top 5  | 87.45          | 87.45           |
+| Top 1  | 67.36%          | 67.36%           |
+| Top 5  | 87.45%          | 87.45%           |
 
 ## Performance
 

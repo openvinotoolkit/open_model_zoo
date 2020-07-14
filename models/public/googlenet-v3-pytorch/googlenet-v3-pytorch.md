@@ -8,7 +8,7 @@ the Inception Architecture for Computer Vision"](https://arxiv.org/abs/1512.0056
 TorchVision package (see [here](https://github.com/pytorch/vision)).
 
 The model input is a blob that consists of a single image of "1x3x299x299"
-in RGB order. 
+in RGB order.
 
 The model output is typical object classifier for the 1000 different classifications
 matching with those in the ImageNet database.
@@ -25,6 +25,11 @@ matching with those in the ImageNet database.
 | Source framework  | PyTorch\*     |
 
 ## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 77.696%|
+| Top 5  | 93.696%|
 
 ## Performance
 

@@ -15,6 +15,13 @@ Faster R-CNN Resnet-101 model. Used for object detection. For details, see the [
 | MParams                         | 48.128                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 30.95%|
+| mAP| 47.21%|
+
 ## Performance
 
 ## Input

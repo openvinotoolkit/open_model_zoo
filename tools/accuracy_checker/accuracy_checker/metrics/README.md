@@ -184,3 +184,13 @@ More detailed information about calculation segmentation metrics you can find [h
 * `youtube_faces_accuracy` - accuracy for face detection models calculated based on IOU values of ground truth bounding boxes and model-detected bounding boxes. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap` - minimum IOU threshold to consider as a true positive candidate face.
   * `relative_size` - size of detected face candidate\'s area in proportion to the size of ground truth\'s face size. This value is set to filter candidates that have high IOU but have a relatively smaller face size than ground truth face size.
+* `normalized_embedding_accuracy` - accuracy for re-identification models based on normalized dot product of embedding values. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
+* `attribute_accuracy` - accuracy for attributes in attribute classification models. Supported representations: `ContainerAnnotation` with `ClassificationAnnotation` and `ContainerPrediction` with `ClassificationPrediction`.
+  * `attributes`: names of attributes.
+  * `calculate_average` - allows calculation of average accuracy (default value: `True`).
+* `attribute_recall` - recall for attributes in attribute classification models. Supported representations: `ContainerAnnotation` with `ClassificationAnnotation` and `ContainerPrediction` with `ClassificationPrediction`.
+  * `attributes`: names of attributes.
+  * `calculate_average` - allows calculation of average recall (default value: `True`).
+* `attribute_precision` - precision for attributes in attribute classification models. Supported representations: `ContainerAnnotation` with `ClassificationAnnotation` and `ContainerPrediction` with `ClassificationPrediction`.
+  * `attributes`: names of attributes.
+  * `calculate_average` - allows calculation of average precision (default value: `True`).

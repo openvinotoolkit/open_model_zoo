@@ -1,0 +1,23 @@
+models:
+  - name: license-plate-recognition-barrier-0007
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/license-plate-recognition-barrier-0007/FP32/license-plate-recognition-barrier-0007.xml
+        weights: public/license-plate-recognition-barrier-0007/FP32/license-plate-recognition-barrier-0007.bin
+        adapter: lpr
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/license-plate-recognition-barrier-0007/FP16/license-plate-recognition-barrier-0007.xml
+        weights: public/license-plate-recognition-barrier-0007/FP16/license-plate-recognition-barrier-0007.bin
+        adapter: lpr
+
+    datasets:
+      - name: synthetic_chinese_license_plates
+
+        metrics:
+          - type: character_recognition_accuracy

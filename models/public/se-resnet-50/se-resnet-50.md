@@ -17,6 +17,11 @@
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 77.596%|
+| Top 5  | 93.85% |
+
 ## Performance
 
 ## Input
@@ -58,7 +63,7 @@ Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`,
 Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in the range [0, 1] 
+- `C` - predicted probabilities for each class in the range [0, 1]
 
 ## Legal Information
 

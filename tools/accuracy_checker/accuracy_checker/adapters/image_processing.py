@@ -13,7 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
 from copy import deepcopy
+from PIL import Image
 import cv2
 import numpy as np
 
@@ -22,10 +24,6 @@ from ..representation import ImageProcessingPrediction, SuperResolutionPredictio
 from ..config import ConfigValidator, BoolField, BaseField, StringField, DictField, ConfigError
 from ..utils import get_or_parse_value
 from ..preprocessor import Normalize
-try:
-    from PIL import Image
-except ImportError:
-    Image = None
 
 
 class ImageProcessingAdapter(Adapter):
@@ -100,6 +98,7 @@ class ImageProcessingAdapter(Adapter):
 
         return img
 
+
 class SuperResolutionAdapter(ImageProcessingAdapter):
     __provider__ = 'super_resolution'
     prediction_types = (SuperResolutionPrediction, )
@@ -162,4 +161,55 @@ class MultiSuperResolutionAdapter(Adapter):
             for batch_id, output_res in enumerate(result):
                 predictions[batch_id][key] = output_res
         results = [ContainerPrediction(prediction_mapping) for prediction_mapping in predictions]
+        return results
+
+
+class SuperResolutionYUV(Adapter):
+    __provider__ = 'super_resolution_yuv'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'y_output': StringField(),
+            'u_output': StringField(),
+            'v_output': StringField(),
+            'target_color': StringField(optional=True, choices=['bgr', 'rgb'], default='bgr')
+        })
+        return parameters
+
+    def configure(self):
+        self.y_output = self.get_value_from_config('y_output')
+        self.u_output = self.get_value_from_config('u_output')
+        self.v_output = self.get_value_from_config('v_output')
+        self.color = cv2.COLOR_YUV2BGR if self.get_value_from_config('target_color') == 'bgr' else cv2.COLOR_YUV2RGB
+
+    def get_image(self, y, u, v):
+        is_hwc = u.shape[-1] == 1
+        if not is_hwc:
+            y = np.transpose(y, (1, 2, 0))
+            u = np.transpose(u, (1, 2, 0))
+            v = np.transpose(v, (1, 2, 0))
+        h, w, __ = u.shape
+        u = u.reshape(h, w, 1)
+        v = v.reshape(h, w, 1)
+        u = cv2.resize(u, None, fx=2, fy=2)
+        v = cv2.resize(v, None, fx=2, fy=2)
+
+        y = y.reshape(2 * h, 2 * w, 1)
+        u = u.reshape(2 * h, 2 * w, 1)
+        v = v.reshape(2 * h, 2 * w, 1)
+        yuv = np.concatenate([y, u, v], axis=2)
+        image = cv2.cvtColor(yuv, self.color)
+        return image
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        outs = self._extract_predictions(raw, frame_meta)
+        results = []
+        for identifier, yres, ures, vres in zip(
+                identifiers, outs[self.y_output], outs[self.u_output], outs[self.v_output]
+        ):
+            sr_img = self.get_image(yres, ures, vres)
+            results.append(SuperResolutionPrediction(identifier, sr_img))
+
         return results

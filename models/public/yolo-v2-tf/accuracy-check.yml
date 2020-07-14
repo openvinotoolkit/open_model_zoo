@@ -1,0 +1,101 @@
+models:
+  - name: yolo-v2-tf
+
+    launchers:
+      - framework: tf
+        model:   public/yolo-v2-tf/yolo-v2.pb
+        output_names: [conv2d_23/BiasAdd]
+        adapter:
+          type: yolo_v2
+          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
+          num: 5
+          coords: 4
+          classes: 80
+          cells: 19
+          raw_output: True
+
+    datasets:
+      - name: ms_coco_detection_80_class_without_background
+
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: normalization
+            std: 255.0
+          - type: resize
+            size: 608
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.001
+            remove_filtered: True
+          - type: nms
+            overlap: 0.5
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: true
+            presenter: print_scalar
+          - type: coco_precision
+            max_detections: 100
+            threshold: 0.5
+
+  - name: yolo-v2-tf
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/yolo-v2-tf/FP32/yolo-v2-tf.xml
+        weights: public/yolo-v2-tf/FP32/yolo-v2-tf.bin
+        adapter:
+          type: yolo_v2
+          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
+          num: 5
+          coords: 4
+          classes: 80
+          cells: 19
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/yolo-v2-tf/FP16/yolo-v2-tf.xml
+        weights: public/yolo-v2-tf/FP16/yolo-v2-tf.bin
+        adapter:
+          type: yolo_v2
+          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
+          num: 5
+          coords: 4
+          classes: 80
+          cells: 19
+
+    datasets:
+      - name: ms_coco_detection_80_class_without_background
+
+        preprocessing:
+          - type: resize
+            size: 608
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.001
+            remove_filtered: True
+          - type: nms
+            overlap: 0.5
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: true
+            presenter: print_scalar
+          - type: coco_precision
+            max_detections: 100
+            threshold: 0.5

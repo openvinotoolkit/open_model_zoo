@@ -28,6 +28,7 @@ Accuracy Checker supports following set of postprocessors:
    - the preprocessing steps contains only two operations changing input image size, and the operations are `resize` and then `padding`.
 * `nms` - non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
   * `overlap` - overlap threshold for merging detections.
+  * `use_min_area` - boolean value to determine whether to use minimum area of two bounding boxes as base area to calculate overlap.
 * `soft_nms` - soft non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
   * `keep_top_k`  - the maximal number of detections which should be kept.
   * `sigma` - sigma-value for updated detection score calculation.
@@ -44,10 +45,11 @@ Accuracy Checker supports following set of postprocessors:
   **Note:** this postprocessing requires specific dataset meta: `segmentation_colors` for annotations and `prediction_to_gt_labels` for predictions.
 * `resize_segmentation_mask` - resizing segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resize respectively. You can also use `size` instead in case when destination sizes are equal.
-    If any of these parameters are not specified, image size will be used as default.
+    For resizing to final input size without padding, you can use `to_dst_image_size` flag with value `True`. If any of these parameters are not specified, original image size will be used as default.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
 * `extend_segmentation_mask` - extending annotation segmentation mask to predicted mask size making border filled by specific value. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
   * `filling_label` - value for filling border (default 255).
+  * `pad_type` - padding space location. Supported: `center`, `left_top`, `right_bottom` (Default is `center`).
 * `zoom_segmentation_mask` - zooming segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
   * `zoom` - size for zoom operation.
 * `crop_segmentation_mask` - cropping 3-d annotation mask. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`.

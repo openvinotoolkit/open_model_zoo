@@ -1,0 +1,50 @@
+models:
+  - name: face-recognition-resnet34-arcface-mx
+
+    launchers:
+      - framework: mxnet
+        model: public/face-recognition-resnet34-arcface/model-r34-amf/model-0000.params
+        adapter: reid
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 3, 112, 112
+
+    datasets:
+      - name: lfw
+
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: point_alignment
+            size: 400
+          - type: resize
+            size: 112
+
+        metrics:
+          - type: pairwise_accuracy_subsets
+
+  - name: face-recognition-resnet34-arcface-mx
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/face-recognition-resnet34-arcface/FP32/face-recognition-resnet34-arcface.xml
+        weights: public/face-recognition-resnet34-arcface/FP32/face-recognition-resnet34-arcface.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/face-recognition-resnet34-arcface/FP16/face-recognition-resnet34-arcface.xml
+        weights: public/face-recognition-resnet34-arcface/FP16/face-recognition-resnet34-arcface.bin
+        adapter: reid
+
+    datasets:
+      - name: lfw
+
+        preprocessing:
+          - type: point_alignment
+            size: 400
+          - type: resize
+            size: 112

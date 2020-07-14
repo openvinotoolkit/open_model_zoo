@@ -1,0 +1,42 @@
+models:
+  - name: densenet-161-cf
+    launchers:
+      - framework: caffe
+        model:   public/densenet-161/densenet-161.prototxt
+        weights: public/densenet-161/densenet-161.caffemodel
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 103.94, 116.78, 123.68
+            std: 58.8235294
+
+  - name: densenet-161
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/densenet-161/FP32/densenet-161.xml
+        weights: public/densenet-161/FP32/densenet-161.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/densenet-161/FP16/densenet-161.xml
+        weights: public/densenet-161/FP16/densenet-161.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224

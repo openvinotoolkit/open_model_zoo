@@ -17,6 +17,10 @@
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| LFW accuracy | 98.8321%|
+
 ## Performance
 
 ## Input

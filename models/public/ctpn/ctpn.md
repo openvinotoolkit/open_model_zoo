@@ -15,6 +15,12 @@ Detecting Text in Natural Image with Connectionist Text Proposal Network. For de
 | MParams                         | 17.237                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| hmean  | 1.0864%|
+
 ## Performance
 
 ## Input

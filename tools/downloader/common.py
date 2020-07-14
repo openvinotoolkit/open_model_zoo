@@ -29,6 +29,7 @@ import traceback
 
 from pathlib import Path
 
+import requests
 import yaml
 
 DOWNLOAD_TIMEOUT = 5 * 60
@@ -64,6 +65,7 @@ KNOWN_TASK_TYPES = {
     'monocular_depth_estimation',
     'object_attributes',
     'optical_character_recognition',
+    'question_answering',
     'semantic_segmentation',
     'style_transfer',
 }
@@ -270,6 +272,8 @@ class TaggedBase:
             raise DeserializationError('Unknown "$type": "{}"'.format(value['$type']))
 
 class FileSource(TaggedBase):
+    RE_CONTENT_RANGE_VALUE = re.compile(r'bytes (\d+)-\d+/(?:\d+|\*)')
+
     types = {}
 
     @classmethod
@@ -277,6 +281,36 @@ class FileSource(TaggedBase):
         if isinstance(source, str):
             source = {'$type': 'http', 'url': source}
         return super().deserialize(source)
+
+    @classmethod
+    def http_range_headers(cls, offset):
+        if offset == 0:
+            return {}
+
+        return {
+            'Accept-Encoding': 'identity',
+            'Range': 'bytes={}-'.format(offset),
+        }
+
+    @classmethod
+    def handle_http_response(cls, response, chunk_size):
+        if response.status_code == requests.codes.partial_content:
+            match = cls.RE_CONTENT_RANGE_VALUE.fullmatch(response.headers.get('Content-Range', ''))
+            if not match:
+                # invalid range reply; return a negative offset to make
+                # the download logic restart the download.
+                return None, -1
+
+            return response.iter_content(chunk_size=chunk_size), int(match.group(1))
+
+        # either we didn't ask for a range, or the server doesn't support ranges
+
+        if 'Content-Range' in response.headers:
+            # non-partial responses aren't supposed to have range information
+            return None, -1
+
+        return response.iter_content(chunk_size=chunk_size), 0
+
 
 class FileSourceHttp(FileSource):
     def __init__(self, url):
@@ -286,11 +320,12 @@ class FileSourceHttp(FileSource):
     def deserialize(cls, source):
         return cls(validate_string('"url"', source['url']))
 
-    def start_download(self, session, chunk_size):
-        response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT)
+    def start_download(self, session, chunk_size, offset):
+        response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT,
+            headers=self.http_range_headers(offset))
         response.raise_for_status()
 
-        return response.iter_content(chunk_size=chunk_size)
+        return self.handle_http_response(response, chunk_size)
 
 FileSource.types['http'] = FileSourceHttp
 
@@ -302,18 +337,21 @@ class FileSourceGoogleDrive(FileSource):
     def deserialize(cls, source):
         return cls(validate_string('"id"', source['id']))
 
-    def start_download(self, session, chunk_size):
+    def start_download(self, session, chunk_size, offset):
+        range_headers = self.http_range_headers(offset)
         URL = 'https://docs.google.com/uc?export=download'
-        response = session.get(URL, params={'id' : self.id}, stream=True, timeout=DOWNLOAD_TIMEOUT)
+        response = session.get(URL, params={'id' : self.id}, headers=range_headers,
+            stream=True, timeout=DOWNLOAD_TIMEOUT)
         response.raise_for_status()
 
         for key, value in response.cookies.items():
             if key.startswith('download_warning'):
                 params = {'id': self.id, 'confirm': value}
-                response = session.get(URL, params=params, stream=True, timeout=DOWNLOAD_TIMEOUT)
+                response = session.get(URL, params=params, headers=range_headers,
+                    stream=True, timeout=DOWNLOAD_TIMEOUT)
                 response.raise_for_status()
 
-        return response.iter_content(chunk_size=chunk_size)
+        return self.handle_http_response(response, chunk_size)
 
 FileSource.types['google_drive'] = FileSourceGoogleDrive
 
