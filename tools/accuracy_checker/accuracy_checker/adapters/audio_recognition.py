@@ -118,23 +118,23 @@ class CTCBeamSearchDecoder(Adapter):
             _pNB['c'] = {}
             _pT['c'] = {}
 
-            for _candidate in _pNB['l']:
+            for _cddt in _pNB['l']:
                 _TpNB = 0
-                if _candidate != _init:
-                    _TpNB = _pNB['l'][_candidate] * pred[_t][_candidate[-1]]
-                _TpB = _pT['l'][_candidate] * pred[_t][idx_b]
+                if _cddt != _init:
+                    _TpNB = _pNB['l'][_cddt] * pred[_t][_cddt[-1]]
+                _TpB = _pT['l'][_cddt] * pred[_t][idx_b]
 
-                _pNB['c'][_candidate] = _TpNB + _pNB['c'][_candidate] if _candidate in _pNB['c'] else _TpNB
+                _pNB['c'][_cddt] = _TpNB + _pNB['c'][_cddt] if _cddt in _pNB['c'] else _TpNB
 
-                _pB['c'][_candidate] = _TpB
-                _pT['c'][_candidate] = _pNB['c'][_candidate] + _pB['c'][_candidate]
+                _pB['c'][_cddt] = _TpB
+                _pT['c'][_cddt] = _pNB['c'][_cddt] + _pB['c'][_cddt]
 
                 nonblanks = [(i, v) for i, v in np.ndenumerate(pred[_t]) if i < (idx_b,)]
                 for nb in nonblanks:
                     i, v = nb
 
-                    extand_t = _candidate + (i,)
-                    _TpNB = v * _pB['l'][_candidate] if len(_candidate) > 0 and _candidate[-1] == i else v * _pT['l'][_candidate]
+                    extand_t = _cddt + (i,)
+                    _TpNB = v * _pB['l'][_cddt] if len(_cddt) > 0 and _cddt[-1] == i else v * _pT['l'][_cddt]
 
                     if extand_t in _pT['c']:
                         _pT['c'][extand_t] += _TpNB
