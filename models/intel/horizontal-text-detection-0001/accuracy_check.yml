@@ -5,11 +5,17 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-#        model:   intel/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.xml
-#        weights: intel/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.bin
-        model:   horizontal-text-detection-0001.xml
-        weights: horizontal-text-detection-0001.bin
-        device: CPU
+        model:   intel/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.xml
+        weights: intel/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.bin
+        adapter:
+            type: class_agnostic_detection
+            scale: 0.00141
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.xml
+        weights: intel/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.bin
         adapter:
             type: class_agnostic_detection
             scale: 0.00141
