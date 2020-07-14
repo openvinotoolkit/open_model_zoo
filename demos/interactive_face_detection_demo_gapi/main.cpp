@@ -485,7 +485,7 @@ int main(int argc, char *argv[]) {
 
                     if (!FLAGS_m_hp.empty()) {
                         headPoseDataUpdate(face, out_y_fc[i], out_p_fc[i], out_r_fc[i]);
-                        if(FLAGS_r)
+                        if (FLAGS_r)
                             rawOutputHeadpose(i, out_y_fc[i], out_p_fc[i], out_r_fc[i]);
                     }
 
