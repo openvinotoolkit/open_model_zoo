@@ -137,7 +137,7 @@ def main():
     current_request_id_list = collections.deque(request_id_list)
     predict_request_id_list = current_request_id_list.copy()
     predict_request_id_list.rotate(rotate_request_by)
-
+    frame_list = [None]*args.num_requests
 
     
     render_time = 0
@@ -146,17 +146,18 @@ def main():
  
     FPS = []
     res = None
+    frame = None
 
     while cap.isOpened():
 
-        ret, frame = cap.read()
+        ret, raw_frame = cap.read()
 
         if not ret:
             break
 
-        frame_h, frame_w = frame.shape[:2]
+        raw_frame_h, raw_frame_w = raw_frame.shape[:2]
 
-        in_frame = cv2.resize(frame, (w, h))
+        in_frame = cv2.resize(raw_frame, (w, h))
         in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         in_frame = in_frame.reshape((n, c, h, w))
         feed_dict[input_blob] = in_frame
@@ -166,15 +167,17 @@ def main():
         inf_start = time.time()
 
         exec_net.start_async(request_id=predict_request_id_list[0], inputs=feed_dict)
+        frame_list[predict_request_id_list[0]] = raw_frame
         predict_request_id_list.rotate(rotate_request_by)
 
         if exec_net.requests[current_request_id_list[0]].wait(-1) == 0:
             # Parse detection results of the current request
             res = exec_net.requests[current_request_id_list[0]].outputs[out_blob]
-
+            frame = frame_list[current_request_id_list[0]]
+        
         current_request_id_list.rotate(rotate_request_by)
 
-        if res is None:
+        if res is None or frame is None:
             continue
 
         inf_end = time.time()
@@ -182,13 +185,14 @@ def main():
         FPS = FPS[-100:]
         FPS.append(1/det_time)
         
+
         for obj in res[0][0]:
             # Draw only objects when probability more than specified threshold
             if obj[2] > args.prob_threshold:
-                xmin = int(obj[3] * frame_w)
-                ymin = int(obj[4] * frame_h)
-                xmax = int(obj[5] * frame_w)
-                ymax = int(obj[6] * frame_h)
+                xmin = int(obj[3] * raw_frame_w)
+                ymin = int(obj[4] * raw_frame_h)
+                xmax = int(obj[5] * raw_frame_w)
+                ymax = int(obj[6] * raw_frame_h)
                 class_id = int(obj[1])
                 # Draw box and label\class_id
                 color = (min(class_id * 12.5, 255), min(class_id * 7, 255), min(class_id * 5, 255))
@@ -207,7 +211,7 @@ def main():
 
         cv2.putText(frame, inf_time_message, (15, 60), cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
         cv2.putText(frame, render_time_message, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
-        cv2.putText(frame, async_mode_message, (10, int(frame_h - 20)), cv2.FONT_HERSHEY_COMPLEX, 0.5,
+        cv2.putText(frame, async_mode_message, (10, int(raw_frame_h - 20)), cv2.FONT_HERSHEY_COMPLEX, 0.5,
                         (10, 10, 200), 1)
 
         
