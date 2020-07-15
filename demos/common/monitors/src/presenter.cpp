@@ -47,18 +47,6 @@ Presenter::Presenter(std::set<MonitorType> enabledMonitors,
 Presenter::Presenter(const std::string& keys, int yPos, cv::Size graphSize, std::size_t historySize) :
     Presenter{strKeysToMonitorSet(keys), yPos, graphSize, historySize} {}
 
-void Presenter::setPresenterVars(const std::string& keys, int yPos, cv::Size graphSize, std::size_t historySize) {
-    this->yPos = yPos;
-    this->graphSize = graphSize;
-    this->graphPadding = std::max(1, static_cast<int>(graphSize.width * 0.05));
-    this->historySize = historySize;
-
-    auto enabledMonitors = strKeysToMonitorSet(keys);
-    for (MonitorType monitor : enabledMonitors) {
-        addRemoveMonitor(monitor);
-    }
-}
-
 void Presenter::addRemoveMonitor(MonitorType monitor) {
     unsigned updatedHistorySize = 1;
     if (historySize > 1) {
