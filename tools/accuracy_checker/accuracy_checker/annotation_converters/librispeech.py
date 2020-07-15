@@ -18,7 +18,6 @@ from pathlib import Path
 import re
 
 from ..representation import CharacterRecognitionAnnotation
-# from ..config import NumberField, StringField, PathField, BoolField
 from .format_converter import DirectoryBasedAnnotationConverter
 from .format_converter import ConverterReturn
 
