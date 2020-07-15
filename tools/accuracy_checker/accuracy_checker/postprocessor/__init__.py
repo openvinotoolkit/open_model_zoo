@@ -39,7 +39,7 @@ from .normalize_landmarks_points import NormalizeLandmarksPoints
 from .clip_points import ClipPoints
 from .extend_segmentation_mask import ExtendSegmentationMask
 from .zoom_segmentation_mask import ZoomSegMask
-from .crop_segmentation_mask import CropSegmentationMask
+from .crop_segmentation_mask import CropSegmentationMask, CropOrPadSegmentationMask
 from .clip_segmentation_mask import ClipSegmentationMask
 from .normalize_boxes import NormalizeBoxes
 from .brats_postprocessing import SegmentationPredictionResample, TransformBratsPrediction

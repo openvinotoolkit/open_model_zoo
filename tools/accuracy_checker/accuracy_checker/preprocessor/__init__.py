@@ -72,6 +72,11 @@ __all__ = [
     'BGR2YUVConverter',
     'TfConvertImageDType',
     'SelectInputChannel',
+    'CropOrPad',
+    'Crop',
+    'CandidateCrop',
+    'CropRect',
+    'Crop3D',
 
     'Normalize3d',
     'Normalize',

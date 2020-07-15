@@ -55,6 +55,8 @@ Accuracy Checker supports following set of postprocessors:
 * `crop_segmentation_mask` - cropping 3-d annotation mask. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`.
   * `dst_width`, `dst_height` and `dst_volume` are destination width, height and volume for cropped 3D-image respectively.
     You can also use `size` instead in case when destination sizes are equal for all three dimensions.
+* `crop_or_pad-segmentation_mask` - performs central cropping if original mask size greater then destination size and padding in case, when source size lower than destination. Padding filling value is 0, realization - right-bottom.
+  * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.  Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
 * `clip_segmentation_mask` - clipping segmentation mask values. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`.
   * `min_value` - lower bound of range.
   * `max_value` - upper bound of range.
