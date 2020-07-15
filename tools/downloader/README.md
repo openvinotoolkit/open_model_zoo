@@ -450,7 +450,7 @@ describing a single model. Each such object has the following keys:
   are:
 
   * `action_recognition`
-  * `audio_classification`
+  * `sound_classification`
   * `classification`
   * `detection`
   * `face_recognition`
