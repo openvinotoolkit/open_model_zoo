@@ -41,7 +41,7 @@ crossroad_camera_demo [OPTION]
 Options:
 
     -h                           Print a usage message.
-    -i "<path>"                  Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -i                           Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
     -loop_input                  Optional. Enable reading the input in a loop.
     -m "<path>"                  Required. Path to the Person/Vehicle/Bike Detection Crossroad model (.xml) file.
     -m_pa "<path>"               Optional. Path to the Person Attributes Recognition Crossroad model (.xml) file.
