@@ -471,7 +471,7 @@ class PackCepstrum(Preprocessor):
         if steps % self.step:
             empty_context = np.zeros((self.step - (steps % self.step), context, numceps), dtype=features.dtype)
             features = np.concatenate((features, empty_context))
-            steps, context, numceps = features.shape
+            steps, context, numceps = features.shape # pylint:disable=E0633
 
         features = np.expand_dims(features, 0)
 
