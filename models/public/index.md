@@ -106,7 +106,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 
 | Model Name                           | Implementation           | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------------ | ------------------------ | -------------- | -------- | ------ | ------- |
-| CTPN                                 | TensorFlow\*             | [ctpn](./ctpn/ctpn.md) | 1.0864% | 55.813 | 17.237 | |
+| CTPN                                 | TensorFlow\*             | [ctpn](./ctpn/ctpn.md) | 1.0864% | 55.813 | 17.237 |
 | CenterNet (CTDET with DLAV0) 384x384 | ONNX\*                   | [ctdet_coco_dlav0_384](./ctdet_coco_dlav0_384/ctdet_coco_dlav0_384.md)| 41.6105%| 34.994 | 17.911 |
 | CenterNet (CTDET with DLAV0) 512x512 | ONNX\*                   | [ctdet_coco_dlav0_512](./ctdet_coco_dlav0_512/ctdet_coco_dlav0_512.md)| 44.2756%| 62.211 | 17.911 |
 | FaceBoxes                            | PyTorch\*                | [faceboxes-pytorch](./faceboxes-pytorch/faceboxes-pytorch.md)|83.565% | 1.8975 | 1.0059 |
