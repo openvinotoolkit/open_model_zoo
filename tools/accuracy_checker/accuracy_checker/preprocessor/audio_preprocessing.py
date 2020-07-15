@@ -252,7 +252,7 @@ class AudioSpectrogram(Preprocessor):
         if self.skip_channels:
             frames = frames.squeeze()
 
-        pspec = np.absolute(np.fft.rfft(frames, self.fftbase))
+        pspec = np.absolute(np.fft.rfft(frames, self.fftbase)) # pylint:disable=W9904
         if self.magnutide_squared:
             pspec = np.square(pspec)
 
