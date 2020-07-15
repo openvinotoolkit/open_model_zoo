@@ -21,6 +21,7 @@ Accuracy Checker supports following set of postprocessors:
 * `correct_yolo_v2_boxes` - resizing detection prediction bbox coordinates using specific for Yolo v2 approach. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
   * `dst_width` and `dst_height` - destination width and height respectively. You can also use `size` instead in case when destination sizes are equal.
 * `resize_prediction_boxes` - resizing normalized detection prediction boxes according to image size. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
+  * `rescale` if this option enabled, rescaling boxes on input size will be performed before multiplying on original input size. (Optional, default `False`)
 * `faster_rcnn_postprocessing_resize` - resizing normalized detection prediction boxes according to the original image size before preprocessing steps.
     Supported representations: `DetectionAnotation`, `DetectionPrediction`.
     At the moment works in the following cases only:
