@@ -1,10 +1,10 @@
 import numpy as np
-from .metric import PerImageEvaluationMetric
+from .metric import FullDatasetEvaluationMetric
 from ..representation import LM1BAnnotation, LanguageModelingPrediction
 from ..config import ConfigError
 
 
-class Perplexity(PerImageEvaluationMetric):
+class Perplexity(FullDatasetEvaluationMetric):
     __provider__ = 'softmax_perplexity'
     annotation_types = (LM1BAnnotation, )
     prediction_types = (LanguageModelingPrediction, )
