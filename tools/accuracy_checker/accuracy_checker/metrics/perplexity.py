@@ -25,6 +25,8 @@ class Perplexity(PerImageEvaluationMetric):
             tgts = np.array([[target_in]])
             cal_log_perp = CalculatePerplexity(tgts, softmax, softmax)
             log_perp = cal_log_perp._log_perplexity_out()
+            if log_perp == -1:
+                continue
 
             sum_num += log_perp * target_weights_in.mean()
             sum_den += target_weights_in.mean()
@@ -119,6 +121,9 @@ class CalculatePerplexity:
       lastlayer = self._softmax_out
     else:
       lastlayer = self._softmax(self._biasadd)
+    for value in lastlayer:
+        if value == 0.0:
+            return -1
     ret = self._cross_entropy(expect, lastlayer)
     return ret
 
