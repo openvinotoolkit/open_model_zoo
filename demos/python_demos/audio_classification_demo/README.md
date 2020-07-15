@@ -43,7 +43,7 @@ Options:
 Running the application with the empty list of options yields the usage message given above and an error message.
 You can use the following command to do inference on GPU with a pre-trained audio classification model and conversion of input audio to samplerate of 16000:
 ```
-    python3 audio_classification_demo.py -i <path_to_wav>/input_audio.wav -m <path_to_model>/aclnet.xml -d GPU --samplerate 16000
+python3 audio_classification_demo.py -i <path_to_wav>/input_audio.wav -m <path_to_model>/aclnet.xml -d GPU --samplerate 16000
 ```
 
 To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
