@@ -3,13 +3,14 @@
 //
 
 /**
-* \brief The entry point for the Inference Engine interactive_face_detection demo application
-* \file interactive_face_detection_demo/main.cpp
-* \example interactive_face_detection_demo/main.cpp
+* \brief The entry point for the G-API/Inference Engine interactive_face_detection_gapi demo application
+* \file interactive_face_detection_demo_gapi/main.cpp
+* \example interactive_face_detection_demo_gapi/main.cpp
 */
 #include <vector>
 #include <string>
 #include <list>
+#include <memory>
 
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
@@ -23,7 +24,7 @@
 
 #include <monitors/presenter.h>
 
-#include "interactive_face_detection.hpp"
+#include "interactive_face_detection_gapi.hpp"
 #include "utils.hpp"
 #include "face.hpp"
 #include "visualizer.hpp"
@@ -148,7 +149,7 @@ void rawOutputDetections(const cv::Mat  &ssd_result,
     }
 }
 
-void rawOutputAgeGender(const int idx, const cv::Mat out_ages, const cv::Mat out_genders) {
+void rawOutputAgeGender(const int idx, const cv::Mat &out_ages, const cv::Mat &out_genders) {
     const float *age_data = out_ages.ptr<float>();
     const float *gender_data = out_genders.ptr<float>();
 
@@ -202,11 +203,11 @@ void rawOutputEmotions(const int idx, const cv::Mat &out_emotion) {
     }
 }
 
-void faceDataUpdate(cv::Mat   &frame,
+void faceDataUpdate(const cv::Mat &frame,
                     Face::Ptr &face,
-                    cv::Rect  &face_rect,
+                    const cv::Rect &face_rect,
                     std::list<Face::Ptr>  &prev_faces,
-                    std::vector<cv::Rect> &face_hub,
+                    const std::vector<cv::Rect> &face_hub,
                     size_t &id,
                     bool no_smooth) {
     // Face update
@@ -231,9 +232,9 @@ void faceDataUpdate(cv::Mat   &frame,
     }
 }
 
-void ageGenderDataUpdate(Face::Ptr &face,
-                         cv::Mat &out_age,
-                         cv::Mat &out_gender) {
+void ageGenderDataUpdate(const Face::Ptr &face,
+                         const cv::Mat &out_age,
+                         const cv::Mat &out_gender) {
     const float *age_data =    out_age.ptr<float>();
     const float *gender_data = out_gender.ptr<float>();
 
@@ -244,10 +245,10 @@ void ageGenderDataUpdate(Face::Ptr &face,
     face->updateAge(age);
 }
 
-void headPoseDataUpdate(Face::Ptr &face,
-                        cv::Mat &out_y_fc,
-                        cv::Mat &out_p_fc,
-                        cv::Mat &out_r_fc) {
+void headPoseDataUpdate(const Face::Ptr &face,
+                        const cv::Mat &out_y_fc,
+                        const cv::Mat &out_p_fc,
+                        const cv::Mat &out_r_fc) {
     const float *y_data = out_y_fc.ptr<float>();
     const float *p_data = out_p_fc.ptr<float>();
     const float *r_data = out_r_fc.ptr<float>();
@@ -255,7 +256,7 @@ void headPoseDataUpdate(Face::Ptr &face,
     face->updateHeadPose(y_data[0], p_data[0], r_data[0]);
 }
 
-void emotionsDataUpdate(Face::Ptr &face, cv::Mat &out_emotion) {
+void emotionsDataUpdate(const Face::Ptr &face, const cv::Mat &out_emotion) {
     const float *em_data = out_emotion.ptr<float>();
 
     face->updateEmotions({
@@ -267,7 +268,7 @@ void emotionsDataUpdate(Face::Ptr &face, cv::Mat &out_emotion) {
                           });
 }
 
-void landmarksDataUpdate(Face::Ptr &face, cv::Mat &out_landmark) {
+void landmarksDataUpdate(const Face::Ptr &face, const cv::Mat &out_landmark) {
     const float *lm_data = out_landmark.ptr<float>();
 
     std::vector<float> normedLandmarks;
@@ -424,7 +425,6 @@ int main(int argc, char *argv[]) {
 
         Visualizer::Ptr visualizer;
         if (!FLAGS_no_show || !FLAGS_o.empty()) {
-            cv::namedWindow("Detection results");
             visualizer = std::make_shared<Visualizer>(!FLAGS_m_ag.empty(), !FLAGS_m_em.empty(), !FLAGS_m_hp.empty(), !FLAGS_m_lm.empty());
         } else {
             std::cout<< "To close the application, press 'CTRL+C' here" << std::endl;
@@ -442,7 +442,7 @@ int main(int argc, char *argv[]) {
         stream.start();
 
         const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
-        Presenter presenter;
+        std::unique_ptr<Presenter> presenter;
         bool presenterWasInit = false;
 
         while (stream.running()) {
@@ -456,7 +456,8 @@ int main(int argc, char *argv[]) {
                 // Init presenter
                 if (!presenterWasInit) {
                     cv::Size graphSize{static_cast<int>(frame.rows / 4), 60};
-                    presenter.setPresenterVars(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, graphSize);
+                    // std::make_unique is available since C++14
+                    presenter = std::unique_ptr<Presenter>(new Presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, graphSize));
                     presenterWasInit = true;
                 }
 
@@ -510,7 +511,7 @@ int main(int argc, char *argv[]) {
                     faces.push_back(face);
                 }
 
-                presenter.drawGraphs(frame);
+                presenter->drawGraphs(frame);
 
                 //  Visualizing results
                 if (!FLAGS_no_show || !FLAGS_o.empty()) {
@@ -529,7 +530,7 @@ int main(int argc, char *argv[]) {
                     if (27 == key || 'Q' == key || 'q' == key) {
                         stream.stop();
                     } else {
-                        presenter.handleKey(key);
+                        presenter->handleKey(key);
                     }
                 }
 
@@ -560,7 +561,7 @@ int main(int argc, char *argv[]) {
         slog::info << "Number of processed frames: " << framesCounter << slog::endl;
         slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
 
-        std::cout << presenter.reportMeans() << '\n';
+        std::cout << presenter->reportMeans() << '\n';
 
         cv::destroyAllWindows();
     }

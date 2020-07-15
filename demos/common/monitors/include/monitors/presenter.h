@@ -26,18 +26,14 @@ public:
         int yPos = 20,
         cv::Size graphSize = {150, 60},
         std::size_t historySize = 20);
-    void setPresenterVars(const std::string& keys = {},
-        int yPos = 20,
-        cv::Size graphSize = {150, 60},
-        std::size_t historySize = 20);
     void addRemoveMonitor(MonitorType monitor);
     void handleKey(int key); // handles c, d, m, h keys
     void drawGraphs(cv::Mat& frame);
     std::string reportMeans() const;
 
-    mutable int yPos;
-    mutable cv::Size graphSize;
-    mutable int graphPadding;
+    const int yPos;
+    const cv::Size graphSize;
+    const int graphPadding;
 private:
     std::chrono::steady_clock::time_point prevTimeStamp;
     std::size_t historySize;
