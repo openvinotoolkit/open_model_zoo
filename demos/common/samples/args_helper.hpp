@@ -31,11 +31,7 @@ static const char input_message[] = "Required. An input to process. The input mu
     "images or anything that cv::VideoCapture can process."; \
 static const char loop_input_message[] = "Optional. Enable reading the input in a loop."; \
 DEFINE_string(i, "", input_message); \
-DEFINE_bool(loop_input, false, loop_input_message); \
-void showInputUsage() { \
-    std::cout << "    -i \"<path>\"               " << input_message << std::endl; \
-    std::cout << "    -loop_input               " << loop_input_message << std::endl; \
-}
+DEFINE_bool(loop_input, false, loop_input_message);
 
 /**
 * @brief This function checks input args and existence of specified files in a given folder

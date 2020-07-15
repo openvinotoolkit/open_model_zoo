@@ -29,13 +29,13 @@ multi_channel_face_detection_demo [OPTION]
 Options:
 
     -h                           Print a usage message
-    -i                           Required. An comma separated list of inputs to process. Each input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -i                           Required. A comma separated list of inputs to process. Each input must be a single image, a folder of images or anything that cv::VideoCapture can process.
     -loop                        Optional. Enable reading the inputs in a loop.
     -duplicate_num               Optional. Multiply the inputs by the given factor. For example, if only one input is provided, but -ni is set to 2, the demo uses half of images from the input as it was the first input and another half goes as the second input.
     -m "<path>"                  Required. Path to an .xml file with a trained model.
-      -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernels implementations
+      -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations
           Or
-      -c "<absolute_path>"       Required for GPU custom kernels. Absolute path to an .xml file with the kernels descriptions
+      -c "<absolute_path>"       Required for GPU custom kernels. Absolute path to an .xml file with the kernel descriptions
     -d "<device>"                Optional. Specify the target device for a network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo looks for a suitable plugin for a specified device.
     -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
     -nireq                       Optional. Number of infer requests

@@ -47,30 +47,44 @@ public:
 };
 
 class DirReader : public ImagesCapture {
-    std::string input;
-    DIR *dir;
+    std::vector<std::string> names;
+    size_t imgId;
 
 public:
-    DirReader(const std::string &input, bool loop): ImagesCapture{loop}, input{input}, dir{opendir(input.c_str())} {
+    const std::string input;
+
+    DirReader(const std::string &input, bool loop): ImagesCapture{loop}, imgId{0}, input{input} {
+        DIR *dir = opendir(input.c_str());
         if (!dir) throw InvalidInput{};
-    }
-
-    ~DirReader() override {closedir(dir);}
-
-    cv::Mat read() override {
-        for (struct dirent *ent = readdir(dir); ent != nullptr; ent = readdir(dir)) {
-            if (strcmp(ent->d_name, ".") && strcmp(ent->d_name, "..")) {
-                cv::Mat img = cv::imread(input + '/' + ent->d_name);
-                if (img.data) return img;
+        for (struct dirent *ent = readdir(dir); ent != nullptr; ent = readdir(dir))
+            if (strcmp(ent->d_name, ".") && strcmp(ent->d_name, ".."))
+                names.emplace_back(ent->d_name);
+        closedir(dir);
+        if (names.empty()) throw InvalidInput{};
+        sort(names.begin(), names.end());
+        bool foundAtLeastOneImg = false;
+        for (const std::string &name : names) {
+            cv::Mat img = cv::imread(input + '/' + name);
+            if (img.data) {
+                foundAtLeastOneImg = true;
+                break;
             }
         }
+        if (!foundAtLeastOneImg) throw InvalidInput{};
+    }
+
+    cv::Mat read() override {
+        while (imgId < names.size()) {
+            cv::Mat img = cv::imread(input + '/' + names[imgId]);
+            ++imgId;
+            if (img.data) return img;
+        }
         if (loop) {
-            rewinddir(dir);
-            for (struct dirent *ent = readdir(dir); ent != nullptr; ent = readdir(dir)) {
-                if (strcmp(ent->d_name, ".") && strcmp(ent->d_name, "..")) {
-                    cv::Mat img = cv::imread(input + '/' + ent->d_name);
-                    if (img.data) return img;
-                }
+            imgId = 0;
+            while (imgId < names.size()) {
+                cv::Mat img = cv::imread(input + '/' + names[imgId]);
+                ++imgId;
+                if (img.data) return img;
             }
         }
         return cv::Mat{};

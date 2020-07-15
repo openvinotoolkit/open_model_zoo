@@ -45,7 +45,7 @@ public:
 
 class VideoSource;
 class VideoSourceNative;
-class VideoSourceOCV;
+class GeneralCaptureSource;
 class VideoSourceStreamFile;
 
 class VideoSources {
@@ -70,7 +70,7 @@ private:
     void stop();
 
     friend VideoSourceNative;
-    friend VideoSourceOCV;
+    friend GeneralCaptureSource;
     friend VideoSourceStreamFile;
 
 public:
