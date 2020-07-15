@@ -209,9 +209,9 @@ The task of action recognition is to predict action that is being performed on a
 | ------------------------- | ---------------| -------------- | ------ | ------- |
 | RGB-I3D, pretrained on ImageNet\* | [TensorFlow\*](./i3d-rgb-tf/i3d-rgb-tf.md) | i3d-rgb-tf | | |
 
-## Audio Classification
+## Sound Classification
 
-The task of audio classification is to predict what sounds in an audio fragment.
+The task of sound classification is to predict what sounds are in an audio fragment.
 
 | Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | ------ | ------- |
