@@ -22,7 +22,7 @@ description: >-
 
   The model output for "AclNet" is the sound classifier output for the 53 different
   environmental sound classes from the DES-53 database.
-task_type: audio_classification
+task_type: sound_classification
 files:
   - name: aclnet_des_53.onnx
     size: 10972740
