@@ -118,6 +118,8 @@ class ClipAudio(Preprocessor):
     def _parse_overlap(self, overlap):
         self.is_overlap_in_samples = False
         self.overlap = 0
+        if overlap is None:
+            return
         if isinstance(overlap, str):
             if overlap.endswith('%'):
                 try:
