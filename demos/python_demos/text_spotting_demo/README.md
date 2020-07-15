@@ -22,11 +22,11 @@ Second model is Text Recognition Encoder that takes `text_features` as input and
 
 Third model is Text Recognition Decoder that takes `encoded text` from Text Recognition Encoder ,`previous symbol` and `hidden state`. On the first step special `Start Of Sequence (SOS)` symbol and zero `hidden state` are fed to Text Recognition Decoder. The decoder produces `symbols distribution`, `current hidden state` each step until `End Of Sequence (EOS)` symbol is generated.
 
-As input, the demo application takes a path to a single image file, a video file or a numeric ID of a web camera specified with a command-line argument `-i`.
+Examples of valid inputs to specify with a command-line argument `-i` are a path to a video file or a numeric ID of a web camera.
 
 The demo workflow is the following:
 
-1. The demo application reads image/video frames one by one, resizes them to fit into the input image blob of the network (`im_data`).
+1. The demo application reads frames from the provided input, resizes them to fit into the input image blob of the network (`im_data`).
 2. The `im_info` input blob passes resulting resolution and scale of a pre-processed image to the network to perform inference of Mask-RCNN-like text detector.
 3. The Text Recognition Encoder takes input from the text detector and produces output.
 4. The Text Recognition Decoder takes output from the Text Recognition Encoder output as input and produces output.
@@ -42,9 +42,10 @@ The demo workflow is the following:
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>" -i
-                             "<path>" [-d "<device>"] [-l "<absolute_path>"]
-                             [--delay "<num>"] [-pt "<num>"] [-a ALPHABET]
+usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>"
+                             -i "<path>" [-d "<device>"]
+                             [-l "<absolute_path>"] [--delay "<num>"]
+                             [-pt "<num>"] [-a ALPHABET]
                              [--trd_input_prev_symbol TRD_INPUT_PREV_SYMBOL]
                              [--trd_input_prev_hidden TRD_INPUT_PREV_HIDDEN]
                              [--trd_input_encoder_outputs TRD_INPUT_ENCODER_OUTPUTS]
@@ -52,7 +53,7 @@ usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>" -i
                              [--trd_output_cur_hidden TRD_OUTPUT_CUR_HIDDEN]
                              [--keep_aspect_ratio] [--no_track]
                              [--show_scores] [--show_boxes] [-pc] [-r]
-                             [--no_show]
+                             [--no_show] [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -65,13 +66,12 @@ Options:
   -m_td "<path>", --text_dec_model "<path>"
                         Required. Path to an .xml file with a trained text
                         recognition model (decoder part).
-  -i "<path>"           Required. Path to an image, video file or a numeric
-                        camera ID.
+  -i "<path>"           Required. Input to process.
   -d "<device>", --device "<device>"
-                        Optional. Specify the target device to infer on: CPU,
-                        GPU, FPGA, HDDL or MYRIAD. The demo will look for a
-                        suitable plugin for device specified (by default, it
-                        is CPU).
+                        Optional. Specify the target device to infer on, i.e. CPU, GPU.
+                        The demo will look for a suitable plugin for device specified
+                        (by default, it is CPU). Please refer to OpenVINO documentation
+                        for the list of devices supported by the model.
   -l "<absolute_path>", --cpu_extension "<absolute_path>"
                         Required for CPU custom layers. Absolute path to a
                         shared library with the kernels implementation.
@@ -105,6 +105,8 @@ Options:
   -r, --raw_output_message
                         Optional. Output inference results raw values.
   --no_show             Optional. Don't show output
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
@@ -113,13 +115,13 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
-To run the demo, please provide paths to the model in the IR format and to an input video, image, or folder with images:
+To run the demo, please provide paths to the model in the IR format and to an input with images:
 ```bash
 python3 text_spotting_demo.py \
 -m_m <path_to_models>/text-spotting-0002-detector.xml \
 -m_te <path_to_models>/text-spotting-0002-recognizer-encoder.xml \
 -m_td <path_to_models>/text-spotting-0002-recognizer-decoder.xml \
--i input_image.jpg
+-i 0
 ```
 
 ## Demo Output

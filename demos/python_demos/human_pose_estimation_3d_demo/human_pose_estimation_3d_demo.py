@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (c) 2019 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,7 @@
 from argparse import ArgumentParser, SUPPRESS
 import json
 import os
+import sys
 
 import cv2
 import numpy as np
@@ -23,6 +24,9 @@ from modules.inference_engine import InferenceEngine
 from modules.input_reader import InputReader
 from modules.draw import Plotter3d, draw_poses
 from modules.parse_poses import parse_poses
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
 
 
 def rotate_poses(poses_3d, R, t):
@@ -59,6 +63,8 @@ if __name__ == '__main__':
                       type=str, default=None)
     args.add_argument('--fx', type=np.float32, default=-1, help='Optional. Camera focal length.')
     args.add_argument('--no_show', help='Optional. Do not display output.', action='store_true')
+    args.add_argument("-u", "--utilization_monitors", default='', type=str,
+                      help="Optional. List of monitors to show initially.")
     args = parser.parse_args()
 
     if args.input == '':
@@ -91,6 +97,7 @@ if __name__ == '__main__':
     p_code = 112
     space_code = 32
     mean_time = 0
+    presenter = monitors.Presenter(args.utilization_monitors, 0)
     for frame in frame_provider:
         current_time = cv2.getTickCount()
         input_scale = base_height / frame.shape[0]
@@ -113,6 +120,7 @@ if __name__ == '__main__':
             edges = (Plotter3d.SKELETON_EDGES + 19 * np.arange(poses_3d.shape[0]).reshape((-1, 1, 1))).reshape((-1, 2))
         plotter.plot(canvas_3d, poses_3d, edges)
 
+        presenter.drawGraphs(frame)
         draw_poses(frame, poses_2d)
         current_time = (cv2.getTickCount() - current_time) / cv2.getTickFrequency()
         if mean_time == 0:
@@ -134,6 +142,8 @@ if __name__ == '__main__':
                 delay = 0
             else:
                 delay = 1
+        else:
+            presenter.handleKey(key)
         if delay == 0 or not is_video:  # allow to rotate 3D canvas while on pause
             key = 0
             while (key != p_code
@@ -146,3 +156,4 @@ if __name__ == '__main__':
                 break
             else:
                 delay = 1
+    print(presenter.reportMeans())

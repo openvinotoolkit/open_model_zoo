@@ -15,6 +15,13 @@
 | MParams                         | 4.221                                     |
 | Source framework                | Caffe\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 69.496%|
+| Top 5  | 89.224%|
+
 ## Performance
 
 ## Input
@@ -28,7 +35,7 @@ Image, name - `input` , shape - `1,3,224,224`, format `B,C,H,W`, where:
     - H - image height
     - W - image width
 
-   Expected color order - BGR.
+   Expected color order: BGR.
    Mean values - [103.94,116.78,123.68], scale factor for each channel - 58.8235294117647
 
 ### Converted model
@@ -40,7 +47,7 @@ Image, name - `input` , shape - `1,3,224,224`, format `B,C,H,W`, where:
     - H - image height
     - W - image width
 
-   Expected color order - BGR.
+   Expected color order: BGR.
 
 ## Output
 

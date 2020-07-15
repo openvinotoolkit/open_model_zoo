@@ -15,6 +15,13 @@ CaffeNet\* model is used for classification. For details see [paper](https://arx
 | MParams                         | 60.965                                    |
 | Source framework                | Caffe\*                                   |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 56.714%|
+| Top 5  | 79.916%|
+
 ## Performance
 
 ## Input
@@ -22,27 +29,27 @@ CaffeNet\* model is used for classification. For details see [paper](https://arx
 ### Original Model
 
 Image, name: `data`, shape: [1x3x227x227], format: [BxCxHxW]
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
-   Mean values: [104.0, 117.0, 123.0].
+Expected color order: BGR.
+Mean values: [104.0, 117.0, 123.0].
 
 ### Converted Model
 
 Image, name: `data`, shape: [1x3x227x227], format: [BxCxHxW]
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 

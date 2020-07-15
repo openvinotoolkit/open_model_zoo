@@ -33,7 +33,6 @@ Only "blue" license plates, which are common in public, were tested
 thoroughly. Other types of license plates may underperform.
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

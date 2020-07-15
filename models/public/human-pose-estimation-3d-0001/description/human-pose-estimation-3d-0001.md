@@ -21,15 +21,15 @@ Multi-person 3D human pose estimation model based on the [Lightweight OpenPose](
 
 ## Inputs
 
-1. Name: `data`, shape: `[1x3x256x448]`. An input image in the `[BxCxHxW]` format,
-   where:
+Name: `data`, shape: `[1x3x256x448]`. An input image in the `[BxCxHxW]` format,
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+- B - batch size
+- C - number of channels
+- H - image height
+- W - image width
 
-   Expected color order is BGR.
+Expected color order is BGR.
 
 ## Outputs
 

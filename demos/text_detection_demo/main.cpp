@@ -217,10 +217,12 @@ int main(int argc, char *argv[]) {
                 if (text_recognition.is_initialized()) {
                     auto blobs = text_recognition.Infer(cropped_text);
                     auto output_shape = blobs.begin()->second->getTensorDesc().getDims();
-                    if (output_shape[2] != kAlphabet.length())
+                    if (output_shape[2] != kAlphabet.length()) {
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
-
-                    float *output_data_pointer = blobs.begin()->second->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+                    }
+                    
+                    LockedMemory<const void> blobMapped = as<MemoryBlob>(blobs.begin()->second)->rmap();
+                    float *output_data_pointer = blobMapped.as<float *>();
                     std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
 
                     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();

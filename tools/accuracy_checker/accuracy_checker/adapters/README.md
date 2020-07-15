@@ -33,6 +33,11 @@ AccuracyChecker supports following set of adapters:
   * `coords` - number of bbox coordinates (default 4).
   * `num` - num parameter from DarkNet configuration file (default 5).
   * `cells` - number of cells across width and height (default 13).
+  * `raw_output` - enabling additional preprocessing for raw YOLO output format (default `False`).
+  * `output_format` - setting output layer format:
+      - `BHW` - boxes first (default, also default for generated IRs).
+      - `HWB` - boxes last.
+      Applicable only if network output not 3D (4D with batch) tensor.
 * `yolo_v3` - converting output of YOLO v3 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 80).
   * `anchors` - anchor values provided as comma-separited list or precomputed:
@@ -43,7 +48,11 @@ AccuracyChecker supports following set of adapters:
   * `anchor_mask` - mask for used anchors for each output layer (Optional, if not provided default way for selecting anchors will be used.)
   * `threshold` - minimal objectness score value for valid detections (default 0.001).
   * `input_width` and `input_height` - network input width and height correspondingly (default 416).
-  * `outputs` - the list of output layers names (optional), if specified there should be exactly 3 output layers provided.
+  * `outputs` - the list of output layers names.
+  * `raw_output` - enabling additional preprocessing for raw YOLO output format (default `False`).
+  * `output_format` - setting output layer format - boxes first (`BHW`)(default, also default for generated IRs), boxes last (`HWB`). Applicable only if network output not 3D (4D with batch) tensor.
+  * `cells` - sets grid size for each layer, according `outputs` filed. Works only with `do_reshape=True` or when output tensor dimensions not equal 3.
+  * `do_reshape` - forces reshape output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on `output_format` value ([B,Cy,Cx] by default). You may need to specify `cells` value.
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
 * `ssd_mxnet` - converting output of SSD-based models from MXNet framework to `DetectionPrediction` representation.
@@ -67,6 +76,10 @@ AccuracyChecker supports following set of adapters:
 * `retinanet` - converting output of RetinaNet-based model.
   * `loc_out` - name of output layer with bounding box deltas.
   * `class_out` - name of output layer with classification probabilities.
+* `rfcn_class_agnostic` - convert output of Caffe RFCN model with agnostic bounding box regression approach.
+  * `cls_out` - the name of output layer with detected probabilities for each class. The layer shape is [num_boxes, num_classes], where `num_boxes` is number of predicted boxes, `num_classes` - number of classes in the dataset including background.
+  * `bbox_out` - the name of output layer with detected boxes deltas. The layer shape is [num_boxes, 8] where  `num_boxes` is number of predicted boxes, 8 (4 for background + 4 for foreground) bouding boxes coordinates.
+  * `roid_out` - the name of output layer with regions of interest.
 * `face_person_detection` - converting face person detection model output with 2 detection outputs to `ContainerPredition`, where value of parameters `face_out`and `person_out` are used for identification `DetectionPrediction` in container.
   * `face_out` -  face detection output layer name.
   * `person_out` - person detection output layer name.
@@ -92,16 +105,43 @@ AccuracyChecker supports following set of adapters:
   * `detection_threshold` - minimal detection confidences level for valid detections.
   * `actions_scores_threshold` - minimal actions confidences level for valid detections.
   * `action_scale` - scale for correct action score calculation.
+* `image_processing` - converting output of network for single image processing to `ImageProcessingPrediction`.
+  * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
+  * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
+  * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations.
+  The order of actions:
+  1. Multiply on `std`
+  2. Add `mean`
+  3. Reverse channels if this option enabled.
+  * `target_out` - target model output layer name in case when model has several outputs.
 * `super_resolution` - converting output of single image super resolution network to `SuperResolutionPrediction`.
   * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
   * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
   * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
-  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
+  * `cast_to_uint8` - perform casting output image pixels to [0, 255] range.
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations.
   The order of actions:
   1. Multiply on `std`
   2. Add `mean`
   3. Reverse channels if this option enabled.
   * `target_out` - super resolution model output layer name in case when model has several outputs.
+* `multi_target_super_resolution` - converting output super resolution network with multiple outputs to `ContainerPrediction` with `SuperResolutionPrediction` for each output.
+  * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
+  * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
+  * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
+  * `cast_to_uint8` - perform casting output image pixels to [0, 255] range.
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations.
+  The order of actions:
+  1. Multiply on `std`
+  2. Add `mean`
+  3. Reverse channels if this option enabled.
+  * `target_mapping` - dictionary where keys are meaningful name for solved task which will be used as keys inside `ConverterPrediction`,  values - output layer names.
+* `super_resolution_yuv` - converts output of super resolution model, which return output in YUV format, to `SuperResolutionPrediction`. Each output layer contains only 1 channel.
+  * `y_output` - Y channel output layer.
+  * `u_output` - U channel output layer.
+  * `v_output` - V channel output layer.
+  * `target_color` - taret color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `bgr`).
 * `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.
@@ -176,3 +216,26 @@ AccuracyChecker supports following set of adapters:
   * `scale` - scalar value to normalize bbox coordinates.
 * `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.
 * `inpainting` - converting output of Image Inpainting model to `ImageInpaintingPrediction` representation.
+* `style_transfer` - converting output of Style Transfer model to `StyleTransferPrediction` representation.
+* `retinaface` - converting output of RetinaFace model to `DetectionPrediction` or representation container with `DetectionPrediction`, `AttributeDetectionPrediction`, `FacialLandmarksPrediction` (depends on provided set of outputs)
+   * `scores_outputs` - the list of names for output layers with face detection score in order belonging to 32-, 16-, 8-strides.
+   * `bboxes_outputs` - the list of names for output layers with face detection boxes in order belonging to 32-, 16-, 8-strides.
+   * `landmarks_outputs` - the list of names for output layers with predicted facial landmarks in order belonging to 32-, 16-, 8-strides (optional, if not provided, only `DetectionPrediction` will be generated).
+   * `type_scores_outputs` - the list of names for output layers with attributes detection score in order belonging to 32-, 16-, 8-strides (optional, if not provided, only `DetectionPrediction` will be generated).
+* `faceboxes` - converting output of FaceBoxes model to `DetectionPrediction` representation.
+  * `scores_out` - name of output layer with bounding boxes scores.
+  * `boxes_out` - name of output layer with bounding boxes coordinates.
+* `prnet` - converting output of PRNet model for 3D landmarks regression task to `FacialLandmarks3DPrediction`
+    * `landmarks_ids_file` - the file with indeces for landmarks extraction from position heatmap. (Optional, default values defined [here](https://github.com/YadiraF/PRNet/blob/master/Data/uv-data/uv_kpt_ind.txt))
+* `person_vehicle_detection` - converts output of person vehicle detection model to `DetectionPrediction` representation. Adapter merges scores, groups predictions into people and vehicles, and assignes labels accordingly.
+    * `iou_threshold` - IOU threshold value for NMS operation.
+* `face_detection` - converts output of face detection model to `DetectionPrediction ` representation. Operation is performed by mapping model output to the defined anchors, window scales, window translates, and window lengths to generate a list of face candidates.
+    * `score_threshold` - Score threshold value used to discern whether a face is valid.
+    * `layer_names` - Target output layer base names.
+    * `anchor_sizes` - Anchor sizes for each base output layer.
+    * `window_scales` - Window scales for each base output layer.
+    * `window_lengths` - Window lengths for each base output layer.
+* `face_detection_refinement` - converts output of face detection refinement model to `DetectionPrediction` representation. Adapter refines candidates generated in previous stage model.
+    * `threshold` - Score threshold to determine as valid face candidate.
+* `attribute_classification` - converts output of attributes classifcation model to `ContainerPrediction` which contains multiple `ClassificationPrediction` for attributes with their scores.
+    * `output_layer_map` - dictionary where keys are output layer names of attribute classification model and values are the names of attributes.

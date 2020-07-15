@@ -17,6 +17,11 @@ The `googlenet-v3` model is the first of the Inception family of models designed
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 77.904% |
+| Top 5  | 93.808%|
+
 ## Performance
 
 ## Input
@@ -37,14 +42,14 @@ Image, name: `input`, shape: [1x299x299x3], format: [BxHxWxC],
 ### Converted Model
 
 Image, name: `input`, shape: [1x3x299x299], format: [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 

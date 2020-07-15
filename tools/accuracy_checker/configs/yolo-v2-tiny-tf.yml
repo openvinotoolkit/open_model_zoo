@@ -15,7 +15,7 @@ models:
           raw_output: True
 
     datasets:
-      - name: ms_coco_detection_80_class_without_backgound
+      - name: ms_coco_detection_80_class_without_background
 
         preprocessing:
           - type: bgr_to_rgb
@@ -72,7 +72,7 @@ models:
           classes: 80
 
     datasets:
-      - name: ms_coco_detection_80_class_without_backgound
+      - name: ms_coco_detection_80_class_without_background
 
         preprocessing:
           - type: resize

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `efficientnet-b5` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946) 
+The `efficientnet-b5` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946)
 models designed to perform image classification.
 This model was pretrained in TensorFlow\*.
 All the EfficientNet models have been pretrained on the ImageNet\* image database.
@@ -23,8 +23,8 @@ For details about this family of models, check out the [TensorFlow Cloud TPU rep
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 83.33          | 83.33           |
-| Top 5  | 96.67          | 96.67           |
+| Top 1  | 83.33%          | 83.33%           |
+| Top 5  | 96.67%          | 96.67%           |
 
 ## Performance
 

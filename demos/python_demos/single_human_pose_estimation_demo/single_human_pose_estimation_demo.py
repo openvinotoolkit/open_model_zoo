@@ -1,10 +1,18 @@
+#!/usr/bin/env python3
+
 import argparse
+import os
+import sys
 import cv2
 
 from openvino.inference_engine import IECore
 
 from detector import Detector
 from estimator import HumanPoseEstimator
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
+
 
 def build_argparser():
     parser = argparse.ArgumentParser()
@@ -19,7 +27,8 @@ def build_argparser():
                         help="Specify the target to infer on CPU or GPU")
     parser.add_argument("--person_label", type=int, required=False, default=15, help="Label of class person for detector")
     parser.add_argument("--no_show", help='Optional. Do not display output.', action='store_true')
-
+    parser.add_argument("-u", "--utilization_monitors", default="", type=str,
+                        help="Optional. List of monitors to show initially.")
     return parser
 
 class ImageReader(object):
@@ -76,9 +85,12 @@ def run_demo(args):
     else:
         raise ValueError('--input has to be set')
 
+    presenter = monitors.Presenter(args.utilization_monitors, 25)
     for frame in frames_reader:
         bboxes = detector_person.detect(frame)
         human_poses = [single_human_pose_estimator.estimate(frame, bbox) for bbox in bboxes]
+
+        presenter.drawGraphs(frame)
 
         colors = [(0, 0, 255),
                   (255, 0, 0), (0, 255, 0), (255, 0, 0), (0, 255, 0),
@@ -100,7 +112,9 @@ def run_demo(args):
         cv2.imshow('Human Pose Estimation Demo', frame)
         key = cv2.waitKey(delay)
         if key == 27:
-            return
+            break
+        presenter.handleKey(key)
+    print(presenter.reportMeans())
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()

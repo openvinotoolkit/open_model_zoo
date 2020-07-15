@@ -294,10 +294,10 @@ def read_pickle(file: Union[str, Path], *args, **kwargs):
         return pickle.load(content, *args, **kwargs)
 
 
-def read_yaml(file: Union[str, Path], *args, **kwargs):
+def read_yaml(file: Union[str, Path], *args, ordered=True, **kwargs):
     with get_path(file).open() as content:
-        loader = orddict_loader or yaml.SafeLoader
-        if not orddict_loader:
+        loader = orddict_loader or yaml.SafeLoader if ordered else yaml.SafeLoader
+        if not orddict_loader and ordered:
             warn('yamlloader is not installed. YAML files order is not preserved. it can be sufficient for some cases')
         return yaml.load(content, *args, Loader=loader, **kwargs)
 

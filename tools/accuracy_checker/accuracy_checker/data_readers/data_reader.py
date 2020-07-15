@@ -18,8 +18,11 @@ from pathlib import Path
 from functools import singledispatch
 from collections import OrderedDict, namedtuple
 import re
+import wave
+
 import cv2
 import numpy as np
+from numpy.lib.npyio import NpzFile
 
 try:
     import tensorflow as tf
@@ -35,6 +38,12 @@ try:
     import nibabel as nib
 except ImportError:
     nib = None
+
+try:
+    import pydicom
+except ImportError:
+    pydicom = None
+
 
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
@@ -90,12 +99,13 @@ class BaseReader(ClassProvider):
     __provider_type__ = 'reader'
 
     def __init__(self, data_source, config=None, **kwargs):
-        self.config = config
+        self.config = config or {}
         self.data_source = data_source
         self.read_dispatcher = singledispatch(self.read)
         self.read_dispatcher.register(list, self._read_list)
         self.read_dispatcher.register(ClipIdentifier, self._read_clip)
         self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
+        self.multi_infer = False
 
         self.validate_config()
         self.configure()
@@ -117,7 +127,11 @@ class BaseReader(ClassProvider):
         return context
 
     def configure(self):
+        if not self.data_source:
+            raise ConfigError('data_source parameter is required to create "{}" '
+                              'data reader and read data'.format(self.__provider__))
         self.data_source = get_path(self.data_source, is_directory=True)
+        self.multi_infer = self.config.get('multi_infer', False)
 
     def validate_config(self):
         pass
@@ -137,7 +151,10 @@ class BaseReader(ClassProvider):
         return self.read_dispatcher(data_id.frames)
 
     def read_item(self, data_id):
-        return DataRepresentation(self.read_dispatcher(data_id), identifier=data_id)
+        data_rep = DataRepresentation(self.read_dispatcher(data_id), identifier=data_id)
+        if self.multi_infer:
+            data_rep.metadata['multi_infer'] = True
+        return data_rep
 
     @property
     def name(self):
@@ -172,6 +189,7 @@ class ReaderCombiner(BaseReader):
             reading_scheme[pattern] = reader
 
         self.reading_scheme = reading_scheme
+        self.multi_infer = self.config.get('multi_infer', False)
 
     def read(self, data_id):
         for pattern, reader in self.reading_scheme.items():
@@ -198,13 +216,14 @@ class OpenCVImageReader(BaseReader):
 
     def validate_config(self):
         if self.config:
-            config_validator = OpenCVImageReaderConfig('opencv_imread_config')
+            config_validator = OpenCVImageReaderConfig(
+                'opencv_imread_config', on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
+            )
             config_validator.validate(self.config)
 
     def configure(self):
         super().configure()
         self.flag = OPENCV_IMREAD_FLAGS[self.config.get('reading_flag', 'color') if self.config else 'color']
-
 
     def read(self, data_id):
         return cv2.imread(str(get_path(self.data_source / data_id)), self.flag)
@@ -270,8 +289,12 @@ class OpenCVFrameReader(BaseReader):
         return frame
 
     def configure(self):
+        if not self.data_source:
+            raise ConfigError('data_source parameter is required to create "{}" '
+                              'data reader and read data'.format(self.__provider__))
         self.data_source = get_path(self.data_source)
         self.videocap = cv2.VideoCapture(str(self.data_source))
+        self.multi_infer = self.config.get('multi_infer', False)
 
     def reset(self):
         self.current = -1
@@ -292,6 +315,10 @@ class JSONReader(BaseReader):
 
     def configure(self):
         self.key = self.config.get('key')
+        self.multi_infer = self.config.get('multi_infer', False)
+        if not self.data_source:
+            raise ConfigError('data_source parameter is required to create "{}" '
+                              'data reader and read data'.format(self.__provider__))
 
     def read(self, data_id):
         data = read_json(str(self.data_source / data_id))
@@ -334,6 +361,10 @@ class NiftiImageReader(BaseReader):
         if nib is None:
             raise ImportError('nifty backend for image reading requires nibabel. Please install it before usage.')
         self.channels_first = self.config.get('channels_first', False) if self.config else False
+        self.multi_infer = self.config.get('multi_infer', False)
+        if not self.data_source:
+            raise ConfigError('data_source parameter is required to create "{}" '
+                              'data reader and read data'.format(self.__provider__))
 
     def read(self, data_id):
         nib_image = nib.load(str(get_path(self.data_source / data_id)))
@@ -345,11 +376,42 @@ class NiftiImageReader(BaseReader):
         return image
 
 
+class NumpyReaderConfig(ConfigValidator):
+    type = StringField(optional=True)
+    keys = StringField(optional=True, default="")
+
+
 class NumPyReader(BaseReader):
     __provider__ = 'numpy_reader'
 
+    def validate_config(self):
+        if self.config:
+            config_validator = NumpyReaderConfig('numpy_reader_config')
+            config_validator.validate(self.config)
+
+    def configure(self):
+        self.multi_infer = self.config.get('multi_infer', False)
+        self.keys = self.config.get('keys', "") if self.config else ""
+        self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
+        self.multi_infer = self.config.get('multi_infer', False)
+        if not self.data_source:
+            raise ConfigError('data_source parameter is required to create "{}" '
+                              'data reader and read data'.format(self.__provider__))
+
     def read(self, data_id):
-        return np.load(str(self.data_source / data_id))
+        data = np.load(str(self.data_source / data_id))
+
+        if not isinstance(data, NpzFile):
+            return data
+
+        if len(self.keys) > 0:
+            res = []
+            for k in self.keys:
+                res.append(data[k])
+            return res
+
+        key = next(iter(data.keys()))
+        return data[key]
 
 
 class TensorflowImageReader(BaseReader):
@@ -390,6 +452,7 @@ class AnnotationFeaturesReader(BaseReader):
         self.single = len(self.feature_list) == 1
         self.counter = 0
         self.subset = range(len(self.data_source))
+        self.multi_infer = self.config.get('multi_infer', False)
 
     def read(self, data_id):
         relevant_annotation = self.data_source[self.subset[self.counter]]
@@ -405,3 +468,45 @@ class AnnotationFeaturesReader(BaseReader):
     def reset(self):
         self.subset = range(len(self.data_source))
         self.counter = 0
+
+
+class WavReader(BaseReader):
+    __provider__ = 'wav_reader'
+
+    _samplewidth_types = {
+        1: np.uint8,
+        2: np.int16
+    }
+
+    def read(self, data_id):
+        with wave.open(str(self.data_source / data_id), "rb") as wav:
+            sample_rate = wav.getframerate()
+            sample_width = wav.getsampwidth()
+            nframes = wav.getnframes()
+            data = wav.readframes(nframes)
+            if self._samplewidth_types.get(sample_width):
+                data = np.frombuffer(data, dtype=self._samplewidth_types[sample_width])
+            else:
+                raise RuntimeError("Reader {} coudn't process file {}: unsupported sample width {}"
+                                   "(reader only supports {})"
+                                   .format(self.__provider__, str(self.data_source / data_id),
+                                           sample_width, [*self._samplewidth_types.keys()]))
+            data = data.reshape(-1, wav.getnchannels()).T
+
+        return data, {'sample_rate': sample_rate}
+
+    def read_item(self, data_id):
+        return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)
+
+
+class DicomReader(BaseReader):
+    __provider__ = 'dicom_reader'
+
+    def __init__(self, data_source, config=None, **kwargs):
+        super().__init__(data_source, config)
+        if pydicom is None:
+            raise ImportError('dicom backend for reading requires pydicom. Please install it before usage.')
+
+    def read(self, data_id):
+        dataset = pydicom.dcmread(str(self.data_source / data_id))
+        return dataset.pixel_array

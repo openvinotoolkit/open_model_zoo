@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
  Copyright (c) 2019 Intel Corporation
 
@@ -13,6 +15,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
+import os
 import sys
 import cv2
 import numpy as np
@@ -21,6 +24,10 @@ from argparse import ArgumentParser, SUPPRESS
 from openvino.inference_engine import IECore
 
 from detector import Detector
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -37,6 +44,8 @@ def build_argparser():
     args.add_argument("-pt", "--prob_threshold", help="Optional. Probability threshold for detections filtering",
                       default=0.3, type=float)
     args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
+    args.add_argument("-u", "--utilization_monitors", default="", type=str,
+                      help="Optional. List of monitors to show initially.")
 
     return parser
 
@@ -94,8 +103,10 @@ def main():
     else:
         labels_map = None
 
+    presenter = monitors.Presenter(args.utilization_monitors, 25)
     for frame in frames_reader:
         detections = detector.detect(frame)
+        presenter.drawGraphs(frame)
         for det in detections:
             xmin, ymin, xmax, ymax = det[:4].astype(np.int)
             xmin = max(0, xmin)
@@ -110,14 +121,15 @@ def main():
                          cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
         cv2.putText(frame, 'summary: {:.1f} FPS'.format(
-            float(1 / (detector.infer_time * len(detections)))), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+            1.0 / detector.infer_time), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
         if args.no_show:
             continue
         cv2.imshow('CenterNet Detection Demo', frame)
         key = cv2.waitKey(delay)
         if key == 27:
-            return
+            break
+        presenter.handleKey(key)
+    print(presenter.reportMeans())
 
 if __name__ == "__main__":
     sys.exit(main() or 0)
-

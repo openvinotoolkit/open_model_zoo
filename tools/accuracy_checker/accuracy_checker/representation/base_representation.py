@@ -40,3 +40,6 @@ class BaseRepresentation(abc.ABC):
 
     def set_data_source(self, data_source):
         self.metadata['data_source'] = data_source
+
+    def set_segmentation_mask_source(self, mask_source):
+        self.metadata['segmentation_masks_source'] = mask_source

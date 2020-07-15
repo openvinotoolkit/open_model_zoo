@@ -17,6 +17,11 @@ The `octave-resnet-200-0.125` model is a modification of [`resnet-200`](https://
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 79.99%|
+| Top 5  | 94.866%|
+
 ## Performance
 
 ## Input
@@ -32,7 +37,7 @@ Image, name: `data`,  shape: `1,3,224,224`, format: `B,C,H,W`, where:
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`. 
+Channel order is `RGB`.
 Mean values: [124,117,104], scale value: 59.880239521.
 
 ### Converted Model

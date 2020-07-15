@@ -20,7 +20,8 @@ from ..representation import (
     SegmentationAnnotation,
     SegmentationPrediction,
     BrainTumorSegmentationAnnotation,
-    BrainTumorSegmentationPrediction
+    BrainTumorSegmentationPrediction,
+    OAR3DTilingSegmentationAnnotation,
 )
 from .metric import PerImageEvaluationMetric
 from ..utils import finalize_metric_result
@@ -198,8 +199,8 @@ class SegmentationDSCAcc(PerImageEvaluationMetric):
 
 class SegmentationDIAcc(PerImageEvaluationMetric):
     __provider__ = 'dice_index'
-    annotation_types = (BrainTumorSegmentationAnnotation, SegmentationAnnotation)
-    prediction_types = (BrainTumorSegmentationPrediction, SegmentationPrediction)
+    annotation_types = (BrainTumorSegmentationAnnotation, SegmentationAnnotation, OAR3DTilingSegmentationAnnotation)
+    prediction_types = (BrainTumorSegmentationPrediction, SegmentationPrediction, )
 
     overall_metric = []
 
@@ -274,4 +275,32 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         names_median = ['median@{}'.format(name) for name in labels] if self.median else []
         self.meta['names'] = names_mean + names_median
         self.meta['calculate_mean'] = False
+        self.overall_metric = []
+
+class SegmentationOAR3DTiling(PerImageEvaluationMetric):
+    __provider__ = 'dice_oar3d'
+    annotation_types = (OAR3DTilingSegmentationAnnotation,)
+    prediction_types = (SegmentationPrediction,)
+
+    overall_metric = []
+
+    def configure(self):
+        self.overall_metric = []
+
+    def update(self, annotation, prediction):
+
+        eps = 1e-6
+        numerator = 2.0 * np.sum(annotation.mask * prediction.mask)
+        denominator = np.sum(annotation.mask) + np.sum(prediction.mask)
+        result = (numerator + eps) / (denominator + eps)
+
+        self.overall_metric.append(result)
+
+        return result
+
+    def evaluate(self, annotations, predictions):
+        result = np.mean(self.overall_metric, axis=0)
+        return result
+
+    def reset(self):
         self.overall_metric = []

@@ -231,3 +231,19 @@ class CoCocInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation
 
     def to_annotation(self, **kwargs):
         return CoCoInstanceSegmentationAnnotation(self.identifier, self.mask, self.labels)
+
+class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
+    def __init__(self, identifier, path_to_mask):
+        super().__init__(identifier, path_to_mask, GTMaskLoader.NUMPY)
+
+    def _load_mask(self):
+        if self._mask is None:
+            loader_config = self.LOADERS.get(self._mask_loader)
+            data_source = self.metadata.get('segmentation_masks_source')
+            if data_source is None:
+                data_source = self.metadata['data_source']
+            loader = BaseReader.provide(loader_config, data_source)
+            mask = loader.read(self._mask_path)
+            return mask
+
+        return self._mask

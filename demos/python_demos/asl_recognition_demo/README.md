@@ -29,6 +29,7 @@ Run the application with the `-h` option to see the following usage message:
 usage: asl_recognition_demo.py [-h] -m_a ACTION_MODEL -m_d DETECTION_MODEL -i
                                INPUT -c CLASS_MAP [-s SAMPLES_DIR] [-d DEVICE]
                                [-l CPU_EXTENSION] [--no_show]
+                               [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -56,6 +57,8 @@ Options:
                         path to a shared library with the kernels
                         implementations.
   --no_show             Optional. Do not visualize inference results.
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.

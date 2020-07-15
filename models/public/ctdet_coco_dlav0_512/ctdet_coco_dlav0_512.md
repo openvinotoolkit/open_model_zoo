@@ -45,7 +45,7 @@ python convert.py ctdet --load_model /path/to/downloaded/weights.pth --exp_id co
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| MAP    | 44.2           | 44.2            |
+| mAP    | 44.2%           | 44.28%           |
 
 ## Performance
 
@@ -54,27 +54,27 @@ python convert.py ctdet --load_model /path/to/downloaded/weights.pth --exp_id co
 ### Original Model
 
 Image, name: `input.1`, shape: [1x3x512x512], format: [BxCxHxW]
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
    Mean values: [104.04, 113.985, 119.85], scale values: [73.695, 69.87, 70.89].
 
 ### Converted Model
 
 Image, name: `input.1`, shape: [1x3x512x512], format: [BxCxHxW]
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 

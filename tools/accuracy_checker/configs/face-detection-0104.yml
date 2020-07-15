@@ -16,6 +16,13 @@ models:
         weights: intel/face-detection-0104/FP16/face-detection-0104.bin
         adapter: ssd
 
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   intel/face-detection-0104/FP16-INT8/face-detection-0104.xml
+        weights: intel/face-detection-0104/FP16-INT8/face-detection-0104.bin
+        adapter: ssd
+
     datasets:
       - name: wider
 

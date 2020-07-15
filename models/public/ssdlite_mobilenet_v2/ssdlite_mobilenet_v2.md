@@ -17,6 +17,10 @@ The `ssdlite_mobilenet_v2` model is used for object detection. For details, see 
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 24.2946%|
+
 ## Performance
 
 ## Input
@@ -36,14 +40,14 @@ Image, name: `image_tensor`, shape: [1x300x300x3], format: [BxHxWxC],
 ### Converted Model
 
 Image, name: `image_tensor`, shape: [1x3x300x300], format [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 

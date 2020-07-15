@@ -32,4 +32,5 @@ model_optimizer_args:
   - --output=508,511,514
   - --input_model=$dl_dir/ctdet_coco_dlav0_384.onnx
 framework: onnx
+quantizable: yes
 license: https://raw.githubusercontent.com/xingyizhou/CenterNet/master/LICENSE

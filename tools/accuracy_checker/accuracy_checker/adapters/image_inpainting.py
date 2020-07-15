@@ -30,6 +30,6 @@ class ImageInpaintingAdapter(Adapter):
         for identifier, img in zip(identifiers, raw_outputs):
             if img.shape[0] == 3:
                 img = np.transpose(img, (1, 2, 0))
-            result.append(ImageInpaintingPrediction(identifier, img))
+            result.append(ImageInpaintingPrediction(identifier, img.astype(np.uint8)))
 
         return result

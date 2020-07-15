@@ -1,11 +1,11 @@
-# Object Detection YOLO* V3 Python* Demo, Async API Performance Showcase
+# Object Detection YOLO\* V3 Python\* Demo, Async API Performance Showcase
 
-This demo showcases Object Detection with YOLO* V3 and Async API.
+This demo showcases Object Detection with Async API and one of YOLO\* V2, Tiny YOLO\* V2, or YOLO\* V3 model.
 
 To learn more about Async API features, please refer to [Object Detection for SSD Demo, Async API Performance Showcase](../../object_detection_demo_ssd_async/README.md).
 
 Other demo objectives are:
-* Video as input support via OpenCV*
+* Video as input support via OpenCV\*
 * Visualization of the resulting bounding boxes and text labels (from the `.labels` file) or class number (if no file is provided)
 * OpenCV provides resulting bounding boxes, labels, and other information.
 You can copy and paste this code without pulling Open Model Zoo demos helpers into your application
@@ -29,10 +29,15 @@ python3 object_detection_demo_yolov3_async.py -h
 The command yields the following usage message:
 ```
 usage: object_detection_demo_yolov3_async.py [-h] -m MODEL -i INPUT
-                                       [-l CPU_EXTENSION] [-d DEVICE]
-                                       [--labels LABELS] [-t PROB_THRESHOLD]
-                                       [-iout IOU_THRESHOLD] [-ni NUMBER_ITER]
-                                       [-pc] [-r]
+                                             [-l CPU_EXTENSION] [-d DEVICE]
+                                             [--labels LABELS]
+                                             [-t PROB_THRESHOLD]
+                                             [-iout IOU_THRESHOLD] [-r]
+                                             [-nireq NUM_INFER_REQUESTS]
+                                             [-nstreams NUM_STREAMS]
+                                             [-nthreads NUMBER_THREADS]
+                                             [-loop_input] [-no_show]
+                                             [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -57,12 +62,32 @@ Options:
   -iout IOU_THRESHOLD, --iou_threshold IOU_THRESHOLD
                         Optional. Intersection over union threshold for
                         overlapping detections filtering
-  -ni NUMBER_ITER, --number_iter NUMBER_ITER
-                        Optional. Number of inference iterations
-  -pc, --perf_counts    Optional. Report performance counters
   -r, --raw_output_message
                         Optional. Output inference results raw values showing
+  -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
+                        Optional. Number of infer requests
+  -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
+                        Optional. Number of streams to use for inference on
+                        the CPU or/and GPU in throughput mode (for HETERO and
+                        MULTI device cases use format
+                        <device1>:<nstreams1>,<device2>:<nstreams2> or just
+                        <nstreams>)
+  -nthreads NUMBER_THREADS, --number_threads NUMBER_THREADS
+                        Optional. Number of threads to use for inference on
+                        CPU (including HETERO cases)
+  -loop_input, --loop_input
+                        Optional. Iterate over input infinitely
+  -no_show, --no_show   Optional. Don't show output
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
+  --keep_aspect_ratio   Optional. Keeps aspect ratio on resize.
 ```
+
+The number of InferRequests is specified by -nireq flag. An increase of this number usually leads to an increase of performance, since in this case several InferRequests can be processed simultaneously if the device supports parallelization. However, a large number of InferRequests increases the latency because each frame still has to wait before being sent for inference.
+
+For higher FPS, it is recommended that you set -nireq to slightly exceed the -nstreams value, summed across all devices used.
+
+> **NOTE**: This demo is based on the callback functionality from the Inference Engine Python API. The selected approach makes the execution in multi-device mode optimal by preventing wait delays caused by the differences in device performance. However, the internal organization of the callback mechanism in Python API leads to FPS decrease. Please, keep it in mind and use the C++ version of this demo for performance-critical cases.
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 You can use the following command to do inference on GPU with a pre-trained object detection model:

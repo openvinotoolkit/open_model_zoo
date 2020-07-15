@@ -39,7 +39,7 @@ models:
 
             # Using accuracy metric, achieved result of public model - 71.8
 
-  - name: mobilenet_v2_pytorch
+  - name: mobilenet-v2-pytorch
 
     # list of launchers for MobileNetV2.
     launchers:
@@ -57,13 +57,25 @@ models:
         weights: public/mobilenet-v2-pytorch/FP16/mobilenet-v2-pytorch.bin
         adapter: classification
 
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   public/mobilenet-v2-pytorch/FP32-INT8/mobilenet-v2-pytorch.xml
+        weights: public/mobilenet-v2-pytorch/FP32-INT8/mobilenet-v2-pytorch.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   public/mobilenet-v2-pytorch/FP16-INT8/mobilenet-v2-pytorch.xml
+        weights: public/mobilenet-v2-pytorch/FP16-INT8/mobilenet-v2-pytorch.bin
+        adapter: classification
+
     datasets:
       - name: imagenet_1000_classes
         reader: pillow_imread
 
-        # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
         preprocessing:
-          - type: bgr_to_rgb
 
           - type: resize
             size: 256
@@ -74,6 +86,9 @@ models:
           - type: crop
             size: 224
             use_pillow: true
+
+          # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
+          - type: rgb_to_bgr
 
             # Using accuracy metric, achieved result of public model - 71.8
 

@@ -34,4 +34,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/se-inception.caffemodel
   - --input_proto=$dl_dir/se-inception.prototxt
 framework: caffe
+quantizable: yes
 license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE

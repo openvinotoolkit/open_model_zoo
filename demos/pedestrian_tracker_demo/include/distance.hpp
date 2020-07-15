@@ -10,11 +10,7 @@
 #include <memory>
 #include <vector>
 
-
-#include <ie_plugin_ptr.hpp>
 #include <inference_engine.hpp>
-
-
 
 ///
 /// \brief The IDescriptorDistance class declares an interface for distance

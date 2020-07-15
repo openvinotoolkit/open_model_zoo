@@ -51,4 +51,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/googlenet-v2.caffemodel
   - --input_proto=$dl_dir/googlenet-v2.prototxt
 framework: caffe
+quantizable: yes
 license: https://raw.githubusercontent.com/lim0606/caffe-googlenet-bn/master/README.md

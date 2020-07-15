@@ -13,7 +13,7 @@ YOLO v3 is a real-time object detection model implemented with Keras\* from this
         ```
         wget -O weights/yolov3.weights https://pjreddie.com/media/files/yolov3.weights
         ```
-   
+
    1. Convert model weights to Keras\*:
         ```
         python tools/convert.py cfg/yolov3.cfg weights/yolov3.weights weights/yolov3.h5
@@ -53,8 +53,8 @@ Accuracy metrics obtained on COCO\* validation dataset for converted model.
 
 | Metric | Value |
 | ------ | ------|
-| mAP    | 62.27 |
-| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 67.7 |
+| mAP    | 62.27% |
+| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 67.7% |
 
 ## Input
 
@@ -96,11 +96,11 @@ For each case format is `B,Cx,Cy,N*85,`, where
     - `Cx`, `Cy` - cell index
     - `N` - number of detection boxes for cell
 
-Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80`], where:
-- (`x`,`y`) - coordinates of box center, relative to cell
-- `h`,`w` - normalized height and width of box
-- `conf` - confidence of detection box
-- `class_no_1`,...,`class_no_80` - score for each class
+Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_80`], where:
+- (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get relative to the cell coordinates
+- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
+- `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
+- `class_no_1`,...,`class_no_80` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) and multiply by obtained confidence value to get confidence of each class
 
 ### Converted model
 
@@ -111,14 +111,15 @@ Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80
 3. The array of detection summary info, name - `conv2d_74/BiasAdd/YoloRegion`,  shape - `1,255,52,52`. The anchor values are `10,13,  16,30,  33,23`.
 
 For each case format is `B,N*85,Cx,Cy`, where
-    - `B` - batch size
-    - `N` - number of detection boxes for cell
-    - `Cx`, `Cy` - cell index
-Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80`], where:
-- (`x`,`y`) - coordinates of box center, relative to cell
-- `h`,`w` - normalized height and width of box
-- `conf` - confidence of detection box
-- `class_no_1`,...,`class_no_80` - score for each class in the [0,1] range
+- `B` - batch size
+- `N` - number of detection boxes for cell
+- `Cx`, `Cy` - cell index
+
+Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_80`], where:
+- (`x`,`y`) - coordinates of box center relative to the cell
+- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
+- `box_score` - confidence of detection box in [0,1] range
+- `class_no_1`,...,`class_no_80` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
 
 ## Legal Information
 

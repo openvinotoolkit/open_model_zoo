@@ -40,13 +40,23 @@ ENTRIES_PATHS = {
 }
 
 PREPROCESSING_PATHS = {
-    'mask_dir': 'source'
+    'mask_dir': 'source',
+    'vocabulary_file': ['model_attributes', 'models']
+}
+
+ADAPTERS_PATHS = {
+    'vocabulary_file': ['model_attributes', 'models']
+}
+
+ANNOTATION_CONVERSION_PATHS = {
+    'vocab_file': ['model_attributes', 'source', 'models'],
+    'merges_file': ['model_attributes', 'source', 'models']
 }
 
 LIST_ENTRIES_PATHS = {
         'model': 'models',
         'weights': 'models',
-        'color_coeff': 'models',
+        'color_coeff': ['model_attributes', 'models'],
         'caffe_model': 'models',
         'caffe_weights': 'models',
         'tf_model': 'models',
@@ -62,6 +72,7 @@ COMMAND_LINE_ARGS_AS_ENV_VARS = {
     'bitstreams': 'BITSTREAMS_DIR',
     'models': 'MODELS_DIR',
     'extensions': 'EXTENSIONS_DIR',
+    'model_attributes': 'MODEL_ATTRIBUTES_DIR',
 }
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
 CONFIG_SHARED_PARAMETERS = ['bitstream']
@@ -73,7 +84,6 @@ ACCEPTABLE_MODEL = [
     'kaldi_model',
     'model'
 ]
-
 
 
 class ConfigReader:
@@ -379,6 +389,13 @@ class ConfigReader:
 
     @staticmethod
     def _provide_cmd_arguments(arguments, config, mode):
+        def _add_subset_specific_arg(dataset_entry):
+            if 'shuffle' in arguments and arguments.shuffle is not None:
+                dataset_entry['shuffle'] = arguments.shuffle
+
+            if 'subsample_size' in arguments and arguments.subsample_size is not None:
+                dataset_entry['subsample_size'] = arguments.subsample_size
+
         def merge_models(config, arguments, update_launcher_entry):
             def provide_models(launchers):
                 if 'models' not in arguments or not arguments.models:
@@ -402,12 +419,16 @@ class ConfigReader:
                 for launcher_entry in model['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry)
                 model['launchers'] = provide_models(model['launchers'])
+                for dataset_entry in model['datasets']:
+                    _add_subset_specific_arg(dataset_entry)
 
         def merge_pipelines(config, arguments, update_launcher_entry):
             for pipeline in config['pipelines']:
                 for stage in pipeline['stages']:
                     if 'launcher' in stage:
                         merge_dlsdk_launcher_args(arguments, stage['launcher'], update_launcher_entry)
+                    if 'dataset' in stage:
+                        _add_subset_specific_arg(stage['dataset'])
 
         def merge_modules(config, arguments, update_launcher_entry):
             for evaluation in config['evaluations']:
@@ -422,6 +443,8 @@ class ConfigReader:
                     continue
                 for launcher in module_config['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher, update_launcher_entry)
+                for dataset in module_config['datasets']:
+                    _add_subset_specific_arg(dataset)
 
         functors_by_mode = {
             'models': merge_models,
@@ -573,13 +596,14 @@ class ConfigReader:
 
     @staticmethod
     def convert_paths(config):
+        mode = 'evaluations' if 'evaluations' in config else 'models'
         definitions = os.environ.get(DEFINITION_ENV_VAR)
         if definitions:
             definitions = read_yaml(Path(definitions))
             ConfigReader._prepare_global_configs(definitions)
-            config = ConfigReader._merge_configs(definitions, config, {}, 'models')
+            config = ConfigReader._merge_configs(definitions, config, {}, mode)
         if COMMAND_LINE_ARGS_AS_ENV_VARS['source'] in os.environ:
-            ConfigReader._merge_paths_with_prefixes({}, config, 'models')
+            ConfigReader._merge_paths_with_prefixes({}, config, mode)
 
         def convert_launcher_paths(launcher_config):
             for key, path in launcher_config.items():
@@ -610,12 +634,24 @@ class ConfigReader:
                     continue
                 dataset_config[key] = Path(path)
 
-        for model in config['models']:
-            for launcher_config in model['launchers']:
-                convert_launcher_paths(launcher_config)
-            datasets = model['datasets'].values() if isinstance(model['datasets'], dict) else model['datasets']
-            for dataset_config in datasets:
-                convert_dataset_paths(dataset_config)
+        if mode == 'models':
+            for model in config['models']:
+                for launcher_config in model['launchers']:
+                    convert_launcher_paths(launcher_config)
+                datasets = model['datasets'].values() if isinstance(model['datasets'], dict) else model['datasets']
+                for dataset_config in datasets:
+                    convert_dataset_paths(dataset_config)
+        else:
+            for evaluation in config['evaluations']:
+                module_config = evaluation.get('module_config', {})
+                for launcher_config in module_config.get('launchers', []):
+                    convert_launcher_paths(launcher_config)
+                d_config = module_config.get('datasets')
+                if d_config:
+                    datasets = d_config.values() if isinstance(d_config, dict) else d_config
+                    for dataset_config in datasets:
+                        convert_dataset_paths(dataset_config)
+
         return config
 
 
@@ -724,7 +760,8 @@ def process_config(
         for datasets_config in datasets_configs:
             annotation_conversion_config = datasets_config.get('annotation_conversion')
             if annotation_conversion_config:
-                command_line_conversion = (create_command_line_mapping(annotation_conversion_config, 'source'))
+                command_line_conversion = (create_command_line_mapping(annotation_conversion_config,
+                                                                       'source', ANNOTATION_CONVERSION_PATHS))
                 merge_entry_paths(command_line_conversion, annotation_conversion_config, args)
             if 'preprocessing' in datasets_config:
                 for preprocessor in datasets_config['preprocessing']:
@@ -749,7 +786,7 @@ def process_config(
                     merge_entry_paths(LIST_ENTRIES_PATHS, new_launcher, args, model_id)
                     adapter_config = new_launcher.get('adapter')
                     if isinstance(adapter_config, dict):
-                        command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
+                        command_line_adapter = (create_command_line_mapping(adapter_config, 'models', ADAPTERS_PATHS))
                         merge_entry_paths(command_line_adapter, adapter_config, args, model_id)
                     if not updated_launchers or new_launcher != updated_launchers[-1]:
                         updated_launchers.append(new_launcher)
@@ -757,7 +794,7 @@ def process_config(
                 merge_entry_paths(LIST_ENTRIES_PATHS, launcher_config, args)
                 adapter_config = launcher_config.get('adapter')
                 if isinstance(adapter_config, dict):
-                    command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
+                    command_line_adapter = (create_command_line_mapping(adapter_config, 'models', ADAPTERS_PATHS))
                     merge_entry_paths(command_line_adapter, adapter_config, args)
                 updated_launchers.append(launcher_config)
 
@@ -792,6 +829,9 @@ def merge_entry_paths(keys, value, args, value_id=0):
         if config_path.is_absolute():
             value[field] = Path(value[field])
             continue
+
+        if isinstance(argument, list):
+            argument = next(filter(args.get, argument), argument[-1])
 
         if argument not in args or not args[argument]:
             continue

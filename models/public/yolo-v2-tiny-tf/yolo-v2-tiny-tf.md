@@ -51,8 +51,8 @@ Accuracy metrics obtained on COCO\* validation dataset for converted model.
 
 | Metric | Value |
 | ------ | ------|
-| mAP    | 27.34 |
-| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 29.11 |
+| mAP    | 27.34% |
+| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 29.11%  |
 
 ## Input
 
@@ -88,11 +88,11 @@ The array of detection summary info, name - `conv2d_9/BiasAdd`,  shape - `1,13,1
 - `Cx`, `Cy` - cell index
 - `N` - number of detection boxes for cell
 
-Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80`], where:
-- (`x`,`y`) - coordinates of box center, relative to cell
-- `h`,`w` - normalized height and width of box
-- `conf` - confidence of detection box
-- `class_no_1`,...,`class_no_80` - score for each class in logits format
+Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_80`], where:
+- (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get coordinates relative to the cell
+- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get height and width values relative to the cell
+- `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
+- `class_no_1`,...,`class_no_80` - probability distribution over the classes in logits format, apply [softmax function](https://en.wikipedia.org/wiki/Softmax_function) and multiply by obtained confidence value to get confidence of each class
 
 The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
 
@@ -103,11 +103,11 @@ The array of detection summary info, name - `conv2d_9/BiasAdd/YoloRegion`,  shap
 - `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index
 
-Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80`], where:
-- (`x`,`y`) - coordinates of box center, relative to cell
-- `h`,`w` - normalized height and width of box
-- `conf` - confidence of detection box
-- `class_no_1`,...,`class_no_80` - score for each class in the [0,1] range
+Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_80`], where:
+- (`x`,`y`) - coordinates of box center relative to the cell
+- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply with corresponding anchors to get height and width values relative to the cell
+- `box_score` - confidence of detection box in [0,1] range
+- `class_no_1`,...,`class_no_80` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
 
 The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
 

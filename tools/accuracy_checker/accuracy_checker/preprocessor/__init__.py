@@ -16,7 +16,10 @@ limitations under the License.
 
 from .preprocessing_executor import PreprocessingExecutor
 from .preprocessor import Preprocessor
-from .color_space_conversion import BgrToRgb, RgbToBgr, BgrToGray, RgbToGray, TfConvertImageDType, SelectInputChannel
+from .audio_preprocessing import ResampleAudio, ClipAudio, NormalizeAudio
+from .color_space_conversion import (
+    BgrToRgb, RgbToBgr, BgrToGray, RgbToGray, TfConvertImageDType, SelectInputChannel, BGR2YUVConverter
+)
 from .normalization import Normalize, Normalize3d
 from .geometric_transformations import (
     GeometricOperationMetadata,
@@ -28,7 +31,10 @@ from .geometric_transformations import (
     Tiling,
     Crop3D,
     TransformedCropWithAutoScale,
-    ImagePyramid
+    ImagePyramid,
+    FaceDetectionImagePyramid,
+    WarpAffine,
+    FacePatch
 )
 from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
@@ -41,6 +47,10 @@ __all__ = [
 
     'Preprocessor',
     'GeometricOperationMetadata',
+
+    'ResampleAudio',
+    'ClipAudio',
+    'NormalizeAudio',
 
     'Resize',
     'Resize3D',
@@ -55,11 +65,15 @@ __all__ = [
     'CropBraTS',
     'TransformedCropWithAutoScale',
     'ImagePyramid',
+    'FaceDetectionImagePyramid',
+    'WarpAffine',
+    'FacePatch',
 
     'BgrToGray',
     'BgrToRgb',
     'RgbToGray',
     'RgbToBgr',
+    'BGR2YUVConverter',
     'TfConvertImageDType',
     'SelectInputChannel',
 
@@ -76,5 +90,5 @@ __all__ = [
 
     'FreeFormMask',
     'RectMask',
-    'CustomMask'
+    'CustomMask',
 ]

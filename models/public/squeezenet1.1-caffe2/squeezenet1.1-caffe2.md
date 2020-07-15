@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 This is a Caffe2\* version of `squeezenet1.1` model, designed to perform image classification.
-This model was converted from Caffe\* to Caffe2\* format. 
+This model was converted from Caffe\* to Caffe2\* format.
 For details see repository <https://github.com/caffe2/models/tree/master/squeezenet>,
 paper <https://arxiv.org/abs/1602.07360>.
 
@@ -19,6 +19,11 @@ paper <https://arxiv.org/abs/1602.07360>.
 | Source framework  | Caffe2\*      |
 
 ## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 56.502%|
+| Top 5  | 79.576%|
 
 ## Performance
 

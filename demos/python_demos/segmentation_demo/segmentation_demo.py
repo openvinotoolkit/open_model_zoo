@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (C) 2018-2019 Intel Corporation
 
@@ -14,7 +14,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-from __future__ import print_function
+
 import sys
 import os
 from argparse import ArgumentParser, SUPPRESS
@@ -90,21 +90,21 @@ def main():
             log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
                       "or --cpu_extension command line argument")
             sys.exit(1)
-    assert len(net.inputs.keys()) == 1, "Sample supports only single input topologies"
+    assert len(net.input_info) == 1, "Sample supports only single input topologies"
     assert len(net.outputs) == 1, "Sample supports only single output topologies"
 
     log.info("Preparing input blobs")
-    input_blob = next(iter(net.inputs))
+    input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
     net.batch_size = len(args.input)
 
     # NB: This is required to load the image as uint8 np.array
     #     Without this step the input blob is loaded in FP32 precision,
     #     this requires additional operation and more memory.
-    net.inputs[input_blob].precision = "U8"
+    net.input_info[input_blob].precision = "U8"
 
     # Read and pre-process input images
-    n, c, h, w = net.inputs[input_blob].shape
+    n, c, h, w = net.input_info[input_blob].input_data.shape
     images = np.ndarray(shape=(n, c, h, w))
     for i in range(n):
         image = cv2.imread(args.input[i])

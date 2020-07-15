@@ -18,7 +18,7 @@ models:
             mean: 127.5
             std: 127.5
 
-  - name: mobilenet-v2-1.4-244
+  - name: mobilenet-v2-1.4-224
     launchers:
       - framework: dlsdk
         tags:

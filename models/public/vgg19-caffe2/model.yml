@@ -27,6 +27,7 @@ files:
     sha256: 492dbbbc7dd23cb052c66964714759f88370f3fa8542aa32556e93abc7beb69f
     source: https://s3.amazonaws.com/download.caffe2.ai/models/vgg19/init_net.pb
 framework: caffe2
+quantizable: yes
 conversion_to_onnx_args:
   - --model-path=$dl_dir/predict_net.pb
   - --model-name=vgg19-caffe2

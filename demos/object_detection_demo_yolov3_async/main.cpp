@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -129,26 +129,9 @@ public:
 
         computeAnchors(mask);
     }
-
-    YoloParams(CNNLayer::Ptr layer) {
-        if (layer->type != "RegionYolo")
-            throw std::runtime_error("Invalid output type: " + layer->type + ". RegionYolo expected");
-
-        num = layer->GetParamAsInt("num");
-        coords = layer->GetParamAsInt("coords");
-        classes = layer->GetParamAsInt("classes");
-
-        try { anchors = layer->GetParamAsFloats("anchors"); } catch (...) {}
-        try {
-            auto mask = layer->GetParamAsInts("mask");
-            num = mask.size();
-
-            computeAnchors(mask);
-        } catch (...) {}
-    }
 };
 
-void ParseYOLOV3Output(const CNNNetwork &cnnNetwork, const std::string & output_name,
+void ParseYOLOV3Output(const YoloParams &params, const std::string & output_name,
                        const Blob::Ptr &blob, const unsigned long resized_im_h,
                        const unsigned long resized_im_w, const unsigned long original_im_h,
                        const unsigned long original_im_w,
@@ -161,28 +144,10 @@ void ParseYOLOV3Output(const CNNNetwork &cnnNetwork, const std::string & output_
         " It should be in NCHW layout and H should be equal to W. Current H = " + std::to_string(out_blob_h) +
         ", current W = " + std::to_string(out_blob_h));
 
-    // --------------------------- Extracting layer parameters -------------------------------------
-    YoloParams params;
-    if (auto ngraphFunction = cnnNetwork.getFunction()) {
-        for (const auto op : ngraphFunction->get_ops()) {
-            if (op->get_friendly_name() == output_name) {
-                auto regionYolo = std::dynamic_pointer_cast<ngraph::op::RegionYolo>(op);
-                if (!regionYolo) {
-                    throw std::runtime_error("Invalid output type: " +
-                        std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
-                }
-
-                params = regionYolo;
-                break;
-            }
-        }
-    } else {
-        throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
-    }
-
     auto side = out_blob_h;
     auto side_square = side * side;
-    const float *output_blob = blob->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+    LockedMemory<const void> blobMapped = as<MemoryBlob>(blob)->rmap();
+    const float *output_blob = blobMapped.as<float *>();
     // --------------------------- Parsing YOLO Region output -------------------------------------
     for (int i = 0; i < side_square; ++i) {
         int row = i / side;
@@ -271,12 +236,16 @@ int main(int argc, char *argv[]) {
         /** Reading network model **/
         auto cnnNetwork = ie.ReadNetwork(FLAGS_m);
         /** Reading labels (if specified) **/
-        std::string labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
         std::vector<std::string> labels;
-        std::ifstream inputFile(labelFileName);
-        std::copy(std::istream_iterator<std::string>(inputFile),
-                  std::istream_iterator<std::string>(),
-                  std::back_inserter(labels));
+        if (!FLAGS_labels.empty()) {
+            std::ifstream inputFile(FLAGS_labels);
+            std::string label; 
+            while (std::getline(inputFile, label)) {
+                labels.push_back(label);
+            }
+            if (labels.empty())
+                throw std::logic_error("File empty or not found: " + FLAGS_labels);
+        }
         // -----------------------------------------------------------------------------------------------------
 
         /** YOLOV3-based network should have one input and three output **/
@@ -308,12 +277,33 @@ int main(int argc, char *argv[]) {
             output.second->setPrecision(Precision::FP32);
             output.second->setLayout(Layout::NCHW);
         }
+
+        std::map<std::string, YoloParams> yoloParams;
+        if (auto ngraphFunction = cnnNetwork.getFunction()) {
+            for (const auto op : ngraphFunction->get_ops()) {
+                auto outputLayer = outputInfo.find(op->get_friendly_name());
+                if (outputLayer != outputInfo.end()) {
+                    auto regionYolo = std::dynamic_pointer_cast<ngraph::op::RegionYolo>(op);
+                    if (!regionYolo) {
+                        throw std::runtime_error("Invalid output type: " +
+                            std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
+                    }
+                    yoloParams[outputLayer->first] = YoloParams(regionYolo);
+                }
+            }
+        }
+        else {
+            throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
+        }
+
+        if (!labels.empty() && static_cast<int>(labels.size()) != yoloParams.begin()->second.classes) {
+            throw std::runtime_error("The number of labels is different from numbers of model classes");
+        }
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 4. Loading model to the device ------------------------------------------
         slog::info << "Loading model to the device" << slog::endl;
         ExecutableNetwork network = ie.LoadNetwork(cnnNetwork, FLAGS_d);
-
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 5. Creating infer request -----------------------------------------------
@@ -414,7 +404,7 @@ int main(int argc, char *argv[]) {
                 for (auto &output : outputInfo) {
                     auto output_name = output.first;
                     Blob::Ptr blob = async_infer_request_curr->GetBlob(output_name);
-                    ParseYOLOV3Output(cnnNetwork, output_name, blob, resized_im_h, resized_im_w, height, width, FLAGS_t, objects);
+                    ParseYOLOV3Output(yoloParams[output_name], output_name, blob, resized_im_h, resized_im_w, height, width, FLAGS_t, objects);
                 }
                 // Filtering overlapping boxes
                 std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());
@@ -441,8 +431,7 @@ int main(int argc, char *argv[]) {
                         std::ostringstream conf;
                         conf << ":" << std::fixed << std::setprecision(3) << confidence;
                         cv::putText(frame,
-                                (label < static_cast<int>(labels.size()) ?
-                                        labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
+                                    (!labels.empty() ? labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
                                     cv::Point2f(static_cast<float>(object.xmin), static_cast<float>(object.ymin - 5)), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
                                     cv::Scalar(0, 0, 255));
                         cv::rectangle(frame, cv::Point2f(static_cast<float>(object.xmin), static_cast<float>(object.ymin)),

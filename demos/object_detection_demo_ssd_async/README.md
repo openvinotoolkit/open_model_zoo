@@ -21,7 +21,7 @@ This and other performance implications and tips for the Async API are covered i
 
 Other demo objectives are:
 * Video as input support via OpenCV
-* Visualization of the resulting bounding boxes and text labels (from the .labels file) or class number (if no file is provided)
+* Visualization of the resulting bounding boxes and text labels (from the labels file, see `-labels` option) or class number (if no file is provided)
 * OpenCV is used to draw resulting bounding boxes, labels, so you can copy paste this code without
 need to pull Inference Engine demos helpers to your app
 * Demonstration of the Async API in action, so the demo features two modes (toggled by the Tab key)
@@ -115,6 +115,7 @@ Options:
           Or
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
+    -labels "<path>"          Optional. Path to a file with labels mapping.
     -pc                       Optional. Enables per-layer performance report.
     -r                        Optional. Inference results as raw values.
     -t                        Optional. Probability threshold for detections.

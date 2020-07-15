@@ -135,19 +135,6 @@ public:
 
         computeAnchors(initialAnchors, mask);
     }
-
-    YoloParams(InferenceEngine::CNNLayer::Ptr layer) {
-        if (layer->type != "RegionYolo")
-            throw std::runtime_error("Invalid output type: " + layer->type + ". RegionYolo expected");
-
-        coords = layer->GetParamAsInt("coords");
-        classes = layer->GetParamAsInt("classes");
-        auto initialAnchors = layer->GetParamAsFloats("anchors");
-        auto mask = layer->GetParamAsInts("mask");
-        num = mask.size();
-
-        computeAnchors(initialAnchors, mask);
-    }
 };
 
 struct DetectionObject {
@@ -206,7 +193,8 @@ void ParseYOLOV3Output(InferenceEngine::InferRequest::Ptr req,
 
     auto side = out_blob_h;
     auto side_square = side * side;
-    const float *output_blob = blob->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
+    InferenceEngine::LockedMemory<const void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->rmap();
+    const float *output_blob  = blobMapped.as<float *>();
     // --------------------------- Parsing YOLO Region output -------------------------------------
     for (int i = 0; i < side_square; ++i) {
         int row = i / side;

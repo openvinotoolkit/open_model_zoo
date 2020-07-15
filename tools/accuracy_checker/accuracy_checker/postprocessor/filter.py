@@ -129,6 +129,22 @@ class FilterByMinConfidence(BaseFilter):
         return filtered
 
 
+class FilterTopK(BaseFilter):
+    __provider__ = 'top_k'
+
+    def apply_filter(self, entry, top_k):
+        filtered = []
+
+        if isinstance(entry, DetectionAnnotation):
+            return filtered
+
+        if len(entry.scores) <= top_k:
+            return filtered
+        scores_inds = np.argsort(entry.scores)[::-1]
+        non_filtered = scores_inds[:int(top_k)]
+
+        return [ind for ind in range(len(entry.scores)) if ind not in non_filtered]
+
 class FilterByHeightRange(BaseFilter):
     __provider__ = 'height_range'
 

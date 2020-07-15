@@ -7,8 +7,8 @@ evaluations:
           predictions: kinetics/driver-action-recognition-encoder-predictions.pickle
 
         decoder:
-          model:   intel/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
-          weights: intel/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
+          model:   intel/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
+          weights: intel/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
           num_processing_frames: 16
           adapter: classification
 
@@ -38,8 +38,8 @@ evaluations:
           predictions: kinetics/driver-action-recognition-encoder-predictions.pickle
 
         decoder:
-          model:   intel/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
-          weights: intel/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+          model:   intel/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
+          weights: intel/driver-action-recognition-adas-0002/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
           num_processing_frames: 16
           adapter: classification
 

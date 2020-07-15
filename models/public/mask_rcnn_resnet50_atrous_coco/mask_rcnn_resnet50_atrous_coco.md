@@ -16,6 +16,13 @@ For details, see the [paper](https://arxiv.org/abs/1703.06870).
 | MParams                         | 50.222                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_orig_precision | 29.7512%|
+| coco_orig_segm_precision | 27.4597%|
+
 ## Performance
 
 ## Input
@@ -35,14 +42,14 @@ Image, name: `image_tensor`, shape: [1x800x1365x3], format: [BxHxWxC],
 ### Converted Model
 
 1. Image, name: `image_tensor`, shape: [1x3x800x1365], format: [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 2. Information of input image size, name: `image_info`, shape: [1x3], format: [BxC],
    where:

@@ -73,6 +73,10 @@ class ContainerAnnotation(ContainerRepresentation):
         for key in self.representations.keys():
             self.representations[key].metadata['data_source'] = data_source
 
+    def set_segmentation_mask_source(self, mask_source):
+        for key in self.representations.keys():
+            self.representations[key].metadata['segmentation_masks_source'] = mask_source
+
 
 class ContainerPrediction(ContainerRepresentation):
     pass

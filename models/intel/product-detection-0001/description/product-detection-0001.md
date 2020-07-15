@@ -22,15 +22,15 @@ The network can detect 12 classes of objects (`sprite`, `kool-aid`, `extra`, `oc
 
 ## Inputs
 
-1. Name: `input` , shape: [1x3x512x512]. An input image in the format [BxCxHxW],
-   where:
+Name: `input`, shape: [1x3x512x512]. An input image in the format [BxCxHxW],
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Outputs
 

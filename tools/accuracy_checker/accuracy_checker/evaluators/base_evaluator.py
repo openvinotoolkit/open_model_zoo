@@ -19,7 +19,7 @@ limitations under the License.
 class BaseEvaluator:
     # create class instance using config
     @classmethod
-    def from_configs(cls, config):
+    def from_configs(cls, config, *args, **kwargs):
         return cls()
 
     # extract information related to evaluation from config

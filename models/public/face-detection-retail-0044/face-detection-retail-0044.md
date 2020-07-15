@@ -38,7 +38,7 @@ Image, name: `input` , shape: `1,3,300,300`, format `B,C,H,W` where:
     - H - image height
     - W - image width
 
-Expected color order - BGR.
+Expected color order: BGR.
 
 ### Converted Model
 
@@ -49,7 +49,7 @@ Image, name: `input` , shape: `1,3,300,300`, format `B,C,H,W` where:
     - H - image height
     - W - image width
 
-Expected color order - BGR.
+Expected color order: BGR.
 
 ## Outputs
 
