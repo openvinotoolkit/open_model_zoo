@@ -84,6 +84,8 @@ from .attribute_classification import (
     AttributeClassificationAccuracy
 )
 
+from .speech_recognition import SpeechRecognitionWER
+
 __all__ = [
     'Metric',
     'MetricsExecutor',
@@ -163,5 +165,7 @@ __all__ = [
 
     'AttributeClassificationRecall',
     'AttributeClassificationPrecision',
-    'AttributeClassificationAccuracy'
+    'AttributeClassificationAccuracy',
+
+    'SpeechRecognitionWER',
 ]

@@ -74,6 +74,8 @@ from .image_processing import ImageProcessingConverter
 from .aflw2000_3d import AFLW20003DConverter
 from .ade20k_dataset_converter import ADE20kConverter
 
+from .librispeech import LibrispeechConverter
+
 __all__ = [
     'BaseFormatConverter',
     'make_subset',
@@ -136,5 +138,8 @@ __all__ = [
     'Wikitext2RawConverter',
     'ImageProcessingConverter',
     'AFLW20003DConverter',
-    'ADE20kConverter'
+
+    'ADE20kConverter',
+
+    'LibrispeechConverter',
 ]
