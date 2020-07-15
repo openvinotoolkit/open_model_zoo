@@ -288,7 +288,9 @@ class DLSDKLauncher(Launcher):
                 raise ConfigError('Layer \'{layer}\' is not present in network'.format(layer=layer))
         layers = self.network.layers
         for layer_name in layers:
-            device = custom_affinity.get(layer_name, automatic_affinity[layer_name])
+            device = custom_affinity.get(layer_name, automatic_affinity.get(layer_name))
+            if device is None:
+                continue
             if device not in self._devices_list():
                 raise ConfigError(
                     'Device \'{device}\' set for \'{layer}\' layer is not present in '
@@ -311,6 +313,12 @@ class DLSDKLauncher(Launcher):
                 blobs_list = list(Path(model_dir).glob('*.blob'))
             return blobs_list
 
+        def get_onnx(model_dir):
+            onnx_list = list(Path(model_dir).glob('{}.onnx'.format(self._model_name)))
+            if not onnx_list:
+                onnx_list = list(Path(model_dir).glob('*.onnx'))
+            return onnx_list
+
         def get_model():
             model = Path(self.get_value_from_config('model'))
             model_is_blob = self.get_value_from_config('_model_is_blob')
@@ -324,6 +332,8 @@ class DLSDKLauncher(Launcher):
                 model_list = get_xml(model)
                 if not model_list and model_is_blob is None:
                     model_list = get_blob(model)
+                if not model_list:
+                    model_list = get_onnx(model)
             if not model_list:
                 raise ConfigError('suitable model is not found')
             if len(model_list) != 1:
@@ -336,7 +346,7 @@ class DLSDKLauncher(Launcher):
         if is_blob:
             return model, None
         weights = self.get_value_from_config('weights')
-        if weights is None or Path(weights).is_dir():
+        if weights is None or Path(weights).is_dir() and model.suffix != '.onnx':
             weights_dir = weights or model.parent
             weights = Path(weights_dir) / model.name.replace('xml', 'bin')
             print_info('Found weights {}'.format(get_path(weights)))
@@ -714,7 +724,7 @@ class DLSDKLauncher(Launcher):
             batch_pos = input_info.layout.find('N')
             self._batch = input_info.shape[batch_pos] if batch_pos != -1 else 1
             return
-        if self._weights is None:
+        if self._weights is None and self._model.suffix != '.onnx':
             self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
         self.network = self.read_network(self._model, self._weights)
         self.original_outputs = self.network.outputs
