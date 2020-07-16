@@ -1,0 +1,25 @@
+models:
+  - name: faster-rcnn onnx
+    launchers:
+      - framework: onnx_runtime
+        adapter:
+          type: faster_rcnn_onnx
+          boxes_out: '6379'
+          labels_out: '6381'
+          scores_out: '6383'
+    datasets:
+      - name: ms_coco_detection_80_class_with_background
+        reader: pillow_imread
+        preprocessing:
+          - type: resize
+            use_pillow: True
+            aspect_ratio_scale: detectron_aspect_ratio
+            size: 800
+          - type: bgr_to_rgb
+          - type: normalization
+            mean: 102.9801, 115.9465, 122.7717
+          - type: padding
+            stride: 32
+        metrics:
+          - type: coco_precision
+
