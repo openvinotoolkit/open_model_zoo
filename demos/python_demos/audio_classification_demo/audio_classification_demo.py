@@ -70,7 +70,8 @@ class AudioSource:
         samplerate, audio = read_wav(self.source, as_float=True)
         audio = audio.T
         if audio.shape[0] != self.channels:
-            raise RuntimeError("Audio has unsupported number of channels")
+            raise RuntimeError("Audio has unsupported number of channels - {} (expected {})"
+                               .format(audio.shape[0], self.channels))
         if self.samplerate:
             if self.samplerate != samplerate:
                 audio = resample(audio, samplerate, self.samplerate)
@@ -171,7 +172,9 @@ def main():
         with open(args.labels, "r") as file:
             labels = [l.rstrip() for l in file.readlines()]
 
-    batch_size, channels, _, length = input_shape
+    batch_size, channels, one, length = input_shape
+    if one != 1:
+        raise RuntimeError("Wrong third dimension size of model input shape - {} (expected 1)".format(one))
 
     audio = AudioSource(args.input, channels=channels, samplerate=args.samplerate)
     audio.load()
@@ -198,17 +201,16 @@ def main():
             end_time = ((idx*batch_size + batch)*hop + length) / audio.samplerate
             outputs.append(data)
             label = np.argmax(data)
-            log.info("[{:.2f}:{:.2f}] - {:s}: {:.2f}%".format(start_time, end_time,
-                                                              labels[label] if labels else "Class {}".format(label),
-                                                              data[label] * 100))
+            log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(start_time, end_time, data[label],
+                                                             labels[label] if labels else "Class {}".format(label)))
 
     if clips == 0:
         log.error("Audio too short for inference by that model")
         sys.exit(1)
     total = np.mean(outputs, axis=0)
     label = np.argmax(total)
-    log.info("Averaged over the audio prediction - {:s}: {:.2f}%"
-             .format(labels[label] if labels else "Class {}".format(label), total[label]*100))
+    log.info("Average over the audio prediction - {:6.2%} {:s}"
+             .format(total[label], labels[label] if labels else "Class {}".format(label)))
     logging.info("Average infer time - {:.1f} ms per clip".format(infer_time / clips * 1000))
 
 

@@ -16,7 +16,7 @@ The command yields the following usage message:
 ```
 usage: audio_classification_demo.py [-h] -i INPUT -m MODEL [-l CPU_EXTENSION]
                                     [-d DEVICE] [--labels LABELS]
-                                    [-fr SAMPLERATE] [-ol OVERLAP]
+                                    [-sr SAMPLERATE] [-ol OVERLAP]
 
 Options:
   -h, --help            Show this help message and exit.
