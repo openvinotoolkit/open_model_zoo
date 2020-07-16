@@ -115,11 +115,11 @@ def read_wav(file, as_float=False):
     with wave.open(file, "rb") as wav:
         params = wav.getparams()
         data = wav.readframes(params.nframes)
-        if sampwidth_types.get(params.sampwidth):
+        if params.sampwidth in sampwidth_types:
             data = np.frombuffer(data, dtype=sampwidth_types[params.sampwidth])
         else:
             raise RuntimeError("Couldn't process file {}: unsupported sample width {}"
-                               .format(str(file), params.sampwidth))
+                               .format(file, params.sampwidth))
         data = np.reshape(data, (params.nframes, params.nchannels))
         if as_float:
             data = data / sampwidth_max[params.sampwidth]
