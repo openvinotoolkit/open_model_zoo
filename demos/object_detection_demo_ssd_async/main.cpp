@@ -19,7 +19,6 @@
 #include <ngraph/ngraph.hpp>
 
 #include <monitors/presenter.h>
-#include <performance_metrics/metrics.h>
 #include <samples/ocv_common.hpp>
 #include <samples/args_helper.hpp>
 #include <cldnn/cldnn_config.hpp>
@@ -257,8 +256,8 @@ int main(int argc, char *argv[]) {
             }                
         }
         const SizeVector outputDims = output->getTensorDesc().getDims();
-        const int maxProposalCount = outputDims[2];
-        const int objectSize = outputDims[3];
+        const size_t maxProposalCount = outputDims[2];
+        const size_t objectSize = outputDims[3];
         if (objectSize != 7) {
             throw std::logic_error("Output should have 7 as a last dimension");
         }
@@ -302,13 +301,23 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 6. Init variables -------------------------------------------------------
+        typedef std::chrono::duration<double, std::chrono::milliseconds::period> Ms;
+        typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
+
         enum class ExecutionMode {USER_SPECIFIED, MIN_LATENCY};
         
         struct RequestResult {
             cv::Mat frame;
-            std::unique_ptr<LockedMemory<const void>> output;
-            PerformanceMetrics::TimePoint requestStartTime;
+            Blob::Ptr output;
+            std::chrono::steady_clock::time_point startTime;
             ExecutionMode frameMode;
+        };
+
+        struct ModeInfo {
+           int framesCount = 0;
+           std::chrono::steady_clock::duration latencySum;
+           std::chrono::steady_clock::time_point lastStartTime;
+           std::chrono::steady_clock::time_point lastEndTime;
         };
 
         auto totalT0 = std::chrono::steady_clock::now();
@@ -324,8 +333,8 @@ int main(int argc, char *argv[]) {
         std::exception_ptr callbackException = nullptr;
         std::mutex mutex;
         std::condition_variable condVar;
-        std::map<bool, PerformanceMetrics> modeMetrics = {{ExecutionMode::USER_SPECIFIED, PerformanceMetrics()},
-                                                          {ExecutionMode::MIN_LATENCY, PerformanceMetrics()}};
+        std::map<ExecutionMode, ModeInfo> modeInfo = {{ExecutionMode::USER_SPECIFIED, ModeInfo()},
+                                                      {ExecutionMode::MIN_LATENCY, ModeInfo()}};
 
         cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
         Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10,
@@ -338,6 +347,7 @@ int main(int argc, char *argv[]) {
         std::cout << "To switch between min_latency/user_specified modes, press TAB key in the output window" 
                   << std::endl;
 
+        modeInfo[currentMode].lastStartTime = std::chrono::steady_clock::now();
         while (true) {
             {
                 std::lock_guard<std::mutex> lock(mutex);
@@ -366,10 +376,10 @@ int main(int argc, char *argv[]) {
 
                 nextFrameIdToShow++;
                 if (requestResult.frameMode == currentMode) {
-                    modeMetrics[currentMode].recalculate(requestResult.requestStartTime);
+                    modeInfo[currentMode].framesCount += 1;
                 }
 
-                for (int i = 0; i < maxProposalCount; i++) {
+                for (size_t i = 0; i < maxProposalCount; i++) {
                     float image_id = detections[i * objectSize + 0];
                     if (image_id < 0) {
                         break;
@@ -403,18 +413,22 @@ int main(int argc, char *argv[]) {
 
                 presenter.drawGraphs(requestResult.frame);
 
+                auto currentTime = std::chrono::steady_clock::now();
                 std::ostringstream out;
                 out << (currentMode == ExecutionMode::USER_SPECIFIED ? "USER SPECIFIED" : "MIN LATENCY")
                     << " mode (press Tab to switch)";
                 putHighlightedText(requestResult.frame, out.str(), cv::Point2f(10, 30), cv::FONT_HERSHEY_TRIPLEX, 0.75, 
                                    cv::Scalar(10, 10, 200), 2);
                 out.str("");
-                out << "FPS: " << std::fixed << std::setprecision(1) << modeMetrics[currentMode].getFps();
+                out << "FPS: " << std::fixed << std::setprecision(1) << modeInfo[currentMode].framesCount / 
+                    std::chrono::duration_cast<Sec>(currentTime - modeInfo[currentMode].lastStartTime).count();
                 putHighlightedText(requestResult.frame, out.str(), cv::Point2f(10, 60), cv::FONT_HERSHEY_TRIPLEX, 0.75, 
                                    cv::Scalar(10, 200, 10), 2);
                 out.str("");
-                out << "Latency: " << std::fixed << std::setprecision(1)
-                    << modeMetrics[currentMode].getLatency() << " ms";
+                modeInfo[currentMode].latencySum += (currentTime - requestResult.startTime);
+                out << "Latency: " << std::fixed << std::setprecision(1) << (std::chrono::duration_cast<Ms>(
+                        modeInfo[currentMode].latencySum).count() / modeInfo[currentMode].framesCount)
+                    << " ms";
                 putHighlightedText(requestResult.frame, out.str(), cv::Point2f(10, 90), cv::FONT_HERSHEY_TRIPLEX, 0.75, 
                                    cv::Scalar(200, 10, 10), 2);
 
@@ -426,11 +440,9 @@ int main(int argc, char *argv[]) {
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                         break;
                     } else if (9 == key) {  // Tab
-                        modeMetrics[currentMode].stop();
                         ExecutionMode prevMode = currentMode;
                         currentMode = (currentMode == ExecutionMode::USER_SPECIFIED ? ExecutionMode::MIN_LATENCY
-                                                                                    : ExecutionMode::USER_SPECIFIED);;
-
+                                                                                    : ExecutionMode::USER_SPECIFIED);
                         if (prevMode == ExecutionMode::USER_SPECIFIED) {
                             for (const auto& request: userSpecifiedInferRequests) {
                                 request->Wait(IInferRequest::WaitMode::RESULT_READY);
@@ -446,7 +458,10 @@ int main(int argc, char *argv[]) {
                             } else emptyRequests = {minLatencyInferRequest};
                         }
 
-                        modeMetrics[currentMode].reinitialize();
+                        modeInfo[currentMode] = ModeInfo();
+                        auto switchTime = std::chrono::steady_clock::now();
+                        modeInfo[prevMode].lastEndTime = switchTime;
+                        modeInfo[currentMode].lastStartTime = switchTime;
                     } else {
                         presenter.handleKey(key);
                     }
@@ -528,15 +543,14 @@ int main(int argc, char *argv[]) {
             request->StartAsync();
             nextFrameId++;
         }
-        modeMetrics[isUserSpecifiedMode].stop();
         // -----------------------------------------------------------------------------------------------------
         
         // --------------------------- 8. Report metrics -------------------------------------------------------
         slog::info << slog::endl << "Metric reports:" << slog::endl;
 
-        std::cout << std::endl << "Total execution time: "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - totalT0).count()
-            << " ms" << std::endl;
+        auto totalT1 = std::chrono::steady_clock::now();
+        Ms totalTime = std::chrono::duration_cast<Ms>(totalT1 - totalT0);
+        std::cout << std::endl << "Total Inference time: " << totalTime.count() << std::endl;
 
         /** Show performace results **/
         if (FLAGS_pc) {
@@ -547,18 +561,36 @@ int main(int argc, char *argv[]) {
             } else printPerformanceCounts(*minLatencyInferRequest, std::cout, getFullDeviceName(ie, FLAGS_d));
         }
 
-        for (const auto & mode : modeMetrics) {
-            if (mode.second.hasStarted()) {
-                std::cout << std::endl << (mode.first == ExecutionMode::USER_SPECIFIED ? "USER_SPECIFIED mode:" : "MIN_LATENCY mode:") << std::endl;
-                std::cout << "FPS: " << std::fixed << std::setprecision(1) << mode.second.getTotalFps() << std::endl;
-                std::cout << "Latency: " << std::fixed << std::setprecision(1) << mode.second.getTotalLatency()
-                    << " ms" << std::endl;
-            }
+        std::chrono::steady_clock::time_point endTime;
+        if (modeInfo[ExecutionMode::USER_SPECIFIED].framesCount) {
+            std::cout << std::endl;
+            std::cout << "USER_SPECIFIED mode:" << std::endl;
+            endTime = (modeInfo[ExecutionMode::USER_SPECIFIED].lastEndTime.time_since_epoch().count() != 0)
+                      ? modeInfo[ExecutionMode::USER_SPECIFIED].lastEndTime
+                      : totalT1;
+            std::cout << "FPS: " << std::fixed << std::setprecision(1)
+                << modeInfo[ExecutionMode::USER_SPECIFIED].framesCount / std::chrono::duration_cast<Sec>(
+                    endTime - modeInfo[ExecutionMode::USER_SPECIFIED].lastStartTime).count() << std::endl;
+            std::cout << "Latency: " << std::fixed << std::setprecision(1)
+                << ((std::chrono::duration_cast<Ms>(modeInfo[ExecutionMode::USER_SPECIFIED].latencySum).count() /
+                     modeInfo[ExecutionMode::USER_SPECIFIED].framesCount)) << " ms" << std::endl;
         }
 
-        if (FLAGS_u != "") {
-            std::cout << std::endl << presenter.reportMeans() << std::endl;
+        if (modeInfo[ExecutionMode::MIN_LATENCY].framesCount) {
+            std::cout << std::endl;
+            std::cout << "MIN_LATENCY mode:" << std::endl;
+            endTime = (modeInfo[ExecutionMode::MIN_LATENCY].lastEndTime.time_since_epoch().count() != 0)
+                      ? modeInfo[ExecutionMode::MIN_LATENCY].lastEndTime
+                      : totalT1;
+            std::cout << "FPS: " << std::fixed << std::setprecision(1)
+                << modeInfo[ExecutionMode::MIN_LATENCY].framesCount / std::chrono::duration_cast<Sec>(
+                    endTime - modeInfo[ExecutionMode::MIN_LATENCY].lastStartTime).count() << std::endl;
+            std::cout << "Latency: " << std::fixed << std::setprecision(1)
+                << ((std::chrono::duration_cast<Ms>(modeInfo[ExecutionMode::MIN_LATENCY].latencySum).count() /
+                     modeInfo[ExecutionMode::MIN_LATENCY].framesCount)) << " ms" << std::endl;
         }
+
+        std::cout << std::endl << presenter.reportMeans() << '\n';
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 9. Wait for running Infer Requests --------------------------------------
