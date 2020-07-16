@@ -53,7 +53,7 @@ def build_argparser():
     args.add_argument('--labels', type=str, default=None,
                       help="Optional. Labels mapping file")
     args.add_argument('-sr', '--samplerate', type=int,
-                      help="Optional. Set samplerate for audio input")
+                      help="Optional. Set sample rate for audio input")
     args.add_argument('-ol', '--overlap', type=type_overlap, default=0,
                       help='Optional. Set the overlapping between audio clip in samples or percent')
 

@@ -35,7 +35,7 @@ Options:
                         Default value is CPU
   --labels LABELS       Optional. Labels mapping file
   -sr SAMPLERATE, --samplerate SAMPLERATE
-                        Optional. Set samplerate for audio input
+                        Optional. Set sample rate for audio input
   -ol OVERLAP, --overlap OVERLAP
                         Optional. Set the overlapping between audio clip in
                         samples or percent
