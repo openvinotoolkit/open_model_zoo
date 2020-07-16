@@ -66,7 +66,7 @@ Accuracy Checker supports following set of postprocessors:
 * `transform_brats_prediction` - transforms prediction from `WT-TC-ET` format to `NCR/NET-ED-ET`. Sequentially fills one-channel mask with specified `values` for elements passing the threshold (threshold is `0.5`) from each prediction channel in specified `order`.
   * `order` - specifies filling order for channels
   * `values` - specifies values for each channel according to new order
-* `extract_prediction_answers` - extract predicted sequence of tokens from annotation text. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
+* `extract_answers_tokens` - extract predicted sequence of tokens from annotation text. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
   * `max_answer` - maximum answer length (Optional, default value is 30).
   * `n_best_size` - total number of n-best prediction size for the answer (Optional, default value is 20).
 * `translate_3d_poses` - translating 3D poses. Supported representations: `PoseEstimation3dAnnotation`, `PoseEstimation3dPrediction`. Shifts 3D coordinates of each predicted poses on corresponding translation vector.
