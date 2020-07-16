@@ -65,6 +65,7 @@ class AudioSource:
         self.source = source
         self.samplerate = samplerate
         self.channels = channels
+        self.load()
 
     def load(self):
         samplerate, audio = read_wav(self.source, as_float=True)
@@ -180,7 +181,6 @@ def main():
         raise RuntimeError("Wrong third dimension size of model input shape - {} (expected 1)".format(one))
 
     audio = AudioSource(args.input, channels=channels, samplerate=args.samplerate)
-    audio.load()
 
     hop = length - args.overlap if isinstance(args.overlap, int) else int(length * (1.0 - args.overlap))
     if hop < 0:
