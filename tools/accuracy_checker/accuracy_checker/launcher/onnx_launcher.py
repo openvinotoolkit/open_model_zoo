@@ -49,7 +49,7 @@ class ONNXLauncher(Launcher):
             for input_info in self._inference_session.get_inputs():
                 dtype = input_info.type.replace('tensor(', '').replace(')', '')
                 if dtype == 'float':
-                    dtype = 'float32'
+                    dtype += '32'
                 self._input_precisions[input_info.name] = dtype
 
     @classmethod
