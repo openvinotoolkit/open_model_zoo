@@ -1,6 +1,6 @@
-# Audio Classification Python\* Demo
+# Sound Classification Python\* Demo
 
-Demo application for audio classification algorithm.
+Demo application for sound classification algorithm.
 
 ## How It Works
 
@@ -41,7 +41,7 @@ Options:
                         samples or percent
 ```
 Running the application with the empty list of options yields the usage message given above and an error message.
-You can use the following command to do inference on GPU with a pre-trained audio classification model and conversion of input audio to samplerate of 16000:
+You can use the following command to do inference on GPU with a pre-trained sound classification model and conversion of input audio to samplerate of 16000:
 ```
 python3 audio_classification_demo.py -i <path_to_wav>/input_audio.wav -m <path_to_model>/aclnet.xml -d GPU --samplerate 16000
 ```
