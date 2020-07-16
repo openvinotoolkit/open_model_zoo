@@ -19,6 +19,7 @@ import os
 import re
 import string
 import sys
+from shutil import copytree
 
 from pathlib import Path
 
@@ -111,6 +112,9 @@ def main():
         if model.mo_args is None:
             reporter.print_section_heading('Skipping {} (no conversions defined)', model.name)
             reporter.print()
+            if model.framework == "dldt":
+                # Copy DLDT IR as is to output directory
+                copytree(args.download_dir / model.subdirectory, output_dir / model.subdirectory)
             return True
 
         model_precisions = requested_precisions & model.precisions
