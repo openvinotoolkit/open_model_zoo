@@ -900,19 +900,18 @@ class FasterRCNNONNX(Adapter):
     def configure(self):
         self.labels_out = self.get_value_from_config('labels_out')
         self.scores_out = self.get_value_from_config('scores_out')
-        self.bboxes_out = self.get_value_from_config('boxes_out')
+        self.boxes_out = self.get_value_from_config('boxes_out')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        results = []
-        for identifier, boxes, scores, labels, meta in zip(
-            identifiers, raw_outputs[self.bboxes_out], raw_outputs[self.scores_out], raw_outputs[self.labels_out],
-            frame_meta
-        ):
-            im_scale_x = meta['scale_x']
-            im_scale_y = meta['scale_y']
-            boxes[:, 0::2] /= im_scale_x
-            boxes[:, 1::2] /= im_scale_y
-            x_mins, y_mins, x_maxs, y_maxs = boxes.T
-            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
-        return results
+        identifier = identifiers[0]
+        boxes = raw_outputs[self.boxes_out]
+        scores = raw_outputs[self.scores_out]
+        labels = raw_outputs[self.labels_out]
+        meta = frame_meta[0]
+        im_scale_x = meta['scale_x']
+        im_scale_y = meta['scale_y']
+        boxes[:, 0::2] /= im_scale_x
+        boxes[:, 1::2] /= im_scale_y
+        x_mins, y_mins, x_maxs, y_maxs = boxes.T
+        return [DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs)]

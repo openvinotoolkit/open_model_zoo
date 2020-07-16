@@ -815,6 +815,11 @@ class DLSDKLauncher(Launcher):
             if len(layer_shape) == 5 and len(layout) == 5:
                 return np.transpose(data, layout)
 
+            if len(layer_shape) == 3 and len(data_shape) == 4:
+                data = np.transpose(data, layout)
+                return data[0]
+
+
             return np.array(data)
 
         layer_shape = tuple(self.inputs[layer_name].shape)
