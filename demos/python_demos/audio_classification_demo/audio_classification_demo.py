@@ -123,6 +123,9 @@ def read_wav(file, as_float=False):
         data = np.reshape(data, (params.nframes, params.nchannels))
         if as_float:
             data = data / sampwidth_max[params.sampwidth]
+            if params.sampwidth == 1:
+                data -= 0.5
+                data *= 2
 
     return params.framerate, data
 
