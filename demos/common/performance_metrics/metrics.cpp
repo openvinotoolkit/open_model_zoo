@@ -4,60 +4,108 @@
 
 #include "metrics.h"
 
+#include <iostream>
+#include <limits>
+#include <sstream>
+#include <iomanip>
+
 PerformanceMetrics::PerformanceMetrics(Duration timeWindow) {
+    // 'timeWindow' defines the length of the timespan over which the 'current fps' value is calculated
     timeWindowSize = timeWindow;
-    fps = 0;
-    latency = 0;
-    startTime = Clock::now();
-    numFramesProcessed = 0;
+
+    lastMovingStatistic = Statistic();
+    currentMovingStatistic = Statistic();
+    totalStatistic = Statistic();
 }
 
-void PerformanceMetrics::recalculate(TimePoint lastRequestStartTime) {
-    auto currentTime = Clock::now();
-    while (!measurements.empty()) {
-        auto firstInWindow = measurements.front();
-        if (currentTime - firstInWindow.timePoint > timeWindowSize) {
-            latencySum -= firstInWindow.latency;
-            measurements.pop_front();
-        } else break;
+void PerformanceMetrics::update(TimePoint lastRequestStartTime,
+                                cv::Mat& frame,
+                                cv::Point position,
+                                double fontScale,
+                                cv::Scalar color,
+                                int thickness) {
+    TimePoint currentTime = Clock::now();
+
+    if (!lastUpdateTime.time_since_epoch().count()) {
+        lastUpdateTime = currentTime;
+        return;
+    }
+    
+    currentMovingStatistic.latency += currentTime - lastRequestStartTime;
+    currentMovingStatistic.period = currentTime - lastUpdateTime;
+    currentMovingStatistic.frameCount++;
+
+    if (currentTime - lastUpdateTime > timeWindowSize) {
+        lastMovingStatistic = currentMovingStatistic;
+        totalStatistic.combine(lastMovingStatistic);
+        currentMovingStatistic = Statistic();
+
+        lastUpdateTime = currentTime;
     }
 
-    auto lastRequestLatency = currentTime - lastRequestStartTime;
-    measurements.push_back({lastRequestLatency, currentTime});
-    latencySum += lastRequestLatency;
-    latencyTotalSum += lastRequestLatency;
-    latency = std::chrono::duration_cast<Ms>(latencySum).count() / measurements.size();
+    // Draw performance stats over frame
+    Metrics metrics = getLast();
+    std::ostringstream out;
+    if (metrics.latency == metrics.latency) {
+        out.str("");
+        out << "Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms";
+        putHighlightedText(frame, out.str(), position, cv::FONT_HERSHEY_COMPLEX, fontScale, color, thickness);
+    }
+    if (metrics.fps == metrics.fps) {
+        out.str("");
+        out << "FPS: " << std::fixed << std::setprecision(1) << metrics.fps;
+        putHighlightedText(frame, out.str(), {position.x, position.y + 30}, cv::FONT_HERSHEY_COMPLEX, fontScale, color,
+                           thickness);
+    }
+}
 
-    auto spfSum = measurements.back().timePoint - measurements.front().timePoint;
-    if (spfSum >= Ms(0)) {
-        fps = 1000.0 * measurements.size() / std::chrono::duration_cast<Ms>(spfSum).count();
+PerformanceMetrics::Metrics PerformanceMetrics::getLast() {
+    Metrics metrics;
+
+    metrics.latency = lastMovingStatistic.frameCount != 0
+                      ? std::chrono::duration_cast<Ms>(lastMovingStatistic.latency).count()
+                        / lastMovingStatistic.frameCount
+                      : std::numeric_limits<double>::signaling_NaN();
+    metrics.fps = lastMovingStatistic.period != Duration::zero()
+                  ? lastMovingStatistic.frameCount / std::chrono::duration_cast<Sec>(lastMovingStatistic.period).count()
+                  : std::numeric_limits<double>::signaling_NaN();
+    
+    return metrics;
+}
+
+PerformanceMetrics::Metrics PerformanceMetrics::getTotal() {
+    Metrics metrics;
+
+    int frameCount = totalStatistic.frameCount + currentMovingStatistic.frameCount;
+    if (frameCount != 0) {
+        metrics.latency = std::chrono::duration_cast<Ms>(
+            totalStatistic.latency + currentMovingStatistic.latency).count() / frameCount;
+        metrics.fps = frameCount / std::chrono::duration_cast<Sec>(
+                                        totalStatistic.period + currentMovingStatistic.period).count();
+    } else {
+        metrics.latency = std::numeric_limits<double>::signaling_NaN();
+        metrics.fps = std::numeric_limits<double>::signaling_NaN();
     }
 
-    numFramesProcessed++;
+    return metrics;
 }
 
-double PerformanceMetrics::getTotalFps() const {
-    return 1000.0 * numFramesProcessed / std::chrono::duration_cast<Ms>(stopTime - startTime).count();
-}
+void PerformanceMetrics::printTotal() {
+    Metrics metrics = getTotal();
 
-double PerformanceMetrics::getTotalLatency() const {
-    return std::chrono::duration_cast<Ms>(latencyTotalSum).count() / numFramesProcessed;
-}
+    std::cout << "Latency: ";
+    if (metrics.latency > std::numeric_limits<double>::epsilon()) {
+        std::cout << std::fixed << std::setprecision(1) << metrics.latency << " ms";
+    } else {
+        std::cout << "N/A";
+    }
+    std::cout << std::endl;
 
-void PerformanceMetrics::stop() {
-    stopTime = Clock::now();
-}
-
-void PerformanceMetrics::reinitialize() {
-    measurements.clear();
-    fps = 0;
-    latency = 0;
-    latencySum = Duration::zero();
-    startTime = Clock::now();
-    numFramesProcessed = 0;
-    latencyTotalSum = Duration::zero();
-}
-
-bool PerformanceMetrics::hasStarted() const {
-    return numFramesProcessed > 0;
+    std::cout << "FPS: ";
+    if (metrics.fps > std::numeric_limits<double>::epsilon()) {
+        std::cout << std::fixed << std::setprecision(1) << metrics.fps;
+    } else {
+        std::cout << "N/A";
+    }
+    std::cout << std::endl;
 }

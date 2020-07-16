@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+find_package(OpenCV REQUIRED COMPONENTS core imgproc)
+
 set(SOURCES metrics.cpp)
 set(HEADERS metrics.h)
 
@@ -12,3 +14,4 @@ source_group("include" FILES ${HEADERS})
 
 add_library(performance_metrics STATIC ${SOURCES} ${HEADERS})
 target_include_directories(performance_metrics PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(performance_metrics PRIVATE opencv_core opencv_imgproc)
