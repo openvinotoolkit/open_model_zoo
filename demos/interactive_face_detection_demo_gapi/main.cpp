@@ -438,12 +438,13 @@ int main(int argc, char *argv[]) {
 
         slog::info << "Start inference " << slog::endl;
         Timer timer;
-        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
+        FLAGS_i == "cam" ?
+            stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(-1)) :
+            stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
         stream.start();
 
         const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
         std::unique_ptr<Presenter> presenter;
-        bool presenterWasInit = false;
 
         while (stream.running()) {
             timer.start("total");
@@ -454,11 +455,10 @@ int main(int argc, char *argv[]) {
                 }
 
                 // Init presenter
-                if (!presenterWasInit) {
+                if (presenter == nullptr) {
                     cv::Size graphSize{static_cast<int>(frame.rows / 4), 60};
                     // std::make_unique is available since C++14
                     presenter = std::unique_ptr<Presenter>(new Presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, graphSize));
-                    presenterWasInit = true;
                 }
 
                 //  Postprocessing
@@ -545,7 +545,9 @@ int main(int argc, char *argv[]) {
                 timer.finish("total");
             } else { // End of streaming
                 if(FLAGS_loop_video) {
-                    stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
+                    FLAGS_i == "cam" ?
+                        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(-1)) :
+                        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
                     stream.start();
                 } else if (!FLAGS_no_wait) {
                     std::cout << "No more frames to process!" << std::endl;
