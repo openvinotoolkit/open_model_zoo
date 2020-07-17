@@ -51,7 +51,6 @@ KNOWN_PRECISIONS = {
 }
 KNOWN_TASK_TYPES = {
     'action_recognition',
-    'sound_classification',
     'classification',
     'colorization',
     'detection',
@@ -66,6 +65,7 @@ KNOWN_TASK_TYPES = {
     'object_attributes',
     'optical_character_recognition',
     'semantic_segmentation',
+    'sound_classification',
     'style_transfer',
 }
 

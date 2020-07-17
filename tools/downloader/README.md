@@ -450,7 +450,6 @@ describing a single model. Each such object has the following keys:
   are:
 
   * `action_recognition`
-  * `sound_classification`
   * `classification`
   * `detection`
   * `face_recognition`
@@ -464,6 +463,7 @@ describing a single model. Each such object has the following keys:
   * `object_attributes`
   * `optical_character_recognition`
   * `semantic_segmentation`
+  * `sound_classification`
   * `style_transfer`
 
   Additional possible values might be added in the future.
