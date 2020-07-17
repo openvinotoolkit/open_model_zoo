@@ -34,9 +34,9 @@ class PerformanceMetrics {
 public:
     using Clock = std::chrono::steady_clock;
     using TimePoint = std::chrono::time_point<Clock>;
-    using Duration = Clock::duration;
-    using Ms = std::chrono::milliseconds;
-    using Sec = std::chrono::seconds;
+    using Duration = std::chrono::duration<double>;
+    using Ms = std::chrono::duration<double, std::ratio<1, 1000>>;
+    using Sec = std::chrono::duration<double, std::ratio<1, 1>>;
 
     struct Metrics {
         double latency;
