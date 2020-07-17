@@ -1,4 +1,4 @@
-# Gaze Estimation Demo
+# Gaze Estimation Demo {#omz_demos_gaze_estimation_demo_README}
 
 This demo showcases the work of gaze estimation model.
 The corresponding pre-trained model `gaze-estimation-adas-0002` is delivered with the product.

@@ -1,4 +1,4 @@
-# text-recognition-0012
+# text-recognition-0012 {#omz_models_intel_text_recognition_0012_description_text_recognition_0012}
 
 ## Use Case and High-Level Description
 

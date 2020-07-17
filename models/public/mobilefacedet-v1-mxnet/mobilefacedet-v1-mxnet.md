@@ -1,4 +1,4 @@
-# mobilefacedet-v1-mxnet
+# mobilefacedet-v1-mxnet {#omz_models_public_mobilefacedet_v1_mxnet_mobilefacedet_v1_mxnet}
 
 ## Use Case and High-Level Description
 

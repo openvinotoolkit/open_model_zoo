@@ -1,4 +1,4 @@
-# resnet-50
+# resnet-50 {#omz_models_public_resnet_50_resnet_50}
 
 ## Use Case and High-Level Description
 

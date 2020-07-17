@@ -1,4 +1,4 @@
-# How to configure TensorFlow Lite launcher
+# How to configure TensorFlow Lite launcher {#omz_tools_accuracy_checker_accuracy_checker_launcher_tf_lite_launcher_readme}
 
 For enabling TensorFlow Lite launcher you need to add `framework: tf_lite` in launchers section of your configuration file and provide following parameters:
 

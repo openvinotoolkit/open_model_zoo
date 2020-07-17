@@ -1,4 +1,4 @@
-# mobilenet-v1-0.25-128
+# mobilenet-v1-0.25-128 {#omz_models_public_mobilenet_v1_0_25_128_mobilenet_v1_0_25_128}
 
 ## Use Case and High-Level Description
 

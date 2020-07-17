@@ -1,4 +1,4 @@
-# single-human-pose-estimation-0001
+# single-human-pose-estimation-0001 {#omz_models_public_single_human_pose_estimation_0001_description_single_human_pose_estimation_0001}
 
 ## Use Case and High-Level Description
 Single human pose estimation model based on https://arxiv.org/abs/1906.04104.

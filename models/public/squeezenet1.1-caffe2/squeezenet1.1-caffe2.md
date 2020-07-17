@@ -1,4 +1,4 @@
-# squeezenet1.1-caffe2
+# squeezenet1.1-caffe2 {#omz_models_public_squeezenet1_1_caffe2_squeezenet1_1_caffe2}
 
 ## Use Case and High-Level Description
 

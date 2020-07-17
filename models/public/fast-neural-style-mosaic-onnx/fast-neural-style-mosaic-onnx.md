@@ -1,4 +1,4 @@
-# fast-neural-style-mosaic-onnx
+# fast-neural-style-mosaic-onnx {#omz_models_public_fast_neural_style_mosaic_onnx_fast_neural_style_mosaic_onnx}
 
 ## Use Case and High-Level Description
 

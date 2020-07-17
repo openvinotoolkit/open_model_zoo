@@ -1,4 +1,4 @@
-# Deep Learning accuracy validation framework
+# Deep Learning accuracy validation framework {#omz_tools_accuracy_checker_README}
 
 ## Installation
 

@@ -1,4 +1,4 @@
-# octave-resnet-26-0.25
+# octave-resnet-26-0.25 {#omz_models_public_octave_resnet_26_0_25_octave_resnet_26_0_25}
 
 ## Use Case and High-Level Description
 

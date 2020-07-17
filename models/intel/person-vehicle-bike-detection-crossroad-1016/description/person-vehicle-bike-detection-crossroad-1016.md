@@ -1,4 +1,4 @@
-# person-vehicle-bike-detection-crossroad-1016
+# person-vehicle-bike-detection-crossroad-1016 {#omz_models_intel_person_vehicle_bike_detection_crossroad_1016_description_person_vehicle_bike_detection_crossroad_1016}
 
 ## Use Case and High-Level Description
 

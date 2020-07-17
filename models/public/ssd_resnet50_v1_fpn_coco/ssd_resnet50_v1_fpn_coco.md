@@ -1,4 +1,4 @@
-# ssd_resnet50_v1_fpn_coco
+# ssd_resnet50_v1_fpn_coco {#omz_models_public_ssd_resnet50_v1_fpn_coco_ssd_resnet50_v1_fpn_coco}
 
 ## Use Case and High-Level Description
 

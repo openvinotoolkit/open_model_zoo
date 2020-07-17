@@ -1,4 +1,4 @@
-# 3D Segmentation Python* Demo
+# 3D Segmentation Python* Demo {#omz_demos_python_demos_3d_segmentation_demo_README}
 
 This topic demonstrates how to run the 3D Segmentation Demo, which segments 3D images using 3D convolutional networks.
 

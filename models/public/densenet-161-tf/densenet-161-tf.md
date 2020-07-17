@@ -1,4 +1,4 @@
-# densenet-161-tf
+# densenet-161-tf {#omz_models_public_densenet_161_tf_densenet_161_tf}
 
 ## Use Case and High-Level Description
 

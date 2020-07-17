@@ -1,4 +1,4 @@
-# Multi-Channel Human Pose Estimation C++ Demo
+# Multi-Channel Human Pose Estimation C++ Demo {#omz_demos_multi_channel_human_pose_estimation_demo_README}
 
 This demo provides an inference pipeline for Multi-Channel Human Pose Estimation. The demo uses Human Pose Estimation network. You can use the following pre-trained model with the demos:
 * `human-pose-estimation-0001`

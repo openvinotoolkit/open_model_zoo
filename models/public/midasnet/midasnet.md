@@ -1,4 +1,4 @@
-# midasnet
+# midasnet {#omz_models_public_midasnet_midasnet}
 
 ## Use Case and High-Level Description
 

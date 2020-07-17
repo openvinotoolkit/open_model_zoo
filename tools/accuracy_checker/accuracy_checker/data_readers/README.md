@@ -1,4 +1,4 @@
-# Data Readers
+# Data Readers {#omz_tools_accuracy_checker_accuracy_checker_data_readers_README}
 
 Data Reader is a function for reading input data.
 You can use 2 ways to set data_reader for dataset:

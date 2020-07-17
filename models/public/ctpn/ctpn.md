@@ -1,4 +1,4 @@
-# ctpn
+# ctpn {#omz_models_public_ctpn_ctpn}
 
 ## Use Case and High-Level Description
 

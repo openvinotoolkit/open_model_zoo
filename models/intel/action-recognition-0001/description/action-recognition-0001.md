@@ -1,4 +1,4 @@
-# action-recognition-0001 (composite)
+# action-recognition-0001 (composite) {#omz_models_intel_action_recognition_0001_description_action_recognition_0001}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# text-image-super-resolution-0001
+# text-image-super-resolution-0001 {#omz_models_intel_text_image_super_resolution_0001_description_text_image_super_resolution_0001}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# yolo-v1-tiny-tf
+# yolo-v1-tiny-tf {#omz_models_public_yolo_v1_tiny_tf_yolo_v1_tiny_tf}
 
 ## Use Case and High-Level Description
 

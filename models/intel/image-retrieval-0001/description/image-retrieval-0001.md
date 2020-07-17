@@ -1,4 +1,4 @@
-# image-retrieval-0001
+# image-retrieval-0001 {#omz_models_intel_image_retrieval_0001_description_image_retrieval_0001}
 
 ## Use Case and High-Level Description
 

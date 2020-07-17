@@ -1,4 +1,4 @@
-# yolo-v2-tiny-ava-0001
+# yolo-v2-tiny-ava-0001 {#omz_models_intel_yolo_v2_tiny_ava_0001_description_yolo_v2_tiny_ava_0001}
 
 ## Use Case and High-Level Description
 

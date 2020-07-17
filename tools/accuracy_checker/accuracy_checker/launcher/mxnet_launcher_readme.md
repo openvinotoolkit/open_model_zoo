@@ -1,4 +1,4 @@
-# How to configure MXNet launcher
+# How to configure MXNet launcher {#omz_tools_accuracy_checker_accuracy_checker_launcher_mxnet_launcher_readme}
 
 For enabling MXNet launcher you need to add `framework: mxnet` in launchers section of your configuration file and provide following parameters:
 

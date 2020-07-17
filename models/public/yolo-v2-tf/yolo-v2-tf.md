@@ -1,4 +1,4 @@
-# yolo-v2-tf
+# yolo-v2-tf {#omz_models_public_yolo_v2_tf_yolo_v2_tf}
 
 ## Use Case and High-Level Description
 

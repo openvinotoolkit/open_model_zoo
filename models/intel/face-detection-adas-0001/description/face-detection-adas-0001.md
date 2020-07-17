@@ -1,4 +1,4 @@
-# face-detection-adas-0001
+# face-detection-adas-0001 {#omz_models_intel_face_detection_adas_0001_description_face_detection_adas_0001}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# open-closed-eye-0001
+# open-closed-eye-0001 {#omz_models_public_open_closed_eye_0001_description_open_closed_eye_0001}
 
 ## Use Case and High-Level Description
 

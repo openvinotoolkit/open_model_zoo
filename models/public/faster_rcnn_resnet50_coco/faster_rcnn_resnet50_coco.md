@@ -1,4 +1,4 @@
-# faster_rcnn_resnet50_coco
+# faster_rcnn_resnet50_coco {#omz_models_public_faster_rcnn_resnet50_coco_faster_rcnn_resnet50_coco}
 
 ## Use Case and High-Level Description
 

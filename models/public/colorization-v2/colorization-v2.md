@@ -1,4 +1,4 @@
-# colorization-v2
+# colorization-v2 {#omz_models_public_colorization_v2_colorization_v2}
 
 ## Use Case and High-Level Description
 

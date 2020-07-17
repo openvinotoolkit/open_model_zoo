@@ -1,4 +1,4 @@
-# Object Detection YOLO* V3 C++ Demo, Async API Performance Showcase
+# Object Detection YOLO* V3 C++ Demo, Async API Performance Showcase {#omz_demos_object_detection_demo_yolov3_async_README}
 
 This demo showcases Object Detection with YOLO* V3 and Async API.
 

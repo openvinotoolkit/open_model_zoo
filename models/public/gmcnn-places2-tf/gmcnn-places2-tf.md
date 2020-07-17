@@ -1,4 +1,4 @@
-# gmcnn-places2-tf
+# gmcnn-places2-tf {#omz_models_public_gmcnn_places2_tf_gmcnn_places2_tf}
 
 ## Use Case and High-Level Description
 

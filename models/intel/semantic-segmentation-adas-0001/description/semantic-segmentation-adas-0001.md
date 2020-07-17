@@ -1,4 +1,4 @@
-# semantic-segmentation-adas-0001
+# semantic-segmentation-adas-0001 {#omz_models_intel_semantic_segmentation_adas_0001_description_semantic_segmentation_adas_0001}
 
 ## Use Case and High-Level Description
 

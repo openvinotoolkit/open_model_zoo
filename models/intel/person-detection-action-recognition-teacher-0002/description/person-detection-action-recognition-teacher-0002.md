@@ -1,4 +1,4 @@
-# person-detection-action-recognition-teacher-0002
+# person-detection-action-recognition-teacher-0002 {#omz_models_intel_person_detection_action_recognition_teacher_0002_description_person_detection_action_recognition_teacher_0002}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# vgg16
+# vgg16 {#omz_models_public_vgg16_vgg16}
 
 ## Use Case and High-Level Description
 

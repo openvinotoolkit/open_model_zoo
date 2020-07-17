@@ -1,4 +1,4 @@
-# faster_rcnn_inception_v2_coco
+# faster_rcnn_inception_v2_coco {#omz_models_public_faster_rcnn_inception_v2_coco_faster_rcnn_inception_v2_coco}
 
 ## Use Case and High-Level Description
 

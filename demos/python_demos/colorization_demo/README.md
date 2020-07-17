@@ -1,4 +1,4 @@
-# Colorization Demo
+# Colorization Demo {#omz_demos_python_demos_colorization_demo_README}
 
 This demo demonstrates an example of using neural networks to colorize a video.
 You can use the following models with the demo:
@@ -6,7 +6,7 @@ You can use the following models with the demo:
 * `colorization-v2`
 * `colorization-v2-norebal`
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
+For more information about the pre-trained models, refer to the <a href="https://github.com/opencv/open_model_zoo/blob/master/models/public/index.md">model documentation</a>.
 
 ### How It Works
 

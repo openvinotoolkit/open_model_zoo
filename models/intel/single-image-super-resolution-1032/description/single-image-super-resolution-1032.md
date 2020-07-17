@@ -1,4 +1,4 @@
-# single-image-super-resolution-1032
+# single-image-super-resolution-1032 {#omz_models_intel_single_image_super_resolution_1032_description_single_image_super_resolution_1032}
 
 ## Use Case and High-Level Description
 

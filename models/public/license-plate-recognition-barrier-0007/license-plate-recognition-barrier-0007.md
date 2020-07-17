@@ -1,4 +1,4 @@
-# license-plate-recognition-barrier-0007
+# license-plate-recognition-barrier-0007 {#omz_models_public_license_plate_recognition_barrier_0007_license_plate_recognition_barrier_0007}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# densenet-121-caffe2
+# densenet-121-caffe2 {#omz_models_public_densenet_121_caffe2_densenet_121_caffe2}
 
 ## Use Case and High-Level Description
 

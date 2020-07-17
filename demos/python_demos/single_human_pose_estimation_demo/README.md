@@ -1,4 +1,4 @@
-# Single Human Pose Estimation Demo (top-down pipeline)
+# Single Human Pose Estimation Demo (top-down pipeline) {#omz_demos_python_demos_single_human_pose_estimation_demo_README}
 
 This demo showcases top-down pipeline for human pose estimation on video or image. The task is to predict bboxes for every person on frame and then to predict a pose for every detected person. The pose may contain up to 17 keypoints: ears, eyes, nose, shoulders, elbows, wrists, hips, knees, and ankles.
 

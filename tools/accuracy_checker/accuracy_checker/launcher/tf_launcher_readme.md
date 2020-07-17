@@ -1,4 +1,4 @@
-# How to configure TensorFlow launcher
+# How to configure TensorFlow launcher {#omz_tools_accuracy_checker_accuracy_checker_launcher_tf_launcher_readme}
 
 For enabling TensorFlow launcher you need to add `framework: tf` in launchers section of your configuration file and provide following parameters:
 

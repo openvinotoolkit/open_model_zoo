@@ -1,4 +1,4 @@
-# facial-landmarks-35-adas-0002
+# facial-landmarks-35-adas-0002 {#omz_models_intel_facial_landmarks_35_adas_0002_description_facial_landmarks_35_adas_0002}
 
 ## Use Case and High-Level Description
 

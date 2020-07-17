@@ -1,4 +1,4 @@
-# retinanet-tf
+# retinanet-tf {#omz_models_public_retinanet_tf_retinanet_tf}
 
 ## Use Case and High-Level Description
 

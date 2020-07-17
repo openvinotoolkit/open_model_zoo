@@ -1,4 +1,4 @@
-# colorization-v2-norebal
+# colorization-v2-norebal {#omz_models_public_colorization_v2_norebal_colorization_v2_norebal}
 
 ## Use Case and High-Level Description
 

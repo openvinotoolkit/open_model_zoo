@@ -1,4 +1,4 @@
-# emotions-recognition-retail-0003
+# emotions-recognition-retail-0003 {#omz_models_intel_emotions_recognition_retail_0003_description_emotions_recognition_retail_0003}
 
 ## Use Case and High-Level Description
 

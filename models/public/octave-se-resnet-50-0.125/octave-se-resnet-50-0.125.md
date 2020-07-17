@@ -1,4 +1,4 @@
-# octave-se-resnet-50-0.125
+# octave-se-resnet-50-0.125 {#omz_models_public_octave_se_resnet_50_0_125_octave_se_resnet_50_0_125}
 
 ## Use Case and High-Level Description
 

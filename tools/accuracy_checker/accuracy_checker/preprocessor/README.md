@@ -1,4 +1,4 @@
-# Preprocessors
+# Preprocessors {#omz_tools_accuracy_checker_accuracy_checker_preprocessor_README}
 
 Preprocessor is function which processes input data before model inference.
 Every preprocessor has parameters available for configuration.

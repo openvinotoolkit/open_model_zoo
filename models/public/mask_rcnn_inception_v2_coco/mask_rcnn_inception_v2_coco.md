@@ -1,4 +1,4 @@
-# mask_rcnn_inception_v2_coco
+# mask_rcnn_inception_v2_coco {#omz_models_public_mask_rcnn_inception_v2_coco_mask_rcnn_inception_v2_coco}
 
 ## Use Case and High-Level Description
 

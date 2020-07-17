@@ -1,10 +1,10 @@
-# 3D Human Pose Estimation Python* Demo
+# 3D Human Pose Estimation Python* Demo {#omz_demos_python_demos_human_pose_estimation_3d_demo_README}
 
 This demo demonstrates how to run 3D Human Pose Estimation models using OpenVINO&trade;. The following pre-trained models can be used:
 
 * `human-pose-estimation-3d-0001`.
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
+For more information about the pre-trained models, refer to the <a href="https://github.com/opencv/open_model_zoo/blob/master/models/public/index.md">model documentation</a>.
 
 > **NOTE**: Only batch size of 1 is supported.
 ## How It Works

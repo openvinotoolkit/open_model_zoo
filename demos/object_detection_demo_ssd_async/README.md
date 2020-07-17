@@ -1,4 +1,4 @@
-# Object Detection SSD C++ Demo, Async API Performance Showcase
+# Object Detection SSD C++ Demo, Async API Performance Showcase {#omz_demos_object_detection_demo_ssd_async_README}
 
 This demo showcases Object Detection with SSD and new Async API.
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,

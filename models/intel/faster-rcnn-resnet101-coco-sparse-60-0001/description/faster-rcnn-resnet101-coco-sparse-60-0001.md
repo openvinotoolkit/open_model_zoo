@@ -1,4 +1,4 @@
-# faster-rcnn-resnet101-coco-sparse-60-0001
+# faster-rcnn-resnet101-coco-sparse-60-0001 {#omz_models_intel_faster_rcnn_resnet101_coco_sparse_60_0001_description_faster_rcnn_resnet101_coco_sparse_60_0001}
 
 ## Use Case and High-Level Description
 

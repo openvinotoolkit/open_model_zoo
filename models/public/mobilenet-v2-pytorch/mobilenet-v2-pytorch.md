@@ -1,4 +1,4 @@
-# mobilenet-v2-pytorch
+# mobilenet-v2-pytorch {#omz_models_public_mobilenet_v2_pytorch_mobilenet_v2_pytorch}
 
 ## Use Case and High-Level Description
 

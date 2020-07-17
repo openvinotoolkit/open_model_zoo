@@ -1,4 +1,4 @@
-# person-detection-asl-0001
+# person-detection-asl-0001 {#omz_models_intel_person_detection_asl_0001_description_person_detection_asl_0001}
 
 ## Use Case and High-Level Description
 

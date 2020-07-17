@@ -1,4 +1,4 @@
-# icnet-camvid-ava-sparse-30-0001
+# icnet-camvid-ava-sparse-30-0001 {#omz_models_intel_icnet_camvid_ava_sparse_30_0001_description_icnet_camvid_ava_sparse_30_0001}
 
 ## Use Case and High-Level Description
 

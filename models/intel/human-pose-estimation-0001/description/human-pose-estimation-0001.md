@@ -1,4 +1,4 @@
-# human-pose-estimation-0001
+# human-pose-estimation-0001 {#omz_models_intel_human_pose_estimation_0001_description_human_pose_estimation_0001}
 
 ## Use Case and High-Level Description
 

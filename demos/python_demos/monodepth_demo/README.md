@@ -1,4 +1,4 @@
-# MonoDepth Python Demo
+# MonoDepth Python Demo {#omz_demos_python_demos_monodepth_demo_README}
 
 This topic demonstrates how to run the MonoDepth demo application, which produces a disparity map for a given input image.
 To this end, the code uses the network described in [Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-dataset Transfer](https://arxiv.org/abs/1907.01341).

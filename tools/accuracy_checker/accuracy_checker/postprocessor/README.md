@@ -1,4 +1,4 @@
-# Postprocessors
+# Postprocessors {#omz_tools_accuracy_checker_accuracy_checker_postprocessor_README}
 
 Postprocessor is function which processes prediction and/or annotation data after model infer and before metric calculation. For correct work postprocessors require specific representation format.
 (e. g. clip boxes postprocessor expects detection annotation and detection prediction for processing).

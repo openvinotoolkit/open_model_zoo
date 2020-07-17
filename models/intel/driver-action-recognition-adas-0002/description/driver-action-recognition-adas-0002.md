@@ -1,4 +1,4 @@
-# driver-action-recognition-adas-0002 (composite)
+# driver-action-recognition-adas-0002 (composite) {#omz_models_intel_driver_action_recognition_adas_0002_description_driver_action_recognition_adas_0002}
 
 ## Use Case and High-Level Description
 

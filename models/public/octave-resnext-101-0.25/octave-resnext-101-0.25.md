@@ -1,4 +1,4 @@
-# octave-resnext-101-0.25
+# octave-resnext-101-0.25 {#omz_models_public_octave_resnext_101_0_25_octave_resnext_101_0_25}
 
 ## Use Case and High-Level Description
 

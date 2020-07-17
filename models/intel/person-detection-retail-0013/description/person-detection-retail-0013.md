@@ -1,4 +1,4 @@
-# person-detection-retail-0013
+# person-detection-retail-0013 {#omz_models_intel_person_detection_retail_0013_description_person_detection_retail_0013}
 
 ## Use Case and High-Level Description
 

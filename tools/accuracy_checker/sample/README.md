@@ -1,4 +1,4 @@
-Sample
+Sample {#omz_tools_accuracy_checker_sample_README}
 ===========
 
 In this sample we will go through typical steps required to evaluate DL topologies. 
@@ -41,7 +41,7 @@ Now try edit config, to run SampLeNet on other device or framework (e.g. Caffe, 
 
 ###  Additional useful resources
 
-* <a href="https://github.com/opencv/open_model_zoo/blob/master/tools/accuracy_checker/sample/opencv_sample_config.yml">config</a>() for running SampleNet via [OpenCV launcher](../accuracy_checker/launcher/opencv_launcher_readme.md)
+* <a href="https://github.com/opencv/open_model_zoo/blob/master/tools/accuracy_checker/sample/opencv_sample_config.yml">config</a> for running SampleNet via [OpenCV launcher](../accuracy_checker/launcher/opencv_launcher_readme.md)
 * <a href="https://github.com/opencv/open_model_zoo/blob/master/tools/accuracy_checker/sample/sample_blob_config.yml">config</a> for running SampleNet using compiled executable network blob.
 
 >**NOTE**: Not all Inference Engine plugins support compiled network blob execution.

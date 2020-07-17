@@ -1,4 +1,4 @@
-# asl-recognition-0004
+# asl-recognition-0004 {#omz_models_intel_asl_recognition_0004_description_asl_recognition_0004}
 
 ## Use Case and High-Level Description
 

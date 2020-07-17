@@ -1,4 +1,4 @@
-# vgg19
+# vgg19 {#omz_models_public_vgg19_vgg19}
 
 ## Use Case and High-Level Description
 

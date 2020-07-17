@@ -1,4 +1,4 @@
-# resnet-101
+# resnet-101 {#omz_models_public_resnet_101_resnet_101}
 
 ## Use Case and High-Level Description
 

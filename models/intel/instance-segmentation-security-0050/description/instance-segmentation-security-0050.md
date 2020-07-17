@@ -1,4 +1,4 @@
-# instance-segmentation-security-0050
+# instance-segmentation-security-0050 {#omz_models_intel_instance_segmentation_security_0050_description_instance_segmentation_security_0050}
 
 ## Use Case and High-Level Description
 

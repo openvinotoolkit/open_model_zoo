@@ -1,4 +1,4 @@
-# age-gender-recognition-retail-0013
+# age-gender-recognition-retail-0013 {#omz_models_intel_age_gender_recognition_retail_0013_description_age_gender_recognition_retail_0013}
 
 ## Use Case and High-Level Description
 

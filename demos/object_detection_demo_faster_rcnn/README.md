@@ -1,4 +1,4 @@
-# Object Detection Faster R-CNN C++ Demo
+# Object Detection Faster R-CNN C++ Demo {#omz_demos_object_detection_demo_faster_rcnn_README}
 
 This topic demonstrates how to run the Object Detection demo application, which does inference using object detection
 networks like Faster R-CNN on Intel® Processors and Intel® HD Graphics.

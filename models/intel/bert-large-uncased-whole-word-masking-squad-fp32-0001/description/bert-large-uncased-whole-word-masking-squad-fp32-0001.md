@@ -1,4 +1,4 @@
-# bert-large-uncased-whole-word-masking-squad-fp32-0001
+# bert-large-uncased-whole-word-masking-squad-fp32-0001 {#omz_models_intel_bert_large_uncased_whole_word_masking_squad_fp32_0001_description_bert_large_uncased_whole_word_masking_squad_fp32_0001}
 
 ## Use Case and High-Level Description
 

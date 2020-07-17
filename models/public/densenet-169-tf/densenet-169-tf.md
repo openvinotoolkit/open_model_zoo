@@ -1,4 +1,4 @@
-# densenet-169-tf
+# densenet-169-tf {#omz_models_public_densenet_169_tf_densenet_169_tf}
 
 ## Use Case and High-Level Description
 

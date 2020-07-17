@@ -1,4 +1,4 @@
-# efficientnet-b5
+# efficientnet-b5 {#omz_models_public_efficientnet_b5_efficientnet_b5}
 
 ## Use Case and High-Level Description
 

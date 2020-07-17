@@ -1,4 +1,4 @@
-# person-reidentification-retail-0248
+# person-reidentification-retail-0248 {#omz_models_intel_person_reidentification_retail_0248_description_person_reidentification_retail_0248}
 
 ## Use Case and High-Level Description
 

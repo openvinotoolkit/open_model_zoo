@@ -1,4 +1,4 @@
-# vehicle-license-plate-detection-barrier-0106
+# vehicle-license-plate-detection-barrier-0106 {#omz_models_intel_vehicle_license_plate_detection_barrier_0106_description_vehicle_license_plate_detection_barrier_0106}
 
 ## Use Case and High-level Description
 

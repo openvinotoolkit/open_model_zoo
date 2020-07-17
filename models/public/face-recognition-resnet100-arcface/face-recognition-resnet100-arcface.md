@@ -1,4 +1,4 @@
-# face-recognition-resnet100-arcface
+# face-recognition-resnet100-arcface {#omz_models_public_face_recognition_resnet100_arcface_face_recognition_resnet100_arcface}
 
 The original name of the model is [LResNet100E-IR,ArcFace@ms1m-refine-v2](https://github.com/deepinsight/insightface/wiki/Model-Zoo).
 

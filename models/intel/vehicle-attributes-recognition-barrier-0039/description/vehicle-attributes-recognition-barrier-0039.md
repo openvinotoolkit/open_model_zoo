@@ -1,4 +1,4 @@
-# vehicle-attributes-recognition-barrier-0039
+# vehicle-attributes-recognition-barrier-0039 {#omz_models_intel_vehicle_attributes_recognition_barrier_0039_description_vehicle_attributes_recognition_barrier_0039}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# How to configure OpenCV launcher
+# How to configure OpenCV launcher {#omz_tools_accuracy_checker_accuracy_checker_launcher_opencv_launcher_readme}
 
 For enabling OpenCV launcher you need to add `framework: opencv` in launchers section of your configuration file and provide following parameters:
 

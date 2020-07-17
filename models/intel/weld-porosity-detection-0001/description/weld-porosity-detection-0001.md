@@ -1,4 +1,4 @@
-# weld-porosity-detection-0001
+# weld-porosity-detection-0001 {#omz_models_intel_weld_porosity_detection_0001_description_weld_porosity_detection_0001}
 
 ## Use Case and High-Level Description
 

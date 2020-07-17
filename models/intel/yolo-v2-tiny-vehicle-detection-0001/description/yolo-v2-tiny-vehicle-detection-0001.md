@@ -1,4 +1,4 @@
-# yolo-v2-tiny-vehicle-detection-0001
+# yolo-v2-tiny-vehicle-detection-0001 {#omz_models_intel_yolo_v2_tiny_vehicle_detection_0001_description_yolo_v2_tiny_vehicle_detection_0001}
 
 ## Use Case and High-Level Description
 

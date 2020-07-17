@@ -1,4 +1,4 @@
-# ssd-resnet-34-1200-onnx
+# ssd-resnet-34-1200-onnx {#omz_models_public_ssd_resnet34_1200_onnx_ssd_resnet34_1200_onnx}
 
 ## Use Case and High-Level Description
 

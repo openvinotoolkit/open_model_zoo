@@ -1,4 +1,4 @@
-# Classification C++ Demo
+# Classification C++ Demo {#omz_demos_classification_demo_README}
 
 The demo shows an example of using neural networks for image classification.
 

@@ -1,4 +1,4 @@
-# ssd_mobilenet_v1_coco
+# ssd_mobilenet_v1_coco {#omz_models_public_ssd_mobilenet_v1_coco_ssd_mobilenet_v1_coco}
 
 ## Use Case and High-Level Description
 

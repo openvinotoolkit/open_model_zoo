@@ -1,4 +1,4 @@
-# vehicle-detection-adas-0002
+# vehicle-detection-adas-0002 {#omz_models_intel_vehicle_detection_adas_0002_description_vehicle_detection_adas_0002}
 
 ## Use Case and High-Level Description
 

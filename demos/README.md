@@ -1,4 +1,4 @@
-Inference Engine Demos
+Inference Engine Demos {#omz_demos_README}
 ========================
 
 The Open Model Zoo demo applications are console applications that demonstrate how you can use the Inference Engine in your applications to solve specific use-cases.

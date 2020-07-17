@@ -1,4 +1,4 @@
-# landmarks-regression-retail-0009
+# landmarks-regression-retail-0009 {#omz_models_intel_landmarks_regression_retail_0009_description_landmarks_regression_retail_0009}
 
 ## Use Case and High-Level Description
 

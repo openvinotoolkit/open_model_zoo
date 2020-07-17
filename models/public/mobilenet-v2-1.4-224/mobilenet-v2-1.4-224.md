@@ -1,4 +1,4 @@
-# mobilenet-v2-1.4-224
+# mobilenet-v2-1.4-224 {#omz_models_public_mobilenet_v2_1_4_224_mobilenet_v2_1_4_224}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# googlenet-v3-pytorch
+# googlenet-v3-pytorch {#omz_models_public_googlenet_v3_pytorch_googlenet_v3_pytorch}
 
 ## Use Case and High-Level Description
 

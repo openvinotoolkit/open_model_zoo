@@ -1,4 +1,4 @@
-# unet-camvid-onnx-0001
+# unet-camvid-onnx-0001 {#omz_models_intel_unet_camvid_onnx_0001_description_unet_camvid_onnx_0001}
 
 ## Use Case and High-Level Description
 

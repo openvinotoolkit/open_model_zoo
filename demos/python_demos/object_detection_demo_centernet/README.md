@@ -1,4 +1,4 @@
-# Object Detection CenterNet Demo
+# Object Detection CenterNet Demo {#omz_demos_python_demos_object_detection_demo_centernet_README}
 
 This demo showcases Object Detection with CenterNet. The task is to identify objects as axis-aligned boxes in an image.
 CenterNet models an object as a single point - the center point of its bounding box and uses keypoint estimation to find center points and regresses to object size. The same approach is used to estimate 3D bounding box and pose.

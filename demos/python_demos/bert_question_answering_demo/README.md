@@ -1,4 +1,4 @@
-# BERT Question Answering Python* Demo
+# BERT Question Answering Python* Demo {#omz_demos_python_demos_bert_question_answering_demo_README}
 
 This README describes the Question Answering demo application that uses a Squad-tuned BERT model for inference.
 

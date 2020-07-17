@@ -1,4 +1,4 @@
-# vehicle-license-plate-detection-barrier-0123
+# vehicle-license-plate-detection-barrier-0123 {#omz_models_public_vehicle_license_plate_detection_barrier_0123_description_vehicle_license_plate_detection_barrier_0123}
 
 ## Use Case and High-level Description
 

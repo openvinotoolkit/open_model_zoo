@@ -1,4 +1,4 @@
-# se-inception
+# se-inception {#omz_models_public_se_inception_se_inception}
 
 ## Use Case and High-Level Description
 

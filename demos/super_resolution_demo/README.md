@@ -1,4 +1,4 @@
-# Super Resolution C++ Demo
+# Super Resolution C++ Demo {#omz_demos_super_resolution_demo_README}
 
 This topic demonstrates how to run Super Resolution demo application, which
 reconstructs the high resolution image from the original low resolution one.

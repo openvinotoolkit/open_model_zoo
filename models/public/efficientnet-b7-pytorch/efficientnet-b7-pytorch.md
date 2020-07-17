@@ -1,4 +1,4 @@
-# efficientnet-b7-pytorch
+# efficientnet-b7-pytorch {#omz_models_public_efficientnet_b7_pytorch_efficientnet_b7_pytorch}
 
 ## Use Case and High-Level Description
 

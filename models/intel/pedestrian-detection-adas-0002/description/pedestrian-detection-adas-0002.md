@@ -1,4 +1,4 @@
-# pedestrian-detection-adas-0002
+# pedestrian-detection-adas-0002 {#omz_models_intel_pedestrian_detection_adas_0002_description_pedestrian_detection_adas_0002}
 
 ## Use Case and High-Level Description
 

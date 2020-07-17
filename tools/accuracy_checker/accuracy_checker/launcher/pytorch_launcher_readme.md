@@ -1,4 +1,4 @@
-# How to configure PyTorch launcher
+# How to configure PyTorch launcher {#omz_tools_accuracy_checker_accuracy_checker_launcher_pytorch_launcher_readme}
 
 For enabling PyTorch launcher you need to add `framework: pytorch` in launchers section of your configuration file and provide following parameters:
 

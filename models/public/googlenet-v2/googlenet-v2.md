@@ -1,4 +1,4 @@
-# googlenet-v2
+# googlenet-v2 {#omz_models_public_googlenet_v2_googlenet_v2}
 
 ## Use Case and High-Level Description
 

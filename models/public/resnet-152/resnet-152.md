@@ -1,4 +1,4 @@
-# resnet-152
+# resnet-152 {#omz_models_public_resnet_152_resnet_152}
 
 ## Use Case and High-Level Description
 

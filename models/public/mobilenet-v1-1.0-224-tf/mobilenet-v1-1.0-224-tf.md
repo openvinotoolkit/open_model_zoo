@@ -1,4 +1,4 @@
-# mobilenet-v1-1.0-224-tf
+# mobilenet-v1-1.0-224-tf {#omz_models_public_mobilenet_v1_1_0_224_tf_mobilenet_v1_1_0_224_tf}
 
 ## Use Case and High-Level Description
 

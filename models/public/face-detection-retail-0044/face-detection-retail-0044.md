@@ -1,4 +1,4 @@
-# face-detection-retail-0044
+# face-detection-retail-0044 {#omz_models_public_face_detection_retail_0044_face_detection_retail_0044}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# densenet-161
+# densenet-161 {#omz_models_public_densenet_161_densenet_161}
 
 ## Use Case and High-Level Description
 

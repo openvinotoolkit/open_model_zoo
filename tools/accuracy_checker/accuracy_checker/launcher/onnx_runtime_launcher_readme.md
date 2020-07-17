@@ -1,4 +1,4 @@
-# How to configure ONNX Runtime launcher
+# How to configure ONNX Runtime launcher {#omz_tools_accuracy_checker_accuracy_checker_launcher_onnx_runtime_launcher_readme}
 
 For enabling ONNX Runtime launcher you need to add `framework: onnx_runtime` in launchers section of your configuration file and provide following parameters:
 

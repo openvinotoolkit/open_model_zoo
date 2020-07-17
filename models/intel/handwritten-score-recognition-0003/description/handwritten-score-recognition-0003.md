@@ -1,4 +1,4 @@
-# handwritten-score-recognition-0003
+# handwritten-score-recognition-0003 {#omz_models_intel_handwritten_score_recognition_0003_description_handwritten_score_recognition_0003}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# deeplabv3
+# deeplabv3 {#omz_models_public_deeplabv3_deeplabv3}
 
 ## Use Case and High-Level Description
 

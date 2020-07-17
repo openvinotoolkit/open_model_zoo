@@ -1,4 +1,4 @@
-# Object Detection RetinaFace Demo
+# Object Detection RetinaFace Demo {#omz_demos_python_demos_object_detection_demo_retinaface_README}
 
 This demo showcases Face Detection with RetinaFace. The task is to identify faces as axis-aligned boxes
 and their keypoints (facial landmarks) in an image.

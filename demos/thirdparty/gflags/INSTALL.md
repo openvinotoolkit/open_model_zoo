@@ -1,4 +1,4 @@
-Installing a binary distribution package
+Installing a binary distribution package {#omz_demos_thirdparty_gflags_INSTALL}
 ========================================
 
 No official binary distribution packages are provided by the gflags developers.

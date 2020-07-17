@@ -1,4 +1,4 @@
-# Adapters
+# Adapters {#omz_tools_accuracy_checker_accuracy_checker_adapters_README}
 
 Adapter is a function for conversion network infer output to metric specific format.
 You can use 2 ways to set adapter for topology:

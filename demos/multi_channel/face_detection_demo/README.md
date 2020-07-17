@@ -1,4 +1,4 @@
-# Multi-Channel Face Detection C++ Demo
+# Multi-Channel Face Detection C++ Demo {#omz_demos_multi_channel_face_detection_demo_README}
 
 This demo provides an inference pipeline for multi-channel face detection. The demo uses Face Detection network. You can use the following pre-trained model with the demo:
 * `face-detection-retail-0004`, which is a primary detection network for finding faces

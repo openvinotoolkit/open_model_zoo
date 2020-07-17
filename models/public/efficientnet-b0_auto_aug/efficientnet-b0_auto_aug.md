@@ -1,4 +1,4 @@
-# efficientnet-b0_auto_aug
+# efficientnet-b0_auto_aug {#omz_models_public_efficientnet_b0_auto_aug_efficientnet_b0_auto_aug}
 
 ## Use Case and High-Level Description
 

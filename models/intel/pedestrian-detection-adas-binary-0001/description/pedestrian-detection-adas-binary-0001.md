@@ -1,4 +1,4 @@
-# pedestrian-detection-adas-binary-0001
+# pedestrian-detection-adas-binary-0001 {#omz_models_intel_pedestrian_detection_adas_binary_0001_description_pedestrian_detection_adas_binary_0001}
 
 ## Use Case and High-Level Description
 

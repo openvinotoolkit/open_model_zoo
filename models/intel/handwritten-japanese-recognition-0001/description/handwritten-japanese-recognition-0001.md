@@ -1,4 +1,4 @@
-# handwritten-japanese-recognition-0001
+# handwritten-japanese-recognition-0001 {#omz_models_intel_handwritten_japanese_recognition_0001_description_handwritten_japanese_recognition_0001}
 
 ## Use Case and High-Level Description
 

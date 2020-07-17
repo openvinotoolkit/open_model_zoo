@@ -1,4 +1,4 @@
-# mask_rcnn_resnet50_atrous_coco
+# mask_rcnn_resnet50_atrous_coco {#omz_models_public_mask_rcnn_resnet50_atrous_coco_mask_rcnn_resnet50_atrous_coco}
 
 ## Use Case and High-Level Description
 

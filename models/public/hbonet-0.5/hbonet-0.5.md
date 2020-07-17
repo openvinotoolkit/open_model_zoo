@@ -1,4 +1,4 @@
-# hbonet-0.5
+# hbonet-0.5 {#omz_models_public_hbonet_0_5_hbonet_0_5}
 
 ## Use Case and High-Level Description
 

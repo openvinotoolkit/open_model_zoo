@@ -1,4 +1,4 @@
-# mtcnn (composite)
+# mtcnn (composite) {#omz_models_public_mtcnn_mtcnn}
 
 ## Use Case and High-Level Description
 

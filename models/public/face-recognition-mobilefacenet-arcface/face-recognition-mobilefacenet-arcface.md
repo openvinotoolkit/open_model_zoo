@@ -1,4 +1,4 @@
-# face-recognition-mobilefacenet-arcface
+# face-recognition-mobilefacenet-arcface {#omz_models_public_face_recognition_mobilefacenet_arcface_face_recognition_mobilefacenet_arcface}
 
 The original name of the model is [MobileFaceNet,ArcFace@ms1m-refine-v1](https://github.com/deepinsight/insightface/wiki/Model-Zoo).
 

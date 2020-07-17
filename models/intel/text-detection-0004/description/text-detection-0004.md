@@ -1,4 +1,4 @@
-# text-detection-0004
+# text-detection-0004 {#omz_models_intel_text_detection_0004_description_text_detection_0004}
 
 ## Use Case and High-Level Description
 

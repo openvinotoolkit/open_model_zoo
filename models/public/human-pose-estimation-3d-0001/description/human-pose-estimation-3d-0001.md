@@ -1,4 +1,4 @@
-# human-pose-estimation-3d-0001
+# human-pose-estimation-3d-0001 {#omz_models_public_human_pose_estimation_3d_0001_description_human_pose_estimation_3d_0001}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# Caffe Installation Tips
+# Caffe Installation Tips {#omz_tools_accuracy_checker_accuracy_checker_launcher_caffe_installation_readme}
 
 ## Install OpenCV 3.3 or later with Python3 bindings
 

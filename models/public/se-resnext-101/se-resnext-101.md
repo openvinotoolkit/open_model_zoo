@@ -1,4 +1,4 @@
-# se-resnext-101
+# se-resnext-101 {#omz_models_public_se_resnext_101_se_resnext_101}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# Object Detection FaceBoxes Demo
+# Object Detection FaceBoxes Demo {#omz_demos_python_demos_object_detection_demo_faceboxes_README}
 
 This demo showcases Face Detection with FaceBoxes. The task is to identify faces as axis-aligned boxes in an image.
 

@@ -1,4 +1,4 @@
-# vehicle-reid-0001
+# vehicle-reid-0001 {#omz_models_public_vehicle_reid_0001_vehicle_reid_0001}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# squeezenet1.1
+# squeezenet1.1 {#omz_models_public_squeezenet1_1_squeezenet1_1}
 
 ## Use Case and High-Level Description
 

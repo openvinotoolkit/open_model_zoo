@@ -1,4 +1,4 @@
-# Metrics
+# Metrics {#omz_tools_accuracy_checker_accuracy_checker_metrics_README}
 
 For correct work metrics require specific representation format.
 (e. g. map expects detection annotation and detection prediction for evaluation).

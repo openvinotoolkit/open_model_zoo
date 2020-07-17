@@ -1,4 +1,4 @@
-# octave-densenet-121-0.125
+# octave-densenet-121-0.125 {#omz_models_public_octave_densenet_121_0_125_octave_densenet_121_0_125}
 
 ## Use Case and High-Level Description
 

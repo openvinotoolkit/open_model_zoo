@@ -1,4 +1,4 @@
-# pedestrian-and-vehicle-detector-adas-0001
+# pedestrian-and-vehicle-detector-adas-0001 {#omz_models_intel_pedestrian_and_vehicle_detector_adas_0001_description_pedestrian_and_vehicle_detector_adas_0001}
 
 ## Use Case and High-Level Description
 

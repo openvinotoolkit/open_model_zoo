@@ -1,4 +1,4 @@
-# How to configure OpenVINO™ launcher
+# How to configure OpenVINO™ launcher {#omz_tools_accuracy_checker_accuracy_checker_launcher_dlsdk_launcher_readme}
 
 For enabling OpenVINO™ launcher you need to add `framework: dlsdk` in launchers section of your configuration file and provide following parameters:
 

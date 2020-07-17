@@ -1,4 +1,4 @@
-# head-pose-estimation-adas-0001
+# head-pose-estimation-adas-0001 {#omz_models_intel_head_pose_estimation_adas_0001_description_head_pose_estimation_adas_0001}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# faster_rcnn_inception_resnet_v2_atrous_coco
+# faster_rcnn_inception_resnet_v2_atrous_coco {#omz_models_public_faster_rcnn_inception_resnet_v2_atrous_coco_faster_rcnn_inception_resnet_v2_atrous_coco}
 
 ## Use Case and High-Level Description
 

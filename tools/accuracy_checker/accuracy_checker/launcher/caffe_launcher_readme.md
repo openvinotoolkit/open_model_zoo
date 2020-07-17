@@ -1,4 +1,4 @@
-# How to configure Caffe launcher
+# How to configure Caffe launcher {#omz_tools_accuracy_checker_accuracy_checker_launcher_caffe_launcher_readme}
 
 For enabling Caffe launcher you need to add `framework: caffe` in launchers section of your configuration file and provide following parameters:
 

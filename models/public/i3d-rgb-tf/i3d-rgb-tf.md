@@ -1,4 +1,4 @@
-# i3d-rgb-tf
+# i3d-rgb-tf {#omz_models_public_i3d_rgb_tf_i3d_rgb_tf}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# bert-small-uncased-whole-word-masking-squad-0001
+# bert-small-uncased-whole-word-masking-squad-0001 {#omz_models_intel_bert_small_uncased_whole_word_masking_squad_0001_description_bert_small_uncased_whole_word_masking_squad_0001}
 
 ## Use Case and High-Level Description
 

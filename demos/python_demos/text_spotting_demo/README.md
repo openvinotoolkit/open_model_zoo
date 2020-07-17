@@ -1,4 +1,4 @@
-# Text Spotting Python* Demo
+# Text Spotting Python* Demo {#omz_demos_python_demos_text_spotting_demo_README}
 
 This demo shows how to run Text Spotting models. Text Spotting models allow us to simultaneously detect and recognize text.
 

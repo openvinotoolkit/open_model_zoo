@@ -1,4 +1,4 @@
-# Sphereface
+# Sphereface {#omz_models_public_Sphereface_Sphereface}
 
 ## Use Case and High-Level Description
 

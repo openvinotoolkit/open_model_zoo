@@ -1,4 +1,4 @@
-# ASL Recognition Python* Demo
+# ASL Recognition Python* Demo {#omz_demos_python_demos_asl_recognition_demo_README}
 
 This demo demonstrates how to run ASL (American Sign Language) Recognition models using OpenVINO&trade; toolkit.
 

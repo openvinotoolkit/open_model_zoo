@@ -1,4 +1,4 @@
-# ctdet_coco_dlav0_512
+# ctdet_coco_dlav0_512 {#omz_models_public_ctdet_coco_dlav0_512_ctdet_coco_dlav0_512}
 
 ## Use Case and High-Level Description
 

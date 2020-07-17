@@ -1,4 +1,4 @@
-# vehicle-detection-adas-binary-0001
+# vehicle-detection-adas-binary-0001 {#omz_models_intel_vehicle_detection_adas_binary_0001_description_vehicle_detection_adas_binary_0001}
 
 ## Use Case and High-Level Description
 

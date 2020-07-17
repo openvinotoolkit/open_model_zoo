@@ -1,4 +1,4 @@
-# person-detection-action-recognition-0006
+# person-detection-action-recognition-0006 {#omz_models_intel_person_detection_action_recognition_0006_description_person_detection_action_recognition_0006}
 
 ## Use Case and High-Level Description
 

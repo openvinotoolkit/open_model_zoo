@@ -1,4 +1,4 @@
-# yolo-v2-ava-sparse-70-0001
+# yolo-v2-ava-sparse-70-0001 {#omz_models_intel_yolo_v2_ava_sparse_70_0001_description_yolo_v2_ava_sparse_70_0001}
 
 ## Use Case and High-Level Description
 

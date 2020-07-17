@@ -1,4 +1,4 @@
-# TensorFlow* Object Detection Mask R-CNNs Segmentation C++ Demo
+# TensorFlow* Object Detection Mask R-CNNs Segmentation C++ Demo {#omz_demos_mask_rcnn_demo_README}
 
 This topic demonstrates how to run the Segmentation demo application, which does inference using image segmentation networks created with Object Detection API.
 

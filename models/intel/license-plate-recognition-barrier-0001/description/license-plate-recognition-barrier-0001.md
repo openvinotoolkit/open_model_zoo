@@ -1,4 +1,4 @@
-# license-plate-recognition-barrier-0001
+# license-plate-recognition-barrier-0001 {#omz_models_intel_license_plate_recognition_barrier_0001_description_license_plate_recognition_barrier_0001}
 
 ## Use Case and High-Level Description
 

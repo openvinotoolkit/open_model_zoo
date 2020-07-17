@@ -1,4 +1,4 @@
-# instance-segmentation-security-0083
+# instance-segmentation-security-0083 {#omz_models_intel_instance_segmentation_security_0083_description_instance_segmentation_security_0083}
 
 ## Use Case and High-Level Description
 

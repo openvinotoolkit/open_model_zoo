@@ -1,4 +1,4 @@
-# inception-resnet-v2-tf
+# inception-resnet-v2-tf {#omz_models_public_inception_resnet_v2_tf_inception_resnet_v2_tf}
 
 ## Use Case and High-Level Description
 

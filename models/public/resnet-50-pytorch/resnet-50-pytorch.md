@@ -1,4 +1,4 @@
-# resnet-50-pytorch
+# resnet-50-pytorch {#omz_models_public_resnet_50_pytorch_resnet_50_pytorch}
 
 ## Use Case and High-Level Description
 

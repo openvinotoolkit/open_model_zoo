@@ -1,4 +1,4 @@
-# Object Detection YOLO\* V3 Python\* Demo, Async API Performance Showcase
+# Object Detection YOLO\* V3 Python\* Demo, Async API Performance Showcase {#omz_demos_python_demos_object_detection_demo_yolov3_async_README}
 
 This demo showcases Object Detection with Async API and one of YOLO\* V2, Tiny YOLO\* V2, or YOLO\* V3 model.
 

@@ -1,4 +1,4 @@
-# product-detection-0001
+# product-detection-0001 {#omz_models_intel_product_detection_0001_description_product_detection_0001}
 
 ## Use Case and High-Level Description
 

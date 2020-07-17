@@ -1,4 +1,4 @@
-# Multi-Channel C++ Demos
+# Multi-Channel C++ Demos {#omz_demos_multi_channel_README}
 
 The demos provide an inference pipeline for three multi-channel scenarios: face detection, human pose estimation and object detection yolov3. For more information, refer to the corresponding pages:
 * [Multi-Channel Face Detection C++ Demo](./face_detection_demo/README.md)

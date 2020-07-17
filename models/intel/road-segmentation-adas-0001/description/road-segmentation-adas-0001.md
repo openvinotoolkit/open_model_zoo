@@ -1,4 +1,4 @@
-# road-segmentation-adas-0001
+# road-segmentation-adas-0001 {#omz_models_intel_road_segmentation_adas_0001_description_road_segmentation_adas_0001}
 
 ## Use Case and High-Level Description
 

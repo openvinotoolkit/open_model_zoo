@@ -1,4 +1,4 @@
-# Custom Evaluators for Accuracy Checker
+# Custom Evaluators for Accuracy Checker {#omz_tools_accuracy_checker_accuracy_checker_evaluators_custom_evaluators_README}
 Standard Accuracy Checker validation pipeline: Annotation Reading -> Data Reading -> Preprocessing -> Inference -> Postprocessing -> Metrics.
 In some cases it can be unsuitable (e.g. if you have sequence of models). You are able to customize validation pipeline using own evaluator.
 Suggested approach based on writing python module which will describe validation approach

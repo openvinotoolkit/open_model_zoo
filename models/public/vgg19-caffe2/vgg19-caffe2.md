@@ -1,4 +1,4 @@
-# vgg19-caffe2
+# vgg19-caffe2 {#omz_models_public_vgg19_caffe2_vgg19_caffe2}
 
 ## Use Case and High-Level Description
 

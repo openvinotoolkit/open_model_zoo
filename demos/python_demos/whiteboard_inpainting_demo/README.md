@@ -1,4 +1,4 @@
-# Whiteboard Inpainting Demo
+# Whiteboard Inpainting Demo {#omz_demos_python_demos_whiteboard_inpainting_demo_README}
 
 This demo focuses on a whiteboard text overlapped by a person. The demo shows
 how to use the OpenVINO<sup>TM</sup> toolkit to detect and hide a person on a

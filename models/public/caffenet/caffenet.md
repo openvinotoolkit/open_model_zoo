@@ -1,4 +1,4 @@
-# caffenet
+# caffenet {#omz_models_public_caffenet_caffenet}
 
 ## Use Case and High-Level Description
 

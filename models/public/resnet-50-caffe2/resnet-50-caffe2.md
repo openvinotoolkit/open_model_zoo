@@ -1,4 +1,4 @@
-# resnet-50-caffe2
+# resnet-50-caffe2 {#omz_models_public_resnet_50_caffe2_resnet_50_caffe2}
 
 ## Use Case and High-Level Description
 

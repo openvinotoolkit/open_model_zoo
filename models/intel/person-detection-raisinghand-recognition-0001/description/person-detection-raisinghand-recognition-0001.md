@@ -1,4 +1,4 @@
-# person-detection-raisinghand-recognition-0001
+# person-detection-raisinghand-recognition-0001 {#omz_models_intel_person_detection_raisinghand_recognition_0001_description_person_detection_raisinghand_recognition_0001}
 
 ## Use Case and High-Level Description
 

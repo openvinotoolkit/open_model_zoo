@@ -1,4 +1,4 @@
-# icnet-camvid-ava-0001
+# icnet-camvid-ava-0001 {#omz_models_intel_icnet_camvid_ava_0001_description_icnet_camvid_ava_0001}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# Multi-Channel Object Detection Yolov3 C++ Demo
+# Multi-Channel Object Detection Yolov3 C++ Demo {#omz_demos_multi_channel_object_detection_demo_yolov3_README}
 
 This demo provides an inference pipeline for multi-channel yolo v3. The demo uses Yolo v3 Object Detection network. You can follow [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page convert the YOLO V3 and tiny YOLO V3 into IR model and execute this demo with converted IR model.
 

@@ -1,4 +1,4 @@
-# resnet18-xnor-binary-onnx-0001
+# resnet18-xnor-binary-onnx-0001 {#omz_models_intel_resnet18_xnor_binary_onnx_0001_description_resnet18_xnor_binary_onnx_0001}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# mobilenet-ssd
+# mobilenet-ssd {#omz_models_public_mobilenet_ssd_mobilenet_ssd}
 
 ## Use Case and High-Level Description
 

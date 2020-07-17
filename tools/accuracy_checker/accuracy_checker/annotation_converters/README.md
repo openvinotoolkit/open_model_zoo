@@ -1,4 +1,4 @@
-# Annotation Converters
+# Annotation Converters {#omz_tools_accuracy_checker_accuracy_checker_annotation_converters_README}
 
 Annotation converter is a function which converts annotation file to suitable for metric evaluation format.
 Each annotation converter expects specific annotation file format or data structure, which depends on original dataset.

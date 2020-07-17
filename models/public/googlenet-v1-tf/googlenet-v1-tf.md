@@ -1,4 +1,4 @@
-# googlenet-v1-tf
+# googlenet-v1-tf {#omz_models_public_googlenet_v1_tf_googlenet_v1_tf}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# Text Detection C++ Demo
+# Text Detection C++ Demo {#omz_demos_text_detection_demo_README}
 
 The demo shows an example of using neural networks to detect and recognize printed text rotated at any angle in various environment. You can use the following pre-trained models with the demo:
 

@@ -1,4 +1,4 @@
-# ssdlite_mobilenet_v2
+# ssdlite_mobilenet_v2 {#omz_models_public_ssdlite_mobilenet_v2_ssdlite_mobilenet_v2}
 
 ## Use Case and High-Level Description
 

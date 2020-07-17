@@ -1,4 +1,4 @@
-# alexnet
+# alexnet {#omz_models_public_alexnet_alexnet}
 
 ## Use Case and High-Level Description
 

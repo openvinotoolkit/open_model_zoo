@@ -1,4 +1,4 @@
-# faceboxes-pytorch
+# faceboxes-pytorch {#omz_models_public_faceboxes_pytorch_faceboxes_pytorch}
 
 ## Use Case and High-Level Description
 

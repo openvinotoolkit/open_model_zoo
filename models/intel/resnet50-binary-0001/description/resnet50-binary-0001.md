@@ -1,4 +1,4 @@
-# resnet50-binary-0001
+# resnet50-binary-0001 {#omz_models_intel_resnet50_binary_0001_description_resnet50_binary_0001}
 
 ## Use Case and High-Level Description
 

@@ -1,4 +1,4 @@
-# gaze-estimation-adas-0002
+# gaze-estimation-adas-0002 {#omz_models_intel_gaze_estimation_adas_0002_description_gaze_estimation_adas_0002}
 
 ## Use Case and High-Level Description
 

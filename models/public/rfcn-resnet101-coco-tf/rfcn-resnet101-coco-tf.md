@@ -1,4 +1,4 @@
-# rfcn-resnet101-coco-tf
+# rfcn-resnet101-coco-tf {#omz_models_public_rfcn_resnet101_coco_tf_rfcn_resnet101_coco_tf}
 
 ## Use Case and High-Level Description
 

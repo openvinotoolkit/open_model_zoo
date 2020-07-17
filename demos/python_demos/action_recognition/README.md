@@ -1,4 +1,4 @@
-Action Recognition Python* Demo
+Action Recognition Python* Demo {#omz_demos_python_demos_action_recognition_README}
 ===============================
 
 This is the demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.

@@ -1,4 +1,4 @@
-# person-detection-0101
+# person-detection-0101 {#omz_models_intel_person_detection_0101_description_person_detection_0101}
 
 ## Use Case and High-Level Description
 
