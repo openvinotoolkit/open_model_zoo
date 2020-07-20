@@ -10,21 +10,20 @@
 #include <vector>
 
 namespace {
-void softmax(std::vector<float> *data) {
+void softmax(std::vector<float>* data) {
     auto &rdata = *data;
     const size_t last_dim = 2;
     for (size_t i = 0; i < rdata.size(); i += last_dim) {
-        float m = std::max(rdata[i], rdata[i + 1]);
-        rdata[i] = std::exp(rdata[i] - m);
-        rdata[i + 1] = std::exp(rdata[i + 1] - m);
-        float s = rdata[i] + rdata[i + 1];
-        rdata[i] /= s;
-        rdata[i + 1] /= s;
+       float m = std::max(rdata[i], rdata[i+1]);
+       rdata[i] = std::exp(rdata[i] - m);
+       rdata[i + 1] = std::exp(rdata[i + 1] - m);
+       float s = rdata[i] + rdata[i + 1];
+       rdata[i] /= s;
+       rdata[i + 1] /= s;
     }
 }
 
-std::vector<float> transpose4d(const std::vector<float> &data,
-                               const std::vector<size_t> &shape,
+std::vector<float> transpose4d(const std::vector<float>& data, const std::vector<size_t> &shape,
                                const std::vector<size_t> &axes) {
     if (shape.size() != axes.size())
         throw std::runtime_error("Shape and axes must have the same dimension.");
@@ -37,7 +36,7 @@ std::vector<float> transpose4d(const std::vector<float> &data,
     size_t total_size = shape[0] * shape[1] * shape[2] * shape[3];
 
     std::vector<size_t> steps{shape[axes[1]] * shape[axes[2]] * shape[axes[3]],
-                        shape[axes[2]] * shape[axes[3]], shape[axes[3]], 1};
+                shape[axes[2]] * shape[axes[3]], shape[axes[3]], 1};
 
     size_t source_data_idx = 0;
     std::vector<float> new_data(total_size, 0);
@@ -46,10 +45,9 @@ std::vector<float> transpose4d(const std::vector<float> &data,
     for (ids[0] = 0; ids[0] < shape[0]; ids[0]++) {
         for (ids[1] = 0; ids[1] < shape[1]; ids[1]++) {
             for (ids[2] = 0; ids[2] < shape[2]; ids[2]++) {
-                for (ids[3] = 0; ids[3] < shape[3]; ids[3]++) {
-                    size_t new_data_idx =
-                        ids[axes[0]] * steps[0] + ids[axes[1]] * steps[1] +
-                        ids[axes[2]] * steps[2] + ids[axes[3]] * steps[3];
+                for (ids[3]= 0; ids[3] < shape[3]; ids[3]++) {
+                    size_t new_data_idx = ids[axes[0]] * steps[0] + ids[axes[1]] * steps[1] +
+                            ids[axes[2]] * steps[2] + ids[axes[3]] * steps[3];
                     new_data[new_data_idx] = data[source_data_idx++];
                 }
             }
@@ -58,7 +56,7 @@ std::vector<float> transpose4d(const std::vector<float> &data,
     return new_data;
 }
 
-std::vector<size_t> ieSizeToVector(const SizeVector &ie_output_dims) {
+std::vector<size_t> ieSizeToVector(const SizeVector& ie_output_dims) {
     std::vector<size_t> blob_sizes(ie_output_dims.size(), 0);
     for (size_t i = 0; i < blob_sizes.size(); ++i) {
         blob_sizes[i] = ie_output_dims[i];
@@ -69,13 +67,12 @@ std::vector<size_t> ieSizeToVector(const SizeVector &ie_output_dims) {
 std::vector<float> sliceAndGetSecondChannel(const std::vector<float> &data) {
     std::vector<float> new_data(data.size() / 2, 0);
     for (size_t i = 0; i < data.size() / 2; i++) {
-        new_data[i] = data[2 * i + 1];
+      new_data[i] = data[2 * i + 1];
     }
     return new_data;
 }
 
-std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area,
-                                         float min_height,
+std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area,float min_height,
                                          const cv::Size &image_size) {
     std::vector<cv::RotatedRect> bboxes;
     double min_val;
@@ -89,12 +86,14 @@ std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area,
         cv::Mat bbox_mask = resized_mask == i;
         std::vector<std::vector<cv::Point>> contours;
 
-        cv::findContours(bbox_mask, contours, cv::RETR_CCOMP,
-                         cv::CHAIN_APPROX_SIMPLE);
-        if (contours.empty()) continue;
+        cv::findContours(bbox_mask, contours, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
+        if (contours.empty())
+            continue;
         cv::RotatedRect r = cv::minAreaRect(contours[0]);
-        if (std::min(r.size.width, r.size.height) < min_height) continue;
-        if (r.size.area() < min_area) continue;
+        if (std::min(r.size.width, r.size.height) < min_height)
+            continue;
+        if (r.size.area() < min_area)
+            continue;
         bboxes.emplace_back(r);
     }
 
@@ -138,7 +137,7 @@ int findRoot(int point, std::unordered_map<int, int> *group_mask) {
         update_parent = true;
     }
     if (update_parent) {
-        (*group_mask)[point] = root;
+       (*group_mask)[point] = root;
     }
     return root;
 }
@@ -154,8 +153,8 @@ void join(int p1, int p2, std::unordered_map<int, int> *group_mask) {
 cv::Mat get_all(const std::vector<cv::Point> &points, int w, int h,
                 std::unordered_map<int, int> *group_mask) {
     std::unordered_map<int, int> root_map;
-    cv::Mat mask(h, w, CV_32S, cv::Scalar(0));
 
+    cv::Mat mask(h, w, CV_32S, cv::Scalar(0));
     for (const auto &point : points) {
         int point_root = findRoot(point.x + point.y * w, group_mask);
         if (root_map.find(point_root) == root_map.end()) {
@@ -167,10 +166,8 @@ cv::Mat get_all(const std::vector<cv::Point> &points, int w, int h,
     return mask;
 }
 
-cv::Mat decodeImageByJoin(const std::vector<float> &cls_data,
-                          const std::vector<int> &cls_data_shape,
-                          const std::vector<float> &link_data,
-                          const std::vector<int> &link_data_shape,
+cv::Mat decodeImageByJoin(const std::vector<float> &cls_data, const std::vector<int> & cls_data_shape,
+                          const std::vector<float> &link_data, const std::vector<int> & link_data_shape,
                           float cls_conf_threshold, float link_conf_threshold) {
     int h = cls_data_shape[1];
     int w = cls_data_shape[2];
@@ -212,13 +209,11 @@ cv::Mat decodeImageByJoin(const std::vector<float> &cls_data,
 
     return get_all(points, w, h, &group_mask);
 }
-}    // namespace
+}  // namespace
 
 std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
-                                         const cv::Size &image_size,
-                                         const cv::Size &input_shape,
-                                         float cls_conf_threshold,
-                                         float link_conf_threshold) {
+                                         const cv::Size &image_size, const cv::Size &input_shape,
+                                         float cls_conf_threshold, float link_conf_threshold) {
     const int kMinArea = 300;
     const int kMinHeight = 10;
 
@@ -227,7 +222,7 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
 
     std::vector<cv::RotatedRect> rects;
 
-    for (const auto &blob : blobs) {
+    for (const auto& blob : blobs) {
         if (blob.second->getTensorDesc().getDims()[1] == 2)
             kClsOutputName = blob.first;
         else if (blob.second->getTensorDesc().getDims()[1] == 16)
@@ -236,10 +231,11 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
 
     if (!kLocOutputName.empty() && !kClsOutputName.empty()) {
         // PostProcessing for PixelLink Text Detection model
-        auto link_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
-        size_t link_data_size = link_shape[0] * link_shape[1] * link_shape[2] * link_shape[3];
-        float *link_data_pointer =
-                blobs.at(kLocOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+    	auto link_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
+    	size_t link_data_size = link_shape[0] * link_shape[1] * link_shape[2] * link_shape[3];
+    	InferenceEngine::LockedMemory<const void> locOutputMapped = InferenceEngine::as<
+   	    InferenceEngine::MemoryBlob>(blobs.at(kLocOutputName))->rmap();
+        float *link_data_pointer = locOutputMapped.as<float *>();
         std::vector<float> link_data(link_data_pointer, link_data_pointer + link_data_size);
         link_data = transpose4d(link_data, ieSizeToVector(link_shape), {0, 2, 3, 1});
         softmax(&link_data);
@@ -252,8 +248,9 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
 
         auto cls_shape = blobs.at(kClsOutputName)->getTensorDesc().getDims();
         size_t cls_data_size = cls_shape[0] * cls_shape[1] * cls_shape[2] * cls_shape[3];
-        float *cls_data_pointer =
-                blobs.at(kClsOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+        InferenceEngine::LockedMemory<const void> clsOutputMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
+            blobs.at(kClsOutputName))->rmap();
+        float *cls_data_pointer = clsOutputMapped.as<float *>();
         std::vector<float> cls_data(cls_data_pointer, cls_data_pointer + cls_data_size);
         cls_data = transpose4d(cls_data, ieSizeToVector(cls_shape), {0, 2, 3, 1});
         softmax(&cls_data);
@@ -264,9 +261,7 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
         new_cls_data_shape[2] = static_cast<int>(cls_shape[3]);
         new_cls_data_shape[3] = static_cast<int>(cls_shape[1]) / 2;
 
-        cv::Mat mask = decodeImageByJoin(cls_data, new_cls_data_shape, link_data,
-                                         new_link_data_shape, cls_conf_threshold,
-                                         link_conf_threshold);
+        cv::Mat mask = decodeImageByJoin(cls_data, new_cls_data_shape, link_data, new_link_data_shape, cls_conf_threshold, link_conf_threshold);
         rects = maskToBoxes(mask, static_cast<float>(kMinArea),
                             static_cast<float>(kMinHeight), image_size);
 
