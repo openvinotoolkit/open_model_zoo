@@ -265,7 +265,7 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
     	rects = maskToBoxes(mask, static_cast<float>(kMinArea),
     	                    static_cast<float>(kMinHeight), image_size);
 
-	} else {
+    } else {
         // PostProcessing for Horizontal Text Detection model
     	kClsOutputName = "labels";
     	for (const auto &blob : blobs) {
