@@ -233,8 +233,8 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
         // PostProcessing for PixelLink Text Detection model
     	auto link_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
     	size_t link_data_size = link_shape[0] * link_shape[1] * link_shape[2] * link_shape[3];
-    	InferenceEngine::LockedMemory<const void> locOutputMapped = InferenceEngine::as<
-   	    InferenceEngine::MemoryBlob>(blobs.at(kLocOutputName))->rmap();
+    	InferenceEngine::LockedMemory<const void> locOutputMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
+    	    blobs.at(kLocOutputName))->rmap();
         float *link_data_pointer = locOutputMapped.as<float *>();
         std::vector<float> link_data(link_data_pointer, link_data_pointer + link_data_size);
         link_data = transpose4d(link_data, ieSizeToVector(link_shape), {0, 2, 3, 1});
@@ -279,8 +279,7 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
             auto boxes_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
             size_t boxes_data_size = boxes_shape[0] * boxes_shape[1];
             float *boxes_data_pointer =
-                blobs.at(kLocOutputName)->buffer()
-                    .as<PrecisionTrait<Precision::FP32>::value_type *>();
+                blobs.at(kLocOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
             std::vector<float> boxes_data(boxes_data_pointer,
                                           boxes_data_pointer + boxes_data_size);
 

@@ -23,7 +23,7 @@ The key benefit of this model compared to the [base model](../../text-detection-
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x704x704] - An input image in the format [BxCxHxW],
+1. Name: `input`, shape: [1x3x704x704] - An input image in the format [BxCxHxW],
    where:
 
     - B - batch size
@@ -35,14 +35,14 @@ The key benefit of this model compared to the [base model](../../text-detection-
 
 ## Outputs
 
-1. The "boxes" is a blob with shape: [N, 5], where N is the number of detected
+1. The `boxes` is a blob with shape: [N, 5], where N is the number of detected
    bounding boxes. For each detection, the description has the format:
    [`x_min`, `y_min`, `x_max`, `y_max`, `conf`],
    where:
     - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
     - `conf` - confidence for the predicted class
-2. The "labels" is a blob with shape: [N], where N is the number of detected
+2. The `labels` is a blob with shape: [N], where N is the number of detected
    bounding boxes. It contains `label` per each detected box.
 
 
