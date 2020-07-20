@@ -33,7 +33,7 @@ See this [publication](http://dcase.community/documents/workshop2019/proceedings
 
 Audio, name - `0`, shape - `1,1,1,16000`, format is `N,C,H,W` where:
 
-- `N` - number of samples
+- `N` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
@@ -42,7 +42,7 @@ Audio, name - `0`, shape - `1,1,1,16000`, format is `N,C,H,W` where:
 
 Audio, name - `0`, shape - `1,1,1,16000`, format is `N,C,H,W` where:
 
-- `N` - number of samples
+- `N` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
@@ -53,14 +53,14 @@ Audio, name - `0`, shape - `1,1,1,16000`, format is `N,C,H,W` where:
 
 Sound classifier according to DES-53 classes, name - `203`, shape - `1,53`, output data format is `N,C` where:
 
-- `N` - number of samples classified
+- `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range
 
 ### Converted Model
 
 Sound classifier according to DES-53 classes, name - `203`, shape - `1,53`, output data format is `N,C` where:
 
-- `N` - number of samples classified
+- `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range
 
 ## Legal Information
