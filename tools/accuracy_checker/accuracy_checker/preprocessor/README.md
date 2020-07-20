@@ -132,6 +132,8 @@ Accuracy Checker supports following set of preprocessors:
 * `warp_affine` - warp affine transformation. (supported only with OpenCV)
   * `src_landmarks` - source landmarks to set as markers for the warp affine transformation.
   * `dst_landmarks` - destination and target landmarks to transform `src_landmarks` to.
+  * `dst_height` - destination height size.
+  * `dst_width` - destination width size.
 * `resample_audio` - converts audio to new sample rate
   * `sample_rate` - sets new sample rate
 * `clip_audio` - slices audio into several parts with equal duration
