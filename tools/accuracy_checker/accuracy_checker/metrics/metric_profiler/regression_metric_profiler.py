@@ -6,7 +6,7 @@ class RegressionMetricProfiler(MetricProfiler):
     __provider__ = 'regression'
     fields = ['identifier', 'annotation_value', 'prediction_value', 'diff']
 
-    def generate_profiling_data(self, identifier,metric_name,  diff, annotation_value=None, prediction_value=None):
+    def generate_profiling_data(self, identifier, metric_name, diff, annotation_value=None, prediction_value=None):
         if self._last_profile and self._last_profile['identifier'] == identifier:
             self._last_profile['{}_result'.format(metric_name)] = diff
             return self._last_profile

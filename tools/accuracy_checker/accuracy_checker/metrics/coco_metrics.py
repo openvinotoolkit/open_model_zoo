@@ -113,9 +113,9 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
             compute_precision_recall(self.thresholds, [per_class_matching[i]])[0] for i, _ in enumerate(self.labels)
         ]
         for class_match, class_metric in zip(per_class_matching, per_class_result):
-            class_match['result'] = per_class_result
+            class_match['result'] = class_metric
         if self.profiler:
-            self.profiler.update(annotation.identifier, per_class_matching, self.name)
+            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(per_class_result))
         return per_class_result
 
     def evaluate(self, annotations, predictions):
@@ -426,11 +426,13 @@ def compute_oks(annotation_points, prediction_points, annotation_boxes, annotati
     return oks
 
 
-def evaluate_image(ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, thresholds, profile=False):
+def evaluate_image(
+        ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, thresholds, profile=False
+):
     thresholds_num = len(thresholds)
     gt_num = len(ground_truth)
     dt_num = len(detections)
-    gt_matched =  np.zeros((thresholds_num, gt_num))
+    gt_matched = np.zeros((thresholds_num, gt_num))
     dt_matched = np.zeros((thresholds_num, dt_num))
     gt_ignored = gt_difficult
     dt_ignored = np.zeros((thresholds_num, dt_num))
@@ -470,7 +472,8 @@ def evaluate_image(ground_truth, gt_difficult, iscrowd, detections, dt_difficult
     if profile:
         results.update({
             'dt': detections,
-            'gt': ground_truth
+            'gt': ground_truth,
+            'iou': iou
         })
 
     return results

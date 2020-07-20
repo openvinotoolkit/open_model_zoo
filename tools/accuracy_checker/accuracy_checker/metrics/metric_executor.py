@@ -41,8 +41,10 @@ class MetricsExecutor:
 
         self._dataset = dataset
         self.profile_metrics = False if dataset is None else dataset.config.get('_profile', False)
-        profiler_type = dataset.config.get('_report_type', 'csv')
-        self.profiler = ProfilingExecutor(profile_report_type=profiler_type)
+        if self.profile_metrics:
+            profiler_type = dataset.config.get('_report_type', 'csv')
+            self.profiler = ProfilingExecutor(profile_report_type=profiler_type)
+            self.profiler.set_dataset_meta(self._dataset.metadata)
 
         self.metrics = []
         self.need_store_predictions = False

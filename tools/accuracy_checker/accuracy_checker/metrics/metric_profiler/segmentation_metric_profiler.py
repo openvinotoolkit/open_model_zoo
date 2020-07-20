@@ -6,12 +6,12 @@ class SegmentationMetricProfiler(MetricProfiler):
     __provider__ = 'segmentation'
     fields = ['identifier']
 
-    def __init__(self, dump_iterations=100):
+    def __init__(self, dump_iterations=100, report_type='csv'):
         self.updated_fields = False
         self.names = []
         self.metric_names = []
 
-        super().__init__(dump_iterations)
+        super().__init__(dump_iterations, report_type)
 
     def register_metric(self, metric_name):
         self.metric_names.append(metric_name)
@@ -26,10 +26,10 @@ class SegmentationMetricProfiler(MetricProfiler):
             dumped_file_name = identifier.split('.')[0] + '.npy'
             predicted_mask.dump(str(dumping_dir / dumped_file_name))
             if not self.updated_fields:
-                self._create_fields(metric_result, metric_name)
+                self._create_fields(metric_result)
             report = {'identifier': identifier, 'predicted_mask': str(dumping_dir / dumped_file_name)}
             if self.report_type == 'json':
-                report['confusion_matrix'] = cm
+                report['confusion_matrix'] = cm.tolist()
         if np.isscalar(metric_result) or np.size(metric_result) == 1:
             report['{}_result'.format(metric_name)] = np.mean(metric_result)
             return report
@@ -46,7 +46,7 @@ class SegmentationMetricProfiler(MetricProfiler):
         return report
 
     def _create_fields(self, metric_result):
-        self.fields = ['identifier']
+        self.fields = ['identifier', 'predicted_mask']
         for metric_name in self.metric_names:
             if np.isscalar(metric_result) or np.size(metric_result) == 1:
                 self.fields.append('result')
@@ -57,4 +57,9 @@ class SegmentationMetricProfiler(MetricProfiler):
                     self.fields.extend(
                         ['class {} ({})'.format(class_id, metric_name) for class_id, _ in enumerate(metric_result)]
                     )
+        if self.report_type == 'json':
+            self.fields.append('confusion_matrix')
         self.updated_fields = True
+
+    def set_dataset_meta(self, meta):
+        self.dataset_meta = meta

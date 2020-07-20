@@ -57,11 +57,11 @@ class MetricProfiler(ClassProvider):
         profiling_data = self.generate_profiling_data(*args, **kwargs)
         self._last_profile = profiling_data
         if isinstance(profiling_data, list):
-            finished = len(profiling_data[0]) == len(self.fields)
+            finished = True
             if finished:
                 self.storage.extend(profiling_data)
         else:
-            finished = len(profiling_data) == len(self.fields)
+            finished = True
             if finished:
                 self.storage.append(profiling_data)
 
@@ -90,18 +90,21 @@ class MetricProfiler(ClassProvider):
         out_path = self.out_dir / self.report_file
         new_file = not out_path.exists()
         if not new_file:
-            with open(out_path, 'r') as f:
+            with open(str(out_path), 'r') as f:
                 out_dict = json.load(f)
             out_dict['report'].extend(self.storage)
         else:
-            out_dict = {'processing_info': {
-                'model': self.model_name,
-                'dataset': self.dataset,
-                'framework': self.framework,
-                'device': self.device,
-                'tags': self.tags
-            },
-                'report': self.storage
+            out_dict = {
+                'processing_info': {
+                    'model': self.model_name,
+                    'dataset': self.dataset,
+                    'framework': self.framework,
+                    'device': self.device,
+                    'tags': self.tags
+                },
+                'report': self.storage,
+                'report_type': self.__provider__,
+                'dataset_meta': self.dataset_meta
             }
         with open(str(out_path), 'w') as f:
             json.dump(out_dict, f)
@@ -116,6 +119,9 @@ class MetricProfiler(ClassProvider):
         self.report_file = '{}_{}_{}_{}_{}_{}'.format(
             self.model_name, self.framework, self.device, '_'.join(self.tags or []), self.dataset, self.report_file
         )
+
+    def set_dataset_meta(self, meta):
+        self.dataset_meta = meta
 
 
 def create_profiler(metric_type, metric_name):
