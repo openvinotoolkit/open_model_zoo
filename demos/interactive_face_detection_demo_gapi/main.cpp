@@ -518,7 +518,7 @@ int main(int argc, char *argv[]) {
                     out.str("");
                     out << "Total image throughput: " << std::fixed << std::setprecision(2)
                         << 1000.f / (timer["total"].getSmoothedDuration()) << " fps";
-                    cv::putText(frame, out.str(), cv::Point2f(10, 45), cv::FONT_HERSHEY_TRIPLEX, 1.2,
+                    cv::putText(frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_TRIPLEX, 1,
                                 cv::Scalar(255, 0, 0), 2);
 
                     // drawing faces
