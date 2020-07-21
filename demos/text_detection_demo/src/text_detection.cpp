@@ -72,7 +72,7 @@ std::vector<float> sliceAndGetSecondChannel(const std::vector<float> &data) {
     return new_data;
 }
 
-std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area,float min_height,
+std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area, float min_height,
                                          const cv::Size &image_size) {
     std::vector<cv::RotatedRect> bboxes;
     double min_val;
@@ -110,8 +110,7 @@ std::vector<cv::RotatedRect> coordToBoxes(const std::vector<float> &coords,
     float y_scale = image_size.height / float(input_shape.height);
 
     for (int i = 1; i <= max_bbox_idx; i++) {
-        std::vector<float> prediction(coords.begin() + (i - 1) * 5,
-                                      coords.begin() + i * 5);
+        const float *prediction = &coords[(i - 1) * 5];
         float confidence = prediction[4];
         if (confidence < std::numeric_limits<float>::epsilon()) break;
         // predictions are sorted the way that all insignificant boxes are
@@ -220,8 +219,6 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
     std::string kLocOutputName;
     std::string kClsOutputName;
 
-    std::vector<cv::RotatedRect> rects;
-
     for (const auto& blob : blobs) {
         if (blob.second->getTensorDesc().getDims()[1] == 2)
             kClsOutputName = blob.first;
@@ -262,31 +259,32 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
     	new_cls_data_shape[3] = static_cast<int>(cls_shape[1]) / 2;
 
     	cv::Mat mask = decodeImageByJoin(cls_data, new_cls_data_shape, link_data, new_link_data_shape, cls_conf_threshold, link_conf_threshold);
-    	rects = maskToBoxes(mask, static_cast<float>(kMinArea),
-    	                    static_cast<float>(kMinHeight), image_size);
+    	std::vector<cv::RotatedRect> rects = maskToBoxes(mask, static_cast<float>(kMinArea),
+    	                                                 static_cast<float>(kMinHeight), image_size);
+    	return rects;
 
     } else {
         // PostProcessing for Horizontal Text Detection model
-    	kClsOutputName = "labels";
     	for (const auto &blob : blobs) {
     	    if (blob.second->getTensorDesc().getDims()[1] == 5) {
     	        kLocOutputName = blob.first;
+    	        kClsOutputName = "labels";
     	    }
 		}
-    	if (kLocOutputName.empty() || kClsOutputName.empty()) {
+    	if (kLocOutputName.empty() || kClsOutputName.empty())
     	    throw std::runtime_error("Failed to determine output blob names");
-    	} else {
-    	    auto boxes_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
-    	    size_t boxes_data_size = boxes_shape[0] * boxes_shape[1];
-    	    float *boxes_data_pointer =
-    	        blobs.at(kLocOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-    	    std::vector<float> boxes_data(boxes_data_pointer,
-    	                                  boxes_data_pointer + boxes_data_size);
 
-    	    rects = coordToBoxes(boxes_data, static_cast<float>(kMinArea),
-								 static_cast<float>(kMinHeight),
-								 input_shape, image_size);
-    	}
+    	auto boxes_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
+    	size_t boxes_data_size = boxes_shape[0] * boxes_shape[1];
+    	InferenceEngine::LockedMemory<const void> locOutputMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
+    	    blobs.at(kLocOutputName))->rmap();
+    	float *boxes_data_pointer = locOutputMapped.as<float *>();
+    	std::vector<float> boxes_data(boxes_data_pointer,
+    	                              boxes_data_pointer + boxes_data_size);
+
+    	std::vector<cv::RotatedRect> rects = coordToBoxes(boxes_data, static_cast<float>(kMinArea),
+    	   					                              static_cast<float>(kMinHeight),
+	    					                              input_shape, image_size);
+	    return rects;
 	}
-	return rects;
 }
