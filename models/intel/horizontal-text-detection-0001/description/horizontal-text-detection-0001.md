@@ -43,7 +43,7 @@ The key benefit of this model compared to the [base model](../../text-detection-
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
     - `conf` - confidence for the predicted class
 2. The `labels` is a blob with shape: [N], where N is the number of detected
-   bounding boxes. It contains `label` per each detected box.
+   bounding boxes. In case of text detection, it is equal to `0` for each detected box.
 
 
 ## Legal Information

@@ -101,24 +101,23 @@ std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area, fl
 }
 
 std::vector<cv::RotatedRect> coordToBoxes(const float* coords,
-                                          const size_t &size_data,
+                                          size_t coords_size,
                                           float min_area, float min_height,
                                           const cv::Size &input_shape,
                                           const cv::Size &image_size) {
     std::vector<cv::RotatedRect> bboxes;
-    int max_bbox_idx = size_data / 5;
+    int num_boxes = coords_size / 5;
     float x_scale = image_size.width / float(input_shape.width);
     float y_scale = image_size.height / float(input_shape.height);
 
-    for (int i = 1; i <= max_bbox_idx; i++) {
-        const float *prediction = &coords[(i - 1) * 5];
+    for (int i = 0; i < num_boxes; i++) {
+        const float *prediction = &coords[i * 5];
         float confidence = prediction[4];
         if (confidence < std::numeric_limits<float>::epsilon()) break;
         // predictions are sorted the way that all insignificant boxes are
         // grouped together
-        cv::Point2f center =
-            cv::Point2f((prediction[0] + prediction[2]) / 2 * x_scale,
-                        (prediction[1] + prediction[3]) / 2 * y_scale);
+        cv::Point2f center = cv::Point2f((prediction[0] + prediction[2]) / 2 * x_scale,
+                                         (prediction[1] + prediction[3]) / 2 * y_scale);
         cv::Size2f size = cv::Size2f((prediction[2] - prediction[0]) * x_scale,
                                      (prediction[3] - prediction[1]) * y_scale);
         cv::RotatedRect rect = cv::RotatedRect(center, size, 0);
@@ -279,7 +278,7 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
     	size_t boxes_data_size = boxes_shape[0] * boxes_shape[1];
     	InferenceEngine::LockedMemory<const void> locOutputMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
     	    blobs.at(kLocOutputName))->rmap();
-    	float *boxes_data_pointer = locOutputMapped.as<float *>();
+    	const float *boxes_data_pointer = locOutputMapped.as<const float *>();
 
     	std::vector<cv::RotatedRect> rects = coordToBoxes(boxes_data_pointer, boxes_data_size,
     	                                                  static_cast<float>(kMinArea),
