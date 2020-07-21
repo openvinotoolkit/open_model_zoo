@@ -52,6 +52,7 @@ from .resize_super_resolution import ResizeSuperResolution
 from .resize_style_transfer import ResizeStyleTransfer
 from .crop_ground_truth_image import CropGTImage
 from .resize import Resize
+from .to_gray_scale_sr import RGB2GRAYSuperResolution
 
 
 __all__ = [
@@ -101,6 +102,7 @@ __all__ = [
 
     'ResizeSuperResolution',
     'ResizeStyleTransfer',
+    'RGB2GRAYSuperResolution',
 
     'CropGTImage',
 
