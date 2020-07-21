@@ -100,12 +100,13 @@ std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area, fl
     return bboxes;
 }
 
-std::vector<cv::RotatedRect> coordToBoxes(const std::vector<float> &coords,
+std::vector<cv::RotatedRect> coordToBoxes(const float* coords,
+                                          const size_t &size_data,
                                           float min_area, float min_height,
                                           const cv::Size &input_shape,
                                           const cv::Size &image_size) {
     std::vector<cv::RotatedRect> bboxes;
-    int max_bbox_idx = coords.size() / 5;
+    int max_bbox_idx = size_data / 5;
     float x_scale = image_size.width / float(input_shape.width);
     float y_scale = image_size.height / float(input_shape.height);
 
@@ -279,10 +280,9 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
     	InferenceEngine::LockedMemory<const void> locOutputMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
     	    blobs.at(kLocOutputName))->rmap();
     	float *boxes_data_pointer = locOutputMapped.as<float *>();
-    	std::vector<float> boxes_data(boxes_data_pointer,
-    	                              boxes_data_pointer + boxes_data_size);
 
-    	std::vector<cv::RotatedRect> rects = coordToBoxes(boxes_data, static_cast<float>(kMinArea),
+    	std::vector<cv::RotatedRect> rects = coordToBoxes(boxes_data_pointer, boxes_data_size,
+    	                                                  static_cast<float>(kMinArea),
     	   					                              static_cast<float>(kMinHeight),
 	    					                              input_shape, image_size);
 	    return rects;
