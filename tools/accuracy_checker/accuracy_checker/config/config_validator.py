@@ -152,7 +152,11 @@ class BaseField(BaseValidator):
 
     @property
     def type(self):
-        return lambda x: x
+        def type_def(x=None):
+            if x is None:
+                return str
+            return x
+        return type_def
 
     def required(self):
         return not self.optional and self.default is None
