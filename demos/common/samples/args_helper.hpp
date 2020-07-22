@@ -34,10 +34,9 @@ DEFINE_string(i, "", input_message); \
 DEFINE_bool(loop, false, loop_message);
 
 constexpr uint32_t uint32Size_tMinMax() noexcept {
-    if (std::numeric_limits<uint32_t>::max() < std::numeric_limits<size_t>::max()) {
-        return std::numeric_limits<uint32_t>::max();
-    }
-    return static_cast<uint32_t>(std::numeric_limits<size_t>::max());
+    return std::numeric_limits<uint32_t>::max() < std::numeric_limits<size_t>::max()
+        ? std::numeric_limits<uint32_t>::max()
+        : std::numeric_limits<size_t>::max();
 }
 
 /**
