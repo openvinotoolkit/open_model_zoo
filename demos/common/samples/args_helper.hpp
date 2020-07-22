@@ -29,9 +29,9 @@
 #define DEFINE_INPUT_FLAGS \
 static const char input_message[] = "Required. An input to process. The input must be a single image, a folder of " \
     "images or anything that cv::VideoCapture can process."; \
-static const char loop_input_message[] = "Optional. Enable reading the input in a loop."; \
+static const char loop_message[] = "Optional. Enable reading the input in a loop."; \
 DEFINE_string(i, "", input_message); \
-DEFINE_bool(loop_input, false, loop_input_message);
+DEFINE_bool(loop, false, loop_message);
 
 constexpr uint32_t uint32Size_tMinMax() noexcept {
     if (std::numeric_limits<uint32_t>::max() < std::numeric_limits<size_t>::max()) {

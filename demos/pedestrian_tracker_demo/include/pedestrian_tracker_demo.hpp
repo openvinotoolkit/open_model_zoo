@@ -74,7 +74,7 @@ static void showUsage() {
     std::cout << std::endl;
     std::cout << "    -h                           " << help_message << std::endl;
     std::cout << "    -i                           " << input_message << std::endl;
-    std::cout << "    -loop_input                  " << loop_input_message << std::endl;
+    std::cout << "    -loop                        " << loop_message << std::endl;
     std::cout << "    -first                       " << first_frame_message << std::endl;
     std::cout << "    -limit                       " << limit_message << std::endl;
     std::cout << "    -m_det \"<path>\"              " << pedestrian_detection_model_message << std::endl;
