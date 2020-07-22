@@ -91,7 +91,7 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
                 im_scale_x = image_meta['scale_x']
                 im_scale_y = image_meta['scale_y']
             else:
-                processed_image_size = next(image_meta['input_shape'])[1:]
+                processed_image_size = next(image_meta['input_shape'])[2:]
                 im_scale_y = processed_image_size[0] / original_image_size[0]
                 im_scale_x = processed_image_size[1] / original_image_size[1]
             boxes[:, 0::2] /= im_scale_x

@@ -429,12 +429,26 @@ class RFCNCaffe(Adapter):
         self.rois_out = self.get_value_from_config('rois_out')
 
     def process(self, raw, identifiers=None, frame_meta=None):
+        assert len(identifiers) == 1, '{} adapter support only batch size 1'.format(self.__provider__)
         raw_out = self._extract_predictions(raw, frame_meta)
         predicted_classes = raw_out[self.cls_out]
         predicted_deltas = raw_out[self.bbox_out]
         predicted_proposals = raw_out[self.rois_out]
-        x_scale = frame_meta[0]['scale_x']
-        y_scale = frame_meta[0]['scale_y']
+        meta = frame_meta[0]
+        if 'scale_x' in meta:
+            x_scale = meta['scale_x']
+            y_scale = meta['scale_y']
+        else:
+            original_image_size = meta['image_size'][:2]
+            image_input = [shape for shape in meta['input_shape'].values() if len(shape) == 4]
+            assert image_input, "image input not found"
+            image_input = image_input[0]
+            if image_input[1] == 3:
+                processed_image_size = image_input[2:]
+            else:
+                processed_image_size = image_input[1:3]
+            y_scale = processed_image_size[0] / original_image_size[0]
+            x_scale = processed_image_size[1] / original_image_size[1]
         real_det_num = np.argwhere(predicted_proposals[:, 0] == -1)
         if np.size(real_det_num) != 0:
             real_det_num = real_det_num[0, 0]
