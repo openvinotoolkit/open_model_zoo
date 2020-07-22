@@ -19,6 +19,7 @@ import numpy as np
 from .adapter import Adapter
 from ..representation import (MachineTranslationPrediction,
                               QuestionAnsweringPrediction,
+                              QuestionAnsweringEmbeddingPrediction,
                               ClassificationPrediction,
                               LanguageModelingPrediction)
 from ..config import PathField, NumberField, StringField
@@ -118,6 +119,33 @@ class QuestionAnsweringAdapter(Adapter):
             )
 
         return result
+
+class QuestionAnsweringEmbeddingAdapter(Adapter):
+    __provider__ = 'bert_question_answering_embedding'
+    prediction_types = (QuestionAnsweringEmbeddingPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'embedding': StringField(description="Output layer name for embedding vector."),
+        })
+        return parameters
+
+    def configure(self):
+        self.embedding = self.get_value_from_config('embedding')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        raw_output = self._extract_predictions(raw, frame_meta)
+        result = []
+        for identifier, embedding in zip(identifiers, raw_output[self.embedding]):
+            result.append(
+                QuestionAnsweringEmbeddingPrediction(identifier, embedding)
+            )
+
+        return result
+
+
 
 class LanguageModelingAdapter(Adapter):
     __provider__ = 'common_language_modeling'
