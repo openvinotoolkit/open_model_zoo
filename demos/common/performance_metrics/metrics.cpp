@@ -46,11 +46,11 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime,
     // Draw performance stats over frame
     Metrics metrics = getLast();
     std::ostringstream out;
-    if (!isnan(metrics.latency)) {
+    if (!std::isnan(metrics.latency)) {
         out << "Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms";
         putHighlightedText(frame, out.str(), position, cv::FONT_HERSHEY_COMPLEX, fontScale, color, thickness);
     }
-    if (!isnan(metrics.fps)) {
+    if (!std::isnan(metrics.fps)) {
         out.str("");
         out << "FPS: " << std::fixed << std::setprecision(1) << metrics.fps;
         putHighlightedText(frame, out.str(), {position.x, position.y + 30}, cv::FONT_HERSHEY_COMPLEX, fontScale, color,
