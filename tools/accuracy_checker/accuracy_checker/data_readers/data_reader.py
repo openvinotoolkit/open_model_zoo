@@ -57,6 +57,8 @@ class DataRepresentation:
             self.metadata['image_size'] = 1
         elif isinstance(data, list) and np.isscalar(data[0]):
             self.metadata['image_size'] = len(data)
+        elif isinstance(data, dict):
+            self.metadata['image_size'] = data.values().next().shape
         else:
             self.metadata['image_size'] = data.shape if not isinstance(data, list) else np.shape(data[0])
 
@@ -355,6 +357,7 @@ class NiftiImageReader(BaseReader):
 class NumpyReaderConfig(ConfigValidator):
     type = StringField(optional=True)
     keys = StringField(optional=True, default="")
+    separator = StringField(optional=True, default="@")
 
 
 class NumPyReader(BaseReader):
@@ -369,22 +372,35 @@ class NumPyReader(BaseReader):
         self.multi_infer = self.config.get('multi_infer', False)
         self.keys = self.config.get('keys', "") if self.config else ""
         self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
+        self.separator = self.config.get('separator')
         self.multi_infer = self.config.get('multi_infer', False)
         if not self.data_source:
             raise ConfigError('data_source parameter is required to create "{}" '
                               'data reader and read data'.format(self.__provider__))
 
+        self.keyRegex = {k: re.compile(k) for k in self.keys}
+        self.valRegex = re.compile(r"([^0-9]+)([0-9]+)")
+
     def read(self, data_id):
+        field_id = None
+        if self.separator:
+            field_id, data_id = data_id.split(self.separator)
+
         data = np.load(str(self.data_source / data_id))
 
         if not isinstance(data, NpzFile):
             return data
 
-        if len(self.keys) > 0:
-            res = []
-            for k in self.keys:
-                res.append(data[k])
-            return res
+        if field_id is not None:
+            key = [k for k, v in self.keyRegex.items() if v.match(field_id)]
+            if len(key):
+                # res = self.valRegex.match(field_id)
+                # recno = res.group(2)
+                recno = field_id.split('_')[-1]
+                recno = int(recno)
+                start, _ = Path(data_id).name.split('.')
+                start = int(start)
+                return data[key[0]][recno - start, :]
 
         key = next(iter(data.keys()))
         return data[key]

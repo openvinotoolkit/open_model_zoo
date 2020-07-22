@@ -75,6 +75,7 @@ from .aflw2000_3d import AFLW20003DConverter
 from .ade20k_dataset_converter import ADE20kConverter
 
 from .librispeech import LibrispeechConverter
+from .criteo_kaggle_dac import CriteoKaggleDACConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -142,4 +143,5 @@ __all__ = [
     'ADE20kConverter',
 
     'LibrispeechConverter',
+    'CriteoKaggleDACConverter',
 ]

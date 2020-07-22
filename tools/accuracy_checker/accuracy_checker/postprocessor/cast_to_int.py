@@ -17,7 +17,14 @@ limitations under the License.
 from functools import singledispatch
 import numpy as np
 from ..config import StringField
-from ..representation import DetectionAnnotation, DetectionPrediction, TextDetectionPrediction, TextDetectionAnnotation
+from ..representation import (
+    DetectionAnnotation,
+    DetectionPrediction,
+    TextDetectionPrediction,
+    TextDetectionAnnotation,
+    ClassificationAnnotation,
+    ClassificationPrediction
+)
 from .postprocessor import Postprocessor
 
 round_policies_func = {
@@ -30,8 +37,8 @@ round_policies_func = {
 
 class CastToInt(Postprocessor):
     __provider__ = 'cast_to_int'
-    annotation_types = (DetectionAnnotation, TextDetectionAnnotation)
-    prediction_types = (DetectionPrediction, TextDetectionPrediction)
+    annotation_types = (DetectionAnnotation, TextDetectionAnnotation, ClassificationAnnotation)
+    prediction_types = (DetectionPrediction, TextDetectionPrediction, ClassificationPrediction)
 
     @classmethod
     def parameters(cls):
@@ -66,6 +73,11 @@ class CastToInt(Postprocessor):
         def _(entry):
             entry.points = self.round_func(entry.points)
 
+        @cast_func.register(ClassificationAnnotation)
+        @cast_func.register(ClassificationPrediction)
+        def _(entry):
+            entry.label = self.round_func(entry.label)
+
         for annotation_ in annotation:
             cast_func(annotation_)
 
@@ -73,3 +85,16 @@ class CastToInt(Postprocessor):
             cast_func(prediction_)
 
         return annotation, prediction
+
+# class RoundToInt(Postprocessor):
+#     __provider__ = 'round_to_int'
+#
+#     def process_image(self, annotation, prediction):
+#         for a in annotation:
+#             a.label = np.round(a.label, 0)
+#
+#         for p in prediction:
+#             p.label = np.round(p.label, 0)
+#
+#         return annotation, prediction
+#
