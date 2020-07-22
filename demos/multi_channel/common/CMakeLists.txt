@@ -29,8 +29,6 @@ add_library(${TARGET_NAME} STATIC ${MAIN_SRC} ${MAIN_HEADERS})
 
 set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_PDB_NAME ${TARGET_NAME})
 
-target_include_directories(${TARGET_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../../common")
-
 if(MULTICHANNEL_DEMO_USE_TBB)
     find_package(TBB REQUIRED tbb)
     target_link_libraries(${TARGET_NAME} ${TBB_IMPORTED_TARGETS})
@@ -108,8 +106,10 @@ endif()
 
 target_include_directories(${TARGET_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_link_libraries(${TARGET_NAME} ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES})
+target_link_libraries(${TARGET_NAME}
+    PRIVATE ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES}
+    PUBLIC common)
 
 if(UNIX)
-    target_link_libraries( ${TARGET_NAME} pthread)
+    target_link_libraries(${TARGET_NAME} PRIVATE pthread)
 endif()

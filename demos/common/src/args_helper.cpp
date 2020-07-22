@@ -1,37 +1,25 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-/**
- * @brief a header file with common samples functionality
- * @file args_helper.hpp
- */
-
-#pragma once
-
-#include <algorithm>
-#include <set>
-#include <sstream>
-#include <string>
-#include <vector>
-#include <gflags/gflags.h>
-#include <iostream>
-#include <sys/stat.h>
-
-#include <samples/slog.hpp>
+#include "samples/args_helper.hpp"
+#include "samples/slog.hpp"
 
 #ifdef _WIN32
-#include <os/windows/w_dirent.h>
+#include "w_dirent.hpp"
 #else
 #include <dirent.h>
 #endif
 
-/**
-* @brief This function checks input args and existence of specified files in a given folder
-* @param arg path to a file to be checked for existence
-* @return files updated vector of verified input files
-*/
-inline void readInputFilesArguments(std::vector<std::string> &files, const std::string& arg) {
+#include <gflags/gflags.h>
+
+#include <sys/stat.h>
+
+#include <algorithm>
+#include <cctype>
+#include <sstream>
+
+void readInputFilesArguments(std::vector<std::string>& files, const std::string& arg) {
     struct stat sb;
     if (stat(arg.c_str(), &sb) != 0) {
         if (arg.compare(0, 5, "rtsp:") != 0) {
@@ -68,12 +56,7 @@ inline void readInputFilesArguments(std::vector<std::string> &files, const std::
     }
 }
 
-/**
-* @brief This function find -i/--images key in input args
-*        It's necessary to process multiple values for single key
-* @return files updated vector of verified input files
-*/
-inline void parseInputFilesArguments(std::vector<std::string> &files) {
+void parseInputFilesArguments(std::vector<std::string>& files) {
     std::vector<std::string> args = gflags::GetArgvs();
     bool readArguments = false;
     for (size_t i = 0; i < args.size(); i++) {
@@ -91,7 +74,7 @@ inline void parseInputFilesArguments(std::vector<std::string> &files) {
     }
 }
 
-inline std::vector<std::string> split(const std::string &s, char delim) {
+std::vector<std::string> split(const std::string& s, char delim) {
     std::vector<std::string> result;
     std::stringstream ss(s);
     std::string item;
@@ -102,7 +85,7 @@ inline std::vector<std::string> split(const std::string &s, char delim) {
     return result;
 }
 
-inline std::vector<std::string> parseDevices(const std::string& device_string) {
+std::vector<std::string> parseDevices(const std::string& device_string) {
     const std::string::size_type colon_position = device_string.find(":");
     if (colon_position != std::string::npos) {
         std::string device_type = device_string.substr(0, colon_position);
@@ -117,7 +100,7 @@ inline std::vector<std::string> parseDevices(const std::string& device_string) {
     return {device_string};
 }
 
-inline std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>& devices,
+std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>& devices,
                                                     const std::string& values_string) {
     //  Format: <device1>:<value1>,<device2>:<value2> or just <value>
     auto values_string_upper = values_string;
