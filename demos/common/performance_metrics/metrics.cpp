@@ -10,12 +10,8 @@
 #include <iomanip>
 
 PerformanceMetrics::PerformanceMetrics(Duration timeWindow) {
-    // 'timeWindow' defines the length of the timespan over which the 'current fps' value is calculated
+    // defines the length of the timespan over which the 'current fps' value is calculated
     timeWindowSize = timeWindow;
-
-    lastMovingStatistic = Statistic();
-    currentMovingStatistic = Statistic();
-    totalStatistic = Statistic();
 }
 
 void PerformanceMetrics::update(TimePoint lastRequestStartTime,
