@@ -10,7 +10,7 @@
 #include "detector.hpp"
 #include "pedestrian_tracker_demo.hpp"
 
-#include <images_capture.h>
+#include <images_capture/images_capture.h>
 #include <monitors/presenter.h>
 
 #include <opencv2/core.hpp>

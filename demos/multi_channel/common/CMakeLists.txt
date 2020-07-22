@@ -108,7 +108,7 @@ endif()
 
 target_include_directories(${TARGET_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_link_libraries(${TARGET_NAME} ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES})
+target_link_libraries(${TARGET_NAME} images_capture ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES})
 
 if(UNIX)
     target_link_libraries( ${TARGET_NAME} pthread)
