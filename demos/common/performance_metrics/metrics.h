@@ -29,6 +29,7 @@ public:
                 double fontScale = 0.75,
                 cv::Scalar color = {200, 10, 10},
                 int thickness = 2);
+    void reset();
     Metrics getLast() const;
     Metrics getTotal() const;
     void printTotal() const;
@@ -57,4 +58,5 @@ private:
     Statistic currentMovingStatistic;
     Statistic totalStatistic;
     TimePoint lastUpdateTime;
+    std::ostringstream message;
 };

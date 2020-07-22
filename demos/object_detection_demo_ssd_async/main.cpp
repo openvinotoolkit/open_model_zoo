@@ -321,7 +321,8 @@ int main(int argc, char *argv[]) {
         std::exception_ptr callbackException = nullptr;
         std::mutex mutex;
         std::condition_variable condVar;
-        std::map<ExecutionMode, PerformanceMetrics> modeMetrics = {{currentMode, PerformanceMetrics()}};
+        std::map<ExecutionMode, PerformanceMetrics> modeMetrics;
+        modeMetrics.insert({currentMode, PerformanceMetrics()});
         int prevModeActiveRequestCount = 0;
 
         cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
@@ -454,7 +455,7 @@ int main(int argc, char *argv[]) {
 
                         if (modeMetrics.find(currentMode) == modeMetrics.end()) {
                             modeMetrics.insert({currentMode, PerformanceMetrics()});
-                        } else modeMetrics[currentMode] = PerformanceMetrics();
+                        } else modeMetrics[currentMode].reset();
                     } else {
                         presenter.handleKey(key);
                     }
