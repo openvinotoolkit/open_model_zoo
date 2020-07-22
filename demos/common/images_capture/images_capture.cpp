@@ -16,10 +16,7 @@
 
 #include "images_capture.h"
 
-class InvalidInput : public std::invalid_argument {
-public:
-    InvalidInput() : std::invalid_argument{""} {}
-};
+class InvalidInput {};
 
 class ImreadWrapper : public ImagesCapture {
 public:
