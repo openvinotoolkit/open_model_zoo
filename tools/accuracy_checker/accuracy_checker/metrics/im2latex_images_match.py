@@ -236,7 +236,8 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         parameters = super().parameters()
         parameters.update({
             'images_dir': PathField(
-                is_directory=True, optional=False,
+                is_directory=True, optional=True,
+                check_exists=False,
                 description='path to rendered images'
             ),
             'num_threads': NumberField(value_type=int),
@@ -316,5 +317,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         pool.join()
 
     def evaluate(self, annotations, predictions):
+        if not os.path.exists(self.images_dir):
+            os.makedirs(self.images_dir)
         self.render_images(annotations, predictions)
         return self.compare_pics()
