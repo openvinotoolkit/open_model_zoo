@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-set(TARGET_NAME "common")
+set(TARGET_NAME "multi_channel_common")
 
 # Find OpenCV components if exist
 find_package(OpenCV COMPONENTS highgui QUIET)

@@ -58,7 +58,8 @@ if(MULTICHANNEL_DEMO_USE_TBB)
     endif()
 endif()
 
-target_link_libraries(${TARGET_NAME} ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} ngraph::ngraph common)
+target_link_libraries(${TARGET_NAME}
+    ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} ngraph::ngraph multi_channel_common)
 
 if(UNIX)
     target_link_libraries( ${TARGET_NAME} pthread)
