@@ -85,16 +85,3 @@ class CastToInt(Postprocessor):
             cast_func(prediction_)
 
         return annotation, prediction
-
-# class RoundToInt(Postprocessor):
-#     __provider__ = 'round_to_int'
-#
-#     def process_image(self, annotation, prediction):
-#         for a in annotation:
-#             a.label = np.round(a.label, 0)
-#
-#         for p in prediction:
-#             p.label = np.round(p.label, 0)
-#
-#         return annotation, prediction
-#

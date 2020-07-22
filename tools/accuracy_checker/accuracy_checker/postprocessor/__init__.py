@@ -67,7 +67,6 @@ __all__ = [
     'FilterByAspectRatio',
 
     'CastToInt',
-    'RoundToInt',
     'ClipBoxes',
     'NMS',
     'SoftNMS',
