@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
             devices.insert(device);
         }
         std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(devices, FLAGS_nstreams);
-        for (auto & device : devices) {
+        for (auto& device : devices) {
             if (device == "CPU") {  // CPU supports a few special performance-oriented keys
                 // limit threading for CPU portion of inference
                 if (FLAGS_nthreads != 0)
@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
         std::string imageInputName, imageInfoInputName;
         size_t netInputHeight, netInputWidth;
 
-        for (const auto & inputInfoItem : inputInfo) {
+        for (const auto& inputInfoItem : inputInfo) {
             if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
                 imageInputName = inputInfoItem.first;
                 inputInfoItem.second->setPrecision(Precision::U8);
@@ -308,7 +308,6 @@ int main(int argc, char *argv[]) {
             ExecutionMode frameMode;
         };
 
-        auto totalT0 = std::chrono::steady_clock::now();
         ExecutionMode currentMode = ExecutionMode::USER_SPECIFIED;
         const std::string imshowWindowTitle = "Detection Results";
         std::deque<InferRequest::Ptr> emptyRequests;
@@ -542,11 +541,6 @@ int main(int argc, char *argv[]) {
         // --------------------------- 8. Report metrics -------------------------------------------------------
         slog::info << slog::endl << "Metric reports:" << slog::endl;
 
-        auto totalT1 = std::chrono::steady_clock::now();
-        std::chrono::duration<double, std::chrono::milliseconds::period> totalTime = 
-            std::chrono::duration_cast<std::chrono::milliseconds>(totalT1 - totalT0);
-        std::cout << std::endl << "Total Inference time: " << totalTime.count() << " ms" << std::endl;
-
         /** Show performace results **/
         if (FLAGS_pc) {
             if (currentMode == ExecutionMode::USER_SPECIFIED) {
@@ -556,7 +550,7 @@ int main(int argc, char *argv[]) {
             } else printPerformanceCounts(*minLatencyInferRequest, std::cout, getFullDeviceName(ie, FLAGS_d));
         }
 
-        for (auto & mode : modeMetrics) {
+        for (auto& mode : modeMetrics) {
             std::cout << std::endl << "Mode: "
                 << (mode.first == ExecutionMode::USER_SPECIFIED ? "USER_SPECIFIED" : "MIN_LATENCY") << std::endl;
             mode.second.printTotal();

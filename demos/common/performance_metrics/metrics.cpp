@@ -26,7 +26,7 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime,
                                 int thickness) {
     TimePoint currentTime = Clock::now();
 
-    if (!lastUpdateTime.time_since_epoch().count()) {
+    if (lastUpdateTime == TimePoint()) {
         lastUpdateTime = currentTime;
         return;
     }
@@ -46,12 +46,11 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime,
     // Draw performance stats over frame
     Metrics metrics = getLast();
     std::ostringstream out;
-    if (metrics.latency == metrics.latency) {
-        out.str("");
+    if (!isnan(metrics.latency)) {
         out << "Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms";
         putHighlightedText(frame, out.str(), position, cv::FONT_HERSHEY_COMPLEX, fontScale, color, thickness);
     }
-    if (metrics.fps == metrics.fps) {
+    if (!isnan(metrics.fps)) {
         out.str("");
         out << "FPS: " << std::fixed << std::setprecision(1) << metrics.fps;
         putHighlightedText(frame, out.str(), {position.x, position.y + 30}, cv::FONT_HERSHEY_COMPLEX, fontScale, color,
@@ -59,29 +58,30 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime,
     }
 }
 
-PerformanceMetrics::Metrics PerformanceMetrics::getLast() {
+PerformanceMetrics::Metrics PerformanceMetrics::getLast() const {
     Metrics metrics;
 
     metrics.latency = lastMovingStatistic.frameCount != 0
-                      ? std::chrono::duration_cast<Ms>(lastMovingStatistic.latency).count()
-                        / lastMovingStatistic.frameCount
+                      ? std::chrono::duration_cast<Us>(lastMovingStatistic.latency).count()
+                        / (1.e3 * lastMovingStatistic.frameCount)
                       : std::numeric_limits<double>::signaling_NaN();
     metrics.fps = lastMovingStatistic.period != Duration::zero()
-                  ? lastMovingStatistic.frameCount / std::chrono::duration_cast<Sec>(lastMovingStatistic.period).count()
+                  ? (1.e3 * lastMovingStatistic.frameCount)
+                    / std::chrono::duration_cast<Ms>(lastMovingStatistic.period).count()
                   : std::numeric_limits<double>::signaling_NaN();
     
     return metrics;
 }
 
-PerformanceMetrics::Metrics PerformanceMetrics::getTotal() {
+PerformanceMetrics::Metrics PerformanceMetrics::getTotal() const {
     Metrics metrics;
 
     int frameCount = totalStatistic.frameCount + currentMovingStatistic.frameCount;
     if (frameCount != 0) {
-        metrics.latency = std::chrono::duration_cast<Ms>(
-            totalStatistic.latency + currentMovingStatistic.latency).count() / frameCount;
-        metrics.fps = frameCount / std::chrono::duration_cast<Sec>(
-                                        totalStatistic.period + currentMovingStatistic.period).count();
+        metrics.latency = std::chrono::duration_cast<Us>(
+            totalStatistic.latency + currentMovingStatistic.latency).count() / (1.e3 * frameCount);
+        metrics.fps = (1.e3 * frameCount) / std::chrono::duration_cast<Ms>(
+                                                totalStatistic.period + currentMovingStatistic.period).count();
     } else {
         metrics.latency = std::numeric_limits<double>::signaling_NaN();
         metrics.fps = std::numeric_limits<double>::signaling_NaN();
@@ -90,7 +90,7 @@ PerformanceMetrics::Metrics PerformanceMetrics::getTotal() {
     return metrics;
 }
 
-void PerformanceMetrics::printTotal() {
+void PerformanceMetrics::printTotal() const {
     Metrics metrics = getTotal();
 
     std::cout << "Latency: ";

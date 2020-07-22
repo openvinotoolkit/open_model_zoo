@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <samples/common.hpp>
+#include "common.hpp"
 #include <opencv2/opencv.hpp>
 
 /**
@@ -85,4 +85,26 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
                                       InferenceEngine::Layout::NHWC);
 
     return InferenceEngine::make_shared_blob<uint8_t>(tDesc, mat.data);
+}
+
+/**
+ * @brief Puts text message on the frame, highlights the text with a white border to make it distinguishable from
+ *        the background.
+ * @param frame - frame to put the text on.
+ * @param message - text of the message.
+ * @param position - bottom-left corner of the text string in the image.
+ * @param fontFace - font type.
+ * @param fontScale - font scale factor that is multiplied by the font-specific base size.
+ * @param color - text color.
+ * @param thickness - thickness of the lines used to draw a text.
+ */
+inline void putHighlightedText(cv::Mat& frame,
+                               const std::string& message,
+                               cv::Point position,
+                               int fontFace,
+                               double fontScale,
+                               cv::Scalar color,
+                               int thickness) {
+    cv::putText(frame, message, position, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness + 1);
+    cv::putText(frame, message, position, fontFace, fontScale, color, thickness);
 }
