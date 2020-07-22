@@ -69,11 +69,11 @@ public:
             if (img.data) {
                 ++readImgs;
                 readAtLeastOnce = true;
-                if (posFrames == 0 || readImgs - 1 >= posFrames) break;
+                if (readImgs - 1 >= posFrames) break;
             }
             ++fileId;
         }
-        if (!readAtLeastOnce && !(posFrames == 0 || readImgs - 1 >= posFrames))
+        if (!readAtLeastOnce && readImgs - 1 < posFrames)
             throw std::runtime_error{"Can't read the first image from " + input + " dir"};
     }
 
