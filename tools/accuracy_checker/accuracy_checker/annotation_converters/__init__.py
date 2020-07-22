@@ -30,6 +30,7 @@ from .super_resolution_converter import (
 )
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
+from .im2latex import Im2latexDatasetConverter
 from .kondate_nakayosi import KondateNakayosiRecognitionDatasetConverter
 from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter, MSCocoSingleKeypointsConverter
 from .cityscapes import CityscapesConverter
@@ -150,4 +151,5 @@ __all__ = [
     'LibrispeechConverter',
     'CriteoKaggleDACConverter',
     'FeaturesRegressionConverter',
+    'Im2latexDatasetConverter',
 ]

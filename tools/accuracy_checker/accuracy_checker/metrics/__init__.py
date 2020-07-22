@@ -92,6 +92,7 @@ from .attribute_classification import (
     AttributeClassificationPrecision,
     AttributeClassificationAccuracy
 )
+from .im2latex_images_match import Im2latexRenderBasedMetric
 
 from .speech_recognition import SpeechRecognitionWER, SpeechRecognitionCER
 from .score_class_comparison import ScoreClassComparisonMetric
@@ -184,5 +185,7 @@ __all__ = [
 
     'ScoreClassComparisonMetric',
 
-    'RocAucScore'
+    'RocAucScore',
+
+    'Im2latexRenderBasedMetric',
 ]
