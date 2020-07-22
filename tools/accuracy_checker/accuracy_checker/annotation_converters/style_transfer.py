@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from pathlib import Path
 from ..config import PathField
 from ..representation import StyleTransferAnnotation
 from .format_converter import BaseFormatConverter, ConverterReturn
@@ -36,7 +35,7 @@ class StyleTransferConverter(BaseFormatConverter):
         return parameters
 
     def configure(self):
-        self.image_dir = Path(self.get_value_from_config('images_dir'))
+        self.image_dir = self.get_value_from_config('images_dir')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_check_errors = [] if check_content else None

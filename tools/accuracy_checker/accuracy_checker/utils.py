@@ -490,7 +490,7 @@ def get_parameter_value_from_config(config, parameters, key):
     field = parameters[key]
     value = config.get(key, field.default)
     field.validate(value)
-    return value
+    return field.type(value) if value is not None else value
 
 
 def check_file_existence(file):
