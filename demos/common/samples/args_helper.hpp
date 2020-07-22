@@ -83,7 +83,7 @@ inline void readInputFilesArguments(std::vector<std::string> &files, const std::
 }
 
 /**
-* @brief This function find -i/--images key in input args
+* @brief This function finds -i/--i key in input args
 *        It's necessary to process multiple values for single key
 * @return files updated vector of verified input files
 */
@@ -91,7 +91,7 @@ inline void parseInputFilesArguments(std::vector<std::string> &files) {
     std::vector<std::string> args = gflags::GetArgvs();
     bool readArguments = false;
     for (size_t i = 0; i < args.size(); i++) {
-        if (args.at(i) == "-i") {
+        if (args.at(i) == "-i" || args.at(i) == "--i") {
             readArguments = true;
             continue;
         }
