@@ -439,7 +439,7 @@ int main(int argc, char *argv[]) {
         slog::info << "Start inference " << slog::endl;
         Timer timer;
         FLAGS_i == "cam" ?
-            stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(-1)) :
+            stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(0)) :
             stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
         stream.start();
 
@@ -546,7 +546,7 @@ int main(int argc, char *argv[]) {
             } else { // End of streaming
                 if(FLAGS_loop_video) {
                     FLAGS_i == "cam" ?
-                        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(-1)) :
+                        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(0)) :
                         stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
                     stream.start();
                 } else if (!FLAGS_no_wait) {
