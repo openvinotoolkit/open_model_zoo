@@ -185,6 +185,7 @@ More detailed information about calculation segmentation metrics you can find [h
   * `overlap` - minimum IOU threshold to consider as a true positive candidate face.
   * `relative_size` - size of detected face candidate\'s area in proportion to the size of ground truth\'s face size. This value is set to filter candidates that have high IOU but have a relatively smaller face size than ground truth face size.
 * `normalized_embedding_accuracy` - accuracy for re-identification models based on normalized dot product of embedding values. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
+  * `top_k` - the number of people with the highest probability, which will be used to decide if prediction is correct.
 * `attribute_accuracy` - accuracy for attributes in attribute classification models. Supported representations: `ContainerAnnotation` with `ClassificationAnnotation` and `ContainerPrediction` with `ClassificationPrediction`.
   * `attributes`: names of attributes.
   * `calculate_average` - allows calculation of average accuracy (default value: `True`).
