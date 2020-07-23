@@ -1,0 +1,49 @@
+models:
+  - name: parking-vehicle-detection-0001
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   intel/parking-vehicle-detection-0001/FP32/parking-vehicle-detection-0001.xml
+        weights: intel/parking-vehicle-detection-0001/FP32/parking-vehicle-detection-0001.bin
+        adapter: class_agnostic_detection
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/parking-vehicle-detection-0001/FP16/parking-vehicle-detection-0001.xml
+        weights: intel/parking-vehicle-detection-0001/FP16/parking-vehicle-detection-0001.bin
+        adapter: class_agnostic_detection
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   intel/parking-vehicle-detection-0001/FP16-INT8/parking-vehicle-detection-0001.xml
+        weights: intel/parking-vehicle-detection-0001/FP16-INT8/parking-vehicle-detection-0001.bin
+        adapter: class_agnostic_detection
+
+    datasets:
+      - name: parking-vehicle-dataset
+
+        preprocessing:
+          - type: resize
+            dst_width: 1333
+            dst_height: 800
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: cast_to_int
+          - type: filter
+            apply_to: annotation
+            height_range: 30
+            is_empty: True
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+            allow_multiple_matches_per_ignored: True
+            distinct_conf: False
+
+global_definitions: ../dataset_definitions.yml

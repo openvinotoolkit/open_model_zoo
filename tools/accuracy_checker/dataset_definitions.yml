@@ -765,6 +765,15 @@ datasets:
     dataset_meta: mrlEyes_2018_01.json
     data_source: mrlEyes_2018_01
 
+  - name: parking-vehicle-dataset
+    data_source: parking-vehicle-dataset
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: ann.xml
+      has_background: False
+    annotation: parking-vehicle.pickle
+    dataset_meta: parking-vehicle.json
+
   - name: ms_coco_style_transfer
     data_source: val2017
     annotation_conversion:
