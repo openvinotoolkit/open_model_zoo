@@ -36,7 +36,7 @@ DEFINE_bool(loop, false, loop_message);
 constexpr uint32_t uint32Size_tMinMax() noexcept {
     return std::numeric_limits<uint32_t>::max() < std::numeric_limits<size_t>::max()
         ? std::numeric_limits<uint32_t>::max()
-        : std::numeric_limits<size_t>::max();
+        : static_cast<uint32_t>(std::numeric_limits<size_t>::max());
 }
 
 /**
