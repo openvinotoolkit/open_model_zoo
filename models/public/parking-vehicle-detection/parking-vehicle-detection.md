@@ -1,12 +1,14 @@
-# mobilenet-ssd
+# Cascade-RCNN
 
 ## Use Case and High-Level Description
+  The "Cascade-RCNN" model is two-stage multibox Detection network intended to perform 
+  object detection. This model is implemented using mmdetection framework.
 
-The `mobilenet-ssd` model is a Single-Shot multibox Detection (SSD) network intended to perform object detection. This model is implemented using the Caffe\* framework. For details about this model, check out the [repository](https://github.com/chuanqi305/MobileNet-SSD).
+  The model input is a blob that consists of a single image of 1x3x800x1333 in BGR
+  order. The BGR mean values need to be subtracted
+  as follows: [123.675, 116.28, 103.53] before passing the image blob into the network. 
+  Also BGR values need to be scaled by division on following coefficients: [58.395, 57.12, 57.375]  
 
-The model input is a blob that consists of a single image of 1x3x300x300 in BGR order, also like the `densenet-121` model. The BGR mean values need to be subtracted as follows: [127.5, 127.5, 127.5] before passing the image blob into the network. In addition, values must be divided by 0.007843.
-
-The model output is a typical vector containing the tracked object data, as previously described.
 
 ## Example
 
@@ -15,13 +17,13 @@ The model output is a typical vector containing the tracked object data, as prev
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Detection     |
-| GFLOPs            | 2.316         |
-| MParams           | 5.783         |
-| Source framework  | Caffe\*         |
+| GFLOPs            | 234.46        |
+| MParams           |   tbd         |
+| Source framework  | Pytorch\*     |
 
 ## Accuracy
 
-See [https://github.com/chuanqi305/MobileNet-SSD](https://github.com/chuanqi305/MobileNet-SSD).
+TBD
 
 ## Performance
 
@@ -29,7 +31,7 @@ See [https://github.com/chuanqi305/MobileNet-SSD](https://github.com/chuanqi305/
 
 ### Original model
 
-Image, name - `prob`,  shape - `1,3,300,300`, format is `B,C,H,W` where:
+Image, name - `image`,  shape - `1,3,800,1333`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -37,48 +39,23 @@ Image, name - `prob`,  shape - `1,3,300,300`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`.
-Mean values - [127.5, 127.5, 127.5], scale value - 127.5.
-
-### Converted model
-
-Image, name - `prob`,  shape - `1,3,300,300`, format is `B,C,H,W` where:
-
-- `B` - batch size
-- `C` - channel
-- `H` - height
-- `W` - width
-
-Channel order is `BGR`
+Mean values - [123.675, 116.28, 103.53], scale value -  [58.395, 57.12, 57.375]
 
 ## Output
 
 ### Original model 
 
-The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 7`, where N is the number of detected bounding boxes. For each detection, the description has the format:
-[`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
+The array of detection summary info, names - `boxes, labels`,  shape - `[1, 1, N, 5], [N,1]`, where N is the number of detected bounding boxes. For each detection, the description has the format:
+[`x_min`, `y_min`, `x_max`, `y_max`, `conf`], where:
 
-- `image_id` - ID of the image in the batch
-- `label` - predicted class ID
 - `conf` - confidence for the predicted class
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates are in normalized format, in range [0, 1])
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates are in normalized format, in range [0, 1])
-
-### Converted model
-
-The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 7`, where N is the number of detected bounding boxes. For each detection, the description has the format:
-[`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
-
-- `image_id` - ID of the image in the batch
-- `label` - predicted class ID
-- `conf` - confidence for the predicted class
-- (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates are in normalized format, in range [0, 1])
-- (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates are in normalized format, in range [0, 1])
+and 
+[`label`] - predicted class (vehicle)
 
 ## Legal Information
-
-The original model is distributed under the following
-[license](https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/master/LICENSE):
-
+[*] Other names and brands may be claimed as the property of others.
 ```
 MIT License
 
