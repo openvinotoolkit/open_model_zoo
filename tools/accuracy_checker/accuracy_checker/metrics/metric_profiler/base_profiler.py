@@ -9,8 +9,8 @@ PROFILERS_MAPPING = {
         'accuracy_per_class',
         'classification_f1-score'
     ): 'classification',
-    ('character_recognition_accuracy', ): 'char_accyracy',
-    ('clip_accuracy', ): 'clip_accuracy',
+    ('character_recognition_accuracy', ): 'char_classification',
+    ('clip_accuracy', ): 'clip_classification',
     (
         'metthews_correlation_coef',
         'multi_accuracy',
@@ -30,7 +30,7 @@ PROFILERS_MAPPING = {
     ('psnr', 'ssim'): 'complex_regression',
     ('normed_error', 'per_point_normed_error'): 'point_regression',
     ('segmentation_accuracy', 'mean_iou', 'mean_accuracy', 'frequency_weighted_accuracy'): 'segmentation',
-    ('coco_precision', ): 'detection'
+    ('coco_precision', 'coco_recall'): 'detection'
 }
 
 

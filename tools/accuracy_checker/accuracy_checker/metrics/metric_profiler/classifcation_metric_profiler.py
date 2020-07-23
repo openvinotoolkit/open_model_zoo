@@ -57,7 +57,7 @@ class CharRecognitionMetricProfiler(MetricProfiler):
 
 
 class ClipAccuracyProfiler(MetricProfiler):
-    __provider__ = 'clip_accuracy'
+    __provider__ = 'clip_classification'
     fields = [
         'identifier', 'annotation_label', 'prediction_label', 'clip_accuracy', 'video_average', 'video_average_accuracy'
     ]
