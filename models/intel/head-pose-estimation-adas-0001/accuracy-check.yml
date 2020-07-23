@@ -1,0 +1,58 @@
+models:
+  - name: head-pose-estimation-adas-0001
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   intel/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
+        weights: intel/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
+        adapter:
+          type: head_pose
+          angle_yaw: angle_y_fc
+          angle_pitch: angle_p_fc
+          angle_roll: angle_r_fc
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
+        weights: intel/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
+        adapter:
+          type: head_pose
+          angle_yaw: angle_y_fc
+          angle_pitch: angle_p_fc
+          angle_roll: angle_r_fc
+
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   intel/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml
+        weights: intel/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.bin
+        adapter:
+          type: head_pose
+          angle_yaw: angle_y_fc
+          angle_pitch: angle_p_fc
+          angle_roll: angle_r_fc
+
+    datasets:
+      - name: head_pose
+
+        metrics:
+          - name: yaw_mae
+            type: mae
+            presenter: print_vector
+            annotation_source: yaw
+            prediction_source: angle_yaw
+
+          - name: pitch_mae
+            type: mae
+            presenter: print_vector
+            annotation_source: pitch
+            prediction_source: angle_pitch
+
+          - name: roll_mae
+            type: mae
+            presenter: print_vector
+            annotation_source: roll
+            prediction_source: angle_roll

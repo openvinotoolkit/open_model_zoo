@@ -1,0 +1,34 @@
+models:
+  - name: vehicle-reid-0001
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/vehicle-reid-0001/FP32/vehicle-reid-0001.xml
+        weights: public/vehicle-reid-0001/FP32/vehicle-reid-0001.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/vehicle-reid-0001/FP16/vehicle-reid-0001.xml
+        weights: public/vehicle-reid-0001/FP16/vehicle-reid-0001.bin
+        adapter: reid
+
+    datasets:
+      - name: veri776
+
+        preprocessing:
+          - type: resize
+            dst_width: 208
+            dst_height: 208
+            use_pillow: True
+            interpolation: BILINEAR
+
+        metrics:
+          - name: rank@1
+            type: cmc
+            top_k: 1
+
+          - type: reid_map

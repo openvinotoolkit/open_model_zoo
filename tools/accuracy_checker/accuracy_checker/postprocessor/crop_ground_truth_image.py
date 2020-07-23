@@ -20,6 +20,7 @@ from ..representation import ImageInpaintingAnnotation, ImageInpaintingPredictio
 from ..config import NumberField
 from ..utils import get_size_from_config
 
+
 class CropGTImage(Postprocessor):
     __provider__ = "crop_ground_truth_image"
 
