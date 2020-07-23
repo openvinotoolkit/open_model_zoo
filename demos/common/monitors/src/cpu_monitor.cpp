@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "cpu_monitor.h"
+#include "monitors/cpu_monitor.h"
+
 #include <algorithm>
 #ifdef _WIN32
 #include "query_wrapper.h"

@@ -19,8 +19,9 @@
 #include <ngraph/ngraph.hpp>
 
 #include <monitors/presenter.h>
-#include <samples/ocv_common.hpp>
 #include <samples/args_helper.hpp>
+#include <samples/ocv_common.hpp>
+#include <samples/slog.hpp>
 #include <cldnn/cldnn_config.hpp>
 
 #include "object_detection_demo_ssd_async.hpp"

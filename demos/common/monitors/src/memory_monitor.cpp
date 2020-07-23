@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "memory_monitor.h"
+#include "monitors/memory_monitor.h"
 
 struct MemState {
     double memTotal, usedMem, usedSwap;
