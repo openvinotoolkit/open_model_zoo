@@ -392,7 +392,7 @@ class NumPyReader(BaseReader):
 
         if field_id is not None:
             key = [k for k, v in self.keyRegex.items() if v.match(field_id)]
-            if len(key):
+            if len(key) > 0:
                 recno = field_id.split('_')[-1]
                 recno = int(recno)
                 start, _ = Path(data_id).name.split('.')

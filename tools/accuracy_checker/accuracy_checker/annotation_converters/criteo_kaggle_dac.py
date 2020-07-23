@@ -17,7 +17,7 @@ limitations under the License.
 from pathlib import Path
 import numpy as np
 
-from ..representation import OAR3DTilingSegmentationAnnotation, ClassificationAnnotation
+from ..representation import ClassificationAnnotation
 from ..config import NumberField, StringField, PathField, BoolField
 from .format_converter import BaseFormatConverter
 from .format_converter import ConverterReturn
@@ -25,7 +25,7 @@ from .format_converter import ConverterReturn
 class CriteoKaggleDACConverter(BaseFormatConverter):
 
     __provider__ = 'criteo_kaggle_dac'
-    # annotation_types = (OAR3DTilingSegmentationAnnotation, )
+    annotation_types = (ClassificationAnnotation, )
 
     @classmethod
     def parameters(cls):
@@ -34,9 +34,9 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
             'testing_file': PathField(description="Path to testing file."),
             "batch": NumberField(optional=True, default=128, description="Model batch"),
             "subsample_size": NumberField(optional=True, default=0,
-                                           description="Limit total record count to batch * subsample size"),
+                                          description="Limit total record count to batch * subsample size"),
             "validation": BoolField(optional=True, default=True,
-                                           description="Allows to use half of dataset for validation purposes"),
+                                    description="Allows to use half of dataset for validation purposes"),
             "separator": StringField(optional=True, default='#',
                                      description="Separator between input identifier and file identifier"),
             "preprocessed_dir": PathField(optional=False, is_directory=True, check_exists=True,
@@ -89,11 +89,11 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
             c_input = c_input / "{:06d}.npz".format(i)
 
             sample = {
-                    "input.1": np.log1p(x_int[i:i+self.batch,...]),
-                     "lS_i": x_cat[i:i+self.batch,...],
-                     "lS_o": np.dot(np.expand_dims(np.linspace(0, self.batch - 1, num=self.batch),-1),
-                                    np.ones((1, cat_feat)))
-                      }
+                "input.1": np.log1p(x_int[i:i+self.batch, ...]),
+                "lS_i": x_cat[i:i+self.batch, ...],
+                "lS_o": np.dot(np.expand_dims(np.linspace(0, self.batch - 1, num=self.batch), -1),
+                               np.ones((1, cat_feat)))
+            }
 
             np.savez_compressed(str(c_input), **sample)
 
@@ -107,11 +107,11 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
             for j in range(i, i + self.batch):
                 annotations.append(ClassificationAnnotation(
                     [
-                    "input.1_{}{}{}".format(j, self.separator, c_file),
-                    "lS_i_{}{}{}".format(j, self.separator, c_file),
-                    "lS_o_{}{}{}".format(j, self.separator, c_file),
+                        "input.1_{}{}{}".format(j, self.separator, c_file),
+                        "lS_i_{}{}{}".format(j, self.separator, c_file),
+                        "lS_o_{}{}{}".format(j, self.separator, c_file),
                     ],
-                    y[j,...]
+                    y[j, ...]
                 ))
 
         return ConverterReturn(annotations, None, None)
