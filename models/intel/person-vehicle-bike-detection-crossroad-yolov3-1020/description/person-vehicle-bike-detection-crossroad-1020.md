@@ -35,21 +35,21 @@ Average Precision (AP) is defined as an area under the
 [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve.
 
-Validation dataset consists of 34,757 images from various scenes and includes:
+Validation dataset consists of 34757 images from various scenes and includes:
 
 | Type of object  | Number of bounding boxes |
 |-----------------|--------------------------|
-| Vehicle         | 229,503                  |
-| Pedestrian      | 240,009                  |
-| Bike/Motorcycle | 62,643                   |
+| Vehicle         | 229503                   |
+| Pedestrian      | 240009                   |
+| Bike/Motorcycle | 62643                    |
 
 Similarly, training dataset has 219,181 images with:
 
 | Type of object  | Number of bounding boxes |
 |-----------------|--------------------------|
-| Vehicle         | 810,323                  |
-| Pedestrian      | 1,114,799                |
-| Bike/Motorcycle | 62,334                   |
+| Vehicle         | 810323                   |
+| Pedestrian      | 1114799                  |
+| Bike/Motorcycle | 62334                    |
 
 ## Performance
 
