@@ -268,10 +268,9 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
         for (const auto &blob : blobs) {
             if (blob.second->getTensorDesc().getDims()[1] == 5) {
                 kLocOutputName = blob.first;
-                kClsOutputName = "labels";
             }
         }
-        if (kLocOutputName.empty() || kClsOutputName.empty())
+        if (kLocOutputName.empty())
             throw std::runtime_error("Failed to determine output blob names");
 
         auto boxes_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
@@ -282,7 +281,7 @@ std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs,
 
         std::vector<cv::RotatedRect> rects = coordToBoxes(boxes_data_pointer, boxes_data_size,
                                                           static_cast<float>(kMinArea),
-                                                             static_cast<float>(kMinHeight),
+                                                          static_cast<float>(kMinHeight),
                                                           input_shape, image_size);
         return rects;
     }
