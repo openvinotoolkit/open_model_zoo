@@ -372,28 +372,22 @@ class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
 
 
     def evaluate(self, annotations, predictions):
-        gallery_embeddings = extract_embeddings(
-            annotations, predictions, query=False)
+        gallery_embeddings = extract_embeddings(annotations, predictions, query=False)
         gallery_person_ids = self.extract_person_id(annotations, False)
         gallery_cam_ids = self.extract_cam_id(annotations, False)
-        query_embeddings = extract_embeddings(
-            annotations, predictions, query=True)
+        query_embeddings = extract_embeddings(annotations, predictions, query=True)
         query_person_ids = self.extract_person_id(annotations, True)
         query_cam_ids = self.extract_cam_id(annotations, True)
 
-        valid_mask = self.eval_valid_matrix(
-            gallery_person_ids, gallery_cam_ids, query_person_ids, query_cam_ids)
+        valid_mask = self.eval_valid_matrix(gallery_person_ids, gallery_cam_ids, query_person_ids, query_cam_ids)
 
-        gallery_embeddings = gallery_embeddings / \
-            np.linalg.norm(gallery_embeddings, axis=1).reshape(-1, 1)
-        query_embeddings = query_embeddings / \
-            np.linalg.norm(query_embeddings, axis=1).reshape(-1, 1)
+        gallery_embeddings = gallery_embeddings / np.linalg.norm(gallery_embeddings, axis=1).reshape(-1, 1)
+        query_embeddings = query_embeddings / np.linalg.norm(query_embeddings, axis=1).reshape(-1, 1)
         dist_mat = np.matmul(query_embeddings, gallery_embeddings.transpose())
         dist_mat *= valid_mask
         sorted_idx = np.argsort(-dist_mat, axis=1)[:, :self.top_k]
 
-        apply_func = lambda row: np.fromiter(map(lambda i: gallery_person_ids[i], row),
-                                             dtype=np.int)
+        apply_func = lambda row: np.fromiter(map(lambda i: gallery_person_ids[i], row), dtype=np.int)
         pred_top_k_query_ids = np.apply_along_axis(apply_func, 1, sorted_idx).T
         query_person_ids = np.tile(query_person_ids, (self.top_k, 1))
 
