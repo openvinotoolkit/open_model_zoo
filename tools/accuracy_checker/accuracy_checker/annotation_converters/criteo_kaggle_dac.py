@@ -57,9 +57,9 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
 
         preprocessed_folder = Path(self.preprocessed_dir)
         input_folder = preprocessed_folder / "bs{}".format(self.batch) / 'input'
-        mask_folder = preprocessed_folder / "bs{}".format(self.batch) / 'mask'
 
-        _ = [folder.mkdir(parents=True) for folder in [input_folder, ] if not folder.exists()]
+        if not input_folder.exists():
+            input_folder.mkdir(parents=True)
 
         annotations = []
 
@@ -67,10 +67,10 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
         filecnt = 0
 
         data = np.load(self.src)
-        X_int = data['X_int']
-        X_cat = data['X_cat']
+        x_int = data['X_int']
+        x_cat = data['X_cat']
         y = data['y']
-        samples, cat_feat = X_cat.shape
+        samples, cat_feat = x_cat.shape
 
         samples = (samples // self.batch) * self.batch
         start = 0
@@ -83,13 +83,14 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
         for i in range(start, samples - self.batch + 1, self.batch):
             c_input = input_folder / "{:02d}".format(subfolder)
 
-            _ = [folder.mkdir(parents=True) for folder in [c_input,] if not folder.exists()]
+            if not c_input.exists():
+                c_input.mkdir(parents=True)
 
             c_input = c_input / "{:06d}.npz".format(i)
 
             sample = {
-                    "input.1": np.log1p(X_int[i:i+self.batch,...]),
-                     "lS_i": X_cat[i:i+self.batch,...],
+                    "input.1": np.log1p(x_int[i:i+self.batch,...]),
+                     "lS_i": x_cat[i:i+self.batch,...],
                      "lS_o": np.dot(np.expand_dims(np.linspace(0, self.batch - 1, num=self.batch),-1),
                                     np.ones((1, cat_feat)))
                       }
