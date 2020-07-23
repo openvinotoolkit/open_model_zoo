@@ -23,10 +23,9 @@ The key benefit of this model compared to the [base model](../../text-detection-
 
 ## Inputs
 
-1. Name: `input`, shape: [1x3x704x704] - An input image in the format [BxCxHxW],
+1. Name: `input`, shape: [1x3x704x704] - An input image in the format [1xCxHxW],
    where:
 
-    - B - batch size
     - C - number of channels
     - H - image height
     - W - image width
