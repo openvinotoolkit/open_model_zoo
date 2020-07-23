@@ -34,7 +34,7 @@ The Open Model Zoo includes the following demos:
 - [Text Spotting Python* Demo](./python_demos/text_spotting_demo/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Handwritten Japanese Recognition Python* Demo](./python_demos/handwritten_japanese_recognition_demo/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models.
 
-\* Several C++ demos referenced above have simplified implementation in Python*, located in the `python_demos` directory.
+\* Several C++ demos referenced above have simplified implementation in Python\*, located in the `python_demos` directory.
 
 ## Media Files Available for Demos
 
@@ -51,7 +51,7 @@ The table below shows the correlation between models, demos, and supported plugi
 
 | Model                                            | Demos supported on the model                                                                                 | CPU       | GPU       | MYRIAD/HDDL | HETERO:FPGA,CPU |
 |--------------------------------------------------|----------------------------------------------------------------------------------------------------------------|-----------|-----------|-------------|-----------------|
-| human-pose-estimation-3d-0001                    | [3D Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_3d_demo/README.md)    | Supported | Supported |             |                 |
+| human-pose-estimation-3d-0001                    | [3D Human Pose Estimation Python\* Demo](./python_demos/human_pose_estimation_3d_demo/README.md)    | Supported | Supported |             |                 |
 | action-recognition-0001-decoder                  | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
 | action-recognition-0001-encoder                  | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
 | driver-action-recognition-adas-0002-decoder      | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
@@ -61,8 +61,9 @@ The table below shows the correlation between models, demos, and supported plugi
 | person-reidentification-retail-0076              | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./python_demos/multi_camera_multi_target_tracking/README.md)                           | Supported | Supported | Supported   | Supported       |
 | person-reidentification-retail-0079              | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./python_demos/multi_camera_multi_target_tracking/README.md)                            | Supported | Supported | Supported   | Supported       |
 | person-vehicle-bike-detection-crossroad-0078     | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
+| person-vehicle-bike-detection-crossroad-yolov3-1020 | [Object Detection for YOLO V3 Python\* Demo](./python_demos/object_detection_demo_yolov3_async/README.md) | Supported |           |             |                 |
 | human-pose-estimation-0001                       | [Human Pose Estimation Demo](./human_pose_estimation_demo/README.md)                  | Supported | Supported | Supported   | Supported       |
-| image-retrieval-0001                             | [Image Retrieval Python* Demo](./python_demos/image_retrieval_demo/README.md)         | Supported | Supported | Supported   | Supported       |
+| image-retrieval-0001                             | [Image Retrieval Python\* Demo](./python_demos/image_retrieval_demo/README.md)         | Supported | Supported | Supported   | Supported       |
 | semantic-segmentation-adas-0001                  | [Image Segmentation Demo](./segmentation_demo/README.md)                              | Supported | Supported |             | Supported       |
 | instance-segmentation-security-0010              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
 | instance-segmentation-security-0050              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
@@ -83,13 +84,13 @@ The table below shows the correlation between models, demos, and supported plugi
 | landmarks-regression-retail-0009                 | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
 | person-detection-action-recognition-0005         | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
 | person-detection-action-recognition-teacher-0002 | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported |             | Supported       |
-| single-human-pose-estimation-0001                | [Single Human Pose Estimation Python* Demo](./python_demos/single_human_pose_estimation_demo/README.md)     | Supported | Supported |  |      |
+| single-human-pose-estimation-0001                | [Single Human Pose Estimation Python\* Demo](./python_demos/single_human_pose_estimation_demo/README.md)     | Supported | Supported |  |      |
 | single-image-super-resolution-1032               | [Super Resolution Demo](./super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
 | single-image-super-resolution-1033               | [Super Resolution Demo](./super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
 | text-detection-0003                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
 | text-detection-0004                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
 | text-recognition-0012                            | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             |                 |
-| handwritten-japanese-recognition-0001            | [Handwritten Japanese Recognition Python* Demo](./python_demos/handwritten_japanese_recognition_demo/README.md)                             | Supported        |        Supported     |        Supported     |                 |
+| handwritten-japanese-recognition-0001            | [Handwritten Japanese Recognition Python\* Demo](./python_demos/handwritten_japanese_recognition_demo/README.md)                             | Supported        |        Supported     |        Supported     |                 |
 | gaze-estimation-adas-0002                        | [Gaze Estimation Demo](./gaze_estimation_demo/README.md)                              | Supported | Supported | Supported | Supported |
 | head-pose-estimation-adas-0001                   | [Gaze Estimation Demo](./gaze_estimation_demo/README.md)                              | Supported | Supported | Supported | Supported |
 | facial-landmarks-35-adas-0002                    | [Gaze Estimation Demo](./gaze_estimation_demo/README.md)                              | Supported | Supported | Supported | Supported |
@@ -101,7 +102,7 @@ The table below shows the correlation between models, demos, and supported plugi
 | road-segmentation-adas-0001                      | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
 | vehicle-detection-adas-binary-0001               | any demo that supports SSD\*-based models, above                                                               | Supported | Supported |             |                 |
 | vehicle-detection-adas-0002                      | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
-| yolo-v2-tiny-vehicle-detection-0001              | [Object Detection for YOLO V3 C++ Demo](./python_demos/object_detection_demo_yolov3_async/README.md) | Supported |           |             |                 |
+| yolo-v2-tiny-vehicle-detection-0001              | [Object Detection for YOLO V3 Python\* Demo](./python_demos/object_detection_demo_yolov3_async/README.md) | Supported |           |             |                 |
 
 
 Notice that the FPGA support comes through a [heterogeneous execution](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_HETERO.html), for example, when the post-processing is happening on the CPU.
