@@ -66,7 +66,7 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
         self.texts_out = self.get_value_from_config('texts_out')
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
 
         classes = raw_outputs[self.classes_out]
@@ -91,7 +91,10 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
                 im_scale_x = image_meta['scale_x']
                 im_scale_y = image_meta['scale_y']
             else:
-                processed_image_size = next(image_meta['input_shape'])[2:]
+                image_input = [shape for shape in image_meta['input_shape'].values() if len(shape) == 4]
+                assert image_input, "image input not found"
+                assert len(image_input) == 1, 'several input images detected'
+                processed_image_size = image_input[0][2:]
                 im_scale_y = processed_image_size[0] / original_image_size[0]
                 im_scale_x = processed_image_size[1] / original_image_size[1]
             boxes[:, 0::2] /= im_scale_x

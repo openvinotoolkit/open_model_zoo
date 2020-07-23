@@ -40,7 +40,7 @@ class SegmentationAdapter(Adapter):
     def configure(self):
         self.make_argmax = self.launcher_config.get('make_argmax', False)
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)

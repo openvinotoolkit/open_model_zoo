@@ -47,7 +47,7 @@ class RetinaFaceAdapter(Adapter):
         else:
             self.landmark_std = 1.0
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_predictions = self._extract_predictions(raw, frame_meta)
         results = []
         for batch_id, (identifier, meta) in enumerate(zip(identifiers, frame_meta)):
@@ -244,6 +244,7 @@ class RetinaFaceAdapter(Adapter):
         original_image_size = meta['image_size'][:2]
         image_input = [shape for shape in meta['input_shape'].values() if len(shape) == 4]
         assert image_input, "image input not found"
+        assert len(image_input) == 1, 'model should have only one image input'
         image_input = image_input[0]
         if image_input[1] == 3:
             processed_image_size = image_input[2:]

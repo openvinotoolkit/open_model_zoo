@@ -72,7 +72,7 @@ class ImageProcessingAdapter(Adapter):
         self.target_out = self.get_value_from_config('target_out')
         self.cast_to_uint8 = self.get_value_from_config('cast_to_uint8')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.target_out:

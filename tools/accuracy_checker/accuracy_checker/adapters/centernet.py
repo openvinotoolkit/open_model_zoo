@@ -122,7 +122,7 @@ class CTDETAdapter(Adapter):
             dets[:, 2:4], center, scale, (width, heigth))
         return dets
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         predictions_batch = self._extract_predictions(raw, frame_meta)
         hm_batch = predictions_batch[self.center_heatmap_out]

@@ -108,7 +108,7 @@ class MaskRCNNAdapter(Adapter):
 
             self.realisation = self._process_pytorch_outputs
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         return self.realisation(raw_outputs, identifiers, frame_meta)
 
@@ -190,6 +190,7 @@ class MaskRCNNAdapter(Adapter):
             else:
                 image_input = [shape for shape in image_meta['input_shape'].values() if len(shape) == 4]
                 assert image_input, "image input not found"
+                assert len(image_input) == 1, 'several input images detected'
                 image_input = image_input[0]
                 if image_input[1] == 3:
                     processed_image_size = image_input[2:]
