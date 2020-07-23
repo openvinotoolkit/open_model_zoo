@@ -22,7 +22,7 @@
 #include <inference_engine.hpp>
 #include <ngraph/ngraph.hpp>
 
-#include <images_capture/images_capture.h>
+#include <images_capture.h>
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>

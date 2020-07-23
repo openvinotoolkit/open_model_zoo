@@ -5,5 +5,5 @@
 ie_add_sample(NAME crossroad_camera_demo
               SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
               HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/crossroad_camera_demo.hpp"
-              DEPENDENCIES images_capture monitors
+              DEPENDENCIES monitors
               OPENCV_DEPENDENCIES highgui)

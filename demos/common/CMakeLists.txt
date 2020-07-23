@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-add_subdirectory(images_capture)
+find_package(OpenCV REQUIRED COMPONENTS core imgcodecs videoio)
+
 add_subdirectory(monitors)
 
 file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*")
@@ -13,4 +14,4 @@ source_group("include" FILES ${HEADERS})
 
 add_library(common STATIC ${HEADERS} ${SOURCES})
 target_include_directories(common PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(common PRIVATE gflags)
+target_link_libraries(common PRIVATE opencv_core opencv_imgcodecs opencv_videoio gflags)

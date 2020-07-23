@@ -21,7 +21,11 @@ static const char loop_message[] = "Optional. Enable reading the input in a loop
 DEFINE_string(i, "", input_message); \
 DEFINE_bool(loop, false, loop_message);
 
-constexpr uint32_t uint32Size_tMinMax() noexcept;
+constexpr uint32_t uint32Size_tMinMax() noexcept {
+    return std::numeric_limits<uint32_t>::max() < std::numeric_limits<size_t>::max()
+        ? std::numeric_limits<uint32_t>::max()
+        : static_cast<uint32_t>(std::numeric_limits<size_t>::max());
+}
 
 /**
 * @brief This function checks input args and existence of specified files in a given folder

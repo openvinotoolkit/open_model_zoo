@@ -2,19 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <stdexcept>
-#include <string>
-#include <memory>
+#include "images_capture.h"
 
 #ifdef _WIN32
-#include <os/windows/w_dirent.h>
+#include "w_dirent.hpp"
 #else
 #include <dirent.h>
 #endif
 
 #include <opencv2/imgcodecs.hpp>
 
-#include "images_capture.h"
+#include <stdexcept>
+#include <string>
+#include <memory>
 
 class InvalidInput {};
 

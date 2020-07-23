@@ -19,12 +19,6 @@
 #include <cctype>
 #include <sstream>
 
-constexpr uint32_t uint32Size_tMinMax() noexcept {
-    return std::numeric_limits<uint32_t>::max() < std::numeric_limits<size_t>::max()
-        ? std::numeric_limits<uint32_t>::max()
-        : static_cast<uint32_t>(std::numeric_limits<size_t>::max());
-}
-
 void readInputFilesArguments(std::vector<std::string>& files, const std::string& arg) {
     struct stat sb;
     if (stat(arg.c_str(), &sb) != 0) {
