@@ -110,15 +110,15 @@ class VideoCapWrapper : public ImagesCapture {
     cv::VideoCapture cap;
     size_t imgId;
     const double posFrames;
-    size_t readLengthLimit_;
+    size_t readLengthLimit;
 
 public:
     VideoCapWrapper(const std::string &input, bool loop, double posFrames, size_t readLengthLimit,
                 double buffersize, double frameWidth, double frameHeight, double autofocus, double fourcc)
-            : ImagesCapture{loop}, imgId{0}, posFrames{posFrames}, readLengthLimit_{readLengthLimit} {
+            : ImagesCapture{loop}, imgId{0}, posFrames{posFrames} {
         try {
             cap.open(std::stoi(input));
-            readLengthLimit_ = loop ? std::numeric_limits<size_t>::max() : readLengthLimit;
+            this->readLengthLimit = loop ? std::numeric_limits<size_t>::max() : readLengthLimit;
             cap.set(cv::CAP_PROP_BUFFERSIZE, buffersize);
             cap.set(cv::CAP_PROP_FRAME_WIDTH, frameWidth);
             cap.set(cv::CAP_PROP_FRAME_HEIGHT, frameHeight);
@@ -126,12 +126,12 @@ public:
             cap.set(cv::CAP_PROP_FOURCC, fourcc);
         } catch (const std::invalid_argument&) {
             cap.open(input);
-            readLengthLimit_ = readLengthLimit;
+            this->readLengthLimit = readLengthLimit;
             if (!cap.set(cv::CAP_PROP_POS_FRAMES, posFrames))
                 throw std::runtime_error{"Can't set the frame to begin with"};
         } catch (const std::out_of_range&) {
             cap.open(input);
-            readLengthLimit_ = readLengthLimit;
+            this->readLengthLimit = readLengthLimit;
             if (!cap.set(cv::CAP_PROP_POS_FRAMES, posFrames))
                 throw std::runtime_error{"Can't set the frame to begin with"};
         }
@@ -143,7 +143,7 @@ public:
     size_t lastImgId() const override {return imgId - 1;}
 
     cv::Mat read() override {
-        if (imgId >= readLengthLimit_) {
+        if (imgId >= readLengthLimit) {
             if (loop && cap.set(cv::CAP_PROP_POS_FRAMES, posFrames)) {
                 imgId = 1;
                 cv::Mat img;
