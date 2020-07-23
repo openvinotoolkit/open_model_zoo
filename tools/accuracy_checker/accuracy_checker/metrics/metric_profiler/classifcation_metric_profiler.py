@@ -2,18 +2,18 @@ import numpy as np
 from .base_profiler import MetricProfiler
 
 
-def preprocess_prediction_label(prediction_label):
+def preprocess_prediction_list(prediction_label, data_type=int):
     if np.isscalar(prediction_label):
-        pred_label = int(prediction_label)
+        pred_label = data_type(prediction_label)
     else:
         if np.shape(prediction_label):
             pred_label = (
-                prediction_label.astype(int).tolist()
-                if len(np.shape(prediction_label)) > 1 else int(prediction_label[0])
+                prediction_label.astype(data_type).tolist()
+                if np.size(prediction_label) > 1 else data_type(prediction_label[0])
             )
         else:
-            pred_label = prediction_label.astype(int)
-            pred_label = pred_label.tolist() if isinstance(prediction_label, np.array) else ''
+            pred_label = prediction_label.astype(data_type)
+            pred_label = pred_label.tolist() if isinstance(prediction_label, type(np.array(0))) else ''
     return pred_label
 
 
@@ -21,16 +21,23 @@ class ClassificationMetricProfiler(MetricProfiler):
     __provider__ = 'classification'
     fields = ['identifier', 'annotation_label', 'prediction_label']
 
-    def generate_profiling_data(self, identifier, annotation_label, prediction_label, metric_name, metric_result):
+    def generate_profiling_data(
+            self, identifier, annotation_label, prediction_label, metric_name, metric_result, prediction_scores=None
+    ):
         if self._last_profile and self._last_profile['identifier'] == identifier:
             self._last_profile['{}_result'.format(metric_name)] = metric_result.tolist()
             return self._last_profile
-        return {
+        if 'prediction_scores' not in self.fields and self.report_type == 'json' and prediction_scores is not None:
+            self.fields.append('prediction_scores')
+        result = {
             'identifier': identifier,
             'annotation_label': int(annotation_label),
-            'prediction_label': preprocess_prediction_label(prediction_label),
-            '{}_result'.format(metric_name): metric_result.tolist()
+            'prediction_label': preprocess_prediction_list(prediction_label),
+            '{}_result'.format(metric_name): preprocess_prediction_list(metric_result, float)
         }
+        if self.report_type == 'json':
+            result['prediction_scores'] = preprocess_prediction_list(prediction_scores, float)
+        return result
 
 
 class CharRecognitionMetricProfiler(MetricProfiler):
@@ -44,8 +51,8 @@ class CharRecognitionMetricProfiler(MetricProfiler):
         return {
             'identifier': identifier,
             'annotation_label': int(annotation_label),
-            'prediction_label': preprocess_prediction_label(prediction_label),
-            '{}_result'.format(metric_name): metric_result.tolist()
+            'prediction_label': preprocess_prediction_list(prediction_label),
+            '{}_result'.format(metric_name): preprocess_prediction_list(metric_result, float)
         }
 
 
@@ -62,7 +69,7 @@ class ClipAccuracyProfiler(MetricProfiler):
         return {
             'identifier': identifier,
             'annotation_label': annotation_label,
-            'prediction_label': preprocess_prediction_label(prediction_label),
+            'prediction_label': preprocess_prediction_list(prediction_label),
             '{}_result'.format(metric_name): metric_result
         }
 
@@ -79,7 +86,7 @@ class BinaryClassificationProfiler(MetricProfiler):
         return {
             'identifier': identifier,
             'annotation_label': annotation_label,
-            'prediction_label': preprocess_prediction_label(prediction_label),
+            'prediction_label': preprocess_prediction_list(prediction_label),
             'TP': tp,
             'TN': tn,
             'FP': fp,

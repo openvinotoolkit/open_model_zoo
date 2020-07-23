@@ -24,7 +24,10 @@ class SegmentationMetricProfiler(MetricProfiler):
             report = self._last_profile
         else:
             dumped_file_name = identifier.split('.')[0] + '.npy'
-            predicted_mask.dump(str(dumping_dir / dumped_file_name))
+            mask_file = dumping_dir / dumped_file_name
+            if not mask_file.parent.exists():
+                mask_file.parent.mkdir(parents=True)
+            predicted_mask.dump(str(mask_file))
             if not self.updated_fields:
                 self._create_fields(metric_result)
             report = {'identifier': identifier, 'predicted_mask': str(dumping_dir / dumped_file_name)}
