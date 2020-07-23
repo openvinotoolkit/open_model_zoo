@@ -152,11 +152,7 @@ class BaseField(BaseValidator):
 
     @property
     def type(self):
-        def type_def(x=None):
-            if x is None:
-                return str
-            return x
-        return type_def
+        return None
 
     def required(self):
         return not self.optional and self.default is None
@@ -169,7 +165,12 @@ class BaseField(BaseValidator):
                     parameters_dict[key] = self.__dict__[key].parameters()
                 else:
                     parameters_dict[key] = self.__dict__[key]
-            parameters_dict['type'] = type(self.type()).__name__
+            data_type = self.type
+            if data_type is not None:
+                data_type = type(data_type()).__name__  # pylint:disable=E1102
+            else:
+                data_type = str.__name__
+            parameters_dict['type'] = data_type
 
         return parameters_dict
 
