@@ -490,6 +490,9 @@ def get_parameter_value_from_config(config, parameters, key):
     field = parameters[key]
     value = config.get(key, field.default)
     field.validate(value)
+    data_type = field.type
+    if value is not None and data_type is not None:
+        value = data_type(value)
     return value
 
 
