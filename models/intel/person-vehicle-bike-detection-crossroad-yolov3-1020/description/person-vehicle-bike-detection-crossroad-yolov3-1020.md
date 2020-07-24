@@ -26,7 +26,6 @@ Person/Vehicle/Bike detection.
 | AP people                       | 58.94%      |
 | AP vehicles                     | 62.05%      |
 | AP bikes/motorcycles            | 25.66%      |
-| Max objects to detect           | 200         |
 | GFlops                          | 65.98       |
 | MParams                         | 61.92       |
 | Source framework                | Keras\*     |
@@ -43,13 +42,13 @@ Validation dataset consists of 34757 images from various scenes and includes:
 | Pedestrian      | 240009                   |
 | Bike/Motorcycle | 62643                    |
 
-Similarly, training dataset has 219,181 images with:
+Similarly, training dataset has 17084 images with:
 
 | Type of object  | Number of bounding boxes |
 |-----------------|--------------------------|
-| Vehicle         | 810323                   |
-| Pedestrian      | 1114799                  |
-| Bike/Motorcycle | 62334                    |
+| Vehicle         | 121111                   |
+| Pedestrian      | 119546                   |
+| Bike/Motorcycle | 30220                    |
 
 ## Performance
 
