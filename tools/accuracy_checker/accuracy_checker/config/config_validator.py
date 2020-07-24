@@ -165,12 +165,7 @@ class BaseField(BaseValidator):
                     parameters_dict[key] = self.__dict__[key].parameters()
                 else:
                     parameters_dict[key] = self.__dict__[key]
-            data_type = self.type
-            if data_type is not None:
-                data_type = type(data_type()).__name__  # pylint:disable=E1102
-            else:
-                data_type = str.__name__
-            parameters_dict['type'] = data_type
+            parameters_dict['type'] = type((self.type or str)()).__name__
 
         return parameters_dict
 
