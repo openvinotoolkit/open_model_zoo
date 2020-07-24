@@ -67,6 +67,7 @@ KNOWN_TASK_TYPES = {
     'optical_character_recognition',
     'question_answering',
     'semantic_segmentation',
+    'sound_classification',
     'style_transfer',
 }
 

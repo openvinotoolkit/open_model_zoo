@@ -1,0 +1,37 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "AclNet" model is designed to perform sound classification. The "AclNet" model
+  is trained on a dataset of environmental sounds (DES-53). For details about the
+  model, see this paper <https://arxiv.org/pdf/1811.06669.pdf>.
+
+  The model input is a segment of PCM audio samples in [N, C, H, W] format with the
+  shape [1, 1, 1, 16000].
+
+  The model output for "AclNet" is the sound classifier output for the 53 different
+  environmental sound classes from the DES-53 database.
+task_type: sound_classification
+files:
+  - name: aclnet_des_53.onnx
+    size: 10972740
+    sha256: 33339e960c788907640e67a040ecc5355304a50eb14d22a02187e10c030bf402
+    source: https://download.01.org/opencv/models_contrib/sound_classification/aclnet/pytorch/15062020/aclnet_des_53_fp32.onnx 
+model_optimizer_args:
+  - --input_shape=[1,1,1,16000]
+  - --input=0
+  - --output=203
+  - --input_model=$dl_dir/aclnet_des_53.onnx
+framework: onnx
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

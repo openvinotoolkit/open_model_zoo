@@ -204,6 +204,14 @@ Colorization task is to predict colors of scene from grayscale image.
 | colorization-v2           | Caffe*         | [colorization-v2](./colorization-v2/colorization-v2.md) | | 64.0047 |  32.2354 |
 | colorization-v2-norebal   | Caffe*         | [colorization-v2-norebal](./colorization-v2-norebal/colorization-v2-norebal.md) | | 64.0047 |  32.2354 |
 
+## Sound Classification
+
+The task of sound classification is to predict what sounds are in an audio fragment.
+
+| Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
+| ------------------------- | ---------------| -------------- | ------ | ------- |
+| ACLNet                    | [PyTorch\*](./aclnet/aclnet.md) | aclnet | 1.4     | 2.7     |
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.
