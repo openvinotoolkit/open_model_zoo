@@ -56,7 +56,7 @@ public:
             fileId{0}, imgId{0}, posFrames{posFrames}, readLengthLimit{readLengthLimit}, input{input} {
         DIR *dir = opendir(input.c_str());
         if (!dir) throw InvalidInput{};
-        for (struct dirent *ent = readdir(dir); ent != nullptr; ent = readdir(dir))
+        while (struct dirent *ent = readdir(dir))
             if (strcmp(ent->d_name, ".") && strcmp(ent->d_name, ".."))
                 names.emplace_back(ent->d_name);
         closedir(dir);
