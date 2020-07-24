@@ -6,7 +6,7 @@ The `AclNet` model is designed to perform sound classification.
 The `AclNet` model is trained on a dataset of environmental sounds (DES-53).
 For details about the model, see this [paper](https://arxiv.org/pdf/1811.06669.pdf).
 
-The model input is a segment of PCM audio samples in [N, C, H, W] format with the shape [1, 1, 1, 16000].
+The model input is a segment of PCM audio samples in [N, C, 1, L] format.
 
 The model output for `AclNet` is the sound classifier output for the 53 different environmental sound classes from the DES-53 database.
 
@@ -31,21 +31,19 @@ See this [publication](http://dcase.community/documents/workshop2019/proceedings
 
 ### Original Model
 
-Audio, name - `0`, shape - `1,1,1,16000`, format is `N,C,H,W` where:
+Audio, name - `0`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 - `N` - batch size
 - `C` - channel
-- `H` - height
-- `W` - width
+- `L` - number of PCM samples (minimum value is 16000)
 
 ### Converted Model
 
-Audio, name - `0`, shape - `1,1,1,16000`, format is `N,C,H,W` where:
+Audio, name - `0`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 - `N` - batch size
 - `C` - channel
-- `H` - height
-- `W` - width
+- `L` - number of PCM samples (minimum value is 16000)
 
 ## Output
 
