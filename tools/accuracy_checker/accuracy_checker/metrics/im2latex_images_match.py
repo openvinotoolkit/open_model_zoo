@@ -23,13 +23,14 @@ import shlex
 import shutil
 import subprocess
 import sys
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 from multiprocessing.dummy import Pool as ThreadPool
 from threading import Timer
 
 
 from ..config import PathField, NumberField
 from .metric import FullDatasetEvaluationMetric
+from ..representation import CharacterRecognitionAnnotation, CharacterRecognitionPrediction
 
 MAX_PX_ROW_DIFF = 3
 TIMEOUT = 10
@@ -50,9 +51,33 @@ template = r"""
 """
 
 
+def crop_image(img, output_path, default_size=None):
+    old_im = cv.imread(img, cv.IMREAD_GRAYSCALE)
+    img_data = np.copy(old_im)
+    nnz_inds = np.where(img_data != 255)
+    if len(nnz_inds[0]) == 0:
+        if not default_size:
+            cv.imwrite(output_path, old_im)
+            return False
+        else:
+            assert len(default_size) == 2, default_size
+            x_min, y_min, x_max, y_max = 0, 0, default_size[0], default_size[1]
+            old_im = old_im[y_min: y_max + 1, x_min, x_max + 1]
+            cv.imwrite(output_path, old_im)
+            return False
+    y_min = np.min(nnz_inds[0])
+    y_max = np.max(nnz_inds[0])
+    x_min = np.min(nnz_inds[1])
+    x_max = np.max(nnz_inds[1])
+
+    old_im = old_im[y_min: y_max + 1, x_min: x_max + 1]
+    cv.imwrite(output_path, old_im)
+    return True
+
+
 def run(cmd, timeout_sec):
     proc = subprocess.Popen(cmd, shell=True)
-    def kill_proc(p): return p.kill()
+    kill_proc = lambda p: p.kill()
     timer = Timer(timeout_sec, kill_proc, [proc])
     try:
         timer.start()
@@ -97,8 +122,8 @@ def render_routine(line):
     Args:
         line (tuple): formula idx, formula string, path to store rendered image
     """
-    idx, formula, out_path = line
-    output_path = os.path.join(out_path, '{}.png'.format(idx))
+    formula, file_idx, folder_path = line
+    output_path = os.path.join(folder_path, file_idx)
     pre_name = output_path.replace('/', '_').replace('.', '_')
     formula = preprocess_formula(formula)
     if not os.path.exists(output_path):
@@ -106,7 +131,7 @@ def render_routine(line):
         log_filename = pre_name + '.log'
         aux_filename = pre_name + '.aux'
         with open(tex_filename, "w") as w:
-            w.write(template.format(formula))
+            w.write(template % formula)
         run("pdflatex -interaction=nonstopmode {}  >/dev/null".format(tex_filename), TIMEOUT)
         os.remove(tex_filename)
         os.remove(log_filename)
@@ -114,16 +139,16 @@ def render_routine(line):
         pdf_filename = tex_filename[:-4] + '.pdf'
         png_filename = tex_filename[:-4] + '.png'
         if not os.path.exists(pdf_filename):
-            logging.info('ERROR: {} cannot compile\n'.format(idx))
+            logging.info('ERROR: {} cannot compile\n'.format(file_idx))
         else:
             os.system("convert -density 200 -quality 100 %s %s" % (pdf_filename, png_filename))
             os.remove(pdf_filename)
             if os.path.exists(png_filename):
-                shutil.copy(png_filename, output_path)
+                crop_image(png_filename, output_path)
                 os.remove(png_filename)
 
 
-def match_images(im1, im2, out_path=None, max_pixel_column_diff=0):
+def match_images(params):
     """Function for single comparing two images
 
     Args:
@@ -136,9 +161,10 @@ def match_images(im1, im2, out_path=None, max_pixel_column_diff=0):
     Returns:
         Tuple of booleans: match with space (as is), match without space
     """
-    im1 = cv.imread(im1)
-    im2 = cv.imread(im2)
-    if not im2:
+    im1, im2, out_path, max_pixel_column_diff = params
+    im1 = cv.imread(im1, cv.IMREAD_GRAYSCALE)
+    im2 = cv.imread(im2, cv.IMREAD_GRAYSCALE)
+    if im2 is None:
         # image 2 not rendered
         return False, False
 
@@ -230,6 +256,8 @@ def match_images(im1, im2, out_path=None, max_pixel_column_diff=0):
 
 class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
     __provider__ = 'im2latex_match_images_metric'
+    annotation_types = (CharacterRecognitionAnnotation, )
+    prediction_types = (CharacterRecognitionPrediction, )
 
     @classmethod
     def parameters(cls):
@@ -240,7 +268,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
                 check_exists=False,
                 description='path to rendered images'
             ),
-            'num_threads': NumberField(value_type=int),
+            'num_threads': NumberField(value_type=int, optional=True),
             'max_pixel_column_diff': NumberField(value_type=int)
         })
 
@@ -249,6 +277,8 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
     def configure(self):
         self.images_dir = self.get_value_from_config('images_dir')
         self.num_threads = self.get_value_from_config('num_threads')
+        if self.num_threads is None:
+            self.num_threads = cpu_count()
         self.max_pixel_column_diff = self.get_value_from_config('max_pixel_column_diff')
 
     def compare_pics(self):
@@ -263,10 +293,14 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         total_correct_eliminate = 0
         lines = []
         pool = ThreadPool(self.num_threads)
-        filenames = os.listdir(os.path.join(self.images_dir, 'images_gold'))
+        gold_dir = os.path.join(self.images_dir, 'images_gold')
         pred_dir = os.path.join(self.images_dir, 'images_pred')
         plots_dir = os.path.join(self.images_dir, 'diff')
+        filenames = os.listdir(gold_dir)
+        if not os.path.exists(plots_dir):
+            os.makedirs(plots_dir)
         for filename in filenames:
+            filename = os.path.join(gold_dir, filename)
             filename2 = os.path.join(pred_dir, os.path.basename(filename))
             plotfilename = os.path.join(plots_dir, os.path.basename(filename))
             lines.append((filename, filename2, plotfilename,
@@ -284,7 +318,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
 
         correct_ratio = float(total_correct / total_num)
         correct_eliminate_ratio = float(total_correct_eliminate / total_num)
-
+        print(correct_eliminate_ratio, correct_ratio)
         logging.info('------------------------------------')
         logging.info('Final')
         logging.info('Total Num: {}'.format(total_num))
@@ -304,10 +338,13 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         if os.path.exists(self.images_dir):
             shutil.rmtree(self.images_dir)
         os.makedirs(self.images_dir)
-        out_path_gold = [self.images_dir / 'images_gold'] * len(annotations)
-        out_path_pred = [self.images_dir / 'images_pred'] * len(predictions)
-        lines_gold = list(enumerate(annotations), out_path_gold)
-        lines_pred = list(enumerate(predictions), out_path_pred)
+        out_path_gold = os.path.join(self.images_dir, 'images_gold')
+        out_path_pred = os.path.join(self.images_dir, 'images_pred')
+        for dir_ in [out_path_gold, out_path_pred]:
+            if not os.path.exists(dir_):
+                os.makedirs(dir_)
+        lines_gold = [(ann.label, ann.identifier, out_path_gold) for ann in annotations]
+        lines_pred = [(pred.label, pred.identifier, out_path_pred) for pred in predictions]
         lines = lines_gold + lines_pred
         logging.info('Creating pool with {} threads'.format(self.num_threads))
         pool = ThreadPool(self.num_threads)

@@ -25,6 +25,7 @@ from accuracy_checker.launcher import create_launcher
 from accuracy_checker.metrics import MetricsExecutor
 from accuracy_checker.preprocessor import PreprocessingExecutor
 from accuracy_checker.postprocessor import PostprocessingExecutor
+from accuracy_checker.representation import CharacterRecognitionAnnotation, CharacterRecognitionPrediction
 from accuracy_checker.utils import contains_all, extract_image_representations
 
 
@@ -78,8 +79,9 @@ class Im2latexEvaluator(BaseEvaluator):
             batch_input = self.preprocessing_executor.process(batch_input, batch_annotation)
             batch_input, batch_meta = extract_image_representations(batch_input)
             batch_prediction = self.model.predict(batch_identifiers, batch_input)
-            batch_annotation = batch_annotation[0].label
-            
+            # batch_annotation = batch_annotation[0].label
+            batch_prediction = [CharacterRecognitionPrediction(label=batch_prediction,
+                                                                 identifier=batch_annotation[0].identifier)]
             self._annotations.append(batch_annotation)
             self._predictions.append(batch_prediction)
 
@@ -244,7 +246,6 @@ class SequentialModel:
                 return res.strip()
         return res.strip()
 
-
     def predict(self, idenitifiers, input_data):
         assert len(idenitifiers) == 1
         input_data = np.array(input_data)
@@ -255,15 +256,15 @@ class SequentialModel:
         dec_states_h = enc_res['hidden']
         dec_states_c = enc_res['context']
         O_t = enc_res['init_0']
-        
+
         tgt = np.array([[self.sos_index]])
         logits = []
         for _ in range(self.max_seq_len):
 
             dec_res = self.recognizer_decoder.predict(inputs={'row_enc_out': row_enc_out,
-                                                     'dec_st_c': dec_states_c, 'dec_st_h': dec_states_h,
-                                                     'O_t_minus_1': O_t, 'tgt': tgt
-                                                     })
+                                                              'dec_st_c': dec_states_c, 'dec_st_h': dec_states_h,
+                                                              'O_t_minus_1': O_t, 'tgt': tgt
+                                                              })
 
             dec_states_h = dec_res['dec_st_h_t']
             dec_states_c = dec_res['dec_st_c_t']
@@ -274,7 +275,7 @@ class SequentialModel:
 
             if tgt[0][0][0] == self.eos_index:
                 break
-        
+
         logits = np.array(logits)
         logits = logits.squeeze(axis=1)
         targets = np.argmax(logits, axis=1)
@@ -287,6 +288,7 @@ class SequentialModel:
     def release(self):
         self.recognizer_encoder.release()
         self.recognizer_decoder.release()
+
 
 class RecognizerDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher, suffix):
