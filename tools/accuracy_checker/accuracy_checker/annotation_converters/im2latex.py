@@ -97,7 +97,6 @@ class Im2latexDatasetConverter(DirectoryBasedAnnotationConverter):
             [type]: Converted dataset
         """
         annotations = []
-        print(self.data_dir)
         content_errors = None if not check_content else []
         split_file = read_txt(self.split_path)
         formulas_file = read_txt(self.formula_path)
