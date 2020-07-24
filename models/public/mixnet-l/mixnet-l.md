@@ -5,7 +5,7 @@ MixNets are a family of mobile-sizes image classification models equipped with M
 a new type of mixed depthwise convolutions. The `mixnet-l` model is one of the
 [MixNet](https://arxiv.org/abs/1907.09595) models designed.
 This model was pretrained in TensorFlow\*.
-All the MixNet models have been pretrained on the ImageNet* image database.
+All the MixNet models have been pretrained on the ImageNet\* image database.
 For details about this family of models, check out the [TensorFlow Cloud TPU repository](https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet/mixnet).
 
 ## Example
