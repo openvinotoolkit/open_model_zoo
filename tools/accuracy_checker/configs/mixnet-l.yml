@@ -1,0 +1,85 @@
+models:
+  - name: mixnet-l
+
+    launchers:
+      - framework: tf
+        model:   public/mixnet-l/mixnet-l/model.ckpt.meta
+        adapter: classification
+        output_names:
+          - logits
+        inputs:
+          - name: IteratorGetNext
+            type: INPUT
+
+    datasets:
+        
+      - name: imagenet_1000_classes
+        annotation_conversion:
+           converter: imagenet
+           annotation_file: val.txt
+        
+        data_source: ILSVRC2012_img_val
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+        
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: crop
+            central_fraction: 0.875
+            use_pillow: True
+          - type: resize
+            size: 224
+            use_pillow: True
+            interpolation: BICUBIC
+
+  - name: mixnet-l
+
+    launchers:
+      - framework: dlsdk
+        device: CPU
+        tags:
+          - FP32
+        model:   public/mixnet-l/FP32/mixnet-l.xml
+        weights: public/mixnet-l/FP32/mixnet-l.bin
+        adapter: classification
+
+      - framework: dlsdk
+        device: CPU
+        tags:
+          - FP16
+        model:   public/mixnet-l/FP16/mixnet-l.xml
+        weights: public/mixnet-l/FP16/mixnet-l.bin
+        adapter: classification
+
+    datasets:
+        
+      - name: imagenet_1000_classes
+        annotation_conversion:
+           converter: imagenet
+           annotation_file: val.txt
+        
+        data_source: ILSVRC2012_img_val
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+        
+        preprocessing:
+          - type: crop
+            central_fraction: 0.875
+            use_pillow: True
+          - type: resize
+            size: 224
+            use_pillow: True
+            interpolation: BICUBIC
+
+
+
