@@ -47,7 +47,7 @@ class RetinaFaceAdapter(Adapter):
         else:
             self.landmark_std = 1.0
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_predictions = self._extract_predictions(raw, frame_meta)
         results = []
         for batch_id, (identifier, meta) in enumerate(zip(identifiers, frame_meta)):
@@ -55,7 +55,6 @@ class RetinaFaceAdapter(Adapter):
             scores_list = []
             landmarks_list = []
             mask_scores_list = []
-            x_scale, y_scale = meta['scale_x'], meta['scale_y']
             for _idx, s in enumerate(self._features_stride_fpn):
                 anchor_num = self._num_anchors[s]
                 scores = self._get_scores(raw_predictions[self.scores_output[_idx]][batch_id], anchor_num)
@@ -80,14 +79,11 @@ class RetinaFaceAdapter(Adapter):
             mask_scores = np.reshape(mask_scores_list, -1)
             labels = np.full_like(scores, 1, dtype=int)
             x_mins, y_mins, x_maxs, y_maxs = np.array(proposals_list).T # pylint: disable=E0633
+            x_scale, y_scale = self.get_scale(meta)
             detection_representation = DetectionPrediction(
                 identifier, labels, scores, x_mins / x_scale, y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
             )
-            if not self.landmarks_output and not self.type_scores_output:
-                results.append(detection_representation)
-                continue
-            representations = {}
-            representations['face_detection'] = detection_representation
+            representations = {'face_detection': detection_representation}
             if self.type_scores_output:
                 representations['mask_detection'] = AttributeDetectionPrediction(
                     identifier, labels, scores, mask_scores, x_mins / x_scale,
@@ -98,7 +94,9 @@ class RetinaFaceAdapter(Adapter):
                 landmarks_y_coords = np.array(landmarks_list)[:, :, 1::2].reshape(len(landmarks_list), -1) / y_scale
                 representations['landmarks_regression'] = FacialLandmarksPrediction(identifier, landmarks_x_coords,
                                                                                     landmarks_y_coords)
-            results.append(ContainerPrediction(representations))
+            results.append(
+                ContainerPrediction(representations) if len(representations) > 1 else detection_representation
+            )
         return results
 
     def _get_proposals(self, bbox_deltas, anchor_num, anchors):
@@ -238,3 +236,21 @@ class RetinaFaceAdapter(Adapter):
             pred[:, i, 1] = landmark_deltas[:, i, 1] * heights + ctr_y
 
         return pred
+
+    @staticmethod
+    def get_scale(meta):
+        if 'scale_x' in meta:
+            return meta['scale_x'], meta['scale_y']
+        original_image_size = meta['image_size'][:2]
+        image_input = [shape for shape in meta['input_shape'].values() if len(shape) == 4]
+        assert image_input, "image input not found"
+        assert len(image_input) == 1, 'model should have only one image input'
+        image_input = image_input[0]
+        if image_input[1] == 3:
+            processed_image_size = image_input[2:]
+        else:
+            processed_image_size = image_input[1:3]
+        y_scale = processed_image_size[0] / original_image_size[0]
+        x_scale = processed_image_size[1] / original_image_size[1]
+
+        return x_scale, y_scale

@@ -46,7 +46,7 @@ class ClassificationAdapter(Adapter):
         self.argmax_output = self.get_value_from_config('argmax_output')
         self.classification_out = self.get_value_from_config('classification_output')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers

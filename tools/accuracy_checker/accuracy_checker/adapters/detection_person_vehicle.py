@@ -39,7 +39,7 @@ class PersonVehicleDetectionAdapter(Adapter):
     def configure(self):
         self.iou_threshold = self.get_value_from_config('iou_threshold')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         if isinstance(raw, dict):
             bbox_pred = raw['bbox_pred']

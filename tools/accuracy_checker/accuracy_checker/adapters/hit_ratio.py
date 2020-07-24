@@ -28,7 +28,7 @@ class HitRatioAdapter(Adapter):
     __provider__ = 'hit_ratio_adapter'
     prediction_types = (HitRatioPrediction, )
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             raw: output of model.

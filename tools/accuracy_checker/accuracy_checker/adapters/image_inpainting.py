@@ -24,7 +24,7 @@ class ImageInpaintingAdapter(Adapter):
     __provider__ = 'inpainting'
     prediction_types = (ImageInpaintingPrediction, )
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)[self.output_blob]
         for identifier, img in zip(identifiers, raw_outputs):

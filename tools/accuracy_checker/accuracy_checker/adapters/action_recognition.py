@@ -137,7 +137,7 @@ class ActionDetection(Adapter):
                 self.head_sizes = [add_conf_out_count]
                 self.glob_layer_id_map = [list(range(add_conf_out_count))]
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.outputs_verified:
