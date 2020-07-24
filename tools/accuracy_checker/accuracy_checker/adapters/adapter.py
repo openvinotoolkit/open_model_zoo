@@ -48,7 +48,7 @@ class Adapter(ClassProvider):
             ),
         }
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raise NotImplementedError
 
     def configure(self):

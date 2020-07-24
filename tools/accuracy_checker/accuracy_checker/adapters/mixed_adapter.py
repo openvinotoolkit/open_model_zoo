@@ -67,7 +67,7 @@ class MixedAdapter(Adapter):
                     return False
         return True
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = {}
 
         for layer, (_, adapter) in self.adapters.items():

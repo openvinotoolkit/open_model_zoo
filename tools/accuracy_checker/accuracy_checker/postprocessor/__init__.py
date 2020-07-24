@@ -39,7 +39,7 @@ from .normalize_landmarks_points import NormalizeLandmarksPoints
 from .clip_points import ClipPoints
 from .extend_segmentation_mask import ExtendSegmentationMask
 from .zoom_segmentation_mask import ZoomSegMask
-from .crop_segmentation_mask import CropSegmentationMask
+from .crop_segmentation_mask import CropSegmentationMask, CropOrPadSegmentationMask
 from .clip_segmentation_mask import ClipSegmentationMask
 from .normalize_boxes import NormalizeBoxes
 from .brats_postprocessing import SegmentationPredictionResample, TransformBratsPrediction
@@ -51,6 +51,7 @@ from .resize_prediction_depth_map import ResizeDepthMap
 from .resize_super_resolution import ResizeSuperResolution
 from .resize_style_transfer import ResizeStyleTransfer
 from .crop_ground_truth_image import CropGTImage
+from .resize import Resize
 
 
 __all__ = [
@@ -101,5 +102,7 @@ __all__ = [
     'ResizeSuperResolution',
     'ResizeStyleTransfer',
 
-    'CropGTImage'
+    'CropGTImage',
+
+    'Resize'
 ]

@@ -152,7 +152,7 @@ class BaseField(BaseValidator):
 
     @property
     def type(self):
-        return str
+        return None
 
     def required(self):
         return not self.optional and self.default is None
@@ -165,7 +165,7 @@ class BaseField(BaseValidator):
                     parameters_dict[key] = self.__dict__[key].parameters()
                 else:
                     parameters_dict[key] = self.__dict__[key]
-            parameters_dict['type'] = type(self.type()).__name__
+            parameters_dict['type'] = type((self.type or str)()).__name__
 
         return parameters_dict
 

@@ -77,6 +77,11 @@ def east_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
     return resize_w, resize_h
 
 
+def min_ratio(dst_width, dst_height, image_width, image_height):
+    ratio = min(float(image_height) / float(dst_height), float(image_width) / float(dst_width))
+    return int(image_width / ratio), int(image_height / ratio)
+
+
 ASPECT_RATIO_SCALE = {
     'width': scale_width,
     'height': scale_height,
@@ -84,7 +89,8 @@ ASPECT_RATIO_SCALE = {
     'fit_to_window': scale_fit_to_window,
     'frcnn_keep_aspect_ratio': frcnn_keep_aspect_ratio,
     'ctpn_keep_aspect_ratio': ctpn_keep_aspect_ratio,
-    'east_keep_aspect_ratio': east_keep_aspect_ratio
+    'east_keep_aspect_ratio': east_keep_aspect_ratio,
+    'min_ratio': min_ratio
 }
 
 

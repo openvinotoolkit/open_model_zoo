@@ -41,7 +41,7 @@ The expected color order is BGR.
 
 
 1.	The net outputs a blob with the shape: [1, 10], containing a row-vector of 10 floating point values
-	for five landmarks coordinates in the form (x0, y0, x1, y1, ..., x5, y5).
+	for five landmarks coordinates in the form (x0, y0, x1, y1, ..., x4, y4).
 	All the coordinates are normalized to be in range [0,1].
 
 ## Legal Information

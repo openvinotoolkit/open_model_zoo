@@ -22,7 +22,7 @@ You can provide:
 * `tf_model` for TensorFlow model (*.pb, *.pb.frozen, *.pbtxt).
 * `tf_meta` for TensorFlow MetaGraph (*.meta).
 * `mxnet_weights` for MXNet params (*.params).
-* `onnx_model` for ONNX model (*.onnx).
+* `onnx_model` for ONNX model (*.onnx). You also able to pass your ONNX model directly using `model` option if you do not need Model Optimizer conversion step.
 * `kaldi_model` for Kaldi model (*.nnet).
 
 In case when you want to determine additional parameters for model conversion (data_type, input_shape and so on), you can use `mo_params` for arguments with values and `mo_flags` for positional arguments like `legacy_mxnet_model` .

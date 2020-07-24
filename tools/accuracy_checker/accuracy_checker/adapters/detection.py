@@ -246,7 +246,7 @@ class RetinaNetAdapter(Adapter):
         self.scales = np.array([2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)])
         self.std = np.array([0.1, 0.1, 0.2, 0.2])
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         results = []
         for identifier, loc_pred, cls_pred, meta in zip(
@@ -364,11 +364,12 @@ class ClassAgnosticDetectionAdapter(Adapter):
         self.out_blob_name = self.get_value_from_config('output_blob')
         self.scale = self.get_value_from_config('scale')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
             raw: output of model
+            frame_meta: image metadata
         Returns:
             list of DetectionPrediction objects
         """
@@ -428,13 +429,28 @@ class RFCNCaffe(Adapter):
         self.bbox_out = self.get_value_from_config('bbox_out')
         self.rois_out = self.get_value_from_config('rois_out')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
+        assert len(identifiers) == 1, '{} adapter support only batch size 1'.format(self.__provider__)
         raw_out = self._extract_predictions(raw, frame_meta)
         predicted_classes = raw_out[self.cls_out]
         predicted_deltas = raw_out[self.bbox_out]
         predicted_proposals = raw_out[self.rois_out]
-        x_scale = frame_meta[0]['scale_x']
-        y_scale = frame_meta[0]['scale_y']
+        meta = frame_meta[0]
+        if 'scale_x' in meta:
+            x_scale = meta['scale_x']
+            y_scale = meta['scale_y']
+        else:
+            original_image_size = meta['image_size'][:2]
+            image_input = [shape for shape in meta['input_shape'].values() if len(shape) == 4]
+            assert image_input, "image input not found"
+            assert len(image_input) == 1, 'several input images detected'
+            image_input = image_input[0]
+            if image_input[1] == 3:
+                processed_image_size = image_input[2:]
+            else:
+                processed_image_size = image_input[1:3]
+            y_scale = processed_image_size[0] / original_image_size[0]
+            x_scale = processed_image_size[1] / original_image_size[1]
         real_det_num = np.argwhere(predicted_proposals[:, 0] == -1)
         if np.size(real_det_num) != 0:
             real_det_num = real_det_num[0, 0]
@@ -566,11 +582,12 @@ class FaceBoxesAdapter(Adapter):
 
         return anchors
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
             raw: output of model
+            frame_meta: images metadata
         Returns:
             list of DetectionPrediction objects
         """
@@ -727,7 +744,7 @@ class FaceDetectionAdapter(Adapter):
                     k += 1
         return output_layers
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         for batch_index, identifier in enumerate(identifiers):
             detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
@@ -805,7 +822,7 @@ class FaceDetectionRefinementAdapter(Adapter):
     def configure(self):
         self.threshold = self.get_value_from_config('threshold')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         if isinstance(raw, dict):
             candidates = frame_meta[0]['candidates']
             result = self.refine_candidates(candidates.identifier, [raw], candidates, self.threshold)

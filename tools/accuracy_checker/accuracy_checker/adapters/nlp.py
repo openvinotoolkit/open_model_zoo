@@ -49,7 +49,7 @@ class MachineTranslationAdapter(Adapter):
         self.eos_index = self.get_value_from_config('eos_index')
         self.subword_option = vocab_file.name.split('.')[1] if len(vocab_file.name.split('.')) > 1 else None
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         translation = raw_outputs[self.output_blob]
         translation = np.transpose(translation, (1, 2, 0))
@@ -91,7 +91,7 @@ class QuestionAnsweringAdapter(Adapter):
         self.start_token_logit_out = self.get_value_from_config('start_token_logits_output')
         self.end_token_logit_out = self.get_value_from_config('end_token_logits_output')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_output = self._extract_predictions(raw, frame_meta)
         result = []
         for identifier, start_token_logits, end_token_logits in zip(

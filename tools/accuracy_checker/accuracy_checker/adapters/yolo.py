@@ -45,7 +45,7 @@ class TinyYOLOv1Adapter(Adapter):
     prediction_types = (DetectionPrediction, )
     topology_types = (YoloV1Tiny, )
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
@@ -203,7 +203,7 @@ class YoloV2Adapter(Adapter):
             self.processor = YoloOutputProcessor(coord_normalizer=(self.cells, self.cells),
                                                  size_normalizer=(self.cells, self.cells))
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
@@ -348,7 +348,7 @@ class YoloV3Adapter(Adapter):
         else:
             self.processor = YoloOutputProcessor()
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers

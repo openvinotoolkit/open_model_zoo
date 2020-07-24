@@ -61,5 +61,9 @@ class ArgMaxClassificationPrediction(ClassificationPrediction):
     def label(self):
         return self._label
 
+    @label.setter
+    def label(self, value):
+        self._label = value
+
     def top_k(self, k):
         return np.full(k, self._label)

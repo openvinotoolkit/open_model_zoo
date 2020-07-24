@@ -21,6 +21,7 @@ Accuracy Checker supports following set of postprocessors:
 * `correct_yolo_v2_boxes` - resizing detection prediction bbox coordinates using specific for Yolo v2 approach. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
   * `dst_width` and `dst_height` - destination width and height respectively. You can also use `size` instead in case when destination sizes are equal.
 * `resize_prediction_boxes` - resizing normalized detection prediction boxes according to image size. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
+  * `rescale` if this option enabled, rescaling boxes on input size will be performed before multiplying on original input size. (Optional, default `False`)
 * `faster_rcnn_postprocessing_resize` - resizing normalized detection prediction boxes according to the original image size before preprocessing steps.
     Supported representations: `DetectionAnotation`, `DetectionPrediction`.
     At the moment works in the following cases only:
@@ -55,6 +56,8 @@ Accuracy Checker supports following set of postprocessors:
 * `crop_segmentation_mask` - cropping 3-d annotation mask. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`.
   * `dst_width`, `dst_height` and `dst_volume` are destination width, height and volume for cropped 3D-image respectively.
     You can also use `size` instead in case when destination sizes are equal for all three dimensions.
+* `crop_or_pad-segmentation_mask` - performs central cropping if original mask size greater then destination size and padding in case, when source size lower than destination. Padding filling value is 0, realization - right-bottom.
+  * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.  Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
 * `clip_segmentation_mask` - clipping segmentation mask values. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`.
   * `min_value` - lower bound of range.
   * `max_value` - upper bound of range.
@@ -63,7 +66,7 @@ Accuracy Checker supports following set of postprocessors:
 * `transform_brats_prediction` - transforms prediction from `WT-TC-ET` format to `NCR/NET-ED-ET`. Sequentially fills one-channel mask with specified `values` for elements passing the threshold (threshold is `0.5`) from each prediction channel in specified `order`.
   * `order` - specifies filling order for channels
   * `values` - specifies values for each channel according to new order
-* `extract_prediction_answers` - extract predicted sequence of tokens from annotation text. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
+* `extract_answers_tokens` - extract predicted sequence of tokens from annotation text. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
   * `max_answer` - maximum answer length (Optional, default value is 30).
   * `n_best_size` - total number of n-best prediction size for the answer (Optional, default value is 20).
 * `translate_3d_poses` - translating 3D poses. Supported representations: `PoseEstimation3dAnnotation`, `PoseEstimation3dPrediction`. Shifts 3D coordinates of each predicted poses on corresponding translation vector.
@@ -73,3 +76,7 @@ Accuracy Checker supports following set of postprocessors:
 * `resize_style_transfer` - resizing style transfer predicted image. Supported representations: `StyleTransferAnotation`, `StyleTransferPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resizing respectively.
 * `crop_ground_truth_image` - croping ground truth image. Supported representations: `ImageInpaintingAnnotation`.
+* `resize` - resizing image or segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`, `StyleTransferAnotation`, `StyleTransferPrediction`, `SuperResolutionAnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+  * `dst_width` and `dst_height` - destination width and height for resize respectively. You can also use `size` instead in case when destination sizes are equal.
+    If any of these parameters are not specified, image size will be used as default.
+  * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).

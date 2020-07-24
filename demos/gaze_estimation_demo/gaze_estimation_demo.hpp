@@ -10,12 +10,6 @@
 #include <gflags/gflags.h>
 #include <iostream>
 
-#ifdef _WIN32
-#include <os/windows/w_dirent.h>
-#else
-#include <dirent.h>
-#endif
-
 static const char help_message[] = "Print a usage message.";
 static const char video_message[] = "Optional. Path to a video file. Default value is \"cam\" to work with camera.";
 static const char gaze_estimation_model_message[] = "Required. Path to an .xml file with a trained Gaze Estimation model.";

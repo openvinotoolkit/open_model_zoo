@@ -34,7 +34,8 @@ Accuracy Checker supports following set of preprocessors:
     - `east_keep_aspect_ratio` - adaptive resize keeping aspect ratio using this algorithm:
       1. If max image size greater max destination size, make max image size equal to max destination size.
       2. Make image height and width divisible by min destination size without remainder.
-  * `factor` -  destination size for aspect ratio resize must be divisible by a given number without remainder. 
+    - `min_ratio` - rescale width and height according to minimal ratio `source_size / destination_size`.
+  * `factor` -  destination size for aspect ratio resize must be divisible by a given number without remainder.
   Please pay attention that this parameter only works with `aspect_ratio_scale` parameters.
 * `auto_resize` - automatic resizing image to input layer shape. (supported only for one input layer case, use OpenCV for image resize)
 * `normalization` - changing the range of pixel intensity values.
@@ -84,6 +85,8 @@ Accuracy Checker supports following set of preprocessors:
   * `draw_points` - allows visualize points.
   * `normalize` - allows to use normalization for keypoints.
   * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
+* `crop_or_pad` - performs central cropping if original image size greater then destination size and padding in case, when source size lower than destination. Padding filling value is 0, realization - right-bottom.
+  * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
 * `padding` - padding for image.
   * `stride` - stride for padding.
   * `pad_value` - value for filling space around original image.
@@ -129,6 +132,8 @@ Accuracy Checker supports following set of preprocessors:
 * `warp_affine` - warp affine transformation. (supported only with OpenCV)
   * `src_landmarks` - source landmarks to set as markers for the warp affine transformation.
   * `dst_landmarks` - destination and target landmarks to transform `src_landmarks` to.
+  * `dst_height` - destination height size.
+  * `dst_width` - destination width size.
 * `resample_audio` - converts audio to new sample rate
   * `sample_rate` - sets new sample rate
 * `clip_audio` - slices audio into several parts with equal duration

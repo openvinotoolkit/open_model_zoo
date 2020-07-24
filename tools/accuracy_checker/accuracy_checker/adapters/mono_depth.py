@@ -18,11 +18,10 @@ from ..representation import DepthEstimationPrediction
 class MonoDepthAdapter(Adapter):
     __provider__ = 'mono_depth'
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         batch_prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
         result = []
         for identifier, prediction in zip(identifiers, batch_prediction):
             result.append(DepthEstimationPrediction(identifier, prediction))
 
         return result
-        
