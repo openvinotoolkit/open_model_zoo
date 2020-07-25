@@ -63,18 +63,15 @@ public:
         if (names.empty()) throw InvalidInput{};
         sort(names.begin(), names.end());
         size_t readImgs = 0;
-        bool readAtLeastOnce = false;
         while (fileId < names.size()) {
             cv::Mat img = cv::imread(input + '/' + names[fileId]);
             if (img.data) {
                 ++readImgs;
-                readAtLeastOnce = true;
-                if (readImgs - 1 >= posFrames) break;
+                if (readImgs - 1 >= posFrames) return;
             }
             ++fileId;
         }
-        if (!readAtLeastOnce && readImgs - 1 < posFrames)
-            throw std::runtime_error{"Can't read the first image from " + input + " dir"};
+        throw std::runtime_error{"Can't read the first image from " + input + " dir"};
     }
 
     double fps() const override {return 0.0;}
