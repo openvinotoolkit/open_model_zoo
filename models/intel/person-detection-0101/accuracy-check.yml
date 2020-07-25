@@ -3,17 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/person-detection-0101/FP32/person-detection-0101.xml
-        weights: intel/person-detection-0101/FP32/person-detection-0101.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/person-detection-0101/FP16/person-detection-0101.xml
-        weights: intel/person-detection-0101/FP16/person-detection-0101.bin
         adapter: ssd
 
     datasets:

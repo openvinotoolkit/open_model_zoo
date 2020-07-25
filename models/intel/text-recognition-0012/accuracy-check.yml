@@ -3,24 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/text-recognition-0012/FP32/text-recognition-0012.xml
-        weights: intel/text-recognition-0012/FP32/text-recognition-0012.bin
-        adapter: beam_search_decoder
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/text-recognition-0012/FP16/text-recognition-0012.xml
-        weights: intel/text-recognition-0012/FP16/text-recognition-0012.bin
-        adapter: beam_search_decoder
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/text-recognition-0012/FP16-INT8/text-recognition-0012.xml
-        weights: intel/text-recognition-0012/FP16-INT8/text-recognition-0012.bin
         adapter: beam_search_decoder
 
     datasets:

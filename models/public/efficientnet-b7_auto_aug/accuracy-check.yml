@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: tf
-        model: public/efficientnet-b7_auto_aug/efficientnet-b7/model.ckpt.meta
+        model: efficientnet-b7/model.ckpt.meta
         adapter: classification
         output_names:
           - logits
@@ -27,17 +27,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/efficientnet-b7_auto_aug/FP32/efficientnet-b7_auto_aug.xml
-        weights: public/efficientnet-b7_auto_aug/FP32/efficientnet-b7_auto_aug.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/efficientnet-b7_auto_aug/FP16/efficientnet-b7_auto_aug.xml
-        weights: public/efficientnet-b7_auto_aug/FP16/efficientnet-b7_auto_aug.bin
         adapter: classification
 
     datasets:

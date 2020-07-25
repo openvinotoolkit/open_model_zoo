@@ -3,17 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/vehicle-reid-0001/FP32/vehicle-reid-0001.xml
-        weights: public/vehicle-reid-0001/FP32/vehicle-reid-0001.bin
-        adapter: reid
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/vehicle-reid-0001/FP16/vehicle-reid-0001.xml
-        weights: public/vehicle-reid-0001/FP16/vehicle-reid-0001.bin
         adapter: reid
 
     datasets:

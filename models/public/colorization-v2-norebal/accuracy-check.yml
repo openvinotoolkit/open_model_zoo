@@ -4,51 +4,13 @@ evaluations:
     module_config:
       network_info:
         colorization_network:
-          model:   public/colorization-v2-norebal/FP32/colorization-v2-norebal.xml
-          weights: public/colorization-v2-norebal/FP32/colorization-v2-norebal.bin
-          color_coeff: public/colorization-v2-norebal/colorization-v2-norebal.npy
+          color_coeff: colorization-v2-norebal.npy
 
         verification_network:
-          model:   public/vgg16/FP32/vgg16.xml
-          weights: public/vgg16/FP32/vgg16.bin
           adapter: classification
 
       launchers:
         - framework: dlsdk
-          tags:
-            - FP32
-
-      datasets:
-        - name: imagenet_1000_classes
-          reader: pillow_imread
-
-          preprocessing:
-            - type: resize
-              size: 256
-              aspect_ratio_scale: greater
-            - type: crop
-              size: 224
-            - type: normalization
-              std:  255
-
-  - name: colorization-v2-norebal
-    module: custom_evaluators.colorization_evaluator.ColorizationEvaluator
-    module_config:
-      network_info:
-        colorization_network:
-          model:   public/colorization-v2-norebal/FP16/colorization-v2-norebal.xml
-          weights: public/colorization-v2-norebal/FP16/colorization-v2-norebal.bin
-          color_coeff: public/colorization-v2-norebal/colorization-v2-norebal.npy
-
-        verification_network:
-          model:   public/vgg16/FP32/vgg16.xml
-          weights: public/vgg16/FP32/vgg16.bin
-          adapter: classification
-
-      launchers:
-        - framework: dlsdk
-          tags:
-            - FP16
 
       datasets:
         - name: imagenet_1000_classes

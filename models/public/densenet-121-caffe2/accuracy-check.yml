@@ -3,7 +3,7 @@ models:
   - name: densenet-121-caffe2
     launchers:
       - framework: onnx_runtime
-        model: public/densenet-121-caffe2/densenet-121.onnx
+        model: densenet-121.onnx
         adapter: classification
 
     datasets:
@@ -21,17 +21,6 @@ models:
   - name: densenet-121-caffe2
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/densenet-121-caffe2/FP32/densenet-121-caffe2.xml
-        weights: public/densenet-121-caffe2/FP32/densenet-121-caffe2.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/densenet-121-caffe2/FP16/densenet-121-caffe2.xml
-        weights: public/densenet-121-caffe2/FP16/densenet-121-caffe2.bin
         adapter: classification
 
     datasets:

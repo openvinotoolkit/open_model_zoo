@@ -3,32 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
-        weights: intel/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
-        adapter: lpr
-        inputs:
-          - name: seq_ind
-            type: CONST_INPUT
-            value: [[0], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
-        weights: intel/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
-        adapter: lpr
-        inputs:
-          - name: seq_ind
-            type: CONST_INPUT
-            value: [[0], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/license-plate-recognition-barrier-0001/FP16-INT8/license-plate-recognition-barrier-0001.xml
-        weights: intel/license-plate-recognition-barrier-0001/FP16-INT8/license-plate-recognition-barrier-0001.bin
         adapter: lpr
         inputs:
           - name: seq_ind

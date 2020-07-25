@@ -3,10 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32-INT1
-        model:   intel/pedestrian-detection-adas-binary-0001/FP32-INT1/pedestrian-detection-adas-binary-0001.xml
-        weights: intel/pedestrian-detection-adas-binary-0001/FP32-INT1/pedestrian-detection-adas-binary-0001.bin
         adapter: ssd
 
     datasets:

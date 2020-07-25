@@ -3,24 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/person-reidentification-retail-0265/FP32/person-reidentification-retail-0265.xml
-        weights: intel/person-reidentification-retail-0265/FP32/person-reidentification-retail-0265.bin
-        adapter: reid
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/person-reidentification-retail-0265/FP16/person-reidentification-retail-0265.xml
-        weights: intel/person-reidentification-retail-0265/FP16/person-reidentification-retail-0265.bin
-        adapter: reid
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/person-reidentification-retail-0265/FP16-INT8/person-reidentification-retail-0265.xml
-        weights: intel/person-reidentification-retail-0265/FP16-INT8/person-reidentification-retail-0265.bin
         adapter: reid
 
     datasets:

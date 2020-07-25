@@ -2,17 +2,6 @@ models:
   - name: retinanet-tf
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model: public/retinanet-tf/FP32/retinanet-tf.xml
-        weights: public/retinanet-tf/FP32/retinanet-tf.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model: public/retinanet-tf/FP16/retinanet-tf.xml
-        weights: public/retinanet-tf/FP16/retinanet-tf.bin
         adapter: ssd
 
     datasets:

@@ -19,31 +19,6 @@ models:
   - name: squeezenet1.1-caffe2
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/squeezenet1.1-caffe2/FP32/squeezenet1.1-caffe2.xml
-        weights: public/squeezenet1.1-caffe2/FP32/squeezenet1.1-caffe2.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/squeezenet1.1-caffe2/FP16/squeezenet1.1-caffe2.xml
-        weights: public/squeezenet1.1-caffe2/FP16/squeezenet1.1-caffe2.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP32-INT8
-        model:   public/squeezenet1.1-caffe2/FP32-INT8/squeezenet1.1-caffe2.xml
-        weights: public/squeezenet1.1-caffe2/FP32-INT8/squeezenet1.1-caffe2.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   public/squeezenet1.1-caffe2/FP16-INT8/squeezenet1.1-caffe2.xml
-        weights: public/squeezenet1.1-caffe2/FP16-INT8/squeezenet1.1-caffe2.bin
         adapter: classification
 
     datasets:

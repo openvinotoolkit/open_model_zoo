@@ -3,22 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/human-pose-estimation-3d-0001/FP32/human-pose-estimation-3d-0001.xml
-        weights: public/human-pose-estimation-3d-0001/FP32/human-pose-estimation-3d-0001.bin
-        allow_reshape_input: True
-        adapter:
-          type: human_pose_estimation_3d
-          features_3d_out: features
-          keypoints_heatmap_out: heatmaps
-          part_affinity_fields_out: pafs
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/human-pose-estimation-3d-0001/FP16/human-pose-estimation-3d-0001.xml
-        weights: public/human-pose-estimation-3d-0001/FP16/human-pose-estimation-3d-0001.bin
         allow_reshape_input: True
         adapter:
           type: human_pose_estimation_3d

@@ -3,44 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
-        weights: intel/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
-        adapter:
-          type: action_detection
-          priorbox_out: mbox/priorbox
-          loc_out: mbox_loc1/out/conv/flat
-          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat
-          add_conf_out_prefix: out/anchor
-          add_conf_out_count: 4
-          num_action_classes: 3
-          detection_threshold: 0.4
-          action_confidence_threshold: 0.75
-          action_scale: 3
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
-        weights: intel/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
-        adapter:
-          type: action_detection
-          priorbox_out: mbox/priorbox
-          loc_out: mbox_loc1/out/conv/flat
-          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat
-          add_conf_out_prefix: out/anchor
-          add_conf_out_count: 4
-          num_action_classes: 3
-          detection_threshold: 0.4
-          action_confidence_threshold: 0.75
-          action_scale: 3
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.xml
-        weights: intel/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.bin
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox

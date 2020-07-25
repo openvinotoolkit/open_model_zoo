@@ -2,8 +2,8 @@ models:
   - name: mobilenet-ssd-cf
     launchers:
       - framework: caffe
-        model:   public/mobilenet-ssd/mobilenet-ssd.prototxt
-        weights: public/mobilenet-ssd/mobilenet-ssd.caffemodel
+        model:   mobilenet-ssd.prototxt
+        weights: mobilenet-ssd.caffemodel
         adapter: ssd
     datasets:
       - name: VOC2012
@@ -19,17 +19,6 @@ models:
   - name: mobilenet-ssd
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/mobilenet-ssd/FP32/mobilenet-ssd.xml
-        weights: public/mobilenet-ssd/FP32/mobilenet-ssd.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/mobilenet-ssd/FP16/mobilenet-ssd.xml
-        weights: public/mobilenet-ssd/FP16/mobilenet-ssd.bin
         adapter: ssd
 
     datasets:

@@ -3,22 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model: intel/icnet-camvid-ava-0001/FP32/icnet-camvid-ava-0001.xml
-        weights: intel/icnet-camvid-ava-0001/FP32/icnet-camvid-ava-0001.bin
-        adapter: segmentation
-      - framework: dlsdk
-        tags:
-          - FP16
-        model: intel/icnet-camvid-ava-0001/FP16/icnet-camvid-ava-0001.xml
-        weights: intel/icnet-camvid-ava-0001/FP16/icnet-camvid-ava-0001.bin
-        adapter: segmentation
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model: intel/icnet-camvid-ava-0001/FP16-INT8/icnet-camvid-ava-0001.xml
-        weights: intel/icnet-camvid-ava-0001/FP16-INT8/icnet-camvid-ava-0001.bin
         adapter: segmentation
     datasets:
       - name: CamVid

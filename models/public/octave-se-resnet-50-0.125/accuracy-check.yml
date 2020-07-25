@@ -5,7 +5,7 @@ models:
     launchers:
       - framework: mxnet
         device: CPU
-        model: public/octave-se-resnet-50-0.125/checkpoint-0-0000.params
+        model: checkpoint-0-0000.params
         adapter: classification
         inputs:
           - name: 'data'
@@ -36,17 +36,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/octave-se-resnet-50-0.125/FP32/octave-se-resnet-50-0.125.xml
-        weights: public/octave-se-resnet-50-0.125/FP32/octave-se-resnet-50-0.125.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/octave-se-resnet-50-0.125/FP16/octave-se-resnet-50-0.125.xml
-        weights: public/octave-se-resnet-50-0.125/FP16/octave-se-resnet-50-0.125.bin
         adapter: classification
 
     datasets:

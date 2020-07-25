@@ -3,40 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/instance-segmentation-security-0083/FP32/instance-segmentation-security-0083.xml
-        weights: intel/instance-segmentation-security-0083/FP32/instance-segmentation-security-0083.bin
-        adapter:
-          type: mask_rcnn
-          classes_out: classes
-          scores_out: scores
-          boxes_out: boxes
-          raw_masks_out: raw_masks
-        inputs:
-          - name: im_info
-            type: IMAGE_INFO
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/instance-segmentation-security-0083/FP16/instance-segmentation-security-0083.xml
-        weights: intel/instance-segmentation-security-0083/FP16/instance-segmentation-security-0083.bin
-        adapter:
-          type: mask_rcnn
-          classes_out: classes
-          scores_out: scores
-          boxes_out: boxes
-          raw_masks_out: raw_masks
-        inputs:
-          - name: im_info
-            type: IMAGE_INFO
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/instance-segmentation-security-0083/FP16-INT8/instance-segmentation-security-0083.xml
-        weights: intel/instance-segmentation-security-0083/FP16-INT8/instance-segmentation-security-0083.bin
         adapter:
           type: mask_rcnn
           classes_out: classes

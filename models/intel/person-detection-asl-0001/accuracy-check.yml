@@ -3,28 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/person-detection-asl-0001/FP32/person-detection-asl-0001.xml
-        weights: intel/person-detection-asl-0001/FP32/person-detection-asl-0001.bin
-        adapter:
-          type: class_agnostic_detection
-          scale: 0.003125
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/person-detection-asl-0001/FP16/person-detection-asl-0001.xml
-        weights: intel/person-detection-asl-0001/FP16/person-detection-asl-0001.bin
-        adapter:
-          type: class_agnostic_detection
-          scale: 0.003125
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/person-detection-asl-0001/FP16-INT8/person-detection-asl-0001.xml
-        weights: intel/person-detection-asl-0001/FP16-INT8/person-detection-asl-0001.bin
         adapter:
           type: class_agnostic_detection
           scale: 0.003125

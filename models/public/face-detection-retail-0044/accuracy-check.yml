@@ -3,22 +3,11 @@ models:
 
     launchers:
       - framework: caffe
-        model:   public/face-detection-retail-0044/face-detection-retail-0044.prototxt
-        weights: public/face-detection-retail-0044/face-detection-retail-0044.caffemodel
+        model:   face-detection-retail-0044.prototxt
+        weights: face-detection-retail-0044.caffemodel
         adapter: ssd
 
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/face-detection-retail-0044/FP32/face-detection-retail-0044.xml
-        weights: public/face-detection-retail-0044/FP32/face-detection-retail-0044.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/face-detection-retail-0044/FP16/face-detection-retail-0044.xml
-        weights: public/face-detection-retail-0044/FP16/face-detection-retail-0044.bin
         adapter: ssd
 
     datasets:

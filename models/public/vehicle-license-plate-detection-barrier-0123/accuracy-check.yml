@@ -3,22 +3,10 @@ models:
 
     launchers:
       - framework: tf
-        device: CPU
-        model:   public/vehicle-license-plate-detection-barrier-0123/model/model.pb.frozen
+        model:   model/model.pb.frozen
         adapter: ssd
 
       - framework: dlsdk
-        tags:
-          - FP32
-        model: public/vehicle-license-plate-detection-barrier-0123/FP32/vehicle-license-plate-detection-barrier-0123.xml
-        weights: public/vehicle-license-plate-detection-barrier-0123/FP32/vehicle-license-plate-detection-barrier-0123.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model: public/vehicle-license-plate-detection-barrier-0123/FP16/vehicle-license-plate-detection-barrier-0123.xml
-        weights: public/vehicle-license-plate-detection-barrier-0123/FP16/vehicle-license-plate-detection-barrier-0123.bin
         adapter: ssd
 
     datasets:

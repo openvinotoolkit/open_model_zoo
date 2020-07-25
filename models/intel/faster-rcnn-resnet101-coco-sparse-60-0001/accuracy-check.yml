@@ -3,21 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model: intel/faster-rcnn-resnet101-coco-sparse-60-0001/FP32/faster-rcnn-resnet101-coco-sparse-60-0001.xml
-        weights: intel/faster-rcnn-resnet101-coco-sparse-60-0001/FP32/faster-rcnn-resnet101-coco-sparse-60-0001.bin
-        adapter:
-          type: ssd
-        inputs:
-          - name: image_info
-            type: CONST_INPUT
-            value: [[800, 1280, 1]]
-      - framework: dlsdk
-        tags:
-          - FP16
-        model: intel/faster-rcnn-resnet101-coco-sparse-60-0001/FP16/faster-rcnn-resnet101-coco-sparse-60-0001.xml
-        weights: intel/faster-rcnn-resnet101-coco-sparse-60-0001/FP16/faster-rcnn-resnet101-coco-sparse-60-0001.bin
         adapter:
           type: ssd
         inputs:

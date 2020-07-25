@@ -4,7 +4,7 @@ models:
 
     launchers:
       - framework: mxnet
-        model: public/octave-resnet-101-0.125/checkpoint-0-0000.params
+        model: checkpoint-0-0000.params
         adapter: classification
         inputs:
           - name: 'data'
@@ -12,14 +12,7 @@ models:
             shape: 3,224,224
 
     datasets:
-      - name: ImageNet
-        data_source: ImageNet
-        reader: opencv_imread
-
-        annotation_conversion:
-          converter: imagenet
-          annotation_file: ImageNet/val.txt
-          labels_file: ImageNet/synset_words.txt
+      - name: imagenet_1000_classes
 
         preprocessing:
           - type: bgr_to_rgb
@@ -43,18 +36,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/octave-resnet-101-0.125/FP32/octave-resnet-101-0.125.xml
-        weights: public/octave-resnet-101-0.125/FP32/octave-resnet-101-0.125.bin
-        adapter: classification
-
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/octave-resnet-101-0.125/FP16/octave-resnet-101-0.125.xml
-        weights: public/octave-resnet-101-0.125/FP16/octave-resnet-101-0.125.bin
         adapter: classification
 
     datasets:

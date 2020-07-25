@@ -3,42 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.xml
-        weights: intel/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
-        adapter:
-          type: super_resolution
-          reverse_channels: True
-        inputs:
-          - name: "0"
-            type: INPUT
-            value: ".*lr_x3*.png"
-          - name: "1"
-            type: INPUT
-            value: ".*upsample_x3*.png"
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.xml
-        weights: intel/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
-        adapter:
-          type: super_resolution
-          reverse_channels: True
-        inputs:
-          - name: "0"
-            type: INPUT
-            value: ".*lr_x3*.png"
-          - name: "1"
-            type: INPUT
-            value: ".*upsample_x3*.png"
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/single-image-super-resolution-1033/FP16-INT8/single-image-super-resolution-1033.xml
-        weights: intel/single-image-super-resolution-1033/FP16-INT8/single-image-super-resolution-1033.bin
         adapter:
           type: super_resolution
           reverse_channels: True

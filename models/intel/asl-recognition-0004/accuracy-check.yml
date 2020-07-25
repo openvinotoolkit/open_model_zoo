@@ -3,21 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/asl-recognition-0004/FP32/asl-recognition-0004.xml
-        weights: intel/asl-recognition-0004/FP32/asl-recognition-0004.bin
-        adapter: classification
-        inputs:
-          - type: INPUT
-            name: input
-            layout: NCDHW
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/asl-recognition-0004/FP16/asl-recognition-0004.xml
-        weights: intel/asl-recognition-0004/FP16/asl-recognition-0004.bin
         adapter: classification
         inputs:
           - type: INPUT

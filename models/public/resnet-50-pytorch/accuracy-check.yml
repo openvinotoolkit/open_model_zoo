@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: onnx_runtime
-        model: public/resnet-50-pytorch/resnet-v1-50.onnx
+        model: resnet-v1-50.onnx
         adapter: classification
         inputs:
           - name: data
@@ -43,31 +43,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/resnet-50-pytorch/FP32/resnet-50-pytorch.xml
-        weights: public/resnet-50-pytorch/FP32/resnet-50-pytorch.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/resnet-50-pytorch/FP16/resnet-50-pytorch.xml
-        weights: public/resnet-50-pytorch/FP16/resnet-50-pytorch.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP32-INT8
-        model:   public/resnet-50-pytorch/FP32-INT8/resnet-50-pytorch.xml
-        weights: public/resnet-50-pytorch/FP32-INT8/resnet-50-pytorch.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   public/resnet-50-pytorch/FP16-INT8/resnet-50-pytorch.xml
-        weights: public/resnet-50-pytorch/FP16-INT8/resnet-50-pytorch.bin
         adapter: classification
 
     datasets:

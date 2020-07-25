@@ -3,24 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/handwritten-japanese-recognition-0001/FP32/handwritten-japanese-recognition-0001.xml
-        weights: intel/handwritten-japanese-recognition-0001/FP32/handwritten-japanese-recognition-0001.bin
-        adapter: ctc_greedy_search_decoder
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/handwritten-japanese-recognition-0001/FP16/handwritten-japanese-recognition-0001.xml
-        weights: intel/handwritten-japanese-recognition-0001/FP16/handwritten-japanese-recognition-0001.bin
-        adapter: ctc_greedy_search_decoder
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/handwritten-japanese-recognition-0001/FP16-INT8/handwritten-japanese-recognition-0001.xml
-        weights: intel/handwritten-japanese-recognition-0001/FP16-INT8/handwritten-japanese-recognition-0001.bin
         adapter: ctc_greedy_search_decoder
 
     datasets:

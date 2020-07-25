@@ -3,24 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.xml
-        weights: intel/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.bin
-        adapter: segmentation
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.xml
-        weights: intel/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.bin
-        adapter: segmentation
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/road-segmentation-adas-0001/FP16-INT8/road-segmentation-adas-0001.xml
-        weights: intel/road-segmentation-adas-0001/FP16-INT8/road-segmentation-adas-0001.bin
         adapter: segmentation
 
     datasets:

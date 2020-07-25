@@ -5,7 +5,7 @@ models:
       - framework: tf
         tags:
           - FP32
-        model:   public/yolo-v2-tiny-tf/yolo-v2-tiny.pb
+        model:   yolo-v2-tiny.pb
         adapter:
           type: yolo_v2
           anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
@@ -48,22 +48,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/yolo-v2-tiny-tf/FP32/yolo-v2-tiny-tf.xml
-        weights: public/yolo-v2-tiny-tf/FP32/yolo-v2-tiny-tf.bin
-        adapter:
-          type: yolo_v2
-          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
-          num: 5
-          coords: 4
-          classes: 80
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/yolo-v2-tiny-tf/FP16/yolo-v2-tiny-tf.xml
-        weights: public/yolo-v2-tiny-tf/FP16/yolo-v2-tiny-tf.bin
         adapter:
           type: yolo_v2
           anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"

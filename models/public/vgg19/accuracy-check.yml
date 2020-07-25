@@ -2,8 +2,8 @@ models:
   - name: vgg19-cf
     launchers:
       - framework: caffe
-        model:   public/vgg19/vgg19.prototxt
-        weights: public/vgg19/vgg19.caffemodel
+        model:   vgg19.prototxt
+        weights: vgg19.caffemodel
         adapter: classification
     datasets:
       - name: imagenet_1000_classes
@@ -19,17 +19,6 @@ models:
   - name: vgg19
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/vgg19/FP32/vgg19.xml
-        weights: public/vgg19/FP32/vgg19.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/vgg19/FP16/vgg19.xml
-        weights: public/vgg19/FP16/vgg19.bin
         adapter: classification
 
     datasets:

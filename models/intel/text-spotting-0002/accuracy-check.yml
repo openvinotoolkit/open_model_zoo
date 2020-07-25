@@ -3,17 +3,11 @@ evaluations:
     module: custom_evaluators.text_spotting_evaluator.TextSpottingEvaluator
     module_config:
       network_info:
-        detector:
-          model:   intel/text-spotting-0002/text-spotting-0002-detector/FP32/text-spotting-0002-detector.xml
-          weights: intel/text-spotting-0002/text-spotting-0002-detector/FP32/text-spotting-0002-detector.bin
+        detector: {}
 
-        recognizer_encoder:
-          model:   intel/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.xml
-          weights: intel/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.bin
+        recognizer_encoder: {}
 
-        recognizer_decoder:
-          model:   intel/text-spotting-0002/text-spotting-0002-recognizer-decoder/FP32/text-spotting-0002-recognizer-decoder.xml
-          weights: intel/text-spotting-0002/text-spotting-0002-recognizer-decoder/FP32/text-spotting-0002-recognizer-decoder.bin
+        recognizer_decoder: {}
 
         recognizer_decoder_inputs:
           prev_symbol: prev_symbol
@@ -41,67 +35,6 @@ evaluations:
 
       launchers:
         - framework: dlsdk
-          tags:
-            - FP32
-
-      datasets:
-        - name: ICDAR2015_word_spotting
-
-          preprocessing:
-            - type: resize
-              dst_width: 1280
-              dst_height: 768
-
-          metrics:
-            - type: incidental_text_hmean
-              name: f-measure
-              ignore_difficult: True
-              word_spotting: True
-
-  - name: text-spotting-0002
-    module: custom_evaluators.text_spotting_evaluator.TextSpottingEvaluator
-    module_config:
-      network_info:
-        detector:
-          model:   intel/text-spotting-0002/text-spotting-0002-detector/FP16/text-spotting-0002-detector.xml
-          weights: intel/text-spotting-0002/text-spotting-0002-detector/FP16/text-spotting-0002-detector.bin
-
-        recognizer_encoder:
-          model:   intel/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.xml
-          weights: intel/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.bin
-
-        recognizer_decoder:
-          model:   intel/text-spotting-0002/text-spotting-0002-recognizer-decoder/FP16/text-spotting-0002-recognizer-decoder.xml
-          weights: intel/text-spotting-0002/text-spotting-0002-recognizer-decoder/FP16/text-spotting-0002-recognizer-decoder.bin
-
-        recognizer_decoder_inputs:
-          prev_symbol: prev_symbol
-          prev_hidden: prev_hidden
-          encoder_outputs: encoder_outputs
-
-        recognizer_decoder_outputs:
-          symbols_distribution: output
-          cur_hidden: hidden
-
-        max_seq_len: '28'
-
-        alphabet: __0123456789abcdefghijklmnopqrstuvwxyz
-        sos_index: '0'
-        eos_index: '1'
-
-        adapter:
-          type: mask_rcnn_with_text
-          classes_out: classes
-          scores_out: scores
-          boxes_out: boxes
-          raw_masks_out: raw_masks
-          texts_out: texts
-          confidence_threshold: 0.8
-
-      launchers:
-        - framework: dlsdk
-          tags:
-            - FP16
 
       datasets:
         - name: ICDAR2015_word_spotting

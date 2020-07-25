@@ -2,8 +2,8 @@ models:
   - name: vgg16-cf
     launchers:
       - framework: caffe
-        model:   public/vgg16/vgg16.prototxt
-        weights: public/vgg16/vgg16.caffemodel
+        model:   vgg16.prototxt
+        weights: vgg16.caffemodel
         adapter: classification
     datasets:
       - name: imagenet_1000_classes
@@ -19,31 +19,6 @@ models:
   - name: vgg16
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/vgg16/FP32/vgg16.xml
-        weights: public/vgg16/FP32/vgg16.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/vgg16/FP16/vgg16.xml
-        weights: public/vgg16/FP16/vgg16.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP32-INT8
-        model:   public/vgg16/FP32-INT8/vgg16.xml
-        weights: public/vgg16/FP32-INT8/vgg16.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   public/vgg16/FP16-INT8/vgg16.xml
-        weights: public/vgg16/FP16-INT8/vgg16.bin
         adapter: classification
 
     datasets:

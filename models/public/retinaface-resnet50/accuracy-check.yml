@@ -2,25 +2,6 @@ models:
   - name: retinaface-resnet50
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/retinaface-resnet50/FP32/retinaface-resnet50.xml
-        weights: public/retinaface-resnet50/FP32/retinaface-resnet50.bin
-        adapter:
-          type: retinaface
-          bboxes_outputs:
-            - face_rpn_bbox_pred_stride32
-            - face_rpn_bbox_pred_stride16
-            - face_rpn_bbox_pred_stride8
-          scores_outputs:
-            - face_rpn_cls_prob_reshape_stride32
-            - face_rpn_cls_prob_reshape_stride16
-            - face_rpn_cls_prob_reshape_stride8
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/retinaface-resnet50/FP16/retinaface-resnet50.xml
-        weights: public/retinaface-resnet50/FP16/retinaface-resnet50.bin
         adapter:
           type: retinaface
           bboxes_outputs:

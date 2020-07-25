@@ -3,17 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32-INT1
-        model:   intel/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
-        weights: intel/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT1
-        model:   intel/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.xml
-        weights: intel/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
         adapter: classification
 
     datasets:

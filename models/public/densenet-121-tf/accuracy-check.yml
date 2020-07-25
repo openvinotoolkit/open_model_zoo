@@ -2,17 +2,6 @@ models:
   - name: densenet-121-tf
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/densenet-121-tf/FP32/densenet-121-tf.xml
-        weights: public/densenet-121-tf/FP32/densenet-121-tf.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/densenet-121-tf/FP16/densenet-121-tf.xml
-        weights: public/densenet-121-tf/FP16/densenet-121-tf.bin
         adapter: classification
 
     datasets:

@@ -2,27 +2,11 @@ models:
   - name: ctdet_coco_dlav0_384
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/ctdet_coco_dlav0_384/FP32/ctdet_coco_dlav0_384.xml
-        weights: public/ctdet_coco_dlav0_384/FP32/ctdet_coco_dlav0_384.bin
         adapter:
           type: ctdet
           center_heatmap_out: "508"
           width_height_out: "514"
           regression_out: "511"
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/ctdet_coco_dlav0_384/FP16/ctdet_coco_dlav0_384.xml
-        weights: public/ctdet_coco_dlav0_384/FP16/ctdet_coco_dlav0_384.bin
-        adapter:
-          type: ctdet
-          center_heatmap_out: "508"
-          width_height_out: "514"
-          regression_out: "511"
-
 
     datasets:
       - name: ms_coco_detection_80_class_without_background

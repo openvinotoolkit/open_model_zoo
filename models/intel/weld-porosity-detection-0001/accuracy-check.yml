@@ -2,17 +2,6 @@ models:
   - name: weld-porosity-detection-0001
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/weld-porosity-detection-0001/FP32/weld-porosity-detection-0001.xml
-        weights: intel/weld-porosity-detection-0001/FP32/weld-porosity-detection-0001.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/weld-porosity-detection-0001/FP16/weld-porosity-detection-0001.xml
-        weights: intel/weld-porosity-detection-0001/FP16/weld-porosity-detection-0001.bin
         adapter: classification
 
     datasets:

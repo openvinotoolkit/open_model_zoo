@@ -3,10 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32-INT1
-        model:   intel/face-detection-adas-binary-0001/FP32-INT1/face-detection-adas-binary-0001.xml
-        weights: intel/face-detection-adas-binary-0001/FP32-INT1/face-detection-adas-binary-0001.bin
         adapter: ssd
 
     datasets:
