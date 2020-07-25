@@ -12,8 +12,8 @@
 #include <string>
 #include <utility>
 
-#include <images_capture.h>
 #include <samples/args_helper.hpp>
+#include <samples/images_capture.h>
 
 #include "perf_timer.hpp"
 

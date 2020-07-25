@@ -23,8 +23,8 @@
 
 #include <inference_engine.hpp>
 
-#include <images_capture.h>
 #include <monitors/presenter.h>
+#include <samples/images_capture.h>
 #include <samples/slog.hpp>
 #include <samples/ocv_common.hpp>
 #include "crossroad_camera_demo.hpp"
