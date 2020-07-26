@@ -204,6 +204,7 @@ class NormalizeAudio(Preprocessor):
 
         return image
 
+
 class HanningWindow(Preprocessor):
     __provider__ = 'hanning_window'
 
@@ -221,15 +222,14 @@ class HanningWindow(Preprocessor):
         return parameters
 
     def configure(self):
-
         self.base = self.get_value_from_config('base')
         self.window = np.hanning(self.base)
-
 
     def process(self, image, annotation_meta=None):
         image.data = image.data * self.window
 
         return image
+
 
 class AudioSpectrogram(Preprocessor):
     __provider__ = 'audio_spectrogram'
@@ -496,3 +496,91 @@ class PackCepstrum(Preprocessor):
         image.metadata['multi_infer'] = True
 
         return image
+
+
+class TrimmingAudio(Preprocessor):
+    __provider__ = 'trim'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'top_db': NumberField(value_type=float, optional=True, default=60),
+            'frame_length': NumberField(value_type=int, optional=True, default=2048, min_value=1),
+            'hop_length': NumberField(value_type=int, optional=True, default=512, min_value=1)
+        })
+        return params
+
+    def configure(self):
+        self.top_db = self.get_value_from_config('top_db')
+        self.frame_length = self.get_value_from_config('frame_length')
+        self.hop_length = self.get_value_from_config('hop_length')
+
+    def process(self, image, annotation_meta=None):
+        image.data = self.trim(image.data)
+        return image
+
+    def trim(self, y):
+        def frames_to_samples(frames, hop):
+            return np.floor(np.asanyarray(frames) // hop).astype(int)
+
+        non_silent = self._signal_to_frame_nonsilent(y)
+        nonzero = np.flatnonzero(non_silent)
+
+        if nonzero.size > 0:
+            start = int(frames_to_samples(nonzero[0], self.hop_length))
+            end = min(y.shape[-1], int(frames_to_samples(nonzero[-1] + 1, self.hop_length)))
+        else:
+            # The signal only contains zeros
+            start, end = 0, 0
+
+        # Build the mono/stereo index
+        full_index = [slice(None)] * y.ndim
+        full_index[-1] = slice(start, end)
+
+        return y[tuple(full_index)], np.asarray([start, end])
+
+    def _signal_to_frame_nonsilent(self, y):
+        y_mono = np.asfortranarray(y)
+
+        if y_mono.ndim > 1:
+            y_mono = np.mean(y-y_mono, axis=0)
+
+        # Compute the MSE for the signal
+        mse = self.mse(y_mono)
+        amin = 1e-10
+        magnitude = mse.squeeze(),
+        ref_value = np.max(magnitude)
+        log_spec = 10.0 * np.log10(np.maximum(amin, magnitude))
+        log_spec -= 10.0 * np.log10(np.maximum(amin, ref_value))
+
+        return log_spec > - self.top_db
+
+    def mse(self, y_mono):
+        y_mono = np.pad(y_mono, int(self.frame_length // 2), mode='reflect')
+        n_frames = 1 + (y_mono.shape[-1] - self.frame_length) // self.hop_length
+        strides = np.asarray(y_mono.strides)
+        new_stride = np.prod(strides[strides > 0] // y_mono.itemsize) * y_mono.itemsize
+        shape = list(y_mono.shape)[:-1] + [self.frame_length, n_frames]
+        strides = list(strides) + [self.hop_length * new_stride]
+
+        class DummyArray:
+            """Dummy object that just exists to hang __array_interface__ dictionaries
+            and possibly keep alive a reference to a base array.
+            """
+
+            def __init__(self, interface, base=None):
+                self.__array_interface__ = interface
+                self.base = base
+
+        interface = dict(y_mono.__array_interface__)
+        if shape is not None:
+            interface['shape'] = tuple(shape)
+        if strides is not None:
+            interface['strides'] = tuple(strides)
+
+        array = np.asarray(DummyArray(interface, base=x))
+        # The route via `__interface__` does not preserve structured
+        # dtypes. Since dtype should remain unchanged, we set it explicitly.
+        array.dtype = y_mono.dtype
+        return np.mean(np.abs(array) ** 2, axis=0, keepdims=True)
