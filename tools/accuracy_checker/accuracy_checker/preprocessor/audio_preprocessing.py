@@ -546,7 +546,7 @@ class TrimmingAudio(Preprocessor):
 
     def trim(self, y):
         def frames_to_samples(frames, hop):
-            return np.floor(np.asanyarray(frames) / hop).astype(int)
+            return np.floor(np.asanyarray(frames) // hop).astype(int)
 
         non_silent = self._signal_to_frame_nonsilent(y)
         nonzero = np.flatnonzero(non_silent)
@@ -562,7 +562,7 @@ class TrimmingAudio(Preprocessor):
         full_index = [slice(None)] * y.ndim
         full_index[-1] = slice(start, end)
 
-        return y[tuple(full_index)]
+        return y[tuple(full_index)], np.asarray([start, end])
 
     def _signal_to_frame_nonsilent(self, y):
         y_mono = np.asfortranarray(y)
@@ -590,28 +590,6 @@ class TrimmingAudio(Preprocessor):
         array = np.lib.stride_tricks.as_strided(y_mono, shape, strides)
         return np.mean(np.abs(array) ** 2, axis=0, keepdims=True)
 
-
-def as_strided(x, shape, strides):
-    class DummyArray:
-        """Dummy object that just exists to hang __array_interface__ dictionaries
-        and possibly keep alive a reference to a base array.
-        """
-
-        def __init__(self, interface, base=None):
-            self.__array_interface__ = interface
-            self.base = base
-
-    interface = dict(x.__array_interface__)
-    if shape is not None:
-        interface['shape'] = tuple(shape)
-    if strides is not None:
-        interface['strides'] = tuple(strides)
-
-    array = np.asarray(DummyArray(interface, base=x))
-    # The route via `__interface__` does not preserve structured
-    # dtypes. Since dtype should remain unchanged, we set it explicitly.
-    array.dtype = x.dtype
-    return array
 
 windows = {
     'hann': np.hanning,
