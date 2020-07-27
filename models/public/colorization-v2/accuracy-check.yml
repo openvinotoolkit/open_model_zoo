@@ -4,7 +4,7 @@ evaluations:
     module_config:
       network_info:
         colorization_network:
-          color_coeff: public/colorization-v2/colorization-v2.npy
+          color_coeff: colorization-v2.npy
 
         verification_network:
           adapter: classification
