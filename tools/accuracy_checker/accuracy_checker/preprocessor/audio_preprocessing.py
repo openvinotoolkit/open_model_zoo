@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import numpy as np
+import librosa
 
 from ..config import BoolField, BaseField, NumberField, ConfigError, StringField
 from ..preprocessor import Preprocessor
@@ -541,12 +542,12 @@ class TrimmingAudio(Preprocessor):
         self.hop_length = self.get_value_from_config('hop_length')
 
     def process(self, image, annotation_meta=None):
-        image.data = self.trim(image.data)
+        image.data, _ = librosa.effects.trim(image.data, self.top_db)
         return image
 
     def trim(self, y):
         def frames_to_samples(frames, hop):
-            return np.floor(np.asanyarray(frames) // hop).astype(int)
+            return np.floor(np.asanyarray(frames) / hop).astype(int)
 
         non_silent = self._signal_to_frame_nonsilent(y)
         nonzero = np.flatnonzero(non_silent)
@@ -562,7 +563,7 @@ class TrimmingAudio(Preprocessor):
         full_index = [slice(None)] * y.ndim
         full_index[-1] = slice(start, end)
 
-        return y[tuple(full_index)], np.asarray([start, end])
+        return y[tuple(full_index)]
 
     def _signal_to_frame_nonsilent(self, y):
         y_mono = np.asfortranarray(y)
@@ -878,11 +879,11 @@ class AudioToMelSpectrogram(Preprocessor):
             x_mean = np.zeros(seq_len, dtype=x.dtype)
             x_std = np.zeros(seq_len, dtype=x.dtype)
             for i in range(x.shape[0]):
-                x_mean[i, :] = x[i, :, : seq_len[i]].mean(axis=1)
-                x_std[i, :] = x[i, :, : seq_len[i]].std(axis=1)
+                x_mean[i, :] = x[i, :seq_len].mean(axis=1)
+                x_std[i, :] = x[i, :seq_len].std(axis=1)
             # make sure x_std is not zero
             x_std += 1e-5
-            return (x - x_mean.unsqueeze(2)) / x_std.unsqueeze(2)
+            return (x - np.expand_dims(x_mean, 2)) / np.expand_dims(x_std, 2)
 
         if normalize_type == "all_features":
             x_mean = np.zeros(seq_len.shape, dtype=x.dtype)
@@ -892,5 +893,5 @@ class AudioToMelSpectrogram(Preprocessor):
                 x_std[i] = x[i, :, : seq_len[i].item()].std()
             # make sure x_std is not zero
             x_std += 1e-5
-            return (x - np.reshape(x_mean, (-1, 1, 1)) / np.reshape(x_std, (-1, 1, 1))
+            return (x - np.reshape(x_mean, (-1, 1, 1)) / np.reshape(x_std, (-1, 1, 1)))
         return x

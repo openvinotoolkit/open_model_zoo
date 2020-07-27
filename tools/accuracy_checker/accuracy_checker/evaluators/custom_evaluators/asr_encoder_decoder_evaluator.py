@@ -490,13 +490,11 @@ class DecoderDLSDKModel(BaseModel, BaseDLSDKModel):
         self.with_prefix = False
 
     def predict(self, identifiers, input_data):
-        feed_dicts = self.fit_to_input(input_data)
-        raw_results = []
-        for feed_dict in feed_dicts:
-            raw_results.append(self.exec_network.infer(feed_dict))
-        result = self.adapter.process(raw_results, identifiers, [{'multi_infer': True}])
+        feed_dict = self.fit_to_input(input_data)
+        raw_result = self.exec_network.infer(feed_dict)
+        result = self.adapter.process([raw_result], identifiers, [{}])
 
-        return raw_results, result
+        return raw_result, result
 
     def release(self):
         del self.exec_network
