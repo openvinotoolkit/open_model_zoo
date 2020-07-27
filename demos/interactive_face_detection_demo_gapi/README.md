@@ -22,7 +22,7 @@ OpenCV is used to draw resulting bounding boxes, labels, and other information. 
 
 1.	The application reads command-line parameters and loads up to five networks depending on `-m...` options family to the Inference
 Engine.
-2.	G-API pipline gets a video/image/camera like a sourse using the OpenCV VideoCapture.
+2.	G-API pipeline gets a video/image/camera like a source using the OpenCV VideoCapture.
 3.	G-API pipline performs inference on the Face Detection network.
 4.	G-API pipline run post processing kernel.
 5.	G-API pipline performs four inferences, using the Age/Gender, Head Pose, Emotions, and Facial Landmarks detection networks if they are specified in the command line.
