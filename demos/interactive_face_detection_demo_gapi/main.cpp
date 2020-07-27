@@ -296,31 +296,6 @@ int main(int argc, char *argv[]) {
         if (FLAGS_i.empty())
             throw std::logic_error("Parameter -i is not set");
         if (FLAGS_m.empty())
-            throw std::logic_error("Parameter -m is not set");
-        if (!FLAGS_c.empty())
-            slog::warn << "Option \"-c\" is not supported in this version of the demo." << slog::endl;
-        if (!FLAGS_l.empty())
-            slog::warn << "Option \"-l\" is not supported in this version of the demo." << slog::endl;
-        if (FLAGS_n_ag != 0)
-            slog::warn << "Option \"-n_ag\" is not supported in this version of the demo." << slog::endl;
-        if (FLAGS_n_hp != 0)
-            slog::warn << "Option \"-n_hp\" is not supported in this version of the demo." << slog::endl;
-        if (FLAGS_n_em != 0)
-            slog::warn << "Option \"-n_em\" is not supported in this version of the demo." << slog::endl;
-        if (FLAGS_n_lm != 0)
-            slog::warn << "Option \"-n_lm\" is not supported in this version of the demo." << slog::endl;
-        if (FLAGS_dyn_ag != false)
-            slog::warn << "Option \"-dyn_ag\" is not supported in this version of the demo." << slog::endl;
-        if (FLAGS_dyn_hp != false)
-            slog::warn << "Option \"-dyn_hp\" is not supported in this version of the demo." << slog::endl;
-        if (FLAGS_dyn_em != false)
-            slog::warn << "Option \"-dyn_em\" is not supported in this version of the demo." << slog::endl;
-        if (FLAGS_dyn_lm != false)
-            slog::warn << "Option \"-dyn_lm\" is not supported in this version of the demo." << slog::endl;
-        if (FLAGS_pc != false)
-            slog::warn << "Option \"-pc\" is not supported in this version of the demo." << slog::endl;
-        if (FLAGS_fps != -1)
-            slog::warn << "Option \"-fps\" is not supported in this version of the demo." << slog::endl;
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
