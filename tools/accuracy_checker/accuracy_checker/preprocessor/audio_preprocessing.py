@@ -15,7 +15,10 @@ limitations under the License.
 """
 
 import numpy as np
-import librosa
+try:
+    import librosa
+except ImportError:
+    librosa = None
 
 from ..config import BoolField, BaseField, NumberField, ConfigError, StringField
 from ..preprocessor import Preprocessor
@@ -537,6 +540,11 @@ class TrimmingAudio(Preprocessor):
         return params
 
     def configure(self):
+        if librosa is None:
+            raise ConfigError(
+                'librosa not installed, preprocessor {} require librosa. Please install it before usage'.format(
+                    self.__provider__)
+            )
         self.top_db = self.get_value_from_config('top_db')
         self.frame_length = self.get_value_from_config('frame_length')
         self.hop_length = self.get_value_from_config('hop_length')
@@ -643,6 +651,11 @@ class AudioToMelSpectrogram(Preprocessor):
         return params
 
     def configure(self):
+        if librosa is None:
+            raise ConfigError(
+                'librosa not installed, preprocessor {} require librosa. Please install it before usage'.format(
+                    self.__provider__)
+            )
         self.window_size = self.get_value_from_config('window_size')
         self.window_stride = self.get_value_from_config('window_stride')
         self.n_fft = self.get_value_from_config('n_fft')
@@ -893,5 +906,5 @@ class AudioToMelSpectrogram(Preprocessor):
                 x_std[i] = x[i, :, : seq_len[i].item()].std()
             # make sure x_std is not zero
             x_std += 1e-5
-            return (x - np.reshape(x_mean, (-1, 1, 1)) / np.reshape(x_std, (-1, 1, 1)))
+            return x - np.reshape(x_mean, (-1, 1, 1)) / np.reshape(x_std, (-1, 1, 1))
         return x
