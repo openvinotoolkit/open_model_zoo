@@ -2,27 +2,34 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+/**
+ * @brief a header file for performance metrics calculation class
+ * @file performance_metrics.hpp
+ */
+
 #pragma once
 
 #include <chrono>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
 
-#include "../samples/ocv_common.hpp"
+#include <samples/ocv_common.hpp>
 
 class PerformanceMetrics {
 public:
     using Clock = std::chrono::steady_clock;
     using TimePoint = std::chrono::time_point<Clock>;
     using Duration = Clock::duration;
-    using Us = std::chrono::microseconds;
-    using Ms = std::chrono::milliseconds;
-    using Sec = std::chrono::seconds;
+    using Ms = std::chrono::duration<double, std::ratio<1, 1000>>;
+    using Sec = std::chrono::duration<double, std::ratio<1, 1>>;
 
     struct Metrics {
         double latency;
         double fps;
     };
 
-    PerformanceMetrics(Duration timeWindow = Sec(1));
+    PerformanceMetrics(Duration timeWindow = std::chrono::duration_cast<Duration>(Sec(1)));
     void update(TimePoint lastRequestStartTime,
                 cv::Mat& frame,
                 cv::Point position = {15, 30},
@@ -31,7 +38,7 @@ public:
                 int thickness = 2);
     Metrics getLast() const;
     Metrics getTotal() const;
-    void printTotal() const;
+    void printTotal();
 
 private:
     struct Statistic {
@@ -51,6 +58,9 @@ private:
             frameCount += other.frameCount;
         }
     };
+
+    void getLatencyMessage(std::ostringstream& out, double value, bool isAvailable);
+    void getFpsMessage(std::ostringstream& out, double value, bool isAvailable);
 
     Duration timeWindowSize;
     Statistic lastMovingStatistic;
