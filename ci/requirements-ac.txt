@@ -6,7 +6,6 @@ editdistance==0.5.3       # via -r tools/accuracy_checker/requirements.in
 imageio==2.9.0            # via scikit-image
 joblib==0.14.1            # via scikit-learn
 kiwisolver==1.1.0         # via matplotlib
-librosa==0.7.2
 matplotlib==3.0.3         # via scikit-image
 networkx==2.4             # via scikit-image
 nibabel==3.0.2            # via -r tools/accuracy_checker/requirements.in

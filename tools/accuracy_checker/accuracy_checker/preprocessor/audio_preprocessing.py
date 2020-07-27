@@ -15,7 +15,10 @@ limitations under the License.
 """
 
 import numpy as np
-import librosa
+try:
+    import librosa
+except ImportError:
+    librosa = None
 
 from ..config import BoolField, BaseField, NumberField, ConfigError, StringField
 from ..preprocessor import Preprocessor
@@ -186,7 +189,8 @@ class SamplesToFloat32(Preprocessor):
         image.data = self._convert_samples_to_float32(image.data)
         return image
 
-    def _convert_samples_to_float32(self, samples):
+    @staticmethod
+    def _convert_samples_to_float32(samples):
         """Convert sample type to float32.
         Audio sample type is usually integer or float-point.
         Integers will be scaled to [-1, 1] in float32.
@@ -198,7 +202,7 @@ class SamplesToFloat32(Preprocessor):
         elif samples.dtype in np.sctypes['float']:
             pass
         else:
-            raise TypeError("Unsupported sample type: %s." % samples.dtype)
+            raise TypeError("Unsupported sample type: {}.".format(samples.dtype))
         return float32_samples
 
 
@@ -536,6 +540,11 @@ class TrimmingAudio(Preprocessor):
         return params
 
     def configure(self):
+        if librosa is None:
+            raise ConfigError(
+                'librosa not installed, preprocessor {} require librosa. Please install it before usage'.format(
+                    self.__provider__)
+            )
         self.top_db = self.get_value_from_config('top_db')
         self.frame_length = self.get_value_from_config('frame_length')
         self.hop_length = self.get_value_from_config('hop_length')
@@ -640,6 +649,11 @@ class AudioToMelSpectrogram(Preprocessor):
         return params
 
     def configure(self):
+        if librosa is None:
+            raise ConfigError(
+                'librosa not installed, preprocessor {} require librosa. Please install it before usage'.format(
+                    self.__provider__)
+            )
         self.window_size = self.get_value_from_config('window_size')
         self.window_stride = self.get_value_from_config('window_stride')
         self.n_fft = self.get_value_from_config('n_fft')
@@ -690,7 +704,10 @@ class AudioToMelSpectrogram(Preprocessor):
         # do preemphasis
         if self.preemph is not None:
             x = np.concatenate((np.expand_dims(x[:, 0], 1), x[:, 1:] - self.preemph * x[:, :-1]), axis=1, )
-        x = librosa.stft(x.squeeze(), n_fft=self.n_fft, hop_length=self.hop_length, win_length=self.window_length, window=self.window, center=True, dtype=np.float32)
+        x = librosa.stft(
+            x.squeeze(), n_fft=self.n_fft, hop_length=self.hop_length, win_length=self.window_length,
+            window=self.window, center=True, dtype=np.float32
+        )
 
         # get power spectrum
         if self.mag_power != 1.0:
@@ -791,7 +808,7 @@ class AudioToMelSpectrogram(Preprocessor):
         mels = np.linspace(min_mel, max_mel, n_mels)
         return mel_to_hz(mels)
 
-    @staticmethod
+    #@staticmethod
     # def stft(y, n_fft, hop_length, window, center=True, dtype=np.complex64, pad_mode='reflect'):
     #     # Constrain STFT block sizes to 256 KB
     #     MAX_MEM_BLOCK = 2 ** 8 * 2 ** 10
@@ -877,5 +894,5 @@ class AudioToMelSpectrogram(Preprocessor):
                 x_std[i] = x[i, :, : seq_len[i].item()].std()
             # make sure x_std is not zero
             x_std += 1e-5
-            return (x - np.reshape(x_mean, (-1, 1, 1)) / np.reshape(x_std, (-1, 1, 1)))
+            return x - np.reshape(x_mean, (-1, 1, 1)) / np.reshape(x_std, (-1, 1, 1))
         return x
