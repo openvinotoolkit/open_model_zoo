@@ -250,7 +250,7 @@ class BaseModel:
         pass
 
 
-class BaseDLSDKModel(BaseModel):
+class BaseDLSDKModel:
     def _reshape_input(self, input_shapes):
         del self.exec_network
         self.network.reshape(input_shapes)
@@ -415,7 +415,6 @@ class ASRModel(BaseModel):
         return raw_outputs, predictions
 
     def reset(self):
-        self.processing_frames_buffer = []
         if self._encoder_predictions is not None:
             self._encoder_predictions = []
 
@@ -447,7 +446,7 @@ class ASRModel(BaseModel):
         return [{'name': 'encoder', 'model': self.encoder.network}, {'name': 'decoder', 'model': self.decoder.network}]
 
 
-class EncoderDLSDKModel(BaseDLSDKModel):
+class EncoderDLSDKModel(BaseModel, BaseDLSDKModel):
     default_model_suffix = 'encoder'
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
@@ -479,7 +478,7 @@ class EncoderDLSDKModel(BaseDLSDKModel):
 
 
 
-class DecoderDLSDKModel(BaseDLSDKModel):
+class DecoderDLSDKModel(BaseModel, BaseDLSDKModel):
     default_model_suffix = 'decoder'
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
@@ -535,7 +534,7 @@ class EncoderONNXModel(BaseModel):
         return results, results[0]
 
     def fit_to_input(self, input_data):
-        return {self.input_blob.name: input_data[0]}
+        return {self.input_blob.name: input_data}
 
     def release(self):
         del self.inference_session

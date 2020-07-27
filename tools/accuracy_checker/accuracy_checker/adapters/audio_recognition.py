@@ -176,7 +176,6 @@ class CTCGreedyDecoder(Adapter):
 
     def configure(self):
         self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\'-'
-#        self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
         self.softmaxed_probabilities = self.launcher_config.get('softmaxed_probabilities')
         self.classification_out = self.get_value_from_config('classification_out')
 

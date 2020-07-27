@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from scipy import signal
 import numpy as np
 
 from ..config import BoolField, BaseField, NumberField, ConfigError, StringField
@@ -591,6 +590,30 @@ class TrimmingAudio(Preprocessor):
         array = np.lib.stride_tricks.as_strided(y_mono, shape, strides)
         return np.mean(np.abs(array) ** 2, axis=0, keepdims=True)
 
+<<<<<<< 956b2cb9de1afa7963dea6c33bdd4584ce74a1fc
+=======
+
+def as_strided(x, shape, strides):
+    class DummyArray:
+        """Dummy object that just exists to hang __array_interface__ dictionaries
+        and possibly keep alive a reference to a base array.
+        """
+
+        def __init__(self, interface, base=None):
+            self.__array_interface__ = interface
+            self.base = base
+
+    interface = dict(x.__array_interface__)
+    if shape is not None:
+        interface['shape'] = tuple(shape)
+    if strides is not None:
+        interface['strides'] = tuple(strides)
+
+    array = np.asarray(DummyArray(interface, base=x))
+    # The route via `__interface__` does not preserve structured
+    # dtypes. Since dtype should remain unchanged, we set it explicitly.
+    array.dtype = x.dtype
+    return array
 
 windows = {
     'hann': np.hanning,
@@ -807,7 +830,7 @@ class AudioToMelSpectrogram(Preprocessor):
 
         # Reshape so that the window can be broadcast
         fft_window = fft_window.reshape((-1, 1))
-        # # Pad the time series so that frames are centered
+        # Pad the time series so that frames are centered
         if center:
             y = np.pad(y, int(n_fft // 2), mode=pad_mode)
 
@@ -827,8 +850,8 @@ class AudioToMelSpectrogram(Preprocessor):
             bl_t = min(bl_s + n_columns, stft_matrix.shape[1])
 
             # RFFT and Conjugate here to match phase from DPWE code
-            rfft = fft_window * y_frames[:, bl_s:bl_t]
-            stft_matrix[:, bl_s:bl_t] = np.fft.rfft(rfft, axis=0)[:stft_matrix.shape[0]]
+            stft_matrix[:, bl_s:bl_t] = np.fft.fft(
+                fft_window * y_frames[:, bl_s:bl_t], axis=0)[:stft_matrix.shape[0]]
 
         return stft_matrix
 
@@ -855,9 +878,19 @@ class AudioToMelSpectrogram(Preprocessor):
             x_mean = np.zeros(seq_len, dtype=x.dtype)
             x_std = np.zeros(seq_len, dtype=x.dtype)
             for i in range(x.shape[0]):
+                x_mean[i, :] = x[i, :, : seq_len[i]].mean(axis=1)
+                x_std[i, :] = x[i, :, : seq_len[i]].std(axis=1)
+            # make sure x_std is not zero
+            x_std += 1e-5
+            return (x - x_mean.unsqueeze(2)) / x_std.unsqueeze(2)
+
+        if normalize_type == "all_features":
+            x_mean = np.zeros(seq_len.shape, dtype=x.dtype)
+            x_std = np.zeros(seq_len.shape, dtype=x.dtype)
+            for i in range(x.shape[0]):
                 x_mean[i] = x[i, :, : seq_len[i].item()].mean()
                 x_std[i] = x[i, :, : seq_len[i].item()].std()
             # make sure x_std is not zero
             x_std += 1e-5
-            return x - np.reshape(x_mean, (-1, 1, 1)) / np.reshape(x_std, (-1, 1, 1))
+            return (x - np.reshape(x_mean, (-1, 1, 1)) / np.reshape(x_std, (-1, 1, 1))
         return x
