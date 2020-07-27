@@ -9,6 +9,7 @@ imageio==2.9.0            # via scikit-image
 importlib-metadata==1.7.0  # via pluggy, pytest
 joblib==0.14.1            # via scikit-learn
 kiwisolver==1.1.0         # via matplotlib
+librosa==0.7.2
 matplotlib==3.0.3         # via scikit-image
 more-itertools==8.4.0     # via pytest
 networkx==2.4             # via scikit-image

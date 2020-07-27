@@ -26,3 +26,6 @@ tokenizers
 
 # editdistance calculation
 editdistance
+
+# audio
+librosa
