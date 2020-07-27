@@ -35,7 +35,7 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
         data_folder = Path(self.data_dir)
         txts = list(data_folder.glob('**/*.txt'))
         for txt in txts:
-            content = open(txt).readlines()
+            content = txt.open().readlines()
             for line in content:
                 res = pattern.search(line)
                 if res:

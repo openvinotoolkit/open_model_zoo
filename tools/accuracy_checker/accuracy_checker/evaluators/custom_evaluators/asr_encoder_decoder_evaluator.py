@@ -241,12 +241,18 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
 class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.network_info = network_info
+        self.launcher = launcher
 
     def predict(self, idenitifiers, input_data):
         raise NotImplementedError
 
     def release(self):
         pass
+
+    def _reshape_input(self, input_shapes):
+        del self.exec_network
+        self.network.reshape(input_shapes)
+        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
 
     def print_input_output_info(self):
         print_info('{} - Input info:'.format(self.default_model_suffix))
@@ -307,7 +313,7 @@ def create_decoder(model_config, launcher, delayed_model_loading):
     return model_class(model_config, launcher, delayed_model_loading)
 
 
-class SequentialModel(BaseModel):
+class ASRModel(BaseModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         if models_args and not delayed_model_loading:
@@ -338,7 +344,7 @@ class SequentialModel(BaseModel):
                 encoder_callback(encoder_prediction)
             if self.store_encoder_predictions:
                 self._encoder_predictions.append(encoder_prediction[self.encoder.output_blob])
-            raw_output, prediction = self.decoder.predict(identifiers, [self.processing_frames_buffer])
+            raw_output, prediction = self.decoder.predict(identifiers, [encoder_prediction[self.encoder.output_blob]])
             raw_outputs.append(raw_output)
             predictions.append(prediction)
         return raw_outputs, predictions
@@ -402,19 +408,22 @@ class EncoderDLSDKModel(BaseModel):
             self.print_input_output_info()
 
     def predict(self, identifiers, input_data):
-        return self.exec_network.infer(self.fit_to_input(input_data))
+        input_data = self.fit_to_input(input_data)
+        return self.exec_network.infer(input_data)
 
     def release(self):
         del self.exec_network
 
     def fit_to_input(self, input_data):
+        has_info = hasattr(self.exec_network, 'input_info')
         if has_info:
             input_info = self.exec_network.input_info[self.input_blob].input_data
         else:
             input_info = self.exec_network.inputs[self.input_blob]
-        input_data = input_data.reshape(input_info.shape)
+        if tuple(input_info.shape) != np.shape(input_data[0]):
+            self._reshape_input({self.input_blob: np.shape(input_data[0])})
 
-        return {self.input_blob: input_data}
+        return {self.input_blob: np.array(input_data[0])}
 
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
@@ -479,7 +488,8 @@ class DecoderDLSDKModel(BaseModel):
         self.with_prefix = False
 
     def predict(self, identifiers, input_data):
-        raw_result = self.exec_network.infer(self.fit_to_input(input_data))
+        feed_dict = self.fit_to_input(input_data)
+        raw_result = self.exec_network.infer(feed_dict)
         result = self.adapter.process([raw_result], identifiers, [{}])
 
         return raw_result, result
@@ -493,7 +503,10 @@ class DecoderDLSDKModel(BaseModel):
             self.exec_network.input_info[self.input_blob].input_data
             if has_info else self.exec_network.inputs[self.input_blob]
         )
-        input_data = np.reshape(input_data, input_info.shape)
+        input_data = np.array(input_data[0])
+        if tuple(input_info.shape) != input_data.shape:
+            self._reshape_input({self.input_blob: input_data.shape})
+
         return {self.input_blob: input_data}
 
     def automatic_model_search(self, network_info):
