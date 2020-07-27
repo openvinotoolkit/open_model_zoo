@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 This is a YOLO V3 network finetuned for Person/Vehicle/Bike detection for security
-surveillance applications. Works in a variety of scenes and weather/lighting
+surveillance applications. It works in a variety of scenes and weather/lighting
 conditions.
 
 Yolo V3 is a real-time object detection model implemented with Keras\*
