@@ -35,7 +35,7 @@ Engine.
 Running the application with the `-h` option yields the following usage message:
 
 ```sh
-./interactive_face_detection_demo -h
+./interactive_face_detection_demo_gapi -h
 
 interactive_face_detection_demo [OPTION]
 Options:
