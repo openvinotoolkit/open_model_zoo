@@ -176,7 +176,7 @@ class CTCGreedyDecoder(Adapter):
 
     def configure(self):
         self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\'-'
-        self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
+#        self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
         self.softmaxed_probabilities = self.launcher_config.get('softmaxed_probabilities')
         self.classification_out = self.get_value_from_config('classification_out')
 
@@ -209,9 +209,9 @@ class CTCGreedyDecoder(Adapter):
 
         if self.softmaxed_probabilities:
             output = np.log(output)
-        argmx = output.argmax(dim=-1, keepdim=False)
+        argmx = output.argmax(axis=-1)
 
-        return [CharacterRecognitionPrediction(identifiers[0], self._ctc_decoder_prediction(argmx, self.alphabet))]
+        return [CharacterRecognitionPrediction(identifiers[0], self._ctc_decoder_prediction(argmx, self.alphabet)[0])]
 
     @staticmethod
     def _ctc_decoder_prediction(prediction, labels):
@@ -219,12 +219,16 @@ class CTCGreedyDecoder(Adapter):
         Decodes a sequence of labels to words
         """
         blank_id = len(labels)
+        hypotheses = []
         # CTC decoding procedure
-        decoded_prediction = []
-        previous = blank_id
-        for p in prediction:
-            if (p != previous or previous == blank_id) and p != blank_id:
-                decoded_prediction.append(p)
+        for ind in range(prediction.shape[0]):
+            decoded_prediction = []
+            previous = blank_id
+            pr = prediction[ind]
+            for p in pr:
+                if (p != previous or previous == blank_id) and p != blank_id:
+                    decoded_prediction.append(p)
                 previous = p
-        hypothesis = ''.join([labels[c] for c in decoded_prediction])
-        return hypothesis
+            hypothesis = ''.join([labels[c] for c in decoded_prediction])
+            hypotheses.append(hypothesis)
+        return hypotheses
