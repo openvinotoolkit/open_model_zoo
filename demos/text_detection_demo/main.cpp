@@ -161,13 +161,15 @@ int main(int argc, char *argv[]) {
         while (!image.empty()) {
             cv::Mat demo_image = image.clone();
             cv::Size orig_image_size = image.size();
+            cv::Size input_shape = text_detection.input_size();
 
             std::chrono::steady_clock::time_point begin_frame = std::chrono::steady_clock::now();
             std::vector<cv::RotatedRect> rects;
             if (text_detection.is_initialized()) {
                 auto blobs = text_detection.Infer(image);
                 std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-                rects = postProcess(blobs, orig_image_size, cls_conf_threshold, link_conf_threshold);
+                rects = postProcess(blobs, orig_image_size, input_shape,
+                                    cls_conf_threshold, link_conf_threshold);
                 std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                 text_detection_postproc_time += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             } else {
@@ -220,7 +222,7 @@ int main(int argc, char *argv[]) {
                     if (output_shape[2] != kAlphabet.length()) {
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
                     }
-                    
+
                     LockedMemory<const void> blobMapped = as<MemoryBlob>(blobs.begin()->second)->rmap();
                     float *output_data_pointer = blobMapped.as<float *>();
                     std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
@@ -294,12 +296,13 @@ int main(int argc, char *argv[]) {
           std::cout << "text detection model inference (ms) (fps): "
                     << text_detection.time_elapsed() / text_detection.ncalls() << " "
                     << text_detection.ncalls() * 1000 / text_detection.time_elapsed() << std::endl;
-        if (std::fabs(text_detection_postproc_time) < std::numeric_limits<double>::epsilon()) {
-            throw std::logic_error("text_detection_postproc_time can't be equal to zero");
-        }
-          std::cout << "text detection postprocessing (ms) (fps): "
-                    << text_detection_postproc_time / text_detection.ncalls() << " "
-                    << text_detection.ncalls() * 1000 / text_detection_postproc_time << std::endl << std::endl;
+          if (std::fabs(text_detection_postproc_time) < std::numeric_limits<double>::epsilon()) {
+              std::cout << "text detection postprocessing: took no time " << std::endl;
+          } else {
+            std::cout << "text detection postprocessing (ms) (fps): "
+                      << text_detection_postproc_time / text_detection.ncalls() << " "
+                      << text_detection.ncalls() * 1000 / text_detection_postproc_time << std::endl << std::endl;
+          }
         }
 
         if (text_recognition.ncalls() && !FLAGS_r) {

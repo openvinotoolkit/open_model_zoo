@@ -169,6 +169,7 @@ Deep Learning models for text detection in various applications.
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [text-detection-0003](./text-detection-0003/description/text-detection-0003.md)                                                                | 51.256               | 6.747      |
 | [text-detection-0004](./text-detection-0004/description/text-detection-0004.md)                                                                | 23.305               | 4.328      |
+| [horizontal-text-detection-0001](./horizontal-text-detection-0001/description/horizontal-text-detection-0001.md)                               | 7.718              | 2.259     |
 
 ## Text Recognition
 

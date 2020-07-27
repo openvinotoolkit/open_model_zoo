@@ -117,7 +117,7 @@ More detailed information about calculation segmentation metrics you can find [h
 * `f1_score` - [F score](https://en.wikipedia.org/wiki/F1_score) metric for multilabel recognition. Supported representations: `MultiLabelRecognitionAnnotation`, `MultiLabelRecognitionPrediction`.
   * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
   * `calculate_average` - allows calculation of average f-score (default value: `True`).
-* `focused_text_hmean` - Harmonic mean of precision and recall for focused scene text detection task introduced in [Robust Reading Competition challenge 2](https://rrc.cvc.uab.es/?ch=2&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`.
+* `focused_text_hmean` - Harmonic mean of precision and recall for focused scene text detection task introduced in [Robust Reading Competition challenge 2](https://rrc.cvc.uab.es/?ch=2&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`, `DetectionPrediction`.
   * `ignore_difficult` - allows to ignore difficult ground truth text polygons in metric calculation.
   * `area_precision_constrain` - minimal value for precision that allows to make decision that prediction polygon matched with annotation.
   * `area_recall_constrain` - minimal value for recall that allows to make decision that prediction polygon matched with annotation.
@@ -125,7 +125,7 @@ More detailed information about calculation segmentation metrics you can find [h
   * `one_to_one_match_score` - weight for one to one matching results (Optional, default 1).
   * `one_to_many_match_score` - weight for one to many matching results (Optional, default 0.8).
   * `many_to_one_match_score` - weight for many to one matching results (optional, default 1).
-* `focused_text_precision` - precision for focused scene text detection task introduced in [Robust Reading Competition challenge 2](https://rrc.cvc.uab.es/?ch=2&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`.
+* `focused_text_precision` - precision for focused scene text detection task introduced in [Robust Reading Competition challenge 2](https://rrc.cvc.uab.es/?ch=2&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`, `DetectionPrediction`.
   * `ignore_difficult` - allows to ignore difficult ground truth text polygons in metric calculation.
   * `area_precision_constrain` - minimal value for precision that allows to make decision that prediction polygon matched with annotation.
   * `area_recall_constrain` - minimal value for recall that allows to make decision that prediction polygon matched with annotation.
@@ -133,7 +133,7 @@ More detailed information about calculation segmentation metrics you can find [h
   * `one_to_one_match_score` - weight for one to one matching results (Optional, default 1).
   * `one_to_many_match_score` - weight for one to many matching results (Optional, default 0.8).
   * `many_to_one_match_score` - weight for many to one matching results (optional, default 1).
-* `focused_text_precision` - recall for focused scene text detection task introduced in [Robust Reading Competition challenge 2](https://rrc.cvc.uab.es/?ch=2&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`.
+* `focused_text_precision` - recall for focused scene text detection task introduced in [Robust Reading Competition challenge 2](https://rrc.cvc.uab.es/?ch=2&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`, `DetectionPrediction`.
   * `ignore_difficult` - allows to ignore difficult ground truth text polygons in metric calculation.
   * `area_precision_constrain` - minimal value for precision that allows to make decision that prediction polygon matched with annotation.
   * `area_recall_constrain` - minimal value for recall that allows to make decision that prediction polygon matched with annotation.
