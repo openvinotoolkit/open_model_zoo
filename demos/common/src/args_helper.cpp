@@ -14,6 +14,7 @@
 #include <gflags/gflags.h>
 
 #include <sys/stat.h>
+#include "cctype"
 
 #include <algorithm>
 #include <cctype>

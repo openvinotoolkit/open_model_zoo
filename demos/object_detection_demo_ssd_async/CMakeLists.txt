@@ -2,9 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+FILE(GLOB SRC_FILES ./*.cpp)
+FILE(GLOB H_FILES ./*.h)
+
 ie_add_sample(NAME object_detection_demo_ssd_async
-              SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
-              HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/object_detection_demo_ssd_async.hpp"
+              SOURCES ${SRC_FILES}
+              HEADERS ${H_FILES}
               DEPENDENCIES monitors
               OPENCV_DEPENDENCIES highgui videoio imgproc)
 

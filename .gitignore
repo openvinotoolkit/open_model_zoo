@@ -1,1 +1,5 @@
 *.pyc
+/demos/.vs
+/demos/build/
+.vs/
+CMakeSettings.json
