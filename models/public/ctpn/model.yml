@@ -27,5 +27,6 @@ model_optimizer_args:
   - --mean_values=Placeholder[102.9801,115.9465,122.7717]
   - --output=Reshape_2,rpn_bbox_pred/Reshape_1
   - --input_model=$dl_dir/ctpn.pb
+  - --keep_shape_ops
 framework: tf
 license: https://raw.githubusercontent.com/eragonruan/text-detection-ctpn/banjin-dev/LICENSE
