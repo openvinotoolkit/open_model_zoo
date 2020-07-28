@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+find_package(InferenceEngine 2.0 REQUIRED)
+find_package(OpenCV REQUIRED COMPONENTS core)
+
 add_subdirectory(monitors)
 
 file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*")
@@ -12,4 +15,4 @@ source_group("include" FILES ${HEADERS})
 
 add_library(common STATIC ${HEADERS} ${SOURCES})
 target_include_directories(common PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(common PRIVATE gflags)
+target_link_libraries(common PRIVATE gflags ${InferenceEngine_LIBRARIES} opencv_core)
