@@ -477,7 +477,6 @@ class EncoderDLSDKModel(BaseModel, BaseDLSDKModel):
         return {self.input_blob: np.array(input_data)}
 
 
-
 class DecoderDLSDKModel(BaseModel, BaseDLSDKModel):
     default_model_suffix = 'decoder'
 

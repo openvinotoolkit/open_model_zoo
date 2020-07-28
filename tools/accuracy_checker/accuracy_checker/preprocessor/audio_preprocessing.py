@@ -895,8 +895,8 @@ class AudioToMelSpectrogram(Preprocessor):
             x_mean = np.zeros(seq_len, dtype=x.dtype)
             x_std = np.zeros(seq_len, dtype=x.dtype)
             for i in range(x.shape[0]):
-                x_mean[i, :] = x[i, :seq_len].mean(axis=1)
-                x_std[i, :] = x[i, :seq_len].std(axis=1)
+                x_mean[i, :min(seq_len, x.shape[1])] = x[i, :min(seq_len, x.shape[1])].mean(axis=1)
+                x_std[i, :min(seq_len, x.shape[1])] = x[i, :min(seq_len, x.shape[1])].std(axis=1)
             # make sure x_std is not zero
             x_std += 1e-5
             return (x - np.expand_dims(x_mean, 2)) / np.expand_dims(x_std, 2)
