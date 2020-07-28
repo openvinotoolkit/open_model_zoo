@@ -422,6 +422,12 @@ class EncoderDLSDKModel(BaseModel):
         )
         inputs = []
         for input_ in input_data[0]:
+            if input_.shape != input_info.shape:
+                new_input = np.zeros(input_info.shape)
+                in_x, in_y, in_z = input_.shape
+                new_input[:in_x, :in_y, :in_z] = input_
+                inputs.append({self.input_blob: new_input})
+                continue
             inputs.append({self.input_blob: input_})
         return inputs
 
