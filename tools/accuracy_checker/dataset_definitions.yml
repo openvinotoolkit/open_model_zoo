@@ -462,10 +462,10 @@ datasets:
     dataset_meta: icdar13_recognition.json
 
   - name: ICDAR2013_detection
-    data_source: icdar13_DET
+    data_source: ICDAR13_DET
     annotation_conversion:
       converter: icdar_detection
-      data_dir: icdar13_DET/gt
+      data_dir: ICDAR13_DET/gt
     annotation: icdar13_detection.pickle
 
   - name: market1501
