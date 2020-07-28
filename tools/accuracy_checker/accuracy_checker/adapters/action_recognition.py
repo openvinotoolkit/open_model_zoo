@@ -75,7 +75,7 @@ class ActionDetection(Adapter):
                 description="Number of layers with action confidences (optional, you can not provide this argument "
                             "if action confidences contained in one layer)."
             ),
-            'num_action_classes': NumberField(description="Number classes for action recognition."),
+            'num_action_classes': NumberField(description="Number classes for action recognition.", value_type=int),
             'detection_threshold': NumberField(
                 optional=True, value_type=float, min_value=0, max_value=1, default=0,
                 description="Minimal detection confidences level for valid detections."),
