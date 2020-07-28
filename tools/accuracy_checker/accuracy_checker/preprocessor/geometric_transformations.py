@@ -63,6 +63,211 @@ class Flip(Preprocessor):
         return image
 
 
+class Crop(Preprocessor):
+    __provider__ = 'crop'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'size': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination size for cropping both dimensions."
+            ),
+            'dst_width': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination width for image cropping respectively."
+            ),
+            'dst_height': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination height for image cropping respectively."
+            ),
+            'use_pillow': BoolField(
+                optional=True, default=False, description="Parameter specifies usage of Pillow library for cropping."
+            ),
+            'no_resize': BoolField(
+                optional=True, default=False, description="Parameter disables resize if image is less then dst_width or dst_heigth."
+            ),
+            'central_fraction' : NumberField(
+                value_type=float, min_value=0, max_value=1, optional=True, description="Central Fraction."
+            )
+        })
+
+        return parameters
+
+    def configure(self):
+        self.use_pillow = self.get_value_from_config('use_pillow')
+        if self.use_pillow and Image is None:
+            raise ValueError(
+                'Crop operation with pillow backend, requires Pillow. Please install it or select default backend'
+            )
+        self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
+        self.central_fraction = self.get_value_from_config('central_fraction')
+        if self.dst_height is None and self.dst_width is None and self.central_fraction is None:
+            raise ConfigError('sizes for crop or central_fraction should be provided')
+        if self.dst_height and self.dst_width and self.central_fraction:
+            raise ConfigError('both sizes and central fraction provided  for cropping')
+
+        if not self.central_fraction:
+            if self.dst_height is None or self.dst_width is None:
+                raise ConfigError('one from crop dimentions is not provided')
+
+        self.no_resize = self.get_value_from_config('no_resize')
+
+    def process(self, image, annotation_meta=None):
+        is_simple_case = not isinstance(image.data, list) # otherwise -- pyramid, tiling, etc
+        data = image.data
+
+        image.data = self.process_data(
+            data, self.dst_height, self.dst_width, self.central_fraction,
+            self.use_pillow, is_simple_case, image.metadata, self.no_resize
+        ) if not isinstance(data, list) else [
+            self.process_data(
+                fragment, self.dst_height, self.dst_width, self.central_fraction,
+                self.use_pillow, is_simple_case, image.metadata, self.no_resize
+            ) for fragment in image.data
+        ]
+
+        return image
+
+    @staticmethod
+    def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata, no_resize):
+        height, width = data.shape[:2]
+        if not central_fraction:
+            new_height = dst_height
+            new_width = dst_width
+        else:
+            new_height = int(height * central_fraction)
+            new_width = int(width * central_fraction)
+
+        if use_pillow:
+            i = int(round((height - new_height) / 2.))
+            j = int(round((width - new_width) / 2.))
+            cropped_data = Image.fromarray(data).crop((j, i, j + new_width, i + new_height))
+            return np.array(cropped_data)
+
+        if not no_resize:
+            if width < new_width or height < new_height:
+                
+                    resized = np.array([width, height])
+                    if resized[0] < new_width:
+                        resized = resized * new_width / resized[0]
+                    if resized[1] < new_height:
+                        resized = resized * new_height / resized[1]
+                    data = cv2.resize(data, tuple(np.ceil(resized).astype(int)))
+
+            height, width = data.shape[:2]
+            start_height = (height - new_height) // 2
+            start_width = (width - new_width) // 2
+            if is_simple_case:
+                # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
+                metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop', {}))
+
+            return data[start_height:start_height + new_height, start_width:start_width + new_width]
+        return data[:dst_height, :dst_width]
+
+
+class CropRect(Preprocessor):
+    __provider__ = 'crop_rect'
+
+    def process(self, image, annotation_meta=None):
+        if not annotation_meta:
+            warning('operation *crop_rect* required annotation metadata')
+            return image
+        rect = annotation_meta.get('rect')
+        if not rect:
+            warning(
+                'operation *crop_rect* rect key in annotation meta, please use annotation converter '
+                'which allows such transformation'
+            )
+            return image
+
+        rows, cols = image.data.shape[:2]
+        rect_x_min, rect_y_min, rect_x_max, rect_y_max = rect
+        start_width, start_height = max(0, rect_x_min), max(0, rect_y_min)
+
+        width = min(start_width + (rect_x_max - rect_x_min), cols)
+        height = min(start_height + (rect_y_max - rect_y_min), rows)
+
+        image.data = image.data[int(start_height):int(height), int(start_width):int(width)]
+        image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop_rect', {}))
+        return image
+
+
+class ExtendAroundRect(Preprocessor):
+    __provider__ = 'extend_around_rect'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'augmentation_param' : NumberField(
+                value_type=float, optional=True, default=0, description="Scale factor for augmentation."
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.augmentation_param = self.get_value_from_config('augmentation_param')
+
+    def process(self, image, annotation_meta=None):
+        if not annotation_meta:
+            warning('operation *extend_around_rect* required annotation metadata')
+            return image
+        rect = annotation_meta.get('rect')
+        if not rect:
+            warning(
+                'operation *extend_around_rect* require rect key in annotation meta, please use annotation converter '
+                'which allows such transformation'
+            )
+            return image
+        rect = annotation_meta.get('rect')
+        rows, cols = image.data.shape[:2]
+
+        rect_x_left, rect_y_top, rect_x_right, rect_y_bottom = rect or (0, 0, cols, rows)
+        rect_x_left = max(0, rect_x_left)
+        rect_y_top = max(0, rect_y_top)
+        rect_x_right = min(rect_x_right, cols)
+        rect_y_bottom = min(rect_y_bottom, rows)
+
+        rect_w = rect_x_right - rect_x_left
+        rect_h = rect_y_bottom - rect_y_top
+
+        width_extent = (rect_x_right - rect_x_left + 1) * self.augmentation_param
+        height_extent = (rect_y_bottom - rect_y_top + 1) * self.augmentation_param
+        rect_x_left = rect_x_left - width_extent
+        border_left = abs(min(0, rect_x_left))
+        rect_x_left = int(max(0, rect_x_left))
+
+        rect_y_top = rect_y_top - height_extent
+        border_top = abs(min(0, rect_y_top))
+        rect_y_top = int(max(0, rect_y_top))
+
+        rect_y_bottom += border_top
+        rect_y_bottom = int(rect_y_bottom + height_extent + 0.5)
+        border_bottom = abs(max(0, rect_y_bottom - rows))
+
+        rect_x_right += border_left
+        rect_x_right = int(rect_x_right + width_extent + 0.5)
+        border_right = abs(max(0, rect_x_right - cols))
+
+        image.data = cv2.copyMakeBorder(
+            image.data, int(border_top), int(border_bottom), int(border_left), int(border_right), cv2.BORDER_REPLICATE
+        )
+
+        rect = (
+            int(rect_x_left), int(rect_y_top),
+            int(rect_x_left) + int(rect_w + width_extent * 2), int(rect_y_top) + int(rect_h + height_extent * 2)
+        )
+        annotation_meta['rect'] = rect
+
+        image.metadata.setdefault('geometric_operations', []).append(
+            GeometricOperationMetadata('extend_around_rect', {})
+        )
+
+        return image
+
+
 class PointAligner(Preprocessor):
     __provider__ = 'point_alignment'
 
