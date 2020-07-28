@@ -59,9 +59,6 @@ private:
         }
     };
 
-    void getLatencyMessage(std::ostringstream& out, double value, bool isAvailable);
-    void getFpsMessage(std::ostringstream& out, double value, bool isAvailable);
-
     Duration timeWindowSize;
     Statistic lastMovingStatistic;
     Statistic currentMovingStatistic;
