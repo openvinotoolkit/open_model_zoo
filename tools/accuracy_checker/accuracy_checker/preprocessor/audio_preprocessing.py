@@ -550,7 +550,10 @@ class TrimmingAudio(Preprocessor):
         self.hop_length = self.get_value_from_config('hop_length')
 
     def process(self, image, annotation_meta=None):
-        image.data, _ = librosa.effects.trim(image.data, self.top_db)
+        if isinstance(image.data, list):
+            image.data = [librosa.effects.trim(data, self.top_db)[0] for data in image.data]
+        else:
+            image.data, _ = librosa.effects.trim(image.data)
         return image
 
     def trim(self, y):

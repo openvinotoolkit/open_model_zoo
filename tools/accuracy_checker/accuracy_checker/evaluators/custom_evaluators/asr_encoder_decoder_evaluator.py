@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019-2020 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -490,11 +490,13 @@ class DecoderDLSDKModel(BaseModel, BaseDLSDKModel):
         self.with_prefix = False
 
     def predict(self, identifiers, input_data):
-        feed_dict = self.fit_to_input(input_data)
-        raw_result = self.exec_network.infer(feed_dict)
-        result = self.adapter.process([raw_result], identifiers, [{}])
+        feed_dicts = self.fit_to_input(input_data)
+        raw_results = []
+        for feed_dict in feed_dicts:
+            raw_results.append(self.exec_network.infer(feed_dict))
+        result = self.adapter.process(raw_results, identifiers, [{'multi_infer': True}])
 
-        return raw_result, result
+        return raw_results, result
 
     def release(self):
         del self.exec_network
