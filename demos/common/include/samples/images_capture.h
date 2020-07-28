@@ -19,6 +19,14 @@ public:
     virtual ~ImagesCapture() = default;
 };
 
+// This is a more advanced version of
+// try {
+//     return cv::VideoCapture(std::stoi(input));
+// } catch (const std::invalid_argument&) {
+//     return cv::VideoCapture(input);
+// } catch (const std::out_of_range&) {
+//     return cv::VideoCapture(input);
+// }
 std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input,
         bool loop, size_t posFrames=0,  // Non camera options
         size_t readLengthLimit=std::numeric_limits<size_t>::max(),  // general option
