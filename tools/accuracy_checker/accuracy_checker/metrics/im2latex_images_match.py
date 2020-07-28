@@ -318,7 +318,6 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
 
         correct_ratio = float(total_correct / total_num)
         correct_eliminate_ratio = float(total_correct_eliminate / total_num)
-        print(correct_eliminate_ratio, correct_ratio)
         logging.info('------------------------------------')
         logging.info('Final')
         logging.info('Total Num: {}'.format(total_num))
@@ -326,7 +325,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         logging.info('Accuracy (w/o spaces): {}'.format(correct_eliminate_ratio))
         logging.info('Total Correct (w spaces): {}'.format(total_correct))
         logging.info('Total Correct (w/o spaces): {}'.format(total_correct_eliminate))
-        return correct_ratio, correct_eliminate_ratio
+        return correct_eliminate_ratio
 
     def render_images(self, annotations, predictions):
         """Runs render script to render images and store them into self.images_dir
