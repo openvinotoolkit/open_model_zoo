@@ -550,7 +550,10 @@ class TrimmingAudio(Preprocessor):
         self.hop_length = self.get_value_from_config('hop_length')
 
     def process(self, image, annotation_meta=None):
-        image.data, _ = librosa.effects.trim(image.data, self.top_db)
+        if isinstance(image.data, list):
+            image.data = [librosa.effects.trim(data, self.top_db)[0] for data in image.data]
+        else:
+            image.data, _ = librosa.effects.trim(image.data)
         return image
 
     def trim(self, y):
@@ -674,24 +677,28 @@ class AudioToMelSpectrogram(Preprocessor):
         self.log_zero_guard_value = 2 ** -24
 
     def process(self, image, annotation_meta=None):
-        sample_rate = image.metadata.get('sample_rate')
-        if sample_rate is None:
+        self.sample_rate = image.metadata.get('sample_rate')
+        if self.sample_rate is None:
             raise RuntimeError(
                 'Operation "{}" failed: required "sample rate" in metadata.'.format(self.__provider__)
             )
-        self.window_length = int(self.window_size * sample_rate)
-        self.hop_length = int(self.window_stride * sample_rate)
+        self.window_length = int(self.window_size * self.sample_rate)
+        self.hop_length = int(self.window_stride * self.sample_rate)
         self.n_fft = self.n_fft or 2 ** np.ceil(np.log2(self.window_length))
         self.window = self.window_fn(self.window_length) if self.window_fn is not None else None
-        highfreq = self.highfreq or (sample_rate / 2)
-        filterbanks = np.expand_dims(self.mel(
-            sample_rate, self.n_fft, n_mels=self.nfilt, fmin=self.lowfreq, fmax=highfreq
+        self.highfreq = self.highfreq or (self.sample_rate / 2)
+        self.filterbanks = np.expand_dims(self.mel(
+            self.sample_rate, self.n_fft, n_mels=self.nfilt, fmin=self.lowfreq, fmax=self.highfreq
         ), 0)
-        x = image.data
+
+        image.data = self.process_single(image.data) if not isinstance(image.data, list) else [self.process_single(data) for data in image.data]
+        return image
+
+    def process_single(self, x):
         seq_len = x.shape[-1]
 
         # Calculate maximum sequence length
-        max_length = np.ceil(self.max_duration * sample_rate / self.hop_length)
+        max_length = np.ceil(self.max_duration * self.sample_rate / self.hop_length)
         max_pad = self.pad_to - (max_length % self.pad_to) if self.pad_to > 0 else 0
         self.max_length = max_length + max_pad
 
@@ -711,11 +718,11 @@ class AudioToMelSpectrogram(Preprocessor):
 
         # get power spectrum
         if self.mag_power != 1.0:
-            x = x**self.mag_power
-#        x = x.sum(-1)
+            x = x ** self.mag_power
+        #        x = x.sum(-1)
 
         # dot with filterbank energies
-        x = np.matmul(filterbanks, x)
+        x = np.matmul(self.filterbanks, x)
 
         # log features if required
         if self.log:
@@ -741,9 +748,7 @@ class AudioToMelSpectrogram(Preprocessor):
             pad_amt = x.shape[-1] % pad_to
             if pad_amt != 0:
                 x = np.pad(x, ((0, 0), (0, 0), (0, pad_to - pad_amt)), constant_values=self.pad_value, mode='constant')
-
-        image.data = x
-        return image
+        return x
 
     def mel(self, sr, n_fft, n_mels=128, fmin=0.0, fmax=None, dtype=np.float32):
         if fmax is None:

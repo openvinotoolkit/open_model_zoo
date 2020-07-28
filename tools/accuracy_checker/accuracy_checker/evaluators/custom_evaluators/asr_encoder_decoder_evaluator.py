@@ -344,7 +344,7 @@ class ASRModel(BaseModel):
                 encoder_callback(encoder_prediction)
             if self.store_encoder_predictions:
                 self._encoder_predictions.append(encoder_prediction[self.encoder.output_blob])
-            raw_output, prediction = self.decoder.predict(identifiers, [encoder_prediction[self.encoder.output_blob]])
+            raw_output, prediction = self.decoder.predict(identifiers, encoder_prediction)
             raw_outputs.append(raw_output)
             predictions.append(prediction)
         return raw_outputs, predictions
@@ -408,22 +408,22 @@ class EncoderDLSDKModel(BaseModel):
             self.print_input_output_info()
 
     def predict(self, identifiers, input_data):
-        input_data = self.fit_to_input(input_data)
-        return self.exec_network.infer(input_data)
+        feed_dicts = self.fit_to_input(input_data)
+        return [self.exec_network.infer(feed_dict)[self.output_blob] for feed_dict in feed_dicts]
 
     def release(self):
         del self.exec_network
 
     def fit_to_input(self, input_data):
-        has_info = hasattr(self.exec_network, 'input_info')
-        if has_info:
-            input_info = self.exec_network.input_info[self.input_blob].input_data
-        else:
-            input_info = self.exec_network.inputs[self.input_blob]
-        if tuple(input_info.shape) != np.shape(input_data[0]):
-            self._reshape_input({self.input_blob: np.shape(input_data[0])})
-
-        return {self.input_blob: np.array(input_data[0])}
+        has_info = hasattr(self.network, 'input_info')
+        input_info = (
+            self.network.input_info[self.input_blob].input_data
+            if has_info else self.network.inputs[self.input_blob]
+        )
+        inputs = []
+        for input_ in input_data[0]:
+            inputs.append({self.input_blob: input_})
+        return inputs
 
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
@@ -488,26 +488,22 @@ class DecoderDLSDKModel(BaseModel):
         self.with_prefix = False
 
     def predict(self, identifiers, input_data):
-        feed_dict = self.fit_to_input(input_data)
-        raw_result = self.exec_network.infer(feed_dict)
-        result = self.adapter.process([raw_result], identifiers, [{}])
+        feed_dicts = self.fit_to_input(input_data)
+        raw_results = []
+        for feed_dict in feed_dicts:
+            raw_results.append(self.exec_network.infer(feed_dict))
+        result = self.adapter.process(raw_results, identifiers, [{'multi_infer': True}])
 
-        return raw_result, result
+        return raw_results, result
 
     def release(self):
         del self.exec_network
 
     def fit_to_input(self, input_data):
-        has_info = hasattr(self.exec_network, 'input_info')
-        input_info = (
-            self.exec_network.input_info[self.input_blob].input_data
-            if has_info else self.exec_network.inputs[self.input_blob]
-        )
-        input_data = np.array(input_data[0])
-        if tuple(input_info.shape) != input_data.shape:
-            self._reshape_input({self.input_blob: input_data.shape})
-
-        return {self.input_blob: input_data}
+        feed_dicts = []
+        for input_ in input_data:
+            feed_dicts.append({self.input_blob: input_})
+        return feed_dicts
 
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
