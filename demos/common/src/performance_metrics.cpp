@@ -17,8 +17,9 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime,
                                 int thickness) {
     TimePoint currentTime = Clock::now();
 
-    if (lastUpdateTime == TimePoint()) {
+    if (!firstFrameProcessed) {
         lastUpdateTime = currentTime;
+        firstFrameProcessed = true;
         return;
     }
     
@@ -36,14 +37,18 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime,
 
     // Draw performance stats over frame
     Metrics metrics = getLast();
-    std::ostringstream out;
     
-    getLatencyMessage(out, metrics.latency, !std::isnan(metrics.latency));
-    putHighlightedText(frame, out.str(), position, cv::FONT_HERSHEY_COMPLEX, fontScale, color, thickness);
-
-    getFpsMessage(out, metrics.fps, !std::isnan(metrics.fps));
-    putHighlightedText(frame, out.str(), {position.x, position.y + 30}, cv::FONT_HERSHEY_COMPLEX, fontScale, color,
-                       thickness);
+    std::ostringstream out;
+    if (!std::isnan(metrics.latency)) {
+        out << "Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms";
+        putHighlightedText(frame, out.str(), position, cv::FONT_HERSHEY_COMPLEX, fontScale, color, thickness);
+    }
+    if (!std::isnan(metrics.fps)) {
+        out.str("");
+        out << "FPS: " << std::fixed << std::setprecision(1) << metrics.fps;
+        putHighlightedText(frame, out.str(), {position.x, position.y + 30}, cv::FONT_HERSHEY_COMPLEX, fontScale, color,
+                           thickness);
+    }
 }
 
 PerformanceMetrics::Metrics PerformanceMetrics::getLast() const {
@@ -78,35 +83,10 @@ PerformanceMetrics::Metrics PerformanceMetrics::getTotal() const {
     return metrics;
 }
 
-void PerformanceMetrics::printTotal() {
+void PerformanceMetrics::printTotal() const {
     Metrics metrics = getTotal();
+
     std::ostringstream out;
-
-    getLatencyMessage(out, metrics.latency, bool(metrics.latency > std::numeric_limits<double>::epsilon()));
-    std::cout << out.str() << std::endl;
-
-    getFpsMessage(out, metrics.fps, bool(metrics.fps > std::numeric_limits<double>::epsilon()));
-    std::cout << out.str() << std::endl;
-}
-
-void PerformanceMetrics::getLatencyMessage(std::ostringstream& out, double value, bool isAvailable) {
-    out.str("");
-
-    out << "Latency: ";
-    if (isAvailable) {
-        out << std::fixed << std::setprecision(1) << value << " ms";
-    } else {
-        out << "N/A";
-    }
-}
-
-void PerformanceMetrics::getFpsMessage(std::ostringstream& out, double value, bool isAvailable) {
-    out.str("");
-
-    out << "FPS: ";
-    if (isAvailable) {
-        out << std::fixed << std::setprecision(1) << value;
-    } else {
-        out << "N/A";
-    }
+    out << "Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms\nFPS: " << metrics.fps << '\n';
+    std::cout << out.str();
 }

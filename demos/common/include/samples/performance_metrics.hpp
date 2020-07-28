@@ -14,7 +14,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include <samples/ocv_common.hpp>
+#include "samples/ocv_common.hpp"
 
 class PerformanceMetrics {
 public:
@@ -29,7 +29,7 @@ public:
         double fps;
     };
 
-    PerformanceMetrics(Duration timeWindow = std::chrono::duration_cast<Duration>(Sec(1)));
+    PerformanceMetrics(Duration timeWindow = std::chrono::seconds(1));
     void update(TimePoint lastRequestStartTime,
                 cv::Mat& frame,
                 cv::Point position = {15, 30},
@@ -38,7 +38,7 @@ public:
                 int thickness = 2);
     Metrics getLast() const;
     Metrics getTotal() const;
-    void printTotal();
+    void printTotal() const;
 
 private:
     struct Statistic {
@@ -67,4 +67,5 @@ private:
     Statistic currentMovingStatistic;
     Statistic totalStatistic;
     TimePoint lastUpdateTime;
+    bool firstFrameProcessed;
 };

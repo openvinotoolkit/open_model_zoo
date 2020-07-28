@@ -21,8 +21,8 @@
 #include <monitors/presenter.h>
 #include <samples/args_helper.hpp>
 #include <samples/ocv_common.hpp>
-#include <samples/slog.hpp>
 #include <samples/performance_metrics.hpp>
+#include <samples/slog.hpp>
 #include <cldnn/cldnn_config.hpp>
 
 #include "object_detection_demo_ssd_async.hpp"
