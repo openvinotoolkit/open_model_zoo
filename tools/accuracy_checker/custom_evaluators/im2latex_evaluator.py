@@ -79,7 +79,6 @@ class Im2latexEvaluator(BaseEvaluator):
             batch_input = self.preprocessing_executor.process(batch_input, batch_annotation)
             batch_input, batch_meta = extract_image_representations(batch_input)
             batch_prediction = self.model.predict(batch_identifiers, batch_input)
-            # batch_annotation = batch_annotation[0].label
             batch_prediction = [CharacterRecognitionPrediction(label=batch_prediction,
                                                                  identifier=batch_annotation[0].identifier)]
             self._annotations.append(batch_annotation)
