@@ -1,0 +1,35 @@
+models:
+  - name: person-attributes-recognition-crossroad-0238
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   intel/person-attributes-recognition-crossroad-0238/FP32/person-attributes-recognition-crossroad-0238.xml
+        weights: intel/person-attributes-recognition-crossroad-0238/FP32/person-attributes-recognition-crossroad-0238.bin
+        adapter:
+          type: person_attributes
+          attributes_recognition_out: "attributes"
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/person-attributes-recognition-crossroad-0238/FP16/person-attributes-recognition-crossroad-0238.xml
+        weights: intel/person-attributes-recognition-crossroad-0238/FP16/person-attributes-recognition-crossroad-0238.bin
+        adapter:
+          type: person_attributes
+          attributes_recognition_out: "attributes"
+
+    datasets:
+      - name: person_7_attributes
+
+        preprocessing:
+          - type: crop_rect
+          - type: resize
+            dst_width: 80
+            dst_height: 160
+
+        metrics:
+          - type: f1-score
+            calculate_average: False
+            presenter: print_vector
