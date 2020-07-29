@@ -124,7 +124,7 @@ def main():
             inputs[0, 0] = samples[0]
             char_ids_inputs[0, 0, :] = char_ids_samples[0]  #input source
             samples = samples[1:]
-            char_ids_samples = char_ids_samples[1:]  
+            char_ids_samples = char_ids_samples[1:]
 
             cal_unique = Calculate_Unique(char_ids_inputs)
             y, idx = cal_unique._Unique()
@@ -151,6 +151,8 @@ def main():
                 tgts = np.array([[samples[0]]])
                 cal_log_perp = Calculate_Perplexity(tgts, _, softmax_out[0])
                 log_perp = cal_log_perp._log_perplexity_out()
+                if log_perp == -1:
+                    continue
                 sum_num += log_perp * target_weights_in.mean()
                 sum_den += target_weights_in.mean()
                 if sum_den > 0:

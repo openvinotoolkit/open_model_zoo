@@ -25,7 +25,6 @@ class Calculate_Perplexity(object):
     return self._transpose_1().reshape(self._shape)
 
   def _transpose_2(self, pack):
-    dim = pack.ndim
     array = np.arange(self._start, pack.ndim, self._delta, dtype=np.int32)
     sub = np.subtract(pack.ndim, self._y, dtype=np.int32)
     sub_1 = np.subtract(array, sub)
@@ -84,8 +83,9 @@ class Calculate_Perplexity(object):
       lastlayer = self._softmax_out
     else:
       lastlayer = self._softmax(self._biasadd)
-    ret = self._cross_entropy(expect, lastlayer)
-    return ret
+    if 0 in lastlayer:
+        return -1
+    return self._cross_entropy(expect, lastlayer)
 
   def _log_perplexity_out(self):
     softmax = self._SoftmaxCrossEntropyWithLogits()
@@ -99,6 +99,4 @@ class Calculate_Perplexity(object):
 
     Add = np.add(Sum_1, self._yy)
 
-    log_perplexity_out = np.divide(Sum, Add)
-
-    return log_perplexity_out
+    return np.divide(Sum, Add)
