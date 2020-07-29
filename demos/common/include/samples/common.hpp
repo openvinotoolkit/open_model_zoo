@@ -50,6 +50,22 @@ static UNUSED std::string fileNameNoExt(const std::string &filepath) {
     return filepath.substr(0, pos);
 }
 
+static UNUSED std::ostream &operator<<(std::ostream &os, const InferenceEngine::Version *version) {
+    os << "\n\tAPI version ............ ";
+    if (nullptr == version) {
+        os << "UNKNOWN";
+    } else {
+        os << version->apiVersion.major << "." << version->apiVersion.minor;
+        if (nullptr != version->buildNumber) {
+            os << "\n\t" << "Build .................. " << version->buildNumber;
+        }
+        if (nullptr != version->description) {
+            os << "\n\t" << "Description ....... " << version->description;
+        }
+    }
+    return os;
+}
+
 inline std::ostream &operator<<(std::ostream &os, const InferenceEngine::Version &version) {
     os << "\t" << version.description << " version ......... ";
     os << version.apiVersion.major << "." << version.apiVersion.minor;
