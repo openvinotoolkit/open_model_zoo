@@ -24,7 +24,13 @@ from .classification import (
     ClassificationF1Score,
     MetthewsCorrelation
 )
-from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric, YoutubeFacesAccuracy)
+from .detection import (
+    DetectionMAP,
+    MissRate,
+    Recall,
+    DetectionAccuracyMetric,
+    YoutubeFacesAccuracy
+)
 from .reid import (
     CMCScore,
     ReidMAP,

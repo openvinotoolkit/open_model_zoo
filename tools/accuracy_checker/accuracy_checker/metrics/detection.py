@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ import bisect
 import enum
 import warnings
 from typing import List
-
 import numpy as np
 
 from ..utils import finalize_metric_result
@@ -619,8 +618,26 @@ def _prepare_prediction_boxes(label, predictions, ignore_difficult):
 def get_valid_labels(labels, background):
     return list(filter(lambda label: label != background, labels))
 
-class YoutubeFacesAccuracy(FullDatasetEvaluationMetric):
+def calc_iou(gt_box, dt_box):
+    # Convert detected face rectangle to integer point form
+    gt_box = list(map(lambda x: int(round(x, 0)), gt_box))
+    dt_box = list(map(lambda x: int(round(x, 0)), dt_box))
 
+    # Calculate overlapping width and height of two boxes
+    inter_width = min(gt_box[2], dt_box[2]) - max(gt_box[0], dt_box[0])
+    inter_height = min(gt_box[3], dt_box[3]) - max(gt_box[1], dt_box[1])
+
+    if inter_width <= 0 or inter_height <= 0:
+        return None
+
+    intersect_area = inter_width * inter_height
+
+    gt_area = (gt_box[2] - gt_box[0]) * (gt_box[3] - gt_box[1])
+    dt_area = (dt_box[2] - dt_box[0]) * (dt_box[3] - dt_box[1])
+
+    return [intersect_area, dt_area, gt_area]
+
+class YoutubeFacesAccuracy(FullDatasetEvaluationMetric):
     __provider__ = 'youtube_faces_accuracy'
     annotation_types = (DetectionAnnotation, )
     prediction_types = (DetectionPrediction, )
@@ -646,59 +663,37 @@ class YoutubeFacesAccuracy(FullDatasetEvaluationMetric):
         self.overlap = self.get_value_from_config('overlap')
         self.relative_size = self.get_value_from_config('relative_size')
 
-    def submit_all(self, annotations, predictions):
-        return self.evaluate(annotations, predictions)
-
     def evaluate(self, annotations, predictions):
         true_positive = 0
         false_positive = 0
 
         for (annotation, prediction) in zip(annotations, predictions):
-            gt_face = [
-                annotation.x_mins[0],
-                annotation.y_mins[0],
-                annotation.x_maxs[0],
-                annotation.y_maxs[0]
-            ]
-            found = False
-            for i in range(prediction.scores.size):
-                dt_face = [
-                    prediction.x_mins[i],
-                    prediction.y_mins[i],
-                    prediction.x_maxs[i],
-                    prediction.y_maxs[i]
+            for gt_idx in range(annotation.x_mins.size):
+                gt_face = [
+                    annotation.x_mins[gt_idx],
+                    annotation.y_mins[gt_idx],
+                    annotation.x_maxs[gt_idx],
+                    annotation.y_maxs[gt_idx]
                 ]
-                iou = self.calc_iou(gt_face, dt_face)
-                if iou:
-                    intersect_area, dt_area, gt_area = iou
-                    if intersect_area / dt_area < self.overlap:
-                        continue
-                    if dt_area / gt_area >= self.relative_size:
-                        found = True
-                        break
-            if found:
-                true_positive += 1
-            else:
-                false_positive += 1
+                found = False
+                for i in range(prediction.scores.size):
+                    dt_face = [
+                        prediction.x_mins[i],
+                        prediction.y_mins[i],
+                        prediction.x_maxs[i],
+                        prediction.y_maxs[i]
+                    ]
+                    iou = calc_iou(gt_face, dt_face)
+                    if iou:
+                        intersect_area, dt_area, gt_area = iou
+                        if intersect_area / dt_area < self.overlap:
+                            continue
+                        if dt_area / gt_area >= self.relative_size:
+                            found = True
+                            break
+                if found:
+                    true_positive += 1
+                else:
+                    false_positive += 1
         accuracy = true_positive / (true_positive + false_positive)
-        return [accuracy]
-
-    @staticmethod
-    def calc_iou(gt_box, dt_box):
-        # Convert detected face rectangle to integer point form
-        gt_box = list(map(lambda x: int(round(x, 0)), gt_box))
-        dt_box = list(map(lambda x: int(round(x, 0)), dt_box))
-
-        # Calculate overlapping width and height of two boxes
-        inter_width = min(gt_box[2], dt_box[2]) - max(gt_box[0], dt_box[0])
-        inter_height = min(gt_box[3], dt_box[3]) - max(gt_box[1], dt_box[1])
-
-        if inter_width <= 0 or inter_height <= 0:
-            return None
-
-        intersect_area = inter_width * inter_height
-
-        gt_area = (gt_box[2] - gt_box[0]) * (gt_box[3] - gt_box[1])
-        dt_area = (dt_box[2] - dt_box[0]) * (dt_box[3] - dt_box[1])
-
-        return [intersect_area, dt_area, gt_area]
+        return accuracy

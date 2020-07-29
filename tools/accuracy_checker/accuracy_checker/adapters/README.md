@@ -243,3 +243,8 @@ AccuracyChecker supports following set of adapters:
 * `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions. 
     * `adapters` - Dict where key is output name and value is adapter config map including `output_blob` key to associate the output of model and this adapter.
 * `person_vehilce_detection_refinement` - converts output of person vehicle detection refinement model to `DetectionPrediction` representation. Adapter refines proposals generated in previous stage model.
+* `head_detection` - converts output of head detection model to `DetectionPrediction ` representation. Operation is performed by mapping model output to the defined anchors, window scales, window translates, and window lengths to generate a list of head candidates.
+    * `score_threshold` - Score threshold value used to discern whether a face is valid.
+    * `anchor_sizes` - Anchor sizes for each base output layer.
+    * `window_scales` - Window scales for each base output layer.
+    * `window_lengths` - Window lengths for each base output layer.
