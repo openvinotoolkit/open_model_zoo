@@ -316,8 +316,8 @@ class TextProposalsDetectionAdapter(Adapter):
         for bbox_pred, cls_prob, meta, identifier in data:
             input_shape = next(iter(meta['input_shape'].values()))
             if input_shape[1] == 3:
-                cls_prob = np.transpose(cls_prob, (2, 1, 0))
-                bbox_pred = np.transpose(bbox_pred, (2, 1, 0))
+                cls_prob = np.transpose(cls_prob, (1, 2, 0))
+                bbox_pred = np.transpose(bbox_pred, (1, 2, 0))
             scale_x, scale_y = meta['scale_x'], meta['scale_y']
             im_info = [meta['original_height'], meta['original_width'], min(scale_x, scale_y)]
             textsegs = self.proposal_layer(cls_prob, bbox_pred, im_info)

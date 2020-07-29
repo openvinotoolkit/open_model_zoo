@@ -24,7 +24,7 @@ models:
         allow_reshape_input: True
 
     datasets:
-      - name: ICDAR2015
+      - name: ICDAR2013_detection
 
         preprocessing:
           - type: resize
@@ -32,8 +32,9 @@ models:
             dst_height: 600
             aspect_ratio_scale: ctpn_keep_aspect_ratio
           - type: resize
-            dst_width: 600
+            dst_width: 1000
             dst_height: 600
+            aspect_ratio_scale: ctpn_keep_aspect_ratio
 
         postprocessing:
           - type: cast_to_int
