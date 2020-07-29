@@ -17,7 +17,6 @@
 #include <set>
 #include <algorithm>
 #include <utility>
-#include <ie_iextension.h>
 
 #include "actions.hpp"
 #include "action_detector.hpp"
