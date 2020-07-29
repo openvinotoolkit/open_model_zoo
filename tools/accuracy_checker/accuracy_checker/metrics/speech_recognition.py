@@ -15,15 +15,16 @@ limitations under the License.
 """
 
 import numpy as np
+import editdistance
 
 from ..representation import (
     CharacterRecognitionAnnotation,
     CharacterRecognitionPrediction,
     )
-from .metric import PerImageEvaluationMetric
+from .metric import PerImageEvaluationMetric, FullDatasetEvaluationMetric
 
 
-class SpeechRecognitionWER(PerImageEvaluationMetric):
+class SpeechRecognitionWER(PerImageEvaluationMetric, FullDatasetEvaluationMetric):
     __provider__ = 'wer'
     annotation_types = (CharacterRecognitionAnnotation,)
     prediction_types = (CharacterRecognitionPrediction,)
@@ -31,36 +32,47 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
     def configure(self):
         self.overall_metric = []
         self.meta['target'] = 'higher-worse'
+        self.words = 0
+        self.score = 0
 
     def update(self, annotation, prediction):
 
         h = prediction.label
         r = annotation.label
+        # print(annotation.identifier)
+        # print("p: {}".format(h))
+        # print('a: {}'.format(r))
+        h_list = h.split()
+        r_list = r.split()
+        self.words += len(r_list)
+        self.score += editdistance.eval(h_list, r_list)
 
-        dist = np.zeros((len(r) + 1, len(h) + 1), dtype=np.uint8)
-        for i in range(len(r) + 1):
-            dist[i][0] = i
-        for j in range(len(h) + 1):
-            dist[0][j] = j
-        for i in range(1, len(r) + 1):
-            for j in range(1, len(h) + 1):
-                if r[i - 1] == h[j - 1]:
-                    dist[i][j] = dist[i - 1][j - 1]
-                else:
-                    substitute = dist[i - 1][j - 1] + 1
-                    insert = dist[i][j - 1] + 1
-                    delete = dist[i - 1][j] + 1
-                    dist[i][j] = min(substitute, insert, delete)
+        # dist = np.zeros((len(r) + 1, len(h) + 1), dtype=np.uint8)
+        # for i in range(len(r) + 1):
+        #     dist[i][0] = i
+        # for j in range(len(h) + 1):
+        #     dist[0][j] = j
+        # for i in range(1, len(r) + 1):
+        #     for j in range(1, len(h) + 1):
+        #         if r[i - 1] == h[j - 1]:
+        #             dist[i][j] = dist[i - 1][j - 1]
+        #         else:
+        #             substitute = dist[i - 1][j - 1] + 1
+        #             insert = dist[i][j - 1] + 1
+        #             delete = dist[i - 1][j] + 1
+        #             dist[i][j] = min(substitute, insert, delete)
+        #
+        # result = float(dist[len(r)][len(h)]) / len(r)
 
-        result = float(dist[len(r)][len(h)]) / len(r)
+        #self.overall_metric.append(result)
 
-        self.overall_metric.append(result)
-
-        return result
+        return self.score / self.words
 
     def evaluate(self, annotations, predictions):
-        result = np.mean(self.overall_metric, axis=0)
-        return result
+        for ann, pred in zip(annotations, predictions):
+            print("a: {}".format(ann.label.lower()))
+            print('p: {}'.format(pred.label.lower()))
+        return self.score / self.words
 
     def reset(self):
         self.overall_metric = []

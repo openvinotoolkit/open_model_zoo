@@ -343,8 +343,8 @@ class ASRModel(BaseModel):
             if encoder_callback:
                 encoder_callback(encoder_prediction)
             if self.store_encoder_predictions:
-                self._encoder_predictions.append(encoder_prediction[self.encoder.output_blob])
-            raw_output, prediction = self.decoder.predict(identifiers, [encoder_prediction[self.encoder.output_blob]])
+                self._encoder_predictions.append(encoder_prediction)
+            raw_output, prediction = self.decoder.predict(identifiers, encoder_prediction)
             raw_outputs.append(raw_output)
             predictions.append(prediction)
         return raw_outputs, predictions
@@ -409,7 +409,7 @@ class EncoderDLSDKModel(BaseModel):
 
     def predict(self, identifiers, input_data):
         input_data = self.fit_to_input(input_data)
-        return self.exec_network.infer(input_data)
+        return self.exec_network.infer(input_data)[self.output_blob]
 
     def release(self):
         del self.exec_network
@@ -503,7 +503,7 @@ class DecoderDLSDKModel(BaseModel):
             self.exec_network.input_info[self.input_blob].input_data
             if has_info else self.exec_network.inputs[self.input_blob]
         )
-        input_data = np.array(input_data[0])
+       # input_data = np.array(input_data[0])
         if tuple(input_info.shape) != input_data.shape:
             self._reshape_input({self.input_blob: input_data.shape})
 
@@ -579,7 +579,7 @@ class DecoderDLSDKModel(BaseModel):
 class EncoderONNXModel(BaseModel):
     default_model_suffix = 'encoder'
 
-    def __init__(self, network_info, launcher):
+    def __init__(self, network_info, launcher, *args, **kwargs):
         super().__init__(network_info, launcher)
         model = self.automatic_model_search(network_info)
         self.inference_session = launcher.create_inference_session(str(model))
@@ -590,9 +590,7 @@ class EncoderONNXModel(BaseModel):
         return self.inference_session.run((self.output_blob.name, ), self.fit_to_input(input_data))[0]
 
     def fit_to_input(self, input_data):
-        input_data = input_data.reshape(self.input_blob.shape)
-
-        return {self.input_blob.name: input_data}
+        return {self.input_blob.name: input_data[0]}
 
     def release(self):
         del self.inference_session
@@ -615,21 +613,21 @@ class EncoderONNXModel(BaseModel):
 class DecoderONNXModel(BaseModel):
     default_model_suffix = 'decoder'
 
-    def __init__(self, network_info, launcher):
+    def __init__(self, network_info, launcher, *args, **kwargs):
         super().__init__(network_info, launcher)
         self.inference_session = launcher.create_inference_session(network_info['model'])
         self.input_blob = next(iter(self.inference_session.get_inputs()))
         self.output_blob = next(iter(self.inference_session.get_outputs()))
-        self.adapter = create_adapter('classification')
+        self.adapter = create_adapter(network_info['adapter'])
         self.adapter.output_blob = self.output_blob.name
         self.num_processing_frames = network_info.get('num_processing_frames', 16)
 
     def predict(self, identifiers, input_data):
         result = self.inference_session.run((self.output_blob.name,), self.fit_to_input(input_data))
-        return self.adapter.process([{self.output_blob.name: result[0]}], identifiers, [{}])
+        return result, self.adapter.process([{self.output_blob.name: result[0]}], identifiers, [{}])
 
     def fit_to_input(self, input_data):
-        input_data = np.reshape(input_data, self.input_blob.shape)
+        #input_data = np.reshape(input_data, self.input_blob.shape)
         return {self.input_blob.name: input_data}
 
     def release(self):

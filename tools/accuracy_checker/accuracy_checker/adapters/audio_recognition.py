@@ -211,7 +211,7 @@ class CTCGreedyDecoder(Adapter):
             output = np.log(output)
         argmx = output.argmax(axis=-1)
 
-        return [CharacterRecognitionPrediction(identifiers[0], self._ctc_decoder_prediction(argmx, self.alphabet)[0])]
+        return [CharacterRecognitionPrediction(identifiers[0], self._ctc_decoder_prediction(argmx, self.alphabet)[0].upper())]
 
     @staticmethod
     def _ctc_decoder_prediction(prediction, labels):
