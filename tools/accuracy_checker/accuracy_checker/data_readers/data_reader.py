@@ -410,7 +410,7 @@ class NumpyTXTReader(BaseReader):
     __provider__ = 'numpy_txt_reader'
 
     def read(self, data_id):
-        return np.loadtxt(data_id)
+        return np.loadtxt(str(self.data_source / data_id))
 
 
 class TensorflowImageReader(BaseReader):

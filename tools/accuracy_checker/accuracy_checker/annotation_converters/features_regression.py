@@ -19,7 +19,7 @@ class FeaturesRegressionConverter(BaseFormatConverter):
 
     def configure(self):
         self.in_directory = self.get_value_from_config('input_dir')
-        self.ref_directory = self.get_value_from_config('reference)dir')
+        self.ref_directory = self.get_value_from_config('reference_dir')
         self.in_suffix = self.get_value_from_config('input_suffix')
         self.ref_suffix = self.get_value_from_config('reference_suffix')
 
@@ -27,8 +27,9 @@ class FeaturesRegressionConverter(BaseFormatConverter):
         annotations = []
         ref_data_list = list(self.ref_directory.glob('*{}'.format(self.ref_suffix)))
         for ref_file in ref_data_list:
-            identifier = ref_file.name.split(self.ref_suffix)[0] + self.in_suffix
-            if not (self.in_directory / identifier).exists():
+            identifier = ref_file.name.replace(self.ref_suffix, self.in_suffix)
+            input_file = self.in_directory / identifier
+            if not input_file.exists():
                 continue
             annotations.append(FeaturesRegressionAnnotation(identifier, ref_file.name))
         return ConverterReturn(annotations, None, None)

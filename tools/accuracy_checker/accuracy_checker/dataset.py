@@ -309,6 +309,7 @@ class DatasetWrapper:
                 annotation.set_data_source(self.data_reader.data_source)
                 segmentation_mask_source = self.annotation_reader.config.get('segmentation_masks_source')
                 annotation.set_segmentation_mask_source(segmentation_mask_source)
+                annotation.set_additional_data_source(self.annotation_reader.config.get('additional_data_source'))
             return batch_annotation_ids, batch_annotation, batch_input, batch_identifiers
         batch_start = item * self.batch
         batch_end = min(self.size, batch_start + self.batch)

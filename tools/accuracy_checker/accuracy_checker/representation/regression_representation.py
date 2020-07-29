@@ -117,7 +117,7 @@ class FeaturesRegressionAnnotation(BaseRepresentation):
 
     @property
     def value(self):
-        data_source = self.metadata.get('additional_source')
+        data_source = self.metadata.get('additional_data_source')
         if data_source is None:
             data_source = self.metadata['data_source']
         return np.loadtxt(str(Path(data_source / self.value_file)))
