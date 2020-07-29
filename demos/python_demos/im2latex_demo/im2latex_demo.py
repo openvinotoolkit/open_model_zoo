@@ -108,12 +108,6 @@ def main():
                   format(args.device, ', '.join(not_supported_layers)))
         # sys.exit(1)
 
-    # add outputs because MO cuts them
-    # encoder.add_outputs(['row_enc_out/sink_port_0', 'hidden/sink_port_0', 'context/sink_port_0'])
-
-    # Loading model to the plugin
-    # log.info("Loading encoder and decoder to the plugin")
-    # exec_net_encoder = ie.load_network(network=encoder, device_name=args.device)
 
     # decoder part:
     dec_step_model_xml = args.dec_step
@@ -122,12 +116,9 @@ def main():
     log.info("Loading decoder files:\n\t{}\n\t{}".format(
         dec_step_model_xml, dec_step_model_bin))
     dec_step = ie.read_network(dec_step_model_xml, dec_step_model_bin)
-    #ie.read_network(model=dec_step_model_xml, weights=dec_step_model_bin)
-
+    
     # add decoder outputs
     dec_step.add_outputs(["dec_st_c_t", "dec_st_h_t", "O_t"])
-
-    # exec_net_decoder = ie.load_network(network=dec_step, device_name=args.device)
 
     # check if all layers are supported
     supported_layers = ie.query_network(dec_step, args.device)
