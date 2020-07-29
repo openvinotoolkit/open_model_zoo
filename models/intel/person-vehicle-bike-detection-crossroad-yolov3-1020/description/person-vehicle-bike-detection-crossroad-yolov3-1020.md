@@ -85,9 +85,9 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
     multiply them by the confidence value `box_score` to get confidence of each class
 
 Since the model is finetuned on person/vehicle/bike detection dataset, it returns non-zero scores for the following classes:
-* person -- the first class score
-* non-vehicle (bike/motorcycle) -- the second class score
-* vehicle -- the third class score
+* person - the first class score
+* non-vehicle (bike/motorcycle) - the second class score
+* vehicle - the third class score
 Note that the indexes of these 3 classes are aligned with the indexes of the classes `person`, `bike`, and `car` in the
 original COCO\* dataset.  
 Also note that the model returns class scores for all 80 COCO classes for backward compatibility with the original Yolo V3.
