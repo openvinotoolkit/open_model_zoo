@@ -321,6 +321,13 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `validation` - if provided, only second half of dataset converted to annotations, according to dataset definition
   * `preprocessed_dir` - path to store preprocessed batch files (e.g. `criteo/terabyte/preprocessed`).
   * `separator` - symbol used to separate feature identifiers from batch data filename. 
+* `features_regression` - converts dataset stored in format of directories with preprocessed input numeric data (features) in text files and reference data in the same format to `FeatureRegressionAnnotation`.
+ This approach allows comparision output of model from different frameworks (e.g. OpenVINO converted model and source framework realisation).
+ * `input_dir` - directory with input data files.
+ * `reference_dir` - directory with reference data. **Note: inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.**
+ * `input_suffix` - suffix for input files (usually file extension). Optional, default `.txt`.
+ * `reference_suffix` - suffix for reference files (usually file extension). Optional, default `.txt`. 
+
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)

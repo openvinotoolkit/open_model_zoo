@@ -46,6 +46,7 @@ class DatasetConfig(ConfigValidator):
     subsample_seed = NumberField(value_type=int, min_value=0, optional=True)
     analyze_dataset = BaseField(optional=True)
     segmentation_masks_source = PathField(is_directory=True, optional=True)
+    additional_data_source = PathField(is_directory=True, optional=True)
     batch = NumberField(value_type=int, min_value=1, optional=True)
 
 
