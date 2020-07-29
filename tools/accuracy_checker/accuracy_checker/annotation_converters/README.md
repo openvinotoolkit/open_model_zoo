@@ -314,6 +314,13 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `images_dir` - path to directory with images (e.g. `ADEChallengeData2016/images/validation`).
   * `annotations_dir` - path to directory with annotations (e.g. `ADEChallengeData2016/annotations/validation`).
   * `object_categories_file` - path to file with labels (e.g. `ADEChallengeData2016/objectInfo150.txt`).
+* `criteo_kaggle_dac` - converts Criteo datasets to `ClassificationAnnotation`.
+  * `testing_file` - path to preprocessed Criteo file (e.g. `criteo/terabyte/terabyte_preprocessed,npz`).
+  * `batch` - batch size expected by model
+  * `subsample_size` - number of batches in test-only dataset, If provided, total number of records is batch * subsample_size
+  * `validation` - if provided, only second half of dataset converted to annotations, according to dataset definition
+  * `preprocessed_dir` - path to store preprocessed batch files (e.g. `criteo/terabyte/preprocessed`).
+  * `separator` - symbol used to separate feature identifiers from batch data filename. 
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)

@@ -57,7 +57,7 @@ class HeadPoseEstimatorAdapter(Adapter):
         self.angle_pitch = self.get_value_from_config('angle_pitch')
         self.angle_roll = self.get_value_from_config('angle_roll')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers

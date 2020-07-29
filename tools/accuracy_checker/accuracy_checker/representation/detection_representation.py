@@ -49,6 +49,14 @@ class Detection(BaseRepresentation):
     def size(self):
         return len(self.x_mins)
 
+    @property
+    def boxes(self):
+        if self.size == 0:
+            return []
+
+        return [[x_min, y_min, x_max, y_max]
+                for x_min, y_min, x_max, y_max in zip(self.x_mins, self.y_mins, self.x_maxs, self.y_maxs)]
+
     def __eq__(self, other):
         if not isinstance(other, type(self)):
             return False

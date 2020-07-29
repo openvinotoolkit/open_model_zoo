@@ -452,6 +452,7 @@ describing a single model. Each such object has the following keys:
   * `optical_character_recognition`
   * `question_answering`
   * `semantic_segmentation`
+  * `sound_classification`
   * `style_transfer`
 
   Additional possible values might be added in the future.

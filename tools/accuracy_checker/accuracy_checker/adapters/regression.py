@@ -27,7 +27,7 @@ class RegressionAdapter(Adapter):
     __provider__ = 'regression'
     prediction_types = (RegressionPrediction, )
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers

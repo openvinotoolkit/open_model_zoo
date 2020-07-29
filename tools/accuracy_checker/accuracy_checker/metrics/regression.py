@@ -434,7 +434,9 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'scale_border': NumberField(optional=True, min_value=0, default=4, description="Scale border."),
+            'scale_border': NumberField(
+                optional=True, min_value=0, default=4, description="Scale border.", value_type=int
+            ),
             'color_order': StringField(
                 optional=True, choices=['BGR', 'RGB'], default='RGB',
                 description="The field specified which color order BGR or RGB will be used during metric calculation."

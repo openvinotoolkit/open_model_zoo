@@ -19,7 +19,7 @@ from collections import namedtuple
 import numpy as np
 from .metric import PerImageEvaluationMetric
 from ..config import BoolField, NumberField
-from ..representation import TextDetectionPrediction, TextDetectionAnnotation
+from ..representation import TextDetectionPrediction, TextDetectionAnnotation, DetectionPrediction
 from ..utils import polygon_from_points
 
 
@@ -97,7 +97,7 @@ def rect_from_points(points):
 
 class FocusedTextLocalizationMetric(PerImageEvaluationMetric):
     annotation_types = (TextDetectionAnnotation, )
-    prediction_types = (TextDetectionPrediction, )
+    prediction_types = (TextDetectionPrediction, DetectionPrediction, )
 
     @classmethod
     def parameters(cls):
