@@ -369,10 +369,13 @@ class NumPyReader(BaseReader):
             config_validator.validate(self.config)
 
     def configure(self):
+        self.is_text = self.config.get('text_file', False)
         self.multi_infer = self.config.get('multi_infer', False)
         self.keys = self.config.get('keys', "") if self.config else ""
         self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
         self.separator = self.config.get('separator')
+        if self.separator and self.is_text:
+            raise ConfigError('text file reading with numpy does')
         self.multi_infer = self.config.get('multi_infer', False)
         if not self.data_source:
             raise ConfigError('data_source parameter is required to create "{}" '
@@ -401,6 +404,13 @@ class NumPyReader(BaseReader):
 
         key = next(iter(data.keys()))
         return data[key]
+
+
+class NumpyTXTReader(BaseReader):
+    __provider__ = 'numpy_txt_reader'
+
+    def read(self, data_id):
+        return np.loadtxt(data_id)
 
 
 class TensorflowImageReader(BaseReader):

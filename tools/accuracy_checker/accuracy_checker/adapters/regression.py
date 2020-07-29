@@ -19,6 +19,7 @@ import numpy as np
 from .adapter import Adapter
 from ..representation import RegressionPrediction
 
+
 class RegressionAdapter(Adapter):
     """
     Class for converting output of regression model to RegressionPrediction representation

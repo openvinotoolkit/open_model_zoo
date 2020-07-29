@@ -36,6 +36,7 @@ ENTRIES_PATHS = {
         'annotation': 'annotations',
         'dataset_meta': 'annotations',
         'data_source': 'source',
+        'additional_data_source': 'source'
     },
 }
 
