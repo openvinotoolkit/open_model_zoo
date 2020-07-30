@@ -23,8 +23,6 @@
 #include <samples/common.hpp>
 #include <samples/slog.hpp>
 
-#include <ie_iextension.h>
-
 #include <opencv2/opencv.hpp>
 
 // -------------------------Generic routines for detection networks-------------------------------------------------

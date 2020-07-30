@@ -49,8 +49,6 @@
 
 #include "utils.hpp"
 
-#include <ie_iextension.h>
-
 using namespace InferenceEngine;
 using namespace gaze_estimation;
 

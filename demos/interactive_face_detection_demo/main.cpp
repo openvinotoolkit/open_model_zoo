@@ -33,8 +33,6 @@
 #include "face.hpp"
 #include "visualizer.hpp"
 
-#include <ie_iextension.h>
-
 using namespace InferenceEngine;
 
 
