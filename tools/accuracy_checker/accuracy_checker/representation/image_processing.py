@@ -49,13 +49,19 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
         super().__init__(identifier)
         self._image_path = path_to_gt
         self._gt_loader = self.LOADERS.get(gt_loader)
+        self._value = None
 
     @property
     def value(self):
-        loader = BaseReader.provide(self._gt_loader, self.metadata['data_source'])
-        gt = loader.read(self._image_path)
-        return gt.astype(np.uint8) if self._gt_loader != 'dicom_reader' else gt
+        if self._value is None:
+            loader = BaseReader.provide(self._gt_loader, self.metadata['data_source'])
+            gt = loader.read(self._image_path)
+            return gt.astype(np.uint8) if self._gt_loader != 'dicom_reader' else gt
+        return self._value
 
+    @value.setter
+    def value(self, value):
+        self._value = value
 
 class ImageProcessingPrediction(ImageProcessingRepresentation):
     def __init__(self, identifiers, prediction):
