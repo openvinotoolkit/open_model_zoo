@@ -948,3 +948,12 @@ datasets:
       - type: pad_with_eos
         eos_index: 1
         sequence_len: 192
+
+  - name: wikitext_2_raw
+    annotation: wikitext_2_raw.pickle
+    annotation_conversion:
+      converter: wikitext2raw
+      vocab_file: model_attributes/gpt2/gpt2-vocab.json
+      merges_file: model_attributes/gpt2/gpt2-merges.txt
+      testing_file: wikitext-2-raw/wiki.test.raw
+      max_seq_length: 1024

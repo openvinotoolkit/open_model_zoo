@@ -216,7 +216,10 @@ class LanguageModelingAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_output = self._extract_predictions(raw, frame_meta)
         result = []
-        for identifier, token_output in zip(identifiers, raw_output[self.logits_out]):
+        logits = raw_output[self.logits_out]
+        if len(logits.shape) == 4:
+            logits = logits[0]
+        for identifier, token_output in zip(identifiers, logits):
             result.append(LanguageModelingPrediction(identifier, token_output))
 
         return result

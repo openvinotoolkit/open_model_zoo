@@ -1,0 +1,23 @@
+models:
+  - name: GPT2-LM-HEAD
+    launchers:
+      - framework: dlsdk
+        adapter:
+            type: common_language_modeling
+            logits_output: "MatMul_2533"
+        inputs:
+          - name: "input1"
+            type: INPUT
+            value: "input_ids"
+            precision: I32
+
+    datasets:
+      - name: wikitext_2_raw
+
+        reader:
+          type: annotation_features_extractor
+          features:
+          - input_ids
+        metrics:
+          - type: 'perplexity'
+            name: 'Perplexity'
