@@ -143,7 +143,8 @@ class SoftNMS(Postprocessor):
         parameters.update({
             'keep_top_k': NumberField(
                 min_value=0, optional=True, default=200,
-                description="The maximal number of detections which should be kept."
+                description="The maximal number of detections which should be kept.",
+                value_type=int
             ),
             'sigma': NumberField(
                 value_type=float, optional=True, default=0.5,
