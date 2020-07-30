@@ -24,6 +24,8 @@ from .data_reader import (
     PillowImageReader,
     ScipyImageReader,
     NiftiImageReader,
+    NumPyReader,
+    NumpyTXTReader,
     TensorflowImageReader,
     AnnotationFeaturesReader,
     WavReader,
@@ -51,6 +53,8 @@ __all__ = [
     'AnnotationFeaturesReader',
     'WavReader',
     'DicomReader',
+    'NumPyReader',
+    'NumpyTXTReader',
 
     'DataRepresentation',
     'ClipIdentifier',

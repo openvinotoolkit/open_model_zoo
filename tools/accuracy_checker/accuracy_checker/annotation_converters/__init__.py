@@ -76,6 +76,7 @@ from .ade20k_dataset_converter import ADE20kConverter
 
 from .librispeech import LibrispeechConverter
 from .criteo_kaggle_dac import CriteoKaggleDACConverter
+from .features_regression import FeaturesRegressionConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -144,4 +145,5 @@ __all__ = [
 
     'LibrispeechConverter',
     'CriteoKaggleDACConverter',
+    'FeaturesRegressionConverter'
 ]

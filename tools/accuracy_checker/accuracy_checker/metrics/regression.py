@@ -37,7 +37,8 @@ from ..representation import (
     ImageProcessingAnnotation,
     ImageProcessingPrediction,
     StyleTransferAnnotation,
-    StyleTransferPrediction
+    StyleTransferPrediction,
+    FeaturesRegressionAnnotation
 )
 
 from .metric import PerImageEvaluationMetric
@@ -46,7 +47,7 @@ from ..utils import string_to_tuple, finalize_metric_result
 
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
-    annotation_types = (RegressionAnnotation, DepthEstimationAnnotation)
+    annotation_types = (RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation)
     prediction_types = (RegressionPrediction, DepthEstimationPrediction)
 
     def __init__(self, value_differ, *args, **kwargs):
@@ -64,6 +65,8 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         diff = self.calculate_diff(annotation, prediction)
         self.magnitude.append(diff)
+        if np.ndim(diff) > 1:
+            return np.mean(diff)
 
         return diff
 

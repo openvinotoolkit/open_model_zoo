@@ -46,6 +46,7 @@ class DatasetConfig(ConfigValidator):
     subsample_seed = NumberField(value_type=int, min_value=0, optional=True)
     analyze_dataset = BaseField(optional=True)
     segmentation_masks_source = PathField(is_directory=True, optional=True)
+    additional_data_source = PathField(is_directory=True, optional=True)
     batch = NumberField(value_type=int, min_value=1, optional=True)
 
 
@@ -206,6 +207,7 @@ class Dataset:
         annotation.set_data_source(data_source)
         segmentation_mask_source = self.config.get('segmentation_masks_source')
         annotation.set_segmentation_mask_source(segmentation_mask_source)
+        annotation.set_additional_data_source(self.config.get('additional_data_source'))
 
     def _load_meta(self):
         meta_data_file = self._config.get('dataset_meta')
@@ -308,6 +310,7 @@ class DatasetWrapper:
                 annotation.set_data_source(self.data_reader.data_source)
                 segmentation_mask_source = self.annotation_reader.config.get('segmentation_masks_source')
                 annotation.set_segmentation_mask_source(segmentation_mask_source)
+                annotation.set_additional_data_source(self.annotation_reader.config.get('additional_data_source'))
             return batch_annotation_ids, batch_annotation, batch_input, batch_identifiers
         batch_start = item * self.batch
         batch_end = min(self.size, batch_start + self.batch)
