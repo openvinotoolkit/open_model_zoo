@@ -453,7 +453,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
         color_order = self.get_value_from_config('color_order')
         channel_order = {
             'BGR': [2, 1, 0],
-            'RGB': [0, 1, 2]
+            'RGB': [0, 1, 2],
         }
         self.meta['postfix'] = 'Db'
         self.channel_order = channel_order[color_order]

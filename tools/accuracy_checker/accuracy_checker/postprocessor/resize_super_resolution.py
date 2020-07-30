@@ -35,8 +35,8 @@ class ResizeSuperResolution(Postprocessor):
 
     def process_image(self, annotation, prediction):
         for annotation_, prediction_ in zip(annotation, prediction):
-            target_height = self.dst_height or annotation_.shape[0]
-            target_width = self.dst_width or annotation_.shape[1]
+            target_height = self.dst_height or annotation_.value.shape[0]
+            target_width = self.dst_width or annotation_.value.shape[1]
             data = Image.fromarray(prediction_.value if self.target == 'prediction' else annotation_.value)
             data = data.resize((target_width, target_height), Image.BICUBIC)
             if self.target == 'prediction':
