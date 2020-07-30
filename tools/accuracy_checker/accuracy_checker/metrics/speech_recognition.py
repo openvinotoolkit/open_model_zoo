@@ -15,64 +15,74 @@ limitations under the License.
 """
 
 import numpy as np
-import editdistance
+try:
+    import editdistance
+except ImportError:
+    editdistance = None
 
+from ..config import BoolField, ConfigError
 from ..representation import (
     CharacterRecognitionAnnotation,
     CharacterRecognitionPrediction,
     )
-from .metric import PerImageEvaluationMetric, FullDatasetEvaluationMetric
+from .metric import PerImageEvaluationMetric
 
 
-class SpeechRecognitionWER(PerImageEvaluationMetric, FullDatasetEvaluationMetric):
+class SpeechRecognitionWER(PerImageEvaluationMetric):
     __provider__ = 'wer'
     annotation_types = (CharacterRecognitionAnnotation,)
     prediction_types = (CharacterRecognitionPrediction,)
 
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({'greedy': BoolField(optional=True, default=False)})
+
     def configure(self):
+        self.greedy = self.get_value_from_config('greedy')
+        if self.greedy and editdistance is None:
+            raise ConfigError('Greedy WER calculation required editdistance package installation.')
         self.overall_metric = []
         self.meta['target'] = 'higher-worse'
-        self.words = 0
-        self.score = 0
+        self.wer_realization = self.standard_wer if not self.greedy else self.greedy_wer
 
-    def update(self, annotation, prediction):
+    @staticmethod
+    def greedy_wer(prediction, annotation):
+        h_list = annotation.label.split()
+        r_list = prediction.label.split()
+        words = len(r_list)
+        score = editdistance.eval(h_list, r_list)
+        return score / words
 
+    @staticmethod
+    def standard_wer(prediction, annotation):
         h = prediction.label
         r = annotation.label
-        # print(annotation.identifier)
-        # print("p: {}".format(h))
-        # print('a: {}'.format(r))
-        h_list = h.split()
-        r_list = r.split()
-        self.words += len(r_list)
-        self.score += editdistance.eval(h_list, r_list)
+        dist = np.zeros((len(r) + 1, len(h) + 1), dtype=np.uint8)
+        for i in range(len(r) + 1):
+            dist[i][0] = i
+        for j in range(len(h) + 1):
+            dist[0][j] = j
+        for i in range(1, len(r) + 1):
+            for j in range(1, len(h) + 1):
+                if r[i - 1] == h[j - 1]:
+                    dist[i][j] = dist[i - 1][j - 1]
+                else:
+                    substitute = dist[i - 1][j - 1] + 1
+                    insert = dist[i][j - 1] + 1
+                    delete = dist[i - 1][j] + 1
+                    dist[i][j] = min(substitute, insert, delete)
 
-        # dist = np.zeros((len(r) + 1, len(h) + 1), dtype=np.uint8)
-        # for i in range(len(r) + 1):
-        #     dist[i][0] = i
-        # for j in range(len(h) + 1):
-        #     dist[0][j] = j
-        # for i in range(1, len(r) + 1):
-        #     for j in range(1, len(h) + 1):
-        #         if r[i - 1] == h[j - 1]:
-        #             dist[i][j] = dist[i - 1][j - 1]
-        #         else:
-        #             substitute = dist[i - 1][j - 1] + 1
-        #             insert = dist[i][j - 1] + 1
-        #             delete = dist[i - 1][j] + 1
-        #             dist[i][j] = min(substitute, insert, delete)
-        #
-        # result = float(dist[len(r)][len(h)]) / len(r)
+        return float(dist[len(r)][len(h)]) / len(r)
 
-        #self.overall_metric.append(result)
+    def update(self, annotation, prediction):
+        result = self.wer_realization(prediction, annotation)
+        self.overall_metric.append(result)
 
-        return self.score / self.words
+        return result
 
     def evaluate(self, annotations, predictions):
-        for ann, pred in zip(annotations, predictions):
-            print("a: {}".format(ann.label.lower()))
-            print('p: {}'.format(pred.label.lower()))
-        return self.score / self.words
+        return np.mean(self.overall_metric)
 
     def reset(self):
         self.overall_metric = []
