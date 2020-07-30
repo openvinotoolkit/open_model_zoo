@@ -3,8 +3,8 @@ models:
     launchers:
       - framework: dlsdk
         adapter:
-            type: common_language_modeling
-            logits_output: "MatMul_2533"
+          type: common_language_modeling
+          logits_output: "MatMul_2533"
         inputs:
           - name: "input1"
             type: INPUT
@@ -17,7 +17,7 @@ models:
         reader:
           type: annotation_features_extractor
           features:
-          - input_ids
+            - input_ids
         metrics:
           - type: 'perplexity'
             name: 'Perplexity'
