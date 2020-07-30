@@ -13,10 +13,10 @@
 # limitations under the License.
 
 description: >-
-  GPT2-LM-HEAD: Transformer-based language model for text generation. For details see the
-  paper <https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf>,
-  original repository <https://github.com/huggingface/transformers> and
-  repository with converted model <https://github.com/onnx/models/tree/master/text/machine_comprehension/gpt-2>
+  GPT2-LM-HEAD: Transformer-based language model for text generation. For details
+  see the paper <https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf>,
+  original repository <https://github.com/huggingface/transformers> and repository
+  with converted model <https://github.com/onnx/models/tree/master/text/machine_comprehension/gpt-2>.
 task_type: text_prediction
 files:
   - name: gpt2-lm-head-10.onnx
