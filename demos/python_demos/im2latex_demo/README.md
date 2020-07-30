@@ -92,7 +92,7 @@ python im2latex_demo.py \
 --dec_step <path_to_models>/decode_step.xml \
 -i input_image.png \
 --vocab_path <path_to_vocab> \
---target_shape heigth width 
+--target_shape <heigth width> 
 ```
 
 ## Demo Output
