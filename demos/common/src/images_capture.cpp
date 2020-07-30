@@ -30,7 +30,7 @@ public:
 
     double fps() const override {return 0.0;}
 
-    size_t lastImgId() const override {return 0;}
+    size_t lastImageId() const override {return 0;}
 
     cv::Mat read() override {
         if (loop) return img.clone();
@@ -45,7 +45,7 @@ public:
 class DirReader : public ImagesCapture {
     std::vector<std::string> names;
     size_t fileId;
-    size_t imgId;
+    size_t nextImgId;
     const size_t posFrames;
     const size_t readLengthLimit;
 
@@ -53,7 +53,7 @@ public:
     const std::string input;
 
     DirReader(const std::string &input, bool loop, size_t posFrames, size_t readLengthLimit) : ImagesCapture{loop},
-            fileId{0}, imgId{0}, posFrames{posFrames}, readLengthLimit{readLengthLimit}, input{input} {
+            fileId{0}, nextImgId{0}, posFrames{posFrames}, readLengthLimit{readLengthLimit}, input{input} {
         DIR *dir = opendir(input.c_str());
         if (!dir) throw InvalidInput{};
         while (struct dirent *ent = readdir(dir))
@@ -76,26 +76,29 @@ public:
 
     double fps() const override {return 0.0;}
 
-    size_t lastImgId() const override {return imgId - 1;}
+    size_t lastImageId() const override {return nextImgId - 1;}
 
     cv::Mat read() override {
-        while (fileId < names.size() && imgId < readLengthLimit) {
+        while (fileId < names.size() && nextImgId < readLengthLimit) {
             cv::Mat img = cv::imread(input + '/' + names[fileId]);
             ++fileId;
             if (img.data) {
-                ++imgId;
+                ++nextImgId;
                 return img;
             }
         }
         if (loop) {
             fileId = 0;
-            imgId = 0;
-            while (fileId < names.size() && imgId < posFrames) {
+            size_t readImgs = 0;
+            while (fileId < names.size()) {
                 cv::Mat img = cv::imread(input + '/' + names[fileId]);
                 ++fileId;
                 if (img.data) {
-                    ++imgId;
-                    return img;
+                    ++readImgs;
+                    if (readImgs - 1 >= posFrames) {
+                        nextImgId = 1;
+                        return img;
+                    }
                 }
             }
         }
@@ -105,14 +108,14 @@ public:
 
 class VideoCapWrapper : public ImagesCapture {
     cv::VideoCapture cap;
-    size_t imgId;
+    size_t nextImgId;
     const double posFrames;
     size_t readLengthLimit;
 
 public:
     VideoCapWrapper(const std::string &input, bool loop, double posFrames, size_t readLengthLimit,
                 double buffersize, double frameWidth, double frameHeight, double autofocus, double fourcc)
-            : ImagesCapture{loop}, imgId{0}, posFrames{posFrames} {
+            : ImagesCapture{loop}, nextImgId{0}, posFrames{posFrames} {
         try {
             cap.open(std::stoi(input));
             this->readLengthLimit = loop ? std::numeric_limits<size_t>::max() : readLengthLimit;
@@ -137,12 +140,12 @@ public:
 
     double fps() const override {return cap.get(cv::CAP_PROP_FPS);}
 
-    size_t lastImgId() const override {return imgId - 1;}
+    size_t lastImageId() const override {return nextImgId - 1;}
 
     cv::Mat read() override {
-        if (imgId >= readLengthLimit) {
+        if (nextImgId >= readLengthLimit) {
             if (loop && cap.set(cv::CAP_PROP_POS_FRAMES, posFrames)) {
-                imgId = 1;
+                nextImgId = 1;
                 cv::Mat img;
                 cap.read(img);
                 return img;
@@ -151,10 +154,10 @@ public:
         }
         cv::Mat img;
         if (!cap.read(img) && loop && cap.set(cv::CAP_PROP_POS_FRAMES, posFrames)) {
-            imgId = 1;
+            nextImgId = 1;
             cap.read(img);
         } else {
-            ++imgId;
+            ++nextImgId;
         }
         return img;
     }

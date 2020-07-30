@@ -165,13 +165,13 @@ int main(int argc, char **argv) {
         std::cout << std::endl;
 
         for (;;) {
-            pedestrian_detector.submitFrame(frame, cap->lastImgId());
+            pedestrian_detector.submitFrame(frame, cap->lastImageId());
             pedestrian_detector.waitAndFetchResults();
 
             TrackedObjects detections = pedestrian_detector.getResults();
 
             // timestamp in milliseconds
-            uint64_t cur_timestamp = static_cast<uint64_t >(1000.0 / video_fps * cap->lastImgId());
+            uint64_t cur_timestamp = static_cast<uint64_t >(1000.0 / video_fps * cap->lastImageId());
             tracker->Process(frame, detections, cur_timestamp);
 
             presenter.drawGraphs(frame);
@@ -203,7 +203,7 @@ int main(int argc, char **argv) {
                 presenter.handleKey(k);
             }
 
-            if (should_save_det_log && (cap->lastImgId() % 100 == 0)) {
+            if (should_save_det_log && (cap->lastImageId() % 100 == 0)) {
                 DetectionLog log = tracker->GetDetectionLog(true);
                 SaveDetectionLogToTrajFile(detlog_out, log);
             }
