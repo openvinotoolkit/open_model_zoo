@@ -26,6 +26,7 @@ import sys
 from multiprocessing import Pool, cpu_count
 from multiprocessing.dummy import Pool as ThreadPool
 from threading import Timer
+import tempfile
 
 
 from ..config import PathField, NumberField
@@ -263,11 +264,6 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'images_dir': PathField(
-                is_directory=True, optional=True,
-                check_exists=False,
-                description='path to rendered images'
-            ),
             'num_threads': NumberField(value_type=int, optional=True),
             'max_pixel_column_diff': NumberField(value_type=int)
         })
@@ -275,13 +271,12 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         return parameters
 
     def configure(self):
-        self.images_dir = self.get_value_from_config('images_dir')
         self.num_threads = self.get_value_from_config('num_threads')
         if self.num_threads is None:
             self.num_threads = cpu_count()
         self.max_pixel_column_diff = self.get_value_from_config('max_pixel_column_diff')
 
-    def compare_pics(self):
+    def compare_pics(self, images_dir):
         """
         Function reads images and compares them, first, as is
         second, deletes all whitespaces and compares again.
@@ -293,9 +288,9 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         total_correct_eliminate = 0
         lines = []
         pool = ThreadPool(self.num_threads)
-        gold_dir = os.path.join(self.images_dir, 'images_gold')
-        pred_dir = os.path.join(self.images_dir, 'images_pred')
-        plots_dir = os.path.join(self.images_dir, 'diff')
+        gold_dir = os.path.join(images_dir, 'images_gold')
+        pred_dir = os.path.join(images_dir, 'images_pred')
+        plots_dir = os.path.join(images_dir, 'diff')
         filenames = os.listdir(gold_dir)
         if not os.path.exists(plots_dir):
             os.makedirs(plots_dir)
@@ -327,18 +322,15 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         logging.info('Total Correct (w/o spaces): {}'.format(total_correct_eliminate))
         return correct_eliminate_ratio
 
-    def render_images(self, annotations, predictions):
-        """Runs render script to render images and store them into self.images_dir
+    def render_images(self, annotations, predictions, images_dir):
+        """Runs render script to render images and store them into images_dir
 
         Args:
             annotations (str): Ground-truth formula
             predictions (str): Predicted formula
         """
-        if os.path.exists(self.images_dir):
-            shutil.rmtree(self.images_dir)
-        os.makedirs(self.images_dir)
-        out_path_gold = os.path.join(self.images_dir, 'images_gold')
-        out_path_pred = os.path.join(self.images_dir, 'images_pred')
+        out_path_gold = os.path.join(images_dir, 'images_gold')
+        out_path_pred = os.path.join(images_dir, 'images_pred')
         for dir_ in [out_path_gold, out_path_pred]:
             if not os.path.exists(dir_):
                 os.makedirs(dir_)
@@ -353,7 +345,8 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         pool.join()
 
     def evaluate(self, annotations, predictions):
-        if not os.path.exists(self.images_dir):
-            os.makedirs(self.images_dir)
-        self.render_images(annotations, predictions)
-        return self.compare_pics()
+        result = 0
+        with tempfile.TemporaryDirectory() as images_dir:
+            self.render_images(annotations, predictions, images_dir)
+            result = self.compare_pics(images_dir)
+        return result
