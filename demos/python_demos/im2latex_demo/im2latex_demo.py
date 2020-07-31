@@ -33,9 +33,7 @@ def print_stats(module):
 
 def preprocess_image(image_raw, tgt_shape):
     target_height, target_width = tgt_shape
-    print(image_raw.shape)
     image_raw = preprocess(tgt_shape)(image_raw)[0]
-    cv2.imwrite("debug_preproc.png", image_raw)
     assert image_raw.shape[0] == target_height and image_raw.shape[1] == target_width, image_raw.shape
     image = image_raw / float(COLOR_WHITE)
     image = image.transpose((2, 0, 1))
@@ -57,12 +55,8 @@ def build_argparser():
                       help="Optional. Path to file where to store output. If not mentioned, result will be stored"
                       "in the console.",
                       type=str)
-    args.add_argument("-l", "--cpu_extension",
-                      help="Optional. Required for CPU custom layers. "
-                           "Absolute MKLDNN (CPU)-targeted custom layers. Absolute path to a shared library with the "
-                           "kernels implementations", type=str)
     args.add_argument("--vocab_path", help="Path to vocab file to construct meaningful phrase",
-                      default='../print_dataset/vocab.pkl', type=str)
+                      type=str)
     args.add_argument("--target_shape", help="Required. Target image shape (height, width). "
                       "Example: 100 500",
                       required=True, type=int, nargs="+")
@@ -87,8 +81,6 @@ def main():
     target_shape = tuple(args.target_shape)
     log.info("Creating Inference Engine")
     ie = IECore()
-    if args.cpu_extension:
-        ie.add_extension(args.cpu_extension, 'CPU')
     ie.set_config(
         {"PERF_COUNT": "YES" if args.perf_stats else "NO"}, args.device)
 
@@ -106,8 +98,6 @@ def main():
     if len(not_supported_layers) != 0:
         log.error("Following layers are not supported by the plugin for specified device {}:\n{}".
                   format(args.device, ', '.join(not_supported_layers)))
-        # sys.exit(1)
-
 
     # decoder part:
     dec_step_model_xml = args.dec_step
@@ -127,11 +117,7 @@ def main():
     if len(not_supported_layers) != 0:
         log.error("Following layers are not supported by the plugin for specified device {}:\n{}".
                   format(args.device, ', '.join(not_supported_layers)))
-        # sys.exit(1)
-
-    # read and preprocess images
-    # Images = namedtuple("Images", "img_name, img, formula")
-
+  
     images_list = []
     inputs = list(args.input)
     log.info("Loading vocab file")
