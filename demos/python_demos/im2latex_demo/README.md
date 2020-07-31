@@ -1,6 +1,6 @@
 # Im2LaTeX Python* Demo
 
-This demo shows how to run im2latex models. Im2latex models allow us to get formula markup in latex format from image.
+This demo shows how to run im2latex models. Im2latex models allow us to get latex formula markup from the image.
 
 > **NOTE**: Only batch size of 1 is supported.
 
@@ -88,11 +88,11 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 To run the demo, please provide paths to the model in the IR format and to an input video or folder with images:
 ```bash
 python im2latex_demo.py \
---encoder <path_to_models>/encoder.xml \
---dec_step <path_to_models>/decode_step.xml \
--i input_image.png \
---vocab_path <path_to_vocab> \
---target_shape <heigth width> 
+        --encoder <path_to_models>/encoder.xml \
+        --dec_step <path_to_models>/decode_step.xml \
+        --vocab_path <path_to_vocab> \
+        --target_shape <heigth width> \
+        -i input_image.png
 ```
 
 ## Demo Output
