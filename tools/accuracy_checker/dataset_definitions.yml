@@ -540,8 +540,8 @@ datasets:
         formula_file: im2latex_medium_rendered/formulas.norm.lst
         split_file: im2latex_medium_rendered/validate_filter.lst
         vocab_file: im2latex_medium_rendered/vocab.json
-    annotation: im2latex_medium_rendered/im2latex_medium_rendered.pickle
-    dataset_meta: im2latex_medium_rendered/im2latex_medium_rendered.json
+    annotation: im2latex_medium_rendered.pickle
+    dataset_meta: im2latex_medium_rendered.json
 
   - name: im2latex_medium_photographed
     data_source: im2latex_medium_photographed/images_processed
@@ -552,8 +552,8 @@ datasets:
         formula_file: im2latex_medium_photographed/formulas.norm.lst
         split_file: im2latex_medium_photographed/test_filter.lst
         vocab_file: im2latex_medium_photographed/vocab.pkl
-    annotation: im2latex_medium_photographed/im2latex_medium_photographed.pickle
-    dataset_meta: im2latex_medium_photographed/im2latex_medium_photographed.json
+    annotation: im2latex_medium_photographed.pickle
+    dataset_meta: im2latex_medium_photographed.json
 
   - name: market1501
     data_source: Market-1501-v15.09.15
