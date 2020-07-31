@@ -1,5 +1,5 @@
 evaluations:
-  - name: im2latex-0001
+  - name: im2latex-medium-0002
     module: custom_evaluators.im2latex_evaluator.Im2latexEvaluator
     module_config:
       network_info:  
@@ -39,7 +39,7 @@ evaluations:
             
           metrics:
             - type: im2latex_match_images_metric
-              images_dir: /home/vloginov/work/im2latex/results_ir/ac_results
+              images_dir: ../ac_results
               max_pixel_column_diff: 0
 
         - name: im2latex_medium_rendered
@@ -60,7 +60,7 @@ evaluations:
             
           metrics:
             - type: im2latex_match_images_metric
-              images_dir: /home/vloginov/work/im2latex/results_ir/ac_results
+              images_dir: ../ac_results
               max_pixel_column_diff: 0
               
 
