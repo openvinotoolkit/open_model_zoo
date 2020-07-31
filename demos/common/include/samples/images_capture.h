@@ -19,7 +19,7 @@ public:
     virtual ~ImagesCapture() = default;
 };
 
-// This is a more advanced version of
+// A more advanced version of
 // try {
 //     return cv::VideoCapture(std::stoi(input));
 // } catch (const std::invalid_argument&) {

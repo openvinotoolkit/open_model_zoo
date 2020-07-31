@@ -19,10 +19,10 @@
 class InvalidInput {};
 
 class ImreadWrapper : public ImagesCapture {
-public:
     cv::Mat img;
     bool canRead;
 
+public:
     ImreadWrapper(const std::string &input, bool loop) : ImagesCapture{loop}, canRead{true} {
         img = cv::imread(input);
         if(!img.data) throw InvalidInput{};
@@ -48,10 +48,9 @@ class DirReader : public ImagesCapture {
     size_t nextImgId;
     const size_t posFrames;
     const size_t readLengthLimit;
-
-public:
     const std::string input;
 
+public:
     DirReader(const std::string &input, bool loop, size_t posFrames, size_t readLengthLimit) : ImagesCapture{loop},
             fileId{0}, nextImgId{0}, posFrames{posFrames}, readLengthLimit{readLengthLimit}, input{input} {
         DIR *dir = opendir(input.c_str());
