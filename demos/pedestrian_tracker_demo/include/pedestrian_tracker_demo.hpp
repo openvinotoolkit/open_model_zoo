@@ -46,7 +46,7 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 
 DEFINE_bool(h, false, help_message);
 DEFINE_uint32(first, 0, first_frame_message);
-DEFINE_uint32(limit, uint32Size_tMinMax(), limit_message);
+DEFINE_uint32(limit, gflags::uint32(std::numeric_limits<size_t>::max()), limit_message);
 DEFINE_string(m_det, "", pedestrian_detection_model_message);
 DEFINE_string(m_reid, "", pedestrian_reid_model_message);
 DEFINE_string(d_det, "CPU", target_device_detection_message);

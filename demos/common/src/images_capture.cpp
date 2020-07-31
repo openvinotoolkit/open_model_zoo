@@ -166,7 +166,7 @@ public:
 std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input, bool loop, size_t posFrames,
         size_t readLengthLimit, 
         double buffersize, double frameWidth, double frameHeight, double autofocus, double fourcc) {
-    if (readLengthLimit == 0) throw std::runtime_error{"Read length limit must be a natural number"};
+    if (readLengthLimit == 0) throw std::runtime_error{"Read length limit must be positive"};
     try {
         return std::unique_ptr<ImagesCapture>{new ImreadWrapper{input, loop}};
     } catch (const InvalidInput &) {}
