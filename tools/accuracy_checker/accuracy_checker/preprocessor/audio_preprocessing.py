@@ -214,7 +214,8 @@ class HanningWindow(Preprocessor):
             'base': NumberField(
                 optional=True,
                 default=512,
-                description="Window length"
+                description="Window length",
+                value_type=int
             ),
         })
         return parameters
@@ -237,7 +238,7 @@ class AudioSpectrogram(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'fftbase': NumberField(optional=True, default=512, description="Base of FFT, samples"),
+            'fftbase': NumberField(optional=True, default=512, description="Base of FFT, samples", value_type=int),
             'magnitude_squared': BoolField(optional=True, default=True, description="Square spectrum magnitudes"),
             'skip_channels': BoolField(optional=True, default=False, description="Skips channels dimension"),
         })
@@ -273,9 +274,15 @@ class TriangleFiltering(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "base": NumberField(default=16000, description='Spectrogram length expected by filter bank'),
-            "sample_rate": NumberField(default=16000, description='sample rate value expected by model'),
-            "filterbank_channel_count": NumberField(default=40, description='number of channels in filter bank'),
+            "base": NumberField(
+                default=16000, description='Spectrogram length expected by filter bank', value_type=int
+            ),
+            "sample_rate": NumberField(
+                default=16000, description='sample rate value expected by model', value_type=int
+            ),
+            "filterbank_channel_count": NumberField(
+                default=40, description='number of channels in filter bank', value_type=int
+            ),
             "lower_frequency_limit": NumberField(default=20, description='filter passband lower boundary'),
             "upper_frequency_limit": NumberField(default=4000, description='filter passband upper boundary'),
         })
@@ -370,8 +377,10 @@ class DCT(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "filterbank_channel_count": NumberField(default=40, description='number of channels in filter bank'),
-            "numceps": NumberField(default=26, description='Number of cepstral coefficients'),
+            "filterbank_channel_count": NumberField(
+                default=40, description='number of channels in filter bank', value_type=int
+            ),
+            "numceps": NumberField(default=26, description='Number of cepstral coefficients', value_type=int),
         })
         return parameters
 
@@ -418,6 +427,7 @@ class DCT(Preprocessor):
 
         return output_dct
 
+
 class ClipCepstrum(Preprocessor):
     __provider__ = 'clip_cepstrum'
 
@@ -425,8 +435,8 @@ class ClipCepstrum(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "context": NumberField(default=9, description='number of samples in context window'),
-            "numceps": NumberField(default=26, description='Number of input coefficients'),
+            "context": NumberField(default=9, description='number of samples in context window', value_type=int),
+            "numceps": NumberField(default=26, description='Number of input coefficients', value_type=int),
         })
         return parameters
 
@@ -452,6 +462,7 @@ class ClipCepstrum(Preprocessor):
 
         return image
 
+
 class PackCepstrum(Preprocessor):
     __provider__ = 'pack_cepstrum'
 
@@ -459,7 +470,7 @@ class PackCepstrum(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "step": NumberField(default=16, description='number of simultaneously processed contexts'),
+            "step": NumberField(default=16, description='number of simultaneously processed contexts', value_type=int),
         })
         return parameters
 
