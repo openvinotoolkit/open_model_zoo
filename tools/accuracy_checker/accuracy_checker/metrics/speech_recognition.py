@@ -33,29 +33,8 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
     annotation_types = (CharacterRecognitionAnnotation,)
     prediction_types = (CharacterRecognitionPrediction,)
 
-    @classmethod
-    def parameters(cls):
-        params = super().parameters()
-        params.update({'greedy': BoolField(optional=True, default=False)})
-
-    def configure(self):
-        self.greedy = self.get_value_from_config('greedy')
-        if self.greedy and editdistance is None:
-            raise ConfigError('Greedy WER calculation required editdistance package installation.')
-        self.overall_metric = []
-        self.meta['target'] = 'higher-worse'
-        self.wer_realization = self.standard_wer if not self.greedy else self.greedy_wer
-
     @staticmethod
-    def greedy_wer(prediction, annotation):
-        h_list = annotation.label.split()
-        r_list = prediction.label.split()
-        words = len(r_list)
-        score = editdistance.eval(h_list, r_list)
-        return score / words
-
-    @staticmethod
-    def standard_wer(prediction, annotation):
+    def distance(prediction, annotation):
         h = prediction.label
         r = annotation.label
         dist = np.zeros((len(r) + 1, len(h) + 1), dtype=np.uint8)
@@ -76,7 +55,7 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
         return float(dist[len(r)][len(h)]) / len(r)
 
     def update(self, annotation, prediction):
-        result = self.wer_realization(prediction, annotation)
+        result = self.distance(prediction, annotation)
         self.overall_metric.append(result)
 
         return result
@@ -86,3 +65,28 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
 
     def reset(self):
         self.overall_metric = []
+
+
+class GreedyWER(PerImageEvaluationMetric):
+    __provider__ = 'greedy_wer'
+    annotation_types = (CharacterRecognitionAnnotation,)
+    prediction_types = (CharacterRecognitionPrediction,)
+
+    def configure(self):
+        if editdistance is None:
+            raise ConfigError('editdistance is not installed. Please install it before usage')
+        self.words = 0
+        self.score = 0
+
+    def update(self, annotation, prediction):
+        cur_score = editdistance.eval(annotation.label.split(), prediction.label.split())
+        cur_words = len(annotation.label.split())
+        self.score += cur_score
+        self.words += cur_words
+        return cur_score / cur_words
+
+    def evaluate(self, annotations, predictions):
+        return self.score / self.words if self.words != 0 else 0
+
+    def reset(self):
+        self.words, self.score = 0, 0
