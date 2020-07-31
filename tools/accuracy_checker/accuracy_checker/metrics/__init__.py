@@ -90,7 +90,7 @@ from .attribute_classification import (
     AttributeClassificationAccuracy
 )
 
-from .speech_recognition import SpeechRecognitionWER
+from .speech_recognition import SpeechRecognitionWER, GreedyWER
 
 __all__ = [
     'Metric',

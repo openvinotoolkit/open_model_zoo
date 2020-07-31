@@ -15,10 +15,6 @@ limitations under the License.
 """
 
 import numpy as np
-try:
-    import librosa
-except ImportError:
-    librosa = None
 
 from ..config import BoolField, BaseField, NumberField, ConfigError, StringField
 from ..preprocessor import Preprocessor
@@ -540,17 +536,12 @@ class TrimmingAudio(Preprocessor):
         return params
 
     def configure(self):
-        if librosa is None:
-            raise ConfigError(
-                'librosa not installed, preprocessor {} require librosa. Please install it before usage'.format(
-                    self.__provider__)
-            )
         self.top_db = self.get_value_from_config('top_db')
         self.frame_length = self.get_value_from_config('frame_length')
         self.hop_length = self.get_value_from_config('hop_length')
 
     def process(self, image, annotation_meta=None):
-        image.data, _ = librosa.effects.trim(image.data, self.top_db)
+        image.data = self.trim(image.data)
         return image
 
     def trim(self, y):
@@ -596,7 +587,7 @@ class TrimmingAudio(Preprocessor):
         new_stride = np.prod(strides[strides > 0] // y_mono.itemsize) * y_mono.itemsize
         shape = list(y_mono.shape)[:-1] + [self.frame_length, n_frames]
         strides = list(strides) + [self.hop_length * new_stride]
-        array = as_strided(y_mono, shape, strides)
+        array = np.lib.stride_tricks.as_strided(y_mono, shape, strides)
         return np.mean(np.abs(array) ** 2, axis=0, keepdims=True)
 
 
@@ -649,11 +640,6 @@ class AudioToMelSpectrogram(Preprocessor):
         return params
 
     def configure(self):
-        if librosa is None:
-            raise ConfigError(
-                'librosa not installed, preprocessor {} require librosa. Please install it before usage'.format(
-                    self.__provider__)
-            )
         self.window_size = self.get_value_from_config('window_size')
         self.window_stride = self.get_value_from_config('window_stride')
         self.n_fft = self.get_value_from_config('n_fft')
@@ -704,8 +690,8 @@ class AudioToMelSpectrogram(Preprocessor):
         # do preemphasis
         if self.preemph is not None:
             x = np.concatenate((np.expand_dims(x[:, 0], 1), x[:, 1:] - self.preemph * x[:, :-1]), axis=1, )
-        x = librosa.stft(
-            x.squeeze(), n_fft=self.n_fft, hop_length=self.hop_length, win_length=self.window_length,
+        x = self.stft(
+            x.squeeze(), n_fft=self.n_fft, hop_length=self.hop_length,
             window=self.window, center=True, dtype=np.float32
         )
 
@@ -808,64 +794,62 @@ class AudioToMelSpectrogram(Preprocessor):
         mels = np.linspace(min_mel, max_mel, n_mels)
         return mel_to_hz(mels)
 
-    #@staticmethod
-    # def stft(y, n_fft, hop_length, window, center=True, dtype=np.complex64, pad_mode='reflect'):
-    #     # Constrain STFT block sizes to 256 KB
-    #     MAX_MEM_BLOCK = 2 ** 8 * 2 ** 10
-    #
-    #     def pad_center(data, size, axis=-1, **kwargs):
-    #         kwargs.setdefault('mode', 'constant')
-    #         n = data.shape[axis]
-    #         lpad = int((size - n) // 2)
-    #         lengths = [(0, 0)] * data.ndim
-    #         lengths[axis] = (lpad, int(size - n - lpad))
-    #         return np.pad(data, lengths, **kwargs)
-    #
-    #     def frame(x, frame_length=2048, hop_length=512):
-    #         '''Slice a data array into (overlapping) frames.'''
-    #
-    #         n_frames = (x.shape[-1] - frame_length) // hop_length
-    #         strides = np.asarray(x.strides)
-    #
-    #         new_stride = np.prod(strides[strides > 0] // x.itemsize) * x.itemsize
-    #         shape = list(x.shape)[:-1] + [frame_length, n_frames]
-    #         strides = list(strides) + [hop_length * new_stride]
-    #
-    #         return as_strided(x, shape=shape, strides=strides)
-    #
-    #     fft_window = np.asarray(window)
-    #
-    #     # Pad the window out to n_fft size
-    #     fft_window = pad_center(fft_window, n_fft)
-    #
-    #     # Reshape so that the window can be broadcast
-    #     fft_window = fft_window.reshape((-1, 1))
-    #     # # Pad the time series so that frames are centered
-    #     # if center:
-    #     #     y = np.pad(y, int(n_fft // 2), mode=pad_mode)
-    #
-    #     # Window the time series.
-    #     y_frames = frame(y, frame_length=n_fft, hop_length=hop_length)
-    #
-    #     # Pre-allocate the STFT matrix
-    #     stft_matrix = np.empty((int(1 + n_fft // 2), y_frames.shape[1]),
-    #                            dtype=dtype,
-    #                            order='F')
-    #
-    #     # how many columns can we fit within MAX_MEM_BLOCK?
-    #     n_columns = int(MAX_MEM_BLOCK / (stft_matrix.shape[0] *
-    #                                      stft_matrix.itemsize))
-    #
-    #     for bl_s in range(0, stft_matrix.shape[1], n_columns):
-    #         bl_t = min(bl_s + n_columns, stft_matrix.shape[1])
-    #         print(bl_s, bl_t, n_columns)
-    #         print(y_frames.shape)
-    #
-    #         # RFFT and Conjugate here to match phase from DPWE code
-    #         rfft = fft_window * y_frames[:, bl_s:bl_t]
-    #         stft_matrix[:, bl_s:bl_t] = np.fft.fft(rfft, axis=0)[:stft_matrix.shape[0]]
-    #
-    #     return stft_matrix
+    @staticmethod
+    def stft(y, n_fft, hop_length, window, center=True, dtype=np.complex64, pad_mode='reflect'):
+        # Constrain STFT block sizes to 256 KB
+        MAX_MEM_BLOCK = 2 ** 8 * 2 ** 10
+
+        def pad_center(data, size, axis=-1, **kwargs):
+            kwargs.setdefault('mode', 'constant')
+            n = data.shape[axis]
+            lpad = int((size - n) // 2)
+            lengths = [(0, 0)] * data.ndim
+            lengths[axis] = (lpad, int(size - n - lpad))
+            return np.pad(data, lengths, **kwargs)
+
+        def frame(x, frame_length=2048, hop_length=512):
+            '''Slice a data array into (overlapping) frames.'''
+
+            n_frames = (x.shape[-1] - frame_length) // hop_length
+            strides = np.asarray(x.strides)
+
+            new_stride = np.prod(strides[strides > 0] // x.itemsize) * x.itemsize
+            shape = list(x.shape)[:-1] + [frame_length, n_frames]
+            strides = list(strides) + [hop_length * new_stride]
+
+            return np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
+
+        fft_window = np.asarray(window)
+
+        # Pad the window out to n_fft size
+        fft_window = pad_center(fft_window, n_fft)
+
+        # Reshape so that the window can be broadcast
+        fft_window = fft_window.reshape((-1, 1))
+        # # Pad the time series so that frames are centered
+        if center:
+            y = np.pad(y, int(n_fft // 2), mode=pad_mode)
+
+        # Window the time series.
+        y_frames = frame(y, frame_length=n_fft, hop_length=hop_length)
+
+        # Pre-allocate the STFT matrix
+        stft_matrix = np.empty((int(1 + n_fft // 2), y_frames.shape[1]),
+                               dtype=dtype,
+                               order='F')
+
+        # how many columns can we fit within MAX_MEM_BLOCK?
+        n_columns = int(MAX_MEM_BLOCK / (stft_matrix.shape[0] *
+                                         stft_matrix.itemsize))
+
+        for bl_s in range(0, stft_matrix.shape[1], n_columns):
+            bl_t = min(bl_s + n_columns, stft_matrix.shape[1])
+
+            # RFFT and Conjugate here to match phase from DPWE code
+            rfft = fft_window * y_frames[:, bl_s:bl_t]
+            stft_matrix[:, bl_s:bl_t] = np.fft.rfft(rfft, axis=0)[:stft_matrix.shape[0]]
+
+        return stft_matrix
 
     @staticmethod
     def splice_frames(x, frame_splicing):
@@ -877,8 +861,8 @@ class AudioToMelSpectrogram(Preprocessor):
     @staticmethod
     def normalize_batch(x, seq_len, normalize_type):
         if normalize_type == "per_feature":
-            x_mean = np.zeros((seq_len, x.shape[1]), dtype=x.dtype)
-            x_std = np.zeros((seq_len, x.shape[1]), dtype=x.dtype)
+            x_mean = np.zeros((x.shape[0], x.shape[1]), dtype=x.dtype)
+            x_std = np.zeros((x.shape[0], x.shape[1]), dtype=x.dtype)
             for i in range(x.shape[0]):
                 x_mean[i, :] = x[i, :seq_len].mean(axis=1)
                 x_std[i, :] = x[i, :seq_len].std(axis=1)
@@ -887,8 +871,8 @@ class AudioToMelSpectrogram(Preprocessor):
             return (x - np.expand_dims(x_mean, 2)) / np.expand_dims(x_std, 2)
 
         if normalize_type == "all_features":
-            x_mean = np.zeros(seq_len.shape, dtype=x.dtype)
-            x_std = np.zeros(seq_len.shape, dtype=x.dtype)
+            x_mean = np.zeros(seq_len, dtype=x.dtype)
+            x_std = np.zeros(seq_len, dtype=x.dtype)
             for i in range(x.shape[0]):
                 x_mean[i] = x[i, :, : seq_len[i].item()].mean()
                 x_std[i] = x[i, :, : seq_len[i].item()].std()

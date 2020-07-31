@@ -250,7 +250,8 @@ class BaseModel:
         pass
 
 
-class BaseDLSDKModel(BaseModel)
+# pylint: disable E0203
+class BaseDLSDKModel:
     def _reshape_input(self, input_shapes):
         del self.exec_network
         self.network.reshape(input_shapes)
@@ -447,7 +448,7 @@ class ASRModel(BaseModel):
         return [{'name': 'encoder', 'model': self.encoder.network}, {'name': 'decoder', 'model': self.decoder.network}]
 
 
-class EncoderDLSDKModel(BaseDLSDKModel):
+class EncoderDLSDKModel(BaseModel, BaseDLSDKModel):
     default_model_suffix = 'encoder'
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
@@ -478,8 +479,7 @@ class EncoderDLSDKModel(BaseDLSDKModel):
         return {self.input_blob: np.array(input_data)}
 
 
-
-class DecoderDLSDKModel(BaseDLSDKModel):
+class DecoderDLSDKModel(BaseModel,BaseDLSDKModel):
     default_model_suffix = 'decoder'
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
@@ -507,11 +507,15 @@ class DecoderDLSDKModel(BaseDLSDKModel):
             self.exec_network.input_info[self.input_blob].input_data
             if has_info else self.exec_network.inputs[self.input_blob]
         )
-        input_data = np.array(input_data[0])
+        input_data = np.array(input_data)
         if tuple(input_info.shape) != input_data.shape:
             self._reshape_input({self.input_blob: input_data.shape})
 
         return {self.input_blob: input_data}
+
+    def set_input_and_output(self):
+        super().set_input_and_output()
+        self.adapter.output_blob = self.output_blob
 
 
 class EncoderONNXModel(BaseModel):
