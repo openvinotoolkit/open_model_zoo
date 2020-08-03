@@ -1,4 +1,4 @@
-# Im2LaTeX Python* Demo
+# Im2LaTeX Python\* Demo
 
 This demo shows how to run im2latex models. Im2latex models allow us to get latex formula markup from the image.
 
