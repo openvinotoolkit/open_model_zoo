@@ -380,7 +380,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `split_file` - path to file containing `img_name` and corresponding formula `index` in `formula_file` separated by tab per line
   * `vocab_file` - file containing vocabulary to cast token class indices into human-readable tokens 
 
-### Customizing dataset meta
+## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `backgound_label` using `dataset_meta_file` argument.
 dataset meta file is JSON file, which can contains following parameters:
