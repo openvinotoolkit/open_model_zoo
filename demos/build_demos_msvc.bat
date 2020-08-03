@@ -149,7 +149,7 @@ cd "%ROOT_DIR%" && cmake -E make_directory "%SOLUTION_DIR64%"
 cd "%SOLUTION_DIR64%" && cmake -G "Visual Studio !MSBUILD_VERSION!" -A %PLATFORM% %EXTRA_CMAKE_OPTS% "%ROOT_DIR%"
 
 echo.
-echo ###############^|^| Build Inference Engine Demos using MS Visual Studio (MSBuild.exe) ^|^|###############
+echo ###############^|^| Build Open Model Zoo Demos using MS Visual Studio (MSBuild.exe) ^|^|###############
 echo.
 echo "!MSBUILD_BIN!" Demos.sln /p:Configuration=Release
 "!MSBUILD_BIN!" Demos.sln /p:Configuration=Release
