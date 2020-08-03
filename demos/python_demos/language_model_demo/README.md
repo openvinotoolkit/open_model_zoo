@@ -68,7 +68,7 @@ python3 ./mo_tf.py
 --input_model_is_text                                                                                                  \
 --output softmax_out,lstm/lstm_0/concat_2,lstm/lstm_1/concat_2                                                         \
 --input_shape [50],[50],[1,9216],[1,9216]                                                                              \
---input char_embedding/EmbeddingLookupUnique:0,char_embedding/EmbeddingLookupUnique:1,Variable/read,Variable_1/read    \
+--input char_embedding/EmbeddingLookupUnique/Unique:0,char_embedding/EmbeddingLookupUnique/Unique:1,Variable/read,Variable_1/read    \
 ```
 
 Running  
