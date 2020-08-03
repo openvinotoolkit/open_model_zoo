@@ -15,12 +15,16 @@ from tqdm import tqdm
 
 import os,sys,inspect
 
-from utils import BatchCropPadToTGTShape as preprocess
+from utils import BatchCropPadToTGTShape, BatchResizePadToTGTShape
 from utils import END_TOKEN, START_TOKEN, read_vocab
 from openvino.inference_engine import IECore, IENetwork
 
 COLOR_WHITE = 255
 
+PREPROCESSING = {
+    'BatchCropPadToTGTShape': BatchCropPadToTGTShape,
+    'BatchResizePadToTGTShape': BatchResizePadToTGTShape
+}
 
 def print_stats(module):
     perf_counts = module.requests[0].get_perf_counts()
@@ -31,7 +35,7 @@ def print_stats(module):
                                                           stats['status'], stats['real_time']))
 
 
-def preprocess_image(image_raw, tgt_shape):
+def preprocess_image(preprocess, image_raw, tgt_shape):
     target_height, target_width = tgt_shape
     image_raw = preprocess(tgt_shape)(image_raw)[0]
     assert image_raw.shape[0] == target_height and image_raw.shape[1] == target_width, image_raw.shape
@@ -45,9 +49,9 @@ def build_argparser():
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help',
                       default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("--encoder", help="Required. Path to an .xml file with a trained encoder part of the model",
+    args.add_argument("-m_encoder", help="Required. Path to an .xml file with a trained encoder part of the model",
                       required=True, type=str)
-    args.add_argument("--dec_step", help="Required. Path to an .xml file with a trained decoder step part of the model",
+    args.add_argument("-m_dec_step", help="Required. Path to an .xml file with a trained decoder step part of the model",
                       required=True, type=str)
     args.add_argument("-i", "--input", help="Required. Path to a folder with images or path to an image files",
                       required=True, type=str, nargs="+")
@@ -67,6 +71,8 @@ def build_argparser():
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU", type=str)
+    args.add_argument('--preprocessing_type', choices=['BatchResizePadToTGTShape', 'BatchCropPadToTGTShape'],
+                    help="Type of the preprocessing", required=True)
     args.add_argument('-pf', '--perf_stats',
                       action='store_true', default=False)
 
@@ -85,7 +91,7 @@ def main():
         {"PERF_COUNT": "YES" if args.perf_stats else "NO"}, args.device)
 
     # encoder part
-    encoder_model_xml = args.encoder
+    encoder_model_xml = args.m_encoder
     encoder_model_bin = os.path.splitext(encoder_model_xml)[0] + ".bin"
     log.info("Loading encoder files:\n\t{}\n\t{}".format(
         encoder_model_xml, encoder_model_bin))
@@ -100,7 +106,7 @@ def main():
                   format(args.device, ', '.join(not_supported_layers)))
 
     # decoder part:
-    dec_step_model_xml = args.dec_step
+    dec_step_model_xml = args.m_dec_step
     dec_step_model_bin = os.path.splitext(dec_step_model_xml)[0] + ".bin"
 
     log.info("Loading decoder files:\n\t{}\n\t{}".format(
@@ -129,7 +135,7 @@ def main():
         assert image_raw is not None, "Error reading image {}".format(filenm)
         #
         image = image_raw
-        image = preprocess_image(image_raw, target_shape)
+        image = preprocess_image(PREPROCESSING[args.preprocessing_type], image_raw, target_shape)
         record = dict(img_name=filenm, img=image, formula=None)
         images_list.append(record)
 
