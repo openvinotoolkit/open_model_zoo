@@ -534,24 +534,24 @@ datasets:
   - name: im2latex_medium_rendered
     data_source: im2latex_medium_rendered/images_processed
     annotation_conversion:
-        converter: im2latex_formula_recognition
-        data_dir: im2latex_medium_rendered
-        images_dir: im2latex_medium_rendered/images_processed
-        formula_file: im2latex_medium_rendered/formulas.norm.lst
-        split_file: im2latex_medium_rendered/validate_filter.lst
-        vocab_file: im2latex_medium_rendered/vocab.json
+      converter: im2latex_formula_recognition
+      data_dir: im2latex_medium_rendered
+      images_dir: im2latex_medium_rendered/images_processed
+      formula_file: im2latex_medium_rendered/formulas.norm.lst
+      split_file: im2latex_medium_rendered/validate_filter.lst
+      vocab_file: im2latex_medium_rendered/vocab.json
     annotation: im2latex_medium_rendered.pickle
     dataset_meta: im2latex_medium_rendered.json
 
   - name: im2latex_medium_photographed
     data_source: im2latex_medium_photographed/images_processed
     annotation_conversion:
-        converter: im2latex_formula_recognition
-        data_dir: im2latex_medium_photographed
-        images_dir: im2latex_medium_photographed/images_processed
-        formula_file: im2latex_medium_photographed/formulas.norm.lst
-        split_file: im2latex_medium_photographed/test_filter.lst
-        vocab_file: im2latex_medium_photographed/vocab.pkl
+      converter: im2latex_formula_recognition
+      data_dir: im2latex_medium_photographed
+      images_dir: im2latex_medium_photographed/images_processed
+      formula_file: im2latex_medium_photographed/formulas.norm.lst
+      split_file: im2latex_medium_photographed/test_filter.lst
+      vocab_file: im2latex_medium_photographed/vocab.pkl
     annotation: im2latex_medium_photographed.pickle
     dataset_meta: im2latex_medium_photographed.json
 
