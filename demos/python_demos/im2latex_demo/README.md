@@ -41,7 +41,7 @@ The demo workflow is the following:
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: im2latex_demo.py [-h] --encoder ENCODER --dec_step DEC_STEP -i INPUT
+usage: im2latex_demo.py [-h] -m_encoder ENCODER -m_dec_step DEC_STEP -i INPUT
                         [INPUT ...] [-o OUTPUT_FILE] [-l CPU_EXTENSION]
                         [--vocab_path VOCAB_PATH] --target_shape TARGET_SHAPE
                         [TARGET_SHAPE ...] [--max_formula_len MAX_FORMULA_LEN]
@@ -49,9 +49,9 @@ usage: im2latex_demo.py [-h] --encoder ENCODER --dec_step DEC_STEP -i INPUT
 
 Options:
   -h, --help            Show this help message and exit.
-  --encoder ENCODER     Required. Path to an .xml file with a trained encoder
+  -m_encoder M_ENCODER     Required. Path to an .xml file with a trained encoder
                         part of the model
-  --dec_step DEC_STEP   Required. Path to an .xml file with a trained decoder
+  -m_dec_step M_DEC_STEP   Required. Path to an .xml file with a trained decoder
                         step part of the model
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
                         Required. Path to a folder with images or path to an
@@ -88,8 +88,8 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 To run the demo, please provide paths to the model in the IR format and to an input video or folder with images:
 ```bash
 python im2latex_demo.py \
-        --encoder <path_to_models>/encoder.xml \
-        --dec_step <path_to_models>/decode_step.xml \
+        -m_encoder <path_to_models>/encoder.xml \
+        -m_dec_step <path_to_models>/decode_step.xml \
         --vocab_path <path_to_vocab> \
         --target_shape <heigth width> \
         -i input_image.png
