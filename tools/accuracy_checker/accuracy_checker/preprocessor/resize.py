@@ -16,6 +16,7 @@ limitations under the License.
 
 import cv2
 import inspect
+from PIL import Image
 import numpy as np
 
 from ..config import ConfigError, NumberField, StringField, BoolField
