@@ -47,6 +47,9 @@ class Crop(Preprocessor):
             'use_pillow': BoolField(
                 optional=True, default=False, description="Parameter specifies usage of Pillow library for cropping."
             ),
+            'no_resize': BoolField(
+                optional=True, default=False, description="Parameter disables resize if image is less then dst_width or dst_heigth."
+            ),
             'central_fraction' : NumberField(
                 value_type=float, min_value=0, max_value=1, optional=True, description="Central Fraction."
             )
@@ -66,6 +69,8 @@ class Crop(Preprocessor):
         if not self.central_fraction:
             if self.dst_height is None or self.dst_width is None:
                 raise ConfigError('one from crop dimentions is not provided')
+        
+        self.no_resize = self.get_value_from_config('no_resize')
 
     def process(self, image, annotation_meta=None):
         is_simple_case = not isinstance(image.data, list) # otherwise -- pyramid, tiling, etc
@@ -73,18 +78,18 @@ class Crop(Preprocessor):
 
         image.data = self.process_data(
             data, self.dst_height, self.dst_width, self.central_fraction,
-            self.use_pillow, is_simple_case, image.metadata
+            self.use_pillow, is_simple_case, image.metadata, self.no_resize
         ) if not isinstance(data, list) else [
             self.process_data(
                 fragment, self.dst_height, self.dst_width, self.central_fraction,
-                self.use_pillow, is_simple_case, image.metadata
+                self.use_pillow, is_simple_case, image.metadata, self.no_resize
             ) for fragment in image.data
         ]
 
         return image
 
     @staticmethod
-    def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata):
+    def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata, no_resize):
         height, width = data.shape[:2]
         if not central_fraction:
             new_height = dst_height
@@ -99,22 +104,25 @@ class Crop(Preprocessor):
             cropped_data = Image.fromarray(data).crop((j, i, j + new_width, i + new_height))
             return np.array(cropped_data)
 
-        if width < new_width or height < new_height:
-            resized = np.array([width, height])
-            if resized[0] < new_width:
-                resized = resized * new_width / resized[0]
-            if resized[1] < new_height:
-                resized = resized * new_height / resized[1]
-            data = cv2.resize(data, tuple(np.ceil(resized).astype(int)))
+        if not no_resize:
+            if width < new_width or height < new_height:
+                
+                    resized = np.array([width, height])
+                    if resized[0] < new_width:
+                        resized = resized * new_width / resized[0]
+                    if resized[1] < new_height:
+                        resized = resized * new_height / resized[1]
+                    data = cv2.resize(data, tuple(np.ceil(resized).astype(int)))
 
-        height, width = data.shape[:2]
-        start_height = (height - new_height) // 2
-        start_width = (width - new_width) // 2
-        if is_simple_case:
-            # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
-            metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop', {}))
+            height, width = data.shape[:2]
+            start_height = (height - new_height) // 2
+            start_width = (width - new_width) // 2
+            if is_simple_case:
+                # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
+                metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop', {}))
 
-        return data[start_height:start_height + new_height, start_width:start_width + new_width]
+            return data[start_height:start_height + new_height, start_width:start_width + new_width]
+        return data[:dst_height, :dst_width]
 
 
 class CropRect(Preprocessor):
