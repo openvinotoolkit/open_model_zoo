@@ -3,24 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.xml
-        weights: intel/unet-camvid-onnx-0001/FP32/unet-camvid-onnx-0001.bin
-        adapter: segmentation
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.xml
-        weights: intel/unet-camvid-onnx-0001/FP16/unet-camvid-onnx-0001.bin
-        adapter: segmentation
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.xml
-        weights: intel/unet-camvid-onnx-0001/FP16-INT8/unet-camvid-onnx-0001.bin
         adapter: segmentation
 
     datasets:

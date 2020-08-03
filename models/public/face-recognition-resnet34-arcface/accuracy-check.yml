@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: mxnet
-        model: public/face-recognition-resnet34-arcface/model-r34-amf/model-0000.params
+        model: model-r34-amf/model-0000.params
         adapter: reid
         inputs:
           - name: data
@@ -27,17 +27,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/face-recognition-resnet34-arcface/FP32/face-recognition-resnet34-arcface.xml
-        weights: public/face-recognition-resnet34-arcface/FP32/face-recognition-resnet34-arcface.bin
-        adapter: reid
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/face-recognition-resnet34-arcface/FP16/face-recognition-resnet34-arcface.xml
-        weights: public/face-recognition-resnet34-arcface/FP16/face-recognition-resnet34-arcface.bin
         adapter: reid
 
     datasets:

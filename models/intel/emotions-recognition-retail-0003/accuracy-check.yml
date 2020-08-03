@@ -3,24 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
-        weights: intel/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
-        weights: intel/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.xml
-        weights: intel/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.bin
         adapter: classification
 
     datasets:

@@ -2,17 +2,6 @@ models:
   - name:  ssdlite_mobilenet_v2
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/ssdlite_mobilenet_v2/FP32/ssdlite_mobilenet_v2.xml
-        weights: public/ssdlite_mobilenet_v2/FP32/ssdlite_mobilenet_v2.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/ssdlite_mobilenet_v2/FP16/ssdlite_mobilenet_v2.xml
-        weights: public/ssdlite_mobilenet_v2/FP16/ssdlite_mobilenet_v2.bin
         adapter: ssd
 
     datasets:

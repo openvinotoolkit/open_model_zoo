@@ -3,24 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/face-detection-retail-0004/FP32/face-detection-retail-0004.xml
-        weights: intel/face-detection-retail-0004/FP32/face-detection-retail-0004.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/face-detection-retail-0004/FP16/face-detection-retail-0004.xml
-        weights: intel/face-detection-retail-0004/FP16/face-detection-retail-0004.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/face-detection-retail-0004/FP16-INT8/face-detection-retail-0004.xml
-        weights: intel/face-detection-retail-0004/FP16-INT8/face-detection-retail-0004.bin
         adapter: ssd
 
     datasets:

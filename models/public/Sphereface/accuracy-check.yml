@@ -3,17 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/Sphereface/FP32/Sphereface.xml
-        weights: public/Sphereface/FP32/Sphereface.bin
-        adapter: reid
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/Sphereface/FP16/Sphereface.xml
-        weights: public/Sphereface/FP16/Sphereface.bin
         adapter: reid
 
     datasets:

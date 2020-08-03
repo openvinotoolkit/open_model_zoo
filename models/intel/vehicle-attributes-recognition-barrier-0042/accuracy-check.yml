@@ -3,30 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/vehicle-attributes-recognition-barrier-0042/FP32/vehicle-attributes-recognition-barrier-0042.xml
-        weights: intel/vehicle-attributes-recognition-barrier-0042/FP32/vehicle-attributes-recognition-barrier-0042.bin
-        adapter:
-          type: vehicle_attributes
-          color_out: color
-          type_out: type
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/vehicle-attributes-recognition-barrier-0042/FP16/vehicle-attributes-recognition-barrier-0042.xml
-        weights: intel/vehicle-attributes-recognition-barrier-0042/FP16/vehicle-attributes-recognition-barrier-0042.bin
-        adapter:
-          type: vehicle_attributes
-          color_out: color
-          type_out: type
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/vehicle-attributes-recognition-barrier-0042/FP16-INT8/vehicle-attributes-recognition-barrier-0042.xml
-        weights: intel/vehicle-attributes-recognition-barrier-0042/FP16-INT8/vehicle-attributes-recognition-barrier-0042.bin
         adapter:
           type: vehicle_attributes
           color_out: color

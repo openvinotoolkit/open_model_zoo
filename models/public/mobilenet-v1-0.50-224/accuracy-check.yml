@@ -21,17 +21,6 @@ models:
   - name: mobilenet-v1-0.50-244
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/mobilenet-v1-0.50-224/FP32/mobilenet-v1-0.50-224.xml
-        weights: public/mobilenet-v1-0.50-224/FP32/mobilenet-v1-0.50-224.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/mobilenet-v1-0.50-224/FP16/mobilenet-v1-0.50-224.xml
-        weights: public/mobilenet-v1-0.50-224/FP16/mobilenet-v1-0.50-224.bin
         adapter: classification
 
     datasets:

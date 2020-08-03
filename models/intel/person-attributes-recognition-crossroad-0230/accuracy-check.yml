@@ -3,19 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.xml
-        weights: intel/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.bin
-        adapter:
-          type: person_attributes
-          attributes_recognition_out: "453"
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.xml
-        weights: intel/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.bin
         adapter:
           type: person_attributes
           attributes_recognition_out: "453"

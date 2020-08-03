@@ -3,20 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/faceboxes-pytorch/FP32/faceboxes-pytorch.xml
-        weights: public/faceboxes-pytorch/FP32/faceboxes-pytorch.bin
-        adapter:
-          type: faceboxes
-          boxes_out: "342"
-          scores_out: "353"
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/faceboxes-pytorch/FP16/faceboxes-pytorch.xml
-        weights: public/faceboxes-pytorch/FP16/faceboxes-pytorch.bin
         adapter:
           type: faceboxes
           boxes_out: "342"

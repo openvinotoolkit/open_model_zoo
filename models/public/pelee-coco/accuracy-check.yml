@@ -3,17 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/pelee-coco/FP32/pelee-coco.xml
-        weights: public/pelee-coco/FP32/pelee-coco.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   pelee-coco/FP16/pelee-coco.xml
-        weights: pelee-coco/FP16/pelee-coco.bin
         adapter: ssd
 
     datasets:

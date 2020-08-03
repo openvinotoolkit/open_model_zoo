@@ -3,44 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
-        weights: intel/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
-        inputs:
-          - name: left_eye_image
-            type: INPUT
-            value: ".*_left.png"
-          - name: right_eye_image
-            type: INPUT
-            value: ".*_right.png"
-          - name: 'head_pose_angles'
-            type: INPUT
-            value: ".*.json"
-        adapter: gaze_estimation
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
-        weights: intel/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
-        inputs:
-          - name: left_eye_image
-            type: INPUT
-            value: ".*_left.png"
-          - name: right_eye_image
-            type: INPUT
-            value: ".*_right.png"
-          - name: 'head_pose_angles'
-            type: INPUT
-            value: ".*.json"
-        adapter: gaze_estimation
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.xml
-        weights: intel/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.bin
         inputs:
           - name: left_eye_image
             type: INPUT

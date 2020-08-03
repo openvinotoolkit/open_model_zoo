@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: onnx_runtime
-        model: public/efficientnet-b7-pytorch/efficientnet-b7-pytorch.onnx
+        model: efficientnet-b7-pytorch.onnx
         adapter: classification
         inputs:
           - name: data
@@ -33,18 +33,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/efficientnet-b7-pytorch/FP32/efficientnet-b7-pytorch.xml
-        weights: public/efficientnet-b7-pytorch/FP32/efficientnet-b7-pytorch.bin
-        adapter: classification
-
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/efficientnet-b7-pytorch/FP16/efficientnet-b7-pytorch.xml
-        weights: public/efficientnet-b7-pytorch/FP16/efficientnet-b7-pytorch.bin
         adapter: classification
 
     datasets:

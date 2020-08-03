@@ -2,7 +2,7 @@ models:
   - name: gmcnn-places2-tf
     launchers:
       - framework: tf
-        model: public/gmcnn-places2-tf/frozen_model.pb
+        model: frozen_model.pb
         adapter: inpainting
         inputs:
           - name: "Placeholder"
@@ -24,24 +24,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model: public/gmcnn-places2-tf/FP32/gmcnn-places2-tf.xml
-        weights: public/gmcnn-places2-tf/FP32/gmcnn-places2-tf.xml
-        adapter: inpainting
-        inputs:
-          - name: "Placeholder"
-            type: INPUT
-            value: '.*image'
-          - name: "Placeholder_1"
-            type: INPUT
-            value: '.*mask'
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model: public/gmcnn-places2-tf/FP16/gmcnn-places2-tf.xml
-        weights: public/gmcnn-places2-tf/FP16/gmcnn-places2-tf.xml
         adapter: inpainting
         inputs:
           - name: "Placeholder"

@@ -2,8 +2,8 @@ models:
   - name: resnet-101-cf
     launchers:
       - framework: caffe
-        model:   public/resnet-101/resnet-101.prototxt
-        weights: public/resnet-101/resnet-101.caffemodel
+        model:   resnet-101.prototxt
+        weights: resnet-101.caffemodel
         adapter: classification
     datasets:
       - name: imagenet_1000_classes
@@ -19,31 +19,6 @@ models:
   - name: resnet-101
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/resnet-101/FP32/resnet-101.xml
-        weights: public/resnet-101/FP32/resnet-101.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/resnet-101/FP16/resnet-101.xml
-        weights: public/resnet-101/FP16/resnet-101.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP32-INT8
-        model:   public/resnet-101/FP32-INT8/resnet-101.xml
-        weights: public/resnet-101/FP32-INT8/resnet-101.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   public/resnet-101/FP16-INT8/resnet-101.xml
-        weights: public/resnet-101/FP16-INT8/resnet-101.bin
         adapter: classification
 
     datasets:

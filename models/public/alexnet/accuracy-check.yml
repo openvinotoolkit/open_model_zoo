@@ -2,8 +2,8 @@ models:
   - name: alexnet-cf
     launchers:
       - framework: caffe
-        model:   public/alexnet/alexnet.prototxt
-        weights: public/alexnet/alexnet.caffemodel
+        model:   alexnet.prototxt
+        weights: alexnet.caffemodel
         adapter: classification
     datasets:
       - name: imagenet_1000_classes
@@ -18,31 +18,6 @@ models:
   - name: alexnet
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/alexnet/FP32/alexnet.xml
-        weights: public/alexnet/FP32/alexnet.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/alexnet/FP16/alexnet.xml
-        weights: public/alexnet/FP16/alexnet.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP32-INT8
-        model:   public/alexnet/FP32-INT8/alexnet.xml
-        weights: public/alexnet/FP32-INT8/alexnet.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   public/alexnet/FP16-INT8/alexnet.xml
-        weights: public/alexnet/FP16-INT8/alexnet.bin
         adapter: classification
 
     datasets:

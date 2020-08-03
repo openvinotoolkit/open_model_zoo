@@ -2,7 +2,7 @@ models:
   - name: open-closed-eye-0001
     launchers:
       - framework: onnx_runtime
-        model: public/open-closed-eye-0001/open-closed-eye.onnx
+        model: open-closed-eye.onnx
         adapter: classification
     datasets:
       - name: mrlEyes_2018_01
@@ -17,16 +17,6 @@ models:
   - name: open-closed-eye-0001
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/open-closed-eye-0001/FP32/open-closed-eye-0001.xml
-        weights: public/open-closed-eye-0001/FP32/open-closed-eye-0001.bin
-        adapter: classification
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/open-closed-eye-0001/FP16/open-closed-eye-0001.xml
-        weights: public/open-closed-eye-0001/FP16/open-closed-eye-0001.bin
         adapter: classification
     datasets:
       - name: mrlEyes_2018_01

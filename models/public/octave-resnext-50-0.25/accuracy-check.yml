@@ -4,8 +4,7 @@ models:
 
     launchers:
       - framework: mxnet
-        device: CPU
-        model: public/octave-resnext-50-0.25/checkpoint-0-0000.params
+        model: checkpoint-0-0000.params
         adapter: classification
         inputs:
           - name: 'data'

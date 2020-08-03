@@ -2,8 +2,8 @@ models:
   - name: squeezenet1.1-cf
     launchers:
       - framework: caffe
-        model:   public/squeezenet1.1/squeezenet1.1.prototxt
-        weights: public/squeezenet1.1/squeezenet1.1.caffemodel
+        model:   squeezenet1.1.prototxt
+        weights: squeezenet1.1.caffemodel
         adapter: classification
     datasets:
       - name: imagenet_1000_classes
@@ -18,31 +18,6 @@ models:
   - name: squeezenet1.1
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/squeezenet1.1/FP32/squeezenet1.1.xml
-        weights: public/squeezenet1.1/FP32/squeezenet1.1.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/squeezenet1.1/FP16/squeezenet1.1.xml
-        weights: public/squeezenet1.1/FP16/squeezenet1.1.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP32-INT8
-        model:   public/squeezenet1.1/FP32-INT8/squeezenet1.1.xml
-        weights: public/squeezenet1.1/FP32-INT8/squeezenet1.1.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   public/squeezenet1.1/FP16-INT8/squeezenet1.1.xml
-        weights: public/squeezenet1.1/FP16-INT8/squeezenet1.1.bin
         adapter: classification
 
     datasets:

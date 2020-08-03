@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: tf
-        model:   public/yolo-v2-tf/yolo-v2.pb
+        model:   yolo-v2.pb
         output_names: [conv2d_23/BiasAdd]
         adapter:
           type: yolo_v2
@@ -48,23 +48,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/yolo-v2-tf/FP32/yolo-v2-tf.xml
-        weights: public/yolo-v2-tf/FP32/yolo-v2-tf.bin
-        adapter:
-          type: yolo_v2
-          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
-          num: 5
-          coords: 4
-          classes: 80
-          cells: 19
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/yolo-v2-tf/FP16/yolo-v2-tf.xml
-        weights: public/yolo-v2-tf/FP16/yolo-v2-tf.bin
         adapter:
           type: yolo_v2
           anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"

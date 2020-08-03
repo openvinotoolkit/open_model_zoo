@@ -2,8 +2,8 @@ models:
   - name: densenet-201-cf
     launchers:
       - framework: caffe
-        model:   public/densenet-201/densenet-201.prototxt
-        weights: public/densenet-201/densenet-201.caffemodel
+        model:   densenet-201.prototxt
+        weights: densenet-201.caffemodel
         adapter: classification
     datasets:
       - name: imagenet_1000_classes
@@ -19,17 +19,6 @@ models:
   - name: densenet-201
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/densenet-201/FP32/densenet-201.xml
-        weights: public/densenet-201/FP32/densenet-201.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/densenet-201/FP16/densenet-201.xml
-        weights: public/densenet-201/FP16/densenet-201.bin
         adapter: classification
 
     datasets:

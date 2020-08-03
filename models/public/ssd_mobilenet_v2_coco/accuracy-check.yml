@@ -2,17 +2,6 @@ models:
   - name:  ssd_mobilenet_v2_coco
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/ssd_mobilenet_v2_coco/FP32/ssd_mobilenet_v2_coco.xml
-        weights: public/ssd_mobilenet_v2_coco/FP32/ssd_mobilenet_v2_coco.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/ssd_mobilenet_v2_coco/FP16/ssd_mobilenet_v2_coco.xml
-        weights: public/ssd_mobilenet_v2_coco/FP16/ssd_mobilenet_v2_coco.bin
         adapter: ssd
 
     datasets:

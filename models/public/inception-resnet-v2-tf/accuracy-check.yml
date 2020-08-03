@@ -21,17 +21,6 @@ models:
   - name: inception-resnet-v2-tf
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/inception-resnet-v2-tf/FP32/inception-resnet-v2-tf.xml
-        weights: public/inception-resnet-v2-tf/FP32/inception-resnet-v2-tf.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/inception-resnet-v2-tf/FP16/inception-resnet-v2-tf.xml
-        weights: public/inception-resnet-v2-tf/FP16/inception-resnet-v2-tf.bin
         adapter: classification
 
     datasets:

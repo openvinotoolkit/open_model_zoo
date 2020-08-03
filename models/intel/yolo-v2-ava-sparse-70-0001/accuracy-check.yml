@@ -3,26 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model: intel/yolo-v2-ava-sparse-70-0001/FP32/yolo-v2-ava-sparse-70-0001.xml
-        weights: intel/yolo-v2-ava-sparse-70-0001/FP32/yolo-v2-ava-sparse-70-0001.bin
-        adapter:
-          type: yolo_v2
-          anchors: yolo_v2
-      - framework: dlsdk
-        tags:
-          - FP16
-        model: intel/yolo-v2-ava-sparse-70-0001/FP16/yolo-v2-ava-sparse-70-0001.xml
-        weights: intel/yolo-v2-ava-sparse-70-0001/FP16/yolo-v2-ava-sparse-70-0001.bin
-        adapter:
-          type: yolo_v2
-          anchors: yolo_v2
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model: intel/yolo-v2-ava-sparse-70-0001/FP16-INT8/yolo-v2-ava-sparse-70-0001.xml
-        weights: intel/yolo-v2-ava-sparse-70-0001/FP16-INT8/yolo-v2-ava-sparse-70-0001.bin
         adapter:
           type: yolo_v2
           anchors: yolo_v2

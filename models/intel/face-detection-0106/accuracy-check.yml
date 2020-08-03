@@ -3,28 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/face-detection-0106/FP32/face-detection-0106.xml
-        weights: intel/face-detection-0106/FP32/face-detection-0106.bin
-        adapter:
-          type: class_agnostic_detection
-          scale: 0.0015625
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/face-detection-0106/FP16/face-detection-0106.xml
-        weights: intel/face-detection-0106/FP16/face-detection-0106.bin
-        adapter:
-          type: class_agnostic_detection
-          scale: 0.0015625
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/face-detection-0106/FP16-INT8/face-detection-0106.xml
-        weights: intel/face-detection-0106/FP16-INT8/face-detection-0106.bin
         adapter:
           type: class_agnostic_detection
           scale: 0.0015625

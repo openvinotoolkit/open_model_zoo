@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: onnx_runtime
-        model: public/googlenet-v3-pytorch/googlenet-v3.onnx
+        model: googlenet-v3.onnx
         adapter: classification
         inputs:
           - name: data
@@ -35,31 +35,6 @@ models:
     # list of launchers
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/googlenet-v3-pytorch/FP32/googlenet-v3-pytorch.xml
-        weights: public/googlenet-v3-pytorch/FP32/googlenet-v3-pytorch.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/googlenet-v3-pytorch/FP16/googlenet-v3-pytorch.xml
-        weights: public/googlenet-v3-pytorch/FP16/googlenet-v3-pytorch.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP32-INT8
-        model:   public/googlenet-v3-pytorch/FP32-INT8/googlenet-v3-pytorch.xml
-        weights: public/googlenet-v3-pytorch/FP32-INT8/googlenet-v3-pytorch.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   public/googlenet-v3-pytorch/FP16-INT8/googlenet-v3-pytorch.xml
-        weights: public/googlenet-v3-pytorch/FP16-INT8/googlenet-v3-pytorch.bin
         adapter: classification
 
     datasets:

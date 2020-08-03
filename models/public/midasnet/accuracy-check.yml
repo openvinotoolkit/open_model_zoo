@@ -2,16 +2,6 @@ models:
   - name: midasnet
     launchers:
       - framework: dlsdk
-        tags:
-          - FP16
-        model: public/midasnet/FP16/midasnet.xml
-        weights: public/midasnet/FP16/midasnet.bin
-        adapter: mono_depth
-      - framework: dlsdk
-        tags:
-          - FP32
-        model: public/midasnet/FP32/midasnet.xml
-        weights: public/midasnet/FP32/midasnet.bin
         adapter: mono_depth
     datasets:
       - name: ReDWeb_V1

@@ -2,8 +2,8 @@ models:
   - name: ssd300-cf
     launchers:
       - framework: caffe
-        model:   public/ssd512/models/VGGNet/VOC0712Plus/SSD_512x512/deploy.prototxt
-        weights: public/ssd512/models/VGGNet/VOC0712Plus/SSD_512x512/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel
+        model:   models/VGGNet/VOC0712Plus/SSD_512x512/deploy.prototxt
+        weights: models/VGGNet/VOC0712Plus/SSD_512x512/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel
         adapter: ssd
     datasets:
       - name: VOC2012
@@ -18,17 +18,6 @@ models:
   - name: ssd512
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/ssd512/FP32/ssd512.xml
-        weights: public/ssd512/FP32/ssd512.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/ssd512/FP16/ssd512.xml
-        weights: public/ssd512/FP16/ssd512.bin
         adapter: ssd
 
     datasets:

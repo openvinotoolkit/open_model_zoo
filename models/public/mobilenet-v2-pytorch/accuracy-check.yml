@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: onnx_runtime
-        model: public/mobilenet-v2-pytorch/mobilenet-v2.onnx
+        model: mobilenet-v2.onnx
         adapter: classification
         inputs:
           - name: data
@@ -44,31 +44,6 @@ models:
     # list of launchers for MobileNetV2.
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/mobilenet-v2-pytorch/FP32/mobilenet-v2-pytorch.xml
-        weights: public/mobilenet-v2-pytorch/FP32/mobilenet-v2-pytorch.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/mobilenet-v2-pytorch/FP16/mobilenet-v2-pytorch.xml
-        weights: public/mobilenet-v2-pytorch/FP16/mobilenet-v2-pytorch.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP32-INT8
-        model:   public/mobilenet-v2-pytorch/FP32-INT8/mobilenet-v2-pytorch.xml
-        weights: public/mobilenet-v2-pytorch/FP32-INT8/mobilenet-v2-pytorch.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   public/mobilenet-v2-pytorch/FP16-INT8/mobilenet-v2-pytorch.xml
-        weights: public/mobilenet-v2-pytorch/FP16-INT8/mobilenet-v2-pytorch.bin
         adapter: classification
 
     datasets:

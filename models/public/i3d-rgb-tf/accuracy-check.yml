@@ -2,21 +2,6 @@ models:
   - name: i3d-rgb-tf
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model: public/i3d-rgb-tf/FP32/i3d-rgb-tf.xml
-        weights: public/i3d-rgb-tf/FP32/i3d-rgb-tf.bin
-        adapter: classification
-        inputs:
-          - name: Placeholder
-            type: INPUT
-            layout: NCDHW
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model: public/i3d-rgb-tf/FP16/i3d-rgb-tf.xml
-        weights: public/i3d-rgb-tf/FP16/i3d-rgb-tf.bin
         adapter: classification
         inputs:
           - name: Placeholder

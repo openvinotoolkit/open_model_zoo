@@ -4,7 +4,7 @@ models:
 
     launchers:
       - framework: mxnet
-        model: public/octave-resnext-101-0.25/checkpoint-0-0000.params
+        model: checkpoint-0-0000.params
         adapter: classification
         inputs:
           - name: 'data'
@@ -37,17 +37,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/octave-resnext-101-0.25/FP32/octave-resnext-101-0.25.xml
-        weights: public/octave-resnext-101-0.25/FP32/octave-resnext-101-0.25.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/octave-resnext-101-0.25/FP16/octave-resnext-101-0.25.xml
-        weights: public/octave-resnext-101-0.25/FP16/octave-resnext-101-0.25.bin
         adapter: classification
 
     datasets:

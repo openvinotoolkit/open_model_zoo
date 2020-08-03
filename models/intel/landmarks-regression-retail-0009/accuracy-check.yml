@@ -3,24 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
-        weights: intel/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
-        adapter: landmarks_regression
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
-        weights: intel/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
-        adapter: landmarks_regression
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml
-        weights: intel/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.bin
         adapter: landmarks_regression
 
     datasets:

@@ -3,32 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
-        weights: intel/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
-        adapter:
-          type: head_pose
-          angle_yaw: angle_y_fc
-          angle_pitch: angle_p_fc
-          angle_roll: angle_r_fc
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
-        weights: intel/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
-        adapter:
-          type: head_pose
-          angle_yaw: angle_y_fc
-          angle_pitch: angle_p_fc
-          angle_roll: angle_r_fc
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml
-        weights: intel/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.bin
         adapter:
           type: head_pose
           angle_yaw: angle_y_fc

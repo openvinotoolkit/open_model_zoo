@@ -3,17 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/facenet-20180408-102900/FP32/facenet-20180408-102900.xml
-        weights: public/facenet-20180408-102900/FP32/facenet-20180408-102900.bin
-        adapter: reid
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/facenet-20180408-102900/FP16/facenet-20180408-102900.xml
-        weights: public/facenet-20180408-102900/FP16/facenet-20180408-102900.bin
         adapter: reid
 
     datasets:

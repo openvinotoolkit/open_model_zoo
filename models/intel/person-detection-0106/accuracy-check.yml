@@ -3,19 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/person-detection-0106/FP32/person-detection-0106.xml
-        weights: intel/person-detection-0106/FP32/person-detection-0106.bin
-        adapter:
-          type: mask_rcnn
-          boxes_out: boxes
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/person-detection-0106/FP16/person-detection-0106.xml
-        weights: intel/person-detection-0106/FP16/person-detection-0106.bin
         adapter:
           type: mask_rcnn
           boxes_out: boxes

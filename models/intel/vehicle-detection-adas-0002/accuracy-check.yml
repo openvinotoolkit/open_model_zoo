@@ -3,24 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
-        weights: intel/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
-        weights: intel/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.xml
-        weights: intel/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.bin
         adapter: ssd
 
     datasets:

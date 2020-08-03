@@ -3,24 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.xml
-        weights: intel/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.xml
-        weights: intel/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/pedestrian-detection-adas-0002/FP16-INT8/pedestrian-detection-adas-0002.xml
-        weights: intel/pedestrian-detection-adas-0002/FP16-INT8/pedestrian-detection-adas-0002.bin
         adapter: ssd
 
     datasets:

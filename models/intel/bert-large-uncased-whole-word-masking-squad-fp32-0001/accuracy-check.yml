@@ -2,30 +2,6 @@ models:
   - name: bert-large-uncased-whole-word-masking-squad-fp32-0001
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model: intel/bert-large-uncased-whole-word-masking-squad-fp32-0001/FP32/bert-large-uncased-whole-word-masking-squad-fp32-0001.xml
-        weights: intel/bert-large-uncased-whole-word-masking-squad-fp32-0001/FP32/bert-large-uncased-whole-word-masking-squad-fp32-0001.bin
-        adapter:
-          type: bert_question_answering
-          start_token_logits_output: "3171"
-          end_token_logits_output: "3172"
-        inputs:
-          - name: "0"
-            type: INPUT
-            value: "input_ids"
-          - name: "1"
-            type: INPUT
-            value: 'input_mask'
-          - name: '2'
-            type: INPUT
-            value: 'segment_ids'
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model: intel/bert-large-uncased-whole-word-masking-squad-fp32-0001/FP16/bert-large-uncased-whole-word-masking-squad-fp32-0001.xml
-        weights: intel/bert-large-uncased-whole-word-masking-squad-fp32-0001/FP16/bert-large-uncased-whole-word-masking-squad-fp32-0001.bin
         adapter:
           type: bert_question_answering
           start_token_logits_output: "3171"

@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: onnx_runtime
-        model: public/resnet-34-pytorch/resnet-34.onnx
+        model: resnet-34.onnx
         adapter: classification
         inputs:
           - name: data
@@ -35,17 +35,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/resnet-34-pytorch/FP32/resnet-34-pytorch.xml
-        weights: public/resnet-34-pytorch/FP32/resnet-34-pytorch.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/resnet-34-pytorch/FP16/resnet-34-pytorch.xml
-        weights: public/resnet-34-pytorch/FP16/resnet-34-pytorch.bin
         adapter: classification
 
     datasets:

@@ -24,17 +24,6 @@ models:
   - name: resnet-50-tf
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/resnet-50-tf/FP32/resnet-50-tf.xml
-        weights: public/resnet-50-tf/FP32/resnet-50-tf.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/resnet-50-tf/FP16/resnet-50-tf.xml
-        weights: public/resnet-50-tf/FP16/resnet-50-tf.bin
         adapter: classification
 
     datasets:

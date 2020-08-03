@@ -2,22 +2,6 @@ models:
   - name:  ssd-resnet34-1200-onnx
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/ssd-resnet34-1200-onnx/FP32/ssd-resnet34-1200-onnx.xml
-        weights: public/ssd-resnet34-1200-onnx/FP32/ssd-resnet34-1200-onnx.bin
-        adapter:
-          type: ssd_onnx
-          scores_out: '.*scores*'
-          labels_out: '.*labels*'
-          bboxes_out: '.*bboxes*'
-
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/ssd-resnet34-1200-onnx/FP16/ssd-resnet34-1200-onnx.xml
-        weights: public/ssd-resnet34-1200-onnx/FP16/ssd-resnet34-1200-onnx.bin
         adapter:
           type: ssd_onnx
           scores_out: '.*scores*'

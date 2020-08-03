@@ -2,8 +2,8 @@ models:
   - name: densenet-121-cf
     launchers:
       - framework: caffe
-        model:   public/densenet-121/densenet-121.prototxt
-        weights: public/densenet-121/densenet-121.caffemodel
+        model:   densenet-121.prototxt
+        weights: densenet-121.caffemodel
         adapter: classification
     datasets:
       - name: imagenet_1000_classes
@@ -19,17 +19,6 @@ models:
   - name: densenet-121
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/densenet-121/FP32/densenet-121.xml
-        weights: public/densenet-121/FP32/densenet-121.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/densenet-121/FP16/densenet-121.xml
-        weights: public/densenet-121/FP16/densenet-121.bin
         adapter: classification
 
     datasets:

@@ -5,7 +5,7 @@ models:
       - framework: tf
         tags:
           - FP32
-        model: public/yolo-v1-tiny-tf/yolo-v1-tiny.pb
+        model: yolo-v1-tiny.pb
         inputs:
           - name: 'input_1'
             type: INPUT
@@ -51,22 +51,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/yolo-v1-tiny-tf/FP32/yolo-v1-tiny-tf.xml
-        weights: public/yolo-v1-tiny-tf/FP32/yolo-v1-tiny-tf.bin
-        adapter:
-          type: yolo_v2
-          anchors: "1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52"
-          num: 5
-          coords: 4
-          classes: 20
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/yolo-v1-tiny-tf/FP16/yolo-v1-tiny-tf.xml
-        weights: public/yolo-v1-tiny-tf/FP16/yolo-v1-tiny-tf.bin
         adapter:
           type: yolo_v2
           anchors: "1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52"

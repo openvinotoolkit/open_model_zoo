@@ -3,19 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/brain-tumor-segmentation-0001/FP32/brain-tumor-segmentation-0001.xml
-        weights: public/brain-tumor-segmentation-0001/FP32/brain-tumor-segmentation-0001.bin
-        adapter:
-          type: brain_tumor_segmentation
-          make_argmax: True
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/brain-tumor-segmentation-0001/FP16/brain-tumor-segmentation-0001.xml
-        weights: public/brain-tumor-segmentation-0001/FP16/brain-tumor-segmentation-0001.bin
         adapter:
           type: brain_tumor_segmentation
           make_argmax: True

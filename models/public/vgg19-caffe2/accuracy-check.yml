@@ -3,7 +3,7 @@ models:
   - name: vgg19-caffe2
     launchers:
       - framework: onnx_runtime
-        model: public/vgg19-caffe2/vgg19-caffe2.onnx
+        model: vgg19-caffe2.onnx
         adapter: classification
 
     datasets:
@@ -20,17 +20,6 @@ models:
   - name: vgg19-caffe2
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/vgg19-caffe2/FP32/vgg19-caffe2.xml
-        weights: public/vgg19-caffe2/FP32/vgg19-caffe2.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/vgg19-caffe2/FP16/vgg19-caffe2.xml
-        weights: public/vgg19-caffe2/FP16/vgg19-caffe2.bin
         adapter: classification
 
     datasets:

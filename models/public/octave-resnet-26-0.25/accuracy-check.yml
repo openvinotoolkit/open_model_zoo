@@ -4,7 +4,7 @@ models:
 
     launchers:
       - framework: mxnet
-        model: public/resnet-26-0.250/checkpoint-0-0000.params
+        model: checkpoint-0-0000.params
         adapter: classification
         cpu_extensions: AUTO
         inputs:
@@ -13,14 +13,7 @@ models:
             shape: 3,224,224
 
     datasets:
-      - name: ImageNet
-        data_source: ImageNet
-        reader: opencv_imread
-
-        annotation_conversion:
-          converter: imagenet
-          annotation_file: ImageNet/val.txt
-          labels_file: ImageNet/synset_words.txt
+      - name: imagenet_1000_classes
 
         preprocessing:
           - type: bgr_to_rgb
@@ -44,17 +37,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/octave-resnet-26-0.25/FP32/octave-resnet-26-0.25.xml
-        weights: public/octave-resnet-26-0.25/FP32/octave-resnet-26-0.25.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/octave-resnet-26-0.25/FP16/octave-resnet-26-0.25.xml
-        weights: public/octave-resnet-26-0.25/FP16/octave-resnet-26-0.25.bin
         adapter: classification
 
     datasets:

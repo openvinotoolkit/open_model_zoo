@@ -2,8 +2,8 @@ models:
   - name: se-resnet-152-cf
     launchers:
       - framework: caffe
-        model:   public/se-resnet-152/se-resnet-152.prototxt
-        weights: public/se-resnet-152/se-resnet-152.caffemodel
+        model:   se-resnet-152.prototxt
+        weights: se-resnet-152.caffemodel
         adapter: classification
 
     datasets:
@@ -19,17 +19,6 @@ models:
   - name: se-resnet-152
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/se-resnet-152/FP32/se-resnet-152.xml
-        weights: public/se-resnet-152/FP32/se-resnet-152.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/se-resnet-152/FP16/se-resnet-152.xml
-        weights: public/se-resnet-152/FP16/se-resnet-152.bin
         adapter: classification
 
     datasets:

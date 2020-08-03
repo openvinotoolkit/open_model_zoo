@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: onnx_runtime
-        model: public/hbonet-1.0/hbonet-1.0.onnx
+        model: hbonet-1.0.onnx
         adapter: classification
         inputs:
           - name: data
@@ -37,19 +37,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/hbonet-1.0/FP32/hbonet-1.0.xml
-        weights: public/hbonet-1.0/FP32/hbonet-1.0.bin
-        adapter:
-          type: classification
-          classification_output: output
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/hbonet-1.0/FP16/hbonet-1.0.xml
-        weights: public/hbonet-1.0/FP16/hbonet-1.0.bin
         adapter:
           type: classification
           classification_output: output

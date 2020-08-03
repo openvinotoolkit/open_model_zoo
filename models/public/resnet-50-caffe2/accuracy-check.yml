@@ -3,7 +3,7 @@ models:
   - name: resnet-50-caffe2
     launchers:
       - framework: onnx_runtime
-        model: public/resnet-50-caffe2/resnet-50-caffe2.onnx
+        model: resnet-50-caffe2.onnx
         adapter: classification
 
     datasets:
@@ -21,17 +21,6 @@ models:
   - name: resnet-50-caffe2
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/resnet-50-caffe2/FP32/resnet-50-caffe2.xml
-        weights: public/resnet-50-caffe2/FP32/resnet-50-caffe2.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/resnet-50-caffe2/FP16/resnet-50-caffe2.xml
-        weights: public/resnet-50-caffe2/FP16/resnet-50-caffe2.bin
         adapter: classification
 
     datasets:

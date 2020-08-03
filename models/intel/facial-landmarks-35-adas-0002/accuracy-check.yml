@@ -3,24 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
-        weights: intel/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
-        adapter: landmarks_regression
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
-        weights: intel/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
-        adapter: landmarks_regression
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   intel/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.xml
-        weights: intel/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.bin
         adapter: landmarks_regression
 
     datasets:
