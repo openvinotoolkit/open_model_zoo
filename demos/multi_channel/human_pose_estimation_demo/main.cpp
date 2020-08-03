@@ -102,7 +102,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -i is not set");
     }
     if (FLAGS_duplicate_num == 0) {
-        throw std::logic_error("Parameter -duplicate_num must be a natural number");
+        throw std::logic_error("Parameter -duplicate_num must be positive");
     }
     slog::info << "\tDetection model:           " << FLAGS_m << slog::endl;
     slog::info << "\tUtilizing device:          " << FLAGS_d << slog::endl;

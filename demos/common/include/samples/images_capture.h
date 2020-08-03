@@ -19,7 +19,7 @@ public:
     virtual ~ImagesCapture() = default;
 };
 
-// A more advanced version of
+// An advanced version of
 // try {
 //     return cv::VideoCapture(std::stoi(input));
 // } catch (const std::invalid_argument&) {
@@ -28,8 +28,7 @@ public:
 //     return cv::VideoCapture(input);
 // }
 std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input,
-        bool loop, size_t posFrames=0,  // Non camera options
+        bool loop, size_t initialImageId=0,  // Non camera options
         size_t readLengthLimit=std::numeric_limits<size_t>::max(),  // general option
-        // Camera options:
-        double buffersize=1, double frameWidth=1280, double frameHeight=720, double autofocus=true,
-        double fourcc=cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+        // Camera option:
+        bool autoFocus=true);
