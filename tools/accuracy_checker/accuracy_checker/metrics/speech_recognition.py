@@ -33,6 +33,9 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
     annotation_types = (CharacterRecognitionAnnotation,)
     prediction_types = (CharacterRecognitionPrediction,)
 
+    def configure(self):
+        self.overall_metric = []
+
     @staticmethod
     def distance(prediction, annotation):
         h = prediction.label

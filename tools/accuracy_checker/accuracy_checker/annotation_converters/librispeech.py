@@ -33,7 +33,7 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
         params = super().parameters()
         params.update({
             'annotation_file': PathField(optional=True),
-            'top_n': NumberField(optional=True, default=100, value_type=int),
+            'top_n': NumberField(optional=True, value_type=int),
             'use_numpy': BoolField(optional=True, default=False)
         })
         return params
