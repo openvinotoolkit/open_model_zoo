@@ -81,8 +81,8 @@ class Im2latexEvaluator(BaseEvaluator):
             batch_prediction = self.model.predict(batch_identifiers, batch_input)
             batch_prediction = [CharacterRecognitionPrediction(label=batch_prediction,
                                                                  identifier=batch_annotation[0].identifier)]
-            self._annotations.append(batch_annotation)
-            self._predictions.append(batch_prediction)
+            self._annotations.extend(batch_annotation)
+            self._predictions.extend(batch_prediction)
 
             progress_reporter.update(batch_id, len(batch_input))
 
@@ -294,8 +294,8 @@ class RecognizerDLSDKModel(BaseModel):
         super().__init__(network_info, launcher, suffix)
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
-            network = launcher.create_ie_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+            self.network = launcher.read_network(str(model), str(weights))
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
 
