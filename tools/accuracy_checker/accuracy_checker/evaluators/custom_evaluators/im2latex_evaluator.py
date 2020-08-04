@@ -218,10 +218,10 @@ class SequentialModel:
         recognizer_encoder = network_info.get('recognizer_encoder', {})
         recognizer_decoder = network_info.get('recognizer_decoder', {})
         if 'model' not in recognizer_encoder:
-            recognizer_encoder['model'] = models_args[0 if len(models_args) > 1 else 0]
+            recognizer_encoder['model'] = models_args[0]
             recognizer_encoder['_model_is_blob'] = is_blob
         if 'model' not in recognizer_decoder:
-            recognizer_decoder['model'] = models_args[1 if len(models_args) > 2 else 0]
+            recognizer_decoder['model'] = models_args[len(models_args) == 2]
             recognizer_decoder['_model_is_blob'] = is_blob
         network_info.update({
             'recognizer_encoder': recognizer_encoder,
