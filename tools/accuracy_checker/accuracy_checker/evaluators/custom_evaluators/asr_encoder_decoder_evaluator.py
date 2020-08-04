@@ -250,7 +250,7 @@ class BaseModel:
         pass
 
 
-# pylint: disable E0203
+# pylint: disable=E0203
 class BaseDLSDKModel:
     def _reshape_input(self, input_shapes):
         del self.exec_network
@@ -479,7 +479,7 @@ class EncoderDLSDKModel(BaseModel, BaseDLSDKModel):
         return {self.input_blob: np.array(input_data)}
 
 
-class DecoderDLSDKModel(BaseModel,BaseDLSDKModel):
+class DecoderDLSDKModel(BaseModel, BaseDLSDKModel):
     default_model_suffix = 'decoder'
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
