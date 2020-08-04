@@ -290,6 +290,7 @@ def main():
     if args.generate_reference:
         with open(os.path.join(sys.path[0], 'reference_values.json'), 'w') as outfile:
             json.dump(reference_values, outfile, indent=2)
+            outfile.write("\n")
             print("File reference_values.json was generated.")
 
     sys.exit(0 if num_failures == 0 else 1)
