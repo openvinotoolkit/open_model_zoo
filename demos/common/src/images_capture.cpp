@@ -46,13 +46,13 @@ class DirReader : public ImagesCapture {
     std::vector<std::string> names;
     size_t fileId;
     size_t nextImgId;
-    const size_t posFrames;
+    const size_t initialImageId;
     const size_t readLengthLimit;
     const std::string input;
 
 public:
-    DirReader(const std::string &input, bool loop, size_t posFrames, size_t readLengthLimit) : ImagesCapture{loop},
-            fileId{0}, nextImgId{0}, posFrames{posFrames}, readLengthLimit{readLengthLimit}, input{input} {
+    DirReader(const std::string &input, bool loop, size_t initialImageId, size_t readLengthLimit) : ImagesCapture{loop},
+            fileId{0}, nextImgId{0}, initialImageId{initialImageId}, readLengthLimit{readLengthLimit}, input{input} {
         DIR *dir = opendir(input.c_str());
         if (!dir) throw InvalidInput{};
         while (struct dirent *ent = readdir(dir))
@@ -66,7 +66,7 @@ public:
             cv::Mat img = cv::imread(input + '/' + names[fileId]);
             if (img.data) {
                 ++readImgs;
-                if (readImgs - 1 >= posFrames) return;
+                if (readImgs - 1 >= initialImageId) return;
             }
             ++fileId;
         }
@@ -94,7 +94,7 @@ public:
                 ++fileId;
                 if (img.data) {
                     ++readImgs;
-                    if (readImgs - 1 >= posFrames) {
+                    if (readImgs - 1 >= initialImageId) {
                         nextImgId = 1;
                         return img;
                     }
