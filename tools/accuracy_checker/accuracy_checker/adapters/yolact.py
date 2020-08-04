@@ -22,7 +22,7 @@ try:
 except ImportError:
     mask_util = None
 
-from ..config import StringField
+from ..config import StringField, NumberField
 from ..postprocessor import NMS
 from ..representation import DetectionPrediction, CoCocInstanceSegmentationPrediction, ContainerPrediction
 
@@ -36,11 +36,17 @@ class YolactAdapter(Adapter):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'loc_out': StringField(),
-            'conf_out': StringField(),
-            'prior_out': StringField(),
-            'mask_out': StringField(),
-            'proto_out': StringField()
+            'loc_out': StringField(description='name of output with box locations'),
+            'conf_out': StringField(description='name of output with confidence scores'),
+            'prior_out': StringField(description='name of output with prior boxes'),
+            'mask_out': StringField(description='name of output with masks'),
+            'proto_out': StringField(description='name of output with proto for masks calculation'),
+            'confidence_threshold':  NumberField(
+                value_type=float, optional=True, default=0.05, description='confidence threshold'
+            ),
+            'max_detections': NumberField(
+                value_type=int, optional=True, default=100, description='max number of detections'
+            )
         })
         return params
 
@@ -53,8 +59,8 @@ class YolactAdapter(Adapter):
         self.prior_out = self.get_value_from_config('prior_out')
         self.mask_out = self.get_value_from_config('mask_out')
         self.proto_out = self.get_value_from_config('proto_out')
-        self.conf_thresh = 0.05
-        self.max_num_detections = 100
+        self.conf_thresh = self.get_value_from_config('confidence_threshold')
+        self.max_num_detections = self.get_value_from_config('max_detections')
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)

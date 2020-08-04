@@ -211,6 +211,14 @@ AccuracyChecker supports following set of adapters:
   * `raw_masks_out` - name of output layer with raw instances masks.
   * `texts_out` - name of output layer with texts.
   * `confidence_threshold` - confidence threshold that is used to filter out detected instances.
+* `yolact` - converting raw outputs of Yolact model to to combination of `DetectionPrediction` and `CoCocInstanceSegmentationPrediction`.
+  * `loc_out` - name of output layer which contains box locations.
+  * `prior_out` - name of output layer which contains prior boxes.
+  * `conf_out` - name of output layer which contains confidence scores for all classes for each box.
+  * `mask_out` - name of output layer which contains instance masks.
+  * `proto_out` - name of output layer which contains proto for masks calculation.
+  * `confidence_threshold` - confidence threshold that is used to filter out detected instances (Optional, default 0.05).
+  * `max_detections` - maximum detection used for metrics calculation (Optional, default 100). 
 * `class_agnostic_detection` - converting 'boxes' [n, 5] output of detection model to `DetectionPrediction` representation.
   * `output_blob` - name of output layer with bboxes.
   * `scale` - scalar value to normalize bbox coordinates.
