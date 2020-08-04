@@ -54,9 +54,10 @@ LOADERS_MAPPING = {
 class SegmentationRepresentation(BaseRepresentation):
     def to_polygon(self):
         polygons = {}
-        indexes = np.unique(self.mask)
+        mask = np.argmax(self.mask, axis=0) if len(self.mask.shape) == 3 else self.mask
+        indexes = np.unique(mask)
         for i in indexes:
-            binary_mask = (self.mask == i).astype(int)
+            binary_mask = (mask == i).astype(int)
 
             contours = find_contours(binary_mask, 0.5, positive_orientation='low')
 
