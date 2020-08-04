@@ -698,7 +698,6 @@ class AudioToMelSpectrogram(Preprocessor):
         # get power spectrum
         if self.mag_power != 1.0:
             x = x**self.mag_power
-#        x = x.sum(-1)
 
         # dot with filterbank energies
         x = np.matmul(filterbanks, x)
