@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -214,6 +214,7 @@ NATIVE_DEMOS = [
 
     NativeDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
+            '-o': DemoOutputFileArg(),
             **MONITORS,
             '-i': DataPatternArg('object-detection-demo-ssd-async')}),
         TestCase(options={'-m': ModelArg('yolo-v3-tf')})
@@ -394,6 +395,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
+            '-o': DemoOutputFileArg(),
             **MONITORS,
             '-i': DataPatternArg('object-detection-demo-ssd-async')}),
         single_option_cases('-m',

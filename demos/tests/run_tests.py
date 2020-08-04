@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,12 +38,16 @@ import subprocess
 import sys
 import tempfile
 import timeit
-
+import cv2 as cv
+import numpy as np
 from pathlib import Path
 
 from args import ArgContext, ModelArg
 from cases import DEMOS
+from crop_size import CROP_SIZE
 from data_sequences import DATA_SEQUENCES
+from similarity_measurement import getPSNR, getMSSSIM
+from thresholds import THRESHOLDS
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -58,10 +62,12 @@ def parse_args():
         help='list of demos to run tests for (by default, every demo is tested)')
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
         help='Model Optimizer entry point script')
-    parser.add_argument('--devices', default="CPU GPU",
+    parser.add_argument('--devices', default="CPU GPU", # FOR DEBUG: CPU
         help='list of devices to test')
     parser.add_argument('--report-file', type=Path,
         help='path to report file')
+    parser.add_argument('--generate-reference', action='store_true',
+        help='generate the reference_values.json file')
     return parser.parse_args()
 
 def collect_result(demo_name, device, pipeline, execution_time, report_file):
@@ -88,6 +94,7 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
     model_names = {arg.name for arg in model_args}
     model_precisions = {arg.precision for arg in model_args}
 
+    # FOR DEBUG: dl_dir = Path('/home/anthonyquantum') / 'models'
     dl_dir = global_temp_dir / 'models'
     complete_models_lst_path = global_temp_dir / 'models.lst'
 
@@ -151,6 +158,11 @@ def main():
         dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test)
 
         num_failures = 0
+        if args.generate_reference:
+            reference_values = {}
+        else:
+            json_file = open(os.path.join(sys.path[0], 'reference_values.json'), 'r')
+            reference_values = json.load(json_file)
 
         os.putenv('PYTHONPATH',  "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir))
 
@@ -206,7 +218,7 @@ def main():
                         continue
 
                     for device, dev_arg in device_args.items():
-                        print('Test case #{}/{}:'.format(test_case_index, device),
+                        print('\nTest case #{}/{}:'.format(test_case_index, device),
                             ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
                         print(flush=True)
                         try:
@@ -214,9 +226,57 @@ def main():
                             subprocess.check_output(fixed_args + dev_arg + case_args,
                                 stderr=subprocess.STDOUT, universal_newlines=True)
                             execution_time = timeit.default_timer() - start_time
-                        except subprocess.CalledProcessError as e:
-                            print(e.output)
-                            print('Exit code:', e.returncode)
+
+                            similarity_res = []
+                            demo_out_file = case_args[case_args.index('-o') + 1]
+
+                            out_cap = cv.VideoCapture(demo_out_file)
+                            raw_cap = cv.VideoCapture(case_args[case_args.index('-i') + 1])
+                            if not out_cap.isOpened() or not raw_cap.isOpened():
+                                raise RuntimeError("Unable to open input files.")
+                            
+                            while True:
+                                out_ret, out_frame = out_cap.read()
+                                raw_ret, raw_frame = raw_cap.read()
+
+                                if out_ret and raw_ret:
+                                    crop = CROP_SIZE[demo.full_name]
+                                    height, width = out_frame.shape[:2]
+                                    out_frame = out_frame[crop[0] : height - crop[2], crop[3] : width - crop[1]]
+                                    raw_frame = raw_frame[crop[0] : height - crop[2], crop[3] : width - crop[1]]
+                                    similarity = list(map(lambda x: round(x, 3),
+                                                          (getPSNR(out_frame, raw_frame),
+                                                           *getMSSSIM(out_frame, raw_frame)[:-1])))
+                                    similarity_res.append(similarity)
+                                else:
+                                  break  
+
+                            out_cap.release()
+                            raw_cap.release()
+                            os.remove(demo_out_file)
+
+                            model_name = test_case.options['-m'].name
+                            if args.generate_reference:
+                                if demo.full_name not in reference_values:
+                                    reference_values[demo.full_name] = {}
+                                reference_values[demo.full_name][model_name] = similarity_res
+                            else:
+                                similarity_reference = reference_values[demo.full_name][model_name]
+                                threshold = THRESHOLDS[demo.full_name][model_name]
+                                for i in range(len(similarity_res)):
+                                    for j in range(len(similarity_res[0])):
+                                        if abs(similarity_res[i][j] - similarity_reference[i][j]) > threshold[j]:
+                                            raise RuntimeError("SSIM test failed: {} != {} with threshold {}."
+                                                               .format(similarity_res[i], similarity_reference[i],
+                                                                       threshold))
+                        except Exception as e:
+                            print("Error:")
+                            if isinstance(e, subprocess.CalledProcessError):
+                                print(e.output)
+                                print('Exit code:', e.returncode)
+                            else:
+                                print(e)
+
                             num_failures += 1
                             execution_time = -1
 
@@ -226,6 +286,11 @@ def main():
             print()
 
     print("Failures: {}".format(num_failures))
+
+    if args.generate_reference:
+        with open(os.path.join(sys.path[0], 'reference_values.json'), 'w') as outfile:
+            json.dump(reference_values, outfile, indent=2)
+            print("File reference_values.json was generated.")
 
     sys.exit(0 if num_failures == 0 else 1)
 

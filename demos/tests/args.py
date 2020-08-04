@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 
 import collections
 import shutil
+import tempfile
 
 from pathlib import Path
 
@@ -47,6 +48,7 @@ class ModelArg:
         self.precision = precision
 
     def resolve(self, context):
+        # FOR DEBUG: return str(Path('/home/anthonyquantum/models') / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))
         return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))
 
 
@@ -106,3 +108,14 @@ class DemoFileArg:
 
     def resolve(self, context):
         return str(context.source_dir / self.file_name)
+
+
+class DemoOutputFileArg:
+    def __init__(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            self.out_dir = Path(temp_dir) / 'demo_output'
+        if not self.out_dir.is_dir():
+            self.out_dir.mkdir(parents=True)
+
+    def resolve(self, context):
+        return str(self.out_dir / 'output.avi')
