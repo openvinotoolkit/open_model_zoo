@@ -27,6 +27,7 @@ static const char raw_output_message[] = "Optional. Output inference results raw
 static const char input_resizable_message[] = "Optional. Enable resizable input with support of ROI crop and auto resize.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+static const char output_message[] = "Optional. Save results of input processing to the specified file.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", video_message);
@@ -42,6 +43,7 @@ DEFINE_double(iou_t, 0.4, iou_thresh_output_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_string(o, "", output_message);
 
 /**
 * \brief This function shows a help message
@@ -66,4 +68,5 @@ static void showUsage() {
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
+    std::cout << "    -o \"<path>\"               " << output_message << std::endl;
 }

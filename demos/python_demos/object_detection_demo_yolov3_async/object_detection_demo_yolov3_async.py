@@ -24,6 +24,7 @@ from argparse import ArgumentParser, SUPPRESS
 from math import exp as exp
 from time import perf_counter
 from enum import Enum
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -73,6 +74,8 @@ def build_argparser():
     args.add_argument("-loop_input", "--loop_input", help="Optional. Iterate over input infinitely",
                       action='store_true')
     args.add_argument("-no_show", "--no_show", help="Optional. Don't show output", action='store_true')
+    args.add_argument("-o", "--output", help="Optional. Save results of input processing to the specified file.",
+                      type=Path)
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
     args.add_argument("--keep_aspect_ratio", action="store_true", default=False,
@@ -378,6 +381,10 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, 55,
         (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
+    if args.output:
+        out_video = cv2.VideoWriter(str(args.output), cv2.VideoWriter_fourcc(*'MJPG'), cap.get(cv2.CAP_PROP_FPS),
+                                    (int(cap.get(3)), int(cap.get(4))))
+
     while (cap.isOpened() \
            or completed_request_results \
            or len(empty_requests) < len(exec_nets[mode.current].requests)) \
@@ -432,6 +439,9 @@ def main():
                                              (10, int(origin_im_size[0] - 50)), cv2.FONT_HERSHEY_COMPLEX, 0.75,
                                              (10, 200, 10), 2)
 
+            if args.output:
+                out_video.write(frame)
+
             if not args.no_show:
                 cv2.imshow("Detection Results", frame)
                 key = cv2.waitKey(wait_key_time)
@@ -459,6 +469,8 @@ def main():
                     cap.open(input_stream)
                 else:
                     cap.release()
+                    if args.output:
+                        out_video.release()
                 continue
 
             request = empty_requests.popleft()

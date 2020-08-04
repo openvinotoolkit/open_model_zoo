@@ -327,6 +327,8 @@ int main(int argc, char *argv[]) {
         std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
         cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
         Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
+        cv::VideoWriter outVideo(FLAGS_o, cv::VideoWriter::fourcc('M','J','P','G'), cap.get(cv::CAP_PROP_FPS),
+                                 cv::Size(width, height));
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
             // Here is the first asynchronous point:
@@ -439,6 +441,11 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
+
+            if (!FLAGS_o.empty()) {
+                outVideo.write(frame);
+            }
+
             if (!FLAGS_no_show) {
                 cv::imshow("Detection results", frame);
             }
