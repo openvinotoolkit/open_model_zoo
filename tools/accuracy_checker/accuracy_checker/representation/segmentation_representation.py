@@ -52,9 +52,11 @@ LOADERS_MAPPING = {
 
 
 class SegmentationRepresentation(BaseRepresentation):
-    def to_polygon(self):
+    def to_polygon(self, segmentation_colors=None):
         polygons = {}
-        mask = np.argmax(self.mask, axis=0) if len(self.mask.shape) == 3 else self.mask
+        mask = self._encode_mask(self.mask, segmentation_colors)
+        if len(mask.shape) == 3:
+            mask = np.argmax(mask, axis=0)
         indexes = np.unique(mask)
         for i in indexes:
             binary_mask = (mask == i).astype(int)
@@ -70,6 +72,10 @@ class SegmentationRepresentation(BaseRepresentation):
                         polygons[i].append(poly.bounds)
 
         return polygons
+
+    @staticmethod
+    def _encode_mask(mask, segmentation_colors):
+        return mask
 
 
 class SegmentationAnnotation(SegmentationRepresentation):
@@ -119,6 +125,21 @@ class SegmentationAnnotation(SegmentationRepresentation):
             return mask.astype(np.uint8)
 
         return self._mask
+
+    @staticmethod
+    def _encode_mask(mask, segmentation_colors):
+        result = mask
+        if segmentation_colors:
+            mask = mask.astype(int)
+            num_channels = len(mask.shape)
+            encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.int16)
+            for label, color in enumerate(segmentation_colors):
+                encoded_mask[np.where(
+                    np.all(mask == color, axis=-1) if num_channels >= 3 else mask == color
+                )[:2]] = label
+                result = encoded_mask.astype(np.int8)
+
+        return result
 
 
 class SegmentationPrediction(SegmentationRepresentation):
@@ -220,7 +241,7 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
             areas.append(maskUtils.area(mask))
         return areas
 
-    def to_polygon(self):
+    def to_polygon(self, segmentation_colors=None):
         polygons = {}
         for elem, label in zip(self.raw_mask, self.labels):
             elem = maskUtils.decode(elem)
