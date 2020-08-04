@@ -52,15 +52,21 @@ LOADERS_MAPPING = {
 
 
 class SegmentationRepresentation(BaseRepresentation):
-    @staticmethod
-    def to_polygon(mask):
-        contours = find_contours(mask, 0.5, positive_orientation='low')
+    def to_polygon(self):
+        polygons = {}
+        indexes = np.unique(self.mask)
+        for i in indexes:
+            binary_mask = (self.mask == i).astype(int)
 
-        polygons = []
-        for contour in contours:
-            poly = Polygon(contour)
-            poly = poly.simplify(1.0, preserve_topology=False)
-            polygons.append(poly.bounds)
+            contours = find_contours(binary_mask, 0.5, positive_orientation='low')
+
+            for contour in contours:
+                poly = Polygon(contour).simplify(1.0, preserve_topology=False)
+                if poly.bounds:
+                    if i not in polygons:
+                        polygons[i] = [poly.bounds]
+                    else:
+                        polygons[i].append(poly.bounds)
 
         return polygons
 
@@ -220,12 +226,12 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
             contours = find_contours(elem, 0.5, positive_orientation='low')
 
             for contour in contours:
-                poly = Polygon(contour)
-                poly = poly.simplify(1.0, preserve_topology=False)
-                if label not in polygons:
-                    polygons[label] = [poly.bounds]
-                else:
-                    polygons[label].append(poly.bounds)
+                poly = Polygon(contour).simplify(1.0, preserve_topology=False)
+                if poly.bounds:
+                    if label not in polygons:
+                        polygons[label] = [poly.bounds]
+                    else:
+                        polygons[label].append(poly.bounds)
 
         return polygons
 
