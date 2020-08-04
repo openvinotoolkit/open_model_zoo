@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -8,23 +8,23 @@
 * \example object_detection_demo_ssd_async/main.cpp
 */
 
-#include <gflags/gflags.h>
-
 #include <chrono>
+#include <condition_variable>
 #include <iostream>
-#include <memory>
 #include <vector>
+#include <deque>
 #include <string>
 #include <algorithm>
 
-#include <inference_engine.hpp>
 #include <ngraph/ngraph.hpp>
 
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
-#include <samples/slog.hpp>
+#include <samples/args_helper.hpp>
+#include <cldnn/cldnn_config.hpp>
 
 #include "object_detection_demo_ssd_async.hpp"
+#include "Ssd_async.h"
 
 using namespace InferenceEngine;
 
@@ -62,6 +62,17 @@ void frameToBlob(const cv::Mat& frame,
     }
 }
 
+void putHighlightedText(cv::Mat& img,
+                        const std::string& text,
+                        cv::Point org,
+                        int fontFace,
+                        double fontScale,
+                        cv::Scalar color,
+                        int thickness) {
+    cv::putText(img, text, org, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness + 1); // white border
+    cv::putText(img, text, org, fontFace, fontScale, color, thickness);
+}
+
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers certain topology and cannot be generalized for any object detection **/
@@ -77,8 +88,8 @@ int main(int argc, char *argv[]) {
         if (!((FLAGS_i == "cam") ? cap.open(0) : cap.open(FLAGS_i.c_str()))) {
             throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
         }
-        const size_t width  = (size_t) cap.get(cv::CAP_PROP_FRAME_WIDTH);
-        const size_t height = (size_t) cap.get(cv::CAP_PROP_FRAME_HEIGHT);
+        const size_t width  = (size_t)cap.get(cv::CAP_PROP_FRAME_WIDTH);
+        const size_t height = (size_t)cap.get(cv::CAP_PROP_FRAME_HEIGHT);
 
         // read input (video) frame
         cv::Mat curr_frame;  cap >> curr_frame;
@@ -90,7 +101,7 @@ int main(int argc, char *argv[]) {
         }
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 1. Load inference engine -------------------------------------
+        // --------------------------- 1. Load inference engine ------------------------------------------------
         slog::info << "Loading Inference Engine" << slog::endl;
         Core ie;
 
@@ -98,7 +109,6 @@ int main(int argc, char *argv[]) {
         std::cout << ie.GetVersions(FLAGS_d);
 
         /** Load extensions for the plugin **/
-
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
             IExtensionPtr extension_ptr = make_so_pointer<IExtension>(FLAGS_l.c_str());
@@ -113,292 +123,362 @@ int main(int argc, char *argv[]) {
         if (FLAGS_pc) {
             ie.SetConfig({ { PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES } });
         }
+
+        std::map<std::string, std::string> userSpecifiedConfig;
+        std::map<std::string, std::string> minLatencyConfig;
+
+        std::set<std::string> devices;
+        for (const std::string& device : parseDevices(FLAGS_d)) {
+            devices.insert(device);
+        }
+        std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(devices, FLAGS_nstreams);
+        for (auto & device : devices) {
+            if (device == "CPU") {  // CPU supports a few special performance-oriented keys
+                // limit threading for CPU portion of inference
+                if (FLAGS_nthreads != 0)
+                    userSpecifiedConfig.insert({ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) });
+
+                if (FLAGS_d.find("MULTI") != std::string::npos
+                    && devices.find("GPU") != devices.end()) {
+                    userSpecifiedConfig.insert({ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) });
+                } else {
+                    // pin threads for CPU portion of inference
+                    userSpecifiedConfig.insert({ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(YES) });
+                }
+
+                // for CPU execution, more throughput-oriented execution via streams
+                userSpecifiedConfig.insert({ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
+                                (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
+                                                                  : CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) });
+
+                minLatencyConfig.insert({ CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1" });
+            } else if (device == "GPU") {
+                userSpecifiedConfig.insert({ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
+                                (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
+                                                                  : CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) });
+
+                minLatencyConfig.insert({ CONFIG_KEY(GPU_THROUGHPUT_STREAMS), "1" });
+
+                if (FLAGS_d.find("MULTI") != std::string::npos
+                    && devices.find("CPU") != devices.end()) {
+                    // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
+                    // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
+                    userSpecifiedConfig.insert({ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" });
+                }
+            }
+        }
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 2. Read IR Generated by ModelOptimizer (.xml and .bin files) ------------
         slog::info << "Loading network files" << slog::endl;
         /** Read network model **/
-        auto cnnNetwork = ie.ReadNetwork(FLAGS_m);
+        ssd_async  ssd( ie, FLAGS_m);
         /** Set batch size to 1 **/
-        slog::info << "Batch size is forced to  1." << slog::endl;
-        cnnNetwork.setBatchSize(1);
+        slog::info << "Batch size is forced to 1." << slog::endl;
+        (ssd.get_cnnNetwork()).setBatchSize(1);
         /** Read labels (if any)**/
-        std::string labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
         std::vector<std::string> labels;
-        std::ifstream inputFile(labelFileName);
-        std::copy(std::istream_iterator<std::string>(inputFile),
-                  std::istream_iterator<std::string>(),
-                  std::back_inserter(labels));
+        if (!FLAGS_labels.empty()) {
+            std::ifstream inputFile(FLAGS_labels);
+            std::string label;
+            while (std::getline(inputFile, label)) {
+                labels.push_back(label);
+            }
+            if (labels.empty())
+                throw std::logic_error("File empty or not found: " + FLAGS_labels);
+        }
         // -----------------------------------------------------------------------------------------------------
 
-        /** SSD-based network should have one input and one output **/
         // --------------------------- 3. Configure input & output ---------------------------------------------
         // --------------------------- Prepare input blobs -----------------------------------------------------
-        slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-        InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
-
-        std::string imageInputName, imageInfoInputName;
-        size_t netInputHeight, netInputWidth;
-
-        for (const auto & inputInfoItem : inputInfo) {
-            if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // first input contains images
-                imageInputName = inputInfoItem.first;
-                inputInfoItem.second->setPrecision(Precision::U8);
-                if (FLAGS_auto_resize) {
-                    inputInfoItem.second->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-                    inputInfoItem.second->getInputData()->setLayout(Layout::NHWC);
-                } else {
-                    inputInfoItem.second->getInputData()->setLayout(Layout::NCHW);
-                }
-                const TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
-                netInputHeight = getTensorHeight(inputDesc);
-                netInputWidth = getTensorWidth(inputDesc);
-            } else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // second input contains image info
-                imageInfoInputName = inputInfoItem.first;
-                inputInfoItem.second->setPrecision(Precision::FP32);
-            } else {
-                throw std::logic_error("Unsupported " +
-                                       std::to_string(inputInfoItem.second->getTensorDesc().getDims().size()) + "D "
-                                       "input layer '" + inputInfoItem.first + "'. "
-                                       "Only 2D and 4D input layers are supported");
-            }
-        }
+        ssd.PreparingInputBlobs();
 
         // --------------------------- Prepare output blobs -----------------------------------------------------
-        slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-        OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
-        if (outputInfo.size() != 1) {
-            throw std::logic_error("This demo accepts networks having only one output");
-        }
-        DataPtr& output = outputInfo.begin()->second;
-        auto outputName = outputInfo.begin()->first;
-
-        int num_classes = 0;
-
-        if (auto ngraphFunction = cnnNetwork.getFunction()) {
-            for (const auto op : ngraphFunction->get_ops()) {
-                if (op->get_friendly_name() == outputName) {
-                    auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
-                    if (!detOutput) {
-                        THROW_IE_EXCEPTION << "Object Detection network output layer(" + op->get_friendly_name() +
-                            ") should be DetectionOutput, but was " +  op->get_type_info().name;
-                    }
-
-                    num_classes = detOutput->get_attrs().num_classes;
-                    break;
-                }
-            }
-        } else if (!labels.empty()) {
-            throw std::logic_error("Class labels are not supported with IR version older than 10");
-        }
-
-        if (static_cast<int>(labels.size()) != num_classes) {
-            if (static_cast<int>(labels.size()) == (num_classes - 1))  // if network assumes default "background" class, having no label
-                labels.insert(labels.begin(), "fake");
-            else
-                labels.clear();
-        }
-        const SizeVector outputDims = output->getTensorDesc().getDims();
-        const int maxProposalCount = outputDims[2];
-        const int objectSize = outputDims[3];
-        if (objectSize != 7) {
-            throw std::logic_error("Output should have 7 as a last dimension");
-        }
-        if (outputDims.size() != 4) {
-            throw std::logic_error("Incorrect output dimensions for SSD");
-        }
-        output->setPrecision(Precision::FP32);
-        output->setLayout(Layout::NCHW);
+        ssd.PreparingOutputBlobs(labels);
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 4. Loading model to the device ------------------------------------------
         slog::info << "Loading model to the device" << slog::endl;
-        ExecutableNetwork network = ie.LoadNetwork(cnnNetwork, FLAGS_d);
+        ExecutableNetwork userSpecifiedExecNetwork = ie.LoadNetwork(ssd.get_cnnNetwork(), FLAGS_d, userSpecifiedConfig);
+        ExecutableNetwork minLatencyExecNetwork = ie.LoadNetwork(ssd.get_cnnNetwork(), FLAGS_d, minLatencyConfig);
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 5. Create infer request -------------------------------------------------
-        InferRequest::Ptr async_infer_request_curr = network.CreateInferRequestPtr();
-        InferRequest::Ptr async_infer_request_next = network.CreateInferRequestPtr();
+        // --------------------------- 5. Create infer requests ------------------------------------------------
+        
 
-        /* it's enough just to set image info input (if used in the model) only once */
-        if (!imageInfoInputName.empty()) {
-            auto setImgInfoBlob = [&](const InferRequest::Ptr &inferReq) {
-                auto blob = inferReq->GetBlob(imageInfoInputName);
-                auto data = blob->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-                data[0] = static_cast<float>(netInputHeight);  // height
-                data[1] = static_cast<float>(netInputWidth);  // width
-                data[2] = 1;
-            };
-            setImgInfoBlob(async_infer_request_curr);
-            setImgInfoBlob(async_infer_request_next);
-        }
+        InferRequest::Ptr minLatencyInferRequest = ssd.CreateInferRequest(userSpecifiedExecNetwork, minLatencyExecNetwork, FLAGS_nireq);
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 6. Do inference ---------------------------------------------------------
-        slog::info << "Start inference " << slog::endl;
+        // --------------------------- 6. Init variables -------------------------------------------------------
+        typedef std::chrono::duration<double, std::chrono::milliseconds::period> Ms;
+        typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
 
-        bool isLastFrame = false;
-        bool isAsyncMode = false;  // execution is always started using SYNC mode
-        bool isModeChanged = false;  // set to TRUE when execution mode is changed (SYNC<->ASYNC)
+        enum class ExecutionMode {USER_SPECIFIED, MIN_LATENCY};
+        
+        struct RequestResult {
+            cv::Mat frame;
+            Blob::Ptr output;
+            std::chrono::steady_clock::time_point startTime;
+            ExecutionMode frameMode;
+        };
 
-        typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
-        auto total_t0 = std::chrono::high_resolution_clock::now();
-        auto wallclock = std::chrono::high_resolution_clock::now();
-        double ocv_render_time = 0;
+        struct ModeInfo {
+           int framesCount = 0;
+           std::chrono::steady_clock::duration latencySum;
+           std::chrono::steady_clock::time_point lastStartTime;
+           std::chrono::steady_clock::time_point lastEndTime;
+        };
 
-        std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
-        std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
+        auto totalT0 = std::chrono::steady_clock::now();
+        ExecutionMode currentMode = ExecutionMode::USER_SPECIFIED;
+        std::deque<InferRequest::Ptr> emptyRequests;
+        if (currentMode == ExecutionMode::USER_SPECIFIED) {
+            emptyRequests.assign(userSpecifiedInferRequests.begin(), userSpecifiedInferRequests.end());
+        } else emptyRequests = {minLatencyInferRequest};
+
+        std::unordered_map<int, RequestResult> completedRequestResults;
+        int nextFrameId = 0;
+        int nextFrameIdToShow = 0;
+        std::exception_ptr callbackException = nullptr;
+        std::mutex mutex;
+        std::condition_variable condVar;
+        std::map<ExecutionMode, ModeInfo> modeInfo = {{ExecutionMode::USER_SPECIFIED, ModeInfo()},
+                                                      {ExecutionMode::MIN_LATENCY, ModeInfo()}};
+
         cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
-        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
+        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10,
+                            graphSize);
+        // -----------------------------------------------------------------------------------------------------
+
+        // --------------------------- 7. Do inference ---------------------------------------------------------
+        std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and "
+                     "press ESC or 'q' key" << std::endl;
+        std::cout << "To switch between min_latency/user_specified modes, press TAB key in the output window" 
+                  << std::endl;
+
+        modeInfo[currentMode].lastStartTime = std::chrono::steady_clock::now();
         while (true) {
-            auto t0 = std::chrono::high_resolution_clock::now();
-            // Here is the first asynchronous point:
-            // in the async mode we capture frame to populate the NEXT infer request
-            // in the regular mode we capture frame to the CURRENT infer request
-            if (!cap.read(next_frame)) {
-                if (next_frame.empty()) {
-                    isLastFrame = true;  // end of video file
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+
+                if (callbackException) std::rethrow_exception(callbackException);
+                if (!cap.isOpened()
+                    && completedRequestResults.empty()
+                    && ((currentMode == ExecutionMode::USER_SPECIFIED && emptyRequests.size() == FLAGS_nireq)
+                        || (currentMode == ExecutionMode::MIN_LATENCY && emptyRequests.size() == 1))) break;
+            }
+
+            RequestResult requestResult;
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+
+                auto requestResultItr = completedRequestResults.find(nextFrameIdToShow);
+                if (requestResultItr != completedRequestResults.end()) {
+                    requestResult = std::move(requestResultItr->second);
+                    completedRequestResults.erase(requestResultItr);
+                };
+            }
+
+            if (requestResult.output) {
+                LockedMemory<const void> outputMapped = as<MemoryBlob>(requestResult.output)->rmap();
+                const float *detections = outputMapped.as<float*>();
+
+                nextFrameIdToShow++;
+                if (requestResult.frameMode == currentMode) {
+                    modeInfo[currentMode].framesCount += 1;
+                }
+
+                ssd.ProcessingOutputBlobs(detections, width, height, labels, FLAGS_r, FLAGS_t);
+
+                presenter.drawGraphs(requestResult.frame);
+
+                auto currentTime = std::chrono::steady_clock::now();
+                std::ostringstream out;
+                out << (currentMode == ExecutionMode::USER_SPECIFIED ? "USER SPECIFIED" : "MIN LATENCY")
+                    << " mode (press Tab to switch)";
+                putHighlightedText(requestResult.frame, out.str(), cv::Point2f(10, 30), cv::FONT_HERSHEY_TRIPLEX, 0.75, 
+                                   cv::Scalar(10, 10, 200), 2);
+                out.str("");
+                out << "FPS: " << std::fixed << std::setprecision(1) << modeInfo[currentMode].framesCount / 
+                    std::chrono::duration_cast<Sec>(currentTime - modeInfo[currentMode].lastStartTime).count();
+                putHighlightedText(requestResult.frame, out.str(), cv::Point2f(10, 60), cv::FONT_HERSHEY_TRIPLEX, 0.75, 
+                                   cv::Scalar(10, 200, 10), 2);
+                out.str("");
+                modeInfo[currentMode].latencySum += (currentTime - requestResult.startTime);
+                out << "Latency: " << std::fixed << std::setprecision(1) << (std::chrono::duration_cast<Ms>(
+                        modeInfo[currentMode].latencySum).count() / modeInfo[currentMode].framesCount)
+                    << " ms";
+                putHighlightedText(requestResult.frame, out.str(), cv::Point2f(10, 90), cv::FONT_HERSHEY_TRIPLEX, 0.75, 
+                                   cv::Scalar(200, 10, 10), 2);
+
+                if (!FLAGS_no_show) {
+                    cv::imshow("Detection Results", requestResult.frame);
+                    
+                    const int key = cv::waitKey(1);
+
+                    if (27 == key || 'q' == key || 'Q' == key) {  // Esc
+                        break;
+                    } else if (9 == key) {  // Tab
+                        ExecutionMode prevMode = currentMode;
+                        currentMode = (currentMode == ExecutionMode::USER_SPECIFIED ? ExecutionMode::MIN_LATENCY
+                                                                                    : ExecutionMode::USER_SPECIFIED);
+                        if (prevMode == ExecutionMode::USER_SPECIFIED) {
+                            for (const auto& request: userSpecifiedInferRequests) {
+                                request->Wait(IInferRequest::WaitMode::RESULT_READY);
+                            }
+                        } else minLatencyInferRequest->Wait(IInferRequest::WaitMode::RESULT_READY);
+                        
+                        {
+                            std::lock_guard<std::mutex> lock(mutex);
+
+                            if (currentMode == ExecutionMode::USER_SPECIFIED) {
+                                emptyRequests.assign(userSpecifiedInferRequests.begin(),
+                                                     userSpecifiedInferRequests.end());
+                            } else emptyRequests = {minLatencyInferRequest};
+                        }
+
+                        modeInfo[currentMode] = ModeInfo();
+                        auto switchTime = std::chrono::steady_clock::now();
+                        modeInfo[prevMode].lastEndTime = switchTime;
+                        modeInfo[currentMode].lastStartTime = switchTime;
+                    } else {
+                        presenter.handleKey(key);
+                    }
+                }
+
+                continue;
+            }
+
+            {
+                std::unique_lock<std::mutex> lock(mutex);
+
+                if (emptyRequests.empty() || !cap.isOpened()) {
+                    while (callbackException == nullptr && emptyRequests.empty() && completedRequestResults.empty()) {
+                        condVar.wait(lock);
+                    }
+
+                    continue;
+                }
+            }
+            
+            auto startTime = std::chrono::steady_clock::now();
+                
+            cv::Mat frame;
+            if (!cap.read(frame)) {
+                if (frame.empty()) {
+                    if (FLAGS_loop_input) {
+                        cap.open((FLAGS_i == "cam") ? 0 : FLAGS_i.c_str());
+                    } else cap.release();
+                    continue;
                 } else {
                     throw std::logic_error("Failed to get frame from cv::VideoCapture");
                 }
             }
-            if (isAsyncMode) {
-                if (isModeChanged) {
-                    frameToBlob(curr_frame, async_infer_request_curr, imageInputName);
-                }
-                if (!isLastFrame) {
-                    frameToBlob(next_frame, async_infer_request_next, imageInputName);
-                }
-            } else if (!isModeChanged) {
-                frameToBlob(curr_frame, async_infer_request_curr, imageInputName);
+
+            InferRequest::Ptr request;
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+
+                request = std::move(emptyRequests.front());
+                emptyRequests.pop_front();
             }
-
-            auto t1 = std::chrono::high_resolution_clock::now();
-            double ocv_decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
-
-            t0 = std::chrono::high_resolution_clock::now();
-            // Main sync point:
-            // in the truly Async mode we start the NEXT infer request, while waiting for the CURRENT to complete
-            // in the regular mode we start the CURRENT request and immediately wait for it's completion
-            if (isAsyncMode) {
-                if (isModeChanged) {
-                    async_infer_request_curr->StartAsync();
-                }
-                if (!isLastFrame) {
-                    async_infer_request_next->StartAsync();
-                }
-            } else if (!isModeChanged) {
-                async_infer_request_curr->StartAsync();
-            }
-
-            if (OK == async_infer_request_curr->Wait(IInferRequest::WaitMode::RESULT_READY)) {
-                t1 = std::chrono::high_resolution_clock::now();
-                ms detection = std::chrono::duration_cast<ms>(t1 - t0);
-
-                t0 = std::chrono::high_resolution_clock::now();
-                ms wall = std::chrono::duration_cast<ms>(t0 - wallclock);
-                wallclock = t0;
-
-                t0 = std::chrono::high_resolution_clock::now();
-
-                presenter.drawGraphs(curr_frame);
-
-                std::ostringstream out;
-                out << "OpenCV cap/render time: " << std::fixed << std::setprecision(2)
-                    << (ocv_decode_time + ocv_render_time) << " ms";
-                cv::putText(curr_frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 255, 0));
-                out.str("");
-                out << "Wallclock time " << (isAsyncMode ? "(TRUE ASYNC):      " : "(SYNC, press Tab): ");
-                out << std::fixed << std::setprecision(2) << wall.count() << " ms (" << 1000.f / wall.count() << " fps)";
-                cv::putText(curr_frame, out.str(), cv::Point2f(0, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 0, 255));
-                if (!isAsyncMode) {  // In the true async mode, there is no way to measure detection time directly
-                    out.str("");
-                    out << "Detection time  : " << std::fixed << std::setprecision(2) << detection.count()
-                        << " ms ("
-                        << 1000.f / detection.count() << " fps)";
-                    cv::putText(curr_frame, out.str(), cv::Point2f(0, 75), cv::FONT_HERSHEY_TRIPLEX, 0.6,
-                                cv::Scalar(255, 0, 0));
-                }
-
-                // ---------------------------Process output blobs--------------------------------------------------
-                // Processing results of the CURRENT request
-                const float *detections = async_infer_request_curr->GetBlob(outputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type*>();
-                for (int i = 0; i < maxProposalCount; i++) {
-                    float image_id = detections[i * objectSize + 0];
-                    if (image_id < 0) {
-                        break;
+            frameToBlob(frame, request, ssd.get_imageInputName());
+                
+            ExecutionMode frameMode = currentMode;
+            request->SetCompletionCallback([&mutex,
+                                            &completedRequestResults,
+                                            nextFrameId,
+                                            frame,
+                                            request,
+                                            &ssd.get_outputName(),
+                                            startTime,
+                                            frameMode,
+                                            &emptyRequests,
+                                            &callbackException,
+                                            &condVar] {
+                {
+                    std::lock_guard<std::mutex> callbackLock(mutex);
+                
+                    try {
+                        completedRequestResults.insert(
+                            std::pair<int, RequestResult>(nextFrameId, RequestResult{
+                                frame,
+                                std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(ssd.get_outputName()))),
+                                startTime,
+                                frameMode
+                            }));
+                        
+                        emptyRequests.push_back(std::move(request));
                     }
-
-                    float confidence = detections[i * objectSize + 2];
-                    auto label = static_cast<int>(detections[i * objectSize + 1]);
-                    float xmin = detections[i * objectSize + 3] * width;
-                    float ymin = detections[i * objectSize + 4] * height;
-                    float xmax = detections[i * objectSize + 5] * width;
-                    float ymax = detections[i * objectSize + 6] * height;
-
-                    if (FLAGS_r) {
-                        std::cout << "[" << i << "," << label << "] element, prob = " << confidence <<
-                                  "    (" << xmin << "," << ymin << ")-(" << xmax << "," << ymax << ")"
-                                  << ((confidence > FLAGS_t) ? " WILL BE RENDERED!" : "") << std::endl;
-                    }
-
-                    if (confidence > FLAGS_t) {
-                        /** Drawing only objects when > confidence_threshold probability **/
-                        std::ostringstream conf;
-                        conf << ":" << std::fixed << std::setprecision(3) << confidence;
-                        cv::putText(curr_frame,
-                                    (static_cast<size_t>(label) < labels.size() ?
-                                    labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
-                                    cv::Point2f(xmin, ymin - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
-                                    cv::Scalar(0, 0, 255));
-                        cv::rectangle(curr_frame, cv::Point2f(xmin, ymin), cv::Point2f(xmax, ymax), cv::Scalar(0, 0, 255));
+                    catch (...) {
+                        if (!callbackException) {
+                            callbackException = std::current_exception();
+                        }
                     }
                 }
-            }
+                condVar.notify_one();
+            });
 
-            if (!FLAGS_no_show) {
-                cv::imshow("Detection results", curr_frame);
-            }
-
-            t1 = std::chrono::high_resolution_clock::now();
-            ocv_render_time = std::chrono::duration_cast<ms>(t1 - t0).count();
-
-            if (isLastFrame) {
-                break;
-            }
-
-            if (isModeChanged) {
-                isModeChanged = false;
-            }
-
-            // Final point:
-            // in the truly Async mode we swap the NEXT and CURRENT requests for the next iteration
-            curr_frame = next_frame;
-            next_frame = cv::Mat();
-            if (isAsyncMode) {
-                async_infer_request_curr.swap(async_infer_request_next);
-            }
-
-            const int key = cv::waitKey(1);
-            if (27 == key)  // Esc
-                break;
-            if (9 == key) {  // Tab
-                isAsyncMode ^= true;
-                isModeChanged = true;
-            } else {
-                presenter.handleKey(key);
-            }
+            request->StartAsync();
+            nextFrameId++;
         }
         // -----------------------------------------------------------------------------------------------------
-        auto total_t1 = std::chrono::high_resolution_clock::now();
-        ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
-        std::cout << "Total Inference time: " << total.count() << std::endl;
+        
+        // --------------------------- 8. Report metrics -------------------------------------------------------
+        slog::info << slog::endl << "Metric reports:" << slog::endl;
+
+        auto totalT1 = std::chrono::steady_clock::now();
+        Ms totalTime = std::chrono::duration_cast<Ms>(totalT1 - totalT0);
+        std::cout << std::endl << "Total Inference time: " << totalTime.count() << std::endl;
 
         /** Show performace results **/
         if (FLAGS_pc) {
-            printPerformanceCounts(*async_infer_request_curr, std::cout, getFullDeviceName(ie, FLAGS_d));
+            if (currentMode == ExecutionMode::USER_SPECIFIED) {
+                for (const auto& request: userSpecifiedInferRequests) {
+                    printPerformanceCounts(*request, std::cout, getFullDeviceName(ie, FLAGS_d));
+                }
+            } else printPerformanceCounts(*minLatencyInferRequest, std::cout, getFullDeviceName(ie, FLAGS_d));
         }
-        std::cout << presenter.reportMeans() << '\n';
+
+        std::chrono::steady_clock::time_point endTime;
+        if (modeInfo[ExecutionMode::USER_SPECIFIED].framesCount) {
+            std::cout << std::endl;
+            std::cout << "USER_SPECIFIED mode:" << std::endl;
+            endTime = (modeInfo[ExecutionMode::USER_SPECIFIED].lastEndTime.time_since_epoch().count() != 0)
+                      ? modeInfo[ExecutionMode::USER_SPECIFIED].lastEndTime
+                      : totalT1;
+            std::cout << "FPS: " << std::fixed << std::setprecision(1)
+                << modeInfo[ExecutionMode::USER_SPECIFIED].framesCount / std::chrono::duration_cast<Sec>(
+                    endTime - modeInfo[ExecutionMode::USER_SPECIFIED].lastStartTime).count() << std::endl;
+            std::cout << "Latency: " << std::fixed << std::setprecision(1)
+                << ((std::chrono::duration_cast<Ms>(modeInfo[ExecutionMode::USER_SPECIFIED].latencySum).count() /
+                     modeInfo[ExecutionMode::USER_SPECIFIED].framesCount)) << " ms" << std::endl;
+        }
+
+        if (modeInfo[ExecutionMode::MIN_LATENCY].framesCount) {
+            std::cout << std::endl;
+            std::cout << "MIN_LATENCY mode:" << std::endl;
+            endTime = (modeInfo[ExecutionMode::MIN_LATENCY].lastEndTime.time_since_epoch().count() != 0)
+                      ? modeInfo[ExecutionMode::MIN_LATENCY].lastEndTime
+                      : totalT1;
+            std::cout << "FPS: " << std::fixed << std::setprecision(1)
+                << modeInfo[ExecutionMode::MIN_LATENCY].framesCount / std::chrono::duration_cast<Sec>(
+                    endTime - modeInfo[ExecutionMode::MIN_LATENCY].lastStartTime).count() << std::endl;
+            std::cout << "Latency: " << std::fixed << std::setprecision(1)
+                << ((std::chrono::duration_cast<Ms>(modeInfo[ExecutionMode::MIN_LATENCY].latencySum).count() /
+                     modeInfo[ExecutionMode::MIN_LATENCY].framesCount)) << " ms" << std::endl;
+        }
+
+        std::cout << std::endl << presenter.reportMeans() << '\n';
+        // -----------------------------------------------------------------------------------------------------
+
+        // --------------------------- 9. Wait for running Infer Requests --------------------------------------
+        if (currentMode == ExecutionMode::USER_SPECIFIED) {
+            for (const auto& request: userSpecifiedInferRequests) {
+                request->Wait(IInferRequest::WaitMode::RESULT_READY);
+            }
+        } else minLatencyInferRequest->Wait(IInferRequest::WaitMode::RESULT_READY);
+        // -----------------------------------------------------------------------------------------------------
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
@@ -409,6 +489,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << "Execution successful" << slog::endl;
+    slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
     return 0;
 }
