@@ -71,6 +71,7 @@ from .hit_ratio import HitRatioAdapter
 
 from .mask_rcnn import MaskRCNNAdapter
 from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
+from .yolact import YolactAdapter
 
 from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
 
@@ -144,6 +145,7 @@ __all__ = [
 
     'MaskRCNNAdapter',
     'MaskRCNNWithTextAdapter',
+    'YolactAdapter',
 
     'MachineTranslationAdapter',
     'QuestionAnsweringAdapter',
