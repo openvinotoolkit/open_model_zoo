@@ -20,7 +20,7 @@ import json
 import numpy as np
 
 from ..representation import CharacterRecognitionAnnotation
-from ..config import PathField, NumberField
+from ..config import PathField, NumberField, BoolField
 from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
 
 
@@ -33,7 +33,8 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
         params = super().parameters()
         params.update({
             'annotation_file': PathField(optional=True),
-            'top_n': NumberField(optional=True, default=100, value_type=int)
+            'top_n': NumberField(optional=True, default=100, value_type=int),
+            'use_numpy': BoolField(optional=True, default=False)
         })
         return params
 
@@ -41,9 +42,10 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
         self.data_dir = self.get_value_from_config('data_dir')
         self.annotation_file = self.get_value_from_config('annotation_file')
         self.top_n = self.get_value_from_config('top_n')
+        self.numpy_files = self.get_value_from_config('use_numpy')
 
     def convert(self, check_content=False, **kwargs):
-        _, file_list = self.create_annotation_list() if self.annotation_file else [], []
+        _, file_list = self.create_annotation_list()
         pattern = re.compile(r'([0-9\-]+)\s+(.+)')
         annotations = []
         data_folder = Path(self.data_dir)
@@ -56,11 +58,12 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
                     name = res.group(1)
                     transcript = res.group(2)
                     fname = txt.parent / name
-                    fname = fname.with_suffix('.wav')
+                    fname = fname.with_suffix('.wav' if not self.numpy_files else '.npy')
                     if file_list and fname.name not in file_list:
                         continue
+                    identifier = str(fname.relative_to(data_folder))
                     annotations.append(CharacterRecognitionAnnotation(
-                        str(fname.relative_to(data_folder)), transcript.upper()
+                        identifier, transcript.upper()
                     ))
         return ConverterReturn(annotations, None, None)
 
@@ -68,12 +71,17 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
         annotation_list = []
         durations = []
         file_names = []
+        if self.annotation_file is None:
+            return [], []
         with self.annotation_file.open() as json_file:
             for line in json_file:
                 record = json.loads(line)
                 annotation_list.append(record)
                 durations.append(float(record['duration']))
-                file_names.append(Path(record["audio_filepath"]).name)
+                filename = Path(record["audio_filepath"]).name
+                if self.numpy_files:
+                    filename = filename.replace('wav', 'npy')
+                file_names.append(filename)
 
         if self.top_n:
             sorted_by_duration = np.argsort(durations)
