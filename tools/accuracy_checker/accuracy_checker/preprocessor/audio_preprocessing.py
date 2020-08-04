@@ -692,8 +692,10 @@ class AudioToMelSpectrogram(Preprocessor):
         self.filterbanks = np.expand_dims(self.mel(
             self.sample_rate, self.n_fft, n_mels=self.nfilt, fmin=self.lowfreq, fmax=self.highfreq
         ), 0)
-
-        image.data = self.process_single(image.data) if not isinstance(image.data, list) else [self.process_single(data) for data in image.data]
+        if not isinstance(image.data, list):
+            image.data = self.process_single(image.data)
+        else:
+            image.data = [self.process_single(data) for data in image.data]
         return image
 
     def process_single(self, x):

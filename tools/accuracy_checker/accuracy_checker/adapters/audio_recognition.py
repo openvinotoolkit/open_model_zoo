@@ -209,8 +209,9 @@ class CTCGreedyDecoder(Adapter):
         if self.softmaxed_probabilities:
             output = np.log(output)
         argmx = output.argmax(axis=-1)
+        decoded_output = self._ctc_decoder_prediction(argmx, self.alphabet)[0].upper()
 
-        return [CharacterRecognitionPrediction(identifiers[0], self._ctc_decoder_prediction(argmx, self.alphabet)[0].upper())]
+        return [CharacterRecognitionPrediction(identifiers[0], decoded_output)]
 
     @staticmethod
     def _ctc_decoder_prediction(prediction, labels):
