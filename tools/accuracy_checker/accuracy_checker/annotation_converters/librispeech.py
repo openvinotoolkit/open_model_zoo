@@ -33,7 +33,7 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
         params = super().parameters()
         params.update({
             'annotation_file': PathField(optional=True),
-            'top_n': NumberField(optional=True, default=100, value_type=int)
+            'top_n': NumberField(optional=True, value_type=int)
         })
         return params
 
@@ -43,7 +43,7 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
         self.top_n = self.get_value_from_config('top_n')
 
     def convert(self, check_content=False, **kwargs):
-        annotation_list, file_list = self.create_annotation_list() if self.annotation_file else None, None
+        _, file_list = self.create_annotation_list() if self.annotation_file else None, []
         pattern = re.compile(r'([0-9\-]+)\s+(.+)')
         annotations = []
         data_folder = Path(self.data_dir)
@@ -57,7 +57,7 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
                     transcript = res.group(2)
                     fname = txt.parent / name
                     fname = fname.with_suffix('.wav')
-                    if file_list is not None and fname.name not in file_list:
+                    if file_list and fname.name not in file_list:
                         continue
                     annotations.append(CharacterRecognitionAnnotation(
                         str(fname.relative_to(data_folder)), transcript.upper()

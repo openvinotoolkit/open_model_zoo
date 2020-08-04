@@ -602,30 +602,6 @@ class TrimmingAudio(Preprocessor):
         array = np.lib.stride_tricks.as_strided(y_mono, shape, strides)
         return np.mean(np.abs(array) ** 2, axis=0, keepdims=True)
 
-<<<<<<< 956b2cb9de1afa7963dea6c33bdd4584ce74a1fc
-=======
-
-def as_strided(x, shape, strides):
-    class DummyArray:
-        """Dummy object that just exists to hang __array_interface__ dictionaries
-        and possibly keep alive a reference to a base array.
-        """
-
-        def __init__(self, interface, base=None):
-            self.__array_interface__ = interface
-            self.base = base
-
-    interface = dict(x.__array_interface__)
-    if shape is not None:
-        interface['shape'] = tuple(shape)
-    if strides is not None:
-        interface['strides'] = tuple(strides)
-
-    array = np.asarray(DummyArray(interface, base=x))
-    # The route via `__interface__` does not preserve structured
-    # dtypes. Since dtype should remain unchanged, we set it explicitly.
-    array.dtype = x.dtype
-    return array
 
 windows = {
     'hann': np.hanning,

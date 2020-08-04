@@ -20,7 +20,7 @@ try:
 except ImportError:
     editdistance = None
 
-from ..config import BoolField, ConfigError
+from ..config import ConfigError
 from ..representation import (
     CharacterRecognitionAnnotation,
     CharacterRecognitionPrediction,

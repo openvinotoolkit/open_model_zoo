@@ -250,6 +250,7 @@ class BaseModel:
         pass
 
 
+# pylint: disable=E0203
 class BaseDLSDKModel:
     def _reshape_input(self, input_shapes):
         del self.exec_network
