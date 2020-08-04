@@ -18,7 +18,7 @@ from enum import Enum
 from pathlib import Path
 from copy import deepcopy
 from skimage.measure import find_contours
-from shapely.geometry import Polygon, MultiPolygon
+from shapely.geometry import Polygon
 
 import numpy as np
 
@@ -60,10 +60,9 @@ class SegmentationRepresentation(BaseRepresentation):
         for contour in contours:
             poly = Polygon(contour)
             poly = poly.simplify(1.0, preserve_topology=False)
-            polygons.append(poly)
+            polygons.append(poly.bounds)
 
-        multi_poly = MultiPolygon(polygons)
-        return multi_poly.bounds
+        return polygons
 
 
 class SegmentationAnnotation(SegmentationRepresentation):
@@ -214,17 +213,19 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
             areas.append(maskUtils.area(mask))
         return areas
 
-    @staticmethod
-    def to_polygon(mask):
-        polygons = []
-        for elem in mask:
+    def to_polygon(self):
+        polygons = {}
+        for elem, label in zip(self.raw_mask, self.labels):
             elem = maskUtils.decode(elem)
             contours = find_contours(elem, 0.5, positive_orientation='low')
 
             for contour in contours:
                 poly = Polygon(contour)
                 poly = poly.simplify(1.0, preserve_topology=False)
-                polygons.append(poly.bounds)
+                if label not in polygons:
+                    polygons[label] = [poly.bounds]
+                else:
+                    polygons[label].append(poly.bounds)
 
         return polygons
 
