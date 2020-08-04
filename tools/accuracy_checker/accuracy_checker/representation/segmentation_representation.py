@@ -17,6 +17,8 @@ limitations under the License.
 from enum import Enum
 from pathlib import Path
 from copy import deepcopy
+from skimage.measure import find_contours
+from shapely.geometry import Polygon, MultiPolygon
 
 import numpy as np
 
@@ -50,7 +52,18 @@ LOADERS_MAPPING = {
 
 
 class SegmentationRepresentation(BaseRepresentation):
-    pass
+    @staticmethod
+    def to_polygon(mask):
+        contours = find_contours(mask, 0.5, positive_orientation='low')
+
+        polygons = []
+        for contour in contours:
+            poly = Polygon(contour)
+            poly = poly.simplify(1.0, preserve_topology=False)
+            polygons.append(poly)
+
+        multi_poly = MultiPolygon(polygons)
+        return multi_poly.bounds
 
 
 class SegmentationAnnotation(SegmentationRepresentation):
@@ -200,6 +213,20 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
         for mask in masks:
             areas.append(maskUtils.area(mask))
         return areas
+
+    @staticmethod
+    def to_polygon(mask):
+        polygons = []
+        for elem in mask:
+            elem = maskUtils.decode(elem)
+            contours = find_contours(elem, 0.5, positive_orientation='low')
+
+            for contour in contours:
+                poly = Polygon(contour)
+                poly = poly.simplify(1.0, preserve_topology=False)
+                polygons.append(poly.bounds)
+
+        return polygons
 
 
 class CoCoInstanceSegmentationAnnotation(CoCoInstanceSegmentationRepresentation):
