@@ -176,7 +176,7 @@ def main():
             O_t = dec_res['O_t']
             logit = dec_res['logit']
             logits.append(logit)
-            tgt = np.array([[np.argmax(np.array(logit), axis=1)]])
+            tgt = np.array([[np.argmax(logit, axis=1)]])
 
             if tgt[0][0][0] == END_TOKEN:
                 break
