@@ -1,6 +1,6 @@
 # Im2LaTeX Python\* Demo
 
-This demo shows how to run im2latex models. Im2latex models allow us to get latex formula markup from the image.
+This demo shows how to run im2latex models. Im2latex models allow to get a latex formula markup from the image.
 
 > **NOTE**: Only batch size of 1 is supported.
 
@@ -8,16 +8,16 @@ This demo shows how to run im2latex models. Im2latex models allow us to get late
 
 The demo application expects an im2latex model that is split into two parts. Every model part must be in the Intermediate Representation (IR) format.
 
-First model is Encoder which extracts features from image and prepares first steps of the decoder
+The First model is Encoder which extracts features from an image and prepares first steps of the decoder.
 
 * One input is `imgs` for input image 
-* Four outputs including:
+* Four outputs are:
     * `row_enc_out` extracts features from the image
     * `hidden` and 
     * `context` are intermediate states of the LSTM
     * `init_0` - first state of the encoder
 
-Second model is Decode Step that takes as input:
+Second model is Decoder that takes as input:
 * `row_enc_out` - extracted images features from the encoder
 * `dec_st_c` and
 * `dec_st_h` - current states of the LSTM
@@ -29,10 +29,10 @@ As input, the demo application takes a path to a single image file with a comman
 
 The demo workflow is the following:
 
-1. The demo application reads image/video frames one by one, crops and pads them to fit into the input image blob of the network (`imgs`). Crop and pad is used to keep size of the font.
+1. The demo application reads images one by one, crops and pads them to fit into the input image blob of the network (`imgs`). Crop and pad is used to keep size of the font.
 2. For each image, encoder extracts features from the image
 3. While length of the current formula is less then `--max_formula_len` or current token is not `END_TOKEN` Decode Step produces new tokens.
-5. The demo results in the text form into the console or in file if `-o` parameter specified. 
+5. The demo prints the decoded text into the console or in a file if `-o` parameter specified. 
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
