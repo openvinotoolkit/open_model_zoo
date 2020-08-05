@@ -106,13 +106,13 @@ class Crop(Preprocessor):
 
         if not no_resize:
             if width < new_width or height < new_height:
-                
-                    resized = np.array([width, height])
-                    if resized[0] < new_width:
-                        resized = resized * new_width / resized[0]
-                    if resized[1] < new_height:
-                        resized = resized * new_height / resized[1]
-                    data = cv2.resize(data, tuple(np.ceil(resized).astype(int)))
+
+                resized = np.array([width, height])
+                if resized[0] < new_width:
+                    resized = resized * new_width / resized[0]
+                if resized[1] < new_height:
+                    resized = resized * new_height / resized[1]
+                data = cv2.resize(data, tuple(np.ceil(resized).astype(int)))
 
             height, width = data.shape[:2]
             start_height = (height - new_height) // 2
