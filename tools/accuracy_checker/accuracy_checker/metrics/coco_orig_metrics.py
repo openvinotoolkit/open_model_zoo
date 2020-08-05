@@ -189,6 +189,8 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             cur_name = Path(pred.identifier).name
             assert cur_name in map_coco_img_file_name_to_img_id
             cur_img_id = map_coco_img_file_name_to_img_id[cur_name]
+            if pred.size == 0:
+                continue
 
             labels = pred.labels.tolist()
             scores = pred.scores.tolist()
