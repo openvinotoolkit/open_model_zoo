@@ -174,4 +174,5 @@ __all__ = [
     'AttributeClassificationAccuracy',
 
     'SpeechRecognitionWER',
+    'GreedyWER'
 ]
