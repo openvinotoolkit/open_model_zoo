@@ -169,6 +169,9 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
         self.integral = APIntegralType(self.get_value_from_config('integral'))
 
     def update(self, annotation, prediction):
+        print('detected boxes for {}'.format(annotation.identifier))
+        for idx, (label_id, score, box) in enumerate(zip(prediction.labels, prediction.scores, prediction.boxes)):
+            print('{}: {} {} [{}]'.format(idx, self.labels[label_id], score, ', '.join(box)))
         return self._calculate_map([annotation], [prediction])
 
     def evaluate(self, annotations, predictions):
