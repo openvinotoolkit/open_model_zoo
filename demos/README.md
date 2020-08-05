@@ -33,6 +33,7 @@ The Open Model Zoo includes the following demos:
 - [Text Detection C++ Demo](./text_detection_demo/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
 - [Text Spotting Python* Demo](./python_demos/text_spotting_demo/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Handwritten Japanese Recognition Python* Demo](./python_demos/handwritten_japanese_recognition_demo/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models.
+- [Im2latex formula recognition Python* Demo](./python_demos/im2latex_demo/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 
 \* Several C++ demos referenced above have simplified implementation in Python\*, located in the `python_demos` directory.
 
