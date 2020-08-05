@@ -16,16 +16,16 @@ limitations under the License.
 from pathlib import Path
 import numpy as np
 
-from accuracy_checker.adapters import create_adapter
-from accuracy_checker.config import ConfigError
-from accuracy_checker.data_readers import BaseReader
-from accuracy_checker.dataset import Dataset
-from accuracy_checker.evaluators import BaseEvaluator
-from accuracy_checker.launcher import create_launcher
-from accuracy_checker.metrics import MetricsExecutor
-from accuracy_checker.preprocessor import PreprocessingExecutor
-from accuracy_checker.representation import CharacterRecognitionAnnotation, CharacterRecognitionPrediction
-from accuracy_checker.utils import contains_all, extract_image_representations
+from ..base_evaluator import BaseEvaluator
+from ...adapters import create_adapter
+from ...config import ConfigError
+from ...utils import contains_all, extract_image_representations
+from ...launcher import create_launcher
+from ...data_readers import BaseReader
+from ...dataset import Dataset
+from ...metrics import MetricsExecutor
+from ...preprocessor import PreprocessingExecutor
+from ...representation import CharacterRecognitionPrediction
 
 
 class Im2latexEvaluator(BaseEvaluator):
