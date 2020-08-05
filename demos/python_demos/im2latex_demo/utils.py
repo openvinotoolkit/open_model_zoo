@@ -50,52 +50,13 @@ class ResizePadToTGTShape():
 
         img_h, img_w = image_raw.shape[0:2]
         if (img_h, img_w) != (self.target_height, self.target_width):
-            if img_h >= self.target_height and img_w >= self.target_width:
-                rescale_h = img_h / self.target_height
-                rescale_w = img_w / self.target_width
-                if rescale_h > rescale_w:
-                    new_h = int(img_h / rescale_h)
-                    new_w = int(img_w / rescale_h)
-                else:
-                    new_h = int(img_h / rescale_w)
-                    new_w = int(img_w / rescale_w)
-
-                image_raw = cv.resize(image_raw, (new_w, new_h))
-                img_h, img_w = image_raw.shape[0:2]
-                if (img_h, img_w != self.target_height, self.target_width):
-                    image_raw = cv.copyMakeBorder(image_raw, 0, self.target_height - img_h,
-                                                  0, self.target_width - img_w, cv.BORDER_CONSTANT,
-                                                  None, COLOR_WHITE)
-            elif img_h < self.target_height and img_w < self.target_width:
-                rescale_h = img_h / self.target_height
-                rescale_w = img_w / self.target_width
-                if rescale_h > rescale_w:
-                    new_h = int(img_h / rescale_h)
-                    new_w = int(img_w / rescale_h)
-                else:
-                    new_h = int(img_h / rescale_w)
-                    new_w = int(img_w / rescale_w)
-                image_raw = cv.resize(image_raw, (new_w, new_h))
-                img_h, img_w = image_raw.shape[0:2]
-                if (img_h, img_w != self.target_height, self.target_width):
-                    image_raw = cv.copyMakeBorder(image_raw, 0, self.target_height - img_h,
-                                                  0, self.target_width - img_w, cv.BORDER_CONSTANT,
-                                                  None, COLOR_WHITE)
-            elif img_h < self.target_height and img_w >= self.target_width:
-                dim = (self.target_width, int(
-                    self.target_width * img_h / img_w))
-                image_raw = cv.resize(image_raw, dim)
-                image_raw = cv.copyMakeBorder(image_raw, 0, self.target_height - image_raw.shape[0],
-                                              0, 0, cv.BORDER_CONSTANT, None,
-                                              COLOR_WHITE)
-            elif img_h >= self.target_height and img_w < self.target_width:
-                dim = (int(self.target_height * img_w / img_h),
-                       self.target_height)
-                image_raw = cv.resize(image_raw, dim)
-                img_h, img_w = image_raw.shape[0:2]
-                image_raw = cv.copyMakeBorder(image_raw, 0, 0,
-                                              0, self.target_width - img_w, cv.BORDER_CONSTANT,
-                                              None, COLOR_WHITE)
+            scale = min(self.target_height / img_h, self.target_width / img_w)
+            image_raw = cv.resize(image_raw, None, fx=scale, fy=scale)
+            img_h, img_w = image_raw.shape[0:2]
+            image_raw = cv.copyMakeBorder(image_raw, 0, abs(self.target_height - img_h),
+                                          0, abs(self.target_width -
+                                                 img_w), cv.BORDER_CONSTANT,
+                                          None, COLOR_WHITE)
         return image_raw
 
 
@@ -106,34 +67,13 @@ class CropPadToTGTShape():
     def __call__(self, image_raw):
         img_h, img_w = image_raw.shape[0:2]
         if (img_h, img_w) != (self.target_height, self.target_width):
-            if img_h >= self.target_height and img_w >= self.target_width:
-                if len(image_raw.shape) > 2:
-                    image_raw = image_raw[:self.target_height,
-                                          :self.target_width, :]
-                    assert image_raw.shape[1] == self.target_width
-                else:
-                    image_raw = image_raw[:self.target_height,
-                                          :self.target_width]
-            elif img_h < self.target_height and img_w < self.target_width:
-
-                image_raw = cv.copyMakeBorder(image_raw, 0, self.target_height - img_h,
-                                              0, self.target_width - img_w, cv.BORDER_CONSTANT,
-                                              None, COLOR_WHITE)
-            elif img_h < self.target_height and img_w >= self.target_width:
-                if len(image_raw.shape) > 2:
-                    image_raw = image_raw[:, :self.target_width, :]
-                else:
-                    image_raw = image_raw[:, :self.target_width]
-                image_raw = cv.copyMakeBorder(image_raw, 0, self.target_height - image_raw.shape[0],
-                                              0, 0, cv.BORDER_CONSTANT, None,
-                                              COLOR_WHITE)
-            elif img_h >= self.target_height and img_w < self.target_width:
-                if len(image_raw.shape) > 2:
-                    image_raw = image_raw[:self.target_height, :, :]
-                else:
-                    image_raw = image_raw[:self.target_height, :]
-                img_h, img_w = image_raw.shape[0:2]
-                image_raw = cv.copyMakeBorder(image_raw, 0, 0,
-                                              0, self.target_width - img_w, cv.BORDER_CONSTANT,
-                                              None, COLOR_WHITE)
+            new_w = min(self.target_width, img_w)
+            new_h = min(self.target_height, img_h)
+            image_raw = image_raw[:new_h,
+                                  :new_w, :]
+            assert (image_raw.shape == self.target_height, self.target_width)
+            img_h, img_w = image_raw.shape[0:2]
+            image_raw = cv.copyMakeBorder(image_raw, 0, self.target_height - img_h,
+                                          0, self.target_width - img_w, cv.BORDER_CONSTANT,
+                                          None, COLOR_WHITE)
         return image_raw
