@@ -195,3 +195,5 @@ More detailed information about calculation segmentation metrics you can find [h
 * `attribute_precision` - precision for attributes in attribute classification models. Supported representations: `ContainerAnnotation` with `ClassificationAnnotation` and `ContainerPrediction` with `ClassificationPrediction`.
   * `attributes`: names of attributes.
   * `calculate_average` - allows calculation of average precision (default value: `True`).
+* `wer` - Word error rate ([WER](https://en.wikipedia.org/wiki/Word_error_rate)). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
+* `greedy_wer` - approach to calculate WER as length normalized [edit distance](https://en.wikipedia.org/wiki/Edit_distance). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.

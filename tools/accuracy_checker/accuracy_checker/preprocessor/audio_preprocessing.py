@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import BoolField, BaseField, NumberField, ConfigError
+from ..config import BoolField, BaseField, NumberField, ConfigError, StringField
 from ..preprocessor import Preprocessor
 
 
@@ -178,6 +178,30 @@ class ClipAudio(Preprocessor):
                                   .format(self.__provider__, self.duration))
 
 
+class SamplesToFloat32(Preprocessor):
+    __provider__ = 'audio_samples_to_float32'
+
+    def process(self, image, annotation_meta=None):
+        image.data = self._convert_samples_to_float32(image.data)
+        return image
+
+    @staticmethod
+    def _convert_samples_to_float32(samples):
+        """Convert sample type to float32.
+        Audio sample type is usually integer or float-point.
+        Integers will be scaled to [-1, 1] in float32.
+        """
+        float32_samples = samples.astype('float32')
+        if samples.dtype in np.sctypes['int']:
+            bits = np.iinfo(samples.dtype).bits
+            float32_samples *= 1.0 / 2 ** (bits - 1)
+        elif samples.dtype in np.sctypes['float']:
+            pass
+        else:
+            raise TypeError("Unsupported sample type: {}.".format(samples.dtype))
+        return float32_samples
+
+
 class NormalizeAudio(Preprocessor):
     __provider__ = 'audio_normalization'
 
@@ -204,6 +228,7 @@ class NormalizeAudio(Preprocessor):
 
         return image
 
+
 class HanningWindow(Preprocessor):
     __provider__ = 'hanning_window'
 
@@ -221,15 +246,14 @@ class HanningWindow(Preprocessor):
         return parameters
 
     def configure(self):
-
         self.base = self.get_value_from_config('base')
         self.window = np.hanning(self.base)
-
 
     def process(self, image, annotation_meta=None):
         image.data = image.data * self.window
 
         return image
+
 
 class AudioSpectrogram(Preprocessor):
     __provider__ = 'audio_spectrogram'
@@ -496,3 +520,362 @@ class PackCepstrum(Preprocessor):
         image.metadata['multi_infer'] = True
 
         return image
+
+
+class TrimmingAudio(Preprocessor):
+    __provider__ = 'trim'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'top_db': NumberField(value_type=float, optional=True, default=60),
+            'frame_length': NumberField(value_type=int, optional=True, default=2048, min_value=1),
+            'hop_length': NumberField(value_type=int, optional=True, default=512, min_value=1)
+        })
+        return params
+
+    def configure(self):
+        self.top_db = self.get_value_from_config('top_db')
+        self.frame_length = self.get_value_from_config('frame_length')
+        self.hop_length = self.get_value_from_config('hop_length')
+
+    def process(self, image, annotation_meta=None):
+        image.data = self.trim(image.data)
+        return image
+
+    def trim(self, y):
+        def frames_to_samples(frames, hop):
+            return np.floor(np.asanyarray(frames) / hop).astype(int)
+
+        non_silent = self._signal_to_frame_nonsilent(y)
+        nonzero = np.flatnonzero(non_silent)
+
+        if nonzero.size > 0:
+            start = int(frames_to_samples(nonzero[0], self.hop_length))
+            end = min(y.shape[-1], int(frames_to_samples(nonzero[-1] + 1, self.hop_length)))
+        else:
+            # The signal only contains zeros
+            start, end = 0, 0
+
+        # Build the mono/stereo index
+        full_index = [slice(None)] * y.ndim
+        full_index[-1] = slice(start, end)
+
+        return y[tuple(full_index)]
+
+    def _signal_to_frame_nonsilent(self, y):
+        y_mono = np.asfortranarray(y)
+
+        if y_mono.ndim > 1:
+            y_mono = np.mean(y-y_mono, axis=0)
+
+        # Compute the MSE for the signal
+        mse = self.mse(y_mono)
+        amin = 1e-10
+        magnitude = mse.squeeze()
+        ref_value = np.max(magnitude)
+        log_spec = 10.0 * np.log10(np.maximum(amin, magnitude))
+        log_spec -= 10.0 * np.log10(np.maximum(amin, ref_value))
+
+        return log_spec > (-1 * self.top_db)
+
+    def mse(self, y_mono):
+        y_mono = np.pad(y_mono, int(self.frame_length // 2), mode='reflect')
+        n_frames = 1 + (y_mono.shape[-1] - self.frame_length) // self.hop_length
+        strides = np.asarray(y_mono.strides)
+        new_stride = np.prod(strides[strides > 0] // y_mono.itemsize) * y_mono.itemsize
+        shape = list(y_mono.shape)[:-1] + [self.frame_length, n_frames]
+        strides = list(strides) + [self.hop_length * new_stride]
+        array = np.lib.stride_tricks.as_strided(y_mono, shape, strides)
+        return np.mean(np.abs(array) ** 2, axis=0, keepdims=True)
+
+
+def as_strided(x, shape, strides):
+    class DummyArray:
+        """Dummy object that just exists to hang __array_interface__ dictionaries
+        and possibly keep alive a reference to a base array.
+        """
+
+        def __init__(self, interface, base=None):
+            self.__array_interface__ = interface
+            self.base = base
+
+    interface = dict(x.__array_interface__)
+    if shape is not None:
+        interface['shape'] = tuple(shape)
+    if strides is not None:
+        interface['strides'] = tuple(strides)
+
+    array = np.asarray(DummyArray(interface, base=x))
+    # The route via `__interface__` does not preserve structured
+    # dtypes. Since dtype should remain unchanged, we set it explicitly.
+    array.dtype = x.dtype
+    return array
+
+windows = {
+    'hann': np.hanning,
+    'hamming': np.hamming,
+    'blackman': np.blackman,
+    'bartlett': np.bartlett,
+    'none': None,
+}
+
+
+class AudioToMelSpectrogram(Preprocessor):
+    __provider__ = 'audio_to_mel_spectrogram'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'window_size': NumberField(optional=True, value_type=float, default=0.02),
+            'window_stride': NumberField(optional=True, value_type=float, default=0.01),
+            'window': StringField(
+                choices=windows.keys(), optional=True, default='hann'
+            ),
+            'n_fft': NumberField(optional=True, value_type=int)
+
+        })
+        return params
+
+    def configure(self):
+        self.window_size = self.get_value_from_config('window_size')
+        self.window_stride = self.get_value_from_config('window_stride')
+        self.n_fft = self.get_value_from_config('n_fft')
+        self.window_fn = windows.get(self.get_value_from_config('window'))
+        self.normalize = 'per_feature'
+        self.preemph = 0.97
+        self.nfilt = 64
+        self.lowfreq = 0
+        self.highfreq = None
+        self.pad_to = 16
+        self.max_duration = 16.7
+        self.frame_splicing = 1
+        self.pad_value = 0
+        self.mag_power = 2.0
+        self.dither = 1e-05
+        self.log = True
+        self.log_zero_guard_type = "add"
+        self.log_zero_guard_value = 2 ** -24
+
+    def process(self, image, annotation_meta=None):
+        sample_rate = image.metadata.get('sample_rate')
+        if sample_rate is None:
+            raise RuntimeError(
+                'Operation "{}" failed: required "sample rate" in metadata.'.format(self.__provider__)
+            )
+        self.window_length = int(self.window_size * sample_rate)
+        self.hop_length = int(self.window_stride * sample_rate)
+        self.n_fft = self.n_fft or 2 ** np.ceil(np.log2(self.window_length))
+        self.window = self.window_fn(self.window_length) if self.window_fn is not None else None
+        highfreq = self.highfreq or (sample_rate / 2)
+        filterbanks = np.expand_dims(self.mel(
+            sample_rate, self.n_fft, n_mels=self.nfilt, fmin=self.lowfreq, fmax=highfreq
+        ), 0)
+        x = image.data
+        seq_len = x.shape[-1]
+
+        # Calculate maximum sequence length
+        max_length = np.ceil(self.max_duration * sample_rate / self.hop_length)
+        max_pad = self.pad_to - (max_length % self.pad_to) if self.pad_to > 0 else 0
+        self.max_length = max_length + max_pad
+
+        seq_len = int(np.ceil(seq_len // self.hop_length))
+
+        # dither
+        if self.dither > 0:
+            x = x + self.dither * np.random.randn(*x.shape)
+
+        # do preemphasis
+        if self.preemph is not None:
+            x = np.concatenate((np.expand_dims(x[:, 0], 1), x[:, 1:] - self.preemph * x[:, :-1]), axis=1, )
+        x = self.stft(
+            x.squeeze(), n_fft=self.n_fft, hop_length=self.hop_length,
+            window=self.window, center=True, dtype=np.float32
+        )
+
+        # get power spectrum
+        if self.mag_power != 1.0:
+            x = x**self.mag_power
+
+        # dot with filterbank energies
+        x = np.matmul(filterbanks, x)
+
+        # log features if required
+        if self.log:
+            x = np.log(x + self.log_zero_guard_value)
+
+        # frame splicing if required
+        if self.frame_splicing > 1:
+            x = self.splice_frames(x, self.frame_splicing)
+
+        # normalize if required
+        if self.normalize:
+            x = self.normalize_batch(x, seq_len, normalize_type=self.normalize)
+
+        # mask to zero any values beyond seq_len in batch, pad to multiple of
+        # `pad_to` (for efficiency)
+        max_len = x.shape[-1]
+        mask = np.arange(max_len)
+        mask = mask >= seq_len
+        x[:, :, mask] = self.pad_value
+        del mask
+        pad_to = self.pad_to
+        if pad_to > 0:
+            pad_amt = x.shape[-1] % pad_to
+            if pad_amt != 0:
+                x = np.pad(x, ((0, 0), (0, 0), (0, pad_to - pad_amt)), constant_values=self.pad_value, mode='constant')
+
+        image.data = x
+        return image
+
+    def mel(self, sr, n_fft, n_mels=128, fmin=0.0, fmax=None, dtype=np.float32):
+        if fmax is None:
+            fmax = float(sr) / 2
+        n_mels = int(n_mels)
+        weights = np.zeros((n_mels, int(1 + n_fft // 2)), dtype=dtype)
+        # Center freqs of each FFT bin
+        fftfreqs = np.linspace(0, float(sr) / 2, int(1 + n_fft // 2), endpoint=True)
+        # 'Center freqs' of mel bands - uniformly spaced between limits
+        mel_f = self.mel_frequencies(n_mels + 2, fmin=fmin, fmax=fmax)
+        fdiff = np.diff(mel_f)
+        ramps = np.subtract.outer(mel_f, fftfreqs)
+        for i in range(n_mels):
+            # lower and upper slopes for all bins
+            lower = -ramps[i] / fdiff[i]
+            upper = ramps[i + 2] / fdiff[i + 1]
+
+            # .. then intersect them with each other and zero
+            weights[i] = np.maximum(0, np.minimum(lower, upper))
+
+        # Slaney-style mel is scaled to be approx constant energy per channel
+        enorm = 2.0 / (mel_f[2:n_mels + 2] - mel_f[:n_mels])
+        weights *= enorm[:, np.newaxis]
+
+        return weights
+
+    @staticmethod
+    def mel_frequencies(n_mels=128, fmin=0.0, fmax=11025.0):
+        def hz_to_mel(frequencies):
+            frequencies = np.asanyarray(frequencies)
+            f_min = 0.0
+            f_sp = 200.0 / 3
+            mels = (frequencies - f_min) / f_sp
+            min_log_hz = 1000.0
+            min_log_mel = (min_log_hz - f_min) / f_sp
+            logstep = np.log(6.4) / 27.0
+            if frequencies.ndim:
+                log_t = (frequencies >= min_log_hz)
+                mels[log_t] = min_log_mel + np.log(frequencies[log_t] / min_log_hz) / logstep
+            elif frequencies >= min_log_hz:
+                mels = min_log_mel + np.log(frequencies / min_log_hz) / logstep
+            return mels
+
+        def mel_to_hz(mels):
+            mels = np.asanyarray(mels)
+            f_min = 0.0
+            f_sp = 200.0 / 3
+            freqs = f_min + f_sp * mels
+            min_log_hz = 1000.0
+            min_log_mel = (min_log_hz - f_min) / f_sp
+            logstep = np.log(6.4) / 27.0
+
+            if mels.ndim:
+                log_t = (mels >= min_log_mel)
+                freqs[log_t] = min_log_hz * np.exp(logstep * (mels[log_t] - min_log_mel))
+            elif mels >= min_log_mel:
+                freqs = min_log_hz * np.exp(logstep * (mels - min_log_mel))
+            return freqs
+
+        min_mel = hz_to_mel(fmin)
+        max_mel = hz_to_mel(fmax)
+        mels = np.linspace(min_mel, max_mel, n_mels)
+        return mel_to_hz(mels)
+
+    @staticmethod
+    def stft(y, n_fft, hop_length, window, center=True, dtype=np.complex64, pad_mode='reflect'):
+        # Constrain STFT block sizes to 256 KB
+        MAX_MEM_BLOCK = 2 ** 8 * 2 ** 10
+
+        def pad_center(data, size, axis=-1, **kwargs):
+            kwargs.setdefault('mode', 'constant')
+            n = data.shape[axis]
+            lpad = int((size - n) // 2)
+            lengths = [(0, 0)] * data.ndim
+            lengths[axis] = (lpad, int(size - n - lpad))
+            return np.pad(data, lengths, **kwargs)
+
+        def frame(x, frame_length=2048, hop_length=512):
+            '''Slice a data array into (overlapping) frames.'''
+
+            n_frames = (x.shape[-1] - frame_length) // hop_length
+            strides = np.asarray(x.strides)
+
+            new_stride = np.prod(strides[strides > 0] // x.itemsize) * x.itemsize
+            shape = list(x.shape)[:-1] + [frame_length, n_frames]
+            strides = list(strides) + [hop_length * new_stride]
+
+            return np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
+
+        fft_window = np.asarray(window)
+
+        # Pad the window out to n_fft size
+        fft_window = pad_center(fft_window, n_fft)
+
+        # Reshape so that the window can be broadcast
+        fft_window = fft_window.reshape((-1, 1))
+        # # Pad the time series so that frames are centered
+        if center:
+            y = np.pad(y, int(n_fft // 2), mode=pad_mode)
+
+        # Window the time series.
+        y_frames = frame(y, frame_length=n_fft, hop_length=hop_length)
+
+        # Pre-allocate the STFT matrix
+        stft_matrix = np.empty((int(1 + n_fft // 2), y_frames.shape[1]),
+                               dtype=dtype,
+                               order='F')
+
+        # how many columns can we fit within MAX_MEM_BLOCK?
+        n_columns = int(MAX_MEM_BLOCK / (stft_matrix.shape[0] *
+                                         stft_matrix.itemsize))
+
+        for bl_s in range(0, stft_matrix.shape[1], n_columns):
+            bl_t = min(bl_s + n_columns, stft_matrix.shape[1])
+
+            # RFFT and Conjugate here to match phase from DPWE code
+            rfft = fft_window * y_frames[:, bl_s:bl_t]
+            stft_matrix[:, bl_s:bl_t] = np.fft.rfft(rfft, axis=0)[:stft_matrix.shape[0]]
+
+        return stft_matrix
+
+    @staticmethod
+    def splice_frames(x, frame_splicing):
+        seq = [x]
+        for n in range(1, frame_splicing):
+            seq.append(np.concatenate([x[:, :, :n], x[:, :, n:]], axis=2))
+        return np.concatenate(seq, axis=1)
+
+    @staticmethod
+    def normalize_batch(x, seq_len, normalize_type):
+        if normalize_type == "per_feature":
+            x_mean = np.zeros((x.shape[0], x.shape[1]), dtype=x.dtype)
+            x_std = np.zeros((x.shape[0], x.shape[1]), dtype=x.dtype)
+            for i in range(x.shape[0]):
+                x_mean[i, :] = x[i, :seq_len].mean(axis=1)
+                x_std[i, :] = x[i, :seq_len].std(axis=1)
+            # make sure x_std is not zero
+            x_std += 1e-5
+            return (x - np.expand_dims(x_mean, 2)) / np.expand_dims(x_std, 2)
+
+        if normalize_type == "all_features":
+            x_mean = np.zeros(seq_len, dtype=x.dtype)
+            x_std = np.zeros(seq_len, dtype=x.dtype)
+            for i in range(x.shape[0]):
+                x_mean[i] = x[i, :, : seq_len[i].item()].mean()
+                x_std[i] = x[i, :, : seq_len[i].item()].std()
+            # make sure x_std is not zero
+            x_std += 1e-5
+            return x - np.reshape(x_mean, (-1, 1, 1)) / np.reshape(x_std, (-1, 1, 1))
+        return x

@@ -33,7 +33,10 @@ from .audio_preprocessing import (
     AudioSpectrogram,
     TriangleFiltering,
     DCT,
-    ClipCepstrum
+    ClipCepstrum,
+    TrimmingAudio,
+    SamplesToFloat32,
+    AudioToMelSpectrogram
 )
 
 from .normalization import Normalize, Normalize3d
@@ -69,6 +72,9 @@ __all__ = [
     'TriangleFiltering',
     'DCT',
     'ClipCepstrum',
+    'TrimmingAudio',
+    'SamplesToFloat32',
+    'AudioToMelSpectrogram',
 
     'Resize',
     'Resize3D',
