@@ -41,33 +41,26 @@ The demo workflow is the following:
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: im2latex_demo.py [-h] -m_encoder ENCODER -m_dec_step DEC_STEP -i INPUT
-                        [INPUT ...] [-o OUTPUT_FILE] [-l CPU_EXTENSION]
-                        [--vocab_path VOCAB_PATH] --target_shape TARGET_SHAPE
-                        [TARGET_SHAPE ...] [--max_formula_len MAX_FORMULA_LEN]
-                        [-d DEVICE] [-pf]
+usage: im2latex_demo.py [-h] -m_encoder M_ENCODER -m_decoder M_DECODER -i
+                        INPUT [-o OUTPUT_FILE] --vocab_path VOCAB_PATH
+                        [--max_formula_len MAX_FORMULA_LEN] [-d DEVICE]
+                        --preprocessing_type {Resize,Crop} [-pc]
 
 Options:
   -h, --help            Show this help message and exit.
-  -m_encoder M_ENCODER     Required. Path to an .xml file with a trained encoder
+  -m_encoder M_ENCODER  Required. Path to an .xml file with a trained encoder
                         part of the model
-  -m_dec_step M_DEC_STEP   Required. Path to an .xml file with a trained decoder
-                        step part of the model
-  -i INPUT [INPUT ...], --input INPUT [INPUT ...]
+  -m_decoder M_DECODER  Required. Path to an .xml file with a trained decoder
+                        part of the model
+  -i INPUT, --input INPUT
                         Required. Path to a folder with images or path to an
                         image files
   -o OUTPUT_FILE, --output_file OUTPUT_FILE
                         Optional. Path to file where to store output. If not
                         mentioned, result will be storedin the console.
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        MKLDNN (CPU)-targeted custom layers. Absolute path to
-                        a shared library with the kernels implementations
   --vocab_path VOCAB_PATH
-                        Path to vocab file to construct meaningful phrase
-  --target_shape TARGET_SHAPE [TARGET_SHAPE ...]
-                        Required. Target image shape (height, width). Example:
-                        100 500
+                        Required. Path to vocab file to construct meaningful
+                        phrase
   --max_formula_len MAX_FORMULA_LEN
                         Optional. Defines maximum length of the formula
                         (number of tokens to decode)
@@ -76,7 +69,9 @@ Options:
                         GPU, FPGA, HDDL or MYRIAD is acceptable. Sample will
                         look for a suitable plugin for device specified.
                         Default value is CPU
-  -pf, --perf_stats
+  --preprocessing_type {Resize,Crop}
+                        Required. Type of the preprocessing
+  -pc, --perf_counts
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
@@ -89,9 +84,9 @@ To run the demo, please provide paths to the model in the IR format and to an in
 ```bash
 python im2latex_demo.py \
         -m_encoder <path_to_models>/encoder.xml \
-        -m_dec_step <path_to_models>/decode_step.xml \
+        -m_decoder <path_to_models>/decode_step.xml \
         --vocab_path <path_to_vocab> \
-        --target_shape <heigth width> \
+        --preprocessing <preproc type> \
         -i input_image.png
 ```
 
