@@ -24,15 +24,15 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
-from utils import BatchCropPadToTGTShape, BatchResizePadToTGTShape
+from utils import CropPadToTGTShape, ResizePadToTGTShape
 from utils import END_TOKEN, START_TOKEN, read_vocab
 from openvino.inference_engine import IECore, IENetwork
 
 COLOR_WHITE = 255
 
 PREPROCESSING = {
-    'BatchCropPadToTGTShape': BatchCropPadToTGTShape,
-    'BatchResizePadToTGTShape': BatchResizePadToTGTShape
+    'Crop': CropPadToTGTShape,
+    'Resize': ResizePadToTGTShape
 }
 
 def print_stats(module):
@@ -46,7 +46,7 @@ def print_stats(module):
 
 def preprocess_image(preprocess, image_raw, tgt_shape):
     target_height, target_width = tgt_shape
-    image_raw = preprocess(tgt_shape)(image_raw)[0]
+    image_raw = preprocess(tgt_shape)(image_raw)
     assert image_raw.shape[0] == target_height and image_raw.shape[1] == target_width, image_raw.shape
     image = image_raw / float(COLOR_WHITE)
     image = image.transpose((2, 0, 1))
@@ -70,9 +70,6 @@ def build_argparser():
                       type=str)
     args.add_argument("--vocab_path", help="Path to vocab file to construct meaningful phrase",
                       type=str)
-    args.add_argument("--target_shape", help="Required. Target image shape (height, width). "
-                      "Example: 100 500",
-                      required=True, type=int, nargs="+")
     args.add_argument("--max_formula_len",
                       help="Optional. Defines maximum length of the formula (number of tokens to decode)",
                       default="128", type=int)
@@ -80,8 +77,8 @@ def build_argparser():
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU", type=str)
-    args.add_argument('--preprocessing_type', choices=['BatchResizePadToTGTShape', 'BatchCropPadToTGTShape'],
-                    help="Type of the preprocessing", required=True)
+    args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
+                    help="Type of the preprocessing", required=True, default='Crop')
     args.add_argument('-pc', '--perf_counts',
                       action='store_true', default=False)
 
@@ -93,7 +90,6 @@ def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s",
                     level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
-    target_shape = tuple(args.target_shape)
     log.info("Creating Inference Engine")
     ie = IECore()
     ie.set_config(
@@ -132,7 +128,8 @@ def main():
     if len(not_supported_layers) != 0:
         log.error("Following layers are not supported by the plugin for specified device {}:\n{}".
                   format(args.device, ', '.join(not_supported_layers)))
-  
+    _, _, H,W = encoder.input_info['imgs'].input_data.shape
+    target_shape = (H, W)
     images_list = []
     if os.path.isdir(args.input):
         inputs = [os.path.join(args.input, inp) for inp in os.listdir(args.input)]
