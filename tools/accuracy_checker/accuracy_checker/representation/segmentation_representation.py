@@ -17,8 +17,7 @@ limitations under the License.
 from enum import Enum
 from pathlib import Path
 from copy import deepcopy
-from skimage.measure import find_contours
-from shapely.geometry import Polygon
+import cv2 as cv
 
 import numpy as np
 
@@ -59,17 +58,17 @@ class SegmentationRepresentation(BaseRepresentation):
             mask = np.argmax(mask, axis=0)
         indexes = np.unique(mask)
         for i in indexes:
-            binary_mask = (mask == i).astype(int)
+            binary_mask = np.uint8(mask == i)
 
-            contours = find_contours(binary_mask, 0.5, positive_orientation='low')
+            contours, _ = cv.findContours(binary_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
             for contour in contours:
-                poly = Polygon(contour).simplify(1.0, preserve_topology=False)
-                if poly.bounds:
+                if contour.size >= 6:
+                    contour = np.squeeze(contour, axis=1)
                     if i not in polygons:
-                        polygons[i] = [poly.bounds]
+                        polygons[i] = [contour]
                     else:
-                        polygons[i].append(poly.bounds)
+                        polygons[i].append(contour)
 
         return polygons
 
@@ -244,16 +243,17 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
     def to_polygon(self, segmentation_colors=None):
         polygons = {}
         for elem, label in zip(self.raw_mask, self.labels):
-            elem = maskUtils.decode(elem)
-            contours = find_contours(elem, 0.5, positive_orientation='low')
+            elem = np.uint8(maskUtils.decode(elem))
+
+            contours, _ = cv.findContours(elem, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
             for contour in contours:
-                poly = Polygon(contour).simplify(1.0, preserve_topology=False)
-                if poly.bounds:
+                if contour.size >= 6:
+                    contour = np.squeeze(contour, axis=1)
                     if label not in polygons:
-                        polygons[label] = [poly.bounds]
+                        polygons[label] = [contour]
                     else:
-                        polygons[label].append(poly.bounds)
+                        polygons[label].append(contour)
 
         return polygons
 
