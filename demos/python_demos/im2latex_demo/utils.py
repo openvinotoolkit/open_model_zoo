@@ -79,7 +79,6 @@ class BatchResizePadToTGTShape():
             img_h, img_w = image_raw.shape[0:2]
             if (img_h, img_w) != (target_height, target_width):
                 if img_h >= target_height and img_w >= target_width:
-                    # dim = (target_width, target_height)
                     rescale_h = img_h / target_height
                     rescale_w = img_w / target_width
                     if rescale_h > rescale_w:

@@ -60,7 +60,7 @@ def build_argparser():
                       default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument("-m_encoder", help="Required. Path to an .xml file with a trained encoder part of the model",
                       required=True, type=str)
-    args.add_argument("-m_dec_step", help="Required. Path to an .xml file with a trained decoder step part of the model",
+    args.add_argument("-m_dec_step", help="Required. Path to an .xml file with a trained decoder part of the model",
                       required=True, type=str)
     args.add_argument("-i", "--input", help="Required. Path to a folder with images or path to an image files",
                       required=True, type=str)
@@ -84,12 +84,10 @@ def build_argparser():
                     help="Type of the preprocessing", required=True)
     args.add_argument('-pc', '--perf_counts',
                       action='store_true', default=False)
-
     return parser
 
 
 def main():
-
     log.basicConfig(format="[ %(levelname)s ] %(message)s",
                     level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
@@ -145,7 +143,6 @@ def main():
     for filenm in tqdm(inputs):
         image_raw = cv2.imread(filenm)
         assert image_raw is not None, "Error reading image {}".format(filenm)
-        #
         image = image_raw
         image = preprocess_image(PREPROCESSING[args.preprocessing_type], image_raw, target_shape)
         record = dict(img_name=filenm, img=image, formula=None)
@@ -153,7 +150,7 @@ def main():
 
     log.info("Starting inference")
 
-    for rec_idx, rec in enumerate(tqdm(images_list)):
+    for rec in tqdm(images_list):
         image = rec['img']
 
         exec_net_encoder = ie.load_network(
@@ -172,7 +169,6 @@ def main():
         tgt = np.array([[START_TOKEN]])
         logits = []
         for _ in range(args.max_formula_len):
-
             dec_res = exec_net_decoder.infer(inputs={'row_enc_out': row_enc_out,
                                                      'dec_st_c': dec_states_c, 'dec_st_h': dec_states_h,
                                                      'O_t_minus_1': O_t, 'tgt': tgt
@@ -196,11 +192,9 @@ def main():
         logits = np.array(logits)
         logits = logits.squeeze(axis=1)
         targets = np.argmax(logits, axis=1)
-        result_phrase = vocab.construct_phrase(targets)
-
-        rec["formula"] = result_phrase
+        rec["formula"] = vocab.construct_phrase(targets)
     if args.output_file:
-        log.info("Writing results to file {}".format(args.output_file))
+        log.info("Writing results to the file {}".format(args.output_file))
         with open(args.output_file, 'w') as output_file:
             for rec in images_list:
                 output_file.write(rec['img_name'] +
