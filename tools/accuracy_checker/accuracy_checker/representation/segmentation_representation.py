@@ -53,7 +53,7 @@ LOADERS_MAPPING = {
 class SegmentationRepresentation(BaseRepresentation):
     def to_polygon(self, segmentation_colors=None):
         polygons = {}
-        mask = self._encode_mask(self.mask, segmentation_colors)
+        mask = self._encode_mask(self.mask, segmentation_colors) if segmentation_colors else self.mask
         if len(mask.shape) == 3:
             mask = np.argmax(mask, axis=0)
         indexes = np.unique(mask)
@@ -71,10 +71,6 @@ class SegmentationRepresentation(BaseRepresentation):
                         polygons[i].append(contour)
 
         return polygons
-
-    @staticmethod
-    def _encode_mask(mask, segmentation_colors):
-        return mask
 
 
 class SegmentationAnnotation(SegmentationRepresentation):
@@ -127,15 +123,13 @@ class SegmentationAnnotation(SegmentationRepresentation):
 
     @staticmethod
     def _encode_mask(mask, segmentation_colors):
-        encoded_mask = mask
-        if segmentation_colors:
-            mask = mask.astype(int)
-            num_channels = len(mask.shape)
-            encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.uint8)
-            for label, color in enumerate(segmentation_colors):
-                encoded_mask[np.where(
-                    np.all(mask == color, axis=-1) if num_channels >= 3 else mask == color
-                )[:2]] = label
+        mask = mask.astype(int)
+        num_channels = len(mask.shape)
+        encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.uint8)
+        for label, color in enumerate(segmentation_colors):
+            encoded_mask[np.where(
+                np.all(mask == color, axis=-1) if num_channels >= 3 else mask == color
+            )[:2]] = label
 
         return encoded_mask
 
