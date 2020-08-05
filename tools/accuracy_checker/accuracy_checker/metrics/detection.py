@@ -173,6 +173,8 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
         for idx, (label_id, score, xmin, ymin, xmax, ymax) in enumerate(
                 zip(prediction.labels, prediction.scores, prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs)
         ):
+            if idx in prediction.metadata.get('difficult_boxes', []):
+                continue
             print('{}: {} {} [{}, {}, {}, {}]'.format(idx, self.labels[label_id], score, xmin, ymin, xmax, ymax))
         return self._calculate_map([annotation], [prediction])
 
