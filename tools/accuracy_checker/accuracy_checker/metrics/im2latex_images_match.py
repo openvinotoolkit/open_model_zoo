@@ -141,7 +141,7 @@ def render_routine(line):
         if not os.path.exists(pdf_filename):
             logging.info('ERROR: {} cannot compile\n'.format(file_idx))
         else:
-            os.system("convert -density 200 -quality 100 %s %s" % (pdf_filename, png_filename))
+            os.system("convert -density 200 -quality 100 {} {}".format(pdf_filename, png_filename))
             os.remove(pdf_filename)
             if os.path.exists(png_filename):
                 crop_image(png_filename, output_path)
@@ -314,11 +314,11 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         correct_eliminate_ratio = float(total_correct_eliminate / total_num)
         logging.info('------------------------------------')
         logging.info('Final')
-        logging.info('Total Num: {}'.format(total_num))
-        logging.info('Accuracy (w spaces): {}'.format(correct_ratio))
-        logging.info('Accuracy (w/o spaces): {}'.format(correct_eliminate_ratio))
-        logging.info('Total Correct (w spaces): {}'.format(total_correct))
-        logging.info('Total Correct (w/o spaces): {}'.format(total_correct_eliminate))
+        logging.info('Total Num: %s' % total_num)
+        logging.info('Accuracy (w spaces): %s ' % correct_ratio)
+        logging.info('Accuracy (w/o spaces): %s' % correct_eliminate_ratio)
+        logging.info('Total Correct (w spaces): %s' % total_correct)
+        logging.info('Total Correct (w/o spaces): %s' % total_correct_eliminate)
         return correct_eliminate_ratio
 
     def render_images(self, annotations, predictions, images_dir):
