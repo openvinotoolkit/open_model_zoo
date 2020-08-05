@@ -314,11 +314,11 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         correct_eliminate_ratio = float(total_correct_eliminate / total_num)
         logging.info('------------------------------------')
         logging.info('Final')
-        logging.info('Total Num: %s' % total_num)
-        logging.info('Accuracy (w spaces): %s ' % correct_ratio)
-        logging.info('Accuracy (w/o spaces): %s' % correct_eliminate_ratio)
-        logging.info('Total Correct (w spaces): %s' % total_correct)
-        logging.info('Total Correct (w/o spaces): %s' % total_correct_eliminate)
+        logging.info('Total Num: %s', total_num)
+        logging.info('Accuracy (w spaces): %s', correct_ratio)
+        logging.info('Accuracy (w/o spaces): %s', correct_eliminate_ratio)
+        logging.info('Total Correct (w spaces): %s', total_correct)
+        logging.info('Total Correct (w/o spaces): %s', total_correct_eliminate)
         return correct_eliminate_ratio
 
     def render_images(self, annotations, predictions, images_dir):
@@ -339,7 +339,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         logging.info('Creating pool with {} threads'.format(self.num_threads))
         pool = ThreadPool(self.num_threads)
         logging.info('Jobs running...')
-        results = pool.map(render_routine, lines)
+        pool.map(render_routine, lines)
         pool.close()
         pool.join()
 
