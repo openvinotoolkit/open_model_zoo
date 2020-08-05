@@ -17,7 +17,6 @@ from pathlib import Path
 import numpy as np
 
 from ..base_evaluator import BaseEvaluator
-from ...adapters import create_adapter
 from ...config import ConfigError
 from ...utils import contains_all, extract_image_representations
 from ...launcher import create_launcher
