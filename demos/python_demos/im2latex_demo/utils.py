@@ -16,22 +16,13 @@ class Vocab(object):
         assert loaded_id2sign and isinstance(loaded_id2sign, dict)
         self.id2sign = loaded_id2sign
 
-    def construct_phrase(self, indices, max_len=None, skip_end_token=True):
+    def construct_phrase(self, indices):
         phrase_converted = []
-        if max_len is not None:
-            indices_to_convert = indices[:max_len]
-        else:
-            indices_to_convert = indices
-
-        for token in indices_to_convert:
-            val = token.item()
-            if val == END_TOKEN and skip_end_token:
+        for token in indices:
+            if token == END_TOKEN:
                 break
             phrase_converted.append(
-                self.id2sign.get(val, "?"))
-            if val == END_TOKEN:
-                break
-
+                self.id2sign.get(token, "?"))
         return " ".join(phrase_converted)
 
 
