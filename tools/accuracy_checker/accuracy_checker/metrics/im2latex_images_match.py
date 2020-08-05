@@ -60,12 +60,11 @@ def crop_image(img, output_path, default_size=None):
         if not default_size:
             cv.imwrite(output_path, old_im)
             return False
-        else:
-            assert len(default_size) == 2, default_size
-            x_min, y_min, x_max, y_max = 0, 0, default_size[0], default_size[1]
-            old_im = old_im[y_min: y_max + 1, x_min, x_max + 1]
-            cv.imwrite(output_path, old_im)
-            return False
+        assert len(default_size) == 2, default_size
+        x_min, y_min, x_max, y_max = 0, 0, default_size[0], default_size[1]
+        old_im = old_im[y_min: y_max + 1, x_min, x_max + 1]
+        cv.imwrite(output_path, old_im)
+        return False
     y_min = np.min(nnz_inds[0])
     y_max = np.max(nnz_inds[0])
     x_min = np.min(nnz_inds[1])
@@ -82,7 +81,7 @@ def run(cmd, timeout_sec):
     timer = Timer(timeout_sec, kill_proc, [proc])
     try:
         timer.start()
-        stdout, stderr = proc.communicate()
+        _, _ = proc.communicate()
     finally:
         timer.cancel()
 
