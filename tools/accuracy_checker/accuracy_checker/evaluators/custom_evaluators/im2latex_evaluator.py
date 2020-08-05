@@ -24,16 +24,14 @@ from accuracy_checker.evaluators import BaseEvaluator
 from accuracy_checker.launcher import create_launcher
 from accuracy_checker.metrics import MetricsExecutor
 from accuracy_checker.preprocessor import PreprocessingExecutor
-from accuracy_checker.postprocessor import PostprocessingExecutor
 from accuracy_checker.representation import CharacterRecognitionAnnotation, CharacterRecognitionPrediction
 from accuracy_checker.utils import contains_all, extract_image_representations
 
 
 class Im2latexEvaluator(BaseEvaluator):
-    def __init__(self, dataset, reader, preprocessing, postprocessing, metric_executor, launcher, model):
+    def __init__(self, dataset, reader, preprocessing, metric_executor, launcher, model):
         self.dataset = dataset
         self.preprocessing_executor = preprocessing
-        self.postprocessing_executor = postprocessing
         self.metric_executor = metric_executor
         self.launcher = launcher
         self.model = model
@@ -53,7 +51,6 @@ class Im2latexEvaluator(BaseEvaluator):
         else:
             raise ConfigError('reader should be dict or string')
         preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
-        postprocessing = PostprocessingExecutor(dataset_config.get('postprocessing', []), dataset.name)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
         meta = dataset.metadata
@@ -64,7 +61,7 @@ class Im2latexEvaluator(BaseEvaluator):
             meta,
             config.get('_model_is_blob'),
         )
-        return cls(dataset, reader, preprocessing, postprocessing, metrics_executor, launcher, model)
+        return cls(dataset, reader, preprocessing, metrics_executor, launcher, model)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         self._annotations, self._predictions = [], []
