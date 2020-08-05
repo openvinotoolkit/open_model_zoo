@@ -63,7 +63,7 @@ def build_argparser():
     args.add_argument("-m_dec_step", help="Required. Path to an .xml file with a trained decoder step part of the model",
                       required=True, type=str)
     args.add_argument("-i", "--input", help="Required. Path to a folder with images or path to an image files",
-                      required=True, type=str, nargs="+")
+                      required=True, type=str)
     args.add_argument("-o", "--output_file",
                       help="Optional. Path to file where to store output. If not mentioned, result will be stored"
                       "in the console.",
@@ -134,7 +134,10 @@ def main():
                   format(args.device, ', '.join(not_supported_layers)))
   
     images_list = []
-    inputs = list(args.input)
+    if os.path.isdir(args.input):
+        inputs = [os.path.join(args.input, inp) for inp in os.listdir(args.input)]
+    else:
+        inputs = [args.input]
     log.info("Loading vocab file")
     vocab = read_vocab(args.vocab_path)
 
