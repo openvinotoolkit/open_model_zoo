@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Models.h"
+#include "models.h"
 
 class ssd_async :public model
 {
@@ -9,19 +9,19 @@ private:
     const int objectSize;
 
 public:
-    
+
     ssd_async(const Core& ie, std::string FLAGS_m) :model(ie, FLAGS_m) {}
 
-    
 
-	void PreparingInputBlobs() {
-		InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
 
-      
+    void PreparingInputBlobs() {
+        InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+
+
 
         for (const auto& inputInfoItem : inputInfo) {
             if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
-               
+
                 inputInfoItem.second->setPrecision(Precision::U8);
                 if (FLAGS_auto_resize) {
                     inputInfoItem.second->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
@@ -30,7 +30,7 @@ public:
                 else {
                     inputInfoItem.second->getInputData()->setLayout(Layout::NCHW);
                 }
-               
+
                 inputs.insert(pair<std::string, InferenceEngine::SizeVector >(inputInfoItem.first, inputInfoItem.second->getTensorDesc().getDims()));// если итератор заходит в это условие больше 1 раза, то вставить условие на пустоту inputs, и изменить заполнение
             }
             else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
@@ -47,7 +47,7 @@ public:
 
 
 
-	}
+    }
 
 
 
@@ -88,8 +88,8 @@ public:
             }
         }
         const SizeVector outputDims = output->getTensorDesc().getDims();
-         maxProposalCount = outputDims[2];// поля класса ssd
-         objectSize = outputDims[3];
+        maxProposalCount = outputDims[2];// поля класса ssd
+        objectSize = outputDims[3];
         if (objectSize != 7) {
             throw std::logic_error("Output should have 7 as a last dimension");
         }
@@ -98,12 +98,12 @@ public:
         }
         output->setPrecision(Precision::FP32);
         output->setLayout(Layout::NCHW);
-    
+
     }
 
 
     InferRequest::Ptr CreateInferRequest(ExecutableNetwork userSpecifiedExecNetwork, ExecutableNetwork minLatencyExecNetwork, uint32 FLAGS_nireq) {
-    
+
 
         std::vector<InferRequest::Ptr> userSpecifiedInferRequests;
         for (unsigned infReqId = 0; infReqId < FLAGS_nireq; ++infReqId) {
@@ -128,13 +128,13 @@ public:
             }
             setImgInfoBlob(minLatencyInferRequest);
         }
-    
+
         return minLatencyInferRequest;
     }
 
 
-    void ProcessingOutputBlobs(const float* detections, const size_t width, const size_t height, std::vector<std::string>& labels,bool FLAGS_r,double FLAGS_t) {
-    
+    void ProcessingOutputBlobs(const float* detections, const size_t width, const size_t height, std::vector<std::string>& labels, bool FLAGS_r, double FLAGS_t) {
+
         for (int i = 0; i < maxProposalCount; i++) {
             float image_id = detections[i * objectSize + 0];
             if (image_id < 0) {
@@ -169,7 +169,7 @@ public:
 
 
     }
-	
+
     const int get_maxProposalCount() {
 
         return this->maxProposalCount;

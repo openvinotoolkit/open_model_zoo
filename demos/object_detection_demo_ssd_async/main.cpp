@@ -24,7 +24,7 @@
 #include <cldnn/cldnn_config.hpp>
 
 #include "object_detection_demo_ssd_async.hpp"
-#include "Ssd_async.h"
+#include "ssd_async.h"
 
 using namespace InferenceEngine;
 

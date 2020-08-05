@@ -26,7 +26,7 @@ public:
 	
 
 	
-	virtual void PreparingInputBlobs() = 0;
+	virtual void PreparingInputBlobs(std::vector<std::string>& labels) = 0;
 	virtual void PreparingOutputBlobs() = 0;
 	
 	
