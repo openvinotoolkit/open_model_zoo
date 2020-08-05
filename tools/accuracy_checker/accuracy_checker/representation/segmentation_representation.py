@@ -127,18 +127,17 @@ class SegmentationAnnotation(SegmentationRepresentation):
 
     @staticmethod
     def _encode_mask(mask, segmentation_colors):
-        result = mask
+        encoded_mask = mask
         if segmentation_colors:
             mask = mask.astype(int)
             num_channels = len(mask.shape)
-            encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.int16)
+            encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.uint8)
             for label, color in enumerate(segmentation_colors):
                 encoded_mask[np.where(
                     np.all(mask == color, axis=-1) if num_channels >= 3 else mask == color
                 )[:2]] = label
-                result = encoded_mask.astype(np.int8)
 
-        return result
+        return encoded_mask
 
 
 class SegmentationPrediction(SegmentationRepresentation):
