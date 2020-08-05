@@ -12,16 +12,9 @@ UNK_TOKEN = 3
 
 
 class Vocab(object):
-    def __init__(self, loaded_sign2id, loaded_id2sign):
-        assert isinstance(loaded_id2sign, dict) and isinstance(
-            loaded_sign2id, dict)
-        assert len(loaded_id2sign) == len(loaded_sign2id)
-        self.sign2id = loaded_sign2id
+    def __init__(self, loaded_id2sign):
+        assert loaded_id2sign and isinstance(loaded_id2sign, dict)
         self.id2sign = loaded_id2sign
-        self.length = len(loaded_id2sign)
-
-    def __len__(self):
-        return self.length
 
     def construct_phrase(self, indices, max_len=None, skip_end_token=True):
         phrase_converted = []
@@ -54,8 +47,7 @@ def read_vocab(vocab_path):
                 vocab_dict['id2sign'][int(k)] = v
     else:
         raise ValueError("Wrong extension of the vocab file")
-    vocab = Vocab(
-        loaded_id2sign=vocab_dict["id2sign"], loaded_sign2id=vocab_dict["sign2id"])
+    vocab = Vocab(loaded_id2sign=vocab_dict["id2sign"])
     return vocab
 
 
