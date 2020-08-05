@@ -13,25 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import argparse
-import cv2 as cv
+
 import logging
-import numpy as np
 import os
 import re
-import shlex
-import shutil
 import subprocess
-import sys
-from multiprocessing import Pool, cpu_count
+import tempfile
+from multiprocessing import cpu_count
 from multiprocessing.dummy import Pool as ThreadPool
 from threading import Timer
-import tempfile
 
+import cv2 as cv
+import numpy as np
 
-from ..config import PathField, NumberField
-from .metric import FullDatasetEvaluationMetric
 from ..representation import CharacterRecognitionAnnotation, CharacterRecognitionPrediction
+from .metric import FullDatasetEvaluationMetric
 
 MAX_PX_ROW_DIFF = 3
 TIMEOUT = 10
