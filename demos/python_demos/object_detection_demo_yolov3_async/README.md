@@ -37,6 +37,7 @@ usage: object_detection_demo_yolov3_async.py [-h] -m MODEL -i INPUT
                                              [-nstreams NUM_STREAMS]
                                              [-nthreads NUMBER_THREADS]
                                              [-loop_input] [-no_show]
+                                             [-o OUT_FILE_PATH]
                                              [-u UTILIZATION_MONITORS]
 
 Options:
@@ -78,6 +79,9 @@ Options:
   -loop_input, --loop_input
                         Optional. Iterate over input infinitely
   -no_show, --no_show   Optional. Don't show output
+  -o OUT_FILE_PATH, --output OUT_FILE_PATH
+                        Optional. Save results of input processing to the
+                        specified file.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
   --keep_aspect_ratio   Optional. Keeps aspect ratio on resize.
