@@ -1,19 +1,11 @@
-from __future__ import print_function
-
-import datetime
 import logging as log
 import os
 import sys
 from argparse import SUPPRESS, ArgumentParser
-from collections import namedtuple
-from copy import deepcopy
-from time import time
 
 import cv2
 import numpy as np
 from tqdm import tqdm
-
-import os,sys,inspect
 
 from utils import BatchCropPadToTGTShape, BatchResizePadToTGTShape
 from utils import END_TOKEN, START_TOKEN, read_vocab
