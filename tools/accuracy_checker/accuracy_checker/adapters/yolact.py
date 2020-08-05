@@ -99,7 +99,7 @@ class YolactAdapter(Adapter):
 
                 if cls_scores.shape[0] == 0:
                     continue
-                keep = NMS.nms(*boxes[conf_mask].T, cls_scores, 0.5)
+                keep = NMS.nms(*boxes[conf_mask].T, cls_scores, 0.5, include_boundaries=False)
 
                 idx_lst.append(idx[keep])
                 cls_lst.append(np.full(len(keep), _cls))
