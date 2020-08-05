@@ -3,23 +3,12 @@ import json
 import numpy as np
 import cv2 as cv
 
-
 COLOR_WHITE = (255, 255, 255)
-
 
 START_TOKEN = 0
 PAD_TOKEN = 1
 END_TOKEN = 2
 UNK_TOKEN = 3
-NUMBER_SIGNS = set("0123456789.")
-# buid sign2id
-
-def split_number(sign):
-    if set(sign) <= NUMBER_SIGNS:
-        return list(sign)
-    else:
-        return [sign]
-
 
 class Vocab(object):
     def __init__(self, loaded_sign2id=None, loaded_id2sign=None):
@@ -30,26 +19,17 @@ class Vocab(object):
                                 for token, idx in self.sign2id.items())
             self.length = 4
         else:
-            assert isinstance(loaded_id2sign, dict) and isinstance(loaded_sign2id, dict)
+            assert isinstance(loaded_id2sign, dict) and isinstance(
+                loaded_sign2id, dict)
             assert len(loaded_id2sign) == len(loaded_sign2id)
             self.sign2id = loaded_sign2id
             self.id2sign = loaded_id2sign
             self.length = len(loaded_id2sign)
 
-    def add_sign(self, sign):
-        if sign not in self.sign2id:
-            self.sign2id[sign] = self.length
-            self.id2sign[self.length] = sign
-            self.length += 1
-
-    def add_formula(self, formula):
-        for sign in formula:
-            self.add_sign(sign)
-
     def __len__(self):
         return self.length
 
-    def construct_phrase(self, indices, max_len = None, skip_end_token = True):
+    def construct_phrase(self, indices, max_len=None, skip_end_token=True):
         phrase_converted = []
         if max_len is not None:
             indices_to_convert = indices[:max_len]
@@ -64,7 +44,7 @@ class Vocab(object):
                 self.id2sign.get(val, "?"))
             if val == END_TOKEN:
                 break
-            
+
         return " ".join(phrase_converted)
 
 
@@ -80,9 +60,9 @@ def read_vocab(vocab_path):
                 vocab_dict['id2sign'][int(k)] = v
     else:
         raise ValueError("Wrong extension of the vocab file")
-    vocab = Vocab(loaded_id2sign = vocab_dict["id2sign"], loaded_sign2id=vocab_dict["sign2id"])
+    vocab = Vocab(
+        loaded_id2sign=vocab_dict["id2sign"], loaded_sign2id=vocab_dict["sign2id"])
     return vocab
-
 
 
 class BatchResizePadToTGTShape():
@@ -95,7 +75,7 @@ class BatchResizePadToTGTShape():
         res = []
         target_height, target_width = self.target_shape
         for image_raw in imgs:
-            
+
             img_h, img_w = image_raw.shape[0:2]
             if (img_h, img_w) != (target_height, target_width):
                 if img_h >= target_height and img_w >= target_width:
@@ -113,8 +93,8 @@ class BatchResizePadToTGTShape():
                     img_h, img_w = image_raw.shape[0:2]
                     if (img_h, img_w != target_height, target_width):
                         image_raw = cv.copyMakeBorder(image_raw, 0, target_height - img_h,
-                                                    0, target_width - img_w, cv.BORDER_CONSTANT,
-                                                    None, COLOR_WHITE)
+                                                      0, target_width - img_w, cv.BORDER_CONSTANT,
+                                                      None, COLOR_WHITE)
                 elif img_h < target_height and img_w < target_width:
                     rescale_h = img_h / target_height
                     rescale_w = img_w / target_width
@@ -128,21 +108,21 @@ class BatchResizePadToTGTShape():
                     img_h, img_w = image_raw.shape[0:2]
                     if (img_h, img_w != target_height, target_width):
                         image_raw = cv.copyMakeBorder(image_raw, 0, target_height - img_h,
-                                                0, target_width - img_w, cv.BORDER_CONSTANT,
-                                                None, COLOR_WHITE)
+                                                      0, target_width - img_w, cv.BORDER_CONSTANT,
+                                                      None, COLOR_WHITE)
                 elif img_h < target_height and img_w >= target_width:
                     dim = (target_width, int(target_width * img_h / img_w))
                     image_raw = cv.resize(image_raw, dim)
                     image_raw = cv.copyMakeBorder(image_raw, 0, target_height - image_raw.shape[0],
-                                                0, 0, cv.BORDER_CONSTANT, None, 
-                                                COLOR_WHITE)
+                                                  0, 0, cv.BORDER_CONSTANT, None,
+                                                  COLOR_WHITE)
                 elif img_h >= target_height and img_w < target_width:
                     dim = (int(target_height * img_w / img_h), target_height)
                     image_raw = cv.resize(image_raw, dim)
                     img_h, img_w = image_raw.shape[0:2]
                     image_raw = cv.copyMakeBorder(image_raw, 0, 0,
-                                                0, target_width - img_w, cv.BORDER_CONSTANT, 
-                                                None, COLOR_WHITE)
+                                                  0, target_width - img_w, cv.BORDER_CONSTANT,
+                                                  None, COLOR_WHITE)
             res.append(image_raw)
         return res
 
@@ -157,7 +137,7 @@ class BatchCropPadToTGTShape():
         res = []
         target_height, target_width = self.target_shape
         for image_raw in imgs:
-            
+
             img_h, img_w = image_raw.shape[0:2]
             if (img_h, img_w) != (target_height, target_width):
                 if img_h >= target_height and img_w >= target_width:
@@ -169,24 +149,24 @@ class BatchCropPadToTGTShape():
                 elif img_h < target_height and img_w < target_width:
 
                     image_raw = cv.copyMakeBorder(image_raw, 0, target_height - img_h,
-                                                0, target_width - img_w, cv.BORDER_CONSTANT,
-                                                None, COLOR_WHITE)
+                                                  0, target_width - img_w, cv.BORDER_CONSTANT,
+                                                  None, COLOR_WHITE)
                 elif img_h < target_height and img_w >= target_width:
                     if len(image_raw.shape) > 2:
-                        image_raw = image_raw[:,:target_width,:]
+                        image_raw = image_raw[:, :target_width, :]
                     else:
-                        image_raw = image_raw[:,:target_width]
+                        image_raw = image_raw[:, :target_width]
                     image_raw = cv.copyMakeBorder(image_raw, 0, target_height - image_raw.shape[0],
-                                                0, 0, cv.BORDER_CONSTANT, None, 
-                                                COLOR_WHITE)
+                                                  0, 0, cv.BORDER_CONSTANT, None,
+                                                  COLOR_WHITE)
                 elif img_h >= target_height and img_w < target_width:
                     if len(image_raw.shape) > 2:
-                        image_raw = image_raw[:target_height,:,:]
+                        image_raw = image_raw[:target_height, :, :]
                     else:
-                        image_raw = image_raw[:target_height,:]
+                        image_raw = image_raw[:target_height, :]
                     img_h, img_w = image_raw.shape[0:2]
                     image_raw = cv.copyMakeBorder(image_raw, 0, 0,
-                                                0, target_width - img_w, cv.BORDER_CONSTANT, 
-                                                None, COLOR_WHITE)
+                                                  0, target_width - img_w, cv.BORDER_CONSTANT,
+                                                  None, COLOR_WHITE)
             res.append(image_raw)
         return res
