@@ -28,12 +28,11 @@ from utils import CropPadToTGTShape, ResizePadToTGTShape
 from utils import END_TOKEN, START_TOKEN, read_vocab
 from openvino.inference_engine import IECore, IENetwork
 
-COLOR_WHITE = 255
-
 PREPROCESSING = {
     'Crop': CropPadToTGTShape,
     'Resize': ResizePadToTGTShape
 }
+
 
 def print_stats(module):
     perf_counts = module.requests[0].get_perf_counts()
@@ -48,8 +47,7 @@ def preprocess_image(preprocess, image_raw, tgt_shape):
     target_height, target_width = tgt_shape
     image_raw = preprocess(tgt_shape)(image_raw)
     assert image_raw.shape[0] == target_height and image_raw.shape[1] == target_width, image_raw.shape
-    image = image_raw / float(COLOR_WHITE)
-    image = image.transpose((2, 0, 1))
+    image = image_raw.transpose((2, 0, 1))
     return image
 
 
@@ -78,7 +76,7 @@ def build_argparser():
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU", type=str)
     args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
-                    help="Required. Type of the preprocessing", required=True, default='Crop')
+                      help="Required. Type of the preprocessing", required=True, default='Crop')
     args.add_argument('-pc', '--perf_counts',
                       action='store_true', default=False)
     return parser
@@ -123,11 +121,12 @@ def main():
     if len(not_supported_layers) != 0:
         log.error("Following layers are not supported by the plugin for specified device {}:\n{}".
                   format(args.device, ', '.join(not_supported_layers)))
-    _, _, H,W = encoder.input_info['imgs'].input_data.shape
+    _, _, H, W = encoder.input_info['imgs'].input_data.shape
     target_shape = (H, W)
     images_list = []
     if os.path.isdir(args.input):
-        inputs = [os.path.join(args.input, inp) for inp in os.listdir(args.input)]
+        inputs = [os.path.join(args.input, inp)
+                  for inp in os.listdir(args.input)]
     else:
         inputs = [args.input]
     log.info("Loading vocab file")
@@ -138,22 +137,21 @@ def main():
         image_raw = cv2.imread(filenm)
         assert image_raw is not None, "Error reading image {}".format(filenm)
         image = image_raw
-        image = preprocess_image(PREPROCESSING[args.preprocessing_type], image_raw, target_shape)
+        image = preprocess_image(
+            PREPROCESSING[args.preprocessing_type], image_raw, target_shape)
         record = dict(img_name=filenm, img=image, formula=None)
         images_list.append(record)
 
     log.info("Loading networks")
     exec_net_encoder = ie.load_network(
-            network=encoder, device_name=args.device)
+        network=encoder, device_name=args.device)
     exec_net_decoder = ie.load_network(
-            network=dec_step, device_name=args.device)
-            
+        network=dec_step, device_name=args.device)
+
     log.info("Starting inference")
 
     for rec in tqdm(images_list):
         image = rec['img']
-
-        
 
         enc_res = exec_net_encoder.infer(
             inputs={'imgs': np.expand_dims(image, axis=0)})
