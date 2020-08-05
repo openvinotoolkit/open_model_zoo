@@ -50,7 +50,7 @@ class Crop(Preprocessor):
             'no_resize': BoolField(
                 optional=True, default=False, description="Parameter disables resize if image is less then dst_width or dst_heigth."
             ),
-            'central_fraction' : NumberField(
+            'central_fraction': NumberField(
                 value_type=float, min_value=0, max_value=1, optional=True, description="Central Fraction."
             )
         })
@@ -69,11 +69,11 @@ class Crop(Preprocessor):
         if not self.central_fraction:
             if self.dst_height is None or self.dst_width is None:
                 raise ConfigError('one from crop dimentions is not provided')
-        
+
         self.no_resize = self.get_value_from_config('no_resize')
 
     def process(self, image, annotation_meta=None):
-        is_simple_case = not isinstance(image.data, list) # otherwise -- pyramid, tiling, etc
+        is_simple_case = not isinstance(image.data, list)  # otherwise -- pyramid, tiling, etc
         data = image.data
 
         image.data = self.process_data(
@@ -159,7 +159,7 @@ class ExtendAroundRect(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'augmentation_param' : NumberField(
+            'augmentation_param': NumberField(
                 value_type=float, optional=True, default=0, description="Scale factor for augmentation."
             )
         })
