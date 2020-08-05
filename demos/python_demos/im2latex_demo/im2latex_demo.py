@@ -82,7 +82,7 @@ def build_argparser():
                       default="CPU", type=str)
     args.add_argument('--preprocessing_type', choices=['BatchResizePadToTGTShape', 'BatchCropPadToTGTShape'],
                     help="Type of the preprocessing", required=True)
-    args.add_argument('-pf', '--perf_stats',
+    args.add_argument('-pc', '--perf_counts',
                       action='store_true', default=False)
 
     return parser
@@ -97,7 +97,7 @@ def main():
     log.info("Creating Inference Engine")
     ie = IECore()
     ie.set_config(
-        {"PERF_COUNT": "YES" if args.perf_stats else "NO"}, args.device)
+        {"PERF_COUNT": "YES" if args.perf_counts else "NO"}, args.device)
 
     # encoder part
     encoder_model_xml = args.m_encoder
@@ -151,7 +151,6 @@ def main():
         record = dict(img_name=filenm, img=image, formula=None)
         images_list.append(record)
 
-    # inference
     log.info("Starting inference")
 
     for rec_idx, rec in enumerate(tqdm(images_list)):
@@ -188,7 +187,7 @@ def main():
 
             if tgt[0][0][0] == END_TOKEN:
                 break
-        if args.perf_stats:
+        if args.perf_counts:
             log.info("Encoder perfomane statistics")
             print_stats(exec_net_encoder)
             log.info("Decoder perfomane statistics")
