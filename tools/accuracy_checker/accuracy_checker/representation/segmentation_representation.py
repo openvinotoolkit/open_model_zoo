@@ -18,6 +18,7 @@ from enum import Enum
 from pathlib import Path
 from copy import deepcopy
 import cv2 as cv
+from collections import defaultdict
 
 import numpy as np
 
@@ -52,7 +53,7 @@ LOADERS_MAPPING = {
 
 class SegmentationRepresentation(BaseRepresentation):
     def to_polygon(self, segmentation_colors=None):
-        polygons = {}
+        polygons = []
         mask = self._encode_mask(self.mask, segmentation_colors) if segmentation_colors else self.mask
         if len(mask.shape) == 3:
             mask = np.argmax(mask, axis=0)
@@ -63,14 +64,17 @@ class SegmentationRepresentation(BaseRepresentation):
             contours, _ = cv.findContours(binary_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
             for contour in contours:
-                if contour.size >= 6:
-                    contour = np.squeeze(contour, axis=1)
-                    if i not in polygons:
-                        polygons[i] = [contour]
-                    else:
-                        polygons[i].append(contour)
+                if contour.size < 6:
+                    continue
 
-        return polygons
+                contour = np.squeeze(contour, axis=1)
+                polygons.append((i, contour))
+
+        result = defaultdict(list)
+        for key, value in polygons:
+            result[key].append(value)
+
+        return result
 
 
 class SegmentationAnnotation(SegmentationRepresentation):
@@ -234,21 +238,24 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
         return areas
 
     def to_polygon(self, segmentation_colors=None):
-        polygons = {}
+        polygons = []
         for elem, label in zip(self.raw_mask, self.labels):
             elem = np.uint8(maskUtils.decode(elem))
 
             contours, _ = cv.findContours(elem, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
             for contour in contours:
-                if contour.size >= 6:
-                    contour = np.squeeze(contour, axis=1)
-                    if label not in polygons:
-                        polygons[label] = [contour]
-                    else:
-                        polygons[label].append(contour)
+                if contour.size < 6:
+                    continue
 
-        return polygons
+                contour = np.squeeze(contour, axis=1)
+                polygons.append((label, contour))
+
+        result = defaultdict(list)
+        for key, value in polygons:
+            result[key].append(value)
+
+        return result
 
 
 class CoCoInstanceSegmentationAnnotation(CoCoInstanceSegmentationRepresentation):
