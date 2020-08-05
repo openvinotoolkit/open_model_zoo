@@ -26,6 +26,7 @@ from threading import Timer
 import cv2 as cv
 import numpy as np
 
+from ..config import NumberField
 from ..representation import CharacterRecognitionAnnotation, CharacterRecognitionPrediction
 from .metric import FullDatasetEvaluationMetric
 
