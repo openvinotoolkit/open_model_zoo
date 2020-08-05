@@ -227,48 +227,50 @@ def main():
                                 stderr=subprocess.STDOUT, universal_newlines=True)
                             execution_time = timeit.default_timer() - start_time
 
-                            similarity_res = []
-                            demo_out_file = case_args[case_args.index('-o') + 1]
+                            # 'if' is debug-only, won't be needed when all demos will be compatible with ssim test
+                            if '-o' in case_args:
+                                similarity_res = []
+                                demo_out_file = case_args[case_args.index('-o') + 1]
 
-                            out_cap = cv.VideoCapture(demo_out_file)
-                            raw_cap = cv.VideoCapture(case_args[case_args.index('-i') + 1])
-                            if not out_cap.isOpened() or not raw_cap.isOpened():
-                                raise RuntimeError("Unable to open input files.")
+                                out_cap = cv.VideoCapture(demo_out_file)
+                                raw_cap = cv.VideoCapture(case_args[case_args.index('-i') + 1])
+                                if not out_cap.isOpened() or not raw_cap.isOpened():
+                                    raise RuntimeError("Unable to open input files.")
                             
-                            while True:
-                                out_ret, out_frame = out_cap.read()
-                                raw_ret, raw_frame = raw_cap.read()
+                                while True:
+                                    out_ret, out_frame = out_cap.read()
+                                    raw_ret, raw_frame = raw_cap.read()
 
-                                if out_ret and raw_ret:
-                                    crop = CROP_SIZE[demo.full_name]
-                                    height, width = out_frame.shape[:2]
-                                    out_frame = out_frame[crop[0] : height - crop[2], crop[3] : width - crop[1]]
-                                    raw_frame = raw_frame[crop[0] : height - crop[2], crop[3] : width - crop[1]]
-                                    similarity = list(map(lambda x: round(x, 3),
-                                                          (getPSNR(out_frame, raw_frame),
-                                                           *getMSSSIM(out_frame, raw_frame)[:-1])))
-                                    similarity_res.append(similarity)
+                                    if out_ret and raw_ret:
+                                        crop = CROP_SIZE[demo.full_name]
+                                        height, width = out_frame.shape[:2]
+                                        out_frame = out_frame[crop[0] : height - crop[2], crop[3] : width - crop[1]]
+                                        raw_frame = raw_frame[crop[0] : height - crop[2], crop[3] : width - crop[1]]
+                                        similarity = list(map(lambda x: round(x, 3),
+                                                              (getPSNR(out_frame, raw_frame),
+                                                               *getMSSSIM(out_frame, raw_frame)[:-1])))
+                                        similarity_res.append(similarity)
+                                    else:
+                                      break
+
+                                out_cap.release()
+                                raw_cap.release()
+                                os.remove(demo_out_file)
+
+                                model_name = test_case.options['-m'].name
+                                if args.generate_reference:
+                                    if demo.full_name not in reference_values:
+                                        reference_values[demo.full_name] = {}
+                                    reference_values[demo.full_name][model_name] = similarity_res
                                 else:
-                                  break  
-
-                            out_cap.release()
-                            raw_cap.release()
-                            os.remove(demo_out_file)
-
-                            model_name = test_case.options['-m'].name
-                            if args.generate_reference:
-                                if demo.full_name not in reference_values:
-                                    reference_values[demo.full_name] = {}
-                                reference_values[demo.full_name][model_name] = similarity_res
-                            else:
-                                similarity_reference = reference_values[demo.full_name][model_name]
-                                threshold = THRESHOLDS[demo.full_name][model_name]
-                                for i in range(len(similarity_res)):
-                                    for j in range(len(similarity_res[0])):
-                                        if abs(similarity_res[i][j] - similarity_reference[i][j]) > threshold[j]:
-                                            raise RuntimeError("SSIM test failed: {} != {} with threshold {}."
-                                                               .format(similarity_res[i], similarity_reference[i],
-                                                                       threshold))
+                                    similarity_reference = reference_values[demo.full_name][model_name]
+                                    threshold = THRESHOLDS[demo.full_name][model_name]
+                                    for i in range(len(similarity_res)):
+                                        for j in range(len(similarity_res[0])):
+                                            if abs(similarity_res[i][j] - similarity_reference[i][j]) > threshold[j]:
+                                                raise RuntimeError("SSIM test failed: {} != {} with threshold {}."
+                                                                   .format(similarity_res[i], similarity_reference[i],
+                                                                           threshold))
                         except Exception as e:
                             print("Error:")
                             if isinstance(e, subprocess.CalledProcessError):
