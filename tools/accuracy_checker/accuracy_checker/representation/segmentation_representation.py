@@ -17,8 +17,8 @@ limitations under the License.
 from enum import Enum
 from pathlib import Path
 from copy import deepcopy
-import cv2 as cv
 from collections import defaultdict
+import cv2 as cv
 
 import numpy as np
 
