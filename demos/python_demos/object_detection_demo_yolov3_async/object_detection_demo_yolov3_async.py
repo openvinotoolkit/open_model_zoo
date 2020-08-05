@@ -381,9 +381,11 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, 55,
         (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
+    input_frame_width = int(cap.get(3))
+    input_frame_height = int(cap.get(4))
     if args.output:
         out_video = cv2.VideoWriter(str(args.output), cv2.VideoWriter_fourcc(*'MJPG'), cap.get(cv2.CAP_PROP_FPS),
-                                    (int(cap.get(3)), int(cap.get(4))))
+                                    (input_frame_width, input_frame_height))
 
     while (cap.isOpened() \
            or completed_request_results \
@@ -440,7 +442,12 @@ def main():
                                              (10, 200, 10), 2)
 
             if args.output:
-                out_video.write(frame)
+                height, width, _ = frame.shape
+                if width == input_frame_width and height == input_frame_height:
+                    out_video.write(frame)
+                else:
+                    resized_frame = cv2.resize(frame, (input_frame_width, input_frame_height))
+                    out_video.write(resized_frame)
 
             if not args.no_show:
                 cv2.imshow("Detection Results", frame)

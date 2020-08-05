@@ -443,7 +443,13 @@ int main(int argc, char *argv[]) {
             }
 
             if (!FLAGS_o.empty()) {
-                outVideo.write(frame);
+                if ((size_t)frame.cols == width && (size_t)frame.rows == height) {
+                    outVideo.write(frame);
+                } else {
+                    cv::Mat resizedFrame;
+                    cv::resize(frame, resizedFrame, cv::Size(width, height));
+                    outVideo.write(resizedFrame);
+                }
             }
 
             if (!FLAGS_no_show) {
