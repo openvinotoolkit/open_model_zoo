@@ -115,9 +115,6 @@ def main():
     log.info("Loading decoder files:\n\t{}\n\t{}".format(
         dec_step_model_xml, dec_step_model_bin))
     dec_step = ie.read_network(dec_step_model_xml, dec_step_model_bin)
-    
-    # add decoder outputs
-    dec_step.add_outputs(["dec_st_c_t", "dec_st_h_t", "O_t"])
 
     # check if all layers are supported
     supported_layers = ie.query_network(dec_step, args.device)
@@ -145,15 +142,18 @@ def main():
         record = dict(img_name=filenm, img=image, formula=None)
         images_list.append(record)
 
+    log.info("Loading networks")
+    exec_net_encoder = ie.load_network(
+            network=encoder, device_name=args.device)
+    exec_net_decoder = ie.load_network(
+            network=dec_step, device_name=args.device)
+            
     log.info("Starting inference")
 
     for rec in tqdm(images_list):
         image = rec['img']
 
-        exec_net_encoder = ie.load_network(
-            network=encoder, device_name=args.device)
-        exec_net_decoder = ie.load_network(
-            network=dec_step, device_name=args.device)
+        
 
         enc_res = exec_net_encoder.infer(
             inputs={'imgs': np.expand_dims(image, axis=0)})
