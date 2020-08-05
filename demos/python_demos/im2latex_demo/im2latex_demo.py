@@ -60,7 +60,7 @@ def build_argparser():
                       default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument("-m_encoder", help="Required. Path to an .xml file with a trained encoder part of the model",
                       required=True, type=str)
-    args.add_argument("-m_dec_step", help="Required. Path to an .xml file with a trained decoder part of the model",
+    args.add_argument("-m_decoder", help="Required. Path to an .xml file with a trained decoder part of the model",
                       required=True, type=str)
     args.add_argument("-i", "--input", help="Required. Path to a folder with images or path to an image files",
                       required=True, type=str)
@@ -68,8 +68,8 @@ def build_argparser():
                       help="Optional. Path to file where to store output. If not mentioned, result will be stored"
                       "in the console.",
                       type=str)
-    args.add_argument("--vocab_path", help="Path to vocab file to construct meaningful phrase",
-                      type=str)
+    args.add_argument("--vocab_path", help="Required. Path to vocab file to construct meaningful phrase",
+                      type=str, required=True)
     args.add_argument("--max_formula_len",
                       help="Optional. Defines maximum length of the formula (number of tokens to decode)",
                       default="128", type=int)
@@ -78,7 +78,7 @@ def build_argparser():
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU", type=str)
     args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
-                    help="Type of the preprocessing", required=True, default='Crop')
+                    help="Required. Type of the preprocessing", required=True, default='Crop')
     args.add_argument('-pc', '--perf_counts',
                       action='store_true', default=False)
     return parser
@@ -109,7 +109,7 @@ def main():
                   format(args.device, ', '.join(not_supported_layers)))
 
     # decoder part:
-    dec_step_model_xml = args.m_dec_step
+    dec_step_model_xml = args.m_decoder
     dec_step_model_bin = os.path.splitext(dec_step_model_xml)[0] + ".bin"
 
     log.info("Loading decoder files:\n\t{}\n\t{}".format(
