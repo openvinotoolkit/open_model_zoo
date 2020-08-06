@@ -136,7 +136,7 @@ def render_routine(line):
         pdf_filename = tex_filename[:-4] + '.pdf'
         png_filename = tex_filename[:-4] + '.png'
         if not os.path.exists(pdf_filename):
-            logging.info('ERROR: {} cannot compile\n'.format(file_idx))
+            logging.info('ERROR: %s cannot compile\n', file_idx)
         else:
             os.system("convert -density 200 -quality 100 {} {}".format(pdf_filename, png_filename))
             os.remove(pdf_filename)
@@ -333,7 +333,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         lines_gold = [(ann.label, ann.identifier, out_path_gold) for ann in annotations]
         lines_pred = [(pred.label, pred.identifier, out_path_pred) for pred in predictions]
         lines = lines_gold + lines_pred
-        logging.info('Creating pool with {} threads'.format(self.num_threads))
+        logging.info('Creating pool with %s threads', self.num_threads)
         pool = ThreadPool(self.num_threads)
         logging.info('Jobs running...')
         pool.map(render_routine, lines)
