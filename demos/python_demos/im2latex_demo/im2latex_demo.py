@@ -24,7 +24,7 @@ import cv2 as cv
 import numpy as np
 from tqdm import tqdm
 
-from utils import END_TOKEN, START_TOKEN, read_vocab
+from utils import END_TOKEN, START_TOKEN, Vocab
 from openvino.inference_engine import IECore
 
 def crop(img, target_shape):
@@ -151,13 +151,12 @@ def main():
     else:
         inputs = [args.input]
     log.info("Loading vocab file")
-    vocab = read_vocab(args.vocab_path)
+    vocab = Vocab(args.vocab_path)
 
     log.info("Loading and preprocessing images")
     for filenm in tqdm(inputs):
         image_raw = cv.imread(filenm)
         assert image_raw is not None, "Error reading image {}".format(filenm)
-        image = image_raw
         image = preprocess_image(
             PREPROCESSING[args.preprocessing_type], image_raw, target_shape)
         record = dict(img_name=filenm, img=image, formula=None)
