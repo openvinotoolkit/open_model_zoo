@@ -15,9 +15,16 @@ limitations under the License.
 """
 
 import numpy as np
+import pytest
 
 from .common import make_segmentation_representation, make_instance_segmentation_representation
 
+def no_available_pycocotools():
+    try:
+        import pycocotools.mask as maskUtils
+        return False
+    except:
+        return True
 
 class TestSegmentationRepresentation:
 
@@ -81,6 +88,7 @@ class TestSegmentationRepresentation:
 
 class TestCoCoInstanceSegmentationRepresentation:
 
+    @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
     def test_to_polygon_annotation(self):
         mask = [np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]),
                 np.array([[0, 1, 1, 1], [0, 0, 1, 1], [0, 0, 0, 1]])]
@@ -97,6 +105,7 @@ class TestCoCoInstanceSegmentationRepresentation:
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
 
+    @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
     def test_to_polygon_prediction(self):
         mask = [np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]),
                 np.array([[0, 1, 1, 1], [0, 0, 1, 1], [0, 0, 0, 1]])]
