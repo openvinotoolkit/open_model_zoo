@@ -14,16 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import cv2
 import inspect
-from PIL import Image
-import numpy as np
 
-from ..config import ConfigError, NumberField, StringField, BoolField
+import cv2
+import numpy as np
+from PIL import Image
+
+from ..config import BoolField, ConfigError, NumberField, StringField
 from ..dependency import ClassProvider
 from ..logging import warning
 from ..preprocessor import Preprocessor, GeometricOperationMetadata
-from ..utils import contains_all, get_size_from_config, UnsupportedPackage
+from ..utils import contains_all, get_size_from_config, get_parameter_value_from_config, UnsupportedPackage
+
 
 
 def scale_width(dst_width, dst_height, image_width, image_height,):
