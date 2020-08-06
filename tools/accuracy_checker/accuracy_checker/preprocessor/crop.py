@@ -89,7 +89,7 @@ class Crop(Preprocessor):
         return image
 
     @staticmethod
-    def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata, no_resize):
+    def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata, no_resize=False):
         height, width = data.shape[:2]
         if not central_fraction:
             new_height = dst_height
