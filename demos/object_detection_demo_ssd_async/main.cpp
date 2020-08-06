@@ -1,9 +1,21 @@
+/*
 // Copyright (C) 2018-2020 Intel Corporation
-// SPDX-License-Identifier: Apache-2.0
 //
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+*/
 
 /**
-* \brief The entry point for the Inference Engine object_detection demo application
+* \brief The entry point for the Inference Engine object_detection_demo_ssd_async demo application
 * \file object_detection_demo_ssd_async/main.cpp
 * \example object_detection_demo_ssd_async/main.cpp
 */
@@ -148,13 +160,18 @@ void paintInfo(cv::Mat& frame, const PipelineBase::PerformanceInfo& info) {
 
     out.str("");
     out << "FPS: " << std::fixed << std::setprecision(1) << info.FPS;
-    putHighlightedText(frame, out.str(), cv::Point2f(10, 60), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(10, 200, 10), 2);
+    putHighlightedText(frame, out.str(), cv::Point2f(10, 30), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(10, 200, 10), 2);
 
     out.str("");
     out << "Avg Latency: " << std::fixed << std::setprecision(1) <<
         (std::chrono::duration_cast<std::chrono::milliseconds>(info.latencySum).count() / info.framesCount)
         << " ms";
+    putHighlightedText(frame, out.str(), cv::Point2f(10, 60), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(200, 10, 10), 2);
+    out.str("");
+    out << "Pool: " << std::fixed << std::setprecision(1) <<
+        info.numRequestsInUse << "/" << FLAGS_nireq;
     putHighlightedText(frame, out.str(), cv::Point2f(10, 90), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(200, 10, 10), 2);
+
 }
 
 int main(int argc, char *argv[]) {
@@ -189,24 +206,23 @@ int main(int argc, char *argv[]) {
                     cv::Mat frame;
                     if (!cap.read(frame)) {
                         if (frame.empty()) {
-                             if (FLAGS_loop) {
-                                 cap.open((FLAGS_i == "cam") ? 0 : FLAGS_i.c_str());
-                             } else cap.release();
-                        continue;
-                    } else {
-                         throw std::logic_error("Failed to get frame from cv::VideoCapture");
+                            if (FLAGS_loop) {
+                                cap.open((FLAGS_i == "cam") ? 0 : FLAGS_i.c_str());
+                            } else cap.release();
+                            continue;
+                        } else {
+                            throw std::logic_error("Failed to get frame from cv::VideoCapture");
+                        }
                     }
                 }
-            }
 
                 frameNum = pipeline.submitImage(curr_frame);
                 if (frameNum < 0)
                     break;
                 frames[frameNum] = std::move(curr_frame);
-            }
 
-            DetectionPipeline::DetectionResults results;
-            while (!(results = pipeline.getDetectionResults()).IsEmpty()) {
+            DetectionPipeline::DetectionResults results = pipeline.getDetectionResults();
+            if(!results.IsEmpty()) {
                 if (!FLAGS_no_show) {
                     auto& outFrame = frames.at(results.frameId);
                     paintResults(outFrame, results);
@@ -215,15 +231,18 @@ int main(int argc, char *argv[]) {
                     cv::imshow("Detection Results", outFrame);
                 }
             }
+            //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
             pipeline.waitForData();
 
             const int key = cv::waitKey(1);
 
-            if (27 == key || 'q' == key || 'Q' == key) {  // Esc
-                break;
-            }
-            else {
-                presenter.handleKey(key);
+            if (!FLAGS_no_show) {
+                if (27 == key || 'q' == key || 'Q' == key) {  // Esc
+                    break;
+                }
+                else {
+                    presenter.handleKey(key);
+                }
             }
         }
 

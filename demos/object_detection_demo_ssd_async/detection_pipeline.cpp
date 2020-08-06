@@ -1,3 +1,18 @@
+/*
+// Copyright (C) 2018-2019 Intel Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+*/
 #include "detection_pipeline.h"
 #include <samples/args_helper.hpp>
 
@@ -10,8 +25,8 @@ DetectionPipeline::DetectionPipeline(){
 DetectionPipeline::~DetectionPipeline(){
 }
 
-void DetectionPipeline::init(const std::string& model_name, const CnnConfig& cnnConfig, float confidenceThreshold, bool useAutoResize){
-    PipelineBase::init(model_name, cnnConfig);
+void DetectionPipeline::init(const std::string& model_name, const CnnConfig& cnnConfig, float confidenceThreshold, bool useAutoResize, InferenceEngine::Core* engine){
+    PipelineBase::init(model_name, cnnConfig, engine);
 
     this->useAutoResize = useAutoResize;
     this->confidenceThreshold = confidenceThreshold;
