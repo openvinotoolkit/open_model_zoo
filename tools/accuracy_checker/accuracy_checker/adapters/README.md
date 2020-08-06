@@ -248,6 +248,7 @@ AccuracyChecker supports following set of adapters:
 * `attribute_classification` - converts output of attributes classifcation model to `ContainerPrediction` which contains multiple `ClassificationPrediction` for attributes with their scores.
     * `output_layer_map` - dictionary where keys are output layer names of attribute classification model and values are the names of attributes.
 * `regression` - converting output of regression model to `RegressionPrediction` representation.
+    * `keep_shape` - allow keeping shape of predicted multi dimension array (Optional, default False).
 * `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions. 
     * `adapters` - Dict where key is output name and value is adapter config map including `output_blob` key to associate the output of model and this adapter.
 * `person_vehilce_detection_refinement` - converts output of person vehicle detection refinement model to `DetectionPrediction` representation. Adapter refines proposals generated in previous stage model.
