@@ -50,7 +50,7 @@ from .geometric_transformations import (
     WarpAffine
 )
 from .crop import (
-    Crop, CropRect, ExtendAroundRect, Crop3D, TransformedCropWithAutoScale, CandidateCrop, CropOrPad
+    Crop, CropRect, ExtendAroundRect, Crop3D, TransformedCropWithAutoScale, CandidateCrop, CropOrPad, CropWithPadSize
 )
 from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
@@ -94,6 +94,7 @@ __all__ = [
     'TfConvertImageDType',
     'SelectInputChannel',
     'CropOrPad',
+    'CropWithPadSize',
     'Crop',
     'CandidateCrop',
     'CropRect',

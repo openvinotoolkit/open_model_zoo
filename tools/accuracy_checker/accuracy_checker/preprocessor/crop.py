@@ -473,3 +473,31 @@ class CropOrPad(Preprocessor):
         return cv2.copyMakeBorder(
             data, offset_h, after_padding_height, offset_w, after_padding_width, cv2.BORDER_CONSTANT, value=0
         ), meta
+
+
+class CropWithPadSize(Preprocessor):
+    __provider__ = 'crop_image_with_padding'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'size': NumberField(value_type=int, min_value=1),
+            'crop_padding': NumberField(value_type=int, min_value=1)
+        })
+        return params
+
+    def configure(self):
+        self.size = self.get_value_from_config('size')
+        self.crop_padding = self.get_value_from_config('crop_padding')
+
+    def process(self, image, annotation_meta=None):
+        image_height, image_width = image.data.shape[:2]
+        padded_center_crop_size = int((self.size / (self.size + self.crop_padding)) * min(image_height, image_width))
+        offset_height = ((image_height - padded_center_crop_size) + 1) // 2
+        offset_width = ((image_width - padded_center_crop_size) + 1) // 2
+        cropped_data = CropOrPad.crop_to_bounding_box(
+            image.data, offset_height, offset_width, padded_center_crop_size, padded_center_crop_size
+        )
+        image.data = cv2.resize(cropped_data, (self.size, self.size))
+        return image
