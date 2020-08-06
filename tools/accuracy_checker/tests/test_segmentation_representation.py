@@ -161,6 +161,7 @@ class TestCoCoInstanceSegmentationRepresentation:
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
 
+    @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
     def test_to_polygon_with_None_mask(self):
         labels = [0, 1]
         prediction = make_instance_segmentation_representation(None, labels, False)[0]
@@ -168,6 +169,7 @@ class TestCoCoInstanceSegmentationRepresentation:
         with pytest.raises(ValueError):
             prediction.to_polygon()
 
+    @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
     def test_to_polygon_with_empty_mask(self):
         labels = [0, 1]
         prediction = make_instance_segmentation_representation([], labels, False)[0]
@@ -175,12 +177,14 @@ class TestCoCoInstanceSegmentationRepresentation:
         with pytest.raises(ValueError):
             prediction.to_polygon()
 
+    @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
     def test_to_polygon_with_None_labels(self):
         prediction = make_instance_segmentation_representation([np.array([[1, 0], [0, 1]])], None, False)[0]
 
         with pytest.raises(ValueError):
             prediction.to_polygon()
 
+    @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
     def test_to_polygon_with_empty_labels(self):
         prediction = make_instance_segmentation_representation([np.array([[1, 0], [0, 1]])], [], False)[0]
 
