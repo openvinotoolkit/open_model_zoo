@@ -87,6 +87,7 @@ from .audio_recognition import CTCBeamSearchDecoder, CTCGreedyDecoder
 
 from .regression import RegressionAdapter
 from .mixed_adapter import MixedAdapter
+from .face_recognition_quality_assessment import QualityAssessmentAdapter
 
 __all__ = [
     'Adapter',
@@ -162,4 +163,6 @@ __all__ = [
 
     'CTCBeamSearchDecoder',
     'CTCGreedyDecoder',
+
+    'QualityAssessmentAdapter',
 ]
