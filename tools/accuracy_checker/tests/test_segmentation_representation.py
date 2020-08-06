@@ -52,7 +52,7 @@ class TestSegmentationRepresentation:
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
 
-    def test_to_polygon_annotation_with_colors(self):
+    def test_to_polygon_annotation_with_colors_in_arg(self):
         annotation = make_segmentation_representation(np.array(
             [[[128, 128, 128], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
              [[128, 128, 128], [128, 128, 128], [0, 0, 0], [0, 0, 0]],
@@ -68,6 +68,79 @@ class TestSegmentationRepresentation:
             assert actual[key]
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
+
+    def test_to_polygon_annotation_with_colors_in_meta(self):
+        annotation = make_segmentation_representation(np.array(
+            [[[128, 128, 128], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
+             [[128, 128, 128], [128, 128, 128], [0, 0, 0], [0, 0, 0]],
+             [[128, 128, 128], [128, 128, 128], [128, 128, 128], [0, 0, 0]]]), True)[0]
+        segmentation_colors = [[0, 0, 0], [128, 128, 128]]
+        annotation.metadata.update({
+            'segmentation_colors': segmentation_colors
+        })
+        expected = {
+            0: [np.array([[1, 0], [3, 0], [3, 2]])],
+            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
+
+        actual = annotation.to_polygon()
+
+        for key in expected.keys():
+            assert actual[key]
+            for actual_arr, expected_arr in zip(actual[key], expected[key]):
+                assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
+
+    def test_to_polygon_annotation_with_colors_on_converted_annotation(self):
+        annotation = make_segmentation_representation(np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]), True)[0]
+        segmentation_colors = [[0, 0, 0], [128, 128, 128]]
+        annotation.metadata.update({
+            'segmentation_colors': segmentation_colors
+        })
+        expected = {
+            0: [np.array([[1, 0], [3, 0], [3, 2]])],
+            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
+
+        actual = annotation.to_polygon()
+
+        for key in expected.keys():
+            assert actual[key]
+            for actual_arr, expected_arr in zip(actual[key], expected[key]):
+                assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
+
+    def test_to_polygon_annotation_without_colors(self):
+        annotation = make_segmentation_representation(np.array(
+            [[[128, 128, 128], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
+             [[128, 128, 128], [128, 128, 128], [0, 0, 0], [0, 0, 0]],
+             [[128, 128, 128], [128, 128, 128], [128, 128, 128], [0, 0, 0]]]), True)[0]
+
+        with pytest.raises(ValueError):
+            annotation.to_polygon()
+
+    def test_to_polygon_annotation_with_empty_mask(self):
+        annotation = make_segmentation_representation(np.array([]), True)[0]
+
+        with pytest.raises(ValueError):
+            annotation.to_polygon()
+
+    def test_to_polygon_annotation_with_label_map_containing_not_all_classes(self):
+        annotation = make_segmentation_representation(np.array(
+            [[1, 0, 0, 0, 2], [1, 1, 0, 0, 2], [1, 1, 1, 0, 2]]), True)[0]
+        label_map = {0: "background", 1: "triangle"}
+        annotation.metadata.update({
+            'label_map': label_map
+        })
+
+        expected = {
+            0: [np.array([[1, 0], [3, 0], [3, 2]])],
+            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
+
+        actual = annotation.to_polygon()
+
+        for key in expected.keys():
+            assert actual[key]
+            for actual_arr, expected_arr in zip(actual[key], expected[key]):
+                assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
+        assert actual.get(2) is None
+
 
     def test_to_polygon_prediction(self):
         prediction = make_segmentation_representation(np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]), False)[0]
@@ -97,31 +170,32 @@ class TestSegmentationRepresentation:
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
 
-    def test_to_polygon_with_None_mask(self):
-        prediction = make_segmentation_representation(None, False)[0]
-
-        with pytest.raises(ValueError):
-            prediction.to_polygon()
-
-    def test_to_polygon_with_empty_mask(self):
-        prediction = make_segmentation_representation(np.array([]), False)[0]
-
-        with pytest.raises(ValueError):
-            prediction.to_polygon()
-
-    def test_to_polygon_with_1_in_shape(self):
-        annotation = make_segmentation_representation(np.array(
-            [[[1], [0], [0], [0]], [[1], [1], [0], [0]], [[1], [1], [1], [0]]]), True)[0]
+    def test_to_polygon_prediction_with_1_in_shape(self):
+        prediction = make_segmentation_representation(np.array(
+            [[[1], [0], [0], [0]], [[1], [1], [0], [0]], [[1], [1], [1], [0]]]), False)[0]
         expected = {
             0: [np.array([[1, 0], [3, 0], [3, 2]])],
             1: [np.array([[0, 0], [0, 2], [2, 2]])]}
 
-        actual = annotation.to_polygon()
+        actual = prediction.to_polygon()
 
         for key in expected.keys():
             assert actual[key]
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
+
+    def test_to_polygon_prediction_with_None_mask(self):
+        prediction = make_segmentation_representation(None, False)[0]
+
+        with pytest.raises(ValueError):
+            prediction.to_polygon()
+
+    def test_to_polygon_prediction_with_empty_mask(self):
+        prediction = make_segmentation_representation(np.array([]), False)[0]
+
+        with pytest.raises(ValueError):
+            prediction.to_polygon()
+
 
 class TestCoCoInstanceSegmentationRepresentation:
 

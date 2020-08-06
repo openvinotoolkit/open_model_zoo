@@ -52,28 +52,7 @@ LOADERS_MAPPING = {
 
 
 class SegmentationRepresentation(BaseRepresentation):
-    def to_polygon(self, segmentation_colors=None):
-        if self.mask is None or self.mask.size == 0:
-            raise ValueError("Polygon can be found only for non-empty mask")
-
-        polygons = defaultdict(list)
-        mask = self._encode_mask(self.mask, segmentation_colors) if segmentation_colors else self.mask
-        if len(mask.shape) == 3:
-            if 1 not in mask.shape:
-                mask = np.argmax(mask, axis=0)
-            else:
-                mask = np.squeeze(mask, axis=-1)
-        indexes = np.unique(mask)
-        for i in indexes:
-            binary_mask = np.uint8(mask == i)
-            contours, _ = cv.findContours(binary_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-            for contour in contours:
-                if contour.size < 6:
-                    continue
-                contour = np.squeeze(contour, axis=1)
-                polygons[i].append(contour)
-
-        return polygons
+    pass
 
 
 class SegmentationAnnotation(SegmentationRepresentation):
@@ -126,6 +105,9 @@ class SegmentationAnnotation(SegmentationRepresentation):
 
     @staticmethod
     def _encode_mask(mask, segmentation_colors):
+        if len(mask.shape) != 3:
+            return mask
+
         mask = mask.astype(int)
         num_channels = len(mask.shape)
         encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.uint8)
@@ -135,6 +117,34 @@ class SegmentationAnnotation(SegmentationRepresentation):
             )[:2]] = label
 
         return encoded_mask
+
+    def to_polygon(self, segmentation_colors=None, label_map=None):
+        if self.mask is None or self.mask.size == 0:
+            raise ValueError("Polygon can be found only for non-empty mask")
+
+        if not segmentation_colors and self.metadata.get('segmentation_colors'):
+            segmentation_colors = self.metadata['segmentation_colors']
+
+        if not segmentation_colors and len(self.mask.shape) == 3:
+            raise ValueError("Mask should be decoded, but there is no segmentation colors")
+
+        mask = self._encode_mask(self.mask, segmentation_colors) if segmentation_colors else self.mask
+
+        if not label_map and self.metadata.get('label_map'):
+            label_map = self.metadata['label_map']
+
+        polygons = defaultdict(list)
+        indexes = np.unique(mask) if not label_map else set(np.unique(mask))&set(label_map.keys())
+        for i in indexes:
+            binary_mask = np.uint8(mask == i)
+            contours, _ = cv.findContours(binary_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+            for contour in contours:
+                if contour.size < 6:
+                    continue
+                contour = np.squeeze(contour, axis=1)
+                polygons[i].append(contour)
+
+        return polygons
 
 
 class SegmentationPrediction(SegmentationRepresentation):
@@ -165,6 +175,31 @@ class SegmentationPrediction(SegmentationRepresentation):
         annotation.metadata = annotation_meta
 
         return annotation
+
+    def to_polygon(self):
+        if self.mask is None or self.mask.size == 0:
+            raise ValueError("Polygon can be found only for non-empty mask")
+
+        polygons = defaultdict(list)
+
+        mask = self.mask
+
+        if len(mask.shape) == 3:
+            if 1 not in mask.shape:
+                mask = np.argmax(mask, axis=0)
+            else:
+                mask = np.squeeze(mask, axis=-1)
+        indexes = np.unique(mask)
+        for i in indexes:
+            binary_mask = np.uint8(mask == i)
+            contours, _ = cv.findContours(binary_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+            for contour in contours:
+                if contour.size < 6:
+                    continue
+                contour = np.squeeze(contour, axis=1)
+                polygons[i].append(contour)
+
+        return polygons
 
 
 class BrainTumorSegmentationAnnotation(SegmentationAnnotation):
@@ -236,7 +271,7 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
             areas.append(maskUtils.area(mask))
         return areas
 
-    def to_polygon(self, segmentation_colors=None):
+    def to_polygon(self):
         if not self.raw_mask:
             raise ValueError("Polygon can be found only for non-empty mask")
 

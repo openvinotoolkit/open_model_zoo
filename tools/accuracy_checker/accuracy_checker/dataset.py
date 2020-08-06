@@ -208,6 +208,10 @@ class Dataset:
         segmentation_mask_source = self.config.get('segmentation_masks_source')
         annotation.set_segmentation_mask_source(segmentation_mask_source)
         annotation.set_additional_data_source(self.config.get('additional_data_source'))
+        annotation.metadata.update({
+            'label_map': self.metadata.get('label_map'),
+            'segmentation_colors': self.metadata.get('segmentation_colors')
+        })
 
     def _load_meta(self):
         meta_data_file = self._config.get('dataset_meta')
