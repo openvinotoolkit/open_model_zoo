@@ -21,11 +21,6 @@ from typing import List
 
 import numpy as np
 
-try:
-    import pycocotools.mask as maskUtils
-except ImportError:
-    maskUtils = None
-
 from accuracy_checker.representation import (
     DetectionAnnotation, DetectionPrediction,
     SegmentationPrediction, SegmentationAnnotation,
@@ -104,10 +99,7 @@ def make_segmentation_representation(mask, ground_truth=False):
     return [SegmentationPrediction('identifier', mask)]
 
 
-def make_instance_segmentation_representation(mask, labels, ground_truth=False):
-    raw_mask = []
-    for elem in mask:
-        raw_mask.append(maskUtils.encode(np.asfortranarray(np.uint8(elem))))
+def make_instance_segmentation_representation(raw_mask, labels, ground_truth=False):
     if ground_truth:
         return [CoCoInstanceSegmentationAnnotation('identifier', raw_mask, labels)]
 

@@ -17,6 +17,11 @@ limitations under the License.
 import numpy as np
 import pytest
 
+try:
+    import pycocotools.mask as maskUtils
+except ImportError:
+    maskUtils = None
+
 from .common import make_segmentation_representation, make_instance_segmentation_representation
 
 def no_available_pycocotools():
@@ -26,62 +31,94 @@ def no_available_pycocotools():
     except:
         return True
 
+def encode_mask(mask):
+    raw_mask = []
+    for elem in mask:
+        raw_mask.append(maskUtils.encode(np.asfortranarray(np.uint8(elem))))
+    return raw_mask
+
 class TestSegmentationRepresentation:
 
     def test_to_polygon_annotation(self):
-        annotations = make_segmentation_representation(np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]), True)
+        annotation = make_segmentation_representation(np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]), True)[0]
         expected = {
             0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
             1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
-        for annotation in annotations:
-            actual = annotation.to_polygon()
 
-        for key, _ in expected.items():
+        actual = annotation.to_polygon()
+
+        for key in expected.keys():
             assert actual[key]
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
 
     def test_to_polygon_annotation_with_colors(self):
-        annotations = make_segmentation_representation(np.array(
+        annotation = make_segmentation_representation(np.array(
             [[[128, 128, 128], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
              [[128, 128, 128], [128, 128, 128], [0, 0, 0], [0, 0, 0]],
-             [[128, 128, 128], [128, 128, 128], [128, 128, 128], [0, 0, 0]]]), True)
+             [[128, 128, 128], [128, 128, 128], [128, 128, 128], [0, 0, 0]]]), True)[0]
         segmentation_colors = [[0, 0, 0], [128, 128, 128]]
         expected = {
             0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
             1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
-        for annotation in annotations:
-            actual = annotation.to_polygon(segmentation_colors)
 
-        for key, _ in expected.items():
+        actual = annotation.to_polygon(segmentation_colors)
+
+        for key in expected.keys():
             assert actual[key]
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
 
     def test_to_polygon_prediction(self):
-        predictions = make_segmentation_representation(np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]), False)
+        prediction = make_segmentation_representation(np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]), False)[0]
         expected = {
             0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
             1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
-        for prediction in predictions:
-            actual = prediction.to_polygon()
 
-        for key, _ in expected.items():
+        actual = prediction.to_polygon()
+
+        for key in expected.keys():
             assert actual[key]
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
 
     def test_to_polygon_prediction_with_argmax(self):
-        predictions = make_segmentation_representation(np.array(
+        prediction = make_segmentation_representation(np.array(
             [[[0.01, 0.99, 0.99, 0.99], [0.01, 0.01, 0.99, 0.99], [0.01, 0.01, 0.01, 0.99]],
-             [[0.99, 0.01, 0.01, 0.01], [0.99, 0.99, 0.01, 0.01], [0.99, 0.99, 0.99, 0.01]]]), False)
+             [[0.99, 0.01, 0.01, 0.01], [0.99, 0.99, 0.01, 0.01], [0.99, 0.99, 0.99, 0.01]]]), False)[0]
         expected = {
             0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
             1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
-        for prediction in predictions:
-            actual = prediction.to_polygon()
 
-        for key, _ in expected.items():
+        actual = prediction.to_polygon()
+
+        for key in expected.keys():
+            assert actual[key]
+            for actual_arr, expected_arr in zip(actual[key], expected[key]):
+                assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
+
+    def test_to_polygon_with_None_mask(self):
+        prediction = make_segmentation_representation(None, False)[0]
+
+        with pytest.raises(ValueError):
+            prediction.to_polygon()
+
+    def test_to_polygon_with_empty_mask(self):
+        prediction = make_segmentation_representation(np.array([]), False)[0]
+
+        with pytest.raises(ValueError):
+            prediction.to_polygon()
+
+    def test_to_polygon_with_1_in_shape(self):
+        annotation = make_segmentation_representation(np.array(
+            [[[1], [0], [0], [0]], [[1], [1], [0], [0]], [[1], [1], [1], [0]]]), True)[0]
+        expected = {
+            0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
+            1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
+
+        actual = annotation.to_polygon()
+
+        for key in expected.keys():
             assert actual[key]
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
@@ -92,15 +129,16 @@ class TestCoCoInstanceSegmentationRepresentation:
     def test_to_polygon_annotation(self):
         mask = [np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]),
                 np.array([[0, 1, 1, 1], [0, 0, 1, 1], [0, 0, 0, 1]])]
+        raw_mask = encode_mask(mask)
         labels = [0, 1]
-        annotations = make_instance_segmentation_representation(mask, labels, True)
+        annotation = make_instance_segmentation_representation(raw_mask, labels, True)[0]
         expected = {
             0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
             1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
-        for annotation in annotations:
-            actual = annotation.to_polygon()
 
-        for key, _ in expected.items():
+        actual = annotation.to_polygon()
+
+        for key in expected.keys():
             assert actual[key]
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
@@ -109,15 +147,42 @@ class TestCoCoInstanceSegmentationRepresentation:
     def test_to_polygon_prediction(self):
         mask = [np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]),
                 np.array([[0, 1, 1, 1], [0, 0, 1, 1], [0, 0, 0, 1]])]
+        raw_mask = encode_mask(mask)
         labels = [0, 1]
-        predictions = make_instance_segmentation_representation(mask, labels, False)
+        prediction = make_instance_segmentation_representation(raw_mask, labels, False)[0]
         expected = {
             0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
             1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
-        for prediction in predictions:
-            actual = prediction.to_polygon()
 
-        for key, _ in expected.items():
+        actual = prediction.to_polygon()
+
+        for key in expected.keys():
             assert actual[key]
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
+
+    def test_to_polygon_with_None_mask(self):
+        labels = [0, 1]
+        prediction = make_instance_segmentation_representation(None, labels, False)[0]
+
+        with pytest.raises(ValueError):
+            prediction.to_polygon()
+
+    def test_to_polygon_with_empty_mask(self):
+        labels = [0, 1]
+        prediction = make_instance_segmentation_representation([], labels, False)[0]
+
+        with pytest.raises(ValueError):
+            prediction.to_polygon()
+
+    def test_to_polygon_with_None_labels(self):
+        prediction = make_instance_segmentation_representation([np.array([[1, 0], [0, 1]])], None, False)[0]
+
+        with pytest.raises(ValueError):
+            prediction.to_polygon()
+
+    def test_to_polygon_with_empty_labels(self):
+        prediction = make_instance_segmentation_representation([np.array([[1, 0], [0, 1]])], [], False)[0]
+
+        with pytest.raises(ValueError):
+            prediction.to_polygon()
