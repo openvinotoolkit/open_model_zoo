@@ -179,8 +179,8 @@ def match_images(params):
         """
         for row in np.transpose(diff, (1, 0, 2)):
             for px_idx in range(len(row) - MAX_PX_ROW_DIFF):
-                if (row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((255, 0, 0),) * MAX_PX_ROW_DIFF).all() or \
-                        (row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((0, 0, 255),) * MAX_PX_ROW_DIFF).all():
+                if ((row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((255, 0, 0),) * MAX_PX_ROW_DIFF).all()
+                    or (row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((0, 0, 255),) * MAX_PX_ROW_DIFF).all()):
                     return True
         return False
 
