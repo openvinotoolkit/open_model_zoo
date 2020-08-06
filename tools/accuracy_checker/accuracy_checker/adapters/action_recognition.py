@@ -71,7 +71,7 @@ class ActionDetection(Adapter):
                 description="Variances to decode SSD prediction."
             ),
             'add_conf_out_count': NumberField(
-                optional=True, min_value=1,
+                optional=True, min_value=1, value_type=int,
                 description="Number of layers with action confidences (optional, you can not provide this argument "
                             "if action confidences contained in one layer)."
             ),
