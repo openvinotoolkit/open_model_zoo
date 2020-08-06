@@ -45,7 +45,7 @@ class CornerCrop(Preprocessor):
                 default='top-left', description="Destination height for image cropping respectively."
             ),
         })
-        
+
         return parameters
 
     def configure(self):
@@ -152,18 +152,18 @@ class Crop(Preprocessor):
 
         image.data = self.process_data(
             data, self.dst_height, self.dst_width, self.central_fraction,
-            self.use_pillow, is_simple_case, image.metadata, self.no_resize
+            self.use_pillow, is_simple_case, image.metadata
         ) if not isinstance(data, list) else [
             self.process_data(
                 fragment, self.dst_height, self.dst_width, self.central_fraction,
-                self.use_pillow, is_simple_case, image.metadata, self.no_resize
+                self.use_pillow, is_simple_case, image.metadata
             ) for fragment in image.data
         ]
 
         return image
 
     @ staticmethod
-    def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata, no_resize=False):
+    def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata):
         height, width = data.shape[:2]
         if not central_fraction:
             new_height = dst_height
