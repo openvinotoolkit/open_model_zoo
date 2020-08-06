@@ -197,3 +197,6 @@ More detailed information about calculation segmentation metrics you can find [h
   * `calculate_average` - allows calculation of average precision (default value: `True`).
 * `wer` - Word error rate ([WER](https://en.wikipedia.org/wiki/Word_error_rate)). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
 * `greedy_wer` - approach to calculate WER as length normalized [edit distance](https://en.wikipedia.org/wiki/Edit_distance). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
+* `score_class_comparison` - allows calculate an accuracy of quality score class(low/normal/good). It sorts all quality scores from annotations and predictions and set the k1 highest scores as high class and the k2 lowest scores as low class where k1 is `num_high_quality` and k2 is `num_low_quality`. Supported representations: `QualityAssessmentAnnotation`, `QualityAssessmentPrediction`.
+  * `num_high_quality` - the number of high class in total (default value: `1`).
+  * `num_low_quality` - the number of low class in total (default value: `1`).

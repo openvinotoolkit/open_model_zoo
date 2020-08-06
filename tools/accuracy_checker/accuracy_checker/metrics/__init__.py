@@ -91,7 +91,7 @@ from .attribute_classification import (
 )
 
 from .speech_recognition import SpeechRecognitionWER, GreedyWER
-
+from .score_class_comparison import ScoreClassComparisonMetric
 __all__ = [
     'Metric',
     'MetricsExecutor',
@@ -174,5 +174,7 @@ __all__ = [
     'AttributeClassificationAccuracy',
 
     'SpeechRecognitionWER',
-    'GreedyWER'
+    'GreedyWER',
+
+    'ScoreClassComparisonMetric',
 ]

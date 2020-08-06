@@ -256,3 +256,4 @@ AccuracyChecker supports following set of adapters:
     * `anchor_sizes` - Anchor sizes for each base output layer.
     * `window_scales` - Window scales for each base output layer.
     * `window_lengths` - Window lengths for each base output layer.
+* `face_recognition_quality_assessment` - converts output of face recognition quality assessment model to `QualityAssessmentPrediction ` representation.
