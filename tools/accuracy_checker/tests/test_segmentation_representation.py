@@ -42,8 +42,8 @@ class TestSegmentationRepresentation:
     def test_to_polygon_annotation(self):
         annotation = make_segmentation_representation(np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]), True)[0]
         expected = {
-            0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
-            1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
+            0: [np.array([[1, 0], [3, 0], [3, 2]])],
+            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
 
         actual = annotation.to_polygon()
 
@@ -59,8 +59,8 @@ class TestSegmentationRepresentation:
              [[128, 128, 128], [128, 128, 128], [128, 128, 128], [0, 0, 0]]]), True)[0]
         segmentation_colors = [[0, 0, 0], [128, 128, 128]]
         expected = {
-            0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
-            1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
+            0: [np.array([[1, 0], [3, 0], [3, 2]])],
+            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
 
         actual = annotation.to_polygon(segmentation_colors)
 
@@ -72,8 +72,8 @@ class TestSegmentationRepresentation:
     def test_to_polygon_prediction(self):
         prediction = make_segmentation_representation(np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]), False)[0]
         expected = {
-            0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
-            1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
+            0: [np.array([[1, 0], [3, 0], [3, 2]])],
+            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
 
         actual = prediction.to_polygon()
 
@@ -87,8 +87,8 @@ class TestSegmentationRepresentation:
             [[[0.01, 0.99, 0.99, 0.99], [0.01, 0.01, 0.99, 0.99], [0.01, 0.01, 0.01, 0.99]],
              [[0.99, 0.01, 0.01, 0.01], [0.99, 0.99, 0.01, 0.01], [0.99, 0.99, 0.99, 0.01]]]), False)[0]
         expected = {
-            0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
-            1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
+            0: [np.array([[1, 0], [3, 0], [3, 2]])],
+            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
 
         actual = prediction.to_polygon()
 
@@ -113,8 +113,8 @@ class TestSegmentationRepresentation:
         annotation = make_segmentation_representation(np.array(
             [[[1], [0], [0], [0]], [[1], [1], [0], [0]], [[1], [1], [1], [0]]]), True)[0]
         expected = {
-            0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
-            1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
+            0: [np.array([[1, 0], [3, 0], [3, 2]])],
+            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
 
         actual = annotation.to_polygon()
 
@@ -133,8 +133,8 @@ class TestCoCoInstanceSegmentationRepresentation:
         labels = [0, 1]
         annotation = make_instance_segmentation_representation(raw_mask, labels, True)[0]
         expected = {
-            0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
-            1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
+            0: [np.array([[1, 0], [3, 0], [3, 2]])],
+            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
 
         actual = annotation.to_polygon()
 
@@ -151,8 +151,8 @@ class TestCoCoInstanceSegmentationRepresentation:
         labels = [0, 1]
         prediction = make_instance_segmentation_representation(raw_mask, labels, False)[0]
         expected = {
-            0: [np.array([[1, 0], [3, 0], [3, 2]], dtype=np.int32)],
-            1: [np.array([[0, 0], [0, 2], [2, 2]], dtype=np.int32)]}
+            0: [np.array([[1, 0], [3, 0], [3, 2]])],
+            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
 
         actual = prediction.to_polygon()
 
