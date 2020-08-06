@@ -82,7 +82,7 @@ from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
 
 from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPrediction
 from .image_processing import ImageProcessingAnnotation, ImageProcessingPrediction
-
+from .quality_assessment import QualityAssessmentAnnotation, QualityAssessmentPrediction
 __all__ = [
     'BaseRepresentation',
 
@@ -167,5 +167,6 @@ __all__ = [
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',
-
+    'QualityAssessmentAnnotation',
+    'QualityAssessmentPrediction',
 ]
