@@ -86,6 +86,14 @@ Accuracy Checker supports following set of preprocessors:
   * `draw_points` - allows visualize points.
   * `normalize` - allows to use normalization for keypoints.
   * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
+* `corner_crop` - Corner crop of the image. 
+  * `dst_width` and `dst_heigth` are destination width and height
+  * `corner_type` is type of the corner crop. Options are:
+    * `top-left`
+    * `top-right`
+    * `bottom-left`
+    * `bottom-right`
+  Default choice is `top-left`
 * `crop_or_pad` - performs central cropping if original image size greater then destination size and padding in case, when source size lower than destination. Padding filling value is 0, realization - right-bottom.
   * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
 * `crop_image_with_padding`- crops to center of image with padding then scales image size.

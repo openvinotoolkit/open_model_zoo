@@ -24,10 +24,9 @@ evaluations:
             - type: resize
               aspect_ratio_scale: scale_factor
               scale: 0.625
-            - type: crop
+            - type: corner_crop
               dst_width: 1400
               dst_height: 160
-              no_resize: true
             - type: padding
               pad_type: right_bottom
               dst_width: 1400

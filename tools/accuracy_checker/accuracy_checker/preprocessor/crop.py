@@ -18,17 +18,96 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from ..config import NumberField, BoolField, ConfigError
+from ..config import NumberField, BoolField, StringField, ConfigError
 from ..logging import warning
 from .preprocessor import Preprocessor
 from .geometric_transformations import GeometricOperationMetadata
 from ..utils import get_size_from_config, get_size_3d_from_config
 
 
+class CornerCrop(Preprocessor):
+    __provider__ = 'corner_crop'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'dst_width': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination width for image cropping respectively."
+            ),
+            'dst_height': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination height for image cropping respectively."
+            ),
+            'corner_type': StringField(
+                optional=True, choices=['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+                default='top-left', description="Destination height for image cropping respectively."
+            ),
+        })
+        
+        return parameters
+
+    def configure(self):
+        self.corner_type = self.get_value_from_config('corner_type')
+        self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        image.data = self.process_data(
+            data, self.dst_height, self.dst_width, self.corner_type)if not isinstance(data, list) else [
+            self.process_data(fragment, self.dst_height, self.dst_width, self.corner_type) for fragment in image.data
+        ]
+
+        return image
+
+    @staticmethod
+    def process_data(data, dst_height, dst_width, corner_type):
+        height, width = data.shape[:2]
+        if corner_type == 'top-left':
+            new_height = min(height, dst_height)
+            start_height = 0
+            new_width = min(width, dst_width)
+            start_width = 0
+        elif corner_type == 'top-right':
+            new_height = min(height, dst_height)
+            start_height = 0
+            if width > dst_width:
+                start_width = width - dst_width
+                new_width = width
+            else:
+                start_width = 0
+                new_width = width
+        elif corner_type == 'bottom-left':
+            if height > dst_height:
+                start_height = height - dst_height
+                new_height = height
+            else:
+                start_height = 0
+                new_height = height
+            new_width = min(width, dst_width)
+            start_width = 0
+        elif corner_type == 'bottom-right':
+            if height > dst_height:
+                start_height = height - dst_height
+                new_height = height
+            else:
+                start_height = 0
+                new_height = height
+            if width > dst_width:
+                start_width = width - dst_width
+                new_width = width
+            else:
+                start_width = 0
+                new_width = width
+
+        return data[start_height:start_height + new_height, start_width:start_width + new_width]
+
+
 class Crop(Preprocessor):
     __provider__ = 'crop'
 
-    @classmethod
+    @ classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
@@ -46,9 +125,6 @@ class Crop(Preprocessor):
             ),
             'use_pillow': BoolField(
                 optional=True, default=False, description="Parameter specifies usage of Pillow library for cropping."
-            ),
-            'no_resize': BoolField(
-                optional=True, default=False, description="Parameter disables resize if image is less then dst_width or dst_heigth."
             ),
             'central_fraction': NumberField(
                 value_type=float, min_value=0, max_value=1, optional=True, description="Central Fraction."
@@ -70,8 +146,6 @@ class Crop(Preprocessor):
             if self.dst_height is None or self.dst_width is None:
                 raise ConfigError('one from crop dimentions is not provided')
 
-        self.no_resize = self.get_value_from_config('no_resize')
-
     def process(self, image, annotation_meta=None):
         is_simple_case = not isinstance(image.data, list)  # otherwise -- pyramid, tiling, etc
         data = image.data
@@ -88,7 +162,7 @@ class Crop(Preprocessor):
 
         return image
 
-    @staticmethod
+    @ staticmethod
     def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata, no_resize=False):
         height, width = data.shape[:2]
         if not central_fraction:
@@ -104,25 +178,22 @@ class Crop(Preprocessor):
             cropped_data = Image.fromarray(data).crop((j, i, j + new_width, i + new_height))
             return np.array(cropped_data)
 
-        if not no_resize:
-            if width < new_width or height < new_height:
+        if width < new_width or height < new_height:
+            resized = np.array([width, height])
+            if resized[0] < new_width:
+                resized = resized * new_width / resized[0]
+            if resized[1] < new_height:
+                resized = resized * new_height / resized[1]
+            data = cv2.resize(data, tuple(np.ceil(resized).astype(int)))
 
-                resized = np.array([width, height])
-                if resized[0] < new_width:
-                    resized = resized * new_width / resized[0]
-                if resized[1] < new_height:
-                    resized = resized * new_height / resized[1]
-                data = cv2.resize(data, tuple(np.ceil(resized).astype(int)))
+        height, width = data.shape[:2]
+        start_height = (height - new_height) // 2
+        start_width = (width - new_width) // 2
+        if is_simple_case:
+            # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
+            metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop', {}))
 
-            height, width = data.shape[:2]
-            start_height = (height - new_height) // 2
-            start_width = (width - new_width) // 2
-            if is_simple_case:
-                # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
-                metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop', {}))
-
-            return data[start_height:start_height + new_height, start_width:start_width + new_width]
-        return data[:dst_height, :dst_width]
+        return data[start_height:start_height + new_height, start_width:start_width + new_width]
 
 
 class CropRect(Preprocessor):
@@ -155,7 +226,7 @@ class CropRect(Preprocessor):
 class ExtendAroundRect(Preprocessor):
     __provider__ = 'extend_around_rect'
 
-    @classmethod
+    @ classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
@@ -229,7 +300,7 @@ class ExtendAroundRect(Preprocessor):
 class Crop3D(Preprocessor):
     __provider__ = 'crop3d'
 
-    @classmethod
+    @ classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
@@ -258,7 +329,7 @@ class Crop3D(Preprocessor):
         image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop3d', {}))
         return image
 
-    @staticmethod
+    @ staticmethod
     def crop_center(img, cropx, cropy, cropz):
 
         z, y, x, _ = img.shape
@@ -279,7 +350,7 @@ class Crop3D(Preprocessor):
 class TransformedCropWithAutoScale(Preprocessor):
     __provider__ = 'transformed_crop_with_auto_scale'
 
-    @classmethod
+    @ classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
@@ -316,7 +387,7 @@ class TransformedCropWithAutoScale(Preprocessor):
         image.metadata.setdefault('rev_trans', rev_trans)
         return image
 
-    @staticmethod
+    @ staticmethod
     def get_center_scale(bbox, image_w, image_h):
         aspect_ratio = 0.75
         bbox[0] = np.max((0, bbox[0]))
@@ -337,7 +408,7 @@ class TransformedCropWithAutoScale(Preprocessor):
 
         return center, scale
 
-    @staticmethod
+    @ staticmethod
     def get_transformation_matrix(center, scale, output_size, key=0):
         w, _ = scale * 200
         shift_y = [0, -w * 0.5]
@@ -357,7 +428,7 @@ class TransformedCropWithAutoScale(Preprocessor):
 class CandidateCrop(Preprocessor):
     __provider__ = 'candidate_crop'
 
-    @classmethod
+    @ classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
@@ -423,7 +494,7 @@ class CandidateCrop(Preprocessor):
 class CropOrPad(Preprocessor):
     __provider__ = 'crop_or_pad'
 
-    @classmethod
+    @ classmethod
     def parameters(cls):
         params = super().parameters()
         params.update({
@@ -462,11 +533,11 @@ class CropOrPad(Preprocessor):
         image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop_or_pad', meta))
         return image
 
-    @staticmethod
+    @ staticmethod
     def crop_to_bounding_box(data, start_h, start_w, end_h, end_w):
         return data[int(start_h):int(end_h), int(start_w):int(end_w)], {}
 
-    @staticmethod
+    @ staticmethod
     def pad_to_bounding_box(data, offset_h, offset_w, dst_h, dst_w):
         height, width = data.shape[:2]
         after_padding_width = dst_w - offset_w - width
