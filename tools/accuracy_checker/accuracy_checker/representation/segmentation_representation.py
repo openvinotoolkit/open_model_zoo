@@ -53,28 +53,21 @@ LOADERS_MAPPING = {
 
 class SegmentationRepresentation(BaseRepresentation):
     def to_polygon(self, segmentation_colors=None):
-        polygons = []
+        polygons = defaultdict(list)
         mask = self._encode_mask(self.mask, segmentation_colors) if segmentation_colors else self.mask
         if len(mask.shape) == 3:
             mask = np.argmax(mask, axis=0)
         indexes = np.unique(mask)
         for i in indexes:
             binary_mask = np.uint8(mask == i)
-
             contours, _ = cv.findContours(binary_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-
             for contour in contours:
                 if contour.size < 6:
                     continue
-
                 contour = np.squeeze(contour, axis=1)
-                polygons.append((i, contour))
+                polygons[i].append(contour)
 
-        result = defaultdict(list)
-        for key, value in polygons:
-            result[key].append(value)
-
-        return result
+        return polygons
 
 
 class SegmentationAnnotation(SegmentationRepresentation):
@@ -238,24 +231,17 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
         return areas
 
     def to_polygon(self, segmentation_colors=None):
-        polygons = []
+        polygons = defaultdict(list)
         for elem, label in zip(self.raw_mask, self.labels):
             elem = np.uint8(maskUtils.decode(elem))
-
             contours, _ = cv.findContours(elem, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-
             for contour in contours:
                 if contour.size < 6:
                     continue
-
                 contour = np.squeeze(contour, axis=1)
-                polygons.append((label, contour))
+                polygons[label].append(contour)
 
-        result = defaultdict(list)
-        for key, value in polygons:
-            result[key].append(value)
-
-        return result
+        return polygons
 
 
 class CoCoInstanceSegmentationAnnotation(CoCoInstanceSegmentationRepresentation):

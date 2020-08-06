@@ -21,7 +21,15 @@ from typing import List
 
 import numpy as np
 
-from accuracy_checker.representation import DetectionAnnotation, DetectionPrediction, SegmentationPrediction, SegmentationAnnotation
+try:
+    import pycocotools.mask as maskUtils
+except ImportError:
+    maskUtils = None
+
+from accuracy_checker.representation import (
+    DetectionAnnotation, DetectionPrediction,
+    SegmentationPrediction, SegmentationAnnotation,
+    CoCoInstanceSegmentationAnnotation, CoCocInstanceSegmentationPrediction)
 from accuracy_checker.utils import get_path
 
 
@@ -94,6 +102,16 @@ def make_segmentation_representation(mask, ground_truth=False):
         return [representation]
 
     return [SegmentationPrediction('identifier', mask)]
+
+
+def make_instance_segmentation_representation(mask, labels, ground_truth=False):
+    raw_mask = []
+    for elem in mask:
+        raw_mask.append(maskUtils.encode(np.asfortranarray(np.uint8(elem))))
+    if ground_truth:
+        return [CoCoInstanceSegmentationAnnotation('identifier', raw_mask, labels)]
+
+    return [CoCocInstanceSegmentationPrediction('identifier', raw_mask, labels, None)]
 
 
 def update_dict(dictionary, **kwargs):
