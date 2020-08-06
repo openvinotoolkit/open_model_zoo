@@ -1,9 +1,5 @@
 import pickle as pkl
 import json
-import numpy as np
-import cv2 as cv
-
-COLOR_WHITE = (255, 255, 255)
 
 START_TOKEN = 0
 PAD_TOKEN = 1
@@ -40,40 +36,3 @@ def read_vocab(vocab_path):
         raise ValueError("Wrong extension of the vocab file")
     vocab = Vocab(loaded_id2sign=vocab_dict["id2sign"])
     return vocab
-
-
-class ResizePadToTGTShape():
-    def __init__(self, target_shape):
-        self.target_height, self.target_width = target_shape
-
-    def __call__(self, image_raw):
-
-        img_h, img_w = image_raw.shape[0:2]
-        if (img_h, img_w) != (self.target_height, self.target_width):
-            scale = min(self.target_height / img_h, self.target_width / img_w)
-            image_raw = cv.resize(image_raw, None, fx=scale, fy=scale)
-            img_h, img_w = image_raw.shape[0:2]
-            image_raw = cv.copyMakeBorder(image_raw, 0, abs(self.target_height - img_h),
-                                          0, abs(self.target_width -
-                                                 img_w), cv.BORDER_CONSTANT,
-                                          None, COLOR_WHITE)
-        return image_raw
-
-
-class CropPadToTGTShape():
-    def __init__(self, target_shape):
-        self.target_height, self.target_width = target_shape
-
-    def __call__(self, image_raw):
-        img_h, img_w = image_raw.shape[0:2]
-        if (img_h, img_w) != (self.target_height, self.target_width):
-            new_w = min(self.target_width, img_w)
-            new_h = min(self.target_height, img_h)
-            image_raw = image_raw[:new_h,
-                                  :new_w, :]
-            assert (image_raw.shape == self.target_height, self.target_width)
-            img_h, img_w = image_raw.shape[0:2]
-            image_raw = cv.copyMakeBorder(image_raw, 0, self.target_height - img_h,
-                                          0, self.target_width - img_w, cv.BORDER_CONSTANT,
-                                          None, COLOR_WHITE)
-        return image_raw

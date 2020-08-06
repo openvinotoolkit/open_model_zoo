@@ -20,18 +20,36 @@ import os
 import sys
 from argparse import SUPPRESS, ArgumentParser
 
-import cv2
+import cv2 as cv
 import numpy as np
 from tqdm import tqdm
 
-from utils import CropPadToTGTShape, ResizePadToTGTShape
 from utils import END_TOKEN, START_TOKEN, read_vocab
-from openvino.inference_engine import IECore, IENetwork
+from openvino.inference_engine import IECore
+
+def crop(img, target_shape):
+    target_height, target_width = target_shape
+    img_h, img_w = img.shape[0:2]
+    new_w = min(target_width, img_w)
+    new_h = min(target_height, img_h)
+    img = img[:new_h, :new_w, :]
+    return img
+
+
+def resize(img, target_shape):
+    target_height, target_width = target_shape
+    img_h, img_w = img.shape[0:2]
+    scale = min(target_height / img_h, target_width / img_w)
+    img = cv.resize(img, None, fx=scale, fy=scale)
+    return img
+
 
 PREPROCESSING = {
-    'Crop': CropPadToTGTShape,
-    'Resize': ResizePadToTGTShape
+    'crop': crop,
+    'resize': resize
 }
+
+COLOR_WHITE = (255, 255, 255)
 
 
 def print_stats(module):
@@ -45,8 +63,11 @@ def print_stats(module):
 
 def preprocess_image(preprocess, image_raw, tgt_shape):
     target_height, target_width = tgt_shape
-    image_raw = preprocess(tgt_shape)(image_raw)
-    assert image_raw.shape[0] == target_height and image_raw.shape[1] == target_width, image_raw.shape
+    image_raw = preprocess(image_raw, tgt_shape)
+    img_h, img_w = image_raw.shape[0:2]
+    image_raw = cv.copyMakeBorder(image_raw, 0, target_height - img_h,
+                                  0, target_width - img_w, cv.BORDER_CONSTANT,
+                                  None, COLOR_WHITE)
     image = image_raw.transpose((2, 0, 1))
     return image
 
@@ -121,8 +142,8 @@ def main():
     if len(not_supported_layers) != 0:
         log.error("Following layers are not supported by the plugin for specified device {}:\n{}".
                   format(args.device, ', '.join(not_supported_layers)))
-    _, _, H, W = encoder.input_info['imgs'].input_data.shape
-    target_shape = (H, W)
+    _, _, height, width = encoder.input_info['imgs'].input_data.shape
+    target_shape = (height, width)
     images_list = []
     if os.path.isdir(args.input):
         inputs = [os.path.join(args.input, inp)
@@ -134,7 +155,7 @@ def main():
 
     log.info("Loading and preprocessing images")
     for filenm in tqdm(inputs):
-        image_raw = cv2.imread(filenm)
+        image_raw = cv.imread(filenm)
         assert image_raw is not None, "Error reading image {}".format(filenm)
         image = image_raw
         image = preprocess_image(
