@@ -497,7 +497,8 @@ class CropWithPadSize(Preprocessor):
         offset_height = ((image_height - padded_center_crop_size) + 1) // 2
         offset_width = ((image_width - padded_center_crop_size) + 1) // 2
         cropped_data, _ = CropOrPad.crop_to_bounding_box(
-            image.data, offset_height, offset_width, padded_center_crop_size, padded_center_crop_size
+            image.data, offset_height, offset_width,
+            offset_height + padded_center_crop_size, offset_width + padded_center_crop_size
         )
         image.data = cv2.resize(cropped_data, (self.size, self.size))
         return image
