@@ -9,7 +9,7 @@
 #include <vector>
 #include <gflags/gflags.h>
 
-#include <samples/args_helper.hpp>
+#include <samples/default_flags.hpp>
 
 DEFINE_INPUT_FLAGS
 

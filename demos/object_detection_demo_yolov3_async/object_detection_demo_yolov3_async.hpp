@@ -10,7 +10,7 @@
 #include <gflags/gflags.h>
 #include <iostream>
 
-#include <samples/args_helper.hpp>
+#include <samples/default_flags.hpp>
 
 DEFINE_INPUT_FLAGS
 
