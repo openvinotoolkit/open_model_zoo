@@ -68,15 +68,15 @@ class Im2latexEvaluator(BaseEvaluator):
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
         self.dataset_meta = self.dataset.metadata
-        for batch_id, (dataset_indices, batch_annotation) in enumerate(self.dataset):
+        for batch_id, (_, batch_annotation) in enumerate(self.dataset):
 
             batch_identifiers = [annotation.identifier for annotation in batch_annotation]
             batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
             batch_input = self.preprocessing_executor.process(batch_input, batch_annotation)
-            batch_input, batch_meta = extract_image_representations(batch_input)
+            batch_input, _ = extract_image_representations(batch_input)
             batch_prediction = self.model.predict(batch_identifiers, batch_input)
-            batch_prediction = [CharacterRecognitionPrediction(label=batch_prediction,
-                                                                 identifier=batch_annotation[0].identifier)]
+            batch_prediction = [CharacterRecognitionPrediction(
+                label=batch_prediction, identifier=batch_annotation[0].identifier)]
             self._annotations.extend(batch_annotation)
             self._predictions.extend(batch_prediction)
 
@@ -169,8 +169,8 @@ class BaseModel:
                 model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
                 blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
                 if not model_list and not blob_list:
-                    model_list = list(model.glob('*.xml'.format(self.default_model_suffix)))
-                    blob_list = list(model.glob('*.blob'.format(self.default_model_suffix)))
+                    model_list = list(model.glob('*.xml'))
+                    blob_list = list(model.glob('*.blob'))
                     if not model_list:
                         model_list = blob_list
             if not model_list:
