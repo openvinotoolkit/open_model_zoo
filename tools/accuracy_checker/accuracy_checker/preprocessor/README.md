@@ -87,6 +87,9 @@ Accuracy Checker supports following set of preprocessors:
   * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
 * `crop_or_pad` - performs central cropping if original image size greater then destination size and padding in case, when source size lower than destination. Padding filling value is 0, realization - right-bottom.
   * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
+* `crop_image_with_padding`- crops to center of image with padding then scales image size.
+  * `size` - destination image height/width dimension,
+  * `crop_padding` - the padding size to use when centering the crop.
 * `padding` - padding for image.
   * `stride` - stride for padding.
   * `pad_value` - value for filling space around original image.
