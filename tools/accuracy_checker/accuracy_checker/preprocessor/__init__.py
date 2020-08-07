@@ -50,7 +50,8 @@ from .geometric_transformations import (
     WarpAffine
 )
 from .crop import (
-    Crop, CropRect, ExtendAroundRect, Crop3D, TransformedCropWithAutoScale, CandidateCrop, CropOrPad, CropWithPadSize, CornerCrop
+    Crop, CropRect, ExtendAroundRect, Crop3D, TransformedCropWithAutoScale,
+    CandidateCrop, CropOrPad, CropWithPadSize, CornerCrop
 )
 from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS

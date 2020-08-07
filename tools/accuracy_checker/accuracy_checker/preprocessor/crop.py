@@ -55,9 +55,12 @@ class CornerCrop(Preprocessor):
     def process(self, image, annotation_meta=None):
         data = image.data
         image.data = self.process_data(
-            data, self.dst_height, self.dst_width, self.corner_type)if not isinstance(data, list) else [
-            self.process_data(fragment, self.dst_height, self.dst_width, self.corner_type) for fragment in image.data
-        ]
+            data, self.dst_height, self.dst_width, self.corner_type
+            ) if not isinstance(data, list) else [
+                self.process_data(
+                    fragment, self.dst_height, self.dst_width, self.corner_type
+                    ) for fragment in image.data
+            ]
 
         return image
 

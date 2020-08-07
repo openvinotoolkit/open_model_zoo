@@ -74,7 +74,7 @@ def crop_image(img, output_path, default_size=None):
 
 def run(cmd, timeout_sec):
     proc = subprocess.Popen(cmd, shell=True)
-    kill_proc = lambda p: p.kill()
+    def kill_proc(p): return p.kill()
     timer = Timer(timeout_sec, kill_proc, [proc])
     try:
         timer.start()
@@ -145,6 +145,43 @@ def render_routine(line):
                 os.remove(png_filename)
 
 
+def check_differ(diff):
+    """Checks if difference of two images has a substring
+    of blue or red pixels with length >= MAX_PX_ROW_DIFF
+    In other words, if one image is shifted from another less then
+    MAX_PX_ROW_DIFF, images are equal
+
+    Args:
+        diff (np.array): Difference of two images
+
+    Returns:
+        bool: Images match
+    """
+    for row in np.transpose(diff, (1, 0, 2)):
+        for px_idx in range(len(row) - MAX_PX_ROW_DIFF):
+            if ((row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((255, 0, 0),) * MAX_PX_ROW_DIFF).all()
+                    or (
+                    row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((0, 0, 255),) * MAX_PX_ROW_DIFF).all()
+                    ):
+                return True
+    return False
+
+
+def preprocess(img):
+    """Preprocessing of the image (transpostion and binarization)
+
+    Args:
+        im1 (np.array): input image
+
+    Returns:
+        np.array: preprocessed image
+    """
+    # transpose for more convinient work
+    img = np.transpose(img)
+    img = (img >= 160).astype(np.uint8)
+    return img
+
+
 def match_images(params):
     """Function for single comparing two images
 
@@ -164,35 +201,6 @@ def match_images(params):
     if im2 is None:
         # image 2 not rendered
         return False, False
-
-    def check_differ(diff):
-        """Checks if difference of two images has a substring
-        of blue or red pixels with length >= MAX_PX_ROW_DIFF
-        In other words, if one image is shifted from another less then
-        MAX_PX_ROW_DIFF, images are equal
-
-        Args:
-            diff (np.array): Difference of two images
-
-        Returns:
-            bool: Images match
-        """
-        for row in np.transpose(diff, (1, 0, 2)):
-            for px_idx in range(len(row) - MAX_PX_ROW_DIFF):
-                if ((row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((255, 0, 0),) * MAX_PX_ROW_DIFF).all()
-                    or (row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((0, 0, 255),) * MAX_PX_ROW_DIFF).all()):
-                    return True
-        return False
-
-    def preprocess(im1):
-        img_data1 = np.asarray(im1, dtype=np.uint8)  # height, width
-
-        # transpose for more convinient work
-        img_data1 = np.transpose(img_data1)
-
-        img_data1 = (img_data1 >= 160).astype(np.uint8)
-        return img_data1
-
     img_data1 = preprocess(im1)
     img_data2 = preprocess(im2)
     w1, h1 = img_data1.shape[0:2]
@@ -247,8 +255,10 @@ def match_images(params):
     if differ:
         cv.imwrite(out_path.replace('.png', '_wout_s.png'),
                    np.transpose(new_diff, (1, 0, 2)))
-        return False, False
-    return False, True
+        match_w, match_wout = False, False
+    else:
+        match_w, match_wout = False, True
+    return match_w, match_wout
 
 
 class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
