@@ -74,9 +74,9 @@ class TestSegmentationRepresentation:
             [[[128, 128, 128], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
              [[128, 128, 128], [128, 128, 128], [0, 0, 0], [0, 0, 0]],
              [[128, 128, 128], [128, 128, 128], [128, 128, 128], [0, 0, 0]]]), True)[0]
-        segmentation_colors = [[0, 0, 0], [128, 128, 128]]
+        dataset_meta = {'segmentation_colors': [[0, 0, 0], [128, 128, 128]]}
         annotation.metadata.update({
-            'segmentation_colors': segmentation_colors
+            'dataset_meta': dataset_meta
         })
         expected = {
             0: [np.array([[1, 0], [3, 0], [3, 2]])],
@@ -91,9 +91,9 @@ class TestSegmentationRepresentation:
 
     def test_to_polygon_annotation_with_colors_on_converted_annotation(self):
         annotation = make_segmentation_representation(np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]), True)[0]
-        segmentation_colors = [[0, 0, 0], [128, 128, 128]]
+        dataset_meta = {'segmentation_colors': [[0, 0, 0], [128, 128, 128]]}
         annotation.metadata.update({
-            'segmentation_colors': segmentation_colors
+            'dataset_meta': dataset_meta
         })
         expected = {
             0: [np.array([[1, 0], [3, 0], [3, 2]])],
@@ -124,9 +124,9 @@ class TestSegmentationRepresentation:
     def test_to_polygon_annotation_with_label_map_containing_not_all_classes(self):
         annotation = make_segmentation_representation(np.array(
             [[1, 0, 0, 0, 2], [1, 1, 0, 0, 2], [1, 1, 1, 0, 2]]), True)[0]
-        label_map = {0: "background", 1: "triangle"}
+        dataset_meta = {'label_map': {0: "background", 1: "triangle"}}
         annotation.metadata.update({
-            'label_map': label_map
+            'dataset_meta': dataset_meta
         })
 
         expected = {
@@ -197,9 +197,9 @@ class TestSegmentationRepresentation:
             assert len(prediction.to_polygon()) == 0
 
 
+@pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
 class TestCoCoInstanceSegmentationRepresentation:
 
-    @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
     def test_to_polygon_annotation(self):
         mask = [np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]),
                 np.array([[0, 1, 1, 1], [0, 0, 1, 1], [0, 0, 0, 1]])]
@@ -217,7 +217,6 @@ class TestCoCoInstanceSegmentationRepresentation:
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
 
-    @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
     def test_to_polygon_prediction(self):
         mask = [np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]),
                 np.array([[0, 1, 1, 1], [0, 0, 1, 1], [0, 0, 0, 1]])]
@@ -235,7 +234,6 @@ class TestCoCoInstanceSegmentationRepresentation:
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
 
-    @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
     def test_to_polygon_with_None_mask(self):
         labels = [0, 1]
         prediction = make_instance_segmentation_representation(None, labels, False)[0]
@@ -243,7 +241,6 @@ class TestCoCoInstanceSegmentationRepresentation:
         with pytest.warns(Warning):
             assert len(prediction.to_polygon()) == 0
 
-    @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
     def test_to_polygon_with_empty_mask(self):
         labels = [0, 1]
         prediction = make_instance_segmentation_representation([], labels, False)[0]
@@ -251,14 +248,12 @@ class TestCoCoInstanceSegmentationRepresentation:
         with pytest.warns(Warning):
             assert len(prediction.to_polygon()) == 0
 
-    @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
     def test_to_polygon_with_None_labels(self):
         prediction = make_instance_segmentation_representation([np.array([[1, 0], [0, 1]])], None, False)[0]
 
         with pytest.warns(Warning):
             assert len(prediction.to_polygon()) == 0
 
-    @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
     def test_to_polygon_with_empty_labels(self):
         prediction = make_instance_segmentation_representation([np.array([[1, 0], [0, 1]])], [], False)[0]
 

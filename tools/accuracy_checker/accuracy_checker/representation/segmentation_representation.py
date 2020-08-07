@@ -124,16 +124,16 @@ class SegmentationAnnotation(SegmentationRepresentation):
             warnings.warn("Polygon can be found only for non-empty mask")
             return {}
 
-        if not segmentation_colors and self.metadata.get('segmentation_colors'):
-            segmentation_colors = self.metadata['segmentation_colors']
+        if self.metadata.get('dataset_meta'):
+            if not segmentation_colors and self.metadata['dataset_meta'].get('segmentation_colors'):
+                segmentation_colors = self.metadata['dataset_meta']['segmentation_colors']
+            if not label_map and self.metadata['dataset_meta'].get('label_map'):
+                label_map = self.metadata['dataset_meta']['label_map']
 
         if not segmentation_colors and len(self.mask.shape) == 3:
             raise ValueError("Mask should be decoded, but there is no segmentation colors")
 
         mask = self._encode_mask(self.mask, segmentation_colors) if segmentation_colors else self.mask
-
-        if not label_map and self.metadata.get('label_map'):
-            label_map = self.metadata['label_map']
 
         polygons = defaultdict(list)
         indexes = np.unique(mask) if not label_map else set(np.unique(mask))&set(label_map.keys())

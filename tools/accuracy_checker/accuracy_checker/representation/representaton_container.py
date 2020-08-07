@@ -83,7 +83,7 @@ class ContainerAnnotation(ContainerRepresentation):
 
     def set_dataset_metadata(self, source):
         for key in self.representations.keys():
-            self.representations[key].metadata.update(source)
+            self.representations[key].metadata['dataset_meta'] = source
 
 
 class ContainerPrediction(ContainerRepresentation):
