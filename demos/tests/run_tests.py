@@ -228,7 +228,7 @@ def main():
                             execution_time = timeit.default_timer() - start_time
 
                             # 'if' is debug-only, won't be needed when all demos will be compatible with ssim test
-                            if '-o' in case_args:
+                            if '-o' in case_args and case_args[case_args.index('-o') + 1] != '.':
                                 similarity_res = []
                                 demo_out_file = case_args[case_args.index('-o') + 1]
 

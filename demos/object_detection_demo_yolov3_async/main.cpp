@@ -329,6 +329,9 @@ int main(int argc, char *argv[]) {
         Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
         cv::VideoWriter outVideo(FLAGS_o, cv::VideoWriter::fourcc('M','J','P','G'), cap.get(cv::CAP_PROP_FPS),
                                  cv::Size(width, height));
+        int out_width = width % 2 == 0 ? width : width + 1;
+        int out_height = height % 2 == 0 ? height : height + 1;
+
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
             // Here is the first asynchronous point:
@@ -447,7 +450,7 @@ int main(int argc, char *argv[]) {
                     outVideo.write(frame);
                 } else {
                     cv::Mat resizedFrame;
-                    cv::resize(frame, resizedFrame, cv::Size(width, height));
+                    cv::resize(frame, resizedFrame, cv::Size(out_width, out_height));
                     outVideo.write(resizedFrame);
                 }
             }
