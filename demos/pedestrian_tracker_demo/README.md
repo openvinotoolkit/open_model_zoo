@@ -37,7 +37,10 @@ pedestrian_tracker_demo [OPTION]
 Options:
 
     -h                           Print a usage message.
-    -i "<path>"                  Required. Video sequence to process.
+    -i                           Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                        Optional. Enable reading the input in a loop.
+    -first                       Optional. The index of the first frame of the input to process. The actual first frame captured depends on cv::VideoCapture implementation and may have slightly different number.
+    -limit                       Optional. Read length limit before stopping or restarting reading the input.
     -m_det "<path>"              Required. Path to the Pedestrian Detection Retail model (.xml) file.
     -m_reid "<path>"             Required. Path to the Pedestrian Reidentification Retail model (.xml) file.
     -l "<absolute_path>"         Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels implementation.
@@ -50,8 +53,6 @@ Options:
     -no_show                     Optional. Do not show processed video.
     -delay                       Optional. Delay between frames used for visualization. If negative, the visualization is turned off (like with the option 'no_show'). If zero, the visualization is made frame-by-frame.
     -out "<path>"                Optional. The file name to write output log file with results of pedestrian tracking. The format of the log file is compatible with MOTChallenge format.
-    -first                       Optional. The index of the first frame of video sequence to process. This has effect only if it is positive. The actual first frame captured depends on cv::VideoCapture implementation and may have slightly different number.
-    -last                        Optional. The index of the last frame of video sequence to process. This has effect only if it is positive.
     -u                           Optional. List of monitors to show initially.
 ```
 

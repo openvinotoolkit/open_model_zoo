@@ -9,8 +9,11 @@
 #include <vector>
 #include <gflags/gflags.h>
 
+#include <samples/default_flags.hpp>
+
+DEFINE_INPUT_FLAGS
+
 static const char help_message[] = "Print a usage message.";
-static const char video_message[] = "Required. Path to a video or image file. Default value is \"cam\" to work with camera.";
 static const char person_vehicle_bike_detection_model_message[] = "Required. Path to the Person/Vehicle/Bike Detection Crossroad model (.xml) file.";
 static const char person_attribs_model_message[] = "Optional. Path to the Person Attributes Recognition Crossroad model (.xml) file.";
 static const char person_reid_model_message[] = "Optional. Path to the Person Reidentification Retail model (.xml) file.";
@@ -42,7 +45,6 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 
 
 DEFINE_bool(h, false, help_message);
-DEFINE_string(i, "cam", video_message);
 DEFINE_string(m, "", person_vehicle_bike_detection_model_message);
 DEFINE_string(m_pa, "", person_attribs_model_message);
 DEFINE_string(m_reid, "", person_reid_model_message);
@@ -72,7 +74,8 @@ static void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                           " << help_message << std::endl;
-    std::cout << "    -i \"<path>\"                  " << video_message << std::endl;
+    std::cout << "    -i                           " << input_message << std::endl;
+    std::cout << "    -loop                        " << loop_message << std::endl;
     std::cout << "    -m \"<path>\"                  " << person_vehicle_bike_detection_model_message<< std::endl;
     std::cout << "    -m_pa \"<path>\"               " << person_attribs_model_message << std::endl;
     std::cout << "    -m_reid \"<path>\"             " << person_reid_model_message << std::endl;

@@ -60,7 +60,7 @@ void parseInputFilesArguments(std::vector<std::string>& files) {
     std::vector<std::string> args = gflags::GetArgvs();
     bool readArguments = false;
     for (size_t i = 0; i < args.size(); i++) {
-        if (args.at(i) == "-i" || args.at(i) == "--images") {
+        if (args.at(i) == "-i" || args.at(i) == "--i") {
             readArguments = true;
             continue;
         }

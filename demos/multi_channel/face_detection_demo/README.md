@@ -29,12 +29,14 @@ multi_channel_face_detection_demo [OPTION]
 Options:
 
     -h                           Print a usage message
+    -i                           Required. A comma separated list of inputs to process. Each input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                        Optional. Enable reading the inputs in a loop.
+    -duplicate_num               Optional. Multiply the inputs by the given factor. For example, if only one input is provided, but -ni is set to 2, the demo uses half of images from the input as it was the first input and another half goes as the second input.
     -m "<path>"                  Required. Path to an .xml file with a trained model.
       -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations
           Or
       -c "<absolute_path>"       Required for GPU custom kernels. Absolute path to an .xml file with the kernel descriptions
     -d "<device>"                Optional. Specify the target device for a network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo looks for a suitable plugin for a specified device.
-    -nc                          Optional. Maximum number of processed camera inputs (web cameras)
     -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
     -nireq                       Optional. Number of infer requests
     -n_iqs                       Optional. Frame queue size for input channels
@@ -42,12 +44,9 @@ Options:
     -n_sp                        Optional. Number of sampling periods
     -pc                          Optional. Enable per-layer performance report
     -t                           Optional. Probability threshold for detections
-    -no_show                     Optional. Do not show processed video
+    -no_show                     Optional. Do not show processed video.
     -show_stats                  Optional. Enable statistics report
-    -duplicate_num               Optional. Enable and specify the number of channels additionally copied from real sources
-    -real_input_fps              Optional. Disable input frames caching for maximum throughput pipeline
-    -i                           Optional. Specify full path to input video files
-    -loop_video                  Optional. Enable playing video on a loop.
+    -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline
     -u                           Optional. List of monitors to show initially.
 ```
 
