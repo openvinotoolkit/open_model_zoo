@@ -145,6 +145,7 @@ class DLSDKLauncher(Launcher):
         self.disable_resize_to_input = False
         self._do_reshape = False
         self._use_set_blob = False
+        self._output_layouts = dict()
 
         if not delayed_model_loading:
             if dlsdk_launcher_config.need_conversion:
@@ -231,6 +232,8 @@ class DLSDKLauncher(Launcher):
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
+                if self._output_layouts:
+                    meta_['output_layout'] = self._output_layouts
         self._do_reshape = False
         self._use_set_blob = self.disable_resize_to_input
 
@@ -252,6 +255,8 @@ class DLSDKLauncher(Launcher):
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
+                if self._output_layouts:
+                    meta_['output_layout'] = self._output_layouts
 
         self._do_reshape = False
 
@@ -262,6 +267,9 @@ class DLSDKLauncher(Launcher):
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
+                if self._output_layouts:
+                    meta_['output_layout'] = self._output_layouts
+
         ir.infer(infer_inputs, metadata, context)
 
     def _is_hetero(self):
@@ -884,6 +892,7 @@ class DLSDKLauncher(Launcher):
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
             print_info('\tshape: {}\n'.format(output_info.shape))
+            self._output_layouts[name] = output_info.layout
 
     def _set_preprocess(self, preprocess):
         if preprocess.ie_processor is None:
