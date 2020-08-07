@@ -74,7 +74,8 @@ def crop_image(img, output_path, default_size=None):
 
 def run(cmd, timeout_sec):
     proc = subprocess.Popen(cmd, shell=True)
-    def kill_proc(p): return p.kill()
+    def kill_proc(process):
+        return process.kill()
     timer = Timer(timeout_sec, kill_proc, [proc])
     try:
         timer.start()
@@ -161,8 +162,9 @@ def check_differ(diff):
         for px_idx in range(len(row) - MAX_PX_ROW_DIFF):
             if ((row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((255, 0, 0),) * MAX_PX_ROW_DIFF).all()
                     or (
-                    row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((0, 0, 255),) * MAX_PX_ROW_DIFF).all()
-                    ):
+                        row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((0, 0, 255),) * MAX_PX_ROW_DIFF).all()
+                    
+               ):
                 return True
     return False
 
