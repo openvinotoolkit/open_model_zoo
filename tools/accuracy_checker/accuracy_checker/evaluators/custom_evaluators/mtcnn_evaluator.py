@@ -721,7 +721,7 @@ class MTCNNEvaluator(BaseEvaluator):
     def from_configs(cls, config, delayed_model_loading=False):
         dataset_config = config['datasets']
         launcher_config = config['launchers'][0]
-        if launcher_config['framework'] == 'dlsdk' and 'devise' not in launcher_config:
+        if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
             launcher_config['device'] = 'CPU'
         models_info = config['network_info']
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
