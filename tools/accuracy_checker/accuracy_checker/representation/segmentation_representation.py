@@ -18,6 +18,7 @@ from enum import Enum
 from pathlib import Path
 from copy import deepcopy
 from collections import defaultdict
+import warnings
 import cv2 as cv
 
 import numpy as np
@@ -120,7 +121,8 @@ class SegmentationAnnotation(SegmentationRepresentation):
 
     def to_polygon(self, segmentation_colors=None, label_map=None):
         if self.mask is None or self.mask.size == 0:
-            raise ValueError("Polygon can be found only for non-empty mask")
+            warnings.warn("Polygon can be found only for non-empty mask")
+            return {}
 
         if not segmentation_colors and self.metadata.get('segmentation_colors'):
             segmentation_colors = self.metadata['segmentation_colors']
@@ -178,7 +180,8 @@ class SegmentationPrediction(SegmentationRepresentation):
 
     def to_polygon(self):
         if self.mask is None or self.mask.size == 0:
-            raise ValueError("Polygon can be found only for non-empty mask")
+            warnings.warn("Polygon can be found only for non-empty mask")
+            return {}
 
         polygons = defaultdict(list)
 
@@ -273,10 +276,12 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
 
     def to_polygon(self):
         if not self.raw_mask:
-            raise ValueError("Polygon can be found only for non-empty mask")
+            warnings.warn("Polygon can be found only for non-empty mask")
+            return {}
 
         if not self.labels:
-            raise ValueError("Polygon can be found only for non-empty labels")
+            warnings.warn("Polygon can be found only for non-empty labels")
+            return {}
 
         polygons = defaultdict(list)
         for elem, label in zip(self.raw_mask, self.labels):
