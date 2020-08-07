@@ -92,7 +92,7 @@ def east_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
 
 class ScaleFactor:
     def __init__(self, config, parameters):
-        self.scale = get_parameter_value_from_config(config, parameters(), 'scale')
+        self.scale = get_parameter_value_from_config(config, parameters, 'scale')
 
     def __call__(self, dst_width, dst_height, image_width, image_height):
         resize_w = int(image_width * self.scale)
@@ -356,7 +356,7 @@ class Resize(Preprocessor):
         self.scaling_func = ASPECT_RATIO_SCALE.get(self.get_value_from_config('aspect_ratio_scale'))
         self.factor = self.get_value_from_config('factor')
         if inspect.isclass(self.scaling_func):
-            self.scaling_func = self.scaling_func(self.config, self.parameters)
+            self.scaling_func = self.scaling_func(self.config, self.parameters())
 
     def process(self, image, annotation_meta=None):
         data = image.data
