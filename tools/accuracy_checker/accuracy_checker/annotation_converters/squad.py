@@ -255,7 +255,7 @@ class SQUADConverter(BaseFormatConverter):
 
                 p_mask = self.fill_p_mask(span, len(truncated_query), sequence_added_tokens, cls_index)
                 idx = example_index
-                identifier = ['input_ids_{}'.format(idx), 'input_mask_{}'.format(idx), 'segment_ids_{}'.format(idx)]
+                identifier = ['input_ids_{}'.format(idx), 'input_mask_{}'.format(idx), 'segment_ids_{}'.format(idx), 'position_ids_{}'.format(idx)]
                 annotation = QuestionAnsweringAnnotation(
                     identifier,
                     example.qas_id,
@@ -263,6 +263,7 @@ class SQUADConverter(BaseFormatConverter):
                     np.array(span["input_ids"]),
                     np.array(span["attention_mask"]),
                     np.array(span["token_type_ids"]),
+                    np.arange(len(span["token_type_ids"])),#position_ids
                     np.array(cls_index),
                     p_mask,
                     example.answers,
