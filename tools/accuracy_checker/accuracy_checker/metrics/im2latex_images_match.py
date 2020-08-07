@@ -162,8 +162,7 @@ def check_differ(diff):
         for px_idx in range(len(row) - MAX_PX_ROW_DIFF):
             if ((row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((255, 0, 0),) * MAX_PX_ROW_DIFF).all()
                     or (
-                        row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((0, 0, 255),) * MAX_PX_ROW_DIFF).all()
-                    
+                        row[px_idx: px_idx + MAX_PX_ROW_DIFF] == ((0, 0, 255),) * MAX_PX_ROW_DIFF).all()                    
                ):
                 return True
     return False
