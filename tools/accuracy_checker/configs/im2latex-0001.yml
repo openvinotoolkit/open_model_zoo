@@ -40,7 +40,7 @@ evaluations:
         - name: im2latex_medium_rendered
 
           preprocessing:
-            - type: crop
+            - type: corner_crop
               dst_width: 1400
               dst_height: 160
               no_resize: true
