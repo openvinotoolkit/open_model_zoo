@@ -107,7 +107,7 @@ class CornerCrop(Preprocessor):
 class Crop(Preprocessor):
     __provider__ = 'crop'
 
-    @ classmethod
+    @classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
@@ -162,7 +162,7 @@ class Crop(Preprocessor):
 
         return image
 
-    @ staticmethod
+    @staticmethod
     def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata):
         height, width = data.shape[:2]
         if not central_fraction:
@@ -226,7 +226,7 @@ class CropRect(Preprocessor):
 class ExtendAroundRect(Preprocessor):
     __provider__ = 'extend_around_rect'
 
-    @ classmethod
+    @classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
@@ -300,7 +300,7 @@ class ExtendAroundRect(Preprocessor):
 class Crop3D(Preprocessor):
     __provider__ = 'crop3d'
 
-    @ classmethod
+    @classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
@@ -329,7 +329,7 @@ class Crop3D(Preprocessor):
         image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop3d', {}))
         return image
 
-    @ staticmethod
+    @staticmethod
     def crop_center(img, cropx, cropy, cropz):
 
         z, y, x, _ = img.shape
@@ -350,7 +350,7 @@ class Crop3D(Preprocessor):
 class TransformedCropWithAutoScale(Preprocessor):
     __provider__ = 'transformed_crop_with_auto_scale'
 
-    @ classmethod
+    @classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
@@ -387,7 +387,7 @@ class TransformedCropWithAutoScale(Preprocessor):
         image.metadata.setdefault('rev_trans', rev_trans)
         return image
 
-    @ staticmethod
+    @staticmethod
     def get_center_scale(bbox, image_w, image_h):
         aspect_ratio = 0.75
         bbox[0] = np.max((0, bbox[0]))
@@ -408,7 +408,7 @@ class TransformedCropWithAutoScale(Preprocessor):
 
         return center, scale
 
-    @ staticmethod
+    @staticmethod
     def get_transformation_matrix(center, scale, output_size, key=0):
         w, _ = scale * 200
         shift_y = [0, -w * 0.5]
@@ -428,7 +428,7 @@ class TransformedCropWithAutoScale(Preprocessor):
 class CandidateCrop(Preprocessor):
     __provider__ = 'candidate_crop'
 
-    @ classmethod
+    @classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
@@ -494,7 +494,7 @@ class CandidateCrop(Preprocessor):
 class CropOrPad(Preprocessor):
     __provider__ = 'crop_or_pad'
 
-    @ classmethod
+    @classmethod
     def parameters(cls):
         params = super().parameters()
         params.update({
@@ -533,11 +533,11 @@ class CropOrPad(Preprocessor):
         image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop_or_pad', meta))
         return image
 
-    @ staticmethod
+    @staticmethod
     def crop_to_bounding_box(data, start_h, start_w, end_h, end_w):
         return data[int(start_h):int(end_h), int(start_w):int(end_w)], {}
 
-    @ staticmethod
+    @staticmethod
     def pad_to_bounding_box(data, offset_h, offset_w, dst_h, dst_w):
         height, width = data.shape[:2]
         after_padding_width = dst_w - offset_w - width
