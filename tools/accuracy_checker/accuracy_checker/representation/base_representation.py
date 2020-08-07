@@ -46,3 +46,6 @@ class BaseRepresentation(abc.ABC):
 
     def set_additional_data_source(self, source):
         self.metadata['additional_data_source'] = source
+
+    def set_dataset_metadata(self, source):
+        self.metadata.update(source)
