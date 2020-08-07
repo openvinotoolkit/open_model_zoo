@@ -90,7 +90,7 @@ It has the following format:
 ...
 ```
 
-Please note that you should use ILSVRC 2015 annotation file (val15.txt) for the following models:
+Please note that you should use the ILSVRC 2015 annotation file (val15.txt) with the following models:
 - googlenet-v2
 - se-inception
 - se-resnet-101
@@ -99,7 +99,7 @@ Please note that you should use ILSVRC 2015 annotation file (val15.txt) for the 
 - se-resnext-101
 - se-resnext-50
 
-and ILSVRC 2012 annotation file (val.txt) for all other models supported by the demo.
+and the ILSVRC 2012 annotation file (val.txt) with all other models supported by the demo.
 
 Class index values must be in range from 0 to 1000. If you want to use "other" class, which is supported only by a small subset of models, specify it with -1 index.
 
