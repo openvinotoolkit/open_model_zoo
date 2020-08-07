@@ -41,8 +41,8 @@ class CornerCrop(Preprocessor):
                 description="Destination height for image cropping respectively."
             ),
             'corner_type': StringField(
-                optional=True, choices=['top-left', 'top-right', 'bottom-left', 'bottom-right'],
-                default='top-left', description="Destination height for image cropping respectively."
+                optional=True, choices=['top_left', 'top_right', 'bottom_left', 'bottom_right'],
+                default='top_left', description="Destination height for image cropping respectively."
             ),
         })
 
@@ -67,12 +67,12 @@ class CornerCrop(Preprocessor):
     @staticmethod
     def process_data(data, dst_height, dst_width, corner_type):
         height, width = data.shape[:2]
-        if corner_type == 'top-left':
+        if corner_type == 'top_left':
             new_height = min(height, dst_height)
             start_height = 0
             new_width = min(width, dst_width)
             start_width = 0
-        elif corner_type == 'top-right':
+        elif corner_type == 'top_right':
             new_height = min(height, dst_height)
             start_height = 0
             if width > dst_width:
@@ -81,7 +81,7 @@ class CornerCrop(Preprocessor):
             else:
                 start_width = 0
                 new_width = width
-        elif corner_type == 'bottom-left':
+        elif corner_type == 'bottom_left':
             if height > dst_height:
                 start_height = height - dst_height
                 new_height = height
@@ -90,7 +90,7 @@ class CornerCrop(Preprocessor):
                 new_height = height
             new_width = min(width, dst_width)
             start_width = 0
-        elif corner_type == 'bottom-right':
+        elif corner_type == 'bottom_right':
             if height > dst_height:
                 start_height = height - dst_height
                 new_height = height
