@@ -85,7 +85,7 @@ class SRConverter(BaseFormatConverter):
     def configure(self):
         self.data_dir = self.get_value_from_config('data_dir')
         self.lr_dir = self.get_value_from_config('lr_dir')
-        self.hr_dir= self.get_value_from_config('hr_dir')
+        self.hr_dir = self.get_value_from_config('hr_dir')
         self.upsampled_dir = self.get_value_from_config('upsampled_dir')
         self.lr_suffix = self.get_value_from_config('lr_suffix')
         self.hr_suffix = self.get_value_from_config('hr_suffix')
