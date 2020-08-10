@@ -57,7 +57,7 @@ The values are equal to:
 * `[PAD]` is a special token used to fill the rest of the input to get given input length (384).
 
 4. Position indexes,  name: `position_ids`, shape: [1x384].
-Position indexes is sequence of integer values from 0 to 383 representing the position index for each input token. The `position_ids` is lways the same for any input tokens set
+Position indexes is sequence of integer values from 0 to 383 representing the position index for each input token. The `position_ids` is always the same for any input tokens set
 
 ## Output
 
