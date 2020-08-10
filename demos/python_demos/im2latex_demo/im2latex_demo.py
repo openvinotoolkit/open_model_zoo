@@ -182,19 +182,19 @@ def main():
         row_enc_out = enc_res['row_enc_out']
         dec_states_h = enc_res['hidden']
         dec_states_c = enc_res['context']
-        O_t = enc_res['init_0']
+        output = enc_res['init_0']
 
         tgt = np.array([[START_TOKEN]])
         logits = []
         for _ in range(args.max_formula_len):
             dec_res = exec_net_decoder.infer(inputs={'row_enc_out': row_enc_out,
                                                      'dec_st_c': dec_states_c, 'dec_st_h': dec_states_h,
-                                                     'O_t_minus_1': O_t, 'tgt': tgt
+                                                     'output_prev': output, 'tgt': tgt
                                                      })
 
             dec_states_h = dec_res['dec_st_h_t']
             dec_states_c = dec_res['dec_st_c_t']
-            O_t = dec_res['O_t']
+            output = dec_res['output']
             logit = dec_res['logit']
             logits.append(logit)
             tgt = np.array([[np.argmax(logit, axis=1)]])
