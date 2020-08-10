@@ -90,7 +90,11 @@ It has the following format:
 ...
 ```
 
-Please note that you should use the ILSVRC 2015 annotation file (val15.txt) with the following models:
+Class index values must be in range from 0 to 1000. If you want to use "other" class, which is supported only by a small subset of models, specify it with -1 index.
+
+"Labels" file contains the list of human-readable labels, one line for each class.
+
+Please note that you should use [id_classes_15.txt](./id_classes_15.txt) labels file with the following models:
 - googlenet-v2
 - se-inception
 - se-resnet-101
@@ -99,11 +103,7 @@ Please note that you should use the ILSVRC 2015 annotation file (val15.txt) with
 - se-resnext-101
 - se-resnext-50
 
-and the ILSVRC 2012 annotation file (val.txt) with all other models supported by the demo.
-
-Class index values must be in range from 0 to 1000. If you want to use "other" class, which is supported only by a small subset of models, specify it with -1 index.
-
-["Labels" file](./synset_words.txt) contains the list of human-readable labels, one line for each class.
+and [id_classes_12.txt](./id_classes_12.txt) labels file with all other models supported by the demo.
 
 ## See Also
 * [Using Open Model Zoo demos](../README.md)
