@@ -39,8 +39,6 @@ static const char delay_message[] = "Optional. Delay between frames used for vis
                                      "If zero, the visualization is made frame-by-frame.";
 static const char output_log_message[] = "Optional. The file name to write output log file with results of pedestrian tracking. "
                                           "The format of the log file is compatible with MOTChallenge format.";
-
-/// @brief Message list of monitors to show
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 
@@ -58,9 +56,6 @@ DEFINE_bool(r, false, raw_output_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_int32(delay, 3, delay_message);
 DEFINE_string(out, "", output_log_message);
-
-/// \brief Define a flag to show monitors<br>
-/// It is an optional parameter
 DEFINE_string(u, "", utilization_monitors_message);
 
 
