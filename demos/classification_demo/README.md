@@ -94,7 +94,7 @@ Class index values must be in range from 0 to 1000. If you want to use "other" c
 
 "Labels" file contains the list of human-readable labels, one line for each class.
 
-Please note that you should use [id_classes_15.txt](./id_classes_15.txt) labels file with the following models:
+Please note that you should use [imagenet_2015_classes.txt](./imagenet_2015_classes.txt) labels file with the following models:
 - googlenet-v2
 - se-inception
 - se-resnet-101
@@ -103,7 +103,7 @@ Please note that you should use [id_classes_15.txt](./id_classes_15.txt) labels 
 - se-resnext-101
 - se-resnext-50
 
-and [id_classes_12.txt](./id_classes_12.txt) labels file with all other models supported by the demo.
+and [imagenet_2012_classes.txt](./imagenet_2012_classes.txt) labels file with all other models supported by the demo.
 
 ## See Also
 * [Using Open Model Zoo demos](../README.md)
