@@ -301,7 +301,7 @@ NATIVE_DEMOS = [
     )),
 
     NativeDemo(subdirectory='text_detection_demo', device_keys=['-d_td', '-d_tr'], test_cases=combine_cases(
-        TestCase(options={'-no_show': None, '-dt': 'video',
+        TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('text-detection')}),
         single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),

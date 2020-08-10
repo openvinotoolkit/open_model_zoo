@@ -23,6 +23,7 @@
 #include <ngraph/ngraph.hpp>
 
 #include <monitors/presenter.h>
+#include <samples/images_capture.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
@@ -187,23 +188,7 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        slog::info << "Reading input" << slog::endl;
-        cv::VideoCapture cap;
-        if (!((FLAGS_i == "cam") ? cap.open(0) : cap.open(FLAGS_i.c_str()))) {
-            throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
-        }
-
-        // read input (video) frame
-        cv::Mat frame;  cap >> frame;
-        cv::Mat next_frame;
-
-        const size_t width  = (size_t) cap.get(cv::CAP_PROP_FRAME_WIDTH);
-        const size_t height = (size_t) cap.get(cv::CAP_PROP_FRAME_HEIGHT);
-
-        if (!cap.grab()) {
-            throw std::logic_error("This demo supports only video (or camera) inputs !!! "
-                                   "Failed to get next frame from the " + FLAGS_i);
-        }
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load inference engine -------------------------------------
@@ -318,26 +303,27 @@ int main(int argc, char *argv[]) {
         bool isAsyncMode = false;  // execution is always started using SYNC mode
         bool isModeChanged = false;  // set to TRUE when execution mode is changed (SYNC<->ASYNC)
 
+        cv::Mat frame = cap->read();
+        if (!frame.data) throw std::runtime_error("Can't read an image from the input");
+
+        cv::Size graphSize{frame.cols / 4, 60};
+        Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
+
+        std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
+        std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
+
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
         auto total_t0 = std::chrono::high_resolution_clock::now();
         auto wallclock = std::chrono::high_resolution_clock::now();
         double ocv_render_time = 0;
-
-        std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
-        std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
-        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
-        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
             // Here is the first asynchronous point:
             // in the Async mode, we capture frame to populate the NEXT infer request
             // in the regular mode, we capture frame to the CURRENT infer request
-            if (!cap.read(next_frame)) {
-                if (next_frame.empty()) {
-                    isLastFrame = true;  // end of video file
-                } else {
-                    throw std::logic_error("Failed to get frame from cv::VideoCapture");
-                }
+            cv::Mat next_frame = cap->read();
+            if (!next_frame.data) {
+                isLastFrame = true;  // end of video file
             }
             if (isAsyncMode) {
                 if (isModeChanged) {
@@ -404,7 +390,7 @@ int main(int argc, char *argv[]) {
                 for (auto &output : outputInfo) {
                     auto output_name = output.first;
                     Blob::Ptr blob = async_infer_request_curr->GetBlob(output_name);
-                    ParseYOLOV3Output(yoloParams[output_name], output_name, blob, resized_im_h, resized_im_w, height, width, FLAGS_t, objects);
+                    ParseYOLOV3Output(yoloParams[output_name], output_name, blob, resized_im_h, resized_im_w, frame.rows, frame.cols, FLAGS_t, objects);
                 }
                 // Filtering overlapping boxes
                 std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());
@@ -457,7 +443,6 @@ int main(int argc, char *argv[]) {
             // Final point:
             // in the truly Async mode, we swap the NEXT and CURRENT requests for the next iteration
             frame = next_frame;
-            next_frame = cv::Mat();
             if (isAsyncMode) {
                 async_infer_request_curr.swap(async_infer_request_next);
             }

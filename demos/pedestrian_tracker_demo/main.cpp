@@ -11,6 +11,7 @@
 #include "pedestrian_tracker_demo.hpp"
 
 #include <monitors/presenter.h>
+#include <samples/images_capture.h>
 
 #include <opencv2/core.hpp>
 
@@ -129,11 +130,6 @@ int main(int argc, char **argv) {
 
         bool should_save_det_log = !detlog_out.empty();
 
-        if ((FLAGS_last >= 0) && (FLAGS_first > FLAGS_last)) {
-            throw std::runtime_error("The first frame index (" + std::to_string(FLAGS_first) + ") must be greater than the "
-                "last frame index (" + std::to_string(FLAGS_last) + ')');
-        }
-
         std::vector<std::string> devices{detector_mode, reid_mode};
         InferenceEngine::Core ie =
             LoadInferenceEngine(
@@ -148,29 +144,19 @@ int main(int argc, char **argv) {
             CreatePedestrianTracker(reid_model, ie, reid_mode,
                                     should_keep_tracking_info);
 
-        cv::VideoCapture cap;
-        try {
-            int intInput = std::stoi(FLAGS_i);
-            if (!cap.open(intInput)) {
-                throw std::runtime_error("Can't open " + std::to_string(intInput));
-            }
-        } catch (const std::invalid_argument&) {
-            if (!cap.open(FLAGS_i)) {
-                throw std::runtime_error("Can't open " + FLAGS_i);
-            }
-        } catch (const std::out_of_range&) {
-            if (!cap.open(FLAGS_i)) {
-                throw std::runtime_error("Can't open " + FLAGS_i);
-            }
-        }
-        double video_fps = cap.get(cv::CAP_PROP_FPS);
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_first, FLAGS_limit);
+        double video_fps = cap->fps();
         if (0.0 == video_fps) {
             // the default frame rate for DukeMTMC dataset
             video_fps = 60.0;
         }
-        if (0 >= FLAGS_first && !cap.set(cv::CAP_PROP_POS_FRAMES, FLAGS_first)) {
-            throw std::runtime_error("Can't set the frame to begin with");
-        }
+
+        cv::Mat frame = cap->read();
+        if (!frame.data) throw std::runtime_error("Can't read an image from the input");
+        cv::Size firstFrameSize = frame.size();
+
+        cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
+        Presenter presenter(FLAGS_u, 10, graphSize);
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
@@ -178,22 +164,14 @@ int main(int argc, char **argv) {
         }
         std::cout << std::endl;
 
-        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
-        Presenter presenter(FLAGS_u, 10, graphSize);
-
-        for (int32_t frame_idx = std::max(0, FLAGS_first); 0 > FLAGS_last || frame_idx <= FLAGS_last; ++frame_idx) {
-            cv::Mat frame;
-            if (!cap.read(frame)) {
-                break;
-            }
-
-            pedestrian_detector.submitFrame(frame, frame_idx);
+        for (unsigned frameIdx = 0; ; ++frameIdx) {
+            pedestrian_detector.submitFrame(frame, frameIdx);
             pedestrian_detector.waitAndFetchResults();
 
             TrackedObjects detections = pedestrian_detector.getResults();
 
             // timestamp in milliseconds
-            uint64_t cur_timestamp = static_cast<uint64_t >(1000.0 / video_fps * frame_idx);
+            uint64_t cur_timestamp = static_cast<uint64_t >(1000.0 / video_fps * frameIdx);
             tracker->Process(frame, detections, cur_timestamp);
 
             presenter.drawGraphs(frame);
@@ -225,10 +203,14 @@ int main(int argc, char **argv) {
                 presenter.handleKey(k);
             }
 
-            if (should_save_det_log && (frame_idx % 100 == 0)) {
+            if (should_save_det_log && (frameIdx % 100 == 0)) {
                 DetectionLog log = tracker->GetDetectionLog(true);
                 SaveDetectionLogToTrajFile(detlog_out, log);
             }
+            frame = cap->read();
+            if (!frame.data) break;
+            if (frame.size() != firstFrameSize)
+                throw std::runtime_error("Can't track objects on images of different size");
         }
 
         if (should_keep_tracking_info) {
