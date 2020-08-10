@@ -22,7 +22,8 @@ from .classification import (
     ClassificationAccuracyClasses,
     ClipAccuracy,
     ClassificationF1Score,
-    MetthewsCorrelation
+    MetthewsCorrelation,
+    RocAucScore
 )
 from .detection import (
     DetectionMAP,
@@ -178,4 +179,6 @@ __all__ = [
     'SpeechRecognitionCER',
 
     'ScoreClassComparisonMetric',
+
+    'RocAucScore'
 ]

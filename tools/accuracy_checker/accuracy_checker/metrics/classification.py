@@ -27,6 +27,10 @@ from ..config import NumberField, StringField, ConfigError
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
 
+try:
+    from sklearn.metrics import roc_auc_score
+except ImportError:
+    roc_auc_score = None
 
 class ClassificationAccuracy(PerImageEvaluationMetric):
     """
@@ -262,3 +266,26 @@ class MetthewsCorrelation(PerImageEvaluationMetric):
         self.tn = 0
         self.fp = 0
         self.fn = 0
+
+class RocAucScore(PerImageEvaluationMetric):
+    __provider__ = 'roc_auc_score'
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
+    prediction_types = (ClassificationPrediction, ArgMaxClassificationPrediction)
+
+    def configure(self):
+        self.reset()
+
+    def update(self, annotation, prediction):
+        self.targets.append(annotation.label)
+        self.results.append(prediction.label)
+        return 0
+
+    def evaluate(self, annotations, predictions):
+        all_results = np.array(self.results)
+        all_targets = np.array(self.targets)
+        roc_auc = roc_auc_score(all_targets, all_results)
+        return roc_auc
+
+    def reset(self):
+        self.targets = []
+        self.results = []
