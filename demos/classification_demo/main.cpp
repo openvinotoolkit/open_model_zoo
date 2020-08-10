@@ -64,7 +64,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-cv::Mat resizeImage(cv::Mat& image, int modelInputResolution) {
+cv::Mat resizeImage(const cv::Mat& image, int modelInputResolution) {
     double scale = static_cast<double>(modelInputResolution) / std::min(image.cols, image.rows);
 
     cv::Mat resizedImage;

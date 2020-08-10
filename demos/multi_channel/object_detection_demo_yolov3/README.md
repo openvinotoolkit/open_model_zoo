@@ -22,7 +22,6 @@ On the start-up, the application reads command line parameters and loads the spe
 
 Running the application with the `-h` option yields the following usage message:
 ```
-cd <samples_build_folder>/intel64/Release
 ./multi_channel_object_detection_demo_yolov3 -h
 
 multi_channel_object_detection_demo_yolov3 [OPTION]
