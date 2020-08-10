@@ -144,7 +144,8 @@ def main():
     if len(not_supported_layers) != 0:
         log.error("Following layers are not supported by the plugin for specified device {}:\n{}".
                   format(args.device, ', '.join(not_supported_layers)))
-    _, _, height, width = encoder.input_info['imgs'].input_data.shape
+    batch_dim, _, height, width = encoder.input_info['imgs'].input_data.shape
+    assert batch_dim == 1, "Demo only works with batch size 1"
     target_shape = (height, width)
     images_list = []
     if os.path.isdir(args.input):
