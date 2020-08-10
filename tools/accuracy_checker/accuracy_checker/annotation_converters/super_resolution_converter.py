@@ -84,9 +84,13 @@ class SRConverter(BaseFormatConverter):
 
     def configure(self):
         self.data_dir = self.get_value_from_config('data_dir')
-        self.lr_dir = self.get_value_from_config('lr_dir')
-        self.hr_dir = self.get_value_from_config('hr_dir')
+        self.lr_dir = self.get_value_from_config('lr_dir') if self.get_value_from_config('lr_dir') else self.data_dir
+        if not self.lr_dir:
+            raise ConfigError('One of the parameters: data_dir or lr_dir should be provided for conversion')
+        self.hr_dir = self.get_value_from_config('hr_dir') if self.get_value_from_config('hr_dir') else self.data_dir
         self.upsampled_dir = self.get_value_from_config('upsampled_dir')
+        if not self.upsampled_dir:
+            self.upsampled_dir = self.lr_dir
         self.lr_suffix = self.get_value_from_config('lr_suffix')
         self.hr_suffix = self.get_value_from_config('hr_suffix')
         self.upsample_suffix = self.get_value_from_config('upsample_suffix')
@@ -100,11 +104,7 @@ class SRConverter(BaseFormatConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_errors = [] if check_content else None
         file_list_lr = []
-        lr_dir = self.lr_dir if self.lr_dir else self.data_dir
-        if not lr_dir:
-            raise ValueError("One of the parameters: data_dir or lr_dir should be provided for conversion")
-
-        for file_in_dir in lr_dir.iterdir():
+        for file_in_dir in self.lr_dir.iterdir():
             if self.lr_suffix in file_in_dir.parts[-1]:
                 file_list_lr.append(file_in_dir)
 
@@ -114,18 +114,15 @@ class SRConverter(BaseFormatConverter):
             lr_file_name = lr_file.parts[-1]
             upsampled_file_name = self.upsample_suffix.join(lr_file_name.split(self.lr_suffix))
             if self.two_streams and self.generate_upsample:
-                dest_path = self.upsampled_dir if self.upsampled_dir else None
-                self.generate_upsample_file(lr_file, self.upsample_factor, upsampled_file_name, dest_path)
+                self.generate_upsample_file(lr_file, self.upsample_factor, upsampled_file_name, self.upsampled_dir)
             hr_file_name = self.hr_suffix.join(lr_file_name.split(self.lr_suffix))
             if check_content:
-                hr_dir = self.hr_dir if self.hr_dir else self.data_dir
-                if not hr_dir:
+                if not self.hr_dir:
                     content_errors.append('No one of the data_dir or hr_dir parameters are provided')
-                if hr_dir and not check_file_existence(hr_dir / hr_file_name):
-                    content_errors.append('{}: does not exist'.format(self.data_dir / hr_file_name))
-                upsampled_dir = self.upsampled_dir if self.upsampled_dir else lr_dir
-                if self.two_streams and not check_file_existence(upsampled_dir / upsampled_file_name):
-                    content_errors.append('{}: does not exist'.format(self.data_dir / upsampled_file_name))
+                if self.hr_dir and not check_file_existence(self.hr_dir / hr_file_name):
+                    content_errors.append('{}: does not exist'.format(self.hr_dir / hr_file_name))
+                if self.two_streams and not check_file_existence(self.upsampled_dir / upsampled_file_name):
+                    content_errors.append('{}: does not exist'.format(self.upsampled_dir / upsampled_file_name))
 
             identifier = [lr_file_name, upsampled_file_name] if self.two_streams else lr_file_name
             annotation.append(SuperResolutionAnnotation(identifier, hr_file_name, gt_loader=self.annotation_loader))
@@ -135,11 +132,10 @@ class SRConverter(BaseFormatConverter):
         return ConverterReturn(annotation, None, content_errors)
 
     @staticmethod
-    def generate_upsample_file(original_image_path, scale_factor, upsampled_file_name, upsampled_image_path=None):
+    def generate_upsample_file(original_image_path, scale_factor, upsampled_file_name, upsampled_image_path):
         image = cv2.imread(str(original_image_path))
         upsampled_image = cv2.resize(image, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_CUBIC)
-        dest_path = upsampled_image_path if upsampled_image_path else original_image_path.parent
-        cv2.imwrite(str(dest_path / upsampled_file_name), upsampled_image)
+        cv2.imwrite(str(upsampled_image_path / upsampled_file_name), upsampled_image)
 
 
 class SRMultiFrameConverter(BaseFormatConverter):
