@@ -43,11 +43,15 @@ class SRConverter(BaseFormatConverter):
             'data_dir': PathField(
                 is_directory=True, description="Path to folder, where images in low and high resolution are located."
             ),
-            'lr_dir_suffix': StringField(
-                optional=True, description="Suffix of directory, where images in low resolution are located."
+            'lr_dir_path': StringField(
+                optional=True, description="Relative path to directory, where images in low resolution are located."
             ),
-            'hr_dir_suffix': StringField(
-                optional=True, description="Suffix of directory, where images in high resolution are located."
+            'hr_dir_path': StringField(
+                optional=True, description="Relative path to directory, where images in high resolution are located."
+            ),
+            'upsample_dir_path': StringField(
+                optional=True, description="Relative path to directory, where upsampled images are located, "
+                                           "if 2 streams used."
             ),
             'lr_suffix': StringField(
                 optional=True, default="lr", description="Low resolution file name's suffix."
@@ -77,8 +81,9 @@ class SRConverter(BaseFormatConverter):
 
     def configure(self):
         self.data_dir = self.get_value_from_config('data_dir')
-        self.lr_dir_suffix = self.get_value_from_config('lr_dir_suffix')
-        self.hr_dir_suffix = self.get_value_from_config('hr_dir_suffix')
+        self.lr_dir_path = self.get_value_from_config('lr_dir_path')
+        self.hr_dir_path = self.get_value_from_config('hr_dir_path')
+        self.upsample_dir_path = self.get_value_from_config('upsample_dir_path')
         self.lr_suffix = self.get_value_from_config('lr_suffix')
         self.hr_suffix = self.get_value_from_config('hr_suffix')
         self.upsample_suffix = self.get_value_from_config('upsample_suffix')
@@ -93,8 +98,8 @@ class SRConverter(BaseFormatConverter):
         content_errors = [] if check_content else None
         file_list_lr = []
         lr_dir = Path(self.data_dir,
-                      self.lr_dir_suffix) if self.lr_dir_suffix and Path(self.data_dir,
-                                                                         self.lr_dir_suffix).is_dir() else self.data_dir
+                      self.lr_dir_path) if self.lr_dir_path and Path(self.data_dir,
+                                                                         self.lr_dir_path).is_dir() else self.data_dir
 
         for file_in_dir in lr_dir.iterdir():
             if self.lr_suffix in file_in_dir.parts[-1]:
@@ -106,13 +111,18 @@ class SRConverter(BaseFormatConverter):
             lr_file_name = lr_file.parts[-1]
             upsampled_file_name = self.upsample_suffix.join(lr_file_name.split(self.lr_suffix))
             if self.two_streams and self.generate_upsample:
-                self.generate_upsample_file(lr_file, self.upsample_factor, upsampled_file_name)
+                dest_path = Path(self.data_dir,
+                                 self.upsample_dir_path) if self.upsample_dir_path and Path(
+                    self.data_dir, self.upsample_dir_path).is_dir() else None
+                self.generate_upsample_file(lr_file, self.upsample_factor, upsampled_file_name, dest_path)
             hr_file_name = self.hr_suffix.join(lr_file_name.split(self.lr_suffix))
-            if self.hr_dir_suffix:
-                hr_file_name = str(Path(self.hr_dir_suffix, hr_file_name))
-            if self.lr_dir_suffix:
-                lr_file_name = str(Path(self.lr_dir_suffix, lr_file_name))
-                upsampled_file_name = str(Path(self.lr_dir_suffix, upsampled_file_name))
+            if self.hr_dir_path:
+                hr_file_name = str(Path(self.hr_dir_path, hr_file_name))
+            if self.lr_dir_path:
+                lr_file_name = str(Path(self.lr_dir_path, lr_file_name))
+                upsampled_file_name = str(Path(self.lr_dir_path, upsampled_file_name))
+            if self.upsample_dir_path and Path(self.data_dir, self.upsample_dir_path).is_dir():
+                upsampled_file_name = str(Path(self.upsample_dir_path, upsampled_file_name))
             if check_content:
                 if not check_file_existence(self.data_dir / hr_file_name):
                     content_errors.append('{}: does not exist'.format(self.data_dir / hr_file_name))
@@ -127,10 +137,11 @@ class SRConverter(BaseFormatConverter):
         return ConverterReturn(annotation, None, content_errors)
 
     @staticmethod
-    def generate_upsample_file(original_image_path, scale_factor, upsampled_file_name):
+    def generate_upsample_file(original_image_path, scale_factor, upsampled_file_name, upsampled_image_path=None):
         image = cv2.imread(str(original_image_path))
         upsampled_image = cv2.resize(image, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_CUBIC)
-        cv2.imwrite(str(original_image_path.parent / upsampled_file_name), upsampled_image)
+        dest_path = upsampled_image_path if upsampled_image_path else original_image_path.parent
+        cv2.imwrite(str(dest_path / upsampled_file_name), upsampled_image)
 
 
 class SRMultiFrameConverter(BaseFormatConverter):
