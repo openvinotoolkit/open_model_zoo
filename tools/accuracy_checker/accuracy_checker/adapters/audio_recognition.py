@@ -17,8 +17,9 @@ import string
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import NumberField, BoolField, StringField
+from ..config import NumberField, BoolField, StringField, ListField
 from ..representation import CharacterRecognitionPrediction
+
 
 class CTCBeamSearchDecoder(Adapter):
     __provider__ = 'ctc_beam_search_decoder'
@@ -49,11 +50,9 @@ class CTCBeamSearchDecoder(Adapter):
         self.beam_size = self.get_value_from_config('beam_size')
         self.blank_label = self.launcher_config.get('blank_label')
         self.softmaxed_probabilities = self.launcher_config.get('softmaxed_probabilities')
-        self.classification_out = self.get_value_from_config('classification_out'
-                                                             '')
+        self.classification_out = self.get_value_from_config('classification_out')
         self.alphabet = ' ' + string.ascii_lowercase + '\'-'
         self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
-
 
     def process(self, raw, identifiers=None, frame_meta=None):
         if self.classification_out is not None:
@@ -71,7 +70,7 @@ class CTCBeamSearchDecoder(Adapter):
 
         result = []
         if self.softmaxed_probabilities:
-            data = np.log(data)
+            output = np.log(output)
         seq = self.decode(output, self.beam_size, self.blank_label)
         decoded = ''.join([self.alphabet[t[0]] for t in seq[0]])
         decoded = decoded.upper()
@@ -156,3 +155,80 @@ class CTCBeamSearchDecoder(Adapter):
         res = sorted(_pT['l'].items(), reverse=True, key=lambda item: item[1])[0]
 
         return res
+
+
+class CTCGreedyDecoder(Adapter):
+    __provider__ = 'ctc_greedy_decoder'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'alphabet': ListField(optional=True),
+            'softmaxed_probabilities': BoolField(
+                optional=True, default=False, description="Indicator that model uses softmax for output layer "
+            ),
+            'classification_out': StringField(
+                optional=True, default=None, description="Name of output node"
+            )
+        })
+        return params
+
+    def configure(self):
+        self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\'-'
+        self.softmaxed_probabilities = self.launcher_config.get('softmaxed_probabilities')
+        self.classification_out = self.get_value_from_config('classification_out')
+
+    @staticmethod
+    def _extract_predictions(outputs_list, meta):
+        is_multi_infer = meta[-1].get('multi_infer', False) if meta else False
+        if not is_multi_infer:
+            return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
+
+        output_map = {}
+        for output_key in outputs_list[0].keys():
+            output_data = np.asarray([output[output_key] for output in outputs_list])
+            output_map[output_key] = output_data
+
+        return output_map
+
+    def process(self, raw, identifiers, frame_meta):
+        if self.classification_out is not None:
+            self.output_blob = self.classification_out
+        multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
+
+        raw_output = self._extract_predictions(raw, frame_meta)
+        output = raw_output[self.output_blob]
+        if multi_infer:
+            steps, _, _, _ = output.shape
+            res = []
+            for i in range(steps):
+                res.append(output[i, ...])
+            output = np.concatenate(tuple(res))
+
+        if self.softmaxed_probabilities:
+            output = np.log(output)
+        argmx = output.argmax(axis=-1)
+
+        decoded = self._ctc_decoder_prediction(argmx, self.alphabet)[0].upper()
+        return [CharacterRecognitionPrediction(identifiers[0], decoded)]
+
+    @staticmethod
+    def _ctc_decoder_prediction(prediction, labels):
+        """
+        Decodes a sequence of labels to words
+        """
+        blank_id = len(labels)
+        hypotheses = []
+        # CTC decoding procedure
+        for ind in range(prediction.shape[0]):
+            decoded_prediction = []
+            previous = blank_id
+            pr = prediction[ind]
+            for p in pr:
+                if (p != previous or previous == blank_id) and p != blank_id:
+                    decoded_prediction.append(p)
+                previous = p
+            hypothesis = ''.join([labels[c] for c in decoded_prediction])
+            hypotheses.append(hypothesis)
+        return hypotheses

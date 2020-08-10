@@ -224,7 +224,11 @@ def download_model(reporter, args, cache, session_factory, requested_precisions,
 
         if not try_retrieve(model_file_reporter, destination, model_file, cache, args.num_attempts,
                 functools.partial(model_file.source.start_download, session, CHUNK_SIZE)):
-            shutil.rmtree(str(output))
+            try:
+                destination.unlink()
+            except FileNotFoundError:
+                pass
+
             model_file_reporter.emit_event('model_file_download_end', successful=False)
             reporter.emit_event('model_download_end', model=model.name, successful=False)
             return False

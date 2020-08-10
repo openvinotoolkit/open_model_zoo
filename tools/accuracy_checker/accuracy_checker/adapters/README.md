@@ -211,6 +211,14 @@ AccuracyChecker supports following set of adapters:
   * `raw_masks_out` - name of output layer with raw instances masks.
   * `texts_out` - name of output layer with texts.
   * `confidence_threshold` - confidence threshold that is used to filter out detected instances.
+* `yolact` - converting raw outputs of Yolact model to to combination of `DetectionPrediction` and `CoCocInstanceSegmentationPrediction`.
+  * `loc_out` - name of output layer which contains box locations.
+  * `prior_out` - name of output layer which contains prior boxes.
+  * `conf_out` - name of output layer which contains confidence scores for all classes for each box.
+  * `mask_out` - name of output layer which contains instance masks.
+  * `proto_out` - name of output layer which contains proto for masks calculation.
+  * `confidence_threshold` - confidence threshold that is used to filter out detected instances (Optional, default 0.05).
+  * `max_detections` - maximum detection used for metrics calculation (Optional, default 100). 
 * `class_agnostic_detection` - converting 'boxes' [n, 5] output of detection model to `DetectionPrediction` representation.
   * `output_blob` - name of output layer with bboxes.
   * `scale` - scalar value to normalize bbox coordinates.
@@ -240,6 +248,7 @@ AccuracyChecker supports following set of adapters:
 * `attribute_classification` - converts output of attributes classifcation model to `ContainerPrediction` which contains multiple `ClassificationPrediction` for attributes with their scores.
     * `output_layer_map` - dictionary where keys are output layer names of attribute classification model and values are the names of attributes.
 * `regression` - converting output of regression model to `RegressionPrediction` representation.
+    * `keep_shape` - allow keeping shape of predicted multi dimension array (Optional, default False).
 * `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions. 
     * `adapters` - Dict where key is output name and value is adapter config map including `output_blob` key to associate the output of model and this adapter.
 * `person_vehilce_detection_refinement` - converts output of person vehicle detection refinement model to `DetectionPrediction` representation. Adapter refines proposals generated in previous stage model.
@@ -248,3 +257,4 @@ AccuracyChecker supports following set of adapters:
     * `anchor_sizes` - Anchor sizes for each base output layer.
     * `window_scales` - Window scales for each base output layer.
     * `window_lengths` - Window lengths for each base output layer.
+* `face_recognition_quality_assessment` - converts output of face recognition quality assessment model to `QualityAssessmentPrediction ` representation.

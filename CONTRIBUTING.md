@@ -72,7 +72,7 @@ The detailed descriptions of file entries provided below.
 
 **`description`**
 
-Description of the model. Must match with the description from the model [documentation](#documentation). Use [this](./ci/description_updater/documentation_updater.py) script for easy update.
+Description of the model. Must match with the description from the model [documentation](#documentation). Use [this](./ci/documentation_updater/documentation_updater.py) script for easy update.
 
 **`task_type`**
 
@@ -191,7 +191,7 @@ The demo's name should end with `_demo` suffix to follow the convention of the p
 
 Demos are required to support the following keys:
 
- -  `-i "<input>"`: Required. Input to process.
+ -  `-i "<input>"`: Required. An input to process. The input can usually be a single image, a folder of images or anything that OpenCV's `VideoCapture` can process.
  -  `-m "<path>"`: Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m_`.
  -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
  -  `-no_show`: Optional. Do not visualize inference results.

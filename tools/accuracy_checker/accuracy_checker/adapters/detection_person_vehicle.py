@@ -59,8 +59,8 @@ class PersonVehicleDetectionAdapter(Adapter):
         return result
 
     def output_to_proposals(self, bbox_pred, proposals, cls_score, frame_meta):
-        img_width, img_height, _ = frame_meta['image_size']
-        input_width, input_height, _ = frame_meta['image_info']
+        img_height, img_width, _ = frame_meta['image_size']
+        input_height, input_width, _ = frame_meta['image_info']
 
         ww = img_width
         hh = img_height

@@ -45,7 +45,7 @@ public:
 
 class VideoSource;
 class VideoSourceNative;
-class VideoSourceOCV;
+class GeneralCaptureSource;
 class VideoSourceStreamFile;
 
 class VideoSources {
@@ -66,14 +66,17 @@ private:
     const size_t queueSize = 1;
     const size_t pollingTimeMSec = 1000;
 
+    void openVideo(const std::string& source, bool native, bool loopVideo);
     void stop();
 
     friend VideoSourceNative;
-    friend VideoSourceOCV;
+    friend GeneralCaptureSource;
     friend VideoSourceStreamFile;
 
 public:
     struct InitParams {
+        std::string inputs;
+        bool loop;
         std::size_t queueSize = 5;
         std::size_t pollingTimeMSec = 1000;
         bool isAsync = true;
@@ -85,8 +88,6 @@ public:
 
     explicit VideoSources(const InitParams& p);
     ~VideoSources();
-
-    void openVideo(const std::string& source, bool native, bool loopVideo);
 
     void start();
 
@@ -100,4 +101,6 @@ public:
     };
 
     Stats getStats() const;
+
+    size_t numberOfInputs() const {return inputs.size();}
 };

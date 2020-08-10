@@ -15,7 +15,12 @@ limitations under the License.
 """
 
 import numpy as np
+try:
+    import editdistance
+except ImportError:
+    editdistance = None
 
+from ..config import ConfigError
 from ..representation import (
     CharacterRecognitionAnnotation,
     CharacterRecognitionPrediction,
@@ -30,13 +35,11 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
 
     def configure(self):
         self.overall_metric = []
-        self.meta['target'] = 'higher-worse'
 
-    def update(self, annotation, prediction):
-
+    @staticmethod
+    def distance(prediction, annotation):
         h = prediction.label
         r = annotation.label
-
         dist = np.zeros((len(r) + 1, len(h) + 1), dtype=np.uint8)
         for i in range(len(r) + 1):
             dist[i][0] = i
@@ -52,15 +55,41 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
                     delete = dist[i - 1][j] + 1
                     dist[i][j] = min(substitute, insert, delete)
 
-        result = float(dist[len(r)][len(h)]) / len(r)
+        return float(dist[len(r)][len(h)]) / len(r)
 
+    def update(self, annotation, prediction):
+        result = self.distance(prediction, annotation)
         self.overall_metric.append(result)
 
         return result
 
     def evaluate(self, annotations, predictions):
-        result = np.mean(self.overall_metric, axis=0)
-        return result
+        return np.mean(self.overall_metric)
 
     def reset(self):
         self.overall_metric = []
+
+
+class GreedyWER(PerImageEvaluationMetric):
+    __provider__ = 'greedy_wer'
+    annotation_types = (CharacterRecognitionAnnotation,)
+    prediction_types = (CharacterRecognitionPrediction,)
+
+    def configure(self):
+        if editdistance is None:
+            raise ConfigError('editdistance is not installed. Please install it before usage')
+        self.words = 0
+        self.score = 0
+
+    def update(self, annotation, prediction):
+        cur_score = editdistance.eval(annotation.label.split(), prediction.label.split())
+        cur_words = len(annotation.label.split())
+        self.score += cur_score
+        self.words += cur_words
+        return cur_score / cur_words
+
+    def evaluate(self, annotations, predictions):
+        return self.score / self.words if self.words != 0 else 0
+
+    def reset(self):
+        self.words, self.score = 0, 0

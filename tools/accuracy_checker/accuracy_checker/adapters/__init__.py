@@ -71,6 +71,7 @@ from .hit_ratio import HitRatioAdapter
 
 from .mask_rcnn import MaskRCNNAdapter
 from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
+from .yolact import YolactAdapter
 
 from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
 
@@ -82,10 +83,11 @@ from .image_inpainting import ImageInpaintingAdapter
 from .style_transfer import StyleTransferAdapter
 
 from .attribute_classification import AttributeClassificationAdapter
-from .audio_recognition import CTCBeamSearchDecoder
+from .audio_recognition import CTCBeamSearchDecoder, CTCGreedyDecoder
 
 from .regression import RegressionAdapter
 from .mixed_adapter import MixedAdapter
+from .face_recognition_quality_assessment import QualityAssessmentAdapter
 
 __all__ = [
     'Adapter',
@@ -144,6 +146,7 @@ __all__ = [
 
     'MaskRCNNAdapter',
     'MaskRCNNWithTextAdapter',
+    'YolactAdapter',
 
     'MachineTranslationAdapter',
     'QuestionAnsweringAdapter',
@@ -159,4 +162,7 @@ __all__ = [
     'MixedAdapter',
 
     'CTCBeamSearchDecoder',
+    'CTCGreedyDecoder',
+
+    'QualityAssessmentAdapter',
 ]

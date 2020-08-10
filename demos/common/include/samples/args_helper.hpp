@@ -22,7 +22,7 @@
 void readInputFilesArguments(std::vector<std::string>& files, const std::string& arg);
 
 /**
-* @brief This function find -i/--images key in input args
+* @brief This function finds -i/--i key in input args
 *        It's necessary to process multiple values for single key
 * @return files updated vector of verified input files
 */

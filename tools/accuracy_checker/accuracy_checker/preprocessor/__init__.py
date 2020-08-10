@@ -33,7 +33,10 @@ from .audio_preprocessing import (
     AudioSpectrogram,
     TriangleFiltering,
     DCT,
-    ClipCepstrum
+    ClipCepstrum,
+    TrimmingAudio,
+    SamplesToFloat32,
+    AudioToMelSpectrogram
 )
 
 from .normalization import Normalize, Normalize3d
@@ -47,7 +50,7 @@ from .geometric_transformations import (
     WarpAffine
 )
 from .crop import (
-    Crop, CropRect, ExtendAroundRect, Crop3D, TransformedCropWithAutoScale, CandidateCrop, CropOrPad
+    Crop, CropRect, ExtendAroundRect, Crop3D, TransformedCropWithAutoScale, CandidateCrop, CropOrPad, CropWithPadSize
 )
 from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
@@ -69,6 +72,9 @@ __all__ = [
     'TriangleFiltering',
     'DCT',
     'ClipCepstrum',
+    'TrimmingAudio',
+    'SamplesToFloat32',
+    'AudioToMelSpectrogram',
 
     'Resize',
     'Resize3D',
@@ -88,6 +94,7 @@ __all__ = [
     'TfConvertImageDType',
     'SelectInputChannel',
     'CropOrPad',
+    'CropWithPadSize',
     'Crop',
     'CandidateCrop',
     'CropRect',
