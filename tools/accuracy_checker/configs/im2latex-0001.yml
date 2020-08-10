@@ -4,12 +4,12 @@ evaluations:
     module_config:
       network_info:
         recognizer_encoder:
-          model:   intel/im2latex-medium-scanned-0002/encoder.xml
-          weights: intel/im2latex-medium-scanned-0002/encoder.bin
+          model:   intel/im2latex-medium-scann-0001/encoder.xml
+          weights: intel/im2latex-medium-scann-0001/encoder.bin
 
         recognizer_decoder:
-          model:   intel/im2latex-medium-scanned-0002/decode_step.xml
-          weights: intel/im2latex-medium-scanned-0002/decode_step.bin
+          model:   intel/im2latex-medium-scann-0001/decode_step.xml
+          weights: intel/im2latex-medium-scann-0001/decode_step.bin
         max_seq_len: '192'
 
       launchers:
