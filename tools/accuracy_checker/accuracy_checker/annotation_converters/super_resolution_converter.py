@@ -43,6 +43,12 @@ class SRConverter(BaseFormatConverter):
             'data_dir': PathField(
                 is_directory=True, description="Path to folder, where images in low and high resolution are located."
             ),
+            'lr_dir_suffix': StringField(
+                optional=True, description="Suffix of directory, where images in low resolution are located."
+            ),
+            'hr_dir_suffix': StringField(
+                optional=True, description="Suffix of directory, where images in high resolution are located."
+            ),
             'lr_suffix': StringField(
                 optional=True, default="lr", description="Low resolution file name's suffix."
             ),
@@ -71,6 +77,8 @@ class SRConverter(BaseFormatConverter):
 
     def configure(self):
         self.data_dir = self.get_value_from_config('data_dir')
+        self.lr_dir_suffix = self.get_value_from_config('lr_dir_suffix')
+        self.hr_dir_suffix = self.get_value_from_config('hr_dir_suffix')
         self.lr_suffix = self.get_value_from_config('lr_suffix')
         self.hr_suffix = self.get_value_from_config('hr_suffix')
         self.upsample_suffix = self.get_value_from_config('upsample_suffix')
@@ -84,7 +92,11 @@ class SRConverter(BaseFormatConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_errors = [] if check_content else None
         file_list_lr = []
-        for file_in_dir in self.data_dir.iterdir():
+        lr_dir = Path(self.data_dir,
+                      self.lr_dir_suffix) if self.lr_dir_suffix and Path(self.data_dir,
+                                                                         self.lr_dir_suffix).is_dir() else self.data_dir
+
+        for file_in_dir in lr_dir.iterdir():
             if self.lr_suffix in file_in_dir.parts[-1]:
                 file_list_lr.append(file_in_dir)
 
@@ -96,6 +108,11 @@ class SRConverter(BaseFormatConverter):
             if self.two_streams and self.generate_upsample:
                 self.generate_upsample_file(lr_file, self.upsample_factor, upsampled_file_name)
             hr_file_name = self.hr_suffix.join(lr_file_name.split(self.lr_suffix))
+            if self.hr_dir_suffix:
+                hr_file_name = str(Path(self.hr_dir_suffix, hr_file_name))
+            if self.lr_dir_suffix:
+                lr_file_name = str(Path(self.lr_dir_suffix, lr_file_name))
+                upsampled_file_name = str(Path(self.lr_dir_suffix, upsampled_file_name))
             if check_content:
                 if not check_file_existence(self.data_dir / hr_file_name):
                     content_errors.append('{}: does not exist'.format(self.data_dir / hr_file_name))
