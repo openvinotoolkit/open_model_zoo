@@ -69,6 +69,7 @@ def preprocess_image(preprocess, image_raw, tgt_shape):
                                   0, target_width - img_w, cv.BORDER_CONSTANT,
                                   None, COLOR_WHITE)
     image = image_raw.transpose((2, 0, 1))
+    image = np.expand_dims(image, axis=0)
     return image
 
 
@@ -174,7 +175,7 @@ def main():
         image = rec['img']
 
         enc_res = exec_net_encoder.infer(
-            inputs={'imgs': np.expand_dims(image, axis=0)})
+            inputs={'imgs': image})
         # get results
         row_enc_out = enc_res['row_enc_out']
         dec_states_h = enc_res['hidden']
