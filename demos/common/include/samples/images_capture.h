@@ -28,7 +28,6 @@ public:
 //     return cv::VideoCapture(input);
 // }
 std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input,
-        bool loop, size_t initialImageId=0,  // Non camera options
-        size_t readLengthLimit=std::numeric_limits<size_t>::max(),  // general option
-        // Camera option:
-        bool autoFocus=true);
+    bool loop, size_t initialImageId=0,  // Non camera options
+    size_t readLengthLimit=std::numeric_limits<size_t>::max()  // General option
+);
