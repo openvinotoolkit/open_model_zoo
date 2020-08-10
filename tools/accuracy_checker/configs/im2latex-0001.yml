@@ -1,15 +1,9 @@
 evaluations:
-  - name: im2latex-medium-0002
+  - name: im2latex-medium-0001
     module: custom_evaluators.im2latex_evaluator.Im2latexEvaluator
     module_config:
       network_info:
-        recognizer_encoder:
-          model:   intel/im2latex-medium-scann-0001/encoder.xml
-          weights: intel/im2latex-medium-scann-0001/encoder.bin
 
-        recognizer_decoder:
-          model:   intel/im2latex-medium-scann-0001/decode_step.xml
-          weights: intel/im2latex-medium-scann-0001/decode_step.bin
         max_seq_len: '192'
 
       launchers:
