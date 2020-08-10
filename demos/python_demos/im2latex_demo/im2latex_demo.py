@@ -99,7 +99,7 @@ def build_argparser():
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU", type=str)
     args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
-                      help="Required. Type of the preprocessing", required=True, default='Crop')
+                      help="Required. Type of the preprocessing", required=True, default='crop')
     args.add_argument('-pc', '--perf_counts',
                       action='store_true', default=False)
     return parser
