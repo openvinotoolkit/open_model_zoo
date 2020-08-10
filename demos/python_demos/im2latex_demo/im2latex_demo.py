@@ -24,8 +24,9 @@ import cv2 as cv
 import numpy as np
 from tqdm import tqdm
 
-from utils import END_TOKEN, START_TOKEN, Vocab
 from openvino.inference_engine import IECore
+
+from utils import END_TOKEN, START_TOKEN, Vocab
 
 def crop(img, target_shape):
     target_height, target_width = target_shape
