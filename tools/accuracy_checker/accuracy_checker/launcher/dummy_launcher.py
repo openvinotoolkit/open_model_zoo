@@ -17,7 +17,7 @@ limitations under the License.
 from ..utils import get_path
 from ..logging import print_info
 from ..adapters import Adapter
-from ..config import PathField, StringField
+from ..config import PathField, StringField, BoolField
 from .loaders import Loader
 from .launcher import Launcher, LauncherConfigValidator
 
@@ -35,7 +35,8 @@ class DummyLauncher(Launcher):
         parameters.update({
             'loader': StringField(choices=Loader.providers, description="Loader."),
             'data_path': PathField(description="Data path."),
-            'adapter': StringField(choices=Adapter.providers, optional=True, description="Adapter.")
+            'adapter': StringField(choices=Adapter.providers, optional=True, description="Adapter."),
+            'provide_identifiers': BoolField(optional=True, default=False)
         })
         return parameters
 
@@ -47,7 +48,7 @@ class DummyLauncher(Launcher):
 
         self.data_path = get_path(self.get_value_from_config('data_path'))
 
-        self._loader = Loader.provide(self.get_value_from_config('loader'), self.data_path)
+        self._loader = Loader.provide(self.get_value_from_config('loader'), self.data_path, **kwargs)
 
         print_info("{} predictions objects loaded from {}".format(len(self._loader), self.data_path))
 
@@ -66,10 +67,13 @@ class DummyLauncher(Launcher):
 
     @property
     def inputs(self):
-        return None
+        return {}
 
     def get_all_inputs(self):
         return self.inputs
+
+    def inputs_info_for_meta(self):
+        return {}
 
     @property
     def output_blob(self):

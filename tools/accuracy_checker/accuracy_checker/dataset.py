@@ -109,6 +109,10 @@ class Dataset:
     def config(self):
         return deepcopy(self._config) #read-only
 
+    @property
+    def identifiers(self):
+        return [ann.identifier for ann in self.annotation]
+
     def __len__(self):
         if self.subset:
             return len(self.subset)
@@ -249,6 +253,12 @@ class Dataset:
         self._annotation = annotation
         self.name = self._config.get('name')
         self.subset = None
+
+    def provide_data_info(self, reader, annotations):
+        for ann in annotations:
+            input_data = reader(ann.identifier)
+            self.set_annotation_metadata(ann, input_data, reader.data_source)
+        return annotations
 
 
 def read_annotation(annotation_file: Path):

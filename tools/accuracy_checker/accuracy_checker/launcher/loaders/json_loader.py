@@ -14,16 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ...utils import read_xml
+from collections import defaultdict
+from ...utils import read_json
 from .loader import Loader, DictLoaderMixin
 
 
-class XMLLoader(DictLoaderMixin, Loader):
+class JSONLoader(DictLoaderMixin, Loader):
     """
-    Class for loading output from another tool in .xml format.
+    Class for loading output from another tool in json format.
     """
 
-    __provider__ = 'xml'
+    __provider__ = 'json'
 
-    def load(self, *args, **kwargs):
-        return read_xml(self._data_path)
+    def load(self, identifiers=None, **kwargs):
+        detection_list = read_json(self._data_path)
+        data = defaultdict(dict)
+        idx = -1
+        for detection in detection_list:
+            if 'timestamp' in detection:
+                idx = int(detection['timestamp']) // 1000000000
+            identifier = identifiers[idx] if identifiers else idx
+            data[identifier] = detection
+        return data

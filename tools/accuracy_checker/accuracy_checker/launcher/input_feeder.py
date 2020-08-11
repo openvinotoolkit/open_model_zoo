@@ -58,7 +58,7 @@ PRECISION_TO_DTYPE = {
 
 
 class InputFeeder:
-    def __init__(self, inputs_config, network_inputs, prepare_input_data=None, default_layout='NCHW'):
+    def __init__(self, inputs_config, network_inputs, prepare_input_data=None, default_layout='NCHW', dummy=False):
         def fit_to_input(data, input_layer_name, layout, precision):
             if len(np.shape(data)) == 4:
                 data = np.transpose(data, layout)
@@ -67,22 +67,18 @@ class InputFeeder:
             return data.astype(precision) if precision else data
 
         self.input_transform_func = prepare_input_data or fit_to_input
-        self.network_inputs = network_inputs
+        self.network_inputs = network_inputs or []
         self.default_layout = default_layout
+        self.dummy = dummy
         self.configure(inputs_config)
 
-    def __call__(self, context, *args, **kwargs):
-        data_batch = context.data_batch
-        _, meta = extract_image_representations(data_batch)
-        context.input_blobs = self.fill_inputs(data_batch)
-        context.batch_meta = meta
-
     def configure(self, inputs_config):
-        parsing_results = self._parse_inputs_config(inputs_config, self.default_layout)
-        self.const_inputs, self.non_constant_inputs, self.inputs_mapping = parsing_results[:3]
-        self.image_info_inputs, self.lstm_inputs, self.layouts_mapping, self.precision_mapping = parsing_results[3:]
-        if not self.non_constant_inputs:
-            raise ConfigError('Network should contain at least one layer for setting variable data.')
+        if not self.dummy:
+            parsing_results = self._parse_inputs_config(inputs_config, self.default_layout)
+            self.const_inputs, self.non_constant_inputs, self.inputs_mapping = parsing_results[:3]
+            self.image_info_inputs, self.lstm_inputs, self.layouts_mapping, self.precision_mapping = parsing_results[3:]
+            if not self.non_constant_inputs:
+                raise ConfigError('Network should contain at least one layer for setting variable data.')
 
     def _fill_image_info_inputs(self, data_representation_batch):
         def prepare_image_info(image_sizes_batch):
@@ -96,7 +92,6 @@ class InputFeeder:
                 image_info.append([height, width, 1])
 
             return image_info
-
         _, meta_batch = extract_image_representations(data_representation_batch)
         if 'image_info' in meta_batch[0]:
             image_info_data = [meta['image_info'] for meta in meta_batch]
@@ -150,6 +145,8 @@ class InputFeeder:
         return self._transform_batch(filled_inputs, extract_image_representations(data_representation_batch)[1])
 
     def fill_inputs(self, data_representation_batch):
+        if self.dummy:
+            return []
         inputs = self.fill_non_constant_inputs(data_representation_batch)
         for infer_inputs in inputs:
             infer_inputs.update(self.const_inputs)
