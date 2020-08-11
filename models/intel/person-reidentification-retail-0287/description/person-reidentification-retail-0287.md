@@ -1,28 +1,29 @@
-# person-reidentification-retail-0248
+# person-reidentification-retail-0287
 
 ## Use Case and High-Level Description
 
 This is a person reidentification model for a general scenario. It uses a whole
 body image as an input and outputs an embedding vector to match a pair of images
-by the cosine distance. The model is based on the OmniScaleNet backbone developed for fast inference.
+by the cosine distance. The model is based on the OmniScaleNet backbone with
+Linear Context Transform (LCT) blocks developed for fast inference.
 A single reidentification head from the 1/16 scale
 feature map outputs an embedding vector of 256 floats.
 
 ## Example
 
-![](./person-reidentification-retail-0248.jpg)
+![](./person-reidentification-retail-0287.jpg)
 
 ## Specification
 
 | Metric                            | Value                                     |
 |-----------------------------------|-------------------------------------------|
-| Market-1501 rank@1 accuracy       | 84.3 %                                    |
-| Market-1501 mAP                   | 55.6 %                                    |
+| Market-1501 rank@1 accuracy       | 92.9 %                                    |
+| Market-1501 mAP                   | 76.6 %                                    |
 | Pose coverage                     | Standing upright, parallel to image plane |
 | Support of occluded pedestrians   | YES                                       |
 | Occlusion coverage                | <50%                                      |
-| GFlops                            | 0.174                                     |
-| MParams                           | 0.183                                     |
+| GFlops                            | 0.564                                     |
+| MParams                           | 0.595                                     |
 | Source framework                  | PyTorch\*                                 |
 
 The cumulative matching curve (CMC) at rank-1 is accuracy denoting the possibility

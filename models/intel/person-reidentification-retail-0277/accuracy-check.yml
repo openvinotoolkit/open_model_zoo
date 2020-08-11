@@ -1,5 +1,5 @@
 models:
-  - name: person-reidentification-retail-0270
+  - name: person-reidentification-retail-0277
 
     launchers:
       - framework: dlsdk
