@@ -1,0 +1,19 @@
+models:
+  - name: person-detection-0201
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: ssd
+          labels_shift: 1
+
+    datasets:
+      - name: crossroad_extra_yg_person
+        preprocessing:
+          - type: resize
+            dst_width: 384
+            dst_height: 384
+        postprocessing:
+          - type: resize_prediction_boxes
+        metrics:
+          - type: coco_orig_precision

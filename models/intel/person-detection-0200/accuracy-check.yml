@@ -1,0 +1,21 @@
+models:
+  - name: person-detection-0200
+
+    launchers:
+      - framework: dlsdk
+        model:   /home/ikrylov/git/openvino_training_extensions/pytorch_toolkit/object_detection/person-detection/person-detection-0200/export/config.xml
+        weights: /home/ikrylov/git/openvino_training_extensions/pytorch_toolkit/object_detection/person-detection/person-detection-0200/export/config.bin
+        adapter:
+          type: ssd
+          labels_shift: 1
+
+    datasets:
+      - name: crossroad_extra_yg_person
+        preprocessing:
+          - type: resize
+            dst_width: 256
+            dst_height: 256
+        postprocessing:
+          - type: resize_prediction_boxes
+        metrics:
+          - type: coco_orig_precision
