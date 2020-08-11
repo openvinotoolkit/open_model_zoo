@@ -373,9 +373,9 @@ datasets:
     annotation_conversion:
       converter: mscoco_detection
       annotation_file: crossroad_extra_untagged/val_coco_no_bg.json
-      has_background: True
+      has_background: False
       sort_annotations: True
-      use_full_label_map: True
+      use_full_label_map: False
     annotation: crossroad_extra_untagged.pickle
     dataset_meta: crossroad_extra_untagged.json
 
@@ -384,9 +384,9 @@ datasets:
     annotation_conversion:
       converter: mscoco_detection
       annotation_file: crossroad_extra_untagged/val_coco_no_bg_person.json
-      has_background: True
+      has_background: False
       sort_annotations: True
-      use_full_label_map: True
+      use_full_label_map: False
     annotation: crossroad_extra_untagged_person.pickle
     dataset_meta: crossroad_extra_untagged_person.json
 
@@ -395,9 +395,9 @@ datasets:
     annotation_conversion:
       converter: mscoco_detection
       annotation_file: crossroad_extra_untagged/val_coco_no_bg_vehicle.json
-      has_background: True
+      has_background: False
       sort_annotations: True
-      use_full_label_map: True
+      use_full_label_map: False
     annotation: crossroad_extra_untagged_vehicle.pickle
     dataset_meta: crossroad_extra_untagged_vehicle.json
 

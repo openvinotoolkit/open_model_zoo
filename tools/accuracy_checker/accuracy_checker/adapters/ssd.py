@@ -35,20 +35,6 @@ class SSDAdapter(Adapter):
     prediction_types = (DetectionPrediction, )
     topology_types = (SSD, FasterRCNN, )
 
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'labels_shift': NumberField(
-                optional=True, value_type=int, default=0,
-                description="Shift predicted labels on specified value."),
-        })
-
-        return parameters
-
-    def configure(self):
-        self.labels_shift = self.get_value_from_config('labels_shift')
-
     def process(self, raw, identifiers, frame_meta):
         """
         Args:
@@ -67,7 +53,6 @@ class SSDAdapter(Adapter):
             prediction_mask = np.where(prediction_batch[:, 0] == batch_index)
             detections = prediction_batch[prediction_mask]
             detections = detections[:, 1::]
-            detections[:, 0] += self.labels_shift
             result.append(DetectionPrediction(identifier, *zip(*detections)))
 
         return result

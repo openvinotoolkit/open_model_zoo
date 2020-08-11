@@ -3,9 +3,7 @@ models:
 
     launchers:
       - framework: dlsdk
-        adapter:
-          type: ssd
-          labels_shift: 1
+        adapter: ssd
 
     datasets:
       - name: crossroad_extra_untagged_person
