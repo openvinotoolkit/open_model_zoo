@@ -368,6 +368,39 @@ datasets:
     annotation: crossroad-0078.pickle
     dataset_meta: crossroad-0078.json
 
+  - name: crossroad_extra_yg
+    data_source: crossroad_extra_yg/val_data
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_yg/val_coco_no_bg.json
+      has_background: True
+      sort_annotations: True
+      use_full_label_map: True
+    annotation: crossroad_extra_yg.pickle
+    dataset_meta: crossroad_extra_yg.json
+
+  - name: crossroad_extra_yg_person
+    data_source: crossroad_extra_yg/val_data
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_yg/val_coco_no_bg_person.json
+      has_background: True
+      sort_annotations: True
+      use_full_label_map: True
+    annotation: crossroad_extra_yg_person.pickle
+    dataset_meta: crossroad_extra_yg_person.json
+
+  - name: crossroad_extra_yg_vehicle
+    data_source: crossroad_extra_yg/val_data
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_yg/val_coco_no_bg_vehicle.json
+      has_background: True
+      sort_annotations: True
+      use_full_label_map: True
+    annotation: crossroad_extra_yg_vehicle.pickle
+    dataset_meta: crossroad_extra_yg_vehicle.json
+
   - name: pedestrian_and_vehicle_dataset
     data_source: val2017
     annotation_conversion:
