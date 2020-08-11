@@ -92,7 +92,18 @@ It has the following format:
 
 Class index values must be in range from 0 to 1000. If you want to use "other" class, which is supported only by a small subset of models, specify it with -1 index.
 
-["Labels" file](./synset_words.txt) contains the list of human-readable labels, one line for each class.
+"Labels" file contains the list of human-readable labels, one line for each class.
+
+Please note that you should use [imagenet_2015_classes.txt](./imagenet_2015_classes.txt) labels file with the following models:
+- googlenet-v2
+- se-inception
+- se-resnet-101
+- se-resnet-152
+- se-resnet-50
+- se-resnext-101
+- se-resnext-50
+
+and [imagenet_2012_classes.txt](./imagenet_2012_classes.txt) labels file with all other models supported by the demo.
 
 ## See Also
 * [Using Open Model Zoo demos](../README.md)

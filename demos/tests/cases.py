@@ -130,7 +130,7 @@ NATIVE_DEMOS = [
             '-no_show': None,
             '-time': '5',
             '-i': DataDirectoryOrigFileNamesArg('classification'),
-            '-labels': DemoFileArg('synset_words.txt'),
+            '-labels': DemoFileArg('imagenet_2012_classes.txt'),
             '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt"),
             '-b': '8'}),
         single_option_cases('-m',
