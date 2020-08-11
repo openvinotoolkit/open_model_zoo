@@ -17,6 +17,7 @@ import sys
 import cv2
 import numpy as np
 from argparse import ArgumentParser, SUPPRESS
+from inpainting_gui import InpaintingGUI
 
 from openvino.inference_engine import IECore
 
@@ -38,25 +39,67 @@ def build_argparser():
     args.add_argument("-ml", "--max_length", help="Optional. Max strokes length to draw mask.", default=100, type=int)
     args.add_argument("-mv", "--max_vertex", help="Optional. Max number of vertex to draw mask.", default=20, type=int)
     args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
+    args.add_argument("-g", "--gui", help="Optional. Enable GUI mode", action='store_true')
 
     return parser
 
 def main():
     args = build_argparser().parse_args()
 
-    ie = IECore()
-    inpainting_processor = ImageInpainting(ie, args.model, args.parts,
-                                           args.max_brush_width, args.max_length, args.max_vertex, args.device)
+    if args.gui:
+        # GUI inpainting
+        gui = InpaintingGUI(args.input,args.model, args.device)
+        gui.run();
 
-    img = cv2.imread(args.input, cv2.IMREAD_COLOR)
-    masked_image, output_image = inpainting_processor.process(img)
-    concat_imgs = np.hstack((masked_image, output_image))
-    cv2.putText(concat_imgs, 'summary: {:.1f} FPS'.format(
+    else:
+        # Command-line inpaining for just one image
+        result = inpaintRandomHoles(args)
+        if not args.no_show:
+            cv2.imshow('Image Inpainting Demo', result)
+            cv2.waitKey(0)
+
+def inpaintRandomHoles(args):
+        ie = IECore()
+        img = cv2.imread(args.input, cv2.IMREAD_COLOR)
+        inpainting_processor = ImageInpainting(ie, args.model, args.device)
+
+        #--- Resize to model input and generate random mask
+        img = cv2.resize(img, (inpainting_processor.input_width,inpainting_processor.input_height))
+
+        mask = createRandomMask(args.parts,args.max_vertex,args.max_length,args.max_brush_width,
+                                inpainting_processor.input_height,inpainting_processor.input_width)
+        masked_image = (img * (1 - mask) + 255 * mask).astype(np.uint8)
+
+        #--- Inpaint and show results
+        output_image = inpainting_processor.process(masked_image,mask)
+        concat_imgs = np.hstack((masked_image, output_image))
+        cv2.putText(concat_imgs, 'summary: {:.1f} FPS'.format(
             float(1 / inpainting_processor.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
-    if not args.no_show:
-        cv2.imshow('Image Inpainting Demo', concat_imgs)
-        cv2.waitKey(0)
+        return concat_imgs
 
+def createRandomMask(parts, max_vertex, max_length, max_brush_width, h, w, max_angle=360):
+    mask = np.zeros((h,w,1), dtype=np.float32)
+    for part in range(parts):
+        num_strokes = np.random.randint(max_vertex)
+        start_y = np.random.randint(h)
+        start_x = np.random.randint(w)
+        brush_width = 0
+        for i in range(num_strokes):
+            angle = np.random.random() * np.deg2rad(max_angle)
+            if i % 2 == 0:
+                angle = 2 * np.pi - angle
+            length = np.random.randint(max_length + 1)
+            brush_width = np.random.randint(10, max_brush_width + 1) // 2 * 2
+            next_y = start_y + length * np.cos(angle)
+            next_x = start_x + length * np.sin(angle)
+
+            next_y = np.clip(next_y, 0, h - 1).astype(np.int)
+            next_x = np.clip(next_x, 0, w - 1).astype(np.int)
+            cv2.line(mask, (start_y, start_x), (next_y, next_x), 1, brush_width)
+            cv2.circle(mask, (start_y, start_x), brush_width // 2, 1)
+
+            start_y, start_x = next_y, next_x
+    return mask
 
 if __name__ == "__main__":
-    sys.exit(main() or 0)
+    main()
