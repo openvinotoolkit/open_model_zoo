@@ -8,7 +8,7 @@ models:
           labels_shift: 1
 
     datasets:
-      - name: crossroad_extra_yg_person
+      - name: crossroad_extra_untagged_person
         preprocessing:
           - type: resize
             dst_width: 256

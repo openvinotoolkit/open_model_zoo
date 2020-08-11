@@ -368,38 +368,38 @@ datasets:
     annotation: crossroad-0078.pickle
     dataset_meta: crossroad-0078.json
 
-  - name: crossroad_extra_yg
-    data_source: crossroad_extra_yg/val_data
+  - name: crossroad_extra_untagged
+    data_source: crossroad_extra_untagged/val_data
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: crossroad_extra_yg/val_coco_no_bg.json
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
-    annotation: crossroad_extra_yg.pickle
-    dataset_meta: crossroad_extra_yg.json
+    annotation: crossroad_extra_untagged.pickle
+    dataset_meta: crossroad_extra_untagged.json
 
-  - name: crossroad_extra_yg_person
-    data_source: crossroad_extra_yg/val_data
+  - name: crossroad_extra_untagged_person
+    data_source: crossroad_extra_untagged/val_data
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: crossroad_extra_yg/val_coco_no_bg_person.json
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg_person.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
-    annotation: crossroad_extra_yg_person.pickle
-    dataset_meta: crossroad_extra_yg_person.json
+    annotation: crossroad_extra_untagged_person.pickle
+    dataset_meta: crossroad_extra_untagged_person.json
 
-  - name: crossroad_extra_yg_vehicle
-    data_source: crossroad_extra_yg/val_data
+  - name: crossroad_extra_untagged_vehicle
+    data_source: crossroad_extra_untagged/val_data
     annotation_conversion:
       converter: mscoco_detection
-      annotation_file: crossroad_extra_yg/val_coco_no_bg_vehicle.json
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg_vehicle.json
       has_background: True
       sort_annotations: True
       use_full_label_map: True
-    annotation: crossroad_extra_yg_vehicle.pickle
-    dataset_meta: crossroad_extra_yg_vehicle.json
+    annotation: crossroad_extra_untagged_vehicle.pickle
+    dataset_meta: crossroad_extra_untagged_vehicle.json
 
   - name: pedestrian_and_vehicle_dataset
     data_source: val2017
