@@ -72,6 +72,56 @@ Options:
   --preprocessing_type {Resize,Crop}
                         Required. Type of the preprocessing
   -pc, --perf_counts
+  --imgs_key IMGS_KEY   Optional. Encoder input key for images. See README for
+                        details. Change it only if name of the node changed by
+                        Model Optimizer
+  --row_enc_out_key ROW_ENC_OUT_KEY
+                        Optional. Encoder output key for row_enc_out. See
+                        README for details. Change it only if name of the node
+                        changed by Model Optimizer
+  --hidden_key HIDDEN_KEY
+                        Optional. Encoder output key for hidden. See README
+                        for details. Change it only if name of the node
+                        changed by Model Optimizer
+  --context_key CONTEXT_KEY
+                        Optional. Encoder output key for context. See README
+                        for details. Change it only if name of the node
+                        changed by Model Optimizer
+  --init_0_key INIT_0_KEY
+                        Optional. Encoder output key for init_0. See README
+                        for details. Change it only if name of the node
+                        changed by Model Optimizer
+  --dec_st_c_key DEC_ST_C_KEY
+                        Optional. Decoder input key for dec_st_c. See README
+                        for details. Change it only if name of the node
+                        changed by Model Optimizer
+  --dec_st_h_key DEC_ST_H_KEY
+                        Optional. Decoder input key for dec_st_h. See README
+                        for details. Change it only if name of the node
+                        changed by Model Optimizer
+  --dec_st_c_t_key DEC_ST_C_T_KEY
+                        Optional. Decoder output key for dec_st_c. See README
+                        for details. Change it only if name of the node
+                        changed by Model Optimizer
+  --dec_st_h_t_key DEC_ST_H_T_KEY
+                        Optional. Decoder output key for dec_st_h. See README
+                        for details. Change it only if name of the node
+                        changed by Model Optimizer
+  --output_key OUTPUT_KEY
+                        Optional. Decoder output key for output. See README
+                        for details. Change it only if name of the node
+                        changed by Model Optimizer
+  --output_prev_key OUTPUT_PREV_KEY
+                        Optional. Decoder input key for output_prev. See
+                        README for details. Change it only if name of the node
+                        changed by Model Optimizer
+  --logit_key LOGIT_KEY
+                        Optional. Decoder output key for logit. See README for
+                        details. Change it only if name of the node changed by
+                        Model Optimizer
+  --tgt_key TGT_KEY     Optional. Decoder input key for tgt. See README for
+                        details. Change it only if name of the node changed by
+                        Model Optimizer
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.

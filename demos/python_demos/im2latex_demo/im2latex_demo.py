@@ -28,6 +28,7 @@ from openvino.inference_engine import IECore
 
 from utils import END_TOKEN, START_TOKEN, Vocab
 
+
 def crop(img, target_shape):
     target_height, target_width = target_shape
     img_h, img_w = img.shape[0:2]
@@ -102,6 +103,45 @@ def build_argparser():
                       help="Required. Type of the preprocessing", required=True, default='crop')
     args.add_argument('-pc', '--perf_counts',
                       action='store_true', default=False)
+    args.add_argument('--imgs_key', help='Optional. Encoder input key for images. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='imgs')
+    args.add_argument('--row_enc_out_key', help='Optional. Encoder output key for row_enc_out. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='row_enc_out')
+    args.add_argument('--hidden_key', help='Optional. Encoder output key for hidden. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='hidden')
+    args.add_argument('--context_key', help='Optional. Encoder output key for context. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='context')
+    args.add_argument('--init_0_key', help='Optional. Encoder output key for init_0. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='init_0')
+    args.add_argument('--dec_st_c_key', help='Optional. Decoder input key for dec_st_c. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='dec_st_c')
+    args.add_argument('--dec_st_h_key', help='Optional. Decoder input key for dec_st_h. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='dec_st_h')
+    args.add_argument('--dec_st_c_t_key', help='Optional. Decoder output key for dec_st_c_t. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='dec_st_c_t')
+    args.add_argument('--dec_st_h_t_key', help='Optional. Decoder output key for dec_st_h_t. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='dec_st_h_t')
+    args.add_argument('--output_key', help='Optional. Decoder output key for output. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='output')
+    args.add_argument('--output_prev_key', help='Optional. Decoder input key for output_prev. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='output_prev')
+    args.add_argument('--logit_key', help='Optional. Decoder output key for logit. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='logit')
+    args.add_argument('--tgt_key', help='Optional. Decoder input key for tgt. See README for details. '
+                      'Change it only if name of the node changed by Model Optimizer',
+                      default='tgt')
     return parser
 
 
@@ -172,30 +212,28 @@ def main():
         network=dec_step, device_name=args.device)
 
     log.info("Starting inference")
-
     for rec in tqdm(images_list):
         image = rec['img']
 
-        enc_res = exec_net_encoder.infer(
-            inputs={'imgs': image})
+        enc_res = exec_net_encoder.infer(inputs={args.imgs_key: image})
         # get results
-        row_enc_out = enc_res['row_enc_out']
-        dec_states_h = enc_res['hidden']
-        dec_states_c = enc_res['context']
-        output = enc_res['init_0']
+        row_enc_out = enc_res[args.row_enc_out_key]
+        dec_states_h = enc_res[args.hidden_key]
+        dec_states_c = enc_res[args.context_key]
+        output = enc_res[args.init_0_key]
 
         tgt = np.array([[START_TOKEN]])
         logits = []
         for _ in range(args.max_formula_len):
-            dec_res = exec_net_decoder.infer(inputs={'row_enc_out': row_enc_out,
-                                                     'dec_st_c': dec_states_c, 'dec_st_h': dec_states_h,
-                                                     'output_prev': output, 'tgt': tgt
+            dec_res = exec_net_decoder.infer(inputs={args.row_enc_out_key: row_enc_out,
+                                                     args.dec_st_c_key: dec_states_c, args.dec_st_h_key: dec_states_h,
+                                                     args.output_prev_key: output, args.tgt_key: tgt
                                                      })
 
-            dec_states_h = dec_res['dec_st_h_t']
-            dec_states_c = dec_res['dec_st_c_t']
-            output = dec_res['output']
-            logit = dec_res['logit']
+            dec_states_h = dec_res[args.dec_st_h_t_key]
+            dec_states_c = dec_res[args.dec_st_c_t_key]
+            output = dec_res[args.output_key]
+            logit = dec_res[args.logit_key]
             logits.append(logit)
             tgt = np.array([[np.argmax(logit, axis=1)]])
 
