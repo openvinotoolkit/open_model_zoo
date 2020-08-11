@@ -153,7 +153,7 @@ static void showUsage() {
     std::cout << "    -student_ac                    " << student_actions_message << std::endl;
     std::cout << "    -top_ac                        " << top_actions_message << std::endl;
     std::cout << "    -teacher_ac                    " << teacher_actions_message << std::endl;
-    std::cout << "    -a_id                          " << target_action_name_message << std::endl;
+    std::cout << "    -top_id                        " << target_action_name_message << std::endl;
     std::cout << "    -a_top                         " << target_actions_num_message << std::endl;
     std::cout << "    -crop_gallery                  " << crop_gallery_message << std::endl;
     std::cout << "    -t_reg_fd                      " << face_threshold_registration_output_message << std::endl;

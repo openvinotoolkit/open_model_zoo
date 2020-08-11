@@ -71,7 +71,7 @@ Options:
     -student_ac                    Optional. List of student actions separated by a comma.
     -top_ac                        Optional. List of student actions (for top-k mode) separated by a comma.
     -teacher_ac                    Optional. List of teacher actions separated by a comma.
-    -a_id                          Optional. Target action name.
+    -top_id                        Optional. Target action name.
     -a_top                         Optional. Number of first K students. If this parameter is positive, the demo detects first K persons with the action, pointed by the parameter 'top_id'
     -crop_gallery                  Optional. Crop images during faces gallery creation.
     -t_reg_fd                      Optional. Probability threshold for face detections during database registration.
