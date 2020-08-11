@@ -14,18 +14,10 @@ prior boxes for 512x512 resolution.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP                              | 91.21% (internal test set)                |
-| Pose coverage                   | Standing upright, parallel to image plane |
-| Support of occluded persons     | YES                                       |
-| Occlusion coverage              | <50%                                      |
-| Min person, vehicle, bike height               | 100 pixels (on 1080p)                     |
-| GFlops                          | 3.143                                     |
-| MParams                         | 1.817                                     |
+| AP @ [ IoU=0.50:0.95 ]          | 0.248 (internal test set)                 |
+| GFlops                          | 3.146                                     |
+| MParams                         | 1.821                                     |
 | Source framework                | PyTorch\*                                 |
-
-Average Precision (AP) is defined as an area under
-the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
-curve. Intersection over union threshold of 0.5 is used for matching.
 
 ## Performance
 
