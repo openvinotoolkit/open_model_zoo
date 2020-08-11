@@ -99,10 +99,10 @@ and accuracy (expect a bigger model to perform better).
 
 | Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Rank-1 on Market-1501 |
 |-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
-| [person-reidentification-retail-0288](./person-reidentification-retail-0248/description/person-reidentification-retail-0288.md)   | 0.174                | 0.183      | 86.1%             |
-| [person-reidentification-retail-0287](./person-reidentification-retail-0267/description/person-reidentification-retail-0287.md)   | 0.564                | 0.595      | 92.9%             |
-| [person-reidentification-retail-0286](./person-reidentification-retail-0270/description/person-reidentification-retail-0286.md)   | 1.170                | 1.234      | 94.8%             |
-| [person-reidentification-retail-0277](./person-reidentification-retail-0265/description/person-reidentification-retail-0277.md)   | 1.993                | 2.103      | 96.2%             |
+| [person-reidentification-retail-0288](./person-reidentification-retail-0288/description/person-reidentification-retail-0288.md)   | 0.174                | 0.183      | 86.1%             |
+| [person-reidentification-retail-0287](./person-reidentification-retail-0287/description/person-reidentification-retail-0287.md)   | 0.564                | 0.595      | 92.9%             |
+| [person-reidentification-retail-0286](./person-reidentification-retail-0286/description/person-reidentification-retail-0286.md)   | 1.170                | 1.234      | 94.8%             |
+| [person-reidentification-retail-0277](./person-reidentification-retail-0277/description/person-reidentification-retail-0277.md)   | 1.993                | 2.103      | 96.2%             |
 
 ## Semantic Segmentation Models
 
