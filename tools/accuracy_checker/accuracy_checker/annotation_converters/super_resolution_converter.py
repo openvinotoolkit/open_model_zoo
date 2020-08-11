@@ -95,6 +95,20 @@ class SRConverter(BaseFormatConverter):
         self.hr_suffix = self.get_value_from_config('hr_suffix')
         self.upsample_suffix = self.get_value_from_config('upsample_suffix')
         self.two_streams = self.get_value_from_config('two_streams')
+        if self.two_streams:
+            if not self.data_dir:
+                if self.lr_dir == self.upsampled_dir:
+                    self.data_dir = self.lr_dir
+                else:
+                    raise ConfigError('data_dir parameter should be provided for conversion as common part of paths '
+                                      'lr_dir and upsampled_dir, if 2 streams used')
+            else:
+                try:
+                    self.lr_dir.relative_to(self.data_dir)
+                    self.upsampled_dir.relative_to(self.data_dir)
+                except:
+                    raise ConfigError('data_dir parameter should be provided for conversion as common part of paths '
+                                      'lr_dir and upsampled_dir, if 2 streams used')
         self.annotation_loader = LOADERS_MAPPING.get(self.get_value_from_config('annotation_loader'))
         if not self.annotation_loader:
             raise ConfigError('provided not existing loader')
@@ -123,8 +137,10 @@ class SRConverter(BaseFormatConverter):
                     content_errors.append('{}: does not exist'.format(self.hr_dir / hr_file_name))
                 if self.two_streams and not check_file_existence(self.upsampled_dir / upsampled_file_name):
                     content_errors.append('{}: does not exist'.format(self.upsampled_dir / upsampled_file_name))
-
-            identifier = [lr_file_name, upsampled_file_name] if self.two_streams else lr_file_name
+            identifier = lr_file_name
+            if self.two_streams:
+                identifier = [str(lr_file.relative_to(self.data_dir)),
+                              str(Path(self.upsampled_dir, upsampled_file_name).relative_to(self.data_dir))]
             annotation.append(SuperResolutionAnnotation(identifier, hr_file_name, gt_loader=self.annotation_loader))
             if progress_callback is not None and lr_id % progress_interval == 0:
                 progress_callback(lr_id / num_iterations * 100)
