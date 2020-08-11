@@ -1,6 +1,8 @@
 ﻿#include "ssd.hpp"
-#include "models.hpp"
-
+#include "model.hpp"
+#include <ngraph/ngraph.hpp>
+#include <iostream>
+#include <samples/slog.hpp>
 Ssd::Ssd(const InferenceEngine::Core &ie, std::string FLAGS_m):Model(ie, FLAGS_m) {
     /** Set batch size to 1 **/
     slog::info << "Batch size is forced to 1." << slog::endl;
@@ -9,7 +11,7 @@ Ssd::Ssd(const InferenceEngine::Core &ie, std::string FLAGS_m):Model(ie, FLAGS_m
     this->objectSize=0;
 }
 
-void  Ssd::prepareInputBlobs() {
+void  Ssd::prepareInputBlobs(bool FLAGS_auto_resize) {
     InferenceEngine::InputsDataMap inputInfo((this->cnnNetwork).getInputsInfo());
 
     for (const auto& inputInfoItem : inputInfo) {
@@ -23,14 +25,15 @@ void  Ssd::prepareInputBlobs() {
             else {
                 inputInfoItem.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
             }
-
-            inputs.insert(std::pair<std::string, InferenceEngine::SizeVector >(inputInfoItem.first, inputInfoItem.second->getTensorDesc().getDims()));
+            this->imageInputName = inputInfoItem.first;
+            this->inputs.insert(std::pair<std::string, InferenceEngine::SizeVector >(inputInfoItem.first, inputInfoItem.second->getTensorDesc().getDims()));
             const InferenceEngine::TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
             this->inputHeight = getTensorHeight(inputDesc);
             this->inputWidth = getTensorWidth(inputDesc);
         }
         else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
             this->imageInfoInputName = inputInfoItem.first;
+            this->inputs.insert(std::pair<std::string, InferenceEngine::SizeVector>(inputInfoItem.first, inputInfoItem.second->getTensorDesc().getDims()));
             inputInfoItem.second->setPrecision(InferenceEngine::Precision::FP32);
         }
         else {
@@ -52,7 +55,7 @@ void Ssd::prepareOutputBlobs() {
         throw std::logic_error("This demo accepts networks having only one output");
     }
     (this->outputs).insert(std::pair<std::string, InferenceEngine::DataPtr&>(outputInfo.begin()->first, outputInfo.begin()->second));
-
+    (this->outputsNames).push_back(outputInfo.begin()->first);
     int num_classes = 0;
 
     if (auto ngraphFunction = (this->cnnNetwork).getFunction()) {
@@ -69,19 +72,19 @@ void Ssd::prepareOutputBlobs() {
             }
         }
     }
-    /* else if (!labels.empty()) {
+     else if (!this->labels.empty()) {
          throw std::logic_error("Class labels are not supported with IR version older than 10");
      }
 
-     if (!labels.empty() && static_cast<int>(labels.size()) != num_classes) {
-         if (static_cast<int>(labels.size()) == (num_classes - 1))  // if network assumes default "background" class, having no label
-             labels.insert(labels.begin(), "fake");
+     if (!this->labels.empty() && static_cast<int>(labels.size()) != num_classes) {
+         if (static_cast<int>(this->labels.size()) == (num_classes - 1))  // if network assumes default "background" class, having no label
+             this->labels.insert(this->labels.begin(), "fake");
          else {
              throw std::logic_error("The number of labels is different from numbers of model classes");
          }
-     }*/
+     }
     InferenceEngine::SizeVector outputDims = (this->outputs).begin()->second->getTensorDesc().getDims();
-    this->maxProposalCount = outputDims[2];// поля класса ssd
+    this->maxProposalCount = outputDims[2];
     this->objectSize = outputDims[3];
     if (this->objectSize != 7) {
         throw std::logic_error("Output should have 7 as a last dimension");
@@ -94,17 +97,27 @@ void Ssd::prepareOutputBlobs() {
 
 }
 
-void Ssd::setConstInput(InferenceEngine::InferRequest::Ptr& inferReq) {
-    auto blob = inferReq->GetBlob(this->imageInfoInputName);
-    InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
-    auto data = blobMapped.as<float*>();
-    data[0] = static_cast<float>(inputHeight);  // height
-    data[1] = static_cast<float>(inputWidth);  // width
-    data[2] = 1;
+void Ssd::setConstInput(InferenceEngine::InferRequest::Ptr& minLatencyInferRequest, std::vector<InferenceEngine::InferRequest::Ptr>& userSpecifiedInferRequests) {
+    if (!this->imageInfoInputName.empty()) {
+        auto setImgInfoBlob = [&](const InferenceEngine::InferRequest::Ptr& inferReq) {
+            auto blob = inferReq->GetBlob(imageInfoInputName);
+            InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
+            auto data = blobMapped.as<float*>();
+            data[0] = static_cast<float>(this->inputHeight);  // height
+            data[1] = static_cast<float>(this->inputWidth);  // width
+            data[2] = 1;
+        };
+
+        for (const InferenceEngine::InferRequest::Ptr& requestPtr : userSpecifiedInferRequests) {
+            setImgInfoBlob(requestPtr);
+        }
+        setImgInfoBlob(minLatencyInferRequest);
+    }
 
 }
 
-void Ssd::processOutput(std::map<const std::string, InferenceEngine::Blob::Ptr>& outputs, cv::Mat frame, const size_t width, const size_t height, std::vector<std::string>& labels, bool FLAGS_r, double threshold) {
+void Ssd::processOutput(std::map< std::string, InferenceEngine::Blob::Ptr>& outputs, cv::Mat frame,
+                         bool printOutput, double threshold) {
     InferenceEngine::LockedMemory<const void> outputMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>((outputs.begin()->second))->rmap();
     const float* detections = outputMapped.as<float*>();
     for (int i = 0; i < this->maxProposalCount; i++) {
@@ -115,12 +128,12 @@ void Ssd::processOutput(std::map<const std::string, InferenceEngine::Blob::Ptr>&
 
         float confidence = detections[i * this->objectSize + 2];
         auto label = static_cast<int>(detections[i * this->objectSize + 1]);
-        float xmin = detections[i * this->objectSize + 3] * width;
-        float ymin = detections[i * this->objectSize + 4] * height;
-        float xmax = detections[i * this->objectSize + 5] * width;
-        float ymax = detections[i * this->objectSize + 6] * height;
+        float xmin = detections[i * this->objectSize + 3] * frame.size().width;
+        float ymin = detections[i * this->objectSize + 4] * frame.size().height;
+        float xmax = detections[i * this->objectSize + 5] * frame.size().width;
+        float ymax = detections[i * this->objectSize + 6] * frame.size().height;
 
-        if (FLAGS_r) {
+        if (printOutput) {
             std::cout << "[" << i << "," << label << "] element, prob = " << confidence <<
                 "    (" << xmin << "," << ymin << ")-(" << xmax << "," << ymax << ")"
                 << ((confidence > threshold) ? " WILL BE RENDERED!" : "") << std::endl;
@@ -131,7 +144,7 @@ void Ssd::processOutput(std::map<const std::string, InferenceEngine::Blob::Ptr>&
             std::ostringstream conf;
             conf << ":" << std::fixed << std::setprecision(3) << confidence;
             cv::putText(frame,
-                (!labels.empty() ? labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
+                (!(this->labels).empty() ? this->labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
                 cv::Point2f(xmin, ymin - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
                 cv::Scalar(0, 0, 255));
             cv::rectangle(frame, cv::Point2f(xmin, ymin), cv::Point2f(xmax, ymax),
@@ -142,15 +155,5 @@ void Ssd::processOutput(std::map<const std::string, InferenceEngine::Blob::Ptr>&
 
 }
 
-const int Ssd::getMaxProposalCount() {
-
-    return this->maxProposalCount;
-}
-
-const int Ssd::getObjectSize() {
-
-    return this->objectSize;
-
-}
 
 
