@@ -31,6 +31,14 @@
 
 using namespace InferenceEngine;
 
+inline char separator() {
+    #ifdef _WIN32
+    return '\\';
+    #else
+    return '/';
+    #endif
+}
+
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validating the input arguments--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
@@ -309,7 +317,10 @@ int main(int argc, char *argv[]) {
         cv::Size graphSize{frame.cols / 4, 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
 
-        cv::VideoWriter outVideo(FLAGS_o, cv::VideoWriter::fourcc('M','J','P','G'), cap->fps(), frame.size());
+        cv::VideoWriter outVideo(FLAGS_o + separator() + "out.avi", cv::VideoWriter::fourcc('M','J','P','G'),
+                                 cap->fps(), frame.size());
+        cv::VideoWriter rawVideo(FLAGS_o + separator() + "raw.avi", cv::VideoWriter::fourcc('M','J','P','G'),
+                                 cap->fps(), frame.size());
 
         std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
         std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
@@ -353,6 +364,10 @@ int main(int argc, char *argv[]) {
                 }
             } else if (!isModeChanged) {
                 async_infer_request_curr->StartAsync();
+            }
+
+            if (!FLAGS_o.empty()) {
+                rawVideo.write(frame);
             }
 
             if (OK == async_infer_request_curr->Wait(IInferRequest::WaitMode::RESULT_READY)) {

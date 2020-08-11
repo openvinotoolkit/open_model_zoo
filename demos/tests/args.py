@@ -118,4 +118,4 @@ class DemoOutputFileArg:
             self.out_dir.mkdir(parents=True)
 
     def resolve(self, context):
-        return str(self.out_dir / 'output.avi')
+        return str(self.out_dir)

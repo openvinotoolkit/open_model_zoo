@@ -74,7 +74,7 @@ def build_argparser():
     args.add_argument("-loop_input", "--loop_input", help="Optional. Iterate over input infinitely",
                       action='store_true')
     args.add_argument("-no_show", "--no_show", help="Optional. Don't show output", action='store_true')
-    args.add_argument("-o", "--output", help="Optional. Save results of input processing to the specified file.",
+    args.add_argument("-o", "--output", help="Optional. Save results of input processing to the specified folder.",
                       type=Path)
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
@@ -382,8 +382,10 @@ def main():
         (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
     if args.output:
-        out_video = cv2.VideoWriter(str(args.output), cv2.VideoWriter_fourcc(*'MJPG'), cap.get(cv2.CAP_PROP_FPS),
-                                    (int(cap.get(3)), int(cap.get(4))))
+        out_video = cv2.VideoWriter(str(Path(args.output) / 'out.avi'), cv2.VideoWriter_fourcc(*'MJPG'),
+                                    cap.get(cv2.CAP_PROP_FPS), (int(cap.get(3)), int(cap.get(4))))
+        raw_video = cv2.VideoWriter(str(Path(args.output) / 'raw.avi'), cv2.VideoWriter_fourcc(*'MJPG'),
+                                    cap.get(cv2.CAP_PROP_FPS), (int(cap.get(3)), int(cap.get(4))))
 
     while (cap.isOpened() \
            or completed_request_results \
@@ -400,6 +402,9 @@ def main():
 
             if len(objects) and args.raw_output_message:
                 log.info(" Class ID | Confidence | XMIN | YMIN | XMAX | YMAX | COLOR ")
+
+            if args.output:
+                raw_video.write(frame)
 
             origin_im_size = frame.shape[:-1]
             presenter.drawGraphs(frame)
@@ -471,6 +476,7 @@ def main():
                     cap.release()
                     if args.output:
                         out_video.release()
+                        raw_video.release()
                 continue
 
             request = empty_requests.popleft()

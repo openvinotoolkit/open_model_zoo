@@ -15,20 +15,6 @@
 import cv2 as cv
 import numpy as np
 
-def getPSNR(I1, I2):
-    s1 = cv.absdiff(I1, I2)
-    s1 = np.float32(s1)
-    s1 = s1 * s1
-    sse = s1.sum()
-    if sse <= 1e-10:
-        return 0
-    else:
-        shape = I1.shape
-        mse = 1.0 * sse / (shape[0] * shape[1] * shape[2])
-        psnr = 10.0 * np.log10((255 * 255) / mse)
-        return psnr
-
-
 def getMSSSIM(i1, i2):
     C1 = 6.5025
     C2 = 58.5225

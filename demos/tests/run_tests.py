@@ -46,7 +46,7 @@ from args import ArgContext, ModelArg
 from cases import DEMOS
 from crop_size import CROP_SIZE
 from data_sequences import DATA_SEQUENCES
-from similarity_measurement import getPSNR, getMSSSIM
+from similarity_measurement import getMSSSIM
 from thresholds import THRESHOLDS
 
 def parse_args():
@@ -230,10 +230,12 @@ def main():
                             # 'if' is debug-only, won't be needed when all demos will be compatible with ssim test
                             if '-o' in case_args and case_args[case_args.index('-o') + 1] != '.':
                                 similarity_res = []
-                                demo_out_file = case_args[case_args.index('-o') + 1]
 
+                                out_folder = case_args[case_args.index('-o') + 1]
+                                demo_out_file = str(Path(out_folder) / 'out.avi')
+                                demo_raw_file = str(Path(out_folder) / 'raw.avi')
                                 out_cap = cv.VideoCapture(demo_out_file)
-                                raw_cap = cv.VideoCapture(case_args[case_args.index('-i') + 1])
+                                raw_cap = cv.VideoCapture(demo_raw_file)
                                 if not out_cap.isOpened() or not raw_cap.isOpened():
                                     raise RuntimeError("Unable to open input files.")
                             
@@ -247,8 +249,7 @@ def main():
                                         out_frame = out_frame[crop[0] : height - crop[2], crop[3] : width - crop[1]]
                                         raw_frame = raw_frame[crop[0] : height - crop[2], crop[3] : width - crop[1]]
                                         similarity = list(map(lambda x: round(x, 3),
-                                                              (getPSNR(out_frame, raw_frame),
-                                                               *getMSSSIM(out_frame, raw_frame)[:-1])))
+                                                              getMSSSIM(out_frame, raw_frame)[:-1]))
                                         similarity_res.append(similarity)
                                     else:
                                       break
@@ -256,6 +257,7 @@ def main():
                                 out_cap.release()
                                 raw_cap.release()
                                 os.remove(demo_out_file)
+                                os.remove(demo_raw_file)
 
                                 model_name = test_case.options['-m'].name
                                 if args.generate_reference:
