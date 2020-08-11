@@ -3,8 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        model:   /home/ikrylov/git/openvino_training_extensions/pytorch_toolkit/object_detection/person-detection/person-detection-0200/export/config.xml
-        weights: /home/ikrylov/git/openvino_training_extensions/pytorch_toolkit/object_detection/person-detection/person-detection-0200/export/config.bin
         adapter:
           type: ssd
           labels_shift: 1
