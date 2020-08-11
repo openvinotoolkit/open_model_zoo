@@ -12,17 +12,17 @@ The First model is Encoder which extracts features from an image and prepares fi
 
 * One input is `imgs` for input image 
 * Four outputs are:
-    * `row_enc_out` extracts features from the image
+    * `Row encoding out (row_enc_out)` extracts features from the image
     * `hidden` and 
     * `context` are intermediate states of the LSTM
     * `init_0` - first state of the encoder
 
 Second model is Decoder that takes as input:
 * `row_enc_out` - extracted images features from the encoder
-* `dec_st_c` and
-* `dec_st_h` - current states of the LSTM
+* `Decoding state context (dec_st_c)` and
+* `Decoding state hidden (dec_st_h)` - current states of the LSTM
 * `output_prev` - previous output of the Decode Step (for the first time it is `init_0` of the encoder)
-* `tgt` - previous token (for the first time it is `START_TOKEN` )
+* `Target (tgt)` - previous token (for the first time it is `START_TOKEN` )
 Second model is being executed until current decoded token is `END_TOKEN` or length of the formula is less then `--max_formula_len` producing one token per each decode step.
 
 As input, the demo application takes a path to a single image file with a command-line argument `-i`.
@@ -72,56 +72,45 @@ Options:
   --preprocessing_type {Resize,Crop}
                         Required. Type of the preprocessing
   -pc, --perf_counts
-  --imgs_key IMGS_KEY   Optional. Encoder input key for images. See README for
-                        details. Change it only if name of the node changed by
-                        Model Optimizer
-  --row_enc_out_key ROW_ENC_OUT_KEY
+  --imgs_layer IMGS_LAYER
+                        Optional. Encoder input key for images. See README for
+                        details.
+  --row_enc_out_layer ROW_ENC_OUT_LAYER
                         Optional. Encoder output key for row_enc_out. See
-                        README for details. Change it only if name of the node
-                        changed by Model Optimizer
-  --hidden_key HIDDEN_KEY
+                        README for details.
+  --hidden_layer HIDDEN_LAYER
                         Optional. Encoder output key for hidden. See README
-                        for details. Change it only if name of the node
-                        changed by Model Optimizer
-  --context_key CONTEXT_KEY
+                        for details.
+  --context_layer CONTEXT_LAYER
                         Optional. Encoder output key for context. See README
-                        for details. Change it only if name of the node
-                        changed by Model Optimizer
-  --init_0_key INIT_0_KEY
+                        for details.
+  --init_0_layer INIT_0_LAYER
                         Optional. Encoder output key for init_0. See README
-                        for details. Change it only if name of the node
-                        changed by Model Optimizer
-  --dec_st_c_key DEC_ST_C_KEY
+                        for details.
+  --dec_st_c_layer DEC_ST_C_LAYER
                         Optional. Decoder input key for dec_st_c. See README
-                        for details. Change it only if name of the node
-                        changed by Model Optimizer
-  --dec_st_h_key DEC_ST_H_KEY
+                        for details.
+  --dec_st_h_layer DEC_ST_H_LAYER
                         Optional. Decoder input key for dec_st_h. See README
-                        for details. Change it only if name of the node
-                        changed by Model Optimizer
-  --dec_st_c_t_key DEC_ST_C_T_KEY
-                        Optional. Decoder output key for dec_st_c. See README
-                        for details. Change it only if name of the node
-                        changed by Model Optimizer
-  --dec_st_h_t_key DEC_ST_H_T_KEY
-                        Optional. Decoder output key for dec_st_h. See README
-                        for details. Change it only if name of the node
-                        changed by Model Optimizer
-  --output_key OUTPUT_KEY
+                        for details.
+  --dec_st_c_t_layer DEC_ST_C_T_LAYER
+                        Optional. Decoder output key for dec_st_c_t. See
+                        README for details.
+  --dec_st_h_t_layer DEC_ST_H_T_LAYER
+                        Optional. Decoder output key for dec_st_h_t. See
+                        README for details.
+  --output_layer OUTPUT_LAYER
                         Optional. Decoder output key for output. See README
-                        for details. Change it only if name of the node
-                        changed by Model Optimizer
-  --output_prev_key OUTPUT_PREV_KEY
+                        for details.
+  --output_prev_layer OUTPUT_PREV_LAYER
                         Optional. Decoder input key for output_prev. See
-                        README for details. Change it only if name of the node
-                        changed by Model Optimizer
-  --logit_key LOGIT_KEY
+                        README for details.
+  --logit_layer LOGIT_LAYER
                         Optional. Decoder output key for logit. See README for
-                        details. Change it only if name of the node changed by
-                        Model Optimizer
-  --tgt_key TGT_KEY     Optional. Decoder input key for tgt. See README for
-                        details. Change it only if name of the node changed by
-                        Model Optimizer
+                        details.
+  --tgt_layer TGT_LAYER
+                        Optional. Decoder input key for tgt. See README for
+                        details.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.

@@ -103,44 +103,31 @@ def build_argparser():
                       help="Required. Type of the preprocessing", required=True, default='crop')
     args.add_argument('-pc', '--perf_counts',
                       action='store_true', default=False)
-    args.add_argument('--imgs_key', help='Optional. Encoder input key for images. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--imgs_layer', help='Optional. Encoder input key for images. See README for details.',
                       default='imgs')
-    args.add_argument('--row_enc_out_key', help='Optional. Encoder output key for row_enc_out. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--row_enc_out_layer', help='Optional. Encoder output key for row_enc_out. See README for details.',
                       default='row_enc_out')
-    args.add_argument('--hidden_key', help='Optional. Encoder output key for hidden. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--hidden_layer', help='Optional. Encoder output key for hidden. See README for details.',
                       default='hidden')
-    args.add_argument('--context_key', help='Optional. Encoder output key for context. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--context_layer', help='Optional. Encoder output key for context. See README for details.',
                       default='context')
-    args.add_argument('--init_0_key', help='Optional. Encoder output key for init_0. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--init_0_layer', help='Optional. Encoder output key for init_0. See README for details.',
                       default='init_0')
-    args.add_argument('--dec_st_c_key', help='Optional. Decoder input key for dec_st_c. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--dec_st_c_layer', help='Optional. Decoder input key for dec_st_c. See README for details.',
                       default='dec_st_c')
-    args.add_argument('--dec_st_h_key', help='Optional. Decoder input key for dec_st_h. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--dec_st_h_layer', help='Optional. Decoder input key for dec_st_h. See README for details.',
                       default='dec_st_h')
-    args.add_argument('--dec_st_c_t_key', help='Optional. Decoder output key for dec_st_c_t. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--dec_st_c_t_layer', help='Optional. Decoder output key for dec_st_c_t. See README for details.',
                       default='dec_st_c_t')
-    args.add_argument('--dec_st_h_t_key', help='Optional. Decoder output key for dec_st_h_t. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--dec_st_h_t_layer', help='Optional. Decoder output key for dec_st_h_t. See README for details.',
                       default='dec_st_h_t')
-    args.add_argument('--output_key', help='Optional. Decoder output key for output. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--output_layer', help='Optional. Decoder output key for output. See README for details.',
                       default='output')
-    args.add_argument('--output_prev_key', help='Optional. Decoder input key for output_prev. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--output_prev_layer', help='Optional. Decoder input key for output_prev. See README for details.',
                       default='output_prev')
-    args.add_argument('--logit_key', help='Optional. Decoder output key for logit. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--logit_layer', help='Optional. Decoder output key for logit. See README for details.',
                       default='logit')
-    args.add_argument('--tgt_key', help='Optional. Decoder input key for tgt. See README for details. '
-                      'Change it only if name of the node changed by Model Optimizer',
+    args.add_argument('--tgt_layer', help='Optional. Decoder input key for tgt. See README for details.',
                       default='tgt')
     return parser
 
@@ -215,25 +202,25 @@ def main():
     for rec in tqdm(images_list):
         image = rec['img']
 
-        enc_res = exec_net_encoder.infer(inputs={args.imgs_key: image})
+        enc_res = exec_net_encoder.infer(inputs={args.imgs_layer: image})
         # get results
-        row_enc_out = enc_res[args.row_enc_out_key]
-        dec_states_h = enc_res[args.hidden_key]
-        dec_states_c = enc_res[args.context_key]
-        output = enc_res[args.init_0_key]
+        row_enc_out = enc_res[args.row_enc_out_layer]
+        dec_states_h = enc_res[args.hidden_layer]
+        dec_states_c = enc_res[args.context_layer]
+        output = enc_res[args.init_0_layer]
 
         tgt = np.array([[START_TOKEN]])
         logits = []
         for _ in range(args.max_formula_len):
-            dec_res = exec_net_decoder.infer(inputs={args.row_enc_out_key: row_enc_out,
-                                                     args.dec_st_c_key: dec_states_c, args.dec_st_h_key: dec_states_h,
-                                                     args.output_prev_key: output, args.tgt_key: tgt
+            dec_res = exec_net_decoder.infer(inputs={args.row_enc_out_layer: row_enc_out,
+                                                     args.dec_st_c_layer: dec_states_c, args.dec_st_h_layer: dec_states_h,
+                                                     args.output_prev_layer: output, args.tgt_layer: tgt
                                                      })
 
-            dec_states_h = dec_res[args.dec_st_h_t_key]
-            dec_states_c = dec_res[args.dec_st_c_t_key]
-            output = dec_res[args.output_key]
-            logit = dec_res[args.logit_key]
+            dec_states_h = dec_res[args.dec_st_h_t_layer]
+            dec_states_c = dec_res[args.dec_st_c_t_layer]
+            output = dec_res[args.output_layer]
+            logit = dec_res[args.logit_layer]
             logits.append(logit)
             tgt = np.array([[np.argmax(logit, axis=1)]])
 
