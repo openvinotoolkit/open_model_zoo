@@ -130,7 +130,7 @@ NATIVE_DEMOS = [
             '-no_show': None,
             '-time': '5',
             '-i': DataDirectoryOrigFileNamesArg('classification'),
-            '-labels': DemoFileArg('synset_words.txt'),
+            '-labels': DemoFileArg('imagenet_2012_classes.txt'),
             '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt"),
             '-b': '8'}),
         single_option_cases('-m',
@@ -302,7 +302,7 @@ NATIVE_DEMOS = [
     )),
 
     NativeDemo(subdirectory='text_detection_demo', device_keys=['-d_td', '-d_tr'], test_cases=combine_cases(
-        TestCase(options={'-no_show': None, '-dt': 'video',
+        TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('text-detection')}),
         single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),

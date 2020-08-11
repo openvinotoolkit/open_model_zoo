@@ -284,7 +284,7 @@ struct PersonAttribsDetection : BaseDetection {
             freq[labels.at<int>(i)]++;
         }
 
-        auto freqArgmax = std::max_element(freq.begin(), freq.end()) - freq.begin();
+        int freqArgmax = static_cast<int>(std::max_element(freq.begin(), freq.end()) - freq.begin());
 
         return centers.at<cv::Vec3b>(freqArgmax);
     }

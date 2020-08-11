@@ -171,9 +171,10 @@ class Reporter:
         self.enable_json_output = enable_json_output
         self.event_context = event_context
 
-    def print_group_heading(self, text):
+    def print_group_heading(self, format, *args):
         if not self.enable_human_output: return
-        self.job_context.printf('{} {} {}', self.GROUP_DECORATION, text, self.GROUP_DECORATION[::-1])
+        self.job_context.printf('{} {} {}',
+            self.GROUP_DECORATION, format.format(*args), self.GROUP_DECORATION[::-1])
         self.job_context.print('')
 
     def print_section_heading(self, format, *args):
