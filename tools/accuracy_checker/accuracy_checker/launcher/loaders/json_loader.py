@@ -14,21 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ...utils import read_pickle
+from collections import defaultdict
+from ...utils import read_json
 from .loader import Loader, DictLoaderMixin
 
 
-class PickleLoader(DictLoaderMixin, Loader):
+class JSONLoader(DictLoaderMixin, Loader):
     """
-    Class for loading output from another tool in .pickle format.
+    Class for loading output from another tool in json format.
     """
 
-    __provider__ = 'pickle'
+    __provider__ = 'json'
 
-    def load(self, *args, **kwargs):
-        data = read_pickle(self._data_path)
-
-        if isinstance(data, list) and all(hasattr(entry, 'identifier') for entry in data):
-            return dict(zip([representation.identifier for representation in data], data))
-
+    def load(self, identifiers=None, **kwargs):
+        detection_list = read_json(self._data_path)
+        data = defaultdict(dict)
+        idx = 0
+        for detection in detection_list:
+            if 'timestamp' in detection:
+                idx = int(detection['timestamp']) // 1000000000
+            identifier = identifiers[idx] if identifiers else idx
+            idx += 1
+            data[identifier] = detection
         return data

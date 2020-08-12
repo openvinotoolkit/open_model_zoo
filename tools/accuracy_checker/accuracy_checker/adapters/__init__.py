@@ -65,8 +65,6 @@ from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
 from .pose_estimation import HumanPoseAdapter
 from .pose_estimation_3d import HumanPose3dAdapter
 
-from .dummy_adapters import XML2DetectionAdapter
-
 from .hit_ratio import HitRatioAdapter
 
 from .mask_rcnn import MaskRCNNAdapter
@@ -88,6 +86,7 @@ from .audio_recognition import CTCBeamSearchDecoder, CTCGreedyDecoder
 from .regression import RegressionAdapter
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
+from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
 
 __all__ = [
     'Adapter',
@@ -165,4 +164,8 @@ __all__ = [
     'CTCGreedyDecoder',
 
     'QualityAssessmentAdapter',
+
+    'GVADetectionAdapter',
+    'GVAClassificationAdapter',
+
 ]
