@@ -6,7 +6,7 @@ This is an im2latex composite model that recognizes latex formulas.
 The model uses vocabulary file to predict sequence of latex tokens.
 The model is built on the resnext50 backbone with additional attention-based text recognition head.
 
-Vocabulary file is being distributed with the model.
+Vocabulary file is distributed with the model. Model can predict big and small letters, numbers, some greek letters, trigonometric functions (e.g. cos, sin, coth), logarithmic function, sqrt and superscript.
 
 ## Example of the input data
 
