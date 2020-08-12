@@ -16,7 +16,6 @@ limitations under the License.
 
 from ..utils import get_path
 from ..logging import print_info
-from ..adapters import Adapter
 from ..config import PathField, StringField, BoolField
 from .loaders import Loader
 from .launcher import Launcher, LauncherConfigValidator

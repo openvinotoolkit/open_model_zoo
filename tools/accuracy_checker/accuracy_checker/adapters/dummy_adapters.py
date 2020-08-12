@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from ..config import BoolField
-from ..representation import DetectionPrediction
+from ..representation import DetectionPrediction, ClassificationPrediction
 from ..adapters import Adapter
 
 
@@ -97,5 +97,15 @@ class GVADetectionAdapter(Adapter):
                 x_maxs.append(x_max)
                 y_maxs.append(y_max)
             results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
+
+        return results
+
+
+class GVAClassificationAdapter(Adapter):
+    def process(self, raw, identifiers, frame_meta):
+        results = []
+        for identifier, image_data in zip(identifiers, raw):
+            data = image_data['tensors'][0]["data"]
+            results.append(ClassificationPrediction(identifier, data))
 
         return results
