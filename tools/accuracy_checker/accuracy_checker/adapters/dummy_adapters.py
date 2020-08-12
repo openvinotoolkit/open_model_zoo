@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from ..config import BoolField
 from ..representation import DetectionPrediction
 from ..adapters import Adapter
 
@@ -63,3 +64,38 @@ class XML2DetectionAdapter(Adapter):
                     result[identifier] = DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs)
 
         return result
+
+
+class GVADetectionAdapter(Adapter):
+    __provider__ = 'gva_detection'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({'raw_detections': BoolField(optional=True, default=False)})
+        return params
+
+    def configure(self):
+        self.raw_detections = self.get_value_from_config('raw_detections')
+
+    def process(self, raw, identifiers, frame_meta):
+        results = []
+        for identifier, prediction in zip(identifiers, raw):
+            objects = prediction.get('objects', [])
+            x_mins, y_mins, x_maxs, y_maxs, scores, labels = [], [], [], [], [], []
+            for obj in objects:
+                det = obj['detection']
+                scores.append(det['confidence'])
+                labels.append(det['label_id'])
+                if not self.raw_detections:
+                    x_min, y_min, x_max, y_max = obj['x'], obj['y'], obj['x'] + obj['w'], obj['y'] + obj['h']
+                else:
+                    bbox = det['bounding_box']
+                    x_min, y_min, x_max, y_max = bbox['x_min'], bbox['y_min'], bbox['x_max'], bbox['y_max']
+                x_mins.append(x_min)
+                y_mins.append(y_min)
+                x_maxs.append(x_max)
+                y_maxs.append(y_max)
+            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
+
+        return results

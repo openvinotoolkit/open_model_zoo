@@ -318,7 +318,7 @@ class ModelEvaluator(BaseEvaluator):
 
     def load(self, stored_predictions, progress_reporter):
         annotations = self.dataset.annotation
-        if self.reader.data_source:
+        if self.postprocessor.has_processors:
             self.dataset.provide_data_info(self.reader, annotations)
         launcher = self.launcher
         if not isinstance(launcher, DummyLauncher):

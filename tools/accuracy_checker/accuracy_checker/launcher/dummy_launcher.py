@@ -35,7 +35,6 @@ class DummyLauncher(Launcher):
         parameters.update({
             'loader': StringField(choices=Loader.providers, description="Loader."),
             'data_path': PathField(description="Data path."),
-            'adapter': StringField(choices=Adapter.providers, optional=True, description="Adapter."),
             'provide_identifiers': BoolField(optional=True, default=False)
         })
         return parameters

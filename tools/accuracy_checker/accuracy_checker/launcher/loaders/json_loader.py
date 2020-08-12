@@ -29,10 +29,11 @@ class JSONLoader(DictLoaderMixin, Loader):
     def load(self, identifiers=None, **kwargs):
         detection_list = read_json(self._data_path)
         data = defaultdict(dict)
-        idx = -1
+        idx = 0
         for detection in detection_list:
             if 'timestamp' in detection:
                 idx = int(detection['timestamp']) // 1000000000
             identifier = identifiers[idx] if identifiers else idx
+            idx += 1
             data[identifier] = detection
         return data
