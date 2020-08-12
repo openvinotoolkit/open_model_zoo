@@ -206,9 +206,12 @@ int main(int argc, char *argv[]) {
 
         /* it's enough just to set image info input (if used in the model) only once */
        
-            model->setConstInput(minLatencyInferRequest, userSpecifiedInferRequests);
-            //if перенесла в метод, но тогда пришлось добавить еще один параметр,
-            //тк он используется в условии
+        for (InferRequest::Ptr& requestPtr : userSpecifiedInferRequests) {
+                model->setConstInput(requestPtr);
+        }
+           model->setConstInput(minLatencyInferRequest);
+         
+
         
 
         
@@ -290,9 +293,9 @@ int main(int argc, char *argv[]) {
                 if (requestResult.frameMode == currentMode) {
                     modeInfo[currentMode].framesCount += 1;
                 }
-                /////////////////////
+                ///////////processing output and drawing boxes
                 model->processOutput(requestResult.outputs, requestResult.frame, FLAGS_r, FLAGS_t);
-                //////////
+                
                 presenter.drawGraphs(requestResult.frame);
 
                 auto currentTime = std::chrono::steady_clock::now();

@@ -3,22 +3,22 @@
 #include <ngraph/ngraph.hpp>
 #include <iostream>
 #include <samples/slog.hpp>
-Ssd::Ssd(const InferenceEngine::Core &ie, std::string FLAGS_m):Model(ie, FLAGS_m) {
+
+Ssd::Ssd(const InferenceEngine::Core &ie, std::string networkModel):maxProposalCount(0), objectSize(0),Model(ie, networkModel) {
     /** Set batch size to 1 **/
     slog::info << "Batch size is forced to 1." << slog::endl;
     (this->cnnNetwork).setBatchSize(1);
-    this->maxProposalCount=0;
-    this->objectSize=0;
+    
 }
 
-void  Ssd::prepareInputBlobs(bool FLAGS_auto_resize) {
+void  Ssd::prepareInputBlobs(bool autoResize) {
     InferenceEngine::InputsDataMap inputInfo((this->cnnNetwork).getInputsInfo());
 
     for (const auto& inputInfoItem : inputInfo) {
         if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
 
             inputInfoItem.second->setPrecision(InferenceEngine::Precision::U8);
-            if (FLAGS_auto_resize) {
+            if (autoResize) {
                 inputInfoItem.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
                 inputInfoItem.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
             }
@@ -43,9 +43,6 @@ void  Ssd::prepareInputBlobs(bool FLAGS_auto_resize) {
                 "Only 2D and 4D input layers are supported");
         }
     }
-
-
-
 }
 
 void Ssd::prepareOutputBlobs() {
@@ -72,9 +69,9 @@ void Ssd::prepareOutputBlobs() {
             }
         }
     }
-     else if (!this->labels.empty()) {
-         throw std::logic_error("Class labels are not supported with IR version older than 10");
-     }
+    else {
+        throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
+    }
 
      if (!this->labels.empty() && static_cast<int>(labels.size()) != num_classes) {
          if (static_cast<int>(this->labels.size()) == (num_classes - 1))  // if network assumes default "background" class, having no label
@@ -94,27 +91,20 @@ void Ssd::prepareOutputBlobs() {
     }
     (this->outputs).begin()->second->setPrecision(InferenceEngine::Precision::FP32);
     (this->outputs).begin()->second->setLayout(InferenceEngine::Layout::NCHW);
-
 }
 
-void Ssd::setConstInput(InferenceEngine::InferRequest::Ptr& minLatencyInferRequest, std::vector<InferenceEngine::InferRequest::Ptr>& userSpecifiedInferRequests) {
-    if (!this->imageInfoInputName.empty()) {
-        auto setImgInfoBlob = [&](const InferenceEngine::InferRequest::Ptr& inferReq) {
-            auto blob = inferReq->GetBlob(imageInfoInputName);
-            InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
-            auto data = blobMapped.as<float*>();
-            data[0] = static_cast<float>(this->inputHeight);  // height
-            data[1] = static_cast<float>(this->inputWidth);  // width
-            data[2] = 1;
-        };
-
-        for (const InferenceEngine::InferRequest::Ptr& requestPtr : userSpecifiedInferRequests) {
-            setImgInfoBlob(requestPtr);
-        }
-        setImgInfoBlob(minLatencyInferRequest);
+void Ssd::setConstInput(InferenceEngine::InferRequest::Ptr& inferReq) {
+    if (!(this->imageInfoInputName).empty()) {
+        auto blob = inferReq->GetBlob(this->imageInfoInputName);
+        InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
+        auto data = blobMapped.as<float*>();
+        data[0] = static_cast<float>(inputHeight);  // height
+        data[1] = static_cast<float>(inputWidth);  // width
+        data[2] = 1;
     }
 
 }
+
 
 void Ssd::processOutput(std::map< std::string, InferenceEngine::Blob::Ptr>& outputs, cv::Mat frame,
                          bool printOutput, double threshold) {
@@ -151,8 +141,6 @@ void Ssd::processOutput(std::map< std::string, InferenceEngine::Blob::Ptr>& outp
                 cv::Scalar(0, 0, 255));
         }
     }
-
-
 }
 
 
