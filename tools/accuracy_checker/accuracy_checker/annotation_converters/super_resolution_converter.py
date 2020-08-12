@@ -84,18 +84,19 @@ class SRConverter(BaseFormatConverter):
 
     def configure(self):
         self.data_dir = self.get_value_from_config('data_dir')
-        self.lr_dir = self.get_value_from_config('lr_dir') if self.get_value_from_config('lr_dir') else self.data_dir
+        self.lr_dir = self.get_value_from_config('lr_dir') or self.data_dir
         if not self.lr_dir:
             raise ConfigError('One of the parameters: data_dir or lr_dir should be provided for conversion')
-        self.hr_dir = self.get_value_from_config('hr_dir') if self.get_value_from_config('hr_dir') else self.data_dir
-        self.upsampled_dir = self.get_value_from_config('upsampled_dir')
-        if not self.upsampled_dir:
-            self.upsampled_dir = self.lr_dir
+        self.hr_dir = self.get_value_from_config('hr_dir') or self.data_dir
         self.lr_suffix = self.get_value_from_config('lr_suffix')
         self.hr_suffix = self.get_value_from_config('hr_suffix')
         self.upsample_suffix = self.get_value_from_config('upsample_suffix')
         self.two_streams = self.get_value_from_config('two_streams')
         if self.two_streams:
+            self.upsampled_dir = self.get_value_from_config('upsampled_dir')
+            if not self.upsampled_dir:
+                self.upsampled_dir = self.lr_dir
+
             if not self.data_dir:
                 if self.lr_dir == self.upsampled_dir:
                     self.data_dir = self.lr_dir
