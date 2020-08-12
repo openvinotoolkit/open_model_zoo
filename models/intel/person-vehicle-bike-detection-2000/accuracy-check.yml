@@ -1,5 +1,5 @@
 models:
-  - name: person-vehicle-bike-detection-detection-0200
+  - name: person-vehicle-bike-detection-0200
 
     launchers:
       - framework: dlsdk
