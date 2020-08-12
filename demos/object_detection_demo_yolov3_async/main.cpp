@@ -317,10 +317,18 @@ int main(int argc, char *argv[]) {
         cv::Size graphSize{frame.cols / 4, 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
 
-        cv::VideoWriter outVideo(FLAGS_o + separator() + "out.avi", cv::VideoWriter::fourcc('M','J','P','G'),
-                                 cap->fps(), frame.size());
-        cv::VideoWriter rawVideo(FLAGS_o + separator() + "raw.avi", cv::VideoWriter::fourcc('M','J','P','G'),
-                                 cap->fps(), frame.size());
+        cv::VideoWriter outVideo;
+        cv::VideoWriter rawVideo;
+        if (!FLAGS_o.empty()) {
+            outVideo.open(FLAGS_o + separator() + "out.avi", cv::VideoWriter::fourcc('M','J','P','G'), cap->fps(),
+                          frame.size());
+            rawVideo.open(FLAGS_o + separator() + "raw.avi", cv::VideoWriter::fourcc('M','J','P','G'), cap->fps(),
+                          frame.size());
+
+            if (!outVideo.isOpened() || !rawVideo.isOpened()) {
+                throw std::runtime_error("Can't open VideoWriter.");
+            }
+        }
 
         std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
         std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;

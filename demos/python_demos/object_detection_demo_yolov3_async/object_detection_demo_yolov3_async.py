@@ -75,7 +75,7 @@ def build_argparser():
                       action='store_true')
     args.add_argument("-no_show", "--no_show", help="Optional. Don't show output", action='store_true')
     args.add_argument("-o", "--output", help="Optional. Save results of input processing to the specified folder.",
-                      type=Path)
+                      default="", type=str)
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
     args.add_argument("--keep_aspect_ratio", action="store_true", default=False,
@@ -381,11 +381,16 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, 55,
         (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
+    out_video = cv2.VideoWriter()
+    raw_video = cv2.VideoWriter()
     if args.output:
-        out_video = cv2.VideoWriter(str(Path(args.output) / 'out.avi'), cv2.VideoWriter_fourcc(*'MJPG'),
-                                    cap.get(cv2.CAP_PROP_FPS), (int(cap.get(3)), int(cap.get(4))))
-        raw_video = cv2.VideoWriter(str(Path(args.output) / 'raw.avi'), cv2.VideoWriter_fourcc(*'MJPG'),
-                                    cap.get(cv2.CAP_PROP_FPS), (int(cap.get(3)), int(cap.get(4))))
+        out_video.open(str(Path(args.output) / 'out.avi'), cv2.VideoWriter_fourcc(*'MJPG'), cap.get(cv2.CAP_PROP_FPS),
+                       (int(cap.get(3)), int(cap.get(4))))
+        raw_video.open(str(Path(args.output) / 'raw.avi'), cv2.VideoWriter_fourcc(*'MJPG'), cap.get(cv2.CAP_PROP_FPS),
+                       (int(cap.get(3)), int(cap.get(4))))
+
+        if not out_video.isOpened() or not raw_video.isOpened():
+            raise RuntimeError('Can\'t open VideoWriter.')
 
     while (cap.isOpened() \
            or completed_request_results \
