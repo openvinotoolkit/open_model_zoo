@@ -15,6 +15,8 @@ limitations under the License.
 """
 
 import re
+import os
+import warnings
 from pathlib import Path
 import cv2
 import numpy as np
@@ -97,13 +99,7 @@ class SRConverter(BaseFormatConverter):
             if not self.upsampled_dir:
                 self.upsampled_dir = self.lr_dir
 
-            if not self.data_dir:
-                if self.lr_dir == self.upsampled_dir:
-                    self.data_dir = self.lr_dir
-                else:
-                    raise ConfigError('data_dir parameter should be provided for conversion as common part of paths '
-                                      'lr_dir and upsampled_dir, if 2 streams used')
-            else:
+            if self.data_dir:
                 try:
                     self.lr_dir.relative_to(self.data_dir)
                     self.upsampled_dir.relative_to(self.data_dir)
@@ -140,8 +136,15 @@ class SRConverter(BaseFormatConverter):
                     content_errors.append('{}: does not exist'.format(self.upsampled_dir / upsampled_file_name))
             identifier = lr_file_name
             if self.two_streams:
-                identifier = [str(lr_file.relative_to(self.data_dir)),
-                              str(Path(self.upsampled_dir, upsampled_file_name).relative_to(self.data_dir))]
+                relative_dir = self.data_dir
+                if not self.data_dir:
+                    relative_dir = os.path.commonpath([self.lr_dir, self.upsampled_dir])
+                    if self.lr_dir != self.upsampled_dir:
+                        warnings.warn("data_dir parameter is undefined, lr_dir and upsampled_dir are different folders."
+                                      "Make sure that data_source is {}".format(relative_dir))
+
+                identifier = [str(lr_file.relative_to(relative_dir)),
+                              str(Path(self.upsampled_dir, upsampled_file_name).relative_to(relative_dir))]
             annotation.append(SuperResolutionAnnotation(identifier, hr_file_name, gt_loader=self.annotation_loader))
             if progress_callback is not None and lr_id % progress_interval == 0:
                 progress_callback(lr_id / num_iterations * 100)
