@@ -136,12 +136,11 @@ class SRConverter(BaseFormatConverter):
                     content_errors.append('{}: does not exist'.format(self.upsampled_dir / upsampled_file_name))
             identifier = lr_file_name
             if self.two_streams:
-                relative_dir = self.data_dir
-                if not self.data_dir:
-                    relative_dir = os.path.commonpath([self.lr_dir, self.upsampled_dir])
-                    if self.lr_dir != self.upsampled_dir:
-                        warnings.warn("data_dir parameter is undefined, lr_dir and upsampled_dir are different folders."
-                                      "Make sure that data_source is {}".format(relative_dir))
+                relative_dir = self.data_dir or os.path.commonpath([self.lr_dir, self.upsampled_dir])
+
+                if self.lr_dir != self.upsampled_dir:
+                    warnings.warn("lr_dir and upsampled_dir are different folders."
+                                  "Make sure that data_source is {}".format(relative_dir))
 
                 identifier = [str(lr_file.relative_to(relative_dir)),
                               str(Path(self.upsampled_dir, upsampled_file_name).relative_to(relative_dir))]
