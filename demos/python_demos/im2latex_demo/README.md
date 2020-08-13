@@ -12,7 +12,7 @@ The First model is Encoder which extracts features from an image and prepares fi
 
 * One input is `imgs` for input image 
 * Four outputs are:
-    * `Row encoding out (row_enc_out)` extracts features from the image
+    * Row encoding out (`row_enc_out`) extracts features from the image
     * `hidden` and 
     * `context` are intermediate states of the LSTM
     * `init_0` - first state of the encoder

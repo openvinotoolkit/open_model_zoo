@@ -100,7 +100,7 @@ def build_argparser():
                       help="Optional. Type of the preprocessing", default='crop')
     args.add_argument('-pc', '--perf_counts',
                       action='store_true', default=False)
-    args.add_argument('--imgs_layer', help='Optional. Encoder input key for images. See README for details.',
+    args.add_argument('--imgs_layer', help='Optional. Encoder input name for images. See README for details.',
                       default='imgs')
     args.add_argument('--row_enc_out_layer', help='Optional. Encoder output key for row_enc_out. See README for details.',
                       default='row_enc_out')
@@ -173,8 +173,8 @@ def main():
     target_shape = (height, width)
     images_list = []
     if os.path.isdir(args.input):
-        inputs = [os.path.join(args.input, inp)
-                  for inp in os.listdir(args.input)]
+        inputs = sorted(os.path.join(args.input, inp)
+                  for inp in os.listdir(args.input))
     else:
         inputs = [args.input]
     log.info("Loading vocab file")
@@ -224,7 +224,7 @@ def main():
             if tgt[0][0][0] == END_TOKEN:
                 break
         if args.perf_counts:
-            log.info("Encoder perfomane statistics")
+            log.info("Encoder perfomance statistics")
             print_stats(exec_net_encoder)
             log.info("Decoder perfomane statistics")
             print_stats(exec_net_decoder)
@@ -241,7 +241,7 @@ def main():
                                   '\t' + rec['formula'] + '\n')
     else:
         for rec in images_list:
-            print("Image name: {}\nformula: {} \n".format(
+            print("Image name: {}\nFormula: {}\n".format(
                 rec['img_name'], rec['formula']))
 
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
