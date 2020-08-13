@@ -2,9 +2,7 @@ import pickle as pkl
 import json
 
 START_TOKEN = 0
-PAD_TOKEN = 1
 END_TOKEN = 2
-UNK_TOKEN = 3
 
 class Vocab():
     """Vocabulary class which helps to get
