@@ -29,7 +29,7 @@ As input, the demo application takes a path to a folder with images or a path to
 
 The demo workflow is the following:
 
-1. The demo application reads images one by one, crops or resizes and pads them to fit into the input image blob of the network (`imgs`). Crop and pad is used to keep size of the font.
+1. The demo application reads a single image or iterates over all images in the given folder, then crops or resizes and inputs to fit into the input image blob of the network (`imgs`). Crop and pad is used to keep size of the font.
 2. For each image, encoder extracts features from the image
 3. While length of the current formula is less then `--max_formula_len` or current token is not `END_TOKEN` Decode Step produces new tokens.
 5. The demo prints the decoded text into the console or in a file if `-o` parameter specified. 
