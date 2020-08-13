@@ -19,10 +19,10 @@ The First model is Encoder which extracts features from an image and prepares fi
 
 Second model is Decoder that takes as input:
 * `row_enc_out` - extracted images features from the encoder
-* `Decoding state context (dec_st_c)` and
-* `Decoding state hidden (dec_st_h)` - current states of the LSTM
+* Decoding state context (`dec_st_c`) and
+* Decoding state hidden (`dec_st_h`) - current states of the LSTM
 * `output_prev` - previous output of the Decode Step (for the first time it is `init_0` of the encoder)
-* `Target (tgt)` - previous token (for the first time it is `START_TOKEN` )
+* Target (`tgt`) - previous token (for the first time it is `START_TOKEN` )
 Second model is being executed until current decoded token is `END_TOKEN` or length of the formula is less then `--max_formula_len` producing one token per each decode step.
 
 As input, the demo application takes a path to a single image file with a command-line argument `-i`.
