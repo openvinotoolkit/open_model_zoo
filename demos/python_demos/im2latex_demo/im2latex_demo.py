@@ -52,6 +52,21 @@ PREPROCESSING = {
 COLOR_WHITE = (255, 255, 255)
 
 
+def read_net(model_path, ie, device):
+    model_xml = model_path
+    model_bin = os.path.splitext(model_xml)[0] + ".bin"
+
+    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+    model = ie.read_network(model_xml, model_bin)
+
+    supported_layers = ie.query_network(model, device)
+    not_supported_layers = [l for l in model.layers.keys() if l not in supported_layers]
+    if len(not_supported_layers) != 0:
+        log.error("Following layers are not supported by the plugin for specified device {}:\n{}".
+                  format(device, ', '.join(not_supported_layers)))
+    return model
+
+
 def print_stats(module):
     perf_counts = module.requests[0].get_perf_counts()
     print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format('name', 'layer_type', 'exet_type', 'status',
@@ -139,42 +154,17 @@ def main():
         {"PERF_COUNT": "YES" if args.perf_counts else "NO"}, args.device)
 
     # encoder part
-    encoder_model_xml = args.m_encoder
-    encoder_model_bin = os.path.splitext(encoder_model_xml)[0] + ".bin"
-    log.info("Loading encoder files:\n\t{}\n\t{}".format(
-        encoder_model_xml, encoder_model_bin))
-    encoder = ie.read_network(encoder_model_xml, encoder_model_bin)
+    encoder = read_net(args.m_encoder, ie, args.device)
+    dec_step = read_net(args.m_decoder, ie, args.device)
 
-    # check if all layers are supported
-    supported_layers = ie.query_network(encoder, args.device)
-    not_supported_layers = [
-        l for l in encoder.layers.keys() if l not in supported_layers]
-    if len(not_supported_layers) != 0:
-        log.error("Following layers are not supported by the plugin for specified device {}:\n{}".
-                  format(args.device, ', '.join(not_supported_layers)))
-
-    # decoder part:
-    dec_step_model_xml = args.m_decoder
-    dec_step_model_bin = os.path.splitext(dec_step_model_xml)[0] + ".bin"
-
-    log.info("Loading decoder files:\n\t{}\n\t{}".format(
-        dec_step_model_xml, dec_step_model_bin))
-    dec_step = ie.read_network(dec_step_model_xml, dec_step_model_bin)
-
-    # check if all layers are supported
-    supported_layers = ie.query_network(dec_step, args.device)
-    not_supported_layers = [
-        l for l in dec_step.layers.keys() if l not in supported_layers]
-    if len(not_supported_layers) != 0:
-        log.error("Following layers are not supported by the plugin for specified device {}:\n{}".
-                  format(args.device, ', '.join(not_supported_layers)))
-    batch_dim, _, height, width = encoder.input_info['imgs'].input_data.shape
-    assert batch_dim == 1, "Demo only works with batch size 1"
+    batch_dim, channels, height, width = encoder.input_info['imgs'].input_data.shape
+    assert batch_dim == 1, "Demo only works with batch size 1."
+    assert channels in (1, 3), "Input image is not 1 or 3 channeled image."
     target_shape = (height, width)
     images_list = []
     if os.path.isdir(args.input):
         inputs = sorted(os.path.join(args.input, inp)
-                  for inp in os.listdir(args.input))
+                        for inp in os.listdir(args.input))
     else:
         inputs = [args.input]
     log.info("Loading vocab file")
@@ -190,10 +180,8 @@ def main():
         images_list.append(record)
 
     log.info("Loading networks")
-    exec_net_encoder = ie.load_network(
-        network=encoder, device_name=args.device)
-    exec_net_decoder = ie.load_network(
-        network=dec_step, device_name=args.device)
+    exec_net_encoder = ie.load_network(network=encoder, device_name=args.device)
+    exec_net_decoder = ie.load_network(network=dec_step, device_name=args.device)
 
     log.info("Starting inference")
     for rec in tqdm(images_list):
@@ -210,9 +198,12 @@ def main():
         logits = []
         for _ in range(args.max_formula_len):
             dec_res = exec_net_decoder.infer(inputs={args.row_enc_out_layer: row_enc_out,
-                                                     args.dec_st_c_layer: dec_states_c, args.dec_st_h_layer: dec_states_h,
-                                                     args.output_prev_layer: output, args.tgt_layer: tgt
-                                                     })
+                                                     args.dec_st_c_layer: dec_states_c,
+                                                     args.dec_st_h_layer: dec_states_h,
+                                                     args.output_prev_layer: output,
+                                                     args.tgt_layer: tgt
+                                                     }
+                                             )
 
             dec_states_h = dec_res[args.dec_st_h_t_layer]
             dec_states_c = dec_res[args.dec_st_c_t_layer]
@@ -226,23 +217,18 @@ def main():
         if args.perf_counts:
             log.info("Encoder perfomance statistics")
             print_stats(exec_net_encoder)
-            log.info("Decoder perfomane statistics")
+            log.info("Decoder perfomanсe statistics")
             print_stats(exec_net_decoder)
 
         logits = np.array(logits)
         logits = logits.squeeze(axis=1)
         targets = np.argmax(logits, axis=1)
         rec["formula"] = vocab.construct_phrase(targets)
-    if args.output_file:
-        log.info("Writing results to the file {}".format(args.output_file))
-        with open(args.output_file, 'w') as output_file:
-            for rec in images_list:
-                output_file.write(rec['img_name'] +
-                                  '\t' + rec['formula'] + '\n')
-    else:
-        for rec in images_list:
-            print("Image name: {}\nFormula: {}\n".format(
-                rec['img_name'], rec['formula']))
+        if args.output_file:
+            with open(args.output_file, 'w') as output_file:
+                output_file.write(rec['img_name'] + '\t' + rec['formula'] + '\n')
+        else:
+            print("Image name: {}\nFormula: {}\n".format(rec['img_name'], rec['formula']))
 
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
              "from the openVINO toolkit\n")
