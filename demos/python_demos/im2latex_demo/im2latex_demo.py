@@ -153,7 +153,6 @@ def main():
     ie.set_config(
         {"PERF_COUNT": "YES" if args.perf_counts else "NO"}, args.device)
 
-    # encoder part
     encoder = read_net(args.m_encoder, ie, args.device)
     dec_step = read_net(args.m_decoder, ie, args.device)
 
