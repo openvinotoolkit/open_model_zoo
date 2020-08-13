@@ -31,7 +31,8 @@ class ADE20kConverter(BaseFormatConverter):
             'images_dir': PathField(is_directory=True, description='Images directory'),
             'annotations_dir': PathField(is_directory=True, description='Annotation directory'),
             'object_categories_file': PathField(description='file with object categories'),
-            'num_classes': NumberField(description='Number of used classes', optional=True, value_type=int, min_value=2),
+            'num_classes': NumberField(description='Number of used classes', optional=True, value_type=int,
+                                       min_value=2),
         })
         return parameters
 
