@@ -317,6 +317,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `images_dir` - path to directory with images (e.g. `ADEChallengeData2016/images/validation`).
   * `annotations_dir` - path to directory with annotations (e.g. `ADEChallengeData2016/annotations/validation`).
   * `object_categories_file` - path to file with labels (e.g. `ADEChallengeData2016/objectInfo150.txt`).
+  * `num_classes` - number of used classes.
 * `criteo_kaggle_dac` - converts Criteo datasets to `ClassificationAnnotation`.
   * `testing_file` - path to preprocessed Criteo file (e.g. `criteo/terabyte/terabyte_preprocessed,npz`).
   * `batch` - batch size expected by model
