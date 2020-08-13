@@ -47,7 +47,19 @@ Run the application with the `-h` option to see the following usage message:
 usage: im2latex_demo.py [-h] -m_encoder M_ENCODER -m_decoder M_DECODER -i
                         INPUT [-o OUTPUT_FILE] --vocab_path VOCAB_PATH
                         [--max_formula_len MAX_FORMULA_LEN] [-d DEVICE]
-                        --preprocessing_type {Resize,Crop} [-pc]
+                        [--preprocessing_type {crop,resize}] [-pc]
+                        [--imgs_layer IMGS_LAYER]
+                        [--row_enc_out_layer ROW_ENC_OUT_LAYER]
+                        [--hidden_layer HIDDEN_LAYER]
+                        [--context_layer CONTEXT_LAYER]
+                        [--init_0_layer INIT_0_LAYER]
+                        [--dec_st_c_layer DEC_ST_C_LAYER]
+                        [--dec_st_h_layer DEC_ST_H_LAYER]
+                        [--dec_st_c_t_layer DEC_ST_C_T_LAYER]
+                        [--dec_st_h_t_layer DEC_ST_H_T_LAYER]
+                        [--output_layer OUTPUT_LAYER]
+                        [--output_prev_layer OUTPUT_PREV_LAYER]
+                        [--logit_layer LOGIT_LAYER] [--tgt_layer TGT_LAYER]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -72,8 +84,8 @@ Options:
                         GPU, FPGA, HDDL or MYRIAD is acceptable. Sample will
                         look for a suitable plugin for device specified.
                         Default value is CPU
-  --preprocessing_type {Resize,Crop}
-                        Required. Type of the preprocessing
+  --preprocessing_type {crop,resize}
+                        Optional. Type of the preprocessing
   -pc, --perf_counts
   --imgs_layer IMGS_LAYER
                         Optional. Encoder input key for images. See README for
