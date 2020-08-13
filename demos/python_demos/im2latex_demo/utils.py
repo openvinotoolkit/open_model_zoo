@@ -20,9 +20,7 @@ class Vocab():
         elif 'json' in vocab_path:
             with open(vocab_path, "r") as f:
                 vocab_dict = json.load(f)
-                for k, v in vocab_dict['id2sign'].items():
-                    del vocab_dict['id2sign'][k]
-                    vocab_dict['id2sign'][int(k)] = v
+                vocab_dict['id2sign'] = {int(k): v for k, v in vocab_dict['id2sign'].items()}
         else:
             raise ValueError("Wrong extension of the vocab file")
         self.id2sign = vocab_dict["id2sign"]
