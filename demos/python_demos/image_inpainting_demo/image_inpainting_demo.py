@@ -34,48 +34,66 @@ def build_argparser():
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU", default="CPU", type=str)
-    args.add_argument("-p", "--parts", help="Optional. Number of parts to draw mask.", default=8, type=int)
-    args.add_argument("-mbw", "--max_brush_width", help="Optional. Max width of brush to draw mask.", default=24, type=int)
-    args.add_argument("-ml", "--max_length", help="Optional. Max strokes length to draw mask.", default=100, type=int)
-    args.add_argument("-mv", "--max_vertex", help="Optional. Max number of vertex to draw mask.", default=20, type=int)
-    args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
-    args.add_argument("-g", "--gui", help="Optional. Enable GUI mode", action='store_true')
+    args.add_argument("-r", "--rnd", help="Optional. Use random mask for inpainting (with parameters set by -p, -mbw, -mk and -mv).Skipped in GUI mode", action='store_true')
+    args.add_argument("-p", "--parts", help="Optional. Number of parts to draw mask. Skipped in GUI mode", default=8, type=int)
+    args.add_argument("-mbw", "--max_brush_width", help="Optional. Max width of brush to draw mask. Skipped in GUI mode", default=24, type=int)
+    args.add_argument("-ml", "--max_length", help="Optional. Max strokes length to draw mask. Skipped in GUI mode", default=100, type=int)
+    args.add_argument("-mv", "--max_vertex", help="Optional. Max number of vertex to draw mask. Skipped in GUI mode", default=20, type=int)
+    args.add_argument("-mc", "--mask_color", help="Optional. Color to be treated as mask (provide 3 RGB components in range of 0...255). Default is 0 0 0. Skipped in GUI mode", default=0, type=int, nargs="+")
+    args.add_argument("--no_show", help="Optional. Don't show output. Skipped in GUI mode", action='store_true')
+    args.add_argument("-o","--output", help="Optional. Save output to the file with provided filename. Skipped in GUI mode", default="", type=str)
+    args.add_argument("-a", "--auto", help="Optional. Use automatic (non-interactive) mode instead of GUI", action='store_true')
 
     return parser
 
 def main():
     args = build_argparser().parse_args()
 
-    if args.gui:
+    if args.auto:
+        # Command-line inpaining for just one image
+        concat_image,result = inpaintRandomHoles(args)
+        if args.output!="":
+            cv2.imwrite(args.output,result)
+        if not args.no_show:
+            cv2.imshow('Image Inpainting Demo', concat_image)
+            cv2.waitKey(0)
+    else:
         # GUI inpainting
         gui = InpaintingGUI(args.input,args.model, args.device)
         gui.run();
 
-    else:
-        # Command-line inpaining for just one image
-        result = inpaintRandomHoles(args)
-        if not args.no_show:
-            cv2.imshow('Image Inpainting Demo', result)
-            cv2.waitKey(0)
-
 def inpaintRandomHoles(args):
-        ie = IECore()
-        img = cv2.imread(args.input, cv2.IMREAD_COLOR)
-        inpainting_processor = ImageInpainting(ie, args.model, args.device)
+    if args.mask_color !=0:
+        mask_color=tuple(args.mask_color)[::-1] # argument comes in RGB mode, but we will use BGR notation below
+        if len(mask_color)!=3:
+            print("Invalid mask_color is provided. Please provide 3 RGB components\n")
+            exit()
+    else:
+        mask_color=(0,0,0)
 
-        #--- Resize to model input and generate random mask
-        img = cv2.resize(img, (inpainting_processor.input_width,inpainting_processor.input_height))
+    ie = IECore()
+    img = cv2.imread(args.input, cv2.IMREAD_COLOR)
+    inpainting_processor = ImageInpainting(ie, args.model, args.device)
 
+    #--- Resize to model input and generate random mask
+    img = cv2.resize(img, (inpainting_processor.input_width,inpainting_processor.input_height))
+
+    if args.rnd:
         mask = createRandomMask(args.parts,args.max_vertex,args.max_length,args.max_brush_width,
                                 inpainting_processor.input_height,inpainting_processor.input_width)
-        masked_image = (img * (1 - mask) + 255 * mask).astype(np.uint8)
+    else:
+        top = np.full(img.shape,[mask_color],np.uint8)
+        mask = cv2.inRange(img,top,top)/255
+        mask=np.expand_dims(mask,2)
 
-        #--- Inpaint and show results
-        output_image = inpainting_processor.process(masked_image,mask)
-        concat_imgs = np.hstack((masked_image, output_image))
-        cv2.putText(concat_imgs, 'summary: {:.1f} FPS'.format(
-            float(1 / inpainting_processor.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
-        return concat_imgs
+    masked_image = (img * (1 - mask) + 255 * mask).astype(np.uint8)
+
+    #--- Inpaint and show results
+    output_image = inpainting_processor.process(masked_image,mask)
+    concat_imgs = np.hstack((masked_image, output_image))
+    cv2.putText(concat_imgs, 'summary: {:.1f} FPS'.format(
+        float(1 / inpainting_processor.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+    return concat_imgs,output_image
 
 def createRandomMask(parts, max_vertex, max_length, max_brush_width, h, w, max_angle=360):
     mask = np.zeros((h,w,1), dtype=np.float32)
