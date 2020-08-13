@@ -9,6 +9,7 @@ The Open Model Zoo includes the following demos:
 - [Action Recognition Python* Demo](./python_demos/action_recognition/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
 - [Colorization Python* Demo](./python_demos/colorization_demo/README.md) - Colorization demo colorizes input frames.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
+- [Formula recognition Python* Demo](./python_demos/im2latex_demo/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/README.md) - Human pose estimation demo.
 - [Image Inpainting Python Demo](./python_demos/image_inpainting_demo/README.md) - Demo application for GMCNN inpainting network.
@@ -33,7 +34,6 @@ The Open Model Zoo includes the following demos:
 - [Text Detection C++ Demo](./text_detection_demo/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
 - [Text Spotting Python* Demo](./python_demos/text_spotting_demo/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Handwritten Japanese Recognition Python* Demo](./python_demos/handwritten_japanese_recognition_demo/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models.
-- [Im2latex formula recognition Python* Demo](./python_demos/im2latex_demo/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 
 \* Several C++ demos referenced above have simplified implementation in Python\*, located in the `python_demos` directory.
 
