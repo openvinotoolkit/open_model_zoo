@@ -44,7 +44,7 @@ The demo has two preprocessing types: Crop and Pad to target shape and Resize an
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: im2latex_demo.py [-h] -m_encoder M_ENCODER -m_decoder M_DECODER -i
+usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder M_DECODER -i
                         INPUT [-o OUTPUT_FILE] --vocab_path VOCAB_PATH
                         [--max_formula_len MAX_FORMULA_LEN] [-d DEVICE]
                         [--preprocessing_type {crop,resize}] [-pc]
@@ -136,7 +136,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 To run the demo, please provide paths to the model in the IR format and to an input video or folder with images:
 ```bash
-python im2latex_demo.py \
+python formula_recognition_demo.py \
         -m_encoder <path_to_models>/encoder.xml \
         -m_decoder <path_to_models>/decode_step.xml \
         --vocab_path <path_to_vocab> \
