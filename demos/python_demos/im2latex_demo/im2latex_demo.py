@@ -34,16 +34,14 @@ def crop(img, target_shape):
     img_h, img_w = img.shape[0:2]
     new_w = min(target_width, img_w)
     new_h = min(target_height, img_h)
-    img = img[:new_h, :new_w, :]
-    return img
+    return img[:new_h, :new_w, :]
 
 
 def resize(img, target_shape):
     target_height, target_width = target_shape
     img_h, img_w = img.shape[0:2]
     scale = min(target_height / img_h, target_width / img_w)
-    img = cv.resize(img, None, fx=scale, fy=scale)
-    return img
+    return cv.resize(img, None, fx=scale, fy=scale)
 
 
 PREPROCESSING = {
@@ -71,8 +69,7 @@ def preprocess_image(preprocess, image_raw, tgt_shape):
                                   0, target_width - img_w, cv.BORDER_CONSTANT,
                                   None, COLOR_WHITE)
     image = image_raw.transpose((2, 0, 1))
-    image = np.expand_dims(image, axis=0)
-    return image
+    return np.expand_dims(image, axis=0)
 
 
 def build_argparser():
@@ -100,7 +97,7 @@ def build_argparser():
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU", type=str)
     args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
-                      help="Required. Type of the preprocessing", required=True, default='crop')
+                      help="Optional. Type of the preprocessing", default='crop')
     args.add_argument('-pc', '--perf_counts',
                       action='store_true', default=False)
     args.add_argument('--imgs_layer', help='Optional. Encoder input key for images. See README for details.',

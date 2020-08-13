@@ -25,11 +25,11 @@ Second model is Decoder that takes as input:
 * Target (`tgt`) - previous token (for the first time it is `START_TOKEN` )
 Second model is being executed until current decoded token is `END_TOKEN` or length of the formula is less then `--max_formula_len` producing one token per each decode step.
 
-As input, the demo application takes a path to a single image file with a command-line argument `-i`.
+As input, the demo application takes a path to a folder with images or a path to a single image file with a command-line argument `-i`.
 
 The demo workflow is the following:
 
-1. The demo application reads images one by one, crops and pads them to fit into the input image blob of the network (`imgs`). Crop and pad is used to keep size of the font.
+1. The demo application reads images one by one, crops or resizes and pads them to fit into the input image blob of the network (`imgs`). Crop and pad is used to keep size of the font.
 2. For each image, encoder extracts features from the image
 3. While length of the current formula is less then `--max_formula_len` or current token is not `END_TOKEN` Decode Step produces new tokens.
 5. The demo prints the decoded text into the console or in a file if `-o` parameter specified. 
