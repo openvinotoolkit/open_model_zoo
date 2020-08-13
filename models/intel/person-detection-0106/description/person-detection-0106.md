@@ -14,8 +14,8 @@ backbone.
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | AP @ [ IoU=0.50:0.95 ]          | 0.442 (internal test set)                 |
-| GFlops                          | 0.786                                     |
-| MParams                         | 1.817                                     |
+| GFlops                          | 404.264                                   |
+| MParams                         | 71.565                                    |
 | Source framework                | PyTorch\*                                 |
 
 Average Precision (AP) is defined as an area under
