@@ -74,31 +74,45 @@ class ReIdentificationDataAnalyzer(BaseDataAnalyzer):
         if count_objects:
             data_analysis['annotations_size'] = self.object_count(result)
 
+        print_info('Number of elements in query: {}'.format(query_count))
+        data_analysis['query_count'] = query_count
+
+        print_info('Number of elements in gallery: {}'.format(gallery_count))
+        data_analysis['gallery_count'] = gallery_count
+
         print_info('Number of unique objects: {}'.format(len(unique_person)))
         data_analysis['unique_objects'] = len(unique_person)
-        print_info('Count for each unique object in query:')
-        for key in person_in_query.keys():
-            print_info('{key}: {count}'.format(key=key, count=person_in_query[key]))
-        data_analysis['unique_objects_query'] = dict(person_in_query)
-        print_info('Count for each unique object in gallery:')
-        for key in person_in_gallery.keys():
-            print_info('{key}: {count}'.format(key=key, count=person_in_gallery[key]))
-        data_analysis['unique_objects_gallery'] = dict(person_in_gallery)
+        data_analysis.update(self._collect_and_print_info_for_unique_elements(person_in_query, 'object', 'query'))
+        data_analysis.update(self._collect_and_print_info_for_unique_elements(person_in_gallery, 'object', 'gallery'))
 
         print_info('Number of unique cameras: {}'.format(len(unique_camera)))
         data_analysis['unique_cameras'] = len(unique_camera)
-        print_info('Count for each unique camera in query:')
-        for key in camera_in_query.keys():
-            print_info('{key}: {count}'.format(key=key, count=camera_in_query[key]))
-        data_analysis['unique_cameras_query'] = dict(camera_in_query)
-        print_info('Count for each unique camera in gallery:')
-        for key in camera_in_gallery.keys():
-            print_info('{key}: {count}'.format(key=key, count=camera_in_gallery[key]))
-        data_analysis['unique_cameras_gallery'] = dict(camera_in_gallery)
+        data_analysis.update(self._collect_and_print_info_for_unique_elements(camera_in_query, 'camera', 'query'))
+        data_analysis.update(self._collect_and_print_info_for_unique_elements(camera_in_gallery, 'camera', 'gallery'))
 
-        print_info('Number of elements in query: {}'.format(query_count))
-        data_analysis['query_count'] = query_count
-        print_info('Number of elements in gallery: {}'.format(gallery_count))
-        data_analysis['gallery_count'] = gallery_count
+        return data_analysis
+
+    @staticmethod
+    def _collect_and_print_info_for_unique_elements(counter, element_name, element_place):
+        data_analysis = {}
+        print_info('Count for each unique {name} in {place}:'.format(name=element_name, place=element_place))
+        max_count = counter.most_common()[0][1]
+        min_count = counter.most_common()[-1][1]
+        most_common = []
+        least_common = []
+        for key, value in counter.most_common():
+            print_info('{key}: {value}'.format(key=key, value=value))
+            if value == max_count:
+                most_common.append(key)
+            if value == min_count:
+                least_common.append(key)
+        data_analysis['unique_{name}_{place}'.format(name=element_name,
+                                                     place=element_place)] = dict(counter.most_common())
+        print_info('Most common {name} in {place}: {value}'.format(name=element_name,
+                                                                   place=element_place, value=most_common))
+        data_analysis['most_common_{name}_in_{place}'.format(name=element_name, place=element_place)] = most_common
+        print_info('Least common {name} in {place}: {value}'.format(name=element_name,
+                                                                    place=element_place, value=least_common))
+        data_analysis['least_common_{name}_in_{place}'.format(name=element_name, place=element_place)] = least_common
 
         return data_analysis
