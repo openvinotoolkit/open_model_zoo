@@ -318,8 +318,8 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
             if match2:
                 total_correct_eliminate += 1
 
-        correct_ratio = float(total_correct / total_num)
-        correct_eliminate_ratio = float(total_correct_eliminate / total_num)
+        correct_ratio = float(total_correct / total_num) if total_num > 0 else 0
+        correct_eliminate_ratio = float(total_correct_eliminate / total_num) if total_num > 0 else 0
         logging.info('------------------------------------')
         logging.info('Final')
         logging.info('Total Num: %s', total_num)
