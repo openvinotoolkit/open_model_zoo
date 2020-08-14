@@ -117,7 +117,7 @@ def main():
     else:
         # GUI inpainting
         gui = InpaintingGUI(args.input,args.model, args.device)
-        gui.run();
+        gui.run()
 
 if __name__ == "__main__":
     main()
