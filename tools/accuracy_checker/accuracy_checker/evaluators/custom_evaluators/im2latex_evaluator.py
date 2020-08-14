@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -258,12 +258,12 @@ class SequentialModel:
 
             dec_res = self.recognizer_decoder.predict(inputs={'row_enc_out': row_enc_out,
                                                               'dec_st_c': dec_states_c, 'dec_st_h': dec_states_h,
-                                                              'O_t_minus_1': O_t, 'tgt': tgt
+                                                              'output_prev': O_t, 'tgt': tgt
                                                               })
 
             dec_states_h = dec_res['dec_st_h_t']
             dec_states_c = dec_res['dec_st_c_t']
-            O_t = dec_res['O_t']
+            O_t = dec_res['output']
             logit = dec_res['logit']
             logits.append(logit)
             tgt = np.array([[np.argmax(np.array(logit), axis=1)]])
