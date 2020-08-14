@@ -4,23 +4,18 @@ import json
 START_TOKEN = 0
 END_TOKEN = 2
 
+
 class Vocab():
     """Vocabulary class which helps to get
     human readable formula from sequence of integer tokens
-
-    Raises:
-        ValueError: If wrong extension file passed as 'vocab_path'
     """
+
     def __init__(self, vocab_path):
-        if '.pkl' in vocab_path:
-            with open(vocab_path, "rb") as f:
-                vocab_dict = pkl.load(f)
-        elif 'json' in vocab_path:
-            with open(vocab_path, "r") as f:
-                vocab_dict = json.load(f)
-                vocab_dict['id2sign'] = {int(k): v for k, v in vocab_dict['id2sign'].items()}
-        else:
-            raise ValueError("Wrong extension of the vocab file")
+        assert vocab_path.endswith(".json"), "Wrong extension of the vocab file"
+        with open(vocab_path, "r") as f:
+            vocab_dict = json.load(f)
+            vocab_dict['id2sign'] = {int(k): v for k, v in vocab_dict['id2sign'].items()}
+
         self.id2sign = vocab_dict["id2sign"]
 
     def construct_phrase(self, indices):
