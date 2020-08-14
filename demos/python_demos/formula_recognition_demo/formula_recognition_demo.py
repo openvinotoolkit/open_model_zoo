@@ -52,8 +52,7 @@ PREPROCESSING = {
 COLOR_WHITE = (255, 255, 255)
 
 
-def read_net(model_path, ie, device):
-    model_xml = model_path
+def read_net(model_xml, ie, device):
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
     log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
