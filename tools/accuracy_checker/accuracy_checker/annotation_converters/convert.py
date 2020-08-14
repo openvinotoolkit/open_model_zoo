@@ -200,5 +200,8 @@ def analyze_dataset(annotations, metadata):
     analyzer = BaseDataAnalyzer.provide(first_element.__class__.__name__)
     inside_meta = copy.copy(metadata)
     data_analysis = analyzer.analyze(annotations, inside_meta)
-    metadata['data_analysis'] = data_analysis
+    if metadata:
+        metadata['data_analysis'] = data_analysis
+    else:
+        metadata = {'data_analysis': data_analysis}
     return metadata

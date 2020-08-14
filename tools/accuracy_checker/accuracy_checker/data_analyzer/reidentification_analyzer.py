@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 from .base_data_analyzer import BaseDataAnalyzer
 from ..logging import print_info
 
@@ -49,10 +49,10 @@ class ReIdentificationDataAnalyzer(BaseDataAnalyzer):
 
     def analyze(self, result: list, meta, count_objects=True):
         data_analysis = {}
-        person_in_query = defaultdict(int)
-        person_in_gallery = defaultdict(int)
-        camera_in_query = defaultdict(int)
-        camera_in_gallery = defaultdict(int)
+        person_in_query = Counter()
+        person_in_gallery = Counter()
+        camera_in_query = Counter()
+        camera_in_gallery = Counter()
         unique_person = set()
         unique_camera = set()
 
@@ -62,39 +62,39 @@ class ReIdentificationDataAnalyzer(BaseDataAnalyzer):
         for data in result:
             if data.query:
                 query_count += 1
-                person_in_query[data.person_id] += 1
-                camera_in_query[data.camera_id] += 1
+                person_in_query.update([data.person_id])
+                camera_in_query.update([data.camera_id])
             else:
                 gallery_count += 1
-                person_in_gallery[data.person_id] += 1
-                camera_in_gallery[data.camera_id] += 1
+                person_in_gallery.update([data.person_id])
+                camera_in_gallery.update([data.camera_id])
             unique_person.add(data.person_id)
             unique_camera.add(data.camera_id)
 
         if count_objects:
             data_analysis['annotations_size'] = self.object_count(result)
 
-        print_info('Number of unique persons: {}'.format(len(unique_person)))
-        data_analysis['unique_persons'] = len(unique_person)
-        print_info('Count for each unique person in query:')
+        print_info('Number of unique objects: {}'.format(len(unique_person)))
+        data_analysis['unique_objects'] = len(unique_person)
+        print_info('Count for each unique object in query:')
         for key in person_in_query.keys():
             print_info('{key}: {count}'.format(key=key, count=person_in_query[key]))
-        data_analysis['unique_persons_query'] = person_in_query
-        print_info('Count for each unique person in gallery:')
+        data_analysis['unique_objects_query'] = dict(person_in_query)
+        print_info('Count for each unique object in gallery:')
         for key in person_in_gallery.keys():
             print_info('{key}: {count}'.format(key=key, count=person_in_gallery[key]))
-        data_analysis['unique_persons_gallery'] = person_in_gallery
+        data_analysis['unique_objects_gallery'] = dict(person_in_gallery)
 
         print_info('Number of unique cameras: {}'.format(len(unique_camera)))
         data_analysis['unique_cameras'] = len(unique_camera)
         print_info('Count for each unique camera in query:')
         for key in camera_in_query.keys():
             print_info('{key}: {count}'.format(key=key, count=camera_in_query[key]))
-        data_analysis['unique_cameras_query'] = camera_in_query
+        data_analysis['unique_cameras_query'] = dict(camera_in_query)
         print_info('Count for each unique camera in gallery:')
         for key in camera_in_gallery.keys():
             print_info('{key}: {count}'.format(key=key, count=camera_in_gallery[key]))
-        data_analysis['unique_cameras_gallery'] = camera_in_gallery
+        data_analysis['unique_cameras_gallery'] = dict(camera_in_gallery)
 
         print_info('Number of elements in query: {}'.format(query_count))
         data_analysis['query_count'] = query_count
