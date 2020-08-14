@@ -48,7 +48,7 @@ def build_argparser():
 
 def createRandomMask(parts, max_vertex, max_length, max_brush_width, h, w, max_angle=360):
     mask = np.zeros((h,w,1), dtype=np.float32)
-    for part in range(parts):
+    for _ in range(parts):
         num_strokes = np.random.randint(max_vertex)
         start_y = np.random.randint(h)
         start_x = np.random.randint(w)
