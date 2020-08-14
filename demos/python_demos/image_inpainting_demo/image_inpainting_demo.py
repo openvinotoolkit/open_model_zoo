@@ -41,7 +41,7 @@ def build_argparser():
     args.add_argument("-mv", "--max_vertex", help="Optional. Max number of vertex to draw mask. Skipped in GUI mode", default=20, type=int)
     args.add_argument("-mc", "--mask_color", help="Optional. Color to be treated as mask (provide 3 RGB components in range of 0...255). Default is 0 0 0. Skipped in GUI mode", default=0, type=int, nargs="+")
     args.add_argument("--no_show", help="Optional. Don't show output. Skipped in GUI mode", action='store_true')
-    args.add_argument("-o","--output", help="Optional. Save output to the file with provided filename. Skipped in GUI mode", default="", type=str)
+    args.add_argument("-o", "--output", help="Optional. Save output to the file with provided filename. Skipped in GUI mode", default="", type=str)
     args.add_argument("-a", "--auto", help="Optional. Use automatic (non-interactive) mode instead of GUI", action='store_true')
 
     return parser
