@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2020 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -14,13 +14,13 @@
 """
 
 import sys
-import cv2
-import numpy as np
 from argparse import ArgumentParser, SUPPRESS
-from inpainting_gui import InpaintingGUI
 
+import numpy as np
+import cv2
 from openvino.inference_engine import IECore
 
+from inpainting_gui import InpaintingGUI
 from inpainting import ImageInpainting
 
 def build_argparser():
@@ -46,21 +46,29 @@ def build_argparser():
 
     return parser
 
-def main():
-    args = build_argparser().parse_args()
+def createRandomMask(parts, max_vertex, max_length, max_brush_width, h, w, max_angle=360):
+    mask = np.zeros((h,w,1), dtype=np.float32)
+    for part in range(parts):
+        num_strokes = np.random.randint(max_vertex)
+        start_y = np.random.randint(h)
+        start_x = np.random.randint(w)
+        brush_width = 0
+        for i in range(num_strokes):
+            angle = np.random.random() * np.deg2rad(max_angle)
+            if i % 2 == 0:
+                angle = 2 * np.pi - angle
+            length = np.random.randint(max_length + 1)
+            brush_width = np.random.randint(10, max_brush_width + 1) // 2 * 2
+            next_y = start_y + length * np.cos(angle)
+            next_x = start_x + length * np.sin(angle)
 
-    if args.auto:
-        # Command-line inpaining for just one image
-        concat_image,result = inpaintRandomHoles(args)
-        if args.output!="":
-            cv2.imwrite(args.output,result)
-        if not args.no_show:
-            cv2.imshow('Image Inpainting Demo', concat_image)
-            cv2.waitKey(0)
-    else:
-        # GUI inpainting
-        gui = InpaintingGUI(args.input,args.model, args.device)
-        gui.run();
+            next_y = np.clip(next_y, 0, h - 1).astype(np.int)
+            next_x = np.clip(next_x, 0, w - 1).astype(np.int)
+            cv2.line(mask, (start_y, start_x), (next_y, next_x), 1, brush_width)
+            cv2.circle(mask, (start_y, start_x), brush_width // 2, 1)
+
+            start_y, start_x = next_y, next_x
+    return mask
 
 def inpaintRandomHoles(args):
     if args.mask_color !=0:
@@ -95,29 +103,21 @@ def inpaintRandomHoles(args):
         float(1 / inpainting_processor.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
     return concat_imgs,output_image
 
-def createRandomMask(parts, max_vertex, max_length, max_brush_width, h, w, max_angle=360):
-    mask = np.zeros((h,w,1), dtype=np.float32)
-    for part in range(parts):
-        num_strokes = np.random.randint(max_vertex)
-        start_y = np.random.randint(h)
-        start_x = np.random.randint(w)
-        brush_width = 0
-        for i in range(num_strokes):
-            angle = np.random.random() * np.deg2rad(max_angle)
-            if i % 2 == 0:
-                angle = 2 * np.pi - angle
-            length = np.random.randint(max_length + 1)
-            brush_width = np.random.randint(10, max_brush_width + 1) // 2 * 2
-            next_y = start_y + length * np.cos(angle)
-            next_x = start_x + length * np.sin(angle)
+def main():
+    args = build_argparser().parse_args()
 
-            next_y = np.clip(next_y, 0, h - 1).astype(np.int)
-            next_x = np.clip(next_x, 0, w - 1).astype(np.int)
-            cv2.line(mask, (start_y, start_x), (next_y, next_x), 1, brush_width)
-            cv2.circle(mask, (start_y, start_x), brush_width // 2, 1)
-
-            start_y, start_x = next_y, next_x
-    return mask
+    if args.auto:
+        # Command-line inpaining for just one image
+        concat_image,result = inpaintRandomHoles(args)
+        if args.output!="":
+            cv2.imwrite(args.output,result)
+        if not args.no_show:
+            cv2.imshow('Image Inpainting Demo', concat_image)
+            cv2.waitKey(0)
+    else:
+        # GUI inpainting
+        gui = InpaintingGUI(args.input,args.model, args.device)
+        gui.run();
 
 if __name__ == "__main__":
     main()
