@@ -4,9 +4,40 @@
 
 #include "samples/ie_config_helper.hpp"
 
+void configureInferenceEngine(Core& ie,
+                              std::string& deviceString,
+                              std::string& deviceInfo,
+                              const std::string& lString,
+                              const std::string& cString,
+                              bool pc) {
+    for (char& ch : deviceString) {
+        ch = std::toupper(ch);
+    }
+
+    std::stringstream strBuffer;
+    strBuffer << ie.GetVersions(deviceString);
+    deviceInfo = strBuffer.str();
+
+    /** Load extensions for the plugin **/
+    if (!lString.empty()) {
+        // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
+        IExtensionPtr extension_ptr = make_so_pointer<IExtension>(lString.c_str());
+        ie.AddExtension(extension_ptr, "CPU");
+    }
+    if (!cString.empty()) {
+        // clDNN Extensions are loaded from an .xml description and OpenCL kernel files
+        ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, cString}}, "GPU");
+    }
+
+    /** Per layer metrics **/
+    if (pc) {
+        ie.SetConfig({ { PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES } });
+    }
+}
+
 std::map<std::string, std::string> createConfig(const std::string& deviceString,
                                                 const std::string& nstreamsString,
-                                                const int& nthreads,
+                                                int nthreads,
                                                 bool minLatency) {
     std::map<std::string, std::string> config;
 
