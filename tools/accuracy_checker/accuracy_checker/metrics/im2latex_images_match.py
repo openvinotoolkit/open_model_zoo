@@ -132,16 +132,17 @@ def render_routine(line):
         with open(tex_filename, "w") as w:
             w.write(template % formula)
         run("pdflatex -interaction=nonstopmode {}  >/dev/null".format(tex_filename), TIMEOUT)
-        os.remove(tex_filename)
-        os.remove(log_filename)
-        os.remove(aux_filename)
+        for filename in (tex_filename, log_filename, aux_filename):
+            if os.path.exists(filename):
+                os.remove(filename)
         pdf_filename = tex_filename[:-4] + '.pdf'
         png_filename = tex_filename[:-4] + '.png'
         if not os.path.exists(pdf_filename):
             logging.info('ERROR: %s cannot compile\n', file_idx)
         else:
             os.system("convert -density 200 -quality 100 {} {}".format(pdf_filename, png_filename))
-            os.remove(pdf_filename)
+            if os.path.exists(pdf_filename):
+                os.remove(pdf_filename)
             if os.path.exists(png_filename):
                 crop_image(png_filename, output_path)
                 os.remove(png_filename)
