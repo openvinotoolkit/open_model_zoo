@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2020 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -40,11 +40,13 @@ class ImageInpainting(object):
         self.input_height = input_height
         self.input_width = input_width
 
+
     def infer(self, image, mask):
         t0 = cv2.getTickCount()
         output = self._exec_model.infer(inputs={self._input_layer_names[0]: image, self._input_layer_names[1]: mask})
         self.infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()
         return output[self._output_layer_name]
+
 
     def process(self, src_image, mask):
         image = np.transpose(src_image, (2, 0, 1))
@@ -54,5 +56,4 @@ class ImageInpainting(object):
         output = self.infer(image, mask)
 
         output = np.transpose(output, (0, 2, 3, 1)).astype(np.uint8)
-        #output[0] = cv2.cvtColor(output[0], cv2.COLOR_RGB2BGR)
         return output[0]

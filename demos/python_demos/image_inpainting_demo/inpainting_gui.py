@@ -18,7 +18,6 @@ from inpainting import ImageInpainting
 from openvino.inference_engine import IECore
 
 class InpaintingGUI(object):
-
     def __init__(self, imgPath, modelPath, device="CPU"):
         self.wndName="Inpainting (press H for help)"
         self.maskColor=(255,0,0)
@@ -36,6 +35,7 @@ class InpaintingGUI(object):
         self.isHelpShown=False
         self.isOriginalShown=False
 
+
     def onMouse(self, event, x,y, flags, param):
         if flags==cv2.EVENT_FLAG_LBUTTON and not self.isOriginalShown:
             if self.oldPoint[0]!=-1:
@@ -47,8 +47,8 @@ class InpaintingGUI(object):
         else:
             self.oldPoint=(-1,-1)
 
-    def run(self):
 
+    def run(self):
         srcImg = cv2.imread(self.imgPath, cv2.IMREAD_COLOR)
         self.img = cv2.resize(srcImg,(self.inpainter.input_width,self.inpainter.input_height))
         self.originalImg = self.img.copy();
@@ -91,14 +91,17 @@ class InpaintingGUI(object):
 
             key = cv2.waitKey(1)
 
+
     def onTrackBar(self,x):
         self.radius=x
+
 
     def showInfo(self,text):
         self.label=text
         self.updateWindow()
         cv2.waitKey(1) # This is fequired to actually paint window contents rigth away
         self.isHelpShown=False # Any other label removes help from the screen
+
 
     def updateWindow(self):
         pad=10
