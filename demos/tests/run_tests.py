@@ -268,9 +268,9 @@ def main():
                                     similarity_reference = reference_values[demo.full_name][model_name]
                                     threshold = THRESHOLDS[demo.full_name][model_name]
                                     for i in range(len(similarity_res)):
-                                        for j in range(len(similarity_res[0])):
-                                            if abs(similarity_res[i][j] - similarity_reference[i][j]) > threshold[j]:
-                                                print("res: {}, ref: {}".format(similarity_res[i], similarity_reference[i]))
+                                        print("res: {}, ref: {}".format(similarity_res[i], similarity_reference[i]))
+                                        # for j in range(len(similarity_res[0])):
+                                            # if abs(similarity_res[i][j] - similarity_reference[i][j]) > threshold[j]:
                                                 # raise RuntimeError("SSIM test failed: {} != {} with threshold {}."
                                                 #                    .format(similarity_res[i], similarity_reference[i],
                                                 #                            threshold))
