@@ -1,4 +1,4 @@
-# im2latex-medium-0001 (composite)
+# formula-recognition-medium-scan-0001 (composite)
 
 ## Use Case and High-Level Description
 
@@ -10,7 +10,7 @@ Vocabulary file is distributed with the model. Model can predict big and small l
 
 ## Example of the input data
 
-![](./im2latex-medium-0001.png)
+![](./formula-recognition-medium-scan-0001.png)
 
 ## Example of the output
 
@@ -28,7 +28,7 @@ Im2latex-match-images metric is calculated by [this algorithm](../../../../tools
 
 ## Encoder model specification
 
-The im2latex-medium-0001-encoder model is a ResNeXt-50 like backbone with some initialization layers for decoder
+The formula-recognition-medium-scan-0001-encoder model is a ResNeXt-50 like backbone with some initialization layers for decoder
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
@@ -53,7 +53,7 @@ The im2latex-medium-0001-encoder model is a ResNeXt-50 like backbone with some i
 
 ## Decoder model specification
 
-The im2latex-medium-0001-decoder model is an LSTM based decoder with attention module.
+The formula-recognition-medium-scan-0001-decoder model is an LSTM based decoder with attention module.
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
