@@ -8,8 +8,6 @@ evaluations:
 
       launchers:
         - framework: dlsdk
-          tags:
-            - FP32
 
       datasets:
         - name: im2latex_medium_photographed
@@ -37,7 +35,6 @@ evaluations:
             - type: corner_crop
               dst_width: 1400
               dst_height: 160
-              no_resize: true
             - type: padding
               pad_type: right_bottom
               dst_width: 1400
