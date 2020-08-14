@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from collections import defaultdict, Counter
+from collections import Counter
 from .base_data_analyzer import BaseDataAnalyzer
 from ..logging import print_info
 
