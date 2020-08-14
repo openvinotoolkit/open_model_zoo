@@ -140,7 +140,7 @@ def render_routine(line):
         if not os.path.exists(pdf_filename):
             logging.info('ERROR: %s cannot compile\n', file_idx)
         else:
-            os.system("convert -density 200 -quality 100 {} {}".format(pdf_filename, png_filename))
+            os.system('convert +profile "icc" -density 200 -quality 100 {} {}'.format(pdf_filename, png_filename))
             if os.path.exists(pdf_filename):
                 os.remove(pdf_filename)
             if os.path.exists(png_filename):
