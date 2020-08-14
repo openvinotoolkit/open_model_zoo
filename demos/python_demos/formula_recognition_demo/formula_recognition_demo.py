@@ -222,12 +222,11 @@ def main():
         logits = np.array(logits)
         logits = logits.squeeze(axis=1)
         targets = np.argmax(logits, axis=1)
-        rec["formula"] = vocab.construct_phrase(targets)
         if args.output_file:
-            with open(args.output_file, 'w') as output_file:
-                output_file.write(rec['img_name'] + '\t' + rec['formula'] + '\n')
+            with open(args.output_file, 'a') as output_file:
+                output_file.write(rec['img_name'] + '\t' +  vocab.construct_phrase(targets) + '\n')
         else:
-            print("Image name: {}\nFormula: {}\n".format(rec['img_name'], rec['formula']))
+            print("Image name: {}\nFormula: {}\n".format(rec['img_name'], vocab.construct_phrase(targets)))
 
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
              "from the openVINO toolkit\n")
