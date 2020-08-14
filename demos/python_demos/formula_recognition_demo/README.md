@@ -1,4 +1,4 @@
-# Formula recognition Python\* Demo
+# Formula Recognition Python\* Demo
 
 This demo shows how to run im2latex models. Im2latex models allow to get a latex formula markup from the image.
 
