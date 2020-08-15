@@ -19,8 +19,6 @@ models:
 
     datasets:
       - name: squad_v1_1_msl384_mql64_ds128_lowercase
-        annotation_conversion:
-          vocab_file: vocab.txt
         reader:
           type: annotation_features_extractor
           features:
