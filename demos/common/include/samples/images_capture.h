@@ -29,5 +29,5 @@ public:
 // }
 std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input,
     bool loop, size_t initialImageId=0,  // Non camera options
-    size_t readLengthLimit=std::numeric_limits<size_t>::max()  // General option
-);
+    size_t readLengthLimit=std::numeric_limits<size_t>::max(),  // General option
+    cv::Size cameraResolution={1280, 720});
