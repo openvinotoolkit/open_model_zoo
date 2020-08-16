@@ -263,7 +263,7 @@ class SQUADConverter(BaseFormatConverter):
                     np.array(span["input_ids"]),
                     np.array(span["attention_mask"]),
                     np.array(span["token_type_ids"]),
-                    np.arange(len(span["token_type_ids"])),#position_ids
+                    np.arange(len(span["token_type_ids"])),
                     np.array(cls_index),
                     p_mask,
                     example.answers,
