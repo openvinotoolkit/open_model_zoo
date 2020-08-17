@@ -18,19 +18,23 @@ from inpainting import ImageInpainting
 from openvino.inference_engine import IECore
 
 class InpaintingGUI(object):
-    def __init__(self, imgPath, modelPath, device="CPU"):
+    def __init__(self, srcImg, modelPath, device="CPU"):
         self.wndName="Inpainting (press H for help)"
         self.maskColor=(255,0,0)
         self.radius=10
         self.oldPoint=(-1,-1)
 
         self.inpainter = ImageInpainting(IECore(),modelPath,device)
-        self.imgPath = imgPath
+   
+        self.img = cv2.resize(srcImg,(self.inpainter.input_width,self.inpainter.input_height))
+        self.originalImg = self.img.copy()
+        self.label = ""
+        self.mask = np.zeros((self.inpainter.input_height,self.inpainter.input_width,1),dtype=np.float32)
 
         cv2.namedWindow(self.wndName, cv2.WINDOW_AUTOSIZE )
         cv2.setMouseCallback(self.wndName,self.onMouse)
         cv2.createTrackbar("Brush size",self.wndName,self.radius,30,self.onTrackBar)
-        cv2.setTrackbarMin("Brush size",self.wndName,1);
+        cv2.setTrackbarMin("Brush size",self.wndName,1)
 
         self.isHelpShown=False
         self.isOriginalShown=False
@@ -49,21 +53,16 @@ class InpaintingGUI(object):
 
 
     def run(self):
-        srcImg = cv2.imread(self.imgPath, cv2.IMREAD_COLOR)
-        self.img = cv2.resize(srcImg,(self.inpainter.input_width,self.inpainter.input_height))
-        self.originalImg = self.img.copy();
-        self.label = ""
-        self.mask = np.zeros((self.inpainter.input_height,self.inpainter.input_width,1),dtype=np.float32)
         self.updateWindow()
 
         if self.img is None:
-            print("Cannot load source image\n");
+            print("Cannot load source image\n")
             return
 
         key= cv2.waitKey(1)
         while key not in (27,ord('q'),ord('Q')):
-            if key==ord(" "):
-                self.isOriginalShown = False;
+            if key in (ord(" "),ord("\r")):
+                self.isOriginalShown = False
                 self.showInfo("Processing...")
 
                 self.img[:,:,0:1][self.mask>0]=0
@@ -75,7 +74,7 @@ class InpaintingGUI(object):
                 self.mask[:,:,:]=0
                 self.updateWindow()
             elif key in (8,ord('c'),ord('C')): # Backspace or c
-                self.isOriginalShown = False;
+                self.isOriginalShown = False
                 self.mask[:,:,:]=0
                 self.updateWindow()
             elif key == ord('\t'):
@@ -83,7 +82,7 @@ class InpaintingGUI(object):
                 self.updateWindow()
             elif key in (ord('h'),ord('H')):
                 if not self.isHelpShown:
-                    self.showInfo("Use mouse with LMB to paint\nBksp or C to clear\nSpace to inpaint\nTab to show original image\nEsc or Q to quit")
+                    self.showInfo("Use mouse with LMB to paint\nBksp or C to clear\nSpace or Enter to inpaint\nTab to show original image\nEsc or Q to quit")
                     self.isHelpShown=True
                 else:
                     self.showInfo("")
@@ -123,7 +122,7 @@ class InpaintingGUI(object):
             lines = self.label.split("\n")
             count = len(lines)
             w = max(cv2.getTextSize(line, cv2.FONT_HERSHEY_COMPLEX, 0.75,1)[0][0] for line in lines)+pad*2
-            lineH = cv2.getTextSize(lines[0], cv2.FONT_HERSHEY_COMPLEX, 0.75,1)[0][1]+pad;
+            lineH = cv2.getTextSize(lines[0], cv2.FONT_HERSHEY_COMPLEX, 0.75,1)[0][1]+pad
             labelArea=backbuffer[margin:lineH*count+pad*2+margin,margin:w+margin]
             labelArea//=2
             for i,line in enumerate(lines):

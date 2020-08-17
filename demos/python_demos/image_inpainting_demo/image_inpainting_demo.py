@@ -46,13 +46,21 @@ def build_argparser():
                       default=20, type=int)
     args.add_argument("-mc", "--mask_color",
                       help="Optional. Color to be treated as mask (provide 3 RGB components in range of 0...255)."
-                      " Default is 0 0 0. Skipped in GUI mode", default=0, type=int, nargs="+")
+                      " Default is 0 0 0. Skipped in GUI mode", default=[0, 0, 0], type=int, nargs="+")
     args.add_argument("--no_show", help="Optional. Don't show output. Skipped in GUI mode", action='store_true')
     args.add_argument("-o", "--output", help="Optional. Save output to the file with provided filename. Skipped in GUI mode",
                       default="", type=str)
     args.add_argument("-a", "--auto", help="Optional. Use automatic (non-interactive) mode instead of GUI", action='store_true')
 
     return parser
+
+
+def loadImage(imgPath):
+    img = cv2.imread(imgPath, cv2.IMREAD_COLOR)
+    if img is None:
+        print(f"Cannot load image {imgPath}")
+        exit()
+    return img
 
 
 def createRandomMask(parts, max_vertex, max_length, max_brush_width, h, w, max_angle=360):
@@ -80,16 +88,14 @@ def createRandomMask(parts, max_vertex, max_length, max_brush_width, h, w, max_a
 
 
 def inpaintRandomHoles(args):
-    if args.mask_color != 0:
-        mask_color = args.mask_color[::-1] # argument comes in RGB mode, but we will use BGR notation below
-        if len(mask_color) != 3:
-            print("Invalid mask_color is provided. Please provide 3 RGB components\n")
-            exit()
-    else:
-        mask_color = (0,0,0)
+    if len(args.mask_color) != 3:
+        print("Invalid mask_color is provided. Please provide 3 RGB components\n")
+        exit()
+    mask_color=args.mask_color[::-1] # argument comes in RGB mode, but we will use BGR notation below
 
     ie = IECore()
-    img = cv2.imread(args.input, cv2.IMREAD_COLOR)
+    img = loadImage(args.input)
+
     inpainting_processor = ImageInpainting(ie, args.model, args.device)
 
     #--- Resize to model input and generate random mask
@@ -99,7 +105,7 @@ def inpaintRandomHoles(args):
         mask = createRandomMask(args.parts,args.max_vertex,args.max_length,args.max_brush_width,
                                 inpainting_processor.input_height,inpainting_processor.input_width)
     else:
-        top = np.full(img.shape,[mask_color],np.uint8)
+        top = np.full(img.shape,mask_color,np.uint8)
         mask = cv2.inRange(img,top,top) / 255
         mask = np.expand_dims(mask,2)
 
@@ -123,8 +129,8 @@ def main():
             cv2.imshow('Image Inpainting Demo', concat_image)
             cv2.waitKey(0)
     else:
-        # GUI inpainting
-        InpaintingGUI(args.input,args.model, args.device).run()
+        # Inpainting with GUI
+        InpaintingGUI(loadImage(args.input),args.model, args.device).run()
 
 if __name__ == "__main__":
     main()
