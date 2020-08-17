@@ -175,10 +175,6 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            if (FLAGS_no_show) {
-                continue;
-            }
-
             presenter.drawGraphs(frame);
 
             // Display the results
@@ -187,19 +183,21 @@ int main(int argc, char *argv[]) {
             }
             putTimingInfoOnFrame(frame, overallTimeAverager.getAveragedValue(),
                                  inferenceTimeAverager.getAveragedValue());
-            cv::imshow(windowName, frame);
+            if (!FLAGS_no_show) {
+                cv::imshow(windowName, frame);
 
-            // Controls the information being displayed while demo runs
-            int key = cv::waitKey(delay);
-            resultsMarker.toggle(key);
+                // Controls the information being displayed while demo runs
+                int key = cv::waitKey(delay);
+                resultsMarker.toggle(key);
 
-            // Press 'Esc' to quit, 'f' to flip the video horizontally
-            if (key == 27)
-                break;
-            else if (key == 'f')
-                flipImage = !flipImage;
-            else
-                presenter.handleKey(key);
+                // Press 'Esc' to quit, 'f' to flip the video horizontally
+                if (key == 27)
+                    break;
+                if (key == 'f')
+                    flipImage = !flipImage;
+                else
+                    presenter.handleKey(key);
+            }
             frame = cap->read();
         } while (frame.data);
         std::cout << presenter.reportMeans() << '\n';
