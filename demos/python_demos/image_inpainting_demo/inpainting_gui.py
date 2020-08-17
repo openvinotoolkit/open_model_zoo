@@ -99,7 +99,7 @@ class InpaintingGUI(object):
     def showInfo(self,text):
         self.label=text
         self.updateWindow()
-        cv2.waitKey(1) # This is fequired to actually paint window contents rigth away
+        cv2.waitKey(1) # This is required to actually paint window contents right away
         self.isHelpShown=False # Any other label removes help from the screen
 
 
@@ -130,4 +130,3 @@ class InpaintingGUI(object):
                 cv2.putText(backbuffer,line,(pad+margin,margin+(i+1)*lineH),cv2.FONT_HERSHEY_COMPLEX, 0.75,(192,192,192))
 
         cv2.imshow(self.wndName, backbuffer)
-
