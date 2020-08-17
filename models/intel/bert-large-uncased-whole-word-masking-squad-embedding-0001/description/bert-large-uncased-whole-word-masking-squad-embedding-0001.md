@@ -17,8 +17,8 @@ Tokenization occurs using the BERT tokenizer (see the demo code for implementati
 
 | Metric            | Value                 |
 |-------------------|-----------------------|
-| GOps              | XX.X                  |
-| MParams           | XX.X                  |
+| GOps              | 246.93 (for [1,384] input size)|
+| MParams           | 333.96                |
 | Source framework  | PyTorch\*             |
 
 ## Accuracy
