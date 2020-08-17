@@ -42,11 +42,11 @@ ENTRIES_PATHS = {
 
 PREPROCESSING_PATHS = {
     'mask_dir': 'source',
-    'vocabulary_file': ['model_attributes', 'models']
+    'vocabulary_file': ['model_attributes', 'models', 'source']
 }
 
 ADAPTERS_PATHS = {
-    'vocabulary_file': ['model_attributes', 'models']
+    'vocabulary_file': ['model_attributes', 'models', 'source']
 }
 
 ANNOTATION_CONVERSION_PATHS = {
@@ -678,10 +678,10 @@ def process_config(
 
         updated_launchers = []
         for launcher_config in launchers_configs:
-            if 'models' not in args or not args['models']:
+            if ('models' not in args or not args['models']) and not isinstance(launcher_config.get('adapter'), dict):
                 updated_launchers.append(launcher_config)
                 continue
-            models = args['models']
+            models = args.get('models')
             if isinstance(models, list):
                 for model_id, _ in enumerate(models):
                     new_launcher = copy.deepcopy(launcher_config)
