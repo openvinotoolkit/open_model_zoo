@@ -138,7 +138,7 @@ NATIVE_DEMOS = [
             ModelArg('densenet-121-tf'),
             ModelArg('densenet-169'),
             ModelArg('mobilenet-v2-pytorch'),
-            ModelArg('resnet-50')),
+            ModelArg('resnet-50-caffe2')),
     )),
 
     NativeDemo(subdirectory='interactive_face_detection_demo',
