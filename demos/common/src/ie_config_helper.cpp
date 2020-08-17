@@ -85,8 +85,9 @@ std::map<std::string, std::string> createConfig(const std::string& deviceString,
                 config.insert({ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" });
             }
         } else if (device == "MYRIAD") {
-            // if (!nstreamsString.empty()) {}
-            // config.insert({ CONFIG_KEY(_THROUGHPUT_STREAMS), "1" });
+            if (!nstreamsString.empty()) {
+                config.insert({ CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1" });
+            }
         }
     }
 
