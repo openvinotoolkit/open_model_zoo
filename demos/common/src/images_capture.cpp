@@ -28,7 +28,7 @@ public:
         if(!img.data) throw InvalidInput{};
     }
 
-    double fps() const override {return 0.0;}
+    double fps() const override {return 1.0;}
 
     size_t lastImageId() const override {return 0;}
 
@@ -73,7 +73,7 @@ public:
         throw std::runtime_error{"Can't read the first image from " + input + " dir"};
     }
 
-    double fps() const override {return 0.0;}
+    double fps() const override {return 1.0;}
 
     size_t lastImageId() const override {return nextImgId - 1;}
 

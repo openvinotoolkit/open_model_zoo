@@ -146,6 +146,9 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
 * `super_resolution` - converts dataset for single image super resolution task to `SuperResolutionAnnotation`.
   * `data_dir` - path to folder, where images in low and high resolution are located.
+  * `lr_dir` - path to directory, where images in low resolution are located.
+  * `hr_dir` - path to directory, where images in high resolution are located. **Note:** inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.
+  * `upsampled_dir` - path to directory, where upsampled images are located, if 2 streams used.
   * `lr_suffix` - low resolution file name's suffix (default lr).
   * `hr_suffix` - high resolution file name's suffix (default hr).
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `dicom`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
@@ -314,19 +317,20 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `images_dir` - path to directory with images (e.g. `ADEChallengeData2016/images/validation`).
   * `annotations_dir` - path to directory with annotations (e.g. `ADEChallengeData2016/annotations/validation`).
   * `object_categories_file` - path to file with labels (e.g. `ADEChallengeData2016/objectInfo150.txt`).
+  * `num_classes` - number of used classes.
 * `criteo_kaggle_dac` - converts Criteo datasets to `ClassificationAnnotation`.
   * `testing_file` - path to preprocessed Criteo file (e.g. `criteo/terabyte/terabyte_preprocessed,npz`).
   * `batch` - batch size expected by model
   * `subsample_size` - number of batches in test-only dataset, If provided, total number of records is batch * subsample_size
   * `validation` - if provided, only second half of dataset converted to annotations, according to dataset definition
   * `preprocessed_dir` - path to store preprocessed batch files (e.g. `criteo/terabyte/preprocessed`).
-  * `separator` - symbol used to separate feature identifiers from batch data filename. 
+  * `separator` - symbol used to separate feature identifiers from batch data filename.
 * `features_regression` - converts dataset stored in format of directories with preprocessed input numeric data (features) in text files and reference data in the same format to `FeatureRegressionAnnotation`.
  This approach allows comparision output of model from different frameworks (e.g. OpenVINO converted model and source framework realisation).
   * `input_dir` - directory with input data files.
   * `reference_dir` - directory with reference data. **Note: inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.**
   * `input_suffix` - suffix for input files (usually file extension). Optional, default `.txt`.
-  * `reference_suffix` - suffix for reference files (usually file extension). Optional, default `.txt`. 
+  * `reference_suffix` - suffix for reference files (usually file extension). Optional, default `.txt`.
 * `librispeech` - converts [librispeech](http://www.openslr.org/12) dataset to `CharachterRecognitionAnnotation`.
   * `data_dir` - path to dataset directory, which contains converted wav files.
   * `annotation_file` - path to file which describe the data which should be used in evaluation (`audio_filepath`, `text`, `duration`). Optional, used only for data filtering and sorting audio samples by duration.
