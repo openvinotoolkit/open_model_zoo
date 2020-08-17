@@ -38,7 +38,6 @@ The new Async API operates with a new notion of the Infer Request that encapsula
 Running the application with the `-h` option yields the following usage message:
 
 ```
-./interactive_face_detection_demo -h
 InferenceEngine:
     API version ............ <version>
     Build .................. <number>
@@ -47,7 +46,8 @@ interactive_face_detection_demo [OPTION]
 Options:
 
     -h                         Print a usage message
-    -i "<path>"                Required. Path to a video file (specify "cam" to work with camera).
+    -i                         Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                      Optional. Enable reading the input in a loop.
     -o "<path>"                Optional. Path to an output video file.
     -m "<path>"                Required. Path to an .xml file with a trained Face Detection model.
     -m_ag "<path>"             Optional. Path to an .xml file with a trained Age/Gender Recognition model.
@@ -80,7 +80,6 @@ Options:
     -dx_coef                   Optional. Coefficient to shift the bounding box around the detected face along the Ox axis
     -dy_coef                   Optional. Coefficient to shift the bounding box around the detected face along the Oy axis
     -fps                       Optional. Maximum FPS for playing video
-    -loop_video                Optional. Enable playing video on a loop
     -no_smooth                 Optional. Do not smooth person attributes
     -no_show_emotion_bar       Optional. Do not show emotion bar
     -u                         Optional. List of monitors to show initially.
