@@ -221,7 +221,8 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         return coco_data_to_store
 
     def _iou_type_specific_coco_annotation(self, annotation_data_to_store, annotation):
-        annotation_data_to_store = self._iou_type_data_to_coco(annotation_data_to_store, annotation)
+        annotation_data_to_store = self._iou_type_data_to_coco(annotation_data_to_store, annotation,
+                                                               self.box_side_delta)
         return annotation_data_to_store
 
     def _prepare_data_for_annotation_file(
