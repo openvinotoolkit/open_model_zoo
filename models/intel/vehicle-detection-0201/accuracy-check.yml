@@ -13,5 +13,8 @@ models:
             dst_height: 384
         postprocessing:
           - type: resize_prediction_boxes
+          - type: clip_boxes
+            apply_to: prediction
         metrics:
           - type: coco_orig_precision
+            include_boundaries: false
