@@ -124,8 +124,7 @@ def main():
             cv2.waitKey(0)
     else:
         # GUI inpainting
-        gui = InpaintingGUI(args.input,args.model, args.device)
-        gui.run()
+        InpaintingGUI(args.input,args.model, args.device).run()
 
 if __name__ == "__main__":
     main()
