@@ -56,7 +56,7 @@ class QuestionAnswering(BaseRepresentation):
         super().__init__(identifier)
 
 class QuestionAnsweringAnnotation(QuestionAnswering):
-    def __init__(self, identifier, question_id, unique_id, input_ids, input_mask, segment_ids,position_ids, cls_index, p_mask,
+    def __init__(self, identifier, question_id, unique_id, input_ids, input_mask, segment_ids, cls_index, p_mask,
                  orig_answer_text=None, paragraph_text=None, doc_tokens=None, is_impossible=False, paragraph_len=None,
                  tokens=None, token_is_max_context=None, token_to_orig_map=None):
         super().__init__(identifier)
@@ -66,7 +66,6 @@ class QuestionAnsweringAnnotation(QuestionAnswering):
         self.input_ids = input_ids
         self.input_mask = input_mask
         self.segment_ids = segment_ids
-        self.position_ids = position_ids
         self.cls_index = cls_index
         self.tokens = tokens
         self.p_mask = p_mask
