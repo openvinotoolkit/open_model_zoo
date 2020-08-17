@@ -90,7 +90,7 @@ class SegmentationAnnotation(SegmentationRepresentation):
     def _load_mask(self):
         if self._mask is None:
             loader_config = self.LOADERS.get(self._mask_loader)
-            data_source = self.metadata.get('segmentation_masks_source')
+            data_source = self.metadata.get('segmentation_masks_source') or self.metadata.get('additional_data_source')
             if data_source is None:
                 data_source = self.metadata['data_source']
             if isinstance(loader_config, str):
