@@ -320,9 +320,9 @@ int main(int argc, char *argv[]) {
         cv::VideoWriter outVideo;
         cv::VideoWriter rawVideo;
         if (!FLAGS_o.empty()) {
-            outVideo.open(FLAGS_o + separator() + "out.avi", cv::VideoWriter::fourcc('H','F','Y','U'), cap->fps(),
+            outVideo.open(FLAGS_o + separator() + "out.avi", cv::VideoWriter::fourcc('I','Y','U','V'), cap->fps(),
                           frame.size());
-            rawVideo.open(FLAGS_o + separator() + "raw.avi", cv::VideoWriter::fourcc('H','F','Y','U'), cap->fps(),
+            rawVideo.open(FLAGS_o + separator() + "raw.avi", cv::VideoWriter::fourcc('I','Y','U','V'), cap->fps(),
                           frame.size());
 
             if (!outVideo.isOpened() || !rawVideo.isOpened()) {
