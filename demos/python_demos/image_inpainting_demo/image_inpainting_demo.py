@@ -81,7 +81,7 @@ def createRandomMask(parts, max_vertex, max_length, max_brush_width, h, w, max_a
 
 def inpaintRandomHoles(args):
     if args.mask_color != 0:
-        mask_color = tuple(args.mask_color)[::-1] # argument comes in RGB mode, but we will use BGR notation below
+        mask_color = args.mask_color[::-1] # argument comes in RGB mode, but we will use BGR notation below
         if len(mask_color) != 3:
             print("Invalid mask_color is provided. Please provide 3 RGB components\n")
             exit()
