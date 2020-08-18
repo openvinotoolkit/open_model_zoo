@@ -14,8 +14,8 @@ that are probabilities of the corresponding 7 attributes.
 | Occlusion coverage    | <20%                                                                                                  |
 | Min object width      | 80 pixels                                                                                             |
 | Supported attributes  | `is_male`, `has_bag`, `has_hat`, `has_longsleeves`, `has_longpants`, `has_longhair`, `has_coat_jacket`|
-| GFlops                | ???                                                                                                   |
-| MParams               | ???                                                                                                   |
+| GFlops                | 2.167                                                                                                 |
+| MParams               | 23.510                                                                                                |
 | Source framework      | PyTorch\*                                                                                             |
 
 
