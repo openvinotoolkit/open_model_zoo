@@ -77,6 +77,8 @@ Age/Gender recognition after Face Detection).
 | [landmarks-regression-retail-0009](./landmarks-regression-retail-0009/description/landmarks-regression-retail-0009.md)                                      | 0.021                | 0.191      |
 | [facial-landmarks-35-adas-0002](./facial-landmarks-35-adas-0002/description/facial-landmarks-35-adas-0002.md)                                               | 0.042                | 4.595      |
 | [person-attributes-recognition-crossroad-0230](./person-attributes-recognition-crossroad-0230/description/person-attributes-recognition-crossroad-0230.md)  | 0.174                | 0.735      |
+| [person-attributes-recognition-crossroad-0234](./person-attributes-recognition-crossroad-0234/description/person-attributes-recognition-crossroad-0234.md)  | 2.167                | 23.510     |
+| [person-attributes-recognition-crossroad-0238](./person-attributes-recognition-crossroad-0238/description/person-attributes-recognition-crossroad-0238.md)  | 1.034                | 21.797     |
 | [gaze-estimation-adas-0002](./gaze-estimation-adas-0002/description/gaze-estimation-adas-0002.md)                                                           | 0.139                | 1.882      |
 
 ## Reidentification Models
