@@ -23,12 +23,12 @@ that are probabilities of the corresponding 7 attributes.
 
 | Attribute         |  F1   |
 |-------------------|-------|
-| `is_male`         | 0.78  |
+| `is_male`         | 0.80  |
 | `has_bag`         | 0.48  |
-| `has_hat`         | 0.33  |
-| `has_longsleeves` | 0.14  |
-| `has_longpants`   | 0.69  |
-| `has_longhair`    | 0.74  |
+| `has_hat`         | 0.42  |
+| `has_longsleeves` | 0.17  |
+| `has_longpants`   | 0.75  |
+| `has_longhair`    | 0.77  |
 | `has_coat_jacket` |  NA   |
 
 ## Performance
