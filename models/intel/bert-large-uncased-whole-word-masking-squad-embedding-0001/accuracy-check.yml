@@ -5,7 +5,7 @@ models:
         allow_reshape_input: True
         adapter:
             type: bert_question_answering_embedding
-            embedding: "embedding"
+            embedding: "3157/Fused_Add_"
         inputs:
           - name: "input_ids"
             type: INPUT
