@@ -83,3 +83,30 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 ### Datasets in dataset_definitions.yml
 * `wider` used for evaluation models on WIDER Face dataset where the face is the first class. (model examples: [`mtcnn`](models/public/mtcnn/mtcnn.md), [`retinaface-resnet50`](models/public/retinaface-resnet50/retinaface-resnet50.md))
 * `wider_without_bkgr` used for evaluation models on WIDER Face dataset where the face is class zero. (model examples: [`mobilefacedet-v1-mxnet`](models/public/mobilefacedet-v1-mxnet/mobilefacedet-v1-mxnet.md))
+
+## [Visual Object Classes Challenge 2012 (VOC2012)](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/)
+
+### How download dataset
+
+To download VOC2012 dataset, you need to follow the steps below:
+1. Go to the [VOC2012](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/) website
+2. Go to the [`Development Kit`](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/#devkit) section
+3. Select [`Download the training/validation data`](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar) and download archive
+4. Unpack archive
+
+### Files layout
+
+To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the following:
+
+* `VOCdevkit/VOC2012` - directory containing annotations, images, segmentation masks and image sets files directories
+    * `Annotations` - directory containing the VOC2012 annotation files
+    * `JPEGImages` - directory containing the VOC2012 validation images
+    * `ImageSets` - directory containing the VOC2012 text files specifying lists of images for different tasks
+        * `Main/val.txt` - image sets file for detection tasks
+        * `Segmentation/val.txt` - image sets file for segmentation tasks
+    * `SegmentationClass` - directory containing the VOC2012 segmentation masks
+
+### Datasets in dataset_definitions.yml
+* `VOC2012` used for evaluation models on VOC2012 dataset for object detection task. Background label + label map with 20 object categories are used. (model examples: [`mobilenet-ssd`](models/public/mobilenet-ssd/mobilenet-ssd.md), [`ssd300`](models/public/ssd300/ssd300.md))
+* `VOC2012_without_background` used for evaluation models on VOC2012 dataset for object detection tasks. Label map with 20 object categories is used.(model examples: [`yolo-v2-ava-0001`](models/intel/yolo-v2-ava-0001/description/yolo-v2-ava-0001.md), [`yolo-v2-tiny-ava-0001`](models/intel/yolo-v2-tiny-ava-0001/description/yolo-v2-tiny-ava-0001.md))
+* `VOC2012_Segmentation` used for evaluation models on VOC2012 dataset for segmentation tasks. Background label + label map with 20 object categories are used.(model examples: [`deeplabv3`](models/public/deeplabv3/deeplabv3.md))

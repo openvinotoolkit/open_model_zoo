@@ -1,5 +1,5 @@
 models:
-  - name: bert-small-uncased-whole-word-masking-squad-0001
+  - name: bert-small-uncased-whole-word-masking-squad-0002
     launchers:
       - framework: dlsdk
         adapter:
@@ -16,6 +16,9 @@ models:
           - name: 'token_type_ids'
             type: INPUT
             value: 'segment_ids'
+          - name: 'position_ids'
+            type: INPUT
+            value: 'position_ids'
 
     datasets:
       - name: squad_v1_1_msl384_mql64_ds128_lowercase
@@ -25,6 +28,7 @@ models:
             - input_ids
             - input_mask
             - segment_ids
+            - position_ids
         postprocessing:
           - type: extract_answers_tokens
             max_answer: 30
