@@ -22,6 +22,7 @@
 #include <map>
 #include <condition_variable>
 #include "config_factory.h"
+#include "requests_pool.h"
 
 /// This is base class for asynchronous pipeline
 /// Derived classes should add functions for data submission and output processing
@@ -63,7 +64,7 @@ public:
 
     /// Waits for all currently submitted requests to be completed.
     ///
-    void waitForCompletion();
+    void waitForTotalCompletion() { requestsPool.waitForTotalCompletion(); }
 
 protected:
     /// This function is called during intialization before loading model to device
@@ -77,17 +78,12 @@ protected:
     /// @returns unique sequential frame ID for this particular request. Same frame ID will be written in responce structure.
     virtual int64_t submitRequest(InferenceEngine::InferRequest::Ptr request);
 
-    /// Returns idle request from the pool. Returned request is automatically marked as In Use (this status will be reset after request processing completion)
-    /// @returns pointer to request with idle state or nullptr if all requests are in use.
-    InferenceEngine::InferRequest::Ptr getIdleRequest();
-
     /// Returns processed result, if available
     /// @returns RequestResult with processed information or empty RequestResult (with negative frameID) if there's no any results yet.
     virtual RequestResult getResult();
 
 protected:
-
-    std::map<InferenceEngine::InferRequest::Ptr, std::atomic_bool> requestsPool;
+    RequestsPool requestsPool;
     std::unordered_map<int64_t, RequestResult> completedRequestResults;
 
     InferenceEngine::ExecutableNetwork execNetwork;
@@ -102,18 +98,5 @@ protected:
     std::string outputName;
 
     std::exception_ptr callbackException = nullptr;
-
-    bool isRequestsPoolEmpty(){
-        return std::find_if(requestsPool.begin(), requestsPool.end(), [](std::pair<const InferenceEngine::InferRequest::Ptr,std::atomic_bool>& x) {return !x.second; })==requestsPool.end();
-    }
-
-    void setRequestIdle(const InferenceEngine::InferRequest::Ptr& request) {
-        this->requestsPool.at(request) = false;
-    }
-
-    int64_t getInUseRequestsCount() {
-        return std::count_if(requestsPool.begin(), requestsPool.end(), [](std::pair<const InferenceEngine::InferRequest::Ptr, std::atomic_bool>& x) {return (bool)x.second; });
-    }
-
 };
 

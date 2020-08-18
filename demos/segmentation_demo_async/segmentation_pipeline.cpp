@@ -76,7 +76,7 @@ void SegmentationPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
 }
 
 int64_t SegmentationPipeline::submitImage(cv::Mat img){
-    auto request = getIdleRequest();
+    auto request = requestsPool.getIdleRequest();
     if (!request)
         return -1;
 

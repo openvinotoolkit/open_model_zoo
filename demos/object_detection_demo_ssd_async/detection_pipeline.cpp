@@ -128,7 +128,7 @@ void DetectionPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
 }
 
 int64_t DetectionPipeline::submitImage(cv::Mat img){
-    auto request = getIdleRequest();
+    auto request = requestsPool.getIdleRequest();
     if (!request)
         return -1;
 

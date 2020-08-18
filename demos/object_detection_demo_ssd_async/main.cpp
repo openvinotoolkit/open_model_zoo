@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        pipeline.waitForCompletion(); // If some requests are still executing, let's wait for them to get full statistics
+        pipeline.waitForTotalCompletion(); // If some requests are still executing, let's wait for them to get full statistics
         auto info = pipeline.getPerformanceInfo();
         slog::info << slog::endl << "Metric reports:" << slog::endl;
 

@@ -28,7 +28,7 @@ PipelineBase::PipelineBase():
 
 PipelineBase::~PipelineBase()
 {
-    waitForCompletion();
+    waitForTotalCompletion();
 }
 
 void PipelineBase::init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine)
@@ -70,41 +70,23 @@ void PipelineBase::init(const std::string& model_name, const CnnConfig& cnnConfi
     // -----------------------------------------------------------------------------------------------------
 
     // --------------------------- 5. Create infer requests ------------------------------------------------
-    for (unsigned infReqId = 0; infReqId < cnnConfig.maxAsyncRequests; ++infReqId) {
-        requestsPool.emplace(execNetwork.CreateInferRequestPtr(),false);
-    }
+    requestsPool = std::move(RequestsPool(execNetwork, cnnConfig.maxAsyncRequests));
 }
 
 void PipelineBase::waitForData()
 {
     std::unique_lock<std::mutex> lock(mtx);
 
-    condVar.wait(lock, [&] {return !(callbackException == nullptr && isRequestsPoolEmpty() && completedRequestResults.empty()); });
+    condVar.wait(lock, [&] {return callbackException != nullptr || requestsPool.getInUseRequestsCount() || !completedRequestResults.empty(); });
 
     if (callbackException)
         std::rethrow_exception(callbackException);
 }
 
-InferenceEngine::InferRequest::Ptr PipelineBase::getIdleRequest()
-{
-    std::lock_guard<std::mutex> lock(mtx);
-
-    const auto& it = std::find_if(requestsPool.begin(), requestsPool.end(), [](std::pair<const InferenceEngine::InferRequest::Ptr,std::atomic_bool>& x) {return !x.second; });
-    if(it==requestsPool.end())
-    {
-        perfInfo.numRequestsInUse = requestsPool.size();
-        return InferenceEngine::InferRequest::Ptr();
-    }
-    else
-    {
-        it->second = true;
-        perfInfo.numRequestsInUse = (uint32_t)getInUseRequestsCount();
-        return it->first;
-    }
-}
-
 int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request)
 {
+    perfInfo.numRequestsInUse = (uint32_t)requestsPool.getInUseRequestsCount();
+
     if (outputName=="")
     {
         throw std::invalid_argument("outputName values is not set.");
@@ -134,7 +116,7 @@ int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request)
 
                     completedRequestResults.emplace(frameID, result);
 
-                    this->setRequestIdle(request);
+                    this->requestsPool.setRequestIdle(request);
                 }
                 catch (...) {
                     if (!this->callbackException) {
@@ -176,11 +158,4 @@ PipelineBase::RequestResult PipelineBase::getResult()
     }
 
     return RequestResult();
-}
-
-void PipelineBase::waitForCompletion(){
-    for (const auto& pair : requestsPool) {
-        if (pair.second)
-            pair.first->Wait(IInferRequest::WaitMode::RESULT_READY);
-    }
 }
