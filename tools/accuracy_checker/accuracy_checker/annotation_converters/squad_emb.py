@@ -29,7 +29,7 @@ import unicodedata
 import string
 # split word by vocab items and get tok codes
 # iterativly return codes
-def encode_by_voc(w,vocab):
+def encode_by_voc(w, vocab):
     # remove mark and control chars
     def clean_word(w):
         wo = ""  # accumulator for output word
@@ -43,7 +43,7 @@ def encode_by_voc(w,vocab):
     w = clean_word(w)
 
     res = []
-    for s0,e0 in split_to_words(w):
+    for s0, e0 in split_to_words(w):
         s, e = s0, e0
         tokens = []
         while e > s:
@@ -88,8 +88,8 @@ def text_to_tokens(text, vocab_or_tokenizer):
             toks = encode_by_voc(text[s:e], vocab_or_tokenizer)
 
         for tok in toks:
-            tokens_id.append( tok )
-            tokens_se.append( (s, e) )
+            tokens_id.append(tok)
+            tokens_se.append((s, e))
 
     return tokens_id, tokens_se
 
@@ -159,8 +159,8 @@ class SQUADConverterEMB(BaseFormatConverter):
             rest = max_len - (ids_len + 2)
             assert rest >= 0
 
-            annotations.append( QuestionAnsweringEmbeddingAnnotation(
-                ['{}_{}'.format(n,index_ref[0]) for n in ('input_ids','input_mask','segment_ids','position_ids') ],
+            annotations.append(QuestionAnsweringEmbeddingAnnotation(
+                ['{}_{}'.format(n, index_ref[0]) for n in ('input_ids', 'input_mask', 'segment_ids', 'position_ids')],
                 np.array(cls + ids + sep + pad * rest),
                 np.array([1] * (1 + ids_len + 1) + pad * rest),
                 np.array([0] * (1 + ids_len + 1) + pad * rest),
@@ -171,8 +171,8 @@ class SQUADConverterEMB(BaseFormatConverter):
 
         c_annos = []
         q_annos = []
-        for art_i, article in enumerate(squad['data']):
-            for par_i, par in enumerate(article['paragraphs']):
+        for article in squad['data']:
+            for par in article['paragraphs']:
 
                 add_sample(
                     par['context_enc'],
@@ -180,7 +180,7 @@ class SQUADConverterEMB(BaseFormatConverter):
                     None,
                     c_annos)
 
-                for qa_i, qa in enumerate(par['qas']):
+                for qa in par['qas']:
                     add_sample(
                         qa['question_enc'],
                         self.max_query_length,
