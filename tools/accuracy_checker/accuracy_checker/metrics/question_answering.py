@@ -151,21 +151,21 @@ class QuestionAnsweringEmbeddingAccurcay(FullDatasetEvaluationMetric):
         ap_pairs = list(zip(annotations, predictions))
 
         #check data aligment
-        assert all(a.identifier is p.identifier for a,p in ap_pairs), "annotations and predictions are not aligned"
+        assert all(a.identifier is p.identifier for a, p in ap_pairs), "annotations and predictions are not aligned"
 
-        q_pairs = [(a,p) for a,p in ap_pairs if a.context_pos_indetifier is not None]
-        c_pairs = [(a,p) for a,p in ap_pairs if a.context_pos_indetifier is None]
+        q_pairs = [(a, p) for a, p in ap_pairs if a.context_pos_indetifier is not None]
+        c_pairs = [(a, p) for a, p in ap_pairs if a.context_pos_indetifier is None]
 
-        c_data_identifiers = [a.identifier for a,p in c_pairs]
-        c_vecs = numpy.array([p.embedding for a,p in c_pairs])
+        c_data_identifiers = [a.identifier for a, p in c_pairs]
+        c_vecs = numpy.array([p.embedding for a, p in c_pairs])
 
         # calc distances from each question to all contexts and check if top_k has true positives
         true_pos = 0
         for q_a, q_p in q_pairs:
 
             #calc distance between question embedding with all conext embeddings
-            d = c_vecs - q_p.embedding[None,:]
-            dist = numpy.linalg.norm(d,ord=2,axis=1)
+            d = c_vecs - q_p.embedding[None, :]
+            dist = numpy.linalg.norm(d, ord=2, axis=1)
             index = dist.argsort()
 
             #check that right context in the list of top_k
