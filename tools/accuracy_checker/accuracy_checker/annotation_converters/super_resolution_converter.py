@@ -113,6 +113,7 @@ class SRConverter(BaseFormatConverter):
             raise ConfigError('provided not existing loader')
         self.generate_upsample = self.get_value_from_config('generate_upsample')
         self.upsample_factor = self.get_value_from_config('upsample_factor')
+        self.relative_dir = ''
         if self.ignore_suffixes:
             if self.lr_dir == self.hr_dir:
                 raise ConfigError(
@@ -126,24 +127,17 @@ class SRConverter(BaseFormatConverter):
                 raise ConfigError(
                     'high resolution and upsample images should be located in separated directories '
                     'if ignore_suffixes enabled')
+        if self.two_streams:
+            self.relative_dir = self.data_dir or os.path.commonpath([self.lr_dir, self.upsampled_dir])
+            if self.lr_dir != self.upsampled_dir:
+                warnings.warn("lr_dir and upsampled_dir are different folders."
+                              "Make sure that data_source is {}".format(self.relative_dir))
 
 
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        def get_index(image_name, suffix):
-            name_parts = image_name.split(suffix) if suffix else [image_name]
-            numbers = []
-            for part in name_parts:
-                numbers += [int(s) for s in re.findall(r'\d+', part)]
-            if not numbers:
-                raise ValueError('no numeric in {}'.format(image_name))
-            return numbers[0]
         content_errors = [] if check_content else None
-        file_list_lr = []
-        for file_in_dir in self.lr_dir.iterdir():
-            if self.lr_suffix in file_in_dir.parts[-1] or self.ignore_suffixes:
-                file_list_lr.append(file_in_dir)
-
+        file_list_lr = self.get_lr_list()
         annotation = []
         num_iterations = len(file_list_lr)
         for lr_id, lr_file in enumerate(file_list_lr):
@@ -152,51 +146,47 @@ class SRConverter(BaseFormatConverter):
             if self.two_streams:
                 if self.generate_upsample:
                     upsampled_file_name = self.upsample_suffix.join(
-                        lr_file_name.split(self.lr_suffix) if self.lr_suffix else [lr_file_name]
+                        lr_file_name.split(self.lr_suffix) if self.lr_suffix else [lr_file_name, '']
                     ) if not self.ignore_suffixes else lr_file_name
                     self.generate_upsample_file(lr_file, self.upsample_factor, upsampled_file_name, self.upsampled_dir)
                 else:
                     if self.ignore_suffixes:
-                        idx = get_index(lr_file_name, '')
+                        idx = self.get_index(lr_file_name, '')
                         ups_files = list(self.upsampled_dir.glob('*{}*'.format(idx)))
                         if not ups_files:
                             continue
                         upsampled_file_name = ups_files[0].name
                     else:
-                        upsampled_file_name = self.upsample_suffix.join(lr_file_name.split(self.lr_suffix))
+                        upsampled_file_name = self.upsample_suffix.join(
+                            lr_file_name.split(self.lr_suffix) if self.lr_suffix else [lr_file_name, '']
+                        )
 
             if not self.ignore_suffixes:
                 hr_file_name = self.hr_suffix.join(
-                    lr_file_name.split(self.lr_suffix) if self.lr_suffix else [lr_file_name]
+                    lr_file_name.split(self.lr_suffix) if self.lr_suffix else [lr_file_name, '']
                 )
             else:
-                idx = get_index(lr_file_name, '')
+                idx = self.get_index(lr_file_name, '')
                 hr_files = list(self.hr_dir.glob('*{}*'.format(idx)))
                 if not hr_files:
                     continue
                 hr_file_name = hr_files[0].name
             if check_content:
-                if not self.hr_dir:
-                    content_errors.append('No one of the data_dir or hr_dir parameters are provided')
-                if self.hr_dir and not check_file_existence(self.hr_dir / hr_file_name):
-                    content_errors.append('{}: does not exist'.format(self.hr_dir / hr_file_name))
-                if self.two_streams and not check_file_existence(self.upsampled_dir / upsampled_file_name):
-                    content_errors.append('{}: does not exist'.format(self.upsampled_dir / upsampled_file_name))
-            identifier = lr_file_name
-            if self.two_streams:
-                relative_dir = self.data_dir or os.path.commonpath([self.lr_dir, self.upsampled_dir])
+                content_errors.extend(self.check_content(hr_file_name, upsampled_file_name))
 
-                if self.lr_dir != self.upsampled_dir:
-                    warnings.warn("lr_dir and upsampled_dir are different folders."
-                                  "Make sure that data_source is {}".format(relative_dir))
-
-                identifier = [str(lr_file.relative_to(relative_dir)),
-                              str(Path(self.upsampled_dir, upsampled_file_name).relative_to(relative_dir))]
+            identifier = self.generate_identifier(lr_file_name, lr_file, upsampled_file_name)
             annotation.append(SuperResolutionAnnotation(identifier, hr_file_name, gt_loader=self.annotation_loader))
             if progress_callback is not None and lr_id % progress_interval == 0:
                 progress_callback(lr_id / num_iterations * 100)
 
         return ConverterReturn(annotation, None, content_errors)
+
+    def generate_identifier(self, lr_file_name, lr_file, upsampled_file_name):
+        identifier = lr_file_name
+        if self.two_streams:
+            identifier = [str(lr_file.relative_to(self.relative_dir)),
+                          str(Path(self.upsampled_dir, upsampled_file_name).relative_to(self.relative_dir))]
+        return identifier
 
     @staticmethod
     def generate_upsample_file(original_image_path, scale_factor, upsampled_file_name, upsampled_image_path):
@@ -204,6 +194,30 @@ class SRConverter(BaseFormatConverter):
         upsampled_image = cv2.resize(image, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_CUBIC)
         cv2.imwrite(str(upsampled_image_path / upsampled_file_name), upsampled_image)
 
+    @staticmethod
+    def get_index(image_name, suffix):
+        name_parts = image_name.split(suffix) if suffix else [image_name]
+        numbers = []
+        for part in name_parts:
+            numbers += [int(s) for s in re.findall(r'\d+', part)]
+        if not numbers:
+            raise ValueError('no numeric in {}'.format(image_name))
+        return numbers[0]
+
+    def get_lr_list(self):
+        file_list_lr = []
+        for file_in_dir in self.lr_dir.iterdir():
+            if self.lr_suffix in file_in_dir.parts[-1] or self.ignore_suffixes:
+                file_list_lr.append(file_in_dir)
+        return file_list_lr
+
+    def check_content(self, hr_file_name, upsampled_file_name):
+        content_errors = []
+        if self.hr_dir and not check_file_existence(self.hr_dir / hr_file_name):
+            content_errors.append('{}: does not exist'.format(self.hr_dir / hr_file_name))
+        if self.two_streams and not check_file_existence(self.upsampled_dir / upsampled_file_name):
+            content_errors.append('{}: does not exist'.format(self.upsampled_dir / upsampled_file_name))
+        return content_errors
 
 class SRMultiFrameConverter(BaseFormatConverter):
     __provider__ = 'multi_frame_super_resolution'
