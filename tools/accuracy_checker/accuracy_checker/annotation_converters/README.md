@@ -240,6 +240,12 @@ Accuracy Checker supports following list of annotation converters and specific f
 * `lpr_txt` - converts annotation for license plate recognition task in txt format to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to txt annotation.
   * `decoding_dictionary` - path to file containing dictionary for output decoding.
+* `squad_emb` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `Question Answering Embedding Annotation`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+  * `testing_file` - path to testing file.
+  * `vocab_file` - path to model co vocabulary file.
+  * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
+  * `max_query_length` - maximum number of tokens for the question (Optional, default value is 64).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False)
 * `squad` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `Question Answering Annotation`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
   * `testing_file` - path to testing file.
   * `vocab_file` - path to model co vocabulary file.
