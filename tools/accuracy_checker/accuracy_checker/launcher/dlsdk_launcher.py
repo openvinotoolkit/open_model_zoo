@@ -123,7 +123,7 @@ class DLSDKLauncher(Launcher):
         return parameters
 
     def __init__(self, config_entry, model_name='', delayed_model_loading=False, preprocessor=None):
-        super().__init__(config_entry, model_name)
+        super().__init__(config_entry, model_name=model_name)
 
         self._set_variable = False
         self.ie_config = self.config.get('ie_config')
