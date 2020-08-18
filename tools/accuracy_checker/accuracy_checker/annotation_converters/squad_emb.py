@@ -14,9 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import numpy as np
 import multiprocessing
+import unicodedata
+import string
 
+import numpy as np
 
 from ..representation import QuestionAnsweringEmbeddingAnnotation
 from ..utils import read_json
@@ -25,8 +27,6 @@ from ..config import PathField, NumberField, BoolField
 from .format_converter import BaseFormatConverter, ConverterReturn
 
 
-import unicodedata
-import string
 # split word by vocab items and get tok codes
 # iterativly return codes
 def encode_by_voc(w, vocab):
