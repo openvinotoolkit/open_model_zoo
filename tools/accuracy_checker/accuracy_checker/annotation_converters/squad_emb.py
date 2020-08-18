@@ -153,7 +153,8 @@ class SQUADConverterEMB(BaseFormatConverter):
         cls = [self.vocab["[CLS]"]]
         sep = [self.vocab["[SEP]"]]
 
-        def add_sample(ids, max_len, conext_pos_id, annotations, index_ref=[0]):
+        index_ref=[0]
+        def add_sample(ids, max_len, conext_pos_id, annotations):
             ids_len = min(max_len - 2, len(ids))
             ids = ids[:ids_len]
             rest = max_len - (ids_len + 2)
