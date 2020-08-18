@@ -64,6 +64,7 @@ class SRConverter(BaseFormatConverter):
             'hr_suffix': StringField(
                 optional=True, default="hr", description="High resolution file name's suffix."
             ),
+            'ignore_suffixes': BoolField(optional=True, default=False),
             'two_streams': BoolField(optional=True, default=False, description="2 streams is used"),
             'annotation_loader': StringField(
                 optional=True, choices=LOADERS_MAPPING.keys(), default='pillow',
@@ -94,6 +95,7 @@ class SRConverter(BaseFormatConverter):
         self.hr_suffix = self.get_value_from_config('hr_suffix')
         self.upsample_suffix = self.get_value_from_config('upsample_suffix')
         self.two_streams = self.get_value_from_config('two_streams')
+        self.ignore_suffixes = self.get_value_from_config('ignore_suffixes')
         if self.two_streams:
             self.upsampled_dir = self.get_value_from_config('upsampled_dir')
             if not self.upsampled_dir:
@@ -111,22 +113,68 @@ class SRConverter(BaseFormatConverter):
             raise ConfigError('provided not existing loader')
         self.generate_upsample = self.get_value_from_config('generate_upsample')
         self.upsample_factor = self.get_value_from_config('upsample_factor')
+        if self.ignore_suffixes:
+            if self.lr_dir == self.hr_dir:
+                raise ConfigError(
+                    'high and low resolution images should be located in separated directories '
+                    'if ignore_suffixes enabled')
+            if self.two_streams and self.lr_dir == self.upsampled_dir:
+                raise ConfigError(
+                    'low resolution and upsample images should be located in separated directories '
+                    'if ignore_suffixes enabled')
+            if self.two_streams and self.hr_dir == self.upsampled_dir:
+                raise ConfigError(
+                    'high resolution and upsample images should be located in separated directories '
+                    'if ignore_suffixes enabled')
+
+
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        def get_index(image_name, suffix):
+            name_parts = image_name.split(suffix) if suffix else [image_name]
+            numbers = []
+            for part in name_parts:
+                numbers += [int(s) for s in re.findall(r'\d+', part)]
+            if not numbers:
+                raise ValueError('no numeric in {}'.format(image_name))
+            return numbers[0]
         content_errors = [] if check_content else None
         file_list_lr = []
         for file_in_dir in self.lr_dir.iterdir():
-            if self.lr_suffix in file_in_dir.parts[-1]:
+            if self.lr_suffix in file_in_dir.parts[-1] or self.ignore_suffixes:
                 file_list_lr.append(file_in_dir)
 
         annotation = []
         num_iterations = len(file_list_lr)
         for lr_id, lr_file in enumerate(file_list_lr):
             lr_file_name = lr_file.parts[-1]
-            upsampled_file_name = self.upsample_suffix.join(lr_file_name.split(self.lr_suffix))
-            if self.two_streams and self.generate_upsample:
-                self.generate_upsample_file(lr_file, self.upsample_factor, upsampled_file_name, self.upsampled_dir)
-            hr_file_name = self.hr_suffix.join(lr_file_name.split(self.lr_suffix))
+            upsampled_file_name = ''
+            if self.two_streams:
+                if self.generate_upsample:
+                    upsampled_file_name = self.upsample_suffix.join(
+                        lr_file_name.split(self.lr_suffix) if self.lr_suffix else [lr_file_name]
+                    ) if not self.ignore_suffixes else lr_file_name
+                    self.generate_upsample_file(lr_file, self.upsample_factor, upsampled_file_name, self.upsampled_dir)
+                else:
+                    if self.ignore_suffixes:
+                        idx = get_index(lr_file_name, '')
+                        ups_files = list(self.upsampled_dir.glob('*{}*'.format(idx)))
+                        if not ups_files:
+                            continue
+                        upsampled_file_name = ups_files[0].name
+                    else:
+                        upsampled_file_name = self.upsample_suffix.join(lr_file_name.split(self.lr_suffix))
+
+            if not self.ignore_suffixes:
+                hr_file_name = self.hr_suffix.join(
+                    lr_file_name.split(self.lr_suffix) if self.lr_suffix else [lr_file_name]
+                )
+            else:
+                idx = get_index(lr_file_name, '')
+                hr_files = list(self.hr_dir.glob('*{}*'.format(idx)))
+                if not hr_files:
+                    continue
+                hr_file_name = hr_files[0].name
             if check_content:
                 if not self.hr_dir:
                     content_errors.append('No one of the data_dir or hr_dir parameters are provided')
