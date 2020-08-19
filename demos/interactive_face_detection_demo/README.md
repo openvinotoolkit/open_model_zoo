@@ -71,7 +71,6 @@ Options:
     -dyn_em                    Optional. Enable dynamic batch size for Emotions Recognition network
     -dyn_lm                    Optional. Enable dynamic batch size for Facial Landmarks Estimation network
     -async                     Optional. Enable asynchronous mode
-    -no_wait                   Optional. Do not wait for key press in the end.
     -no_show                   Optional. Do not show processed video.
     -pc                        Optional. Enable per-layer performance report
     -r                         Optional. Output inference results as raw values

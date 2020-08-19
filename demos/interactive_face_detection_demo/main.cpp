@@ -62,10 +62,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_n_hp < 1) {
         throw std::logic_error("Parameter -n_hp cannot be 0");
     }
-
-    // no need to wait for a key press from a user if an output image/video file is not shown.
-    FLAGS_no_wait |= FLAGS_no_show;
-
     return true;
 }
 
@@ -149,7 +145,7 @@ int main(int argc, char *argv[]) {
         Timer timer;
         std::ostringstream out;
         size_t framesCounter = 0;
-        double msrate = FLAGS_fps > 0 ? 1000.0 / FLAGS_fps : 0.0;
+        double msrate = 1000.0 / FLAGS_fps;
         std::list<Face::Ptr> faces;
         size_t id = 0;
 
@@ -172,7 +168,7 @@ int main(int argc, char *argv[]) {
             videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'),
                 !FLAGS_no_show && FLAGS_fps > 0.0 ? FLAGS_fps : cap->fps(), frame.size());
             if (!videoWriter.isOpened()) {
-                throw std::runtime_error("Can't open a video to write");
+                throw std::runtime_error("Can't open video writer");
             }
         }
 
@@ -188,16 +184,11 @@ int main(int argc, char *argv[]) {
         }
         std::cout << std::endl;
 
-        bool isLastFrame = false;
-        while (!isLastFrame) {
+        while (frame.data) {
             timer.start("total");
             cv::Mat prev_frame = std::move(frame);
             frame = std::move(next_frame);
-            if (frame.data && frame.size() != prev_frame.size()) {
-                throw std::runtime_error("Images of different size are not supported");
-            }
             framesCounter++;
-            isLastFrame = !frame.data;
 
             // Retrieving face detection results for the previous frame
             faceDetector.wait();
@@ -205,7 +196,10 @@ int main(int argc, char *argv[]) {
             auto prev_detection_results = faceDetector.results;
 
             // No valid frame to infer if previous frame is the last
-            if (!isLastFrame) {
+            if (frame.data) {
+                if (frame.size() != prev_frame.size()) {
+                    throw std::runtime_error("Images of different size are not supported");
+                }
                 faceDetector.enqueue(frame);
                 faceDetector.submitRequest();
             }
@@ -303,17 +297,15 @@ int main(int argc, char *argv[]) {
 
             presenter.drawGraphs(prev_frame);
 
-            //  Visualizing results
-            out.str("");
-            out << "Total image throughput: " << std::fixed << std::setprecision(2)
-                << 1000.f / (timer["total"].getSmoothedDuration()) << " fps";
-            cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_TRIPLEX, 1,
-                        cv::Scalar(255, 0, 0), 2);
-
             // drawing faces
             visualizer.draw(prev_frame, faces);
 
             timer.finish("total");
+            out.str("");
+            out << "Total image throughput: " << std::fixed << std::setprecision(1)
+                << 1000.0 / (timer["total"].getSmoothedDuration()) << " fps";
+            cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_TRIPLEX, 1,
+                        cv::Scalar(255, 0, 0), 2);
 
             if (videoWriter.isOpened()) {
                 videoWriter.write(prev_frame);
@@ -331,7 +323,7 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << "Number of processed frames: " << framesCounter << slog::endl;
-        slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
+        slog::info << "Total image throughput: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << " fps" << slog::endl;
 
         // Showing performance results
         if (FLAGS_pc) {
