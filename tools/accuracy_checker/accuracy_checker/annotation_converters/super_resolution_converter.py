@@ -96,6 +96,7 @@ class SRConverter(BaseFormatConverter):
         self.upsample_suffix = self.get_value_from_config('upsample_suffix')
         self.two_streams = self.get_value_from_config('two_streams')
         self.ignore_suffixes = self.get_value_from_config('ignore_suffixes')
+        self.relative_dir = ''
         if self.two_streams:
             self.upsampled_dir = self.get_value_from_config('upsampled_dir')
             if not self.upsampled_dir:
@@ -108,12 +109,16 @@ class SRConverter(BaseFormatConverter):
                 except:
                     raise ConfigError('data_dir parameter should be provided for conversion as common part of paths '
                                       'lr_dir and upsampled_dir, if 2 streams used')
+            self.relative_dir = self.data_dir or os.path.commonpath([self.lr_dir, self.upsampled_dir])
+            if self.lr_dir != self.upsampled_dir:
+                warnings.warn("lr_dir and upsampled_dir are different folders."
+                              "Make sure that data_source is {}".format(self.relative_dir))
+
         self.annotation_loader = LOADERS_MAPPING.get(self.get_value_from_config('annotation_loader'))
         if not self.annotation_loader:
             raise ConfigError('provided not existing loader')
         self.generate_upsample = self.get_value_from_config('generate_upsample')
         self.upsample_factor = self.get_value_from_config('upsample_factor')
-        self.relative_dir = ''
         if self.ignore_suffixes:
             if self.hr_dir is None:
                 raise ConfigError('please provide hr_dir')
@@ -129,12 +134,6 @@ class SRConverter(BaseFormatConverter):
                 raise ConfigError(
                     'high resolution and upsample images should be located in separated directories '
                     'if ignore_suffixes enabled')
-        if self.two_streams:
-            self.relative_dir = self.data_dir or os.path.commonpath([self.lr_dir, self.upsampled_dir])
-            if self.lr_dir != self.upsampled_dir:
-                warnings.warn("lr_dir and upsampled_dir are different folders."
-                              "Make sure that data_source is {}".format(self.relative_dir))
-
 
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
