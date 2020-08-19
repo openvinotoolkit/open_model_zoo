@@ -1,37 +1,33 @@
-# person-detection-0102
+# vehicle-detection-0200
 
 ## Use Case and High-Level Description
 
-This is a person detector that is based on MobileNetV2
+This is a vehicle detector that is based on MobileNetV2
 backbone with two SSD heads from 1/16 and 1/8 scale feature maps and clustered
-prior boxes for 512x512 resolution.
+prior boxes for 256x256 resolution.
 
 ## Example
 
-![](./person-detection-0102.png)
+![](./vehicle-detection-0200.png)
 
 ## Specification
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP                              | 91.21% (internal test set)                |
-| Pose coverage                   | Standing upright, parallel to image plane |
-| Support of occluded persons     | YES                                       |
-| Occlusion coverage              | <50%                                      |
-| Min person height               | 100 pixels (on 1080p)                     |
-| GFlops                          | 3.143                                     |
+| AP @ [ IoU=0.50:0.95 ]          | 0.254 (internal test set)                 |
+| GFlops                          | 0.786                                     |
 | MParams                         | 1.817                                     |
 | Source framework                | PyTorch\*                                 |
 
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
-curve. Intersection over union threshold of 0.5 is used for matching.
+curve.
 
 ## Performance
 
 ## Inputs
 
-Name: `input`, shape: [1x3x512x512] - An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x256x256] - An input image in the format [BxCxHxW],
 where:
 
 - B - batch size
