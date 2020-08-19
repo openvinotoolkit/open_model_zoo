@@ -384,10 +384,9 @@ def main():
     out_video = cv2.VideoWriter()
     raw_video = cv2.VideoWriter()
     if args.output:
-        out_video.open(str(Path(args.output) / 'out.avi'), cv2.VideoWriter_fourcc(*'MJPG'), cap.get(cv2.CAP_PROP_FPS),
-                       (int(cap.get(3)), int(cap.get(4))))
-        raw_video.open(str(Path(args.output) / 'raw.avi'), cv2.VideoWriter_fourcc(*'MJPG'), cap.get(cv2.CAP_PROP_FPS),
-                       (int(cap.get(3)), int(cap.get(4))))
+        frame_size = (int(cap.get(3)), int(cap.get(4)))
+        out_video.open(str(Path(args.output) / 'out_%08d.BMP'), 0, 0, frame_size)
+        raw_video.open(str(Path(args.output) / 'raw_%08d.BMP'), 0, 0, frame_size)
 
         if not out_video.isOpened() or not raw_video.isOpened():
             raise RuntimeError('Can\'t open VideoWriter.')

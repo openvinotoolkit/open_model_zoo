@@ -320,10 +320,8 @@ int main(int argc, char *argv[]) {
         cv::VideoWriter outVideo;
         cv::VideoWriter rawVideo;
         if (!FLAGS_o.empty()) {
-            outVideo.open(FLAGS_o + separator() + "out.avi", cv::VideoWriter::fourcc('I','Y','U','V'), cap->fps(),
-                          frame.size());
-            rawVideo.open(FLAGS_o + separator() + "raw.avi", cv::VideoWriter::fourcc('I','Y','U','V'), cap->fps(),
-                          frame.size());
+            outVideo.open(FLAGS_o + separator() + "out_%08d.BMP", 0, 0, frame.size());
+            rawVideo.open(FLAGS_o + separator() + "raw_%08d.BMP", 0, 0, frame.size());
 
             if (!outVideo.isOpened() || !rawVideo.isOpened()) {
                 throw std::runtime_error("Can't open VideoWriter.");

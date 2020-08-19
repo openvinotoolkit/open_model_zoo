@@ -30,6 +30,7 @@ import collections
 import contextlib
 import csv
 import itertools
+import glob
 import json
 import os
 import shlex
@@ -232,8 +233,8 @@ def main():
                                 similarity_res = []
 
                                 out_folder = case_args[case_args.index('-o') + 1]
-                                demo_out_file = str(Path(out_folder) / 'out.avi')
-                                demo_raw_file = str(Path(out_folder) / 'raw.avi')
+                                demo_out_file = str(Path(out_folder) / 'out_%08d.BMP')
+                                demo_raw_file = str(Path(out_folder) / 'raw_%08d.BMP')
                                 out_cap = cv.VideoCapture(demo_out_file)
                                 raw_cap = cv.VideoCapture(demo_raw_file)
                                 if not out_cap.isOpened() or not raw_cap.isOpened():
@@ -256,8 +257,9 @@ def main():
 
                                 out_cap.release()
                                 raw_cap.release()
-                                os.remove(demo_out_file)
-                                os.remove(demo_raw_file)
+                                tmp_files = glob.glob(str(Path(out_folder) / '*'))
+                                for file_path in tmp_files:
+                                    os.remove(file_path)
 
                                 model_name = test_case.options['-m'].name
                                 if args.generate_reference:
