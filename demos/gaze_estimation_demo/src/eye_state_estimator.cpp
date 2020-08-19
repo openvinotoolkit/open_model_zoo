@@ -50,13 +50,12 @@ void EyeStateEstimator::rotateImageAroundCenter(const cv::Mat& srcImage,
 }
 
 void EyeStateEstimator::estimate(const cv::Mat& image, FaceInferenceResults& outputResults) {
-    outputResults.leftEyeMidpoint = (outputResults.faceLandmarks[0] + outputResults.faceLandmarks[1]) / 2;
-    outputResults.rightEyeMidpoint = (outputResults.faceLandmarks[2] + outputResults.faceLandmarks[3]) / 2;
     auto roll = outputResults.headPoseAngles.z;
 
+    outputResults.leftEyeMidpoint = (outputResults.faceLandmarks[0] + outputResults.faceLandmarks[1]) / 2;
     auto leftEyeBoundingBox = createEyeBoundingBox(outputResults.faceLandmarks[0], outputResults.faceLandmarks[1]);
     outputResults.leftEyeBoundingBox = leftEyeBoundingBox;
-    if (outputResults.faceLandmarks[0] != outputResults.faceLandmarks[1]) {
+    if (leftEyeBoundingBox.area()) {
         auto leftEyeImage(cv::Mat(image, leftEyeBoundingBox));
         cv::Mat leftEyeImageRotated;
         rotateImageAroundCenter(leftEyeImage, leftEyeImageRotated, roll);
@@ -71,9 +70,10 @@ void EyeStateEstimator::estimate(const cv::Mat& image, FaceInferenceResults& out
         outputResults.leftEyeState = false;
     }
 
+    outputResults.rightEyeMidpoint = (outputResults.faceLandmarks[2] + outputResults.faceLandmarks[3]) / 2;
     auto rightEyeBoundingBox = createEyeBoundingBox(outputResults.faceLandmarks[2], outputResults.faceLandmarks[3]);
     outputResults.rightEyeBoundingBox = rightEyeBoundingBox;
-    if (outputResults.faceLandmarks[2] != outputResults.faceLandmarks[3]) {
+    if (rightEyeBoundingBox.area()) {
         auto rightEyeImage(cv::Mat(image, rightEyeBoundingBox));
         cv::Mat rightEyeImageRotated;
         rotateImageAroundCenter(rightEyeImage, rightEyeImageRotated, roll);
