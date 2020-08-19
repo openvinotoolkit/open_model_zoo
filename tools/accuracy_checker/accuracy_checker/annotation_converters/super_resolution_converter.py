@@ -115,6 +115,8 @@ class SRConverter(BaseFormatConverter):
         self.upsample_factor = self.get_value_from_config('upsample_factor')
         self.relative_dir = ''
         if self.ignore_suffixes:
+            if self.hr_dir is None:
+                raise ConfigError('please provide hr_dir')
             if self.lr_dir == self.hr_dir:
                 raise ConfigError(
                     'high and low resolution images should be located in separated directories '
