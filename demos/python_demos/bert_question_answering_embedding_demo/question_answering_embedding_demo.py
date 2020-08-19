@@ -346,7 +346,7 @@ def main():
 
             #print top 3 results
             answers = list(sorted(answers, key=lambda x: -x[0]))
-            log.info("Find best 3 answers from {} results of Stage 1".format(len(answers)))
+            log.info("---Stage 2---Find best 3 answers from {} results of Stage 1".format(len(answers)))
             for score, s, e, context in answers[:3]:
                 log.info("answer: {:0.2f} {} ".format(score, mark(context[s:e])))
                 log.info(context[:s] + mark(context[s:e]) + context[e:])
