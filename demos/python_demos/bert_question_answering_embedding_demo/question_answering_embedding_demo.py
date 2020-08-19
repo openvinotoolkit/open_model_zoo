@@ -86,9 +86,9 @@ def main():
     model_bin_emb = os.path.splitext(model_xml_emb)[0] + ".bin"
 
     log.info("Loading embedding network files:\n\t{}\n\t{}".format(model_xml_emb, model_bin_emb))
-    ie_encoder_emb = IENetwork(model=model_xml_emb, weights=model_bin_emb)
+    ie_encoder_emb = ie.read_network(model=model_xml_emb, weights=model_bin_emb)
     # check input and output names
-    input_names_model_emb = list(ie_encoder_emb.inputs.keys())
+    input_names_model_emb = list(ie_encoder_emb.input_info.keys())
     output_names_model_emb = list(ie_encoder_emb.outputs.keys())
     log.info(
         "Network embedding input->output names: {}->{}".format(input_names_model_emb, output_names_model_emb))
@@ -100,11 +100,12 @@ def main():
 
     for l in [max_length_q, max_length_c]:
 
-        new_shapes = {i:[1, l] for i in input_names_model_emb}
-        for i in input_names_model_emb:
+        new_shapes = {}
+        for i,input_info in ie_encoder_emb.input_info.items():
+            new_shapes[i] = [1, l]
             log.info("Reshaped input {} from {} to the {}".format(
                 i,
-                ie_encoder_emb.inputs[i].shape,
+                input_info.input_data.shape,
                 new_shapes[i]))
         log.info("Attempting to reshape the context embedding network to the modified inputs...")
 
@@ -125,7 +126,7 @@ def main():
         model_bin = os.path.splitext(model_xml)[0] + ".bin"
         log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
 
-        ie_encoder_qa = IENetwork(model=model_xml, weights=model_bin)
+        ie_encoder_qa = ie.read_network(model=model_xml, weights=model_bin)
         ie_encoder_qa.batch_size = 1
 
         if args.input_names and args.output_names:
@@ -137,7 +138,7 @@ def main():
             raise Exception("input_names and output_names are missed in cmd args")
 
         #check input and output names
-        input_names_model = list(ie_encoder_qa.inputs.keys())
+        input_names_model = list(ie_encoder_qa.input_info.keys())
         output_names_model = list(ie_encoder_qa.outputs.keys())
         log.info("Network input->output names: {}->{}".format(input_names_model, output_names_model))
         if set(input_names_model) != set(input_names) or set(output_names_model) != set(output_names):
@@ -148,7 +149,7 @@ def main():
         log.info("Loading model to the plugin")
         ie_encoder_qa_exec = ie.load_network(network=ie_encoder_qa, device_name=args.device)
 
-        max_length_qc = ie_encoder_qa.inputs[input_names[0]].shape[1]
+        max_length_qc = ie_encoder_qa.input_info[input_names[0]].input_data.shape[1]
 
 
 
