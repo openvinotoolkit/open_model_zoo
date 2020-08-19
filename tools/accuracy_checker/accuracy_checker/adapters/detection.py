@@ -890,9 +890,9 @@ class FasterRCNNONNX(Adapter):
         parameters = super().parameters()
         parameters.update(
             {
-                'labels_out': StringField(description='name (or regex for it) of output layer with labels'),
-                'scores_out': StringField(description='name (or regex for it) of output layer with scores'),
-                'boxes_out': StringField(description='name (or regex for it) of output layer with bboxes')
+                'labels_out': StringField(description='name of output layer with labels'),
+                'scores_out': StringField(description='name of output layer with scores'),
+                'boxes_out': StringField(description='name of output layer with bboxes')
             }
         )
         return parameters
