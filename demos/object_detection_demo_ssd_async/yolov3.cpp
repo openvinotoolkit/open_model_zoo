@@ -20,20 +20,20 @@ double IntersectionOverUnion(const DetectionObject& box_1, const DetectionObject
     return area_of_overlap / area_of_union;
 }
 
- static int EntryIndex(int side, int lcoords, int lclasses, int location, int entry) {
+static int EntryIndex(int side, int lcoords, int lclasses, int location, int entry) {
     int n = location / (side * side);
     int loc = location % (side * side);
     return n * side * side * (lcoords + lclasses + 1) + entry * side * side + loc;
 }
 
-Yolov3::Yolov3(const InferenceEngine::Core& ie, std::string networkModel):Model(ie, networkModel) {
+Yolov3::Yolov3(const InferenceEngine::Core& ie, std::string networkModel,double filterBox) :Model(ie, networkModel) {
     /** Set batch size to 1 **/
     slog::info << "Batch size is forced to 1." << slog::endl;
     (this->cnnNetwork).setBatchSize(1);
-
+    this->filterBoxes = filterBox;
 }
 
-void Yolov3::parseYOLOV3Output( const std::string& output_name,
+void Yolov3::parseYOLOV3Output(const std::string& output_name,
     const InferenceEngine::Blob::Ptr& blob, const unsigned long resized_im_h,
     const unsigned long resized_im_w, const unsigned long original_im_h,
     const unsigned long original_im_w,
@@ -139,8 +139,8 @@ void Yolov3::prepareOutputBlobs() {
                     throw std::runtime_error("Invalid output type: " +
                         std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
                 }
-              
-                this->params.insert(std::pair<std::string, Params*>(outputLayer->first,new Params(regionYolo)));
+
+                this->params.insert(std::pair<std::string, Params*>(outputLayer->first, new Params(regionYolo)));
             }
         }
     }
@@ -165,13 +165,13 @@ void Yolov3::processOutput(std::map< std::string, InferenceEngine::Blob::Ptr>& o
         this->parseYOLOV3Output(output.first, output.second, this->inputHeight, this->inputWidth, frame.size().height, frame.size().width, threshold, objects);
     }
     // Filtering overlapping boxes
-    double FLAGS_iou_t=0;
+    
     std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());
     for (size_t i = 0; i < objects.size(); ++i) {
         if (objects[i].confidence == 0)
             continue;
         for (size_t j = i + 1; j < objects.size(); ++j)
-            if (IntersectionOverUnion(objects[i], objects[j]) >= FLAGS_iou_t)
+            if (IntersectionOverUnion(objects[i], objects[j]) >= filterBoxes)
                 objects[j].confidence = 0;
     }
     // Drawing boxes
@@ -220,4 +220,3 @@ Params::Params(const std::shared_ptr<ngraph::op::RegionYolo> regionYolo) {
 
     computeAnchors(mask);
 }
-

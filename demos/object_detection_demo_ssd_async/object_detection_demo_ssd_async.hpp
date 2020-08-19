@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2020 Intel Corporation
+﻿// Copyright (C) 2018-2020 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -16,6 +16,7 @@ static const char model_message[] = "Required. Path to an .xml file with a train
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
                                             "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                             "The demo will look for a suitable plugin for a specified device.";
+static const char model_type_message[] = "Required.Сonstructor for model operation(Ssd or Yolov3).";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
 static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
@@ -33,11 +34,13 @@ static const char num_streams_message[] = "Optional. Number of streams to use fo
 static const char loop_input_message[] = "Optional. Iterate over input infinitely.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", video_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
+DEFINE_string(model_type, "", model_type_message);
 DEFINE_string(labels, "", labels_message);
 DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
@@ -51,6 +54,7 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(loop_input, false, loop_input_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_double(iou_t, 0.4, iou_thresh_output_message);
 
 /**
 * \brief This function shows a help message
@@ -67,6 +71,7 @@ static void showUsage() {
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
+    std::cout << "    -model_type            " << model_type_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
     std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;

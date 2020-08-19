@@ -42,7 +42,7 @@ public:
 class Yolov3 :public Model
 {
 public:
-    Yolov3(const InferenceEngine::Core& ie, std::string networkModel);
+    Yolov3(const InferenceEngine::Core& ie, std::string networkModel, double filterBox);
     void prepareInputBlobs(bool autoResize);
     void prepareOutputBlobs();
     void setConstInput(InferenceEngine::InferRequest::Ptr& inferReq);
@@ -54,4 +54,5 @@ public:
         const double threshold, std::vector<DetectionObject>& objects);
 private:
     std::map<std::string, Params*> params;
+    double filterBoxes;
 };
