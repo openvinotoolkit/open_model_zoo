@@ -15,6 +15,7 @@
 */
 #include "detection_pipeline.h"
 #include <samples/args_helper.hpp>
+#include <samples/slog.hpp>
 
 using namespace InferenceEngine;
 

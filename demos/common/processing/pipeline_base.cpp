@@ -17,6 +17,7 @@
 #include "pipeline_base.h"
 #include <samples/args_helper.hpp>
 #include <cldnn/cldnn_config.hpp>
+#include <samples/slog.hpp>
 
 using namespace InferenceEngine;
 

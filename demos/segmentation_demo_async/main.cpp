@@ -27,6 +27,7 @@
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/args_helper.hpp>
+#include <samples/slog.hpp>
 
 #include "segmentation_pipeline.h"
 #include "config_factory.h"
@@ -117,17 +118,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     }
 
     return true;
-}
-
-void putHighlightedText(cv::Mat& img,
-    const std::string& text,
-    cv::Point org,
-    int fontFace,
-    double fontScale,
-    cv::Scalar color,
-    int thickness) {
-    cv::putText(img, text, org, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness + 1); // white border
-    cv::putText(img, text, org, fontFace, fontScale, color, thickness);
 }
 
 void paintResults(cv::Mat& frame, const cv::Mat& mask) {
