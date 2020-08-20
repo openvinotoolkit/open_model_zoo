@@ -9,19 +9,12 @@
 
 #pragma once
 
-#include <cldnn/cldnn_config.hpp>
+#include <string>
+#include <map>
 
-#include "samples/common.hpp"
-#include "samples/args_helper.hpp"
+void formatDeviceString(std::string& deviceString);
 
-using namespace InferenceEngine;
-
-void configureInferenceEngine(Core& ie,
-                              std::string& deviceString,
-                              std::string& deviceInfo,
-                              const std::string& lString,
-                              const std::string& cString,
-                              bool pc);
+std::map<std::string, std::string> createSimpleConfig(const std::string& deviceString);
 
 std::map<std::string, std::string> createConfig(const std::string& deviceString,
                                                 const std::string& nstreamsString,

@@ -3,36 +3,49 @@
 //
 
 #include "samples/ie_config_helper.hpp"
+#include "samples/args_helper.hpp"
 
-void configureInferenceEngine(Core& ie,
-                              std::string& deviceString,
-                              std::string& deviceInfo,
-                              const std::string& lString,
-                              const std::string& cString,
-                              bool pc) {
-    for (char& ch : deviceString) {
-        ch = std::toupper(ch);
+#include <cldnn/cldnn_config.hpp>
+#include <vpu/myriad_config.hpp>
+
+void formatDeviceString(std::string& deviceString) {
+    bool preserveCase = false;
+
+    for (size_t i = 0; i < deviceString.size(); ++i) {
+        // These two conditions handle the special case of MYRIAD device names in "ma1234" format, where letters should
+        // not be transformed to upper case.
+        if (deviceString[i] == 'm' && i+1 != deviceString.size() && deviceString[i+1] == 'a') {
+            preserveCase = true;
+        }
+        if (preserveCase == true && deviceString[i] == ',') {
+            preserveCase = false;
+        }
+
+        if (!preserveCase) {
+            deviceString[i] = std::toupper(deviceString[i]);
+        }
+    }
+}
+
+std::map<std::string, std::string> createSimpleConfig(const std::string& deviceString) {
+    std::map<std::string, std::string> config;
+
+    std::set<std::string> devices;
+    for (const std::string& device : parseDevices(deviceString)) {
+        devices.insert(device);
     }
 
-    std::stringstream strBuffer;
-    strBuffer << ie.GetVersions(deviceString);
-    deviceInfo = strBuffer.str();
-
-    /** Load extensions for the plugin **/
-    if (!lString.empty()) {
-        // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-        IExtensionPtr extension_ptr = make_so_pointer<IExtension>(lString.c_str());
-        ie.AddExtension(extension_ptr, "CPU");
-    }
-    if (!cString.empty()) {
-        // clDNN Extensions are loaded from an .xml description and OpenCL kernel files
-        ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, cString}}, "GPU");
+    for (auto& device : devices) {
+        if (device == "CPU") {
+            config.insert({ CONFIG_KEY(CPU_THROUGHPUT_STREAMS), CONFIG_VALUE(CPU_THROUGHPUT_AUTO) });
+        } else if (device == "GPU") {
+            config.insert({ CONFIG_KEY(GPU_THROUGHPUT_STREAMS), CONFIG_VALUE(GPU_THROUGHPUT_AUTO) });
+        } else if (device == "MYRIAD") {
+            config.insert({ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" });
+        }
     }
 
-    /** Per layer metrics **/
-    if (pc) {
-        ie.SetConfig({ { PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES } });
-    }
+    return config;
 }
 
 std::map<std::string, std::string> createConfig(const std::string& deviceString,
@@ -84,9 +97,15 @@ std::map<std::string, std::string> createConfig(const std::string& deviceString,
                 // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
                 config.insert({ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" });
             }
-        } else if (device == "MYRIAD") {
-            if (!nstreamsString.empty()) {
-                config.insert({ CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1" });
+        } else if (device == "MYRIAD" || device.find("ma") == 0) {
+            if (minLatency) {
+                config.insert({ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" });
+                continue;
+            }
+
+            if (deviceNstreams.count(device) > 0) {
+                config.insert({ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS,
+                                std::to_string(deviceNstreams.at(device)) });
             }
         }
     }

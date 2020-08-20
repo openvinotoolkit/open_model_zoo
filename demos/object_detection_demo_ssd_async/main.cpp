@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
 
         std::string deviceInfo;
         std::string deviceString = FLAGS_d;
-        configureInferenceEngine(ie, deviceString, deviceInfo, FLAGS_l, FLAGS_c, FLAGS_pc);
+        formatDeviceString(deviceString);
 
         slog::info << "Device info: " << slog::endl;
         std::cout << deviceInfo;
@@ -489,15 +489,6 @@ int main(int argc, char *argv[]) {
         
         // --------------------------- 8. Report metrics -------------------------------------------------------
         slog::info << slog::endl << "Metric reports:" << slog::endl;
-
-        /** Show performace results **/
-        if (FLAGS_pc) {
-            if (currentMode == ExecutionMode::USER_SPECIFIED) {
-                for (const auto& request: userSpecifiedInferRequests) {
-                    printPerformanceCounts(*request, std::cout, getFullDeviceName(ie, deviceString));
-                }
-            } else printPerformanceCounts(*minLatencyInferRequest, std::cout, getFullDeviceName(ie, deviceString));
-        }
 
         for (auto& mode : modeMetrics) {
             std::cout << std::endl << "Mode: "
