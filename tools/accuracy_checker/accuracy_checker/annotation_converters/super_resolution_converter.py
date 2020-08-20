@@ -359,7 +359,7 @@ class SRDirectoryBased(BaseFormatConverter):
             'images_dir': PathField(is_directory=True, description='dataset roo dir', optional=True),
             'lr_dir': PathField(optional=True, description='directory with low resolution images', is_directory=True),
             'hr_dir': PathField(optional=True, description='directory with high resolution images', is_directory=True),
-            'upsample_dir': PathField(optional=True, description='directory with upsampled images', is_directory=True),
+            'upsampled_dir': PathField(optional=True, description='directory with upsampled images', is_directory=True),
             'two_streams': BoolField(optional=True, default=False),
             'annotation_loader': StringField(
                 optional=True, choices=LOADERS_MAPPING.keys(), default='pillow',
@@ -381,7 +381,7 @@ class SRDirectoryBased(BaseFormatConverter):
         self.relaxed_names = self.get_value_from_config('relaxed_names')
         self.lr_dir = self.get_value_from_config('lr_dir')
         self.hr_dir = self.get_value_from_config('hr_dir')
-        self.upsample_dir = self.get_value_from_config('upsample_dir')
+        self.upsample_dir = self.get_value_from_config('upsampled_dir')
         self.two_streams = self.get_value_from_config('two_streams')
         error_msg_not_provided = '{} or {} should be provided'
         error_msg_the_same_dir = '{} and {} should contain different directories'
