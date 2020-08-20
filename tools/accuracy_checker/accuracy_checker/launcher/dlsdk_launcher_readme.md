@@ -51,7 +51,8 @@ Each supported device has own set of supported configuration parameters which ca
 
 **Note:** Since OpenVINO 2020.4 on platforms with native bfloat16 support models will be executed on this precision by default. For disabling this behaviour, you need to use device_config with following configuration:
 ```yml
-ENFORCE_BF16: "NO"
+CPU:
+   ENFORCE_BF16: "NO"
 ```
 Device config example can be found <a href="https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/sample/disable_bfloat16_device_config.yml">here</a>
 
