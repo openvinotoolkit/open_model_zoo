@@ -1,5 +1,4 @@
-Action Recognition Python* Demo
-===============================
+# Action Recognition Python* Demo
 
 This is the demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
 The following pre-trained models are delivered with the product:
@@ -8,8 +7,8 @@ The following pre-trained models are delivered with the product:
 
 For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
-How It Works
-------------
+## How It Works
+
 The demo pipeline consists of several frames, namely `Data`, `Encoder`, `Decoder` and `Render`.
 Every step implements `PipelineStep` interface by creating a class derived from `PipelineStep` base class. See `steps.py` for implementation details.
 
@@ -29,8 +28,8 @@ You can change the value of `num_requests` in `action_recognition.py` to find an
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
-Running
--------
+## Running
+
 Running the application with the `-h` option yields the following usage message:
 
 ```
@@ -89,8 +88,8 @@ python3 action_recognition.py -m_en models/driver_action_recognition_tsd_0002_en
     -lb driver_actions.txt
 ```
 
-Demo Output
-------------
+## Demo Output
+
 The application uses OpenCV to display the real-time results and current inference performance (in FPS).
 
 ## See Also

@@ -1,5 +1,4 @@
-Sample
-===========
+# Sample
 
 In this sample we will go through typical steps required to evaluate DL topologies. 
 
