@@ -43,7 +43,7 @@ Additionally you can provide device specific parameters:
 * `gpu_extensions` (path to extension *.xml file with OpenCL kernel description for gpu).
 * `bitstream` for running on FPGA.
 
-For setting device specific flags, you are able to use `-dc` or `--device_config` command line option. Device config should be represented as YML file with dictionary, where:
+For setting device specific flags, you are able to use `-dc` or `--device_config` command line option. Device config should be represented as YML file with dictionary of one of two types:
 1. keys are plugin configuration keys and values are their values respectively
 2. keys are supported devices and values are dictionaries with plugin configuration keys and their values
 
