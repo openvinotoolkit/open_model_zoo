@@ -795,31 +795,9 @@ class DLSDKLauncher(Launcher):
         }
 
     def fit_to_input(self, data, layer_name, layout, precision):
-        def data_to_blob(layer_shape, data):
-            data_shape = np.shape(data)
-            if len(layer_shape) == 4:
-                if len(data_shape) == 5:
-                    data = data[0]
-
-                if len(data_shape) < 4:
-                    if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
-                        return np.resize(data, layer_shape)
-                return np.transpose(data, layout)
-
-            if len(layer_shape) == 2:
-                if len(data_shape) == 1:
-                    return np.transpose([data])
-                if len(layout) == 2:
-                    return np.transpose(data, layout)
-
-            if len(layer_shape) == 5 and len(layout) == 5:
-                return np.transpose(data, layout)
-
-            return np.array(data)
-
         layer_shape = tuple(self.inputs[layer_name].shape)
 
-        data = data_to_blob(layer_shape, data)
+        data = self._data_to_blob(layer_shape, data, layout)
         if precision:
             data = data.astype(precision)
 
@@ -830,6 +808,31 @@ class DLSDKLauncher(Launcher):
                 return data
 
         return self._align_data_shape(data, layer_name, layout)
+
+    @staticmethod
+    def _data_to_blob(layer_shape, data, layout):
+        data_shape = np.shape(data)
+        if len(layer_shape) == 4:
+            if len(data_shape) == 5:
+                data = data[0]
+
+            if len(data_shape) < 4:
+                if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
+                    return np.resize(data, layer_shape)
+            return np.transpose(data, layout)
+
+        if len(layer_shape) == 2:
+            if len(data_shape) == 1:
+                return np.transpose([data])
+
+        if len(layer_shape) == 3 and len(data_shape) == 4:
+            data = np.transpose(data, layout)
+            return data[0]
+
+        if len(layer_shape) == len(layout):
+            return np.transpose(data, layout)
+
+        return np.array(data)
 
     def _set_precision(self):
         has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
