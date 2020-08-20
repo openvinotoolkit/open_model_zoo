@@ -1107,6 +1107,50 @@ class TestDLSDKLauncher:
         with pytest.raises(ConfigError):
             DLSDKLauncher(config)
 
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_config_not_dict_like(self, mocker, models_dir):
+        device_config = 'ENFORCE_BF16'
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.raises(ConfigError):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_device_unknown(self, mocker, models_dir):
+        device_config = {'device': {'ENFORCE_BF16': 'NO'}}
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.warns(Warning):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_one_option_for_device_is_not_dict(self, mocker, models_dir):
+        device_config = {'CPU': {'ENFORCE_BF16': 'NO'}, 'GPU': 'ENFORCE_BF16'}
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.warns(Warning):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_one_option_is_not_binding_to_device(self, mocker, models_dir):
+        device_config = {'CPU': {'ENFORCE_BF16': 'NO'}, 'ENFORCE_BF16': 'NO'}
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.warns(Warning):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inputs', 'mock_inference_engine')
 class TestDLSDKLauncherConfig:
