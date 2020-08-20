@@ -62,6 +62,7 @@ void PipelineBase::init(const std::string& model_name, const CnnConfig& cnnConfi
     slog::info << "Batch size is forced to 1." << slog::endl;
     cnnNetwork.setBatchSize(1);
 
+    // -------------------------- Reading all outputs names and customizing I/O blobs (in inherited classes)
     PrepareInputsOutputs(cnnNetwork);
 
     // --------------------------- 4. Loading model to the device ------------------------------------------
@@ -87,9 +88,9 @@ int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request)
 {
     perfInfo.numRequestsInUse = (uint32_t)requestsPool.getInUseRequestsCount();
 
-    if (outputName=="")
+    if (outputsNames.empty())
     {
-        throw std::invalid_argument("outputName values is not set.");
+        throw std::invalid_argument("outputsNames values are not set.");
     }
     auto frameStartTime = std::chrono::steady_clock::now();
 
@@ -111,7 +112,8 @@ int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request)
                     RequestResult result;
 
                     result.frameId = frameID;
-                    result.output = std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(this->outputName)));
+                    for(std::string outName : this->outputsNames)
+                        result.outputs.emplace(outName,std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outName))));
                     result.startTime = frameStartTime;
 
                     completedRequestResults.emplace(frameID, result);

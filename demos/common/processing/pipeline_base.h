@@ -31,10 +31,19 @@ class PipelineBase
 public:
     struct RequestResult {
         int64_t frameId;
-        InferenceEngine::MemoryBlob::Ptr output=nullptr;
+        std::map<std::string,InferenceEngine::MemoryBlob::Ptr> outputs;
         std::chrono::steady_clock::time_point startTime;
 
-        bool IsEmpty() { return output == nullptr; }
+        /// Returns pointer to first output blob
+        /// This function is a useful addition to direct access to outputs list as many models have only one output
+        /// @returns pointer to first output blob
+        InferenceEngine::MemoryBlob::Ptr getFirstOutputBlob() {
+            if (outputs.empty())
+                throw std::out_of_range("Outputs map is empty.");
+            return outputs.begin()->second;
+        }
+
+        bool IsEmpty() { return outputs.empty(); }
     };
 
     struct PerformanceInfo
@@ -95,7 +104,7 @@ protected:
 
     int64_t inputFrameId;
     int64_t outputFrameId;
-    std::string outputName;
+    std::vector<std::string> outputsNames;
 
     std::exception_ptr callbackException = nullptr;
 };

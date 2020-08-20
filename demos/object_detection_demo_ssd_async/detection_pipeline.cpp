@@ -84,13 +84,13 @@ void DetectionPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
         throw std::logic_error("This demo accepts networks having only one output");
     }
     DataPtr& output = outputInfo.begin()->second;
-    outputName = outputInfo.begin()->first;
+    outputsNames.push_back(outputInfo.begin()->first);
 
     int num_classes = 0;
 
     if (auto ngraphFunction = cnnNetwork.getFunction()) {
         for (const auto op : ngraphFunction->get_ops()) {
-            if (op->get_friendly_name() == outputName) {
+            if (op->get_friendly_name() == outputsNames[0]) {
                 auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
                 if (!detOutput) {
                     THROW_IE_EXCEPTION << "Object Detection network output layer(" + op->get_friendly_name() +
@@ -151,7 +151,7 @@ DetectionPipeline::DetectionResults DetectionPipeline::getDetectionResults(){
         return DetectionResults();
     }
 
-    LockedMemory<const void> outputMapped = reqResult.output->rmap();
+    LockedMemory<const void> outputMapped = reqResult.getFirstOutputBlob()->rmap();
     const float *detections = outputMapped.as<float*>();
 
     DetectionResults results;

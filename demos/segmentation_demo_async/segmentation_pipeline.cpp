@@ -51,7 +51,8 @@ void SegmentationPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const OutputsDataMap& outputsDataMap = cnnNetwork.getOutputsInfo();
     if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
-    outputName = outputsDataMap.begin()->first;
+
+    outputsNames.push_back(outputsDataMap.begin()->first);
     Data& data = *outputsDataMap.begin()->second;
     // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
     // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
@@ -90,7 +91,7 @@ SegmentationPipeline::SegmentationResult SegmentationPipeline::getSegmentationRe
         return SegmentationResult();
     }
 
-    LockedMemory<const void> outMapped = reqResult.output->rmap();
+    LockedMemory<const void> outMapped = reqResult.getFirstOutputBlob()->rmap();
     const float * const predictions = outMapped.as<float*>();
 
     cv::Mat maskImg(outHeight, outWidth, CV_8UC3);
