@@ -20,6 +20,7 @@ from pathlib import Path
 import os
 import platform
 import re
+import warnings
 from collections import OrderedDict
 import numpy as np
 import openvino.inference_engine as ie
@@ -702,11 +703,19 @@ class DLSDKLauncher(Launcher):
         device_configuration = read_yaml(device_config)
         if not isinstance(device_configuration, dict):
             raise ConfigError('device configuration should be a dict-like')
-        for key, value in device_configuration.items():
-            if isinstance(value, dict):
-                self.ie_core.set_config(value, key)
-            else:
-                self.ie_core.set_config({key: value}, self.device)
+        if all(not isinstance(value, dict) for value in device_configuration.values()):
+            self.ie_core.set_config(device_configuration, self.device)
+        else:
+            for key, value in device_configuration.items():
+                if isinstance(value, dict):
+                    if key in ie.known_plugins:
+                        self.ie_core.set_config(value, key)
+                    else:
+                        warnings.warn('Option {key}: {value} will be skipped because device is '
+                                      'unknown'.format(key=key, value=value))
+                else:
+                    warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
+                                  'applied is not specified or option is not a dict-like'.format(key=key, value=value))
 
     def _log_versions(self):
         versions = self.ie_core.get_versions(self._device)
