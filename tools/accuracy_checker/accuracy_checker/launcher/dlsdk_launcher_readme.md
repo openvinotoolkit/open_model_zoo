@@ -44,7 +44,7 @@ Additionally you can provide device specific parameters:
 * `bitstream` for running on FPGA.
 
 For setting device specific flags, you are able to use `-dc` or `--device_config` command line option. Device config should be represented as YML file with dictionary of one of two types:
-1. keys are plugin configuration keys and values are their values respectively
+1. keys are plugin configuration keys and values are their values respectively. In this way configuration will be applied to current running device.
 2. keys are supported devices and values are dictionaries with plugin configuration keys and their values
 
 Each supported device has own set of supported configuration parameters which can be found on device page in [Inference Engine development guide](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_Supported_Devices.html)
