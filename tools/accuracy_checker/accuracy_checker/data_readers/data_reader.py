@@ -413,6 +413,24 @@ class NumpyTXTReader(BaseReader):
         return np.loadtxt(str(self.data_source / data_id))
 
 
+class NumpyDictReader(BaseReader):
+    __provider__ = 'numpy_dict_reader'
+
+    def read(self, data_id):
+        return np.load(str(self.data_source / data_id), allow_pickle=True)[()]
+
+    def read_item(self, data_id):
+        dict_data = self.read_dispatcher(data_id)
+        identifier = []
+        data = []
+        for key, value in dict_data.items():
+            identifier.append('{}.{}'.format(data_id, key))
+            data.append(value)
+        if len(data) == 1:
+            return DataRepresentation(data[0], data_id)
+        return DataRepresentation(data, identifier)
+
+
 class TensorflowImageReader(BaseReader):
     __provider__ = 'tf_imread'
 

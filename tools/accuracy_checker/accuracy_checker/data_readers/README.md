@@ -43,6 +43,7 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
   * `features` - list of features. All features should be fields of annotation representation.
 * `numpy_reader` - read numpy dumped files (npy or npz formats are supported for reading)
 * `numpy_txt_reader`- read data stored in text format to numpy array.
+* `numpy_dict_reader` - read and unpack dictionaries saved in numpy files.
 * `nifti_reader` - read NifTI data format
   * `channels_first` - allows read nifti files and transpose in order where channels first (Optional, default False)
 * `wav_reader` - read WAV file into NumPy array. Also gets the samplerate.
