@@ -22,7 +22,7 @@ from ..representation import (MachineTranslationPrediction,
                               QuestionAnsweringPrediction,
                               ClassificationPrediction,
                               LanguageModelingPrediction)
-from ..config import PathField, NumberField, StringField
+from ..config import PathField, NumberField, StringField, BoolField
 from ..utils import read_txt
 
 
