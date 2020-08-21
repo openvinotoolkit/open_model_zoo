@@ -19,6 +19,7 @@ import enum
 import warnings
 from typing import List
 import numpy as np
+from collections import defaultdict
 
 from ..utils import finalize_metric_result
 from .overlap import Overlap, IOA
@@ -96,7 +97,7 @@ class BaseDetectionMetricMixin(Metric):
     def per_class_detection_statistics(self, annotations, predictions, labels):
         labels_stat = {}
         for label in labels:
-            tp, fp, conf, n = bbox_match(
+            tp, fp, conf, n, _, _ = bbox_match(
                 annotations, predictions, int(label),
                 self.overlap_method, self.overlap_threshold,
                 self.ignore_difficult, self.allow_multiple_matches_per_ignored, self.include_boundaries,
@@ -487,6 +488,7 @@ def bbox_match(annotation: List[DetectionAnnotation], prediction: List[Detection
 
     tp = np.zeros_like(prediction_images)
     fp = np.zeros_like(prediction_images)
+    max_overlapped_dt = defaultdict(list)
 
     for image in range(prediction_images.shape[0]):
         gt_img = annotation[prediction_images[image]]
@@ -529,12 +531,12 @@ def bbox_match(annotation: List[DetectionAnnotation], prediction: List[Detection
         if max_overlap < overlap_thresh:
             fp[image] = set_false_positive(image)
             continue
-
         if not annotation_difficult[max_overlapped].any():
             if not used[max_overlapped].any():
                 if not ignore_difficult or use_filtered_tp or not difficult_boxes_prediction[image].any():
                     tp[image] = 1
                     used[max_overlapped] = True
+                    max_overlapped_dt[image].append(max_overlapped)
             else:
                 fp[image] = set_false_positive(image)
         elif not allow_multiple_matches_per_ignored:
@@ -542,7 +544,7 @@ def bbox_match(annotation: List[DetectionAnnotation], prediction: List[Detection
                 fp[image] = set_false_positive(image)
             used[max_overlapped] = True
 
-    return tp, fp, prediction_boxes[:, 0], number_ground_truth
+    return tp, fp, prediction_boxes[:, 0], number_ground_truth, max_overlapped_dt, prediction_boxes[:, 1:]
 
 
 def _prepare_annotation_boxes(annotation, ignore_difficult, label):
