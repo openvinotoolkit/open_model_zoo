@@ -15,6 +15,7 @@
 
 #include <monitors/presenter.h>
 #include <samples/common.hpp>
+#include <samples/images_capture.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
@@ -115,17 +116,10 @@ int main(int argc, char *argv[]) {
         ExecutableNetwork executableNetwork = ie.LoadNetwork(network, FLAGS_d);
         InferRequest inferRequest = executableNetwork.CreateInferRequest();
 
-        cv::VideoCapture cap;
-        try {
-            int index = std::stoi(FLAGS_i);
-            if (!cap.open(index))
-                throw std::runtime_error("Can't open camera " + std::to_string(index));
-        } catch (const std::invalid_argument&) {
-            if (!cap.open(FLAGS_i))
-                throw std::runtime_error("Can't open input " + FLAGS_i);
-        } catch (const std::out_of_range&) {
-            if (!cap.open(FLAGS_i))
-                throw std::runtime_error("Can't open input " + FLAGS_i);
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        cv::Mat inImg = cap->read();
+        if (!inImg.data) {
+            throw std::runtime_error("Can't read an image from the input");
         }
 
         float blending = 0.3f;
@@ -138,22 +132,21 @@ int main(int argc, char *argv[]) {
                 &blending);
         }
 
-        cv::Mat inImg, resImg, maskImg(outHeight, outWidth, CV_8UC3);
+        cv::Mat resImg, maskImg(outHeight, outWidth, CV_8UC3);
         std::vector<cv::Vec3b> colors(arraySize(CITYSCAPES_COLORS));
         for (std::size_t i = 0; i < colors.size(); ++i)
             colors[i] = {CITYSCAPES_COLORS[i].blue(), CITYSCAPES_COLORS[i].green(), CITYSCAPES_COLORS[i].red()};
         std::mt19937 rng;
         std::uniform_int_distribution<int> distr(0, 255);
         int delay = FLAGS_delay;
-        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
-        Presenter presenter(FLAGS_u, 10, graphSize);
+        Presenter presenter(FLAGS_u, 10, {inImg.cols / 4, 60});
 
         std::chrono::steady_clock::duration latencySum{0};
         unsigned latencySamplesNum = 0;
         std::ostringstream latencyStream;
 
         std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
-        while (cap.read(inImg) && delay >= 0) {
+        while (delay >= 0) {
             if (CV_8UC3 != inImg.type())
                 throw std::runtime_error("BGR (or RGB) image expected to come from input");
             inferRequest.SetBlob(inName, wrapMat2Blob(inImg));
@@ -211,7 +204,7 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'p':
                     case 'P':
-                    case 32: // Space
+                    case ' ':
                         delay = !delay * (FLAGS_delay + !FLAGS_delay);
                         break;
                     default:
@@ -219,6 +212,10 @@ int main(int argc, char *argv[]) {
                 }
             }
             t0 = std::chrono::steady_clock::now();
+            inImg = cap->read();
+            if (!inImg.data) {
+                break;
+            }
         }
         std::cout << "Mean pipeline latency: " << latencyStream.str() << '\n';
         std::cout << presenter.reportMeans() << '\n';
