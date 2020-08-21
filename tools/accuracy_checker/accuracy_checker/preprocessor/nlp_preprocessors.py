@@ -44,7 +44,7 @@ class DecodeBySentencePieceBPETokenizer(Preprocessor):
         self.idx = {}
         for s in ['sos', 'eos']:
             self.idx[s] = self.tokenizer.token_to_id(
-                str(self.get_value_from_config(f'{s}_symbol'))
+                str(self.get_value_from_config(s + '_symbol'))
             )
 
     def process(self, image, annotation_meta=None):

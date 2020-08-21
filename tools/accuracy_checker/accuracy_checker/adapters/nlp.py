@@ -64,7 +64,7 @@ class NonAutoregressiveMachineTranslationAdapter(Adapter):
         self.remove_extra_symbols = self.get_value_from_config('remove_extra_symbols')
         self.idx = {}
         for s in ['sos', 'eos', 'pad']:
-            self.idx[s] = str(self.get_value_from_config(f'{s}_symbol'))
+            self.idx[s] = str(self.get_value_from_config(s + '_symbol'))
         self.output_name = self.get_value_from_config('output_name')
         if self.output_name is None:
             self.output_name = self.output_blob
