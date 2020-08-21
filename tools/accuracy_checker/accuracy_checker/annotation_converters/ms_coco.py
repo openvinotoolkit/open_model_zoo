@@ -76,6 +76,9 @@ class MSCocoDetectionConverter(BaseFormatConverter):
             'sort_annotations': BoolField(
                 optional=True, default=True, description='Allows to sort annotations before conversion'
             ),
+            'sort_annotations_by_size': BoolField(
+                optional=True, default=True, description='Allows to sort annotations by images size before conversion'
+            ),
             'images_dir': PathField(
                 is_directory=True, optional=True,
                 description='path to dataset images, used only for content existence check'
@@ -91,6 +94,7 @@ class MSCocoDetectionConverter(BaseFormatConverter):
         self.has_background = self.get_value_from_config('has_background')
         self.use_full_label_map = self.get_value_from_config('use_full_label_map')
         self.sort_annotations = self.get_value_from_config('sort_annotations')
+        self.sort_annotations_by_size = self.get_value_from_config('sort_annotations_by_size')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
@@ -99,8 +103,16 @@ class MSCocoDetectionConverter(BaseFormatConverter):
         image_info = full_annotation['images']
         image_ids = [(image['id'], image['file_name'], np.array([image['height'], image['width'], 3]))
                      for image in image_info]
-        if self.sort_annotations:
+        if self.sort_annotations and self.sort_annotations_by_size:
+            image_shape = np.array([value[2] for value in image_ids])
+            image_ids = list(np.array(image_ids)[np.lexsort((np.array(image_ids)[:, 0],
+                                                             image_shape[:, 1], image_shape[:, 0]))])
+        if self.sort_annotations and not self.sort_annotations_by_size:
             image_ids.sort(key=lambda value: value[0])
+        if self.sort_annotations_by_size and not self.sort_annotations:
+            image_shape = np.array([value[2] for value in image_ids])
+            image_ids = list(np.array(image_ids)[np.lexsort((image_shape[:, 1], image_shape[:, 0]))])
+
         annotations = full_annotation['annotations']
 
         label_map, label_id_to_label = get_label_map(
