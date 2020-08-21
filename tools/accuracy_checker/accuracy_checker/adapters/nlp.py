@@ -16,6 +16,7 @@ limitations under the License.
 
 import re
 import numpy as np
+from tokenizers import SentencePieceBPETokenizer
 from .adapter import Adapter
 from ..representation import (MachineTranslationPrediction,
                               QuestionAnsweringPrediction,
@@ -36,6 +37,49 @@ def _clean(sentence, subword_option=None):
         sentence = u"".join(sentence.split()).replace(u"\u2581", u" ").lstrip()
 
     return sentence.split(' ')
+
+
+class NonAutoregressiveMachineTranslationAdapter(Adapter):
+    __provider__ = 'narnmt'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'vocabulary_file': PathField(),
+            'merges_file': PathField(),
+            'output_name': StringField(optional=True, default=None),
+            'sos_symbol': StringField(optional=True, default='<s>'),
+            'eos_symbol': StringField(optional=True, default='</s>'),
+            'pad_symbol': StringField(optional=True, default='<pad>'),
+            'remove_extra_symbols': BoolField(optional=True, default=True)
+        })
+        return parameters
+
+    def configure(self):
+        self.tokenizer = SentencePieceBPETokenizer(
+            str(self.get_value_from_config('vocabulary_file')),
+            str(self.get_value_from_config('merges_file'))
+        )
+        self.remove_extra_symbols = self.get_value_from_config('remove_extra_symbols')
+        self.idx = {}
+        for s in ['sos', 'eos', 'pad']:
+            self.idx[s] = str(self.get_value_from_config(f'{s}_symbol'))
+        self.output_name = self.get_value_from_config('output_name')
+        if self.output_name is None:
+            self.output_name = self.output_blob
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        translation = raw_outputs[self.output_name]
+        results = []
+        for identifier, tokens in zip(identifiers, translation):
+            sentence = self.tokenizer.decode(tokens)
+            if self.remove_extra_symbols:
+                for s in self.idx.values():
+                    sentence = sentence.replace(s, '')
+            results.append(MachineTranslationPrediction(identifier, sentence.lstrip().split(' ')))
+        return results
 
 
 class MachineTranslationAdapter(Adapter):
