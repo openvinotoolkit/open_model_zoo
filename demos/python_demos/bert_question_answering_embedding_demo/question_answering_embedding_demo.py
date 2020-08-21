@@ -39,7 +39,7 @@ def build_argparser():
                       default=10, required=False, type=int)
     args.add_argument("-v", "--vocab", help="Required. Path to vocabulary file with tokens",
                       required=True, type=str)
-    args.add_argument("--model_emb", help="Required. Path to an .xml file with a trained model to build embeddings",
+    args.add_argument("-m","--model_emb", help="Required. Path to an .xml file with a trained model to build embeddings",
                       required=True, type=str, default=None)
 
     args.add_argument("--model_qa", help="Optional. Path to an .xml file with a trained model to give exact answer",
@@ -81,9 +81,9 @@ class HTMLDataExtractor(HTMLParser):
                 d.append(data)
 
 # return context as list of paragraphs texts
-def get_paragraphs(args):
+def get_paragraphs(url_list):
     contexts_all = []
-    for url in args.input.split(','):
+    for url in url_list:
         log.info("Get paragraphs from {}".format(url))
         with urllib.request.urlopen(url) as response:
             parser = HTMLDataExtractor(['title', 'p'])
@@ -229,7 +229,7 @@ def main():
             self.c_tokens_se = c_tokens_se
             self.c_emb = calc_emb(self.c_tokens_id, max_length_c)
 
-    paragraphs = get_paragraphs(args)
+    paragraphs = get_paragraphs(args.input.split(','))
     contexts_all = []
 
     log.info("Indexing {} paragraphs...".format(len(paragraphs)))
