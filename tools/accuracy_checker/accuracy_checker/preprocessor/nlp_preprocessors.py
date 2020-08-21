@@ -14,7 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from tokenizers import SentencePieceBPETokenizer
+try:
+    from tokenizers import SentencePieceBPETokenizer
+except ImportError:
+    SentencePieceBPETokenizer = None
 from .preprocessor import Preprocessor
 from ..config import PathField, NumberField, StringField, BoolField, ConfigError
 from ..utils import read_txt
@@ -36,6 +39,11 @@ class DecodeBySentencePieceBPETokenizer(Preprocessor):
         return parameters
 
     def configure(self):
+        if SentencePieceBPETokenizer is None:
+            raise ConfigError(
+                'tokenizers is not installed, please install this module before '
+                'using {} preprocessing'.format(self.__provider__)
+            )
         self.tokenizer = SentencePieceBPETokenizer(
             str(self.get_value_from_config('vocabulary_file')),
             str(self.get_value_from_config('merges_file'))
