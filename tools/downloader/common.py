@@ -68,6 +68,7 @@ KNOWN_TASK_TYPES = {
     'question_answering',
     'semantic_segmentation',
     'style_transfer',
+    'text_to_speech'
 }
 
 KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}
