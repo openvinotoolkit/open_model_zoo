@@ -42,7 +42,8 @@ ENTRIES_PATHS = {
 
 PREPROCESSING_PATHS = {
     'mask_dir': 'source',
-    'vocabulary_file': ['model_attributes', 'models', 'source']
+    'vocabulary_file': ['model_attributes', 'models', 'source'],
+    'merges_file': ['model_attributes', 'source', 'models']
 }
 
 ADAPTERS_PATHS = {
