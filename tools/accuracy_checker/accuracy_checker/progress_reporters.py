@@ -67,9 +67,9 @@ class PrintProgressReporter(ProgressReporter):
         super().__init__(dataset_size)
         self.print_interval = print_interval
 
-    def reset(self, dataset_size, object='dataset'):
+    def reset(self, dataset_size, objects='dataset'):
         self.dataset_size = dataset_size
-        print_info('Total {object} size: {size}'.format(object=object, size=dataset_size))
+        print_info('Total {objects} size: {size}'.format(objects=objects, size=dataset_size))
         self.start_time = time.time()
         self.prev_time = self.start_time
         self.current = 0
