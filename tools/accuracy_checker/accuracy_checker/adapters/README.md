@@ -189,6 +189,14 @@ AccuracyChecker supports following set of adapters:
 * `nmt` - converting output of neural machine translation model to `MachineTranslationPrediction`.
   * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.bpe.32000.de). Path can be prefixed with `--models` arguments.
   * `eos_index` - index end of string symbol in vocabulary (Optional, used in cases when launcher does not support dynamic output shape for cut off empty prediction).
+* `narnmt` - converting output of non-autoregressive neural machine translation model to `MachineTranslationPrediction`.
+  * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.json). Path can be prefixed with `--models` arguments.
+  * `merges_file` - file which contains merges for encoding model predicted indexes to words (e. g. merges.txt). Path can be prefixed with `--models` arguments.
+  * `output_name` - name of model's output layer if need (optional).
+  * `sos_symbol` - string representation of start_of_sentence symbol (default='<s>').
+  * `eos_symbol` - string representation of end_of_sentence symbol (default='</s>').
+  * `pad_symbol` - string representation of pad symbol (default='<pad>').
+  * `remove_extra_symbols` - remove sos/eos/pad symbols from predicted string (default=True)
 * `bert_question_answering` - converting output of BERT model trained to solve question answering task to `QuestionAnsweringPrediction`.
 * `bert_classification` - converting output of BERT model trained for classification task to `ClassificationPrediction`.
   * `num_classes` - number of predicted classes.
@@ -222,7 +230,7 @@ AccuracyChecker supports following set of adapters:
   * `mask_out` - name of output layer which contains instance masks.
   * `proto_out` - name of output layer which contains proto for masks calculation.
   * `confidence_threshold` - confidence threshold that is used to filter out detected instances (Optional, default 0.05).
-  * `max_detections` - maximum detection used for metrics calculation (Optional, default 100). 
+  * `max_detections` - maximum detection used for metrics calculation (Optional, default 100).
 * `class_agnostic_detection` - converting 'boxes' [n, 5] output of detection model to `DetectionPrediction` representation.
   * `output_blob` - name of output layer with bboxes.
   * `scale` - scalar value to normalize bbox coordinates.
@@ -253,7 +261,7 @@ AccuracyChecker supports following set of adapters:
     * `output_layer_map` - dictionary where keys are output layer names of attribute classification model and values are the names of attributes.
 * `regression` - converting output of regression model to `RegressionPrediction` representation.
     * `keep_shape` - allow keeping shape of predicted multi dimension array (Optional, default False).
-* `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions. 
+* `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions.
     * `adapters` - Dict where key is output name and value is adapter config map including `output_blob` key to associate the output of model and this adapter.
 * `person_vehilce_detection_refinement` - converts output of person vehicle detection refinement model to `DetectionPrediction` representation. Adapter refines proposals generated in previous stage model.
 * `head_detection` - converts output of head detection model to `DetectionPrediction ` representation. Operation is performed by mapping model output to the defined anchors, window scales, window translates, and window lengths to generate a list of head candidates.
