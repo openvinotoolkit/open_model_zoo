@@ -10,8 +10,8 @@ Tokenization occurs using the SentencePieceBPETokenizer (see the demo code for i
 
 | Metric            | Value                 |
 |-------------------|-----------------------|
-| GOps              | 10.8                  |
-| MParams           | 69                    |
+| GOps              | 23.17                 |
+| MParams           | 69.29                 |
 | Source framework  | PyTorch\*             |
 
 
