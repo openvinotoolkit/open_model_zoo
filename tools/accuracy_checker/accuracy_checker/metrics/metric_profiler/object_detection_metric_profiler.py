@@ -1,5 +1,6 @@
 import numpy as np
 from .base_profiler import MetricProfiler
+from ...utils import contains_all
 
 
 class DetectionProfiler(MetricProfiler):
@@ -13,7 +14,7 @@ class DetectionProfiler(MetricProfiler):
         if self.report_file == 'csv':
             report = self.per_box_result(identifier, metric_result)
         else:
-            report = self.generate_json_report(identifier, metric_result)
+            report = self.generate_json_report(identifier, metric_result, metric_name)
             report['{}_result'.format(metric_name)] = final_score
             return report
 
@@ -25,23 +26,21 @@ class DetectionProfiler(MetricProfiler):
 
         return report
 
-    def generate_json_report(self, identifier, metric_result):
+    def generate_json_report(self, identifier, metric_result, metric_name):
         report = {'identifier': identifier, 'per_class_result': {}}
         per_class_results = {}
-        for idx, class_result in enumerate(metric_result):
+        for idx, (class_id, class_result) in enumerate(metric_result.items()):
             if not np.size(class_result['scores']):
                 continue
-            label_id = self.valid_labels[idx] if self.valid_labels else idx
+            label_id = self.valid_labels[idx] if self.valid_labels else class_id
             iou = [iou_str.tolist() for iou_str in class_result['iou']]
             per_class_results[label_id] = {
-                'annotation_boxes': class_result['gt'].tolist(),
-                'prediction_boxes': class_result['dt'].tolist(),
-                'prediction_scores': class_result['scores'].tolist(),
+                'annotation_boxes': class_result['gt'].tolist() if not isinstance(class_result['gt'], list) else class_result['gt'],
+                'prediction_boxes': class_result['dt'].tolist() if not isinstance(class_result['dt'], list) else class_result['dt'],
+                'prediction_scores': class_result['scores'].tolist() if not isinstance(class_result['scores'], list) else class_result['scores'],
                 'iou': iou,
-                'prediction_matches': class_result['dt_matches'][0].tolist(),
-                'annotation_matches': class_result['gt_matches'][0].tolist(),
-                'average_precision': class_result['result']
             }
+            per_class_results[label_id].update(self.generate_result_matching(class_result, metric_result))
         report['per_class_result'] = per_class_results
         return report
 
@@ -86,3 +85,29 @@ class DetectionProfiler(MetricProfiler):
         self.valid_labels = [
             label for label in meta.get('label_map', {}) if label != meta.get('background_label')
         ]
+
+    @staticmethod
+    def generate_result_matching(per_class_result, metric_name):
+        if contains_all(['gt_matches', 'dt_matches'], per_class_result):
+            matching_result = {
+                'prediction_matches': per_class_result['dt_matches'][0],
+                'annotation_matches':  per_class_result['gt_matches'][0],
+                metric_name: per_class_result['result']
+                }
+            return matching_result
+        matches = per_class_result['matched']
+        dt_matches = np.zeros_like(per_class_result['scores'], dtype=int)
+        gt_matches = [[] for _ in range(np.size(per_class_result['gt']))]
+        for dt, value in matches.items():
+            dt_matches[dt] = 1
+            gt_list = value[0].tolist()
+            for gt in gt_list:
+                gt_matches[gt].append(dt)
+        matching_result = {
+            'prediction_matches': dt_matches.tolist(),
+            'annotation_matches': gt_matches,
+            'precision': per_class_result['precision'].tolist(),
+            'recall': per_class_result['recall'].tolist(),
+            'fppi': per_class_result['fppi'].tolist()
+        }
+        return matching_result
