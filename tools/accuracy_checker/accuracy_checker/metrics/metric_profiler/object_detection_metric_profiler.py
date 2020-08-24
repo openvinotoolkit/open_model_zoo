@@ -34,10 +34,17 @@ class DetectionProfiler(MetricProfiler):
                 continue
             label_id = self.valid_labels[idx] if self.valid_labels else class_id
             iou = [iou_str.tolist() for iou_str in class_result['iou']]
+            gt = class_result['gt'].tolist() if not isinstance(class_result['gt'], list) else class_result['gt']
+            dt = class_result['dt'].tolist() if not isinstance(class_result['dt'], list) else class_result['dt']
+            scores = (
+                class_result['scores'].tolist()
+                if not isinstance(class_result['scores'], list) else class_result['scores']
+            )
+
             per_class_results[label_id] = {
-                'annotation_boxes': class_result['gt'].tolist() if not isinstance(class_result['gt'], list) else class_result['gt'],
-                'prediction_boxes': class_result['dt'].tolist() if not isinstance(class_result['dt'], list) else class_result['dt'],
-                'prediction_scores': class_result['scores'].tolist() if not isinstance(class_result['scores'], list) else class_result['scores'],
+                'annotation_boxes': gt,
+                'prediction_boxes': dt,
+                'prediction_scores': scores,
                 'iou': iou,
             }
             per_class_results[label_id].update(self.generate_result_matching(class_result, metric_result))

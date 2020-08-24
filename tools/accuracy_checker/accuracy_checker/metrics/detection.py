@@ -18,8 +18,8 @@ import bisect
 import enum
 import warnings
 from typing import List
-import numpy as np
 from collections import defaultdict
+import numpy as np
 
 from ..utils import finalize_metric_result
 from .overlap import Overlap, IOA
@@ -246,7 +246,9 @@ class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEv
 
     def update(self, annotation, prediction):
         valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
-        labels_stat = self.per_class_detection_statistics([annotation], [prediction], valid_labels, self.profiler is not None)
+        labels_stat = self.per_class_detection_statistics(
+            [annotation], [prediction], valid_labels, self.profiler is not None
+        )
         miss_rates = []
         for label in labels_stat:
             label_miss_rate = 1.0 - labels_stat[label]['recall']
@@ -523,6 +525,7 @@ def bbox_match(annotation: List[DetectionAnnotation], prediction: List[Detection
     tp = np.zeros_like(prediction_images)
     fp = np.zeros_like(prediction_images)
     max_overlapped_dt = defaultdict(list)
+    overlaps = np.array([])
 
     for image in range(prediction_images.shape[0]):
         gt_img = annotation[prediction_images[image]]
