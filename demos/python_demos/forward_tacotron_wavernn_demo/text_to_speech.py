@@ -9,18 +9,12 @@ from models.forward_tacotron_ie import ForwardTacotronIE
 from models.mel2wave_ie import WaveRNNIE
 
 import time
-import wave
+import scipy.io.wavfile
 
 
 def save_wav(x, path):
     sr = 22050
-    with wave.open(path, 'w') as obj:
-        obj.setnchannels(1)  # mono
-        obj.setsampwidth(2)
-        obj.setframerate(sr)
-        obj.writeframes(x)
-        obj.close()
-
+    scipy.io.wavfile.write(path, sr, x)
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
