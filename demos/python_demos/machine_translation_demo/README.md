@@ -1,4 +1,4 @@
-# Machine Translation Python* Demo
+# Machine Translation Python\* Demo
 
 This README describes the Machine Translation demo application that uses a non-autoregressive Transformer model for inference.
 

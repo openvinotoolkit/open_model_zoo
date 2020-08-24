@@ -14,11 +14,12 @@
 """
 import argparse
 import logging as log
-import numpy as np
-from openvino.inference_engine import IECore
 import os
 import sys
 import time
+
+import numpy as np
+from openvino.inference_engine import IECore
 from tokenizers import SentencePieceBPETokenizer
 
 
@@ -197,10 +198,8 @@ def build_argparser():
     """ Build argument parser.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model-xml', type=str, required=True,
-                        help='Required. Path to an .xml file with a trained model.')
-    parser.add_argument('--model-bin', type=str, required=True,
-                        help='Required. Path to an .bin file with a trained model.')
+    parser.add_argument("-m", "--model", required=True, type=str,
+                        help="Required. Path to an .xml file with a trained model")
     parser.add_argument('--tokenizer-src', type=str, required=True,
                         help='Required. Path to the folder with src tokenizer that contains vocab.json and merges.txt.')
     parser.add_argument('--tokenizer-tgt', type=str, required=True,
@@ -211,7 +210,12 @@ def build_argparser():
 def main(args):
     log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     log.info("creating translator")
-    model = Translator(**vars(args))
+    model = Translator(
+        model_xml=args.model,
+        model_bin=os.path.splitext(args.model)[0] + ".bin",
+        tokenizer_src=args.tokenizer_src,
+        tokenizer_tgt=args.tokenizer_tgt
+    )
     log.info("enter 'q!' to exit.")
     while True:
         sentence = input("> ")
