@@ -4,9 +4,9 @@ This README describes the Machine Translation demo application that uses a non-a
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network to Inference engine.
+Upon the start-up the demo application reads command line parameters and loads a network to Inference Engine.
 
-The program provides an interactive CLI interface that gets a sentence on the source language as an input and returns its translation on the target language.
+The program provides an interactive CLI interface that gets a sentence in the source language as an input and returns its translation to the target language.
 
 ### Running the Demo
 

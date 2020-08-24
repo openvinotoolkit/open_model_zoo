@@ -13,6 +13,7 @@
  limitations under the License.
 """
 import argparse
+import itertools
 import logging as log
 import os
 import sys
@@ -49,7 +50,7 @@ class Translator:
             translation (str): translated sentence.
         """
         tokens = self.tokenizer_src.encode(sentence)
-        assert len(tokens) == self.max_tokens, "length of the tokens shouldn't exceed the " + str(self.max_tokens) + " tokens"
+        assert len(tokens) == self.max_tokens, "length of the tokens should equal the " + str(self.max_tokens) + " tokens"
         tokens = np.array(tokens).reshape(1, -1)
         translation = self.model(tokens)
         translation = self.tokenizer_tgt.decode(translation[0], remove_repeats)
@@ -65,9 +66,10 @@ class TranslationEngine:
         output_name (str): name of output blob of model.
     """
     def __init__(self, model_xml, model_bin, output_name):
-        log.info("[ TranslationEngine ] loading network")
-        log.info("[ TranslationEngine ] model_xml: " + str(model_xml))
-        log.info("[ TranslationEngine ] model_bin: " + str(model_bin))
+        self.logger = log.getLogger("TranslationEngine")
+        self.logger.info("loading network")
+        self.logger.info("model_xml: " + model_xml)
+        self.logger.info("model_bin: " + model_bin)
         self.ie = IECore()
         self.net = self.ie.read_network(
             model=model_xml,
@@ -108,9 +110,10 @@ class Tokenizer:
         max_tokens (int): max tokens.
     """
     def __init__(self, path, max_tokens):
-        log.info("[ Tokenizer ] loading tokenizer")
-        log.info("[ Tokenizer ] path: " + str(path))
-        log.info("[ Tokenizer ] max_tokens: " + str(max_tokens))
+        self.logger = log.getLogger("Tokenizer")
+        self.logger.info("loading tokenizer")
+        self.logger.info("path: " + path)
+        self.logger.info("max_tokens: " + str(max_tokens))
         self.tokenizer = SentencePieceBPETokenizer(
             os.path.join(path, "vocab.json"),
             os.path.join(path, "merges.txt")
@@ -162,7 +165,7 @@ class Tokenizer:
         tokens = [self.idx['<s>']] + tokens + [self.idx['</s>']]
         pad_length = self.max_tokens - len(tokens)
         if pad_length > 0:
-            tokens = tokens + [self.idx['<pad>'] for i in range(pad_length)]
+            tokens = tokens + [self.idx['<pad>']] * pad_length
         return tokens
 
     def _remove_repeats(self, sentence):
@@ -175,13 +178,7 @@ class Tokenizer:
             sentence (str): sentence in lowercase without repeated words.
         """
         tokens = sentence.lower().split()
-        tokens_new = []
-        if len(tokens):
-            tokens_new = [tokens[0]]
-            for i in range(1, len(tokens)):
-                if tokens[i] != tokens_new[-1]:
-                    tokens_new.append(tokens[i])
-        return " ".join(tokens_new)
+        return " ".join(key for key, _ in itertools.groupby(tokens))
 
 
 def build_argparser():
@@ -200,8 +197,9 @@ def build_argparser():
 
 
 def main(args):
-    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
-    log.info("creating translator")
+    log.basicConfig(format="[ %(levelname)s ] [ %(name)s ] %(message)s", level=log.INFO, stream=sys.stdout)
+    logger = log.getLogger("main")
+    logger.info("creating translator")
     model = Translator(
         model_xml=args.model,
         model_bin=os.path.splitext(args.model)[0] + ".bin",
@@ -209,19 +207,19 @@ def main(args):
         tokenizer_tgt=args.tokenizer_tgt,
         output_name=args.output_name
     )
-    log.info("enter 'q!' to exit.")
     while True:
+        logger.info("enter 'q!' to exit.")
         sentence = input("> ")
         if sentence == "q!":
             break
         try:
-            start = time.time()
+            start = time.perf_counter()
             translation = model(sentence)
-            stop = time.time()
-            log.info(translation)
-            log.info("time: " + str(stop - start) + " s.")
+            stop = time.perf_counter()
+            print(translation)
+            logger.info("time: " + str(stop - start) + " s.")
         except Exception as e:
-            log.error(str(e))
+            log.error("an error occurred", exc_info=True)
 
 
 if __name__ == "__main__":
