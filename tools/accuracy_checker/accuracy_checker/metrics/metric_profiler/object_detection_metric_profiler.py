@@ -5,15 +5,28 @@ from ...utils import contains_all
 
 class DetectionProfiler(MetricProfiler):
     __provider__ = 'detection'
-    fields = ['identifier', 'label', 'score', 'pred', 'gt', 'matched']
+
+    def __init__(self, dump_iterations=100, report_type='csv'):
+        self.updated_fields = report_type != 'csv'
+        self.names = []
+        self.metric_names = []
+        if report_type == 'csv':
+            self.fields = ['identifier', 'label', 'score', 'pred', 'gt', 'matched']
+        else:
+            self.fields = ['identifier', 'per_class_result']
+        self.updated_fields = False
+
+        super().__init__(dump_iterations, report_type)
 
     def generate_profiling_data(self, identifier, metric_result, metric_name, final_score):
-        # if self._last_profile and self._last_profile == identifier:
-        #     report = self._last_profile
-        # else:
-        if self.report_file == 'csv':
-            report = self.per_box_result(identifier, metric_result)
+        if not self.updated_fields:
+            self._update_fields()
+        if self._last_profile and self._last_profile == identifier:
+             report = self._last_profile
         else:
+            report = self.per_box_result(identifier, metric_result) if self.report_file == 'csv' else {}
+
+        if self.report_type == 'json':
             report = self.generate_json_report(identifier, metric_result, metric_name)
             report['{}_result'.format(metric_name)] = final_score
             return report
@@ -47,7 +60,7 @@ class DetectionProfiler(MetricProfiler):
                 'prediction_scores': scores,
                 'iou': iou,
             }
-            per_class_results[label_id].update(self.generate_result_matching(class_result, metric_result))
+            per_class_results[label_id].update(self.generate_result_matching(class_result, metric_name))
         report['per_class_result'] = per_class_results
         return report
 
@@ -60,8 +73,9 @@ class DetectionProfiler(MetricProfiler):
             scores = per_class_result['scores']
             dt = per_class_result['dt']
             gt = per_class_result['gt']
-            dt_matched = per_class_result['dt_matches'][0]
-            gt_matched = per_class_result['gt_matches'][0]
+            matches_result = self.generate_result_matching(per_class_result, '')
+            dt_matched = matches_result['dt_matches']
+            gt_matched = matches_result['gt_matches']
             for dt_id, dt_box in enumerate(dt):
                 box_result = {
                     'identifier': identifier,
@@ -118,3 +132,11 @@ class DetectionProfiler(MetricProfiler):
             'fppi': per_class_result['fppi'].tolist()
         }
         return matching_result
+
+    def register_metric(self, metric_name):
+        self.metric_names.append(metric_name)
+
+    def _update_fields(self):
+        for metric_name in self.metric_names:
+            self.fields.append('{}_result'.format(metric_name))
+        self.updated_fields = True
