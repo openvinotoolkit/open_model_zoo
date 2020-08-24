@@ -6,7 +6,7 @@ models:
           type: narnmt
           vocabulary_file: tokenizer_tgt/vocab.json
           merges_file: tokenizer_tgt/merges.txt
-          output_name: ArgMax_1407/Squeeze
+          output_name: pred/Squeeze
         inputs:
           - name: "tokens"
             value: 'tokens'

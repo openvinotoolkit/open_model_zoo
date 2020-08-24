@@ -32,8 +32,8 @@ class Translator:
         tokenizer_src (str): path to src tokenizer.
         tokenizer_tgt (str): path to tgt tokenizer.
     """
-    def __init__(self, model_xml, model_bin, tokenizer_src, tokenizer_tgt):
-        self.model = TranslationEngine(model_xml, model_bin)
+    def __init__(self, model_xml, model_bin, tokenizer_src, tokenizer_tgt, output_name):
+        self.model = TranslationEngine(model_xml, model_bin, output_name)
         self.max_tokens = self.model.get_max_tokens()
         self.tokenizer_src = Tokenizer(tokenizer_src, self.max_tokens)
         self.tokenizer_tgt = Tokenizer(tokenizer_tgt, self.max_tokens)
@@ -64,7 +64,7 @@ class TranslationEngine:
         model_bin (str): path to model's .bin file.
         output_name (str): name of output blob of model.
     """
-    def __init__(self, model_xml, model_bin):
+    def __init__(self, model_xml, model_bin, output_name):
         log.info("[ TranslationEngine ] loading network")
         log.info("[ TranslationEngine ] model_xml: " + str(model_xml))
         log.info("[ TranslationEngine ] model_bin: " + str(model_bin))
@@ -74,7 +74,7 @@ class TranslationEngine:
             weights=model_bin
         )
         self.net_exec = self.ie.load_network(self.net, "CPU")
-        self.output_name = self._get_output_name()
+        self.output_name = output_name
         assert self.output_name != "", "there is not output in model"
 
     def get_max_tokens(self):
@@ -98,16 +98,6 @@ class TranslationEngine:
             inputs={"tokens": tokens}
         )
         return out[self.output_name]
-
-    def _get_output_name(self):
-        """ Get name of output blob.
-        """
-        output_name = ""
-        for k in self.net.outputs.keys():
-            if "ArgMax" in k:
-                output_name = k
-                break
-        return output_name
 
 
 class Tokenizer:
@@ -204,6 +194,8 @@ def build_argparser():
                         help='Required. Path to the folder with src tokenizer that contains vocab.json and merges.txt.')
     parser.add_argument('--tokenizer-tgt', type=str, required=True,
                         help='Required. Path to the folder with tgt tokenizer that contains vocab.json and merges.txt.')
+    parser.add_argument('--output-name', type=str, default='pred/Squeeze',
+                        help='Name of the models output node.')
     return parser
 
 
@@ -214,7 +206,8 @@ def main(args):
         model_xml=args.model,
         model_bin=os.path.splitext(args.model)[0] + ".bin",
         tokenizer_src=args.tokenizer_src,
-        tokenizer_tgt=args.tokenizer_tgt
+        tokenizer_tgt=args.tokenizer_tgt,
+        output_name=args.output_name
     )
     log.info("enter 'q!' to exit.")
     while True:

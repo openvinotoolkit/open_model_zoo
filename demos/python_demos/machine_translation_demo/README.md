@@ -13,22 +13,22 @@ The program provides an interactive CLI interface that gets a sentence on the so
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: machine_translation_demo.py [-h] --model-xml MODEL_XML --model-bin
-                                   MODEL_BIN --tokenizer-src TOKENIZER_SRC
+usage: machine_translation_demo.py [-h] -m MODEL --tokenizer-src TOKENIZER_SRC
                                    --tokenizer-tgt TOKENIZER_TGT
+                                   [--output-name OUTPUT_NAME]
 
 optional arguments:
   -h, --help            show this help message and exit
-  --model-xml MODEL_XML
-                        Required. Path to an .xml file with a trained model.
-  --model-bin MODEL_BIN
-                        Required. Path to an .bin file with a trained model.
+  -m MODEL, --model MODEL
+                        Required. Path to an .xml file with a trained model
   --tokenizer-src TOKENIZER_SRC
                         Required. Path to the folder with src tokenizer that
                         contains vocab.json and merges.txt.
   --tokenizer-tgt TOKENIZER_TGT
                         Required. Path to the folder with tgt tokenizer that
                         contains vocab.json and merges.txt.
+  --output-name OUTPUT_NAME
+                        Name of the models output node.
 ```
 
 To run the demo, you can use Intel's pretrained model. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md) or go to the [Intel&reg; Open Source Technology Center](https://download.01.org/opencv/).

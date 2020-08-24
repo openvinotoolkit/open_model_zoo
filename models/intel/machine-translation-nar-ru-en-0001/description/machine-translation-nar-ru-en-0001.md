@@ -36,7 +36,7 @@ The sequence structure is as follows (`<s>`, `</s>` and `<pad>` should be replac
 
 ## Output
 
-name: ArgMax_1407/Squueze
+name: pred/Squeeze
 shape: [1, 192]
 description: sequence of tokens (integer values) representing the tokenized translation.
 The sequence structure is as follows (`<s>`, `</s>` and `<pad>` should be replaced by corresponding token IDs as specified by the dictionary):
