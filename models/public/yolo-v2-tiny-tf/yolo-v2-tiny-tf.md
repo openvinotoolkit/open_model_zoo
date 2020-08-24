@@ -1,4 +1,4 @@
-# yolo-v2-tiny
+# yolo-v2-tiny-tf
 
 ## Use Case and High-Level Description
 
