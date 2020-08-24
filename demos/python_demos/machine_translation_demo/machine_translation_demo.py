@@ -48,7 +48,7 @@ class Translator:
             translation (str): translated sentence.
         """
         tokens = self.tokenizer_src.encode(sentence)
-        assert len(tokens) == self.max_tokens, f"length of the tokens shouldn't exceed the {self.max_tokens} tokens"
+        assert len(tokens) == self.max_tokens, "length of the tokens shouldn't exceed the " + str(self.max_tokens) + " tokens"
         tokens = np.array(tokens).reshape(1, -1)
         translation = self.model(tokens)
         translation = self.tokenizer_tgt.decode(translation[0], remove_repeats)
@@ -65,8 +65,8 @@ class TranslationEngine:
     """
     def __init__(self, model_xml, model_bin):
         log.info("[ TranslationEngine ] loading network")
-        log.info(f"[ TranslationEngine ] model_xml: {model_xml}")
-        log.info(f"[ TranslationEngine ] model_bin: {model_bin}")
+        log.info("[ TranslationEngine ] model_xml: " + str(model_xml))
+        log.info("[ TranslationEngine ] model_bin: " + str(model_bin))
         self.ie = IECore()
         self.net = self.ie.read_network(
             model=model_xml,
@@ -118,8 +118,8 @@ class Tokenizer:
     """
     def __init__(self, path, max_tokens):
         log.info("[ Tokenizer ] loading tokenizer")
-        log.info(f"[ Tokenizer ] path: {path}")
-        log.info(f"[ Tokenizer ] max_tokens: {max_tokens}")
+        log.info("[ Tokenizer ] path: " + str(path))
+        log.info("[ Tokenizer ] max_tokens: " + str(max_tokens))
         self.tokenizer = SentencePieceBPETokenizer(
             os.path.join(path, "vocab.json"),
             os.path.join(path, "merges.txt")
@@ -222,7 +222,7 @@ def main(args):
             translation = model(sentence)
             stop = time.time()
             log.info(translation)
-            log.info(f"time: {stop - start} s.")
+            log.info("time: " + str(stop - start) + " s.")
         except Exception as e:
             log.error(str(e))
 
