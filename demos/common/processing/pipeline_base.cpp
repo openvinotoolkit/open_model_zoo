@@ -120,6 +120,8 @@ int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request)
                     completedRequestResults.emplace(frameID, result);
 
                     this->requestsPool.setRequestIdle(request);
+
+                    this->onProcessingCompleted(request);
                 }
                 catch (...) {
                     if (!this->callbackException) {

@@ -107,5 +107,10 @@ protected:
     std::vector<std::string> outputsNames;
 
     std::exception_ptr callbackException = nullptr;
+
+    /// Callback firing after request is processed by CNN
+    /// NOTE: this callback is executed in separate inference engine's thread
+    /// So it should not block execution for long time and should use data synchroniztion
+    virtual void onProcessingCompleted(InferenceEngine::InferRequest::Ptr request) {}
 };
 
