@@ -59,8 +59,8 @@ class SRConverter(BaseFormatConverter):
                 description="Path to directory, where upsampled images are located, if 2 streams used."
             ),
             'images_dir': PathField(
-                optional=False, is_directory=True,
-                description="Path to directory with images."
+                optional=True, is_directory=True,
+                description="Path to directory with images.",
             ),
             'lr_suffix': StringField(
                 optional=True, default="lr", description="Low resolution file name's suffix."
@@ -90,7 +90,7 @@ class SRConverter(BaseFormatConverter):
         return configuration_parameters
 
     def configure(self):
-        self.data_dir = self.get_value_from_config('data_dir')
+        self.data_dir = self.get_value_from_config('data_dir') or self.get_value_from_config('images_dir')
         self.lr_dir = self.get_value_from_config('lr_dir') or self.data_dir
         if not self.lr_dir:
             raise ConfigError('One of the parameters: data_dir or lr_dir should be provided for conversion')
