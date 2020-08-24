@@ -207,10 +207,10 @@ def main(args):
         tokenizer_tgt=args.tokenizer_tgt,
         output_name=args.output_name
     )
+    logger.info("enter empty string to exit.")
     while True:
-        logger.info("enter 'q!' to exit.")
         sentence = input("> ")
-        if sentence == "q!":
+        if not sentence:
             break
         try:
             start = time.perf_counter()
