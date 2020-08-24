@@ -1,12 +1,12 @@
 # BERT Question Answering Embedding Python* Demo
 
-This README describes the Question Answering Embedding demo application that uses a Squad-tuned BERT model to calculate embedding vectors for context and question to find right context for question.
+This README describes the Question Answering Embedding demo application that uses a Squad-tuned BERT model to calculate embedding vectors for context and question to find right context for question. The primary difference from the initial demo (../bert_question_answering_demo) is that this demo domonstrates how the inference can be accelerated via pre-computing the embeddings for the contexts. 
 
 ## How It Works
 
 Upon the start-up the demo application reads command line parameters and loads network(s) to the InferenceEngine.
 It also fetches data from the user-provided urls to populate the list of "contexts" with the text.
-Prior to the actual inference to answer user questions, the embedding vectors are pre-calculated (via inference) for each context from the list.
+Prior to the actual inference to answer user's questions, the embedding vectors are pre-calculated (via inference) for each context from the list.
 This is done using the first ("emdbeddings-only") BERT model.
 
 After that, when user type the question and the "embeddings" network is used to calculate an embedding vector for the specified question.
