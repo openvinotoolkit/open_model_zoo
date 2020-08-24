@@ -17,6 +17,12 @@
 import unicodedata
 import string
 
+# load vocabulary file for encoding
+def load_vocab_file(vocab_file_name):
+    with open(vocab_file_name, "r", encoding="utf-8") as r:
+        return {t.rstrip("\n"): i for i, t in enumerate(r.readlines())}
+
+
 # split word by vocab items and get tok codes
 # iterativly return codes
 def encode_by_voc(w, vocab):

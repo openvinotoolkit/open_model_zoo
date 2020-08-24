@@ -18,16 +18,16 @@
 import sys
 import os
 import time
-import urllib.request
 import logging as log
-import re
-from html.parser import HTMLParser
 from argparse import ArgumentParser, SUPPRESS
 
 import numpy as np
-from tokens_bert import text_to_tokens
+
 from openvino.inference_engine import IENetwork, IECore
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from tokens_bert import text_to_tokens, load_vocab_file
+from html_reader import get_paragraphs
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -58,48 +58,6 @@ def build_argparser():
                       help="Optional. Nice coloring of the questions/answers. "
                            "Might not work on some terminals (like Windows* cmd console)")
     return parser
-
-
-class HTMLDataExtractor(HTMLParser):
-    def __init__(self, tags):
-        super(HTMLDataExtractor, self).__init__()
-        self.started_tags = {k:[] for k in tags}
-        self.ended_tags = {k:[] for k in tags}
-
-    def handle_starttag(self, tag, attrs):
-        if tag in self.started_tags:
-            self.started_tags[tag].append([])
-
-    def handle_endtag(self, tag):
-        if tag in self.ended_tags:
-            txt = ''.join(self.started_tags[tag].pop())
-            self.ended_tags[tag].append(txt)
-
-    def handle_data(self, data):
-        for tag, l in self.started_tags.items():
-            for d in l:
-                d.append(data)
-
-# return context as list of paragraphs texts
-def get_paragraphs(url_list):
-    contexts_all = []
-    for url in url_list:
-        log.info("Get paragraphs from {}".format(url))
-        with urllib.request.urlopen(url) as response:
-            parser = HTMLDataExtractor(['title', 'p'])
-            charset='utf-8'
-            for h,v in response.headers.items():
-                m = re.match('.*charset=(\S+).*', v)
-                if m:
-                    charset = m.group(1)
-            data = response.read()
-            parser.feed(data.decode(charset))
-            title = ' '.join(parser.ended_tags['title'])
-            paragraphs = parser.ended_tags['p']
-            log.info("Article '{}' has {} chars in {} paragraphs".format(title, sum(len(p) for p in paragraphs), len(paragraphs)))
-            contexts_all.extend(paragraphs)
-
-    return contexts_all
 
 def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
@@ -178,13 +136,9 @@ def main():
 
         max_length_qc = ie_encoder_qa.input_info[input_names[0]].input_data.shape[1]
 
-
-
-
     #load vocabulary file for all models
     log.info("Loading vocab file:\t{}".format(args.vocab))
-    with open(args.vocab, "r", encoding="utf-8") as r:
-        vocab = dict((t.rstrip("\n"), i) for i, t in enumerate(r.readlines()))
+    vocab = load_vocab_file(args.vocab)
     log.info("{} tokens loaded".format(len(vocab)))
 
     #define function to infer embedding
