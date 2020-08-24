@@ -13,18 +13,14 @@ backbone.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP                              | 94.54% (internal test set)                |
-| Pose coverage                   | Standing upright, parallel to image plane |
-| Support of occluded persons     | YES                                       |
-| Occlusion coverage              | <50%                                      |
-| Min person height               | 100 pixels (on 1080p)                     |
+| AP @ [ IoU=0.50:0.95 ]          | 0.442 (internal test set)                 |
 | GFlops                          | 404.264                                   |
 | MParams                         | 71.565                                    |
 | Source framework                | PyTorch\*                                 |
 
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
-curve. Intersection over union threshold of 0.5 is used for matching.
+curve.
 
 ## Performance
 

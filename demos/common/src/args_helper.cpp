@@ -128,3 +128,11 @@ std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>&
     }
     return result;
 }
+
+cv::Size stringToSize(const std::string& str) {
+    std::vector<std::string> strings = split(str, 'x');
+    if (strings.size() != 2) {
+        throw std::invalid_argument("Can't convert std::string to cv::Size. The string must contain exactly one x");
+    }
+    return {std::stoi(strings[0]), std::stoi(strings[1])};
+}

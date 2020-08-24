@@ -380,6 +380,8 @@ class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
         query_cam_ids = self.extract_cam_id(annotations, True)
 
         valid_mask = self.eval_valid_matrix(gallery_person_ids, gallery_cam_ids, query_person_ids, query_cam_ids)
+        if np.size(gallery_embeddings) == 0 or np.size(query_embeddings) == 0:
+            return 0
 
         gallery_embeddings = gallery_embeddings / np.linalg.norm(gallery_embeddings, axis=1).reshape(-1, 1)
         query_embeddings = query_embeddings / np.linalg.norm(query_embeddings, axis=1).reshape(-1, 1)
