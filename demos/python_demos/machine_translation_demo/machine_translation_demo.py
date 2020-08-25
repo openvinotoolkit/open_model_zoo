@@ -50,7 +50,7 @@ class Translator:
             translation (str): translated sentence.
         """
         tokens = self.tokenizer_src.encode(sentence)
-        assert len(tokens) == self.max_tokens, "length of the tokens should equal the " + str(self.max_tokens) + " tokens"
+        assert len(tokens) == self.max_tokens, "the input sentence is too long."
         tokens = np.array(tokens).reshape(1, -1)
         translation = self.model(tokens)
         translation = self.tokenizer_tgt.decode(translation[0], remove_repeats)
