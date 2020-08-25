@@ -230,7 +230,7 @@ def main():
         if not question:
             break
 
-        log.info("---Stage 1--- Calc question embedding and compare with {} context embeddings".format(len(contexts_all)))
+        log.info("---Stage 1---Calc question embedding and compare with {} context embeddings".format(len(contexts_all)))
         q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
 
         q_emb = calc_emb(q_tokens_id, max_length_q)
