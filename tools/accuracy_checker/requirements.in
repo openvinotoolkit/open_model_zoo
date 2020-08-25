@@ -26,3 +26,6 @@ tokenizers
 
 # editdistance calculation
 editdistance
+
+# speech recognition with language modeling
+pypi-kenlm

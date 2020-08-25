@@ -184,6 +184,10 @@ AccuracyChecker supports following set of adapters:
   * `softmaxed_probabilities` - indicator that model uses softmax for output layer (default False).
 * `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
   * `blank_label` - index of the CTC blank label (default 0).
+* `ctc_beam_search_decoder` - Python implementation of CTC beam search decoder without LM for speech recognition.
+* `ctc_greedy_decoder` - CTC greedy decoder for speech recognition.
+* `ctc_beam_search_decoder_with_lm` - Python implementation of CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition.
+* `fast_ctc_beam_search_decoder_with_lm` - CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition, depends on ctcdecoder_numpy Python module.
 * `gaze_estimation` - converting output of gaze estimation model to `GazeVectorPrediction`.
 * `hit_ratio_adapter` - converting output NCF model to `HitRatioPrediction`.
 * `brain_tumor_segmentation` - converting output of brain tumor segmentation model to `BrainTumorSegmentationPrediction`.
