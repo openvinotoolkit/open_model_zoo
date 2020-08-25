@@ -21,17 +21,18 @@ If second (conventional SQuAD-tuned) Bert model is provided as well, it is used 
 
 Running the application with the `-h` option yields the following usage message:
 ```
-python3 question_answering_embedding_demo.py -h
+python3 bert_question_answering_embedding_demo.py -h
 ```
 The command yields the following usage message:
 ```
-usage: question_answering_embedding_demo.py [-h] -i INPUT [--par_num PAR_NUM]
-                                            -v VOCAB --model_emb MODEL_EMB
-                                            [--model_qa MODEL_QA]
-                                            [--input_names INPUT_NAMES]
-                                            [--output_names OUTPUT_NAMES]
-                                            [-a MAX_ANSWER_TOKEN_NUM]
-                                            [-d DEVICE] [-c]
+usage: bert_question_answering_embedding_demo.py [-h] -i INPUT
+                                                 [--par_num PAR_NUM] -v VOCAB
+                                                 -m_emb MODEL_EMB
+                                                 [-m_qa MODEL_QA]
+                                                 [--input_names INPUT_NAMES]
+                                                 [--output_names OUTPUT_NAMES]
+                                                 [-a MAX_ANSWER_TOKEN_NUM]
+                                                 [-d DEVICE] [-c]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -41,10 +42,11 @@ Options:
                         vectors
   -v VOCAB, --vocab VOCAB
                         Required. Path to vocabulary file with tokens
-  --model_emb MODEL_EMB
+  -m_emb MODEL_EMB, --model_emb MODEL_EMB
                         Required. Path to an .xml file with a trained model to
                         build embeddings
-  --model_qa MODEL_QA   Optional. Path to an .xml file with a trained model to
+  -m_qa MODEL_QA, --model_qa MODEL_QA
+                        Optional. Path to an .xml file with a trained model to
                         give exact answer
   --input_names INPUT_NAMES
                         Optional. Names for inputs in MODEL_QA network. For
@@ -62,6 +64,7 @@ Options:
   -c, --colors          Optional. Nice coloring of the questions/answers.
                         Might not work on some terminals (like Windows* cmd
                         console)
+
 
 ```
 
