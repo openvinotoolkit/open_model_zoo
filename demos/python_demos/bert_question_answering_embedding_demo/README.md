@@ -1,4 +1,4 @@
-# BERT Question Answering Embedding Python* Demo
+# BERT Question Answering Embedding Python\* Demo
 
 This README describes the Question Answering Embedding demo application that uses a Squad-tuned BERT model to calculate embedding vectors for context and question to find right context for question. The primary difference from the initial demo (../bert_question_answering_demo) is that this demo domonstrates how the inference can be accelerated via pre-computing the embeddings for the contexts. 
 
