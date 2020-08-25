@@ -253,17 +253,22 @@ struct PersonAttribsDetection : BaseDetection {
     std::string outputNameForAttributes;
     std::string outputNameForTopColorPoint;
     std::string outputNameForBottomColorPoint;
+    bool hasTopBottomColor;
 
 
-    PersonAttribsDetection() : BaseDetection(FLAGS_m_pa, "Person Attributes Recognition") {}
+    PersonAttribsDetection() : BaseDetection(FLAGS_m_pa, "Person Attributes Recognition"), hasTopBottomColor(false) {}
 
     struct AttributesAndColorPoints{
         std::vector<std::string> attributes_strings;
         std::vector<bool> attributes_indicators;
+
+        bool hasTopBottomColor;
         cv::Point2f top_color_point;
         cv::Point2f bottom_color_point;
         cv::Vec3b top_color;
         cv::Vec3b bottom_color;
+
+        AttributesAndColorPoints(): hasTopBottomColor(false) {}
     };
 
     static cv::Vec3b GetAvgColor(const cv::Mat& image) {
@@ -290,49 +295,68 @@ struct PersonAttribsDetection : BaseDetection {
     }
 
     AttributesAndColorPoints GetPersonAttributes() {
-        static const char *const attributeStrings[] = {
+        static const char *const attributeStringsFor7Attributes[] = {
+                "is male", "has_bag", "has hat", "has longsleeves", "has longpants", "has longhair", "has coat_jacket"
+        };
+        static const char *const attributeStringsFor8Attributes[] = {
                 "is male", "has_bag", "has_backpack" , "has hat", "has longsleeves", "has longpants", "has longhair", "has coat_jacket"
         };
 
         Blob::Ptr attribsBlob = request.GetBlob(outputNameForAttributes);
-        Blob::Ptr topColorPointBlob = request.GetBlob(outputNameForTopColorPoint);
-        Blob::Ptr bottomColorPointBlob = request.GetBlob(outputNameForBottomColorPoint);
         size_t numOfAttrChannels = attribsBlob->getTensorDesc().getDims().at(1);
-        size_t numOfTCPointChannels = topColorPointBlob->getTensorDesc().getDims().at(1);
-        size_t numOfBCPointChannels = bottomColorPointBlob->getTensorDesc().getDims().at(1);
 
-        if (numOfAttrChannels != arraySize(attributeStrings)) {
+        const char *const *attributeStrings;
+        if (numOfAttrChannels == arraySize(attributeStringsFor7Attributes)) {
+            attributeStrings = attributeStringsFor7Attributes;
+        } else if (numOfAttrChannels == arraySize(attributeStringsFor8Attributes)) {
+            attributeStrings = attributeStringsFor8Attributes;
+        } else {
             throw std::logic_error("Output size (" + std::to_string(numOfAttrChannels) + ") of the "
                                    "Person Attributes Recognition network is not equal to expected "
-                                   "number of attributes (" + std::to_string(arraySize(attributeStrings)) + ")");
+                                   "number of attributes ("
+                                   + std::to_string(arraySize(attributeStringsFor7Attributes))
+                                   + " or "
+                                   + std::to_string(arraySize(attributeStringsFor7Attributes)) + ")");
         }
-        if (numOfTCPointChannels != 2) {
-            throw std::logic_error("Output size (" + std::to_string(numOfTCPointChannels) + ") of the "
-                                   "Person Attributes Recognition network is not equal to point coordinates(2)");
-        }
-        if (numOfBCPointChannels != 2) {
-            throw std::logic_error("Output size (" + std::to_string(numOfBCPointChannels) + ") of the "
-                                   "Person Attributes Recognition network is not equal to point coordinates (2)");
-        }
-
-        LockedMemory<const void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rmap();
-        auto outputAttrValues = attribsBlobMapped.as<float*>();
-        LockedMemory<const void> topColorPointBlobMapped = as<MemoryBlob>(topColorPointBlob)->rmap();
-        auto outputTCPointValues = topColorPointBlobMapped.as<float*>();
-        LockedMemory<const void> bottomColorPointBlobMapped = as<MemoryBlob>(bottomColorPointBlob)->rmap();
-        auto outputBCPointValues = bottomColorPointBlobMapped.as<float*>();
 
         AttributesAndColorPoints returnValue;
 
-        returnValue.top_color_point.x = outputTCPointValues[0];
-        returnValue.top_color_point.y = outputTCPointValues[1];
-
-        returnValue.bottom_color_point.x = outputBCPointValues[0];
-        returnValue.bottom_color_point.y = outputBCPointValues[1];
-
-        for (size_t i = 0; i < arraySize(attributeStrings); i++) {
+        LockedMemory<const void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rmap();
+        auto outputAttrValues = attribsBlobMapped.as<float*>();
+        for (size_t i = 0; i < numOfAttrChannels; i++) {
             returnValue.attributes_strings.push_back(attributeStrings[i]);
             returnValue.attributes_indicators.push_back(outputAttrValues[i] > 0.5);
+        }
+
+        if (hasTopBottomColor) {
+            Blob::Ptr topColorPointBlob = request.GetBlob(outputNameForTopColorPoint);
+            Blob::Ptr bottomColorPointBlob = request.GetBlob(outputNameForBottomColorPoint);
+
+            size_t numOfTCPointChannels = topColorPointBlob->getTensorDesc().getDims().at(1);
+            size_t numOfBCPointChannels = bottomColorPointBlob->getTensorDesc().getDims().at(1);
+            if (numOfTCPointChannels != 2) {
+                throw std::logic_error("Output size (" + std::to_string(numOfTCPointChannels) + ") of the "
+                                       "Person Attributes Recognition network is not equal to point coordinates(2)");
+            }
+            if (numOfBCPointChannels != 2) {
+                throw std::logic_error("Output size (" + std::to_string(numOfBCPointChannels) + ") of the "
+                                       "Person Attributes Recognition network is not equal to point coordinates (2)");
+            }
+
+            returnValue.hasTopBottomColor = true;
+
+            LockedMemory<const void> topColorPointBlobMapped = as<MemoryBlob>(topColorPointBlob)->rmap();
+            auto outputTCPointValues = topColorPointBlobMapped.as<float*>();
+            LockedMemory<const void> bottomColorPointBlobMapped = as<MemoryBlob>(bottomColorPointBlob)->rmap();
+            auto outputBCPointValues = bottomColorPointBlobMapped.as<float*>();
+
+            returnValue.top_color_point.x = outputTCPointValues[0];
+            returnValue.top_color_point.y = outputTCPointValues[1];
+
+            returnValue.bottom_color_point.x = outputBCPointValues[0];
+            returnValue.bottom_color_point.y = outputBCPointValues[1];
+        } else {
+            returnValue.hasTopBottomColor = false;
         }
 
         return returnValue;
@@ -368,13 +392,19 @@ struct PersonAttribsDetection : BaseDetection {
         // ---------------------------Check outputs ------------------------------------------------------
         slog::info << "Checking Person Attribs outputs" << slog::endl;
         OutputsDataMap outputInfo(network.getOutputsInfo());
-        if (outputInfo.size() != 3) {
-             throw std::logic_error("Person Attribs Network expects networks having one output");
+        if ((outputInfo.size() != 1) && (outputInfo.size() != 3)) {
+             throw std::logic_error("Person Attribs Network expects either a network having one output (person attributes), "
+                                    "or a network having three outputs (person attributes, top color point, bottom color point)");
         }
         auto it = outputInfo.begin();
         outputNameForAttributes = (it++)->second->getName();  // attribute probabilities
-        outputNameForTopColorPoint = (it++)->second->getName();  // top color location
-        outputNameForBottomColorPoint = (it++)->second->getName();  // bottom color location
+        if (outputInfo.size() == 3) {
+            outputNameForTopColorPoint = (it++)->second->getName();  // top color location
+            outputNameForBottomColorPoint = (it++)->second->getName();  // bottom color location
+            hasTopBottomColor = true;
+        } else {
+            hasTopBottomColor = false;
+        }
         slog::info << "Loading Person Attributes Recognition model to the "<< FLAGS_d_pa << " device" << slog::endl;
         _enabled = true;
         return network;
@@ -605,7 +635,7 @@ int main(int argc, char *argv[]) {
             ms personAttribsNetworkTime(0), personReIdNetworktime(0);
             int personAttribsInferred = 0,  personReIdInferred = 0;
             for (auto && result : personDetection.results) {
-                if (result.label == 1) {  // person
+                if (result.label == FLAGS_person_label) {  // person
                     if (FLAGS_auto_resize) {
                         cropRoi.posX = (result.location.x < 0) ? 0 : result.location.x;
                         cropRoi.posY = (result.location.y < 0) ? 0 : result.location.y;
@@ -617,11 +647,8 @@ int main(int argc, char *argv[]) {
                         auto clippedRect = result.location & cv::Rect(0, 0, frame.cols, frame.rows);
                         person = frame(clippedRect);
                     }
-                    PersonAttribsDetection::AttributesAndColorPoints resPersAttrAndColor;
-                    std::string resPersReid = "";
-                    cv::Point top_color_p;
-                    cv::Point bottom_color_p;
 
+                    PersonAttribsDetection::AttributesAndColorPoints resPersAttrAndColor;
                     if (personAttribs.enabled()) {
                         // --------------------------- Run Person Attributes Recognition -----------------------
                         if (FLAGS_auto_resize) {
@@ -640,36 +667,43 @@ int main(int argc, char *argv[]) {
 
                         resPersAttrAndColor = personAttribs.GetPersonAttributes();
 
-                        top_color_p.x = static_cast<int>(resPersAttrAndColor.top_color_point.x) * person.cols;
-                        top_color_p.y = static_cast<int>(resPersAttrAndColor.top_color_point.y) * person.rows;
+                        if (resPersAttrAndColor.hasTopBottomColor) {
+                            cv::Point top_color_p;
+                            cv::Point bottom_color_p;
 
-                        bottom_color_p.x = static_cast<int>(resPersAttrAndColor.bottom_color_point.x) * person.cols;
-                        bottom_color_p.y = static_cast<int>(resPersAttrAndColor.bottom_color_point.y) * person.rows;
+                            top_color_p.x = static_cast<int>(resPersAttrAndColor.top_color_point.x) * person.cols;
+                            top_color_p.y = static_cast<int>(resPersAttrAndColor.top_color_point.y) * person.rows;
+
+                            bottom_color_p.x = static_cast<int>(resPersAttrAndColor.bottom_color_point.x) * person.cols;
+                            bottom_color_p.y = static_cast<int>(resPersAttrAndColor.bottom_color_point.y) * person.rows;
 
 
-                        cv::Rect person_rect(0, 0, person.cols, person.rows);
+                            cv::Rect person_rect(0, 0, person.cols, person.rows);
 
-                        // Define area around top color's location
-                        cv::Rect tc_rect;
-                        tc_rect.x = top_color_p.x - person.cols / 6;
-                        tc_rect.y = top_color_p.y - person.rows / 10;
-                        tc_rect.height = 2 * person.rows / 8;
-                        tc_rect.width = 2 * person.cols / 6;
+                            // Define area around top color's location
+                            cv::Rect tc_rect;
+                            tc_rect.x = top_color_p.x - person.cols / 6;
+                            tc_rect.y = top_color_p.y - person.rows / 10;
+                            tc_rect.height = 2 * person.rows / 8;
+                            tc_rect.width = 2 * person.cols / 6;
 
-                        tc_rect = tc_rect & person_rect;
+                            tc_rect = tc_rect & person_rect;
 
-                        // Define area around bottom color's location
-                        cv::Rect bc_rect;
-                        bc_rect.x = bottom_color_p.x - person.cols / 6;
-                        bc_rect.y = bottom_color_p.y - person.rows / 10;
-                        bc_rect.height =  2 * person.rows / 8;
-                        bc_rect.width = 2 * person.cols / 6;
+                            // Define area around bottom color's location
+                            cv::Rect bc_rect;
+                            bc_rect.x = bottom_color_p.x - person.cols / 6;
+                            bc_rect.y = bottom_color_p.y - person.rows / 10;
+                            bc_rect.height =  2 * person.rows / 8;
+                            bc_rect.width = 2 * person.cols / 6;
 
-                        bc_rect = bc_rect & person_rect;
+                            bc_rect = bc_rect & person_rect;
 
-                        resPersAttrAndColor.top_color = PersonAttribsDetection::GetAvgColor(person(tc_rect));
-                        resPersAttrAndColor.bottom_color = PersonAttribsDetection::GetAvgColor(person(bc_rect));
+                            resPersAttrAndColor.top_color = PersonAttribsDetection::GetAvgColor(person(tc_rect));
+                            resPersAttrAndColor.bottom_color = PersonAttribsDetection::GetAvgColor(person(bc_rect));
+                        }
                     }
+
+                    std::string resPersReid = "";
                     if (personReId.enabled()) {
                         // --------------------------- Run Person Reidentification -----------------------------
                         if (FLAGS_auto_resize) {
@@ -704,8 +738,10 @@ int main(int argc, char *argv[]) {
                         cv::Rect bc_label(result.location.x + result.location.width, result.location.y + result.location.height / 2,
                                             result.location.width / 4, result.location.height / 2);
 
-                        frame(tc_label & image_area) = resPersAttrAndColor.top_color;
-                        frame(bc_label & image_area) = resPersAttrAndColor.bottom_color;
+                        if (resPersAttrAndColor.hasTopBottomColor) {
+                            frame(tc_label & image_area) = resPersAttrAndColor.top_color;
+                            frame(bc_label & image_area) = resPersAttrAndColor.bottom_color;
+                        }
 
                         for (size_t i = 0; i < resPersAttrAndColor.attributes_strings.size(); ++i) {
                             cv::Scalar color;
@@ -729,8 +765,13 @@ int main(int argc, char *argv[]) {
                                 if (resPersAttrAndColor.attributes_indicators[i])
                                     output_attribute_string += resPersAttrAndColor.attributes_strings[i] + ",";
                             std::cout << "Person Attributes results: " << output_attribute_string << std::endl;
-                            std::cout << "Person top color: " << resPersAttrAndColor.top_color << std::endl;
-                            std::cout << "Person bottom color: " << resPersAttrAndColor.bottom_color << std::endl;
+                            if (resPersAttrAndColor.hasTopBottomColor) {
+                                std::cout << "Person top color: " << resPersAttrAndColor.top_color << std::endl;
+                                std::cout << "Person bottom color: " << resPersAttrAndColor.bottom_color << std::endl;
+                            } else {
+                                std::cout << "Person top color: N/A" << std::endl;
+                                std::cout << "Person bottom color: N/A" << std::endl;
+                            }
                         }
                     }
                     if (!resPersReid.empty()) {
