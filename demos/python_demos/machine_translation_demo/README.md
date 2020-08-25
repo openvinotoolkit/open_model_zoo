@@ -28,7 +28,7 @@ optional arguments:
                         Required. Path to the folder with tgt tokenizer that
                         contains vocab.json and merges.txt.
   --output-name OUTPUT_NAME
-                        Name of the models output node.
+                        Optional. Name of the models output node.
 ```
 
 To run the demo, you can use Intel's pretrained model. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md) or go to the [Intel&reg; Open Source Technology Center](https://download.01.org/opencv/).

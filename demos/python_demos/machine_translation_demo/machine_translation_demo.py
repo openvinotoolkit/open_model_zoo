@@ -133,8 +133,7 @@ class Tokenizer:
             tokens (np.array): encoded sentence in tokneized format.
         """
         tokens = self.tokenizer.encode(sentence).ids
-        tokens = self._extend_tokens(tokens)
-        return tokens
+        return self._extend_tokens(tokens)
 
     def decode(self, tokens, remove_repeats=True):
         """ Decode method for tokens.
@@ -192,7 +191,7 @@ def build_argparser():
     parser.add_argument('--tokenizer-tgt', type=str, required=True,
                         help='Required. Path to the folder with tgt tokenizer that contains vocab.json and merges.txt.')
     parser.add_argument('--output-name', type=str, default='pred/Squeeze',
-                        help='Name of the models output node.')
+                        help='Optional. Name of the models output node.')
     return parser
 
 
