@@ -84,7 +84,6 @@ def main():
     max_length_q = 32
 
     for l in [max_length_q, max_length_c]:
-
         new_shapes = {}
         for i,input_info in ie_encoder_emb.input_info.items():
             new_shapes[i] = [1, l]
