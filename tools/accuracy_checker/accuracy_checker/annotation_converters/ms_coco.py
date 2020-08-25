@@ -185,6 +185,13 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
                 ),
                 'dataset_meta_file': PathField(
                     description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
+                ),
+                'sort_annotations': BoolField(
+                    optional=True, default=True, description='Allows to sort annotations before conversion'
+                ),
+                'sort_key': StringField(
+                    optional=True, default='image_id', choices=['image_id', 'image_size'],
+                    description='Key by which annotations will be sorted.'
                 )
             }
         )
@@ -194,6 +201,8 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
         super().configure()
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
+        self.sort_annotations = self.get_value_from_config('sort_annotations')
+        self.sort_key = self.get_value_from_config('sort_key')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         keypoints_annotations = []
@@ -201,16 +210,25 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
 
         full_annotation = read_json(self.annotation_file)
         image_info = full_annotation['images']
+
+        image_ids = [(image['id'], image['file_name'], np.array([image['height'], image['width'], 3]))
+                     for image in image_info]
+        if self.sort_annotations:
+            if self.sort_key == 'image_id':
+                image_ids.sort(key=lambda value: value[0])
+            else:
+                image_ids.sort(key=lambda value: tuple(value[2]))
+
         annotations = full_annotation['annotations']
         label_map, _ = get_label_map(self.dataset_meta, full_annotation, True)
         num_iterations = len(image_info)
-        for image_id, image in enumerate(image_info):
-            identifier = image['file_name']
+        for image_id, image in enumerate(image_ids):
+            identifier = image[1]
             if check_content:
                 full_image_path = self.images_dir / identifier
                 if not check_file_existence(full_image_path):
                     content_errors.append('{}: does not exist'.format(full_image_path))
-            image_annotation = get_image_annotation(image['id'], annotations)
+            image_annotation = get_image_annotation(image[0], annotations)
             if not image_annotation:
                 continue
             x_vals, y_vals, visibility, labels, areas, is_crowd, bboxes, difficult = [], [], [], [], [], [], [], []
@@ -324,6 +342,13 @@ class MSCocoSingleKeypointsConverter(FileBasedAnnotationConverter):
                 'images_dir': PathField(
                     is_directory=True, optional=True,
                     description='path to dataset images, used only for content existence check'
+                ),
+                'sort_annotations': BoolField(
+                    optional=True, default=True, description='Allows to sort annotations before conversion'
+                ),
+                'sort_key': StringField(
+                    optional=True, default='image_id', choices=['image_id', 'image_size'],
+                    description='Key by which annotations will be sorted.'
                 )
             }
         )
@@ -332,6 +357,8 @@ class MSCocoSingleKeypointsConverter(FileBasedAnnotationConverter):
     def configure(self):
         super().configure()
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
+        self.sort_annotations = self.get_value_from_config('sort_annotations')
+        self.sort_key = self.get_value_from_config('sort_key')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         keypoints_annotations = []
@@ -339,15 +366,24 @@ class MSCocoSingleKeypointsConverter(FileBasedAnnotationConverter):
 
         full_annotation = read_json(self.annotation_file)
         image_info = full_annotation['images']
+
+        image_ids = [(image['id'], image['file_name'], np.array([image['height'], image['width'], 3]))
+                     for image in image_info]
+        if self.sort_annotations:
+            if self.sort_key == 'image_id':
+                image_ids.sort(key=lambda value: value[0])
+            else:
+                image_ids.sort(key=lambda value: tuple(value[2]))
+
         annotations = full_annotation['annotations']
         num_iterations = len(image_info)
-        for image_id, image in enumerate(image_info):
-            identifier = image['file_name']
+        for image_id, image in enumerate(image_ids):
+            identifier = image[1]
             if check_content:
                 full_image_path = self.images_dir / identifier
                 if not check_file_existence(full_image_path):
                     content_errors.append('{}: does not exist'.format(full_image_path))
-            image_annotation = get_image_annotation(image['id'], annotations)
+            image_annotation = get_image_annotation(image[0], annotations)
             if not image_annotation:
                 continue
             for target in image_annotation:
