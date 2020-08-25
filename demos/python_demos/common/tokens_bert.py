@@ -72,18 +72,11 @@ def split_to_words(text):
         prev_is_sep = cur_is_sep
 
 # get big text and return list of token id and start-end positions for each id in original texts
-def text_to_tokens(text, vocab_or_tokenizer):
+def text_to_tokens(text, vocab):
     tokens_id = []
     tokens_se = []
     for s, e in split_to_words(text):
-        if hasattr(vocab_or_tokenizer, 'encode'):
-            #vocab_or_tokenizer is tokenizer
-            toks = vocab_or_tokenizer.encode(text[s:e], add_special_tokens=False)
-        else:
-            #vocab_or_tokenizer is tokens dictionary
-            toks = encode_by_voc(text[s:e], vocab_or_tokenizer)
-
-        for tok in toks:
+        for tok in encode_by_voc(text[s:e], vocab):
             tokens_id.append(tok)
             tokens_se.append((s, e))
 

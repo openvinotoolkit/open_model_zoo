@@ -1,6 +1,6 @@
 # BERT Question Answering Embedding Python\* Demo
 
-This README describes the Question Answering Embedding demo application that uses a Squad-tuned BERT model to calculate embedding vectors for context and question to find right context for question. The primary difference from the initial demo (../bert_question_answering_demo) is that this demo domonstrates how the inference can be accelerated via pre-computing the embeddings for the contexts. 
+This README describes the Question Answering Embedding demo application that uses a Squad-tuned BERT model to calculate embedding vectors for context and question to find right context for question. The primary difference from the initial demo (../bert_question_answering_demo) is that this demo domonstrates how the inference can be accelerated via pre-computing the embeddings for the contexts.
 
 ## How It Works
 
@@ -28,9 +28,10 @@ The command yields the following usage message:
 usage: bert_question_answering_embedding_demo.py [-h] -i INPUT
                                                  [--par_num PAR_NUM] -v VOCAB
                                                  -m_emb MODEL_EMB
+                                                 [--input_names_emb INPUT_NAMES_EMB]
                                                  [-m_qa MODEL_QA]
-                                                 [--input_names INPUT_NAMES]
-                                                 [--output_names OUTPUT_NAMES]
+                                                 [--input_names_qa INPUT_NAMES_QA]
+                                                 [--output_names_qa OUTPUT_NAMES_QA]
                                                  [-a MAX_ANSWER_TOKEN_NUM]
                                                  [-d DEVICE] [-c]
 
@@ -38,21 +39,24 @@ Options:
   -h, --help            Show this help message and exit.
   -i INPUT, --input INPUT
                         Required. Urls to a wiki pages with context
-  --par_num PAR_NUM     Optional. Number of contexts filtered in by embedding
-                        vectors
+  --par_num PAR_NUM     Optional. Number of best (closest) contexts selected
   -v VOCAB, --vocab VOCAB
                         Required. Path to vocabulary file with tokens
   -m_emb MODEL_EMB, --model_emb MODEL_EMB
                         Required. Path to an .xml file with a trained model to
                         build embeddings
+  --input_names_emb INPUT_NAMES_EMB
+                        Optional. Names for inputs in MODEL_EMB network. For
+                        example 'input_ids,attention_mask,token_type_ids','pos
+                        ition_ids'
   -m_qa MODEL_QA, --model_qa MODEL_QA
                         Optional. Path to an .xml file with a trained model to
                         give exact answer
-  --input_names INPUT_NAMES
+  --input_names_qa INPUT_NAMES_QA
                         Optional. Names for inputs in MODEL_QA network. For
                         example 'input_ids,attention_mask,token_type_ids','pos
                         ition_ids'
-  --output_names OUTPUT_NAMES
+  --output_names_qa OUTPUT_NAMES_QA
                         Optional. Names for outputs in MODEL_QA network. For
                         example 'output_s,output_e'
   -a MAX_ANSWER_TOKEN_NUM, --max_answer_token_num MAX_ANSWER_TOKEN_NUM
@@ -64,6 +68,7 @@ Options:
   -c, --colors          Optional. Nice coloring of the questions/answers.
                         Might not work on some terminals (like Windows* cmd
                         console)
+
 
 
 ```

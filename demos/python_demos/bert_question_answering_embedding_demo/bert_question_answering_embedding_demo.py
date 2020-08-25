@@ -33,27 +33,44 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("-i", "--input", help="Required. Urls to a wiki pages with context",
+    args.add_argument("-i", "--input",
+                      help="Required. Urls to a wiki pages with context",
                       required=True, type=str)
-    args.add_argument("--par_num", help="Optional. Number of contexts filtered in by embedding vectors",
-                      default=10, required=False, type=int)
-    args.add_argument("-v", "--vocab", help="Required. Path to vocabulary file with tokens",
+    args.add_argument("--par_num",
+                      help="Optional. Number of best (closest) contexts selected",
+                      default=10,
+                      required=False, type=int)
+    args.add_argument("-v", "--vocab",
+                      help="Required. Path to vocabulary file with tokens",
                       required=True, type=str)
-    args.add_argument("-m_emb","--model_emb", help="Required. Path to an .xml file with a trained model to build embeddings",
-                      required=True, type=str, default=None)
-
-    args.add_argument("-m_qa","--model_qa", help="Optional. Path to an .xml file with a trained model to give exact answer",
+    args.add_argument("-m_emb","--model_emb",
+                      help="Required. Path to an .xml file with a trained model to build embeddings",
+                      required=True, type=str)
+    args.add_argument("--input_names_emb",
+                      help="Optional. Names for inputs in MODEL_EMB network. For example 'input_ids,attention_mask,token_type_ids','position_ids'",
+                      default='input_ids,attention_mask,token_type_ids,position_ids',
                       required=False, type=str)
-    args.add_argument("--input_names", help="Optional. Names for inputs in MODEL_QA network. For example 'input_ids,attention_mask,token_type_ids','position_ids'",
+    args.add_argument("-m_qa","--model_qa",
+                      help="Optional. Path to an .xml file with a trained model to give exact answer",
+                      default = None,
+                      required=False,type=str)
+    args.add_argument("--input_names_qa",
+                      help="Optional. Names for inputs in MODEL_QA network. For example 'input_ids,attention_mask,token_type_ids','position_ids'",
+                      default='input_ids,attention_mask,token_type_ids,position_ids',
                       required=False, type=str)
-    args.add_argument("--output_names", help="Optional. Names for outputs in MODEL_QA network. For example 'output_s,output_e'",
+    args.add_argument("--output_names_qa",
+                      help="Optional. Names for outputs in MODEL_QA network. For example 'output_s,output_e'",
+                      default='output_s,output_e',
                       required=False, type=str)
-    args.add_argument("-a", "--max_answer_token_num", help="Optional. Maximum number of tokens in exact answer",
-                      default=15, required=False, type=int)
+    args.add_argument("-a", "--max_answer_token_num",
+                      help="Optional. Maximum number of tokens in exact answer",
+                      default=15,
+                      required=False, type=int)
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU is "
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
-                      default="CPU", type=str)
+                      default="CPU",
+                      required=False, type=str)
     args.add_argument('-c', '--colors', action='store_true',
                       help="Optional. Nice coloring of the questions/answers. "
                            "Might not work on some terminals (like Windows* cmd console)")
@@ -72,11 +89,21 @@ def main():
 
     log.info("Loading embedding network files:\n\t{}\n\t{}".format(model_xml_emb, model_bin_emb))
     ie_encoder_emb = ie.read_network(model=model_xml_emb, weights=model_bin_emb)
-    # check input and output names
     input_names_model_emb = list(ie_encoder_emb.input_info.keys())
+    input_names_emb = args.input_names_emb.split(',')
+    log.info("Expected embedding input names: {}".format(input_names_emb))
+    log.info("Network embedding input names: {}".format(input_names_model_emb))
+    # check input names
+    if set(input_names_model_emb) != set(input_names_emb):
+        log.error("Unexpected embedding nework input names")
+        raise Exception("Unexpected embedding nework input names")
+
+    # check outputs
     output_names_model_emb = list(ie_encoder_emb.outputs.keys())
-    log.info(
-        "Network embedding input->output names: {}->{}".format(input_names_model_emb, output_names_model_emb))
+    if len(output_names_model_emb)>1:
+        log.error("Expected only single output in embedding nework but {} outputs detected".format(output_names_model_emb))
+        raise Exception("Unexpected number of embedding nework outputs")
+
 
     #reshape embedding model to infer short questions and long contexts
     ie_encoder_exec_emb_dict = {}
@@ -113,19 +140,15 @@ def main():
         ie_encoder_qa = ie.read_network(model=model_xml, weights=model_bin)
         ie_encoder_qa.batch_size = 1
 
-        if args.input_names and args.output_names:
-            input_names = args.input_names.split(',')
-            output_names = args.output_names.split(',')
-            log.info("Expected input->output names: {}->{}".format(input_names, output_names))
-        else:
-            log.error("Please specify input_names and output_names for {} model".format(args.model_qa))
-            raise Exception("input_names and output_names are missed in cmd args")
+        input_names_qa = args.input_names_qa.split(',')
+        output_names_qa = args.output_names_qa.split(',')
+        log.info("Expected input->output names: {}->{}".format(input_names_qa, output_names_qa))
 
         #check input and output names
-        input_names_model = list(ie_encoder_qa.input_info.keys())
-        output_names_model = list(ie_encoder_qa.outputs.keys())
-        log.info("Network input->output names: {}->{}".format(input_names_model, output_names_model))
-        if set(input_names_model) != set(input_names) or set(output_names_model) != set(output_names):
+        input_names_model_qa = list(ie_encoder_qa.input_info.keys())
+        output_names_model_qa = list(ie_encoder_qa.outputs.keys())
+        log.info("Network input->output names: {}->{}".format(input_names_model_qa, output_names_model_qa))
+        if set(input_names_model_qa) != set(input_names_qa) or set(output_names_model_qa) != set(output_names_qa):
             log.error("Unexpected nework input or output names")
             raise Exception("Unexpected nework input or output names")
 
@@ -133,7 +156,7 @@ def main():
         log.info("Loading model to the plugin")
         ie_encoder_qa_exec = ie.load_network(network=ie_encoder_qa, device_name=args.device)
 
-        max_length_qc = ie_encoder_qa.input_info[input_names[0]].input_data.shape[1]
+        max_length_qc = ie_encoder_qa.input_info[input_names_qa[0]].input_data.shape[1]
 
     #load vocabulary file for all models
     log.info("Loading vocab file:\t{}".format(args.vocab))
@@ -152,10 +175,10 @@ def main():
 
         dtype = np.int32
         inputs = {
-            'input_ids':      np.array([tok_cls + tokens_id[:num] + tok_sep + tok_pad * pad_len], dtype=dtype),
-            'attention_mask': np.array([[1]     + [1] * num       + [1]     + [0]     * pad_len], dtype=dtype),
-            'token_type_ids': np.array([[0]     + [0] * num       + [0]     + tok_pad * pad_len], dtype=dtype),
-            'position_ids':   np.arange(max_length, dtype=dtype)[None, :]
+            input_names_emb[0]: np.array([tok_cls + tokens_id[:num] + tok_sep + tok_pad * pad_len], dtype=dtype),
+            input_names_emb[1]: np.array([[1]     + [1] * num       + [1]     + [0]     * pad_len], dtype=dtype),
+            input_names_emb[2]: np.array([[0]     + [0] * num       + [0]     + tok_pad * pad_len], dtype=dtype),
+            input_names_emb[3]: np.arange(max_length, dtype=dtype)[None, :]
         }
 
         # calc embedding
@@ -266,11 +289,11 @@ def main():
 
                 #create numpy inputs for IE
                 inputs = {
-                    input_names[0]: np.array([input_ids], dtype=np.int32),
-                    input_names[1]: np.array([attention_mask], dtype=np.int32),
-                    input_names[2]: np.array([token_type_ids], dtype=np.int32),
+                    input_names_qa[0]: np.array([input_ids], dtype=np.int32),
+                    input_names_qa[1]: np.array([attention_mask], dtype=np.int32),
+                    input_names_qa[2]: np.array([token_type_ids], dtype=np.int32),
                 }
-                if len(input_names) > 3:
+                if len(input_names_qa) > 3:
                     inputs['position_ids'] = np.arange(max_length_qc, dtype=np.int32)[None, :]
 
                 #infer by IE
@@ -288,8 +311,8 @@ def main():
                 def get_score(name):
                     out = np.exp(res[name].reshape((max_length_qc, )))
                     return out / out.sum(axis=-1)
-                score_s = get_score(output_names[0])
-                score_e = get_score(output_names[1])
+                score_s = get_score(output_names_qa[0])
+                score_e = get_score(output_names_qa[1])
 
                 # find product of all start-end combinations to find the best one
                 c_s_idx = len(q_tokens_id) + 2 # index of first context token in tensor
