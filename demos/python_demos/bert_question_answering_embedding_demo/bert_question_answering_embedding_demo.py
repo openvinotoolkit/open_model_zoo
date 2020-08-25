@@ -66,7 +66,7 @@ def main():
     log.info("Creating Inference Engine")
     ie = IECore()
 
-    #read model to calculate mebedding
+    #read model to calculate embedding
     model_xml_emb = args.model_emb
     model_bin_emb = os.path.splitext(model_xml_emb)[0] + ".bin"
 
