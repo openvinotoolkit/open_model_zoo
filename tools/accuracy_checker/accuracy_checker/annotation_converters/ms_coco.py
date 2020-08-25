@@ -56,6 +56,12 @@ def get_label_map(dataset_meta, full_annotation, use_full_label_map=False, has_b
     return label_map, label_id_to_label
 
 
+sort_lambda = {
+    'image_id': lambda value: value[0],
+    'image_size': lambda value: tuple(value[2])
+}
+
+
 class MSCocoDetectionConverter(BaseFormatConverter):
     __provider__ = 'mscoco_detection'
     annotation_types = (DetectionAnnotation, )
@@ -105,10 +111,7 @@ class MSCocoDetectionConverter(BaseFormatConverter):
         image_ids = [(image['id'], image['file_name'], np.array([image['height'], image['width'], 3]))
                      for image in image_info]
         if self.sort_annotations:
-            if self.sort_key == 'image_id':
-                image_ids.sort(key=lambda value: value[0])
-            else:
-                image_ids.sort(key=lambda value: tuple(value[2]))
+            image_ids.sort(key=sort_lambda[self.sort_key])
 
         annotations = full_annotation['annotations']
 
@@ -214,10 +217,7 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
         image_ids = [(image['id'], image['file_name'], np.array([image['height'], image['width'], 3]))
                      for image in image_info]
         if self.sort_annotations:
-            if self.sort_key == 'image_id':
-                image_ids.sort(key=lambda value: value[0])
-            else:
-                image_ids.sort(key=lambda value: tuple(value[2]))
+            image_ids.sort(key=sort_lambda[self.sort_key])
 
         annotations = full_annotation['annotations']
         label_map, _ = get_label_map(self.dataset_meta, full_annotation, True)
@@ -370,10 +370,7 @@ class MSCocoSingleKeypointsConverter(FileBasedAnnotationConverter):
         image_ids = [(image['id'], image['file_name'], np.array([image['height'], image['width'], 3]))
                      for image in image_info]
         if self.sort_annotations:
-            if self.sort_key == 'image_id':
-                image_ids.sort(key=lambda value: value[0])
-            else:
-                image_ids.sort(key=lambda value: tuple(value[2]))
+            image_ids.sort(key=sort_lambda[self.sort_key])
 
         annotations = full_annotation['annotations']
         num_iterations = len(image_info)
