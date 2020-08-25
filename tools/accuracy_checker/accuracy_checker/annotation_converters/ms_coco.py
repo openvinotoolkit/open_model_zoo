@@ -77,7 +77,8 @@ class MSCocoDetectionConverter(BaseFormatConverter):
                 optional=True, default=True, description='Allows to sort annotations before conversion'
             ),
             'sort_key': StringField(
-                optional=True, default='image_id', choices=['image_id', 'image_size'], description='Key by which annotations will be sorted.'
+                optional=True, default='image_id', choices=['image_id', 'image_size'],
+                description='Key by which annotations will be sorted.'
             ),
             'images_dir': PathField(
                 is_directory=True, optional=True,
