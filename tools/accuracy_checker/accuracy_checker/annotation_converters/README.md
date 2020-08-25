@@ -91,22 +91,27 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `annotation_file` - path ot annotation file in json format.
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is False).
   * `use_full_label_map` - allows to use original label map (with 91 object categories) from paper instead public available(80 categories).
-  * `sort_annotations` - allows to save annotations in image id ascend order.
+  * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
+  * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `mscoco_segmentation` - converts MS COCO dataset for object instance segmentation task to `CocoInstanceSegmentationAnnotation`.
   * `annotation_file` - path ot annotation file in json format.
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is False).
   * `use_full_label_map` - allows to use original label map (with 91 object categories) from paper instead public available(80 categories).
-  * `sort_annotations` - allows to save annotations in image id ascend order.
+  * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
+  * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `mscoco_mask_rcnn` - converts MS COCO dataset to `ContainerAnnotation` with `DetectionAnnotation` and `CocoInstanceSegmentationAnnotation` named `detection_annotation` and `segmentation_annotation` respectively.
   * `annotation_file` - path ot annotation file in json format.
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is False).
   * `use_full_label_map` - allows to use original label map (with 91 object categories) from paper instead public available(80 categories).
-  * `sort_annotations` - allows to save annotations in image id ascend order.
+  * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
+  * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `mscoco_keypoints` - converts MS COCO dataset for keypoints localization task to `PoseEstimationAnnotation`.
   * `annotation_file` - path ot annotation file in json format.
+  * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
+  * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
 * `wider` - converts from Wider Face dataset to `DetectionAnnotation`.
   * `annotation_file` - path to txt file, which contains ground truth data in WiderFace dataset format.
   * `label_start` - specifies face label index in label map. Default value is 1. You can provide another value, if you want to use this dataset for separate label validation,
