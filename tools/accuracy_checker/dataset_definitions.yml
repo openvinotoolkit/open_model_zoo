@@ -107,6 +107,7 @@ datasets:
     annotation_conversion:
       converter: mscoco_keypoints
       annotation_file: person_keypoints_val2017.json
+      sort_key: image_size
     annotation: mscoco_keypoints.pickle
     dataset_meta: mscoco_keypoints.json
     metrics:
