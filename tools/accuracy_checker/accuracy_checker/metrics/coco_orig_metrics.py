@@ -403,7 +403,7 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
     iou_type = 'segm'
 
     @staticmethod
-    def _iou_type_data_to_coco(data_to_store, data):
+    def _iou_type_data_to_coco(data_to_store, data, box_side_delta):
         encoded_masks = data.mask
 
         for data_record, segm_mask in zip(data_to_store, encoded_masks):
@@ -443,7 +443,7 @@ class MSCOCOorigSegmRecall(MSCOCOorigRecall):
     iou_type = 'segm'
 
     @staticmethod
-    def _iou_type_data_to_coco(data_to_store, data):
+    def _iou_type_data_to_coco(data_to_store, data, box_side_delta):
         encoded_masks = data.mask
 
         for data_record, segm_mask in zip(data_to_store, encoded_masks):
@@ -473,7 +473,7 @@ class MSCOCOOrigKeyPointsAveragePrecision(MSCOCOorigAveragePrecision):
     iou_type = 'keypoints'
 
     @staticmethod
-    def _iou_type_data_to_coco(data_to_store, data):
+    def _iou_type_data_to_coco(data_to_store, data, box_side_delta):
         for data_record, x_val, y_val, vis in zip(
                 data_to_store, data.x_values, data.y_values, data.visibility
         ):
