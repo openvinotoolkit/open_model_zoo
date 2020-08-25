@@ -39,10 +39,10 @@ def build_argparser():
                       default=10, required=False, type=int)
     args.add_argument("-v", "--vocab", help="Required. Path to vocabulary file with tokens",
                       required=True, type=str)
-    args.add_argument("-m","--model_emb", help="Required. Path to an .xml file with a trained model to build embeddings",
+    args.add_argument("-m_emb","--model_emb", help="Required. Path to an .xml file with a trained model to build embeddings",
                       required=True, type=str, default=None)
 
-    args.add_argument("--model_qa", help="Optional. Path to an .xml file with a trained model to give exact answer",
+    args.add_argument("-m_qa","--model_qa", help="Optional. Path to an .xml file with a trained model to give exact answer",
                       required=False, type=str)
     args.add_argument("--input_names", help="Optional. Names for inputs in MODEL_QA network. For example 'input_ids,attention_mask,token_type_ids','position_ids'",
                       required=False, type=str)
