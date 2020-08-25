@@ -209,7 +209,7 @@ def main():
         # init scan window
         c_s, c_e = 0, min(c_wnd_len, len(c_tokens_id))
 
-        # iterate while context window does not empty
+        # iterate while context window is not empty
         while c_e > c_s:
             contexts_all.append(ContextData(par, c_tokens_id[c_s:c_e], c_tokens_se[c_s:c_e]))
 
