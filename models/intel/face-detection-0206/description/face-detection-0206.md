@@ -1,4 +1,4 @@
-# face-detection-0106
+# face-detection-0206
 
 ## Use Case and High-Level Description
 
@@ -7,7 +7,7 @@ ATSS head for indoor and outdoor scenes shot by a front-facing camera.
 
 ## Example
 
-![](./face-detection-0106.png)
+![](./face-detection-0206.png)
 
 ## Specification
 

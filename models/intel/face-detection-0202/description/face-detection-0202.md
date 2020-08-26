@@ -1,4 +1,4 @@
-# face-detection-0102
+# face-detection-0202
 
 ## Use Case and High-Level Description
 
@@ -8,7 +8,7 @@ During the training of this model, training images were resized to 384x384.
 
 ## Example
 
-![](./face-detection-0102.png)
+![](./face-detection-0202.png)
 
 ## Specification
 

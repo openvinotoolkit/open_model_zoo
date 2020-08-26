@@ -1,4 +1,4 @@
-# face-detection-0105
+# face-detection-0205
 
 ## Use Case and High-Level Description
 
@@ -7,7 +7,7 @@ FCOS head for indoor and outdoor scenes shot by a front-facing camera.
 
 ## Example
 
-![](./face-detection-0105.png)
+![](./face-detection-0205.png)
 
 ## Specification
 
