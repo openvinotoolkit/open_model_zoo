@@ -87,7 +87,7 @@ Be sure that the original model converted by Model Optimizer with reshape option
 Please see general [reshape intro and limitations](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_ShapeInference.html)
 
 ## Demo Outputs
-The application outputs found answers to the same console.
+The application outputs contexts with answers to the same console.
 
 ## Supported Models
 [Open Model Zoo Models](../../../models/intel/index.md) feature
@@ -101,9 +101,10 @@ You can use the following command to try the demo (assuming the model from the O
     python3 bert_question_answering_embedding_demo.py
             --vocab=<path_to_model>/vocab.txt
             --model_emb=<path_to_model>/bert-large-uncased-whole-word-masking-squad-embedding-0001.xml
+            --input_names_emb="input_ids,attention_mask,token_type_ids,position_ids"
             --model_qa=<path_to_model>/bert-small-uncased-whole-word-masking-squad-0002.xml
-            --input_names="input_ids,attention_mask,token_type_ids,position_ids"
-            --output_names="output_s,output_e"
+            --input_names_qa="input_ids,attention_mask,token_type_ids,position_ids"
+            --output_names_qa="output_s,output_e"
             --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street),https://en.wikipedia.org/wiki/Speed_of_light"
             -c
 ```
