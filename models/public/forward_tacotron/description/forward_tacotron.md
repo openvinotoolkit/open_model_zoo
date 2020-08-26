@@ -3,8 +3,8 @@
 ## Use Case and High-Level Description
 
 ForwardTacotron is a model for the text-to-speech task originally trained in PyTorch\*
-then converted to ONNX\* format. Forward Tacotron is the model for mel-spectrogramm regression from text.
-For details see [paper](https://arxiv.org/pdf/1703.10135.pdf),[paper](https://arxiv.org/pdf/1905.09263.pdf), [repository](https://github.com/as-ideas/ForwardTacotron).
+then converted to ONNX\* format. ForwardTacotron performs mel-spectrogram regression from text.
+For details see [paper](https://arxiv.org/pdf/1703.10135.pdf), [paper](https://arxiv.org/pdf/1905.09263.pdf), [repository](https://github.com/as-ideas/ForwardTacotron).
 
 ### Steps to Reproduce PyTorch to ONNX Conversion
 Model is provided in ONNX format, which was obtained by the following steps.
@@ -19,7 +19,7 @@ cd ForwardTacotron
 git checkout 78789c1aa845057bb2f799e702b1be76bf7defd0
 ```
 3. Follow README.md and train ForwardTacotron model.
-4. Copy provided scripts `forward_to_onnx.py` to ForwardTacotron root directory.
+4. Copy provided script `forward_to_onnx.py` to ForwardTacotron root directory.
 
 5. Create pretrained directory and copy the best model to it.
 ```sh
@@ -32,7 +32,7 @@ python3 forward_to_onnx.py --force_cpu --tts_weights pretrained/forward_<iterati
 ```
 Notes:
    1. By the reason of unsupported operation in ONNX, the model is divided into two parts: `forward_tacotron_duration_prediction.onnx, forward_tacotron_regression.onnx`.
-   2. We stoped training of the Tacotron model in 183K iteration for aligment generation and stoped ForwardTacotron training in 290K iteration.
+   2. We stopped training of the Tacotron model in 183K iteration for alignment generation and stopped ForwardTacotron training in 290K iteration.
 
 ## ONNX Models
 We provide pretrained models in ONNX format for user convenience.
@@ -81,21 +81,21 @@ Processed embeddigs aligned by durations, name: `data`, shape: [1x805x512], form
 where:
 
    - B - batch size
-   - T - time in mel-spectrogramm
-   - C - processed embedding dimention
+   - T - time in mel-spectrogram
+   - C - processed embedding dimension
 
 ## Output
 
-Mel-spectorgramm, name: `mel`, shape: [80x805], format: [CxT]
+Mel-spectrogram, name: `mel`, shape: [80x805], format: [CxT]
 where:
 
-   - T - time in mel-spectrogramm
-   - C - number of mels in mel-spectrogramm
+   - T - time in mel-spectrogram
+   - C - number of mels in mel-spectrogram
 
 ## Legal Information
 
 The original model is distributed under the following
-[license](https://github.com/as-ideas/ForwardTacotron/blob/78789c1aa845057bb2f799e702b1be76bf7defd0/LICENSE)
+[license](https://github.com/as-ideas/ForwardTacotron/blob/78789c1aa845057bb2f799e702b1be76bf7defd0/LICENSE):
 
 ```
 MIT License

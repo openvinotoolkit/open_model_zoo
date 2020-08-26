@@ -83,7 +83,7 @@ class DurationPredictor(nn.Module):
 
 
 
-class Tacotorn(nn.Module):
+class Tacotron(nn.Module):
     def __init__(self, model):
         super().__init__()
         self.model = model
@@ -149,7 +149,7 @@ def main():
                                 dropout=hp.forward_dropout,
                                 n_mels=hp.num_mels).to(device)
 
-    tts_load_path = tts_weights if tts_weights else paths.forward_latest_weights
+    tts_load_path = tts_weights or paths.forward_latest_weights
     tts_model.load(tts_load_path)
 
 
@@ -203,4 +203,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

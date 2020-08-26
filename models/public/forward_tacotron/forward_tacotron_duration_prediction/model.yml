@@ -26,6 +26,4 @@ model_optimizer_args:
   - --output=embeddings,duration
   - --input_model=$dl_dir/forward_tacotron_duration_prediction.onnx
 framework: onnx
-quantizable: no
-
 license: https://github.com/as-ideas/ForwardTacotron/blob/master/LICENSE
