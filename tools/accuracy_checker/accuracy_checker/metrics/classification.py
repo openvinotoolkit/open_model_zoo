@@ -26,6 +26,7 @@ from ..representation import (
 from ..config import NumberField, StringField, ConfigError, BoolField
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
+from sklearn.metrics import accuracy_score
 
 try:
     from sklearn.metrics import roc_auc_score
@@ -82,7 +83,6 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
             accuracy = accuracy_score(annotation.label, prediction.label)
             self.accuracy.append(accuracy)
             return accuracy
-
 
     def evaluate(self, annotations, predictions):
         if not self.match:
