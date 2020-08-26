@@ -6,7 +6,7 @@ models:
         adapter: ssd
 
     datasets:
-      - name: wider
+      - name: wider_without_bkgr
 
         preprocessing:
           - type: resize
