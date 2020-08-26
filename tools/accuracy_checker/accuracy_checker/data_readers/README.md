@@ -48,3 +48,6 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
   * `channels_first` - allows read nifti files and transpose in order where channels first (Optional, default False)
 * `wav_reader` - read WAV file into NumPy array. Also gets the samplerate.
 * `dicom_reader` - read images stored in DICOM format.
+* `pickle_reader` - read data stored in pickle file. Supported formats of pickle content:
+  1. numeric data array
+  2. numeric data array + metadata stored in dictionary
