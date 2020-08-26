@@ -78,7 +78,7 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 > Since different detection networks may have different category index corresponding to the category "person", this index may be pointed by the command line parameter `-person_label`.
 > Please, note that
 > * the model `person-vehicle-bike-detection-crossroad-0078` returns for persons the category index 1, it is the default value for the demo
-> * the model `person-vehicle-bike-detection-crossroad-1016` returns for persons the category index 2, so for the correct work of the demo the command line parameter `-person_label 2` should be added.
+> * the model `person-vehicle-bike-detection-crossroad-1016` returns for persons the category index 2, so for the demo to work correctly, the command line parameter `-person_label 2` should be added.
 
 ## Demo Output
 
