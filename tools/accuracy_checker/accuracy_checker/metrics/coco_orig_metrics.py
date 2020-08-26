@@ -21,6 +21,7 @@ from copy import deepcopy
 import warnings
 from pathlib import Path
 import numpy as np
+
 try:
     from pycocotools.coco import COCO
 except ImportError:
@@ -29,6 +30,11 @@ try:
     from pycocotools.cocoeval import COCOeval as coco_eval
 except ImportError:
     coco_eval = None
+try:
+    from pycocotools.mask import iou as iou_calc
+except ImportError:
+    iou_calc = None
+
 from ..representation import (
     DetectionPrediction,
     DetectionAnnotation,
@@ -401,6 +407,28 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
     prediction_types = (CoCocInstanceSegmentationPrediction, )
 
     iou_type = 'segm'
+
+    def update(self, annotation, prediction):
+        if self.profiler:
+            per_class_results = []
+            for label_id, label in enumerate(self.labels):
+                detections, scores, dt_difficult = self._prepare_predictions(prediction, label)
+                ground_truth, gt_difficult, iscrowd, boxes, areas = self._prepare_annotations(annotation, label)
+                iou = self._compute_iou(ground_truth, detections, iscrowd)
+                eval_result = evaluate_image(
+                    ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, self.threshold,
+                    True
+                )
+                per_class_results.append(eval_result)
+
+    @staticmethod
+    def _compute_iou(gt, dets, iscrowd):
+        return iou_calc(gt, dets, iscrowd)
+
+    def _prepare_prediction(self, prediction, label):
+        pass
+
+
 
     @staticmethod
     def _iou_type_data_to_coco(data_to_store, data, box_side_delta):

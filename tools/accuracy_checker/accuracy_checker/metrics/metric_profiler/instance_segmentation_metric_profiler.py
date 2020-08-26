@@ -1,11 +1,7 @@
 import numpy as np
-from .base_profiler import MetricProfiler
-from ...utils import contains_all
+from  .base_profiler import MetricProfiler
 
-
-class DetectionProfiler(MetricProfiler):
-    __provider__ = 'detection'
-
+class InstanceSegmentationProfiler(MetricProfiler):
     def __init__(self, dump_iterations=100, report_type='csv'):
         self.names = []
         self.metric_names = []
@@ -23,7 +19,7 @@ class DetectionProfiler(MetricProfiler):
         if self._last_profile and self._last_profile == identifier:
              report = self._last_profile
         else:
-            report = self.per_box_result(identifier, metric_result) if self.report_file == 'csv' else {}
+            report = self.per_instance_result(identifier, metric_result) if self.report_file == 'csv' else {}
 
         if self.report_type == 'json':
             report = self.generate_json_report(identifier, metric_result, metric_name)
@@ -63,7 +59,7 @@ class DetectionProfiler(MetricProfiler):
         report['per_class_result'] = per_class_results
         return report
 
-    def per_box_result(self, identifier, metric_result):
+    def per_instance_result(self, identifier, metric_result):
         per_box_results = []
         for label, per_class_result in enumerate(metric_result):
             if not np.size(per_class_result['scores']):
@@ -108,28 +104,11 @@ class DetectionProfiler(MetricProfiler):
 
     @staticmethod
     def generate_result_matching(per_class_result, metric_name):
-        if contains_all(['gt_matches', 'dt_matches'], per_class_result):
-            matching_result = {
-                'prediction_matches': per_class_result['dt_matches'][0],
-                'annotation_matches':  per_class_result['gt_matches'][0],
-                metric_name: per_class_result['result']
-                }
-            return matching_result
-        matches = per_class_result['matched']
-        dt_matches = np.zeros_like(per_class_result['scores'], dtype=int)
-        gt_matches = [[] for _ in range(np.size(per_class_result['gt']))]
-        for dt, value in matches.items():
-            dt_matches[dt] = 1
-            gt_list = value[0].tolist()
-            for gt in gt_list:
-                gt_matches[gt].append(dt)
         matching_result = {
-            'prediction_matches': dt_matches.tolist(),
-            'annotation_matches': gt_matches,
-            'precision': per_class_result['precision'].tolist(),
-            'recall': per_class_result['recall'].tolist(),
-            'fppi': per_class_result['fppi'].tolist()
-        }
+            'prediction_matches': per_class_result['dt_matches'][0],
+            'annotation_matches':  per_class_result['gt_matches'][0],
+            metric_name: per_class_result['result']
+            }
         return matching_result
 
     def register_metric(self, metric_name):
