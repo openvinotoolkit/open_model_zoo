@@ -26,7 +26,7 @@ python3 bert_question_answering_embedding_demo.py -h
 The command yields the following usage message:
 ```
 usage: bert_question_answering_embedding_demo.py [-h] -i INPUT
-                                                 [--par_num PAR_NUM] -v VOCAB
+                                                 [--best_n BEST_N] -v VOCAB
                                                  -m_emb MODEL_EMB
                                                  [--input_names_emb INPUT_NAMES_EMB]
                                                  [-m_qa MODEL_QA]
@@ -39,7 +39,7 @@ Options:
   -h, --help            Show this help message and exit.
   -i INPUT, --input INPUT
                         Required. Urls to a wiki pages with context
-  --par_num PAR_NUM     Optional. Number of best (closest) contexts selected
+  --best_n BEST_N       Optional. Number of best (closest) contexts selected
   -v VOCAB, --vocab VOCAB
                         Required. Path to vocabulary file with tokens
   -m_emb MODEL_EMB, --model_emb MODEL_EMB
