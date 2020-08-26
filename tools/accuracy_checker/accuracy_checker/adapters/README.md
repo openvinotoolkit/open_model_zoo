@@ -189,6 +189,7 @@ AccuracyChecker supports following set of adapters:
 * `nmt` - converting output of neural machine translation model to `MachineTranslationPrediction`.
   * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.bpe.32000.de). Path can be prefixed with `--models` arguments.
   * `eos_index` - index end of string symbol in vocabulary (Optional, used in cases when launcher does not support dynamic output shape for cut off empty prediction).
+* `bert_question_answering_embedding` - converting output of BERT model trained to produce embedding vectors to `QuestionAnsweringEmbeddingPrediction`.
 * `narnmt` - converting output of non-autoregressive neural machine translation model to `MachineTranslationPrediction`.
   * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.json). Path can be prefixed with `--models` arguments.
   * `merges_file` - file which contains merges for encoding model predicted indexes to words (e. g. merges.txt). Path can be prefixed with `--models` arguments.

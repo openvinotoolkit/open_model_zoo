@@ -91,6 +91,20 @@ class QuestionAnsweringPrediction(QuestionAnswering):
         self.tokens = tokens if tokens is not None else []
 
 
+class QuestionAnsweringEmbeddingAnnotation(QuestionAnswering):
+    def __init__(self, identifier, input_ids, input_mask, segment_ids, position_ids, context_pos_identifier):
+        super().__init__(identifier)
+        self.input_ids = input_ids
+        self.input_mask = input_mask
+        self.segment_ids = segment_ids
+        self.position_ids = position_ids
+        self.context_pos_indetifier = context_pos_identifier
+
+class QuestionAnsweringEmbeddingPrediction(QuestionAnswering):
+    def __init__(self, identifier, embedding):
+        super().__init__(identifier)
+        self.embedding = embedding
+
 class TextClassificationAnnotation(ClassificationAnnotation):
     def __init__(self, identifier, label, input_ids, input_mask, segment_ids, tokens):
         super().__init__(identifier, label)

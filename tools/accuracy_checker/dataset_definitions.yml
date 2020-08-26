@@ -857,3 +857,11 @@ datasets:
       doc_stride: 128
       lower_case: true
       vocab_file: vocab.txt
+  - name: squad_emb_v1_1_msl384_mql32_lowercase
+    annotation_conversion:
+      converter: squad_emb
+      testing_file: squad_v1.1/dev-v1.1.json
+      vocab_file: vocab.txt
+      max_seq_length: 384
+      max_query_length: 32
+      lower_case: true

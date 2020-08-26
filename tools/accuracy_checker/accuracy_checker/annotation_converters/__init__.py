@@ -53,6 +53,7 @@ from .cvat_human_pose import CVATPoseEstimationConverter
 from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
 from .mrlEyes_2018_01 import mrlEyes_2018_01_Converter
 from .squad import SQUADConverter
+from .squad_emb import SQUADConverterEMB
 from .text_classification import (
     XNLIDatasetConverter,
     BertXNLITFRecordConverter,
