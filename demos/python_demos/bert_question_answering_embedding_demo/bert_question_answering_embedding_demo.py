@@ -36,7 +36,7 @@ def build_argparser():
     args.add_argument("-i", "--input",
                       help="Required. Urls to a wiki pages with context",
                       required=True, type=str)
-    args.add_argument("--par_num",
+    args.add_argument("--best_n",
                       help="Optional. Number of best (closest) contexts selected",
                       default=10,
                       required=False, type=int)
@@ -259,7 +259,7 @@ def main():
         q_emb = calc_emb(q_tokens_id, max_length_q)
         distances = [(np.linalg.norm(c.c_emb - q_emb, 2), c) for c in contexts_all]
         distances = sorted(distances, key=lambda x: x[0])
-        keep_num = min(args.par_num, len(distances))
+        keep_num = min(args.best_n, len(distances))
         distances_filtered = distances[:keep_num]
 
         #print short list
