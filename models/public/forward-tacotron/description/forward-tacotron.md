@@ -1,4 +1,4 @@
-# ForwardTacotron
+# forward-tacotron
 
 ## Use Case and High-Level Description
 
@@ -6,7 +6,10 @@ ForwardTacotron is a model for the text-to-speech task originally trained in PyT
 then converted to ONNX\* format. ForwardTacotron performs mel-spectrogram regression from text.
 For details see [paper](https://arxiv.org/pdf/1703.10135.pdf), [paper](https://arxiv.org/pdf/1905.09263.pdf), [repository](https://github.com/as-ideas/ForwardTacotron).
 
-### Steps to Reproduce PyTorch to ONNX Conversion
+## ONNX Models
+We provide pretrained models in ONNX format for user convenience.
+
+### Steps to Reproduce training in PyTorch and Conversion to ONNX
 Model is provided in ONNX format, which was obtained by the following steps.
 
 1. Clone the original repository
@@ -20,42 +23,38 @@ git checkout 78789c1aa845057bb2f799e702b1be76bf7defd0
 ```
 3. Follow README.md and train ForwardTacotron model.
 4. Copy provided script `forward_to_onnx.py` to ForwardTacotron root directory.
-
-5. Create pretrained directory and copy the best model to it.
+5. Run provided script for conversion ForwardTacotron to onnx format
 ```sh
-mkdir pretrained
-cp checkouts/ljspeech_tts.forward/forward_<iteration>k.pyt pretrained
-```
-6. Run provided script for conversion ForwardTacotron to onnx format
-```sh
-python3 forward_to_onnx.py --force_cpu --tts_weights pretrained/forward_<iteration>K.pyt
+python3 forward_to_onnx.py --tts_weights checkpoints/ljspeech_tts.forward/fast_speech_step<iteration>K_weights.pyt
 ```
 Notes:
-   1. By the reason of unsupported operation in ONNX, the model is divided into two parts: `forward_tacotron_duration_prediction.onnx, forward_tacotron_regression.onnx`.
+   1. Since ONNX doesn't support the build_index operation from pytorch pipeline, the model is divided into two parts: `forward_tacotron_duration_prediction.onnx, forward_tacotron_regression.onnx`.
    2. We stopped training of the Tacotron model in 183K iteration for alignment generation and stopped ForwardTacotron training in 290K iteration.
 
-## ONNX Models
-We provide pretrained models in ONNX format for user convenience.
+## Composite model specification
 
-## Specification
+| Metric                          | Value                                     |
+|---------------------------------|-------------------------------------------|
+| Source framework                | PyTorch*                                  |
 
-| Metric           | Value              |
-|------------------|--------------------|
-| Type             | Mean Opinion Score |
-| GFlops           | -                  |
-| MParams          | -                  |
-| Source framework | PyTorch\*          |
-
-## Accuracy
+### Accuracy
 
 Subjective
 
-## Performance
+## forward-tacotron-duration-prediction model specification
+
+The forward-tacotron-duration-prediction model accepts preprocessed text (see text_to_sequence in [repository](https://github.com/as-ideas/ForwardTacotron/blob/78789c1aa845057bb2f799e702b1be76bf7defd0/utils/text/__init__.py)) and produces processed embeddings and
+duration in time for every processed embedding.
+
+| Metric                          | Value                                     |
+|---------------------------------|-------------------------------------------|
+| GFlops                          |                                           |
+| MParams                         |                                           |
 
 
-### ForwardTacotron duration predictor
+### Performance
 
-## Input
+### Input
 
 Sequence, name: `input_seq`, shape: [1x241], format: [BxC]
 where:
@@ -63,7 +62,7 @@ where:
    - B - batch size
    - C - number of symbols in sequence (letters or phonemes)
 
-## Output
+### Output
 
 1. Duration for input symbols, name: `duration`, shape: [1, 241, 1], format [BxCxH]. Contains predicted duration for each of the symbol in sequence.
    - B - batch size
@@ -73,9 +72,19 @@ where:
    - B - batch size
    - C - number of symbols in sequence (letters or phonemes)
    - H - height of the intermediate feature map.
-### ForwardTacotron regression
 
-## Input
+## forward-tacotron-regression model specification
+
+The forward-tacotron-regression model accepts aligned by duration processed embeddings (for example: if duration is [2, 3] and processed embeddings is [[1, 2], [3, 4]], aligned embeddings is [[1, 2], [1, 2], [1,2], [3, 4], [3, 4]]) and produces mel-spectrogram.
+
+| Metric                          | Value                                     |
+|---------------------------------|-------------------------------------------|
+| GFlops                          |                                           |
+| MParams                         |                                           |
+
+### Performance
+
+### Input
 
 Processed embeddigs aligned by durations, name: `data`, shape: [1x805x512], format: [BxTxC]
 where:
@@ -84,7 +93,7 @@ where:
    - T - time in mel-spectrogram
    - C - processed embedding dimension
 
-## Output
+### Output
 
 Mel-spectrogram, name: `mel`, shape: [80x805], format: [CxT]
 where:
