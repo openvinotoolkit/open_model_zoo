@@ -182,10 +182,12 @@ int main(int argc, char *argv[]) {
         slog::info << "Loading network files" << slog::endl;
         /** Read network model **/
         Model* model;
-        if(FLAGS_model_type=="Ssd")
+        if(FLAGS_model_type=="SSD")
             model = new Ssd(ie, FLAGS_m);
-        else if (FLAGS_model_type == "Yolov3")
+        else if (FLAGS_model_type == "YOLO")
             model = new Yolov3(ie, FLAGS_m,FLAGS_iou_t);
+        else
+            slog::info << "incorrect model_type" << slog::endl;
            
        
         

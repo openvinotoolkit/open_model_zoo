@@ -16,7 +16,7 @@ static const char model_message[] = "Required. Path to an .xml file with a train
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
                                             "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                             "The demo will look for a suitable plugin for a specified device.";
-static const char model_type_message[] = "Required.Сonstructor for model operation(Ssd or Yolov3).";
+static const char model_type_message[] = "Required. Type of detection model (supports \"SSD\",  \"YOLO\").";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
 static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
