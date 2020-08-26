@@ -1,18 +1,16 @@
+#!/usr/bin/env python3
 import os
+import argparse
 
 import torch
 import torch.nn as nn
-from torch.nn import functional as F
 
 from models.forward_tacotron import ForwardTacotron
-from utils.distribution import sample_from_discretized_mix_logistic
-
 from utils import hparams as hp
 from utils.text.symbols import symbols
 from utils.paths import Paths
-import argparse
 from utils.text import text_to_sequence
-import numpy as np
+
 
 ##################################################################################################
 
@@ -108,8 +106,6 @@ def main():
 
     parser.add_argument('--tts_weights', type=str, help='[string/path] Load in different FastSpeech weights')
 
-    parser.add_argument('--force_cpu', '-c', action='store_true',
-                        help='Forces CPU-only training, even when in CUDA capable environment')
     parser.add_argument('--hp_file', metavar='FILE', default='hparams.py',
                         help='The file to use for the hyperparameters')
     parser.add_argument('--alpha', type=float, default=1.,
@@ -129,10 +125,7 @@ def main():
 
     paths = Paths(hp.data_path, hp.voc_model_id, hp.tts_model_id)
 
-    if not args.force_cpu and torch.cuda.is_available():
-        device = torch.device('cuda')
-    else:
-        device = torch.device('cpu')
+    device = torch.device('cpu')
     print('Using device:', device)
 
     print('\nInitialising Forward TTS Model...\n')
@@ -154,7 +147,7 @@ def main():
 
 
     encoder = DurationPredictor(tts_model)
-    decoder = Tacotorn(tts_model)
+    decoder = Tacotron(tts_model)
 
     tts_model.eval()
     encoder.eval()
@@ -191,13 +184,6 @@ def main():
                           do_constant_folding=True,
                           input_names=["data"],
                           output_names=["mel"])
-
-        mels = decoder(x)
-        mel = mels.cpu().data.numpy()
-
-        mel = (mel + 4) / 8
-        np.clip(mel, 0, 1, out=mel)
-        # Save if you want
 
     print('Done!')
 
