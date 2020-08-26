@@ -301,7 +301,7 @@ def main():
                 res = ie_encoder_qa_exec.infer(inputs=inputs)
                 t_end = time.perf_counter()
                 log.info(
-                    "exact answer calculated for sequence of length {} with {:0.2f} requests/sec ({:0.2} sec per request)".format(
+                    "Exact answer calculated for sequence of length {} with {:0.2f} requests/sec ({:0.2} sec per request)".format(
                         max_length_qc,
                         1 / (t_end - t_start),
                         t_end - t_start
