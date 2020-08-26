@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
                 estimator.startCurr();
             }
 
-            estimator.readyCurr();
+            estimator.waitCurr();
             t1 = std::chrono::high_resolution_clock::now();
             ms detection = std::chrono::duration_cast<ms>(t1 - t0);
             t0 = std::chrono::high_resolution_clock::now();

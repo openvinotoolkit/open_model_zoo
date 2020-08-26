@@ -358,12 +358,10 @@ int main(int argc, char *argv[]) {
             t0 = std::chrono::high_resolution_clock::now();
             presenter.drawGraphs(frame);
             std::ostringstream out;
-            if (!FLAGS_no_show) {
-                out << "OpenCV cap/render time: " << std::fixed << std::setprecision(1)
-                    << (ocv_decode_time + ocv_render_time) << " ms";
-                cv::putText(frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 255, 0));
-                out.str("");
-            }
+            out << "OpenCV cap/render time: " << std::fixed << std::setprecision(1)
+                << (ocv_decode_time + ocv_render_time) << " ms";
+            cv::putText(frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 255, 0));
+            out.str("");
             out << "Wallclock time " << (isAsyncMode ? "(TRUE ASYNC):      " : "(SYNC, press Tab): ");
             out << std::fixed << std::setprecision(1) << wall.count() << " ms (" << 1000.0 / wall.count() << " fps)";
             cv::putText(frame, out.str(), cv::Point2f(0, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 0, 255));
