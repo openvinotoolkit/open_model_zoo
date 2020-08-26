@@ -37,6 +37,9 @@ class ClassificationAdapter(Adapter):
             'argmax_output': BoolField(
                 optional=True, default=False, description="identifier that model output is ArgMax layer"
             ),
+            'block': BoolField(
+                optional=True, default=False, description="process whole batch as a single data block"
+            ),
             'classification_output': StringField(optional=True, description='otarget output layer name')
         })
 
@@ -44,6 +47,7 @@ class ClassificationAdapter(Adapter):
 
     def configure(self):
         self.argmax_output = self.get_value_from_config('argmax_output')
+        self.block = self.get_value_from_config('block')
         self.classification_out = self.get_value_from_config('classification_output')
 
     def process(self, raw, identifiers, frame_meta):
@@ -66,12 +70,21 @@ class ClassificationAdapter(Adapter):
         prediction = np.reshape(prediction, (prediction.shape[0], -1))
 
         result = []
-        for identifier, output in zip(identifiers, prediction):
+        if self.block:
             if self.argmax_output:
-                single_prediction = ArgMaxClassificationPrediction(identifier, output[0])
+                single_prediction = ArgMaxClassificationPrediction(identifiers[0], prediction)
             else:
-                single_prediction = ClassificationPrediction(identifier, output)
+                single_prediction = ClassificationPrediction(identifiers[0], prediction)
+
             result.append(single_prediction)
+
+        else:
+            for identifier, output in zip(identifiers, prediction):
+                if self.argmax_output:
+                    single_prediction = ArgMaxClassificationPrediction(identifier, output[0])
+                else:
+                    single_prediction = ClassificationPrediction(identifier, output)
+                result.append(single_prediction)
 
         return result
 

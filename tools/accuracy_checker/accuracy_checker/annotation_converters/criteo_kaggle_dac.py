@@ -37,6 +37,8 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
                                           description="Limit total record count to batch * subsample size"),
             "validation": BoolField(optional=True, default=True,
                                     description="Allows to use half of dataset for validation purposes"),
+            "block": BoolField(optional=True, default=True,
+                                    description="Make batch-oriented annotations"),
             "separator": StringField(optional=True, default='#',
                                      description="Separator between input identifier and file identifier"),
             "preprocessed_dir": PathField(optional=False, is_directory=True, check_exists=True,
@@ -47,9 +49,10 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
 
     def configure(self):
         self.src = self.get_value_from_config('testing_file')
-        self.batch = self.get_value_from_config('batch')
-        self.subsample = self.get_value_from_config('subsample_size')
+        self.batch = int(self.get_value_from_config('batch'))
+        self.subsample = int(self.get_value_from_config('subsample_size'))
         self.validation = self.get_value_from_config('validation')
+        self.block = self.get_value_from_config('block')
         self.separator = self.get_value_from_config('separator')
         self.preprocessed_dir = self.get_value_from_config('preprocessed_dir')
 
@@ -90,9 +93,9 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
 
             sample = {
                 "input.1": np.log1p(x_int[i:i+self.batch, ...]),
-                "lS_i": x_cat[i:i+self.batch, ...],
+                "lS_i": x_cat[i:i+self.batch, ...].T,
                 "lS_o": np.dot(np.expand_dims(np.linspace(0, self.batch - 1, num=self.batch), -1),
-                               np.ones((1, cat_feat)))
+                               np.ones((1, cat_feat))).T
             }
 
             np.savez_compressed(str(c_input), **sample)
@@ -104,14 +107,24 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
 
             c_file = str(c_input.relative_to(preprocessed_folder))
 
-            for j in range(i, i + self.batch):
+            if self.block:
                 annotations.append(ClassificationAnnotation(
                     [
-                        "input.1_{}{}{}".format(j, self.separator, c_file),
-                        "lS_i_{}{}{}".format(j, self.separator, c_file),
-                        "lS_o_{}{}{}".format(j, self.separator, c_file),
+                        "input.1_{}{}{}".format(i, self.separator, c_file),
+                        "lS_i_{}{}{}".format(i, self.separator, c_file),
+                        "lS_o_{}{}{}".format(i, self.separator, c_file),
                     ],
-                    y[j, ...]
+                    y[i:i+self.batch, ...]
                 ))
+            else:
+                for j in range(i, i + self.batch):
+                    annotations.append(ClassificationAnnotation(
+                        [
+                            "input.1_{}{}{}".format(j, self.separator, c_file),
+                            "lS_i_{}{}{}".format(j, self.separator, c_file),
+                            "lS_o_{}{}{}".format(j, self.separator, c_file),
+                        ],
+                        y[j, ...]
+                    ))
 
         return ConverterReturn(annotations, None, None)
