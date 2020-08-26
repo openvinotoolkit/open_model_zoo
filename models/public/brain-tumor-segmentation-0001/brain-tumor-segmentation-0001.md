@@ -1,4 +1,4 @@
-# Brain-tumor-segmentation-0001
+# brain-tumor-segmentation-0001
 
 ## Use Case and High-Level Description
 
