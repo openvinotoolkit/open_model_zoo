@@ -68,9 +68,6 @@ Options:
   -c, --colors          Optional. Nice coloring of the questions/answers.
                         Might not work on some terminals (like Windows* cmd
                         console)
-
-
-
 ```
 
 > **NOTE**: Before running the demo with a trained model, make sure to convert the model to the Inference Engine's
