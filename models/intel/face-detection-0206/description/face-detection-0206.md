@@ -13,7 +13,7 @@ ATSS head for indoor and outdoor scenes shot by a front-facing camera.
 
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
-| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 94.49%                  |
+| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 94.27%                  |
 | GFlops                                                        | 339.602                   |
 | MParams                                                       | 69.920                   |
 | Source framework                                              | PyTorch*                |

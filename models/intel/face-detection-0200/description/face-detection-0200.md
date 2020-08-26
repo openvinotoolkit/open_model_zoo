@@ -14,7 +14,7 @@ During the training of this model, training images were resized to 256x256.
 
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
-| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 86.66%                  |
+| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 86.74%                  |
 | GFlops                                                        | 0.786                   |
 | MParams                                                       | 1.828                   |
 | Source framework                                              | PyTorch*                |

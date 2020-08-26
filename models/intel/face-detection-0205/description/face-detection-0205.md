@@ -13,7 +13,7 @@ FCOS head for indoor and outdoor scenes shot by a front-facing camera.
 
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
-| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 93.36%                  |
+| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 93.57%                  |
 | GFlops                                                        | 2.853                   |
 | MParams                                                       | 2.392                   |
 | Source framework                                              | PyTorch*                |
