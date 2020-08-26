@@ -16,6 +16,7 @@
 
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
+#include <samples/ie_config_helper.hpp>
 #include <samples/ocv_common.hpp>
 
 #include "super_resolution_demo.h"
@@ -153,7 +154,8 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 4. Loading model to the device ------------------------------------------
         slog::info << "Loading model to the device" << slog::endl;
-        ExecutableNetwork executableNetwork = ie.LoadNetwork(network, FLAGS_d);
+        ExecutableNetwork executableNetwork = ie.LoadNetwork(network, formatDeviceString(FLAGS_d),
+                                                             {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 5. Create infer request -------------------------------------------------

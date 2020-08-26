@@ -17,6 +17,7 @@
 #include <samples/common.hpp>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
+#include <samples/ie_config_helper.hpp>
 
 #include "segmentation_demo.h"
 
@@ -112,7 +113,8 @@ int main(int argc, char *argv[]) {
                     "supported.");
         }
 
-        ExecutableNetwork executableNetwork = ie.LoadNetwork(network, FLAGS_d);
+        ExecutableNetwork executableNetwork = ie.LoadNetwork(network, formatDeviceString(FLAGS_d),
+                                                             {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
         InferRequest inferRequest = executableNetwork.CreateInferRequest();
 
         cv::VideoCapture cap;

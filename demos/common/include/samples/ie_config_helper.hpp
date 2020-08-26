@@ -12,9 +12,10 @@
 #include <string>
 #include <map>
 
-void formatDeviceString(std::string& deviceString);
+#include <cldnn/cldnn_config.hpp>
+#include <vpu/myriad_config.hpp>
 
-std::map<std::string, std::string> createSimpleConfig(const std::string& deviceString);
+std::string formatDeviceString(const std::string& deviceString);
 
 std::map<std::string, std::string> createConfig(const std::string& deviceString,
                                                 const std::string& nstreamsString,

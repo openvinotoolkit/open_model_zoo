@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <samples/ie_config_helper.hpp>
+
 #include "ie_wrapper.hpp"
 
 using namespace InferenceEngine;
@@ -54,7 +56,7 @@ void IEWrapper::setExecPart() {
         layerData->setPrecision(Precision::FP32);
     }
 
-    executableNetwork = ie.LoadNetwork(network, deviceName);
+    executableNetwork = ie.LoadNetwork(network, formatDeviceString(deviceName), {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
     request = executableNetwork.CreateInferRequest();
 }
 

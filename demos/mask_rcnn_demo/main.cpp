@@ -21,6 +21,7 @@
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
+#include <samples/ie_config_helper.hpp>
 
 #include "mask_rcnn_demo.h"
 
@@ -165,7 +166,8 @@ int main(int argc, char *argv[]) {
 
         // -------------------------Load model to the device----------------------------------------------------
         slog::info << "Loading model to the device" << slog::endl;
-        auto executable_network = ie.LoadNetwork(network, FLAGS_d);
+        auto executable_network = ie.LoadNetwork(network, formatDeviceString(FLAGS_d),
+                                                 {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
 
         // -------------------------Create Infer Request--------------------------------------------------------
         slog::info << "Create infer request" << slog::endl;

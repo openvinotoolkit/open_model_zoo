@@ -23,6 +23,7 @@
 #include <ngraph/ngraph.hpp>
 
 #include <monitors/presenter.h>
+#include <samples/ie_config_helper.hpp>
 #include <samples/images_capture.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
@@ -288,7 +289,8 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 4. Loading model to the device ------------------------------------------
         slog::info << "Loading model to the device" << slog::endl;
-        ExecutableNetwork network = ie.LoadNetwork(cnnNetwork, FLAGS_d);
+        ExecutableNetwork network = ie.LoadNetwork(cnnNetwork, formatDeviceString(FLAGS_d),
+                                                   {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 5. Creating infer request -----------------------------------------------

@@ -107,8 +107,7 @@ int main(int argc, char *argv[]) {
         Core ie;
 
         std::string deviceInfo;
-        std::string deviceString = FLAGS_d;
-        formatDeviceString(deviceString);
+        std::string deviceString = formatDeviceString(FLAGS_d);
 
         slog::info << "Device info: " << slog::endl;
         std::cout << deviceInfo;

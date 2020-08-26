@@ -5,47 +5,26 @@
 #include "samples/ie_config_helper.hpp"
 #include "samples/args_helper.hpp"
 
-#include <cldnn/cldnn_config.hpp>
-#include <vpu/myriad_config.hpp>
-
-void formatDeviceString(std::string& deviceString) {
+std::string formatDeviceString(const std::string& deviceString) {
+    std::string formattedString = deviceString;
     bool preserveCase = false;
 
     for (size_t i = 0; i < deviceString.size(); ++i) {
         // These two conditions handle the special case of MYRIAD device names in "ma1234" format, where letters should
         // not be transformed to upper case.
-        if (deviceString[i] == 'm' && i+1 != deviceString.size() && deviceString[i+1] == 'a') {
-            preserveCase = true;
-        }
-        if (preserveCase == true && deviceString[i] == ',') {
+        // if (deviceString[i] == 'm' && i+1 != deviceString.size() && deviceString[i+1] == 'a') {
+        //     preserveCase = true;
+        // }
+        if (preserveCase && deviceString[i] == ',') {
             preserveCase = false;
         }
 
         if (!preserveCase) {
-            deviceString[i] = std::toupper(deviceString[i]);
-        }
-    }
-}
-
-std::map<std::string, std::string> createSimpleConfig(const std::string& deviceString) {
-    std::map<std::string, std::string> config;
-
-    std::set<std::string> devices;
-    for (const std::string& device : parseDevices(deviceString)) {
-        devices.insert(device);
-    }
-
-    for (auto& device : devices) {
-        if (device == "CPU") {
-            config.insert({ CONFIG_KEY(CPU_THROUGHPUT_STREAMS), CONFIG_VALUE(CPU_THROUGHPUT_AUTO) });
-        } else if (device == "GPU") {
-            config.insert({ CONFIG_KEY(GPU_THROUGHPUT_STREAMS), CONFIG_VALUE(GPU_THROUGHPUT_AUTO) });
-        } else if (device == "MYRIAD") {
-            config.insert({ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" });
+            formattedString[i] = std::toupper(deviceString[i]);
         }
     }
 
-    return config;
+    return formattedString;
 }
 
 std::map<std::string, std::string> createConfig(const std::string& deviceString,
@@ -97,7 +76,7 @@ std::map<std::string, std::string> createConfig(const std::string& deviceString,
                 // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
                 config.insert({ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" });
             }
-        } else if (device == "MYRIAD" || device.find("ma") == 0) {
+        } else if (device.find("MYRIAD") == 0 /*|| device.find("ma") == 0*/) {
             if (minLatency) {
                 config.insert({ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" });
                 continue;

@@ -18,6 +18,7 @@
 #include <samples/common.hpp>
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
+#include <samples/ie_config_helper.hpp>
 #include <samples/ocv_common.hpp>
 
 #include <cldnn/cldnn_config.hpp>
@@ -255,50 +256,12 @@ int main(int argc, char *argv[]) {
         // ---------------------------------------------------------------------------------------------------
 
         // ----------------------------------Set device and device settings-----------------------------------
-        std::set<std::string> devices;
-        for (const std::string& device : parseDevices(FLAGS_d)) {
-            devices.insert(device);
-        }
-        std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(devices, FLAGS_nstreams);
-        for (auto & device : devices) {
-            if (device == "CPU") {  // CPU supports a few special performance-oriented keys
-                // limit threading for CPU portion of inference
-                if (FLAGS_nthreads != 0)
-                    ie.SetConfig({{ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }}, device);
-
-                if (FLAGS_d.find("MULTI") != std::string::npos
-                    && devices.find("GPU") != devices.end()) {
-                    ie.SetConfig({{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }}, device);
-                } else {
-                    // pin threads for CPU portion of inference
-                    ie.SetConfig({{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(YES) }}, device);
-                }
-
-                // for CPU execution, more throughput-oriented execution via streams
-                ie.SetConfig({{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
-                                (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
-                                                                  : CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) }}, device);
-                deviceNstreams[device] = std::stoi(
-                    ie.GetConfig(device, CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
-            } else if (device == "GPU") {
-                ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
-                                (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
-                                                                  : CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) }}, device);
-                deviceNstreams[device] = std::stoi(
-                    ie.GetConfig(device, CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
-
-                if (FLAGS_d.find("MULTI") != std::string::npos
-                    && devices.find("CPU") != devices.end()) {
-                    // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
-                    // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                    ie.SetConfig({{ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
-                }
-            }
-        }
+        std::string deviceString = formatDeviceString(FLAGS_d);
+        auto ieConfig = createConfig(deviceString, FLAGS_nstreams, FLAGS_nthreads);
         // ---------------------------------------------------------------------------------------------------
 
         // --------------------------------------Load network to device---------------------------------------
-        ExecutableNetwork executableNetwork = ie.LoadNetwork(network, FLAGS_d);
+        ExecutableNetwork executableNetwork = ie.LoadNetwork(network, deviceString, ieConfig);
         // ---------------------------------------------------------------------------------------------------
 
         // ----------------------------Try to set optimal number of infer requests----------------------------
@@ -311,7 +274,7 @@ int main(int argc, char *argv[]) {
                 THROW_IE_EXCEPTION
                         << "Every device used with the classification_demo should "
                         << "support OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. "
-                        << "Failed to query the metric for the " << FLAGS_d << " with error:" << ex.what();
+                        << "Failed to query the metric for the " << deviceString << " with error:" << ex.what();
             }
         }
         // ---------------------------------------------------------------------------------------------------

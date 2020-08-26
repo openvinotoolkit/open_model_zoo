@@ -10,6 +10,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <samples/ie_config_helper.hpp>
 
 #include <inference_engine.hpp>
 
@@ -39,7 +40,8 @@ void CnnDLSDKBase::Load() {
         output_blobs_names_.push_back(item.first);
     }
 
-    executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
+    executable_network_ = config_.ie.LoadNetwork(cnnNetwork, formatDeviceString(config_.deviceName),
+                                                 {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
     infer_request_ = executable_network_.CreateInferRequest();
 }
 

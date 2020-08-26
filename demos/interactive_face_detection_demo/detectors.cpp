@@ -19,6 +19,7 @@
 #include <inference_engine.hpp>
 #include <ngraph/ngraph.hpp>
 
+#include <samples/ie_config_helper.hpp>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
@@ -701,11 +702,12 @@ void Load::into(InferenceEngine::Core & ie, const std::string & deviceName, bool
         bool isPossibleDynBatch = deviceName.find("CPU") != std::string::npos ||
                                   deviceName.find("GPU") != std::string::npos;
 
+        config.insert({ MYRIAD_THROUGHPUT_STREAMS, "1" });
         if (enable_dynamic_batch && isPossibleDynBatch) {
             config[PluginConfigParams::KEY_DYN_BATCH_ENABLED] = PluginConfigParams::YES;
         }
 
-        detector.net = ie.LoadNetwork(detector.read(ie), deviceName, config);
+        detector.net = ie.LoadNetwork(detector.read(ie), formatDeviceString(deviceName), config);
     }
 }
 

@@ -9,6 +9,7 @@
 #include <map>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <samples/ie_config_helper.hpp>
 #include <inference_engine.hpp>
 
 #include <ngraph/ngraph.hpp>
@@ -111,7 +112,8 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
     input_name_ = inputInfo.begin()->first;
-    net_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
+    net_ = config_.ie.LoadNetwork(cnnNetwork, formatDeviceString(config_.deviceName),
+                                  {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
 }
 
 DetectedObjects FaceDetection::fetchResults() {

@@ -24,6 +24,7 @@
 #include <inference_engine.hpp>
 
 #include <monitors/presenter.h>
+#include <samples/ie_config_helper.hpp>
 #include <samples/images_capture.h>
 #include <samples/slog.hpp>
 #include <samples/ocv_common.hpp>
@@ -483,7 +484,8 @@ struct Load {
 
     void into(Core & ie, const std::string & deviceName) const {
         if (detector.enabled()) {
-            detector.net = ie.LoadNetwork(detector.read(ie), deviceName);
+            detector.net = ie.LoadNetwork(detector.read(ie), formatDeviceString(deviceName),
+                                          {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
         }
     }
 };

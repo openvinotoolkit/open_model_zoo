@@ -9,6 +9,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include <samples/common.hpp>
+#include <samples/ie_config_helper.hpp>
 
 #include "human_pose_estimator.hpp"
 #include "peak.hpp"
@@ -27,7 +28,7 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
       minSubsetScore(0.2f),
       inputLayerSize(-1, -1),
       upsampleRatio(4),
-      targetDeviceName(targetDeviceName_),
+      targetDeviceName(formatDeviceString(targetDeviceName_)),
       enablePerformanceReport(enablePerformanceReport),
       modelPath(modelPath) {
     if (enablePerformanceReport) {
@@ -93,7 +94,8 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
                 "to have matching last two dimensions");
     }
 
-    executableNetwork = ie.LoadNetwork(network, targetDeviceName);
+    executableNetwork = ie.LoadNetwork(network, targetDeviceName,
+                                       {{ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" }});
     requestNext = executableNetwork.CreateInferRequestPtr();
     requestCurr = executableNetwork.CreateInferRequestPtr();
 }
@@ -111,7 +113,8 @@ void HumanPoseEstimator::reshape(const cv::Mat& image){
         input_shape[3] = inputLayerSize.width;
         input_shapes[input_name] = input_shape;
         network.reshape(input_shapes);
-        executableNetwork = ie.LoadNetwork(network, targetDeviceName);
+        executableNetwork = ie.LoadNetwork(network, targetDeviceName,
+                                           {{ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" }});
         requestNext = executableNetwork.CreateInferRequestPtr();
         requestCurr = executableNetwork.CreateInferRequestPtr();
         std::cout << "Reshape needed" << std::endl;

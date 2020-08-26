@@ -9,6 +9,7 @@
 #include <limits>
 #include <numeric>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <samples/ie_config_helper.hpp>
 
 using namespace InferenceEngine;
 
@@ -71,7 +72,8 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
 
     new_network_ = outputInfo.find(config_.new_loc_blob_name) != outputInfo.end();
     input_name_ = inputInfo.begin()->first;
-    net_ = config_.ie.LoadNetwork(network, config_.deviceName);
+    net_ = config_.ie.LoadNetwork(network, formatDeviceString(config_.deviceName),
+                                  {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
 
     const auto& head_anchors = new_network_ ? config_.new_anchors : config_.old_anchors;
     const int num_heads = head_anchors.size();

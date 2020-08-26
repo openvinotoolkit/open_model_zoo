@@ -10,6 +10,8 @@
 #include <numeric>
 #include <functional>
 
+#include <samples/ie_config_helper.hpp>
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -20,7 +22,7 @@ using namespace InferenceEngine;
 CnnBase::CnnBase(const Config& config,
                  const InferenceEngine::Core & ie,
                  const std::string & deviceName) :
-    config_(config), ie_(ie), deviceName_(deviceName) {}
+    config_(config), ie_(ie), deviceName_(formatDeviceString(deviceName)) {}
 
 void CnnBase::Load() {
     auto cnnNetwork = ie_.ReadNetwork(config_.path_to_model);
@@ -53,7 +55,7 @@ void CnnBase::Load() {
         outputs_[item.first] = output;
     }
 
-    executable_network_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
+    executable_network_ = ie_.LoadNetwork(cnnNetwork, deviceName_, {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
     infer_request_ = executable_network_.CreateInferRequest();
     infer_request_.SetInput(inputs);
     infer_request_.SetOutput(outputs_);

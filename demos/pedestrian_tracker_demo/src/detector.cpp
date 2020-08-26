@@ -9,6 +9,7 @@
 #include <map>
 #include <opencv2/core/core.hpp>
 #include <inference_engine.hpp>
+#include <samples/ie_config_helper.hpp>
 
 #include <ngraph/ngraph.hpp>
 
@@ -100,7 +101,7 @@ ObjectDetector::ObjectDetector(
     const std::string & deviceName) :
     config_(config),
     ie_(ie),
-    deviceName_(deviceName) {
+    deviceName_(formatDeviceString(deviceName)) {
     auto cnnNetwork = ie_.ReadNetwork(config.path_to_model);
 
     InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
@@ -148,7 +149,7 @@ ObjectDetector::ObjectDetector(
     _output->setPrecision(Precision::FP32);
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
-    net_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
+    net_ = ie_.LoadNetwork(cnnNetwork, deviceName_, {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
 }
 
 void ObjectDetector::wait() {

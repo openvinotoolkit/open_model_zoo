@@ -9,6 +9,7 @@
 #include <string>
 
 #include <samples/common.hpp>
+#include <samples/ie_config_helper.hpp>
 
 
 void Cnn::Init(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
@@ -58,7 +59,8 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Loading model to the device -------------------------------------------
-    ExecutableNetwork executable_network = ie.LoadNetwork(network, deviceName);
+    ExecutableNetwork executable_network = ie.LoadNetwork(network, formatDeviceString(deviceName),
+                                                          {{ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" }});
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Creating infer request ------------------------------------------------

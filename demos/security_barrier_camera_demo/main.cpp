@@ -19,6 +19,7 @@
 #include <vpu/vpu_plugin_config.hpp>
 #include <monitors/presenter.h>
 #include <samples/args_helper.hpp>
+#include <samples/ie_config_helper.hpp>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
@@ -696,60 +697,12 @@ int main(int argc, char* argv[]) {
         // --------------------------- 1. Load Inference Engine -------------------------------------
         InferenceEngine::Core ie;
 
-        std::set<std::string> devices;
-        for (const std::string& netDevices : {FLAGS_d, FLAGS_d_va, FLAGS_d_lpr}) {
-            if (netDevices.empty()) {
-                continue;
-            }
-            for (const std::string& device : parseDevices(netDevices)) {
-                devices.insert(device);
-            }
-        }
-        std::map<std::string, uint32_t> device_nstreams = parseValuePerDevice(devices, FLAGS_nstreams);
+        std::string device = formatDeviceString(FLAGS_d);
+        std::string deviceVA = formatDeviceString(FLAGS_d_va);
+        std::string deviceLPR = formatDeviceString(FLAGS_d_lpr);
 
-        for (const std::string& device : devices) {
-            slog::info << "Loading device " << device << slog::endl;
-
-            /** Printing device version **/
-            std::cout << ie.GetVersions(device) << std::endl;
-
-            if ("CPU" == device) {
-                if (!FLAGS_l.empty()) {
-                    // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-                    ie.AddExtension(extension_ptr, "CPU");
-                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
-                }
-                if (FLAGS_nthreads != 0) {
-                    ie.SetConfig({{ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }}, "CPU");
-                }
-                ie.SetConfig({{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }}, "CPU");
-                ie.SetConfig({{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
-                                (device_nstreams.count("CPU") > 0 ? std::to_string(device_nstreams.at("CPU")) :
-                                                                    CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) }}, "CPU");
-                device_nstreams["CPU"] = std::stoi(ie.GetConfig("CPU", CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
-            }
-
-            if ("GPU" == device) {
-                // Load any user-specified clDNN Extensions
-                if (!FLAGS_c.empty()) {
-                    ie.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
-                }
-                ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
-                                (device_nstreams.count("GPU") > 0 ? std::to_string(device_nstreams.at("GPU")) :
-                                                                    CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) }}, "GPU");
-                device_nstreams["GPU"] = std::stoi(ie.GetConfig("GPU", CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
-                if (devices.end() != devices.find("CPU")) {
-                    // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
-                    // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                    ie.SetConfig({{ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
-                }
-            }
-
-            if ("FPGA" == device) {
-                ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_DEVICE_ID, FLAGS_fpga_device_ids } }, "FPGA");
-            }
-        }
+        std::string deviceString = device + "," + deviceVA + "," + deviceLPR;
+        auto ieConfig = createConfig(deviceString, FLAGS_nstreams, FLAGS_nthreads);
 
         /** Per layer metrics **/
         if (FLAGS_pc) {
@@ -758,7 +711,7 @@ int main(int argc, char* argv[]) {
 
         /** Graph tagging via config options**/
         auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
-            std::map<std::string, std::string> config;
+            std::map<std::string, std::string> config = ieConfig;
             if (FLAGS_tag && deviceName == "HDDL") {
                 config[VPU_HDDL_CONFIG_KEY(GRAPH_TAG)] = "tag" + suffix;
             }
@@ -767,21 +720,21 @@ int main(int argc, char* argv[]) {
 
         // -----------------------------------------------------------------------------------------------------
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
-        slog::info << "Loading detection model to the "<< FLAGS_d << " plugin" << slog::endl;
-        Detector detector(ie, FLAGS_d, FLAGS_m,
-            {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d, "Detect"));
+        slog::info << "Loading detection model to the "<< device << " plugin" << slog::endl;
+        Detector detector(ie, device, FLAGS_m,
+            {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(device, "Detect"));
         VehicleAttributesClassifier vehicleAttributesClassifier;
         std::size_t nclassifiersireq{0};
         Lpr lpr;
         std::size_t nrecognizersireq{0};
         if (!FLAGS_m_va.empty()) {
-            slog::info << "Loading Vehicle Attribs model to the "<< FLAGS_d_va << " plugin" << slog::endl;
-            vehicleAttributesClassifier = VehicleAttributesClassifier(ie, FLAGS_d_va, FLAGS_m_va, FLAGS_auto_resize, makeTagConfig(FLAGS_d_va, "Attr"));
+            slog::info << "Loading Vehicle Attribs model to the "<< deviceVA << " plugin" << slog::endl;
+            vehicleAttributesClassifier = VehicleAttributesClassifier(ie, deviceVA, FLAGS_m_va, FLAGS_auto_resize, makeTagConfig(deviceVA, "Attr"));
             nclassifiersireq = nireq * 3;
         }
         if (!FLAGS_m_lpr.empty()) {
-            slog::info << "Loading Licence Plate Recognition (LPR) model to the "<< FLAGS_d_lpr << " plugin" << slog::endl;
-            lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));
+            slog::info << "Loading Licence Plate Recognition (LPR) model to the "<< deviceLPR << " plugin" << slog::endl;
+            lpr = Lpr(ie, deviceLPR, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(deviceLPR, "LPR"));
             nrecognizersireq = nireq * 3;
         }
         bool isVideo = imageSourcess.empty() ? true : false;
@@ -797,17 +750,17 @@ int main(int argc, char* argv[]) {
         cv::Size displayResolution = cv::Size{std::stoi(FLAGS_display_resolution.substr(0, found)),
                                               std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()))};
 
-        slog::info << "Number of InferRequests: " << nireq << " (detection), " << nclassifiersireq << " (classification), " << nrecognizersireq << " (recognition)" << slog::endl;
-        std::ostringstream device_ss;
-        for (const auto& nstreams : device_nstreams) {
-            if (!device_ss.str().empty()) {
-                device_ss << ", ";
-            }
-            device_ss << nstreams.second << " streams for " << nstreams.first;
-        }
-        if (!device_ss.str().empty()) {
-            slog::info << device_ss.str() << slog::endl;
-        }
+        // slog::info << "Number of InferRequests: " << nireq << " (detection), " << nclassifiersireq << " (classification), " << nrecognizersireq << " (recognition)" << slog::endl;
+        // std::ostringstream device_ss;
+        // for (const auto& nstreams : device_nstreams) {
+        //     if (!device_ss.str().empty()) {
+        //         device_ss << ", ";
+        //     }
+        //     device_ss << nstreams.second << " streams for " << nstreams.first;
+        // }
+        // if (!device_ss.str().empty()) {
+        //     slog::info << device_ss.str() << slog::endl;
+        // }
         slog::info << "Display resolution: " << FLAGS_display_resolution << slog::endl;
 
         Context context{inputChannels,
@@ -849,11 +802,11 @@ int main(int argc, char* argv[]) {
         worker->join();
         const auto t1 = std::chrono::steady_clock::now();
 
-        std::map<std::string, std::string> mapDevices = getMapFullDevicesNames(ie, {FLAGS_d, FLAGS_d_va, FLAGS_d_lpr});
+        std::map<std::string, std::string> mapDevices = getMapFullDevicesNames(ie, {device, deviceVA, deviceLPR});
         for (auto& net : std::array<std::pair<std::vector<InferRequest>, std::string>, 3>{
-            std::make_pair(context.detectorsInfers.getActualInferRequests(), FLAGS_d),
-                std::make_pair(context.attributesInfers.getActualInferRequests(), FLAGS_d_va),
-                std::make_pair(context.platesInfers.getActualInferRequests(), FLAGS_d_lpr)}) {
+            std::make_pair(context.detectorsInfers.getActualInferRequests(), device),
+                std::make_pair(context.attributesInfers.getActualInferRequests(), deviceVA),
+                std::make_pair(context.platesInfers.getActualInferRequests(), deviceLPR)}) {
             for (InferRequest& ir : net.first) {
                 ir.Wait(IInferRequest::WaitMode::RESULT_READY);
                 if (FLAGS_pc) {  // Show performace results
