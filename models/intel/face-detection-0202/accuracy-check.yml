@@ -1,5 +1,5 @@
 models:
-  - name: face-detection-0104
+  - name: face-detection-0202
 
     launchers:
       - framework: dlsdk
@@ -10,7 +10,7 @@ models:
 
         preprocessing:
           - type: resize
-            size: 448
+            size: 384
 
         postprocessing:
           - type: resize_prediction_boxes
