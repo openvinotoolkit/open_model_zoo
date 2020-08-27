@@ -55,7 +55,7 @@ def encode_by_voc(w, vocab):
     return res
 
 #split big text into words by spaces
-#iterativly return words
+#iteratively return words
 def split_to_words(text):
     prev_is_sep = True # mark initial prev as space to start word from 0 char
     for i, c in enumerate(text + " "):
