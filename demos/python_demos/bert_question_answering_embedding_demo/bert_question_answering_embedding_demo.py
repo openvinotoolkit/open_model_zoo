@@ -350,7 +350,7 @@ def main():
                 return "\033[91m" + txt + "\033[0m" if args.colors else "*" + txt + "*"
 
             #print top 3 results
-            answers = list(sorted(answers, key=lambda x: -x[0]))
+            answers.sort(key=lambda x: -x[0])
             log.info("---Stage 3---Find best 3 answers from {} results of Stage 1".format(len(answers)))
             for score, s, e, context in answers[:3]:
                 log.info("Answer: {:0.2f} {} ".format(score, mark(context[s:e])))
