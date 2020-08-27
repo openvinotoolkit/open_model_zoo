@@ -18,8 +18,8 @@ description: >-
 task_type: detection
 files:
   - name: yolo-v2-tiny.pb
-    size: 44978237
-    sha256: 665620ba84d9baaf728da5f4842cd3ec494e37b0121526263602bc9cee342da4
+    size: 44962543
+    sha256: 84ccafde4a5ae0d41a0f201342814718bd35bac52492a0e72c175fecf4231e58
     source: https://download.01.org/opencv/public_models/022020/tiny_yolo_v2/saved_model.pb
 model_optimizer_args:
   - --input_shape=[1,416,416,3]
@@ -30,4 +30,4 @@ model_optimizer_args:
   - --input_model=$dl_dir/yolo-v2-tiny.pb
 framework: tf
 quantizable: yes
-license: https://raw.githubusercontent.com/shaqian/tfjs-yolo/master/LICENSE
+license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

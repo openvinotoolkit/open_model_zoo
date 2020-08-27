@@ -2,39 +2,26 @@
 
 ## Use Case and High-Level Description
 
-YOLO v2 Tiny is a real-time object detection model from TensorFlow.js\* framework. This model was pretrained on COCO\* dataset with 80 classes.
+YOLO v2 Tiny is a real-time object detection model implemented with Keras\* from this [repository](https://github.com/david8862/keras-YOLOv3-model-set) and converted to TensorFlow\* framework. This model was pretrained on COCO\* dataset with 80 classes.
 
 ## Conversion
 
-0. Install additional dependencies:
-    ```
-    h5py
-    keras
-    tensorflowjs
-    ```
-1. Download the model from [here](https://github.com/shaqian/tfjs-yolo-demo/tree/master/dist/model/v2tiny) (tested on `aa4354c` commit).
-2. Convert the model to Keras\* format using `tensorflowjs_converter` script, e.g.:
-    ```
-    tensorflowjs_converter --input_format tfjs_layers_model --output_format keras <model_in>.json <model_out>.h5
-    ```
-3. Convert the produced model to protobuf format.
+1. Download or clone the official [repository](https://github.com/david8862/keras-YOLOv3-model-set) (tested on `ffede5` commit).
+2. Use the folllowing commands to get original model (named `yolov2_tiny` in repository) and convert it to Keras\* format (see details in the [README.md](https://github.com/david8862/keras-YOLOv3-model-set/blob/ffede5d316568479610b75a3424e2a7b81f0209b/README.md)  file in the official repository):
 
-    1. Get conversion script from [repository](https://github.com/amir-abdi/keras_to_tensorflow):
-        ```buildoutcfg
-        git clone https://github.com/amir-abdi/keras_to_tensorflow
+   1. Download YOLO v3 weights:
         ```
-    1. (Optional) Checkout the commit that the conversion was tested on:
+        wget -O weights/yolov3.weights https://pjreddie.com/media/files/yolov3.weights
         ```
-        git checkout c841508a88faa5aa1ffc7a4947c3809ea4ec1228
+
+   1. Convert model weights to Keras\*:
         ```
-    1. Apply `keras_to_tensorflow.py.patch`:
+        python tools/convert.py cfg/yolov3.cfg weights/yolov3.weights weights/yolov3.h5
         ```
-        git apply keras_to_tensorflow.py.patch
-        ```
-    1. Run script:
-        ```
-        python keras_to_tensorflow.py --input_model=<model_in>.h5 --output_model=<model_out>.pb
-        ```
+3. Convert model to protobuf:
+    ```
+    python tools/keras_to_tensorflow.py --input_model weights/yolov3.h5 --output_model="path/to/save/model.pb"
+    ```
 
 ## Specification
 
@@ -43,7 +30,7 @@ YOLO v2 Tiny is a real-time object detection model from TensorFlow.js\* framewor
 | Type              | Detection     |
 | GFLOPs            | 5.424         |
 | MParams           | 11.229        |
-| Source framework  | TensorFlow.js\*  |
+| Source framework  | Keras\*  |
 
 ## Accuracy
 
