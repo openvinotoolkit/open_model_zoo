@@ -2,6 +2,8 @@ import numpy as np
 from  .base_profiler import MetricProfiler
 
 class InstanceSegmentationProfiler(MetricProfiler):
+    __provider__ = 'instance_segmentation'
+
     def __init__(self, dump_iterations=100, report_type='csv'):
         self.names = []
         self.metric_names = []
@@ -17,7 +19,7 @@ class InstanceSegmentationProfiler(MetricProfiler):
         if not self.updated_fields:
             self._update_fields()
         if self._last_profile and self._last_profile == identifier:
-             report = self._last_profile
+            report = self._last_profile
         else:
             report = self.per_instance_result(identifier, metric_result) if self.report_file == 'csv' else {}
 
@@ -42,16 +44,16 @@ class InstanceSegmentationProfiler(MetricProfiler):
                 continue
             label_id = self.valid_labels[idx] if self.valid_labels else class_id
             iou = [iou_str.tolist() for iou_str in class_result['iou']]
-            gt = class_result['gt'].tolist() if not isinstance(class_result['gt'], list) else class_result['gt']
-            dt = class_result['dt'].tolist() if not isinstance(class_result['dt'], list) else class_result['dt']
+            gt = [gt_obj.tolist() for gt_obj in class_result['gt']]
+            dt = [dt_obj.tolist() for dt_obj in class_result['dt']]
             scores = (
                 class_result['scores'].tolist()
                 if not isinstance(class_result['scores'], list) else class_result['scores']
             )
 
             per_class_results[label_id] = {
-                'annotation_boxes': gt,
-                'prediction_boxes': dt,
+                'annotation_polygons': gt,
+                'prediction_polygons': dt,
                 'prediction_scores': scores,
                 'iou': iou,
             }
@@ -102,11 +104,10 @@ class InstanceSegmentationProfiler(MetricProfiler):
             label for label in meta.get('label_map', {}) if label != meta.get('background_label')
         ]
 
-    @staticmethod
-    def generate_result_matching(per_class_result, metric_name):
+    def generate_result_matching(self, per_class_result, metric_name):
         matching_result = {
-            'prediction_matches': per_class_result['dt_matches'][0],
-            'annotation_matches':  per_class_result['gt_matches'][0],
+            'prediction_matches': per_class_result['dt_matches'][0].tolist(),
+            'annotation_matches':  per_class_result['gt_matches'][0].tolist(),
             metric_name: per_class_result['result']
             }
         return matching_result

@@ -21,7 +21,7 @@ class DetectionProfiler(MetricProfiler):
         if not self.updated_fields:
             self._update_fields()
         if self._last_profile and self._last_profile == identifier:
-             report = self._last_profile
+            report = self._last_profile
         else:
             report = self.per_box_result(identifier, metric_result) if self.report_file == 'csv' else {}
 

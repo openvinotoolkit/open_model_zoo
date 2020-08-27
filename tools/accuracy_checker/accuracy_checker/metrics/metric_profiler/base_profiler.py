@@ -30,7 +30,8 @@ PROFILERS_MAPPING = {
     ('psnr', 'ssim'): 'complex_regression',
     ('normed_error', 'per_point_normed_error'): 'point_regression',
     ('segmentation_accuracy', 'mean_iou', 'mean_accuracy', 'frequency_weighted_accuracy'): 'segmentation',
-    ('coco_precision', 'coco_recall', 'map', 'recall', 'miss_rate'): 'detection'
+    ('coco_precision', 'coco_recall', 'map', 'recall', 'miss_rate'): 'detection',
+    ('coco_orig_segm_precision', ): 'instance_segmentation'
 }
 
 

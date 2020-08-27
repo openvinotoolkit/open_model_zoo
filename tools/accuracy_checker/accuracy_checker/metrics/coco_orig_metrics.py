@@ -46,8 +46,8 @@ from ..representation import (
 from ..logging import print_info
 from ..config import BaseField, BoolField, ConfigError
 from ..utils import get_or_parse_value
-from .metric import FullDatasetEvaluationMetric
-from .coco_metrics import COCO_THRESHOLDS, process_threshold
+from .metric import FullDatasetEvaluationMetric, PerImageEvaluationMetric
+from .coco_metrics import COCO_THRESHOLDS, process_threshold, compute_precision_recall
 
 SHOULD_SHOW_PREDICTIONS = False
 SHOULD_DISPLAY_DEBUG_IMAGES = False
@@ -89,6 +89,11 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
                               'Please provide dataset meta file or regenerated annotation')
         if COCO is None:
             raise ValueError('pycocotools is not installed, please install it')
+        label_map = self.dataset.metadata.get('label_map', {})
+        self.labels = [
+            label for label in label_map
+            if label != self.dataset.metadata.get('background_label')
+        ]
 
     @staticmethod
     def _iou_type_data_to_coco(data_to_store, data, box_side_delta):
@@ -390,6 +395,57 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
         return res
 
+    @staticmethod
+    def _evaluate_image(
+            ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, thresholds, profile=False
+    ):
+        thresholds_num = len(thresholds)
+        gt_num = len(ground_truth)
+        dt_num = len(detections)
+        gt_matched = np.zeros((thresholds_num, gt_num))
+        dt_matched = np.zeros((thresholds_num, dt_num))
+        gt_ignored = gt_difficult
+        dt_ignored = np.zeros((thresholds_num, dt_num))
+        if np.size(iou):
+            for tind, t in enumerate(thresholds):
+                for dtind, _ in enumerate(detections):
+                    # information about best match so far (matched_id = -1 -> unmatched)
+                    iou_current = min([t, 1 - 1e-10])
+                    matched_id = -1
+                    for gtind, _ in enumerate(ground_truth):
+                        # if this gt already matched, and not a crowd, continue
+                        if gt_matched[tind, gtind] > 0 and not iscrowd[gtind]:
+                            continue
+                        # if dt matched to reg gt, and on ignore gt, stop
+                        if matched_id > -1 and not gt_ignored[matched_id] and gt_ignored[gtind]:
+                            break
+                        # continue to next gt unless better match made
+                        if iou[dtind, gtind] < iou_current:
+                            continue
+                        # if match successful and best so far, store appropriately
+                        iou_current = iou[dtind, gtind]
+                        matched_id = gtind
+                    # if match made store id of match for both dt and gt
+                    if matched_id == -1:
+                        continue
+                    dt_ignored[tind, dtind] = gt_ignored[matched_id]
+                    dt_matched[tind, dtind] = 1
+                    gt_matched[tind, matched_id] = dtind
+        # store results for given image
+        results = {
+            'dt_matches': dt_matched,
+            'gt_matches': gt_matched,
+            'gt_ignore': gt_ignored,
+            'dt_ignore': np.logical_or(dt_ignored, dt_difficult),
+            'scores': scores
+        }
+        if profile:
+            results.update({
+                'iou': iou
+            })
+
+        return results
+
     def evaluate(self, annotations, predictions):
         pass
 
@@ -398,10 +454,12 @@ class MSCOCOorigAveragePrecision(MSCOCOorigBaseMetric):
     __provider__ = 'coco_orig_precision'
 
     def evaluate(self, annotations, predictions):
+        if self.profiler:
+            self.profiler.finish()
         return self.compute_precision_recall(annotations, predictions)[0][0]
 
 
-class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
+class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluationMetric):
     __provider__ = 'coco_orig_segm_precision'
     annotation_types = (CoCoInstanceSegmentationAnnotation, )
     prediction_types = (CoCocInstanceSegmentationPrediction, )
@@ -410,24 +468,62 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
 
     def update(self, annotation, prediction):
         if self.profiler:
-            per_class_results = []
-            for label_id, label in enumerate(self.labels):
+            per_class_matching = {}
+            for _, label in enumerate(self.labels):
                 detections, scores, dt_difficult = self._prepare_predictions(prediction, label)
-                ground_truth, gt_difficult, iscrowd, boxes, areas = self._prepare_annotations(annotation, label)
+                ground_truth, gt_difficult, iscrowd = self._prepare_annotations(annotation, label)
+                if not ground_truth.size:
+                    continue
                 iou = self._compute_iou(ground_truth, detections, iscrowd)
-                eval_result = evaluate_image(
+                eval_result = self._evaluate_image(
                     ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, self.threshold,
                     True
                 )
-                per_class_results.append(eval_result)
+                eval_result['gt'] = annotation.to_polygon()[label]
+                eval_result['dt'] = annotation.to_polygon()[label]
+                per_class_matching[label] = eval_result
+            per_class_result = {k: compute_precision_recall(self.threshold, [v])[0] for k, v in per_class_matching.items()}
+            for label in per_class_matching:
+                per_class_matching[label]['result'] = per_class_result[label]
+            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(list(per_class_result.values())))
 
     @staticmethod
     def _compute_iou(gt, dets, iscrowd):
-        return iou_calc(gt, dets, iscrowd)
+        return iou_calc(list(dets), list(gt), iscrowd)
 
-    def _prepare_prediction(self, prediction, label):
-        pass
 
+    @staticmethod
+    def _prepare_predictions(prediction, label):
+        if prediction.size == 0:
+            return [], [], []
+        prediction_ids = np.argwhere(prediction.labels == label).reshape(-1)
+        scores = prediction.scores[prediction_ids]
+        if np.size(scores) == 0:
+            return [], [], []
+        scores_ids = np.argsort(- scores, kind='mergesort')
+        difficult_mask = np.full(prediction.size, False)
+        difficult_mask[prediction.metadata.get('difficult_boxes', [])] = True
+        difficult_for_label = difficult_mask[prediction_ids]
+        detections = [prediction.mask[idx] for idx in prediction_ids]
+        detections = np.array(detections)[scores_ids]
+
+        return detections, scores[scores_ids], difficult_for_label[scores_ids]
+
+    def _prepare_annotations(self, annotation, label):
+        annotation_ids = np.argwhere(np.array(annotation.labels) == label).reshape(-1)
+        difficult_mask = np.full(annotation.size, False)
+        difficult_indices = annotation.metadata.get("difficult_boxes", [])
+        iscrowd = np.array(annotation.metadata.get('iscrowd', [0] * annotation.size))
+        difficult_mask[difficult_indices] = True
+        difficult_mask[iscrowd > 0] = True
+        difficult_label = difficult_mask[annotation_ids]
+        not_difficult_box_indices = np.argwhere(~difficult_label).reshape(-1)
+        difficult_box_indices = np.argwhere(difficult_label).reshape(-1)
+        iscrowd_label = iscrowd[annotation_ids]
+        order = np.hstack((not_difficult_box_indices, difficult_box_indices)).astype(int)
+        ann = np.array([annotation.mask[idx] for idx in annotation_ids])
+
+        return ann[order], difficult_label[order], iscrowd_label[order]
 
 
     @staticmethod
@@ -456,10 +552,13 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
         return annotation_data_to_store
 
 
+
 class MSCOCOorigRecall(MSCOCOorigBaseMetric):
     __provider__ = 'coco_orig_recall'
 
     def evaluate(self, annotations, predictions):
+        if self.profiler:
+            self.profiler.finish()
         return self.compute_precision_recall(annotations, predictions)[1][2]
 
 
