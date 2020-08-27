@@ -20,11 +20,6 @@ If second (conventional SQuAD-tuned) Bert model is provided as well, it is used 
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```
-python3 bert_question_answering_embedding_demo.py -h
-```
-The command yields the following usage message:
-```
 usage: bert_question_answering_embedding_demo.py [-h] -i INPUT
                                                  [--best_n BEST_N] -v VOCAB
                                                  -m_emb MODEL_EMB
@@ -91,8 +86,8 @@ The application outputs contexts with answers to the same console.
 
 ## Supported Models
 [Open Model Zoo Models](../../../models/intel/index.md) feature
-example BERT-large tuned on the Squad* for embedding calculation. It comes with "embedding" in its names.
-For second stage to find exact answer in filtered context the same models as for question_answering_demo can be used.
+example BERT-large tuned on the Squad* for embedding calculation. It comes with "embedding" in its name.
+For second stage to find exact answer in filtered context the same models as for `bert_question_answering_demo` can be used.
 
 ## Example Demo Cmd-Line
 You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
@@ -108,11 +103,11 @@ You can use the following command to try the demo (assuming the model from the O
             --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street),https://en.wikipedia.org/wiki/Speed_of_light"
             -c
 ```
-The demo will use a wiki-pages about the Bert character and the speed of light to answer your questions like
-"what is the speed of light","how to measure the speed of light" ,"who is Bert", "how old is Bert", etc.
+The demo will use the Wikipedia articles about the Bert character and the speed of light to answer your questions like
+"what is the speed of light", "how to measure the speed of light", "who is Bert", "how old is Bert", etc.
 
 ## Classifying Documents with Long Texts
-Notice that when the original "context" (paragraph text from the url) alon or together with the question do not fit the model input
+Notice that when the original "context" (paragraph text from the url) alone or together with the question do not fit the model input
 (usually 384 tokens for the Bert-Large, or 128 for the Bert-Base), the demo splits the paragraph into overlapping segments.
 Thus, for the long paragraph texts, the network is called multiple times as for separate contexts.
 
