@@ -50,6 +50,8 @@ class ExtendSegmentationMask(Postprocessor):
 
     def process_image(self, annotation, prediction):
         for annotation_, prediction_ in zip(annotation, prediction):
+            if annotation_ is None:
+                continue
             annotation_mask = annotation_.mask
             dst_height, dst_width = prediction_.mask.shape[-2:]
             height, width = annotation_mask.shape[-2:]

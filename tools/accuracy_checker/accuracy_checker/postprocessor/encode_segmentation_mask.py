@@ -43,6 +43,8 @@ class EncodeSegMask(PostprocessorWithSpecificTargets):
                 raise ValueError("No 'prediction_to_gt_labels' in dataset metadata")
 
         for annotation_ in annotation:
+            if annotation_ is None:
+                continue
             mask = annotation_.mask.astype(int)
             num_channels = len(mask.shape)
             encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.int16)
@@ -53,6 +55,8 @@ class EncodeSegMask(PostprocessorWithSpecificTargets):
             annotation_.mask = encoded_mask.astype(np.int8)
 
         for prediction_ in prediction:
+            if prediction_ is None:
+                continue
             mask = prediction_.mask
             updated_mask = mask
             saved_mask = mask.copy()
