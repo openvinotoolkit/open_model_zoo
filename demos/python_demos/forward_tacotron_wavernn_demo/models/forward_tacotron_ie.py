@@ -1,10 +1,9 @@
-import sys
-from openvino.inference_engine import IECore
-import numpy as np
+import os.path as osp
 import logging as log
 
+import numpy as np
+from openvino.inference_engine import IECore
 
-import os.path as osp
 from utils.text_preprocessing import text_to_sequence, _symbol_to_id
 
 class ForwardTacotronIE:

@@ -1,27 +1,11 @@
-import sys
-from openvino.inference_engine import IECore
-import numpy as np
+import os.path as osp
 import logging as log
 import time
-import os.path as osp
-import pickle
+
+from openvino.inference_engine import IECore
+import numpy as np
 
 from utils.wav_processing import *
-import openvino
-
-
-def timeit(method):
-    def timed(*args, **kw):
-        ts = time.time()
-        result = method(*args, **kw)
-        te = time.time()
-        if 'log_time' in kw:
-            name = kw.get('log_name', method.__name__.upper())
-            kw['log_time'][name] = int((te - ts) * 1000)
-        else:
-            print('{0}  {1} ms'.format(method.__name__, (te - ts) * 1000))
-        return result
-    return timed
 
 
 class Mel2WaveInference():
@@ -131,7 +115,6 @@ class WaveRNNIE(Mel2WaveInference):
 
         return audio
 
-    @timeit
     def forward_upsample(self, mels):
         mels = pad_tensor(mels, pad=self.pad)
 
@@ -142,7 +125,7 @@ class WaveRNNIE(Mel2WaveInference):
     def forward_upsample_one_iter(self, inputs):
         out = self.upsample_exec.infer(inputs=inputs)
         return out
-    @timeit
+
     def forward_rnn(self, mels, upsampled_mels, aux):
         wave_len = (mels.shape[1] - 1) * self.hop_length
 

@@ -1,20 +1,20 @@
+#!/usr/bin/env python
+
 import sys
-import os.path as osp
-
+import time
 from argparse import ArgumentParser, SUPPRESS
-import numpy as np
 
+import numpy as np
+import scipy.io.wavfile
 
 from models.forward_tacotron_ie import ForwardTacotronIE
 from models.mel2wave_ie import WaveRNNIE
-
-import time
-import scipy.io.wavfile
 
 
 def save_wav(x, path):
     sr = 22050
     scipy.io.wavfile.write(path, sr, x)
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -46,6 +46,7 @@ def build_argparser():
 def mel_to_wave(mel_spec, out_name, ap):
     waveform = ap.reconstruct_waveform(mel_spec)
     ap.save_wav(waveform, out_name)
+
 
 def main():
     args = build_argparser().parse_args()
