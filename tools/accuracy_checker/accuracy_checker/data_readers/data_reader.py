@@ -41,7 +41,7 @@ except ImportError:
     pydicom = None
 
 
-from ..utils import get_path, read_json, contains_all
+from ..utils import get_path, read_json, read_pickle, contains_all
 from ..dependency import ClassProvider
 from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField
 
@@ -527,3 +527,17 @@ class DicomReader(BaseReader):
     def read(self, data_id):
         dataset = pydicom.dcmread(str(self.data_source / data_id))
         return dataset.pixel_array
+
+
+class PickleReader(BaseReader):
+    __provider__ = 'pickle_reader'
+
+    def read(self, data_id):
+        data = read_pickle(self.data_source / data_id)
+        if isinstance(data, list) and len(data) == 2 and isinstance(data[1], dict):
+            return data
+
+        return data, {}
+
+    def read_item(self, data_id):
+        return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)

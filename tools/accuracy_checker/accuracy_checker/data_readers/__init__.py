@@ -31,6 +31,7 @@ from .data_reader import (
     AnnotationFeaturesReader,
     WavReader,
     DicomReader,
+    PickleReader,
 
     DataRepresentation,
     ClipIdentifier,
@@ -54,6 +55,7 @@ __all__ = [
     'AnnotationFeaturesReader',
     'WavReader',
     'DicomReader',
+    'PickleReader',
     'NumPyReader',
     'NumpyTXTReader',
     'NumpyDictReader',
