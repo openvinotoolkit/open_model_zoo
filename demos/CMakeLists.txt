@@ -7,6 +7,7 @@ cmake_minimum_required (VERSION 2.8.12)
 project(Demos)
 
 option(ENABLE_PYTHON "Whether to build extension modules for Python demos" OFF)
+option(TREAT_WARNING_AS_ERROR "Treat warnings as errors for WIN32" ON)
 
 if (CMAKE_BUILD_TYPE STREQUAL "")
     message(STATUS "CMAKE_BUILD_TYPE not defined, 'Release' will be used")

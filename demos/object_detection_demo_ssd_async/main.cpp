@@ -401,7 +401,7 @@ int main(int argc, char *argv[]) {
                 std::ostringstream out;
                 out << (currentMode == ExecutionMode::USER_SPECIFIED ? "USER SPECIFIED" : "MIN LATENCY")
                     << " mode (press Tab to switch)";
-                putHighlightedText(requestResult.frame, out.str(), cv::Point2f(10, requestResult.frame.rows - 30),
+                putHighlightedText(requestResult.frame, out.str(), cv::Point(10, requestResult.frame.rows - 30),
                                    cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(10, 10, 200), 2);
 
                 if (requestResult.frameMode == currentMode && prevModeActiveRequestCount == 0) {
@@ -433,7 +433,7 @@ int main(int argc, char *argv[]) {
                         }
 
                         putHighlightedText(requestResult.frame, "Switching modes, please wait...",
-                                           cv::Point2f(10, requestResult.frame.rows - 60),
+                                           cv::Point(10, requestResult.frame.rows - 60),
                                            cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(10, 200, 10), 2);
                         cv::imshow(imshowWindowTitle, requestResult.frame);
                         cv::waitKey(1);
