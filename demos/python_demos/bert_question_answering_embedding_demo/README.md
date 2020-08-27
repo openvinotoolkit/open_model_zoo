@@ -100,7 +100,8 @@ You can use the following command to try the demo (assuming the model from the O
             --model_qa=<path_to_model>/bert-small-uncased-whole-word-masking-squad-0002.xml
             --input_names_qa="input_ids,attention_mask,token_type_ids,position_ids"
             --output_names_qa="output_s,output_e"
-            --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street),https://en.wikipedia.org/wiki/Speed_of_light"
+            --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street)"
+            --input="https://en.wikipedia.org/wiki/Speed_of_light"
             -c
 ```
 The demo will use the Wikipedia articles about the Bert character and the speed of light to answer your questions like
