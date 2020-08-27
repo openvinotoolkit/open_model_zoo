@@ -96,7 +96,7 @@ You can use the following command to try the demo (assuming the model from the O
 ```
     python3 bert_question_answering_embedding_demo.py
             --vocab=<path_to_model>/vocab.txt
-            --model_emb=<path_to_model>/bert-large-uncased-whole-word-masking-squad-embedding-0001.xml
+            --model_emb=<path_to_model>/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
             --input_names_emb="input_ids,attention_mask,token_type_ids,position_ids"
             --model_qa=<path_to_model>/bert-small-uncased-whole-word-masking-squad-0002.xml
             --input_names_qa="input_ids,attention_mask,token_type_ids,position_ids"
