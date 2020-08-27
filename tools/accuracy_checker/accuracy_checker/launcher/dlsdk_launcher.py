@@ -355,7 +355,7 @@ class DLSDKLauncher(Launcher):
         if is_blob:
             return model, None
         weights = self.get_value_from_config('weights')
-        if weights is None or Path(weights).is_dir() and model.suffix != '.onnx':
+        if (weights is None or Path(weights).is_dir()) and model.suffix != '.onnx':
             weights_dir = weights or model.parent
             weights = Path(weights_dir) / model.name.replace('xml', 'bin')
             print_info('Found weights {}'.format(get_path(weights)))
