@@ -35,6 +35,7 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument("-i", "--input",
                       help="Required. Urls to a wiki pages with context",
+                      action='append',
                       required=True, type=str)
     args.add_argument("--best_n",
                       help="Optional. Number of best (closest) contexts selected",
@@ -205,7 +206,7 @@ def main():
             self.c_tokens_se = c_tokens_se
             self.c_emb = calc_emb(self.c_tokens_id, max_length_c)
 
-    paragraphs = get_paragraphs(args.input.split(','))
+    paragraphs = get_paragraphs(args.input)
     contexts_all = []
 
     log.info("Indexing {} paragraphs...".format(len(paragraphs)))
