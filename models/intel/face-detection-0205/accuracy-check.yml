@@ -1,16 +1,18 @@
 models:
-  - name: face-detection-0100
+  - name: face-detection-0205
 
     launchers:
       - framework: dlsdk
-        adapter: ssd
+        adapter:
+          type: class_agnostic_detection
+          scale: 0.00240384615
 
     datasets:
       - name: wider
 
         preprocessing:
           - type: resize
-            size: 256
+            size: 416
 
         postprocessing:
           - type: resize_prediction_boxes

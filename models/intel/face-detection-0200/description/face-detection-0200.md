@@ -1,22 +1,22 @@
-# face-detection-0104
+# face-detection-0200
 
 ## Use Case and High-Level Description
 
 Face detector based on MobileNetV2 as a backbone with a
 multiple SSD head for indoor and outdoor scenes shot by a front-facing camera.
-During the training of this model, training images were resized to 448x448.
+During the training of this model, training images were resized to 256x256.
 
 ## Example
 
-![](./face-detection-0104.png)
+![](./face-detection-0200.png)
 
 ## Specification
 
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
-| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 92.74%                  |
-| GFlops                                                        | 2.406                   |
-| MParams                                                       | 1.851                   |
+| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 86.74%                  |
+| GFlops                                                        | 0.786                   |
+| MParams                                                       | 1.828                   |
 | Source framework                                              | PyTorch*                |
 
 Average Precision (AP) is defined as an area under the
@@ -28,7 +28,7 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 
 ## Inputs
 
-Name: `input`, shape: [1x3x448x448] - An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x256x256] - An input image in the format [BxCxHxW],
 where:
 
 - B - batch size

@@ -1,5 +1,5 @@
 models:
-  - name: face-detection-0106
+  - name: face-detection-0206
 
     launchers:
       - framework: dlsdk

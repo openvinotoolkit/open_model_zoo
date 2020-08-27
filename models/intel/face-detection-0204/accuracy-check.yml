@@ -1,12 +1,12 @@
 models:
-  - name: face-detection-0104
+  - name: face-detection-0204
 
     launchers:
       - framework: dlsdk
         adapter: ssd
 
     datasets:
-      - name: wider
+      - name: wider_without_bkgr
 
         preprocessing:
           - type: resize

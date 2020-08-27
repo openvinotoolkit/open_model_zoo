@@ -1,21 +1,21 @@
-# face-detection-0105
+# face-detection-0206
 
 ## Use Case and High-Level Description
 
-Face detector based on MobileNetV2 as a backbone with a
-FCOS head for indoor and outdoor scenes shot by a front-facing camera.
+Face detector based on ResNet152 as a backbone with a
+ATSS head for indoor and outdoor scenes shot by a front-facing camera.
 
 ## Example
 
-![](./face-detection-0105.png)
+![](./face-detection-0206.png)
 
 ## Specification
 
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
-| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 93.36%                  |
-| GFlops                                                        | 2.853                   |
-| MParams                                                       | 2.392                   |
+| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 94.27%                  |
+| GFlops                                                        | 339.602                   |
+| MParams                                                       | 69.920                   |
 | Source framework                                              | PyTorch*                |
 
 Average Precision (AP) is defined as an area under the
@@ -27,7 +27,7 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 
 ## Inputs
 
-Name: `input`, shape: [1x3x416x416] - An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x640x640] - An input image in the format [BxCxHxW],
 where:
 
 - B - batch size
