@@ -15,7 +15,7 @@ as candidates to further seek for the final answer to the question. At this poin
 
 Notice that question is usually much shorter than the contexts, so calculating the embedding for that is really fast. Also calculating the L2 distance between a context and question is almost free, compared to the actual inference. Together, during question answering, this substantially saves on the actual inference, which is needed ONLY for the question (while contexts are pre-calculated), compared to the conventional approach that has to concatenate each context with the question and do an inference on this large input (per context).
 
-If second (conventional SQuAD-tuned) Bert model is provided as well, it is used to further search for the exact answer in the best contexts found in the first step, and the result then also displyed to the user.
+If second (conventional SQuAD-tuned) Bert model is provided as well, it is used to further search for the exact answer in the best contexts found in the first step, and the result then also displayed to the user.
 
 ## Running
 
