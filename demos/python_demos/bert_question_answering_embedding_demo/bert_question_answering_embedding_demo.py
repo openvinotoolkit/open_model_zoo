@@ -264,9 +264,9 @@ def main():
         distances_filtered = distances[:keep_num]
 
         #print short list
-        log.info("The most closest contexts to question")
+        print("The closest contexts to question:")
         for i, (dist, c_data) in enumerate(distances_filtered):
-            log.info("{} embedding distance {} for context '{}'".format(i, dist, c_data.context))
+            print("#{}: embedding distance {} for context '{}'".format(i + 1, dist, c_data.context))
 
         #run model_qa if available to find exact answer to question in filtered in contexts
         if args.model_qa:
