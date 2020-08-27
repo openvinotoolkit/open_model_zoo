@@ -30,8 +30,6 @@ public:
 
     double fps() const override {return 1.0;}
 
-    size_t lastImageId() const override {return 0;}
-
     cv::Mat read() override {
         if (loop) return img.clone();
         if (canRead) {
@@ -74,8 +72,6 @@ public:
     }
 
     double fps() const override {return 1.0;}
-
-    size_t lastImageId() const override {return nextImgId - 1;}
 
     cv::Mat read() override {
         while (fileId < names.size() && nextImgId < readLengthLimit) {
@@ -138,8 +134,6 @@ public:
     }
 
     double fps() const override {return cap.get(cv::CAP_PROP_FPS);}
-
-    size_t lastImageId() const override {return nextImgId - 1;}
 
     cv::Mat read() override {
         if (nextImgId >= readLengthLimit) {
