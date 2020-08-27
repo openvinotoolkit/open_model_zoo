@@ -1,4 +1,4 @@
-# bert-large-uncased-whole-word-masking-embedding-0001
+# bert-large-uncased-whole-word-masking-squad-emb-0001
 
 ## Use Case and High-Level Description
 
