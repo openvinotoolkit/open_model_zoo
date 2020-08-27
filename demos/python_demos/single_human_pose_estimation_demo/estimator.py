@@ -104,7 +104,7 @@ class HumanPoseEstimator(object):
             "Expected model output shape [1, %s, H, W]" % (self.OUTPUT_CHANNELS_SIZE)
 
         self._ie = ie
-        self._exec_model = self._ie.load_network(self.model, device)
+        self._exec_model = self._ie.load_network(self.model, device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
         self._scale = scale
         self._thr = thr
 

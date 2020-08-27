@@ -17,9 +17,6 @@ def main():
         "-m", "--model", help="Required. Path to an .xml file with a trained model", required=True, type=str)
     parser.add_argument(
         "-i", "--input", help="Required. Path to a input image file", required=True, type=str)
-    parser.add_argument("-l", "--cpu_extension", 
-        help="Optional. Required for CPU custom layers. Absolute MKLDNN (CPU)-targeted custom layers. "
-        "Absolute path to a shared library with the kernels implementations", type=str, default=None)
     parser.add_argument("-d", "--device", 
         help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. "
         "Sample will look for a suitable plugin for device specified. Default value is CPU", default="CPU", type=str)
@@ -32,8 +29,6 @@ def main():
 
     log.info("creating inference engine")
     ie = IECore()
-    if args.cpu_extension and "CPU" in args.device:
-        ie.add_extension(args.cpu_extension, "CPU")
 
     log.info("Loading network")
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
@@ -46,8 +41,6 @@ def main():
         if len(not_supported_layers) != 0:
             log.error("Following layers are not supported by the plugin for specified device {}:\n {}".
                       format(args.device, ', '.join(not_supported_layers)))
-            log.error("Please try to specify a CPU extensions library path in sample's command line parameters "
-                      "using -l or --cpu_extension command line argument")
             sys.exit(1)
 
     assert len(net.input_info) == 1, "Sample supports only single input topologies"
@@ -77,7 +70,7 @@ def main():
 
     # loading model to the plugin
     log.info("loading model to the plugin")
-    exec_net = ie.load_network(network=net, device_name=args.device)
+    exec_net = ie.load_network(network=net, device_name=args.device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
 
     # start sync inference
     log.info("starting inference")

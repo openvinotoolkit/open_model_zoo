@@ -48,17 +48,6 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     if (formattedDeviceName.find("CPU") != std::string::npos) {
         ieConfig.insert({ InferenceEngine::PluginConfigParams::KEY_CPU_BIND_THREAD, "NO" });
     }
-    if (!cpuExtensionPath.empty()) {
-        auto extension_ptr = InferenceEngine::make_so_pointer<InferenceEngine::IExtension>(cpuExtensionPath);
-        ie.AddExtension(extension_ptr, "CPU");
-    }
-    if (!cldnnConfigPath.empty()) {
-        ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, cldnnConfigPath}}, "GPU");
-    }
-    /** Setting parameter for collecting per layer metrics **/
-    if (printPerfReport) {
-        ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_PERF_COUNT, InferenceEngine::PluginConfigParams::YES } });
-    }
 
     // Set batch size
     if (batchSize > 1) {
@@ -195,7 +184,6 @@ IEGraph::IEGraph(const InitParams& p):
     perfTimerInfer(p.collectStats ? PerfTimer::DefaultIterationsCount : 0),
     confidenceThreshold(0.5f), batchSize(p.batchSize),
     modelPath(p.modelPath),
-    cpuExtensionPath(p.cpuExtPath), cldnnConfigPath(p.cldnnConfigPath),
     printPerfReport(p.reportPerf), deviceName(p.deviceName),
     maxRequests(p.maxRequests) {
     assert(p.maxRequests > 0);

@@ -87,10 +87,6 @@ def build_argparser():
                            '(by default, it is CPU). Please refer to OpenVINO documentation '
                            'for the list of devices supported by the model.',
                       default='CPU', type=str, metavar='"<device>"')
-    args.add_argument('-l', '--cpu_extension',
-                      help='Required for CPU custom layers. '
-                           'Absolute path to a shared library with the kernels implementation.',
-                      default=None, type=str, metavar='"<absolute_path>"')
     args.add_argument('--delay',
                       help='Optional. Interval in milliseconds of waiting for a key to be pressed.',
                       default=0, type=int, metavar='"<num>"')
@@ -126,9 +122,6 @@ def build_argparser():
                       action='store_true')
     args.add_argument('--show_boxes',
                       help='Optional. Show bounding boxes.',
-                      action='store_true')
-    args.add_argument('-pc', '--perf_counts',
-                      help='Optional. Report performance counters.',
                       action='store_true')
     args.add_argument('-r', '--raw_output_message',
                       help='Optional. Output inference results raw values.',
@@ -177,11 +170,10 @@ def main():
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    # Plugin initialization for specified device and load extensions library if specified.
+    # Plugin initialization for specified device.
     log.info('Creating Inference Engine...')
     ie = IECore()
-    if args.cpu_extension and 'CPU' in args.device:
-        ie.add_extension(args.cpu_extension, 'CPU')
+
     # Read IR
     log.info('Loading Mask-RCNN network')
     mask_rcnn_net = ie.read_network(args.mask_rcnn_model, os.path.splitext(args.mask_rcnn_model)[0] + '.bin')
@@ -198,8 +190,6 @@ def main():
         if len(not_supported_layers) != 0:
             log.error('Following layers are not supported by the plugin for specified device {}:\n {}'.
                       format(args.device, ', '.join(not_supported_layers)))
-            log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
-                      "or --cpu_extension command line argument")
             sys.exit(1)
 
     required_input_keys = {'im_data', 'im_info'}
@@ -213,9 +203,12 @@ def main():
     assert n == 1, 'Only batch 1 is supported by the demo application'
 
     log.info('Loading IR to the plugin...')
-    mask_rcnn_exec_net = ie.load_network(network=mask_rcnn_net, device_name=args.device, num_requests=2)
-    text_enc_exec_net = ie.load_network(network=text_enc_net, device_name=args.device)
-    text_dec_exec_net = ie.load_network(network=text_dec_net, device_name=args.device)
+    mask_rcnn_exec_net = ie.load_network(network=mask_rcnn_net, device_name=args.device,
+                                         config={'MYRIAD_THROUGHPUT_STREAMS': '1'}, num_requests=2)
+    text_enc_exec_net = ie.load_network(network=text_enc_net, device_name=args.device,
+                                        config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+    text_dec_exec_net = ie.load_network(network=text_dec_net, device_name=args.device,
+                                        config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
 
     hidden_shape = text_dec_net.input_info[args.trd_input_prev_hidden].input_data.shape
 

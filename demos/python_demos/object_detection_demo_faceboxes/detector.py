@@ -36,7 +36,7 @@ class Detector(object):
         assert model.outputs[self._output_layer_names[1]].shape[2] == 2, "Expected 2-class scores(background, face)"
 
         self._ie = ie
-        self._exec_model = self._ie.load_network(model, device)
+        self._exec_model = self._ie.load_network(model, device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
         self.infer_time = -1
         _, channels, self.input_height, self.input_width = model.input_info[self._input_layer_name].input_data.shape
         assert channels == 3, "Expected 3-channel input"

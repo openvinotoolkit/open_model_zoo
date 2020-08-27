@@ -139,7 +139,4 @@ std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
 }
 
 InferenceEngine::Core
-LoadInferenceEngine(const std::vector<std::string>& devices,
-                    const std::string& custom_cpu_library,
-                    const std::string& custom_cldnn_kernels,
-                    bool should_use_perf_counter);
+LoadInferenceEngine(const std::vector<std::string>& devices);

@@ -224,7 +224,8 @@ def main():
 
     # load model to the device
     log.info("Loading model to the {}".format(args.device))
-    ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
+    ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device,
+                                      config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
 
     # loop on user's questions
     while True:

@@ -33,6 +33,7 @@ from openvino.inference_engine import IECore
 
 sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
 import monitors
+from ie_config_helper import format_device_string, create_config
 
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
@@ -130,7 +131,8 @@ class Model:
         if 'CPU' in device:
             self.check_cpu_support(ie, self.net)
         self.max_num_requests = max_num_requests
-        self.exec_net = ie.load_network(network=self.net, device_name=device, config=plugin_config, num_requests=max_num_requests)
+        self.exec_net = ie.load_network(network=self.net, device_name=device, config=plugin_config,
+                                        num_requests=max_num_requests)
 
         self.requests = self.exec_net.requests
         self.empty_requests = deque(self.requests)
@@ -399,44 +401,15 @@ def put_highlighted_text(frame, message, position, font_face, font_scale, color,
     cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
 
 
-def get_plugin_configs(device, num_streams, num_threads):
-    config_user_specified = {}
-    config_min_latency = {}
-
-    devices_nstreams = {}
-    if num_streams:
-        devices_nstreams = {device: num_streams for device in ['CPU', 'GPU'] if device in device} \
-                           if num_streams.isdigit() \
-                           else dict(device.split(':', 1) for device in num_streams.split(','))
-
-    if 'CPU' in device:
-        if num_threads is not None:
-            config_user_specified['CPU_THREADS_NUM'] = str(num_threads)
-        if 'CPU' in devices_nstreams:
-            config_user_specified['CPU_THROUGHPUT_STREAMS'] = devices_nstreams['CPU'] \
-                                                              if int(devices_nstreams['CPU']) > 0 \
-                                                              else 'CPU_THROUGHPUT_AUTO'
-
-        config_min_latency['CPU_THROUGHPUT_STREAMS'] = '1'
-
-    if 'GPU' in device:
-        if 'GPU' in devices_nstreams:
-            config_user_specified['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] \
-                                                              if int(devices_nstreams['GPU']) > 0 \
-                                                              else 'GPU_THROUGHPUT_AUTO'
-
-        config_min_latency['GPU_THROUGHPUT_STREAMS'] = '1'
-    
-    return config_user_specified, config_min_latency
-
-
 def main():
     args = build_argparser().parse_args()
 
     log.info('Initializing Inference Engine...')
     ie = IECore()
 
-    config_user_specified, config_min_latency = get_plugin_configs(args.device, args.num_streams, args.num_threads)
+    device_string = format_device_string(args.device)
+    config_user_specified = create_config(device_string, args.num_streams, args.number_threads)
+    config_min_latency = create_config(device_string, args.num_streams, args.number_threads, True)
 
     labels_map = None
     if args.labels:
@@ -453,13 +426,13 @@ def main():
 
     detectors = {
         Modes.USER_SPECIFIED:
-            Detector(ie, args.model, device=args.device, plugin_config=config_user_specified,
+            Detector(ie, args.model, device=device_string, plugin_config=config_user_specified,
                      results=completed_request_results, max_num_requests=args.num_infer_requests,
                      labels_map=labels_map, keep_aspect_ratio_resize=args.keep_aspect_ratio,
                      caught_exceptions=exceptions),
         Modes.MIN_LATENCY:
-            Detector(ie, args.model, device=args.device.split(':')[-1].split(',')[0], plugin_config=config_min_latency,
-                     results=completed_request_results, max_num_requests=1,
+            Detector(ie, args.model, device=device_string.split(':')[-1].split(',')[0],
+                     plugin_config=config_min_latency, results=completed_request_results, max_num_requests=1,
                      labels_map=labels_map, keep_aspect_ratio_resize=args.keep_aspect_ratio,
                      caught_exceptions=exceptions)
     }

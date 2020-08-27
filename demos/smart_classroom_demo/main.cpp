@@ -608,27 +608,11 @@ int main(int argc, char* argv[]) {
 
             std::cout << ie.GetVersions(device) << std::endl;
 
-            /** Load extensions for the CPU device **/
-            if ((device.find("CPU") != std::string::npos)) {
-                if (!FLAGS_l.empty()) {
-                    // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-                    ie.AddExtension(extension_ptr, "CPU");
-                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
-                }
-            } else if (!FLAGS_c.empty()) {
-                // Load Extensions for other plugins not CPU
-                ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
-            }
-
             if (device.find("CPU") != std::string::npos) {
                 ie.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}}, "CPU");
             } else if (device.find("GPU") != std::string::npos) {
                 ie.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}}, "GPU");
             }
-
-            if (FLAGS_pc)
-                ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
 
             loadedDevices.insert(device);
         }
@@ -1020,16 +1004,6 @@ int main(int argc, char* argv[]) {
             slog::info << "Mean FPS: " << 1e3f / mean_time_ms << slog::endl;
         }
         slog::info << "Frames processed: " << total_num_frames << slog::endl;
-        if (FLAGS_pc) {
-            std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, devices);
-            face_detector->wait();
-            action_detector->wait();
-            action_detector->printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_act));
-            face_detector->printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_fd));
-            face_recognizer->PrintPerformanceCounts(
-                getFullDeviceName(mapDevices, FLAGS_d_lm),
-                getFullDeviceName(mapDevices, FLAGS_d_reid));
-        }
 
         if (actions_type == STUDENT) {
             auto face_tracks = tracker_reid.vector_tracks();

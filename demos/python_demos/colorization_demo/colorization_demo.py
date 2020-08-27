@@ -63,7 +63,7 @@ if __name__ == '__main__':
     ie = IECore()
     load_net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
     load_net.batch_size = 1
-    exec_net = ie.load_network(network=load_net, device_name=args.device)
+    exec_net = ie.load_network(network=load_net, device_name=args.device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
 
     assert len(load_net.input_info) == 1, "Expected number of inputs is equal 1"
     input_blob = next(iter(load_net.input_info))

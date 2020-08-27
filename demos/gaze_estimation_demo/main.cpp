@@ -127,11 +127,6 @@ int main(int argc, char *argv[]) {
         InferenceEngine::Core ie;
         initializeIEObject(ie, cmdOptions);
 
-        // Enable per-layer metrics
-        if (FLAGS_pc) {
-            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-        }
-
         // Set up face detector and estimators
         FaceDetector faceDetector(ie, FLAGS_m_fd, FLAGS_d_fd, FLAGS_t, FLAGS_fd_reshape);
 
@@ -178,13 +173,6 @@ int main(int argc, char *argv[]) {
 
             double inferenceTime = (tInferenceEnds - tInferenceBegins) * 1000. / cv::getTickFrequency();
             inferenceTimeAverager.updateValue(inferenceTime);
-
-            if (FLAGS_pc) {
-                faceDetector.printPerformanceCounts();
-                for (auto const estimator : estimators) {
-                    estimator->printPerformanceCounts();
-                }
-            }
 
             if (FLAGS_r) {
                 for (auto& inferenceResult : inferenceResults) {

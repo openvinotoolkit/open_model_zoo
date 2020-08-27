@@ -116,10 +116,6 @@ int main(int argc, char **argv) {
         auto detector_mode = FLAGS_d_det;
         auto reid_mode = FLAGS_d_reid;
 
-        auto custom_cpu_library = FLAGS_l;
-        auto path_to_custom_layers = FLAGS_c;
-        bool should_use_perf_counter = FLAGS_pc;
-
         bool should_print_out = FLAGS_r;
 
         bool should_show = !FLAGS_no_show;
@@ -131,10 +127,7 @@ int main(int argc, char **argv) {
         bool should_save_det_log = !detlog_out.empty();
 
         std::vector<std::string> devices{detector_mode, reid_mode};
-        InferenceEngine::Core ie =
-            LoadInferenceEngine(
-                devices, custom_cpu_library, path_to_custom_layers,
-                should_use_perf_counter);
+        InferenceEngine::Core ie = LoadInferenceEngine(devices);
 
         DetectorConfig detector_confid(det_model);
         ObjectDetector pedestrian_detector(detector_confid, ie, detector_mode);
@@ -220,10 +213,6 @@ int main(int argc, char **argv) {
                 SaveDetectionLogToTrajFile(detlog_out, log);
             if (should_print_out)
                 PrintDetectionLog(log);
-        }
-        if (should_use_perf_counter) {
-            pedestrian_detector.PrintPerformanceCounts(getFullDeviceName(ie, FLAGS_d_det));
-            tracker->PrintReidPerformanceCounts(getFullDeviceName(ie, FLAGS_d_reid));
         }
 
         std::cout << presenter.reportMeans() << '\n';

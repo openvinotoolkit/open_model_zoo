@@ -96,7 +96,7 @@ def main():
 
     # Loading model to the plugin
     log.info("Loading model to the plugin")
-    exec_net = ie.load_network(network=net, device_name=args.device)
+    exec_net = ie.load_network(network=net, device_name=args.device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
 
     # Start sync inference
     log.info("Starting inference ({} iterations)".format(args.number_iter))

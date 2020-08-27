@@ -24,7 +24,7 @@ class Detector(object):
             "Expected model output shape with %s outputs" % (self.OUTPUT_SIZE)
 
         self._ie = ie
-        self._exec_model = self._ie.load_network(self.model, device)
+        self._exec_model = self._ie.load_network(self.model, device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
         self._scale = scale
         self._thr = thr
         self._label_class = label_class

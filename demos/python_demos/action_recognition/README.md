@@ -35,7 +35,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: action_recognition.py [-h] -i INPUT -m_en M_ENCODER [-m_de M_DECODER]
-                             [-l CPU_EXTENSION] [-d DEVICE] [--fps FPS]
+                             [-d DEVICE] [--fps FPS]
                              [-lb LABELS] [--no_show] [-s LABEL_SMOOTHING]
                              [--seq DECODER_SEQ_SIZE]
                              [-u UTILIZATION_MONITORS]
@@ -53,9 +53,6 @@ Options:
                         Optional. Path to decoder model. If not specified,
                         simple averaging of encoder's outputs over a time
                         window is applied
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. For CPU custom layers, if any. Absolute path
-                        to a shared library with the kernels implementation.
   -d DEVICE, --device DEVICE
                         Optional. Specify a target device to infer on. CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will

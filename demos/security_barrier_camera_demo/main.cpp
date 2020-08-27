@@ -704,11 +704,6 @@ int main(int argc, char* argv[]) {
         std::string deviceString = device + "," + deviceVA + "," + deviceLPR;
         auto ieConfig = createConfig(deviceString, FLAGS_nstreams, FLAGS_nthreads);
 
-        /** Per layer metrics **/
-        if (FLAGS_pc) {
-            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-        }
-
         /** Graph tagging via config options**/
         auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
             std::map<std::string, std::string> config = ieConfig;
@@ -809,10 +804,6 @@ int main(int argc, char* argv[]) {
                 std::make_pair(context.platesInfers.getActualInferRequests(), deviceLPR)}) {
             for (InferRequest& ir : net.first) {
                 ir.Wait(IInferRequest::WaitMode::RESULT_READY);
-                if (FLAGS_pc) {  // Show performace results
-                    printPerformanceCounts(ir, std::cout, std::string::npos == net.second.find("MULTI") ? getFullDeviceName(mapDevices, net.second)
-                                                                                                        : net.second);
-                }
             }
         }
 

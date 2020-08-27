@@ -52,7 +52,6 @@ Options:
     -res "<WxH>"             Optional. Set camera resolution in format WxH.
     -fd_reshape              Optional. Reshape Face Detector network so that its input resolution has the same aspect ratio as the input frame.
     -no_show                 Optional. Do not show processed video.
-    -pc                      Optional. Enable per-layer performance report.
     -r                       Optional. Output inference results as raw values.
     -t                       Optional. Probability threshold for Face Detector. The default value is 0.5.
     -u                       Optional. List of monitors to show initially.

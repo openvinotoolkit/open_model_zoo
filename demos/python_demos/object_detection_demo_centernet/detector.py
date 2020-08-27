@@ -31,7 +31,7 @@ class Detector(object):
         self._output_layer_names = sorted(model.outputs)
 
         self._ie = ie
-        self._exec_model = self._ie.load_network(model, device)
+        self._exec_model = self._ie.load_network(model, device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
         self._threshold = threshold
         self.infer_time = -1
         _, channels, self.input_height, self.input_width = model.input_info[self._input_layer_name].input_data.shape

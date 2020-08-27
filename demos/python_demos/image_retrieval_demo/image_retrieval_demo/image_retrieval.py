@@ -28,15 +28,13 @@ from openvino.inference_engine import IECore # pylint: disable=no-name-in-module
 class IEModel(): # pylint: disable=too-few-public-methods
     """ Class that allows worknig with Inference Engine model. """
 
-    def __init__(self, model_path, device, cpu_extension):
+    def __init__(self, model_path, device):
         ie = IECore()
-        if cpu_extension and device == 'CPU':
-            ie.add_extension(cpu_extension, 'CPU')
 
         path = '.'.join(model_path.split('.')[:-1])
         self.net = ie.read_network(path + '.xml', path + '.bin')
         self.output_name = list(self.net.outputs.keys())[0]
-        self.exec_net = ie.load_network(network=self.net, device_name=device)
+        self.exec_net = ie.load_network(network=self.net, device_name=device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
@@ -50,11 +48,11 @@ class IEModel(): # pylint: disable=too-few-public-methods
 class ImageRetrieval:
     """ Class representing Image Retrieval algorithm. """
 
-    def __init__(self, model_path, device, gallery_path, input_size, cpu_extension):
+    def __init__(self, model_path, device, gallery_path, input_size):
         self.impaths, self.gallery_classes, _, self.text_label_to_class_id = from_list(
             gallery_path, multiple_images_per_label=False)
         self.input_size = input_size
-        self.model = IEModel(model_path, device, cpu_extension)
+        self.model = IEModel(model_path, device)
         self.embeddings = self.compute_gallery_embeddings()
 
     def compute_embedding(self, image):

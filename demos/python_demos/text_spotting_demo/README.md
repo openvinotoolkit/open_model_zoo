@@ -44,7 +44,7 @@ Run the application with the `-h` option to see the following usage message:
 ```
 usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>"
                              -i "<path>" [-d "<device>"]
-                             [-l "<absolute_path>"] [--delay "<num>"]
+                             [--delay "<num>"]
                              [-pt "<num>"] [-a ALPHABET]
                              [--trd_input_prev_symbol TRD_INPUT_PREV_SYMBOL]
                              [--trd_input_prev_hidden TRD_INPUT_PREV_HIDDEN]
@@ -52,7 +52,7 @@ usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>"
                              [--trd_output_symbols_distr TRD_OUTPUT_SYMBOLS_DISTR]
                              [--trd_output_cur_hidden TRD_OUTPUT_CUR_HIDDEN]
                              [--keep_aspect_ratio] [--no_track]
-                             [--show_scores] [--show_boxes] [-pc] [-r]
+                             [--show_scores] [--show_boxes] [-r]
                              [--no_show] [-u UTILIZATION_MONITORS]
 
 Options:
@@ -72,9 +72,6 @@ Options:
                         The demo will look for a suitable plugin for device specified
                         (by default, it is CPU). Please refer to OpenVINO documentation
                         for the list of devices supported by the model.
-  -l "<absolute_path>", --cpu_extension "<absolute_path>"
-                        Required for CPU custom layers. Absolute path to a
-                        shared library with the kernels implementation.
   --delay "<num>"       Optional. Interval in milliseconds of waiting for a
                         key to be pressed.
   -pt "<num>", --prob_threshold "<num>"
@@ -101,7 +98,6 @@ Options:
   --no_track            Optional. Disable tracking.
   --show_scores         Optional. Show detection scores.
   --show_boxes          Optional. Show bounding boxes.
-  -pc, --perf_counts    Optional. Report performance counters.
   -r, --raw_output_message
                         Optional. Output inference results raw values.
   --no_show             Optional. Don't show output

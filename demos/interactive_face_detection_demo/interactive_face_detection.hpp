@@ -47,11 +47,6 @@ static const char dyn_batch_ag_message[] = "Optional. Enable dynamic batch size 
 static const char dyn_batch_hp_message[] = "Optional. Enable dynamic batch size for Head Pose Estimation network";
 static const char dyn_batch_em_message[] = "Optional. Enable dynamic batch size for Emotions Recognition network";
 static const char dyn_batch_lm_message[] = "Optional. Enable dynamic batch size for Facial Landmarks Estimation network";
-static const char performance_counter_message[] = "Optional. Enable per-layer performance report";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-                                           "Absolute path to an .xml file with the kernels description.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
-                                                 "Absolute path to a shared library with the kernels implementation.";
 static const char thresh_output_message[] = "Optional. Probability threshold for detections";
 static const char bb_enlarge_coef_output_message[] = "Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face";
 static const char raw_output_message[] = "Optional. Output inference results as raw values";
@@ -87,9 +82,6 @@ DEFINE_uint32(n_em, 16, num_batch_em_message);
 DEFINE_bool(dyn_em, false, dyn_batch_em_message);
 DEFINE_uint32(n_lm, 16, num_batch_em_message);
 DEFINE_bool(dyn_lm, false, dyn_batch_em_message);
-DEFINE_bool(pc, false, performance_counter_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_output_message);
@@ -122,9 +114,6 @@ static void showUsage() {
     std::cout << "    -m_hp \"<path>\"             " << head_pose_model_message << std::endl;
     std::cout << "    -m_em \"<path>\"             " << emotions_model_message << std::endl;
     std::cout << "    -m_lm \"<path>\"             " << facial_landmarks_model_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"     " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"     " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"              " << target_device_message << std::endl;
     std::cout << "    -d_ag \"<device>\"           " << target_device_message_ag << std::endl;
     std::cout << "    -d_hp \"<device>\"           " << target_device_message_hp << std::endl;
@@ -141,7 +130,6 @@ static void showUsage() {
     std::cout << "    -async                     " << async_message << std::endl;
     std::cout << "    -no_wait                   " << no_wait_for_keypress_message << std::endl;
     std::cout << "    -no_show                   " << no_show_processed_video << std::endl;
-    std::cout << "    -pc                        " << performance_counter_message << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;
     std::cout << "    -t                         " << thresh_output_message << std::endl;
     std::cout << "    -bb_enlarge_coef           " << bb_enlarge_coef_output_message << std::endl;

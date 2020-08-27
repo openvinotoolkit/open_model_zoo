@@ -24,9 +24,6 @@ Options:
     -h                        Print a usage message.
     -i "<path>"               Required. Input to process.
     -m "<path>"               Required. Path to an .xml file with a trained model.
-      -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernels implementations.
-          Or
-      -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernels descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -delay                    Optional. Default is 1. Interval in milliseconds of waiting for a key to be pressed. For a negative value the demo loads a model, opens an input and exits.
     -no_show                  Optional. Do not visualize inference results.

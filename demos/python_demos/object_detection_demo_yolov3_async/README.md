@@ -29,7 +29,7 @@ python3 object_detection_demo_yolov3_async.py -h
 The command yields the following usage message:
 ```
 usage: object_detection_demo_yolov3_async.py [-h] -m MODEL -i INPUT
-                                             [-l CPU_EXTENSION] [-d DEVICE]
+                                             [-d DEVICE]
                                              [--labels LABELS]
                                              [-t PROB_THRESHOLD]
                                              [-iout IOU_THRESHOLD] [-r]
@@ -46,10 +46,6 @@ Options:
   -i INPUT, --input INPUT
                         Required. Path to an image/video file. (Specify 'cam'
                         to work with camera)
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        path to a shared library with the kernels
-                        implementations.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The sample

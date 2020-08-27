@@ -17,12 +17,10 @@
 from openvino.inference_engine import IECore  # pylint: disable=no-name-in-module
 
 
-def load_ie_core(device, cpu_extension=None):
+def load_ie_core(device):
     """Loads IE Core"""
-
+    
     ie = IECore()
-    if device == "CPU" and cpu_extension:
-        ie.add_extension(cpu_extension, "CPU")
 
     return ie
 
@@ -45,6 +43,7 @@ class IEModel:  # pylint: disable=too-few-public-methods
 
         self.exec_net = ie_core.load_network(network=self.net,
                                              device_name=device,
+                                             config={'MYRIAD_THROUGHPUT_STREAMS': '1'},
                                              num_requests=num_requests)
 
         self.input_name = next(iter(self.net.input_info))

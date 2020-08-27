@@ -19,8 +19,8 @@ python3 segmentation_demo.py -h
 The command yields the following usage message:
 ```
 usage: segmentation_demo.py [-h] -m MODEL -i INPUT [INPUT ...]
-                            [-l CPU_EXTENSION] [-d DEVICE]
-                            [-nt NUMBER_TOP] [-ni NUMBER_ITER] [-pc]
+                            [-d DEVICE]
+                            [-nt NUMBER_TOP] [-ni NUMBER_ITER]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -29,10 +29,6 @@ Options:
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
                         Required. Path to a folder with images or path to an
                         image files
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        MKLDNN (CPU)-targeted custom layers. Absolute path to
-                        a shared library with the kernels implementations
   -d DEVICE, --device DEVICE
                         Optional. Required for CPU custom layers Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. Sample will

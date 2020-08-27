@@ -36,8 +36,6 @@ private:
     std::size_t batchSize;
 
     std::string modelPath;
-    std::string cpuExtensionPath;
-    std::string cldnnConfigPath;
 
     std::string inputDataBlobName;
     std::vector<std::string> outputDataBlobNames;
@@ -80,8 +78,6 @@ public:
         bool collectStats = false;
         bool reportPerf = false;
         std::string modelPath;
-        std::string cpuExtPath;
-        std::string cldnnConfigPath;
         std::string deviceName;
         PostLoadFunc postLoadFunc = nullptr;
     };

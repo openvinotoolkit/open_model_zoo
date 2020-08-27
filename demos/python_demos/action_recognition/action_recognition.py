@@ -48,9 +48,6 @@ def build_argparser():
                               help='Optional. Length of sequence that decoder takes as input',
                               default=16, type=int)
 
-    args.add_argument('-l', '--cpu_extension',
-                      help='Optional. For CPU custom layers, if any. Absolute path to a shared library with the '
-                           'kernels implementation.', type=str, default=None)
     args.add_argument('-d', '--device',
                       help='Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for the device specified. '
@@ -93,9 +90,6 @@ def main():
     if 'MYRIAD' in args.device:
         myriad_config = {'VPU_HW_STAGES_OPTIMIZATION': 'YES'}
         ie.set_config(myriad_config, 'MYRIAD')
-
-    if args.cpu_extension and 'CPU' in args.device:
-        ie.add_extension(args.cpu_extension, 'CPU')
 
     decoder_target_device = 'CPU'
     if args.device != 'CPU':

@@ -76,10 +76,6 @@ def build_argparser():
                            'or MYRIAD. The demo will look for a suitable plugin for device '
                            'specified (by default, it is CPU).',
                       default='CPU', type=str)
-    args.add_argument("-l", "--cpu_extension",
-                      help="Optional. Required for CPU custom layers. Absolute path to "
-                           "a shared library with the kernels implementations.", type=str,
-                      default=None)
     args.add_argument('--no_show', action='store_true',
                       help='Optional. Do not visualize inference results.')
 
@@ -110,7 +106,7 @@ def main():
     class_map = load_class_map(args.class_map)
     assert class_map is not None
 
-    ie_core = load_ie_core(args.device, args.cpu_extension)
+    ie_core = load_ie_core(args.device)
 
     person_detector = PersonDetector(args.detection_model, args.device, ie_core,
                                      num_requests=2, output_shape=DETECTOR_OUTPUT_SHAPE)

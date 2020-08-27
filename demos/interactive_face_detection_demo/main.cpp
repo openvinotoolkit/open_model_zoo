@@ -131,26 +131,7 @@ int main(int argc, char *argv[]) {
             slog::info << "Loading device " << deviceName << slog::endl;
             std::cout << ie.GetVersions(deviceName) << std::endl;
 
-            /** Loading extensions for the CPU device **/
-            if ((deviceName.find("CPU") != std::string::npos)) {
-
-                if (!FLAGS_l.empty()) {
-                    // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-                    ie.AddExtension(extension_ptr, "CPU");
-                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
-                }
-            } else if (!FLAGS_c.empty()) {
-                // Loading extensions for GPU
-                ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
-            }
-
             loadedDevices.insert(deviceName);
-        }
-
-        /** Per-layer metrics **/
-        if (FLAGS_pc) {
-            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
         }
         // ---------------------------------------------------------------------------------------------------
 
@@ -375,15 +356,6 @@ int main(int argc, char *argv[]) {
 
         slog::info << "Number of processed frames: " << framesCounter << slog::endl;
         slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
-
-        // Showing performance results
-        if (FLAGS_pc) {
-            faceDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d));
-            ageGenderDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_ag));
-            headPoseDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_hp));
-            emotionsDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_em));
-            facialLandmarksDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_lm));
-        }
 
         std::cout << presenter.reportMeans() << '\n';
         // ---------------------------------------------------------------------------------------------------

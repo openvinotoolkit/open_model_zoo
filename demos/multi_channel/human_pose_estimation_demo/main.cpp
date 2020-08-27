@@ -69,16 +69,12 @@ void showUsage() {
     std::cout << "    -loop                        " << loop_message << std::endl;
     std::cout << "    -duplicate_num               " << duplication_channel_number_message << std::endl;
     std::cout << "    -m \"<path>\"                  " << model_path_message<< std::endl;
-    std::cout << "      -l \"<absolute_path>\"       " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"       " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
     std::cout << "    -bs                          " << batch_size << std::endl;
     std::cout << "    -nireq                       " << num_infer_requests << std::endl;
     std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
     std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
     std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
-    std::cout << "    -pc                          " << performance_counter_message << std::endl;
     std::cout << "    -no_show                     " << no_show_processed_video << std::endl;
     std::cout << "    -show_stats                  " << show_statistics << std::endl;
     std::cout << "    -real_input_fps              " << real_input_fps << std::endl;
@@ -106,12 +102,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     }
     slog::info << "\tDetection model:           " << FLAGS_m << slog::endl;
     slog::info << "\tUtilizing device:          " << FLAGS_d << slog::endl;
-    if (!FLAGS_l.empty()) {
-        slog::info << "\tCPU extension library:     " << FLAGS_l << slog::endl;
-    }
-    if (!FLAGS_c.empty()) {
-        slog::info << "\tCLDNN custom kernels map:  " << FLAGS_c << slog::endl;
-    }
     slog::info << "\tBatch size:                " << FLAGS_bs << slog::endl;
     slog::info << "\tNumber of infer requests:  " << FLAGS_nireq << slog::endl;
 
@@ -233,10 +223,7 @@ int main(int argc, char* argv[]) {
         graphParams.batchSize       = FLAGS_bs;
         graphParams.maxRequests     = FLAGS_nireq;
         graphParams.collectStats    = FLAGS_show_stats;
-        graphParams.reportPerf      = FLAGS_pc;
         graphParams.modelPath       = modelPath;
-        graphParams.cpuExtPath      = FLAGS_l;
-        graphParams.cldnnConfigPath = FLAGS_c;
         graphParams.deviceName      = FLAGS_d;
 
         std::shared_ptr<IEGraph> network(new IEGraph(graphParams));

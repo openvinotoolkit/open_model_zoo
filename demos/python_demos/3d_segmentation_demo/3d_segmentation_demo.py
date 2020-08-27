@@ -97,18 +97,12 @@ def parse_arguments():
     args.add_argument('-d', '--target_device', type=str, required=False, default="CPU",
                         help="Optional. Specify a target device to infer on: CPU, GPU. "
                              "Use \"-d HETERO:<comma separated devices list>\" format to specify HETERO plugin.")
-    args.add_argument('-l', '--path_to_extension', type=str, required=False, default=None,
-                        help="Required for CPU custom layers. "
-                             "Absolute path to a shared library with the kernels implementations.")
     args.add_argument("-nii", "--output_nifti", help="Show output inference results as raw values", default=False,
                         action="store_true")
     args.add_argument('-nthreads', '--number_threads', type=int, required=False, default=None,
                         help="Optional. Number of threads to use for inference on CPU (including HETERO cases).")
     args.add_argument('-s', '--shape', nargs='*', type=int, required=False, default=None,
                         help="Optional. Specify shape for a network")
-    args.add_argument('-c', '--path_to_cldnn_config', type=str, required=False,
-                        help="Required for GPU custom kernels. "
-                             "Absolute path to an .xml file with the kernels description.")
     args.add_argument('-ms', '--mri_sequence', type=mri_sequence, metavar='N1,N2,N3,N4', default=(0,1,2,3),
                       help='Optional. Transfer MRI-sequence from dataset order to the network order.')
     args.add_argument("--full_intensities_range", required=False, default=False, action="store_true",
@@ -251,14 +245,8 @@ def main():
     ie = IECore()
 
     if 'CPU' in args.target_device:
-        if args.path_to_extension:
-            ie.add_extension(args.path_to_extension, "CPU")
         if args.number_threads is not None:
             ie.set_config({'CPU_THREADS_NUM': str(args.number_threads)}, "CPU")
-    elif 'GPU' in args.target_device:
-        if args.path_to_cldnn_config:
-            ie.set_config({'CONFIG_FILE':  args.path_to_cldnn_config}, "GPU")
-            logger.info("GPU extensions is loaded {}".format(args.path_to_cldnn_config))
     else:
         raise AttributeError("Device {} do not support of 3D convolution. "
                              "Please use CPU, GPU or HETERO:*CPU*, HETERO:*GPU*")
@@ -324,7 +312,8 @@ def main():
 
     # ------------------------------------- 4. Loading model to the plugin -------------------------------------
     logger.info("Loading model to the plugin")
-    executable_network = ie.load_network(network=ie_network, device_name=args.target_device)
+    executable_network = ie.load_network(network=ie_network, device_name=args.target_device,
+                                         config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
     del ie_network
 
     # ---------------------------------------------- 5. Do inference --------------------------------------------

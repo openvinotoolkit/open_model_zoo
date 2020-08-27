@@ -80,9 +80,6 @@ def main():
     parser.add_argument('-d', '--device', type=str, default='CPU',
                         help='Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is '
                              'acceptable. The demo will look for a suitable plugin for the device specified')
-    parser.add_argument('-l', '--cpu_extension', type=str, default=None,
-                        help='MKLDNN (CPU)-targeted custom layers.Absolute \
-                              path to a shared library with the kernels impl.')
     parser.add_argument('-u', '--utilization_monitors', default='', type=str,
                         help='Optional. List of monitors to show initially')
     args = parser.parse_args()
@@ -116,11 +113,11 @@ def main():
     if args.m_instance_segmentation:
         labels_file = osp.join(root_dir, 'coco_labels.txt')
         segmentation = MaskRCNN(ie, args.m_instance_segmentation, labels_file,
-                                args.threshold, args.device, args.cpu_extension)
+                                args.threshold, args.device)
     elif args.m_semantic_segmentation:
         labels_file = osp.join(root_dir, 'cityscapes_labels.txt')
         segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, labels_file,
-                                            args.threshold, args.device, args.cpu_extension)
+                                            args.threshold, args.device)
 
     black_board = False
     output_frame = np.full((frame_size[1], frame_size[0], 3), 255, dtype='uint8')

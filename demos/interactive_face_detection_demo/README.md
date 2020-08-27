@@ -54,9 +54,6 @@ Options:
     -m_hp "<path>"             Optional. Path to an .xml file with a trained Head Pose Estimation model.
     -m_em "<path>"             Optional. Path to an .xml file with a trained Emotions Recognition model.
     -m_lm "<path>"             Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.
-      -l "<absolute_path>"     Required for CPU custom layers. Absolute path to a shared library with the kernels implementation.
-          Or
-      -c "<absolute_path>"     Required for GPU custom kernels. Absolute path to an .xml file with the kernels description.
     -d "<device>"              Optional. Target device for Face Detection network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -d_ag "<device>"           Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -d_hp "<device>"           Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
@@ -73,7 +70,6 @@ Options:
     -async                     Optional. Enable asynchronous mode
     -no_wait                   Optional. Do not wait for key press in the end.
     -no_show                   Optional. Do not show processed video.
-    -pc                        Optional. Enable per-layer performance report
     -r                         Optional. Output inference results as raw values
     -t                         Optional. Probability threshold for detections
     -bb_enlarge_coef           Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face

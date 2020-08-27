@@ -40,8 +40,6 @@ Options:
     -max_rect_num "<value>"      Optional. Maximum number of rectangles to recognize. If it is negative, number of rectangles to recognize is not limited.
     -d_td "<device>"             Optional. Specify the target device for the Text Detection model to infer on (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. By default, it is CPU.
     -d_tr "<device>"             Optional. Specify the target device for the Text Recognition model to infer on (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. By default, it is CPU.
-    -l "<absolute_path>"         Optional. Absolute path to a shared library with the CPU kernels implementation for custom layers.
-    -c "<absolute_path>"         Optional. Absolute path to the GPU kernels implementation for custom layers.
     -no_show                     Optional. If it is true, then detected text will not be shown on image frame. By default, it is false.
     -r                           Optional. Output Inference results as raw values.
     -u                           Optional. List of monitors to show initially.

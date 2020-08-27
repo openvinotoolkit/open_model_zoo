@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
             return EXIT_SUCCESS;
         }
 
-        HumanPoseEstimator estimator(FLAGS_m, FLAGS_d, FLAGS_pc);
+        HumanPoseEstimator estimator(FLAGS_m, FLAGS_d);
         cv::VideoCapture cap;
         if (!(FLAGS_i == "cam" ? cap.open(0) : cap.open(FLAGS_i))) {
             throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);

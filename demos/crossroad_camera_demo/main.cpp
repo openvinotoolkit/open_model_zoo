@@ -533,26 +533,7 @@ int main(int argc, char *argv[]) {
             /** Printing device version **/
             std::cout << ie.GetVersions(flag) << std::endl;
 
-            if ((flag.find("CPU") != std::string::npos)) {
-                if (!FLAGS_l.empty()) {
-                    // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-                    ie.AddExtension(extension_ptr, "CPU");
-                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
-                }
-            }
-
-            if ((flag.find("GPU") != std::string::npos) && !FLAGS_c.empty()) {
-                // Load any user-specified clDNN Extensions
-                ie.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
-            }
-
             loadedDevices.insert(flag);
-        }
-
-        /** Per layer metrics **/
-        if (FLAGS_pc) {
-            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
         }
         // -----------------------------------------------------------------------------------------------------
 
@@ -800,23 +781,6 @@ int main(int argc, char *argv[]) {
         auto total_t1 = std::chrono::high_resolution_clock::now();
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
         slog::info << "Total Inference time: " << total.count() << slog::endl;
-
-        /** Show performace results **/
-        if (FLAGS_pc) {
-            std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, deviceNames);
-            std::cout << "Performance counts for person detection: " << std::endl;
-            personDetection.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d));
-
-            if (!FLAGS_m_pa.empty()) {
-                std::cout << "Performance counts for person attributes: " << std::endl;
-                personAttribs.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_pa));
-            }
-
-            if (!FLAGS_m_reid.empty()) {
-                std::cout << "Performance counts for person re-identification: " << std::endl;
-                personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
-            }
-        }
 
         std::cout << presenter.reportMeans() << '\n';
         // -----------------------------------------------------------------------------------------------------

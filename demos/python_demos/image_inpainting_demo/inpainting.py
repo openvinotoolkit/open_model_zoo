@@ -27,7 +27,7 @@ class ImageInpainting(object):
         self._output_layer_name = next(iter(model.outputs))
 
         self._ie = ie
-        self._exec_model = self._ie.load_network(model, device)
+        self._exec_model = self._ie.load_network(model, device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
         self.infer_time = -1
 
         _, channels, input_height, input_width = model.input_info[self._input_layer_names[0]].input_data.shape

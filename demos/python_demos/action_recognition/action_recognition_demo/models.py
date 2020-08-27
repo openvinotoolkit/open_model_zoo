@@ -89,7 +89,8 @@ class IEModel:
         assert len(self.net.outputs) == 1, "One output is expected"
 
         print("Loading IR to the plugin...")
-        self.exec_net = ie_core.load_network(network=self.net, device_name=target_device, num_requests=num_requests)
+        self.exec_net = ie_core.load_network(network=self.net, device_name=target_device,
+                                             config={'MYRIAD_THROUGHPUT_STREAMS': '1'}, num_requests=num_requests)
         self.input_name = next(iter(self.net.input_info))
         self.output_name = next(iter(self.net.outputs))
         self.input_size = self.net.input_info[self.input_name].input_data.shape

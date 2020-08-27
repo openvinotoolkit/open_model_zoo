@@ -36,7 +36,7 @@ class Detector(object):
         self.face_prob_threshold = face_prob_threshold
 
         self._ie = ie
-        self._exec_model = self._ie.load_network(model, device)
+        self._exec_model = self._ie.load_network(model, device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
 
         self.infer_time = -1
 

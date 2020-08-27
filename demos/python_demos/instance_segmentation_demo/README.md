@@ -37,10 +37,10 @@ Run the application with the `-h` option to see the following usage message:
 ```
 usage: instance_segmentation_demo.py [-h] -m "<path>" --labels "<path>" -i
                                      "<path>" [-d "<device>"]
-                                     [-l "<absolute_path>"] [--delay "<num>"]
+                                     [--delay "<num>"]
                                      [-pt "<num>"] [--no_keep_aspect_ratio]
                                      [--no_track] [--show_scores]
-                                     [--show_boxes] [-pc] [-r] [--no_show]
+                                     [--show_boxes] [-r] [--no_show]
                                      [-u UTILIZATION_MONITORS]
 
 Options:
@@ -55,9 +55,6 @@ Options:
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a
                         suitable plugin for device specified (by default, it
                         is CPU).
-  -l "<absolute_path>", --cpu_extension "<absolute_path>"
-                        Required for CPU custom layers. Absolute path to a
-                        shared library with the kernels implementation.
   --delay "<num>"       Optional. Interval in milliseconds of waiting for a
                         key to be pressed.
   -pt "<num>", --prob_threshold "<num>"
@@ -68,7 +65,6 @@ Options:
   --no_track            Optional. Disable tracking.
   --show_scores         Optional. Show detection scores.
   --show_boxes          Optional. Show bounding boxes.
-  -pc, --perf_counts    Optional. Report performance counters.
   -r, --raw_output_message
                         Optional. Output inference results raw values.
   --no_show             Optional. Don't show output

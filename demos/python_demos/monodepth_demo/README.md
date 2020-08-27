@@ -21,7 +21,7 @@ python3 monodepth_demo.py -h
 The command yields the following usage message:
 
 ``` 
-usage: monodepth_demo.py [-h] -m MODEL -i INPUT [-l CPU_EXTENSION] [-d DEVICE]
+usage: monodepth_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -29,10 +29,6 @@ optional arguments:
                         Required. Path to an .xml file with a trained model
   -i INPUT, --input INPUT
                         Required. Path to a input image file
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        MKLDNN (CPU)-targeted custom layers. Absolute path to
-                        a shared library with the kernels implementations
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. Sample will

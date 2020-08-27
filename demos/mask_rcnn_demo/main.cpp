@@ -68,18 +68,6 @@ int main(int argc, char *argv[]) {
         slog::info << "Loading Inference Engine" << slog::endl;
         Core ie;
 
-        if (!FLAGS_l.empty()) {
-            // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-            auto extension_ptr = make_so_pointer<InferenceEngine::IExtension>(FLAGS_l);
-            ie.AddExtension(extension_ptr, "CPU");
-            slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
-        }
-        if (!FLAGS_c.empty()) {
-            // clDNN Extensions are loaded from an .xml description and OpenCL kernel files
-            ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "CPU");
-            slog::info << "GPU Extension loaded: " << FLAGS_c << slog::endl;
-        }
-
         /** Printing version **/
         slog::info << "Device info: " << slog::endl;
         std::cout << ie.GetVersions(FLAGS_d);

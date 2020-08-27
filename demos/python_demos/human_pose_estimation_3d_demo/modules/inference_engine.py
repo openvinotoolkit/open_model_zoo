@@ -33,7 +33,8 @@ class InferenceEngine:
         assert required_output_keys.issubset(self.net.outputs.keys()), \
             'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
 
-        self.exec_net = self.ie.load_network(network=self.net, num_requests=1, device_name=device)
+        self.exec_net = self.ie.load_network(network=self.net, num_requests=1, device_name=device,
+                                             config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
 
     def infer(self, img):
         img = img[0:img.shape[0] - (img.shape[0] % self.stride),
@@ -42,7 +43,8 @@ class InferenceEngine:
         n, c, h, w = self.net.input_info[input_layer].input_data.shape
         if h != img.shape[0] or w != img.shape[1]:
             self.net.reshape({input_layer: (n, c, img.shape[0], img.shape[1])})
-            self.exec_net = self.ie.load_network(network=self.net, num_requests=1, device_name=self.device)
+            self.exec_net = self.ie.load_network(network=self.net, num_requests=1, device_name=self.device,
+                                                 config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
         img = np.transpose(img, (2, 0, 1))[None, ]
 
         inference_result = self.exec_net.infer(inputs={'data': img})

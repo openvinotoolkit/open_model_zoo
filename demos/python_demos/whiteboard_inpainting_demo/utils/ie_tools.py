@@ -56,14 +56,12 @@ class IEModel:
     def get_allowed_outputs_len(self):
         return (1, )
 
-    def load_ie_model(self, ie, model_xml, device, cpu_extension=''):
+    def load_ie_model(self, ie, model_xml, device):
         """Loads a model in the Inference Engine format"""
         model_bin = os.path.splitext(model_xml)[0] + ".bin"
-        # Plugin initialization for specified device and load extensions library if specified
+        # Plugin initialization for specified device
         log.info("Initializing Inference Engine plugin for %s ", device)
 
-        if cpu_extension and 'CPU' in device:
-            ie.add_extension(cpu_extension, 'CPU')
         # Read IR
         log.info("Loading network files:\n\t%s\n\t%s", model_xml, model_bin)
         net = ie.read_network(model=model_xml, weights=model_bin)
@@ -74,8 +72,6 @@ class IEModel:
             if not_supported_layers:
                 log.error("Following layers are not supported by the plugin for specified device %s:\n %s",
                           device, ', '.join(not_supported_layers))
-                log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
-                          "or --cpu_extension command line argument")
                 sys.exit(1)
 
         assert len(net.input_info) in self.get_allowed_inputs_len(), \
@@ -92,7 +88,7 @@ class IEModel:
 
         # Loading model to the plugin
         log.info("Loading model to the plugin")
-        self.net = ie.load_network(network=net, device_name=device)
+        self.net = ie.load_network(network=net, device_name=device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
         self.inputs_info = net.input_info
         self.input_key = input_blob
         self.output_key = out_blob

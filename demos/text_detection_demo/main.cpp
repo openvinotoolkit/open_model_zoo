@@ -103,25 +103,11 @@ int main(int argc, char *argv[]) {
             slog::info << "Device info: " << slog::endl;
             std::cout << ie.GetVersions(device) << std::endl;
 
-            /** Load extensions for the CPU device **/
-            if ((device.find("CPU") != std::string::npos)) {
-                if (!FLAGS_l.empty()) {
-                    // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-                    ie.AddExtension(extension_ptr, "CPU");
-                    std::cout << "CPU Extension loaded: " << FLAGS_l << std::endl;
-                }
-            } else if (!FLAGS_c.empty()) {
-                // Load Extensions for GPU
-                ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
-            }
-
             loadedDevices.insert(device);
         }
 
         auto text_detection_model_path = FLAGS_m_td;
         auto text_recognition_model_path = FLAGS_m_tr;
-        auto extension_path = FLAGS_l;
         auto cls_conf_threshold = static_cast<float>(FLAGS_cls_pixel_thr);
         auto link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
         auto decoder_bandwidth = FLAGS_b;
