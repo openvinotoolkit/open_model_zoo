@@ -81,10 +81,6 @@ The application uses OpenCV to display found poses and current inference perform
 
 ![](./data/human_pose_estimation_3d_demo.jpg)
 
-## See Also
-* [Using Open Model Zoo demos](../../README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
 
 
 # 2D Human Pose Estimation Python* Demo
