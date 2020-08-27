@@ -38,6 +38,7 @@ def build_argparser():
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
                       required=True, type=str)
     args.add_argument("-i", "--input", help="Required. URL to a page with context",
+                      action='append',
                       required=True, type=str)
     args.add_argument("--input_names",
                       help="Optional. Inputs names for the network. "
@@ -97,7 +98,7 @@ def main():
     log.info("{} tokens loaded".format(len(vocab)))
 
     # get context as a string (as we might need it's length for the sequence reshape)
-    paragraphs = get_paragraphs(args.input.split(','))
+    paragraphs = get_paragraphs(args.input)
     context = '\n'.join(paragraphs)
     log.info("Size: {} chars".format(len(context)))
     log.info("Context: " + COLOR_RED + context + COLOR_RESET)
