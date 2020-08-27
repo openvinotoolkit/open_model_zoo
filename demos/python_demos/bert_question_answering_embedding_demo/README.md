@@ -20,6 +20,7 @@ If second (conventional SQuAD-tuned) Bert model is provided as well, it is used 
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+```
 usage: bert_question_answering_embedding_demo.py [-h] -i INPUT
                                                  [--best_n BEST_N] -v VOCAB
                                                  -m_emb MODEL_EMB
