@@ -26,7 +26,6 @@ from ..representation import (
 from ..config import NumberField, StringField, ConfigError, BoolField
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
-from sklearn.metrics import accuracy_score
 
 try:
     from sklearn.metrics import roc_auc_score
