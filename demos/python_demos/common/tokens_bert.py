@@ -24,7 +24,7 @@ def load_vocab_file(vocab_file_name):
 
 
 # split word by vocab items and get tok codes
-# iterativly return codes
+# iteratively return codes
 def encode_by_voc(w, vocab):
     # remove mark and control chars
     def clean_word(w):
