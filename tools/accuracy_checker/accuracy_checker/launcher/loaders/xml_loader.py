@@ -25,5 +25,5 @@ class XMLLoader(DictLoaderMixin, Loader):
 
     __provider__ = 'xml'
 
-    def load(self):
+    def load(self, *args, **kwargs):
         return read_xml(self._data_path)

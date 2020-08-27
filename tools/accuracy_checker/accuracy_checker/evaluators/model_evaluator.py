@@ -70,6 +70,7 @@ class ModelEvaluator(BaseEvaluator):
         if data_reader_type in REQUIRES_ANNOTATIONS:
             data_source = dataset.annotation
         data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
+        launcher_kwargs = {}
         enable_ie_preprocessing = (
             dataset_config.get('_ie_preprocessing', False)
             if launcher_config['framework'] == 'dlsdk' else False
@@ -78,15 +79,17 @@ class ModelEvaluator(BaseEvaluator):
             dataset_config.get('preprocessing'), dataset_name, dataset.metadata,
             enable_ie_preprocessing=enable_ie_preprocessing
         )
-        launcher = (
-            create_launcher(launcher_config, model_name)
-            if not enable_ie_preprocessing else create_launcher(launcher_config, model_name, preprocessor=preprocessor)
-        )
+        if enable_ie_preprocessing:
+            launcher_config['preprocessor'] = preprocessor
+        if launcher_config['framework'] == 'dummy' and launcher_config.get('provide_identifiers', False):
+            launcher_kwargs = {'identifiers': dataset.identifiers}
+        launcher = create_launcher(launcher_config, model_name, **launcher_kwargs)
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)
         input_feeder = InputFeeder(
-            launcher.config.get('inputs', []), launcher.inputs, launcher.fit_to_input, launcher.default_layout
+            launcher.config.get('inputs', []), launcher.inputs, launcher.fit_to_input, launcher.default_layout,
+            launcher_config['framework'] == 'dummy'
         )
         preprocessor.input_shapes = launcher.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
@@ -104,7 +107,7 @@ class ModelEvaluator(BaseEvaluator):
 
         return (
             config['name'],
-            launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
+            launcher_config['framework'], launcher_config.get('device', ''), launcher_config.get('tags'),
             dataset_config['name']
         )
 
@@ -274,6 +277,22 @@ class ModelEvaluator(BaseEvaluator):
 
         return free_irs, queued_irs
 
+    def process_single_image(self, image):
+        input_data = [self.reader(identifier=image)]
+        batch_input = self.preprocessor.process(input_data)
+        _, batch_meta = extract_image_representations(batch_input)
+        filled_inputs = self.input_feeder.fill_inputs(batch_input)
+        batch_predictions = self.launcher.predict(filled_inputs, batch_meta)
+
+        if self.adapter:
+            self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
+            batch_predictions = self.adapter.process(batch_predictions, [image], batch_meta)
+
+        _, predictions = self.postprocessor.process_batch(
+            None, batch_predictions, batch_meta, allow_empty_annotation=True
+        )
+        return predictions[0]
+
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
             del self._metrics_results
@@ -314,7 +333,9 @@ class ModelEvaluator(BaseEvaluator):
             presenter.write_result(metric_result, ignore_results_formatting)
 
     def load(self, stored_predictions, progress_reporter):
-        self._annotations = self.dataset.annotation
+        annotations = self.dataset.annotation
+        if self.postprocessor.has_processors:
+            self.dataset.provide_data_info(self.reader, annotations)
         launcher = self.launcher
         if not isinstance(launcher, DummyLauncher):
             launcher = DummyLauncher({
@@ -323,12 +344,15 @@ class ModelEvaluator(BaseEvaluator):
                 'data_path': stored_predictions
             }, adapter=None)
 
-        predictions = launcher.predict([annotation.identifier for annotation in self._annotations])
+        identifiers = self.dataset.identifiers
+        predictions = launcher.predict(identifiers)
+        if self.adapter is not None:
+            predictions = self.adapter.process(predictions, identifiers, [])
 
         if progress_reporter:
             progress_reporter.finish(False)
 
-        return self._annotations, predictions
+        return annotations, predictions
 
     @property
     def metrics_results(self):

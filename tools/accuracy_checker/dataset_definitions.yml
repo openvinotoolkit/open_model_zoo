@@ -107,6 +107,7 @@ datasets:
     annotation_conversion:
       converter: mscoco_keypoints
       annotation_file: person_keypoints_val2017.json
+      sort_key: image_size
     annotation: mscoco_keypoints.pickle
     dataset_meta: mscoco_keypoints.json
     metrics:
@@ -180,6 +181,7 @@ datasets:
       annotations_dir: VOCdevkit/VOC2012/Annotations
       images_dir: VOCdevkit/VOC2012/JPEGImages
       imageset_file: VOCdevkit/VOC2012/ImageSets/Main/val.txt
+      has_background: False
     data_source: VOCdevkit/VOC2012/JPEGImages
     annotation: voc12_without_background.pickle
     dataset_meta: voc12_without_background.json
@@ -367,6 +369,50 @@ datasets:
       has_background: True
     annotation: crossroad-0078.pickle
     dataset_meta: crossroad-0078.json
+
+  - name: crossroad_extra_untagged
+    data_source: crossroad_extra_untagged/val_data
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg.json
+      has_background: False
+      sort_annotations: True
+      use_full_label_map: False
+    annotation: crossroad_extra_untagged.pickle
+    dataset_meta: crossroad_extra_untagged.json
+
+  - name: crossroad_extra_untagged_person
+    data_source: crossroad_extra_untagged/val_data
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg_person.json
+      has_background: False
+      sort_annotations: True
+      use_full_label_map: False
+    annotation: crossroad_extra_untagged_person.pickle
+    dataset_meta: crossroad_extra_untagged_person.json
+
+  - name: crossroad_extra_untagged_person_hb
+    data_source: crossroad_extra_untagged/val_data
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg_person.json
+      has_background: True
+      sort_annotations: True
+      use_full_label_map: False
+    annotation: crossroad_extra_untagged_person_hb.pickle
+    dataset_meta: crossroad_extra_untagged_person_hb.json
+
+  - name: crossroad_extra_untagged_vehicle
+    data_source: crossroad_extra_untagged/val_data
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg_vehicle.json
+      has_background: False
+      sort_annotations: True
+      use_full_label_map: False
+    annotation: crossroad_extra_untagged_vehicle.pickle
+    dataset_meta: crossroad_extra_untagged_vehicle.json
 
   - name: pedestrian_and_vehicle_dataset
     data_source: val2017
@@ -811,3 +857,11 @@ datasets:
       doc_stride: 128
       lower_case: true
       vocab_file: vocab.txt
+  - name: squad_emb_v1_1_msl384_mql32_lowercase
+    annotation_conversion:
+      converter: squad_emb
+      testing_file: squad_v1.1/dev-v1.1.json
+      vocab_file: vocab.txt
+      max_seq_length: 384
+      max_query_length: 32
+      lower_case: true

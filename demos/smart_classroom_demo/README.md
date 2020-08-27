@@ -37,9 +37,11 @@ smart_classroom_demo [OPTION]
 Options:
 
     -h                             Print a usage message.
-    -i '<path>'                    Required. Path to a video or image file. Default value is "cam" to work with camera.
+    -i                             Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                          Optional. Enable reading the input in a loop.
+    -limit                         Optional. Read length limit before stopping or restarting reading the input.
     -m_act '<path>'                Required. Path to the Person/Action Detection Retail model (.xml) file.
-    -m_fd '<path>'                 Required. Path to the Face Detection Retail model (.xml) file.
+    -m_fd '<path>'                 Required. Path to the Face Detection model (.xml) file.
     -m_lm '<path>'                 Required. Path to the Facial Landmarks Regression Retail model (.xml) file.
     -m_reid '<path>'               Required. Path to the Face Reidentification Retail model (.xml) file.
     -l '<absolute_path>'           Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels implementation.
@@ -62,15 +64,15 @@ Options:
     -exp_r_fd                      Optional. Expand ratio for bbox before face recognition.
     -t_reid                        Optional. Cosine distance threshold between two vectors for face reidentification.
     -fg                            Optional. Path to a faces gallery in .json format.
-    -no_show                       Optional. Do not show processed video.
-    -last_frame                    Optional. Last frame number to handle in demo. If negative, handle all input video.
     -teacher_id                    Optional. ID of a teacher. You must also set a faces gallery parameter (-fg) to use it.
+    -no_show                       Optional. Do not show processed video.
     -min_ad                        Optional. Minimum action duration in seconds.
     -d_ad                          Optional. Maximum time difference between actions in seconds.
     -student_ac                    Optional. List of student actions separated by a comma.
+    -top_ac                        Optional. List of student actions (for top-k mode) separated by a comma.
     -teacher_ac                    Optional. List of teacher actions separated by a comma.
-    -a_id                          Optional. Target action name.
-    -a_top                         Optional. Number of first K students. If this parameter is positive, the demo detects first K persons with the action, pointed by the parameter "a_id"
+    -top_id                        Optional. Target action name.
+    -a_top                         Optional. Number of first K students. If this parameter is positive, the demo detects first K persons with the action, pointed by the parameter 'top_id'
     -crop_gallery                  Optional. Crop images during faces gallery creation.
     -t_reg_fd                      Optional. Probability threshold for face detections during database registration.
     -min_size_fr                   Optional. Minimum input size for faces during database registration.

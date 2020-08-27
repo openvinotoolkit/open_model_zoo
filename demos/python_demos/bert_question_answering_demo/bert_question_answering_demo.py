@@ -206,6 +206,9 @@ def main():
                 input_names[1]: np.array([attention_mask], dtype=np.int32),
                 input_names[2]: np.array([token_type_ids], dtype=np.int32),
             }
+            if len(input_names)>3:
+                inputs[input_names[3]] = np.arange(len(input_ids), dtype=np.int32)[None,:]
+
             t_start = time.perf_counter()
             # infer by IE
             res = ie_encoder_exec.infer(inputs=inputs)

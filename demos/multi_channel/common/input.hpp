@@ -44,9 +44,6 @@ public:
 };
 
 class VideoSource;
-class VideoSourceNative;
-class GeneralCaptureSource;
-class VideoSourceStreamFile;
 
 class VideoSources {
 private:
@@ -68,10 +65,6 @@ private:
 
     void openVideo(const std::string& source, bool native, bool loopVideo);
     void stop();
-
-    friend VideoSourceNative;
-    friend GeneralCaptureSource;
-    friend VideoSourceStreamFile;
 
 public:
     struct InitParams {

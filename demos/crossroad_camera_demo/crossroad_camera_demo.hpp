@@ -39,8 +39,6 @@ static const char threshold_output_message_person_reid[] = "Optional. Cosine sim
 static const char raw_output_message[] = "Optional. Output Inference results as raw values.";
 static const char no_show_processed_video[] = "Optional. No show processed video.";
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
-
-/// @brief Message list of monitors to show
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 
@@ -59,9 +57,6 @@ DEFINE_double(t, 0.5, threshold_output_message);
 DEFINE_double(t_reid, 0.7, threshold_output_message_person_reid);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_bool(auto_resize, false, input_resizable_message);
-
-/// \brief Define a flag to show monitors<br>
-/// It is an optional parameter
 DEFINE_string(u, "", utilization_monitors_message);
 
 

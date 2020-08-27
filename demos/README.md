@@ -1,5 +1,4 @@
-Open Model Zoo Demos
-====================
+# Open Model Zoo Demos
 
 The Open Model Zoo demo applications are console applications that demonstrate how you can use the Inference Engine in your applications to solve specific use-cases.
 
@@ -7,9 +6,12 @@ The Open Model Zoo includes the following demos:
 
 - [3D Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_3d_demo/README.md) - 3D human pose estimation demo.
 - [Action Recognition Python* Demo](./python_demos/action_recognition/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
+- [BERT Question Answering Python* Demo](./python_demos/bert_question_answering_demo/README.md)
 - [BERT Question Answering Embedding Python* Demo](./python_demos/bert_question_answering_embedding_demo/README.md) - The demo demonstrates how to run BERT based models for question answering task.
+- [Classification C++ Demo](./classification_demo/README.md) - Shows an example of using neural networks for image classification.
 - [Colorization Python* Demo](./python_demos/colorization_demo/README.md) - Colorization demo colorizes input frames.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
+- [Formula Recognition Python* Demo](./python_demos/formula_recognition_demo/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/README.md) - Human pose estimation demo.
 - [Image Inpainting Python Demo](./python_demos/image_inpainting_demo/README.md) - Demo application for GMCNN inpainting network.
@@ -34,8 +36,6 @@ The Open Model Zoo includes the following demos:
 - [Text Detection C++ Demo](./text_detection_demo/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
 - [Text Spotting Python* Demo](./python_demos/text_spotting_demo/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Handwritten Japanese Recognition Python* Demo](./python_demos/handwritten_japanese_recognition_demo/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models.
-
-\* Several C++ demos referenced above have simplified implementation in Python\*, located in the `python_demos` directory.
 
 ## Media Files Available for Demos
 

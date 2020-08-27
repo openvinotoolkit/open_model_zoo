@@ -22,7 +22,6 @@ On the start-up, the application reads command line parameters and loads human p
 
 Running the application with the `-h` option yields the following usage message:
 ```
-./human_pose_estimation_demo -h
 InferenceEngine:
     API version ............ <version>
     Build .................. <number>
@@ -31,7 +30,8 @@ human_pose_estimation_demo [OPTION]
 Options:
 
     -h                         Print a usage message.
-    -i "<path>"                Required. Path to a video. Default value is "cam" to work with camera.
+    -i                         Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                      Optional. Enable reading the input in a loop.
     -m "<path>"                Required. Path to the Human Pose Estimation model (.xml) file.
     -d "<device>"              Optional. Specify the target device for Human Pose Estimation (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -pc                        Optional. Enable per-layer performance report.

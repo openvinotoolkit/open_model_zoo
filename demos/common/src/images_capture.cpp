@@ -28,7 +28,7 @@ public:
         if(!img.data) throw InvalidInput{};
     }
 
-    double fps() const override {return 0.0;}
+    double fps() const override {return 1.0;}
 
     size_t lastImageId() const override {return 0;}
 
@@ -73,7 +73,7 @@ public:
         throw std::runtime_error{"Can't read the first image from " + input + " dir"};
     }
 
-    double fps() const override {return 0.0;}
+    double fps() const override {return 1.0;}
 
     size_t lastImageId() const override {return nextImgId - 1;}
 
@@ -112,15 +112,16 @@ class VideoCapWrapper : public ImagesCapture {
     size_t readLengthLimit;
 
 public:
-    VideoCapWrapper(const std::string &input, bool loop, size_t initialImageId, size_t readLengthLimit, bool autoFocus)
+    VideoCapWrapper(const std::string &input, bool loop, size_t initialImageId, size_t readLengthLimit,
+                cv::Size cameraResolution)
             : ImagesCapture{loop}, nextImgId{0}, initialImageId{static_cast<double>(initialImageId)} {
         try {
             cap.open(std::stoi(input));
             this->readLengthLimit = loop ? std::numeric_limits<size_t>::max() : readLengthLimit;
             cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
-            cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
-            cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
-            cap.set(cv::CAP_PROP_AUTOFOCUS, autoFocus);
+            cap.set(cv::CAP_PROP_FRAME_WIDTH, cameraResolution.width);
+            cap.set(cv::CAP_PROP_FRAME_HEIGHT, cameraResolution.height);
+            cap.set(cv::CAP_PROP_AUTOFOCUS, true);
             cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
         } catch (const std::invalid_argument&) {
             cap.open(input);
@@ -162,7 +163,7 @@ public:
 };
 
 std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input, bool loop, size_t initialImageId,
-        size_t readLengthLimit, bool autoFocus) {
+        size_t readLengthLimit, cv::Size cameraResolution) {
     if (readLengthLimit == 0) throw std::runtime_error{"Read length limit must be positive"};
     try {
         return std::unique_ptr<ImagesCapture>(new ImreadWrapper{input, loop});
@@ -172,7 +173,7 @@ std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input, bool 
     } catch (const InvalidInput &) {}
     try {
         return std::unique_ptr<ImagesCapture>(new VideoCapWrapper{input, loop, initialImageId, readLengthLimit,
-            autoFocus});
+            cameraResolution});
     } catch (const InvalidInput &) {}
     throw std::runtime_error{"Can't read " + input};
 }

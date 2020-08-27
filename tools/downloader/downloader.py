@@ -206,6 +206,9 @@ def try_retrieve(reporter, destination, model_file, cache, num_attempts, start_d
 
 def download_model(reporter, args, cache, session_factory, requested_precisions, model):
     session = session_factory()
+
+    reporter.print_group_heading('Downloading {}', model.name)
+
     reporter.emit_event('model_download_begin', model=model.name, num_files=len(model.files))
 
     output = args.output_dir / model.subdirectory
@@ -236,6 +239,17 @@ def download_model(reporter, args, cache, session_factory, requested_precisions,
         model_file_reporter.emit_event('model_file_download_end', successful=True)
 
     reporter.emit_event('model_download_end', model=model.name, successful=True)
+
+    if model.postprocessing:
+        reporter.emit_event('model_postprocessing_begin', model=model.name)
+
+        for postproc in model.postprocessing:
+            postproc.apply(reporter, output)
+
+        reporter.emit_event('model_postprocessing_end', model=model.name)
+
+        reporter.print()
+
     return True
 
 
@@ -319,7 +333,6 @@ def main():
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    reporter.print_group_heading('Downloading models')
     with contextlib.ExitStack() as exit_stack:
         session_factory = ThreadSessionFactory(exit_stack)
         if args.jobs == 1:
@@ -332,19 +345,6 @@ def main():
                 models)
 
     failed_models = {model.name for model, successful in zip(models, results) if not successful}
-
-    reporter.print_group_heading('Post-processing')
-    for model in models:
-        if model.name in failed_models or not model.postprocessing: continue
-
-        reporter.emit_event('model_postprocessing_begin', model=model.name)
-
-        output = args.output_dir / model.subdirectory
-
-        for postproc in model.postprocessing:
-            postproc.apply(reporter, output)
-
-        reporter.emit_event('model_postprocessing_end', model=model.name)
 
     if failed_models:
         reporter.print('FAILED:')

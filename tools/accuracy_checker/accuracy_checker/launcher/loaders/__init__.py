@@ -18,9 +18,11 @@ from .loader import Loader
 
 from .pickle_loader import PickleLoader
 from .xml_loader import XMLLoader
+from .json_loader import JSONLoader
 
 __all__ = [
     'Loader',
     'PickleLoader',
     'XMLLoader',
+    'JSONLoader'
 ]

@@ -65,6 +65,7 @@ class RetinaFaceAdapter(Adapter):
 
     def process(self, raw, identifiers, frame_meta):
         raw_predictions = self._extract_predictions(raw, frame_meta)
+        raw_predictions = self._repack_data_according_layout(raw_predictions, frame_meta[0])
         results = []
         for batch_id, (identifier, meta) in enumerate(zip(identifiers, frame_meta)):
             proposals_list = []
@@ -270,3 +271,20 @@ class RetinaFaceAdapter(Adapter):
         x_scale = processed_image_size[1] / original_image_size[1]
 
         return x_scale, y_scale
+
+    def _repack_data_according_layout(self, raw_predictions, meta):
+        if 'output_layouts' not in meta:
+            return raw_predictions
+        output_layouts = meta['output_layouts']
+        target_outputs = self.bboxes_output + self.scores_output + self.landmarks_output + self.type_scores_output
+        for target_out in target_outputs:
+            layout = output_layouts[target_out]
+            if layout != 'NHWC':
+                continue
+            shape = raw_predictions[target_out].shape
+            transposed_output = np.transpose(raw_predictions, (0, 3, 1, 2))
+            if shape[1] <= shape[3]:
+                transposed_output = transposed_output.reshape(shape)
+            raw_predictions[target_out] = transposed_output
+
+        return raw_predictions

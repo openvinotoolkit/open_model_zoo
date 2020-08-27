@@ -80,7 +80,7 @@ from .coco_orig_metrics import (
 )
 from .hit_ratio import HitRatioMetric, NDSGMetric
 from .machine_translation import BilingualEvaluationUnderstudy
-from .question_answering import ExactMatchScore, ScoreF1
+from .question_answering import ExactMatchScore, ScoreF1, QuestionAnsweringEmbeddingAccurcay
 from .mpjpe_multiperson import MpjpeMultiperson
 from .language_modeling import ScorePerplexity
 
@@ -90,7 +90,7 @@ from .attribute_classification import (
     AttributeClassificationAccuracy
 )
 
-from .speech_recognition import SpeechRecognitionWER, GreedyWER
+from .speech_recognition import SpeechRecognitionWER, SpeechRecognitionCER
 from .score_class_comparison import ScoreClassComparisonMetric
 __all__ = [
     'Metric',
@@ -164,6 +164,7 @@ __all__ = [
 
     'ScoreF1',
     'ExactMatchScore',
+    'QuestionAnsweringEmbeddingAccurcay',
 
     'MpjpeMultiperson',
 
@@ -174,7 +175,7 @@ __all__ = [
     'AttributeClassificationAccuracy',
 
     'SpeechRecognitionWER',
-    'GreedyWER',
+    'SpeechRecognitionCER',
 
     'ScoreClassComparisonMetric',
 ]

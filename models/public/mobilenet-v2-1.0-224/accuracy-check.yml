@@ -5,6 +5,7 @@ models:
         model: mobilenet_v2_1.0_224_frozen.pb
         inputs:
           - name: input
+            type: INPUT
         adapter: classification
     datasets:
       - name: imagenet_1001_classes
