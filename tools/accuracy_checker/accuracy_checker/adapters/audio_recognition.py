@@ -14,8 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import math
-import numpy as np
 import string
+
+import numpy as np
 
 from ..adapters import Adapter
 from ..config import NumberField, BoolField, StringField, ListField, PathField
@@ -31,10 +32,10 @@ def require_kenlm():
     """
     Import kenlm module
     """
-    global kenlm
+    global kenlm  # pylint: disable=global-statement
     if kenlm is None:
         try:
-            import kenlm as kenlm_imported
+            import kenlm as kenlm_imported  # pylint: disable=import-outside-toplevel
         except ImportError:
             raise ValueError("kenlm is not installed. Please install it with 'pip install pypi-kenlm'.")
         kenlm = kenlm_imported
@@ -44,13 +45,15 @@ def require_ctcdecode_numpy():
     """
     Import ctcdecode_numpy module
     """
-    global ctcdecode_numpy
+    global ctcdecode_numpy  # pylint: disable=global-statement
     if ctcdecode_numpy is None:
         try:
-            import ctcdecode_numpy as ctcdecode_numpy_imported
+            import ctcdecode_numpy as ctcdecode_numpy_imported  # pylint: disable=import-outside-toplevel
         except ImportError:
-            raise ValueError("To use ctc_beam_search_decoder_with_lm adapter you need ctcdecode_numpy installed. "
-                "Please see open_model_zoo/demos/python_demos/speech_recognition_demo/README.md for instructions.")
+            raise ValueError(
+                "To use ctc_beam_search_decoder_with_lm adapter you need ctcdecode_numpy installed. "
+                "Please see open_model_zoo/demos/python_demos/speech_recognition_demo/README.md for instructions."
+            )
         ctcdecode_numpy = ctcdecode_numpy_imported
 
 
@@ -280,49 +283,50 @@ class CTCBeamSearchDecoderWithLm(Adapter):
         parameters = super().parameters()
         parameters.update({
             'beam_size': NumberField(
-                optional=True, value_type=int, min_value=1, default=10,
-                description="Size of the beam to use during decoding"
+                optional=True, value_type=int, min_value=1, default=10, description=
+                "Size of the beam to use during decoding"
             ),
             'logarithmic_prob': BoolField(
                 optional=True, default=False, description=
-                    "Set to \"True\" to indicate that network gives natural-logarithmic "
-                    "probabilities. Default is plain probabilities (after softmax)."
+                "Set to \"True\" to indicate that network gives natural-logarithmic "
+                "probabilities. Default is plain probabilities (after softmax)."
             ),
             'probability_out': StringField(
                 optional=False, description="Name of the network's output with character probabilities"
             ),
             'alphabet': ListField(
-                optional=True, default=None, value_type=str, allow_empty=False,
-                description="Alphabet. Use an empty string for the CTC blank sybmol. "
-                    "Default is space + 26 English letters + apostrophe + blank."
+                optional=True, default=None, value_type=str, allow_empty=False, description=
+                "Alphabet. Use an empty string for the CTC blank sybmol. "
+                "Default is space + 26 English letters + apostrophe + blank."
             ),
             'sep': StringField(
                 optional=True, default=' ', description=
-                    "Word separator character. Use an empty string for character-based LM. Default is space."
+                "Word separator character. Use an empty string for character-based LM. Default is space."
             ),
             'lm_file': PathField(
-                optional=True, default=None, description="Path to LM in binary kenlm format. Default is no LM."
+                optional=True, default=None, description=
+                "Path to LM in binary kenlm format. Default is no LM."
             ),
             'lm_alpha': NumberField(
                 optional=True, default=None, value_type=float, min_value=0, description=
-                    "LM alpha: weight factor for LM score"
+                "LM alpha: weight factor for LM score"
             ),
             'lm_beta': NumberField(
                 optional=True, default=None, value_type=float, description=
-                    "LM beta: score bonus for each additional word, in log_e units"
+                "LM beta: score bonus for each additional word, in log_e units"
             ),
             'lm_oov_score': NumberField(
                 optional=True, default=-1000., value_type=float, description=
-                    "Replace LM score for out-of-vocabulary words with this value"
+                "Replace LM score for out-of-vocabulary words with this value"
             ),
             'lm_vocabulary_offset': NumberField(
                 optional=True, default=None, value_type=int, min_value=0, description=
-                    "Start of vocabulary strings section in the LM file.  "
-                    "Default is to not filter candidate words using vocabulary"
+                "Start of vocabulary strings section in the LM file.  "
+                "Default is to not filter candidate words using vocabulary"
             ),
             'lm_vocabulary_length': NumberField(
                 optional=True, default=None, value_type=int, min_value=0, description=
-                    "Size in bytes of vocabulary strings section in the LM file"
+                "Size in bytes of vocabulary strings section in the LM file"
             ),
         })
         return parameters
@@ -336,8 +340,8 @@ class CTCBeamSearchDecoderWithLm(Adapter):
         if self.alphabet is None:
             self.alphabet = list(' ' + string.ascii_lowercase + "'") + ['']
         self.sep = self.launcher_config.get('sep')
-        if self.sep is None:
-            self.sep = ' '  # TODO: default is not working here for some reasons
+        if self.sep is None:  # default is not working here for some reasons
+            self.sep = ' '
         lm_file = self.get_value_from_config('lm_file')
         self.alpha = self.get_value_from_config('lm_alpha')
         self.beta = self.get_value_from_config('lm_beta')
@@ -351,7 +355,8 @@ class CTCBeamSearchDecoderWithLm(Adapter):
             raise ValueError("\"sep\" must be in alphabet or be an empty string")
         self.init_lm(lm_file, lm_vocabulary_offset, lm_vocabulary_length)
 
-    def load_python_modules(self):
+    @staticmethod
+    def load_python_modules():
         require_kenlm()
 
     def init_lm(self, lm_file, lm_vocabulary_offset, lm_vocabulary_length):
@@ -382,7 +387,7 @@ class CTCBeamSearchDecoderWithLm(Adapter):
             )
 
         decoded = self.decode(log_prob)
-        decoded = decoded.upper()  # TODO: this should go into metric
+        decoded = decoded.upper()  # this should be responsibility of metric
         return [CharacterRecognitionPrediction(identifiers[0], decoded)]
 
     @staticmethod
@@ -403,13 +408,13 @@ class CTCBeamSearchDecoderWithLm(Adapter):
         cand_set = CtcBeamSearchWithLmCandidateSet(
             self.alphabet,
             self.beam_size,
-            sep = self.sep,
-            lm = self.lm,
-            start_with_bos = True,
-            alpha = self.alpha,
-            beta = self.beta,
-            oov_score = self.oov_score,
-            allowed_prefixes = self.vocab_prefixes,
+            sep=self.sep,
+            lm=self.lm,
+            start_with_bos=True,
+            alpha=self.alpha,
+            beta=self.beta,
+            oov_score=self.oov_score,
+            allowed_prefixes=self.vocab_prefixes,
         )
         for logp_audio_slice in logp_audio:
             cand_set.advance_time(logp_audio_slice)
@@ -426,32 +431,37 @@ class FastCTCBeamSearchDecoderWithLm(CTCBeamSearchDecoderWithLm):
     __provider__ = 'fast_ctc_beam_search_decoder_with_lm'
     prediction_types = (CharacterRecognitionPrediction, )
 
-    def load_python_modules(self):
+    @staticmethod
+    def load_python_modules():
         require_ctcdecode_numpy()
 
     def init_lm(self, lm_file, lm_vocabulary_offset=None, lm_vocabulary_length=None):
         if self.oov_score != -1000:
-            raise ValueError("fast_ctc_beam_search_decoder_with_lm does not support non-default (default=-1000) lm_oov_score")
+            raise ValueError(
+                "fast_ctc_beam_search_decoder_with_lm does not support non-default lm_oov_score (default is -1000)"
+            )
         if self.sep not in [' ', '']:
             raise ValueError("fast_ctc_beam_search_decoder_with_lm does not support non-default value of sep")
         self.ctcdecoder_state = ctcdecode_numpy.CTCBeamDecoder(
             self.alphabet,
-            model_path = str(lm_file) if lm_file is not None else None,
-            alpha = self.alpha,
-            beta = self.beta,
-            cutoff_top_n = 40,
-            cutoff_prob = 1.0,
-            beam_width = self.beam_size,
-            blank_id = self.alphabet.index(''),
-            log_probs_input = True,
+            model_path=str(lm_file) if lm_file is not None else None,
+            alpha=self.alpha,
+            beta=self.beta,
+            cutoff_top_n=40,
+            cutoff_prob=1.0,
+            beam_width=self.beam_size,
+            blank_id=self.alphabet.index(''),
+            log_probs_input=True,
         )
 
     def decode(self, logp_audio):
+        # pylint: disable=unused-variable
         output, scores, timesteps, out_seq_len = self.ctcdecoder_state.decode(logp_audio[np.newaxis])
+        # pylint: enable=unused-variable
         if out_seq_len.shape[0] != 1:
             raise ValueError("ctcdecode_numpy returned incorrect value.  Maybe module version mismatch?")
         result_rank = 0
-        decoded_text = self._char_indices_to_str(output[0, result_rank, :out_seq_len[0,result_rank]])
+        decoded_text = self._char_indices_to_str(output[0, result_rank, :out_seq_len[0, result_rank]])
         return decoded_text
 
     def _char_indices_to_str(self, char_indices):
@@ -461,8 +471,8 @@ class FastCTCBeamSearchDecoderWithLm(CTCBeamSearchDecoderWithLm):
 class CtcBeamSearchWithLmCandidateSet:
     log10_to_ln = math.log(10.)
 
-    def __init__(self, alphabet, beam_width, sep=' ', lm=None,
-            start_with_bos=True, alpha=1.0, beta=0.0, oov_score=None, allowed_prefixes=None):
+    def __init__(self, alphabet, beam_width, sep=' ', lm=None, start_with_bos=True,
+                 alpha=1.0, beta=0.0, oov_score=None, allowed_prefixes=None):
         """
             Some args:
         alphabet (list of str), alphabet, including the blank symbol as ''
@@ -483,10 +493,7 @@ class CtcBeamSearchWithLmCandidateSet:
         self.oov_score = oov_score
         self.allowed_prefixes = allowed_prefixes
 
-        empty_candidate = CtcBeamSearchCandidate.empty(
-            lm = lm,
-            start_with_bos = start_with_bos,
-        )
+        empty_candidate = CtcBeamSearchCandidate.empty(lm=lm, start_with_bos=start_with_bos)
         self.candidates = [empty_candidate]
         self.text_to_candidates = None
         self.candidates_finalized = False
@@ -696,10 +703,9 @@ class TextState:
         """
         if new_char == sep:
             return TextState(self.text + new_char, '', new_char_index), self.last_word
-        elif sep == '':
+        if sep == '':
             return TextState(self.text + new_char, new_char, new_char_index), self.last_word
-        else:
-            return TextState(self.text + new_char, self.last_word + new_char, new_char_index), None
+        return TextState(self.text + new_char, self.last_word + new_char, new_char_index), None
 
 
 def log_sum_exp(a, b):
@@ -711,7 +717,7 @@ def log_sum_exp(a, b):
     # Checking for -inf is here to only silence runtime warning.
     if a == -np.inf:
         return b
-    elif b == -np.inf:
+    if b == -np.inf:
         return a
 
     max_a_b = max(a, b)
@@ -744,13 +750,15 @@ def read_vocabulary_prefixes(lm_filename, vocab_offset, vocab_length):
         vocab_data = lm_file.read(vocab_length)
 
     if len(vocab_data) < 6 or vocab_data[:6] != b'<unk>\0':
-        raise RuntimeError("LM vocabulary section does not start with \"<unk>\\0\".  "
-            "Wrong value of lm_vocabulary_offset parameter?  "
-            "lm_vocabulary_offset should point to \"<unk>\" in lm_file.")
+        raise RuntimeError(
+            "LM vocabulary section does not start with \"<unk>\\0\".  Wrong value of lm_vocabulary_offset parameter?  "
+            "lm_vocabulary_offset should point to \"<unk>\" in lm_file."
+        )
     if vocab_data[-1:] != b'\0':
-        raise RuntimeError("The last byte is LM vocabulary section is not 0.  "
-            "Wrong value of lm_vocabulary_length parameter?  "
-            "Omitting this parameter results in this section spanning to the end of file.")
+        raise RuntimeError(
+            "The last byte is LM vocabulary strings section is not 0.  Wrong value of lm_vocabulary_length parameter?  "
+            "Omitting this parameter results in vocabulary strings section spanning to the end of file."
+        )
 
     vocab_list = vocab_data[:-1].decode('utf8').split('\0')
 
