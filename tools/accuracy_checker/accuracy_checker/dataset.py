@@ -26,6 +26,7 @@ from .config import (
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
 from .representation import BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
 from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS
+from .logging import print_info
 
 
 class DatasetConfig(ConfigValidator):
@@ -66,11 +67,24 @@ class Dataset:
         if 'annotation' in self._config:
             annotation_file = Path(self._config['annotation'])
             if annotation_file.exists():
+                print_info('Annotation for {dataset_name} dataset will be loaded from {file}'.format(
+                    dataset_name=self._config['name'], file=annotation_file))
                 annotation = read_annotation(get_path(annotation_file))
+                if self._config.get('dataset_meta'):
+                    print_info('{dataset_name} dataset metadata will be loaded from {file}'.format(
+                        dataset_name=self._config['name'], file=self._config['dataset_meta']))
                 meta = self._load_meta()
                 use_converted_annotation = False
         if not annotation and 'annotation_conversion' in self._config:
+            print_info("Annotation conversion for {dataset_name} dataset has been started".format(
+                dataset_name=self._config['name']))
+            print_info("Parameters to be used for conversion:")
+            for key, value in self._config['annotation_conversion'].items():
+                print_info('{key}: {value}'.format(key=key, value=value))
             annotation, meta = self._convert_annotation()
+            if annotation:
+                print_info("Annotation conversion for {dataset_name} dataset has been finished".format(
+                    dataset_name=self._config['name']))
 
         if not annotation:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
@@ -94,6 +108,10 @@ class Dataset:
             meta_name = self._config.get('dataset_meta')
             if meta_name:
                 meta_name = Path(meta_name)
+                print_info("{dataset_name} dataset metadata will be saved to {file}".format(
+                    dataset_name=self._config['name'], file=meta_name))
+            print_info('Converted annotation for {dataset_name} dataset will be saved to {file}'.format(
+                dataset_name=self._config['name'], file=Path(annotation_name)))
             save_annotation(annotation, meta, Path(annotation_name), meta_name)
 
         self._annotation = annotation
