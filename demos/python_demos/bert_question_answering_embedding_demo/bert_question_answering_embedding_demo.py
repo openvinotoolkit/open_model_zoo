@@ -353,8 +353,8 @@ def main():
             answers.sort(key=lambda x: -x[0])
             log.info("---Stage 3---Find best 3 answers from {} results of Stage 1".format(len(answers)))
             for score, s, e, context in answers[:3]:
-                log.info("Answer: {:0.2f} {} ".format(score, mark(context[s:e])))
-                log.info(context[:s] + mark(context[s:e]) + context[e:])
+                print("Answer (score: {:0.2f}): {}".format(score, mark(context[s:e])))
+                print(context[:s] + mark(context[s:e]) + context[e:])
 
 
 if __name__ == '__main__':
