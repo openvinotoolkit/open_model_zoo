@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
         std::ostringstream latencyStream;
 
         std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
-        while (delay >= 0) {
+        while (inImg.data && delay >= 0) {
             if (CV_8UC3 != inImg.type())
                 throw std::runtime_error("BGR (or RGB) image expected to come from input");
             inferRequest.SetBlob(inName, wrapMat2Blob(inImg));
@@ -213,9 +213,6 @@ int main(int argc, char *argv[]) {
             }
             t0 = std::chrono::steady_clock::now();
             inImg = cap->read();
-            if (!inImg.data) {
-                break;
-            }
         }
         std::cout << "Mean pipeline latency: " << latencyStream.str() << '\n';
         std::cout << presenter.reportMeans() << '\n';
