@@ -70,9 +70,6 @@ class Dataset:
                 print_info('Annotation for {dataset_name} dataset will be loaded from {file}'.format(
                     dataset_name=self._config['name'], file=annotation_file))
                 annotation = read_annotation(get_path(annotation_file))
-                if self._config.get('dataset_meta'):
-                    print_info('{dataset_name} dataset metadata will be loaded from {file}'.format(
-                        dataset_name=self._config['name'], file=self._config['dataset_meta']))
                 meta = self._load_meta()
                 use_converted_annotation = False
         if not annotation and 'annotation_conversion' in self._config:
@@ -233,8 +230,13 @@ class Dataset:
         annotation.set_dataset_metadata(self.metadata)
 
     def _load_meta(self):
+        meta = None
         meta_data_file = self._config.get('dataset_meta')
-        return read_json(meta_data_file, cls=JSONDecoderWithAutoConversion) if meta_data_file else None
+        if meta_data_file:
+            print_info('{dataset_name} dataset metadata will be loaded from {file}'.format(
+                dataset_name=self._config['name'], file=meta_data_file))
+            meta = read_json(meta_data_file, cls=JSONDecoderWithAutoConversion)
+        return meta
 
     def _convert_annotation(self):
         conversion_params = self._config.get('annotation_conversion')
