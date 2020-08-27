@@ -2,6 +2,7 @@
 import os
 import argparse
 
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -13,6 +14,36 @@ from utils.text import text_to_sequence
 
 
 ##################################################################################################
+
+class FixedLengthRegulator(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x, dur):
+        return self.expand(x, dur)
+
+    @staticmethod
+    def build_index(duration, x):
+        duration[duration<0]=0
+        tot_duration = duration.cumsum(1).detach().cpu().numpy().astype('int')
+        max_duration = int(tot_duration.max().item())
+        index = np.zeros([x.shape[0], max_duration, x.shape[2]], dtype='long')
+
+        for i in range(tot_duration.shape[0]):
+            pos = 0
+            for j in range(tot_duration.shape[1]):
+                pos1 = int(tot_duration[i, j])
+                index[i, pos:pos1, :] = j
+                pos = pos1
+            index[i, pos:, :] = j
+        return torch.LongTensor(index).to(duration.device)
+
+    def expand(self, x, dur):
+        idx = self.build_index(dur, x)
+        y = torch.gather(x, 1, idx)
+        return y
+
 
 class CBHGWrapper(nn.Module):
     """Class for changing forward pass in CBHG layer: MaxPool1d to MaxPool2d."""
@@ -65,6 +96,7 @@ class DurationPredictor(nn.Module):
         super().__init__()
         self.model = model
         self.model.prenet = CBHGWrapper(self.model.prenet)
+        self.model.lr = FixedLengthRegulator()
 
     def forward(self, x, alpha=1.0):
         x = self.model.embedding(x)
