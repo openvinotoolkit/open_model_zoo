@@ -58,9 +58,6 @@ if __name__ == '__main__':
     canvas_2d = np.zeros((720, 1280, 3), dtype=np.uint8)
     plotter = Plotter3d(canvas_2d.shape[:2])
     canvas_2d_window_name = 'Canvas 2D'
-    if not args.no_show:
-        cv2.namedWindow(canvas_2d_window_name)
-        cv2.setMouseCallback(canvas_2d_window_name, Plotter3d.mouse_callback)
 
     frame_provider = InputReader(args.input)
     is_video = frame_provider.is_video
