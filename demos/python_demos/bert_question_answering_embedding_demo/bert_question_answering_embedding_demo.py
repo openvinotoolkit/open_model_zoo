@@ -95,7 +95,7 @@ def main():
     log.info("Network embedding input names: {}".format(input_names_model_emb))
     # check input names
     if set(input_names_model_emb) != set(input_names_emb):
-        log.error("Unexpected embedding nework input names")
+        log.error("Unexpected embedding network input names")
         raise Exception("Unexpected embedding nework input names")
 
     # check outputs
