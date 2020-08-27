@@ -26,7 +26,7 @@ public:
     void frameToBlobNext(const cv::Mat& image);
     void startCurr();
     void startNext();
-    bool readyCurr();
+    void waitCurr();
     void swapRequest();
     ~HumanPoseEstimator();
 
