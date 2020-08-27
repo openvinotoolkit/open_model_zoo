@@ -22,7 +22,7 @@ cd ForwardTacotron
 ```sh
 git checkout 78789c1aa845057bb2f799e702b1be76bf7defd0
 ```
-4. Copy provided script `wavernn_to_onnx.py` to ForwardTacotron root directory, and script `fatchord_version_fused.py` to ForwardTacotron/models directory.
+4. Copy provided script `wavernn_to_onnx.py` to ForwardTacotron root directory, and apply git path `0001-Added-batch-norm-fusing-to-conv-layers.patch`.
 5. Download WaveRNN model from https://github.com/fatchord/WaveRNN/tree/master/pretrained/ and extract in to pretrained directory.
 ```sh
 mkdir pretrained

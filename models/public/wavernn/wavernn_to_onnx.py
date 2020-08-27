@@ -1,57 +1,21 @@
+#!/usr/bin/env python3
 import os
-import os.path as osp
+import argparse
+
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
 from utils.distribution import sample_from_discretized_mix_logistic
-from models.fatchord_version_fused import WaveRNN
-
+from models.fatchord_version import WaveRNN
 from utils import hparams as hp
-from utils.paths import Paths
-import argparse
-
 from utils.dsp import reconstruct_waveform, save_wav
 from utils.dsp import *
 
-import numpy as np
-import pickle
+
 
 ##################################################################################################
-
-def forwardLikeGRUCell(input, h, gru):
-    r"""A gated recurrent unit (GRU) cell
-
-        .. math::
-
-            \begin{array}{ll}
-            r = \sigma(W_{ir} x + b_{ir} + W_{hr} h + b_{hr}) \\
-            z = \sigma(W_{iz} x + b_{iz} + W_{hz} h + b_{hz}) \\
-            n = \tanh(W_{in} x + b_{in} + r * (W_{hn} h + b_{hn})) \\
-            h' = (1 - z) * n + z * h
-            \end{array}
-        """
-
-    #w_ir, w_ii, w_ih = gru.weight_ih_l0.chunk(0, 3)
-    #w_ir, w_ii, w_ih = gru.weight_hh_l0.chunk(0, 3)
-    w_ih = gru.weight_ih_l0
-    w_hh = gru.weight_hh_l0
-    b_ih = gru.bias_ih_l0
-    b_hh = gru.bias_hh_l0
-
-    i_s = F.linear(input, w_ih, b_ih)
-    h_s = F.linear(h, w_hh, b_hh)
-
-    r_i_s, z_i_s, o_i_s = i_s.chunk(3, 1)
-    r_h_s, z_h_s, o_h_s = h_s.chunk(3, 1)
-
-    r = torch.sigmoid(r_i_s + r_h_s)
-    z = torch.sigmoid(z_i_s + z_h_s)
-    n = torch.tanh(o_i_s + r * o_h_s)
-
-    h_t = (1 - z) * n + z * h
-
-    return h_t
 
 class WaveRNNUpsamplerONNX(nn.Module):
     def __init__(self, model, batched, target, overlap):
@@ -112,7 +76,7 @@ class WaveRNNONNX(nn.Module):
 
     def infer(self, m_t, a1_t, a2_t, a3_t, a4_t, h1, h2, x):
         """
-        implement one step forward pass form WaveRNN fachord version
+        implement one step forward pass form WaveRNN fatchord version
         :return:
         """
         x = torch.cat([x, m_t, a1_t], dim=1)
@@ -154,46 +118,6 @@ class WaveRNNONNX(nn.Module):
         return self.model.xfade_and_unfold(y, target, overlap)
 
 ##################################################################################################
-class DurationPredictor(nn.Module):
-    def __init__(self, model):
-        super().__init__()
-        self.model = model
-
-    def forward(self, x, alpha=1.0):
-        x = self.model.embedding(x)
-        dur = self.model.dur_pred(x, alpha=alpha)
-
-        x = x.transpose(1, 2)
-        x = self.model.prenet(x)
-
-        return x, dur
-
-
-    def lr(self, x, dur):
-        return self.model.lr(x, dur)
-
-
-
-
-class Tacotorn(nn.Module):
-    def __init__(self, model):
-        super().__init__()
-        self.model = model
-
-    def forward(self, x):
-        x, _ = self.model.lstm(x)
-
-        x = self.model.lin(x)
-        x = x.transpose(1, 2)
-
-        x_post = self.model.postnet(x)
-        x_post = self.model.post_proj(x_post)
-        x_post = x_post.transpose(1, 2)
-
-        x_post = x_post.squeeze()
-
-        return x_post
-
 
 def main():
     # Parse Arguments
@@ -201,16 +125,12 @@ def main():
 
     parser.add_argument('--mel', type=str, help='[string/path] path to test mel file')
 
-    parser.add_argument('--force_cpu', '-c', action='store_true',
-                        help='Forces CPU-only training, even when in CUDA capable environment')
     parser.add_argument('--hp_file', metavar='FILE', default='hparams.py',
                         help='The file to use for the hyperparameters')
 
     parser.add_argument('--batched', '-b', dest='batched', action='store_true', help='Fast Batched Generation')
 
     parser.add_argument('--voc_weights', type=str, help='[string/path] Load in different FastSpeech weights', default="pretrained/wave_800K.pyt")
-
-    parser.add_argument('--voc_onnx', dest='voc_onnx', action='store_true', help='Convert or not vocoder ot onnx')
 
     args = parser.parse_args()
 
@@ -219,10 +139,7 @@ def main():
 
     hp.configure(args.hp_file)
 
-    if not args.force_cpu and torch.cuda.is_available():
-        device = torch.device('cuda')
-    else:
-        device = torch.device('cpu')
+    device = torch.device('cpu')
     print('Using device:', device)
 
     #####
