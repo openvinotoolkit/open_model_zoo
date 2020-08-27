@@ -40,7 +40,9 @@ static const char raw_output_message[] = "Optional. Output Inference results as 
 static const char no_show_processed_video[] = "Optional. No show processed video.";
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-static const char person_label_message[] = "Optional. The integer index of the objects' category corresponding to persons (as it is returned from the detection network, may vary from one network to another). The default value is 1.";
+static const char person_label_message[] = "Optional. The integer index of the objects' category corresponding to persons "
+                                           "(as it is returned from the detection network, may vary from one network to another). "
+                                           "The default value is 1.";
 
 
 DEFINE_bool(h, false, help_message);

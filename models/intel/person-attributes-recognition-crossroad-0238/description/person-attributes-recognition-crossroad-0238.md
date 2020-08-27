@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 This model presents a person attributes classification algorithm analysis scenario.
-The model consists of the Inception V3 backbone and a head, which returns for an input image with a pedestrian 7 values
+The model consists of the Inception V3 backbone and a head. For an input image with a pedestrian the model returns 7 values
 that are probabilities of the corresponding 7 attributes.
 
 ## Specification

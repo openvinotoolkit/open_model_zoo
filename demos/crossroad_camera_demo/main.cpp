@@ -262,13 +262,10 @@ struct PersonAttribsDetection : BaseDetection {
         std::vector<std::string> attributes_strings;
         std::vector<bool> attributes_indicators;
 
-        bool hasTopBottomColor;
         cv::Point2f top_color_point;
         cv::Point2f bottom_color_point;
         cv::Vec3b top_color;
         cv::Vec3b bottom_color;
-
-        AttributesAndColorPoints(): hasTopBottomColor(false) {}
     };
 
     static cv::Vec3b GetAvgColor(const cv::Mat& image) {
@@ -343,8 +340,6 @@ struct PersonAttribsDetection : BaseDetection {
                                        "Person Attributes Recognition network is not equal to point coordinates (2)");
             }
 
-            returnValue.hasTopBottomColor = true;
-
             LockedMemory<const void> topColorPointBlobMapped = as<MemoryBlob>(topColorPointBlob)->rmap();
             auto outputTCPointValues = topColorPointBlobMapped.as<float*>();
             LockedMemory<const void> bottomColorPointBlobMapped = as<MemoryBlob>(bottomColorPointBlob)->rmap();
@@ -355,11 +350,13 @@ struct PersonAttribsDetection : BaseDetection {
 
             returnValue.bottom_color_point.x = outputBCPointValues[0];
             returnValue.bottom_color_point.y = outputBCPointValues[1];
-        } else {
-            returnValue.hasTopBottomColor = false;
         }
 
         return returnValue;
+    }
+
+    bool HasTopBottomColor() const {
+        return hasTopBottomColor;
     }
 
     CNNNetwork read(const Core& ie) override {
@@ -613,6 +610,8 @@ int main(int argc, char *argv[]) {
         }
         std::cout << std::endl;
 
+        bool shouldHandleTopBottomColors = personAttribs.HasTopBottomColor();
+
         do {
             if (FLAGS_auto_resize) {
                 // just wrap Mat object with Blob::Ptr without additional memory allocation
@@ -667,7 +666,7 @@ int main(int argc, char *argv[]) {
 
                         resPersAttrAndColor = personAttribs.GetPersonAttributes();
 
-                        if (resPersAttrAndColor.hasTopBottomColor) {
+                        if (shouldHandleTopBottomColors) {
                             cv::Point top_color_p;
                             cv::Point bottom_color_p;
 
@@ -738,7 +737,7 @@ int main(int argc, char *argv[]) {
                         cv::Rect bc_label(result.location.x + result.location.width, result.location.y + result.location.height / 2,
                                             result.location.width / 4, result.location.height / 2);
 
-                        if (resPersAttrAndColor.hasTopBottomColor) {
+                        if (shouldHandleTopBottomColors) {
                             frame(tc_label & image_area) = resPersAttrAndColor.top_color;
                             frame(bc_label & image_area) = resPersAttrAndColor.bottom_color;
                         }
@@ -765,12 +764,9 @@ int main(int argc, char *argv[]) {
                                 if (resPersAttrAndColor.attributes_indicators[i])
                                     output_attribute_string += resPersAttrAndColor.attributes_strings[i] + ",";
                             std::cout << "Person Attributes results: " << output_attribute_string << std::endl;
-                            if (resPersAttrAndColor.hasTopBottomColor) {
+                            if (shouldHandleTopBottomColors) {
                                 std::cout << "Person top color: " << resPersAttrAndColor.top_color << std::endl;
                                 std::cout << "Person bottom color: " << resPersAttrAndColor.bottom_color << std::endl;
-                            } else {
-                                std::cout << "Person top color: N/A" << std::endl;
-                                std::cout << "Person bottom color: N/A" << std::endl;
                             }
                         }
                     }
