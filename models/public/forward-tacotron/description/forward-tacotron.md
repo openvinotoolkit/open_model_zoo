@@ -1,4 +1,4 @@
-# forward-tacotron
+# forward-tacotron (composite)
 
 ## Use Case and High-Level Description
 
@@ -28,7 +28,7 @@ git checkout 78789c1aa845057bb2f799e702b1be76bf7defd0
 python3 forward_to_onnx.py --tts_weights checkpoints/ljspeech_tts.forward/fast_speech_step<iteration>K_weights.pyt
 ```
 Notes:
-   1. Since ONNX doesn't support the build_index operation from pytorch pipeline, the model is divided into two parts: `forward_tacotron_duration_prediction.onnx, forward_tacotron_regression.onnx`.
+   1. Since ONNX doesn't support the build_index operation from PyTorch pipeline, the model is divided into two parts: `forward_tacotron_duration_prediction.onnx, forward_tacotron_regression.onnx`.
    2. We stopped training of the Tacotron model in 183K iteration for alignment generation and stopped ForwardTacotron training in 290K iteration.
 
 ## Composite model specification
