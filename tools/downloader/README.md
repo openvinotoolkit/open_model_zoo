@@ -83,7 +83,7 @@ You may use `--precisions` flag to specify comma separated precisions of weights
 to be downloaded.
 
 ```sh
-./downloader.py --name face-detection-retail-0004 --precisions FP16,INT8
+./downloader.py --name face-detection-retail-0004 --precisions FP16,FP16-INT8
 ```
 
 By default, the script will attempt to download each file only once. You can use
@@ -420,8 +420,6 @@ describing a single model. Each such object has the following keys:
   * `FP32`
   * `FP32-INT1`
   * `FP32-INT8`
-  * `INT1`
-  * `INT8`
 
   Additional possible values might be added in the future.
 
