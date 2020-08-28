@@ -71,6 +71,8 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         if not self.match:
             self.accuracy = AverageMeter(loss)
         else:
+            if accuracy_score is None:
+                raise ConfigError('sklearn.metric.accuracy_score not available')
             self.accuracy = []
 
     def update(self, annotation, prediction):

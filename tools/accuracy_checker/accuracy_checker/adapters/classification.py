@@ -40,7 +40,7 @@ class ClassificationAdapter(Adapter):
             'block': BoolField(
                 optional=True, default=False, description="process whole batch as a single data block"
             ),
-            'classification_output': StringField(optional=True, description='otarget output layer name')
+            'classification_output': StringField(optional=True, description='target output layer name')
         })
 
         return parameters

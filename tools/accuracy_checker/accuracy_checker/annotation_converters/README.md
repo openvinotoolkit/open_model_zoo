@@ -357,6 +357,17 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotation_file` - path to file which describe the data which should be used in evaluation (`audio_filepath`, `text`, `duration`). Optional, used only for data filtering and sorting audio samples by duration.
   * `use_numpy` - allows to use preprocessed data stored in npy-files instead of audio (Optional, default False).
   * `top_n` - numeric value for getting only the n shortest samples **Note:** applicable only with `annotation_file` providing.
+* `criteo` - converts [Criteo](http://labs.criteo.com/2013/12/download-terabyte-click-logs/) datasets to `ClassificationAnnotation`.
+  * `testing_file` - Path to testing file, terabyte_preprocessed.npz (Criteo Terabyte) or day_6_processed.npz (Criteo Kaggle Dac)
+  * `batch` - Model batch.
+  * `subsample_size` - Subsample size in batches
+  * `validation` - Allows to use half of dataset for validation purposes
+  * `block` - Make batch-oriented annotations
+  * `separator` - Separator between input identifier and file identifier
+  * `preprocessed_dir` - Preprocessed dataset location
+  * `dense_features` - Name of model dense features input
+  * `sparse_features` - Name of model sparse features input. For multiple inputs use comma-separated list in form <name>:<index>
+  * `lso_features` - Name of lS_o-like features input
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
