@@ -279,12 +279,12 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
             warnings.warn("Polygon can be found only for non-empty mask")
             return {}
 
-        if not self.labels:
+        if self.labels is None or np.size(self.labels) == 0:
             warnings.warn("Polygon can be found only for non-empty labels")
             return {}
 
         polygons = defaultdict(list)
-        for elem, label in zip(self.raw_mask, self.labels):
+        for elem, label in zip(self.mask, self.labels):
             elem = np.uint8(maskUtils.decode(elem))
             obj_contours = []
             contours, _ = cv.findContours(elem, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
