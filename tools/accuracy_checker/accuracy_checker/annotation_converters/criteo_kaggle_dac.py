@@ -118,7 +118,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
             sample = {
                 self.dense_features: np.log1p(x_int[i:i+self.batch, ...]),
                 self.lso_features: np.dot(np.expand_dims(np.linspace(0, self.batch - 1, num=self.batch), -1),
-                               np.ones((1, cat_feat))).T
+                                          np.ones((1, cat_feat))).T
             }
 
             for name in self.sparse_features.keys():

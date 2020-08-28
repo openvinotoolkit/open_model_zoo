@@ -77,7 +77,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
 
     def update(self, annotation, prediction):
         if not self.match:
-            accuracy =  self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
+            accuracy = self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
         else:
             accuracy = accuracy_score(annotation.label, prediction.label)
             self.accuracy.append(accuracy)
@@ -85,7 +85,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         if not self.match:
-            accuracy =  self.accuracy.evaluate()
+            accuracy = self.accuracy.evaluate()
         else:
             accuracy = np.mean(self.accuracy)
         return accuracy
