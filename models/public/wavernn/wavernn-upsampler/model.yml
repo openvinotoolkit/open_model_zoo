@@ -26,6 +26,5 @@ model_optimizer_args:
   - --output=upsample_mels,aux
   - --input_model=$dl_dir/wavernn_upsampler.onnx
 framework: onnx
-quantizable: no
 
 license: https://github.com/fatchord/WaveRNN/blob/master/LICENSE.txt

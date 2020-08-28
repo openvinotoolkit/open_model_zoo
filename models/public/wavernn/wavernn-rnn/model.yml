@@ -25,6 +25,5 @@ model_optimizer_args:
   - --output=logits,h1,h2
   - --input_model=$dl_dir/wavernn_rnn.onnx
 framework: onnx
-quantizable: no
 
 license: https://github.com/fatchord/WaveRNN/blob/master/LICENSE.txt

@@ -26,6 +26,5 @@ model_optimizer_args:
   - --output=mel
   - --input_model=$dl_dir/forward_tacotron_regression.onnx
 framework: onnx
-quantizable: no
 
 license: https://github.com/as-ideas/ForwardTacotron/blob/master/LICENSE
