@@ -170,9 +170,23 @@ class TestSegmentationRepresentation:
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
 
-    def test_to_polygon_prediction_with_1_in_shape(self):
+    def test_to_polygon_prediction_with_1_in_shape_channels_last(self):
         prediction = make_segmentation_representation(np.array(
             [[[1], [0], [0], [0]], [[1], [1], [0], [0]], [[1], [1], [1], [0]]]), False)[0]
+        expected = {
+            0: [np.array([[1, 0], [3, 0], [3, 2]])],
+            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
+
+        actual = prediction.to_polygon()
+
+        for key in expected.keys():
+            assert actual[key]
+            for actual_arr, expected_arr in zip(actual[key], expected[key]):
+                assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
+
+    def test_to_polygon_prediction_with_1_in_shape_channels_first(self):
+        prediction = make_segmentation_representation(np.array(
+            [[[1], [0], [0], [0]], [[1], [1], [0], [0]], [[1], [1], [1], [0]]]).reshape(1, 3, 4), False)[0]
         expected = {
             0: [np.array([[1, 0], [3, 0], [3, 2]])],
             1: [np.array([[0, 0], [0, 2], [2, 2]])]}
