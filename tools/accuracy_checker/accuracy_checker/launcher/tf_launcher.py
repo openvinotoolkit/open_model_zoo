@@ -45,7 +45,7 @@ class TFLauncher(Launcher):
         super().__init__(config_entry, *args, **kwargs)
         try:
             import tensorflow as tf # pylint: disable=C0415
-            from tensorflow.python.saved_model import tag_constants
+            from tensorflow.python.saved_model import tag_constants # pylint: disable=C0415
             self.tf = tf
             self.tag_constants = tag_constants
         except ImportError as import_error:

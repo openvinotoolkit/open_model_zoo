@@ -233,7 +233,7 @@ class _TFResizer(_Resizer):
 
     def __init__(self, interpolation):
         try:
-            import tensorflow as tf
+            import tensorflow as tf # pylint: disable=C0415
         except ImportError:
             raise ImportError('tf backend for resize operation requires TensorFlow. Please install it before usage.')
         tf.enable_eager_execution()

@@ -67,7 +67,7 @@ class TfConvertImageDType(Preprocessor):
     def __init__(self, config, name):
         super().__init__(config, name)
         try:
-            import tensorflow as tf
+            import tensorflow as tf # pylint: disable=C0415
         except ImportError as import_error:
             raise ImportError(
                 '*tf_convert_image_dtype* operation requires TensorFlow. '

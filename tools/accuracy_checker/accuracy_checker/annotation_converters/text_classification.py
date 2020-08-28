@@ -227,7 +227,7 @@ class BertTextClassificationTFRecordConverter(BaseFormatConverter):
 
     def configure(self):
         try:
-            import tensorflow as tf
+            import tensorflow as tf # pylint: disable=C0415
             self.tf = tf
         except ImportError:
             raise ConfigError(

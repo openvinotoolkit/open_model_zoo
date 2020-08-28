@@ -432,7 +432,7 @@ class TensorflowImageReader(BaseReader):
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
         try:
-            import tensorflow as tf
+            import tensorflow as tf # pylint: disable=C0415
         except ImportError as import_error:
             raise ImportError(
                 'tf backend for image reading requires TensorFlow. '
