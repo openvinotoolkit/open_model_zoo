@@ -401,7 +401,7 @@ class NumPyReader(BaseReader):
                 else:
                     recno = field_id.split('_')[-1]
                     recno = int(recno)
-                    start, _ = Path(data_id).name.split('.')
+                    start = Path(data_id).name.split('.')[0]
                     start = int(start)
                     return data[key[0]][recno - start, :]
 
