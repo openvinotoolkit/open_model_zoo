@@ -38,18 +38,17 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
             "validation": BoolField(optional=True, default=True,
                                     description="Allows to use half of dataset for validation purposes"),
             "block": BoolField(optional=True, default=True,
-                                    description="Make batch-oriented annotations"),
+                               description="Make batch-oriented annotations"),
             "separator": StringField(optional=True, default='#',
                                      description="Separator between input identifier and file identifier"),
             "preprocessed_dir": PathField(optional=False, is_directory=True, check_exists=True,
                                           description="Preprocessed dataset location"),
             "dense_features": StringField(optional=True, default='input.1',
-                                     description="Name of model dense features input"),
+                                          description="Name of model dense features input"),
             "sparse_features": StringField(optional=True, default='lS_i',
-                                          description="Name of model sparse features input. " +
-                                                "For multiple inputs use comma-separated list in form <name>:<index>"),
-            "lso_features": StringField(optional=True, default='lS_o',
-                                           description="Name of lS_o-like features input. " ),
+                                           description="Name of model sparse features input. " +
+                                           "For multiple inputs use comma-separated list in form <name>:<index>"),
+            "lso_features": StringField(optional=True, default='lS_o', description="Name of lS_o-like features input."),
         })
 
         return parameters
@@ -149,7 +148,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
                         "{}_{}{}{}".format(self.lso_features, j, self.separator, c_file),
                     ]
                     for name in self.sparse_features.keys():
-                        identifiers,append("{}_{}{}{}".format(name, j, self.separator, c_file))
+                        identifiers.append("{}_{}{}{}".format(name, j, self.separator, c_file))
                     annotations.append(ClassificationAnnotation(identifiers, y[j, ...]))
 
         return ConverterReturn(annotations, None, None)

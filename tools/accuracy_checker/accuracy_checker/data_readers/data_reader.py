@@ -397,13 +397,14 @@ class NumPyReader(BaseReader):
             key = [k for k, v in self.keyRegex.items() if v.match(field_id)]
             if len(key) > 0:
                 if self.block:
-                    return data[key[0]]
+                    res = data[key[0]]
                 else:
                     recno = field_id.split('_')[-1]
                     recno = int(recno)
                     start = Path(data_id).name.split('.')[0]
                     start = int(start)
-                    return data[key[0]][recno - start, :]
+                    res = data[key[0]][recno - start, :]
+                return res
 
         key = next(iter(data.keys()))
         return data[key]
