@@ -24,11 +24,6 @@ from ..logging import warning
 from ..preprocessor import Preprocessor, GeometricOperationMetadata
 from ..utils import contains_all, get_size_from_config
 
-try:
-    import tensorflow as tf
-except ImportError:
-    tf = None
-
 
 def scale_width(dst_width, dst_height, image_width, image_height,):
     return int(dst_width * image_width / image_height), dst_height
@@ -237,7 +232,9 @@ class _TFResizer(_Resizer):
     _supported_interpolations = {}
 
     def __init__(self, interpolation):
-        if tf is None:
+        try:
+            import tensorflow as tf
+        except ImportError:
             raise ImportError('tf backend for resize operation requires TensorFlow. Please install it before usage.')
         tf.enable_eager_execution()
         self._supported_interpolations = {
@@ -256,13 +253,7 @@ class _TFResizer(_Resizer):
 
     @classmethod
     def supported_interpolations(cls):
-        if tf is None:
-            return {}
-        return {
-            'BILINEAR': tf.image.ResizeMethod.BILINEAR,
-            'AREA': tf.image.ResizeMethod.AREA,
-            'BICUBIC': tf.image.ResizeMethod.BICUBIC,
-        }
+        return {}
 
 
 def create_resizer(config):
