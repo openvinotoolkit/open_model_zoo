@@ -191,7 +191,7 @@ class SegmentationPrediction(SegmentationRepresentation):
             if 1 not in mask.shape:
                 mask = np.argmax(mask, axis=0)
             else:
-                mask = np.squeeze(mask, axis=-1)
+                mask = np.squeeze(mask)
         indexes = np.unique(mask)
         for i in indexes:
             binary_mask = np.uint8(mask == i)
