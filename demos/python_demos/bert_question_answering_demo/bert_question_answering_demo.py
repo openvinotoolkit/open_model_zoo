@@ -17,16 +17,16 @@
 """
 import logging as log
 import os
-import string
 import sys
 import time
-import unicodedata
 from argparse import ArgumentParser, SUPPRESS
 
-import bs4
 import numpy as np
-import urllib.request
 from openvino.inference_engine import IECore
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from tokens_bert import text_to_tokens, load_vocab_file
+from html_reader import get_paragraphs
 
 
 def build_argparser():
@@ -38,6 +38,7 @@ def build_argparser():
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
                       required=True, type=str)
     args.add_argument("-i", "--input", help="Required. URL to a page with context",
+                      action='append',
                       required=True, type=str)
     args.add_argument("--input_names",
                       help="Optional. Inputs names for the network. "
@@ -65,65 +66,6 @@ def build_argparser():
                            "Might not work on some terminals (like Windows* cmd console)")
     return parser
 
-
-# split word by vocab items and get tok codes
-# iteratively return codes
-def encode_by_voc(w, vocab):
-    # remove mark and control chars
-    def clean_word(w):
-        # extract marks as separate chars to remove them later
-        wo = ""  # accumulator for output word
-        for c in unicodedata.normalize("NFD", w):
-            c_cat = unicodedata.category(c)
-            # remove mark nonspacing code and controls
-            if c_cat != "Mn" and c_cat[0] != "C":
-                wo += c
-        return wo
-
-    w = clean_word(w)
-    w = w.lower()
-    s, e = 0, len(w)
-    while e > s:
-        subword = w[s:e] if s == 0 else "##" + w[s:e]
-        if subword in vocab:
-            yield vocab[subword]
-            s, e = e, len(w)
-        else:
-            e -= 1
-    if s < len(w):
-        yield vocab['[UNK]']
-
-
-# split big text into words by spaces
-# iteratively return words
-def split_to_words(text):
-    prev_is_sep = True  # mark initial prev as space to start word from 0 char
-    for i, c in enumerate(text + " "):
-        is_punc = (c in string.punctuation or unicodedata.category(c)[0] == "P")
-        cur_is_sep = (c.isspace() or is_punc)
-        if prev_is_sep != cur_is_sep:
-            if prev_is_sep:
-                start = i
-            else:
-                yield start, i
-                del start
-        if is_punc:
-            yield i, i + 1
-        prev_is_sep = cur_is_sep
-
-
-# get the text and return list of token ids and start-end position for each id (in the original text)
-def text_to_tokens(text, vocab):
-    tokens_id = []
-    tokens_se = []
-    for s, e in split_to_words(text):
-        for tok in encode_by_voc(text[s:e], vocab):
-            tokens_id.append(tok)
-            tokens_se.append((s, e))
-    log.info("Size: {} tokens".format(len(tokens_id)))
-    return tokens_id, tokens_se
-
-
 # return entire sentence as start-end positions for a given answer (within the sentence).
 def find_sentence_range(context, s, e):
     # find start of sentence
@@ -139,17 +81,6 @@ def find_sentence_range(context, s, e):
 
     return c_s, c_e
 
-
-# return context as one big string by given input arguments
-def get_context(url):
-    log.info("Get context from {}".format(url))
-    with urllib.request.urlopen(url) as response:
-        html = bs4.BeautifulSoup(response.read(), 'html.parser')
-    paragraphs = html.select("p")
-    context = '\n'.join(par.text for par in paragraphs)
-    return context
-
-
 def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
@@ -163,16 +94,16 @@ def main():
 
     # load vocabulary file for model
     log.info("Loading vocab file:\t{}".format(args.vocab))
-    with open(args.vocab, "r", encoding="utf-8") as r:
-        vocab = {t.rstrip("\n"): i for i, t in enumerate(r.readlines())}
+    vocab = load_vocab_file(args.vocab)
     log.info("{} tokens loaded".format(len(vocab)))
 
     # get context as a string (as we might need it's length for the sequence reshape)
-    context = get_context(args.input)
+    paragraphs = get_paragraphs(args.input)
+    context = '\n'.join(paragraphs)
     log.info("Size: {} chars".format(len(context)))
     log.info("Context: " + COLOR_RED + context + COLOR_RESET)
     # encode context into token ids list
-    c_tokens_id, c_tokens_se = text_to_tokens(context, vocab)
+    c_tokens_id, c_tokens_se = text_to_tokens(context.lower(), vocab)
 
     log.info("Initializing Inference Engine")
     ie = IECore()
@@ -232,7 +163,7 @@ def main():
         if not question:
             break
 
-        q_tokens_id, _ = text_to_tokens(question, vocab)
+        q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
 
         # maximum number of tokens that can be processed by network at once
         max_length = ie_encoder.inputs[input_names[0]].shape[1]
