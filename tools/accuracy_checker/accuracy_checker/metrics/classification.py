@@ -273,6 +273,8 @@ class RocAucScore(PerImageEvaluationMetric):
     prediction_types = (ClassificationPrediction, ArgMaxClassificationPrediction)
 
     def configure(self):
+        if roc_auc_score is None:
+            raise ConfigError('sklearn.metrics.roc_auc_score not available')
         self.reset()
 
     def update(self, annotation, prediction):
