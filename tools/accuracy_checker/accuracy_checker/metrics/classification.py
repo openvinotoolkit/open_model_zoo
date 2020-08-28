@@ -79,6 +79,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         else:
             accuracy = accuracy_score(annotation.label, prediction.label)
             self.accuracy.append(accuracy)
+            return accuracy
 
 
     def evaluate(self, annotations, predictions):
