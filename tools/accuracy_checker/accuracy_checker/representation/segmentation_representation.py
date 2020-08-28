@@ -279,9 +279,15 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
             warnings.warn("Polygon can be found only for non-empty mask")
             return {}
 
-        if not self.labels:
+        if self.labels is None or np.size(self.labels) == 0:
             warnings.warn("Polygon can be found only for non-empty labels")
             return {}
+
+        if all(not isinstance(value, dict) for value in self.raw_mask):
+            polygons = defaultdict(list)
+            for elem, label in zip(self.raw_mask, self.labels):
+                polygons[label].append(elem)
+            return polygons
 
         polygons = defaultdict(list)
         for elem, label in zip(self.raw_mask, self.labels):
