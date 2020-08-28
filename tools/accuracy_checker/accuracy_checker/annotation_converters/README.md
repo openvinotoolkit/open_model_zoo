@@ -9,15 +9,15 @@ Process of conversion can be implemented in two ways:
 * via configuration file
 * via command line
 
-### Describing annotation conversion in configuration file.
+## Describing Annotation Conversion in Configuration File
 
-Annotation conversion can be provided in `dataset` section your configuration file to convert annotation inplace before every evaluation.
+Annotation conversion can be provided in `dataset` section your configuration file to convert annotation in-place before every evaluation.
 Each conversion configuration should contain `converter` field filled selected converter name and provide converter specific parameters (more details in supported converters section). All paths can be prefixed via command line with `-s, --source` argument.
 
 You can additionally use optional parameters like:
 * `subsample_size` - Dataset subsample size. You can specify the number of ground truth objects or dataset ratio in percentage. Please, be careful to use this option, some datasets does not support subsampling. You can also specify `subsample_seed` if you want to generate subsample with specific random seed.
 * `annotation` - path to store converted annotation pickle file. You can use this parameter if you need to reuse converted annotation to avoid subsequent conversions.
-* `dataset_meta` - path to store mata information about converted annotation if it is provided.
+* `dataset_meta` - path to store meta information about converted annotation if it is provided.
 * `analyze_dataset` - flag which allow to get statistics about converted dataset. Supported annotations: `ClassificationAnnotation`, `DetectionAnnotation`, `MultiLabelRecognitionAnnotation`, `RegressionAnnotation`. Default value is False.
 
 Example of usage:
@@ -35,7 +35,7 @@ Example of usage:
    dataset_meta: sample_dataset.json
 ```
 
-### Conversing process via command line.
+## Conversing Process via Command Line
 
 The command line for annotation conversion looks like:
 
@@ -49,7 +49,7 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 * `-a, --annotation_name` - annotation file name.
 * `-m, --meta_name` - meta info file name.
 
-### Supported converters
+## Supported Converters
 
 Accuracy Checker supports following list of annotation converters and specific for them parameters:
 * `cifar` - converts [CIFAR](https://www.cs.toronto.edu/~kriz/cifar.html) classification dataset to `ClassificationAnnotation`
@@ -86,26 +86,32 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `images_dir` - path to directory with images related to devkit root (default JPEGImages).
   * `mask_dir` - path to directory with ground truth segmentation masks related to devkit root (default SegmentationClass).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+**Note**: Since OpenVINO 2020.4 the converter behaviour changed. `data_source` parameter of dataset should contains directory for images only, if you have segmentation mask in separated location, please use `segmentation_masks_source` for specifying gt masks location.
 * `mscoco_detection` - converts MS COCO dataset for object detection task to `DetectionAnnotation`.
   * `annotation_file` - path ot annotation file in json format.
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is False).
   * `use_full_label_map` - allows to use original label map (with 91 object categories) from paper instead public available(80 categories).
-  * `sort_annotations` - allows to save annotations in image id ascend order.
+  * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
+  * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `mscoco_segmentation` - converts MS COCO dataset for object instance segmentation task to `CocoInstanceSegmentationAnnotation`.
   * `annotation_file` - path ot annotation file in json format.
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is False).
   * `use_full_label_map` - allows to use original label map (with 91 object categories) from paper instead public available(80 categories).
-  * `sort_annotations` - allows to save annotations in image id ascend order.
+  * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
+  * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `mscoco_mask_rcnn` - converts MS COCO dataset to `ContainerAnnotation` with `DetectionAnnotation` and `CocoInstanceSegmentationAnnotation` named `detection_annotation` and `segmentation_annotation` respectively.
   * `annotation_file` - path ot annotation file in json format.
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is False).
   * `use_full_label_map` - allows to use original label map (with 91 object categories) from paper instead public available(80 categories).
-  * `sort_annotations` - allows to save annotations in image id ascend order.
+  * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
+  * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `mscoco_keypoints` - converts MS COCO dataset for keypoints localization task to `PoseEstimationAnnotation`.
   * `annotation_file` - path ot annotation file in json format.
+  * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
+  * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
 * `wider` - converts from Wider Face dataset to `DetectionAnnotation`.
   * `annotation_file` - path to txt file, which contains ground truth data in WiderFace dataset format.
   * `label_start` - specifies face label index in label map. Default value is 1. You can provide another value, if you want to use this dataset for separate label validation,
@@ -136,6 +142,8 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `data_dir` - path to data directory, where gallery (`bbox_test`) and `query` subdirectories are located.
 * `market1501_reid` - converts Market1501 person reidentification dataset to `ReidentificationAnnotation`.
   * `data_dir` - path to data directory, where gallery (`bounding_box_test`) and `query` subdirectories are located.
+* `veri776_reid` - converts VeRi776 vehicle reidentification dataset to `ReidentificationAnnotation`.
+  * `data_dir` - path to data directory, where gallery (`image_test`) and `image_query` subdirectories are located.
 * `image_processing` - converts dataset for common single image processing tasks (e.g. image denoising, style transferring) to `ImageProcessingAnnotation`. This converter is suitable for tasks where model output produced on specific input image should be compared with target image.
   * `data_dir` - path to folder, where images in low and high resolution are located.
   * `input_suffix` - input file name's suffix (default `in`).
@@ -143,11 +151,24 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
 * `super_resolution` - converts dataset for single image super resolution task to `SuperResolutionAnnotation`.
   * `data_dir` - path to folder, where images in low and high resolution are located.
+  * `lr_dir` - path to directory, where images in low resolution are located.
+  * `hr_dir` - path to directory, where images in high resolution are located. **Note:** inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.
+  * `upsampled_dir` - path to directory, where upsampled images are located, if 2 streams used.
+  * `ignore_suffixes` - matched low resolution, high resolution image located in different directories without usage suffixes, using numeric ids (Optional, default False).
   * `lr_suffix` - low resolution file name's suffix (default lr).
   * `hr_suffix` - high resolution file name's suffix (default hr).
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `dicom`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
   * `two_streams` - enable 2 input streams where usually first for original image and second for upsampled image. (Optional, default False).
   * `upsample_suffix` - upsample images file name's suffix (default upsample).
+* `super_resolution_dir_based` - converts dataset for single image super resolution task to `SuperResolutionAnnotation` which have directory based structure (high resolution and low resolution images located on separated directories and matches by name or numeric id).
+The main difference between this converter and `super_resolution` in data organization. `super_resolution` converter should be used if all high and low resolution images located in the same dir and have difference in suffixes.
+  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `dicom`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+  * `two_streams` - enable 2 input streams where usually first for original image and second for upsampled image. (Optional, default False).
+  * `images_dir` - path to dataset root, where directories with low and high resolutions are located.
+  *  `lr_dir` - path to directory, where images in low resolution are located (Optional, default <images_dir>/LR).
+  * `hr_dir` - path to directory, where images in high resolution are located (Optional, default <images_dir>/HR). **Note:** inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.
+  * `upsampled_dir` - path to directory, where upsampled images are located, if 2 streams used (Optional, default <images_dir>/upsample).
+  * `relaxed_names` - allow to use more relaxed search of high resolution or/and upsampled images matching only numeric ids. Optional, by default full name matching required.
 * `multi_frame_super_resolution` - converts dataset for super resolution task with multiple input frames usage.
     * `data_dir` - path to folder, where images in low and high resolution are located.
     * `lr_suffix` - low resolution file name's suffix (default lr).
@@ -155,8 +176,8 @@ Accuracy Checker supports following list of annotation converters and specific f
     * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
     * `number_input_frames` - the number of input frames per inference.
 * `multi_target_super_resolution` - converts dataset for single image super resolution task with multiple target resolutions to `ContainerAnnotation` with `SuperResolutionAnnotation` representations for each target resolution.
-   * `data_dir` - path to dataset root, where direcotories with low and high resolutions are located.
-   * `lr_path` - path to low resolution images direcotry relative to `data_dir`.
+   * `data_dir` - path to dataset root, where directories with low and high resolutions are located.
+   * `lr_path` - path to low resolution images directory relative to `data_dir`.
    * `hr_mapping` - dictionary which represent mapping between target resolution and directory with images. Keys are also used as keys for `ContainerAnnotation`. All paths should be relative to `data_dir`.
 * `icdar_detection` - converts ICDAR13 and ICDAR15 datasets for text detection challenge to `TextDetectionAnnotation`.
   * `data_dir` - path to folder with annotations on txt format.
@@ -196,6 +217,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `image_postfix` - postfix part for mask file names (optional, default is `.png`).
   * `mask_loader` - the way how GT mask should be loaded. Supported methods: `pillow`, `opencv`, `nifti`, `numpy`, `scipy`.
   * `dataset_meta_file` - path to json file with prepared dataset meta info. It should contains `label_map` key with dictionary in format class_id: class_name and optionally `segmentation_colors` (if your dataset uses color encoding). Segmentation colors is a list of channel-wise values for each class. (e.g. if your dataset has 3 classes in BGR colors, segmentation colors for it will looks like: `[[255, 0, 0], [0, 255, 0], [0, 0, 255]]`). (Optional, you can provide self-created file as `dataset_meta` in your config).
+**Note: since OpenVINO 2020.4 converter behaviour changed. `data_source` parameter of dataset should contains directory for images only, if you have segmentation mask in separated location, please use `segmentation_masks_source` for specifying gt masks location.**
 * `camvid` - converts CamVid dataset format to `SegmentationAnnotation`.
   * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space)
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
@@ -233,6 +255,12 @@ Accuracy Checker supports following list of annotation converters and specific f
 * `lpr_txt` - converts annotation for license plate recognition task in txt format to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to txt annotation.
   * `decoding_dictionary` - path to file containing dictionary for output decoding.
+* `squad_emb` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `Question Answering Embedding Annotation`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+  * `testing_file` - path to testing file.
+  * `vocab_file` - path to model co vocabulary file.
+  * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
+  * `max_query_length` - maximum number of tokens for the question (Optional, default value is 64).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False)
 * `squad` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `Question Answering Annotation`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
   * `testing_file` - path to testing file.
   * `vocab_file` - path to model co vocabulary file.
@@ -297,21 +325,44 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `out_fps` - output frame rate of generated video clips.
   * `clip_length` - number of frames of generated video clips.
 * `redweb` - converts [ReDWeb](https://sites.google.com/site/redwebcvpr18) dataset for monocular relative depth perception to `DepthEstimationAnnotation`
-   * `data_dir` - the dataset root directory, where `imgs` - directory with RGB images and `RD` - directory with relative depth maps are located (Optional, if you want to provide `annotation_file`)
+  * `data_dir` - the dataset root directory, where `imgs` - directory with RGB images and `RD` - directory with relative depth maps are located (Optional, if you want to provide `annotation_file`)
   * `annotation_file`- the file in txt format which contains pairs of image and depth map files. (Optional, if not provided full content of `data_dir` will be considered as dataset.)
 * `inpainting` - converts images to `ImageInpaintingAnnotation`.
   * `images_dir` - path to images directory.
   * `masks_dir` - path to mask dataset to be used for inpainting (Optional).
 * `aflw2000_3d` - converts [AFLW2000-3D](http://www.cbsr.ia.ac.cn/users/xiangyuzhu/projects/3DDFA/main.htm) dataset for 3d facial landmarks regression task to `FacialLandmarks3DAnnotation`.
-   * `data_dir` - directory, where input images and annotation files in matlab format stored.
+   * `data_dir` - directory, where input images and annotation files in MATLAB format stored.
 * `style_transfer` - converts images to `StyleTransferAnnotation`.
   * `images_dir` - path to images directory.
+* `ade20k` - converts ADE20K dataset to `SegmentationAnnotation`.
+  * `images_dir` - path to directory with images (e.g. `ADEChallengeData2016/images/validation`).
+  * `annotations_dir` - path to directory with annotations (e.g. `ADEChallengeData2016/annotations/validation`).
+  * `object_categories_file` - path to file with labels (e.g. `ADEChallengeData2016/objectInfo150.txt`).
+  * `num_classes` - number of used classes.
+* `criteo_kaggle_dac` - converts Criteo datasets to `ClassificationAnnotation`.
+  * `testing_file` - path to preprocessed Criteo file (e.g. `criteo/terabyte/terabyte_preprocessed,npz`).
+  * `batch` - batch size expected by model
+  * `subsample_size` - number of batches in test-only dataset, If provided, total number of records is batch * subsample_size
+  * `validation` - if provided, only second half of dataset converted to annotations, according to dataset definition
+  * `preprocessed_dir` - path to store preprocessed batch files (e.g. `criteo/terabyte/preprocessed`).
+  * `separator` - symbol used to separate feature identifiers from batch data filename.
+* `features_regression` - converts dataset stored in format of directories with preprocessed input numeric data (features) in text files and reference data in the same format to `FeatureRegressionAnnotation`.
+ This approach allows comparision output of model from different frameworks (e.g. OpenVINO converted model and source framework realisation).
+  * `input_dir` - directory with input data files.
+  * `reference_dir` - directory with reference data. **Note: inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.**
+  * `input_suffix` - suffix for input files (usually file extension). Optional, default `.txt`.
+  * `reference_suffix` - suffix for reference files (usually file extension). Optional, default `.txt`.
+* `librispeech` - converts [librispeech](http://www.openslr.org/12) dataset to `CharachterRecognitionAnnotation`.
+  * `data_dir` - path to dataset directory, which contains converted wav files.
+  * `annotation_file` - path to file which describe the data which should be used in evaluation (`audio_filepath`, `text`, `duration`). Optional, used only for data filtering and sorting audio samples by duration.
+  * `use_numpy` - allows to use preprocessed data stored in npy-files instead of audio (Optional, default False).
+  * `top_n` - numeric value for getting only the n shortest samples **Note:** applicable only with `annotation_file` providing.
 
-### Customizing dataset meta
+## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `backgound_label` using `dataset_meta_file` argument.
 dataset meta file is JSON file, which can contains following parameters:
-  * `label_map` is dictionary where <CLASS_ID> is key and <CLASS_NAME> - value.
+  * `label_map` is dictionary where `<CLASS_ID>` is key and `<CLASS_NAME>` - value.
   * `labels` is the list of strings, which represent class names (order is matter, the index of class name used as class id). Can be used instead `label_map`.
   * `background_label` - id of background label in the dataset.
   * `segmentation_colors` (if your dataset for semantic segmentation task uses color encoding). Segmentation colors is a list of channel-wise values for each class. (e.g. if your dataset has 3 classes in BGR colors, segmentation colors for it will looks like: `[[255, 0, 0], [0, 255, 0], [0, 0, 255]]`).

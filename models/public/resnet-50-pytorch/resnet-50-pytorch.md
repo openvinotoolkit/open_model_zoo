@@ -8,7 +8,7 @@ Learning for Image Recognition"](https://arxiv.org/abs/1512.03385) in TorchVisio
 package (see [here](https://github.com/pytorch/vision)).
 
 The model input is a blob that consists of a single image of "1x3x224x224"
-in RGB order. 
+in RGB order.
 
 The model output is typical object classifier for the 1000 different classifications
 matching with those in the ImageNet database.
@@ -26,6 +26,11 @@ matching with those in the ImageNet database.
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 76.128%|
+| Top 5  | 92.858%|
+
 ## Performance
 
 ## Input
@@ -39,7 +44,7 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`. 
+Channel order is `RGB`.
 Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
 
 ### Converted model

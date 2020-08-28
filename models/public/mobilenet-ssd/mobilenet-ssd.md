@@ -21,7 +21,11 @@ The model output is a typical vector containing the tracked object data, as prev
 
 ## Accuracy
 
-See [https://github.com/chuanqi305/MobileNet-SSD](https://github.com/chuanqi305/MobileNet-SSD).
+| Metric | Value |
+| ------ | ----- |
+|  mAP | 79.8377% |
+
+See [the original repository](https://github.com/chuanqi305/MobileNet-SSD).
 
 ## Performance
 
@@ -52,7 +56,7 @@ Channel order is `BGR`
 
 ## Output
 
-### Original model 
+### Original model
 
 The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 7`, where N is the number of detected bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:

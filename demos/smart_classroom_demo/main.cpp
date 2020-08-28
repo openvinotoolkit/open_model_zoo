@@ -6,6 +6,8 @@
 
 #include <gflags/gflags.h>
 #include <monitors/presenter.h>
+#include <samples/args_helper.hpp>
+#include <samples/images_capture.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 #include <string>
@@ -17,7 +19,6 @@
 #include <set>
 #include <algorithm>
 #include <utility>
-#include <ie_iextension.h>
 
 #include "actions.hpp"
 #include "action_detector.hpp"
@@ -25,7 +26,6 @@
 #include "detector.hpp"
 #include "face_reid.hpp"
 #include "tracker.hpp"
-#include "image_grabber.hpp"
 #include "logger.hpp"
 #include "smart_classroom_demo.hpp"
 
@@ -329,18 +329,6 @@ void ConvertRangeEventsTracksToActionMaps(int num_frames,
     }
 }
 
-std::vector<std::string> ParseActionLabels(const std::string& in_str) {
-    std::vector<std::string> labels;
-    std::string label;
-    std::istringstream stream_to_split(in_str);
-
-    while (std::getline(stream_to_split, label, ',')) {
-      labels.push_back(label);
-    }
-
-    return labels;
-}
-
 std::string GetActionTextLabel(const unsigned label, const std::vector<std::string>& actions_map) {
     if (label < actions_map.size()) {
         return actions_map[label];
@@ -557,7 +545,6 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        const auto video_path = FLAGS_i;
         const auto ad_model_path = FLAGS_m_act;
         const auto fd_model_path = FLAGS_m_fd;
         const auto fr_model_path = FLAGS_m_reid;
@@ -574,23 +561,16 @@ int main(int argc, char* argv[]) {
                                       ? FLAGS_a_top > 0 ? TOP_K : STUDENT
                                       : TEACHER;
         const auto actions_map = actions_type == STUDENT
-                                     ? ParseActionLabels(FLAGS_student_ac)
+                                     ? split(FLAGS_student_ac, ',')
                                      : actions_type == TOP_K
-                                         ? ParseActionLabels(FLAGS_top_ac)
-                                         : ParseActionLabels(FLAGS_teacher_ac);
+                                         ? split(FLAGS_top_ac, ',')
+                                         : split(FLAGS_teacher_ac, ',');
         const auto num_top_persons = actions_type == TOP_K ? FLAGS_a_top : -1;
         const auto top_action_id = actions_type == TOP_K
                                    ? std::distance(actions_map.begin(), find(actions_map.begin(), actions_map.end(), FLAGS_top_id))
                                    : -1;
         if (actions_type == TOP_K && (top_action_id < 0 || top_action_id >= static_cast<int>(actions_map.size()))) {
             slog::err << "Cannot find target action: " << FLAGS_top_id << slog::endl;
-            return 1;
-        }
-
-        slog::info << "Reading video '" << video_path << "'" << slog::endl;
-        ImageGrabber cap(video_path);
-        if (!cap.IsOpened()) {
-            slog::err << "Cannot open the video" << slog::endl;
             return 1;
         }
 
@@ -744,8 +724,6 @@ int main(int argc, char* argv[]) {
 
         Tracker tracker_action(tracker_action_params);
 
-        cv::Mat frame, prev_frame;
-
         float work_time_ms = 0.f;
         float wait_time_ms = 0.f;
         size_t work_num_frames = 0;
@@ -761,12 +739,28 @@ int main(int argc, char* argv[]) {
 
         int teacher_track_id = -1;
 
-        if (cap.GrabNext()) {
-            cap.Retrieve(frame);
-        } else {
-            slog::err << "Can't read the first frame" << slog::endl;
-            return 1;
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_limit);
+        cv::Mat frame = cap->read();
+        if (!frame.data) {
+            throw std::runtime_error("Can't read an image from the input");
         }
+
+        cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
+        Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
+
+        cv::VideoWriter vid_writer;
+        if (!FLAGS_out_v.empty()) {
+            vid_writer = cv::VideoWriter(FLAGS_out_v, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                                         cap->fps(), Visualizer::GetOutputSize(frame.size()));
+        }
+        Visualizer sc_visualizer(!FLAGS_no_show, vid_writer, num_top_persons);
+        DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad, FLAGS_al);
+
+        std::cout << "To close the application, press 'CTRL+C' here";
+        if (!FLAGS_no_show) {
+            std::cout << " or switch to the output window and press ESC key";
+        }
+        std::cout << std::endl;
 
         if (actions_type != TOP_K) {
             action_detector->enqueue(frame);
@@ -775,39 +769,19 @@ int main(int argc, char* argv[]) {
             face_detector->submitRequest();
         }
 
-        prev_frame = frame.clone();
+        bool is_monitoring_enabled = false;
 
         bool is_last_frame = false;
-        bool is_monitoring_enabled = false;
-        auto prev_frame_path = cap.GetVideoPath();
-
-        cv::VideoWriter vid_writer;
-        if (!FLAGS_out_v.empty()) {
-            vid_writer = cv::VideoWriter(FLAGS_out_v, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                         cap.GetFPS(), Visualizer::GetOutputSize(frame.size()));
-        }
-        Visualizer sc_visualizer(!FLAGS_no_show, vid_writer, num_top_persons);
-        DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad, FLAGS_al);
-
-        const int smooth_window_size = static_cast<int>(cap.GetFPS() * FLAGS_d_ad);
-        const int smooth_min_length = static_cast<int>(cap.GetFPS() * FLAGS_min_ad);
-
-        std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press ESC key";
-        }
-        std::cout << std::endl;
-
-        cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
-        Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
-
         while (!is_last_frame) {
-            logger.CreateNextFrameRecord(cap.GetVideoPath(), work_num_frames, prev_frame.cols, prev_frame.rows);
             auto started = std::chrono::high_resolution_clock::now();
+            cv::Mat prev_frame = std::move(frame);
+            frame = cap->read();
+            if (frame.data && frame.size() != prev_frame.size()) {
+                throw std::runtime_error("Can't track objects on images of different size");
+            }
+            is_last_frame = !frame.data;
 
-            is_last_frame = !cap.GrabNext();
-            if (!is_last_frame)
-                cap.Retrieve(frame);
+            logger.CreateNextFrameRecord(FLAGS_i, work_num_frames, prev_frame.cols, prev_frame.rows);
 
             char key = cv::waitKey(1);
             if (key == ESC_KEY) {
@@ -854,7 +828,6 @@ int main(int argc, char* argv[]) {
                     DetectedActions actions = action_detector->fetchResults();
 
                     if (!is_last_frame) {
-                        prev_frame_path = cap.GetVideoPath();
                         action_detector->enqueue(frame);
                         action_detector->submitRequest();
                     }
@@ -911,7 +884,6 @@ int main(int argc, char* argv[]) {
                 DetectedActions actions = action_detector->fetchResults();
 
                 if (!is_last_frame) {
-                    prev_frame_path = cap.GetVideoPath();
                     face_detector->enqueue(frame);
                     face_detector->submitRequest();
                     action_detector->enqueue(frame);
@@ -1007,10 +979,6 @@ int main(int argc, char* argv[]) {
 
             sc_visualizer.Show();
 
-            if (FLAGS_last_frame >= 0 && work_num_frames > static_cast<size_t>(FLAGS_last_frame)) {
-                break;
-            }
-            prev_frame = frame.clone();
             logger.FinalizeFrameRecord();
         }
         sc_visualizer.Finalize();
@@ -1048,6 +1016,8 @@ int main(int argc, char* argv[]) {
 
                 const int start_frame = 0;
                 const int end_frame = face_obj_id_to_action_maps.size();
+                const int smooth_window_size = static_cast<int>(cap->fps() * FLAGS_d_ad);
+                const int smooth_min_length = static_cast<int>(cap->fps() * FLAGS_min_ad);
                 std::map<int, RangeEventsTrack> face_obj_id_to_events;
                 SmoothTracks(face_obj_id_to_actions_track, start_frame, end_frame,
                              smooth_window_size, smooth_min_length, default_action_index,
@@ -1063,7 +1033,7 @@ int main(int argc, char* argv[]) {
                                                      &face_obj_id_to_smoothed_action_maps);
 
                 slog::info << "Final per-frame ID->action mapping" << slog::endl;
-                logger.DumpDetections(cap.GetVideoPath(), frame.size(), work_num_frames,
+                logger.DumpDetections(FLAGS_i, frame.size(), work_num_frames,
                                       new_face_tracks,
                                       face_track_id_to_label,
                                       actions_map, face_id_to_label_map,

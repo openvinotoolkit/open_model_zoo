@@ -17,8 +17,8 @@ Accuracy Checker supports following set of preprocessors:
       * **OpenCV**: Nearest, Linear, Cubic, Area, Max, Lanczos4, Bits, Bits32
       * **Pillow**: None, Nearest, Cubic, Bicubic, Box, Bilinear, Lanczos, Antialias, Hamming, Linear
       * **TensorFlow**: Bilinear, Area, Bicubic
-      `Linear` used as default for OpenCV, `Bilinear` as default for Pillow and TensorFlow. 
-  * `aspect_ratio_scale` allows resize with changing or saving image aspect ratio. May be done using one of these ways: 
+      `Linear` used as default for OpenCV, `Bilinear` as default for Pillow and TensorFlow.
+  * `aspect_ratio_scale` allows resize with changing or saving image aspect ratio. May be done using one of these ways:
     - `width` - rescale width (height has fixed size, provided as `dst_height` or `size`, width size will be rescaled to save aspect ratio).
     - `height` - rescale height (width has fixed size, provided as `dst_width` or `size`, height size will be rescales to save aspect ratio).
     - `greater` - rescale greater from image sizes (smaller dimension has fixed size, greater will be rescaled to save aspect ratio)
@@ -34,6 +34,10 @@ Accuracy Checker supports following set of preprocessors:
     - `east_keep_aspect_ratio` - adaptive resize keeping aspect ratio using this algorithm:
       1. If max image size greater max destination size, make max image size equal to max destination size.
       2. Make image height and width divisible by min destination size without remainder.
+    - `min_ratio` - rescale width and height according to minimal ratio `source_size / destination_size`.
+    - `mask_rcnn_benchmark_aspect_ratio` - rescale image size according [preprocessing](https://github.com/onnx/models/blob/master/vision/object_detection_segmentation/mask-rcnn/README.md#preprocessing-steps) for maskrcnn-benchmark models in ONNX zoo
+  * `factor` -  destination size for aspect ratio resize must be divisible by a given number without remainder.
+  Please pay attention that this parameter only works with `aspect_ratio_scale` parameters.
 * `auto_resize` - automatic resizing image to input layer shape. (supported only for one input layer case, use OpenCV for image resize)
 * `normalization` - changing the range of pixel intensity values.
   * `mean` values which will be subtracted from image channels.
@@ -59,6 +63,14 @@ Accuracy Checker supports following set of preprocessors:
 * `bgr_to_gray` - converting image in BGR to gray scale color space.
 * `rgb_to_bgr` - reversing image channels. Convert image in RGB format to BGR.
 * `rgb_to_gray` - converting image in RGB to gray scale color space.
+* `bgr_to_yuv` - converting image in BGR to YUV.
+  * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+* `rgb_to_yuv` - converting image in RGB to YUV.
+  * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+* `bgr_to_nv12` - converting BGR image to NV12 format.
+* `rgb_to_nv12` - converting RGB image to NV12 format.
+* `nv12_to_bgr` - converting NV12 data to BGR format.
+* `nv12_to_rgb` - converting NV12 data to RGB format.
 * `select_channel` - select channel only one specified channel from multichannel image.
   * `channel` - channel id in image (e.g. if you read image in RGB and want to select green channel, you need to specify 1 as channel)
 * `flip` - image mirroring around specified axis.
@@ -74,6 +86,11 @@ Accuracy Checker supports following set of preprocessors:
   * `draw_points` - allows visualize points.
   * `normalize` - allows to use normalization for keypoints.
   * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
+* `crop_or_pad` - performs central cropping if original image size greater then destination size and padding in case, when source size lower than destination. Padding filling value is 0, realization - right-bottom.
+  * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
+* `crop_image_with_padding`- crops to center of image with padding then scales image size.
+  * `size` - destination image height/width dimension,
+  * `crop_padding` - the padding size to use when centering the crop.
 * `padding` - padding for image.
   * `stride` - stride for padding.
   * `pad_value` - value for filling space around original image.
@@ -94,6 +111,12 @@ Accuracy Checker supports following set of preprocessors:
 * `decode_by_vocabulary` - Decode words to set of indexes using model vocab.
   * `vocabulary_file` - path to vocabulary file for decoding. Path can be prefixed with `--models` argument.
   * `unk_index` - index of unknown symbol in vocab.
+* `decode_by_sentence_piece_bpe_tokenizer` - Decode words to set of indexes using SentencePieceBPETokenizer.
+  * `vocabulary_file` - path to vocabulary file for decoding. Path can be prefixed with `--models` argument.
+  * `merges_file` - path to merges file for decoding. Path can be prefixed with `--models` argument.
+  * `sos_symbol` - string representation of start_of_sentence symbol (default='<s>').
+  * `eos_symbol` - string representation of end_of_sentence symbol (default='</s>').
+  * `add_symbols` - add sos/eos symbols to sentence (default=True).
 *  `pad_with_eos` - supplement the input sequence to a specific size using a line terminator character or index.
   * `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
   *  `sequence_len` - length of sequence after supplement.
@@ -119,6 +142,8 @@ Accuracy Checker supports following set of preprocessors:
 * `warp_affine` - warp affine transformation. (supported only with OpenCV)
   * `src_landmarks` - source landmarks to set as markers for the warp affine transformation.
   * `dst_landmarks` - destination and target landmarks to transform `src_landmarks` to.
+  * `dst_height` - destination height size.
+  * `dst_width` - destination width size.
 * `resample_audio` - converts audio to new sample rate
   * `sample_rate` - sets new sample rate
 * `clip_audio` - slices audio into several parts with equal duration
@@ -130,3 +155,18 @@ Accuracy Checker supports following set of preprocessors:
     * `box_scale` - box scale factor (Optional, default 1).
     * `dst_width` and `dst_height` are destination width and height for transformed image respectively.
     You can also use `size` instead in case when destination sizes are equal for both dimensions.
+* `face_detection_image_pyramid` - image pyramid for face detection
+  * `min_face_ratio` - minimum face ratio to image size.
+  * `resize_scale` - scale factor for pyramid layers.
+* `candidate_crop` - crops candidates detected in previous stage model from input image with vertical and horizontal scaling.
+  * `scale_width` - value to scale width relative to the original candidate width.
+  * `scale_height` - value to scale height relative to the original candidate height.
+
+## Optimized preprocessing via OpenVINO Inference Engine
+OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`.
+When this option turn on, specified in config preprocessing will be translated to Inference Engine PreProcessInfo API.
+**Note**: This option is available only for `dlsdk` launcher and not all preprocessing operations can be ported to Inference Engine.
+Supported preprocessing:
+* Resizing: `resize` without aspect_ratio_scale and with `BILINEAR` or `AREA` interpolation. Destination size is model input shape. (`auto_resize` is also can be used for resize with bilinear interpolation.)
+* Color conversion: `bgr_to_rgb`, `rgb_to_bgr`, `nv12_to_bgr`, `nv12_to_rgb`
+* Normalization:  `normalization` with per channel `mean` and `std`

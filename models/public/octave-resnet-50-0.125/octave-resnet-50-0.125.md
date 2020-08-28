@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `octave-resnet-50-0.125` model is a modification of `resnet-50` from [this paper](https://arxiv.org/abs/1512.03385) with octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.125`. The model is originally designed for image classification. For details about family of Octave Convolution models, check out the  [repository](https://github.com/facebookresearch/OctConv).
+The `octave-resnet-50-0.125` model is a modification of ResNet-50 from [this paper](https://arxiv.org/abs/1512.03385) with octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.125`. The model is originally designed for image classification. For details about family of Octave Convolution models, check out the  [repository](https://github.com/facebookresearch/OctConv).
 
 The model input is a blob that consists of a single image of 1x3x224x224 in RGB order. The RGB mean values need to be subtracted as follows: [124,117,104] before passing the image blob into the network. In addition, values must be divided by 0.0167.
 
@@ -21,6 +21,11 @@ The model output for `octave-resnet-50-0.125` is the typical object classifier o
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 78.19%|
+| Top 5  | 93.862%|
+
 ## Performance
 
 ## Input
@@ -34,7 +39,7 @@ Image, name: `data`,  shape: `1,3,224,224`, format: `B,C,H,W`, where:
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`. 
+Channel order is `RGB`.
 Mean values: [124,117,104], scale value: 59.880239521.
 
 ### Converted Model

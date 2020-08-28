@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ limitations under the License.
 import os
 import tempfile
 import json
+from copy import deepcopy
 import warnings
 from pathlib import Path
 import numpy as np
@@ -37,7 +38,7 @@ from ..representation import (
     PoseEstimationPrediction
 )
 from ..logging import print_info
-from ..config import BaseField, ConfigError
+from ..config import BaseField, BoolField, ConfigError
 from ..utils import get_or_parse_value
 from .metric import FullDatasetEvaluationMetric
 from .coco_metrics import COCO_THRESHOLDS, process_threshold
@@ -61,11 +62,18 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             'threshold': BaseField(optional=True, default='.50:.05:.95', description='threshold for metric calculation')
         })
 
+        parameters.update({
+            'include_boundaries': BoolField(
+                optional=True, default=True,
+                description="Whether to add '1' when computing height and width from bounding box coordinates."),
+        })
+
         return parameters
 
     def configure(self):
         threshold = process_threshold(self.get_value_from_config('threshold'))
         self.threshold = get_or_parse_value(threshold, COCO_THRESHOLDS)
+        self.box_side_delta = int(self.get_value_from_config('include_boundaries'))
         if not self.dataset.metadata:
             raise ConfigError('coco orig metrics require dataset_meta'
                               'Please provide dataset meta file or regenerate annotation')
@@ -77,7 +85,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             raise ValueError('pycocotools is not installed, please install it')
 
     @staticmethod
-    def _iou_type_data_to_coco(data_to_store, data):
+    def _iou_type_data_to_coco(data_to_store, data, box_side_delta):
         x_mins = data.x_mins.tolist()
         y_mins = data.y_mins.tolist()
         x_maxs = data.x_maxs.tolist()
@@ -86,8 +94,8 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         for data_record, x_min, y_min, x_max, y_max in zip(
                 data_to_store, x_mins, y_mins, x_maxs, y_maxs
         ):
-            width = x_max - x_min + 1
-            height = y_max - y_min + 1
+            width = x_max - x_min + box_side_delta
+            height = y_max - y_min + box_side_delta
             area = width * height
             data_record.update({
                 'bbox': [x_min, y_min, width, height],
@@ -175,7 +183,8 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
                     'category_id': cur_cat,
                     '_image_name_from_dataset': cur_name,
                 })
-            prediction_data_to_store = self._iou_type_data_to_coco(prediction_data_to_store, pred)
+            prediction_data_to_store = self._iou_type_data_to_coco(prediction_data_to_store, pred,
+                                                                   self.box_side_delta)
             coco_data_to_store.extend(prediction_data_to_store)
 
         return coco_data_to_store
@@ -188,6 +197,8 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             cur_name = Path(pred.identifier).name
             assert cur_name in map_coco_img_file_name_to_img_id
             cur_img_id = map_coco_img_file_name_to_img_id[cur_name]
+            if pred.size == 0:
+                continue
 
             labels = pred.labels.tolist()
             scores = pred.scores.tolist()
@@ -203,13 +214,15 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
                     'category_id': cur_cat,
                     '_image_name_from_dataset': cur_name,
                 })
-            prediction_data_to_store = self._iou_type_data_to_coco(prediction_data_to_store, pred)
+            prediction_data_to_store = self._iou_type_data_to_coco(prediction_data_to_store, pred,
+                                                                   self.box_side_delta)
             coco_data_to_store.extend(prediction_data_to_store)
 
         return coco_data_to_store
 
     def _iou_type_specific_coco_annotation(self, annotation_data_to_store, annotation):
-        annotation_data_to_store = self._iou_type_data_to_coco(annotation_data_to_store, annotation)
+        annotation_data_to_store = self._iou_type_data_to_coco(annotation_data_to_store, annotation,
+                                                               self.box_side_delta)
         return annotation_data_to_store
 
     def _prepare_data_for_annotation_file(
@@ -390,11 +403,11 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
     iou_type = 'segm'
 
     @staticmethod
-    def _iou_type_data_to_coco(data_to_store, data):
+    def _iou_type_data_to_coco(data_to_store, data, box_side_delta):
         encoded_masks = data.mask
 
         for data_record, segm_mask in zip(data_to_store, encoded_masks):
-            data_record.update({'segmentation': segm_mask})
+            data_record.update({'segmentation': deepcopy(segm_mask)})
 
         return data_to_store
 
@@ -404,10 +417,12 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
         for data_record, area, segm_mask in zip(
                 annotation_data_to_store, annotation.areas, encoded_masks
         ):
-            segm_mask.update({'counts': str(segm_mask.get('counts'), 'utf-8')})
+
+            mask = deepcopy(segm_mask)
+            mask.update({'counts': str(mask.get('counts'), 'utf-8')})
             data_record.update({
                 'area': float(area),
-                'segmentation': segm_mask
+                'segmentation': mask
             })
 
         return annotation_data_to_store
@@ -428,24 +443,23 @@ class MSCOCOorigSegmRecall(MSCOCOorigRecall):
     iou_type = 'segm'
 
     @staticmethod
-    def _iou_type_data_to_coco(data_to_store, data):
+    def _iou_type_data_to_coco(data_to_store, data, box_side_delta):
         encoded_masks = data.mask
 
         for data_record, segm_mask in zip(data_to_store, encoded_masks):
-            data_record.update({'segmentation': segm_mask})
+            data_record.update({'segmentation': deepcopy(segm_mask)})
 
         return data_to_store
 
     def _iou_type_specific_coco_annotation(self, annotation_data_to_store, annotation):
-        encoded_masks = annotation.mask
-
         for data_record, area, segm_mask in zip(
-                annotation_data_to_store, annotation.areas, encoded_masks
+                annotation_data_to_store, annotation.areas, annotation.mask
         ):
-            segm_mask.update({'counts': str(segm_mask.get('counts'), 'utf-8')})
+            mask = deepcopy(segm_mask)
+            mask.update({'counts': str(mask.get('counts'), 'utf-8')})
             data_record.update({
                 'area': float(area),
-                'segmentation': segm_mask
+                'segmentation': mask
             })
 
         return annotation_data_to_store
@@ -459,7 +473,7 @@ class MSCOCOOrigKeyPointsAveragePrecision(MSCOCOorigAveragePrecision):
     iou_type = 'keypoints'
 
     @staticmethod
-    def _iou_type_data_to_coco(data_to_store, data):
+    def _iou_type_data_to_coco(data_to_store, data, box_side_delta):
         for data_record, x_val, y_val, vis in zip(
                 data_to_store, data.x_values, data.y_values, data.visibility
         ):

@@ -1,0 +1,31 @@
+models:
+  - name: resnet-101-cf
+    launchers:
+      - framework: caffe
+        model:   resnet-101.prototxt
+        weights: resnet-101.caffemodel
+        adapter: classification
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 104, 117, 123
+
+  - name: resnet-101
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224

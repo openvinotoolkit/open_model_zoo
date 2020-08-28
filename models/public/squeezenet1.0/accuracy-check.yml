@@ -1,0 +1,29 @@
+models:
+  - name: squeezenet1.0-cf
+    launchers:
+      - framework: caffe
+        model:   squeezenet1.0.prototxt
+        weights: squeezenet1.0.caffemodel
+        adapter: classification
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 227
+          - type: normalization
+            mean: 104, 117, 123
+
+  - name: squeezenet1.0
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 227

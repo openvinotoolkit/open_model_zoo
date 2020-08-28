@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ class SSDAdapter(Adapter):
     prediction_types = (DetectionPrediction, )
     topology_types = (SSD, FasterRCNN, )
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
@@ -143,7 +143,7 @@ class PyTorchSSDDecoder(Adapter):
 
         return default_boxes
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
@@ -256,9 +256,9 @@ class FacePersonAdapter(Adapter):
         self.face_adapter = SSDAdapter(self.launcher_config, self.label_map, self.face_detection_out)
         self.person_adapter = SSDAdapter(self.launcher_config, self.label_map, self.person_detection_out)
 
-    def process(self, raw, identifiers=None, frame_meta=None):
-        face_batch_result = self.face_adapter.process(raw, identifiers)
-        person_batch_result = self.person_adapter.process(raw, identifiers)
+    def process(self, raw, identifiers, frame_meta):
+        face_batch_result = self.face_adapter.process(raw, identifiers, frame_meta)
+        person_batch_result = self.person_adapter.process(raw, identifiers, frame_meta)
         result = [ContainerPrediction({self.face_detection_out: face_result, self.person_detection_out: person_result})
                   for face_result, person_result in zip(face_batch_result, person_batch_result)]
 
@@ -271,7 +271,7 @@ class SSDAdapterMxNet(Adapter):
     """
     __provider__ = 'ssd_mxnet'
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
@@ -312,7 +312,7 @@ class SSDONNXAdapter(Adapter):
         self.bboxes_out = self.get_value_from_config('bboxes_out')
         self.outputs_verified = False
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         results = []
         if not self.outputs_verified:

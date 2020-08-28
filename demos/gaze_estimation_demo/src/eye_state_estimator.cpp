@@ -52,39 +52,41 @@ void EyeStateEstimator::rotateImageAroundCenter(const cv::Mat& srcImage,
 void EyeStateEstimator::estimate(const cv::Mat& image, FaceInferenceResults& outputResults) {
     auto roll = outputResults.headPoseAngles.z;
 
-    auto leftEyeBoundingBox = createEyeBoundingBox(outputResults.faceLandmarks[0],
-        outputResults.faceLandmarks[1]);
-    auto rightEyeBoundingBox = createEyeBoundingBox(outputResults.faceLandmarks[2],
-        outputResults.faceLandmarks[3]);
-    auto leftEyeImage(cv::Mat(image, leftEyeBoundingBox));
-    auto rightEyeImage(cv::Mat(image, rightEyeBoundingBox));
-
-    cv::Mat leftEyeImageRotated, rightEyeImageRotated;
-    rotateImageAroundCenter(leftEyeImage, leftEyeImageRotated, roll);
-    rotateImageAroundCenter(rightEyeImage, rightEyeImageRotated, roll);
-    leftEyeImage = leftEyeImageRotated;
-    rightEyeImage = rightEyeImageRotated;
-
+    outputResults.leftEyeMidpoint = (outputResults.faceLandmarks[0] + outputResults.faceLandmarks[1]) / 2;
+    auto leftEyeBoundingBox = createEyeBoundingBox(outputResults.faceLandmarks[0], outputResults.faceLandmarks[1]);
     outputResults.leftEyeBoundingBox = leftEyeBoundingBox;
+    if (leftEyeBoundingBox.area()) {
+        auto leftEyeImage(cv::Mat(image, leftEyeBoundingBox));
+        cv::Mat leftEyeImageRotated;
+        rotateImageAroundCenter(leftEyeImage, leftEyeImageRotated, roll);
+        leftEyeImage = leftEyeImageRotated;
+        std::vector<float> outputValue;
+        ieWrapper.setInputBlob(inputBlobName, leftEyeImage);
+        ieWrapper.infer();
+        ieWrapper.getOutputBlob(outputBlobName, outputValue);
+        outputResults.leftEyeState = outputValue[0] < outputValue[1];
+    } else {
+        // Landmarks collapsed and the eye takes no area on image, pretend it's closed
+        outputResults.leftEyeState = false;
+    }
+
+    outputResults.rightEyeMidpoint = (outputResults.faceLandmarks[2] + outputResults.faceLandmarks[3]) / 2;
+    auto rightEyeBoundingBox = createEyeBoundingBox(outputResults.faceLandmarks[2], outputResults.faceLandmarks[3]);
     outputResults.rightEyeBoundingBox = rightEyeBoundingBox;
-
-    auto leftEyeMidpoint = (outputResults.faceLandmarks[0] + outputResults.faceLandmarks[1]) / 2;
-    auto rightEyeMidpoint = (outputResults.faceLandmarks[2] + outputResults.faceLandmarks[3]) / 2;
-
-    outputResults.leftEyeMidpoint = leftEyeMidpoint;
-    outputResults.rightEyeMidpoint = rightEyeMidpoint;
-
-    std::vector<float> outputValue;
-    ieWrapper.setInputBlob(inputBlobName, leftEyeImage);
-    ieWrapper.infer();
-    ieWrapper.getOutputBlob(outputBlobName, outputValue);
-    outputResults.leftEyeState = outputValue[0] < outputValue[1];
-
-    outputValue.clear();
-    ieWrapper.setInputBlob(inputBlobName, rightEyeImage);
-    ieWrapper.infer();
-    ieWrapper.getOutputBlob(outputBlobName, outputValue);
-    outputResults.rightEyeState = outputValue[0] < outputValue[1];  
+    if (rightEyeBoundingBox.area()) {
+        auto rightEyeImage(cv::Mat(image, rightEyeBoundingBox));
+        cv::Mat rightEyeImageRotated;
+        rotateImageAroundCenter(rightEyeImage, rightEyeImageRotated, roll);
+        rightEyeImage = rightEyeImageRotated;
+        std::vector<float> outputValue;
+        ieWrapper.setInputBlob(inputBlobName, rightEyeImage);
+        ieWrapper.infer();
+        ieWrapper.getOutputBlob(outputBlobName, outputValue);
+        outputResults.rightEyeState = outputValue[0] < outputValue[1];
+    } else {
+        // Landmarks collapsed and the eye takes no area on image, pretend it's closed
+        outputResults.rightEyeState = false;
+    }
 }
 
 void EyeStateEstimator::printPerformanceCounts() const {

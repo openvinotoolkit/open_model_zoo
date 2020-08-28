@@ -52,7 +52,7 @@ class IEModel:  # pylint: disable=too-few-public-methods
             if output_shape is not None:
                 candidates = []
                 for candidate_name in self.net.outputs:
-                    candidate_shape = self.exec_net.requests[0].outputs[candidate_name].shape
+                    candidate_shape = self.exec_net.requests[0].output_blobs[candidate_name].buffer.shape
                     if len(candidate_shape) != len(output_shape):
                         continue
 
@@ -71,7 +71,7 @@ class IEModel:  # pylint: disable=too-few-public-methods
             self.output_name = next(iter(self.net.outputs))
 
         self.input_size = self.net.input_info[self.input_name].input_data.shape
-        self.output_size = self.exec_net.requests[0].outputs[self.output_name].shape
+        self.output_size = self.exec_net.requests[0].output_blobs[self.output_name].buffer.shape
         self.num_requests = num_requests
 
     def infer(self, data):
@@ -91,6 +91,6 @@ class IEModel:  # pylint: disable=too-few-public-methods
         """Waits for the model output by the specified request ID"""
 
         if self.exec_net.requests[req_id].wait(-1) == 0:
-            return self.exec_net.requests[req_id].outputs[self.output_name]
+            return self.exec_net.requests[req_id].output_blobs[self.output_name].buffer
         else:
             return None

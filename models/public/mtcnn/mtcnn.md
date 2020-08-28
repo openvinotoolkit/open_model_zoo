@@ -13,6 +13,12 @@ The input for each models is a blob with specific face data. The mean values nee
 | Type              | Detection     |
 | Source framework  | Caffe\*       |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| mAP | 48.1308%|
+| Recall | 62.2625%|
 
 ## mtcnn-p model specification
 

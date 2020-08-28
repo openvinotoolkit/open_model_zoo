@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ PRECISION_TO_DTYPE = {
 
 
 class InputFeeder:
-    def __init__(self, inputs_config, network_inputs, prepare_input_data=None, default_layout='NCHW'):
+    def __init__(self, inputs_config, network_inputs, prepare_input_data=None, default_layout='NCHW', dummy=False):
         def fit_to_input(data, input_layer_name, layout, precision):
             if len(np.shape(data)) == 4:
                 data = np.transpose(data, layout)
@@ -67,22 +67,18 @@ class InputFeeder:
             return data.astype(precision) if precision else data
 
         self.input_transform_func = prepare_input_data or fit_to_input
-        self.network_inputs = network_inputs
+        self.network_inputs = network_inputs or []
         self.default_layout = default_layout
+        self.dummy = dummy
         self.configure(inputs_config)
 
-    def __call__(self, context, *args, **kwargs):
-        data_batch = context.data_batch
-        _, meta = extract_image_representations(data_batch)
-        context.input_blobs = self.fill_inputs(data_batch)
-        context.batch_meta = meta
-
     def configure(self, inputs_config):
-        parsing_results = self._parse_inputs_config(inputs_config, self.default_layout)
-        self.const_inputs, self.non_constant_inputs = parsing_results[:2]
-        self.inputs_mapping, self.image_info_inputs, self.layouts_mapping, self.precision_mapping = parsing_results[2:]
-        if not self.non_constant_inputs:
-            raise ConfigError('Network should contain at least one layer for setting variable data.')
+        if not self.dummy:
+            parsing_results = self._parse_inputs_config(inputs_config, self.default_layout)
+            self.const_inputs, self.non_constant_inputs, self.inputs_mapping = parsing_results[:3]
+            self.image_info_inputs, self.lstm_inputs, self.layouts_mapping, self.precision_mapping = parsing_results[3:]
+            if not self.non_constant_inputs:
+                raise ConfigError('Network should contain at least one layer for setting variable data.')
 
     def _fill_image_info_inputs(self, data_representation_batch):
         def prepare_image_info(image_sizes_batch):
@@ -96,7 +92,6 @@ class InputFeeder:
                 image_info.append([height, width, 1])
 
             return image_info
-
         _, meta_batch = extract_image_representations(data_representation_batch)
         if 'image_info' in meta_batch[0]:
             image_info_data = [meta['image_info'] for meta in meta_batch]
@@ -150,6 +145,8 @@ class InputFeeder:
         return self._transform_batch(filled_inputs, extract_image_representations(data_representation_batch)[1])
 
     def fill_inputs(self, data_representation_batch):
+        if self.dummy:
+            return []
         inputs = self.fill_non_constant_inputs(data_representation_batch)
         for infer_inputs in inputs:
             infer_inputs.update(self.const_inputs)
@@ -171,6 +168,7 @@ class InputFeeder:
         layouts = {}
         precisions = {}
         image_info_inputs = []
+        lstm_inputs = []
 
         for input_ in inputs_entry:
             name = input_['name']
@@ -181,6 +179,12 @@ class InputFeeder:
                 image_info_inputs.append(name)
                 get_layer_precision(input_, name)
                 continue
+
+            if input_['type'] == 'LSTM_INPUT':
+                lstm_inputs.append(name)
+                get_layer_precision(input_, name)
+                continue
+
             value = input_.get('value')
 
             if input_['type'] == 'CONST_INPUT':
@@ -198,7 +202,7 @@ class InputFeeder:
                 layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
                 get_layer_precision(input_, name)
 
-        all_config_inputs = config_non_constant_inputs + list(constant_inputs.keys()) + image_info_inputs
+        all_config_inputs = config_non_constant_inputs + list(constant_inputs.keys()) + image_info_inputs + lstm_inputs
         not_config_inputs = [input_layer for input_layer in self.network_inputs if input_layer not in all_config_inputs]
         if config_non_constant_inputs and not_config_inputs:
             raise ConfigError('input value for {} are not presented in config.'.format(','.join(not_config_inputs)))
@@ -209,6 +213,7 @@ class InputFeeder:
             non_constant_inputs,
             non_constant_inputs_mapping or None,
             image_info_inputs,
+            lstm_inputs,
             layouts,
             precisions
         )

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ from .classification_analyzer import ClassificationDataAnalyzer
 from .container_analyzer import ContainerDataAnalyzer
 from .regression_analyzer import RegressionDataAnalyzer
 from .detection_analyzer import DetectionDataAnalyzer
+from .coco_instance_segmentation_analyzer import CoCoInstanceSegmentationDataAnalyzer
+from .segmentation_analyzer import SegmentationDataAnalyzer
+from .reidentification_analyzer import ReIdentificationDataAnalyzer, ReIdentificationClassificationDataAnalyzer
 
 __all__ = [
     'BaseDataAnalyzer',
@@ -27,5 +30,9 @@ __all__ = [
     'ClassificationDataAnalyzer',
     'ContainerDataAnalyzer',
     'RegressionDataAnalyzer',
-    'DetectionDataAnalyzer'
+    'DetectionDataAnalyzer',
+    'CoCoInstanceSegmentationDataAnalyzer',
+    'SegmentationDataAnalyzer',
+    'ReIdentificationDataAnalyzer',
+    'ReIdentificationClassificationDataAnalyzer'
     ]

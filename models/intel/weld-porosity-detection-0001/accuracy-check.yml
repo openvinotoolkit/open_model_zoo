@@ -1,0 +1,21 @@
+models:
+  - name: weld-porosity-detection-0001
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: weld-porosity
+        reader:
+          type: opencv_imread
+          multi_infer: True
+
+        preprocessing:
+          - type: resize
+            size: 224
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224
+
+        metrics:
+          - type: accuracy

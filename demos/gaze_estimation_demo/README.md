@@ -29,7 +29,6 @@ Other demo objectives are:
 
 Running the application with the `-h` option yields the following usage message:
 ```
-./gaze_estimation_demo -h
 InferenceEngine:
     API version ............ <version>
     Build .................. <number>
@@ -38,7 +37,9 @@ gaze_estimation_demo [OPTION]
 Options:
 
     -h                       Print a usage message.
-    -i "<path>"              Optional. Path to a video file. Default value is "cam" to work with camera.
+    -i                       Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                    Optional. Enable reading the input in a loop.
+    -res "<WxH>"             Optional. Set camera resolution in format WxH.
     -m "<path>"              Required. Path to an .xml file with a trained Gaze Estimation model.
     -m_fd "<path>"           Required. Path to an .xml file with a trained Face Detection model.
     -m_hp "<path>"           Required. Path to an .xml file with a trained Head Pose Estimation model.
@@ -48,8 +49,7 @@ Options:
     -d_fd "<device>"         Optional. Target device for Face Detection network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
     -d_hp "<device>"         Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
     -d_lm "<device>"         Optional. Target device for Facial Landmarks Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
-    -d_es "<device>"         Optional. Target device for Open/Closed Eye Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
-    -res "<WxH>"             Optional. Set camera resolution in format WxH.
+    -d_es "<device>"         Optional. Target device for Open/Closed Eye network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
     -fd_reshape              Optional. Reshape Face Detector network so that its input resolution has the same aspect ratio as the input frame.
     -no_show                 Optional. Do not show processed video.
     -pc                      Optional. Enable per-layer performance report.
@@ -80,8 +80,8 @@ By default, it shows only gaze estimation results. To see inference results of a
 The demo allows you to control what information is displayed in run-time.
 The following keys are supported:
 * G - to toggle displaying gaze vector
-* D - to toggle displaying face detector bounding boxes 
-* H - to toggle displaying head pose information
+* B - to toggle displaying face detector bounding boxes
+* O - to toggle displaying head pose information
 * L - to toggle displaying facial landmarks 
 * E - to toggle displaying eyes state
 * A - to switch on displaying all inference results

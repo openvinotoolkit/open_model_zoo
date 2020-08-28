@@ -1,0 +1,23 @@
+models:
+  - name: person-reidentification-retail-0288
+
+    launchers:
+      - framework: dlsdk
+        adapter: reid
+
+    datasets:
+      - name: market1501
+
+        preprocessing:
+          - type: resize
+            dst_width: 128
+            dst_height: 256
+            use_pillow: True
+            interpolation: BILINEAR
+
+        metrics:
+          - name: rank@1
+            type: cmc
+            top_k: 1
+
+          - type: reid_map

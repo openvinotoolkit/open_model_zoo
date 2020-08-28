@@ -73,6 +73,10 @@ AccuracyChecker supports following set of adapters:
   * `boxes_out` - name of output layer with predicted boxes coordinates in format [y0, x0, y1, x1].
   *  `scores_out` - name of output layer with detection scores.
   * `num_detections_out` - name of output layer which contains the number of valid detections.
+* `faster_rcnn_onnx` - converts output of ONNX Faster RCNN model to `DetectionPrediction`
+  * `labels_out` - name of output layer with labels.
+  * `scores_out`- name of output layer with scores.
+  * `bboxes_out` - name of output layer with bboxes.
 * `retinanet` - converting output of RetinaNet-based model.
   * `loc_out` - name of output layer with bounding box deltas.
   * `class_out` - name of output layer with classification probabilities.
@@ -137,6 +141,11 @@ AccuracyChecker supports following set of adapters:
   2. Add `mean`
   3. Reverse channels if this option enabled.
   * `target_mapping` - dictionary where keys are meaningful name for solved task which will be used as keys inside `ConverterPrediction`,  values - output layer names.
+* `super_resolution_yuv` - converts output of super resolution model, which return output in YUV format, to `SuperResolutionPrediction`. Each output layer contains only 1 channel.
+  * `y_output` - Y channel output layer.
+  * `u_output` - U channel output layer.
+  * `v_output` - V channel output layer.
+  * `target_color` - taret color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `bgr`).
 * `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.
@@ -180,6 +189,15 @@ AccuracyChecker supports following set of adapters:
 * `nmt` - converting output of neural machine translation model to `MachineTranslationPrediction`.
   * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.bpe.32000.de). Path can be prefixed with `--models` arguments.
   * `eos_index` - index end of string symbol in vocabulary (Optional, used in cases when launcher does not support dynamic output shape for cut off empty prediction).
+* `bert_question_answering_embedding` - converting output of BERT model trained to produce embedding vectors to `QuestionAnsweringEmbeddingPrediction`.
+* `narnmt` - converting output of non-autoregressive neural machine translation model to `MachineTranslationPrediction`.
+  * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.json). Path can be prefixed with `--models` arguments.
+  * `merges_file` - file which contains merges for encoding model predicted indexes to words (e. g. merges.txt). Path can be prefixed with `--models` arguments.
+  * `output_name` - name of model's output layer if need (optional).
+  * `sos_symbol` - string representation of start_of_sentence symbol (default='<s>').
+  * `eos_symbol` - string representation of end_of_sentence symbol (default='</s>').
+  * `pad_symbol` - string representation of pad symbol (default='<pad>').
+  * `remove_extra_symbols` - remove sos/eos/pad symbols from predicted string (default=True)
 * `bert_question_answering` - converting output of BERT model trained to solve question answering task to `QuestionAnsweringPrediction`.
 * `bert_classification` - converting output of BERT model trained for classification task to `ClassificationPrediction`.
   * `num_classes` - number of predicted classes.
@@ -206,6 +224,14 @@ AccuracyChecker supports following set of adapters:
   * `raw_masks_out` - name of output layer with raw instances masks.
   * `texts_out` - name of output layer with texts.
   * `confidence_threshold` - confidence threshold that is used to filter out detected instances.
+* `yolact` - converting raw outputs of Yolact model to to combination of `DetectionPrediction` and `CoCocInstanceSegmentationPrediction`.
+  * `loc_out` - name of output layer which contains box locations.
+  * `prior_out` - name of output layer which contains prior boxes.
+  * `conf_out` - name of output layer which contains confidence scores for all classes for each box.
+  * `mask_out` - name of output layer which contains instance masks.
+  * `proto_out` - name of output layer which contains proto for masks calculation.
+  * `confidence_threshold` - confidence threshold that is used to filter out detected instances (Optional, default 0.05).
+  * `max_detections` - maximum detection used for metrics calculation (Optional, default 100).
 * `class_agnostic_detection` - converting 'boxes' [n, 5] output of detection model to `DetectionPrediction` representation.
   * `output_blob` - name of output layer with bboxes.
   * `scale` - scalar value to normalize bbox coordinates.
@@ -222,3 +248,26 @@ AccuracyChecker supports following set of adapters:
   * `boxes_out` - name of output layer with bounding boxes coordinates.
 * `prnet` - converting output of PRNet model for 3D landmarks regression task to `FacialLandmarks3DPrediction`
     * `landmarks_ids_file` - the file with indeces for landmarks extraction from position heatmap. (Optional, default values defined [here](https://github.com/YadiraF/PRNet/blob/master/Data/uv-data/uv_kpt_ind.txt))
+* `person_vehicle_detection` - converts output of person vehicle detection model to `DetectionPrediction` representation. Adapter merges scores, groups predictions into people and vehicles, and assignes labels accordingly.
+    * `iou_threshold` - IOU threshold value for NMS operation.
+* `face_detection` - converts output of face detection model to `DetectionPrediction ` representation. Operation is performed by mapping model output to the defined anchors, window scales, window translates, and window lengths to generate a list of face candidates.
+    * `score_threshold` - Score threshold value used to discern whether a face is valid.
+    * `layer_names` - Target output layer base names.
+    * `anchor_sizes` - Anchor sizes for each base output layer.
+    * `window_scales` - Window scales for each base output layer.
+    * `window_lengths` - Window lengths for each base output layer.
+* `face_detection_refinement` - converts output of face detection refinement model to `DetectionPrediction` representation. Adapter refines candidates generated in previous stage model.
+    * `threshold` - Score threshold to determine as valid face candidate.
+* `attribute_classification` - converts output of attributes classifcation model to `ContainerPrediction` which contains multiple `ClassificationPrediction` for attributes with their scores.
+    * `output_layer_map` - dictionary where keys are output layer names of attribute classification model and values are the names of attributes.
+* `regression` - converting output of regression model to `RegressionPrediction` representation.
+    * `keep_shape` - allow keeping shape of predicted multi dimension array (Optional, default False).
+* `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions.
+    * `adapters` - Dict where key is output name and value is adapter config map including `output_blob` key to associate the output of model and this adapter.
+* `person_vehilce_detection_refinement` - converts output of person vehicle detection refinement model to `DetectionPrediction` representation. Adapter refines proposals generated in previous stage model.
+* `head_detection` - converts output of head detection model to `DetectionPrediction ` representation. Operation is performed by mapping model output to the defined anchors, window scales, window translates, and window lengths to generate a list of head candidates.
+    * `score_threshold` - Score threshold value used to discern whether a face is valid.
+    * `anchor_sizes` - Anchor sizes for each base output layer.
+    * `window_scales` - Window scales for each base output layer.
+    * `window_lengths` - Window lengths for each base output layer.
+* `face_recognition_quality_assessment` - converts output of face recognition quality assessment model to `QualityAssessmentPrediction ` representation.

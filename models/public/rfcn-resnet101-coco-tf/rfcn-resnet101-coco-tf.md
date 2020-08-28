@@ -15,6 +15,13 @@ R-FCN Resnet-101 model, pretrained on COCO\* dataset. Used for object detection.
 | MParams                         | 171.85                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 28.40%|
+| mAP | 45.02%|
+
 ## Performance
 
 ## Input

@@ -1,0 +1,55 @@
+models:
+  # MXnet inference
+  - name: octave-resnext-101-0.25-mx
+
+    launchers:
+      - framework: mxnet
+        model: checkpoint-0-0000.params
+        adapter: classification
+        inputs:
+          - name: 'data'
+            type: INPUT
+            shape: 3,224,224
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: opencv_imread
+
+        preprocessing:
+          - type: bgr_to_rgb
+
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            interpolation: CUBIC
+
+          - type: crop
+            size: 224
+
+          - type: normalization
+            mean: (124,117,104)
+            std: 59.88
+
+            # Using accuracy metric, achieved result of public model - 79.6 / 94.5 (top 1 and top 5 respectively)
+
+  # DLSDK inference
+  - name: octave-resnext-101-0.25
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: opencv_imread
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            interpolation: CUBIC
+
+          - type: crop
+            size: 224
+
+            # Using accuracy metric, achieved result of public model - 79.6 / 94.5 (top 1 and top 5 respectively)

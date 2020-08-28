@@ -1,0 +1,30 @@
+models:
+  - name: mobilenet-v1-1.0-224-cf
+    launchers:
+      - framework: caffe
+        model:   mobilenet-v1-1.0-224.prototxt
+        weights: mobilenet-v1-1.0-224.caffemodel
+        adapter: classification
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 103.94, 116.78, 123.68
+            std: 58.8235294
+
+  - name: mobilenet-v1-1.0-224
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224

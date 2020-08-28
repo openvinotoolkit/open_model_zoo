@@ -22,10 +22,10 @@
 
 #include <monitors/presenter.h>
 #include <samples/common.hpp>
+#include <samples/images_capture.h>
 #include <samples/slog.hpp>
 
 #include "cnn.hpp"
-#include "image_grabber.hpp"
 #include "text_detection.hpp"
 #include "text_recognition.hpp"
 
@@ -57,10 +57,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_m_td.empty() && FLAGS_m_tr.empty()) {
         throw std::logic_error("Neither parameter -m_td nor -m_tr is not set");
     }
-    if (FLAGS_dt.empty()) {
-        throw std::logic_error("Parameter -dt is not set");
-    }
-
     return true;
 }
 
@@ -123,7 +119,6 @@ int main(int argc, char *argv[]) {
             loadedDevices.insert(device);
         }
 
-        auto image_path = FLAGS_i;
         auto text_detection_model_path = FLAGS_m_td;
         auto text_recognition_model_path = FLAGS_m_tr;
         auto extension_path = FLAGS_l;
@@ -140,34 +135,33 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_m_tr.empty())
             text_recognition.Init(FLAGS_m_tr, ie, FLAGS_d_tr);
 
-        slog::info << "Reading input" << slog::endl;
-        std::unique_ptr<Grabber> grabber = Grabber::make_grabber(FLAGS_dt, FLAGS_i);
-        int wait_time = (FLAGS_dt == "image" || FLAGS_dt == "list") ? 0 : 3;
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        cv::Mat image = cap->read();
+        if (!image.data) {
+            throw std::runtime_error("Can't read an image from the input");
+        }
 
-        cv::Mat image;
-        grabber->GrabNextImage(&image);
+        cv::Size graphSize{static_cast<int>(image.cols / 4), 60};
+        Presenter presenter(FLAGS_u, image.rows - graphSize.height - 10, graphSize);
 
         slog::info << "Starting inference" << slog::endl;
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press ESC key";
+            std::cout << " or switch to the output window and press ESC or Q";
         }
         std::cout << std::endl;
 
-        cv::Size graphSize{static_cast<int>(image.cols / 4), 60};
-        Presenter presenter(FLAGS_u, image.rows - graphSize.height - 10, graphSize);
-
-        while (!image.empty()) {
+        do {
             cv::Mat demo_image = image.clone();
-            cv::Size orig_image_size = image.size();
 
             std::chrono::steady_clock::time_point begin_frame = std::chrono::steady_clock::now();
             std::vector<cv::RotatedRect> rects;
             if (text_detection.is_initialized()) {
                 auto blobs = text_detection.Infer(image);
                 std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-                rects = postProcess(blobs, orig_image_size, cls_conf_threshold, link_conf_threshold);
+                rects = postProcess(blobs, image.size(), text_detection.input_size(),
+                                    cls_conf_threshold, link_conf_threshold);
                 std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                 text_detection_postproc_time += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
             } else {
@@ -220,7 +214,7 @@ int main(int argc, char *argv[]) {
                     if (output_shape[2] != kAlphabet.length()) {
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
                     }
-                    
+
                     LockedMemory<const void> blobMapped = as<MemoryBlob>(blobs.begin()->second)->rmap();
                     float *output_data_pointer = blobMapped.as<float *>();
                     std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
@@ -275,31 +269,32 @@ int main(int argc, char *argv[]) {
                 avg_time = avg_time * avg_time_decay + (1.0 - avg_time_decay) * cur_time;
             }
             int fps = static_cast<int>(1000 / avg_time);
+            cv::putText(demo_image, "fps: " + std::to_string(fps) + " found: " + std::to_string(num_found),
+                        cv::Point(50, 50), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255), 1);
 
             presenter.drawGraphs(demo_image);
 
             if (!FLAGS_no_show) {
-                cv::putText(demo_image, "fps: " + std::to_string(fps) + " found: " + std::to_string(num_found),
-                            cv::Point(50, 50), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255), 1);
-                cv::imshow("Press ESC key to exit", demo_image);
-                char k = cv::waitKey(wait_time);
-                if (k == 27) break;
-                presenter.handleKey(k);
+                cv::imshow("Press ESC or Q to exit", demo_image);
+                int key = cv::waitKey(1);
+                if ('q' == key || 'Q' == key || key == 27) break;
+                presenter.handleKey(key);
             }
 
-            grabber->GrabNextImage(&image);
-        }
+            image = cap->read();
+        } while (image.data);
 
         if (text_detection.ncalls() && !FLAGS_r) {
           std::cout << "text detection model inference (ms) (fps): "
                     << text_detection.time_elapsed() / text_detection.ncalls() << " "
                     << text_detection.ncalls() * 1000 / text_detection.time_elapsed() << std::endl;
-        if (std::fabs(text_detection_postproc_time) < std::numeric_limits<double>::epsilon()) {
-            throw std::logic_error("text_detection_postproc_time can't be equal to zero");
-        }
-          std::cout << "text detection postprocessing (ms) (fps): "
-                    << text_detection_postproc_time / text_detection.ncalls() << " "
-                    << text_detection.ncalls() * 1000 / text_detection_postproc_time << std::endl << std::endl;
+          if (std::fabs(text_detection_postproc_time) < std::numeric_limits<double>::epsilon()) {
+              std::cout << "text detection postprocessing: took no time " << std::endl;
+          } else {
+            std::cout << "text detection postprocessing (ms) (fps): "
+                      << text_detection_postproc_time / text_detection.ncalls() << " "
+                      << text_detection.ncalls() * 1000 / text_detection_postproc_time << std::endl << std::endl;
+          }
         }
 
         if (text_recognition.ncalls() && !FLAGS_r) {

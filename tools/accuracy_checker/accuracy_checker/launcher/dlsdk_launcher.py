@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,24 +20,29 @@ from pathlib import Path
 import os
 import platform
 import re
+import warnings
 from collections import OrderedDict
 import numpy as np
 import openvino.inference_engine as ie
 
+from .dlsdk_launcher_config import (
+    HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, FPGA_COMPILER_MODE_VAR, NIREQ_REGEX, VPU_PLUGINS, VPU_LOG_LEVELS,
+    CPUExtensionPathField,
+    DLSDKLauncherConfigValidator
+)
 from .dlsdk_async_request import AsyncInferRequestWrapper
 from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField, BaseField
 from ..logging import warning
 from ..utils import (
     read_yaml,
-    contains_all,
     get_path,
     contains_any,
     get_parameter_value_from_config,
     string_to_tuple,
     get_or_parse_value
 )
-from .launcher import Launcher, LauncherConfigValidator
-from .model_conversion import convert_model, FrameworkParameters
+from .launcher import Launcher
+from .model_conversion import convert_model
 from ..logging import print_info
 from .input_feeder import PRECISION_TO_DTYPE, DIM_IDS_TO_LAYOUT
 try:
@@ -55,137 +60,6 @@ except ImportError:
         TensorDesc = IETensorDesc
     except ImportError:
         Blob, TensorDesc = None, None
-
-
-HETERO_KEYWORD = 'HETERO:'
-MULTI_DEVICE_KEYWORD = 'MULTI:'
-FPGA_COMPILER_MODE_VAR = 'CL_CONTEXT_COMPILER_MODE_INTELFPGA'
-NIREQ_REGEX = r"(\(\d+\))"
-VPU_PLUGINS = ('HDDL', "MYRIAD")
-VPU_LOG_LEVELS = ('LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG')
-
-
-class CPUExtensionPathField(PathField):
-    def __init__(self, **kwargs):
-        super().__init__(is_directory=False, **kwargs)
-
-    def validate(self, entry, field_uri=None):
-        if entry is None:
-            return
-
-        field_uri = field_uri or self.field_uri
-        validation_entry = ''
-        try:
-            validation_entry = Path(entry)
-        except TypeError:
-            self.raise_error(entry, field_uri, "values is expected to be path-like")
-        is_directory = False
-        if validation_entry.parts[-1] == 'AUTO':
-            validation_entry = validation_entry.parent
-            is_directory = True
-        try:
-            get_path(validation_entry, is_directory)
-        except FileNotFoundError:
-            self.raise_error(validation_entry, field_uri, "path does not exist")
-        except NotADirectoryError:
-            self.raise_error(validation_entry, field_uri, "path is not a directory")
-        except IsADirectoryError:
-            self.raise_error(validation_entry, field_uri, "path is a directory, regular file expected")
-
-
-class DLSDKLauncherConfigValidator(LauncherConfigValidator):
-    def __init__(
-            self, config_uri, fields=None, delayed_model_loading=False, **kwargs
-    ):
-        super().__init__(config_uri, fields, delayed_model_loading, **kwargs)
-        self.need_conversion = None
-
-    def create_device_regex(self, available_devices):
-        self.regular_device_regex = r"(?:^(?P<device>{devices})$)".format(devices="|".join(available_devices))
-        self.hetero_regex = r"(?:^{hetero}(?P<devices>(?:{devices})(?:,(?:{devices}))*)$)".format(
-            hetero=HETERO_KEYWORD, devices="|".join(available_devices)
-        )
-        self.multi_device_regex = r"(?:^{multi}(?P<devices_ireq>(?:{devices_ireq})(?:,(?:{devices_ireq}))*)$)".format(
-            multi=MULTI_DEVICE_KEYWORD, devices_ireq="{}?|".format(NIREQ_REGEX).join(available_devices)
-        )
-        self.supported_device_regex = r"{multi}|{hetero}|{regular}".format(
-            multi=self.multi_device_regex, hetero=self.hetero_regex, regular=self.regular_device_regex
-        )
-        self.fields['device'].set_regex(self.supported_device_regex)
-
-    def validate(self, entry, field_uri=None, ie_core=None):
-        """
-        Validate that launcher entry meets all configuration structure requirements.
-        Args:
-            entry: launcher configuration file entry.
-            field_uri: id of launcher entry.
-            ie_core: IECore instance.
-        """
-        if not self.delayed_model_loading:
-            framework_parameters = self.check_model_source(entry)
-            self._set_model_source(framework_parameters)
-        super().validate(entry, field_uri)
-        self.create_device_regex(ie.known_plugins)
-        try:
-            self.fields['device'].validate(entry['device'], field_uri)
-        except ConfigError as error:
-            if ie_core is not None:
-                self.create_device_regex(ie_core.available_devices)
-                try:
-                    self.fields['device'].validate(entry['device'], field_uri)
-                except ConfigError:
-                    # workaround for devices where this metric is non implemented
-                    warning('unknown device: {}'.format(entry['device']))
-            else:
-                raise error
-
-    def _set_model_source(self, framework):
-        self.need_conversion = framework.name != 'dlsdk'
-        self.framework = framework
-        self.fields['model'].optional = self.need_conversion
-        self.fields['caffe_model'].optional = framework.name != 'caffe'
-        self.fields['caffe_weights'].optional = framework.name != 'caffe'
-        self.fields['mxnet_weights'].optional = framework.name != 'mxnet'
-        self.fields['tf_model'].optional = framework != FrameworkParameters('tf', False)
-        self.fields['tf_meta'].optional = framework != FrameworkParameters('tf', True)
-        self.fields['onnx_model'].optional = framework.name != 'onnx'
-        self.fields['kaldi_model'].optional = framework.name != 'kaldi'
-
-    @staticmethod
-    def check_model_source(entry):
-        dlsdk_model_options = ['model']
-        caffe_model_options = ['caffe_model', 'caffe_weights']
-        mxnet_model_options = ['mxnet_weights']
-        tf_model_options = ['tf_model']
-        tf_meta_options = ['tf_meta']
-        onnx_model_options = ['onnx_model']
-        kaldi_model_options = ['kaldi_model']
-
-        multiple_model_sources_err = (
-            'Either model and weights or caffe_model and caffe_weights '
-            'or mxnet_weights or tf_model or tf_meta should be specified.'
-        )
-        sources = {
-            FrameworkParameters('dlsdk', False): dlsdk_model_options,
-            FrameworkParameters('caffe', False): caffe_model_options,
-            FrameworkParameters('tf', False): tf_model_options,
-            FrameworkParameters('mxnet', False): mxnet_model_options,
-            FrameworkParameters('onnx', False): onnx_model_options,
-            FrameworkParameters('kaldi', False): kaldi_model_options,
-            FrameworkParameters('tf', True): tf_meta_options
-        }
-
-        specified = []
-        for mo_source_option in sources:
-            if contains_all(entry, sources[mo_source_option]):
-                specified.append(mo_source_option)
-
-        if not specified:
-            raise ConfigError('{} None provided'.format(multiple_model_sources_err))
-        if len(specified) > 1:
-            raise ConfigError('{} Several provided'.format(multiple_model_sources_err))
-
-        return specified[0]
 
 
 class DLSDKLauncher(Launcher):
@@ -249,8 +123,8 @@ class DLSDKLauncher(Launcher):
 
         return parameters
 
-    def __init__(self, config_entry, model_name='', delayed_model_loading=False):
-        super().__init__(config_entry, model_name)
+    def __init__(self, config_entry, model_name='', delayed_model_loading=False, preprocessor=None):
+        super().__init__(config_entry, model_name=model_name)
 
         self._set_variable = False
         self.ie_config = self.config.get('ie_config')
@@ -267,6 +141,12 @@ class DLSDKLauncher(Launcher):
         self._prepare_bitstream_firmware(self.config)
         self._prepare_ie()
         self._delayed_model_loading = delayed_model_loading
+        self._preprocess_info = {}
+        self._preprocess_steps = []
+        self.disable_resize_to_input = False
+        self._do_reshape = False
+        self._use_set_blob = False
+        self._output_layouts = dict()
 
         if not delayed_model_loading:
             if dlsdk_launcher_config.need_conversion:
@@ -274,13 +154,14 @@ class DLSDKLauncher(Launcher):
             else:
                 self._model, self._weights = self.automatic_model_search()
 
-            self.load_network(log=True)
+            self.load_network(log=True, preprocessing=preprocessor)
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
         else:
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
-        self._do_reshape = False
-        self._use_set_blob = False
         self._target_layout_mapping = {}
+        self._lstm_inputs = None
+        if '_list_lstm_inputs' in self.config:
+            self._configure_lstm_inputs()
 
     @property
     def device(self):
@@ -318,6 +199,9 @@ class DLSDKLauncher(Launcher):
         Returns:
             raw data from network.
         """
+        if self._lstm_inputs:
+            return self._predict_sequential(inputs, metadata)
+
         results = []
         for infer_inputs in inputs:
             if self._do_reshape:
@@ -335,18 +219,47 @@ class DLSDKLauncher(Launcher):
                     layout = self._target_layout_mapping.get(key, ie_input_info[key].layout)
                     tensor_desc = TensorDesc(
                         ie_input_info[key].precision,
-                        ie_input_info[key].shape,
+                        input_data.shape,
                         layout
                     )
-                    self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data))
+                    preprocess_info = self._preprocess_info.get(key)
+                    if preprocess_info is not None:
+                        self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data), preprocess_info)
+                    else:
+                        self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data))
             result = self.exec_network.infer(infer_inputs) if not self._use_set_blob else self.exec_network.infer()
             results.append(result)
 
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
+                if self._output_layouts:
+                    meta_['output_layout'] = self._output_layouts
         self._do_reshape = False
-        self._use_set_blob = False
+        self._use_set_blob = self.disable_resize_to_input
+
+        return results
+
+    def _predict_sequential(self, inputs, metadata=None, **kwargs):
+        lstm_inputs_feed = self._fill_lstm_inputs()
+        results = []
+        for feed_dict in inputs:
+            feed_dict.update(lstm_inputs_feed)
+            output_result = self.exec_network.infer(feed_dict)
+            lstm_inputs_feed = self._fill_lstm_inputs(output_result)
+            results.append(output_result)
+
+            if self._do_reshape:
+                input_shapes = {layer_name: data.shape for layer_name, data in feed_dict.items()}
+                self._reshape_input(input_shapes)
+
+        if metadata is not None:
+            for meta_ in metadata:
+                meta_['input_shape'] = self.inputs_info_for_meta()
+                if self._output_layouts:
+                    meta_['output_layout'] = self._output_layouts
+
+        self._do_reshape = False
 
         return results
 
@@ -355,6 +268,9 @@ class DLSDKLauncher(Launcher):
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
+                if self._output_layouts:
+                    meta_['output_layout'] = self._output_layouts
+
         ir.infer(infer_inputs, metadata, context)
 
     def _is_hetero(self):
@@ -381,7 +297,9 @@ class DLSDKLauncher(Launcher):
                 raise ConfigError('Layer \'{layer}\' is not present in network'.format(layer=layer))
         layers = self.network.layers
         for layer_name in layers:
-            device = custom_affinity.get(layer_name, automatic_affinity[layer_name])
+            device = custom_affinity.get(layer_name, automatic_affinity.get(layer_name))
+            if device is None:
+                continue
             if device not in self._devices_list():
                 raise ConfigError(
                     'Device \'{device}\' set for \'{layer}\' layer is not present in '
@@ -404,6 +322,12 @@ class DLSDKLauncher(Launcher):
                 blobs_list = list(Path(model_dir).glob('*.blob'))
             return blobs_list
 
+        def get_onnx(model_dir):
+            onnx_list = list(Path(model_dir).glob('{}.onnx'.format(self._model_name)))
+            if not onnx_list:
+                onnx_list = list(Path(model_dir).glob('*.onnx'))
+            return onnx_list
+
         def get_model():
             model = Path(self.get_value_from_config('model'))
             model_is_blob = self.get_value_from_config('_model_is_blob')
@@ -417,6 +341,8 @@ class DLSDKLauncher(Launcher):
                 model_list = get_xml(model)
                 if not model_list and model_is_blob is None:
                     model_list = get_blob(model)
+                if not model_list:
+                    model_list = get_onnx(model)
             if not model_list:
                 raise ConfigError('suitable model is not found')
             if len(model_list) != 1:
@@ -429,7 +355,7 @@ class DLSDKLauncher(Launcher):
         if is_blob:
             return model, None
         weights = self.get_value_from_config('weights')
-        if weights is None or Path(weights).is_dir():
+        if (weights is None or Path(weights).is_dir()) and model.suffix != '.onnx':
             weights_dir = weights or model.parent
             weights = Path(weights_dir) / model.name.replace('xml', 'bin')
             print_info('Found weights {}'.format(get_path(weights)))
@@ -650,12 +576,12 @@ class DLSDKLauncher(Launcher):
         layout_mismatch = (
             data_layout is not None and len(input_layout) == len(data_layout) and input_layout != data_layout
         )
-        if layout_mismatch and Blob is not None and self.network is None:
+        if layout_mismatch and Blob is not None and self.network is None or input_blob in self._preprocess_info:
             self._target_layout_mapping[input_blob] = data_layout
             self._use_set_blob = True
             return data
 
-        return data.reshape(input_shape)
+        return data.reshape(input_shape) if not self.disable_resize_to_input else data
 
     def _prepare_ie(self, log=True):
         if log:
@@ -774,10 +700,22 @@ class DLSDKLauncher(Launcher):
                 print_info('    {} - {}'.format(device, nreq))
 
     def _set_device_config(self, device_config):
-        device_specific_configuration = read_yaml(device_config, ordered=False)
-        if not isinstance(device_specific_configuration, dict):
+        device_configuration = read_yaml(device_config)
+        if not isinstance(device_configuration, dict):
             raise ConfigError('device configuration should be a dict-like')
-        self.ie_core.set_config(device_specific_configuration, self.device)
+        if all(not isinstance(value, dict) for value in device_configuration.values()):
+            self.ie_core.set_config(device_configuration, self.device)
+        else:
+            for key, value in device_configuration.items():
+                if isinstance(value, dict):
+                    if key in ie.known_plugins:
+                        self.ie_core.set_config(value, key)
+                    else:
+                        warnings.warn('Option {key}: {value} will be skipped because device is '
+                                      'unknown'.format(key=key, value=value))
+                else:
+                    warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
+                                  'applied is not specified or option is not a dict-like'.format(key=key, value=value))
 
     def _log_versions(self):
         versions = self.ie_core.get_versions(self._device)
@@ -797,7 +735,9 @@ class DLSDKLauncher(Launcher):
             self.original_outputs = list(self.exec_network.outputs.keys())
             has_info = hasattr(self.exec_network, 'input_info')
             if has_info:
-                ie_input_info = OrderedDict([(name, data.input_data) for name, data in self.network.input_info.items()])
+                ie_input_info = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
             else:
                 ie_input_info = self.exec_network.inputs
             first_input = next(iter(ie_input_info))
@@ -805,7 +745,7 @@ class DLSDKLauncher(Launcher):
             batch_pos = input_info.layout.find('N')
             self._batch = input_info.shape[batch_pos] if batch_pos != -1 else 1
             return
-        if self._weights is None:
+        if self._weights is None and self._model.suffix != '.onnx':
             self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
         self.network = self.read_network(self._model, self._weights)
         self.original_outputs = self.network.outputs
@@ -832,7 +772,7 @@ class DLSDKLauncher(Launcher):
         elif affinity_map_path:
             warning('affinity_map config is applicable only for HETERO device')
 
-    def load_network(self, network=None, log=False):
+    def load_network(self, network=None, log=False, preprocessing=None):
         if hasattr(self, 'exec_network'):
             del self.exec_network
         if network is None:
@@ -842,6 +782,8 @@ class DLSDKLauncher(Launcher):
         self._set_precision()
         if log:
             self._print_input_output_info()
+        if preprocessing:
+            self._set_preprocess(preprocessing)
 
         if self.network:
             self.exec_network = self.ie_core.load_network(self.network, self._device, num_requests=self.num_requests)
@@ -866,31 +808,9 @@ class DLSDKLauncher(Launcher):
         }
 
     def fit_to_input(self, data, layer_name, layout, precision):
-        def data_to_blob(layer_shape, data):
-            data_shape = np.shape(data)
-            if len(layer_shape) == 4:
-                if len(data_shape) == 5:
-                    data = data[0]
-
-                if len(data_shape) < 4:
-                    if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
-                        return np.resize(data, layer_shape)
-                return np.transpose(data, layout)
-
-            if len(layer_shape) == 2:
-                if len(data_shape) == 1:
-                    return np.transpose([data])
-                if len(layout) == 2:
-                    return np.transpose(data, layout)
-
-            if len(layer_shape) == 5 and len(layout) == 5:
-                return np.transpose(data, layout)
-
-            return np.array(data)
-
         layer_shape = tuple(self.inputs[layer_name].shape)
 
-        data = data_to_blob(layer_shape, data)
+        data = self._data_to_blob(layer_shape, data, layout)
         if precision:
             data = data.astype(precision)
 
@@ -901,6 +821,31 @@ class DLSDKLauncher(Launcher):
                 return data
 
         return self._align_data_shape(data, layer_name, layout)
+
+    @staticmethod
+    def _data_to_blob(layer_shape, data, layout):
+        data_shape = np.shape(data)
+        if len(layer_shape) == 4:
+            if len(data_shape) == 5:
+                data = data[0]
+
+            if len(data_shape) < 4:
+                if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
+                    return np.resize(data, layer_shape)
+            return np.transpose(data, layout)
+
+        if len(layer_shape) == 2:
+            if len(data_shape) == 1:
+                return np.transpose([data])
+
+        if len(layer_shape) == 3 and len(data_shape) == 4:
+            data = np.transpose(data, layout)
+            return data[0]
+
+        if len(layer_shape) == len(layout):
+            return np.transpose(data, layout)
+
+        return np.array(data)
 
     def _set_precision(self):
         has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
@@ -917,6 +862,23 @@ class DLSDKLauncher(Launcher):
                         self.exec_network.inputs[input_config['name']].precision = input_config['precision']
                     else:
                         self.exec_network.input_info[input_config['name']].precision = input_config['precision']
+
+    def _configure_lstm_inputs(self):
+        lstm_mapping = {}
+        config_inputs = self.config.get('inputs', [])
+        for input_config in config_inputs:
+            if input_config['type'] == 'LSTM_INPUT':
+                lstm_mapping[input_config['name']] = input_config['value']
+        self._lstm_inputs = lstm_mapping
+
+    def _fill_lstm_inputs(self, infer_outputs=None):
+        feed_dict = {}
+        for lstm_var, output_layer in self._lstm_inputs.items():
+            layer_shape = self.inputs[lstm_var].shape
+            input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(layer_shape)
+            feed_dict[lstm_var] = input_data
+
+        return feed_dict
 
     def _print_input_output_info(self):
         print_info('Input info:')
@@ -946,6 +908,44 @@ class DLSDKLauncher(Launcher):
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
             print_info('\tshape: {}\n'.format(output_info.shape))
+            self._output_layouts[name] = output_info.layout
+
+    def _set_preprocess(self, preprocess):
+        if preprocess.ie_processor is None:
+            return
+        if self.network is not None:
+            self.disable_resize_to_input = False
+            preprocess_steps = preprocess.ie_preprocess_steps
+            if not preprocess_steps:
+                return
+            for input_name, input_info in self.network.input_info.items():
+                if input_name in self.const_inputs + self.image_info_inputs:
+                    continue
+                for (name, value) in preprocess_steps:
+                    setattr(input_info.preprocess_info, name, value)
+                if preprocess.ie_processor.has_normalization():
+                    channel_id = input_info.layout.find('C')
+                    if channel_id != -1:
+                        num_channels = input_info.input_data.shape[channel_id]
+                        preprocess.ie_processor.set_normalization(num_channels, input_info.preprocess_info)
+            self.disable_resize_to_input = preprocess.ie_processor.has_resize()
+            self._use_set_blob = self.disable_resize_to_input
+            self.load_network(self.network)
+            self._preprocess_steps = preprocess_steps
+            return
+        preprocess_info_by_input = OrderedDict()
+        preprocess_info = preprocess.preprocess_info
+        for input_name in self.inputs:
+            if input_name in self.const_inputs + self.image_info_inputs:
+                continue
+            if preprocess.ie_processor.has_normalization():
+                channel_id = self.inputs[input_name].layout.find('C')
+                if channel_id != -1:
+                    num_channels = self.inputs[input_name].shape[channel_id]
+                    preprocess.ie_processor.set_normalization(num_channels, preprocess_info)
+            preprocess_info_by_input[input_name] = preprocess_info
+        self._preprocess_info = preprocess_info_by_input
+        self.disable_resize_to_input = preprocess.ie_processor.has_resize()
 
     def release(self):
         if 'network' in self.__dict__:

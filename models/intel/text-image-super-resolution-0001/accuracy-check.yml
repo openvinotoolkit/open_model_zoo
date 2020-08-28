@@ -1,0 +1,10 @@
+models:
+  - name: text-image-super-resolution-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: super_resolution
+
+    datasets:
+      - name: text_super_resolution_x3

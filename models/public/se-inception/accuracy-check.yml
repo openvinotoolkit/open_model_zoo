@@ -1,0 +1,30 @@
+models:
+  - name: se-inception-cf
+    launchers:
+      - framework: caffe
+        model:   se-inception.prototxt
+        weights: se-inception.caffemodel
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes_2015
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 104, 117, 123
+
+  - name: se-inception
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes_2015
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224

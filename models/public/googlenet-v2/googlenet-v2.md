@@ -21,7 +21,12 @@ The model output for `googlenet-v2` is the typical object classifier output for 
 
 ## Accuracy
 
-See [https://github.com/lim0606/caffe-googlenet-bn](https://github.com/lim0606/caffe-googlenet-bn).
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 72.024% |
+| Top 5  | 90.844%|
+
+See [the original repository](https://github.com/lim0606/caffe-googlenet-bn).
 
 ## Performance
 

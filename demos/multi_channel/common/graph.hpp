@@ -16,12 +16,6 @@
 #include <memory>
 
 #include <inference_engine.hpp>
-#include <ie_common.h>
-#include <ie_plugin_ptr.hpp>
-#include <ie_icnn_network.hpp>
-#include <ie_iextension.h>
-#include <cpp/ie_cnn_net_reader.h>
-#include <ie_plugin_config.hpp>
 
 #include <samples/common.hpp>
 #include <samples/slog.hpp>

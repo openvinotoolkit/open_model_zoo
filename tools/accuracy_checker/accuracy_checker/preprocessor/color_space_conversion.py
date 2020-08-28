@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,12 +12,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
 """
 
 import cv2
 import numpy as np
-from ..config import NumberField
+from ..config import NumberField, BoolField
 
 try:
     import tensorflow as tf
@@ -45,6 +44,7 @@ class BgrToGray(Preprocessor):
     def process(self, image, annotation_meta=None):
         image.data = np.expand_dims(cv2.cvtColor(image.data, cv2.COLOR_BGR2GRAY).astype(np.float32), -1)
         return image
+
 
 class RgbToBgr(Preprocessor):
     __provider__ = 'rgb_to_bgr'
@@ -105,4 +105,106 @@ class SelectInputChannel(Preprocessor):
         else:
             image.data = process_data(image.data)
 
+        return image
+
+
+class BGR2YUVConverter(Preprocessor):
+    __provider__ = 'bgr_to_yuv'
+    color = cv2.COLOR_BGR2YUV
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'split_channels': BoolField(
+                optional=True, default=False, description='Allow treat channels as independent input'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.split_channels = self.get_value_from_config('split_channels')
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        yuvdata = cv2.cvtColor(data, self.color)
+        if self.split_channels:
+            y = yuvdata[:, :, 0]
+            u = yuvdata[:, :, 1]
+            v = yuvdata[:, :, 2]
+            identifier = image.data
+            new_identifier = ['{}_y'.format(identifier), '{}_u'.format(identifier), '{}_v'.format(identifier)]
+            yuvdata = [np.expand_dims(y, -1), np.expand_dims(u, -1), np.expand_dims(v, -1)]
+            image.identifier = new_identifier
+        image.data = yuvdata
+
+        return image
+
+
+class RGB2YUVConverter(BGR2YUVConverter):
+    __provider__ = 'rgb_to_yuv'
+    color = cv2.COLOR_RGB2YUV
+
+
+class BGRtoNV12Converter(Preprocessor):
+    __provider__ = 'bgr_to_nv12'
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        height, width, _ = data.shape
+        y, u, v = cv2.cvtColor(data, cv2.COLOR_BGR2YUV)
+
+        shrunk_u = cv2.resize(u, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+        shrunk_v = cv2.resize(v, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+
+        uv = np.zeros((height // 2, width))
+
+        uv[:, 0::2] = shrunk_u
+        uv[:, 1::2] = shrunk_v
+
+        nv12 = np.vstack((y, uv))
+
+        nv12 = np.floor(nv12 + 0.5).astype(np.uint8)
+        image.data = nv12
+
+        return image
+
+
+class RGBtoNV12Converter(Preprocessor):
+    __provider__ = 'rgb_to_nv12'
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        height, width, _ = data.shape
+        y, u, v = cv2.cvtColor(data, cv2.COLOR_RGB2YUV)
+
+        shrunk_u = cv2.resize(u, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+        shrunk_v = cv2.resize(v, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+
+        uv = np.zeros((height // 2, width))
+
+        uv[:, 0::2] = shrunk_u
+        uv[:, 1::2] = shrunk_v
+
+        nv12 = np.vstack((y, uv))
+
+        nv12 = np.floor(nv12 + 0.5).astype(np.uint8)
+        image.data = nv12
+
+        return image
+
+
+class NV12toBGRConverter(Preprocessor):
+    __provider__ = 'nv12_to_bgr'
+
+    def process(self, image, annotation_meta=None):
+        image.data = cv2.cvtColor(image.data, cv2.COLOR_YUV2BGR_NV12)
+        return image
+
+
+class NV12toRGBConverter(Preprocessor):
+    __provider__ = 'nv12_to_rgb'
+
+    def process(self, image, annotation_meta=None):
+        image.data = cv2.cvtColor(image.data, cv2.COLOR_YUV2RGB_NV12)
         return image

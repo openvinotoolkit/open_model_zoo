@@ -1,5 +1,4 @@
-Model Downloader and other automation tools
-===========================================
+# Model Downloader and other automation tools
 
 This directory contains scripts that automate certain model-related tasks
 based on configuration files in the models' directories.
@@ -21,8 +20,7 @@ Please use these tools instead of attempting to parse the configuration files
 directly. Their format is undocumented and may change in incompatible ways in
 future releases.
 
-Prerequisites
--------------
+## Prerequisites
 
 1. Install Python (version 3.5.2 or higher)
 2. Install the tools' dependencies with the following command:
@@ -61,8 +59,7 @@ python3 -mpip install --user 'requests[security]'
 
 Alternatively, upgrade to Python 3.6 or a later version.
 
-Model downloader usage
-----------------------
+## Model downloader usage
 
 The basic usage is to run the script like this:
 
@@ -220,8 +217,7 @@ In particular:
   is set to a value greater than 1, event sequences for different files or models
   may get interleaved.
 
-Model converter usage
----------------------
+## Model converter usage
 
 The basic usage is to run the script like this:
 
@@ -307,13 +303,12 @@ To do this, use the `--dry_run` option:
 See the "Shared options" section for information on other options accepted by
 the script.
 
-Model quantizer usage
----------------------
+## Model Quantizer Usage
 
 Before you run the model quantizer, you must prepare a directory with
 the datasets required for the quantization process. This directory will be
-referred to as `<DATASET_DIR>` below. See the "Dataset directory layout"
-section for information on the expected contents of that directory.
+referred to as `<DATASET_DIR>` below. You can find more detailed information
+about dataset preparation in the <a href="https://github.com/opencv/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.
 
 The basic usage is to run the script like this:
 
@@ -389,20 +384,7 @@ Toolkit will still be created, so that you can inspect it.
 See the "Shared options" section for information on other options accepted by
 the script.
 
-### Dataset directory layout
-
-Currently, all models for which quantization is supported require the
-[ILSVRC 2012](http://image-net.org/challenges/LSVRC/2012/index) validation
-dataset. This means that `<DATASET_DIR>` must contain the following entries:
-
-* A subdirectory named `ILSVRC2012_img_val` containing the ILSVRC 2012
-  validation images. To obtain these images, follow the
-  [instructions at the ILSVRC 2012 website](http://image-net.org/challenges/LSVRC/2012/signup).
-
-* `val.txt` from <http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz>.
-
-Model information dumper usage
-------------------------------
+## Model information dumper usage
 
 The basic usage is to run the script like this:
 
@@ -462,13 +444,14 @@ describing a single model. Each such object has the following keys:
   * `monocular_depth_estimation`
   * `object_attributes`
   * `optical_character_recognition`
+  * `question_answering`
   * `semantic_segmentation`
+  * `sound_classification`
   * `style_transfer`
 
   Additional possible values might be added in the future.
 
-Shared options
---------------
+## Shared options
 
 The are certain options that all tools accept.
 

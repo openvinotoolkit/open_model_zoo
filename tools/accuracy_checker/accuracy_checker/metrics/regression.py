@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,7 +37,8 @@ from ..representation import (
     ImageProcessingAnnotation,
     ImageProcessingPrediction,
     StyleTransferAnnotation,
-    StyleTransferPrediction
+    StyleTransferPrediction,
+    FeaturesRegressionAnnotation
 )
 
 from .metric import PerImageEvaluationMetric
@@ -46,7 +47,7 @@ from ..utils import string_to_tuple, finalize_metric_result
 
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
-    annotation_types = (RegressionAnnotation, DepthEstimationAnnotation)
+    annotation_types = (RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation)
     prediction_types = (RegressionPrediction, DepthEstimationPrediction)
 
     def __init__(self, value_differ, *args, **kwargs):
@@ -64,6 +65,8 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         diff = self.calculate_diff(annotation, prediction)
         self.magnitude.append(diff)
+        if np.ndim(diff) > 1:
+            return np.mean(diff)
 
         return diff
 
@@ -434,7 +437,9 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'scale_border': NumberField(optional=True, min_value=0, default=4, description="Scale border."),
+            'scale_border': NumberField(
+                optional=True, min_value=0, default=4, description="Scale border.", value_type=int
+            ),
             'color_order': StringField(
                 optional=True, choices=['BGR', 'RGB'], default='RGB',
                 description="The field specified which color order BGR or RGB will be used during metric calculation."
@@ -453,7 +458,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
         color_order = self.get_value_from_config('color_order')
         channel_order = {
             'BGR': [2, 1, 0],
-            'RGB': [0, 1, 2]
+            'RGB': [0, 1, 2],
         }
         self.meta['postfix'] = 'Db'
         self.channel_order = channel_order[color_order]
@@ -471,17 +476,19 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             self.scale_border:height - self.scale_border,
             self.scale_border:width - self.scale_border
         ]
-        image_difference = (prediction - ground_truth) / 255.  # rgb color space
+        image_difference = (prediction - ground_truth) / 255
+        if len(ground_truth.shape) == 3 and ground_truth.shape[2] == 3:
+            r_channel_diff = image_difference[:, :, self.channel_order[0]]
+            g_channel_diff = image_difference[:, :, self.channel_order[1]]
+            b_channel_diff = image_difference[:, :, self.channel_order[2]]
 
-        r_channel_diff = image_difference[:, :, self.channel_order[0]]
-        g_channel_diff = image_difference[:, :, self.channel_order[1]]
-        b_channel_diff = image_difference[:, :, self.channel_order[2]]
+            channels_diff = (r_channel_diff * 65.738 + g_channel_diff * 129.057 + b_channel_diff * 25.064) / 256
 
-        channels_diff = (r_channel_diff * 65.738 + g_channel_diff * 129.057 + b_channel_diff * 25.064) / 256
-
-        mse = np.mean(channels_diff ** 2)
-        if mse == 0:
-            return np.Infinity
+            mse = np.mean(channels_diff ** 2)
+            if mse == 0:
+                return np.Infinity
+        else:
+            mse = np.mean(image_difference ** 2)
 
         return -10 * math.log10(mse)
 
@@ -506,7 +513,7 @@ class AngleError(BaseRegressionMetric):
 def _ssim(annotation_image, prediction_image):
     prediction = np.asarray(prediction_image)
     ground_truth = np.asarray(annotation_image)
-    if len(ground_truth.shape) < len(prediction) and prediction.shape[-1] == 1:
+    if len(ground_truth.shape) < len(prediction.shape) and prediction.shape[-1] == 1:
         prediction = np.squeeze(prediction)
     mu_x = np.mean(prediction)
     mu_y = np.mean(ground_truth)

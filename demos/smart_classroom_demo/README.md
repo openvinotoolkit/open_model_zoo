@@ -5,8 +5,6 @@ The demo shows an example of joint usage of several neural networks to detect st
 * `face-detection-adas-0001`, which is a primary detection network for finding faces.
 * `landmarks-regression-retail-0009`, which is executed on top of the results from the first network and outputs
 a vector of facial landmarks for each detected face.
-* `face-reidentification-retail-0095`,  which is executed on top of the results from the first network and outputs
-a vector of features for each detected face.
 * `person-detection-action-recognition-0005`, which is a detection network for finding persons and simultaneously predicting their current actions (3 actions - sitting, standing, raising hand).
 * `person-detection-action-recognition-0006`, which is a detection network for finding persons and simultaneously predicting their current actions (6 actions: sitting, writing, raising hand, standing, turned around, lie on the desk).
 * `person-detection-raisinghand-recognition-0001`, which is a detection network for finding students and simultaneously predicting their current actions (in contrast with the previous model, predicts only if a student raising hand or not).
@@ -39,9 +37,11 @@ smart_classroom_demo [OPTION]
 Options:
 
     -h                             Print a usage message.
-    -i '<path>'                    Required. Path to a video or image file. Default value is "cam" to work with camera.
+    -i                             Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                          Optional. Enable reading the input in a loop.
+    -limit                         Optional. Read length limit before stopping or restarting reading the input.
     -m_act '<path>'                Required. Path to the Person/Action Detection Retail model (.xml) file.
-    -m_fd '<path>'                 Required. Path to the Face Detection Retail model (.xml) file.
+    -m_fd '<path>'                 Required. Path to the Face Detection model (.xml) file.
     -m_lm '<path>'                 Required. Path to the Facial Landmarks Regression Retail model (.xml) file.
     -m_reid '<path>'               Required. Path to the Face Reidentification Retail model (.xml) file.
     -l '<absolute_path>'           Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels implementation.
@@ -64,15 +64,15 @@ Options:
     -exp_r_fd                      Optional. Expand ratio for bbox before face recognition.
     -t_reid                        Optional. Cosine distance threshold between two vectors for face reidentification.
     -fg                            Optional. Path to a faces gallery in .json format.
-    -no_show                       Optional. Do not show processed video.
-    -last_frame                    Optional. Last frame number to handle in demo. If negative, handle all input video.
     -teacher_id                    Optional. ID of a teacher. You must also set a faces gallery parameter (-fg) to use it.
+    -no_show                       Optional. Do not show processed video.
     -min_ad                        Optional. Minimum action duration in seconds.
     -d_ad                          Optional. Maximum time difference between actions in seconds.
     -student_ac                    Optional. List of student actions separated by a comma.
+    -top_ac                        Optional. List of student actions (for top-k mode) separated by a comma.
     -teacher_ac                    Optional. List of teacher actions separated by a comma.
-    -a_id                          Optional. Target action name.
-    -a_top                         Optional. Number of first K students. If this parameter is positive, the demo detects first K persons with the action, pointed by the parameter "a_id"
+    -top_id                        Optional. Target action name.
+    -a_top                         Optional. Number of first K students. If this parameter is positive, the demo detects first K persons with the action, pointed by the parameter 'top_id'
     -crop_gallery                  Optional. Crop images during faces gallery creation.
     -t_reg_fd                      Optional. Probability threshold for face detections during database registration.
     -min_size_fr                   Optional. Minimum input size for faces during database registration.
@@ -91,24 +91,9 @@ Example of a valid command line to run the application with pre-trained models f
 ```sh
 ./smart_classroom_demo -m_act <path_to_model>/person-detection-action-recognition-0005.xml \
                        -m_fd <path_to_model>/face-detection-adas-0001.xml \
-                       -m_reid <path_to_model>/face-reidentification-retail-0095.xml \
-                       -m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
-                       -fg <path_to_faces_gallery.json> \
                        -i <path_to_video>
 ```
 > **NOTE**: To recognize actions of students, use `person-detection-action-recognition-0005` model for 3 basic actions and `person-detection-action-recognition-0006` model for 6 actions.
-
-Example of a valid command line to run the application for recognizing actions of a teacher:
-```sh
-./smart_classroom_demo -m_act <path_to_model>/person-detection-action-recognition-teacher-0002.xml \
-                       -m_fd <path_to_model>/face-detection-adas-0001.xml \
-                       -m_reid <path_to_model>/face-reidentification-retail-0095.xml \
-                       -m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
-                       -fg <path to faces_gallery.json> \
-                       -teacher_id <ID of a teacher in the face gallery> \
-                       -i <path_to_video>
-```
-> **NOTE**: To recognize actions of a teacher, use `person-detection-action-recognition-teacher-0002` model.
 
 Example of a valid command line to run the application for recognizing first raised-hand students:
 ```sh
@@ -122,9 +107,8 @@ Example of a valid command line to run the application for recognizing first rai
 
 The demo uses OpenCV to display the resulting frame with labeled actions and faces.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
 >* `face-detection-adas-0001`
->* `face-reidentification-retail-0095`
 >* `landmarks-regression-retail-0009`
 >* `person-detection-action-recognition-0005`
 > Other models may produce unexpected results on these devices.

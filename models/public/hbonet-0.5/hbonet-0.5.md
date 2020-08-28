@@ -19,8 +19,8 @@ The `hbonet-0.5` model is one of the classification models from [repository](htt
 
 | Metric | Original model |
 | ------ | -------------- |
-| Top 1  | 67.00          |
-| Top 5  | 86.90          |
+| Top 1  | 67.00%          |
+| Top 5  | 86.90%          |
 
 
 ## Performance

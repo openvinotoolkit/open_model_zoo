@@ -9,8 +9,11 @@
 #include <vector>
 #include <gflags/gflags.h>
 
+#include <samples/default_flags.hpp>
+
+DEFINE_INPUT_FLAGS
+
 static const char help_message[] = "Print a usage message.";
-static const char video_message[] = "Required. Path to a video or image file. Default value is \"cam\" to work with camera.";
 static const char person_vehicle_bike_detection_model_message[] = "Required. Path to the Person/Vehicle/Bike Detection Crossroad model (.xml) file.";
 static const char person_attribs_model_message[] = "Optional. Path to the Person Attributes Recognition Crossroad model (.xml) file.";
 static const char person_reid_model_message[] = "Optional. Path to the Person Reidentification Retail model (.xml) file.";
@@ -36,13 +39,10 @@ static const char threshold_output_message_person_reid[] = "Optional. Cosine sim
 static const char raw_output_message[] = "Optional. Output Inference results as raw values.";
 static const char no_show_processed_video[] = "Optional. No show processed video.";
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
-
-/// @brief Message list of monitors to show
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 
 DEFINE_bool(h, false, help_message);
-DEFINE_string(i, "cam", video_message);
 DEFINE_string(m, "", person_vehicle_bike_detection_model_message);
 DEFINE_string(m_pa, "", person_attribs_model_message);
 DEFINE_string(m_reid, "", person_reid_model_message);
@@ -57,9 +57,6 @@ DEFINE_double(t, 0.5, threshold_output_message);
 DEFINE_double(t_reid, 0.7, threshold_output_message_person_reid);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_bool(auto_resize, false, input_resizable_message);
-
-/// \brief Define a flag to show monitors<br>
-/// It is an optional parameter
 DEFINE_string(u, "", utilization_monitors_message);
 
 
@@ -72,7 +69,8 @@ static void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                           " << help_message << std::endl;
-    std::cout << "    -i \"<path>\"                  " << video_message << std::endl;
+    std::cout << "    -i                           " << input_message << std::endl;
+    std::cout << "    -loop                        " << loop_message << std::endl;
     std::cout << "    -m \"<path>\"                  " << person_vehicle_bike_detection_model_message<< std::endl;
     std::cout << "    -m_pa \"<path>\"               " << person_attribs_model_message << std::endl;
     std::cout << "    -m_reid \"<path>\"             " << person_reid_model_message << std::endl;

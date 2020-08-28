@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ class RegressionDataAnalyzer(BaseDataAnalyzer):
     __provider__ = 'RegressionAnnotation'
 
     def analyze(self, result: list, meta, count_objects=True):
+        data_analysis = {}
         if count_objects:
-            self.object_count(result)
+            data_analysis['annotations_size'] = self.object_count(result)
         min_value = sys.float_info.max
         max_value = sys.float_info.min
         average = 0.0
@@ -36,3 +37,7 @@ class RegressionDataAnalyzer(BaseDataAnalyzer):
         print_info('min_value: {value}'.format(value=min_value))
         print_info('max_value: {value}'.format(value=max_value))
         print_info('average: {value}'.format(value=average))
+        data_analysis['min_value'] = min_value
+        data_analysis['max_value'] = max_value
+        data_analysis['average'] = average
+        return data_analysis

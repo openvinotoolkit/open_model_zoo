@@ -1,0 +1,32 @@
+models:
+  - name: mobilenet-v3-large-1.0-224-tf
+
+    launchers:
+      - framework: tf
+        model: v3-large_224_1.0_float/v3-large_224_1.0_float.pb
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 127.5
+            std: 127.5
+
+  - name: mobilenet-v3-large-1.0-224-tf
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224

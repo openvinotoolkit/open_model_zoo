@@ -1,0 +1,21 @@
+models:
+  - name: pelee-coco
+
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+
+    datasets:
+      - name: ms_coco_detection_80_class_with_background
+
+        preprocessing:
+          - type: resize
+            dst_width: 304
+            dst_height: 304
+
+        postprocessing:
+          - type: resize_prediction_boxes
+
+        metrics:
+          - type: coco_precision
+            max_detections: 100

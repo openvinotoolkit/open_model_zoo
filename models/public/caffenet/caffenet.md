@@ -15,6 +15,13 @@ CaffeNet\* model is used for classification. For details see [paper](https://arx
 | MParams                         | 60.965                                    |
 | Source framework                | Caffe\*                                   |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 56.714%|
+| Top 5  | 79.916%|
+
 ## Performance
 
 ## Input

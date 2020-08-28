@@ -24,6 +24,7 @@
 #include <inference_engine.hpp>
 
 #include <monitors/presenter.h>
+#include <samples/images_capture.h>
 #include <samples/slog.hpp>
 #include <samples/ocv_common.hpp>
 #include "crossroad_camera_demo.hpp"
@@ -283,7 +284,7 @@ struct PersonAttribsDetection : BaseDetection {
             freq[labels.at<int>(i)]++;
         }
 
-        auto freqArgmax = std::max_element(freq.begin(), freq.end()) - freq.begin();
+        int freqArgmax = static_cast<int>(std::max_element(freq.begin(), freq.end()) - freq.begin());
 
         return centers.at<cv::Vec3b>(freqArgmax);
     }
@@ -499,15 +500,7 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        slog::info << "Reading input" << slog::endl;
-        cv::Mat frame = cv::imread(FLAGS_i, cv::IMREAD_COLOR);
-        const bool isVideo = frame.empty();
-        cv::VideoCapture cap;
-        if (isVideo && !(FLAGS_i == "cam" ? cap.open(0) : cap.open(FLAGS_i))) {
-            throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
-        }
-        const size_t width  = isVideo ? (size_t) cap.get(cv::CAP_PROP_FRAME_WIDTH) : frame.size().width;
-        const size_t height = isVideo ? (size_t) cap.get(cv::CAP_PROP_FRAME_HEIGHT) : frame.size().height;
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load inference engine -------------------------------------
@@ -578,22 +571,19 @@ int main(int argc, char *argv[]) {
         auto total_t0 = std::chrono::high_resolution_clock::now();
         slog::info << "Start inference " << slog::endl;
 
+        cv::Mat frame = cap->read();
+        if (!frame.data) throw std::logic_error("Can't read an image from the input");
+
+        cv::Size graphSize{frame.cols / 4, 60};
+        Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
+
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
             std::cout << " or switch to the output window and press ESC key";
         }
         std::cout << std::endl;
 
-        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
-        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
-
         do {
-            // get and enqueue the next frame (in case of video)
-            if (isVideo && !cap.read(frame)) {
-                if (frame.empty())
-                    break;  // end of video file
-                throw std::logic_error("Failed to get frame from cv::VideoCapture");
-            }
             if (FLAGS_auto_resize) {
                 // just wrap Mat object with Blob::Ptr without additional memory allocation
                 frameBlob = wrapMat2Blob(frame);
@@ -619,12 +609,12 @@ int main(int argc, char *argv[]) {
                     if (FLAGS_auto_resize) {
                         cropRoi.posX = (result.location.x < 0) ? 0 : result.location.x;
                         cropRoi.posY = (result.location.y < 0) ? 0 : result.location.y;
-                        cropRoi.sizeX = std::min((size_t) result.location.width, width - cropRoi.posX);
-                        cropRoi.sizeY = std::min((size_t) result.location.height, height - cropRoi.posY);
+                        cropRoi.sizeX = std::min((size_t) result.location.width, frame.cols - cropRoi.posX);
+                        cropRoi.sizeY = std::min((size_t) result.location.height, frame.rows - cropRoi.posY);
                         roiBlob = make_shared_blob(frameBlob, cropRoi);
                     } else {
                         // To crop ROI manually and allocate required memory (cv::Mat) again
-                        auto clippedRect = result.location & cv::Rect(0, 0, width, height);
+                        auto clippedRect = result.location & cv::Rect(0, 0, frame.cols, frame.rows);
                         person = frame(clippedRect);
                     }
                     PersonAttribsDetection::AttributesAndColorPoints resPersAttrAndColor;
@@ -797,13 +787,13 @@ int main(int argc, char *argv[]) {
 
             if (!FLAGS_no_show) {
                 cv::imshow("Detection results", frame);
-                // for still images wait until any key is pressed, for video 1 ms is enough per frame
-                const int key = cv::waitKey(isVideo ? 1 : 0);
+                const int key = cv::waitKey(1);
                 if (27 == key)  // Esc
                     break;
                 presenter.handleKey(key);
             }
-        } while (isVideo);
+            frame = cap->read();
+        } while (frame.data);
 
         auto total_t1 = std::chrono::high_resolution_clock::now();
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);

@@ -19,6 +19,16 @@ datasets:
     dataset_meta: mscoco_mask_rcnn_short_80.json
     data_source: val2017
 
+  - name: ms_coco_mask_rcnn_short_80_classes_without_background
+    annotation_conversion:
+      converter: mscoco_mask_rcnn
+      annotation_file: instances_val2017.json
+      has_background: False
+      sort_annotations: True
+    annotation: mscoco_mask_rcnn_short_80_without_bkgr.pickle
+    dataset_meta: mscoco_mask_rcnn_short_80_without_bkgr.json
+    data_source: val2017
+
   - name: ms_coco_mask_rcnn_short_91_classes
     annotation_conversion:
       converter: mscoco_mask_rcnn
@@ -97,6 +107,7 @@ datasets:
     annotation_conversion:
       converter: mscoco_keypoints
       annotation_file: person_keypoints_val2017.json
+      sort_key: image_size
     annotation: mscoco_keypoints.pickle
     dataset_meta: mscoco_keypoints.json
     metrics:
@@ -170,6 +181,7 @@ datasets:
       annotations_dir: VOCdevkit/VOC2012/Annotations
       images_dir: VOCdevkit/VOC2012/JPEGImages
       imageset_file: VOCdevkit/VOC2012/ImageSets/Main/val.txt
+      has_background: False
     data_source: VOCdevkit/VOC2012/JPEGImages
     annotation: voc12_without_background.pickle
     dataset_meta: voc12_without_background.json
@@ -358,6 +370,50 @@ datasets:
     annotation: crossroad-0078.pickle
     dataset_meta: crossroad-0078.json
 
+  - name: crossroad_extra_untagged
+    data_source: crossroad_extra_untagged/val_data
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg.json
+      has_background: False
+      sort_annotations: True
+      use_full_label_map: False
+    annotation: crossroad_extra_untagged.pickle
+    dataset_meta: crossroad_extra_untagged.json
+
+  - name: crossroad_extra_untagged_person
+    data_source: crossroad_extra_untagged/val_data
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg_person.json
+      has_background: False
+      sort_annotations: True
+      use_full_label_map: False
+    annotation: crossroad_extra_untagged_person.pickle
+    dataset_meta: crossroad_extra_untagged_person.json
+
+  - name: crossroad_extra_untagged_person_hb
+    data_source: crossroad_extra_untagged/val_data
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg_person.json
+      has_background: True
+      sort_annotations: True
+      use_full_label_map: False
+    annotation: crossroad_extra_untagged_person_hb.pickle
+    dataset_meta: crossroad_extra_untagged_person_hb.json
+
+  - name: crossroad_extra_untagged_vehicle
+    data_source: crossroad_extra_untagged/val_data
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg_vehicle.json
+      has_background: False
+      sort_annotations: True
+      use_full_label_map: False
+    annotation: crossroad_extra_untagged_vehicle.pickle
+    dataset_meta: crossroad_extra_untagged_vehicle.json
+
   - name: pedestrian_and_vehicle_dataset
     data_source: val2017
     annotation_conversion:
@@ -453,6 +509,13 @@ datasets:
       data_dir: ICDAR15_DET/gt
     annotation: icdar15_detection.pickle
 
+  - name: ICDAR2013_detection
+    data_source: ICDAR13_DET
+    annotation_conversion:
+      converter: icdar_detection
+      data_dir: ICDAR13_DET/gt
+    annotation: icdar13_detection.pickle
+
   - name: ICDAR2013
     data_source: ICDAR13_REC/Challenge2_Test_Task3_Images
     annotation_conversion:
@@ -461,12 +524,26 @@ datasets:
     annotation: icdar13_recognition.pickle
     dataset_meta: icdar13_recognition.json
 
+  - name: ICDAR2013_detection
+    data_source: ICDAR13_DET
+    annotation_conversion:
+      converter: icdar_detection
+      data_dir: ICDAR13_DET/gt
+    annotation: icdar13_detection.pickle
+
   - name: market1501
     data_source: Market-1501-v15.09.15
     annotation_conversion:
       converter: market1501_reid
       data_dir: Market-1501-v15.09.15
     annotation: market1501_reid.pickle
+
+  - name: veri776
+    data_source: VeRi-776
+    annotation_conversion:
+      converter: veri776_reid
+      data_dir: VeRi-776
+    annotation: veri776_reid.pickle
 
   - name: reid_dataset
     data_source: Market-1501-v15.09.15
@@ -485,7 +562,8 @@ datasets:
     dataset_meta: vggfaces2.json
 
   - name: semantic_segmentation_adas
-    data_source: segmentation
+    data_source: segmentation/images
+    segmentation_masks_source: segmentation/mask_segmentation_adas
     annotation_conversion:
       converter: common_semantic_segmentation
       images_dir: segmentation/images
@@ -510,7 +588,8 @@ datasets:
         dst_width: 2048
 
   - name: road_segmentation
-    data_source: segmentation
+    data_source: segmentation/images
+    segmentation_masks_source: segmentation/mask_road_segmentation
     annotation_conversion:
       converter: common_semantic_segmentation
       images_dir: segmentation/images
@@ -755,6 +834,7 @@ datasets:
     annotation: mrlEyes_2018_01.pickle
     dataset_meta: mrlEyes_2018_01.json
     data_source: mrlEyes_2018_01
+
   - name: ms_coco_style_transfer
     data_source: val2017
     annotation_conversion:
@@ -775,6 +855,16 @@ datasets:
       max_seq_length: 384
       max_query_length: 64
       doc_stride: 128
+      lower_case: true
+      vocab_file: vocab.txt
+
+  - name: squad_emb_v1_1_msl384_mql32_lowercase
+    annotation_conversion:
+      converter: squad_emb
+      testing_file: squad_v1.1/dev-v1.1.json
+      vocab_file: vocab.txt
+      max_seq_length: 384
+      max_query_length: 32
       lower_case: true
 
   - name: SCUT_EPT

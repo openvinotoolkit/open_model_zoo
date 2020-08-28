@@ -15,6 +15,13 @@ Faster R-CNN with Inception v2. Used for object detection. For details, see the 
 | MParams                         | 13.307                                    |
 | Source framework                | TensorFlow\*                              |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 25.65%|
+| mAP| 40.04%|
+
 ## Performance
 
 ## Input

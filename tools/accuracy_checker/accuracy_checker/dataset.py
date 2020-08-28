@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ from .config import (
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
 from .representation import BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
 from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS
+from .logging import print_info
 
 
 class DatasetConfig(ConfigValidator):
@@ -46,6 +47,7 @@ class DatasetConfig(ConfigValidator):
     subsample_seed = NumberField(value_type=int, min_value=0, optional=True)
     analyze_dataset = BaseField(optional=True)
     segmentation_masks_source = PathField(is_directory=True, optional=True)
+    additional_data_source = PathField(is_directory=True, optional=True)
     batch = NumberField(value_type=int, min_value=1, optional=True)
 
 
@@ -65,11 +67,21 @@ class Dataset:
         if 'annotation' in self._config:
             annotation_file = Path(self._config['annotation'])
             if annotation_file.exists():
+                print_info('Annotation for {dataset_name} dataset will be loaded from {file}'.format(
+                    dataset_name=self._config['name'], file=annotation_file))
                 annotation = read_annotation(get_path(annotation_file))
                 meta = self._load_meta()
                 use_converted_annotation = False
         if not annotation and 'annotation_conversion' in self._config:
+            print_info("Annotation conversion for {dataset_name} dataset has been started".format(
+                dataset_name=self._config['name']))
+            print_info("Parameters to be used for conversion:")
+            for key, value in self._config['annotation_conversion'].items():
+                print_info('{key}: {value}'.format(key=key, value=value))
             annotation, meta = self._convert_annotation()
+            if annotation:
+                print_info("Annotation conversion for {dataset_name} dataset has been finished".format(
+                    dataset_name=self._config['name']))
 
         if not annotation:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
@@ -82,13 +94,21 @@ class Dataset:
             annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
 
         if self._config.get('analyze_dataset', False):
-            analyze_dataset(annotation, meta)
+            if self._config.get('segmentation_masks_source'):
+                meta['segmentation_masks_source'] = self._config.get('segmentation_masks_source')
+            meta = analyze_dataset(annotation, meta)
+            if meta.get('segmentation_masks_source'):
+                del meta['segmentation_masks_source']
 
         if use_converted_annotation and contains_all(self._config, ['annotation', 'annotation_conversion']):
             annotation_name = self._config['annotation']
             meta_name = self._config.get('dataset_meta')
             if meta_name:
                 meta_name = Path(meta_name)
+                print_info("{dataset_name} dataset metadata will be saved to {file}".format(
+                    dataset_name=self._config['name'], file=meta_name))
+            print_info('Converted annotation for {dataset_name} dataset will be saved to {file}'.format(
+                dataset_name=self._config['name'], file=Path(annotation_name)))
             save_annotation(annotation, meta, Path(annotation_name), meta_name)
 
         self._annotation = annotation
@@ -103,6 +123,10 @@ class Dataset:
     @property
     def config(self):
         return deepcopy(self._config) #read-only
+
+    @property
+    def identifiers(self):
+        return [ann.identifier for ann in self.annotation]
 
     def __len__(self):
         if self.subset:
@@ -202,10 +226,17 @@ class Dataset:
         annotation.set_data_source(data_source)
         segmentation_mask_source = self.config.get('segmentation_masks_source')
         annotation.set_segmentation_mask_source(segmentation_mask_source)
+        annotation.set_additional_data_source(self.config.get('additional_data_source'))
+        annotation.set_dataset_metadata(self.metadata)
 
     def _load_meta(self):
+        meta = None
         meta_data_file = self._config.get('dataset_meta')
-        return read_json(meta_data_file, cls=JSONDecoderWithAutoConversion) if meta_data_file else None
+        if meta_data_file:
+            print_info('{dataset_name} dataset metadata will be loaded from {file}'.format(
+                dataset_name=self._config['name'], file=meta_data_file))
+            meta = read_json(meta_data_file, cls=JSONDecoderWithAutoConversion)
+        return meta
 
     def _convert_annotation(self):
         conversion_params = self._config.get('annotation_conversion')
@@ -233,11 +264,21 @@ class Dataset:
             annotation = create_subset(annotation, subsample_size, subsample_seed)
 
         if self._config.get('analyze_dataset', False):
-            analyze_dataset(annotation, self.metadata)
+            if self._config.get('segmentation_masks_source'):
+                self.metadata['segmentation_masks_source'] = self._config.get('segmentation_masks_source')
+            self.metadata = analyze_dataset(annotation, self.metadata)
+            if self.metadata.get('segmentation_masks_source'):
+                del self.metadata['segmentation_masks_source']
 
         self._annotation = annotation
         self.name = self._config.get('name')
         self.subset = None
+
+    def provide_data_info(self, reader, annotations):
+        for ann in annotations:
+            input_data = reader(ann.identifier)
+            self.set_annotation_metadata(ann, input_data, reader.data_source)
+        return annotations
 
 
 def read_annotation(annotation_file: Path):
@@ -300,6 +341,7 @@ class DatasetWrapper:
                 annotation.set_data_source(self.data_reader.data_source)
                 segmentation_mask_source = self.annotation_reader.config.get('segmentation_masks_source')
                 annotation.set_segmentation_mask_source(segmentation_mask_source)
+                annotation.set_additional_data_source(self.annotation_reader.config.get('additional_data_source'))
             return batch_annotation_ids, batch_annotation, batch_input, batch_identifiers
         batch_start = item * self.batch
         batch_end = min(self.size, batch_start + self.batch)

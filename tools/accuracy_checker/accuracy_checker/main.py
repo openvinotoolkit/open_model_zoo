@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ import cv2
 
 from .config import ConfigReader
 from .logging import print_info, add_file_handler, exception
-from .evaluators import ModelEvaluator, PipeLineEvaluator, ModuleEvaluator
+from .evaluators import ModelEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
 from .utils import get_path, cast_to_bool, check_file_existence
+from . import __version__
 
 EVALUATION_MODE = {
     'models': ModelEvaluator,
-    'pipelines': PipeLineEvaluator,
     'evaluations': ModuleEvaluator
 }
 
@@ -241,6 +241,10 @@ def build_arguments_parser():
         type=partial(get_path, is_directory=True)
     )
     parser.add_argument(
+        '--ie_preprocessing', help='enable preprocessing via Inference Engine. Accepted only for dlsdk launcher.',
+        required=False, default=False, type=cast_to_bool
+    )
+    parser.add_argument(
         '-ss', '--subsample_size', help="dataset subsample size",
         required=False,
         type=str
@@ -249,6 +253,10 @@ def build_arguments_parser():
         '--shuffle', help="Allow shuffle annotation during creation a subset",
         required=False,
         type=cast_to_bool
+    )
+    parser.add_argument(
+        '--version', action='version', version='%(prog)s {version}'.format(version=__version__),
+        help='show tool version and exit'
     )
 
     return parser

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,12 +27,13 @@ from pathlib import Path
 from unittest.mock import PropertyMock
 from accuracy_checker.config import ConfigError
 from accuracy_checker.launcher import DLSDKLauncher
-from accuracy_checker.launcher.dlsdk_launcher import DLSDKLauncherConfigValidator
+from accuracy_checker.launcher.dlsdk_launcher_config import DLSDKLauncherConfigValidator
 from accuracy_checker.launcher.launcher import create_launcher
 from accuracy_checker.launcher.model_conversion import FrameworkParameters
 from tests.common import update_dict
 from accuracy_checker.data_readers import DataRepresentation
 from accuracy_checker.utils import contains_all
+
 
 def no_available_myriad():
     try:
@@ -89,7 +90,19 @@ def get_dlsdk_test_blob(models_dir, config_update=None):
         'model': str(models_dir / 'SampLeNet.blob'),
         'device': 'MYRIAD',
         'adapter': 'classification',
-        '_models_prefix': str(models_dir)
+    }
+    if config_update:
+        config.update(config_update)
+
+    return create_launcher(config)
+
+
+def get_onnx_test_model(model_dir, config_update=None):
+    config = {
+        'framework': 'dlsdk',
+        'model': str(model_dir / 'samplenet.onnx'),
+        'device': 'CPU',
+        'adapter': 'classification'
     }
     if config_update:
         config.update(config_update)
@@ -148,6 +161,14 @@ class TestDLSDKLauncherInfer:
         dlsdk_test_model = get_dlsdk_test_model(models_dir, config_update)
         assert dlsdk_test_model._model == models_dir / 'SampLeNet.xml'
         assert dlsdk_test_model._weights == models_dir / 'SampLeNet.bin'
+
+    def test_dlsdk_onnx_import(self, data_dir, models_dir):
+        dlsdk_test_model = get_onnx_test_model(models_dir)
+        image = get_image(data_dir / '1.jpg', dlsdk_test_model.inputs['data'].shape)
+        input_blob = np.transpose([image.data], (0, 3, 1, 2))
+        dlsdk_test_model.predict([{'data': input_blob.astype(np.float32)}], [image.metadata])
+        assert dlsdk_test_model.output_blob == 'fc3'
+
 
 
 class TestDLSDKLauncherAffinity:
@@ -504,7 +525,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_meta': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to/source_models',
             'adapter': 'classification',
             'should_log_cmd': False
         }
@@ -521,7 +541,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_use_custom_operations_config': 'ssd_v2_support.json'},
             '_tf_custom_op_config_dir': 'config/dir'
@@ -549,7 +568,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_use_custom_operations_config': 'config.json'}
         }
@@ -575,7 +593,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_object_detection_api_pipeline_config': 'operations.config'},
             '_tf_obj_detection_api_pipeline_config_path': None
@@ -1090,6 +1107,50 @@ class TestDLSDKLauncher:
         with pytest.raises(ConfigError):
             DLSDKLauncher(config)
 
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_config_not_dict_like(self, mocker, models_dir):
+        device_config = 'ENFORCE_BF16'
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.raises(ConfigError):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_device_unknown(self, mocker, models_dir):
+        device_config = {'device': {'ENFORCE_BF16': 'NO'}}
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.warns(Warning):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_one_option_for_device_is_not_dict(self, mocker, models_dir):
+        device_config = {'CPU': {'ENFORCE_BF16': 'NO'}, 'GPU': 'ENFORCE_BF16'}
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.warns(Warning):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_one_option_is_not_binding_to_device(self, mocker, models_dir):
+        device_config = {'CPU': {'ENFORCE_BF16': 'NO'}, 'ENFORCE_BF16': 'NO'}
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.warns(Warning):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inputs', 'mock_inference_engine')
 class TestDLSDKLauncherConfig:
@@ -1165,8 +1226,7 @@ class TestDLSDKLauncherConfig:
 
     def test_dlsdk_launcher(self):
         launcher = {
-            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': 'ssd', 'device': 'cpu',
-            '_models_prefix': 'models'
+            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': 'ssd', 'device': 'cpu'
         }
         create_launcher(launcher)
 

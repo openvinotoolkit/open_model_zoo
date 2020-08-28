@@ -1,0 +1,23 @@
+models:
+  - name: landmarks-regression-retail-0009
+
+    launchers:
+      - framework: dlsdk
+        adapter: landmarks_regression
+
+    datasets:
+      - name: vgg2face
+
+        preprocessing:
+          - type: crop_rect
+          - type: resize
+            size: 48
+
+        postprocessing:
+          - type: normalize_landmarks_points
+            use_annotation_rect: True
+
+        metrics:
+          - type: per_point_normed_error
+            presenter: print_vector
+          - type: normed_error

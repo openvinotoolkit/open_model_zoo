@@ -34,7 +34,7 @@ class IEModel:
         return ('person', )
 
     def _preprocess(self, img):
-        _, _, h, w = self.get_input_shape().shape
+        _, _, h, w = self.get_input_shape()
         img = np.expand_dims(cv2.resize(img, (w, h)).transpose(2, 0, 1), axis=0)
         return img
 
@@ -48,7 +48,7 @@ class IEModel:
 
     def get_input_shape(self):
         """Returns an input shape of the wrapped IE model"""
-        return self.inputs_info[self.input_key]
+        return self.inputs_info[self.input_key].input_data.shape
 
     def get_allowed_inputs_len(self):
         return (1, )
@@ -78,21 +78,21 @@ class IEModel:
                           "or --cpu_extension command line argument")
                 sys.exit(1)
 
-        assert len(net.inputs.keys()) in self.get_allowed_inputs_len(), \
+        assert len(net.input_info) in self.get_allowed_inputs_len(), \
             "Supports topologies with only {} inputs, but got {}" \
-            .format(self.get_allowed_inputs_len(), len(net.inputs.keys()))
+            .format(self.get_allowed_inputs_len(), len(net.input_info))
         assert len(net.outputs) in self.get_allowed_outputs_len(), \
             "Supports topologies with only {} outputs, but got {}" \
             .format(self.get_allowed_outputs_len(), len(net.outputs))
 
         log.info("Preparing input blobs")
-        input_blob = next(iter(net.inputs))
+        input_blob = next(iter(net.input_info))
         out_blob = next(iter(net.outputs))
         net.batch_size = 1
 
         # Loading model to the plugin
         log.info("Loading model to the plugin")
         self.net = ie.load_network(network=net, device_name=device)
-        self.inputs_info = net.inputs
+        self.inputs_info = net.input_info
         self.input_key = input_blob
         self.output_key = out_blob

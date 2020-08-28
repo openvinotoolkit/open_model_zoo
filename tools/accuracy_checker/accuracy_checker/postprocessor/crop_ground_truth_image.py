@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ from ..preprocessor import Crop
 from ..representation import ImageInpaintingAnnotation, ImageInpaintingPrediction
 from ..config import NumberField
 from ..utils import get_size_from_config
+
 
 class CropGTImage(Postprocessor):
     __provider__ = "crop_ground_truth_image"

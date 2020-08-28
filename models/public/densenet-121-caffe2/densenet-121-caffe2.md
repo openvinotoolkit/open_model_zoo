@@ -4,7 +4,7 @@
 
 This is a Caffe2\* version of `densenet-121` model, one of the DenseNet
 group of models designed to perform image classification. This model
-was converted from Caffe\* to Caffe2\* format. 
+was converted from Caffe\* to Caffe2\* format.
 For details see repository <https://github.com/caffe2/models/tree/master/densenet121>,
 paper <https://arxiv.org/abs/1608.06993>.
 
@@ -21,6 +21,11 @@ paper <https://arxiv.org/abs/1608.06993>.
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 74.904% |
+| Top 5  | 92.192% |
+
 ## Performance
 
 ## Input
@@ -34,7 +39,7 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `BGR`. 
+Channel order is `BGR`.
 Mean values - [103.94,116.78,123.68], scale value - 58.8235294.
 
 ### Converted model

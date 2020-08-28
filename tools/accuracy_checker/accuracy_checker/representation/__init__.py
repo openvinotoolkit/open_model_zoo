@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
 
 from .base_representation import BaseRepresentation
 from .classification_representation import (
@@ -60,7 +59,8 @@ from .regression_representation import (
     FacialLandmarks3DAnnotation,
     FacialLandmarks3DPrediction,
     GazeVectorAnnotation,
-    GazeVectorPrediction
+    GazeVectorPrediction,
+    FeaturesRegressionAnnotation
 )
 from .multilabel_recognition import MultiLabelRecognitionAnnotation, MultiLabelRecognitionPrediction
 from .super_resolution_representation import SuperResolutionAnnotation, SuperResolutionPrediction
@@ -73,6 +73,8 @@ from .nlp_representation import (
     MachineTranslationPrediction,
     QuestionAnsweringAnnotation,
     QuestionAnsweringPrediction,
+    QuestionAnsweringEmbeddingAnnotation,
+    QuestionAnsweringEmbeddingPrediction,
     TextClassificationAnnotation,
     LanguageModelingAnnotation,
     LanguageModelingPrediction
@@ -82,7 +84,7 @@ from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
 
 from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPrediction
 from .image_processing import ImageProcessingAnnotation, ImageProcessingPrediction
-
+from .quality_assessment import QualityAssessmentAnnotation, QualityAssessmentPrediction
 __all__ = [
     'BaseRepresentation',
 
@@ -131,6 +133,7 @@ __all__ = [
     'FacialLandmarks3DPrediction',
     'GazeVectorAnnotation',
     'GazeVectorPrediction',
+    'FeaturesRegressionAnnotation',
 
     'MultiLabelRecognitionAnnotation',
     'MultiLabelRecognitionPrediction',
@@ -160,11 +163,14 @@ __all__ = [
     'MachineTranslationPrediction',
     'QuestionAnsweringAnnotation',
     'QuestionAnsweringPrediction',
+    'QuestionAnsweringEmbeddingAnnotation',
+    'QuestionAnsweringEmbeddingPrediction',
     'TextClassificationAnnotation',
     'LanguageModelingAnnotation',
     'LanguageModelingPrediction',
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',
-
+    'QualityAssessmentAnnotation',
+    'QualityAssessmentPrediction',
 ]

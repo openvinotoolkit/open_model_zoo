@@ -9,9 +9,11 @@
 #include <vector>
 #include <gflags/gflags.h>
 
+#include <samples/default_flags.hpp>
+
+DEFINE_INPUT_FLAGS
+
 static const char help_message[] = "Print a usage message.";
-static const char input_message[] = "Required. Path to an image or video file, to a text file with paths to images, "
-                                    "or to a webcamera device node (for example, /dev/video0).";
 static const char text_detection_model_message[] = "Required. Path to the Text Detection model (.xml) file.";
 static const char text_recognition_model_message[] = "Required. Path to the Text Recognition model (.xml) file.";
 static const char text_recognition_model_symbols_set_message[] = "Optional. Symbol set for the Text Recognition model.";
@@ -46,18 +48,16 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 static const char decoder_bandwidth_message[] = "Optional. Bandwidth for CTC beam search decoder. Default value is 0, in this case CTC greedy decoder will be used.";
 
 DEFINE_bool(h, false, help_message);
-DEFINE_string(i, "", input_message);
 DEFINE_string(m_td, "", text_detection_model_message);
 DEFINE_string(m_tr, "", text_recognition_model_message);
 DEFINE_string(m_tr_ss, "0123456789abcdefghijklmnopqrstuvwxyz", text_recognition_model_symbols_set_message);
 DEFINE_bool(cc, false, text_central_image_crop_message);
-DEFINE_int32(w_td, 1280, image_width_for_text_detection_model_message);
-DEFINE_int32(h_td, 768, image_height_for_text_detection_model_message);
+DEFINE_int32(w_td, 0, image_width_for_text_detection_model_message);
+DEFINE_int32(h_td, 0, image_height_for_text_detection_model_message);
 DEFINE_double(thr, 0.2, text_recognition_threshold_message);
 DEFINE_double(cls_pixel_thr, 0.8, pixel_classification_threshold_message);
 DEFINE_double(link_pixel_thr, 0.8, pixel_linkage_threshold_message);
 DEFINE_int32(max_rect_num, -1, text_max_rectangles_number_message);
-DEFINE_string(dt, "", input_data_type_message);
 DEFINE_string(d_td, "CPU", text_detection_target_device_message);
 DEFINE_string(d_tr, "CPU", text_recognition_target_device_message);
 DEFINE_string(l, "", custom_cpu_library_message);
@@ -76,10 +76,10 @@ static void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                           " << help_message << std::endl;
-    std::cout << "    -i \"<path>\"                  " << input_message << std::endl;
+    std::cout << "    -i                           " << input_message << std::endl;
+    std::cout << "    -loop                        " << loop_message << std::endl;
     std::cout << "    -m_td \"<path>\"               " << text_detection_model_message << std::endl;
     std::cout << "    -m_tr \"<path>\"               " << text_recognition_model_message << std::endl;
-    std::cout << "    -dt \"<input_data_type>\"      " << input_data_type_message << std::endl;
     std::cout << "    -m_tr_ss \"<value>\"           " << text_recognition_model_symbols_set_message << std::endl;
     std::cout << "    -cc                          " << text_central_image_crop_message << std::endl;
     std::cout << "    -w_td \"<value>\"              " << image_width_for_text_detection_model_message << std::endl;

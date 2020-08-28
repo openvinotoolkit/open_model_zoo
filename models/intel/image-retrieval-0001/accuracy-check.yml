@@ -1,0 +1,16 @@
+models:
+  - name: image-retrieval-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter: reid
+
+    datasets:
+      - name: image_retrieval
+
+        metrics:
+          - name: rank@1
+            type: cmc
+            top_k: 1
+
+          - type: reid_map

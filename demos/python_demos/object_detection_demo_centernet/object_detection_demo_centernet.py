@@ -127,7 +127,7 @@ def main():
         cv2.imshow('CenterNet Detection Demo', frame)
         key = cv2.waitKey(delay)
         if key == 27:
-            return
+            break
         presenter.handleKey(key)
     print(presenter.reportMeans())
 

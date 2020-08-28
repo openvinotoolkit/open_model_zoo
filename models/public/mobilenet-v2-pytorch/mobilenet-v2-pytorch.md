@@ -31,6 +31,7 @@ See [here](https://github.com/tonylins/pytorch-mobilenet-v2)
 | Metric | Original model | Converted model |
 |--------|----------------|-----------------|
 | Top 1  | 71.8%          | 71.8%           |
+| Top 5  | 90.396%          | 90.396%       |
 
 ## Performance
 

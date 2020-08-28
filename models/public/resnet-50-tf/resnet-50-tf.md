@@ -6,7 +6,7 @@
 pretrained on the ImageNet dataset. Originally redistributed in Saved model format,
 converted to frozen graph using `tf.graph_util` module.
 For details see [paper](https://arxiv.org/abs/1512.03385),
-[repository](https://github.com/tensorflow/models/tree/master/official/r1/resnet).
+[repository](https://github.com/tensorflow/models/tree/v2.2.0/official/r1/resnet).
 
 ### Steps to Reproduce Conversion to Frozen Graph
 
@@ -32,8 +32,8 @@ python3 freeze_saved_model.py --saved_model_dir path/to/downloaded/saved_model -
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 76.45          | 76.17           |
-| Top 5  | 93.05          | 92.98           |
+| Top 1  | 76.45%          | 76.17%          |
+| Top 5  | 93.05%          | 92.98%           |
 
 ## Performance
 
@@ -48,7 +48,7 @@ Image, name: `map/TensorArrayStack/TensorArrayGatherV3`,  shape: `1,224,224,3`, 
 - `W` - width
 - `C` - channel
 
-Channel order is `RGB`. 
+Channel order is `RGB`.
 Mean values: [123.68,116.78,103.94].
 
 ### Converted Model

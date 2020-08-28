@@ -1,4 +1,4 @@
-# yolo-v2-tiny
+# yolo-v2-tiny-tf
 
 ## Use Case and High-Level Description
 
@@ -51,8 +51,8 @@ Accuracy metrics obtained on COCO\* validation dataset for converted model.
 
 | Metric | Value |
 | ------ | ------|
-| mAP    | 27.34 |
-| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 29.11 |
+| mAP    | 27.34% |
+| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 29.11%  |
 
 ## Input
 

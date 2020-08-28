@@ -16,6 +16,12 @@ the [repository](https://github.com/zisianw/FaceBoxes.PyTorch), [paper](https://
 | MParams                         | 1.0059                                   |
 | Source framework                | PyTorch\*                                |
 
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| mAP   | 83.565%|
+
 ## Performance
 
 ## Input

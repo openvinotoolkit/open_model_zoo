@@ -21,6 +21,11 @@ The model output for `vgg19` is the typical object classifier output for the 100
 
 ## Accuracy
 
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 71.062%|
+| Top 5  | 89.832%|
+
 ## Performance
 
 ## Input

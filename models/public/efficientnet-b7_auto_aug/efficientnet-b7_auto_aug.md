@@ -24,8 +24,8 @@ For details about this family of models, check out the [TensorFlow Cloud TPU rep
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 84.68          | 84.68           |
-| Top 5  | 97.09          | 97.09           | 
+| Top 1  | 84.68%          | 84.68%           |
+| Top 5  | 97.09%         | 97.09%           |
 
 ## Performance
 

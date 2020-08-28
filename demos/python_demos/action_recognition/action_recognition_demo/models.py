@@ -93,7 +93,7 @@ class IEModel:
         self.input_name = next(iter(self.net.input_info))
         self.output_name = next(iter(self.net.outputs))
         self.input_size = self.net.input_info[self.input_name].input_data.shape
-        self.output_size = self.exec_net.requests[0].outputs[self.output_name].shape
+        self.output_size = self.exec_net.requests[0].output_blobs[self.output_name].buffer.shape
         self.num_requests = num_requests
 
     def infer(self, frame):
@@ -108,7 +108,7 @@ class IEModel:
 
     def wait_request(self, req_id):
         self.exec_net.requests[req_id].wait()
-        return self.exec_net.requests[req_id].outputs[self.output_name]
+        return self.exec_net.requests[req_id].output_blobs[self.output_name].buffer
 
 
 class DummyDecoder:
