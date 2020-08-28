@@ -51,10 +51,13 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
     def configure(self):
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self.to_dst_image_size = self.get_value_from_config('to_dst_image_size')
+        self._deprocess_predictions = False
 
     def process_image(self, annotation, prediction):
         target_height = self.dst_height or self.image_size[0]
         target_width = self.dst_width or self.image_size[1]
+        if self._deprocess_predictions:
+            target_height, target_width = self.image_size[:2]
 
         @singledispatch
         def resize_segmentation_mask(entry, height, width):
@@ -84,6 +87,7 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
 
         for target in prediction:
             resize_segmentation_mask(target, target_height, target_width)
+        self._deprocess_predictions = False
 
         return annotation, prediction
 
