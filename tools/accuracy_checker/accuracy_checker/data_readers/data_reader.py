@@ -26,11 +26,6 @@ import numpy as np
 from numpy.lib.npyio import NpzFile
 
 try:
-    import tensorflow as tf
-except ImportError as import_error:
-    tf = None
-
-try:
     import nibabel as nib
 except ImportError:
     nib = None
@@ -436,9 +431,13 @@ class TensorflowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        if tf is None:
-            raise ImportError('tf backend for image reading requires TensorFlow. Please install it before usage.')
-
+        try:
+            import tensorflow as tf # pylint: disable=C0415
+        except ImportError as import_error:
+            raise ImportError(
+                'tf backend for image reading requires TensorFlow. '
+                'Please install it before usage. {}'.format(import_error.msg)
+            )
         tf.enable_eager_execution()
 
         def read_func(path):
