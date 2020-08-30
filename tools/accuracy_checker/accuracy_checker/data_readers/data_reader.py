@@ -38,7 +38,7 @@ except ImportError:
 
 from ..utils import get_path, read_json, read_pickle, contains_all
 from ..dependency import ClassProvider
-from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField
+from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField
 
 REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
 
@@ -353,6 +353,8 @@ class NumpyReaderConfig(ConfigValidator):
     type = StringField(optional=True)
     keys = StringField(optional=True, default="")
     separator = StringField(optional=True, default="@")
+    block = BoolField(optional=True, default=False)
+    batch = NumberField(optional=True, default=1)
 
 
 class NumPyReader(BaseReader):
@@ -369,6 +371,9 @@ class NumPyReader(BaseReader):
         self.keys = self.config.get('keys', "") if self.config else ""
         self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
         self.separator = self.config.get('separator')
+        self.block = self.config.get('block', False)
+        self.batch = int(self.config.get('batch', 1))
+
         if self.separator and self.is_text:
             raise ConfigError('text file reading with numpy does')
         self.multi_infer = self.config.get('multi_infer', False)
@@ -391,11 +396,15 @@ class NumPyReader(BaseReader):
         if field_id is not None:
             key = [k for k, v in self.keyRegex.items() if v.match(field_id)]
             if len(key) > 0:
-                recno = field_id.split('_')[-1]
-                recno = int(recno)
-                start, _ = Path(data_id).name.split('.')
-                start = int(start)
-                return data[key[0]][recno - start, :]
+                if self.block:
+                    res = data[key[0]]
+                else:
+                    recno = field_id.split('_')[-1]
+                    recno = int(recno)
+                    start = Path(data_id).name.split('.')[0]
+                    start = int(start)
+                    res = data[key[0]][recno - start, :]
+                return res
 
         key = next(iter(data.keys()))
         return data[key]

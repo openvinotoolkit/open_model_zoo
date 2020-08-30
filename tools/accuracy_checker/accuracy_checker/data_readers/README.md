@@ -28,10 +28,10 @@ reader:
 ```
 
 AccuracyChecker supports following list of data readers:
-* `opencv_imread` - read images using OpenCV library. Default color space is BGR. 
+* `opencv_imread` - read images using OpenCV library. Default color space is BGR.
    * `reading_flag` - (Optional) flag which specifies the way image should be read: `color` - default, loads color image, `gray` - loads image in grayscale mode, `unchanged` - loads image as such including alpha channel.
 * `pillow_imread` - read images using Pillow library. Default color space is RGB.
-* `scipy_imread` - read images using similar approach as in `scipy.misc.imread` 
+* `scipy_imread` - read images using similar approach as in `scipy.misc.imread`
 ```
 Note: since 1.3.0 version the image processing module is not a part of scipy library. This reader does not use scipy anymore.
 ```
@@ -42,6 +42,9 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
 * `annotation_features_extractor` - read features from annotation.
   * `features` - list of features. All features should be fields of annotation representation.
 * `numpy_reader` - read numpy dumped files (npy or npz formats are supported for reading)
+  * `keys` - comma-separated list of model input names
+  * `separator` - separator symbol between input identifier and file identifier
+  * `block` - block mode (batch - oriented). In this mode reader returns whole variable.
 * `numpy_txt_reader`- read data stored in text format to numpy array.
 * `numpy_dict_reader` - read and unpack dictionaries saved in numpy files.
 * `nifti_reader` - read NifTI data format

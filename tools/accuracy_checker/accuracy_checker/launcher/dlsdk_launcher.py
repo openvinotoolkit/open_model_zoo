@@ -823,7 +823,7 @@ class DLSDKLauncher(Launcher):
         return self._align_data_shape(data, layer_name, layout)
 
     @staticmethod
-    def _data_to_blob(layer_shape, data, layout):
+    def _data_to_blob(layer_shape, data, layout): # pylint:disable=R0911
         data_shape = np.shape(data)
         if len(layer_shape) == 4:
             if len(data_shape) == 5:
@@ -837,6 +837,9 @@ class DLSDKLauncher(Launcher):
         if len(layer_shape) == 2:
             if len(data_shape) == 1:
                 return np.transpose([data])
+            if len(data_shape) > 2:
+                if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
+                    return np.resize(data, layer_shape)
 
         if len(layer_shape) == 3 and len(data_shape) == 4:
             data = np.transpose(data, layout)
