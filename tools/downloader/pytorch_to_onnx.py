@@ -24,6 +24,13 @@ def positive_int_arg(values):
     return result
 
 
+def prepare_model_params(module, model_params):
+    for key in model_params:
+        func = model_params[key].split(".", 1)[0]
+        if hasattr(module, func):
+            model_params[key] = eval("module." + model_params[key])
+
+
 def model_parameter(parameter):
     param, value = parameter.split('=', 1)
     try:
@@ -42,7 +49,7 @@ def parse_args():
 
     parser.add_argument('--model-name', type=str, required=True,
                         help='Model to convert. May be class name or name of constructor function')
-    parser.add_argument('--weights', type=str, required=True,
+    parser.add_argument('--weights', type=str, required=False, default="",
                         help='Path to the weights in PyTorch\'s format')
     parser.add_argument('--input-shape', metavar='INPUT_DIM', type=positive_int_arg, required=True,
                         help='Shape of the input blob')
@@ -58,10 +65,14 @@ def parse_args():
                         help='Space separated names of the output layers')
     parser.add_argument('--model-param', type=model_parameter, default=[], action='append',
                         help='Pair "name"="value" of model constructor parameter')
+    parser.add_argument('--onnx-version', type=int, default=9,
+                        help='Version of symbolic opset')
+    parser.add_argument('--prepare-params', type=bool, default=False,
+                        help='Using functions as parameters of models')
     return parser.parse_args()
 
 
-def load_model(model_name, weights, model_path, module_name, model_params):
+def load_model(model_name, weights, model_path, module_name, model_params, prepare_params):
     """Import model and load pretrained weights"""
 
     if model_path:
@@ -70,6 +81,8 @@ def load_model(model_name, weights, model_path, module_name, model_params):
     try:
         module = importlib.import_module(module_name)
         creator = getattr(module, model_name)
+        if prepare_params:
+            prepare_model_params(module, model_params)
         model = creator(**model_params)
     except ImportError as err:
         if model_path:
@@ -81,9 +94,10 @@ def load_model(model_name, weights, model_path, module_name, model_params):
         print('ERROR: Module {} contains no class or function with name {}!'
               .format(module_name, model_name))
         sys.exit(err)
-
+    
     try:
-        model.load_state_dict(torch.load(weights, map_location='cpu'))
+        if weights!="":
+            model.load_state_dict(torch.load(weights, map_location='cpu'))
     except RuntimeError as err:
         print('ERROR: Weights from {} cannot be loaded for model {}! Check matching between model and weights'.format(
             weights, model_name))
@@ -91,14 +105,14 @@ def load_model(model_name, weights, model_path, module_name, model_params):
     return model
 
 
-def convert_to_onnx(model, input_shape, output_file, input_names, output_names):
+def convert_to_onnx(model, input_shape, output_file, input_names, output_names, onnx_version):
     """Convert PyTorch model to ONNX and check the resulting onnx model"""
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     model.eval()
     dummy_input = torch.randn(input_shape)
     model(dummy_input)
-    torch.onnx.export(model, dummy_input, str(output_file), verbose=False, opset_version=11,
+    torch.onnx.export(model, dummy_input, str(output_file), verbose=False, opset_version=onnx_version,
                       input_names=input_names.split(','), output_names=output_names.split(','))
 
     model = onnx.load(str(output_file))
@@ -121,9 +135,11 @@ def convert_to_onnx(model, input_shape, output_file, input_names, output_names):
 def main():
     args = parse_args()
     model = load_model(args.model_name, args.weights,
-                       args.model_path, args.import_module, dict(args.model_param))
+                       args.model_path, args.import_module,
+                       dict(args.model_param), args.prepare_params)
 
-    convert_to_onnx(model, args.input_shape, args.output_file, args.input_names, args.output_names)
+    convert_to_onnx(model, args.input_shape, args.output_file,
+                    args.input_names, args.output_names, args.onnx_version)
 
 
 if __name__ == '__main__':
