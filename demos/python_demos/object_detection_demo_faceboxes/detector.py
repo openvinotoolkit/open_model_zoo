@@ -20,6 +20,10 @@ import os
 import cv2
 from collections import namedtuple
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
+
+
 class Detector(object):
     def __init__(self, ie, model_path, device='CPU', threshold=0.5):
         model = ie.read_network(model=model_path, weights=os.path.splitext(model_path)[0] + '.bin')
@@ -36,7 +40,7 @@ class Detector(object):
         assert model.outputs[self._output_layer_names[1]].shape[2] == 2, "Expected 2-class scores(background, face)"
 
         self._ie = ie
-        self._exec_model = self._ie.load_network(model, device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+        self._exec_model = self._ie.load_network(model, device, create_default_config(device))
         self.infer_time = -1
         _, channels, self.input_height, self.input_width = model.input_info[self._input_layer_name].input_data.shape
         assert channels == 3, "Expected 3-channel input"

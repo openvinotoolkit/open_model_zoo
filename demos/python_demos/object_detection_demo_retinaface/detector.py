@@ -16,9 +16,13 @@
 
 import cv2
 import os
+import sys
 import numpy as np
 
 from postprocessor import RetinaFacePostprocessor
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
 
 class Detector(object):
     def __init__(self, ie, model_path, face_prob_threshold, device='CPU'):
@@ -36,7 +40,7 @@ class Detector(object):
         self.face_prob_threshold = face_prob_threshold
 
         self._ie = ie
-        self._exec_model = self._ie.load_network(model, device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+        self._exec_model = self._ie.load_network(model, device, create_default_config(device))
 
         self.infer_time = -1
 

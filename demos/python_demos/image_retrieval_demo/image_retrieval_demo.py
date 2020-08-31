@@ -30,6 +30,7 @@ from image_retrieval_demo.roi_detector_on_video import RoiDetectorOnVideo
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
+from ie_config_helper import format_device_string
 
 
 INPUT_SIZE = 224
@@ -106,7 +107,7 @@ def main():
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE)
+    img_retrieval = ImageRetrieval(args.model, format_device_string(args.device), args.gallery, INPUT_SIZE)
 
     frames = RoiDetectorOnVideo(args.i)
 

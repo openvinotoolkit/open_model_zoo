@@ -106,11 +106,12 @@ def main():
     class_map = load_class_map(args.class_map)
     assert class_map is not None
 
-    ie_core = load_ie_core(args.device)
+    device_string = format_device_string(args.device)
+    ie_core = load_ie_core(device_string)
 
-    person_detector = PersonDetector(args.detection_model, args.device, ie_core,
+    person_detector = PersonDetector(args.detection_model, device_string, ie_core,
                                      num_requests=2, output_shape=DETECTOR_OUTPUT_SHAPE)
-    action_recognizer = ActionRecognizer(args.action_model, args.device, ie_core,
+    action_recognizer = ActionRecognizer(args.action_model, device_string, ie_core,
                                          num_requests=2, img_scale=ACTION_IMAGE_SCALE,
                                          num_classes=ACTION_NUM_CLASSES)
     person_tracker = Tracker(person_detector, TRACKER_SCORE_THRESHOLD, TRACKER_IOU_THRESHOLD)

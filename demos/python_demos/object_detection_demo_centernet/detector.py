@@ -19,6 +19,9 @@ import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
+
 
 class Detector(object):
     def __init__(self, ie, model_path, threshold=0.3, device='CPU'):
@@ -31,7 +34,7 @@ class Detector(object):
         self._output_layer_names = sorted(model.outputs)
 
         self._ie = ie
-        self._exec_model = self._ie.load_network(model, device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+        self._exec_model = self._ie.load_network(model, device, create_default_config(device))
         self._threshold = threshold
         self.infer_time = -1
         _, channels, self.input_height, self.input_width = model.input_info[self._input_layer_name].input_data.shape

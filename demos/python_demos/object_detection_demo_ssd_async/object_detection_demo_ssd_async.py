@@ -408,8 +408,8 @@ def main():
     ie = IECore()
 
     device_string = format_device_string(args.device)
-    config_user_specified = create_config(device_string, args.num_streams, args.number_threads)
-    config_min_latency = create_config(device_string, args.num_streams, args.number_threads, True)
+    config_user_specified = create_config(device_string, args.num_streams, args.num_threads)
+    config_min_latency = create_config(device_string, args.num_streams, args.num_threads, True)
 
     labels_map = None
     if args.labels:

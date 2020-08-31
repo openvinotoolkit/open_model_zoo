@@ -18,6 +18,9 @@ import logging as log
 import numpy as np
 import cv2 as cv
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
+
 
 class IEModel:
     """Class for inference of models in the Inference Engine format"""
@@ -87,7 +90,7 @@ def load_ie_model(ie, model_xml, device, plugin_dir, num_reqs=1):
 
     # Loading model to the plugin
     log.info("Loading model to the plugin")
-    exec_net = ie.load_network(network=net, device_name=device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'},
+    exec_net = ie.load_network(network=net, device_name=device, create_default_config(device_string),
                                num_requests=num_reqs)
     model = IEModel(exec_net, net.input_info, input_blob, out_blob)
     return model

@@ -28,6 +28,7 @@ from action_recognition_demo.steps import run_pipeline
 
 sys.path.append(path.join(path.dirname(path.dirname(path.abspath(__file__))), 'common'))
 import monitors
+from ie_config_helper import format_device_string
 
 
 def build_argparser():
@@ -86,21 +87,22 @@ def main():
         labels = None
 
     ie = IECore()
+    device_string = format_device_string(args.device)
 
-    if 'MYRIAD' in args.device:
+    if 'MYRIAD' in device_string:
         myriad_config = {'VPU_HW_STAGES_OPTIMIZATION': 'YES'}
         ie.set_config(myriad_config, 'MYRIAD')
 
     decoder_target_device = 'CPU'
-    if args.device != 'CPU':
-        encoder_target_device = args.device
+    if device_string != 'CPU':
+        encoder_target_device = device_string
     else:
         encoder_target_device = decoder_target_device
 
     encoder_xml = args.m_encoder
     encoder_bin = args.m_encoder.replace('.xml', '.bin')
     encoder = IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
-                      num_requests=(3 if args.device == 'MYRIAD' else 1))
+                      num_requests=(3 if device_string == 'MYRIAD' else 1))
 
     if args.m_decoder is not None:
         decoder_xml = args.m_decoder

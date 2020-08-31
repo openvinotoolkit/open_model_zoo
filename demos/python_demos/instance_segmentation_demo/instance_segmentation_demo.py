@@ -30,6 +30,7 @@ from instance_segmentation_demo.visualizer import Visualizer
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
+from ie_config_helper import create_default_config
 
 
 def build_argparser():
@@ -124,13 +125,14 @@ def main():
     # Read IR
     log.info('Loading network')
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + '.bin')
-
-    if 'CPU' in args.device:
+    
+    device_string = format_device_string(args.device)
+    if 'CPU' in device_string:
         supported_layers = ie.query_network(net, 'CPU')
         not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
         if len(not_supported_layers) != 0:
             log.error('Following layers are not supported by the plugin for specified device {}:\n {}'.
-                      format(args.device, ', '.join(not_supported_layers)))
+                      format(device_string, ', '.join(not_supported_layers)))
             sys.exit(1)
 
     required_input_keys = {'im_data', 'im_info'}
@@ -144,7 +146,7 @@ def main():
     assert n == 1, 'Only batch 1 is supported by the demo application'
 
     log.info('Loading IR to the plugin...')
-    exec_net = ie.load_network(network=net, device_name=args.device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'},
+    exec_net = ie.load_network(network=net, device_name=device_string, create_default_config(device_string),
                                num_requests=2)
 
     try:

@@ -16,6 +16,8 @@
 
 from openvino.inference_engine import IECore  # pylint: disable=no-name-in-module
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
 
 def load_ie_core(device):
     """Loads IE Core"""
@@ -43,7 +45,7 @@ class IEModel:  # pylint: disable=too-few-public-methods
 
         self.exec_net = ie_core.load_network(network=self.net,
                                              device_name=device,
-                                             config={'MYRIAD_THROUGHPUT_STREAMS': '1'},
+                                             create_default_config(device),
                                              num_requests=num_requests)
 
         self.input_name = next(iter(self.net.input_info))

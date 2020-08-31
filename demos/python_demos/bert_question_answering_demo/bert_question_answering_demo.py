@@ -28,6 +28,9 @@ import numpy as np
 import urllib.request
 from openvino.inference_engine import IECore
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -176,7 +179,8 @@ def main():
 
     log.info("Initializing Inference Engine")
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device]
+    device_string = format_device_string(args.device)
+    version = ie.get_versions(device_string)[device_string]
     version_str = "{}.{}.{}".format(version.major, version.minor, version.build_number)
     log.info("Plugin version is {}".format(version_str))
 
@@ -223,9 +227,9 @@ def main():
         raise Exception("Unexpected network input or output names")
 
     # load model to the device
-    log.info("Loading model to the {}".format(args.device))
-    ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device,
-                                      config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+    log.info("Loading model to the {}".format(device_string))
+    ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=device_string,
+                                      create_default_config(device_string))
 
     # loop on user's questions
     while True:

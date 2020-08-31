@@ -17,6 +17,9 @@ import numpy as np
 import os
 import sys
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
+
 
 class IEModel:
     """Class for inference of models in the Inference Engine format"""
@@ -88,7 +91,7 @@ class IEModel:
 
         # Loading model to the plugin
         log.info("Loading model to the plugin")
-        self.net = ie.load_network(network=net, device_name=device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+        self.net = ie.load_network(network=net, device_name=device, create_default_config(device))
         self.inputs_info = net.input_info
         self.input_key = input_blob
         self.output_key = out_blob

@@ -12,6 +12,7 @@ from estimator import HumanPoseEstimator
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
+from ie_config_helper import format_device_string
 
 
 def build_argparser():
@@ -73,12 +74,13 @@ class VideoReader(object):
 
 def run_demo(args):
     ie = IECore()
+    device_string = format_device_string(args.device)
     detector_person = Detector(ie, path_to_model_xml=args.model_od,
-                              device=args.device,
+                              device=device_string,
                               label_class=args.person_label)
 
     single_human_pose_estimator = HumanPoseEstimator(ie, path_to_model_xml=args.model_hpe,
-                                                  device=args.device)
+                                                  device=device_string)
     if args.input != '':
         img = cv2.imread(args.input[0], cv2.IMREAD_COLOR)
         frames_reader, delay = (VideoReader(args.input), 1) if img is None else (ImageReader(args.input), 0)

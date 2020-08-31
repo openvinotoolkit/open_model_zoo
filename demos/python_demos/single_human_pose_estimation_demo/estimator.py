@@ -3,6 +3,10 @@ import numpy as np
 
 import cv2
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
+
+
 def preprocess_bbox(bbox, image):
     aspect_ratio = 0.75
     bbox[0] = np.clip(bbox[0], 0, image.shape[0] - 1)
@@ -104,7 +108,7 @@ class HumanPoseEstimator(object):
             "Expected model output shape [1, %s, H, W]" % (self.OUTPUT_CHANNELS_SIZE)
 
         self._ie = ie
-        self._exec_model = self._ie.load_network(self.model, device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+        self._exec_model = self._ie.load_network(self.model, device, create_default_config(device))
         self._scale = scale
         self._thr = thr
 

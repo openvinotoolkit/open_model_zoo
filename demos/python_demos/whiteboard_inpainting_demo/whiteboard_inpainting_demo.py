@@ -110,14 +110,15 @@ def main():
 
     log.info("Initializing Inference Engine")
     ie = IECore()
+    device_string = format_device_string(args.device)
     if args.m_instance_segmentation:
         labels_file = osp.join(root_dir, 'coco_labels.txt')
         segmentation = MaskRCNN(ie, args.m_instance_segmentation, labels_file,
-                                args.threshold, args.device)
+                                args.threshold, device_string)
     elif args.m_semantic_segmentation:
         labels_file = osp.join(root_dir, 'cityscapes_labels.txt')
         segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, labels_file,
-                                            args.threshold, args.device)
+                                            args.threshold, device_string)
 
     black_board = False
     output_frame = np.full((frame_size[1], frame_size[0], 3), 255, dtype='uint8')

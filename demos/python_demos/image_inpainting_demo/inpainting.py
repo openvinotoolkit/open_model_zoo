@@ -15,6 +15,9 @@ import os
 import cv2
 import numpy as np
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
+
 
 class ImageInpainting(object):
     def __init__(self, ie, model_path, parts, max_brush_width, max_length, max_vertex, device='CPU'):
@@ -27,7 +30,7 @@ class ImageInpainting(object):
         self._output_layer_name = next(iter(model.outputs))
 
         self._ie = ie
-        self._exec_model = self._ie.load_network(model, device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+        self._exec_model = self._ie.load_network(model, device, create_default_config(device))
         self.infer_time = -1
 
         _, channels, input_height, input_width = model.input_info[self._input_layer_names[0]].input_data.shape

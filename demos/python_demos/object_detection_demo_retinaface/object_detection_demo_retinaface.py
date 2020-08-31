@@ -28,6 +28,7 @@ from detector import Detector
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
+from ie_config_helper import format_device_string
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -91,7 +92,7 @@ def main():
     args = build_argparser().parse_args()
 
     ie = IECore()
-    detector = Detector(ie, args.model, args.face_prob_threshold, args.device)
+    detector = Detector(ie, args.model, args.face_prob_threshold, format_device_string(args.device))
 
     img = cv2.imread(args.input[0], cv2.IMREAD_COLOR)
     frames_reader, delay = (VideoReader(args.input), 1) if img is None else (ImageReader(args.input), 0)

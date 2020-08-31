@@ -27,6 +27,7 @@ from modules.parse_poses import parse_poses
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
+from ie_config_helper import format_device_string
 
 
 def rotate_poses(poses_3d, R, t):
@@ -71,7 +72,7 @@ if __name__ == '__main__':
         raise ValueError('Please, provide input data.')
 
     stride = 8
-    inference_engine = InferenceEngine(args.model, args.device, stride)
+    inference_engine = InferenceEngine(args.model, format_device_string(args.device), stride)
     canvas_3d = np.zeros((720, 1280, 3), dtype=np.uint8)
     plotter = Plotter3d(canvas_3d.shape[:2])
     canvas_3d_window_name = 'Canvas 3D'

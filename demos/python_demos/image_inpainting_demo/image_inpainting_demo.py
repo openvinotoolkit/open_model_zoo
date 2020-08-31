@@ -22,6 +22,9 @@ from openvino.inference_engine import IECore
 
 from inpainting import ImageInpainting
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import format_device_string
+
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
@@ -46,7 +49,8 @@ def main():
 
     ie = IECore()
     inpainting_processor = ImageInpainting(ie, args.model, args.parts,
-                                           args.max_brush_width, args.max_length, args.max_vertex, args.device)
+                                           args.max_brush_width, args.max_length, args.max_vertex,
+                                           format_device_string(args.device))
 
     img = cv2.imread(args.input, cv2.IMREAD_COLOR)
     masked_image, output_image = inpainting_processor.process(img)

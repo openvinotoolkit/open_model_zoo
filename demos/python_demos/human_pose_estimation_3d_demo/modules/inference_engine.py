@@ -17,6 +17,9 @@ import numpy as np
 
 from openvino.inference_engine import IECore
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
+
 
 class InferenceEngine:
     def __init__(self, net_model_xml_path, device, stride):
@@ -34,7 +37,7 @@ class InferenceEngine:
             'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
 
         self.exec_net = self.ie.load_network(network=self.net, num_requests=1, device_name=device,
-                                             config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+                                             create_default_config(device))
 
     def infer(self, img):
         img = img[0:img.shape[0] - (img.shape[0] % self.stride),
@@ -44,7 +47,7 @@ class InferenceEngine:
         if h != img.shape[0] or w != img.shape[1]:
             self.net.reshape({input_layer: (n, c, img.shape[0], img.shape[1])})
             self.exec_net = self.ie.load_network(network=self.net, num_requests=1, device_name=self.device,
-                                                 config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+                                                 create_default_config(self.device))
         img = np.transpose(img, (2, 0, 1))[None, ]
 
         inference_result = self.exec_net.infer(inputs={'data': img})

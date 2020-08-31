@@ -20,6 +20,8 @@ from itertools import cycle
 import cv2
 import numpy as np
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
 
 def center_crop(frame, crop_size):
     img_h, img_w, _ = frame.shape
@@ -90,7 +92,7 @@ class IEModel:
 
         print("Loading IR to the plugin...")
         self.exec_net = ie_core.load_network(network=self.net, device_name=target_device,
-                                             config={'MYRIAD_THROUGHPUT_STREAMS': '1'}, num_requests=num_requests)
+                                             create_default_config(target_device), num_requests=num_requests)
         self.input_name = next(iter(self.net.input_info))
         self.output_name = next(iter(self.net.outputs))
         self.input_size = self.net.input_info[self.input_name].input_data.shape

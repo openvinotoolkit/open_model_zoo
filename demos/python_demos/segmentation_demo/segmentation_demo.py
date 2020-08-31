@@ -24,6 +24,10 @@ import logging as log
 from time import time
 from openvino.inference_engine import IECore
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
+
+
 classes_color_map = [
     (150, 150, 150),
     (58, 55, 169),
@@ -76,12 +80,13 @@ def main():
     log.info("Loading network")
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
-    if "CPU" in args.device:
+    device_string = format_device_string(args.device)
+    if "CPU" in device_string:
         supported_layers = ie.query_network(net, "CPU")
         not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
         if len(not_supported_layers) != 0:
             log.error("Following layers are not supported by the plugin for specified device {}:\n {}".
-                      format(args.device, ', '.join(not_supported_layers)))
+                      format(device_string, ', '.join(not_supported_layers)))
             sys.exit(1)
     assert len(net.input_info) == 1, "Sample supports only single input topologies"
     assert len(net.outputs) == 1, "Sample supports only single output topologies"
@@ -111,7 +116,7 @@ def main():
 
     # Loading model to the plugin
     log.info("Loading model to the plugin")
-    exec_net = ie.load_network(network=net, device_name=args.device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+    exec_net = ie.load_network(network=net, device_name=device_string, create_default_config(device_string))
 
     # Start sync inference
     log.info("Starting inference")

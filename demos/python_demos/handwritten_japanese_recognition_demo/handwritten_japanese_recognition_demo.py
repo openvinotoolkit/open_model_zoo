@@ -25,6 +25,9 @@ import numpy as np
 from openvino.inference_engine import IECore
 from utils.codec import CTCCodec
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -96,7 +99,8 @@ def main():
 
     # Loading model to the plugin
     log.info("Loading model to the plugin")
-    exec_net = ie.load_network(network=net, device_name=args.device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+    device_string = format_device_string(args.device)
+    exec_net = ie.load_network(network=net, device_name=device_string, create_default_config(device_string))
 
     # Start sync inference
     log.info("Starting inference ({} iterations)".format(args.number_iter))

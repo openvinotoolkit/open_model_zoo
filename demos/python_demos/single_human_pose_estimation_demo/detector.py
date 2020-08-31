@@ -1,6 +1,9 @@
 import os
 import cv2
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import create_default_config
+
 
 class Detector(object):
     def __init__(self, ie, path_to_model_xml, label_class, scale=None, thr=0.3, device='CPU'):
@@ -24,7 +27,7 @@ class Detector(object):
             "Expected model output shape with %s outputs" % (self.OUTPUT_SIZE)
 
         self._ie = ie
-        self._exec_model = self._ie.load_network(self.model, device, config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+        self._exec_model = self._ie.load_network(self.model, device, create_default_config(device))
         self._scale = scale
         self._thr = thr
         self._label_class = label_class

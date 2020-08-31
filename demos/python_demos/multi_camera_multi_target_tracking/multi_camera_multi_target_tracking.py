@@ -243,6 +243,7 @@ def main():
 
     log.info("Creating Inference Engine")
     ie = IECore()
+    device_string = format_device_string(args.device)
 
     if args.detections:
         object_detector = DetectionsFromFileReader(args.detections, args.t_detector)
@@ -250,15 +251,15 @@ def main():
         object_detector = MaskRCNN(ie, args.m_segmentation,
                                    config['obj_segm']['trg_classes'],
                                    args.t_segmentation,
-                                   args.device, capture.get_num_sources())
+                                   device_string, capture.get_num_sources())
     else:
         object_detector = Detector(ie, args.m_detector,
                                    config['obj_det']['trg_classes'],
                                    args.t_detector,
-                                   args.device, capture.get_num_sources())
+                                   device_string, capture.get_num_sources())
 
     if args.m_reid:
-        object_recognizer = VectorCNN(ie, args.m_reid, args.device)
+        object_recognizer = VectorCNN(ie, args.m_reid, device_string)
     else:
         object_recognizer = None
 

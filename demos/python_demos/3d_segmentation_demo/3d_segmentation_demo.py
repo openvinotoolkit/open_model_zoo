@@ -30,6 +30,9 @@ from sys import stdout
 
 from openvino.inference_engine import IECore
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from ie_config_helper import format_device_string, create_default_config
+
 
 logging.basicConfig(format="[ %(levelname)s ] %(message)s", level=logging.INFO, stream=stdout)
 logger = logging.getLogger('3d_segmentation_demo')
@@ -244,15 +247,16 @@ def main():
     logger.info("Creating Inference Engine")
     ie = IECore()
 
-    if 'CPU' in args.target_device:
+    device_string = format_device_string(args.target_device)
+    if 'CPU' in device_string:
         if args.number_threads is not None:
             ie.set_config({'CPU_THREADS_NUM': str(args.number_threads)}, "CPU")
     else:
         raise AttributeError("Device {} do not support of 3D convolution. "
                              "Please use CPU, GPU or HETERO:*CPU*, HETERO:*GPU*")
 
-    logger.info("Device is {}".format(args.target_device))
-    version = ie.get_versions(args.target_device)[args.target_device]
+    logger.info("Device is {}".format(device_string))
+    version = ie.get_versions(device_string)[device_string]
     version_str = "{}.{}.{}".format(version.major, version.minor, version.build_number)
     logger.info("Plugin version is {}".format(version_str))
 
@@ -312,8 +316,8 @@ def main():
 
     # ------------------------------------- 4. Loading model to the plugin -------------------------------------
     logger.info("Loading model to the plugin")
-    executable_network = ie.load_network(network=ie_network, device_name=args.target_device,
-                                         config={'MYRIAD_THROUGHPUT_STREAMS': '1'})
+    executable_network = ie.load_network(network=ie_network, device_name=device_string,
+                                         create_default_config(device_string))
     del ie_network
 
     # ---------------------------------------------- 5. Do inference --------------------------------------------
