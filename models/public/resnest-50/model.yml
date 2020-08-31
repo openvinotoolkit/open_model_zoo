@@ -1,0 +1,64 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  ResNeSt-50 is image classification model pretrained on ImageNet dataset. ResNeSt
+  is stacked in ResNet-style from modular Split-Attention blocks that enables attention
+  across feature-map groups.
+
+  The model input is a blob that consists of a single image of "1x3x224x224" in RGB
+  order.
+
+  The model output is typical object classifier for the 1000 different classifications  matching
+  with those in the ImageNet database.
+
+  For details see repository <https://github.com/zhanghang1989/ResNeSt> and paper
+  <https://arxiv.org/pdf/2004.08955.pdf>.
+task_type: classification
+files:
+  - name: resnest50-528c19ca.pth
+    sha256: 528c19ca6509420548c8359f63ff37975e7d92f42eaf72a7af152a015c8ef48c
+    size: 110273258
+    source: https://s3.us-west-1.wasabisys.com/resnest/resnest50-528c19ca.pth
+  - name: model/resnest.py
+    size: 2908
+    sha256: ef4629dca658fb7b52dff05ca6b4cdd2f62eae387a67c8f3036e58aaf23955d1
+    source: https://raw.githubusercontent.com/zhanghang1989/ResNeSt/c4ea0c083fe4308eda92bd7d4140a248914bead5/resnest/torch/resnest.py
+  - name: model/resnet.py
+    size: 13205
+    sha256: c826ebc85827e85669d244884242105dd6b9491e94cea8ecd799bf6bc1d665bd
+    source: https://raw.githubusercontent.com/zhanghang1989/ResNeSt/c4ea0c083fe4308eda92bd7d4140a248914bead5/resnest/torch/resnet.py
+  - name: model/splat.py
+    size: 3620
+    sha256: 4321cf23ca112a4eac287454ba267c22aa52f416352f0de9dcd3a9576908b397
+    source: https://raw.githubusercontent.com/zhanghang1989/ResNeSt/c4ea0c083fe4308eda92bd7d4140a248914bead5/resnest/torch/splat.py
+framework: pytorch
+conversion_to_onnx_args:
+  - --model-path=$dl_dir
+  - --model-name=resnest50
+  - --weights=$dl_dir/resnest50-528c19ca.pth
+  - --import-module=model.resnest
+  - --input-shape=1,3,224,224
+  - --output-file=$conv_dir/resnest-50.onnx
+  - --input-names=data
+  - --output-names=prob
+model_optimizer_args:
+  - --input_shape=[1,3,224,224]
+  - --input_model=$conv_dir/resnest-50.onnx
+  - --input=data
+  - --mean_values=data[123.675,116.28,103.53]
+  - --scale_values=data[58.395,57.12,57.375]
+  - --reverse_input_channels
+  - --output=prob
+license: https://raw.githubusercontent.com/zhanghang1989/ResNeSt/master/LICENSE
