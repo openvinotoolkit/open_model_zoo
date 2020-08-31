@@ -29,7 +29,11 @@ class Shift(PostprocessorWithSpecificTargets):
 
     annotation_types = (SegmentationAnnotation, )
     prediction_types = (SegmentationPrediction, )
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> Add semantic-segmentation model hrnetv2 based on opset9
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
@@ -39,10 +43,17 @@ class Shift(PostprocessorWithSpecificTargets):
             )
         })
         return parameters
+<<<<<<< HEAD
 
     def configure(self):
         self.shift_value = self.config.get('shift_value')
 
+=======
+    
+    def configure(self):
+        self.shift_value = self.config.get('shift_value')
+    
+>>>>>>> Add semantic-segmentation model hrnetv2 based on opset9
     def process_image(self, annotation, prediction):
 
         for annotation_ in annotation:
