@@ -31,8 +31,8 @@ YOLO v3 Tiny is a real-time object detection model implemented with Keras\* from
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Detection     |
-| GFLOPs            | -        |
-| MParams           | -        |
+| GFLOPs            | 5.582         |
+| MParams           | 8.848         |
 | Source framework  | Keras\*       |
 
 ## Accuracy
