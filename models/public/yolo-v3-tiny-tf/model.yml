@@ -18,21 +18,21 @@ description: >-
   to TensorFlow* framework. This model was pretrained on COCO* dataset with 80 classes.
 task_type: detection
 files:
-  - name: yolo-v3-tiny.pb
-    size: 35455390
-    sha256: 736a43141814e8e74c42fcfd352d22871a677e4141492d58b6993fd9a4f4f7b4
-    source: https://download.01.org/opencv/public_models/
-  - name: yolo-v3-tiny.json
-    size: 326
-    sha256: 874f57f517fefc60d646bc8030576217330238d90b51093c3378fb5c68f1b2ab
-    source: https://download.01.org/opencv/public_models/
+  - name: yolo-v3-tiny-tf.zip
+    size: 32836256
+    sha256: b872207db53b592de64c2a1f04420278a23707aa9a05549efd78778a947fc854
+    source: https://download.01.org/opencv/public_models/082020/yolo-v3-tiny-tf/yolo-v3-tiny-tf.zip
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: yolo-v3-tiny-tf.zip
 model_optimizer_args:
   - --input_shape=[1,416,416,3]
   - --input=input_image
   - --scale_values=input_image[255]
   - --reverse_input_channels
-  - --transformations_config=$dl_dir/yolo-v3-tiny.json
-  - --input_model=$dl_dir/yolo-v3-tiny.pb
+  - --transformations_config=$dl_dir/yolo-v3-tiny-tf/yolo-v3-tiny-tf.json
+  - --input_model=$dl_dir/yolo-v3-tiny-tf/yolo-v3-tiny-tf.pb
 framework: tf
 
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE
