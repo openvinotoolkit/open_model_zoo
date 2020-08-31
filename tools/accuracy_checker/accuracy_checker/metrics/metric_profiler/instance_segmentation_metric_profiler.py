@@ -120,7 +120,8 @@ class InstanceSegmentationProfiler(MetricProfiler):
             label for label in meta.get('label_map', {}) if label != meta.get('background_label')
         ]
 
-    def generate_result_matching(self, per_class_result, metric_name):
+    @staticmethod
+    def generate_result_matching(per_class_result, metric_name):
         matching_result = {
             'prediction_matches': per_class_result['dt_matches'][0].tolist(),
             'annotation_matches':  per_class_result['gt_matches'][0].tolist(),

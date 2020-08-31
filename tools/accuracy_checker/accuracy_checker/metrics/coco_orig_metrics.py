@@ -459,7 +459,7 @@ class MSCOCOorigAveragePrecision(MSCOCOorigBaseMetric):
         return self.compute_precision_recall(annotations, predictions)[0][0]
 
 
-class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluationMetric):
+class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluationMetric): # pylint:disable=R0901
     __provider__ = 'coco_orig_segm_precision'
     annotation_types = (CoCoInstanceSegmentationAnnotation, )
     prediction_types = (CoCocInstanceSegmentationPrediction, )
@@ -482,10 +482,14 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluat
                 eval_result['gt'] = annotation.to_polygon()[label]
                 eval_result['dt'] = annotation.to_polygon()[label]
                 per_class_matching[label] = eval_result
-            per_class_result = {k: compute_precision_recall(self.threshold, [v])[0] for k, v in per_class_matching.items()}
+            per_class_result = {k: compute_precision_recall(
+                self.threshold, [v])[0] for k, v in per_class_matching.items()
+                                }
             for label in per_class_matching:
                 per_class_matching[label]['result'] = per_class_result[label]
-            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(list(per_class_result.values())))
+            self.profiler.update(
+                annotation.identifier, per_class_matching, self.name, np.nanmean(list(per_class_result.values()))
+            )
 
     @staticmethod
     def _compute_iou(gt, dets, iscrowd):
@@ -509,7 +513,8 @@ class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluat
 
         return detections, scores[scores_ids], difficult_for_label[scores_ids]
 
-    def _prepare_annotations(self, annotation, label):
+    @staticmethod
+    def _prepare_annotations(annotation, label):
         annotation_ids = np.argwhere(np.array(annotation.labels) == label).reshape(-1)
         difficult_mask = np.full(annotation.size, False)
         difficult_indices = annotation.metadata.get("difficult_boxes", [])
