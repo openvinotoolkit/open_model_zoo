@@ -1,5 +1,7 @@
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 from .base_profiler import PROFILERS_MAPPING, MetricProfiler
+
+PorfilerID = namedtuple('ProfilerID', ['type', 'annotation_source', 'prediction_source'])
 
 
 class ProfilingExecutor:
@@ -8,13 +10,14 @@ class ProfilingExecutor:
         self._profiler_by_metric = OrderedDict()
         self.profile_report_type = profile_report_type
 
-    def register_profiler_for_metric(self, metric_type, metric_name):
+    def register_profiler_for_metric(self, metric_type, metric_name, annotation_source='', prediction_source=''):
         profiler = None
-        for metric_types, profiler_id in PROFILERS_MAPPING.items():
+        for metric_types, profiler_type in PROFILERS_MAPPING.items():
             if metric_type in metric_types:
+                profiler_id = PorfilerID(profiler_type, annotation_source, prediction_source)
                 if profiler_id not in self.profilers:
                     self.profilers[profiler_id] = MetricProfiler.provide(
-                        profiler_id, report_type=self.profile_report_type
+                        profiler_id.type, report_type=self.profile_report_type
                     )
                     self.profilers[profiler_id].set_dataset_meta(self.dataset_meta)
                 self.profilers[profiler_id].register_metric(metric_name)

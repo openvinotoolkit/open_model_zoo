@@ -127,9 +127,13 @@ class MetricsExecutor:
         metric_config_validator.validate(metric_config_entry, type_)
 
         metric_identifier = metric_config_entry.get(identifier, metric_type)
+        annotation_source = metric_config_entry.get('annotation_source', '')
+        prediction_source = metric_config_entry.get('prediction_source', '')
         metric_kwargs = {}
         if self.profile_metrics:
-            profiler = self.profiler.register_profiler_for_metric(metric_type, metric_identifier)
+            profiler = self.profiler.register_profiler_for_metric(
+                metric_type, metric_identifier, annotation_source, prediction_source
+            )
             metric_kwargs['profiler'] = profiler
 
         metric_fn = Metric.provide(
