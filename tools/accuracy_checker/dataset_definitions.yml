@@ -879,7 +879,7 @@ datasets:
         presenter: print_vector
       - type: ssim
         presenter: print_vector
-    annotation: style_transfer_val2017.pickle
+    annotation: style_trasfer_val2017.pickle
 
   - name: squad_v1_1_msl384_mql64_ds128_lowercase
     annotation_conversion:
