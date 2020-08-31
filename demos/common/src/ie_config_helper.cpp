@@ -91,3 +91,13 @@ std::map<std::string, std::string> createConfig(const std::string& deviceString,
 
     return config;
 }
+
+std::map<std::string, std::string> createDefaultConfig(std::string deviceString) {
+    std::map<std::string, std::string> config;
+
+    if (deviceString.find("MYRIAD") != std::string::npos) {
+        config.insert({ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" });
+    }
+    
+    return config;
+}

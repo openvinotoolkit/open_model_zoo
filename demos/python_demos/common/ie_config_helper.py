@@ -67,3 +67,12 @@ def create_config(device_string, nstreams_string, nthreads, min_latency=False):
         #                         std::to_string(deviceNstreams.at(device)) });
 
     return config
+
+
+def create_default_config(device_string):
+    config = {}
+
+    if 'MYRIAD' in device_string:
+        config['MYRIAD_THROUGHPUT_STREAMS'] = '1'
+
+    return config
