@@ -16,13 +16,13 @@ YOLO v3 Tiny is a real-time object detection model implemented with Keras\* from
         wget -O weights/yolov3-tiny.weights https://pjreddie.com/media/files/yolov3-tiny.weights
         ```
 
-   1. Convert model weights to Keras\*:
+   2. Convert model weights to Keras\*:
         ```
         python tools/convert.py cfg/yolov3.cfg weights/yolov3-tiny.weights weights/yolov3-tiny.h5
         ```
 3. Convert model to protobuf:
     ```
-    python tools/keras_to_tensorflow.py --input_model weights/yolov3-tiny.h5 --output_model="path/to/save/model.pb"
+    python tools/keras_to_tensorflow.py --input_model weights/yolov3-tiny.h5 --output_model=weights/yolo-v3-tiny.pb
     ```
 
 
@@ -105,7 +105,6 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `box_score` - confidence of detection box in [0,1] range
 - `class_no_1`,...,`class_no_80` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
 
-> **NOTE:** Original model uses [[3,4,5],[**1,2,3**]] (not [[3,4,5], [**0,1,2**]]) mask for anchors.
 
 ## Legal Information
 
