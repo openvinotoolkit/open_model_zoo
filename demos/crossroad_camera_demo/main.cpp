@@ -484,8 +484,7 @@ struct Load {
 
     void into(Core & ie, const std::string & deviceName) const {
         if (detector.enabled()) {
-            detector.net = ie.LoadNetwork(detector.read(ie), formatDeviceString(deviceName),
-                                          {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
+            detector.net = ie.LoadNetwork(detector.read(ie), deviceName, createDefaultConfig(deviceName));
         }
     }
 };

@@ -56,7 +56,8 @@ int main(int argc, char *argv[]) {
         Core ie;
 
         slog::info << "Device info" << slog::endl;
-        std::cout << ie.GetVersions(FLAGS_d);
+        std::string deviceString = formatDeviceString(FLAGS_d);
+        std::cout << ie.GetVersions(deviceString);
 
         CNNNetwork network = ie.ReadNetwork(FLAGS_m);
 
@@ -101,8 +102,7 @@ int main(int argc, char *argv[]) {
                     "supported.");
         }
 
-        ExecutableNetwork executableNetwork = ie.LoadNetwork(network, formatDeviceString(FLAGS_d),
-                                                             {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
+        ExecutableNetwork executableNetwork = ie.LoadNetwork(network, deviceString, createDefaultConfig(deviceString));
         InferRequest inferRequest = executableNetwork.CreateInferRequest();
 
         cv::VideoCapture cap;

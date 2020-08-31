@@ -149,7 +149,7 @@ ObjectDetector::ObjectDetector(
     _output->setPrecision(Precision::FP32);
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
-    net_ = ie_.LoadNetwork(cnnNetwork, deviceName_, {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
+    net_ = ie_.LoadNetwork(cnnNetwork, deviceName_, createDefaultConfig(deviceName_));
 }
 
 void ObjectDetector::wait() {

@@ -56,7 +56,7 @@ void IEWrapper::setExecPart() {
         layerData->setPrecision(Precision::FP32);
     }
 
-    executableNetwork = ie.LoadNetwork(network, formatDeviceString(deviceName), {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
+    executableNetwork = ie.LoadNetwork(network, deviceName, createDefaultConfig(deviceName));
     request = executableNetwork.CreateInferRequest();
 }
 

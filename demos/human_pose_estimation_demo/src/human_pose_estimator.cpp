@@ -94,8 +94,7 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
                 "to have matching last two dimensions");
     }
 
-    executableNetwork = ie.LoadNetwork(network, targetDeviceName,
-                                       {{ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" }});
+    executableNetwork = ie.LoadNetwork(network, targetDeviceName, createDefaultConfig(targetDeviceName));
     requestNext = executableNetwork.CreateInferRequestPtr();
     requestCurr = executableNetwork.CreateInferRequestPtr();
 }
@@ -113,8 +112,7 @@ void HumanPoseEstimator::reshape(const cv::Mat& image){
         input_shape[3] = inputLayerSize.width;
         input_shapes[input_name] = input_shape;
         network.reshape(input_shapes);
-        executableNetwork = ie.LoadNetwork(network, targetDeviceName,
-                                           {{ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" }});
+        executableNetwork = ie.LoadNetwork(network, targetDeviceName, createDefaultConfig(targetDeviceName));
         requestNext = executableNetwork.CreateInferRequestPtr();
         requestCurr = executableNetwork.CreateInferRequestPtr();
         std::cout << "Reshape needed" << std::endl;

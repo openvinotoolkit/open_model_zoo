@@ -40,8 +40,8 @@ void CnnDLSDKBase::Load() {
         output_blobs_names_.push_back(item.first);
     }
 
-    executable_network_ = config_.ie.LoadNetwork(cnnNetwork, formatDeviceString(config_.deviceName),
-                                                 {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
+    executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName,
+                                                 createDefaultConfig(config_.deviceName));
     infer_request_ = executable_network_.CreateInferRequest();
 }
 

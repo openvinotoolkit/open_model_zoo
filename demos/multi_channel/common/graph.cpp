@@ -42,10 +42,9 @@ void loadImgToIEGraph(const cv::Mat& img, size_t batch, void* ieBuffer) {
 
 void IEGraph::initNetwork(const std::string& deviceName) {
     auto cnnNetwork = ie.ReadNetwork(modelPath);
-    std::string formattedDeviceName = formatDeviceString(deviceName);
 
-    std::map<std::string, std::string> ieConfig = {{ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" }};
-    if (formattedDeviceName.find("CPU") != std::string::npos) {
+    std::map<std::string, std::string> ieConfig = createDefaultConfig(deviceName);
+    if (deviceName.find("CPU") != std::string::npos) {
         ieConfig.insert({ InferenceEngine::PluginConfigParams::KEY_CPU_BIND_THREAD, "NO" });
     }
 
@@ -62,7 +61,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     }
 
     InferenceEngine::ExecutableNetwork network;
-    network = ie.LoadNetwork(cnnNetwork, formattedDeviceName, ieConfig);
+    network = ie.LoadNetwork(cnnNetwork, deviceName, ieConfig);
 
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {

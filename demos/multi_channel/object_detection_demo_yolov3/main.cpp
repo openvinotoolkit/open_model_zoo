@@ -29,6 +29,7 @@
 #include <ngraph/ngraph.hpp>
 
 #include <monitors/presenter.h>
+#include <samples/ie_config_helper.hpp>
 #include <samples/slog.hpp>
 
 #include "input.hpp"
@@ -87,7 +88,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     }
     slog::info << "\tDetection model:           " << FLAGS_m << slog::endl;
     slog::info << "\tDetection threshold:       " << FLAGS_t << slog::endl;
-    slog::info << "\tUtilizing device:          " << FLAGS_d << slog::endl;
+    slog::info << "\tUtilizing device:          " << formatDeviceString(FLAGS_d) << slog::endl;
     slog::info << "\tBatch size:                " << FLAGS_bs << slog::endl;
     slog::info << "\tNumber of infer requests:  " << FLAGS_nireq << slog::endl;
 
@@ -374,7 +375,7 @@ int main(int argc, char* argv[]) {
         graphParams.maxRequests     = FLAGS_nireq;
         graphParams.collectStats    = FLAGS_show_stats;
         graphParams.modelPath       = modelPath;
-        graphParams.deviceName      = FLAGS_d;
+        graphParams.deviceName      = formatDeviceString(FLAGS_d);
         graphParams.postLoadFunc    = [&yoloParams](const std::vector<std::string>& outputDataBlobNames,
                                                     InferenceEngine::CNNNetwork &network) {
                                                         yoloParams = GetYoloParams(outputDataBlobNames, network);

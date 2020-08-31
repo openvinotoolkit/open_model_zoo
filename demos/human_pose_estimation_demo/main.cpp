@@ -15,6 +15,7 @@
 
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
+#include <samples/ie_config_helper.hpp>
 
 #include "human_pose_estimation_demo.hpp"
 #include "human_pose_estimator.hpp"
@@ -55,7 +56,8 @@ int main(int argc, char* argv[]) {
             return EXIT_SUCCESS;
         }
 
-        HumanPoseEstimator estimator(FLAGS_m, FLAGS_d);
+        std::string deviceString = formatDeviceString(FLAGS_d);
+        HumanPoseEstimator estimator(FLAGS_m, deviceString);
         cv::VideoCapture cap;
         if (!(FLAGS_i == "cam" ? cap.open(0) : cap.open(FLAGS_i))) {
             throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
@@ -192,7 +194,7 @@ int main(int argc, char* argv[]) {
                 if (!FLAGS_no_show) {
                     presenter.drawGraphs(curr_frame);
                     renderHumanPose(poses, curr_frame);
-                    cv::imshow("Human Pose Estimation on " + FLAGS_d, curr_frame);
+                    cv::imshow("Human Pose Estimation on " + deviceString, curr_frame);
                     t1 = std::chrono::high_resolution_clock::now();
                     render_time = std::chrono::duration_cast<ms>(t1 - t0).count();
                 }

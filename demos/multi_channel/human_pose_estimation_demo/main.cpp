@@ -41,6 +41,7 @@
 #include <monitors/presenter.h>
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
+#include <samples/ie_config_helper.hpp>
 
 #include "input.hpp"
 #include "multichannel_params.hpp"
@@ -101,7 +102,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -duplicate_num must be positive");
     }
     slog::info << "\tDetection model:           " << FLAGS_m << slog::endl;
-    slog::info << "\tUtilizing device:          " << FLAGS_d << slog::endl;
+    slog::info << "\tUtilizing device:          " << formatDeviceString(FLAGS_d) << slog::endl;
     slog::info << "\tBatch size:                " << FLAGS_bs << slog::endl;
     slog::info << "\tNumber of infer requests:  " << FLAGS_nireq << slog::endl;
 
@@ -224,7 +225,7 @@ int main(int argc, char* argv[]) {
         graphParams.maxRequests     = FLAGS_nireq;
         graphParams.collectStats    = FLAGS_show_stats;
         graphParams.modelPath       = modelPath;
-        graphParams.deviceName      = FLAGS_d;
+        graphParams.deviceName      = formatDeviceString(FLAGS_d);
 
         std::shared_ptr<IEGraph> network(new IEGraph(graphParams));
         auto inputDims = network->getInputDims();

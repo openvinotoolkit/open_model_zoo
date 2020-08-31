@@ -12,6 +12,7 @@
 
 #include <monitors/presenter.h>
 #include <samples/images_capture.h>
+#include <samples/ie_config_helper.hpp>
 
 #include <opencv2/core.hpp>
 
@@ -113,8 +114,8 @@ int main(int argc, char **argv) {
 
         auto detlog_out = FLAGS_out;
 
-        auto detector_mode = FLAGS_d_det;
-        auto reid_mode = FLAGS_d_reid;
+        auto detector_mode =  formatDeviceString(FLAGS_d_det);
+        auto reid_mode = formatDeviceString(FLAGS_d_reid);
 
         bool should_print_out = FLAGS_r;
 

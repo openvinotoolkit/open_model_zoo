@@ -70,7 +70,8 @@ int main(int argc, char *argv[]) {
 
         /** Printing version **/
         slog::info << "Device info: " << slog::endl;
-        std::cout << ie.GetVersions(FLAGS_d);
+        std::string deviceString = formatDeviceString(FLAGS_d);
+        std::cout << ie.GetVersions(deviceString);
 
         // -----------------------------------------------------------------------------------------------------
 
@@ -154,8 +155,7 @@ int main(int argc, char *argv[]) {
 
         // -------------------------Load model to the device----------------------------------------------------
         slog::info << "Loading model to the device" << slog::endl;
-        auto executable_network = ie.LoadNetwork(network, formatDeviceString(FLAGS_d),
-                                                 {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
+        auto executable_network = ie.LoadNetwork(network, deviceString, createDefaultConfig(deviceString));
 
         // -------------------------Create Infer Request--------------------------------------------------------
         slog::info << "Create infer request" << slog::endl;

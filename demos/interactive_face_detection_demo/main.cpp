@@ -25,6 +25,7 @@
 #include <inference_engine.hpp>
 
 #include <monitors/presenter.h>
+#include <samples/ie_config_helper.hpp>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
@@ -102,20 +103,26 @@ int main(int argc, char *argv[]) {
 
         Core ie;
 
+        std::string deviceString = formatDeviceString(FLAGS_d);
+        std::string deviceAgString = formatDeviceString(FLAGS_d_ag);
+        std::string deviceHpString = formatDeviceString(FLAGS_d_hp);
+        std::string deviceEmString = formatDeviceString(FLAGS_d_em);
+        std::string deviceLmString = formatDeviceString(FLAGS_d_lm);
+
         std::set<std::string> loadedDevices;
         std::pair<std::string, std::string> cmdOptions[] = {
-            {FLAGS_d, FLAGS_m},
-            {FLAGS_d_ag, FLAGS_m_ag},
-            {FLAGS_d_hp, FLAGS_m_hp},
-            {FLAGS_d_em, FLAGS_m_em},
-            {FLAGS_d_lm, FLAGS_m_lm}
+            {deviceString, FLAGS_m},
+            {deviceAgString, FLAGS_m_ag},
+            {deviceHpString, FLAGS_m_hp},
+            {deviceEmString, FLAGS_m_em},
+            {deviceLmString, FLAGS_m_lm}
         };
-        FaceDetection faceDetector(FLAGS_m, FLAGS_d, 1, false, FLAGS_async, FLAGS_t, FLAGS_r,
+        FaceDetection faceDetector(FLAGS_m, deviceString, 1, false, FLAGS_async, FLAGS_t, FLAGS_r,
                                    static_cast<float>(FLAGS_bb_enlarge_coef), static_cast<float>(FLAGS_dx_coef), static_cast<float>(FLAGS_dy_coef));
-        AgeGenderDetection ageGenderDetector(FLAGS_m_ag, FLAGS_d_ag, FLAGS_n_ag, FLAGS_dyn_ag, FLAGS_async, FLAGS_r);
-        HeadPoseDetection headPoseDetector(FLAGS_m_hp, FLAGS_d_hp, FLAGS_n_hp, FLAGS_dyn_hp, FLAGS_async, FLAGS_r);
-        EmotionsDetection emotionsDetector(FLAGS_m_em, FLAGS_d_em, FLAGS_n_em, FLAGS_dyn_em, FLAGS_async, FLAGS_r);
-        FacialLandmarksDetection facialLandmarksDetector(FLAGS_m_lm, FLAGS_d_lm, FLAGS_n_lm, FLAGS_dyn_lm, FLAGS_async, FLAGS_r);
+        AgeGenderDetection ageGenderDetector(FLAGS_m_ag, deviceAgString, FLAGS_n_ag, FLAGS_dyn_ag, FLAGS_async, FLAGS_r);
+        HeadPoseDetection headPoseDetector(FLAGS_m_hp, deviceHpString, FLAGS_n_hp, FLAGS_dyn_hp, FLAGS_async, FLAGS_r);
+        EmotionsDetection emotionsDetector(FLAGS_m_em, deviceEmString, FLAGS_n_em, FLAGS_dyn_em, FLAGS_async, FLAGS_r);
+        FacialLandmarksDetection facialLandmarksDetector(FLAGS_m_lm, deviceLmString, FLAGS_n_lm, FLAGS_dyn_lm, FLAGS_async, FLAGS_r);
 
         for (auto && option : cmdOptions) {
             auto deviceName = option.first;
@@ -137,11 +144,11 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 2. Reading IR models and loading them to plugins ----------------------
         // Disable dynamic batching for face detector as it processes one image at a time
-        Load(faceDetector).into(ie, FLAGS_d, false);
-        Load(ageGenderDetector).into(ie, FLAGS_d_ag, FLAGS_dyn_ag);
-        Load(headPoseDetector).into(ie, FLAGS_d_hp, FLAGS_dyn_hp);
-        Load(emotionsDetector).into(ie, FLAGS_d_em, FLAGS_dyn_em);
-        Load(facialLandmarksDetector).into(ie, FLAGS_d_lm, FLAGS_dyn_lm);
+        Load(faceDetector).into(ie, deviceString, false);
+        Load(ageGenderDetector).into(ie, deviceAgString, FLAGS_dyn_ag);
+        Load(headPoseDetector).into(ie, deviceHpString, FLAGS_dyn_hp);
+        Load(emotionsDetector).into(ie, deviceEmString, FLAGS_dyn_em);
+        Load(facialLandmarksDetector).into(ie, deviceLmString, FLAGS_dyn_lm);
         // ----------------------------------------------------------------------------------------------------
 
         // --------------------------- 3. Doing inference -----------------------------------------------------

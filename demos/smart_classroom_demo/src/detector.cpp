@@ -112,8 +112,7 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
     input_name_ = inputInfo.begin()->first;
-    net_ = config_.ie.LoadNetwork(cnnNetwork, formatDeviceString(config_.deviceName),
-                                  {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
+    net_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName, createDefaultConfig(config_.deviceName));
 }
 
 DetectedObjects FaceDetection::fetchResults() {

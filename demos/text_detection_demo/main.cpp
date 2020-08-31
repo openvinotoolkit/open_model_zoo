@@ -22,6 +22,7 @@
 
 #include <monitors/presenter.h>
 #include <samples/common.hpp>
+#include <samples/ie_config_helper.hpp>
 #include <samples/images_capture.h>
 #include <samples/slog.hpp>
 
@@ -91,8 +92,10 @@ int main(int argc, char *argv[]) {
         slog::info << "Loading Inference Engine" << slog::endl;
         Core ie;
 
+        std::string deviceTdString = formatDeviceString(FLAGS_d_td);
+        std::string deviceTrString = formatDeviceString(FLAGS_d_tr);
         std::set<std::string> loadedDevices;
-        std::vector<std::string> devices = {FLAGS_m_td.empty() ? "" : FLAGS_d_td, FLAGS_m_tr.empty() ? "" : FLAGS_d_tr};
+        std::vector<std::string> devices = {FLAGS_m_td.empty() ? "" : deviceTdString, FLAGS_m_tr.empty() ? "" : deviceTrString};
 
         for (const auto &device : devices) {
             if (device.empty())
@@ -116,10 +119,10 @@ int main(int argc, char *argv[]) {
         Cnn text_detection, text_recognition;
 
         if (!FLAGS_m_td.empty())
-            text_detection.Init(FLAGS_m_td, ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td));
+            text_detection.Init(FLAGS_m_td, ie, deviceTdString, cv::Size(FLAGS_w_td, FLAGS_h_td));
 
         if (!FLAGS_m_tr.empty())
-            text_recognition.Init(FLAGS_m_tr, ie, FLAGS_d_tr);
+            text_recognition.Init(FLAGS_m_tr, ie, deviceTrString);
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat image = cap->read();

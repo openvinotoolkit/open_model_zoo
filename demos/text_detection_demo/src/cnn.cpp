@@ -59,8 +59,7 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Loading model to the device -------------------------------------------
-    ExecutableNetwork executable_network = ie.LoadNetwork(network, formatDeviceString(deviceName),
-                                                          {{ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" }});
+    ExecutableNetwork executable_network = ie.LoadNetwork(network, deviceName, createDefaultConfig(deviceName));
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Creating infer request ------------------------------------------------

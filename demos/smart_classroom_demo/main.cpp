@@ -6,6 +6,7 @@
 
 #include <gflags/gflags.h>
 #include <monitors/presenter.h>
+#include <samples/ie_config_helper.hpp>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 #include <string>
@@ -596,8 +597,12 @@ int main(int argc, char* argv[]) {
         slog::info << "Loading Inference Engine" << slog::endl;
         Core ie;
 
-        std::vector<std::string> devices = {FLAGS_d_act, FLAGS_d_fd, FLAGS_d_lm,
-                                            FLAGS_d_reid};
+        std::string deviceActString = formatDeviceString(FLAGS_d_act);
+        std::string deviceFdString = formatDeviceString(FLAGS_d_fd);
+        std::string deviceLmString = formatDeviceString(FLAGS_d_lm);
+        std::string deviceReidString = formatDeviceString(FLAGS_d_reid);
+        std::vector<std::string> devices = {deviceActString, deviceFdString, deviceLmString,
+                                            deviceReidString};
         std::set<std::string> loadedDevices;
 
         slog::info << "Device info: " << slog::endl;
@@ -621,7 +626,7 @@ int main(int argc, char* argv[]) {
         if (!ad_model_path.empty()) {
             // Load action detector
             ActionDetectorConfig action_config(ad_model_path);
-            action_config.deviceName = FLAGS_d_act;
+            action_config.deviceName = deviceActString;
             action_config.ie = ie;
             action_config.is_async = true;
             action_config.detection_confidence_threshold = static_cast<float>(FLAGS_t_ad);
@@ -636,7 +641,7 @@ int main(int argc, char* argv[]) {
         if (!fd_model_path.empty()) {
             // Load face detector
             detection::DetectorConfig face_config(fd_model_path);
-            face_config.deviceName = FLAGS_d_fd;
+            face_config.deviceName = deviceFdString;
             face_config.ie = ie;
             face_config.is_async = true;
             face_config.confidence_threshold = static_cast<float>(FLAGS_t_fd);
@@ -655,7 +660,7 @@ int main(int argc, char* argv[]) {
             // Create face recognizer
 
             detection::DetectorConfig face_registration_det_config(fd_model_path);
-            face_registration_det_config.deviceName = FLAGS_d_fd;
+            face_registration_det_config.deviceName = deviceFdString;
             face_registration_det_config.ie = ie;
             face_registration_det_config.is_async = false;
             face_registration_det_config.confidence_threshold = static_cast<float>(FLAGS_t_reg_fd);
@@ -663,16 +668,16 @@ int main(int argc, char* argv[]) {
             face_registration_det_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
 
             CnnConfig reid_config(fr_model_path);
-            reid_config.deviceName = FLAGS_d_reid;
-            if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
+            reid_config.deviceName = deviceReidString;
+            if (checkDynamicBatchSupport(ie, deviceReidString))
                 reid_config.max_batch_size = 16;
             else
                 reid_config.max_batch_size = 1;
             reid_config.ie = ie;
 
             CnnConfig landmarks_config(lm_model_path);
-            landmarks_config.deviceName = FLAGS_d_lm;
-            if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
+            landmarks_config.deviceName = deviceLmString;
+            if (checkDynamicBatchSupport(ie, deviceLmString))
                 landmarks_config.max_batch_size = 16;
             else
                 landmarks_config.max_batch_size = 1;

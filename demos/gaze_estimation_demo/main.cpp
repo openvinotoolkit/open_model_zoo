@@ -30,6 +30,7 @@
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
+#include <samples/ie_config_helper.hpp>
 
 #include "gaze_estimation_demo.hpp"
 
@@ -117,23 +118,29 @@ int main(int argc, char *argv[]) {
         bool flipImage = false;
         ResultsMarker resultsMarker(false, false, false, true, true);
 
+        std::string deviceString = formatDeviceString(FLAGS_d);
+        std::string deviceFdString = formatDeviceString(FLAGS_d_fd);
+        std::string deviceHpString = formatDeviceString(FLAGS_d_hp);
+        std::string deviceLmString = formatDeviceString(FLAGS_d_lm);
+        std::string deviceEsString = formatDeviceString(FLAGS_d_es);
+
         // Loading Inference Engine
         std::vector<std::pair<std::string, std::string>> cmdOptions = {
-            {FLAGS_d, FLAGS_m}, {FLAGS_d_fd, FLAGS_m_fd},
-            {FLAGS_d_hp, FLAGS_m_hp}, {FLAGS_d_lm, FLAGS_m_lm},
-            {FLAGS_d_es, FLAGS_m_es}
+            {deviceString, FLAGS_m}, {deviceFdString, FLAGS_m_fd},
+            {deviceHpString, FLAGS_m_hp}, {deviceLmString, FLAGS_m_lm},
+            {deviceEsString, FLAGS_m_es}
         };
 
         InferenceEngine::Core ie;
         initializeIEObject(ie, cmdOptions);
 
         // Set up face detector and estimators
-        FaceDetector faceDetector(ie, FLAGS_m_fd, FLAGS_d_fd, FLAGS_t, FLAGS_fd_reshape);
+        FaceDetector faceDetector(ie, FLAGS_m_fd, deviceFdString, FLAGS_t, FLAGS_fd_reshape);
 
-        HeadPoseEstimator headPoseEstimator(ie, FLAGS_m_hp, FLAGS_d_hp);
-        LandmarksEstimator landmarksEstimator(ie, FLAGS_m_lm, FLAGS_d_lm);
-        EyeStateEstimator eyeStateEstimator(ie, FLAGS_m_es, FLAGS_d_es);
-        GazeEstimator gazeEstimator(ie, FLAGS_m, FLAGS_d);
+        HeadPoseEstimator headPoseEstimator(ie, FLAGS_m_hp, deviceHpString);
+        LandmarksEstimator landmarksEstimator(ie, FLAGS_m_lm, deviceLmString);
+        EyeStateEstimator eyeStateEstimator(ie, FLAGS_m_es, deviceEsString);
+        GazeEstimator gazeEstimator(ie, FLAGS_m, deviceString);
 
         // Put pointers to all estimators in an array so that they could be processed uniformly in a loop
         BaseEstimator* estimators[] = {&headPoseEstimator, &landmarksEstimator, &eyeStateEstimator, &gazeEstimator};

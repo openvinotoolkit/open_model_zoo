@@ -55,7 +55,7 @@ void CnnBase::Load() {
         outputs_[item.first] = output;
     }
 
-    executable_network_ = ie_.LoadNetwork(cnnNetwork, deviceName_, {{ MYRIAD_THROUGHPUT_STREAMS, "1" }});
+    executable_network_ = ie_.LoadNetwork(cnnNetwork, deviceName_, createDefaultConfig(deviceName_));
     infer_request_ = executable_network_.CreateInferRequest();
     infer_request_.SetInput(inputs);
     infer_request_.SetOutput(outputs_);
