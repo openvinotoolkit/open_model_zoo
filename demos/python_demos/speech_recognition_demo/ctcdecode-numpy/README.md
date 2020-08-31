@@ -1,17 +1,22 @@
-# ctcdecode
+# ctcdecode-numpy Python package
 
-ctcdecode is an implementation of CTC (Connectionist Temporal Classification) beam search decoding for NumPy.
-C++ code borrowed liberally from Paddle Paddles' [DeepSpeech](https://github.com/PaddlePaddle/DeepSpeech) and [Parlance](https://github.com/parlance/ctcdecode).
-It includes swappable scorer support enabling standard beam search, and KenLM-based decoding powered by yoklm library.
+ctcdecode-numpy is an implementation of CTC (Connectionist Temporal Classification) beam search decoding for NumPy with optional n-gram language modeling.
+C++ code is based on [Parlance](https://github.com/parlance/ctcdecode), which in turn borrowed liberally from Paddle Paddles' [DeepSpeech](https://github.com/PaddlePaddle/DeepSpeech).
+It includes standard beam search with swappable scorer support enabling KenLM-based n-gram scoring powered by yoklm library.
+KenLM dependency was removed due to licensing concerns, but can be restored manually using Parlance code.
+
+yoklm subcomponent is a library for reading KenLM binary format.  It supports KenLM binary format version 5, with quantization and trie with Bhiksha array representation.
 
 ## Installation
-The library is largely self-contained and requires only kenlm compiled as a shared library. Building the C++ library requires gcc or clang. KenLM language modeling support is also optionally included powered by yoklm library.
+The library needs SWIG for building Python interface. For Ubuntu 16.04 or 18.04:
 
-```bash
-# get the code
-git clone --recursive git@gitlab-icv.inn.intel.com:alexeykr/ctcdecode-numpy.git
-cd ctcdecode-numpy
+```shell
+sudo apt install swig
+```
+
+To build ctcdecode-numpy run:
+
+```shell
 pip install -r requirements.txt
-# pip install .
-python setup.py build_ext install  # !!!TODO: get rid of build_ext and replace with pip ^^^
+python setup.py build_ext install
 ```
