@@ -23,8 +23,8 @@ For details about implementation of model, check out the [Semantic Segmentation 
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Pixel accuracy  | 76.79%          | 76.79%           |
-| mean IoU  | 32.10%          | 32.10%           |
+| Pixel accuracy  | 77.69%          | 72.81%           |
+| mean IoU  | 33.02%          | 28.44%           |
 
 ## Performance
 
