@@ -45,6 +45,7 @@ class Metric(ClassProvider):
         self.dataset = dataset
         self.state = state
         self._update_iter = 0
+        self.set_profiler(profiler)
         self.meta = {'target': 'higher-better'}
         self._initial_state = copy.deepcopy(state)
 
@@ -59,8 +60,6 @@ class Metric(ClassProvider):
         self.prediction_source = self.config.get('prediction_source')
         if self.prediction_source and not is_single_metric_source(self.prediction_source):
             raise ConfigError(message_unsupported_multi_source.format(self.name, 'prediction'))
-
-        self.set_profiler(profiler)
 
     def __call__(self, *args, **kwargs):
         return self.submit_all(*args, **kwargs)

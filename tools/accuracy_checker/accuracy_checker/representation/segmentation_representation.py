@@ -275,7 +275,7 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
         return areas
 
     def to_polygon(self):
-        if self.mask is None or np.size(self.mask) == 0:
+        if self.raw_mask is None or np.size(self.raw_mask) == 0:
             warnings.warn("Polygon can be found only for non-empty mask")
             return {}
 
@@ -290,7 +290,7 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
             return polygons
 
         polygons = defaultdict(list)
-        for elem, label in zip(self.mask, self.labels):
+        for elem, label in zip(self.raw_mask, self.labels):
             elem = np.uint8(maskUtils.decode(elem))
             obj_contours = []
             contours, _ = cv.findContours(elem, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
