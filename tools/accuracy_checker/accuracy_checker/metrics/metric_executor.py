@@ -86,7 +86,7 @@ class MetricsExecutor:
 
         return metric_results
 
-    def update_metrics_on_batch(self, batch_ids, annotation, prediction):
+    def update_metrics_on_batch(self, batch_ids, annotation, prediction, profile=False):
         """
         Updates metric value corresponding given batch.
 
@@ -96,11 +96,14 @@ class MetricsExecutor:
         """
 
         results = OrderedDict()
+        profile_results = OrderedDict()
 
         for input_id, single_annotation, single_prediction in zip(batch_ids, annotation, prediction):
             results[input_id] = self.update_metrics_on_object(single_annotation, single_prediction)
+            if profile:
+                profile_results[input_id] = self.profiler.get_last_report()
 
-        return results
+        return results, profile_results
 
     def iterate_metrics(self, annotations, predictions):
         for name, metric_type, functor, reference, threshold, presenter in self.metrics:
@@ -151,6 +154,18 @@ class MetricsExecutor:
         ))
         if isinstance(metric_fn, FullDatasetEvaluationMetric):
             self.need_store_predictions = True
+
+    def enable_profiling(self, dataset, report_type=None):
+        profiler_type = dataset.config.get('_report_type', 'csv') if report_type is None else report_type
+        self.profiler = ProfilingExecutor(profile_report_type=profiler_type)
+        self.profiler.set_dataset_meta(self._dataset.metadata)
+        for metric in self.metrics:
+            annotation_source = metric.metric_fn.config.get('annotation_source', '')
+            prediction_source = metric.metric_fn.config.get('prediction_source', '')
+            profiler = self.profiler.register_profiler_for_metric(
+                metric.metric_type, metric.name, annotation_source, prediction_source
+            )
+            metric.metric_fn.set_profiler(profiler)
 
     def get_metric_presenters(self):
         return [metric.presenter for metric in self.metrics]

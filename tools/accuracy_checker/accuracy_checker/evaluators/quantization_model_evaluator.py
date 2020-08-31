@@ -164,7 +164,7 @@ class ModelEvaluator:
                         self._dumped_annotations.extend(annotations)
                     metrics_result = None
                     if self.metric_executor:
-                        metrics_result = self.metric_executor.update_metrics_on_batch(
+                        metrics_result, _ = self.metric_executor.update_metrics_on_batch(
                             batch_input_ids, annotations, predictions
                         )
                         if self.metric_executor.need_store_predictions:
@@ -267,7 +267,7 @@ class ModelEvaluator:
                 self._dumped_annotations.extend(annotations)
             metrics_result = None
             if self.metric_executor:
-                metrics_result = self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
+                metrics_result, _ = self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
                 if self.metric_executor.need_store_predictions:
                     self._annotations.extend(annotations)
                     self._predictions.extend(predictions)
