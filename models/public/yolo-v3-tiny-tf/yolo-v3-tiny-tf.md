@@ -9,7 +9,7 @@ YOLO v3 Tiny is a real-time object detection model implemented with Keras\* from
 ## Conversion
 
 1. Download or clone the official [repository](https://github.com/david8862/keras-YOLOv3-model-set) (tested on `d38c3d8` commit).
-2. Use the folllowing commands to get original model (named `yolov3_tiny` in repository) and convert it to Keras\* format (see details in the [README.md](https://github.com/david8862/keras-YOLOv3-model-set/blob/ffede5d316568479610b75a3424e2a7b81f0209b/README.md)  file in the official repository):
+2. Use the folllowing commands to get original model (named `yolov3_tiny` in repository) and convert it to Keras\* format (see details in the [README.md](https://github.com/david8862/keras-YOLOv3-model-set/blob/d38c3d865f7190ee9b19a30e91f2b750a31320c1/README.md)  file in the official repository):
 
    1. Download YOLO v3 Tiny weights:
         ```
@@ -18,11 +18,11 @@ YOLO v3 Tiny is a real-time object detection model implemented with Keras\* from
 
    2. Convert model weights to Keras\*:
         ```
-        python tools/convert.py cfg/yolov3.cfg weights/yolov3-tiny.weights weights/yolov3-tiny.h5
+        python tools/model_converter/convert.py cfg/yolov3.cfg weights/yolov3-tiny.weights weights/yolov3-tiny.h5
         ```
 3. Convert model to protobuf:
     ```
-    python tools/keras_to_tensorflow.py --input_model weights/yolov3-tiny.h5 --output_model=weights/yolo-v3-tiny.pb
+    python tools/model_converter/keras_to_tensorflow.py --input_model weights/yolov3-tiny.h5 --output_model=weights/yolo-v3-tiny.pb
     ```
 
 
@@ -77,7 +77,7 @@ Channel order is `BGR`.
 
 2. The array of detection summary info, name - `conv2d_12/BiasAdd`,  shape - `1,26,26,255`. The anchor values are `23,27, 37,58, 81,82`.
 
-For each case format is `B,Cx,Cy,N*85,`, where
+For each case format is `B,Cx,Cy,N*85`, where
     - `B` - batch size
     - `Cx`, `Cy` - cell index
     - `N` - number of detection boxes for cell
