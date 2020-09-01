@@ -16,8 +16,7 @@
 
 namespace human_pose_estimation {
 HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
-                                       const std::string& targetDeviceName_,
-                                       bool enablePerformanceReport)
+                                       const std::string& targetDeviceName_)
     : minJointsNumber(3),
       stride(8),
       pad(cv::Vec4i::all(0)),
@@ -29,12 +28,7 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
       inputLayerSize(-1, -1),
       upsampleRatio(4),
       targetDeviceName(formatDeviceString(targetDeviceName_)),
-      enablePerformanceReport(enablePerformanceReport),
       modelPath(modelPath) {
-    if (enablePerformanceReport) {
-        ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_PERF_COUNT,
-                       InferenceEngine::PluginConfigParams::YES}});
-    }
     network = ie.ReadNetwork(modelPath);
 
     const auto& inputInfo = network.getInputsInfo();
@@ -312,15 +306,5 @@ bool HumanPoseEstimator::inputWidthIsChanged(const cv::Size& imageSize) {
     return true;
 }
 
-HumanPoseEstimator::~HumanPoseEstimator() {
-    try {
-        if (enablePerformanceReport) {
-            std::cout << "Performance counts for " << modelPath << std::endl << std::endl;
-            printPerformanceCounts(*requestCurr, std::cout, getFullDeviceName(ie, targetDeviceName), false);
-        }
-    }
-    catch (...) {
-        std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
-    }
-}
+HumanPoseEstimator::~HumanPoseEstimator() {}
 }  // namespace human_pose_estimation

@@ -38,7 +38,6 @@ static const char target_device_message_lm[] = "Optional. Target device for Faci
 static const char target_device_message_es[] = "Optional. Target device for Open/Closed Eye network "
                                                "(the list of available devices is shown below). Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                "The demo will look for a suitable plugin for device specified. Default value is \"CPU\".";
-static const char camera_resolution_message[] = "Optional. Set camera resolution in format WxH.";
 static const char thresh_output_message[] = "Optional. Probability threshold for Face Detector. The default value is 0.5.";
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 static const char fd_reshape_message[] = "Optional. Reshape Face Detector network so that its input resolution has the same aspect ratio as the input frame.";

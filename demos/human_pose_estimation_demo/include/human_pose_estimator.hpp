@@ -18,8 +18,7 @@ public:
     static const size_t keypointsNumber = 18;
 
     HumanPoseEstimator(const std::string& modelPath,
-                       const std::string& targetDeviceName,
-                       bool enablePerformanceReport = false);
+                       const std::string& targetDeviceName);
     std::vector<HumanPose> postprocessCurr();
     void reshape(const cv::Mat& image);
     void frameToBlobCurr(const cv::Mat& image);
@@ -64,7 +63,6 @@ private:
     InferenceEngine::InferRequest::Ptr requestCurr;
     std::string pafsBlobName;
     std::string heatmapsBlobName;
-    bool enablePerformanceReport;
     std::string modelPath;
 };
 }  // namespace human_pose_estimation

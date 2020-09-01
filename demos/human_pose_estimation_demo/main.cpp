@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
         }
 
         std::string deviceString = formatDeviceString(FLAGS_d);
-        HumanPoseEstimator estimator(FLAGS_m, deviceString, FLAGS_pc);
+        HumanPoseEstimator estimator(FLAGS_m, deviceString);
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat curr_frame = cap->read();
