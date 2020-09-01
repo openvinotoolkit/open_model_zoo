@@ -17,12 +17,13 @@ limitations under the License.
 import numpy as np
 import pytest
 
+from .common import make_segmentation_representation, make_instance_segmentation_representation
+from ..accuracy_checker.utils import UnsupportedPackage
+
 try:
     import pycocotools.mask as maskUtils
-except ImportError:
-    maskUtils = None
-
-from .common import make_segmentation_representation, make_instance_segmentation_representation
+except ImportError as import_error:
+    maskUtils = UnsupportedPackage("pycocotools", import_error.msg)
 
 def no_available_pycocotools():
     try:
