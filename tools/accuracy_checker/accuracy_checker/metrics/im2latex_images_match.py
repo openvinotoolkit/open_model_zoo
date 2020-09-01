@@ -73,7 +73,7 @@ def crop_image(img, output_path, default_size=None):
 
 
 def run(cmd, timeout_sec):
-    proc = subprocess.Popen(cmd, shell=True)
+    proc = subprocess.Popen(cmd, shell=True, stdout = subprocess.DEVNULL)
 
     def kill_proc(process):
         return process.kill()
@@ -131,7 +131,7 @@ def render_routine(line):
         aux_filename = pre_name + '.aux'
         with open(tex_filename, "w") as w:
             w.write(template % formula)
-        run("pdflatex -interaction=nonstopmode {}  >/dev/null".format(tex_filename), TIMEOUT)
+        run("pdflatex -interaction=nonstopmode {}".format(tex_filename), TIMEOUT)
         for filename in (tex_filename, log_filename, aux_filename):
             if os.path.exists(filename):
                 os.remove(filename)
