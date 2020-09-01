@@ -68,6 +68,14 @@ You can install only core part of the tool without additional dependencies and m
 python setup.py install_core
 ```
 
+#### Troubleshooting during installation
+
+When previous version of the tool already installed in the environment, in some cases, it can broke new installation. 
+If you see the error about directory/file not found, please try remove manually old tool version from your environment or install the tool with following command (in accuracy checker directory, instead of setup.py install):
+```bash
+pip install --upgrade --force-reinstall .
+```
+
 #### Usage
 
 You may test your installation and get familiar with accuracy checker by running [sample](sample/README.md).
