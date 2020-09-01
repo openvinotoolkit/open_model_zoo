@@ -19,7 +19,7 @@ import csv
 import numpy as np
 
 
-from ..config import PathField, StringField, NumberField, BoolField, ConfigError
+from ..config import PathField, StringField, NumberField, BoolField
 from ..representation import TextClassificationAnnotation
 from ..utils import string_to_list, UnsupportedPackage
 from .format_converter import BaseFormatConverter, ConverterReturn

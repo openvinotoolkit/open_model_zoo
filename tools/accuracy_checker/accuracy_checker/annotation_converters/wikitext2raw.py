@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 
 from ..representation import LanguageModelingAnnotation
-from ..config import PathField, NumberField, ConfigError
+from ..config import PathField, NumberField
 from ..utils import UnsupportedPackage
 from .format_converter import BaseFormatConverter, ConverterReturn
 

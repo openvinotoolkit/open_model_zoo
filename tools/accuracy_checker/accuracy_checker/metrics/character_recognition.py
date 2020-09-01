@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 from ..representation import CharacterRecognitionAnnotation, CharacterRecognitionPrediction
-from ..config import ConfigError
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
 from .average_editdistance_meter import AverageEditdistanceMeter
