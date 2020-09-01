@@ -22,13 +22,14 @@ import numpy as np
 
 from ..config import ConfigError, NumberField, StringField, BoolField, ListField
 from ..preprocessor import Preprocessor
-from ..utils import get_size_from_config, string_to_tuple
+from ..utils import get_size_from_config, string_to_tuple, UnsupportedPackage
 from ..logging import warning
 
 try:
     from skimage.transform import estimate_transform, warp
-except ImportError:
-    estimate_transform, warp = None, None
+except ImportError as import_error:
+    estimate_transform = UnsupportedPackage("skimage.transform", import_error.msg)
+    warp = UnsupportedPackage("skimage.transform", import_error.msg)
 
 # The field .type should be string, the field .parameters should be dict
 GeometricOperationMetadata = namedtuple('GeometricOperationMetadata', ['type', 'parameters'])
@@ -553,8 +554,8 @@ class SimilarityTransfom(Preprocessor):
         return params
 
     def configure(self):
-        if estimate_transform is None:
-            raise ConfigError('similarity_transform_box requires skimage installation. Please install it before usage.')
+        if isinstance(estimate_transform, UnsupportedPackage):
+            estimate_transform.raise_error(self.__provider__)
         self.box_scale = self.get_value_from_config('box_scale')
         self.dst_height, self.dst_width = get_size_from_config(self.config)
 
