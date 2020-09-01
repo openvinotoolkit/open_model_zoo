@@ -800,7 +800,7 @@ def loadmat(filename):
     return mdict
 
 
-class UnsupportedPackage():
+class UnsupportedPackage:
     def __init__(self, package, message):
         self.package = package
         self.msg = message
