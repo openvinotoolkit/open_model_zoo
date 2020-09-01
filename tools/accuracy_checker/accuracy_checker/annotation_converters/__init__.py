@@ -80,6 +80,7 @@ from .ade20k_dataset_converter import ADE20kConverter
 from .librispeech import LibrispeechConverter
 from .criteo_kaggle_dac import CriteoKaggleDACConverter
 from .features_regression import FeaturesRegressionConverter
+from .nyu_depth import NYUDepthV2Converter
 
 __all__ = [
     'BaseFormatConverter',
@@ -137,6 +138,7 @@ __all__ = [
     'ActionRecognitionConverter',
     'MSASLContiniousConverter',
     'ReDWebDatasetConverter',
+    'NYUDepthV2Converter',
     'FashionMnistConverter',
     'InpaintingConverter',
     'mrlEyes_2018_01_Converter',
@@ -144,10 +146,8 @@ __all__ = [
     'Wikitext2RawConverter',
     'ImageProcessingConverter',
     'AFLW20003DConverter',
-
     'ADE20kConverter',
-
     'LibrispeechConverter',
     'CriteoKaggleDACConverter',
-    'FeaturesRegressionConverter'
+    'FeaturesRegressionConverter',
 ]
