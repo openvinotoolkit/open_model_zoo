@@ -19,14 +19,16 @@ import warnings
 import cv2
 import numpy as np
 
-try:
-    import pycocotools.mask as mask_util
-except ImportError:
-    mask_util = None
 from .adapter import Adapter
 from ..config import StringField, ConfigError
 from ..representation import CoCocInstanceSegmentationPrediction, DetectionPrediction, ContainerPrediction
 from ..postprocessor import FRCNNPostprocessingBboxResize
+from ..utils import UnsupportedPackage
+
+try:
+    import pycocotools.mask as mask_util
+except ImportError as import_error:
+    mask_util = UnsupportedPackage("pycocotools", import_error.msg)
 
 
 class MaskRCNNAdapter(Adapter):
@@ -34,8 +36,8 @@ class MaskRCNNAdapter(Adapter):
 
     def __init__(self, launcher_config, label_map=None, output_blob=None):
         super().__init__(launcher_config, label_map, output_blob)
-        if mask_util is None:
-            raise ImportError('pycocotools is not installed. Please install it before using mask_rcnn adapter.')
+        if isinstance(mask_util, UnsupportedPackage):
+            mask_util.raise_error(self.__provider__)
         self.encoder = mask_util.encode
 
     @classmethod

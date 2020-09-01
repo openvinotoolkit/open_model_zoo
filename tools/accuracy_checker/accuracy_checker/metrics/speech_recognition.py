@@ -14,18 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-try:
-    import editdistance
-except ImportError:
-    editdistance = None
-
-from ..config import ConfigError
 from ..representation import (
     CharacterRecognitionAnnotation,
     CharacterRecognitionPrediction,
     )
 from .metric import PerImageEvaluationMetric
+from ..utils import UnsupportedPackage
 
+try:
+    import editdistance
+except ImportError as import_error:
+    editdistance = UnsupportedPackage("editdistance", import_error.msg)
 
 class SpeechRecognitionWER(PerImageEvaluationMetric):
     __provider__ = 'wer'
@@ -33,8 +32,8 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
     prediction_types = (CharacterRecognitionPrediction,)
 
     def configure(self):
-        if editdistance is None:
-            raise ConfigError('editdistance is not installed. Please install it before usage')
+        if isinstance(editdistance, UnsupportedPackage):
+            editdistance.raise_error(self.__provider__)
         self.words = 0
         self.score = 0
 
@@ -58,8 +57,8 @@ class SpeechRecognitionCER(PerImageEvaluationMetric):
     prediction_types = (CharacterRecognitionPrediction,)
 
     def configure(self):
-        if editdistance is None:
-            raise ConfigError('editdistance is not installed. Please install it before usage')
+        if isinstance(editdistance, UnsupportedPackage):
+            editdistance.raise_error(self.__provider__)
         self.length = 0
         self.score = 0
 

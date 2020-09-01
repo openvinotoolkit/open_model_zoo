@@ -18,15 +18,16 @@ import numpy as np
 from .postprocessor import Postprocessor
 from ..config import ConfigError, BoolField, ListField, NumberField
 from ..representation import BrainTumorSegmentationPrediction, BrainTumorSegmentationAnnotation
+from ..utils import UnsupportedPackage
 try:
     from scipy.ndimage import interpolation
-except ImportError:
-    interpolation = None
+except ImportError as import_error:
+    interpolation = UnsupportedPackage("scipy", import_error.msg)
 
 
 def resample(data, shape):
-    if interpolation is None:
-        raise ValueError('scipy required, please install it')
+    if isinstance(interpolation, UnsupportedPackage):
+        interpolation.raise_error("segmentation_prediction_resample")
     if len(data.shape) != len(shape):
         raise RuntimeError('Dimensions of input array and shape are different. Resampling is impossible.')
     factor = [float(o) / i for i, o in zip(data.shape, shape)]

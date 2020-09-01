@@ -17,17 +17,16 @@ limitations under the License.
 import cv2
 import numpy as np
 
-try:
-    import pycocotools.mask as mask_util
-except ImportError:
-    mask_util = None
-
 from ..config import StringField, NumberField
 from ..postprocessor import NMS
 from ..representation import DetectionPrediction, CoCocInstanceSegmentationPrediction, ContainerPrediction
-
+from ..utils import UnsupportedPackage
 from .adapter import Adapter
 
+try:
+    import pycocotools.mask as mask_util
+except ImportError as import_error:
+    mask_util = UnsupportedPackage("pycocotools", import_error.msg)
 
 class YolactAdapter(Adapter):
     __provider__ = 'yolact'
@@ -51,8 +50,8 @@ class YolactAdapter(Adapter):
         return params
 
     def configure(self):
-        if mask_util is None:
-            raise ImportError('pycocotools is not installed. Please install it before using mask_rcnn adapter.')
+        if isinstance(mask_util, UnsupportedPackage):
+            mask_util.raise_error(self.__provider__)
         self.encoder = mask_util.encode
         self.loc_out = self.get_value_from_config('loc_out')
         self.conf_out = self.get_value_from_config('conf_out')

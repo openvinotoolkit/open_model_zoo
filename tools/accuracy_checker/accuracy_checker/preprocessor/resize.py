@@ -22,7 +22,7 @@ from ..config import ConfigError, NumberField, StringField, BoolField
 from ..dependency import ClassProvider
 from ..logging import warning
 from ..preprocessor import Preprocessor, GeometricOperationMetadata
-from ..utils import contains_all, get_size_from_config
+from ..utils import contains_all, get_size_from_config, UnsupportedPackage
 
 
 def scale_width(dst_width, dst_height, image_width, image_height,):
@@ -234,8 +234,8 @@ class _TFResizer(_Resizer):
     def __init__(self, interpolation):
         try:
             import tensorflow as tf # pylint: disable=C0415
-        except ImportError:
-            raise ImportError('tf backend for resize operation requires TensorFlow. Please install it before usage.')
+        except ImportError as import_error:
+            UnsupportedPackage("tf", import_error.msg).raise_error(self.__provider__)
         tf.enable_eager_execution()
         self._supported_interpolations = {
             'BILINEAR': tf.image.ResizeMethod.BILINEAR,

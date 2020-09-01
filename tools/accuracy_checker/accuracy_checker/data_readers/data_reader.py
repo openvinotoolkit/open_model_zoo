@@ -25,20 +25,19 @@ from PIL import Image
 import numpy as np
 from numpy.lib.npyio import NpzFile
 
+from ..utils import get_path, read_json, read_pickle, contains_all, UnsupportedPackage
+from ..dependency import ClassProvider
+from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField
+
 try:
     import nibabel as nib
-except ImportError:
-    nib = None
+except ImportError as import_error:
+    nib = UnsupportedPackage("nibabel", import_error.msg)
 
 try:
     import pydicom
-except ImportError:
-    pydicom = None
-
-
-from ..utils import get_path, read_json, read_pickle, contains_all
-from ..dependency import ClassProvider
-from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField
+except ImportError as import_error:
+    pydicom = UnsupportedPackage("pydicom", import_error.msg)
 
 REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
 
@@ -331,8 +330,8 @@ class NiftiImageReader(BaseReader):
             config_validator.validate(self.config)
 
     def configure(self):
-        if nib is None:
-            raise ImportError('nifty backend for image reading requires nibabel. Please install it before usage.')
+        if isinstance(nib, UnsupportedPackage):
+            nib.raise_error(self.__provider__)
         self.channels_first = self.config.get('channels_first', False) if self.config else False
         self.multi_infer = self.config.get('multi_infer', False)
         if not self.data_source:
@@ -529,8 +528,8 @@ class DicomReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        if pydicom is None:
-            raise ImportError('dicom backend for reading requires pydicom. Please install it before usage.')
+        if isinstance(pydicom, UnsupportedPackage):
+            pydicom.raise_error(self.__provider__)
 
     def read(self, data_id):
         dataset = pydicom.dcmread(str(self.data_source / data_id))

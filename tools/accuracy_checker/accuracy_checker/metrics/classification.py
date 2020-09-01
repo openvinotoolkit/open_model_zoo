@@ -26,16 +26,17 @@ from ..representation import (
 from ..config import NumberField, StringField, ConfigError, BoolField
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
+from ..utils import UnsupportedPackage
 
 try:
     from sklearn.metrics import roc_auc_score
-except ImportError:
-    roc_auc_score = None
+except ImportError as import_error:
+    roc_auc_score = UnsupportedPackage("sklearn.metric.roc_auc_score", import_error.msg)
 
 try:
     from sklearn.metrics import accuracy_score
-except ImportError:
-    accuracy_score = None
+except ImportError as import_error:
+    accuracy_score = UnsupportedPackage("sklearn.metric.accuracy_score", import_error.msg)
 
 class ClassificationAccuracy(PerImageEvaluationMetric):
     """
@@ -71,8 +72,8 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         if not self.match:
             self.accuracy = AverageMeter(loss)
         else:
-            if accuracy_score is None:
-                raise ConfigError('sklearn.metric.accuracy_score not available')
+            if isinstance(accuracy_score, UnsupportedPackage):
+                accuracy_score.raise_error(self.__provider__)
             self.accuracy = []
 
     def update(self, annotation, prediction):
@@ -331,8 +332,8 @@ class RocAucScore(PerImageEvaluationMetric):
     prediction_types = (ClassificationPrediction, ArgMaxClassificationPrediction)
 
     def configure(self):
-        if roc_auc_score is None:
-            raise ConfigError('sklearn.metrics.roc_auc_score not available')
+        if isinstance(roc_auc_score, UnsupportedPackage):
+            roc_auc_score.raise_error(self.__provider__)
         self.reset()
 
     def update(self, annotation, prediction):

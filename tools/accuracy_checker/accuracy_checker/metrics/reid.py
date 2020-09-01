@@ -25,11 +25,13 @@ from ..representation import (
 )
 from ..config import BaseField, BoolField, NumberField
 from .metric import FullDatasetEvaluationMetric
+from ..utils import UnsupportedPackage
 
 try:
     from sklearn.metrics import auc, precision_recall_curve
-except ImportError:
-    auc, precision_recall_curve = None, None
+except ImportError as import_error:
+    auc = UnsupportedPackage("sklearn.metrics.auc", import_error.msg)
+    precision_recall_curve = UnsupportedPackage("sklearn.metrics.precision_recall_curve", import_error.msg)
 
 PairDesc = namedtuple('PairDesc', 'image1 image2 same')
 
@@ -567,8 +569,10 @@ def get_embedding_distances(annotation, prediction, train=False):
 
 
 def binary_average_precision(y_true, y_score, interpolated_auc=True):
-    if auc is None:
-        raise ValueError('please install sklearn')
+    if isinstance(auc, UnsupportedPackage):
+        auc.raise_error("reid metric")
+    if isinstance(precision_recall_curve, UnsupportedPackage):
+        precision_recall_curve.raise_error("reid metric")
     def _average_precision(y_true_, y_score_):
         precision, recall, _ = precision_recall_curve(y_true_, y_score_)
         if not interpolated_auc:
