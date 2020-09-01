@@ -7,20 +7,23 @@
 
 std::string formatDeviceString(const std::string& deviceString) {
     std::string formattedString = deviceString;
-    bool preserveCase = false;
+    int changeCase = 1;
 
     for (size_t i = 0; i < deviceString.size(); ++i) {
-        // These two conditions handle the special case of MYRIAD device names in "ma1234" format, where letters should
-        // not be transformed to upper case.
-        // if (deviceString[i] == 'm' && i+1 != deviceString.size() && deviceString[i+1] == 'a') {
-        //     preserveCase = true;
-        // }
-        if (preserveCase && deviceString[i] == ',') {
-            preserveCase = false;
+        // For the special case of MYRIAD device names in "MYRIAD.0.0-ma0000" format
+        std::string prefix = deviceString.substr(i, 2);
+        if (prefix == "ma") {
+            changeCase = 0;
+        } else if (prefix == "MA" || prefix == "Ma" || prefix == "mA") {
+            changeCase = -1;
+        } else if (changeCase != 1 && deviceString[i] == ',') {
+            changeCase = 1;
         }
 
-        if (!preserveCase) {
+        if (changeCase == 1) {
             formattedString[i] = std::toupper(deviceString[i]);
+        } else if (changeCase == -1) {
+            formattedString[i] = std::tolower(deviceString[i]);
         }
     }
 
@@ -47,8 +50,9 @@ std::map<std::string, std::string> createConfig(const std::string& deviceString,
             }
             
             // limit threading for CPU portion of inference
-            if (nthreads != 0)
+            if (nthreads != 0) {
                 config.insert({ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(nthreads) });
+            }
 
             if (deviceString.find("MULTI") != std::string::npos && devices.find("GPU") != devices.end()) {
                 config.insert({ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) });
@@ -76,7 +80,7 @@ std::map<std::string, std::string> createConfig(const std::string& deviceString,
                 // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
                 config.insert({ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" });
             }
-        } else if (device.find("MYRIAD") == 0 /*|| device.find("ma") == 0*/) {
+        } else if (device.find("MYRIAD") == 0) {
             if (minLatency) {
                 config.insert({ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS, "1" });
                 continue;

@@ -16,55 +16,73 @@
 
 def format_device_string(device_string):
     formatted_string = ''
-    preserve_case = False
+    change_case = 1
 
     for i in range(len(device_string)):
-        # These two conditions handle the special case of MYRIAD device names in "ma1234" format, where letters should
-        # not be transformed to upper case.
-        # if device_string[i] == 'm' and i+1 != len(device_string) and device_string[i+1] == 'a':
-        #     preserve_case = True
-        if preserve_case and device_string[i] == ',':
-            preserve_case = False
+        # For the special case of MYRIAD device names in "MYRIAD.0.0-ma0000" format
+        prefix = device_string[i:i+2]
+        if prefix == 'ma':
+            change_case = 0
+        elif prefix == 'MA' or prefix == 'Ma' or prefix == 'mA':
+            change_case = -1
+        elif change_case != 1 and device_string[i] == ',':
+            change_case = 1
 
-        formatted_string += device_string[i] if preserve_case \
-                                             else device_string[i].upper()
-    
+        if change_case == 1:
+            formatted_string += device_string[i].upper()
+        elif change_case == -1:
+            formatted_string += device_string[i].lower()
+        elif change_case == 0:
+            formatted_string += device_string[i]
+
     return formatted_string
 
 
 def create_config(device_string, nstreams_string, nthreads, min_latency=False):
     config = {}
 
+    is_multi = (device_string.find('MULTI') == 0)
+    devices = device_string.split(':')[-1].split(',')
+
     devices_nstreams = {}
     if nstreams_string:
-        devices_nstreams = {device: nstreams_string for device in ['CPU', 'GPU', 'MYRIAD'] if device in device_string} \
+        devices_nstreams = {device: nstreams_string for device in devices if device in device_string} \
                                     if nstreams_string.isdigit() \
                                     else dict([device.split(':') for device in nstreams_string.split(',')])
 
-    if 'CPU' in device_string:
-        if min_latency:
-            config['CPU_THROUGHPUT_STREAMS'] = '1'
-        else:
+    for device in devices:
+        if device == 'CPU':
+            if min_latency:
+                config['CPU_THROUGHPUT_STREAMS'] = '1'
+                continue
+
             if nthreads:
                 config['CPU_THREADS_NUM'] = str(nthreads)
+            
+            config['CPU_BIND_THREAD'] = 'NO' if is_multi and 'GPU' in devices \
+                                             else 'YES'
 
             if 'CPU' in devices_nstreams:
                 config['CPU_THROUGHPUT_STREAMS'] = devices_nstreams['CPU'] if int(devices_nstreams['CPU']) > 0 \
                                                                            else 'CPU_THROUGHPUT_AUTO'
-    
-    if 'GPU' in device_string:
-        if min_latency:
-            config['GPU_THROUGHPUT_STREAMS'] = '1'
-        elif 'GPU' in devices_nstreams:
-            config['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] if int(devices_nstreams['GPU']) > 0 \
-                                                                       else 'GPU_THROUGHPUT_AUTO'
-    
-    if 'MYRIAD' in device_string: #or 'ma' in device_string:
-        if min_latency:
-            config['MYRIAD_THROUGHPUT_STREAMS'] = '1'
-        # elif devices_nstreams.count('MYRIAD') > 0 or :
-        #         config.insert({ InferenceEngine::MYRIAD_THROUGHPUT_STREAMS,
-        #                         std::to_string(deviceNstreams.at(device)) });
+        elif device == 'GPU':
+            if min_latency:
+                config['GPU_THROUGHPUT_STREAMS'] = '1'
+                continue
+
+            if 'GPU' in devices_nstreams:
+                config['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] if int(devices_nstreams['GPU']) > 0 \
+                                                                           else 'GPU_THROUGHPUT_AUTO'
+            
+            if is_multi and 'CPU' in devices:
+                config['PLUGIN_THROTTLE'] = '1'
+        elif 'MYRIAD' in device:
+            if min_latency:
+                config['MYRIAD_THROUGHPUT_STREAMS'] = '1'
+                continue
+
+            if device in devices_nstreams:
+                config['MYRIAD_THROUGHPUT_STREAMS'] = devices_nstreams[device]
 
     return config
 
