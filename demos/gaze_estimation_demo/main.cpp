@@ -28,6 +28,8 @@
 #include <inference_engine.hpp>
 
 #include <monitors/presenter.h>
+#include <samples/args_helper.hpp>
+#include <samples/images_capture.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 #include <samples/ie_config_helper.hpp>
@@ -88,43 +90,12 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        slog::info << "Reading input" << slog::endl;
-        cv::VideoCapture cap;
-
-        if (!(FLAGS_i == "cam" ? cap.open(0) : cap.open(FLAGS_i))) {
-            throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
-        }
-
-        // Parse camera resolution parameter and set camera resolution
-        if (FLAGS_i == "cam" && FLAGS_res != "") {
-            auto xPos = FLAGS_res.find("x");
-            if (xPos == std::string::npos)
-                throw std::runtime_error("Incorrect -res parameter format, please use 'x' to separate width and height");
-            int frameWidth, frameHeight;
-            std::stringstream widthStream(FLAGS_res.substr(0, xPos));
-            widthStream >> frameWidth;
-            std::stringstream heightStream(FLAGS_res.substr(xPos + 1));
-            heightStream >> frameHeight;
-            cap.set(cv::CAP_PROP_FRAME_WIDTH, frameWidth);
-            cap.set(cv::CAP_PROP_FRAME_HEIGHT, frameHeight);
-        }
-
-        // read input (video) frame
-        cv::Mat frame;
-        if (!cap.read(frame)) {
-            throw std::logic_error("Failed to get frame from cv::VideoCapture");
-        }
-
-        bool flipImage = false;
-        ResultsMarker resultsMarker(false, false, false, true, true);
-
+        // Loading Inference Engine
         std::string deviceString = formatDeviceString(FLAGS_d);
         std::string deviceFdString = formatDeviceString(FLAGS_d_fd);
         std::string deviceHpString = formatDeviceString(FLAGS_d_hp);
         std::string deviceLmString = formatDeviceString(FLAGS_d_lm);
         std::string deviceEsString = formatDeviceString(FLAGS_d_es);
-
-        // Loading Inference Engine
         std::vector<std::pair<std::string, std::string>> cmdOptions = {
             {deviceString, FLAGS_m}, {deviceFdString, FLAGS_m_fd},
             {deviceHpString, FLAGS_m_hp}, {deviceLmString, FLAGS_m_lm},
@@ -152,10 +123,21 @@ int main(int argc, char *argv[]) {
         ExponentialAverager overallTimeAverager(smoothingFactor, 30.);
         ExponentialAverager inferenceTimeAverager(smoothingFactor, 30.);
 
+        bool flipImage = false;
+        ResultsMarker resultsMarker(false, false, false, true, true);
         int delay = 1;
         std::string windowName = "Gaze estimation demo";
-        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
-        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
+
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+            std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
+        cv::Mat frame = cap->read();
+        if (!frame.data) {
+            throw std::runtime_error("Can't read an image from the input");
+        }
+
+        cv::Size graphSize{frame.cols / 4, 60};
+        Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
+
         auto tIterationBegins = cv::getTickCount();
         do {
             if (flipImage) {
@@ -187,10 +169,6 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            if (FLAGS_no_show) {
-                continue;
-            }
-
             presenter.drawGraphs(frame);
 
             // Display the results
@@ -199,20 +177,23 @@ int main(int argc, char *argv[]) {
             }
             putTimingInfoOnFrame(frame, overallTimeAverager.getAveragedValue(),
                                  inferenceTimeAverager.getAveragedValue());
-            cv::imshow(windowName, frame);
+            if (!FLAGS_no_show) {
+                cv::imshow(windowName, frame);
 
-            // Controls the information being displayed while demo runs
-            int key = cv::waitKey(delay);
-            resultsMarker.toggle(key);
+                // Controls the information being displayed while demo runs
+                int key = cv::waitKey(delay);
+                resultsMarker.toggle(key);
 
-            // Press 'Esc' to quit, 'f' to flip the video horizontally
-            if (key == 27)
-                break;
-            else if (key == 'f')
-                flipImage = !flipImage;
-            else
-                presenter.handleKey(key);
-        } while (cap.read(frame));
+                // Press 'Esc' to quit, 'f' to flip the video horizontally
+                if (key == 27)
+                    break;
+                if (key == 'f')
+                    flipImage = !flipImage;
+                else
+                    presenter.handleKey(key);
+            }
+            frame = cap->read();
+        } while (frame.data);
         std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {

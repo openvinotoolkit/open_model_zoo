@@ -20,6 +20,7 @@ from pathlib import Path
 import os
 import platform
 import re
+import warnings
 from collections import OrderedDict
 import numpy as np
 import openvino.inference_engine as ie
@@ -123,7 +124,7 @@ class DLSDKLauncher(Launcher):
         return parameters
 
     def __init__(self, config_entry, model_name='', delayed_model_loading=False, preprocessor=None):
-        super().__init__(config_entry, model_name)
+        super().__init__(config_entry, model_name=model_name)
 
         self._set_variable = False
         self.ie_config = self.config.get('ie_config')
@@ -354,7 +355,7 @@ class DLSDKLauncher(Launcher):
         if is_blob:
             return model, None
         weights = self.get_value_from_config('weights')
-        if weights is None or Path(weights).is_dir() and model.suffix != '.onnx':
+        if (weights is None or Path(weights).is_dir()) and model.suffix != '.onnx':
             weights_dir = weights or model.parent
             weights = Path(weights_dir) / model.name.replace('xml', 'bin')
             print_info('Found weights {}'.format(get_path(weights)))
@@ -699,10 +700,22 @@ class DLSDKLauncher(Launcher):
                 print_info('    {} - {}'.format(device, nreq))
 
     def _set_device_config(self, device_config):
-        device_specific_configuration = read_yaml(device_config)
-        if not isinstance(device_specific_configuration, dict):
+        device_configuration = read_yaml(device_config)
+        if not isinstance(device_configuration, dict):
             raise ConfigError('device configuration should be a dict-like')
-        self.ie_core.set_config(device_specific_configuration, self.device)
+        if all(not isinstance(value, dict) for value in device_configuration.values()):
+            self.ie_core.set_config(device_configuration, self.device)
+        else:
+            for key, value in device_configuration.items():
+                if isinstance(value, dict):
+                    if key in ie.known_plugins:
+                        self.ie_core.set_config(value, key)
+                    else:
+                        warnings.warn('Option {key}: {value} will be skipped because device is '
+                                      'unknown'.format(key=key, value=value))
+                else:
+                    warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
+                                  'applied is not specified or option is not a dict-like'.format(key=key, value=value))
 
     def _log_versions(self):
         versions = self.ie_core.get_versions(self._device)
@@ -795,31 +808,9 @@ class DLSDKLauncher(Launcher):
         }
 
     def fit_to_input(self, data, layer_name, layout, precision):
-        def data_to_blob(layer_shape, data):
-            data_shape = np.shape(data)
-            if len(layer_shape) == 4:
-                if len(data_shape) == 5:
-                    data = data[0]
-
-                if len(data_shape) < 4:
-                    if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
-                        return np.resize(data, layer_shape)
-                return np.transpose(data, layout)
-
-            if len(layer_shape) == 2:
-                if len(data_shape) == 1:
-                    return np.transpose([data])
-                if len(layout) == 2:
-                    return np.transpose(data, layout)
-
-            if len(layer_shape) == 5 and len(layout) == 5:
-                return np.transpose(data, layout)
-
-            return np.array(data)
-
         layer_shape = tuple(self.inputs[layer_name].shape)
 
-        data = data_to_blob(layer_shape, data)
+        data = self._data_to_blob(layer_shape, data, layout)
         if precision:
             data = data.astype(precision)
 
@@ -830,6 +821,34 @@ class DLSDKLauncher(Launcher):
                 return data
 
         return self._align_data_shape(data, layer_name, layout)
+
+    @staticmethod
+    def _data_to_blob(layer_shape, data, layout): # pylint:disable=R0911
+        data_shape = np.shape(data)
+        if len(layer_shape) == 4:
+            if len(data_shape) == 5:
+                data = data[0]
+
+            if len(data_shape) < 4:
+                if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
+                    return np.resize(data, layer_shape)
+            return np.transpose(data, layout)
+
+        if len(layer_shape) == 2:
+            if len(data_shape) == 1:
+                return np.transpose([data])
+            if len(data_shape) > 2:
+                if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
+                    return np.resize(data, layer_shape)
+
+        if len(layer_shape) == 3 and len(data_shape) == 4:
+            data = np.transpose(data, layout)
+            return data[0]
+
+        if len(layer_shape) == len(layout):
+            return np.transpose(data, layout)
+
+        return np.array(data)
 
     def _set_precision(self):
         has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')

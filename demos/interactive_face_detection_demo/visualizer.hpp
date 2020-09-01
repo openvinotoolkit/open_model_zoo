@@ -80,8 +80,6 @@ private:
 // Drawing detected faces on the frame
 class Visualizer {
 public:
-    using Ptr = std::shared_ptr<Visualizer>;
-
     enum AnchorType {
         TL = 0,
         TR,

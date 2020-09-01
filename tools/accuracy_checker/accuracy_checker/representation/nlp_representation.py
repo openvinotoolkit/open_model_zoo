@@ -56,8 +56,11 @@ class QuestionAnswering(BaseRepresentation):
         super().__init__(identifier)
 
 class QuestionAnsweringAnnotation(QuestionAnswering):
-    def __init__(self, identifier, question_id, unique_id, input_ids, input_mask, segment_ids, cls_index, p_mask,
-                 orig_answer_text=None, paragraph_text=None, doc_tokens=None, is_impossible=False, paragraph_len=None,
+    def __init__(self, identifier, question_id, unique_id,
+                 input_ids, input_mask, segment_ids, position_ids,
+                 cls_index, p_mask,
+                 orig_answer_text=None, paragraph_text=None, doc_tokens=None,
+                 is_impossible=False, paragraph_len=None,
                  tokens=None, token_is_max_context=None, token_to_orig_map=None):
         super().__init__(identifier)
         self.orig_answer_text = orig_answer_text if orig_answer_text is not None else ''
@@ -66,6 +69,7 @@ class QuestionAnsweringAnnotation(QuestionAnswering):
         self.input_ids = input_ids
         self.input_mask = input_mask
         self.segment_ids = segment_ids
+        self.position_ids = position_ids
         self.cls_index = cls_index
         self.tokens = tokens
         self.p_mask = p_mask
@@ -86,6 +90,20 @@ class QuestionAnsweringPrediction(QuestionAnswering):
         self.end_index = end_index if end_index is not None else []
         self.tokens = tokens if tokens is not None else []
 
+
+class QuestionAnsweringEmbeddingAnnotation(QuestionAnswering):
+    def __init__(self, identifier, input_ids, input_mask, segment_ids, position_ids, context_pos_identifier):
+        super().__init__(identifier)
+        self.input_ids = input_ids
+        self.input_mask = input_mask
+        self.segment_ids = segment_ids
+        self.position_ids = position_ids
+        self.context_pos_indetifier = context_pos_identifier
+
+class QuestionAnsweringEmbeddingPrediction(QuestionAnswering):
+    def __init__(self, identifier, embedding):
+        super().__init__(identifier)
+        self.embedding = embedding
 
 class TextClassificationAnnotation(ClassificationAnnotation):
     def __init__(self, identifier, label, input_ids, input_mask, segment_ids, tokens):

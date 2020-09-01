@@ -140,7 +140,7 @@ def main():
                 else:
                     pixel_class = np.argmax(data[:, i, j])
                 classes_map[i, j, :] = classes_color_map[min(pixel_class, 20)]
-        out_img = os.path.join(os.path.dirname(__file__), "out_{}.bmp".format(batch))
+        out_img = "out_{}.bmp".format(batch)
         cv2.imwrite(out_img, classes_map)
         log.info("Result image was saved to {}".format(out_img))
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "

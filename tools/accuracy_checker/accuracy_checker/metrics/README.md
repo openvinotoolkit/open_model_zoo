@@ -13,8 +13,9 @@ Every metric has parameters available for configuration.
 Accuracy Checker supports following set of metrics:
 
 * `accuracy` - classification accuracy metric, defined as the number of correct predictions divided by the total number of predictions.
-Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
+Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`, `ArgMaxClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
+  * `match` - Batch-oriented binary classification metric. Metric value calculated for each record in batch. Parameter `top_k` ignored in this mode.
 * `accuracy_per_class` - classification accuracy metric which represents results for each class. Supported representation: `ClassificationAnnotation`, `ClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
@@ -23,6 +24,7 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
 * `classification_f1-score` - [F1 score](https://en.wikipedia.org/wiki/F1_score) metric for classification task. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
 * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
 * `metthews_correlation_coef` - [Matthews correlation coefficient (MCC)](https://en.wikipedia.org/wiki/Matthews_correlation_coefficient) for binary classification. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
+* `roc_auc_score` - [ROC AUC score](https://en.wikipedia.org/wiki/Receiver_operating_characteristic) for binary classification. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction` `ArgMaxClassificationPrediction`.
 * `map` - mean average precision. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
   * `overlap_method` - method for calculation bbox overlap. You can choose between intersection over union (`iou`), defined as area of intersection divided by union of annotation and prediction boxes areas, and intersection over area (`ioa`), defined as area of intersection divided by ara of prediction box.
@@ -178,6 +180,7 @@ More detailed information about calculation segmentation metrics you can find [h
   *  `max_order` - Maximum n-gram order to use when computing BLEU score. (Optional, default 4).
 * `f1` - F1-score for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
 * `exact_match` - Exact matching (EM) metric for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
+* `qa_embedding_accuracy` - Right context detection accuracy metric for question answering task solved by question vs context embeddings comparison. Supported representations: `QuestionAnsweringEmbeddingAnnotation`, `QuestionAnsweringEmbeddingPrediction`.
 * `mpjpe_multiperson` - [Mean Per Joint Position Error](http://vision.imar.ro/human3.6m/pami-h36m.pdf) extended for multi-person case. Supported representations: `PoseEstimation3dAnnotation`, `PoseEstimation3dPrediction`. As the first step, correspondence between ground truth and prediction skeletons is established for each image. Then MPJPE is computed for each ground truth and prediction pair. The error is averaged over poses in each frame, then over all frames.
 * `face_recognition_tafa_pair_metric` - accuracy for face recognition models based on dot product of embedding values. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
   * `threshold` - minimal dot product value of embeddings to identify as matched face pair.
@@ -196,7 +199,7 @@ More detailed information about calculation segmentation metrics you can find [h
   * `attributes`: names of attributes.
   * `calculate_average` - allows calculation of average precision (default value: `True`).
 * `wer` - Word error rate ([WER](https://en.wikipedia.org/wiki/Word_error_rate)). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
-* `greedy_wer` - approach to calculate WER as length normalized [edit distance](https://en.wikipedia.org/wiki/Edit_distance). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
+* `cer` - Character error rate, character-level counterpart of [WER](https://en.wikipedia.org/wiki/Word_error_rate). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
 * `score_class_comparison` - allows calculate an accuracy of quality score class(low/normal/good). It sorts all quality scores from annotations and predictions and set the k1 highest scores as high class and the k2 lowest scores as low class where k1 is `num_high_quality` and k2 is `num_low_quality`. Supported representations: `QualityAssessmentAnnotation`, `QualityAssessmentPrediction`.
   * `num_high_quality` - the number of high class in total (default value: `1`).
   * `num_low_quality` - the number of low class in total (default value: `1`).

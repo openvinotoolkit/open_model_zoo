@@ -23,10 +23,19 @@ from ..representation import (
     ArgMaxClassificationPrediction
 )
 
-from ..config import NumberField, StringField, ConfigError
+from ..config import NumberField, StringField, ConfigError, BoolField
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
 
+try:
+    from sklearn.metrics import roc_auc_score
+except ImportError:
+    roc_auc_score = None
+
+try:
+    from sklearn.metrics import accuracy_score
+except ImportError:
+    accuracy_score = None
 
 class ClassificationAccuracy(PerImageEvaluationMetric):
     """
@@ -46,27 +55,46 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
                 value_type=int, min_value=1, optional=True, default=1,
                 description="The number of classes with the highest probability, which will be used to decide "
                             "if prediction is correct."
-            )
+            ),
+            'match': BoolField(optional=True, default=False)
         })
 
         return parameters
 
     def configure(self):
         self.top_k = self.get_value_from_config('top_k')
+        self.match = self.get_value_from_config('match')
 
         def loss(annotation_label, prediction_top_k_labels):
             return int(annotation_label in prediction_top_k_labels)
 
-        self.accuracy = AverageMeter(loss)
+        if not self.match:
+            self.accuracy = AverageMeter(loss)
+        else:
+            if accuracy_score is None:
+                raise ConfigError('sklearn.metric.accuracy_score not available')
+            self.accuracy = []
 
     def update(self, annotation, prediction):
-        return self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
+        if not self.match:
+            accuracy = self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
+        else:
+            accuracy = accuracy_score(annotation.label, prediction.label)
+            self.accuracy.append(accuracy)
+        return accuracy
 
     def evaluate(self, annotations, predictions):
-        return self.accuracy.evaluate()
+        if not self.match:
+            accuracy = self.accuracy.evaluate()
+        else:
+            accuracy = np.mean(self.accuracy)
+        return accuracy
 
     def reset(self):
-        self.accuracy.reset()
+        if not self.match:
+            self.accuracy.reset()
+        else:
+            self.accuracy = []
 
 
 class ClassificationAccuracyClasses(PerImageEvaluationMetric):
@@ -262,3 +290,28 @@ class MetthewsCorrelation(PerImageEvaluationMetric):
         self.tn = 0
         self.fp = 0
         self.fn = 0
+
+class RocAucScore(PerImageEvaluationMetric):
+    __provider__ = 'roc_auc_score'
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
+    prediction_types = (ClassificationPrediction, ArgMaxClassificationPrediction)
+
+    def configure(self):
+        if roc_auc_score is None:
+            raise ConfigError('sklearn.metrics.roc_auc_score not available')
+        self.reset()
+
+    def update(self, annotation, prediction):
+        self.targets.append(annotation.label)
+        self.results.append(prediction.label)
+        return 0
+
+    def evaluate(self, annotations, predictions):
+        all_results = np.array(self.results)
+        all_targets = np.array(self.targets)
+        roc_auc = roc_auc_score(all_targets, all_results)
+        return roc_auc
+
+    def reset(self):
+        self.targets = []
+        self.results = []

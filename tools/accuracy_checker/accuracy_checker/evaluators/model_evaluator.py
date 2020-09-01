@@ -277,6 +277,22 @@ class ModelEvaluator(BaseEvaluator):
 
         return free_irs, queued_irs
 
+    def process_single_image(self, image):
+        input_data = [self.reader(identifier=image)]
+        batch_input = self.preprocessor.process(input_data)
+        _, batch_meta = extract_image_representations(batch_input)
+        filled_inputs = self.input_feeder.fill_inputs(batch_input)
+        batch_predictions = self.launcher.predict(filled_inputs, batch_meta)
+
+        if self.adapter:
+            self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
+            batch_predictions = self.adapter.process(batch_predictions, [image], batch_meta)
+
+        _, predictions = self.postprocessor.process_batch(
+            None, batch_predictions, batch_meta, allow_empty_annotation=True
+        )
+        return predictions[0]
+
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
             del self._metrics_results

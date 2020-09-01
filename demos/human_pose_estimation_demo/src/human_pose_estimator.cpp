@@ -145,11 +145,9 @@ void HumanPoseEstimator::startNext() {
     requestNext->StartAsync();
 }
 
-bool HumanPoseEstimator::readyCurr() {
-    if (InferenceEngine::OK == requestCurr->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY)) {
-        return true;
-    } else {
-        return false;
+void HumanPoseEstimator::waitCurr() {
+    if (InferenceEngine::OK != requestCurr->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY)) {
+        throw std::runtime_error("Waiting for inference results error");
     }
 }
 

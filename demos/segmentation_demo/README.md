@@ -22,7 +22,8 @@ segmentation_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -i "<path>"               Required. Input to process.
+    -i                        Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                     Optional. Enable reading the input in a loop.
     -m "<path>"               Required. Path to an .xml file with a trained model.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -delay                    Optional. Default is 1. Interval in milliseconds of waiting for a key to be pressed. For a negative value the demo loads a model, opens an input and exits.

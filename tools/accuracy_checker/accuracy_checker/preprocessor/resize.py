@@ -24,11 +24,6 @@ from ..logging import warning
 from ..preprocessor import Preprocessor, GeometricOperationMetadata
 from ..utils import contains_all, get_size_from_config
 
-try:
-    import tensorflow as tf
-except ImportError:
-    tf = None
-
 
 def scale_width(dst_width, dst_height, image_width, image_height,):
     return int(dst_width * image_width / image_height), dst_height
@@ -97,6 +92,12 @@ def min_ratio(dst_width, dst_height, image_width, image_height):
     ratio = min(float(image_height) / float(dst_height), float(image_width) / float(dst_width))
     return int(image_width / ratio), int(image_height / ratio)
 
+def mask_rcnn_benchmark_ratio(dst_width, dst_height, image_width, image_height):
+    min_dst_size = min(dst_width, dst_height)
+    ratio = min_dst_size / min(image_width, image_height)
+    return int(image_width * ratio), int(image_height * ratio)
+
+
 
 ASPECT_RATIO_SCALE = {
     'width': scale_width,
@@ -106,7 +107,8 @@ ASPECT_RATIO_SCALE = {
     'frcnn_keep_aspect_ratio': frcnn_keep_aspect_ratio,
     'ctpn_keep_aspect_ratio': ctpn_keep_aspect_ratio,
     'east_keep_aspect_ratio': east_keep_aspect_ratio,
-    'min_ratio': min_ratio
+    'min_ratio': min_ratio,
+    'mask_rcnn_benchmark_aspect_ratio': mask_rcnn_benchmark_ratio
 }
 
 
@@ -230,7 +232,9 @@ class _TFResizer(_Resizer):
     _supported_interpolations = {}
 
     def __init__(self, interpolation):
-        if tf is None:
+        try:
+            import tensorflow as tf # pylint: disable=C0415
+        except ImportError:
             raise ImportError('tf backend for resize operation requires TensorFlow. Please install it before usage.')
         tf.enable_eager_execution()
         self._supported_interpolations = {
@@ -249,13 +253,7 @@ class _TFResizer(_Resizer):
 
     @classmethod
     def supported_interpolations(cls):
-        if tf is None:
-            return {}
-        return {
-            'BILINEAR': tf.image.ResizeMethod.BILINEAR,
-            'AREA': tf.image.ResizeMethod.AREA,
-            'BICUBIC': tf.image.ResizeMethod.BICUBIC,
-        }
+        return {}
 
 
 def create_resizer(config):

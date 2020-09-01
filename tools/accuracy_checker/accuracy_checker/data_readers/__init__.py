@@ -26,10 +26,12 @@ from .data_reader import (
     NiftiImageReader,
     NumPyReader,
     NumpyTXTReader,
+    NumpyDictReader,
     TensorflowImageReader,
     AnnotationFeaturesReader,
     WavReader,
     DicomReader,
+    PickleReader,
 
     DataRepresentation,
     ClipIdentifier,
@@ -53,8 +55,10 @@ __all__ = [
     'AnnotationFeaturesReader',
     'WavReader',
     'DicomReader',
+    'PickleReader',
     'NumPyReader',
     'NumpyTXTReader',
+    'NumpyDictReader',
 
     'DataRepresentation',
     'ClipIdentifier',

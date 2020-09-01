@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+#include <opencv2/core/types.hpp>
+
 /**
 * @brief This function checks input args and existence of specified files in a given folder
 * @param arg path to a file to be checked for existence
@@ -34,3 +36,5 @@ std::vector<std::string> parseDevices(const std::string& device_string);
 
 std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>& devices,
                                                     const std::string& values_string);
+
+cv::Size stringToSize(const std::string& str);

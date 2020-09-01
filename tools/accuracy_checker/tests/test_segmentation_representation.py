@@ -37,8 +37,8 @@ def encode_mask(mask):
         raw_mask.append(maskUtils.encode(np.asfortranarray(np.uint8(elem))))
     return raw_mask
 
-class TestSegmentationRepresentation:
 
+class TestSegmentationRepresentation:
     def test_to_polygon_annotation(self):
         annotation = make_segmentation_representation(np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]), True)[0]
         expected = {
@@ -170,9 +170,23 @@ class TestSegmentationRepresentation:
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
                 assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
 
-    def test_to_polygon_prediction_with_1_in_shape(self):
+    def test_to_polygon_prediction_with_1_in_shape_channels_last(self):
         prediction = make_segmentation_representation(np.array(
             [[[1], [0], [0], [0]], [[1], [1], [0], [0]], [[1], [1], [1], [0]]]), False)[0]
+        expected = {
+            0: [np.array([[1, 0], [3, 0], [3, 2]])],
+            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
+
+        actual = prediction.to_polygon()
+
+        for key in expected.keys():
+            assert actual[key]
+            for actual_arr, expected_arr in zip(actual[key], expected[key]):
+                assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
+
+    def test_to_polygon_prediction_with_1_in_shape_channels_first(self):
+        prediction = make_segmentation_representation(np.array(
+            [[[1], [0], [0], [0]], [[1], [1], [0], [0]], [[1], [1], [1], [0]]]).reshape(1, 3, 4), False)[0]
         expected = {
             0: [np.array([[1, 0], [3, 0], [3, 2]])],
             1: [np.array([[0, 0], [0, 2], [2, 2]])]}
@@ -199,23 +213,42 @@ class TestSegmentationRepresentation:
 
 @pytest.mark.skipif(no_available_pycocotools(), reason='no installed pycocotools in the system')
 class TestCoCoInstanceSegmentationRepresentation:
-
-    def test_to_polygon_annotation(self):
+    def test_to_polygon_annotation_mask_rle(self):
         mask = [np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]),
                 np.array([[0, 1, 1, 1], [0, 0, 1, 1], [0, 0, 0, 1]])]
         raw_mask = encode_mask(mask)
         labels = [0, 1]
         annotation = make_instance_segmentation_representation(raw_mask, labels, True)[0]
         expected = {
-            0: [np.array([[1, 0], [3, 0], [3, 2]])],
-            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
+            1: [np.array([[[1, 0], [3, 0], [3, 2]]])],
+            0: [np.array([[[0, 0], [0, 2], [2, 2]]])]}
 
         actual = annotation.to_polygon()
 
         for key in expected.keys():
             assert actual[key]
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
-                assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
+                actual_arr = np.sort(actual_arr, axis=1)
+                expected_arr = np.sort(expected_arr, axis=1)
+                assert np.array_equal(actual_arr, expected_arr)
+
+    def test_to_polygon_annotation_mask_polygon(self):
+        mask = [np.array([[[0, 0], [0, 2], [2, 2]]]),
+                np.array([[[1, 0], [3, 0], [3, 2]]])]
+        labels = [0, 1]
+        annotation = make_instance_segmentation_representation(mask, labels, True)[0]
+        expected = {
+            1: [np.array([[[1, 0], [3, 0], [3, 2]]])],
+            0: [np.array([[[0, 0], [0, 2], [2, 2]]])]}
+
+        actual = annotation.to_polygon()
+
+        for key in expected.keys():
+            assert actual[key]
+            for actual_arr, expected_arr in zip(actual[key], expected[key]):
+                actual_arr = np.sort(actual_arr, axis=1)
+                expected_arr = np.sort(expected_arr, axis=1)
+                assert np.array_equal(actual_arr, expected_arr)
 
     def test_to_polygon_prediction(self):
         mask = [np.array([[1, 0, 0, 0], [1, 1, 0, 0], [1, 1, 1, 0]]),
@@ -224,15 +257,17 @@ class TestCoCoInstanceSegmentationRepresentation:
         labels = [0, 1]
         prediction = make_instance_segmentation_representation(raw_mask, labels, False)[0]
         expected = {
-            0: [np.array([[1, 0], [3, 0], [3, 2]])],
-            1: [np.array([[0, 0], [0, 2], [2, 2]])]}
+            1: [np.array([[[1, 0], [3, 0], [3, 2]]])],
+            0: [np.array([[[0, 0], [0, 2], [2, 2]]])]}
 
         actual = prediction.to_polygon()
 
         for key in expected.keys():
             assert actual[key]
             for actual_arr, expected_arr in zip(actual[key], expected[key]):
-                assert np.array_equal(actual_arr.sort(axis=0), expected_arr.sort(axis=0))
+                actual_arr = np.sort(actual_arr, axis=1)
+                expected_arr = np.sort(expected_arr, axis=1)
+                assert np.array_equal(actual_arr, expected_arr)
 
     def test_to_polygon_with_None_mask(self):
         labels = [0, 1]

@@ -11,7 +11,7 @@ a vector of features for each detected person. This vector is used to conclude i
 For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 Other demo objectives are:
-* Images/Video/Camera as inputs, via OpenCV*
+* Images/Video/Camera as inputs, via OpenCV\*
 * Example of simple networks pipelining: Person Attributes and Person Reidentification networks are executed on top of
 the Person Detection results
 * Visualization of Person Attributes and Person Reidentification (REID) information for each detected person
@@ -55,6 +55,7 @@ Options:
     -no_show                     Optional. No show processed video.
     -auto_resize                 Optional. Enables resizable input with support of ROI crop & auto resize.
     -u                           Optional. List of monitors to show initially.
+    -person_label                Optional. The integer index of the objects' category corresponding to persons (as it is returned from the detection network, may vary from one network to another). The default value is 1.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.
@@ -69,6 +70,12 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 ./crossroad_camera_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/person-vehicle-bike-detection-crossroad-0078.xml -m_pa <path_to_model>/person-attributes-recognition-crossroad-0230.xml -m_reid <path_to_model>/person-reidentification-retail-0079.xml -d GPU
 ```
 
+> **NOTE**: The detection network returns as the result a set of detected objects, where each detected object consists of a bounding box and an index of the object's category (person/vehicle/bike). The demo runs Person Attributes Recognition and Person Reidentification networks only for the bounding boxes that has the category "person".
+> Since different detection networks may have different category index corresponding to the category "person", this index may be pointed by the command line parameter `-person_label`.
+> Please, note that
+> * the model `person-vehicle-bike-detection-crossroad-0078` returns for persons the category index 1, it is the default value for the demo
+> * the model `person-vehicle-bike-detection-crossroad-1016` returns for persons the category index 2, so for the demo to work correctly, the command line parameter `-person_label 2` should be added.
+
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
@@ -79,9 +86,9 @@ If Person Attributes Recognition or Person Reidentification Retail are enabled, 
 	* **Person Reidentification time** - Inference time of Person Reidentification averaged by the number of detected persons.
 
 > **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
->* `person-attributes-recognition-crossroad-0230`
->* `person-reidentification-retail-0031`
->* `person-vehicle-bike-detection-crossroad-0078`
+> * `person-attributes-recognition-crossroad-0230`
+> * `person-reidentification-retail-0031`
+> * `person-vehicle-bike-detection-crossroad-0078`
 > Other models may produce unexpected results on these devices.
 
 ## See Also

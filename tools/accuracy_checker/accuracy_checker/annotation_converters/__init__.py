@@ -25,7 +25,9 @@ from .wider import WiderFormatConverter
 from .detection_opencv_storage import DetectionOpenCVStorageFormatConverter
 from .lfw import LFWConverter
 from .vgg_face_regression import VGGFaceRegressionConverter
-from .super_resolution_converter import SRConverter, SRMultiFrameConverter, MultiTargetSuperResolutionConverter
+from .super_resolution_converter import (
+    SRConverter, SRMultiFrameConverter, MultiTargetSuperResolutionConverter, SRDirectoryBased
+)
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
 from .kondate_nakayosi import KondateNakayosiRecognitionDatasetConverter
@@ -51,6 +53,7 @@ from .cvat_human_pose import CVATPoseEstimationConverter
 from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
 from .mrlEyes_2018_01 import mrlEyes_2018_01_Converter
 from .squad import SQUADConverter
+from .squad_emb import SQUADConverterEMB
 from .text_classification import (
     XNLIDatasetConverter,
     BertXNLITFRecordConverter,
@@ -97,6 +100,7 @@ __all__ = [
     'SRConverter',
     'SRMultiFrameConverter',
     'MultiTargetSuperResolutionConverter',
+    'SRDirectoryBased',
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
     'KondateNakayosiRecognitionDatasetConverter',

@@ -7,7 +7,10 @@
 #include <limits>
 
 // timeWindow defines the length of the timespan over which the 'current fps' value is calculated
-PerformanceMetrics::PerformanceMetrics(Duration timeWindow) : timeWindowSize(timeWindow) {}
+PerformanceMetrics::PerformanceMetrics(Duration timeWindow)
+    : timeWindowSize(timeWindow)
+    , firstFrameProcessed(false)
+{}
 
 void PerformanceMetrics::update(TimePoint lastRequestStartTime,
                                 cv::Mat& frame,
