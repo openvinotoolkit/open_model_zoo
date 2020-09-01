@@ -217,6 +217,9 @@ class Padding(Preprocessor):
                 optional=True, default='constant',
                 choices=['constant', 'edge', 'maximum', 'minimum', 'mean', 'median', 'wrap'],
                 description="If use_numpy is True, Numpy padding mode,including constant, edge, mean, etc."
+            ),
+            'enable_resize': BoolField(
+                optional=True, default=False, description='allow resize images if source image large then padding size'
             )
         })
 
@@ -233,6 +236,7 @@ class Padding(Preprocessor):
         self.pad_func = padding_func[self.get_value_from_config('pad_type')]
         self.use_numpy = self.get_value_from_config('use_numpy')
         self.numpy_pad_mode = self.get_value_from_config('numpy_pad_mode')
+        self.enable_resize = self.get_value_from_config('enable_resize')
 
     def process(self, image, annotation_meta=None):
         height, width, _ = image.data.shape
@@ -246,18 +250,22 @@ class Padding(Preprocessor):
         image.metadata['padding'] = pad
         padding_realization_func = self._opencv_padding if not self.use_numpy else self._numpy_padding
         image.data = padding_realization_func(image.data, pad)
+        meta = {
+            'pad': pad,
+            'dst_width': self.dst_width,
+            'dst_height': self.dst_height,
+            'pref_width': pref_width,
+            'pref_height': pref_height,
+            'width': width,
+            'height': height,
+            'resized': False
+        }
+        if image.data.shape[:2] != (pref_height, pref_width):
+            image.data = cv2.resize(image.data, (pref_height, pref_width))
+            meta['resized'] = True
 
         image.metadata.setdefault('geometric_operations', []).append(
-            GeometricOperationMetadata('padding',
-                                       {
-                                           'pad': pad,
-                                           'dst_width': self.dst_width,
-                                           'dst_height': self.dst_height,
-                                           'pref_width': pref_width,
-                                           'pref_height': pref_height,
-                                           'width': width,
-                                           'height': height
-                                       }))
+            GeometricOperationMetadata('padding', meta))
 
         return image
 
