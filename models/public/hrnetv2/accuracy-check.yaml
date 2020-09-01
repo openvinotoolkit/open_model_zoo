@@ -38,19 +38,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        device: CPU
-        tags:
-          - FP16
-        model:   public/hrnetv2/FP16/hrnetv2.xml
-        weights: public/hrnetv2/FP16/hrnetv2.bin
-        adapter: segmentation
-
-      - framework: dlsdk
-        device: CPU
-        tags:
-          - FP32
-        model:   public/hrnetv2/FP32/hrnetv2.xml
-        weights: public/hrnetv2/FP32/hrnetv2.bin
         adapter: segmentation
  
     datasets:
