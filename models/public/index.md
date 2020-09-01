@@ -130,7 +130,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | RetinaFace-R50                       | MXNet\*                  | [retinaface-resnet50](./retinaface-resnet50/retinaface-resnet50.md) | 87.2902% | 100.8478 | 29.427 |
 | RetinaFace-Anti-Cov                  | MXNet\*                  | [retinaface-anti-cov](./retinaface-anti-cov/retinaface-anti-cov.md)  | 77.1531% | 2.7781 | 0.5955 |
 | YOLO v1 Tiny                         | TensorFlow.js\*          | [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | 72.1716% | 6.9883	 |	15.8587 |
-| YOLO v2 Tiny                         | TensorFlow.js\*          | [yolo-v2-tiny-tf](./yolo-v2-tiny-tf/yolo-v2-tiny-tf.md) | 27.3443%/29.1184%| 5.4236	 |	11.2295 |
+| YOLO v2 Tiny                         | Keras\*                  | [yolo-v2-tiny-tf](./yolo-v2-tiny-tf/yolo-v2-tiny-tf.md) | 27.3443%/29.1184%| 5.4236	 |	11.2295 |
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/yolo-v2-tf.md) | 53.1453%/56.483% | 63.0301	 |	50.9526 |
 | YOLO v3                              | Keras\*                  | [yolo-v3-tf](./yolo-v3-tf/yolo-v3-tf.md) | 62.2759%/67.7221% | 65.9843	 |	61.9221 |
 

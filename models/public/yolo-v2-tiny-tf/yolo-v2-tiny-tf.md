@@ -6,21 +6,21 @@ YOLO v2 Tiny is a real-time object detection model implemented with Keras\* from
 
 ## Conversion
 
-1. Download or clone the official [repository](https://github.com/david8862/keras-YOLOv3-model-set) (tested on `ffede5` commit).
-2. Use the folllowing commands to get original model (named `yolov2_tiny` in repository) and convert it to Keras\* format (see details in the [README.md](https://github.com/david8862/keras-YOLOv3-model-set/blob/ffede5d316568479610b75a3424e2a7b81f0209b/README.md)  file in the official repository):
+1. Download or clone the original [repository](https://github.com/david8862/keras-YOLOv3-model-set) (tested on `d38c3d8` commit).
+2. Use the folllowing commands to get original model (named `yolov2_tiny` in repository) and convert it to Keras\* format (see details in the [README.md](https://github.com/david8862/keras-YOLOv3-model-set/blob/d38c3d865f7190ee9b19a30e91f2b750a31320c1/README.md)  file in the official repository):
 
-   1. Download YOLO v3 weights:
+   1. Download YOLO v2 Tiny weights:
         ```
-        wget -O weights/yolov3.weights https://pjreddie.com/media/files/yolov3.weights
+        wget -O weights/yolov2_tiny.weights https://pjreddie.com/media/files/yolov2_tiny.weights
         ```
 
-   1. Convert model weights to Keras\*:
+   2. Convert model weights to Keras\*:
         ```
-        python tools/convert.py cfg/yolov3.cfg weights/yolov3.weights weights/yolov3.h5
+        python tools/model_converter/convert.py cfg/yolov2_tiny.cfg weights/yolov2_tiny.weights weights/yolov2_tiny.h5
         ```
 3. Convert model to protobuf:
     ```
-    python tools/keras_to_tensorflow.py --input_model weights/yolov3.h5 --output_model="path/to/save/model.pb"
+    python tools/model_converter/keras_to_tensorflow.py --input_model weights/yolov2_tiny.h5 --output_model=weights/yolo-v2-tiny.pb
     ```
 
 ## Specification
@@ -45,7 +45,7 @@ Accuracy metrics obtained on COCO\* validation dataset for converted model.
 
 ### Original model
 
-Image, name - `input_1`, shape - `1,416,416,3`, format is `B,H,W,C` where:
+Image, name - `image_input`, shape - `1,416,416,3`, format is `B,H,W,C` where:
 
 - `B` - batch size
 - `H` - height
@@ -57,7 +57,7 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `input_1`, shape - `1,3,416,416`, format is `B,C,H,W` where:
+Image, name - `image_input`, shape - `1,3,416,416`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -101,10 +101,12 @@ The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.882
 ## Legal Information
 
 The original model is distributed under the following
-[license](https://raw.githubusercontent.com/shaqian/tfjs-yolo/master/LICENSE):
+[license](https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE):
 
 ```
-Copyright (c) 2018 Qian Sha
+MIT License
+
+Copyright (c) 2019 david8862
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -116,11 +118,11 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
-OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 ```
