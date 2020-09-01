@@ -1,6 +1,7 @@
-# hrnetv2
+# hrnet-v2-c1
 
 ## Use Case and High-Level Description
+This model is a pair of encoder and decoder. The encoder is HRNetV2-W48 and the decoder is C1 (one convolution module and interpolation).
 HRNetV2-W48 is semantic-segmentation model based on architecture described in paper
 [High-Resolution Representations for Labeling Pixels and Regions](https://arxiv.org/abs/1904.04514).
 This is PyTorch implementation based on retaining high resolution representations throughout the model
@@ -38,7 +39,7 @@ Image, name - `image`,  shape - `[1x3x320x320]`, format is `[BxCxHxW]`, where:
 - `W` - width
 - `C` - channel
 
-Channel order is `RGB`.
+Channel order is `RGB`. Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
 
 ### Converted Model
 
@@ -49,7 +50,7 @@ Image, name - `input.1`,  shape - `[1x3x320x320]`, format is `[BxCxHxW]`, where:
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`.
+Channel order is `BGR`.
 
 ## Output
 

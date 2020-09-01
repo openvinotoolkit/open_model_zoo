@@ -29,7 +29,7 @@ class Shift(PostprocessorWithSpecificTargets):
 
     annotation_types = (SegmentationAnnotation, )
     prediction_types = (SegmentationPrediction, )
-    
+
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
@@ -39,10 +39,10 @@ class Shift(PostprocessorWithSpecificTargets):
             )
         })
         return parameters
-    
+
     def configure(self):
         self.shift_value = self.config.get('shift_value')
-    
+
     def process_image(self, annotation, prediction):
 
         for annotation_ in annotation:
