@@ -98,25 +98,6 @@ class WaveRNNONNX(nn.Module):
 
         return logits, h1, h2
 
-
-
-    def infer_from_logits(self, logits):
-        if self.model.mode == 'MOL':
-            sample = sample_from_discretized_mix_logistic(logits.unsqueeze(0).transpose(1, 2))
-        elif self.model.mode == 'RAW':
-            posterior = F.softmax(logits, dim=1)
-            distrib = torch.distributions.Categorical(posterior)
-
-            sample = 2 * distrib.sample().float() / (self.model.n_classes - 1.) - 1.
-        else:
-            raise RuntimeError("Unknown model mode value - ", self.mode)
-        return sample
-
-    def xfade_and_unfold(self, y, target, overlap):
-        if self.model.mode == 'RAW':
-            y = decode_mu_law(y, self.model.n_classes, False)
-        return self.model.xfade_and_unfold(y, target, overlap)
-
 ##################################################################################################
 
 def main():
@@ -174,25 +155,15 @@ def main():
     with torch.no_grad():
         mels = np.load(args.mel)
 
-        mel = (mels + 4) / 8
-        np.clip(mel, 0, 1, out=mel)
-        wav = reconstruct_waveform(mels, n_iter=60)
-
-        save_wav(wav, "./onnx/wav_from_mel_griffin_lim.wav")
-
         '''
         FIRST STEP: Upsample mels to the output wave shape
         '''
         mels = torch.from_numpy(mels)
         mels = mels.unsqueeze(0)
-
-        wave_len = (mels.size(-1) - 1) * voc_model.hop_length
-
         mels = voc_upsampler.pad_tensor(mels)
 
         mels_onnx = mels.clone()
 
-        print(mels_onnx.shape)
         torch.onnx.export(voc_upsampler, mels_onnx, "./onnx/wavernn_upsampler.onnx",
                           opset_version=opset_version,
                           do_constant_folding=True,
@@ -205,10 +176,6 @@ def main():
 
         mels, aux = voc_upsampler.fold(mels, aux)
 
-        print("Mels/Aux fold shape: {0}/{1}".format(mels.shape, aux.shape))
-
-        output = []
-
         h1, h2, x = voc_infer.get_initial_parameters(mels)
 
         aux_split = voc_infer.split_aux(aux)
@@ -219,44 +186,18 @@ def main():
         SECOND STEP: Iterativelly generate wavs
         '''
 
-        for i in range(seq_len):
-            m_t = mels[:, i, :]
+        if seq_len:
+            m_t = mels[:, 0, :]
 
             a1_t, a2_t, a3_t, a4_t = \
-                (a[:, i, :] for a in aux_split)
+                (a[:, 0, :] for a in aux_split)
 
-            if i == 0:
-                rnn_input = (m_t, a1_t, a2_t, a3_t, a4_t, h1, h2, x)
-                torch.onnx.export(voc_infer, rnn_input, "./onnx/wavernn_rnn.onnx",
-                                  opset_version=opset_version,
-                                  do_constant_folding=True,
-                                  input_names=["m_t", "a1_t", "a2_t", "a3_t", "a4_t", "h1", "h2", "x"],
-                                  output_names=["logits", "h1", "h2"])
-
-
-            logits, h1, h2 = voc_infer(m_t, a1_t, a2_t, a3_t, a4_t, h1, h2, x)
-
-            sample = voc_infer.infer_from_logits(logits)
-
-            x = sample.transpose(0, 1)
-
-            output.append(sample.view(-1))
-
-        output = torch.stack(output).transpose(0, 1)
-        output = output.cpu().numpy()
-        output = output.astype(np.float64)
-
-        if args.batched:
-            output = voc_infer.xfade_and_unfold(output, hp.voc_target, hp.voc_overlap)
-        else:
-            output = output[0]
-
-        # Fade-out at the end to avoid signal cutting out suddenly
-        fade_out = np.linspace(1, 0, 20 * voc_model.hop_length)
-        output = output[:wave_len]
-        output[-20 * voc_model.hop_length:] *= fade_out
-
-        save_wav(output, 'onnx/wav_from_mel_wavernn.wav')
+            rnn_input = (m_t, a1_t, a2_t, a3_t, a4_t, h1, h2, x)
+            torch.onnx.export(voc_infer, rnn_input, "./onnx/wavernn_rnn.onnx",
+                              opset_version=opset_version,
+                              do_constant_folding=True,
+                              input_names=["m_t", "a1_t", "a2_t", "a3_t", "a4_t", "h1", "h2", "x"],
+                              output_names=["logits", "h1", "h2"])
 
     print('Done!')
 
