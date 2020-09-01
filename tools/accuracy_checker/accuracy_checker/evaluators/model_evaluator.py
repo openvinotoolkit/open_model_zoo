@@ -94,6 +94,8 @@ class ModelEvaluator(BaseEvaluator):
         preprocessor.input_shapes = launcher.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
         metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
+        if metric_dispatcher.profile_metrics:
+            metric_dispatcher.set_processing_info(ModelEvaluator.get_processing_info(model_config))
 
         return cls(
             launcher, input_feeder, adapter, data_reader,
@@ -212,6 +214,10 @@ class ModelEvaluator(BaseEvaluator):
         if self.dataset.batch is None:
             self.dataset.batch = self.launcher.batch
         output_callback = kwargs.get('output_callback')
+        enable_profiling = kwargs.get('profile', False)
+        profile_type = 'json' if output_callback and enable_profiling else kwargs.get('profile_report_type')
+        if enable_profiling:
+            self.metric_executor.enable_profiling(self.dataset, profile_type)
         predictions_to_store = []
         for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
@@ -225,9 +231,12 @@ class ModelEvaluator(BaseEvaluator):
                 predictions_to_store.extend(copy.deepcopy(batch_predictions))
 
             annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
-            self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
+            _, profile_result = self.metric_executor.update_metrics_on_batch(
+                batch_input_ids, annotations, predictions, enable_profiling
+            )
             if output_callback:
-                output_callback(annotations, predictions)
+                callback_kwargs = {'profiling_result': profile_result} if enable_profiling else {}
+                output_callback(annotations, predictions, **callback_kwargs)
 
             if self.metric_executor.need_store_predictions:
                 self._annotations.extend(annotations)
@@ -360,6 +369,9 @@ class ModelEvaluator(BaseEvaluator):
             self.compute_metrics(print_results=False)
         computed_metrics = copy.deepcopy(self._metrics_results)
         return computed_metrics
+
+    def set_profiling_dir(self, profiler_dir):
+        self.metric_executor.set_profiling_dir(profiler_dir)
 
     @staticmethod
     def store_predictions(stored_predictions, predictions):

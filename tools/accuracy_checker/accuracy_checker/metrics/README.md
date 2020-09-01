@@ -205,3 +205,44 @@ More detailed information about calculation segmentation metrics you can find [h
 * `score_class_comparison` - allows calculate an accuracy of quality score class(low/normal/good). It sorts all quality scores from annotations and predictions and set the k1 highest scores as high class and the k2 lowest scores as low class where k1 is `num_high_quality` and k2 is `num_low_quality`. Supported representations: `QualityAssessmentAnnotation`, `QualityAssessmentPrediction`.
   * `num_high_quality` - the number of high class in total (default value: `1`).
   * `num_low_quality` - the number of low class in total (default value: `1`).
+
+## Metrics profiling
+Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.
+This feature can be useful for debug purposes. For enabling this behaviour you need to provide `--profile True` in accuracy checker command line.
+Additionally, you can specify directory for saving profiling results `--profiler_logs_dir` and select data format in `--profile_report_type` between `csv` (brief) and `json` (more detailed).
+
+Supported for profiling metrics:
+* Classification:
+  * `accuracy`
+  * `accuracy_per_class`
+  * `classification_f1-score`
+  * `metthews_correlation_coef`
+  * `multi_accuracy`
+  * `multi_recall`
+  * `multi_precision`
+  * `f1-score`
+* Regression:
+  * `mae`
+  * `mse`
+  * `rmse`
+  * `mae_on_interval`
+  * `mse_on_interval`
+  * `rmse_on_interval`
+  * `angle_error`
+  * `psnr`
+  * `ssim`
+  * `normed_error`
+  * `per_point_normed_error`
+* Object Detection:
+  * `map`
+  * `recall`
+  * `miss_rate`
+  * `coco_precision`
+  * `coco_recall`
+* Semantic Segmentation
+  * `segmentation_accuracy`
+  * `mean_iou`
+  * `mean_accuracy`
+  * `frequency_weighted_accuracy`
+* Instance Segmentation
+  * `coco_orig_segm_precision`

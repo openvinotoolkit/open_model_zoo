@@ -657,7 +657,7 @@ class MTCNNEvaluator(BaseEvaluator):
 
             metrics_result = None
             if self.metric_executor:
-                metrics_result = self.metric_executor.update_metrics_on_batch(
+                metrics_result, _ = self.metric_executor.update_metrics_on_batch(
                     batch_input_ids, batch_annotation, batch_prediction
                 )
                 if self.metric_executor.need_store_predictions:
@@ -739,6 +739,9 @@ class MTCNNEvaluator(BaseEvaluator):
             model_name, launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
             dataset_config['name']
         )
+
+    def set_profiling_dir(self, profiler_dir):
+        self.metric_executor.set_profiling_dir(profiler_dir)
 
     def release(self):
         for _, stage in self.stages.items():
