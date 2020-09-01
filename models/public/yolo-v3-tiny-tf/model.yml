@@ -28,8 +28,8 @@ postprocessing:
     file: yolo-v3-tiny-tf.zip
 model_optimizer_args:
   - --input_shape=[1,416,416,3]
-  - --input=input_image
-  - --scale_values=input_image[255]
+  - --input=image_input
+  - --scale_values=image_input[255]
   - --reverse_input_channels
   - --transformations_config=$dl_dir/yolo-v3-tiny-tf/yolo-v3-tiny-tf.json
   - --input_model=$dl_dir/yolo-v3-tiny-tf/yolo-v3-tiny-tf.pb

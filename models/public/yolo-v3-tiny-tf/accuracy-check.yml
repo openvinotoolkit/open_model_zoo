@@ -10,17 +10,16 @@ models:
           coords: 4
           classes: 80
           threshold: 0.001
-          anchor_masks: [[3,4,5],[1,2,3]]
+          anchor_masks: [[3, 4, 5], [1, 2, 3]]
           raw_output: True
           output_format: HWB
-          cells: [13,26]
+          cells: [13, 26]
           outputs:
             - conv2d_9/BiasAdd
             - conv2d_12/BiasAdd
         inputs:
           - name: 'image_input'
             type: INPUT
-            shape: [1,416,416,3]
         outputs:
           - conv2d_9/BiasAdd
           - conv2d_12/BiasAdd
@@ -66,7 +65,7 @@ models:
           coords: 4
           classes: 80
           threshold: 0.001
-          anchor_masks: [[3,4,5],[1,2,3]]
+          anchor_masks: [[3, 4, 5], [1, 2, 3]]
           outputs:
             - conv2d_9/Conv2D/YoloRegion
             - conv2d_12/Conv2D/YoloRegion
