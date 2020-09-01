@@ -19,10 +19,11 @@ from ..config import ConfigError
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
 from .average_editdistance_meter import AverageEditdistanceMeter
+from ..utils import UnsupportedPackage
 try:
     import editdistance
-except ImportError:
-    editdistance = None
+except ImportError as import_error:
+    editdistance = UnsupportedPackage("editdistance", import_error.msg)
 
 
 class CharacterRecognitionAccuracy(PerImageEvaluationMetric):
@@ -51,10 +52,8 @@ class LabelLevelRecognitionAccuracy(PerImageEvaluationMetric):
     prediction_types = (CharacterRecognitionPrediction, )
 
     def configure(self):
-        if editdistance is None:
-            raise ConfigError('Metric {} requires editdistance package installation. Please install it.'.format(
-                self.__provider__
-            ))
+        if isinstance(editdistance, UnsupportedPackage):
+            editdistance.raise_error(self.__provider__)
         self.accuracy = AverageEditdistanceMeter(editdistance.eval)
 
     def update(self, annotation, prediction):

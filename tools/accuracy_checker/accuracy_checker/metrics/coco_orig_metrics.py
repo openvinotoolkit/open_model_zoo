@@ -22,19 +22,6 @@ import warnings
 from pathlib import Path
 import numpy as np
 
-try:
-    from pycocotools.coco import COCO
-except ImportError:
-    COCO = None
-try:
-    from pycocotools.cocoeval import COCOeval as coco_eval
-except ImportError:
-    coco_eval = None
-try:
-    from pycocotools.mask import iou as iou_calc
-except ImportError:
-    iou_calc = None
-
 from ..representation import (
     DetectionPrediction,
     DetectionAnnotation,
@@ -45,9 +32,22 @@ from ..representation import (
 )
 from ..logging import print_info
 from ..config import BaseField, BoolField, ConfigError
-from ..utils import get_or_parse_value
+from ..utils import get_or_parse_value, UnsupportedPackage
 from .metric import FullDatasetEvaluationMetric, PerImageEvaluationMetric
 from .coco_metrics import COCO_THRESHOLDS, process_threshold, compute_precision_recall
+
+try:
+    from pycocotools.coco import COCO
+except ImportError as import_error:
+    COCO = UnsupportedPackage("pycocotools.coco", import_error.msg)
+try:
+    from pycocotools.cocoeval import COCOeval as coco_eval
+except ImportError as import_error:
+    coco_eval = UnsupportedPackage("pycocotools.cocoeval", import_error.msg)
+try:
+    from pycocotools.mask import iou as iou_calc
+except ImportError as import_error:
+    iou_calc = UnsupportedPackage("pycocotools.mask", import_error.msg)
 
 SHOULD_SHOW_PREDICTIONS = False
 SHOULD_DISPLAY_DEBUG_IMAGES = False
@@ -87,8 +87,8 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         if not self.dataset.metadata.get('label_map'):
             raise ConfigError('coco_orig metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerated annotation')
-        if COCO is None:
-            raise ValueError('pycocotools is not installed, please install it')
+        if isinstance(COCO, UnsupportedPackage):
+            COCO.raise_error("MSCOCOorigBaseMetric")
         label_map = self.dataset.metadata.get('label_map', {})
         self.labels = [
             label for label in label_map
@@ -339,8 +339,8 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
     @staticmethod
     def _run_coco_evaluation(coco, coco_res, iou_type='bbox', threshold=None):
-        if coco_eval is None:
-            raise ValueError('pycocotools is not installed, please install it before usage')
+        if isinstance(coco_eval, UnsupportedPackage):
+            coco_eval.raise_error("MSCOCOorigBaseMetric")
         cocoeval = coco_eval(coco, coco_res, iouType=iou_type)
         if threshold is not None:
             cocoeval.params.iouThrs = threshold
