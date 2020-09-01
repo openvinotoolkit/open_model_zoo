@@ -22,7 +22,8 @@ cd ForwardTacotron
 ```sh
 git checkout 78789c1aa845057bb2f799e702b1be76bf7defd0
 ```
-4. Copy provided script `wavernn_to_onnx.py` to ForwardTacotron root directory, and apply git path `0001-Added-batch-norm-fusing-to-conv-layers.patch`.
+3. Follow README.md and preprocess LJSpeech dataset.
+4. Copy provided script `wavernn_to_onnx.py` to ForwardTacotron root directory, and apply git patch `0001-Added-batch-norm-fusing-to-conv-layers.patch`.
 5. Download WaveRNN model from https://github.com/fatchord/WaveRNN/tree/master/pretrained/ and extract in to pretrained directory.
 ```sh
 mkdir pretrained
@@ -31,7 +32,7 @@ unzip ljspeech.wavernn.mol.800k.zip -d pretrained && mv pretrained/latest_weight
 ```
 6. Run provided script for conversion WaveRNN to onnx format
 ```sh
-python3 wavernn_to_onnx.py --mel <path_to_some_mel_spectrogram_file_from_train_directory>.npy --voc_weights pretrained/wave_800K.pyt --hp_file hparams.py --force_cpu --batched
+python3 wavernn_to_onnx.py --mel <path_to_preprocessed_dataset>/mel/LJ008-0254.npy --voc_weights pretrained/wave_800K.pyt --hp_file hparams.py --batched
 ```
 Note: by the reason of autoregressive nature of the network, the model is divided into two parts: `wavernn_upsampler.onnx, wavernn_rnn.onnx`. The first part expands feature map by the time dimension, and the second one iteratively processes every column in expanded feature map.
 
@@ -92,7 +93,7 @@ The wavernn-rnn model accepts two feature maps from wavernn-upsampler and produc
 
 ### Input
 1. Time slice in `upsampled_mels`, name: `m_t`. Shape: [Bx80]
-2. Time/space slices in `aux`, name: `a1_t`, `a2_t`, `a3_t`,`a4_t`. Shape: [Bx32]. Second dimention is 32 = aux.shape[1] / 4
+2. Time/space slices in `aux`, name: `a1_t`, `a2_t`, `a3_t`,`a4_t`. Shape: [Bx32]. Second dimension is 32 = aux.shape[1] / 4
 3. Hidden states for GRU layers in autoregression, name `h1.1`, `h2.1`. Shape: [Bx512].
 4. Previous prediction for autoregression (initially equal to zero), name: `x`. Shape: [Bx1]
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  WaveRNN model for text to speech task. Part for mel-spectrogramm upsampling by time axis.
+  WaveRNN model for text to speech task. Part for mel-spectrogram upsampling by time axis.
 task_type: text_to_speech
 files:
   - name: wavernn_upsampler.onnx
