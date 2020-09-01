@@ -15,8 +15,10 @@ limitations under the License.
 """
 
 import cv2
+import numpy as np
 
 from .postprocessor import Postprocessor
+from .resize_segmentation_mask import ResizeSegmentationMask
 from ..representation import SegmentationAnnotation, SegmentationPrediction
 from ..config import NumberField, ConfigError, StringField
 from ..preprocessor.geometric_transformations import padding_func
@@ -65,3 +67,36 @@ class ExtendSegmentationMask(Postprocessor):
             annotation_.mask = extended_mask
 
         return annotation, prediction
+
+    def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
+        if all([annotation_ is None for annotation_ in annotation]):
+            return annotation, self._deprocess_prediction(prediction, image_metadata)
+        return self.process_image(annotation, prediction)
+
+    @staticmethod
+    def _deprocess_prediction(prediction, meta):
+        def _resize(entry, height, width):
+            if len(entry.shape) == 2:
+                entry.mask = ResizeSegmentationMask.segm_resize(entry, width, height)
+                return entry
+
+            entry_mask = []
+            for class_mask in entry:
+                resized_mask = ResizeSegmentationMask.segm_resize(class_mask, width, height)
+                entry_mask.append(resized_mask)
+            entry = np.array(entry_mask)
+
+            return entry
+        geom_ops = meta.get('geometric_operations', [])
+        pad = geom_ops[-1].parameters['pad'] if geom_ops and geom_ops[-1].type == 'padding' else [0, 0, 0, 0]
+        image_h, image_w = meta['image_size'][:2]
+
+        for prediction_ in prediction:
+            pred_h, pred_w = prediction_.mask.shape[-2:]
+            pred_mask = prediction_.mask[pad[0]:pred_w-pad[2], pad[1]:pred_h-pad[3]]
+            pred_h, pred_w = pred_mask.shape[-2:]
+            if (pred_h, pred_w) != (image_h, image_w):
+                pred_mask = _resize(pred_mask, image_h, image_w)
+            prediction_.mask = pred_mask
+
+        return prediction
