@@ -48,6 +48,8 @@ from .regression import (
 
     MeanAbsoluteError,
     MeanSquaredError,
+    Log10Error,
+    MeanAbsolutePercentageError,
 
     RootMeanSquaredErrorOnInterval,
     RootMeanSquaredError,
@@ -135,6 +137,8 @@ __all__ = [
     'PeakSignalToNoiseRatio',
     'StructuralSimilarity',
     'AngleError',
+    'MeanAbsolutePercentageError',
+    'Log10Error',
 
     'MultiLabelAccuracy',
     'MultiLabelRecall',

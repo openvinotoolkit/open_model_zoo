@@ -195,6 +195,20 @@ class MeanSquaredError(BaseRegressionMetric):
         super().__init__(mse_differ, *args, **kwargs)
 
 
+class Log10Error(BaseRegressionMetric):
+    __provider__ = 'log10_error'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(log10_differ, *args, **kwargs)
+
+
+class MeanAbsolutePercentageError(BaseRegressionMetric):
+    __provider__ = 'mape'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(mape_differ, *args, **kwargs)
+
+
 class RootMeanSquaredError(BaseRegressionMetric):
     __provider__ = 'rmse'
 
@@ -499,6 +513,12 @@ def angle_differ(gt_gaze_vector, predicted_gaze_vector):
         / np.linalg.norm(predicted_gaze_vector)
     ) * 180 / np.pi
 
+
+def log10_differ(annotation_val, prediction_val):
+    return np.abs(np.log10(annotation_val) - np.log10(prediction_val))
+
+def mape_differ(annotation_val, prediction_val):
+    return np.abs(annotation_val - prediction_val) / annotation_val
 
 class AngleError(BaseRegressionMetric):
     __provider__ = 'angle_error'
