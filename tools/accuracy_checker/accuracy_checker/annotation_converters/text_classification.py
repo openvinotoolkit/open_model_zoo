@@ -21,7 +21,7 @@ import numpy as np
 
 from ..config import PathField, StringField, NumberField, BoolField, ConfigError
 from ..representation import TextClassificationAnnotation
-from ..utils import string_to_list
+from ..utils import string_to_list, UnsupportedPackage
 from .format_converter import BaseFormatConverter, ConverterReturn
 from ._nlp_common import get_tokenizer, truncate_seq_pair, SEG_ID_A, SEG_ID_B, SEP_ID, CLS_ID, SEG_ID_CLS, SEG_ID_PAD
 
@@ -229,10 +229,8 @@ class BertTextClassificationTFRecordConverter(BaseFormatConverter):
         try:
             import tensorflow as tf # pylint: disable=C0415
             self.tf = tf
-        except ImportError:
-            raise ConfigError(
-                'bert_tf_record converter requires TensorFlow installation. Please install it first.'
-            )
+        except ImportError as import_error:
+            UnsupportedPackage("tf", import_error.msg).raise_error(self.__provider__)
         self.annotation_file = self.get_value_from_config('annotation_file')
 
     def read_tf_record(self):
