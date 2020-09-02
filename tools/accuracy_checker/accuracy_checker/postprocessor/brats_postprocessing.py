@@ -150,7 +150,7 @@ class RemoveBratsPredictionPadding(Postprocessor):
         return parameters
 
     def configure(self):
-        self.make_argmax = self.get_value_from_config('make_argmax', False)
+        self.make_argmax = self.get_value_from_config('make_argmax')
 
     def process_image(self, annotation, prediction):
         raise RuntimeError("Since `process_image_with_metadata` is overriden, this method MUST NOT be called")
