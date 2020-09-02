@@ -73,7 +73,7 @@ def crop_image(img, output_path, default_size=None):
 
 
 def run(cmd, timeout_sec):
-    proc = subprocess.Popen(cmd, shell=True, stdout = subprocess.DEVNULL)
+    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL)
 
     def kill_proc(process):
         return process.kill()
