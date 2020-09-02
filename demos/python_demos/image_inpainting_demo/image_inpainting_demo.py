@@ -82,7 +82,7 @@ def createRandomMask(parts, max_vertex, max_length, max_brush_width, h, w, max_a
     return mask
 
 
-def inpaintRandomHoles(img,args):
+def inpaintRandomHoles(img, args):
     mask_color = args.mask_color[::-1] # argument comes in RGB mode, but we will use BGR notation below
 
     ie = IECore()
