@@ -158,7 +158,7 @@ class RemoveBratsPredictionPadding(Postprocessor):
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         raw_shape = image_metadata.get('size_after_cropping')
         if not raw_shape:
-            raise ValueError("No 'size_after_cropping' in dataset metadata")
+            raise ValueError("No 'size_after_cropping' in metadata")
 
         for target in prediction:
 
@@ -171,11 +171,11 @@ class RemoveBratsPredictionPadding(Postprocessor):
             # Undo cropping
             bbox = image_metadata.get('crop_bbox')
             if not bbox:
-                raise ValueError("No 'crop_bbox' in dataset metadata")
+                raise ValueError("No 'crop_bbox' in metadata")
 
             original_size = image_metadata.get('original_size_of_raw_data')
-            if not original_size:
-                raise ValueError("No 'original_size_of_raw_data' in dataset metadata")
+            if original_size is None:
+                raise ValueError("No 'original_size_of_raw_data' in metadata")
 
             label = np.zeros(shape=([target.mask.shape[0]] + list(image_metadata['original_size_of_raw_data'])))
             label[:, bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1], bbox[2][0]:bbox[2][1]] = result
