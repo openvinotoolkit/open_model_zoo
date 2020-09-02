@@ -134,3 +134,39 @@ class TransformBratsPrediction(Postprocessor):
             target.mask = result
 
         return annotation, prediction
+
+class RemoveBratsPredictionPadding(Postprocessor):
+    __provider__ = 'remove_brats_prediction_padding'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        return parameters
+
+    def configure(self):
+        pass
+
+    def process_image(self, annotation, prediction):
+        raise RuntimeError("Since `process_image_with_metadata` is overriden, this method MUST NOT be called")
+
+    def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
+        raw_shape = image_metadata['size_after_cropping']
+        for target in prediction:
+
+            # Remove padding
+            padded_shape = target.mask.shape[1:]
+            pad_before = [(p - r) // 2 for p, r in zip(padded_shape, raw_shape)]
+            pad_after = [-(p - r - b) for p, r, b in zip(padded_shape, raw_shape, pad_before)]
+            result = target.mask[:, pad_before[0]:pad_after[0], pad_before[1]:pad_after[1], pad_before[2]:pad_after[2]]
+
+            # Undo cropping
+            crop_bbox = image_metadata['crop_bbox']
+            label = np.zeros(shape=([target.mask.shape[0]] + list(image_metadata['original_size_of_raw_data'])))
+            label[:, crop_bbox[0][0]:crop_bbox[0][1], crop_bbox[1][0]:crop_bbox[1][1], crop_bbox[2][0]:crop_bbox[2][1]] = result
+            target.mask = label
+
+            # Apply argmax and expand dims with axis=-1 to comply with annotation shape
+            target.mask = np.argmax(target.mask, axis=0)
+            target.mask = np.expand_dims(target.mask, axis=-1)
+
+        return annotation, prediction

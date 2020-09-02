@@ -1,12 +1,9 @@
 """
 Copyright (c) 2018-2020 Intel Corporation
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -300,6 +297,70 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         self.meta['calculate_mean'] = False
         self.overall_metric = []
 
+class SegmentationUnet3D(PerImageEvaluationMetric):
+    __provider__ = 'dice_unet3d'
+    annotation_types = (BrainTumorSegmentationAnnotation, SegmentationAnnotation, OAR3DTilingSegmentationAnnotation)
+    prediction_types = (BrainTumorSegmentationPrediction, SegmentationPrediction, )
+
+    overall_metric = []
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'mean': BoolField(optional=True, default=True, description='Allows calculation mean value.'),
+            'median': BoolField(optional=True, default=False, description='Allows calculation median value.'),
+        })
+
+        return parameters
+
+    def configure(self):
+        self.mean = self.get_value_from_config('mean')
+        self.median = self.get_value_from_config('median')
+        self.output_order = self.get_value_from_config('output_order')
+
+        labels = ['whole tumor', 'tumor core', 'enhancing tumor']
+        self.classes = len(labels)
+
+        names_mean = ['mean@{}'.format(name) for name in labels] if self.mean else []
+        names_median = ['median@{}'.format(name) for name in labels] if self.median else []
+        self.meta['names'] = names_mean + names_median
+
+        self.meta['calculate_mean'] = False
+
+        self.overall_metric = []
+
+    def update(self, annotation, prediction):
+        result = np.zeros(shape=self.classes)
+
+        annotation_data = annotation.mask
+        prediction_data = prediction.mask
+
+        for c in range(self.classes):
+            annotation_data_ = (annotation_data > c)
+            prediction_data_ = (prediction_data > c)
+            intersection_count = np.logical_and(annotation_data_, prediction_data_).sum()
+            union_count = annotation_data_.sum() + prediction_data_.sum()
+            if union_count > 0:
+                result[c] += 2.0*intersection_count / union_count
+
+        self.overall_metric.append(result)
+        return result
+
+    def evaluate(self, annotations, predictions):
+        mean = np.mean(self.overall_metric, axis=0) if self.mean else []
+        median = np.median(self.overall_metric, axis=0) if self.median else []
+        result = np.concatenate((mean, median))
+        return result
+
+    def reset(self):
+        labels = self.dataset.labels.values() if self.dataset.metadata else ['overall']
+        self.classes = len(labels)
+        names_mean = ['mean@{}'.format(name) for name in labels] if self.mean else []
+        names_median = ['median@{}'.format(name) for name in labels] if self.median else []
+        self.meta['names'] = names_mean + names_median
+        self.meta['calculate_mean'] = False
+        self.overall_metric = []
 
 class SegmentationOAR3DTiling(PerImageEvaluationMetric):
     __provider__ = 'dice_oar3d'
