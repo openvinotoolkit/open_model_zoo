@@ -23,8 +23,6 @@ class CTCBeamDecoder(object):
         if model_path is not None:
             if loader == 'yoklm':
                 self._scorer = ctc_decode.create_scorer_yoklm(alpha, beta, model_path, self._labels)
-            elif loader == 'kenlm':
-                self._scorer = ctc_decode.create_scorer(alpha, beta, model_path, self._labels)
             else:
                 raise ValueError("Unknown loader type: \"%s\"" % loader)
         self._cutoff_prob = cutoff_prob

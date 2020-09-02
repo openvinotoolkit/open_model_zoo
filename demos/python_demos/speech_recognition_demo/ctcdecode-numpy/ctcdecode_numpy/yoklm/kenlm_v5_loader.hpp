@@ -17,7 +17,7 @@
 
 namespace yoklm {
 
-// It takes a provided file / file contents and a LanguageModel, 
+// It takes a provided file / file contents and a LanguageModel,
 // and loads file contents into the LanguageModel.
 class KenlmV5Loader {
   public:

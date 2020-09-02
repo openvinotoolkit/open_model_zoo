@@ -2,17 +2,25 @@
 * Copyright (c) 2020 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
-* This file is based in its major part on decoder_utils.h from https://github.com/parlance/ctcdecode,
+* This file is based in part on decoder_utils.h from https://github.com/parlance/ctcdecode,
 * commit 431408f22d93ef5ebc4422995111bbb081b971a9 on Apr 4, 2020, 20:54:49 UTC+1.
 **********************************************************************/
 
 #ifndef DECODER_UTILS_H_
 #define DECODER_UTILS_H_
 
+#include <cmath>
+#include <limits>
+#include <string>
 #include <utility>
-#include "fst/log.h"
+#include <iostream>
+#include <algorithm>  // std::max
+#include <stdexcept>
+#include <unordered_map>
+
 #include "path_trie.h"
 #include "output.h"
+
 
 const float NUM_FLT_INF  = std::numeric_limits<float>::max();
 const float NUM_FLT_MIN  = std::numeric_limits<float>::min();
@@ -23,7 +31,7 @@ inline void check(
     bool x, const char *expr, const char *file, int line, const char *err) {
   if (!x) {
     std::cout << "[" << file << ":" << line << "] ";
-    LOG(FATAL) << "\"" << expr << "\" check failed. " << err;
+    throw std::logic_error("\"" + std::string(expr) + "\" check failed. " + std::string(err));
   }
 }
 
@@ -90,15 +98,11 @@ std::vector<std::string> split_str(const std::string &s,
  */
 std::vector<std::string> split_utf8_str(const std::string &str);
 
-// Add a word in index to the dicionary of fst
-void add_word_to_fst(const std::vector<int> &word,
-                     fst::StdVectorFst *dictionary);
-
 // Add a word in string to dictionary
 bool add_word_to_dictionary(
     const std::string &word,
     const std::unordered_map<std::string, int> &char_map,
     bool add_space,
     int space_id,
-    fst::StdVectorFst *dictionary);
+    std::vector<std::vector<int> >& int_vocabulary);
 #endif  // DECODER_UTILS_H

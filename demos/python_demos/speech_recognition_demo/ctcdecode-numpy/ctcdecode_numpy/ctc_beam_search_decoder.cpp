@@ -2,7 +2,7 @@
 * Copyright (c) 2020 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
-* This file is based in its major part on ctc_beam_search_decoder.cpp from https://github.com/parlance/ctcdecode,
+* This file is based in part on ctc_beam_search_decoder.cpp from https://github.com/parlance/ctcdecode,
 * commit 431408f22d93ef5ebc4422995111bbb081b971a9 on Apr 4, 2020, 20:54:49 UTC+1.
 **********************************************************************/
 
@@ -17,10 +17,7 @@
 
 #include "decoder_utils.h"
 #include "ThreadPool.h"
-#include "fst/fstlib.h"
 #include "path_trie.h"
-
-using FSTMATCH = fst::SortedMatcher<fst::StdVectorFst>;
 
 std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
     const std::vector<std::vector<float>> &probs_seq,
@@ -58,10 +55,8 @@ std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
   prefixes.push_back(&root);
 
   if (ext_scorer != nullptr && !ext_scorer->is_character_based()) {
-    fst::StdVectorFst *dict_ptr = ext_scorer->dictionary->Copy(true);
+    WordPrefixSet *dict_ptr = ext_scorer->dictionary.get();
     root.set_dictionary(dict_ptr);
-    auto matcher = std::make_shared<FSTMATCH>(*dict_ptr, fst::MATCH_INPUT);
-    root.set_matcher(matcher);
   }
 
   // prefix search over time

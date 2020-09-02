@@ -79,7 +79,7 @@ class LanguageModel {
     // Accepts n-gram in state.words (as const, reverse order: the last word in state.words[0])
     // Returns:
     //   * Return value (float) = raw p-value for the longest n-gram present in the LM
-    //   * state.backoff.size(): the length of the longest n-gram present in the LM 
+    //   * state.backoff.size(): the length of the longest n-gram present in the LM
     //   * state.backoff[]: state.backoff[k] if backoff for (k+1)-gram postfix
     float find_ngram(LmState& state) const;
     //std::pair<uint64_t, uint64_t> bhiksha_lookup(const MemorySectionArray<uint64_t>& bhiksha_highs, uint64_t index) const;

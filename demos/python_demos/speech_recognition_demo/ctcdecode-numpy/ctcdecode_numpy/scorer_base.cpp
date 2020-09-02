@@ -8,9 +8,7 @@
 
 #include "scorer_base.h"
 
-#include <unistd.h>
-#include <iostream>
-#include <utility>
+#include <cassert>
 
 #include "decoder_utils.h"
 
@@ -32,7 +30,7 @@ void ScorerBase::setup(const std::string& lm_path,
   load_lm(lm_path);
   // set char map for scorer
   set_char_map(vocab_list);
-  // fill the dictionary for FST
+  // fill word prefix dictionary
   if (!is_character_based()) {
     fill_dictionary(true);
   }
@@ -99,9 +97,10 @@ void ScorerBase::set_char_map(const std::vector<std::string>& char_list) {
     if (char_list_[i] == " ") {
       space_id_ = i;
     }
-    // The initial state of FST is state 0, hence the index of chars in
-    // the FST should start from 1 to avoid the conflict with the initial
-    // state, otherwise wrong decoding results would be given.
+    // The original implementation avoided 0, we keep this behavior for now for simplicity:
+    //   "The initial state of FST is state 0, hence the index of chars in
+    //   the FST should start from 1 to avoid the conflict with the initial
+    //   state, otherwise wrong decoding results would be given."
     char_map_[char_list_[i]] = i + 1;
   }
 }
@@ -140,37 +139,13 @@ std::vector<std::string> ScorerBase::make_ngram(PathTrie* prefix) {
 }
 
 void ScorerBase::fill_dictionary(bool add_space) {
-  fst::StdVectorFst dictionary;
-  // For each unigram convert to ints and put in trie
-  int dict_size = 0;
+  // For each unigram convert to ints and store
+  std::vector<std::vector<int> > int_vocabulary;
   for (const auto& word : vocabulary_) {
-    bool added = add_word_to_dictionary(
-        word, char_map_, add_space, space_id_ + 1, &dictionary);
-    dict_size += added ? 1 : 0;
+    add_word_to_dictionary(word, char_map_, add_space, space_id_ + 1, int_vocabulary);
   }
 
-  dict_size_ = dict_size;
-
-  /* Simplify FST
-
-   * This gets rid of "epsilon" transitions in the FST.
-   * These are transitions that don't require a string input to be taken.
-   * Getting rid of them is necessary to make the FST determinisitc, but
-   * can greatly increase the size of the FST
-   */
-  fst::RmEpsilon(&dictionary);
-  std::unique_ptr<fst::StdVectorFst> new_dict(new fst::StdVectorFst);
-
-  /* This makes the FST deterministic, meaning for any string input there's
-   * only one possible state the FST could be in.  It is assumed our
-   * dictionary is deterministic when using it.
-   * (lest we'd have to check for multiple transitions at each state)
-   */
-  fst::Determinize(dictionary, new_dict.get());
-
-  /* Finds the simplest equivalent fst. This is unnecessary but decreases
-   * memory usage of the dictionary
-   */
-  fst::Minimize(new_dict.get());
-  this->dictionary = std::move(new_dict);
+  // Add the converted vocabulary to WordPrefixSet
+  this->dictionary.reset(new WordPrefixSet);
+  dict_size_ = this->dictionary->add_words(int_vocabulary);
 }

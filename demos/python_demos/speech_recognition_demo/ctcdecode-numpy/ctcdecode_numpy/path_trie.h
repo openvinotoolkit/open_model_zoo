@@ -1,5 +1,8 @@
 /*********************************************************************
-* This file is taken from https://github.com/parlance/ctcdecode,
+* Copyright (c) 2020 Intel Corporation
+* SPDX-License-Identifier: Apache-2.0
+*
+* This file is based in part on path_trie.h from https://github.com/parlance/ctcdecode,
 * commit 431408f22d93ef5ebc4422995111bbb081b971a9 on Apr 4, 2020, 20:54:49 UTC+1.
 **********************************************************************/
 
@@ -12,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-#include "fst/fstlib.h"
+#include "word_prefix_set.h"
 
 /* Trie tree for prefix storing and manipulating, with a dictionary in
  * finite-state transducer for spelling correction.
@@ -37,10 +40,8 @@ public:
   // update log probs
   void iterate_to_vec(std::vector<PathTrie*>& output);
 
-  // set dictionary for FST
-  void set_dictionary(fst::StdVectorFst* dictionary);
-
-  void set_matcher(std::shared_ptr<fst::SortedMatcher<fst::StdVectorFst>>);
+  // set word prefix dictionary
+  void set_dictionary(WordPrefixSet* dictionary);
 
   bool is_empty() { return ROOT_ == character; }
 
@@ -65,11 +66,9 @@ private:
 
   std::vector<std::pair<int, PathTrie*>> children_;
 
-  // pointer to dictionary of FST
-  fst::StdVectorFst* dictionary_;
-  fst::StdVectorFst::StateId dictionary_state_;
-  // true if finding ars in FST
-  std::shared_ptr<fst::SortedMatcher<fst::StdVectorFst>> matcher_;
+  // pointer to word prefix dictionary
+  WordPrefixSet* dictionary_;
+  WordPrefixSetState dictionary_state_;
 };
 
 #endif  // PATH_TRIE_H

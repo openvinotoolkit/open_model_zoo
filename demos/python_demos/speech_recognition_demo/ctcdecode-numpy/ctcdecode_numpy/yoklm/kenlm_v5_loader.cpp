@@ -4,11 +4,11 @@
 **********************************************************************/
 
 #include <cstring>
+#include <iostream>
+#include <algorithm>  // std::max
 
 #include "kenlm_v5_loader.hpp"
 #include "memory_section.hpp"
-
-#include <iostream>
 
 
 // Only support little-endian targets now.

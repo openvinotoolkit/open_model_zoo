@@ -11,11 +11,11 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
+#include <unordered_map>
 
 #include "path_trie.h"
-#include "fst/fstlib.h"  // fst::StdVectorFst
+#include "word_prefix_set.h"
 
 const double OOV_SCORE = -1000.0;
 const std::string START_TOKEN = "<s>";
@@ -65,11 +65,11 @@ public:
   // word insertion weight
   double beta;
 
-  // pointer to the dictionary of FST
-  std::unique_ptr<fst::StdVectorFst> dictionary;
+  // pointer to the dictionary of vocabulary word prefixes
+  std::unique_ptr<WordPrefixSet> dictionary;
 
 protected:
-  // necessary setup: load language model, set char map, fill FST's dictionary
+  // necessary setup: load language model, set char map, fill word prefix dictionary
   void setup(const std::string &lm_path,
              const std::vector<std::string> &vocab_list);
 
@@ -80,7 +80,7 @@ protected:
   //  * setting vocabulary_
   virtual void load_lm(const std::string &lm_path) = 0;
 
-  // fill dictionary for FST
+  // fill word prefix dictionary
   void fill_dictionary(bool add_space);
 
   // set char map

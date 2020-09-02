@@ -43,7 +43,7 @@ class ManagedMemory {
     size_t size_;
 }; // class ManagedMemory
 
-// Holds a non-owning pointer+size to a CONSTANT memory section, that 
+// Holds a non-owning pointer+size to a CONSTANT memory section, that
 // is memory contents is not going to be changed using this pointer.
 // Plus it holds a shared_ptr to ManagedMemory object that owns the memory.
 class MemorySection {

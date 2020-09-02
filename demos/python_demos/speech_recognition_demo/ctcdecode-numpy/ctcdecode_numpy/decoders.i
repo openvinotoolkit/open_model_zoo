@@ -20,14 +20,11 @@ import_array();
 #include "scorer_base.h"
 #include "scorer_yoklm.h"
 #include "binding.h"
-// #include "ctc_beam_search_decoder.h"
-// #include "decoder_utils.h"
 %}
 
 %include "std_vector.i"
 %include "std_pair.i"
 %include "std_string.i"
-// %import "decoder_utils.h"
 
 %include "numpy.i"
 // Add support for size_t
@@ -35,16 +32,8 @@ import_array();
 %numpy_typemaps(float , NPY_FLOAT , size_t)
 
 namespace std {
-    %template(DoubleVector) std::vector<double>;
     %template(IntVector) std::vector<int>;
     %template(StringVector) std::vector<std::string>;
-    %template(VectorOfStructVector) std::vector<std::vector<double> >;
-    %template(FloatVector) std::vector<float>;
-    %template(Pair) std::pair<float, std::string>;
-    %template(PairFloatStringVector)  std::vector<std::pair<float, std::string> >;
-    %template(PairDoubleStringVector) std::vector<std::pair<double, std::string> >;
-    %template(PairDoubleStringVector2) std::vector<std::vector<std::pair<double, std::string> > >;
-    %template(DoubleVector3) std::vector<std::vector<std::vector<double> > >;
 }
 
 %apply (float * IN_ARRAY3, size_t DIM1, size_t DIM2, size_t DIM3) {(const float * probs, size_t batch_size, size_t max_frames, size_t num_classes)}
@@ -57,8 +46,6 @@ namespace std {
 // Workaround for the absent support of std::unique_ptr<...>.
 %ignore ScorerBase::dictionary;
 
-// %include "output.h"
 %include "scorer_base.h"
 %include "scorer_yoklm.h"
-// %include "ctc_beam_search_decoder.h"
 %include "binding.h"

@@ -1,5 +1,8 @@
 /*********************************************************************
-* This file is taken from https://github.com/parlance/ctcdecode,
+* Copyright (c) 2020 Intel Corporation
+* SPDX-License-Identifier: Apache-2.0
+*
+* This file is based in part on path_trie.cpp from https://github.com/parlance/ctcdecode,
 * commit 431408f22d93ef5ebc4422995111bbb081b971a9 on Apr 4, 2020, 20:54:49 UTC+1.
 **********************************************************************/
 
@@ -28,10 +31,7 @@ PathTrie::PathTrie() {
   parent = nullptr;
 
   dictionary_ = nullptr;
-  dictionary_state_ = 0;
   has_dictionary_ = false;
-
-  matcher_ = nullptr;
 }
 
 PathTrie::~PathTrie() {
@@ -62,15 +62,13 @@ PathTrie* PathTrie::get_path_trie(int new_char, int new_timestep, float cur_log_
     return (child->second);
   } else {
     if (has_dictionary_) {
-      matcher_->SetState(dictionary_state_);
-      bool found = matcher_->Find(new_char + 1);
+      WordPrefixSetState new_state = dictionary_state_;
+      bool found = dictionary_->append_character(new_char + 1, new_state);
       if (!found) {
         // Adding this character causes word outside dictionary
-        auto FSTZERO = fst::TropicalWeight::Zero();
-        auto final_weight = dictionary_->Final(dictionary_state_);
-        bool is_final = (final_weight != FSTZERO);
+        bool is_final = dictionary_state_.weight;
         if (is_final && reset) {
-          dictionary_state_ = dictionary_->Start();
+          dictionary_state_ = dictionary_->empty_state();
         }
         return nullptr;
       } else {
@@ -80,20 +78,17 @@ PathTrie* PathTrie::get_path_trie(int new_char, int new_timestep, float cur_log_
         new_path->parent = this;
         new_path->dictionary_ = dictionary_;
         new_path->has_dictionary_ = true;
-        new_path->matcher_ = matcher_;
 	new_path->log_prob_c = cur_log_prob_c;
 
         // set spell checker state
         // check to see if next state is final
-        auto FSTZERO = fst::TropicalWeight::Zero();
-        auto final_weight = dictionary_->Final(matcher_->Value().nextstate);
-        bool is_final = (final_weight != FSTZERO);
+        bool is_final = new_state.weight;
         if (is_final && reset) {
 	  // restart spell checker at the start state
-          new_path->dictionary_state_ = dictionary_->Start();
+          new_path->dictionary_state_ = dictionary_->empty_state();
         } else {
 	  // go to next state
-          new_path->dictionary_state_ = matcher_->Value().nextstate;
+          new_path->dictionary_state_ = new_state;
         }
 
         children_.push_back(std::make_pair(new_char, new_path));
@@ -167,13 +162,8 @@ void PathTrie::remove() {
   }
 }
 
-void PathTrie::set_dictionary(fst::StdVectorFst* dictionary) {
+void PathTrie::set_dictionary(WordPrefixSet* dictionary) {
   dictionary_ = dictionary;
-  dictionary_state_ = dictionary->Start();
+  dictionary_state_ = dictionary->empty_state();
   has_dictionary_ = true;
-}
-
-using FSTMATCH = fst::SortedMatcher<fst::StdVectorFst>;
-void PathTrie::set_matcher(std::shared_ptr<FSTMATCH> matcher) {
-  matcher_ = matcher;
 }

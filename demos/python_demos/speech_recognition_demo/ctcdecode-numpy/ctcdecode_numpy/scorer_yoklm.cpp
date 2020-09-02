@@ -5,9 +5,6 @@
 
 #include "scorer_yoklm.h"
 
-#include <unistd.h>
-#include <iostream>
-
 #include "yoklm/kenlm_v5_loader.hpp"
 #include "yoklm/language_model.hpp"
 #include "yoklm/vocabulary.hpp"
@@ -25,9 +22,6 @@ ScorerYoklm::ScorerYoklm(double alpha,
 ScorerYoklm::~ScorerYoklm() {}
 
 void ScorerYoklm::load_lm(const std::string& lm_path) {
-  const char* filename = lm_path.c_str();
-  VALID_CHECK_EQ(access(filename, F_OK), 0, "Invalid language model path");
-
   std::unique_ptr<yoklm::KenlmV5Loader> loader(new yoklm::KenlmV5Loader);
   lm_vocabulary_.reset(new yoklm::Vocabulary);
   language_model_.reset(new yoklm::LanguageModel);

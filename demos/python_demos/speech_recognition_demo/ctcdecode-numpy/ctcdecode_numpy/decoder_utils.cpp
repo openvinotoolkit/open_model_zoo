@@ -2,7 +2,7 @@
 * Copyright (c) 2020 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
-* This file is based in its major part on decoder_utils.cpp from https://github.com/parlance/ctcdecode,
+* This file is based in part on decoder_utils.cpp from https://github.com/parlance/ctcdecode,
 * commit 431408f22d93ef5ebc4422995111bbb081b971a9 on Apr 4, 2020, 20:54:49 UTC+1.
 **********************************************************************/
 
@@ -137,29 +137,12 @@ bool prefix_compare(const PathTrie *x, const PathTrie *y) {
   }
 }
 
-void add_word_to_fst(const std::vector<int> &word,
-                     fst::StdVectorFst *dictionary) {
-  if (dictionary->NumStates() == 0) {
-    fst::StdVectorFst::StateId start = dictionary->AddState();
-    assert(start == 0);
-    dictionary->SetStart(start);
-  }
-  fst::StdVectorFst::StateId src = dictionary->Start();
-  fst::StdVectorFst::StateId dst;
-  for (auto c : word) {
-    dst = dictionary->AddState();
-    dictionary->AddArc(src, fst::StdArc(c, c, 0, dst));
-    src = dst;
-  }
-  dictionary->SetFinal(dst, fst::StdArc::Weight::One());
-}
-
 bool add_word_to_dictionary(
     const std::string &word,
     const std::unordered_map<std::string, int> &char_map,
     bool add_space,
     int space_id,
-    fst::StdVectorFst *dictionary) {
+    std::vector<std::vector<int> >& int_vocabulary) {
   auto characters = split_utf8_str(word);
 
   std::vector<int> int_word;
@@ -181,6 +164,6 @@ bool add_word_to_dictionary(
     int_word.push_back(space_id);
   }
 
-  add_word_to_fst(int_word, dictionary);
+  int_vocabulary.push_back(std::move(int_word));
   return true;  // return with successful adding
 }
