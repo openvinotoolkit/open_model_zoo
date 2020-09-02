@@ -1,9 +1,12 @@
 """
 Copyright (c) 2018-2020 Intel Corporation
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
+
       http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -297,6 +300,7 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         self.meta['calculate_mean'] = False
         self.overall_metric = []
 
+
 class SegmentationUnet3D(PerImageEvaluationMetric):
     __provider__ = 'dice_unet3d'
     annotation_types = (BrainTumorSegmentationAnnotation, SegmentationAnnotation, OAR3DTilingSegmentationAnnotation)
@@ -354,13 +358,8 @@ class SegmentationUnet3D(PerImageEvaluationMetric):
         return result
 
     def reset(self):
-        labels = self.dataset.labels.values() if self.dataset.metadata else ['overall']
-        self.classes = len(labels)
-        names_mean = ['mean@{}'.format(name) for name in labels] if self.mean else []
-        names_median = ['median@{}'.format(name) for name in labels] if self.median else []
-        self.meta['names'] = names_mean + names_median
-        self.meta['calculate_mean'] = False
         self.overall_metric = []
+
 
 class SegmentationOAR3DTiling(PerImageEvaluationMetric):
     __provider__ = 'dice_oar3d'
