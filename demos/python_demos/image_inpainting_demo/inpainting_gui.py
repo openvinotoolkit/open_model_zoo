@@ -108,7 +108,7 @@ class InpaintingGUI(object):
             cv2.putText(backbuffer, "Original", (imgWidth-margin-sz[0]-pad, margin+sz[1]+pad), cv2.FONT_HERSHEY_COMPLEX, 0.75, (128, 255, 128))
         else:
             backbuffer = self.img.copy()
-            backbuffer[np.squeeze(self.mask, -1) > 0]=self.maskColor
+            backbuffer[np.squeeze(self.mask, -1) > 0] = self.maskColor
 
         if self.label is not None and self.label != "":
             lines = self.label.split("\n")
