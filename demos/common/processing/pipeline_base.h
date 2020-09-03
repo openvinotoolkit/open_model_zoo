@@ -75,6 +75,17 @@ public:
     ///
     void waitForTotalCompletion() { requestsPool.waitForTotalCompletion(); }
 
+    /// Submit request to network
+    /// @param image - image to submit for processing
+    /// @returns -1 if image cannot be scheduled for processing (there's no any free InferRequest available).
+    /// Otherwise reqturns unique sequential frame ID for this particular request. Same frame ID will be written in the responce structure.
+    int64_t submitImage(cv::Mat img);
+
+    /// Gets available data from the queue and renders it to output frame
+    /// This function should be overriden in inherited classes to provide default rendering of processed data
+    /// @returns rendered frame, its size corresponds to the size of network output
+    virtual cv::Mat renderData() { return cv::Mat(); }
+
 protected:
     /// This function is called during intialization before loading model to device
     /// Inherited classes may override this function to prepare input/output blobs (get names, set precision, etc...)
@@ -84,7 +95,7 @@ protected:
 
     /// Submit request to network
     /// @param request - request to be submitted (caller function should obtain it using getIdleRequest)
-    /// @returns unique sequential frame ID for this particular request. Same frame ID will be written in responce structure.
+    /// @returns unique sequential frame ID for this particular request. Same frame ID will be written in the responce structure.
     virtual int64_t submitRequest(InferenceEngine::InferRequest::Ptr request);
 
     /// Returns processed result, if available
@@ -104,7 +115,10 @@ protected:
 
     int64_t inputFrameId;
     int64_t outputFrameId;
+
+    std::string imageInputName;
     std::vector<std::string> outputsNames;
+    bool useInputAutoResize;
 
     std::exception_ptr callbackException = nullptr;
 

@@ -54,8 +54,6 @@ public:
     std::vector<std::string> labels;
 
 protected:
-
-    std::string imageInputName;
     std::string imageInfoInputName;
     size_t netInputHeight=0;
     size_t netInputWidth=0;

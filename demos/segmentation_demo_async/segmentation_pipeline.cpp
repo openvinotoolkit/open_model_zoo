@@ -76,15 +76,6 @@ void SegmentationPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
     }
 }
 
-int64_t SegmentationPipeline::submitImage(cv::Mat img){
-    auto request = requestsPool.getIdleRequest();
-    if (!request)
-        return -1;
-
-    request->SetBlob(imageInputName, wrapMat2Blob(img));
-    return submitRequest(request);
-}
-
 SegmentationPipeline::SegmentationResult SegmentationPipeline::getSegmentationResult(){
     auto reqResult = PipelineBase::getResult();
     if (reqResult.IsEmpty()){

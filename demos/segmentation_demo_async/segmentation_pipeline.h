@@ -40,12 +40,10 @@ public:
 
     virtual void PrepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
 
-    int64_t submitImage(cv::Mat img);
     SegmentationResult getSegmentationResult();
 protected:
     const cv::Vec3b& class2Color(int classId);
 
-    std::string imageInputName;
     int outHeight = 0;
     int outWidth = 0;
     int outChannels = 0;

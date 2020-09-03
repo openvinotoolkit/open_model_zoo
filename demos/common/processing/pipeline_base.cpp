@@ -140,6 +140,19 @@ int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request)
     return frameID;
 }
 
+int64_t PipelineBase::submitImage(cv::Mat img) {
+    if (imageInputName == "") {
+        throw std::invalid_argument("imageInputName value is not set.");
+    }
+
+    auto request = requestsPool.getIdleRequest();
+    if (!request)
+        return -1;
+
+    request->SetBlob(imageInputName, wrapMat2Blob(img));
+    return submitRequest(request);
+}
+
 PipelineBase::RequestResult PipelineBase::getResult()
 {
     std::lock_guard<std::mutex> lock(mtx);
