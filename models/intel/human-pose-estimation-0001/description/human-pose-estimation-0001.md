@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a multi-person 2D pose estimation network (based on the OpenPose approach) with tuned MobileNet v1 as a feature extractor. 
+This is a multi-person 2D pose estimation network (based on the OpenPose approach) with tuned MobileNet v1 as a feature extractor.
 For every person in an image, the network detects a human pose: a body skeleton consisting of keypoints and connections between them.
 The pose may contain up to 18 keypoints: ears, eyes, nose, neck, shoulders, elbows, wrists, hips, knees, and ankles.
 

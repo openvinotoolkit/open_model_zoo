@@ -36,7 +36,7 @@ Expected color order is BGR.
 The net outputs a blob with the shape [300, 7], where each row consists of [`image_id`, `class_id`, `confidence`, `x0`, `y0`, `x1`, `y1`] respectively:
 - `image_id` - image ID in the batch
 - `class_id` - predicted class ID
-- `confidence` - [0, 1] detection score; the higher the value, the more confident the detection is 
+- `confidence` - [0, 1] detection score; the higher the value, the more confident the detection is
 - (`x0`, `y0`) - normalized coordinates of the top left bounding box corner, in the [0, 1] range
 - (`x1`, `y1`) - normalized coordinates of the bottom right bounding box corner, in the [0, 1] range
 

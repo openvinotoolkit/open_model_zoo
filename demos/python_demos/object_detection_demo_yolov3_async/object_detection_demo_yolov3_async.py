@@ -240,8 +240,8 @@ def filter_objects(objects, iou_threshold, prob_threshold):
         if objects[i]['confidence'] == 0:
             continue
         for j in range(i + 1, len(objects)):
-            # We perform IOU only on objects of same class 
-            if objects[i]['class_id'] != objects[j]['class_id']: 
+            # We perform IOU only on objects of same class
+            if objects[i]['class_id'] != objects[j]['class_id']:
                 continue
 
             if intersection_over_union(objects[i], objects[j]) > iou_threshold:
@@ -411,7 +411,7 @@ def main():
 
             helpers.put_highlighted_text(frame, "{} mode".format(mode.current.name), (10, int(origin_im_size[0] - 20)),
                                          cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
-            
+
             if is_same_mode and prev_mode_active_request_count == 0:
                 mode_metrics[mode.current].update(start_time, frame)
             else:

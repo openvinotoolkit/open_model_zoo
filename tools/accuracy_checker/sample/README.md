@@ -1,12 +1,12 @@
 # Sample
 
-In this sample we will go through typical steps required to evaluate DL topologies. 
+In this sample we will go through typical steps required to evaluate DL topologies.
 
 We will try to evaluate **SampLeNet** topology as an example.
 
 ### 1. Download and extract dataset
 
-In this sample we will use toy dataset which we refer to as *sample dataset*, which contains 10K images 
+In this sample we will use toy dataset which we refer to as *sample dataset*, which contains 10K images
 of 10 different classes (classification problem), which is actually CIFAR10 dataset converted to PNG (image conversion will be done automatically in evaluation process)
 
 You can download original CIFAR10 dataset from [official website](https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz).

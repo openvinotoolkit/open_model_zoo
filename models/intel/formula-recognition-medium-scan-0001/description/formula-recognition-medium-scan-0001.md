@@ -78,7 +78,7 @@ The formula-recognition-medium-scan-0001-decoder model is an LSTM based decoder 
 2.	Name: `dec_st_h` , shape: [1x512]. Current hidden state of the LSTM cell.
 3.	Name: `output`, shape: [1x256]. Current state of the decoder.
 1.	Name: `logit`, shape: [1xVocab_Size]. Classification confidence scores in the [0, 1] range
-    for every token. 
+    for every token.
 
 
 ## Legal Information
