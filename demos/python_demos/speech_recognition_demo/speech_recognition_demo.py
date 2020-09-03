@@ -19,12 +19,11 @@ from utils.deep_speech_pipeline import DeepSpeechPipeline
 
 def build_argparser():
     parser = argparse.ArgumentParser(description="Speech recognition example")
-    parser.add_argument('input', help="Path to an audio file.  Must be WAV PCM 16 kHz mono format.",
+    parser.add_argument('input', help="Path to an audio file in WAV PCM 16 kHz mono format",
                         type=str, metavar="FILENAME")
     parser.add_argument('-d', '--device', default='CPU', type=str,
-                        help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL, MYRIAD or HETERO: is "
-                             "acceptable. The sample will look for a suitable plugin for device specified. Default "
-                             "value is CPU")
+                        help="Optional. Specify the target device to infer on, for example: CPU, GPU, FPGA, HDDL, MYRIAD or HETERO. "
+                             "The sample will look for a suitable IE plugin for this device. (default is CPU)")
     parser.add_argument('-m', '--model', type=str, metavar="FILENAME",
                         help="Path to an .xml file with a trained model (required)", required=True)
 
@@ -33,7 +32,7 @@ def build_argparser():
     parser.add_argument('-L', '--lm', type=str, metavar="FILENAME",
                         help="path to language model file (optional)")
     parser.add_argument('-a', '--alphabet', type=str, metavar="FILENAME",
-                        help="path to alphabet file matching the model; use 'utf8' for Chinese (defaults to the 28-token alphabet with English letters)")
+                        help="path to alphabet file matching the model (defaults to the 28-symbol alphabet with English letters)")
     parser.add_argument('--alpha', type=float, default=0.75, metavar="X",
                         help="Language model weight (default 0.75)")
     parser.add_argument('--beta', type=float, default=1.85, metavar="X",
@@ -70,6 +69,7 @@ def main():
         audio = np.frombuffer(wave_read.readframes(pcm_length * channel_num), dtype=np.int16).reshape((pcm_length, channel_num))
         wave_read.close()
     print("Loading, including network weights, IE initialization, LM, building LM vocabulary trie, loading audio: {} s".format(timer.elapsed))
+    print("Audio file length: {} s".format(audio.shape[0] / sampling_rate))
 
     # Now it is enough to call:
     #   transcription = stt.recognize_audio(audio, sampling_rate)

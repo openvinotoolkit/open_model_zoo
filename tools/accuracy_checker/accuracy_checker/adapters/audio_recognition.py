@@ -296,7 +296,7 @@ class CTCBeamSearchDecoderWithLm(Adapter):
             ),
             'alphabet': ListField(
                 optional=True, default=None, value_type=str, allow_empty=False, description=
-                "Alphabet. Use an empty string for the CTC blank sybmol. "
+                "Alphabet as list of strings. Include an empty string for the CTC blank sybmol. "
                 "Default is space + 26 English letters + apostrophe + blank."
             ),
             'sep': StringField(
@@ -305,7 +305,8 @@ class CTCBeamSearchDecoderWithLm(Adapter):
             ),
             'lm_file': PathField(
                 optional=True, default=None, description=
-                "Path to LM in binary kenlm format. Default is no LM."
+                "Path to LM in binary kenlm format, relative to --model_attributes or --models.  "
+                "Default is beam search without LM."
             ),
             'lm_alpha': NumberField(
                 optional=True, default=None, value_type=float, min_value=0, description=
@@ -322,7 +323,7 @@ class CTCBeamSearchDecoderWithLm(Adapter):
             'lm_vocabulary_offset': NumberField(
                 optional=True, default=None, value_type=int, min_value=0, description=
                 "Start of vocabulary strings section in the LM file.  "
-                "Default is to not filter candidate words using vocabulary"
+                "Default is to not filter candidate words using vocabulary."
             ),
             'lm_vocabulary_length': NumberField(
                 optional=True, default=None, value_type=int, min_value=0, description=

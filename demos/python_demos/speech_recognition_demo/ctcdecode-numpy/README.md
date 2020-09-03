@@ -14,6 +14,8 @@ The library needs SWIG for building Python interface. For Ubuntu 16.04 or 18.04:
 sudo apt install swig
 ```
 
+For Windows [download](http://www.swig.org/download.html) and unzip a recent version of `swigwin-*.zip`, and add the directory containing `swig.exe` to your PATH environment valiable.
+
 To build ctcdecode-numpy run:
 
 ```shell

@@ -2,7 +2,6 @@ models:
   - name: mozilla-deepspeech-0.6.1-with-lm
     launchers:
       - framework: dlsdk
-        device: CPU
         adapter:
           type: ctc_beam_search_decoder_with_lm
           probability_out: logits

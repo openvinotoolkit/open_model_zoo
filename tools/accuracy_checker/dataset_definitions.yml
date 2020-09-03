@@ -869,18 +869,18 @@ datasets:
 
   - name: librispeech-test-clean
     data_source: librispeech/test/LibriSpeech/test-clean.wav
-    annotation: librispeech/accuracy_checker_annotations_test/full/librispeech.pickle
     annotation_conversion:
       converter: librispeech
       data_dir: librispeech/test/LibriSpeech/test-clean.wav
+    annotation: librispeech-test-clean.pickle
     metrics:
       - name: wer
 
   - name: librispeech-dev-clean
     data_source: librispeech/dev/LibriSpeech/dev-clean.wav
-    annotation: librispeech/accuracy_checker_annotations/full/librispeech.pickle
     annotation_conversion:
       converter: librispeech
       data_dir: librispeech/dev/LibriSpeech/dev-clean.wav
+    annotation: librispeech-dev-clean.pickle
     metrics:
       - name: wer

@@ -8,7 +8,7 @@ with changed neural network topology.
 
 For details on the original DeepSpeech, see paper <https://arxiv.org/abs/1412.5567>.
 
-For details on this model, see <https://github.com/mozilla/STT/releases/tag/v0.6.1>.
+For details on this model, see <https://github.com/mozilla/DeepSpeech/releases/tag/v0.6.1>.
 
 ## Example
 
@@ -45,7 +45,7 @@ Increasing beam_width improves WER metric and slows down decoding.  Speech recog
     - T - context frames: along with the current frame, the network expects 9 preceeding frames and 9 succeeding frames. The absent context frames are filled with zeros.
     - C - 26 MFCC coefficients per each frame
 
-   See `accuracy-check.yml` for audio preprocessing and feature extraction parameters.
+   See [`accuracy-check.yml`](accuracy-check.yml) for all audio preprocessing and feature extraction parameters.
 
  * Number of audio frames, INT32 value, name: `input_lengths`, shape [1].
 
@@ -64,7 +64,7 @@ Increasing beam_width improves WER metric and slows down decoding.  Speech recog
     - T - context frames: along with the current frame, the network expects 9 preceeding frames and 9 succeeding frames. The absent context frames are filled with zeros.
     - C - 26 MFCC coefficients in each frame
 
-    See `accuracy-check.yml` for all audio preprocessing and feature extraction parameters.
+    See [`accuracy-check.yml`](accuracy-check.yml) for all audio preprocessing and feature extraction parameters.
 
  * LSTM in-state and input vectors. Names: `previous_state_c` and `previous_state_h`, shapes: [1x2048], format: [BxC].
 When splitting a long audio into chunks, these inputs must be fed with the corresponding outputs from the previous chunk.
@@ -110,5 +110,5 @@ Chunk processing order must be from early to late audio positions.
 ## Legal Information
 
 The original model is distributed under the
-[Mozilla Public License, Version 2.0](https://raw.githubusercontent.com/mozilla/STT/master/LICENSE).
+[Mozilla Public License, Version 2.0](https://raw.githubusercontent.com/mozilla/DeepSpeech/master/LICENSE).
 A copy of the license is provided in [MPL-2.0-Mozilla-Deepspeech.txt](../licenses/MPL-2.0-Mozilla-Deepspeech.txt).

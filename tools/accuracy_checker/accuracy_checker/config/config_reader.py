@@ -47,6 +47,7 @@ PREPROCESSING_PATHS = {
 }
 
 ADAPTERS_PATHS = {
+    'lm_file': ['model_attributes', 'models'],
     'vocabulary_file': ['model_attributes', 'models', 'source'],
     'merges_file': ['model_attributes', 'source', 'models']
 }

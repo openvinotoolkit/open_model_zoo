@@ -10,16 +10,9 @@ The application accepts
  * n-gram language model file in kenlm quantized binary format, and
  * an audio file in PCM WAV 16 kHz mono format.
 
-The app also depends on `ctcdecode_numpy` Python\* module, its installation is described below.
+After computing audio features, running a neural network to get per-frame character probabilities, and CTC decoding, the demo prints the decoded text together with the timings of the processing stages.
 
-Demo workflow is the following:
-
- * Initialization: the neural network and language model (LM) are read and initialized.
-An OpenFST trie with allowed word prefixed is build during the initialization of LM scorer.
- * Audio file is loaded
- * MFCC audio features are extracted from the audio file
- * MFCC features are split into chunks, and fed to the neural network. The network outputs per-frame character probabilities.
- * Per-frame character probabilities and the LM scorer are fed into CTC beam search decoder. It finds the transcription of the audio file.
+The app depends on `ctcdecode_numpy` Python\* module, its installation is described below.
 
 ## Model preparation
 
@@ -31,7 +24,7 @@ https://github.com/mozilla/DeepSpeech/releases/download/v0.6.1/deepspeech-0.6.1-
 2. Generate OpenVINO Inference Engine Intermediate Representation (IR) from the downloaded model using OpenVINO model optimizer (MO)
 
     ```shell
-    python ./mo_tf.py --model_name "deepspeech_0.6.1" \
+    python <path_to_mo>/mo_tf.py --model_name "deepspeech_0.6.1" \
       --output_dir <output_ir_dir> \
       --input_model <path_to_tf_model>/output_graph.pb \
       --freeze_placeholder_with_value "input_lengths->[16]" \
@@ -63,6 +56,8 @@ To install `ctcdecode_numpy` Python module:
     ```shell
     sudo apt install swig
     ```
+
+    For Windows [download](http://www.swig.org/download.html) and unzip `swigwin-*.zip` file, and add the directory containing `swig.exe` to your PATH environment valiable.
 
 1. Build and install `ctcdecode_numpy` Python module:
 
