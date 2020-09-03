@@ -148,4 +148,3 @@ public:
         handler.PrintPerformanceCounts(fullDeviceName);
     }
 };
-

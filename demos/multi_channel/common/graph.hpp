@@ -111,4 +111,3 @@ public:
 
     void printPerformanceCounts(std::string fullDeviceName);
 };
-
