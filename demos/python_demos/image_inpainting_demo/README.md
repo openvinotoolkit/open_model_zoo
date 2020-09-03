@@ -46,7 +46,7 @@ Options:
                         Optional. Color to be treated as mask (provide 3 RGB
                         components in range of 0...255). Default is 0 0 0.
                         Skipped in GUI mode
-  --no_show             Optional. Don't show output. Skipped in GUI mode
+  --no_show             Optional. Don't show output. Cannot be used in GUI mode
   -o OUTPUT, --output OUTPUT
                         Optional. Save output to the file with provided
                         filename. Skipped in GUI mode

@@ -32,71 +32,71 @@ class InpaintingGUI(object):
         self.mask = np.zeros((self.inpainter.input_height, self.inpainter.input_width, 1), dtype=np.float32)
 
         cv2.namedWindow(self.wndName, cv2.WINDOW_AUTOSIZE)
-        cv2.setMouseCallback(self.wndName, self.onMouse)
-        cv2.createTrackbar("Brush size", self.wndName, self.radius, 30, self.onTrackBar)
+        cv2.setMouseCallback(self.wndName, self.on_mouse)
+        cv2.createTrackbar("Brush size", self.wndName, self.radius, 30, self.on_trackbar)
         cv2.setTrackbarMin("Brush size", self.wndName, 1)
 
         self.isHelpShown = False
         self.isOriginalShown = False
 
 
-    def onMouse(self, _event, x, y, flags, _param):
+    def on_mouse(self, _event, x, y, flags, _param):
         if flags == cv2.EVENT_FLAG_LBUTTON and not self.isOriginalShown:
             if self.oldPoint is not None:
                 cv2.line(self.mask, self.oldPoint, (x, y), 1, self.radius*2)
             cv2.circle(self.mask, (x, y), self.radius, 1, cv2.FILLED)
             self.oldPoint = (x, y)
 
-            self.updateWindow()
+            self.update_window()
         else:
             self.oldPoint = None
 
 
     def run(self):
-        self.updateWindow()
+        self.update_window()
 
         key = ""
         while key not in (27, ord('q'), ord('Q')):
             if key in (ord(" "), ord("\r")):
                 self.isOriginalShown = False
-                self.showInfo("Processing...")
+                self.show_info("Processing...")
 
                 self.img[np.squeeze(self.mask, -1) > 0] = 0
                 self.img = self.inpainter.process(self.img, self.mask)
 
-                self.showInfo("")
+                self.show_info("")
                 self.mask[:, :, :] = 0
-                self.updateWindow()
+                self.update_window()
             elif key in (8, ord('c'), ord('C')): # Backspace or c
                 self.isOriginalShown = False
                 self.mask[:, :, :] = 0
-                self.updateWindow()
+                self.update_window()
             elif key == ord('\t'):
                 self.isOriginalShown = not self.isOriginalShown
-                self.updateWindow()
+                self.update_window()
             elif key in (ord('h'), ord('H')):
                 if not self.isHelpShown:
-                    self.showInfo("Use mouse with LMB to paint\nBksp or C to clear\nSpace or Enter to inpaint\nTab to show original image\nEsc or Q to quit")
+                    self.show_info("Use mouse with LMB to paint\nBksp or C to clear\nSpace or Enter to inpaint\nTab to show original image\nEsc or Q to quit")
                     self.isHelpShown = True
                 else:
-                    self.showInfo("")
+                    self.show_info("")
                     self.isHelpShown = False
 
             key = cv2.waitKey()
 
 
-    def onTrackBar(self, x):
+    def on_trackbar(self, x):
         self.radius = x
 
 
-    def showInfo(self, text):
+    def show_info(self, text):
         self.label = text
-        self.updateWindow()
+        self.update_window()
         cv2.waitKey(1) # This is required to actually paint window contents right away
         self.isHelpShown = False # Any other label removes help from the screen
 
 
-    def updateWindow(self):
+    def update_window(self):
         pad = 10
         margin = 10
         if self.isOriginalShown:
