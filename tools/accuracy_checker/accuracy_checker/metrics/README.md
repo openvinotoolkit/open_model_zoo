@@ -177,6 +177,10 @@ More detailed information about calculation segmentation metrics you can find [h
 * `dice_index` - [Sørensen–Dice coefficient](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). Supported representations: `BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction`, `SegmentationAnnotation, SegmentationPrediction`. Supports result representation for multiple classes. Metric represents result for each class if `label_map` for used dataset is provided, otherwise it represents overall result. For `brats_numpy` converter file with labels set in `labels_file` tag.
   * `mean` - allows calculation mean value (default - `True`).
   * `median` - allows calculation median value (default - `False`).
+* `dice_unet3d` - [Sørensen–Dice coefficient](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). Supported representations: `BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction`.
+Applied for models trained on brats data with labels in range (0, 1, 2, 3). The metric is quite similar to `dice_index` with only the difference that represents data for three statically defined labels:  1) `whole tumor` - aggregated data for labels (1, 2, 3) of the dataset; 2) `tumor core` - aggregated data for labels (2, 3) of the dataset; 3) `enhancing tumor` - data for label (3) of the dataset.
+  * `mean` - allows calculation mean value (default - `True`).
+  * `median` - allows calculation median value (default - `False`).
 * `bleu` - [Bilingual Evaluation Understudy](https://en.wikipedia.org/wiki/BLEU). Supperted representations: `MachineTranslationAnnotation`, `MachineTranslationPrediction`.
   * `smooth` - Whether or not to apply Lin et al. 2004 smoothing.
   *  `max_order` - Maximum n-gram order to use when computing BLEU score. (Optional, default 4).

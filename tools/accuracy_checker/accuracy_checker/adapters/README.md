@@ -187,6 +187,7 @@ AccuracyChecker supports following set of adapters:
 * `gaze_estimation` - converting output of gaze estimation model to `GazeVectorPrediction`.
 * `hit_ratio_adapter` - converting output NCF model to `HitRatioPrediction`.
 * `brain_tumor_segmentation` - converting output of brain tumor segmentation model to `BrainTumorSegmentationPrediction`.
+  * `segmentation_out` - segmentation output layer name. (Optional, if not provided default first output blob will be used).
   * `make_argmax`  - allows to apply argmax operation to output values. (default - `False`)
   * `label_order` - sets mapping from output classes to dataset classes. For example: `label_order: [3,1,2]` means that class with id 3 from model's output matches with class with id 1 from dataset,  class with id 1 from model's output matches with class with id 2 from dataset, class with id 2 from model's output matches with class with id 3 from dataset.
 * `nmt` - converting output of neural machine translation model to `MachineTranslationPrediction`.
