@@ -17,8 +17,8 @@ from modules.pose import Pose, propagate_ids
 try:
     from pose_extractor import extract_poses
 except ImportError as err:
-    raise ImportError("{}.\nModule 'pose_extactor' not found. "
-                      "Please build module according to documentation before usage.".format(err.msg))
+    raise ImportError("Module 'pose_extractor' not found. "
+                      "Please build module according to documentation before usage.") from err
 
 
 AVG_PERSON_HEIGHT = 180
