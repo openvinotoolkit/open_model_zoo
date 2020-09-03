@@ -178,7 +178,7 @@ More detailed information about calculation segmentation metrics you can find [h
   * `mean` - allows calculation mean value (default - `True`).
   * `median` - allows calculation median value (default - `False`).
 * `dice_unet3d` - [Sørensen–Dice coefficient](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). Supported representations: `BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction`.
-Applied for models trained on brats data with labels in range (0, 1, 2, 3). The metric is quite similar to `dice_index` with only the difference that represents data for three statically defined labels:  1) `whole tumor` - aggregated data for labels (1, 2, 3) of the dataset; 2) `tumor core` - aggregated data for labels (2, 3) of the dataset; 3) `enhancing tumor` - data label (3) of the dataset.
+Applied for models trained on brats data with labels in range (0, 1, 2, 3). The metric is quite similar to `dice_index` with only the difference that represents data for three statically defined labels:  1) `whole tumor` - aggregated data for labels (1, 2, 3) of the dataset; 2) `tumor core` - aggregated data for labels (2, 3) of the dataset; 3) `enhancing tumor` - data for label (3) of the dataset.
 For `brats` converter file with original dataset labels set in `labels_file` tag.
   * `mean` - allows calculation mean value (default - `True`).
   * `median` - allows calculation median value (default - `False`).
