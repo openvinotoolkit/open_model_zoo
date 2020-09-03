@@ -30,7 +30,6 @@ def type_overlap(arg):
         res = float(arg[:-1]) / 100
     else:
         res = int(arg)
-
     return res
 
 
@@ -62,17 +61,12 @@ def build_argparser():
 
 class AudioSource:
     def __init__(self, source, channels=2, samplerate=None):
-        self.source = source
         self.samplerate = samplerate
-        self.channels = channels
-        self.load()
-
-    def load(self):
-        samplerate, audio = read_wav(self.source, as_float=True)
+        samplerate, audio = read_wav(source, as_float=True)
         audio = audio.T
-        if audio.shape[0] != self.channels:
+        if audio.shape[0] != channels:
             raise RuntimeError("Audio has unsupported number of channels - {} (expected {})"
-                               .format(audio.shape[0], self.channels))
+                               .format(audio.shape[0], channels))
         if self.samplerate:
             if self.samplerate != samplerate:
                 audio = resample(audio, samplerate, self.samplerate)
@@ -81,14 +75,29 @@ class AudioSource:
 
         self.audio = audio
 
+    def duration(self):
+        return self.audio.shape[1] / self.samplerate
+
     def chunks(self, size, hop=None, num_chunks=1):
+        def get_clip(pos, size):
+            if pos > self.audio.shape[1]:
+                return np.zeros((self.audio.shape[0], size), dtype=self.audio.dtype)
+            if pos + size > self.audio.shape[1]:
+                clip = np.zeros((self.audio.shape[0], size), dtype=self.audio.dtype)
+                clip[:, :self.audio.shape[1]-pos] = self.audio[:, pos:]
+                return clip
+            else:
+                return self.audio[:, pos:pos+size]
         if not hop:
             hop = size
         pos = 0
 
-        while pos + (num_chunks-1)*hop + size <= self.audio.shape[1]:
-            yield np.array([self.audio[:, pos+n*hop: pos+n*hop+size] for n in range(num_chunks)])
-            pos += hop*num_chunks
+        while pos < self.audio.shape[1]:
+            chunk = np.zeros((num_chunks, self.audio.shape[0], size), dtype=self.audio.dtype)
+            for n in range(num_chunks):
+                chunk[n, :, :] = get_clip(pos, size)
+                pos += hop
+            yield chunk
 
 
 def resample(audio, sample_rate, new_sample_rate):
@@ -104,13 +113,11 @@ def read_wav(file, as_float=False):
     sampwidth_types = {
         1: np.uint8,
         2: np.int16,
-        3: np.int32,
         4: np.int32
     }
     sampwidth_max = {
         1: 255,
         2: 2**15,
-        3: 2*23,
         4: 2**31
     }
     with wave.open(file, "rb") as wav:
@@ -156,11 +163,11 @@ def main():
                       "-l/--cpu_extension command line argument")
             sys.exit(1)
 
-    if len(net.inputs) != 1:
+    if len(net.input_info) != 1:
         log.error("Demo supports only models with 1 input layer")
         sys.exit(1)
-    input_blob = next(iter(net.inputs))
-    input_shape = net.inputs[input_blob].shape
+    input_blob = next(iter(net.input_info))
+    input_shape = net.input_info[input_blob].input_data.shape
     if len(net.outputs) != 1:
         log.error("Demo supports only models with 1 output layer")
         sys.exit(1)
@@ -204,16 +211,14 @@ def main():
             end_time = ((idx*batch_size + batch)*hop + length) / audio.samplerate
             outputs.append(data)
             label = np.argmax(data)
-            log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(start_time, end_time, data[label],
-                                                             labels[label] if labels else "Class {}".format(label)))
+            if start_time < audio.duration():
+                log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(start_time, end_time, data[label],
+                                                                 labels[label] if labels else "Class {}".format(label)))
 
     if clips == 0:
         log.error("Audio too short for inference by that model")
         sys.exit(1)
-    total = np.mean(outputs, axis=0)
-    label = np.argmax(total)
-    log.info("Average over the audio prediction - {:6.2%} {:s}"
-             .format(total[label], labels[label] if labels else "Class {}".format(label)))
+
     logging.info("Average infer time - {:.1f} ms per clip".format(infer_time / clips * 1000))
 
 
