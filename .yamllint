@@ -3,6 +3,17 @@ yaml-files:
   - '*.yml'
   - '.yamllint'
 
+# The tools/accuracy_checker/ ignores are there because those files
+# are all symlinks, and:
+# a) it's pointless to check symlinks if we check the real files too;
+# b) on Windows, Git turns links into regular files containing the target name,
+#    which yamllint complains about.
+
+ignore: |
+  demos/thirdparty/
+  tools/accuracy_checker/.yamllint
+  tools/accuracy_checker/configs/
+
 rules:
   line-length: disable
   braces: enable
@@ -22,7 +33,7 @@ rules:
   key-duplicates: enable
   key-ordering: disable
   new-line-at-end-of-file: enable
-  new-lines: enable
+  new-lines: disable
   octal-values: disable
   quoted-strings: disable
   trailing-spaces: enable
