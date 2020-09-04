@@ -218,8 +218,8 @@ class InputFeeder:
                 get_layer_precision(input_, name)
 
         all_config_inputs = (
-                config_non_constant_inputs + list(constant_inputs.keys()) +
-                image_info_inputs + lstm_inputs + orig_image_info_inputs
+            config_non_constant_inputs + list(constant_inputs.keys()) +
+            image_info_inputs + lstm_inputs + orig_image_info_inputs
         )
         not_config_inputs = [input_layer for input_layer in self.network_inputs if input_layer not in all_config_inputs]
         if config_non_constant_inputs and not_config_inputs:

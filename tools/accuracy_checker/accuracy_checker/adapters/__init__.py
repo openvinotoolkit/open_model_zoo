@@ -60,7 +60,7 @@ from .detection_person_vehicle import (
 from .detection_head import HeadDetectionAdapter
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
-from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
+from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
 from .pose_estimation import HumanPoseAdapter
@@ -111,6 +111,17 @@ __all__ = [
     'PersonVehicleDetectionRefinementAdapter',
     'HeadDetectionAdapter',
     'FasterRCNNONNX',
+
+    'TinyYOLOv1Adapter',
+    'YoloV2Adapter',
+    'YoloV3Adapter',
+    'YoloV3ONNX',
+
+    'SSDAdapter',
+    'SSDAdapterMxNet',
+    'SSDONNXAdapter',
+    'PyTorchSSDDecoder',
+    'FacePersonAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
