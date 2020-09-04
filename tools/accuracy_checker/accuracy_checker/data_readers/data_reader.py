@@ -379,7 +379,7 @@ class NumPyReader(BaseReader):
         if not self.data_source:
             raise ConfigError('data_source parameter is required to create "{}" '
                               'data reader and read data'.format(self.__provider__))
-        self.keyRegex = {k: re.compile(k) for k in self.keys}
+        self.keyRegex = {k: re.compile(k + '_') for k in self.keys}
         self.valRegex = re.compile(r"([^0-9]+)([0-9]+)")
 
     def read(self, data_id):
