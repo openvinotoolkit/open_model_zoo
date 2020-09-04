@@ -346,14 +346,16 @@ class SegmentationUnet3D(PerImageEvaluationMetric):
             intersection_count = np.logical_and(annotation_data_, prediction_data_).sum()
             union_count = annotation_data_.sum() + prediction_data_.sum()
             if union_count > 0:
-                result[c] += 2.0*intersection_count / union_count
+                result[c] = 2.0*intersection_count / union_count
+            else:
+                result[c] = np.nan
 
         self.overall_metric.append(result)
         return result
 
     def evaluate(self, annotations, predictions):
-        mean = np.mean(self.overall_metric, axis=0) if self.mean else []
-        median = np.median(self.overall_metric, axis=0) if self.median else []
+        mean = np.nanmean(self.overall_metric, axis=0) if self.mean else []
+        median = np.nanmedian(self.overall_metric, axis=0) if self.median else []
         result = np.concatenate((mean, median))
         return result
 
