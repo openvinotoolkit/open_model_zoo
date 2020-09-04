@@ -352,6 +352,7 @@ class NumpyReaderConfig(ConfigValidator):
     type = StringField(optional=True)
     keys = StringField(optional=True, default="")
     separator = StringField(optional=True, default="@")
+    id_sep = StringField(optional=True, default="_")
     block = BoolField(optional=True, default=False)
     batch = NumberField(optional=True, default=1)
 
@@ -370,6 +371,7 @@ class NumPyReader(BaseReader):
         self.keys = self.config.get('keys', "") if self.config else ""
         self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
         self.separator = self.config.get('separator')
+        self.id_sep = self.config.get('id_sep', '_')
         self.block = self.config.get('block', False)
         self.batch = int(self.config.get('batch', 1))
 
@@ -379,7 +381,7 @@ class NumPyReader(BaseReader):
         if not self.data_source:
             raise ConfigError('data_source parameter is required to create "{}" '
                               'data reader and read data'.format(self.__provider__))
-        self.keyRegex = {k: re.compile(k + '_') for k in self.keys}
+        self.keyRegex = {k: re.compile(k + self.id_sep) for k in self.keys}
         self.valRegex = re.compile(r"([^0-9]+)([0-9]+)")
 
     def read(self, data_id):

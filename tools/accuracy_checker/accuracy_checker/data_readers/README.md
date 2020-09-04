@@ -44,6 +44,7 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
 * `numpy_reader` - read numpy dumped files (npy or npz formats are supported for reading)
   * `keys` - comma-separated list of model input names
   * `separator` - separator symbol between input identifier and file identifier
+  * `id_sep` - separator symbol between input name and record number in input identifier
   * `block` - block mode (batch - oriented). In this mode reader returns whole variable.
 * `numpy_txt_reader`- read data stored in text format to numpy array.
 * `numpy_dict_reader` - read and unpack dictionaries saved in numpy files.
