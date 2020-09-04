@@ -16,7 +16,7 @@ import cv2
 import numpy as np
 
 
-class ImageInpainting(object):
+class ImageInpainting:
     def __init__(self, ie, model_path, device='CPU'):
         model = ie.read_network(model_path, os.path.splitext(model_path)[0] + '.bin')
 

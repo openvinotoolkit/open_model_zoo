@@ -40,7 +40,7 @@ def build_arg_parser():
     args.add_argument("-p", "--parts", help="Optional. Number of parts to draw mask. Ignored in GUI mode",
                       default=8, type=int)
     args.add_argument("-mbw", "--max_brush_width", help="Optional. Max width of brush to draw mask."
-                     " Ignored in GUI mode",
+                      " Ignored in GUI mode",
                       default=24, type=int)
     args.add_argument("-ml", "--max_length", help="Optional. Max strokes length to draw mask. Ignored in GUI mode",
                       default=100, type=int)
@@ -51,7 +51,7 @@ def build_arg_parser():
                       " Default is 0 0 0. Ignored in GUI mode", default=[0, 0, 0], type=int, nargs=3)
     args.add_argument("--no_show", help="Optional. Don't show output. Cannot be used in GUI mode", action='store_true')
     args.add_argument("-o", "--output", help="Optional. Save output to the file with provided filename."
-                     " Ignored in GUI mode", default="", type=str)
+                      " Ignored in GUI mode", default="", type=str)
     args.add_argument("-a", "--auto", help="Optional. Use automatic (non-interactive) mode instead of GUI",
                       action='store_true')
 
