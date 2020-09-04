@@ -51,7 +51,7 @@ def build_argparser():
                            "Default value is CPU")
     args.add_argument('--labels', type=str, default=None,
                       help="Optional. Labels mapping file")
-    args.add_argument('-sr', '--samplerate', type=int,
+    args.add_argument('-sr', '--sample_rate', type=int,
                       help="Optional. Set sample rate for audio input")
     args.add_argument('-ol', '--overlap', type=type_overlap, default=0,
                       help='Optional. Set the overlapping between audio clip in samples or percent')
@@ -187,7 +187,7 @@ def main():
     if one != 1:
         raise RuntimeError("Wrong third dimension size of model input shape - {} (expected 1)".format(one))
 
-    audio = AudioSource(args.input, channels=channels, samplerate=args.samplerate)
+    audio = AudioSource(args.input, channels=channels, samplerate=args.sample_rate)
 
     hop = length - args.overlap if isinstance(args.overlap, int) else int(length * (1.0 - args.overlap))
     if hop < 0:
@@ -199,8 +199,7 @@ def main():
     clips = 0
     infer_time = 0
     for idx, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
-        if len(chunk.shape) != len(input_shape):
-            chunk = np.reshape(chunk, newshape=input_shape)
+        chunk.shape = input_shape
         infer_start_time = time.perf_counter()
         output = exec_net.infer(inputs={input_blob: chunk})
         infer_time += time.perf_counter() - infer_start_time
@@ -214,10 +213,6 @@ def main():
             if start_time < audio.duration():
                 log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(start_time, end_time, data[label],
                                                                  labels[label] if labels else "Class {}".format(label)))
-
-    if clips == 0:
-        log.error("Audio too short for inference by that model")
-        sys.exit(1)
 
     logging.info("Average infer time - {:.1f} ms per clip".format(infer_time / clips * 1000))
 

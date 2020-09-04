@@ -34,7 +34,7 @@ Options:
                         will look for a suitable plugin for device specified.
                         Default value is CPU
   --labels LABELS       Optional. Labels mapping file
-  -sr SAMPLERATE, --samplerate SAMPLERATE
+  -sr SAMPLERATE, --sample_rate SAMPLERATE
                         Optional. Set sample rate for audio input
   -ol OVERLAP, --overlap OVERLAP
                         Optional. Set the overlapping between audio clip in
