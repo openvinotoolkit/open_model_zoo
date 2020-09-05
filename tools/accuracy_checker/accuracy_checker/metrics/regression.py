@@ -95,7 +95,8 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
 
     def reset(self):
         self.magnitude = []
-        self.profiler.reset()
+        if self.profiler:
+            self.profiler.reset()
 
 
 class BaseRegressionOnIntervals(PerImageEvaluationMetric):

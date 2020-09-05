@@ -88,6 +88,8 @@ class SegmentationMetric(PerImageEvaluationMetric):
     def reset(self):
         self.state = {}
         self._update_iter = 0
+        if self.profiler:
+            self.profiler.reset()
 
 
 class SegmentationAccuracy(SegmentationMetric):
