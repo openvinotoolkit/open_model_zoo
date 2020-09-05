@@ -342,8 +342,8 @@ class RocAucScore(PerImageEvaluationMetric):
         return 0
 
     def evaluate(self, annotations, predictions):
-        all_results = np.array(self.results)
-        all_targets = np.array(self.targets)
+        all_results = np.concatenate([t.squeeze() for t in self.results])
+        all_targets = np.concatenate(self.targets)
         roc_auc = roc_auc_score(all_targets, all_results)
         return roc_auc
 
