@@ -428,3 +428,41 @@ class YoloV3Adapter(Adapter):
             ))
 
         return result
+
+
+class YoloV3ONNX(Adapter):
+    __provider__ = 'yolo_v3_onnx'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'boxes_out': StringField(),
+            'scores_out': StringField(),
+            'indices_out': StringField()
+        })
+        return params
+
+    def configure(self):
+        self.boxes_out = self.get_value_from_config('boxes_out')
+        self.scores_out = self.get_value_from_config('scores_out')
+        self.indices_out = self.get_value_from_config('indices_out')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        result = []
+        for identifier, boxes, scores, indices in zip(
+                identifiers, raw_outputs[self.boxes_out], raw_outputs[self.scores_out], raw_outputs[self.indices_out]
+        ):
+            out_boxes, out_scores, out_classes = [], [], []
+            for idx_ in indices:
+                out_classes.append(idx_[1])
+                out_scores.append(scores[tuple(idx_[1:])])
+                out_boxes.append(boxes[idx_[2]])
+            transposed_boxes = np.array(out_boxes).T if out_boxes else ([], [], [], [])
+            x_mins = transposed_boxes[1]
+            y_mins = transposed_boxes[0]
+            x_maxs = transposed_boxes[3]
+            y_maxs = transposed_boxes[2]
+            result.append(DetectionPrediction(identifier, out_classes, out_scores, x_mins, y_mins, x_maxs, y_maxs))
+        return result
