@@ -209,6 +209,9 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
 * `score_class_comparison` - allows calculate an accuracy of quality score class(low/normal/good). It sorts all quality scores from annotations and predictions and set the k1 highest scores as high class and the k2 lowest scores as low class where k1 is `num_high_quality` and k2 is `num_low_quality`. Supported representations: `QualityAssessmentAnnotation`, `QualityAssessmentPrediction`.
   * `num_high_quality` - the number of high class in total (default value: `1`).
   * `num_low_quality` - the number of low class in total (default value: `1`).
+* `im2latex_images_match` - This metric gets formulas in `CharacterRecognitionAnnotation` and `CharacterRecognitionPrediction` format and based on this given text renders images with this formulas. Then for every two corresponding formulas images are getting compared. The result accuracy is percent of the equivalent formulas.
+  >Note: this metric requires installed packages texlive and imagemagick. In linux you can do it this way:
+  > `sudo apt-get update && apt-get install texlive imagemagick`
 
 ## Metrics profiling
 Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.
