@@ -58,7 +58,9 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
         annotations = []
         for file_in_dir in image_dir.iterdir():
             file_name = file_in_dir.parts[-1]
-            mask_file_name = file_name.rsplit('.', 1)[0] + '.nii.gz'
+            mask_file_name = (
+                file_name.rsplit('.', 1)[0] + '.nii.gz' if not file_name.endswith('.nii.gz') else file_name
+            )
             mask = mask_dir / mask_file_name
             if not mask.exists():
                 if not check_content:
