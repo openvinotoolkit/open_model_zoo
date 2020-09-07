@@ -520,7 +520,7 @@ struct Load {
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers 3 certain topologies and cannot be generalized **/
-        std::cout << "InferenceEngine: " << GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {

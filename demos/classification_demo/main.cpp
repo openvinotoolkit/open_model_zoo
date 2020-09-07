@@ -106,6 +106,8 @@ std::vector<std::vector<unsigned>> topResults(Blob& inputBlob, unsigned numTop) 
 
 int main(int argc, char *argv[]) {
     try {
+        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
+
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
