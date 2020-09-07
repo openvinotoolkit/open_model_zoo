@@ -629,6 +629,10 @@ class MTCNNEvaluator(BaseEvaluator):
         self._prepare_dataset(dataset_tag)
         self._create_subset(subset, num_images, allow_pairwise_subset)
         _progress_reporter = self._prepare_progress_reporter(check_progress, kwargs.get('progress_reporter'))
+        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
+        if compute_intermediate_metric_res:
+            metric_interval = kwargs.get('metric_interval', 1000)
+            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_prediction = []
@@ -673,6 +677,10 @@ class MTCNNEvaluator(BaseEvaluator):
                 )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
+                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(
+                        print_results=True, ignore_results_formatting=ignore_results_formatting
+                    )
 
         if _progress_reporter:
             _progress_reporter.finish()

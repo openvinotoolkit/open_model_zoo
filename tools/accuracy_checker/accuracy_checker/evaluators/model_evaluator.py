@@ -157,6 +157,10 @@ class ModelEvaluator(BaseEvaluator):
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
 
+        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
+        if compute_intermediate_metric_res:
+            metric_interval = kwargs.get('metric_interval', 1000)
+            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
         predictions_to_store = []
         dataset_iterator = iter(enumerate(self.dataset))
         infer_requests_pool = {ir.request_id: ir for ir in self.launcher.get_async_requests()}
@@ -192,6 +196,10 @@ class ModelEvaluator(BaseEvaluator):
 
                     if progress_reporter:
                         progress_reporter.update(batch_id, len(batch_predictions))
+                        if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
+                            self.compute_metrics(
+                                print_results=True, ignore_results_formatting=ignore_results_formatting
+                            )
 
         if progress_reporter:
             progress_reporter.finish()
@@ -218,6 +226,10 @@ class ModelEvaluator(BaseEvaluator):
         profile_type = 'json' if output_callback and enable_profiling else kwargs.get('profile_report_type')
         if enable_profiling:
             self.metric_executor.enable_profiling(self.dataset, profile_type)
+        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
+        if compute_intermediate_metric_res:
+            metric_interval = kwargs.get('metric_interval', 1000)
+            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
         predictions_to_store = []
         for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
@@ -244,6 +256,8 @@ class ModelEvaluator(BaseEvaluator):
 
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_predictions))
+                if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting)
 
         if progress_reporter:
             progress_reporter.finish()
