@@ -107,6 +107,10 @@ class ColorizationEvaluator(BaseEvaluator):
             _progress_reporter = None if not check_progress else self._create_progress_reporter(
                 check_progress, self.dataset.size
             )
+        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
+        if compute_intermediate_metric_res:
+            metric_interval = kwargs.get('metric_interval', 1000)
+            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             extr_batch_inputs, _ = extract_image_representations(batch_inputs)
@@ -137,6 +141,10 @@ class ColorizationEvaluator(BaseEvaluator):
                 )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
+                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(
+                        print_results=True, ignore_results_formatting=ignore_results_formatting
+                    )
 
         if _progress_reporter:
             _progress_reporter.finish()
