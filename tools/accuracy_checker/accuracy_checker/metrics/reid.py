@@ -238,6 +238,9 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
         ))
 
         idx_subsets = self.make_subsets(self.subset_num, len(first_images_annotations))
+        if not idx_subsets:
+            return 0
+
         for subset in range(self.subset_num):
             test_subset = self.get_subset(first_images_annotations, idx_subsets[subset]['test'])
             test_subset = self.mark_subset(test_subset, False)
@@ -255,7 +258,8 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
     def make_subsets(subset_num, dataset_size):
         subsets = []
         if subset_num > dataset_size:
-            raise ValueError('It is impossible to divide dataset on more than number of annotations subsets.')
+            warnings.warn('It is impossible to divide dataset on more than number of annotations subsets.')
+            return []
 
         for subset in range(subset_num):
             lower_bnd = subset * dataset_size // subset_num
