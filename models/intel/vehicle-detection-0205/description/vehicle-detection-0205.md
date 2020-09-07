@@ -13,7 +13,7 @@ backbone with FPN and CascadeRCNN heads.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP @ [ IoU=0.50:0.95 ]          | TBD (internal test set)                   |
+| AP @ [ IoU=0.50:0.95 ]          | 0.476                                     |
 | GFlops                          | 212.22                                    |
 | MParams                         | 36.56                                     |
 | Source framework                | PyTorch\*                                 |
