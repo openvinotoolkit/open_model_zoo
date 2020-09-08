@@ -89,7 +89,8 @@ def main():
     print("Overall time: {} s".format(time.time() - start_time))
 
     print("\nTranscription and confidence score:")
-    for candidate in transcription[:1]:
+    max_candidates = 1
+    for candidate in transcription[:max_candidates]:
         print(
             "{}\t{}".format(
                 candidate['conf'],

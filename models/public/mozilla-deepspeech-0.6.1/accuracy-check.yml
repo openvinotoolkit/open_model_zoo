@@ -7,7 +7,8 @@ models:
           probability_out: logits
           logarithmic_prob: False
           beam_size: 32
-          lm_file: ../deepspeech-0.6.1-models/lm.binary
+          # Use option "accuracy_check [...] --model_attributes <path_to_lm>" to provide path to lm.binary.
+          lm_file: lm.binary
           lm_alpha: 0.75
           lm_beta: 1.85
           lm_oov_score: -1000.

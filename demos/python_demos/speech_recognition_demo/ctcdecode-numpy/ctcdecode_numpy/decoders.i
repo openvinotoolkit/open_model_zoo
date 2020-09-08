@@ -6,6 +6,10 @@
 * commit 766e96e600795cea4187123b9ed76dcd250f2d04 on Jan 20, 2020, 17:09:14 UTC+8
 **********************************************************************/
 
+// After updating this file or its dependencies, please run
+//   swig -python -c++ -o decoders_wrap.cpp decoders.i
+// to update decoders_wrap.cpp and impl.py
+
 %module impl
 
 %{
@@ -26,8 +30,7 @@ import_array();
 %include "std_pair.i"
 %include "std_string.i"
 
-%include "numpy.i"
-// Add support for size_t
+// Add support for size_t to numpy.i
 %numpy_typemaps(int   , NPY_INT   , size_t)
 %numpy_typemaps(float , NPY_FLOAT , size_t)
 

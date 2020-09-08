@@ -378,7 +378,7 @@ class CTCBeamSearchDecoderWithLm(Adapter):
         log_prob = self._extract_predictions(raw, frame_meta, self.probability_out)
         log_prob = np.concatenate(list(log_prob))
         if not self.logarithmic_prob:
-            log_prob = np.log(log_prob)
+            log_prob = np.log(log_prob.clip(min=np.finfo(log_prob.dtype).tiny))
         if len(log_prob.shape) == 3:
             log_prob = log_prob.squeeze(axis=1)
         elif len(log_prob.shape) != 2:
