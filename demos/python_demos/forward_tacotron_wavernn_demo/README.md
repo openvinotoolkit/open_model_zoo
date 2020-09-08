@@ -16,28 +16,33 @@ When inference is done, the application outputs the audio to the WAV file with 2
 Running the application with the `-h` option yields the following usage message:
 
 ```
-python3 text_to_speech.py -h
+python3 forward_tacotron_wavernn_demo.py -h
 ```
 
 The command yields the following usage message:
 
 ```
-usage: text_to_speech.py [-h] --model_duration MODEL_DURATION --model_forward
-                         MODEL_FORWARD [-o OUT] --model_upsample
-                         MODEL_UPSAMPLE --model_rnn MODEL_RNN --input INPUT
-                         [-d DEVICE]
+usage: forward_tacotron_wavernn_demo.py [-h] --model_duration MODEL_DURATION
+                                        --model_forward MODEL_FORWARD [-o OUT]
+                                        --model_upsample MODEL_UPSAMPLE
+                                        --model_rnn MODEL_RNN --input INPUT
+                                        [-d DEVICE]
 
 Options:
   -h, --help            Show this help message and exit.
   --model_duration MODEL_DURATION
-                        Required. Path to an .xml file with a trained model.
+                        Required. Path to ForwardTacotron`s duration
+                        prediction part (*.xml format).
   --model_forward MODEL_FORWARD
-                        Required. Path to an .xml file with a trained model.
+                        Required. Path to ForwardTacotron`s mel-spectrogram
+                        regression part (*.xml format).
   -o OUT, --out OUT     Required. Path to an output .wav file
   --model_upsample MODEL_UPSAMPLE
-                        Required. Path to a .xml file with a trained model.
+                        Required. Path to WaveRNN`s part for mel-spectrogram
+                        upsampling by time axis (*.xml format).
   --model_rnn MODEL_RNN
-                        Required. Path to a .xml file with a trained model.
+                        Required. Path to WaveRNN`s part for waveform
+                        autoregression (*.xml format).
   --input INPUT         Text file with text.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
@@ -45,13 +50,14 @@ Options:
                         sample will look for a suitable plugin for device
                         specified. Default value is CPU
 
+
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
 ## Example for running with arguments
 ```
-python3 text_to_speech.py --model_upsample weights/wavernn_upsampler.xml --model_rnn weights/wavernn_rnn.xml --model_duration weights/forward_tacotron_duration_prediction.xml --model_forward weights/forward_tacotron_regression.xml --input <path_to_file_with_text.txt>
+python3 forward_tacotron_wavernn_demo.py --model_upsample weights/wavernn_upsampler.xml --model_rnn weights/wavernn_rnn.xml --model_duration weights/forward_tacotron_duration_prediction.xml --model_forward weights/forward_tacotron_regression.xml --input <path_to_file_with_text.txt>
 ```
 
 ## Demo Output
