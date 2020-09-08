@@ -29,9 +29,10 @@ import numpy as np
 from ..config import NumberField
 from ..representation import CharacterRecognitionAnnotation, CharacterRecognitionPrediction
 from .metric import FullDatasetEvaluationMetric
-
+from ..logging import print_info
 MAX_PX_ROW_DIFF = 3
 TIMEOUT = 10
+PRINT_FREQ = 100
 
 # replace \pmatrix with \begin{pmatrix}\end{pmatrix}
 # replace \matrix with \begin{matrix}\end{matrix}
@@ -48,6 +49,17 @@ template = r"""
 \end{document}
 """
 
+
+def check_environment():
+    command = subprocess.run(["pdflatex", "--version"], capture_output=True)
+    if command.stderr:
+        raise EnvironmentError("pdflatex not installed, please install it")
+    command = subprocess.run(["gs", "--version"], capture_output=True)
+    if command.stderr:
+        raise EnvironmentError("ghostscript not installed, please install it")
+    command = subprocess.run(["convert", "--version"], capture_output=True)
+    if command.stderr:
+        raise EnvironmentError("imagemagick not installed, please install it")
 
 def crop_image(img, output_path, default_size=None):
     old_im = cv.imread(img, cv.IMREAD_GRAYSCALE)
@@ -140,7 +152,7 @@ def render_routine(line):
         if not os.path.exists(pdf_filename):
             logging.info('ERROR: %s cannot compile\n', file_idx)
         else:
-            os.system('convert +profile "icc" -density 200 -quality 100 {} {}'.format(pdf_filename, png_filename))
+            subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100', pdf_filename, png_filename])
             if os.path.exists(pdf_filename):
                 os.remove(pdf_filename)
             if os.path.exists(png_filename):
@@ -282,6 +294,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         if self.num_threads is None:
             self.num_threads = cpu_count()
         self.max_pixel_column_diff = self.get_value_from_config('max_pixel_column_diff')
+        check_environment()
 
     def compare_pics(self, images_dir):
         """
@@ -307,7 +320,11 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
             plotfilename = os.path.join(plots_dir, os.path.basename(filename))
             lines.append((filename, filename2, plotfilename,
                           self.max_pixel_column_diff))
-        results = pool.map(match_images, lines)
+        results = []
+        for num, elem in enumerate(pool.imap_unordered(match_images, lines)):
+            results.append(elem)
+            if num % PRINT_FREQ == 0 and num != 0:
+                print_info("{} images compared".format(PRINT_FREQ))
         assert len(results) == len(lines)
         for element in results:
 
@@ -344,10 +361,12 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         lines_gold = [(ann.label, ann.identifier, out_path_gold) for ann in annotations]
         lines_pred = [(pred.label, pred.identifier, out_path_pred) for pred in predictions]
         lines = lines_gold + lines_pred
-        logging.info('Creating pool with %s threads', self.num_threads)
+        logging.info('Creating render pool with %s threads', self.num_threads)
         pool = ThreadPool(self.num_threads)
         logging.info('Jobs running...')
-        pool.map(render_routine, lines)
+        for num, _ in enumerate(pool.imap_unordered(render_routine, lines)):
+            if num % PRINT_FREQ == 0 and num != 0:
+                print_info("{} images rendered".format(PRINT_FREQ))
         pool.close()
         pool.join()
 
