@@ -50,7 +50,9 @@ Options:
 Running the application with the empty list of options yields the usage message given above and an error message.
 
 ## Example for running with arguments
+```
 python3 text_to_speech.py --model_upsample weights/wavernn_upsampler.xml --model_rnn weights/wavernn_rnn.xml --model_duration weights/forward_tacotron_duration_prediction.xml --model_forward weights/forward_tacotron_regression.xml --input <path_to_file_with_text.txt>
+```
 
 ## Demo Output
 

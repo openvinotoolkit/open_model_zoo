@@ -20,16 +20,16 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("--model_duration", help="Required. Path to an .xml file with a trained model.", required=True,
+    args.add_argument("--model_duration", help="Required. Path to ForwardTacotron`s duration prediction part (*.xml format).", required=True,
                       type=str)
-    args.add_argument("--model_forward", help="Required. Path to an .xml file with a trained model.", required=True,
+    args.add_argument("--model_forward", help="Required. Path to ForwardTacotron`s mel-spectrogram regression part (*.xml format).", required=True,
                       type=str)
 
     args.add_argument("-o", "--out", help="Required. Path to an output .wav file", default='out.wav',
                       type=str)
-    args.add_argument("--model_upsample", help="Required. Path to a .xml file with a trained model.", required=True,
+    args.add_argument("--model_upsample", help="Required. Path to WaveRNN`s part for mel-spectrogram upsampling by time axis (*.xml format).", required=True,
                       type=str)
-    args.add_argument("--model_rnn", help="Required. Path to a .xml file with a trained model.", required=True,
+    args.add_argument("--model_rnn", help="Required. Path to WaveRNN`s part for waveform autoregression (*.xml format).", required=True,
                       type=str)
 
     args.add_argument("--input", help="Text file with text.", required=True,
