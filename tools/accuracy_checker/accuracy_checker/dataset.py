@@ -57,7 +57,7 @@ class DatasetConfig(ConfigValidator):
     additional_data_source = PathField(is_directory=True, optional=True)
     batch = NumberField(value_type=int, min_value=1, optional=True)
     _profile = BoolField(optional=True, default=False)
-    _profile_type = StringField(optional=True, choices=['json', 'csv'])
+    _report_type = StringField(optional=True, choices=['json', 'csv'])
     _ie_preprocessing = BoolField(optional=True, default=False)
 
 
