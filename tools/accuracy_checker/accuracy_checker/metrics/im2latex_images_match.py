@@ -22,6 +22,7 @@ import tempfile
 from multiprocessing import cpu_count
 from multiprocessing.dummy import Pool as ThreadPool
 from threading import Timer
+from subprocess import PIPE
 
 import cv2 as cv
 import numpy as np
@@ -51,13 +52,13 @@ template = r"""
 
 
 def check_environment():
-    command = subprocess.run(["pdflatex", "--version"], capture_output=True, check=True)
+    command = subprocess.run(["pdflatex", "--version"], stdout=PIPE, stderr=PIPE, check=True)
     if command.stderr:
         raise EnvironmentError("pdflatex not installed, please install it")
-    command = subprocess.run(["gs", "--version"], capture_output=True, check=True)
+    command = subprocess.run(["gs", "--version"], stdout=PIPE, stderr=PIPE, check=True)
     if command.stderr:
         raise EnvironmentError("ghostscript not installed, please install it")
-    command = subprocess.run(["convert", "--version"], capture_output=True, check=True)
+    command = subprocess.run(["convert", "--version"], stdout=PIPE, stderr=PIPE, check=True)
     if command.stderr:
         raise EnvironmentError("imagemagick not installed, please install it")
 
@@ -153,8 +154,8 @@ def render_routine(line):
         if not os.path.exists(pdf_filename):
             logging.info('ERROR: %s cannot compile\n', file_idx)
         else:
-            subprocess.run(['convert', '+profile', '"icc"', '-density', '200',
-                            '-quality', '100', pdf_filename, png_filename], check=True)
+            subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
+                            pdf_filename, png_filename], check=True, stdout=PIPE, stderr=PIPE)
             if os.path.exists(pdf_filename):
                 os.remove(pdf_filename)
             if os.path.exists(png_filename):
