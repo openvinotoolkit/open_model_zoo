@@ -80,7 +80,7 @@ pip install --upgrade --force-reinstall .
 
 You may test your installation and get familiar with accuracy checker by running [sample](sample/README.md).
 
-Each model can be evaluated using a configuration file. Please refer to [How to use configuration files](configs/README.md) guide.
+Each Open Model Zoo model can be evaluated using a configuration file. Please refer to [How to use predefined configuration files](configs/README.md) guide.
 
 Once you installed accuracy checker you can evaluate your configurations with:
 
