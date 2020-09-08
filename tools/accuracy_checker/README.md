@@ -70,7 +70,7 @@ python setup.py install_core
 
 #### Troubleshooting during installation
 
-When previous version of the tool already installed in the environment, in some cases, it can broke new installation. 
+When previous version of the tool already installed in the environment, in some cases, it can broke new installation.
 If you see the error about directory/file not found, please try remove manually old tool version from your environment or install the tool with following command (in accuracy checker directory, instead of setup.py install):
 ```bash
 pip install --upgrade --force-reinstall .
@@ -80,21 +80,20 @@ pip install --upgrade --force-reinstall .
 
 You may test your installation and get familiar with accuracy checker by running [sample](sample/README.md).
 
+Each model can be evaluated using a configuration file. Please refer to [How to use configuration files](configs/README.md) guide.
+
 Once you installed accuracy checker you can evaluate your configurations with:
 
 ```bash
 accuracy_check -c path/to/configuration_file -m /path/to/models -s /path/to/source/data -a /path/to/annotation
 ```
 
-All relative paths in config files will be prefixed with values specified in command line:
+You may refer to `-h, --help` to full list of command line options. Some arguments are:
 
 - `-c, --config` path to configuration file.
 - `-m, --models` specifies directory in which models and weights declared in config file will be searched. You also can specify space separated list of directories if you want to run the same configuration several times with models located in different directories or if you have the pipeline with several models.
 - `-s, --source` specifies directory in which input images will be searched.
 - `-a, --annotations` specifies directory in which annotation and meta files will be searched.
-
-You may refer to `-h, --help` to full list of command line options. Some optional arguments are:
-
 - `-d, --definitions` path to the global configuration file.
 - `-e, --extensions` directory with InferenceEngine extensions.
 - `-b, --bitstreams` directory with bitstream (for Inference Engine with fpga plugin).
@@ -131,8 +130,8 @@ models:
 - name: model_name
   launchers:
     - framework: caffe
-      model:   public/alexnet/caffe/bvlc_alexnet.prototxt
-      weights: public/alexnet/caffe/bvlc_alexnet.caffemodel
+      model:   bvlc_alexnet.prototxt
+      weights: bvlc_alexnet.caffemodel
       adapter: classification
       batch: 128
   datasets:
