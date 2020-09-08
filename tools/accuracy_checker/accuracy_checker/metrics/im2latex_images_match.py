@@ -325,9 +325,10 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
                           self.max_pixel_column_diff))
         results = []
         for num, elem in enumerate(pool.imap_unordered(match_images, lines)):
-            results.append(elem)
             if num % PRINT_FREQ == 0 and num != 0:
-                print_info("{} images compared".format(PRINT_FREQ))
+                print_info("{} / {} images compared".format(len(results), len(lines)))
+            results.append(elem)
+        print_info("All images compared")
         assert len(results) == len(lines)
         for element in results:
 
@@ -367,9 +368,13 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         logging.info('Creating render pool with %s threads', self.num_threads)
         pool = ThreadPool(self.num_threads)
         logging.info('Jobs running...')
+        pairs_images_rendered = 0
         for num, _ in enumerate(pool.imap_unordered(render_routine, lines)):
-            if num % PRINT_FREQ == 0 and num != 0:
-                print_info("{} images rendered".format(PRINT_FREQ))
+            if num % (PRINT_FREQ * 2) == 0 and num != 0:
+                pairs_images_rendered += PRINT_FREQ
+                # 2x PRINT_FREQ because images are rendered by pairs (original + predicted)
+                print_info("{} / {} images rendered".format(pairs_images_rendered, len(lines) // 2))
+        print_info("All images rendered")
         pool.close()
         pool.join()
 
