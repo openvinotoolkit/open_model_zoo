@@ -106,12 +106,14 @@ class ModuleEvaluator(BaseEvaluator):
     def dataset(self):
         return self._internal_module.dataset
 
-
     @staticmethod
     def get_processing_info(config):
         module = config['module']
         python_path = config.get('python_path')
         return load_module(module, python_path).get_processing_info(config)
+
+    def set_profiling_dir(self, profiler_dir):
+        self._internal_module.set_profiling_dir(profiler_dir)
 
 
 def load_module(model_cls, python_path=None):

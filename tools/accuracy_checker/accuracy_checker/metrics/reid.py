@@ -25,11 +25,13 @@ from ..representation import (
 )
 from ..config import BaseField, BoolField, NumberField
 from .metric import FullDatasetEvaluationMetric
+from ..utils import UnsupportedPackage
 
 try:
     from sklearn.metrics import auc, precision_recall_curve
-except ImportError:
-    auc, precision_recall_curve = None, None
+except ImportError as import_error:
+    auc = UnsupportedPackage("sklearn.metrics.auc", import_error.msg)
+    precision_recall_curve = UnsupportedPackage("sklearn.metrics.precision_recall_curve", import_error.msg)
 
 PairDesc = namedtuple('PairDesc', 'image1 image2 same')
 
@@ -236,6 +238,9 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
         ))
 
         idx_subsets = self.make_subsets(self.subset_num, len(first_images_annotations))
+        if not idx_subsets:
+            return 0
+
         for subset in range(self.subset_num):
             test_subset = self.get_subset(first_images_annotations, idx_subsets[subset]['test'])
             test_subset = self.mark_subset(test_subset, False)
@@ -253,7 +258,8 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
     def make_subsets(subset_num, dataset_size):
         subsets = []
         if subset_num > dataset_size:
-            raise ValueError('It is impossible to divide dataset on more than number of annotations subsets.')
+            warnings.warn('It is impossible to divide dataset on more than number of annotations subsets.')
+            return []
 
         for subset in range(subset_num):
             lower_bnd = subset * dataset_size // subset_num
@@ -380,6 +386,8 @@ class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
         query_cam_ids = self.extract_cam_id(annotations, True)
 
         valid_mask = self.eval_valid_matrix(gallery_person_ids, gallery_cam_ids, query_person_ids, query_cam_ids)
+        if np.size(gallery_embeddings) == 0 or np.size(query_embeddings) == 0:
+            return 0
 
         gallery_embeddings = gallery_embeddings / np.linalg.norm(gallery_embeddings, axis=1).reshape(-1, 1)
         query_embeddings = query_embeddings / np.linalg.norm(query_embeddings, axis=1).reshape(-1, 1)
@@ -565,8 +573,10 @@ def get_embedding_distances(annotation, prediction, train=False):
 
 
 def binary_average_precision(y_true, y_score, interpolated_auc=True):
-    if auc is None:
-        raise ValueError('please install sklearn')
+    if isinstance(auc, UnsupportedPackage):
+        auc.raise_error("reid metric")
+    if isinstance(precision_recall_curve, UnsupportedPackage):
+        precision_recall_curve.raise_error("reid metric")
     def _average_precision(y_true_, y_score_):
         precision, recall, _ = precision_recall_curve(y_true_, y_score_)
         if not interpolated_auc:

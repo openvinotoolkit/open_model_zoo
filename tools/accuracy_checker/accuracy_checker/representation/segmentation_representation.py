@@ -23,15 +23,14 @@ import cv2 as cv
 
 import numpy as np
 
-try:
-    import pycocotools.mask as maskUtils
-except ImportError:
-    maskUtils = None
-
 from .base_representation import BaseRepresentation
 from ..data_readers import BaseReader
-from ..utils import remove_difficult
+from ..utils import remove_difficult, UnsupportedPackage
 
+try:
+    import pycocotools.mask as maskUtils
+except ImportError as import_error:
+    maskUtils = UnsupportedPackage("pycocotools", import_error.msg)
 
 class GTMaskLoader(Enum):
     PILLOW = 0
@@ -90,7 +89,7 @@ class SegmentationAnnotation(SegmentationRepresentation):
     def _load_mask(self):
         if self._mask is None:
             loader_config = self.LOADERS.get(self._mask_loader)
-            data_source = self.metadata.get('segmentation_masks_source')
+            data_source = self.metadata.get('segmentation_masks_source') or self.metadata.get('additional_data_source')
             if data_source is None:
                 data_source = self.metadata['data_source']
             if isinstance(loader_config, str):
@@ -191,7 +190,7 @@ class SegmentationPrediction(SegmentationRepresentation):
             if 1 not in mask.shape:
                 mask = np.argmax(mask, axis=0)
             else:
-                mask = np.squeeze(mask, axis=-1)
+                mask = np.squeeze(mask)
         indexes = np.unique(mask)
         for i in indexes:
             binary_mask = np.uint8(mask == i)
@@ -219,7 +218,8 @@ class BrainTumorSegmentationPrediction(SegmentationPrediction):
 
 class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
     def __init__(self, identifier, mask, labels):
-        if not maskUtils:
+        if isinstance(maskUtils, UnsupportedPackage):
+            maskUtils.raise_error("CoCoInstanceSegmentationRepresentation")
             raise ValueError('can not create representation')
         super().__init__(identifier)
         self.raw_mask = mask
@@ -275,23 +275,31 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
         return areas
 
     def to_polygon(self):
-        if not self.raw_mask:
+        if self.raw_mask is None or np.size(self.raw_mask) == 0:
             warnings.warn("Polygon can be found only for non-empty mask")
             return {}
 
-        if not self.labels:
+        if self.labels is None or np.size(self.labels) == 0:
             warnings.warn("Polygon can be found only for non-empty labels")
             return {}
+
+        if all(not isinstance(value, dict) for value in self.raw_mask):
+            polygons = defaultdict(list)
+            for elem, label in zip(self.raw_mask, self.labels):
+                polygons[label].append(elem)
+            return polygons
 
         polygons = defaultdict(list)
         for elem, label in zip(self.raw_mask, self.labels):
             elem = np.uint8(maskUtils.decode(elem))
+            obj_contours = []
             contours, _ = cv.findContours(elem, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
             for contour in contours:
                 if contour.size < 6:
                     continue
                 contour = np.squeeze(contour, axis=1)
-                polygons[label].append(contour)
+                obj_contours.append(contour)
+            polygons[label].append(obj_contours)
 
         return polygons
 

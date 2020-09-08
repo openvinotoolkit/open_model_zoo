@@ -1,0 +1,46 @@
+evaluations:
+  - name: formula-recognition-medium-scan-0001
+    module: custom_evaluators.im2latex_evaluator.Im2latexEvaluator
+    module_config:
+      network_info:
+
+        max_seq_len: '192'
+
+      launchers:
+        - framework: dlsdk
+
+      datasets:
+        - name: im2latex_medium_photographed
+
+          preprocessing:
+            - type: resize
+              aspect_ratio_scale: scale_factor
+              scale: 0.625
+            - type: corner_crop
+              dst_width: 1400
+              dst_height: 160
+            - type: padding
+              pad_type: right_bottom
+              dst_width: 1400
+              dst_height: 160
+              pad_value: '(255, 255, 255)'
+
+          metrics:
+            - type: im2latex_match_images_metric
+              max_pixel_column_diff: 0
+
+        - name: im2latex_medium_rendered
+
+          preprocessing:
+            - type: corner_crop
+              dst_width: 1400
+              dst_height: 160
+            - type: padding
+              pad_type: right_bottom
+              dst_width: 1400
+              dst_height: 160
+              pad_value: '(255, 255, 255)'
+
+          metrics:
+            - type: im2latex_match_images_metric
+              max_pixel_column_diff: 0

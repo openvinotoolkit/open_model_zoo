@@ -18,11 +18,6 @@ import cv2
 import numpy as np
 from ..config import NumberField, BoolField
 
-try:
-    import tensorflow as tf
-except ImportError as import_error:
-    tf = None
-
 from .preprocessor import Preprocessor
 
 
@@ -71,8 +66,13 @@ class TfConvertImageDType(Preprocessor):
 
     def __init__(self, config, name):
         super().__init__(config, name)
-        if tf is None:
-            raise ImportError('*tf_convert_image_dtype* operation requires TensorFlow. Please install it before usage')
+        try:
+            import tensorflow as tf # pylint: disable=C0415
+        except ImportError as import_error:
+            raise ImportError(
+                '*tf_convert_image_dtype* operation requires TensorFlow. '
+                'Please install it before usage. {}'.format(import_error.msg)
+            )
         tf.enable_eager_execution()
         self.converter = tf.image.convert_image_dtype
         self.dtype = tf.float32

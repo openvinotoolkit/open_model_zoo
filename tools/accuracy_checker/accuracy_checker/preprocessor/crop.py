@@ -18,11 +18,93 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from ..config import NumberField, BoolField, ConfigError
+from ..config import NumberField, BoolField, StringField, ConfigError
 from ..logging import warning
 from .preprocessor import Preprocessor
 from .geometric_transformations import GeometricOperationMetadata
 from ..utils import get_size_from_config, get_size_3d_from_config
+
+
+class CornerCrop(Preprocessor):
+    __provider__ = 'corner_crop'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'dst_width': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination width for image cropping respectively."
+            ),
+            'dst_height': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination height for image cropping respectively."
+            ),
+            'corner_type': StringField(
+                optional=True, choices=['top_left', 'top_right', 'bottom_left', 'bottom_right'],
+                default='top_left', description="Destination height for image cropping respectively."
+            ),
+        })
+
+        return parameters
+
+    def configure(self):
+        self.corner_type = self.get_value_from_config('corner_type')
+        self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        image.data = self.process_data(
+            data, self.dst_height, self.dst_width, self.corner_type
+            ) if not isinstance(data, list) else [
+                self.process_data(
+                    fragment, self.dst_height, self.dst_width, self.corner_type
+                    ) for fragment in image.data
+            ]
+
+        return image
+
+    @staticmethod
+    def process_data(data, dst_height, dst_width, corner_type):
+        height, width = data.shape[:2]
+        if corner_type == 'top_left':
+            new_height = min(height, dst_height)
+            start_height = 0
+            new_width = min(width, dst_width)
+            start_width = 0
+        elif corner_type == 'top_right':
+            new_height = min(height, dst_height)
+            start_height = 0
+            if width > dst_width:
+                start_width = width - dst_width
+                new_width = width
+            else:
+                start_width = 0
+                new_width = width
+        elif corner_type == 'bottom_left':
+            if height > dst_height:
+                start_height = height - dst_height
+                new_height = height
+            else:
+                start_height = 0
+                new_height = height
+            new_width = min(width, dst_width)
+            start_width = 0
+        elif corner_type == 'bottom_right':
+            if height > dst_height:
+                start_height = height - dst_height
+                new_height = height
+            else:
+                start_height = 0
+                new_height = height
+            if width > dst_width:
+                start_width = width - dst_width
+                new_width = width
+            else:
+                start_width = 0
+                new_width = width
+
+        return data[start_height:start_height + new_height, start_width:start_width + new_width]
 
 
 class Crop(Preprocessor):
@@ -47,7 +129,7 @@ class Crop(Preprocessor):
             'use_pillow': BoolField(
                 optional=True, default=False, description="Parameter specifies usage of Pillow library for cropping."
             ),
-            'central_fraction' : NumberField(
+            'central_fraction': NumberField(
                 value_type=float, min_value=0, max_value=1, optional=True, description="Central Fraction."
             )
         })
@@ -68,7 +150,7 @@ class Crop(Preprocessor):
                 raise ConfigError('one from crop dimentions is not provided')
 
     def process(self, image, annotation_meta=None):
-        is_simple_case = not isinstance(image.data, list) # otherwise -- pyramid, tiling, etc
+        is_simple_case = not isinstance(image.data, list)  # otherwise -- pyramid, tiling, etc
         data = image.data
 
         image.data = self.process_data(
@@ -151,7 +233,7 @@ class ExtendAroundRect(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'augmentation_param' : NumberField(
+            'augmentation_param': NumberField(
                 value_type=float, optional=True, default=0, description="Scale factor for augmentation."
             )
         })

@@ -70,6 +70,7 @@ class Launcher(ClassProvider):
         self.default_layout = 'NCHW'
         self.const_inputs = self.config.get('_list_const_inputs', [])
         self.image_info_inputs = self.config.get('_list_image_infos', [])
+        self._lstm_inputs = self.config.get('_list_lstm_inputs', [])
 
     @classmethod
     def parameters(cls):
@@ -89,6 +90,12 @@ class Launcher(ClassProvider):
             ),
             '_list_image_infos': ListField(
                 allow_empty=True, optional=True, default=[], description="List of image information inputs."
+            ),
+            '_list_orig_image_infos': ListField(
+                allow_empty=True, optional=True, default=[], description="List of image information inputs."
+            ),
+            '_list_lstm_inputs': ListField(
+                allow_empty=True, optional=True, default=[], description="List of lstm inputs."
             )
         }
 

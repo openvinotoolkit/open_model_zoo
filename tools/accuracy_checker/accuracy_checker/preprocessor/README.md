@@ -17,8 +17,8 @@ Accuracy Checker supports following set of preprocessors:
       * **OpenCV**: Nearest, Linear, Cubic, Area, Max, Lanczos4, Bits, Bits32
       * **Pillow**: None, Nearest, Cubic, Bicubic, Box, Bilinear, Lanczos, Antialias, Hamming, Linear
       * **TensorFlow**: Bilinear, Area, Bicubic
-      `Linear` used as default for OpenCV, `Bilinear` as default for Pillow and TensorFlow. 
-  * `aspect_ratio_scale` allows resize with changing or saving image aspect ratio. May be done using one of these ways: 
+      `Linear` used as default for OpenCV, `Bilinear` as default for Pillow and TensorFlow.
+  * `aspect_ratio_scale` allows resize with changing or saving image aspect ratio. May be done using one of these ways:
     - `width` - rescale width (height has fixed size, provided as `dst_height` or `size`, width size will be rescaled to save aspect ratio).
     - `height` - rescale height (width has fixed size, provided as `dst_width` or `size`, height size will be rescales to save aspect ratio).
     - `greater` - rescale greater from image sizes (smaller dimension has fixed size, greater will be rescaled to save aspect ratio)
@@ -35,6 +35,7 @@ Accuracy Checker supports following set of preprocessors:
       1. If max image size greater max destination size, make max image size equal to max destination size.
       2. Make image height and width divisible by min destination size without remainder.
     - `min_ratio` - rescale width and height according to minimal ratio `source_size / destination_size`.
+    - `mask_rcnn_benchmark_aspect_ratio` - rescale image size according [preprocessing](https://github.com/onnx/models/blob/master/vision/object_detection_segmentation/mask-rcnn/README.md#preprocessing-steps) for maskrcnn-benchmark models in ONNX zoo
   * `factor` -  destination size for aspect ratio resize must be divisible by a given number without remainder.
   Please pay attention that this parameter only works with `aspect_ratio_scale` parameters.
 * `auto_resize` - automatic resizing image to input layer shape. (supported only for one input layer case, use OpenCV for image resize)
@@ -85,6 +86,14 @@ Accuracy Checker supports following set of preprocessors:
   * `draw_points` - allows visualize points.
   * `normalize` - allows to use normalization for keypoints.
   * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
+* `corner_crop` - Corner crop of the image. 
+  * `dst_width` and `dst_heigth` are destination width and height
+  * `corner_type` is type of the corner crop. Options are:
+    * `top-left`
+    * `top-right`
+    * `bottom-left`
+    * `bottom-right`
+  Default choice is `top-left`
 * `crop_or_pad` - performs central cropping if original image size greater then destination size and padding in case, when source size lower than destination. Padding filling value is 0, realization - right-bottom.
   * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
 * `crop_image_with_padding`- crops to center of image with padding then scales image size.
@@ -97,7 +106,8 @@ Accuracy Checker supports following set of preprocessors:
     You can also use `size` instead in case when destination sizes are equal for both dimensions.
   * `pad_type` - padding space location. Supported: `center`, `left_top`, `right_bottom` (Default is `center`).
   * `use_numpy` - allow to use numpy for padding instead default OpenCV.
-  * `numpy_pad_mode` - if using numpy for padding, numpy padding mode, including constant, edge, mean, etc. (Default is `constant`)
+  * `numpy_pad_mode` - if using numpy for padding, numpy padding mode, including constant, edge, mean, etc. (Default is `constant`).
+  * `enable_resize` - allow resize image to destination size, if source image greater that destination (Optional, default `False`).
 * `tiling` - image tiling.
   * `margin` - margin for tiled fragment of image.
   * `dst_width` and `dst_height` are destination width and height of tiled fragment respectively.
@@ -110,6 +120,12 @@ Accuracy Checker supports following set of preprocessors:
 * `decode_by_vocabulary` - Decode words to set of indexes using model vocab.
   * `vocabulary_file` - path to vocabulary file for decoding. Path can be prefixed with `--models` argument.
   * `unk_index` - index of unknown symbol in vocab.
+* `decode_by_sentence_piece_bpe_tokenizer` - Decode words to set of indexes using SentencePieceBPETokenizer.
+  * `vocabulary_file` - path to vocabulary file for decoding. Path can be prefixed with `--models` argument.
+  * `merges_file` - path to merges file for decoding. Path can be prefixed with `--models` argument.
+  * `sos_symbol` - string representation of start_of_sentence symbol (default='<s>').
+  * `eos_symbol` - string representation of end_of_sentence symbol (default='</s>').
+  * `add_symbols` - add sos/eos symbols to sentence (default=True).
 *  `pad_with_eos` - supplement the input sequence to a specific size using a line terminator character or index.
   * `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
   *  `sequence_len` - length of sequence after supplement.
@@ -156,7 +172,7 @@ Accuracy Checker supports following set of preprocessors:
   * `scale_height` - value to scale height relative to the original candidate height.
 
 ## Optimized preprocessing via OpenVINO Inference Engine
-OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`. 
+OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`.
 When this option turn on, specified in config preprocessing will be translated to Inference Engine PreProcessInfo API.
 **Note**: This option is available only for `dlsdk` launcher and not all preprocessing operations can be ported to Inference Engine.
 Supported preprocessing:

@@ -18,13 +18,13 @@ from pathlib import Path
 import numpy as np
 
 from ..representation import ClassificationAnnotation
-from ..config import NumberField, StringField, PathField, BoolField
+from ..config import NumberField, StringField, PathField, BoolField, ConfigError
 from .format_converter import BaseFormatConverter
 from .format_converter import ConverterReturn
 
 class CriteoKaggleDACConverter(BaseFormatConverter):
 
-    __provider__ = 'criteo_kaggle_dac'
+    __provider__ = 'criteo'
     annotation_types = (ClassificationAnnotation, )
 
     @classmethod
@@ -37,21 +37,48 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
                                           description="Limit total record count to batch * subsample size"),
             "validation": BoolField(optional=True, default=True,
                                     description="Allows to use half of dataset for validation purposes"),
+            "block": BoolField(optional=True, default=True,
+                               description="Make batch-oriented annotations"),
             "separator": StringField(optional=True, default='#',
                                      description="Separator between input identifier and file identifier"),
             "preprocessed_dir": PathField(optional=False, is_directory=True, check_exists=True,
-                                          description="Preprocessed dataset location")
+                                          description="Preprocessed dataset location"),
+            "dense_features": StringField(optional=True, default='input.1',
+                                          description="Name of model dense features input"),
+            "sparse_features": StringField(optional=True, default='lS_i',
+                                           description="Name of model sparse features input. " +
+                                           "For multiple inputs use comma-separated list in form <name>:<index>"),
+            "lso_features": StringField(optional=True, default='lS_o', description="Name of lS_o-like features input."),
         })
 
         return parameters
 
     def configure(self):
         self.src = self.get_value_from_config('testing_file')
-        self.batch = self.get_value_from_config('batch')
-        self.subsample = self.get_value_from_config('subsample_size')
+        self.batch = int(self.get_value_from_config('batch'))
+        self.subsample = int(self.get_value_from_config('subsample_size'))
         self.validation = self.get_value_from_config('validation')
+        self.block = self.get_value_from_config('block')
         self.separator = self.get_value_from_config('separator')
         self.preprocessed_dir = self.get_value_from_config('preprocessed_dir')
+        self.dense_features = self.get_value_from_config('dense_features')
+        self.sparse_features = self.get_value_from_config('sparse_features')
+        self.lso_features = self.get_value_from_config('lso_features')
+        self.parse_sparse_features()
+
+    def parse_sparse_features(self):
+        features = self.sparse_features.split(',')
+        if len(features) == 1:
+            self.sparse_features = {features[0]: range(26)}
+        else:
+            self.sparse_features = {}
+            for feat in features:
+                parts = feat.split(':')
+                if len(parts) == 2:
+                    self.sparse_features[parts[0]] = int(parts[1])
+                else:
+                    ConfigError('Invalid configuration option {}'.format(feat))
+
 
     def convert(self, check_content=False, **kwargs):
 
@@ -89,11 +116,13 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
             c_input = c_input / "{:06d}.npz".format(i)
 
             sample = {
-                "input.1": np.log1p(x_int[i:i+self.batch, ...]),
-                "lS_i": x_cat[i:i+self.batch, ...],
-                "lS_o": np.dot(np.expand_dims(np.linspace(0, self.batch - 1, num=self.batch), -1),
-                               np.ones((1, cat_feat)))
+                self.dense_features: np.log1p(x_int[i:i+self.batch, ...]),
+                self.lso_features: np.dot(np.expand_dims(np.linspace(0, self.batch - 1, num=self.batch), -1),
+                                          np.ones((1, cat_feat))).T
             }
+
+            for name in self.sparse_features.keys():
+                sample[name] = x_cat[i:i+self.batch, self.sparse_features[name]].T
 
             np.savez_compressed(str(c_input), **sample)
 
@@ -104,14 +133,22 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
 
             c_file = str(c_input.relative_to(preprocessed_folder))
 
-            for j in range(i, i + self.batch):
-                annotations.append(ClassificationAnnotation(
-                    [
-                        "input.1_{}{}{}".format(j, self.separator, c_file),
-                        "lS_i_{}{}{}".format(j, self.separator, c_file),
-                        "lS_o_{}{}{}".format(j, self.separator, c_file),
-                    ],
-                    y[j, ...]
-                ))
+            if self.block:
+                identifiers = [
+                    "{}_{}{}{}".format(self.dense_features, i, self.separator, c_file),
+                    "{}_{}{}{}".format(self.lso_features, i, self.separator, c_file),
+                ]
+                for name in self.sparse_features.keys():
+                    identifiers.append("{}_{}{}{}".format(name, i, self.separator, c_file))
+                annotations.append(ClassificationAnnotation(identifiers, y[i:i+self.batch, ...]))
+            else:
+                for j in range(i, i + self.batch):
+                    identifiers = [
+                        "{}_{}{}{}".format(self.dense_features, j, self.separator, c_file),
+                        "{}_{}{}{}".format(self.lso_features, j, self.separator, c_file),
+                    ]
+                    for name in self.sparse_features.keys():
+                        identifiers.append("{}_{}{}{}".format(name, j, self.separator, c_file))
+                    annotations.append(ClassificationAnnotation(identifiers, y[j, ...]))
 
         return ConverterReturn(annotations, None, None)

@@ -15,8 +15,54 @@ limitations under the License.
 """
 
 from .preprocessor import Preprocessor
-from ..config import PathField, NumberField, StringField, ConfigError
-from ..utils import read_txt
+from ..config import PathField, NumberField, StringField, BoolField, ConfigError
+from ..utils import read_txt, UnsupportedPackage
+
+try:
+    from tokenizers import SentencePieceBPETokenizer
+except ImportError as import_error:
+    SentencePieceBPETokenizer = UnsupportedPackage("tokenizers", import_error.msg)
+
+class DecodeBySentencePieceBPETokenizer(Preprocessor):
+    __provider__ = 'decode_by_sentence_piece_bpe_tokenizer'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'vocabulary_file': PathField(),
+            'merges_file': PathField(),
+            'sos_symbol': StringField(optional=True, default='<s>'),
+            'eos_symbol': StringField(optional=True, default='</s>'),
+            'add_extra_symbols': BoolField(optional=True, default=True),
+        })
+
+        return parameters
+
+    def configure(self):
+        if isinstance(SentencePieceBPETokenizer, UnsupportedPackage):
+            SentencePieceBPETokenizer.raise_error(self.__provider__)
+        self.tokenizer = SentencePieceBPETokenizer(
+            str(self.get_value_from_config('vocabulary_file')),
+            str(self.get_value_from_config('merges_file'))
+        )
+        self.add_extra_symbols = self.get_value_from_config('add_extra_symbols')
+        self.idx = {}
+        for s in ['sos', 'eos']:
+            self.idx[s] = self.tokenizer.token_to_id(
+                str(self.get_value_from_config(s + '_symbol'))
+            )
+
+    def process(self, image, annotation_meta=None):
+        sentence = " ".join(image.data)
+        tokens = self.tokenizer.encode(sentence).ids
+        if self.add_extra_symbols:
+            tokens = [self.idx['sos']] + tokens + [self.idx['eos']]
+        image.data = tokens
+        image.metadata['decoded'] = True
+        image.identifier = "tokens"
+
+        return image
 
 
 class DecodeByVocabulary(Preprocessor):

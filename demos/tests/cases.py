@@ -138,7 +138,7 @@ NATIVE_DEMOS = [
             ModelArg('densenet-121-tf'),
             ModelArg('densenet-169'),
             ModelArg('mobilenet-v2-pytorch'),
-            ModelArg('resnet-50')),
+            ModelArg('resnet-50-caffe2')),
     )),
 
     NativeDemo(subdirectory='interactive_face_detection_demo',
@@ -146,7 +146,7 @@ NATIVE_DEMOS = [
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': DataPatternArg('face-detection-adas')}),
+            '-i': DataPatternArg('375x500')}),
         TestCase(options={'-m': ModelArg('face-detection-adas-0001')}),
         [
             TestCase(options={}),

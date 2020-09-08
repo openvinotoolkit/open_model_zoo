@@ -137,7 +137,8 @@ class ActionRecognitionConverter(BaseFormatConverter):
 
     @staticmethod
     def get_clips(video, clips_per_video, clip_duration, temporal_stride=1, file_ext='jpg'):
-        num_frames = video['n_frames']
+        shift = int(file_ext == 'npy')
+        num_frames = video['n_frames'] - shift
         clip_duration *= temporal_stride
 
         if clips_per_video == 0:

@@ -525,7 +525,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_meta': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to/source_models',
             'adapter': 'classification',
             'should_log_cmd': False
         }
@@ -542,7 +541,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_use_custom_operations_config': 'ssd_v2_support.json'},
             '_tf_custom_op_config_dir': 'config/dir'
@@ -570,7 +568,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_use_custom_operations_config': 'config.json'}
         }
@@ -596,7 +593,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_object_detection_api_pipeline_config': 'operations.config'},
             '_tf_obj_detection_api_pipeline_config_path': None
@@ -1111,6 +1107,50 @@ class TestDLSDKLauncher:
         with pytest.raises(ConfigError):
             DLSDKLauncher(config)
 
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_config_not_dict_like(self, mocker, models_dir):
+        device_config = 'ENFORCE_BF16'
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.raises(ConfigError):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_device_unknown(self, mocker, models_dir):
+        device_config = {'device': {'ENFORCE_BF16': 'NO'}}
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.warns(Warning):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_one_option_for_device_is_not_dict(self, mocker, models_dir):
+        device_config = {'CPU': {'ENFORCE_BF16': 'NO'}, 'GPU': 'ENFORCE_BF16'}
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.warns(Warning):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_one_option_is_not_binding_to_device(self, mocker, models_dir):
+        device_config = {'CPU': {'ENFORCE_BF16': 'NO'}, 'ENFORCE_BF16': 'NO'}
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.warns(Warning):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inputs', 'mock_inference_engine')
 class TestDLSDKLauncherConfig:
@@ -1186,8 +1226,7 @@ class TestDLSDKLauncherConfig:
 
     def test_dlsdk_launcher(self):
         launcher = {
-            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': 'ssd', 'device': 'cpu',
-            '_models_prefix': 'models'
+            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': 'ssd', 'device': 'cpu'
         }
         create_launcher(launcher)
 

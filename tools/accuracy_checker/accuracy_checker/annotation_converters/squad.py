@@ -255,24 +255,28 @@ class SQUADConverter(BaseFormatConverter):
 
                 p_mask = self.fill_p_mask(span, len(truncated_query), sequence_added_tokens, cls_index)
                 idx = example_index
-                identifier = ['input_ids_{}'.format(idx), 'input_mask_{}'.format(idx), 'segment_ids_{}'.format(idx)]
+                identifier = ['input_ids_{}'.format(idx),
+                              'input_mask_{}'.format(idx),
+                              'segment_ids_{}'.format(idx),
+                              'position_ids_{}'.format(idx)]
                 annotation = QuestionAnsweringAnnotation(
-                    identifier,
-                    example.qas_id,
-                    np.array(unique_id),
-                    np.array(span["input_ids"]),
-                    np.array(span["attention_mask"]),
-                    np.array(span["token_type_ids"]),
-                    np.array(cls_index),
-                    p_mask,
-                    example.answers,
-                    example.context_text,
-                    example.doc_tokens,
-                    example.is_impossible,
-                    span["paragraph_len"],
-                    span["tokens"],
-                    span["token_is_max_context"],
-                    span["token_to_orig_map"],
+                    identifier=identifier,
+                    question_id=example.qas_id,
+                    unique_id=np.array(unique_id),
+                    input_ids=np.array(span["input_ids"]),
+                    input_mask=np.array(span["attention_mask"]),
+                    segment_ids=np.array(span["token_type_ids"]),
+                    position_ids=np.arange(len(span["token_type_ids"])),
+                    cls_index=np.array(cls_index),
+                    p_mask=p_mask,
+                    orig_answer_text=example.answers,
+                    paragraph_text=example.context_text,
+                    doc_tokens=example.doc_tokens,
+                    is_impossible=example.is_impossible,
+                    paragraph_len=span["paragraph_len"],
+                    tokens=span["tokens"],
+                    token_is_max_context=span["token_is_max_context"],
+                    token_to_orig_map=span["token_to_orig_map"],
                 )
                 annotation.metadata['lower_case'] = self.lower_case
                 annotations.append(annotation)

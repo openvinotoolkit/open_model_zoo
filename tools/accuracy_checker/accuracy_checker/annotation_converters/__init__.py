@@ -25,9 +25,12 @@ from .wider import WiderFormatConverter
 from .detection_opencv_storage import DetectionOpenCVStorageFormatConverter
 from .lfw import LFWConverter
 from .vgg_face_regression import VGGFaceRegressionConverter
-from .super_resolution_converter import SRConverter, SRMultiFrameConverter, MultiTargetSuperResolutionConverter
+from .super_resolution_converter import (
+    SRConverter, SRMultiFrameConverter, MultiTargetSuperResolutionConverter, SRDirectoryBased
+)
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
+from .im2latex import Im2latexDatasetConverter
 from .kondate_nakayosi import KondateNakayosiRecognitionDatasetConverter
 from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter, MSCocoSingleKeypointsConverter
 from .cityscapes import CityscapesConverter
@@ -51,6 +54,7 @@ from .cvat_human_pose import CVATPoseEstimationConverter
 from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
 from .mrlEyes_2018_01 import mrlEyes_2018_01_Converter
 from .squad import SQUADConverter
+from .squad_emb import SQUADConverterEMB
 from .text_classification import (
     XNLIDatasetConverter,
     BertXNLITFRecordConverter,
@@ -77,6 +81,7 @@ from .ade20k_dataset_converter import ADE20kConverter
 from .librispeech import LibrispeechConverter
 from .criteo_kaggle_dac import CriteoKaggleDACConverter
 from .features_regression import FeaturesRegressionConverter
+from .nyu_depth import NYUDepthV2Converter
 
 __all__ = [
     'BaseFormatConverter',
@@ -97,6 +102,7 @@ __all__ = [
     'SRConverter',
     'SRMultiFrameConverter',
     'MultiTargetSuperResolutionConverter',
+    'SRDirectoryBased',
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
     'KondateNakayosiRecognitionDatasetConverter',
@@ -133,6 +139,7 @@ __all__ = [
     'ActionRecognitionConverter',
     'MSASLContiniousConverter',
     'ReDWebDatasetConverter',
+    'NYUDepthV2Converter',
     'FashionMnistConverter',
     'InpaintingConverter',
     'mrlEyes_2018_01_Converter',
@@ -140,10 +147,10 @@ __all__ = [
     'Wikitext2RawConverter',
     'ImageProcessingConverter',
     'AFLW20003DConverter',
-
     'ADE20kConverter',
-
     'LibrispeechConverter',
     'CriteoKaggleDACConverter',
-    'FeaturesRegressionConverter'
+    'FeaturesRegressionConverter',
+    'Im2latexDatasetConverter',
+
 ]

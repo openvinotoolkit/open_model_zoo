@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 from enum import Enum
+import numpy as np
 
 from .base_representation import BaseRepresentation
 from ..data_readers import BaseReader
@@ -23,6 +24,7 @@ from ..data_readers import BaseReader
 class GTLoader(Enum):
     PILLOW = 0
     OPENCV = 1
+    NUMPY = 2
 
 
 class DepthEstimationRepresentation(BaseRepresentation):
@@ -32,7 +34,8 @@ class DepthEstimationRepresentation(BaseRepresentation):
 class DepthEstimationAnnotation(DepthEstimationRepresentation):
     LOADERS = {
         GTLoader.PILLOW: 'pillow_imread',
-        GTLoader.OPENCV: {'type': 'opencv_imread', 'reading_flag': 'unchanged'}
+        GTLoader.OPENCV: {'type': 'opencv_imread', 'reading_flag': 'unchanged'},
+        GTLoader.NUMPY: 'numpy_reader'
     }
 
     def __init__(self, identifier, depth_map_path, gt_loader=GTLoader.OPENCV):
@@ -43,17 +46,23 @@ class DepthEstimationAnnotation(DepthEstimationRepresentation):
         self._mask = None
 
     def _load_depth_map(self):
+        data_source = self.metadata.get('additional_data_source')
+        if data_source is None:
+            data_source = self.metadata['data_source']
         loader_config = self.LOADERS.get(self._gt_loader)
         if isinstance(loader_config, str):
-            loader = BaseReader.provide(loader_config, self.metadata['data_source'])
+            loader = BaseReader.provide(loader_config, data_source)
         else:
-            loader = BaseReader.provide(loader_config['type'], self.metadata['data_source'], config=loader_config)
+            loader = BaseReader.provide(loader_config['type'], data_source, config=loader_config)
         if self._gt_loader == GTLoader.PILLOW:
             loader.convert_to_rgb = False
         input_map = loader.read(self._depth_map_path)
-
-        self._depth_map = 1 - input_map / 255
-        self._mask = input_map != 255
+        if self._gt_loader != GTLoader.NUMPY:
+            self._depth_map = 1 - input_map / 255
+            self._mask = input_map != 255
+        else:
+            self._depth_map = input_map
+            self._mask = np.ones_like(input_map, dtype=bool)
 
     @property
     def depth_map(self):

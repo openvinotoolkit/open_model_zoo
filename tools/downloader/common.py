@@ -48,7 +48,6 @@ KNOWN_FRAMEWORKS = {
 KNOWN_PRECISIONS = {
     'FP16', 'FP16-INT1', 'FP16-INT8',
     'FP32', 'FP32-INT1', 'FP32-INT8',
-    'INT1', 'INT8',
 }
 KNOWN_TASK_TYPES = {
     'action_recognition',

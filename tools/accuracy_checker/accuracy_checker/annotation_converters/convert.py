@@ -24,7 +24,7 @@ from functools import partial
 
 import numpy as np
 
-from ..representation import ReIdentificationClassificationAnnotation
+from ..representation import ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
 from ..utils import get_path, OrderedSet
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
@@ -65,45 +65,6 @@ def build_argparser():
 
 
 def make_subset(annotation, size, seed=666, shuffle=True):
-    def make_subset_pairwise(annotation, size, shuffle=True):
-        def get_pairs(pairs_list):
-            pairs_set = OrderedSet()
-            for identifier in pairs_list:
-                next_annotation = next(
-                    pair_annotation for pair_annotation in annotation if pair_annotation.identifier == identifier
-                )
-                positive_pairs = get_pairs(next_annotation.positive_pairs)
-                negative_pairs = get_pairs(next_annotation.negative_pairs)
-                pairs_set.add(next_annotation)
-                pairs_set |= positive_pairs
-                pairs_set |= negative_pairs
-
-            return pairs_set
-
-        subsample_set = OrderedSet()
-
-        potential_ann_ind = np.random.choice(len(annotation), size, replace=False) if shuffle else np.arange(size)
-
-        for ann_ind in potential_ann_ind: # pylint: disable=E1133
-            annotation_for_subset = annotation[ann_ind]
-            positive_pairs = annotation_for_subset.positive_pairs
-            negative_pairs = annotation_for_subset.negative_pairs
-            if len(positive_pairs) + len(negative_pairs) == 0:
-                continue
-            updated_pairs = OrderedSet()
-            updated_pairs.add(annotation_for_subset)
-            updated_pairs |= get_pairs(positive_pairs)
-            updated_pairs |= get_pairs(negative_pairs)
-            intersection = subsample_set & updated_pairs
-            subsample_set |= updated_pairs
-            if len(subsample_set) == size:
-                break
-            if len(subsample_set) > size:
-                to_delete = updated_pairs - intersection
-                subsample_set -= to_delete
-
-        return list(subsample_set)
-
     np.random.seed(seed)
     dataset_size = len(annotation)
     if dataset_size < size:
@@ -111,9 +72,82 @@ def make_subset(annotation, size, seed=666, shuffle=True):
         return annotation
     if isinstance(annotation[-1], ReIdentificationClassificationAnnotation):
         return make_subset_pairwise(annotation, size, shuffle)
+    if isinstance(annotation[-1], ReIdentificationAnnotation):
+        return make_subset_reid(annotation, size, shuffle)
 
     result_annotation = list(np.random.choice(annotation, size=size, replace=False)) if shuffle else annotation[:size]
     return result_annotation
+
+
+def make_subset_pairwise(annotation, size, shuffle=True):
+    def get_pairs(pairs_list):
+        pairs_set = OrderedSet()
+        for identifier in pairs_list:
+            next_annotation = next(
+                pair_annotation for pair_annotation in annotation if pair_annotation.identifier == identifier
+            )
+            positive_pairs = get_pairs(next_annotation.positive_pairs)
+            negative_pairs = get_pairs(next_annotation.negative_pairs)
+            pairs_set.add(next_annotation)
+            pairs_set |= positive_pairs
+            pairs_set |= negative_pairs
+
+        return pairs_set
+
+    subsample_set = OrderedSet()
+
+    potential_ann_ind = np.random.choice(len(annotation), size, replace=False) if shuffle else np.arange(size)
+
+    for ann_ind in potential_ann_ind:  # pylint: disable=E1133
+        annotation_for_subset = annotation[ann_ind]
+        positive_pairs = annotation_for_subset.positive_pairs
+        negative_pairs = annotation_for_subset.negative_pairs
+        if len(positive_pairs) + len(negative_pairs) == 0:
+            continue
+        updated_pairs = OrderedSet()
+        updated_pairs.add(annotation_for_subset)
+        updated_pairs |= get_pairs(positive_pairs)
+        updated_pairs |= get_pairs(negative_pairs)
+        intersection = subsample_set & updated_pairs
+        subsample_set |= updated_pairs
+        if len(subsample_set) == size:
+            break
+        if len(subsample_set) > size:
+            to_delete = updated_pairs - intersection
+            subsample_set -= to_delete
+
+    return list(subsample_set)
+
+
+def make_subset_reid(annotation, size, shuffle=True):
+    subsample_set = OrderedSet()
+    potential_ann_ind = np.random.choice(len(annotation), size, replace=False) if shuffle else np.arange(size)
+    for ann_ind in potential_ann_ind:
+        selected_annotation = annotation[ann_ind]
+        if not selected_annotation.query:
+            query_for_person = [
+                ann for ann in annotation if ann.person_id == selected_annotation.person_id and ann.query
+            ]
+            pairs_set = OrderedSet(query_for_person)
+        else:
+            gallery_for_person = [
+                ann for ann in annotation
+                if ann.person_id == selected_annotation.person_id and not ann.query
+            ]
+            pairs_set = OrderedSet(gallery_for_person)
+        if len(pairs_set) == 0:
+            continue
+        subsample_set.add(selected_annotation)
+        intersection = subsample_set & pairs_set
+        subsample_set |= pairs_set
+        if len(subsample_set) == size:
+            break
+        if len(subsample_set) > size:
+            pairs_set.add(selected_annotation)
+            to_delete = pairs_set - intersection
+            subsample_set -= to_delete
+
+    return list(subsample_set)
 
 
 def main():
@@ -200,5 +234,8 @@ def analyze_dataset(annotations, metadata):
     analyzer = BaseDataAnalyzer.provide(first_element.__class__.__name__)
     inside_meta = copy.copy(metadata)
     data_analysis = analyzer.analyze(annotations, inside_meta)
-    metadata['data_analysis'] = data_analysis
+    if metadata:
+        metadata['data_analysis'] = data_analysis
+    else:
+        metadata = {'data_analysis': data_analysis}
     return metadata

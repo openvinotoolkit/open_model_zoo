@@ -141,7 +141,11 @@ void Presenter::drawGraphs(cv::Mat& frame) {
 
     if (cpuMonitor.getHistorySize() > 1 && possibleHistorySize > 1 && --numberOfEnabledMonitors >= 0) {
         std::deque<std::vector<double>> lastHistory = cpuMonitor.getLastHistory();
-        cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
+        cv::Rect intersection = cv::Rect{cv::Point(graphPos, yPos), graphSize} & cv::Rect{0, 0, frame.cols, frame.rows};
+        if (!intersection.area()) {
+            return;
+        }
+        cv::Mat graph = frame(intersection);
         graph = graph / 2 + cv::Scalar{127, 127, 127};
 
         int lineXPos = graph.cols - 1;
@@ -182,7 +186,11 @@ void Presenter::drawGraphs(cv::Mat& frame) {
 
     if (distributionCpuEnabled && --numberOfEnabledMonitors >= 0) {
         std::deque<std::vector<double>> lastHistory = cpuMonitor.getLastHistory();
-        cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
+        cv::Rect intersection = cv::Rect{cv::Point(graphPos, yPos), graphSize} & cv::Rect{0, 0, frame.cols, frame.rows};
+        if (!intersection.area()) {
+            return;
+        }
+        cv::Mat graph = frame(intersection);
         graph = graph / 2 + cv::Scalar{127, 127, 127};
 
         if (!lastHistory.empty()) {
@@ -227,7 +235,11 @@ void Presenter::drawGraphs(cv::Mat& frame) {
 
     if (memoryMonitor.getHistorySize() > 1 && possibleHistorySize > 1 && --numberOfEnabledMonitors >= 0) {
         std::deque<std::pair<double, double>> lastHistory = memoryMonitor.getLastHistory();
-        cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
+        cv::Rect intersection = cv::Rect{cv::Point(graphPos, yPos), graphSize} & cv::Rect{0, 0, frame.cols, frame.rows};
+        if (!intersection.area()) {
+            return;
+        }
+        cv::Mat graph = frame(intersection);
         graph = graph / 2 + cv::Scalar{127, 127, 127};
         int histxPos = graph.cols - 1;
         double range = std::min(memoryMonitor.getMaxMemTotal() + memoryMonitor.getMaxSwap(),
