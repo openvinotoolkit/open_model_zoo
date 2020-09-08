@@ -48,7 +48,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        slog::info << "InferenceEngine: " << GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: " << *GetInferenceEngineVersion() << slog::endl;
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }

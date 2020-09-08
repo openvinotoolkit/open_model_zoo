@@ -76,7 +76,7 @@ void switchMode(ExecutionMode& mode) {
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers certain topology and cannot be generalized for any object detection **/
-        std::cout << "InferenceEngine: " << GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
