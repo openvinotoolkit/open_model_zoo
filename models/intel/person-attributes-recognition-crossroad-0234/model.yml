@@ -1,0 +1,36 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Pedestrian attributes recognition based on ResNet-50 backbone
+task_type: object_attributes
+files:
+  - name: FP32/person-attributes-recognition-crossroad-0234.xml
+    size: 181729
+    sha256: 31524b45126214825bf76b657fd365af2b94edee07667fde2caad7bb3fef3a06
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-attributes-recognition-crossroad-0234/FP32/person-attributes-recognition-crossroad-0234.xml
+  - name: FP32/person-attributes-recognition-crossroad-0234.bin
+    size: 94040708
+    sha256: a8ba23bee30a6f20e7e1de1296c55818e929cf54f4a529e87690485ea8869b09
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-attributes-recognition-crossroad-0234/FP32/person-attributes-recognition-crossroad-0234.bin
+  - name: FP16/person-attributes-recognition-crossroad-0234.xml
+    size: 181669
+    sha256: d93ff100bbe4ac1a28fbd9bd98c1a2e5be48ffc9ef5b1a89ffb4a1639961315d
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-attributes-recognition-crossroad-0234/FP16/person-attributes-recognition-crossroad-0234.xml
+  - name: FP16/person-attributes-recognition-crossroad-0234.bin
+    size: 47020380
+    sha256: b93faed86b3af8c379e25a86634b05442eff65c4a5a06812072692a2b424cf28
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-attributes-recognition-crossroad-0234/FP16/person-attributes-recognition-crossroad-0234.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
