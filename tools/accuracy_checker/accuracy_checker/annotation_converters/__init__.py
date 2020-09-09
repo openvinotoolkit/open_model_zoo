@@ -90,6 +90,7 @@ from .place_recognition import PlaceRecognitionDatasetConverter
 from .cluttered_mnist import ClutteredMNISTConverter
 from .mpii import MPIIDatasetConverter
 from .mapillary_20 import Mapillary20Converter
+from .cocosnet_converter import CocosnetConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -161,10 +162,25 @@ __all__ = [
     'ADE20kConverter',
     'LibrispeechConverter',
     'CriteoKaggleDACConverter',
+<<<<<<< HEAD
     'FeaturesRegressionConverter',
     'Im2latexDatasetConverter',
+<<<<<<< HEAD
     'DNASequenceDatasetConverter',
+<<<<<<< HEAD
     'PlaceRecognitionDatasetConverter',
     'ClutteredMNISTConverter',
     'MPIIDatasetConverter'
+=======
+<<<<<<< HEAD
+    'PlaceRecognitionDatasetConverter'
+=======
+=======
+
+=======
+    'CocosnetConverter'
+>>>>>>> add Cocosnet annotation converter
+>>>>>>> add Cocosnet annotation converter
+>>>>>>> add Cocosnet annotation converter
+>>>>>>> add Cocosnet annotation converter
 ]
