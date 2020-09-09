@@ -13,25 +13,30 @@
 # limitations under the License.
 
 description: >-
-
-  task_type: classification
-  files:
-    - name: 
-      size: 
-      sha256:
-      source:
-  postprocessing:
-    - $type:
-      file: 
-      pattern: 
-      replacement: 
-  model_optimizer_args:
-    - --input_shape=
-    - --input=
-    - --mean_values=
-    - --output=
-    - --input_model=
-    - --input_proto=
-  framework: PyTorch
-  quantizable: yes
-  license:
+  conv-deconvnet model is used for classification. For details see paper <https://...>.
+task_type: classification
+files:
+  - name: conv-deconvnet
+    size: 1111
+    sha256: 472d4a06035497b180636d8a82667129960371375bd10fcb6df5c6c7631f25e1
+    source: http
+  - name: deploy.prototxt
+    size: 2878
+    sha256: 922248a4d2f6aac1cc8e7e5dbd996cc2ecd3356480d67c198f6cf96b12311a04
+    source: https
+conversion_to_onnx_args:
+      - --model-path=$dl_dir/conv-deconvnet.pth
+      - --model-name=conv-deconvnet
+      - --weights=$dl_dir/init_net.pth
+      - --input-shape=1,1,255,401
+      - --input-names=data
+      - --output-file=$conv_dir/conv-deconvnet.onnx
+model_optimizer_args:
+  - --input_shape=[1, 1, 255, 401]
+  - --input=data
+  - --output=prob
+  - --input_model=$dl_dir/conv-deconvnet.onnx
+  - --input_proto=$dl_dir/conv-deconvnet.prototxt
+framework: caffe
+quantizable: yes
+license: http
