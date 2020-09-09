@@ -18,7 +18,7 @@ models:
       - name: dataset_name
 ```
 
-Also there are composite models which consist of several parts (models) and the output of one of them is the input for the next one. Thus, the evaluation is performed by sequentially executing a set of models. Each composite model has to have entry in `evaluations` list. Each entry should contain distinct `name`, `module` and `module_config`. `module_config` has to consist of `network_info`,`launchers` and `datasets` fields. Custom evaluators are used for such models. More information about defining and using your own evaluator or an existing one can be found in [Custom Evaluators Guide](../accuracy_checker/evaluators/custom_evaluators/README.md)
+Also there are composite models which consist of several parts (models) and the accuracy measurement requires building the pipeline from these parts. Thus, the evaluation is performed by sequentially executing a set of models and impossible to evaluate them independently. Each composite model has to have entry in `evaluations` list. Each entry should contain distinct `name`, `module` and `module_config`. `module_config` has to consist of `network_info`,`launchers` and `datasets` fields. Custom evaluators are used for such models. More information about defining and using your own evaluator or an existing one can be found in [Custom Evaluators Guide](../accuracy_checker/evaluators/custom_evaluators/README.md)
 
 Example:
 
