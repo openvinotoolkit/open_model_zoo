@@ -62,6 +62,7 @@ class PostprocessingExecutor:
             zipped_result = zipped_transform(self.process_image, annotations, predictions)
         else:
             zipped_result = zipped_transform(self.process_image, annotations, predictions, metas)
+
         return zipped_result[0:2]  # return changed annotations and predictions only
 
     def full_process(self, annotations, predictions, metas=None):
