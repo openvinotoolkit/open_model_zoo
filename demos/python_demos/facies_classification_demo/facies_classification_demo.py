@@ -46,7 +46,7 @@ def build_argparser():
                       type=int, default=0)
     parser.add_argument("-l", "--cpu_extension", 
                       help="Optional. Required for CPU custom layers. Absolute MKLDNN (CPU)-targeted custom layers. "
-                      "Absolute path to a shared library with the kernels implementations", type=str, default="libuser_cpu_extension.so")
+                      "Absolute path to a shared library with the kernels implementations", type=str, default="libuser_cpu_extension_for_max_unpool.so")
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
