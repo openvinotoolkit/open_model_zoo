@@ -40,6 +40,7 @@ CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 
 def process_download(reporter, chunk_iterable, size, progress, file):
     start_time = time.monotonic()
+    start_size = progress.size
 
     try:
         for chunk in chunk_iterable:
@@ -51,7 +52,7 @@ def process_download(reporter, chunk_iterable, size, progress, file):
                 progress.hasher.update(chunk)
 
                 if duration != 0:
-                    speed = int(progress.size / (1024 * duration))
+                    speed = int((progress.size - start_size) / (1024 * duration))
                 else:
                     speed = '?'
 
