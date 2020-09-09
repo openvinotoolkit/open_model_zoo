@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,28 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/handwritten-score-recognition-0003.xml
-    size: 81064
-    sha256: 4a914988402dac3a1c02ffc3b33da5ad224aa6ad28f8b95de31b1d9c948d441a
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/handwritten-score-recognition-0003/FP32/handwritten-score-recognition-0003.xml
+    size: 82966
+    sha256: acd9a9b6e2c39af9a6421d6e38a59ce49c36e83c7aeac22971ab164a3047d6a4
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/handwritten-score-recognition-0003/FP32/handwritten-score-recognition-0003.xml
   - name: FP32/handwritten-score-recognition-0003.bin
-    size: 41121956
-    sha256: 55350eecb10ea7c95b495a44dcd78b8287e124abed4689956aea23bff062b8ff
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/handwritten-score-recognition-0003/FP32/handwritten-score-recognition-0003.bin
+    size: 41121960
+    sha256: bec7a2090057609f2e371d01b2a44e4915fa80423caf520f536218b976f520ca
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/handwritten-score-recognition-0003/FP32/handwritten-score-recognition-0003.bin
   - name: FP16/handwritten-score-recognition-0003.xml
-    size: 81039
-    sha256: 562eb43ed5d34762b32eba03241317c2baa90153147a1ab71f0dfb8419eb0c21
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.xml
+    size: 82941
+    sha256: c303ea7b65a7f0601812412b3ae632ac6731a8e22a3cc257f37af99a51ff95d6
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.xml
   - name: FP16/handwritten-score-recognition-0003.bin
-    size: 20561030
-    sha256: b19f78f990bbfd7d86c52c075a094a18578de3243b5d531692bf8bd9afd4d9f4
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.bin
+    size: 20561034
+    sha256: 7563345b12bc0d636237a78cb69fa9f43a4d99e1c07a7cf9d0abb74effd98471
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.bin
   - name: FP16-INT8/handwritten-score-recognition-0003.xml
-    size: 121086
-    sha256: c039e60c2c26ef4f7b49dee787ee66c42c0f3e7f89e4ba8c4999d8a0eb937086
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/handwritten-score-recognition-0003/FP16-INT8/handwritten-score-recognition-0003.xml
+    size: 118912
+    sha256: b647f2cf79f6de0ae0dfa4e69df973d31440e918a49ae76a92d959d1f16ddebf
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/handwritten-score-recognition-0003/FP16-INT8/handwritten-score-recognition-0003.xml
   - name: FP16-INT8/handwritten-score-recognition-0003.bin
     size: 15016854
     sha256: f245f460702608cfe20528419a9d1ba8ca23a220047742e4d1478f5da15815f8
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/handwritten-score-recognition-0003/FP16-INT8/handwritten-score-recognition-0003.bin
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/handwritten-score-recognition-0003/FP16-INT8/handwritten-score-recognition-0003.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
