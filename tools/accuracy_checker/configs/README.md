@@ -59,6 +59,7 @@ Example:
 5. The path relative to which the  `annotation` and `dataset_meta` are specified can be provided via `-a, --annotations` command line.   Annotation and dataset_meta (if required) will be stored to this directory after annotation conversion step if they do not exist and can be used for the next running to skip annotation conversion. Detailed information about annotation conversion you can find in [Annotation Conversion Guide](../accuracy_checker/annotation_converters/README.md).
 6. Some models can have additional files for evaluation (for example, vocabulary files for NLP models), generally, named as model attributes. The relative paths to model specific attributes(vocabulary files, merges files, etc.) can be provided in the configuration file, if it is required. The path prefix for them should be passed through `--model_attributes` command line option (usually, it is the model directory).
 7. To specify devices for infer use `-td, --target_devices` command line option. Several devices should be separated by spaces (e.g. -td CPU GPU).
+8. Optionally, if several frameworks are provided in the configuration file, you can specify inference framework for evaluation using `-tf, --target_framework` command line option. Otherwise, if the option is not provided evaluation will be launched with all frameworks mentioned in the configuration file.
 
 ## Example of usage
 
