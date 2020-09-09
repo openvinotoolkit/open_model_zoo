@@ -35,7 +35,7 @@ index 0000000..c3fabef
 +
 +        output = model.evaluate(input_image, input_mask, config)
 +        output = (output + 1) * 127.5
-+        output = tf.minimum(tf.maximum(output[:, :, :, ::-1], 0), 255)
++        output = tf.minimum(tf.maximum(output, 0), 255)
 +
 +        vars_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
 +        assign_ops = [tf.assign(x, tf.train.load_variable(input_checkpoints, x.name)) for x in vars_list]
