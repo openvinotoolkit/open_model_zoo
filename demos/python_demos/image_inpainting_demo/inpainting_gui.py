@@ -71,12 +71,17 @@ class InpaintingGUI:
                 self.is_original_shown = False
                 self.mask[:, :, :] = 0
                 self.update_window()
+            elif key in (ord('r'), ord('R')):
+                self.is_original_shown = False
+                self.mask[:, :, :] = 0
+                self.img = self.original_img.copy()
+                self.update_window()
             elif key == ord('\t'):
                 self.is_original_shown = not self.is_original_shown
                 self.update_window()
             elif key in (ord('h'), ord('H')):
                 if not self.is_help_shown:
-                    self.show_info("Use mouse with LMB to paint\nBksp or C to clear\nSpace or Enter to inpaint\nTab to show original image\nEsc or Q to quit")
+                    self.show_info("Use mouse with LMB to paint\nBksp or C to clear current mask\nSpace or Enter to inpaint\nR to reset all changes\nTab to show original image\nEsc or Q to quit")
                     self.is_help_shown = True
                 else:
                     self.show_info("")
