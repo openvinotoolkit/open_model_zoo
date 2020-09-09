@@ -59,6 +59,7 @@ from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 from .centernet_preprocessing import CenterNetAffineTransformation
 from .brats_preprocessing import Resize3D, NormalizeBrats, CropBraTS, SwapModalitiesBrats
 from .inpainting_preprocessor import FreeFormMask, RectMask, CustomMask
+from .one_hot_encoding import OneHotEncoding
 
 __all__ = [
     'PreprocessingExecutor',
@@ -120,4 +121,5 @@ __all__ = [
     'CustomMask',
     'RGB2YCrCbConverter',
     'BGR2YCrCbConverter',
+    'OneHotEncoding'
 ]
