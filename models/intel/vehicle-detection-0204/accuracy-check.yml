@@ -8,7 +8,7 @@ models:
       - name: crossroad_extra_untagged_vehicle
         preprocessing:
           - type: resize
-            dst_width: 1333
+            dst_width: 1344
             dst_height: 800
         postprocessing:
           - type: resize_prediction_boxes
