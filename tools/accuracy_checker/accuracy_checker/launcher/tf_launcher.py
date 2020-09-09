@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@ limitations under the License.
 
 import re
 from pathlib import Path
-import tensorflow as tf
-from tensorflow.python.saved_model import tag_constants
 from .launcher import Launcher, LauncherConfigValidator
 from ..config import BaseField, ListField, PathField, StringField, ConfigError
 from ..utils import contains_any, contains_all
@@ -45,6 +43,15 @@ class TFLauncher(Launcher):
 
     def __init__(self, config_entry, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
+        try:
+            import tensorflow as tf # pylint: disable=C0415
+            from tensorflow.python.saved_model import tag_constants # pylint: disable=C0415
+            self.tf = tf
+            self.tag_constants = tag_constants
+        except ImportError as import_error:
+            raise ValueError(
+                "TensorFlow isn't installed. Please, install it before using. \n{}".format(import_error.msg)
+            )
         self.default_layout = 'NHWC'
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
@@ -93,8 +100,8 @@ class TFLauncher(Launcher):
         """
         results = []
         for infer_input in inputs:
-            with tf.device(self.device):
-                with tf.Session(graph=self._graph) as session:
+            with self.tf.device(self.device):
+                with self.tf.Session(graph=self._graph) as session:
                     feed_dictionary = {
                         self.node_pattern.format(input_name): input_data
                         for input_name, input_data in infer_input.items()
@@ -140,42 +147,40 @@ class TFLauncher(Launcher):
         return self._load_frozen_graph(model)
 
     def _load_graph_using_meta(self, model):
-        tf.reset_default_graph()
-        graph = tf.Graph()
-        graph_def = tf.MetaGraphDef()
+        self.tf.reset_default_graph()
+        graph = self.tf.Graph()
+        graph_def = self.tf.MetaGraphDef()
 
         with open(model, "rb") as model_file:
             graph_def.ParseFromString(model_file.read())
 
-        with tf.Session() as sess:
-            restorer = tf.train.import_meta_graph(graph_def)
+        with self.tf.Session() as sess:
+            restorer = self.tf.train.import_meta_graph(graph_def)
             restorer.restore(sess, re.sub(r'\.meta$', '', model))
-            graph_def = tf.graph_util.convert_variables_to_constants(
+            graph_def = self.tf.graph_util.convert_variables_to_constants(
                 sess, graph_def.graph_def, self._config_outputs
             )
 
         with graph.as_default():
-            tf.import_graph_def(graph_def, name='')
+            self.tf.import_graph_def(graph_def, name='')
         return graph
 
-    @staticmethod
-    def _load_frozen_graph(model):
-        with tf.gfile.GFile(model, 'rb') as file:
-            graph_def = tf.GraphDef()
+    def _load_frozen_graph(self, model):
+        with self.tf.gfile.GFile(model, 'rb') as file:
+            graph_def = self.tf.GraphDef()
             graph_def.ParseFromString(file.read())
 
-        with tf.Graph().as_default() as graph:
-            tf.import_graph_def(graph_def)
+        with self.tf.Graph().as_default() as graph:
+            self.tf.import_graph_def(graph_def)
 
         return graph
 
-    @staticmethod
-    def _load_saved_model(model_dir):
-        graph = tf.Graph()
+    def _load_saved_model(self, model_dir):
+        graph = self.tf.Graph()
 
         with graph.as_default():
-            with tf.Session() as sess:
-                tf.saved_model.loader.load(sess, [tag_constants.SERVING], model_dir)
+            with self.tf.Session() as sess:
+                self.tf.saved_model.loader.load(sess, [self.tag_constants.SERVING], model_dir)
 
         return graph
 

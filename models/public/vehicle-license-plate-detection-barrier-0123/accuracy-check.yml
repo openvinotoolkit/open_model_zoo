@@ -1,0 +1,40 @@
+models:
+  - name: vehicle-license-plate-detection-barrier-0123
+
+    launchers:
+      - framework: tf
+        model:   model/model.pb.frozen
+        adapter: ssd
+
+      - framework: dlsdk
+        adapter: ssd
+
+    datasets:
+      - name: vehicle_license_plate_detection
+
+        preprocessing:
+          - type: resize
+            dst_width: 256
+            dst_height: 256
+
+        postprocessing:
+          - type: clip_boxes
+            apply_to: prediction
+            dst_width: 1
+            dst_height: 1
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.005
+            is_empty: True
+          - type: filter
+            apply_to: annotation
+            area_ratio: 0.034722222222222224
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+            allow_multiple_matches_per_ignored: True
+            distinct_conf: False
+            presenter: print_vector

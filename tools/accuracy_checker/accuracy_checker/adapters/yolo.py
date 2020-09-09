@@ -1,3 +1,19 @@
+"""
+Copyright (c) 2018-2020 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 from collections import namedtuple
 import warnings
 
@@ -45,7 +61,7 @@ class TinyYOLOv1Adapter(Adapter):
     prediction_types = (DetectionPrediction, )
     topology_types = (YoloV1Tiny, )
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
@@ -203,7 +219,7 @@ class YoloV2Adapter(Adapter):
             self.processor = YoloOutputProcessor(coord_normalizer=(self.cells, self.cells),
                                                  size_normalizer=(self.cells, self.cells))
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
@@ -348,7 +364,7 @@ class YoloV3Adapter(Adapter):
         else:
             self.processor = YoloOutputProcessor()
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
@@ -411,4 +427,42 @@ class YoloV3Adapter(Adapter):
                 detections['x_maxs'], detections['y_maxs']
             ))
 
+        return result
+
+
+class YoloV3ONNX(Adapter):
+    __provider__ = 'yolo_v3_onnx'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'boxes_out': StringField(),
+            'scores_out': StringField(),
+            'indices_out': StringField()
+        })
+        return params
+
+    def configure(self):
+        self.boxes_out = self.get_value_from_config('boxes_out')
+        self.scores_out = self.get_value_from_config('scores_out')
+        self.indices_out = self.get_value_from_config('indices_out')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        result = []
+        for identifier, boxes, scores, indices in zip(
+                identifiers, raw_outputs[self.boxes_out], raw_outputs[self.scores_out], raw_outputs[self.indices_out]
+        ):
+            out_boxes, out_scores, out_classes = [], [], []
+            for idx_ in indices:
+                out_classes.append(idx_[1])
+                out_scores.append(scores[tuple(idx_[1:])])
+                out_boxes.append(boxes[idx_[2]])
+            transposed_boxes = np.array(out_boxes).T if out_boxes else ([], [], [], [])
+            x_mins = transposed_boxes[1]
+            y_mins = transposed_boxes[0]
+            x_maxs = transposed_boxes[3]
+            y_maxs = transposed_boxes[2]
+            result.append(DetectionPrediction(identifier, out_classes, out_scores, x_mins, y_mins, x_maxs, y_maxs))
         return result

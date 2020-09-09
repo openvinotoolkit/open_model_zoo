@@ -1,0 +1,42 @@
+models:
+  - name: efficientnet-b0_auto_aug
+
+    launchers:
+      - framework: tf
+        model: efficientnet-b0/model.ckpt.meta
+        adapter: classification
+        output_names:
+          - logits
+        inputs:
+          - name: IteratorGetNext
+            type: INPUT
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: crop
+            central_fraction: 0.875
+            use_pillow: True
+          - type: resize
+            size: 224
+            use_pillow: True
+            interpolation: BICUBIC
+
+
+  - name: efficientnet-b0_auto_aug
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: crop
+            central_fraction: 0.875
+            use_pillow: True
+          - type: resize
+            size: 224
+            use_pillow: True
+            interpolation: BICUBIC

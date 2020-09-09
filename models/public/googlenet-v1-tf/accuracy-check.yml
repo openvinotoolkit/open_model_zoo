@@ -1,0 +1,32 @@
+models:
+  - name: googlenet-v1-tf
+    launchers:
+      - framework: tf
+        model: inception_v1.frozen.pb
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: normalization
+            mean: 127.5
+            std: 127.5
+          - type: crop
+            central_fraction: 0.875
+          - type: resize
+            size: 224
+
+
+  - name: googlenet-v1-tf
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+          - type: crop
+            central_fraction: 0.875
+          - type: resize
+            size: 224

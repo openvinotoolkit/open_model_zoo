@@ -1,0 +1,23 @@
+models:
+  - name: gaze-estimation-adas-0002
+
+    launchers:
+      - framework: dlsdk
+        inputs:
+          - name: left_eye_image
+            type: INPUT
+            value: ".*_left.png"
+          - name: right_eye_image
+            type: INPUT
+            value: ".*_right.png"
+          - name: 'head_pose_angles'
+            type: INPUT
+            value: ".*.json"
+        adapter: gaze_estimation
+
+    datasets:
+      - name: gaze_estimation_dataset
+
+        metrics:
+          - type: angle_error
+            presenter: print_vector

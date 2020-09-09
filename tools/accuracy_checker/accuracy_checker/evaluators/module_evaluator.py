@@ -1,3 +1,19 @@
+"""
+Copyright (c) 2018-2020 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 from contextlib import contextmanager
 import sys
 import importlib
@@ -90,12 +106,14 @@ class ModuleEvaluator(BaseEvaluator):
     def dataset(self):
         return self._internal_module.dataset
 
-
     @staticmethod
     def get_processing_info(config):
         module = config['module']
         python_path = config.get('python_path')
         return load_module(module, python_path).get_processing_info(config)
+
+    def set_profiling_dir(self, profiler_dir):
+        self._internal_module.set_profiling_dir(profiler_dir)
 
 
 def load_module(model_cls, python_path=None):

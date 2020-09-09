@@ -1,0 +1,32 @@
+models:
+  - name: mobilenet-v1-1.0-224-tf
+    launchers:
+      - framework: tf
+        model: mobilenet_v1_1.0_224_frozen.pb
+        inputs:
+          - name: input
+        adapter: classification
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: crop
+            central_fraction: 0.875
+          - type: resize
+            size: 224
+          - type: normalization
+            mean: 127.5
+            std: 127.5
+
+  - name: mobilenet-v1-1.0-224-tf
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+          - type: crop
+            central_fraction: 0.875
+          - type: resize
+            size: 224

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,10 +21,11 @@ from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, NumberField
 from ..representation import TextDetectionPrediction
 from ..postprocessor import NMS
+from ..utils import UnsupportedPackage
 try:
     from shapely.geometry import Polygon
-except ImportError:
-    Polygon = None
+except ImportError as import_error:
+    Polygon = UnsupportedPackage("shapely", import_error.msg)
 
 
 class TextDetectionAdapter(Adapter):
@@ -74,7 +75,7 @@ class TextDetectionAdapter(Adapter):
         self.min_area = self.get_value_from_config('min_area')
         self.min_height = self.get_value_from_config('min_height')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         results = []
         predictions = self._extract_predictions(raw, frame_meta)
 
@@ -305,19 +306,19 @@ class TextProposalsDetectionAdapter(Adapter):
         self.line_min_score = self.get_value_from_config('line_min_score')
         self.text_proposals_width = self.get_value_from_config('text_proposals_width')
         self.min_num_proposals = self.get_value_from_config('min_num_proposals')
-        if Polygon is None:
-            raise ValueError("east_text_detection adapter requires shapely, please install it")
+        if isinstance(Polygon, UnsupportedPackage):
+            Polygon.raise_error(self.__provider__)
         self.text_proposal_connector = TextProposalConnector()
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         result = []
         data = zip(raw_outputs[self.bbox_pred_out], raw_outputs[self.cls_prob_out], frame_meta, identifiers)
         for bbox_pred, cls_prob, meta, identifier in data:
             input_shape = next(iter(meta['input_shape'].values()))
             if input_shape[1] == 3:
-                cls_prob = np.transpose(cls_prob, (2, 1, 0))
-                bbox_pred = np.transpose(bbox_pred, (2, 1, 0))
+                cls_prob = np.transpose(cls_prob, (1, 2, 0))
+                bbox_pred = np.transpose(bbox_pred, (1, 2, 0))
             scale_x, scale_y = meta['scale_x'], meta['scale_y']
             im_info = [meta['original_height'], meta['original_width'], min(scale_x, scale_y)]
             textsegs = self.proposal_layer(cls_prob, bbox_pred, im_info)
@@ -688,10 +689,10 @@ class EASTTextDetectionAdapter(Adapter):
         self.score_map_thresh = self.get_value_from_config('score_map_threshold')
         self.nms_thresh = self.get_value_from_config('nms_threshold')
         self.box_thresh = self.get_value_from_config('box_threshold')
-        if Polygon is None:
-            raise ValueError("east_text_detection adapter requires shapely, please install it")
+        if isinstance(Polygon, UnsupportedPackage):
+            Polygon.raise_error(self.__provider__)
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         score_maps = raw_outputs[self.score_map_out]
         geometry_maps = raw_outputs[self.geometry_map_out]

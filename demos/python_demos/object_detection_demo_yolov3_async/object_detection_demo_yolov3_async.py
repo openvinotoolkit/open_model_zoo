@@ -30,7 +30,9 @@ import numpy as np
 from openvino.inference_engine import IECore
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import helpers
 import monitors
+from performance_metrics import PerformanceMetrics
 
 
 logging.basicConfig(format="[ %(levelname)s ] %(message)s", level=logging.INFO, stream=sys.stdout)
@@ -113,19 +115,12 @@ class Mode():
     def __init__(self, value):
         self.current = value
 
-    def next(self):
-        if self.current.value + 1 < len(Modes):
-            self.current = Modes(self.current.value + 1)
-        else:
-            self.current = Modes(0)
+    def get_other(self):
+        return Modes.MIN_LATENCY if self.current == Modes.USER_SPECIFIED \
+                                 else Modes.USER_SPECIFIED
 
-
-class ModeInfo():
-    def __init__(self):
-        self.last_start_time = perf_counter()
-        self.last_end_time = None
-        self.frames_count = 0
-        self.latency_sum = 0
+    def switch(self):
+        self.current = self.get_other()
 
 
 def scale_bbox(x, y, height, width, class_id, confidence, im_h, im_w, is_proportional):
@@ -245,6 +240,10 @@ def filter_objects(objects, iou_threshold, prob_threshold):
         if objects[i]['confidence'] == 0:
             continue
         for j in range(i + 1, len(objects)):
+            # We perform IOU only on objects of same class 
+            if objects[i]['class_id'] != objects[j]['class_id']: 
+                continue
+
             if intersection_over_union(objects[i], objects[j]) > iou_threshold:
                 objects[j]['confidence'] = 0
 
@@ -267,11 +266,6 @@ def async_callback(status, callback_args):
         callback_exceptions.append(e)
 
     event.set()
-
-
-def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
-    cv2.putText(frame, message, position, font_face, font_scale, (255, 255, 255), thickness + 1) # white border
-    cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
 
 
 def await_requests_completion(requests):
@@ -371,7 +365,8 @@ def main():
     completed_request_results = {}
     next_frame_id = 0
     next_frame_id_to_show = 0
-    mode_info = { mode.current: ModeInfo() }
+    mode_metrics = {mode.current: PerformanceMetrics()}
+    prev_mode_active_request_count = 0
     event = threading.Event()
     callback_exceptions = []
 
@@ -391,8 +386,6 @@ def main():
             frame, output, start_time, is_same_mode = completed_request_results.pop(next_frame_id_to_show)
 
             next_frame_id_to_show += 1
-            if is_same_mode:
-                mode_info[mode.current].frames_count += 1
 
             objects = get_objects(output, net, (input_height, input_width), frame.shape[:-1], args.prob_threshold,
                                   args.keep_aspect_ratio)
@@ -427,20 +420,17 @@ def main():
                             "#" + det_label + ' ' + str(round(obj['confidence'] * 100, 1)) + ' %',
                             (obj['xmin'], obj['ymin'] - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
-            # Draw performance stats over frame
-            if mode_info[mode.current].frames_count != 0:
-                fps_message = "FPS: {:.1f}".format(mode_info[mode.current].frames_count / \
-                                                   (perf_counter() - mode_info[mode.current].last_start_time))
-                mode_info[mode.current].latency_sum += perf_counter() - start_time
-                latency_message = "Latency: {:.1f} ms".format((mode_info[mode.current].latency_sum / \
-                                                              mode_info[mode.current].frames_count) * 1e3)
-
-                put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
-                put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
-
-            mode_message = "{} mode".format(mode.current.name)
-            put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
-                                 cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
+            helpers.put_highlighted_text(frame, "{} mode".format(mode.current.name), (10, int(origin_im_size[0] - 20)),
+                                         cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
+            
+            if is_same_mode and prev_mode_active_request_count == 0:
+                mode_metrics[mode.current].update(start_time, frame)
+            else:
+                mode_metrics[mode.get_other()].update(start_time, frame)
+                prev_mode_active_request_count -= 1
+                helpers.put_highlighted_text(frame, "Switching modes, please wait...",
+                                             (10, int(origin_im_size[0] - 50)), cv2.FONT_HERSHEY_COMPLEX, 0.75,
+                                             (10, 200, 10), 2)
 
             if not args.no_show:
                 cv2.imshow("Detection Results", frame)
@@ -449,19 +439,19 @@ def main():
                 if key in {ord("q"), ord("Q"), 27}: # ESC key
                     break
                 if key == 9: # Tab key
-                    prev_mode = mode.current
-                    mode.next()
+                    if prev_mode_active_request_count == 0:
+                        prev_mode = mode.current
+                        mode.switch()
 
-                    await_requests_completion(exec_nets[prev_mode].requests)
-                    empty_requests.clear()
-                    empty_requests.extend(exec_nets[mode.current].requests)
+                        prev_mode_active_request_count = len(exec_nets[prev_mode].requests) - len(empty_requests)
+                        empty_requests.clear()
+                        empty_requests.extend(exec_nets[mode.current].requests)
 
-                    mode_info[prev_mode].last_end_time = perf_counter()
-                    mode_info[mode.current] = ModeInfo()
+                        mode_metrics[mode.current] = PerformanceMetrics()
                 else:
                     presenter.handleKey(key)
 
-        elif empty_requests and cap.isOpened():
+        elif empty_requests and prev_mode_active_request_count == 0 and cap.isOpened():
             start_time = perf_counter()
             ret, frame = cap.read()
             if not ret:
@@ -493,21 +483,14 @@ def main():
 
         else:
             event.wait()
+            event.clear()
 
     if callback_exceptions:
         raise callback_exceptions[0]
 
-    for mode_value in mode_info.keys():
-        log.info("")
-        log.info("Mode: {}".format(mode_value.name))
-
-        end_time = mode_info[mode_value].last_end_time if mode_value in mode_info \
-                                                          and mode_info[mode_value].last_end_time is not None \
-                                                       else perf_counter()
-        log.info("FPS: {:.1f}".format(mode_info[mode_value].frames_count / \
-                                      (end_time - mode_info[mode_value].last_start_time)))
-        log.info("Latency: {:.1f} ms".format((mode_info[mode_value].latency_sum / \
-                                             mode_info[mode_value].frames_count) * 1e3))
+    for mode, metrics in mode_metrics.items():
+        print("\nMode: {}".format(mode.name))
+        metrics.print_total()
     print(presenter.reportMeans())
 
     for exec_net in exec_nets.values():

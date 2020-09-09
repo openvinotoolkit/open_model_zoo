@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ import numpy as np
 
 from ..config import ConfigError, BaseField, NumberField, ListField, StringField
 from ..preprocessor import Preprocessor
-from ..utils import get_or_parse_value
+from ..utils import get_or_parse_value, UnsupportedPackage
 
 try:
     from scipy.ndimage import interpolation
-except ImportError:
-    interpolation = None
+except ImportError as import_error:
+    interpolation = UnsupportedPackage("scipy", import_error.msg)
 
 
 class Resize3D(Preprocessor):
@@ -38,8 +38,8 @@ class Resize3D(Preprocessor):
         return parameters
 
     def configure(self):
-        if interpolation is None:
-            raise ValueError('resize3d require scipy, please install it before usage.')
+        if isinstance(interpolation, UnsupportedPackage):
+            interpolation.raise_error(self.__provider__)
 
         self.shape = self._check_size(
             get_or_parse_value(self.config.get('size'), default=(128, 128, 128), casting_type=int))

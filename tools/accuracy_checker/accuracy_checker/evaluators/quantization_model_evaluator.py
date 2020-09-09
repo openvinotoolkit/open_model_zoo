@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -108,7 +108,7 @@ class ModelEvaluator:
         self._prepare_to_evaluation(dataset_tag, dump_prediction_to_annotation)
 
         if (
-                self.launcher.allow_reshape_input or
+                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
                 self.preprocessor.has_multi_infer_transformations or
                 self.dataset.multi_infer
         ):
@@ -164,7 +164,7 @@ class ModelEvaluator:
                         self._dumped_annotations.extend(annotations)
                     metrics_result = None
                     if self.metric_executor:
-                        metrics_result = self.metric_executor.update_metrics_on_batch(
+                        metrics_result, _ = self.metric_executor.update_metrics_on_batch(
                             batch_input_ids, annotations, predictions
                         )
                         if self.metric_executor.need_store_predictions:
@@ -267,7 +267,9 @@ class ModelEvaluator:
                 self._dumped_annotations.extend(annotations)
             metrics_result = None
             if self.metric_executor:
-                metrics_result = self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
+                metrics_result, _ = self.metric_executor.update_metrics_on_batch(
+                    batch_input_ids, annotations, predictions
+                )
                 if self.metric_executor.need_store_predictions:
                     self._annotations.extend(annotations)
                     self._predictions.extend(predictions)

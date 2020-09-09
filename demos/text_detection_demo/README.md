@@ -4,6 +4,7 @@ The demo shows an example of using neural networks to detect and recognize print
 
 * `text-detection-0003`, which is a detection network for finding text.
 * `text-detection-0004`, which is a lightweight detection network for finding text.
+* `horizontal-text-detection-0001`, which is a detection network that works much faster than models above, but it is applicable to finding more or less horizontal text only.
 * `text-recognition-0012`, which is a recognition network for recognizing text.
 * `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
 
@@ -21,16 +22,14 @@ If text recognition model is provided, the demo prints recognized text as well.
 
 Running the application with the <code>-h</code> option yields the following usage message:
 ```
-./text_detection_demo -h
-
 text_detection_demo [OPTION]
 Options:
 
     -h                           Print a usage message.
-    -i "<path>"                  Required. Path to an image or video file, to a text file with paths to images, or to a webcamera device node (for example, /dev/video0).
+    -i                           Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                        Optional. Enable reading the input in a loop.
     -m_td "<path>"               Required. Path to the Text Detection model (.xml) file.
     -m_tr "<path>"               Required. Path to the Text Recognition model (.xml) file.
-    -dt "<input_data_type>"      Required. Input data type: "image" (for a single image), "list" (for a text file where images paths are listed), "video" (for a saved video), "webcam" (for a webcamera device). By default, it is "image".
     -m_tr_ss "<value>"           Optional. Symbol set for the Text Recognition model.
     -cc                          Optional. If it is set, then in case of absence of the Text Detector, the Text Recognition model takes a central image crop as an input, but not full frame.
     -w_td "<value>"              Optional. Input image width for Text Detection model.

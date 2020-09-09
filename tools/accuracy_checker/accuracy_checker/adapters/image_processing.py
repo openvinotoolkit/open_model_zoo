@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,7 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
 from copy import deepcopy
+from PIL import Image
 import cv2
 import numpy as np
 
@@ -22,10 +24,6 @@ from ..representation import ImageProcessingPrediction, SuperResolutionPredictio
 from ..config import ConfigValidator, BoolField, BaseField, StringField, DictField, ConfigError
 from ..utils import get_or_parse_value
 from ..preprocessor import Normalize
-try:
-    from PIL import Image
-except ImportError:
-    Image = None
 
 
 class ImageProcessingAdapter(Adapter):
@@ -74,7 +72,7 @@ class ImageProcessingAdapter(Adapter):
         self.target_out = self.get_value_from_config('target_out')
         self.cast_to_uint8 = self.get_value_from_config('cast_to_uint8')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.target_out:
@@ -99,6 +97,7 @@ class ImageProcessingAdapter(Adapter):
             img = np.array(img).astype(np.uint8)
 
         return img
+
 
 class SuperResolutionAdapter(ImageProcessingAdapter):
     __provider__ = 'super_resolution'

@@ -6,8 +6,6 @@
 
 #include <opencv2/imgproc.hpp>
 
-#include <ie_plugin_config.hpp>
-
 #include <algorithm>
 #include <vector>
 #include <map>

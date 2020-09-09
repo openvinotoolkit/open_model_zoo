@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ class TestModelEvaluator:
         ))
 
         self.metric = Mock()
-        self.metric.update_metrics_on_batch = Mock()
+        self.metric.update_metrics_on_batch = Mock(return_value=[{}, {}])
 
         self.evaluator = ModelEvaluator(
             self.launcher,
@@ -139,7 +139,8 @@ class TestModelEvaluatorAsync:
         self.preprocessor.process = Mock(return_value=data)
         self.postprocessor = Mock()
         self.adapter = MagicMock(return_value=[])
-        self.input_feeder = Mock()
+        self.input_feeder = MagicMock()
+        self.input_feeder.lstm_inputs = []
         self.data_reader = Mock(return_value=data)
         self.data_reader.data_source = 'source'
 
@@ -170,7 +171,7 @@ class TestModelEvaluatorAsync:
         ))
 
         self.metric = Mock()
-        self.metric.update_metrics_on_batch = Mock()
+        self.metric.update_metrics_on_batch = Mock(return_value=[{}, {}])
 
         self.evaluator = ModelEvaluator(
             self.launcher,

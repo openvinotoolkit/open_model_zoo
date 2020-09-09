@@ -1,0 +1,32 @@
+models:
+  - name: age-gender-recognition-retail-0013
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: age_gender
+          gender_out: prob
+          age_out: age_conv3
+
+    datasets:
+      - name: age_gender
+
+        preprocessing:
+          - type: crop_rect
+          - type: resize
+            size: 62
+
+        metrics:
+          - name: accuracy@gender
+            type: accuracy
+            annotation_source: gender_annotation
+            prediction_source: gender
+
+          - name: accuracy@age
+            type: accuracy_per_class
+            presenter: print_vector
+            label_map: age_label_map
+            annotation_source: age_class_annotation
+            prediction_source: age_classification
+
+          - type: mae

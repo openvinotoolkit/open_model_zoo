@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,12 +39,13 @@ class Metric(ClassProvider):
 
     description = ""
 
-    def __init__(self, config, dataset, name=None, state=None):
+    def __init__(self, config, dataset, name=None, state=None, profiler=None):
         self.config = config
         self.name = name
         self.dataset = dataset
         self.state = state
         self._update_iter = 0
+        self.set_profiler(profiler)
         self.meta = {'target': 'higher-better'}
         self._initial_state = copy.deepcopy(state)
 
@@ -177,10 +178,15 @@ class Metric(ClassProvider):
 
         return resolved_annotation, resolved_prediction
 
+    def set_profiler(self, profiler):
+        self.profiler = profiler
+
     def reset(self):
         if self.state:
             self.state = copy.deepcopy(self._initial_state)
             self._update_iter = 0
+        if self.profiler:
+            self.profiler.reset()
 
 
 class PerImageEvaluationMetric(Metric):

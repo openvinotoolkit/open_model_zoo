@@ -12,6 +12,9 @@
 #include <string>
 #include <utility>
 
+#include <samples/args_helper.hpp>
+#include <samples/images_capture.h>
+
 #include "perf_timer.hpp"
 
 #include "decoder.hpp"
@@ -248,37 +251,35 @@ public:
 
 #endif
 
-class VideoSourceOCV : public VideoSource {
+class GeneralCaptureSource : public VideoSource {
     PerfTimer perfTimer;
     std::thread workThread;
     const bool isAsync;
     std::atomic_bool running = {true};
-    std::string videoName;
 
     std::mutex mutex;
     std::condition_variable condVar;
     std::condition_variable hasFrame;
     std::queue<std::pair<bool, cv::Mat>> queue;
 
-    cv::VideoCapture source;
-    bool loopVideo;
+    std::unique_ptr<ImagesCapture> cap;
 
     bool realFps;
 
-    const size_t queueSize = 1;
-    const size_t pollingTimeMSec = 1000;
+    const size_t queueSize;
+    const size_t pollingTimeMSec;
 
     template<bool CollectStats>
-    bool readFrame(cv::Mat& frame);
+    cv::Mat readFrame();
 
     template<bool CollectStats>
     void startImpl();
 
 public:
-    VideoSourceOCV(bool async, bool collectStats_, const std::string& name, bool loopVideo,
+    GeneralCaptureSource(bool async, bool collectStats_, const std::string& name, bool loopVideo,
                 size_t queueSize_, size_t pollingTimeMSec_, bool realFps_);
 
-    ~VideoSourceOCV();
+    ~GeneralCaptureSource();
 
     void start();
 
@@ -295,7 +296,7 @@ public:
 
 private:
     template<bool CollectStats>
-    static void thread_fn(VideoSourceOCV*);
+    static void thread_fn(GeneralCaptureSource*);
 };
 
 #ifdef USE_NATIVE_CAMERA_API
@@ -440,59 +441,38 @@ bool isNumeric(const std::string& str) {
 }  // namespace
 
 template<bool CollectStats>
-bool VideoSourceOCV::readFrame(cv::Mat& frame) {
+cv::Mat GeneralCaptureSource::readFrame() {
     if (CollectStats) {
         ScopedTimer st(perfTimer);
-        bool captured = source.read(frame);
-        if (!captured && loopVideo) {
-            source.set(cv::CAP_PROP_POS_FRAMES, 0.0);
-            return source.read(frame);
-        }
-        return captured;
+        return cap->read();
     } else {
-        bool captured = source.read(frame);
-        if (!captured && loopVideo) {
-            source.set(cv::CAP_PROP_POS_FRAMES, 0.0);
-            return source.read(frame);
-        }
-        return captured;
+        return cap->read();
     }
 }
 
-VideoSourceOCV::VideoSourceOCV(bool async, bool collectStats_,
+GeneralCaptureSource::GeneralCaptureSource(bool async, bool collectStats_,
                          const std::string& name, bool loopVideo, size_t queueSize_,
                          size_t pollingTimeMSec_, bool realFps_):
-        perfTimer(collectStats_ ? PerfTimer::DefaultIterationsCount : 0),
-        isAsync(async), videoName(name),
-        loopVideo(loopVideo),
-        realFps(realFps_),
-        queueSize(queueSize_),
-        pollingTimeMSec(pollingTimeMSec_) {
-    if (isNumeric(videoName)) {
-        if (!source.open(std::stoi(videoName))) {
-            throw std::runtime_error("Can't open " + videoName + " with cv::VideoCapture::open(int)");
-        }
-    } else {
-        if (!source.open(videoName)) {
-            throw std::runtime_error("Can't open " + videoName + " with cv::VideoCapture::open(std::string)");
-        }
-    }
-    source.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
-}
+    perfTimer(collectStats_ ? PerfTimer::DefaultIterationsCount : 0),
+    isAsync(async),
+    cap(openImagesCapture(name, loopVideo)),
+    realFps(realFps_),
+    queueSize(queueSize_),
+    pollingTimeMSec(pollingTimeMSec_) {}
 
-VideoSourceOCV::~VideoSourceOCV() {
+GeneralCaptureSource::~GeneralCaptureSource() {
     stop();
 }
 
-bool VideoSourceOCV::isRunning() const {
+bool GeneralCaptureSource::isRunning() const {
     return running;
 }
 
 template<bool CollectStats>
-void VideoSourceOCV::thread_fn(VideoSourceOCV *vs) {
+void GeneralCaptureSource::thread_fn(GeneralCaptureSource *vs) {
     while (vs->running) {
-        cv::Mat frame;
-        const bool result = vs->readFrame<CollectStats>(frame);
+        cv::Mat frame = vs->readFrame<CollectStats>();
+        const bool result = frame.data;
         if (!result) {
             vs->running = false; // stop() also affects running, so override it only when out of frames
         }
@@ -506,14 +486,14 @@ void VideoSourceOCV::thread_fn(VideoSourceOCV *vs) {
 }
 
 template<bool CollectStats>
-void VideoSourceOCV::startImpl() {
+void GeneralCaptureSource::startImpl() {
     if (isAsync) {
         running = true;
-        workThread = std::thread(&VideoSourceOCV::thread_fn<CollectStats>, this);
+        workThread = std::thread(&GeneralCaptureSource::thread_fn<CollectStats>, this);
     }
 }
 
-void VideoSourceOCV::start() {
+void GeneralCaptureSource::start() {
     if (perfTimer.enabled()) {
         startImpl<true>();
     } else {
@@ -521,7 +501,7 @@ void VideoSourceOCV::start() {
     }
 }
 
-void VideoSourceOCV::stop() {
+void GeneralCaptureSource::stop() {
     if (isAsync) {
         running = false;
         condVar.notify_one();
@@ -531,7 +511,7 @@ void VideoSourceOCV::stop() {
     }
 }
 
-bool VideoSourceOCV::read(cv::Mat& frame) {
+bool GeneralCaptureSource::read(cv::Mat& frame) {
     if (isAsync) {
         bool res;
         {
@@ -548,11 +528,12 @@ bool VideoSourceOCV::read(cv::Mat& frame) {
         condVar.notify_one();
         return res;
     } else {
-        return source.read(frame);
+        frame = cap->read();
+        return frame.data;
     }
 }
 
-bool VideoSourceOCV::read(VideoFrame& frame) {
+bool GeneralCaptureSource::read(VideoFrame& frame) {
     return read(frame.frame);
 }
 
@@ -582,7 +563,10 @@ VideoSources::VideoSources(const InitParams& p):
     collectStats(p.collectStats),
     realFps(p.realFps),
     queueSize(p.queueSize),
-    pollingTimeMSec(p.pollingTimeMSec) {}
+    pollingTimeMSec(p.pollingTimeMSec) {
+        for (const std::string& input : split(p.inputs, ','))
+            openVideo(input, isNumeric(input), p.loop);
+    }
 
 VideoSources::~VideoSources() {
     // nothing
@@ -626,10 +610,10 @@ void VideoSources::openVideo(const std::string& source, bool native, bool loopVi
             newSrc.reset(new VideoSourceStreamFile(*this, isAsync, collectStats, source,
                                             queueSize, pollingTimeMSec, realFps));
         else
-            newSrc.reset(new VideoSourceOCV(isAsync, collectStats, source, loopVideo,
+            newSrc.reset(new GeneralCaptureSource(isAsync, collectStats, source, loopVideo,
                                             queueSize, pollingTimeMSec, realFps));
 #else
-        std::unique_ptr<VideoSource> newSrc(new VideoSourceOCV(isAsync, collectStats, source, loopVideo,
+        std::unique_ptr<VideoSource> newSrc(new GeneralCaptureSource(isAsync, collectStats, source, loopVideo,
                                             queueSize, pollingTimeMSec, realFps));
 #endif
         inputs.emplace_back(std::move(newSrc));

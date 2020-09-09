@@ -106,7 +106,7 @@ Restored image, name `Cast`, shape: [1x512x680x3], format: [BxHxWxC]
     - W - image width
     - C - number of channels
 
-   Expected color order: RGB.
+   Expected color order: BGR.
 
 ### Converted Model
 
@@ -118,7 +118,7 @@ Restored image, name: `Cast`, shape: [1x3x512x680], format: [BxCxHxW]
     - H - image height
     - W - image width
 
-   Expected color order: RGB.
+   Expected color order: BGR.
 
 ## Legal Information
 

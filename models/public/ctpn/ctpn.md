@@ -19,7 +19,7 @@ Detecting Text in Natural Image with Connectionist Text Proposal Network. For de
 
 | Metric | Value |
 | ------ | ----- |
-| hmean  | 1.0864%|
+| hmean  | 73.67%|
 
 ## Performance
 

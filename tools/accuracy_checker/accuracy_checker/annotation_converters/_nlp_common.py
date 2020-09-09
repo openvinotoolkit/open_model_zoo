@@ -1,11 +1,29 @@
+"""
+Copyright (c) 2018-2020 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 import unicodedata
+
 from collections import OrderedDict
+from ..config import ConfigError
+from ..utils import contains_all, UnsupportedPackage
+
 try:
     import sentencepiece as spm
-except ImportError:
-    spm = None
-from ..config import ConfigError
-from ..utils import contains_all
+except ImportError as import_error:
+    spm = UnsupportedPackage("sentencepiece", import_error.msg)
 
 
 SPIECE_UNDERLINE = '\N{LOWER ONE EIGHTH BLOCK}'
@@ -577,8 +595,8 @@ def truncate_seq_pair(tokens_a, tokens_b, max_length):
 
 class SentencePieceTokenizer:
     def __init__(self, tokenizer_model, lower_case=True, remove_space=True):
-        if spm is None:
-            raise ConfigError('Sentence piece tokenizer required sentencepiece, please install it before usage')
+        if isinstance(spm, UnsupportedPackage):
+            spm.raise_error("Sentence piece tokenizer")
         self.encoder = spm.SentencePieceProcessor()
         self.encoder.Load(str(tokenizer_model))
         self.lower_case = lower_case

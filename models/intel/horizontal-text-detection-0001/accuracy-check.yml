@@ -1,0 +1,47 @@
+models:
+  - name: horizontal-text-detection-0001
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   intel/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.xml
+        weights: intel/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.bin
+        adapter:
+          type: class_agnostic_detection
+          scale: 0.0014204
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.xml
+        weights: intel/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.bin
+        adapter:
+          type: class_agnostic_detection
+          scale: 0.0014204
+
+    datasets:
+      - name: ICDAR2013_detection
+        preprocessing:
+          - type: resize
+            size: 704
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: cast_to_int
+
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.25
+            remove_filtered: True
+          - type: nms
+            overlap: 0.5
+
+        metrics:
+          - type: focused_text_hmean
+            ignore_difficult: True
+            area_recall_constrain: 0.5
+            area_precision_constrain: 0.5
+
+
+global_definitions: ../dataset_definitions.yml

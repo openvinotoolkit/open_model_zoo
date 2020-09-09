@@ -1,4 +1,4 @@
-# person-detection-retail-0002 {#person-detection-retail-0002}
+# person-detection-retail-0002
 
 ## Use Case and High-Level Description
 

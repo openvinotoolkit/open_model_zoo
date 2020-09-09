@@ -1,0 +1,149 @@
+evaluations:
+  - name: mtcnn
+    module: custom_evaluators.mtcnn_evaluator.MTCNNEvaluator
+    module_config:
+      network_info:
+        pnet:
+          model:   mtcnn-p/mtcnn-p.prototxt
+          weights: mtcnn-p/mtcnn-p.caffemodel
+          outputs:
+            probability_out: prob1
+            region_out: conv4-2
+          inputs:
+            - name: data
+              type: INPUT
+              layout: NCWH
+          preprocessing:
+            - type: bgr_to_rgb
+            - type: pyramid
+              min_size: 10
+              factor: 0.79
+          adapter:
+            type: mtcnn_p
+            probability_out: prob1
+            region_out: conv4-2
+            regions_format: hw
+
+        rnet:
+          model:   mtcnn-r/mtcnn-r.prototxt
+          weights: mtcnn-r/mtcnn-r.caffemodel
+          outputs:
+            probability_out: prob1
+            region_out: conv5-2
+          inputs:
+            - name: data
+              type: INPUT
+              layout: NCWH
+          preprocessing:
+            - type: bgr_to_rgb
+        onet:
+          model:   mtcnn-o/mtcnn-o.prototxt
+          weights: mtcnn-o/mtcnn-o.caffemodel
+          outputs:
+            probability_out: prob1
+            region_out: conv6-2
+          inputs:
+            - name: data
+              type: INPUT
+              layout: NCWH
+          preprocessing:
+            - type: bgr_to_rgb
+
+      launchers:
+        - framework: caffe
+
+      datasets:
+        - name: wider
+
+          preprocessing:
+            - type: normalization
+              mean: 127.5
+              std: 128
+
+          postprocessing:
+            - type: filter
+              apply_to: prediction
+              is_empty: True
+            - type: filter
+              height_range: 60
+              apply_to: annotation
+
+          metrics:
+            - type: recall
+              ignore_difficult: True
+              include_boundaries: True
+              allow_multiple_matches_per_ignored: True
+              distinct_conf: False
+
+            - type: map
+              ignore_difficult: True
+              include_boundaries: True
+              allow_multiple_matches_per_ignored: True
+              distinct_conf: False
+
+  - name: mtcnn
+    module: custom_evaluators.mtcnn_evaluator.MTCNNEvaluator
+    module_config:
+      network_info:
+        pnet:
+          outputs:
+            probability_out: prob1
+            region_out: conv4-2
+          inputs:
+            - name: data
+              type: INPUT
+              layout: NCWH
+          preprocessing:
+            - type: bgr_to_rgb
+            - type: pyramid
+              min_size: 10
+              factor: 0.79
+
+        rnet:
+          outputs:
+            probability_out: prob1
+            region_out: conv5-2
+          inputs:
+            - name: data
+              type: INPUT
+              layout: NCWH
+          preprocessing:
+            - type: bgr_to_rgb
+
+        onet:
+          outputs:
+            probability_out: prob1
+            region_out: conv6-2
+          inputs:
+            - name: data
+              type: INPUT
+              layout: NCWH
+          preprocessing:
+            - type: bgr_to_rgb
+
+      launchers:
+        - framework: dlsdk
+
+      datasets:
+        - name: wider
+
+          postprocessing:
+            - type: filter
+              apply_to: prediction
+              is_empty: True
+            - type: filter
+              height_range: 60
+              apply_to: annotation
+
+          metrics:
+            - type: recall
+              ignore_difficult: True
+              include_boundaries: True
+              allow_multiple_matches_per_ignored: True
+              distinct_conf: False
+
+            - type: map
+              ignore_difficult: True
+              include_boundaries: True
+              allow_multiple_matches_per_ignored: True
+              distinct_conf: False

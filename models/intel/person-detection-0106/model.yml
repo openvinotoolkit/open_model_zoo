@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-0106.xml
-    size: 926028
-    sha256: 9fb9534f9bc3a123ae5167c1b04f4279c09f2e775c19501a873f765d93758414
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-0106/FP32/person-detection-0106.xml
+    size: 1276676
+    sha256: 1e961a07d672e2f036b6cb513aa44d66d2e73ef3f3536d9e08d3046bfdde497a
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-detection-0106/FP32/person-detection-0106.xml
   - name: FP32/person-detection-0106.bin
-    size: 276524288
-    sha256: bbe4d3e579f013dd45e98c5d1b71bf24b8e0a707e50e6a8f0e3180f47c53b27e
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-0106/FP32/person-detection-0106.bin
+    size: 276502576
+    sha256: 4b0457d7432954a8868a62c1207e13269b6912def92bf9a94d369f8ad9419137
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-detection-0106/FP32/person-detection-0106.bin
   - name: FP16/person-detection-0106.xml
-    size: 925013
-    sha256: d58f01ffe089dd7b472037e8280ffd6cc9d86116d1800a4122e52809c033d250
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-0106/FP16/person-detection-0106.xml
+    size: 1275629
+    sha256: a7826ce9b99e25871b752d58ff76053db751e8b26c458345bd86eedda4e9c919
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-detection-0106/FP16/person-detection-0106.xml
   - name: FP16/person-detection-0106.bin
-    size: 138262516
-    sha256: be2fd576c4818126d33a08f6cc3f56b23f10ac049c6cca7961a89ebfe5441b27
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/person-detection-0106/FP16/person-detection-0106.bin
+    size: 138251530
+    sha256: 69efb894d35fcc6e49383576d51c529a4393f27c0933486180a3ec1c1912025d
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-detection-0106/FP16/person-detection-0106.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

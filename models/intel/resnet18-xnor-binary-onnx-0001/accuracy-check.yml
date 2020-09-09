@@ -1,0 +1,30 @@
+models:
+  - name: resnet18-xnor-binary-onnx-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        annotation: imagenet1000.pickle
+        reader: pillow_imread
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BILINEAR
+          - type: crop
+            size: 224
+            use_pillow: True
+          - type: rgb_to_bgr
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5

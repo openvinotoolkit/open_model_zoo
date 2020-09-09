@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,13 +37,6 @@ class Adapter(ClassProvider):
         self.validate_config()
         self.configure()
 
-    def __call__(self, context=None, outputs=None, **kwargs):
-        if outputs is not None:
-            return self.process(outputs, **kwargs)
-        predictions = self.process(context.prediction_batch, context.identifiers_batch, **kwargs)
-        context.prediction_batch = predictions
-        return context
-
     def get_value_from_config(self, key):
         return get_parameter_value_from_config(self.launcher_config, self.parameters(), key)
 
@@ -55,7 +48,7 @@ class Adapter(ClassProvider):
             ),
         }
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raise NotImplementedError
 
     def configure(self):

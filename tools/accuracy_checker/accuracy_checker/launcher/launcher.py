@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ class Launcher(ClassProvider):
         self.default_layout = 'NCHW'
         self.const_inputs = self.config.get('_list_const_inputs', [])
         self.image_info_inputs = self.config.get('_list_image_infos', [])
+        self._lstm_inputs = self.config.get('_list_lstm_inputs', [])
 
     @classmethod
     def parameters(cls):
@@ -89,6 +90,12 @@ class Launcher(ClassProvider):
             ),
             '_list_image_infos': ListField(
                 allow_empty=True, optional=True, default=[], description="List of image information inputs."
+            ),
+            '_list_orig_image_infos': ListField(
+                allow_empty=True, optional=True, default=[], description="List of image information inputs."
+            ),
+            '_list_lstm_inputs': ListField(
+                allow_empty=True, optional=True, default=[], description="List of lstm inputs."
             )
         }
 
@@ -108,9 +115,6 @@ class Launcher(ClassProvider):
         """
 
         raise NotImplementedError
-
-    def __call__(self, context, *args, **kwargs):
-        context.prediction_batch = self.predict(context.input_blobs, context.batch_meta, **kwargs)
 
     def release(self):
         raise NotImplementedError
@@ -177,7 +181,7 @@ def unsupported_launcher(name, error_message=None):
     return UnsupportedLauncher
 
 
-def create_launcher(launcher_config, model_name='', delayed_model_loading=False):
+def create_launcher(launcher_config, model_name='', delayed_model_loading=False, **kwargs):
     """
     Args:
         launcher_config: launcher configuration file entry.
@@ -197,5 +201,5 @@ def create_launcher(launcher_config, model_name='', delayed_model_loading=False)
 
     return Launcher.provide(
         config_framework, launcher_config,
-        model_name=model_name, delayed_model_loading=delayed_model_loading
+        model_name=model_name, delayed_model_loading=delayed_model_loading, **kwargs
     )

@@ -1,0 +1,30 @@
+models:
+  - name: mobilenet-ssd-cf
+    launchers:
+      - framework: caffe
+        model:   mobilenet-ssd.prototxt
+        weights: mobilenet-ssd.caffemodel
+        adapter: ssd
+    datasets:
+      - name: VOC2012
+        preprocessing:
+          - type: resize
+            size: 300
+          - type: normalization
+            mean: 127.5
+            std:  127.5
+        postprocessing:
+          - type: resize_prediction_boxes
+
+  - name: mobilenet-ssd
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+
+    datasets:
+      - name: VOC2012
+        preprocessing:
+          - type: resize
+            size: 300
+        postprocessing:
+          - type: resize_prediction_boxes

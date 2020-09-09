@@ -44,7 +44,7 @@ def main():
     args = parser.parse_args()
 
     git_diff_output = subprocess.check_output(
-        ["git", "diff", "--name-only", "-z", args.base_commit + "...HEAD"])
+        ["git", "diff", "--name-only", "--no-renames", "-z", args.base_commit + "...HEAD"])
     changed_files = list(map(PurePosixPath, git_diff_output.decode()[:-1].split("\0")))
 
     models_dir = PurePosixPath("models")
@@ -55,6 +55,9 @@ def main():
         if models_dir in changed_file.parents and changed_file.name == "model.yml":
             if Path(changed_file).exists(): # it might've been deleted in the branch
                 jobs.setdefault("models", []).append(changed_file.parent.name)
+            else:
+                # make sure no models.lst files reference the deleted model
+                jobs["models_lst"] = True
 
     git_check_attr_output = subprocess.run(
         ["git", "check-attr", "--stdin", "-z", "--all"],

@@ -1,0 +1,18 @@
+models:
+  - name: single-image-super-resolution-1032
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: super_resolution
+          reverse_channels: True
+        inputs:
+          - name: "0"
+            type: INPUT
+            value: ".*lr_x4*.png"
+          - name: "1"
+            type: INPUT
+            value: ".*upsample_x4*.png"
+
+    datasets:
+      - name: super_resolution_x4

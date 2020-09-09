@@ -25,6 +25,7 @@
 #include <inference_engine.hpp>
 
 #include <monitors/presenter.h>
+#include <samples/images_capture.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
@@ -32,8 +33,6 @@
 #include "detectors.hpp"
 #include "face.hpp"
 #include "visualizer.hpp"
-
-#include <ie_iextension.h>
 
 using namespace InferenceEngine;
 
@@ -63,43 +62,18 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_n_hp < 1) {
         throw std::logic_error("Parameter -n_hp cannot be 0");
     }
-
-    // no need to wait for a key press from a user if an output image/video file is not shown.
-    FLAGS_no_wait |= FLAGS_no_show;
-
     return true;
 }
 
 int main(int argc, char *argv[]) {
     try {
-        std::cout << "InferenceEngine: " << GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
 
         // ------------------------------ Parsing and validating of input arguments --------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
 
-        slog::info << "Reading input" << slog::endl;
-        cv::VideoCapture cap;
-        if (!(FLAGS_i == "cam" ? cap.open(0) : cap.open(FLAGS_i))) {
-            throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
-        }
-
-        Timer timer;
-        // read input (video) frame
-        cv::Mat frame;
-        if (!cap.read(frame)) {
-            throw std::logic_error("Failed to get frame from cv::VideoCapture");
-        }
-
-        const size_t width  = static_cast<size_t>(frame.cols);
-        const size_t height = static_cast<size_t>(frame.rows);
-
-        cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty()) {
-            videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'), 25, cv::Size(width, height));
-        }
-        // ---------------------------------------------------------------------------------------------------
         // --------------------------- 1. Loading Inference Engine -----------------------------
 
         Core ie;
@@ -165,30 +139,36 @@ int main(int argc, char *argv[]) {
         Load(facialLandmarksDetector).into(ie, FLAGS_d_lm, FLAGS_dyn_lm);
         // ----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 3. Doing inference -----------------------------------------------------
-        // Starting inference & calculating performance
-        slog::info << "Start inference " << slog::endl;
-
         bool isFaceAnalyticsEnabled = ageGenderDetector.enabled() || headPoseDetector.enabled() ||
                                       emotionsDetector.enabled() || facialLandmarksDetector.enabled();
 
+        Timer timer;
         std::ostringstream out;
         size_t framesCounter = 0;
-        int delay = 1;
-        double msrate = -1;
-        cv::Mat prev_frame, next_frame;
+        double msrate = 1000.0 / FLAGS_fps;
         std::list<Face::Ptr> faces;
         size_t id = 0;
 
-        if (FLAGS_fps > 0) {
-            msrate = 1000.f / FLAGS_fps;
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        cv::Mat frame = cap->read();
+        if (!frame.data) {
+            throw std::runtime_error("Can't read an image from the input");
         }
 
-        Visualizer::Ptr visualizer;
-        if (!FLAGS_no_show || !FLAGS_o.empty()) {
-            visualizer = std::make_shared<Visualizer>(cv::Size(width, height));
-            if (!FLAGS_no_show_emotion_bar && emotionsDetector.enabled()) {
-                visualizer->enableEmotionBar(emotionsDetector.emotionsVec);
+        const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
+        Presenter presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, {frame.cols / 4, 60});
+
+        Visualizer visualizer{frame.size()};
+        if (!FLAGS_no_show_emotion_bar && emotionsDetector.enabled()) {
+                visualizer.enableEmotionBar(emotionsDetector.emotionsVec);
+        }
+
+        cv::VideoWriter videoWriter;
+        if (!FLAGS_o.empty()) {
+            videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'),
+                !FLAGS_no_show && FLAGS_fps > 0.0 ? FLAGS_fps : cap->fps(), frame.size());
+            if (!videoWriter.isOpened()) {
+                throw std::runtime_error("Can't open video writer");
             }
         }
 
@@ -196,10 +176,7 @@ int main(int argc, char *argv[]) {
         faceDetector.enqueue(frame);
         faceDetector.submitRequest();
 
-        prev_frame = frame.clone();
-
-        // Reading the next frame
-        bool frameReadStatus = cap.read(frame);
+        cv::Mat next_frame = cap->read();
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
@@ -207,15 +184,11 @@ int main(int argc, char *argv[]) {
         }
         std::cout << std::endl;
 
-        const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
-
-        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
-        Presenter presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, graphSize);
-
-        while (true) {
+        while (frame.data) {
             timer.start("total");
+            cv::Mat prev_frame = std::move(frame);
+            frame = std::move(next_frame);
             framesCounter++;
-            bool isLastFrame = !frameReadStatus;
 
             // Retrieving face detection results for the previous frame
             faceDetector.wait();
@@ -223,7 +196,10 @@ int main(int argc, char *argv[]) {
             auto prev_detection_results = faceDetector.results;
 
             // No valid frame to infer if previous frame is the last
-            if (!isLastFrame) {
+            if (frame.data) {
+                if (frame.size() != prev_frame.size()) {
+                    throw std::runtime_error("Images of different size are not supported");
+                }
                 faceDetector.enqueue(frame);
                 faceDetector.submitRequest();
             }
@@ -231,7 +207,7 @@ int main(int argc, char *argv[]) {
             // Filling inputs of face analytics networks
             for (auto &&face : prev_detection_results) {
                 if (isFaceAnalyticsEnabled) {
-                    auto clippedRect = face.location & cv::Rect(0, 0, width, height);
+                    cv::Rect clippedRect = face.location & cv::Rect({0, 0}, prev_frame.size());
                     cv::Mat face = prev_frame(clippedRect);
                     ageGenderDetector.enqueue(face);
                     headPoseDetector.enqueue(face);
@@ -248,16 +224,8 @@ int main(int argc, char *argv[]) {
                 facialLandmarksDetector.submitRequest();
             }
 
-            // Reading the next frame if the current one is not the last
-            if (!isLastFrame) {
-                frameReadStatus = cap.read(next_frame);
-                if (FLAGS_loop_video && !frameReadStatus) {
-                    if (!(FLAGS_i == "cam" ? cap.open(0) : cap.open(FLAGS_i))) {
-                        throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
-                    }
-                    frameReadStatus = cap.read(next_frame);
-                }
-            }
+            // Read the next frame while waiting for inference results
+            next_frame = cap->read();
 
             if (isFaceAnalyticsEnabled) {
                 ageGenderDetector.wait();
@@ -278,7 +246,7 @@ int main(int argc, char *argv[]) {
             // For every detected face
             for (size_t i = 0; i < prev_detection_results.size(); i++) {
                 auto& result = prev_detection_results[i];
-                cv::Rect rect = result.location & cv::Rect(0, 0, width, height);
+                cv::Rect rect = result.location & cv::Rect({0, 0}, prev_frame.size());
 
                 Face::Ptr face;
                 if (!FLAGS_no_smooth) {
@@ -329,44 +297,23 @@ int main(int argc, char *argv[]) {
 
             presenter.drawGraphs(prev_frame);
 
-            //  Visualizing results
-            if (!FLAGS_no_show || !FLAGS_o.empty()) {
-                out.str("");
-                out << "Total image throughput: " << std::fixed << std::setprecision(2)
-                    << 1000.f / (timer["total"].getSmoothedDuration()) << " fps";
-                cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_TRIPLEX, 1,
-                            cv::Scalar(255, 0, 0), 2);
+            // drawing faces
+            visualizer.draw(prev_frame, faces);
 
-                // drawing faces
-                visualizer->draw(prev_frame, faces);
+            timer.finish("total");
+            out.str("");
+            out << "Total image throughput: " << std::fixed << std::setprecision(1)
+                << 1000.0 / (timer["total"].getSmoothedDuration()) << " fps";
+            cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_TRIPLEX, 1,
+                        cv::Scalar(255, 0, 0), 2);
 
-                if (!FLAGS_no_show) {
-                    cv::imshow("Detection results", prev_frame);
-                }
-            }
-
-            if (!FLAGS_o.empty()) {
+            if (videoWriter.isOpened()) {
                 videoWriter.write(prev_frame);
             }
 
-            prev_frame = frame;
-            frame = next_frame;
-            next_frame = cv::Mat();
-
-            timer.finish("total");
-
-            if (FLAGS_fps > 0) {
-                delay = std::max(1, static_cast<int>(msrate - timer["total"].getLastCallDuration()));
-            }
-
-            // End of file (or a single frame file like an image). The last frame is displayed to let you check what is shown
-            if (isLastFrame) {
-                if (!FLAGS_no_wait) {
-                    std::cout << "No more frames to process!" << std::endl;
-                    cv::waitKey(0);
-                }
-                break;
-            } else if (!FLAGS_no_show) {
+            int delay = std::max(1, static_cast<int>(msrate - timer["total"].getLastCallDuration()));
+            if (!FLAGS_no_show) {
+                cv::imshow("Detection results", prev_frame);
                 int key = cv::waitKey(delay);
                 if (27 == key || 'Q' == key || 'q' == key) {
                     break;
@@ -376,7 +323,7 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << "Number of processed frames: " << framesCounter << slog::endl;
-        slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
+        slog::info << "Total image throughput: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << " fps" << slog::endl;
 
         // Showing performance results
         if (FLAGS_pc) {
@@ -388,17 +335,6 @@ int main(int argc, char *argv[]) {
         }
 
         std::cout << presenter.reportMeans() << '\n';
-        // ---------------------------------------------------------------------------------------------------
-
-        if (!FLAGS_o.empty()) {
-            videoWriter.release();
-        }
-
-        // release input video stream
-        cap.release();
-
-        // close windows
-        cv::destroyAllWindows();
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

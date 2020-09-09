@@ -12,4 +12,5 @@
 using namespace InferenceEngine;
 
 std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, const cv::Size& image_size,
-                                         float cls_conf_threshold, float link_conf_threshold);
+                                         const cv::Size& image_shape, float cls_conf_threshold,
+                                         float link_conf_threshold);

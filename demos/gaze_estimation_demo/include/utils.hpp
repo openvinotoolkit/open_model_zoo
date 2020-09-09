@@ -13,8 +13,6 @@
 
 #include <inference_engine.hpp>
 
-#include <ie_iextension.h>
-
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 

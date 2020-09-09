@@ -1,0 +1,21 @@
+models:
+  - name: style_transfer
+    launchers:
+      - framework: onnx_runtime
+        model: fast-neural-style-mosaic-onnx.onnx
+        adapter:
+          type: style_transfer
+
+      - framework: dlsdk
+        adapter:
+          type: style_transfer
+
+    datasets:
+      - name: ms_coco_style_transfer
+        preprocessing:
+          - type: resize
+            size: 224
+        postprocessing:
+          - type: resize_style_transfer
+            dst_width: 224
+            dst_height: 224
