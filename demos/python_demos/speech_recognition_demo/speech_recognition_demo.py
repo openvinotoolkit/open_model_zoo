@@ -19,8 +19,8 @@ from utils.deep_speech_pipeline import DeepSpeechPipeline
 
 def build_argparser():
     parser = argparse.ArgumentParser(description="Speech recognition example")
-    parser.add_argument('input', help="Path to an audio file in WAV PCM 16 kHz mono format",
-                        type=str, metavar="FILENAME")
+    parser.add_argument('-i', '--input', help="Path to an audio file in WAV PCM 16 kHz mono format",
+                        type=str, metavar="FILENAME", required=True)
     parser.add_argument('-d', '--device', default='CPU', type=str,
                         help="Optional. Specify the target device to infer on, for example: CPU, GPU, FPGA, HDDL, MYRIAD or HETERO. "
                              "The sample will look for a suitable IE plugin for this device. (default is CPU)")

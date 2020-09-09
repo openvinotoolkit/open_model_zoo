@@ -5,11 +5,7 @@
 """
 Manage alphabets.
 
-Character lists for alphabets are stored in list(str) or
-dict:int->str.
-
-Functions load_alphabet(), get_default_alphabet(), and
-get_utf8_alphabet() return alphabet in this format.
+Alphabets are stored in character lists as list(str).
 """
 
 import codecs

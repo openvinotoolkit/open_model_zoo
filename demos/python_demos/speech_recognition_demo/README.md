@@ -58,19 +58,16 @@ Run the application with `-h` option to see help message.
 Here are the essential options:
 
 ```
-usage: speech_recognition_demo.py [-h] [-d DEVICE] -m FILENAME [-b N]
-                                  [-L FILENAME] [-a FILENAME] [--alpha X]
-                                  [--beta X] [-l FILENAME]
-                                  FILENAME
+usage: speech_recognition_demo.py [-h] -i FILENAME [-d DEVICE] -m FILENAME
+                                  [-b N] [-L FILENAME] [-a FILENAME]
+                                  [--alpha X] [--beta X] [-l FILENAME]
 
 Speech recognition example
 
-positional arguments:
-  FILENAME              Path to an audio file. Must be WAV PCM 16 kHz mono
-                        format.
-
 optional arguments:
   -h, --help            show this help message and exit
+  -i FILENAME, --input FILENAME
+                        Path to an audio file in WAV PCM 16 kHz mono format
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
                         example: CPU, GPU, FPGA, HDDL, MYRIAD or HETERO. The
