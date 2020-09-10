@@ -3,6 +3,8 @@ models:
 
     launchers:
       - framework: dlsdk
+        adapter:
+           type: class_agnostic_detection
 
     datasets:
       - name: crossroad_extra_untagged_vehicle
