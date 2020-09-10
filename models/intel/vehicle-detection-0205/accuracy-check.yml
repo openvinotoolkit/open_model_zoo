@@ -6,7 +6,7 @@ models:
         adapter:
            type: class_agnostic_detection
     datasets:
-      - name: crossroad_extra_untagged_vehicle
+      - name: crossroad_extra_untagged_vehicle_labels_from_1
         preprocessing:
           - type: resize
             dst_width: 1344
