@@ -14,6 +14,7 @@ models:
             dst_height: 800
         postprocessing:
           - type: resize_prediction_boxes
+            rescale: True 
           - type: clip_boxes
             apply_to: prediction
         metrics:
