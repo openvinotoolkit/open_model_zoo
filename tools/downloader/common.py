@@ -61,6 +61,7 @@ KNOWN_TASK_TYPES = {
     'image_inpainting',
     'image_processing',
     'instance_segmentation',
+    'machine_translation',
     'monocular_depth_estimation',
     'object_attributes',
     'optical_character_recognition',
@@ -68,6 +69,7 @@ KNOWN_TASK_TYPES = {
     'semantic_segmentation',
     'sound_classification',
     'style_transfer',
+    'token_recognition',
 }
 
 KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}
