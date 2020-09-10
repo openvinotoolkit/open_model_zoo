@@ -417,9 +417,9 @@ datasets:
   - name: crossroad_extra_untagged_vehicle_labels_from_1
     data_source: crossroad_extra_untagged/val_data
     annotation_conversion:
-    converter: mscoco_detection
-    annotation_file: crossroad_extra_untagged/val_coco_no_bg_vehicle.json
-    has_background: True
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg_vehicle.json
+      has_background: True
     annotation: crossroad_extra_untagged_vehicle_labels_from_1.pickle
     dataset_meta: crossroad_extra_untagged_vehicle_labels_from_1.json
   
