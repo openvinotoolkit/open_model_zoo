@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 from ..config import PathField
-from ..utils import get_path
 from ..logging import warning
 from ..representation import ImageInpaintingAnnotation
 from .format_converter import BaseFormatConverter, ConverterReturn
@@ -63,9 +62,8 @@ class InpaintingConverter(BaseFormatConverter):
 
         for i, image in enumerate(images):
             mask_name = None if self.masks_dir is None else masks[i].name
-            identifiers = [image.name]
-            image_path = get_path(image)
-            annotation = ImageInpaintingAnnotation(identifiers, image_path)
+            identifier = image.name
+            annotation = ImageInpaintingAnnotation([identifier], identifier)
             annotation.metadata['mask'] = {
                 'mask_name': mask_name
             }

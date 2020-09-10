@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class TestPixelAccuracy:
         annotations = make_segmentation_representation(np.array([[0, 0], [0, 0]]), True)
         predictions = make_segmentation_representation(np.array([[0, 0], [0, 0]]), False)
         dispatcher = MetricsExecutor(create_config(self.name), single_class_dataset())
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 1
 
     def test_multi_class_not_matched(self):
@@ -74,7 +74,7 @@ class TestPixelAccuracy:
         annotations = make_segmentation_representation(np.array([[1, 0, 3, 0, 0], [0, 0, 0, 0, 0]]), True)
         predictions = make_segmentation_representation(np.array([[1, 2, 3, 2, 3], [0, 0, 0, 0, 0]]), False)
         dispatcher = MetricsExecutor(create_config(self.name), multi_class_dataset())
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 0.7
 
 
@@ -116,7 +116,7 @@ class TestMeanAccuracy:
         annotations = make_segmentation_representation(np.array([[1, 2, 3, 2, 3], [0, 0, 0, 0, 0]]), True)
         predictions = make_segmentation_representation(np.array([[1, 0, 3, 0, 0], [0, 0, 0, 0, 0]]), False)
         dispatcher = MetricsExecutor(create_config(self.name), dataset)
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         for class_result, expected_class_result in zip(metric_result[0][0].result, [1.0, 1.0, 0.0, 0.5]):
             assert class_result == expected_class_result
 
@@ -159,7 +159,7 @@ class TestMeanIOU:
         annotations = make_segmentation_representation(np.array([[1, 2, 3, 2, 3], [0, 0, 0, 0, 0]]), True)
         predictions = make_segmentation_representation(np.array([[1, 0, 3, 0, 0], [0, 0, 0, 0, 0]]), False)
         dispatcher = MetricsExecutor(create_config(self.name), dataset)
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         for class_result, expected_class_result in zip(metric_result[0][0].result, [0.625, 1.0, 0.0, 0.5]):
             assert class_result == expected_class_result
 
@@ -202,5 +202,5 @@ class TestSegmentationFWAcc:
         annotations = make_segmentation_representation(np.array([[1, 2, 3, 2, 3], [0, 0, 0, 0, 0]]), True)
         predictions = make_segmentation_representation(np.array([[1, 0, 3, 0, 0], [0, 0, 0, 0, 0]]), False)
         dispatcher = MetricsExecutor(create_config(self.name), dataset)
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 0.5125

@@ -1,0 +1,33 @@
+models:
+  - name: faster-rcnn-resnet101-coco-sparse-60-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: ssd
+        inputs:
+          - name: image_info
+            type: CONST_INPUT
+            value: [[800, 1280, 1]]
+
+    datasets:
+      - name: ms_coco_detection_80_class_with_background
+
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: fit_to_window
+            dst_width: 1280
+            dst_height: 800
+          - type: padding
+            dst_width: 1280
+            dst_height: 800
+            pad_type: right_bottom
+
+        postprocessing:
+          - type: faster_rcnn_postprocessing_resize
+            dst_width: 1280
+            dst_height: 800
+
+        metrics:
+          - type: coco_precision
+            max_detections: 100

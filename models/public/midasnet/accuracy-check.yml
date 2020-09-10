@@ -1,0 +1,15 @@
+models:
+  - name: midasnet
+    launchers:
+      - framework: dlsdk
+        adapter: mono_depth
+    datasets:
+      - name: ReDWeb_V1
+        preprocessing:
+          - type: resize
+            size: 384
+        postprocessing:
+          - type: resize_prediction_depth_map
+          - type: align_prediction_depth_map
+        metrics:
+          - type: rmse

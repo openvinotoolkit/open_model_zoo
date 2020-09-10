@@ -1,0 +1,15 @@
+models:
+  - name: facial-landmarks-35-adas-0002
+
+    launchers:
+      - framework: dlsdk
+        adapter: landmarks_regression
+
+    datasets:
+      - name: facial_landmarks_35
+
+        metrics:
+          - type: normed_error
+            calculate_std: True
+            percentile: 90
+            presenter: print_vector

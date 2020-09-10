@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -178,6 +178,7 @@ class PostprocessorWithSpecificTargets(Postprocessor):
     def setup(self):
         apply_to = self.get_value_from_config('apply_to')
         self.apply_to = ApplyToOption(apply_to) if apply_to else None
+        self._deprocess_predictions = False
 
         if (self.annotation_source or self.prediction_source) and self.apply_to:
             raise ConfigError("apply_to and sources both provided. You need specify only one from them")
@@ -215,13 +216,18 @@ class PostprocessorWithSpecificTargets(Postprocessor):
         return target_annotations, target_predictions
 
     def _choose_targets_using_apply_to(self, annotations, predictions):
+        if all([annotation is None for annotation in annotations]):
+            apply_to = ApplyToOption.PREDICTION
+            self._deprocess_predictions = True
+        else:
+            apply_to = self.apply_to
         targets_specification = {
             ApplyToOption.ANNOTATION: (annotations, []),
             ApplyToOption.PREDICTION: ([], predictions),
             ApplyToOption.ALL: (annotations, predictions)
         }
 
-        return targets_specification[self.apply_to]
+        return targets_specification[apply_to]
 
     def process_image(self, annotation, prediction):
         raise NotImplementedError

@@ -1,0 +1,22 @@
+models:
+  - name: person-attributes-recognition-crossroad-0238
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: person_attributes
+          attributes_recognition_out: "attributes"
+
+    datasets:
+      - name: person_7_attributes
+
+        preprocessing:
+          - type: crop_rect
+          - type: resize
+            dst_width: 80
+            dst_height: 160
+
+        metrics:
+          - type: f1-score
+            calculate_average: False
+            presenter: print_vector

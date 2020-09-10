@@ -1,9 +1,12 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
+
       http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,11 +21,10 @@ from ..representation import DepthEstimationPrediction
 class MonoDepthAdapter(Adapter):
     __provider__ = 'mono_depth'
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         batch_prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
         result = []
         for identifier, prediction in zip(identifiers, batch_prediction):
             result.append(DepthEstimationPrediction(identifier, prediction))
 
         return result
-        

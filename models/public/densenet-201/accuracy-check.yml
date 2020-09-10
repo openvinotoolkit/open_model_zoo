@@ -1,0 +1,30 @@
+models:
+  - name: densenet-201-cf
+    launchers:
+      - framework: caffe
+        model:   densenet-201.prototxt
+        weights: densenet-201.caffemodel
+        adapter: classification
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 103.94, 116.78, 123.68
+            std: 58.8235294
+
+  - name: densenet-201
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224

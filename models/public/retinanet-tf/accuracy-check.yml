@@ -1,0 +1,26 @@
+models:
+  - name: retinanet-tf
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+
+    datasets:
+      - name: ms_coco_detection_80_class_without_background
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: frcnn_keep_aspect_ratio
+            size: 1333
+          - type: padding
+            size: 1333
+            pad_type: right_bottom
+
+        postprocessing:
+          - type: faster_rcnn_postprocessing_resize
+            size: 1333
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.05
+            remove_filtered: True
+
+        metrics:
+          - type: coco_precision

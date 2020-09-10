@@ -29,8 +29,6 @@ import yaml
 
 import common
 
-OMZ_ROOT = Path(__file__).resolve().parents[2]
-
 DEFAULT_POT_CONFIG_BASE = {
     'compression': {
         'algorithms': [
@@ -58,7 +56,7 @@ def quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
 
     pot_config_paths = {
         'engine': {
-            'config': str(OMZ_ROOT / 'tools/accuracy_checker/configs' / (model.name + '.yml')),
+            'config': str(common.MODEL_ROOT/ model.subdirectory / 'accuracy-check.yml'),
         },
         'model': {
             'model': str(args.model_dir / model.subdirectory / input_precision / (model.name + '.xml')),

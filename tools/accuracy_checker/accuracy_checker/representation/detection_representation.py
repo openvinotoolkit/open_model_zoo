@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -48,6 +48,14 @@ class Detection(BaseRepresentation):
     @property
     def size(self):
         return len(self.x_mins)
+
+    @property
+    def boxes(self):
+        if self.size == 0:
+            return []
+
+        return [[x_min, y_min, x_max, y_max]
+                for x_min, y_min, x_max, y_max in zip(self.x_mins, self.y_mins, self.x_maxs, self.y_maxs)]
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):

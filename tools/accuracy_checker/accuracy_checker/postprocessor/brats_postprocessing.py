@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,15 +18,16 @@ import numpy as np
 from .postprocessor import Postprocessor
 from ..config import ConfigError, BoolField, ListField, NumberField
 from ..representation import BrainTumorSegmentationPrediction, BrainTumorSegmentationAnnotation
+from ..utils import UnsupportedPackage
 try:
     from scipy.ndimage import interpolation
-except ImportError:
-    interpolation = None
+except ImportError as import_error:
+    interpolation = UnsupportedPackage("scipy", import_error.msg)
 
 
 def resample(data, shape):
-    if interpolation is None:
-        raise ValueError('scipy required, please install it')
+    if isinstance(interpolation, UnsupportedPackage):
+        interpolation.raise_error("segmentation_prediction_resample")
     if len(data.shape) != len(shape):
         raise RuntimeError('Dimensions of input array and shape are different. Resampling is impossible.')
     factor = [float(o) / i for i, o in zip(data.shape, shape)]
@@ -131,5 +132,61 @@ class TransformBratsPrediction(Postprocessor):
             result = np.expand_dims(result, axis=0)
 
             target.mask = result
+
+        return annotation, prediction
+
+
+class RemoveBratsPredictionPadding(Postprocessor):
+    __provider__ = 'remove_brats_prediction_padding'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'make_argmax': BoolField(
+                optional=True, default=False, description="Allows to apply argmax operation to output values."
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.make_argmax = self.get_value_from_config('make_argmax')
+
+    def process_image(self, annotation, prediction):
+        raise RuntimeError("Since `process_image_with_metadata` is overriden, this method MUST NOT be called")
+
+    def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
+        raw_shape = image_metadata.get('size_after_cropping')
+        if not raw_shape:
+            raise ValueError("No 'size_after_cropping' in metadata")
+
+        for target in prediction:
+
+            # Remove padding
+            padded_shape = target.mask.shape[1:]
+            pad_before = [(p - r) // 2 for p, r in zip(padded_shape, raw_shape)]
+            pad_after = [-(p - r - b) for p, r, b in zip(padded_shape, raw_shape, pad_before)]
+            result = target.mask[:, pad_before[0]:pad_after[0], pad_before[1]:pad_after[1], pad_before[2]:pad_after[2]]
+
+            # Undo cropping
+            bbox = image_metadata.get('crop_bbox')
+            if not bbox:
+                raise ValueError("No 'crop_bbox' in metadata")
+
+            original_size = image_metadata.get('original_size_of_raw_data')
+            if original_size is None:
+                raise ValueError("No 'original_size_of_raw_data' in metadata")
+
+            label = np.zeros(shape=([target.mask.shape[0]] + list(image_metadata['original_size_of_raw_data'])))
+            label[:, bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1], bbox[2][0]:bbox[2][1]] = result
+            target.mask = label
+
+            # Apply argmax
+            if self.make_argmax:
+                target.mask = np.argmax(target.mask, axis=0)
+                target.mask = np.expand_dims(target.mask, axis=0)
+
+            # Align with annotation shape
+            target.mask = np.transpose(target.mask, (1, 2, 3, 0))
 
         return annotation, prediction

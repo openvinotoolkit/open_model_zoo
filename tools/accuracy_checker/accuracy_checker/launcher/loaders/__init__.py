@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ from .loader import Loader
 
 from .pickle_loader import PickleLoader
 from .xml_loader import XMLLoader
+from .json_loader import JSONLoader
 
 __all__ = [
     'Loader',
     'PickleLoader',
     'XMLLoader',
+    'JSONLoader'
 ]

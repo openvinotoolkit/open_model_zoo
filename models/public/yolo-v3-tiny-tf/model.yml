@@ -1,0 +1,38 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  YOLO v3 Tiny is a real-time object detection model implemented with Keras* from
+  this repository <https://github.com/david8862/keras-YOLOv3-model-set> and converted
+  to TensorFlow* framework. This model was pretrained on COCO* dataset with 80 classes.
+task_type: detection
+files:
+  - name: yolo-v3-tiny-tf.zip
+    size: 32836256
+    sha256: b872207db53b592de64c2a1f04420278a23707aa9a05549efd78778a947fc854
+    source: https://download.01.org/opencv/public_models/082020/yolo-v3-tiny-tf/yolo-v3-tiny-tf.zip
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: yolo-v3-tiny-tf.zip
+model_optimizer_args:
+  - --input_shape=[1,416,416,3]
+  - --input=image_input
+  - --scale_values=image_input[255]
+  - --reverse_input_channels
+  - --transformations_config=$dl_dir/yolo-v3-tiny-tf/yolo-v3-tiny-tf.json
+  - --input_model=$dl_dir/yolo-v3-tiny-tf/yolo-v3-tiny-tf.pb
+framework: tf
+
+license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

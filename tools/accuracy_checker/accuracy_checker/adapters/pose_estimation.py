@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ class HumanPoseAdapter(Adapter):
             self._keypoints_heatmap_bias = self.keypoints_heatmap + '/add_'
             self._part_affinity_fileds_bias = self.part_affinity_fields + '/add_'
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.concat_out:

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 from ..adapters import Adapter
 from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction
-from ..config import ConfigValidator, BoolField, ListField, NumberField
+from ..config import ConfigValidator, BoolField, ListField, NumberField, StringField
 
 
 class SegmentationAdapter(Adapter):
@@ -40,7 +40,7 @@ class SegmentationAdapter(Adapter):
     def configure(self):
         self.make_argmax = self.launcher_config.get('make_argmax', False)
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
@@ -114,6 +114,10 @@ class BrainTumorSegmentationAdapter(Adapter):
             'label_order': ListField(
                 optional=True, default=[1, 2, 3], value_type=int, validate_values=True,
                 description="Specifies order of output labels, according to order of dataset labels"
+            ),
+            'segmentation_out': StringField(
+                optional=True,
+                description='Segmentation output layer name. If not provided, first output will be used.'
             )
         })
 
@@ -122,12 +126,15 @@ class BrainTumorSegmentationAdapter(Adapter):
     def configure(self):
         self.argmax = self.get_value_from_config('make_argmax')
         self.label_order = tuple(self.get_value_from_config('label_order'))
+        self.segmentation_out = self.get_value_from_config('segmentation_out')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
+        if not self.segmentation_out:
+            self.segmentation_out = self.output_blob
+        for identifier, output in zip(identifiers, raw_outputs[self.segmentation_out]):
             if self.argmax:
                 output = np.argmax(output, axis=0).astype(np.int8)
                 output = np.expand_dims(output, axis=0)

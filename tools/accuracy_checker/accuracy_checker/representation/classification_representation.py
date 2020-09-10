@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -60,6 +60,10 @@ class ArgMaxClassificationPrediction(ClassificationPrediction):
     @property
     def label(self):
         return self._label
+
+    @label.setter
+    def label(self, value):
+        self._label = value
 
     def top_k(self, k):
         return np.full(k, self._label)

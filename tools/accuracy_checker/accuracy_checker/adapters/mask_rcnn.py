@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,14 +19,16 @@ import warnings
 import cv2
 import numpy as np
 
-try:
-    import pycocotools.mask as mask_util
-except ImportError:
-    mask_util = None
 from .adapter import Adapter
 from ..config import StringField, ConfigError
 from ..representation import CoCocInstanceSegmentationPrediction, DetectionPrediction, ContainerPrediction
 from ..postprocessor import FRCNNPostprocessingBboxResize
+from ..utils import UnsupportedPackage
+
+try:
+    import pycocotools.mask as mask_util
+except ImportError as import_error:
+    mask_util = UnsupportedPackage("pycocotools", import_error.msg)
 
 
 class MaskRCNNAdapter(Adapter):
@@ -34,8 +36,8 @@ class MaskRCNNAdapter(Adapter):
 
     def __init__(self, launcher_config, label_map=None, output_blob=None):
         super().__init__(launcher_config, label_map, output_blob)
-        if mask_util is None:
-            raise ImportError('pycocotools is not installed. Please install it before using mask_rcnn adapter.')
+        if isinstance(mask_util, UnsupportedPackage):
+            mask_util.raise_error(self.__provider__)
         self.encoder = mask_util.encode
 
     @classmethod
@@ -108,7 +110,7 @@ class MaskRCNNAdapter(Adapter):
 
             self.realisation = self._process_pytorch_outputs
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         return self.realisation(raw_outputs, identifiers, frame_meta)
 
@@ -189,7 +191,13 @@ class MaskRCNNAdapter(Adapter):
                 im_scale_y = image_meta['scale_y']
             else:
                 image_input = [shape for shape in image_meta['input_shape'].values() if len(shape) == 4]
-                processed_image_size = image_input[0][1:]
+                assert image_input, "image input not found"
+                assert len(image_input) == 1, 'several input images detected'
+                image_input = image_input[0]
+                if image_input[1] == 3:
+                    processed_image_size = image_input[2:]
+                else:
+                    processed_image_size = image_input[1:3]
                 im_scale_y = processed_image_size[0] / original_image_size[0]
                 im_scale_x = processed_image_size[1] / original_image_size[1]
             boxes[:, 0::2] /= im_scale_x

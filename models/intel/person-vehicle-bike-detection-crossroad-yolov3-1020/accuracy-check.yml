@@ -1,0 +1,49 @@
+models:
+  - name: person-vehicle-bike-detection-crossroad-yolov3-1020
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: yolo_v3
+          anchors: "10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326"
+          num: 9
+          coords: 4
+          classes: 80
+          anchor_masks: [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
+          outputs:
+            - conv2d_58/Conv2D/YoloRegion
+            - conv2d_66/Conv2D/YoloRegion
+            - conv2d_74/Conv2D/YoloRegion
+
+    datasets:
+      - name: crossroad_dataset_1020
+
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: frcnn_keep_aspect_ratio
+            dst_height: 416
+            dst_width: 416
+          - type: padding
+            size: 416
+            pad_type: right_bottom
+
+        postprocessing:
+          - type: faster_rcnn_postprocessing_resize
+            dst_height: 416
+            dst_width: 416
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.001
+            remove_filtered: True
+
+          - type: nms
+            overlap: 0.5
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: map
+            presenter: print_vector
+            ignore_difficult: True
+            include_boundaries: True
+            allow_multiple_matches_per_ignored: True
+            use_filtered_tp: False

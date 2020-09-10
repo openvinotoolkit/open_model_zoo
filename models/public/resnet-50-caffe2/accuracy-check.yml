@@ -1,0 +1,33 @@
+models:
+
+  - name: resnet-50-caffe2
+    launchers:
+      - framework: onnx_runtime
+        model: resnet-50-caffe2.onnx
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 103.53, 116.28, 123.675
+            std: 57.375, 57.12, 58.395
+
+  - name: resnet-50-caffe2
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224

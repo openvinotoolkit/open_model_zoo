@@ -3,29 +3,28 @@
 cycler==0.10.0            # via matplotlib
 decorator==4.4.2          # via networkx
 editdistance==0.5.3       # via -r tools/accuracy_checker/requirements.in
-imageio==2.8.0            # via scikit-image
+imageio==2.9.0            # via scikit-image
 joblib==0.14.1            # via scikit-learn
 kiwisolver==1.1.0         # via matplotlib
 matplotlib==3.0.3         # via scikit-image
 networkx==2.4             # via scikit-image
 nibabel==3.0.2            # via -r tools/accuracy_checker/requirements.in
 numpy==1.17.5             # via -r tools/accuracy_checker/requirements-core.in, imageio, matplotlib, nibabel, pywavelets, scikit-learn, scipy
-pillow==7.1.1             # via -r tools/accuracy_checker/requirements.in, imageio, scikit-image
+pillow==7.2.0             # via -r tools/accuracy_checker/requirements.in, imageio, scikit-image
 py-cpuinfo==4.0.0         # via -r tools/accuracy_checker/requirements.in
-pydicom==1.4.2            # via -r tools/accuracy_checker/requirements.in
+pydicom==2.0.0            # via -r tools/accuracy_checker/requirements.in
 pyparsing==2.4.7          # via matplotlib
 python-dateutil==2.8.1    # via matplotlib
 pywavelets==1.1.1         # via scikit-image
-pyyaml==5.3.1             # via -r tools/accuracy_checker/requirements-core.in, yamlloader
+pyyaml==5.3.1             # via -r tools/accuracy_checker/requirements-core.in
 scikit-image==0.15.0      # via -r tools/accuracy_checker/requirements.in
 scikit-learn==0.22.2.post1  # via -r tools/accuracy_checker/requirements.in
 scipy==1.4.1              # via -r tools/accuracy_checker/requirements.in, scikit-image, scikit-learn
-sentencepiece==0.1.85     # via -r tools/accuracy_checker/requirements.in
+sentencepiece==0.1.91     # via -r tools/accuracy_checker/requirements.in
 shapely==1.7.0            # via -r tools/accuracy_checker/requirements.in
 six==1.15.0               # via python-dateutil
-tokenizers==0.7           # via -r tools/accuracy_checker/requirements.in
-tqdm==4.45.0              # via -r tools/accuracy_checker/requirements.in
-yamlloader==0.5.5         # via -r tools/accuracy_checker/requirements.in
+tokenizers==0.8.0         # via -r tools/accuracy_checker/requirements.in
+tqdm==4.47.0              # via -r tools/accuracy_checker/requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,28 @@ description: >-
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-0050.xml
-    size: 289772
-    sha256: 2ef6a5a8ad7c308da045c8283477ecfb21e0ee26e807cf6460a348ca90df5b59
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/instance-segmentation-security-0050/FP32/instance-segmentation-security-0050.xml
+    size: 304976
+    sha256: 56c1c249bbab54d65ce9d2b448bfaab67a02be1497a38fd4e9ea32cf42be0088
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/instance-segmentation-security-0050/FP32/instance-segmentation-security-0050.xml
   - name: FP32/instance-segmentation-security-0050.bin
-    size: 121497432
-    sha256: d19d52955a973c5210b7b8cf9170fadf4c812329740f04733ae200cd62a8a175
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/instance-segmentation-security-0050/FP32/instance-segmentation-security-0050.bin
+    size: 121497512
+    sha256: 695c5fcbf8b49916c3a8b9a16011bfdf9f9a17d4460596fa518b26c01d0726ff
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/instance-segmentation-security-0050/FP32/instance-segmentation-security-0050.bin
   - name: FP16/instance-segmentation-security-0050.xml
-    size: 289662
-    sha256: 950423b06d5564ec343273547304ef2ba79e26b901bcc78df16fab984704bf39
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/instance-segmentation-security-0050/FP16/instance-segmentation-security-0050.xml
+    size: 304864
+    sha256: 4b6d44a82e3b70e3242cce3b2675c3a73f51d6fcbf2a1f93bd49767d630aa7b7
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/instance-segmentation-security-0050/FP16/instance-segmentation-security-0050.xml
   - name: FP16/instance-segmentation-security-0050.bin
-    size: 60748778
-    sha256: 52e0aa71864aae1ff9277c692476383b208526031464adb661751263752122df
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/instance-segmentation-security-0050/FP16/instance-segmentation-security-0050.bin
+    size: 60748858
+    sha256: e1408865cee9629e60160cb767aa0afa6cf87813425806a0de7ee29898ec14dc
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/instance-segmentation-security-0050/FP16/instance-segmentation-security-0050.bin
   - name: FP16-INT8/instance-segmentation-security-0050.xml
-    size: 724832
-    sha256: da468de9676abedfc5f116bc8d359d898b5c10c4179b874d63dbace7e7582712
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/instance-segmentation-security-0050/FP16-INT8/instance-segmentation-security-0050.xml
+    size: 737519
+    sha256: aac4bed4d9405bb1481260b1bf292482fdd25d14b66cb2c9c27d9886839a8de2
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/instance-segmentation-security-0050/FP16-INT8/instance-segmentation-security-0050.xml
   - name: FP16-INT8/instance-segmentation-security-0050.bin
-    size: 30597942
-    sha256: 74f7be4f151234d05d689dfaa432aa253071c16db26d4c9ab5387af08950d193
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/instance-segmentation-security-0050/FP16-INT8/instance-segmentation-security-0050.bin
+    size: 30598022
+    sha256: 6761bec44b6f6c36906dbd8fa51da8f8b2430e7f97958f95f2574c4adf986724
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/instance-segmentation-security-0050/FP16-INT8/instance-segmentation-security-0050.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

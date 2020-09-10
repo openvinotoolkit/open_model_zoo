@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -80,10 +80,12 @@ class BaseFormatConverter(ClassProvider):
                 # Converter argparser should contain only converter specific arguments.
                 continue
 
-            required = not field.optional
-            parser.add_argument(
-                format_key(field_name), required=required, type=field.type
-            )
+            kwargs = {'required': not field.optional}
+            data_type = field.type
+            if data_type is not None:
+                kwargs['type'] = data_type
+
+            parser.add_argument(format_key(field_name), **kwargs)
 
         return parser
 

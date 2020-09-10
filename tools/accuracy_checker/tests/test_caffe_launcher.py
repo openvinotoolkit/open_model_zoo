@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -67,8 +67,8 @@ class TestCaffeLauncher:
             "device": "cpu"
         }
         caffe_model = create_launcher(config, 'SampleNet')
-        assert caffe_model.model == models_dir / 'SampleNet.prototxt'
-        assert caffe_model.weights == models_dir / 'SampleNet.caffemodel'
+        assert caffe_model.model == models_dir / 'SampLeNet.prototxt'
+        assert caffe_model.weights == models_dir / 'SampLeNet.caffemodel'
 
 
 def test_missed_model_in_create_caffe_launcher_raises_config_error_exception():
