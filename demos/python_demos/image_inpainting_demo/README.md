@@ -5,6 +5,7 @@ to fill holes in images.
 
 ## How It Works
 This demo can work in 2 modes: 
+
 * GUI mode: areas for inpainting can be marked interactively using mouse painting
 * Auto mode (use -a option for it): image will be processed automatically using randomly applied mask (-r option) or using specific color-based mask (-mc option to set mask color)
 
@@ -58,9 +59,22 @@ To run the demo, you can use public or pretrained models. You can download the p
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
+## GUI Mode operation
+In GUI mode user can draw mask using mouse (holding left mouse button). The brush size is adjustable using slider on the top of the screen. After the mask painting is done, inpainting processing can be started by pressing Space or Enter key.
+
+Also, these hot keys are available:
+
+* **Backspace or C** to clear current mask
+* **Space or Enter** to inpaint
+* **R** to reset all changes
+* **Tab** to show original image
+* **Esc or Q** to quit
+
 ## Demo Output
 
-The demo uses OpenCV to display the resulting image and image with mask applied and reports performance in the format of summary inference FPS.
+In auto mode this demo uses OpenCV to display the resulting image and image with mask applied and reports performance in the format of summary inference FPS. Processed image can be also written to file.
+
+In GUI mode this demo provides interactive means to apply mask and see the result of processing instantly (see hotkeys above).
 
 ## See Also
 

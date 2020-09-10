@@ -92,20 +92,6 @@ class DeepSpeechPipeline:
         # Read IR
         self.net = self.ie.read_network(model=model_xml_fname, weights=model_bin_fname)
 
-        if device is not None:
-            self._check_ir_nodes(device, device_config)
-
-    def _check_ir_nodes(self, device, device_config):
-        # Check NN nodes
-        device_supported_layers = self.ie.query_network(self.net, device, device_config)
-        net_unsupported_layers = [l for l in self.net.layers.keys() if l not in device_supported_layers]
-        if len(net_unsupported_layers) > 0:
-            raise RuntimeError(
-                ("Following layers are not supported by the plugin for specified device {}: {}.  " +
-                "Please try to specify IE extension library path with --cpu_extension command line argument").
-                format(device, ', '.join(net_unsupported_layers))
-            )
-
     def activate_model(self, device):
         if self.exec_net is not None:
             return  # Assuming self.net didn't change

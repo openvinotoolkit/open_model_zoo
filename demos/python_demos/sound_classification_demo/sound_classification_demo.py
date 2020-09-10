@@ -153,16 +153,6 @@ def main():
     log.info("Loading model {}".format(args.model))
     net = ie.read_network(args.model, args.model[:-4] + ".bin")
 
-    if args.device == "CPU":
-        supported_layers = ie.query_network(net, args.device)
-        not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
-        if len(not_supported_layers) > 0:
-            log.error("Following layers are not supported by the {} plugin:\n {}"
-                      .format(args.device, ', '.join(not_supported_layers)))
-            log.error("Please try to specify cpu extensions library path in sample's command line parameters using "
-                      "-l/--cpu_extension command line argument")
-            sys.exit(1)
-
     if len(net.input_info) != 1:
         log.error("Demo supports only models with 1 input layer")
         sys.exit(1)
