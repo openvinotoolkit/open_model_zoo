@@ -37,6 +37,12 @@ class IEModel:  # pylint: disable=too-few-public-methods
         self.net = ie_core.read_network(model_path + ".xml", model_path + ".bin")
         assert len(self.net.input_info) == 1, "One input is expected"
 
+        supported_layers = ie_core.query_network(self.net, device)
+        not_supported_layers = [l for l in self.net.layers.keys() if l not in supported_layers]
+        if len(not_supported_layers) > 0:
+            raise RuntimeError("Following layers are not supported by the {} plugin:\n {}"
+                               .format(device, ', '.join(not_supported_layers)))
+
         self.exec_net = ie_core.load_network(network=self.net,
                                              device_name=device,
                                              num_requests=num_requests)

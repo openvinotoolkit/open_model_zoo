@@ -68,6 +68,16 @@ class IEModel:
         log.info("Loading network files:\n\t%s\n\t%s", model_xml, model_bin)
         net = ie.read_network(model=model_xml, weights=model_bin)
 
+        if "CPU" in device:
+            supported_layers = ie.query_network(net, "CPU")
+            not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
+            if not_supported_layers:
+                log.error("Following layers are not supported by the plugin for specified device %s:\n %s",
+                          device, ', '.join(not_supported_layers))
+                log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
+                          "or --cpu_extension command line argument")
+                sys.exit(1)
+
         assert len(net.input_info) in self.get_allowed_inputs_len(), \
             "Supports topologies with only {} inputs, but got {}" \
             .format(self.get_allowed_inputs_len(), len(net.input_info))

@@ -69,6 +69,16 @@ def load_ie_model(ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=
     log.info("Loading network")
     net = ie.read_network(model_xml, os.path.splitext(model_xml)[0] + ".bin")
 
+    if "CPU" in device:
+        supported_layers = ie.query_network(net, "CPU")
+        not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
+        if not_supported_layers:
+            log.error("Following layers are not supported by the plugin for specified device %s:\n %s",
+                      device, ', '.join(not_supported_layers))
+            log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
+                      "or --cpu_extension command line argument")
+            sys.exit(1)
+
     assert len(net.input_info) == 1 or len(net.input_info) == 2, \
         "Supports topologies with only 1 or 2 inputs"
     assert len(net.outputs) == 1 or len(net.outputs) == 4 or len(net.outputs) == 5, \
