@@ -192,6 +192,16 @@ def main():
     log.info('Loading decoder part of text recognition network')
     text_dec_net = ie.read_network(args.text_dec_model, os.path.splitext(args.text_dec_model)[0] + '.bin')
 
+    if 'CPU' in args.device:
+        supported_layers = ie.query_network(mask_rcnn_net, 'CPU')
+        not_supported_layers = [l for l in mask_rcnn_net.layers.keys() if l not in supported_layers]
+        if len(not_supported_layers) != 0:
+            log.error('Following layers are not supported by the plugin for specified device {}:\n {}'.
+                      format(args.device, ', '.join(not_supported_layers)))
+            log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
+                      "or --cpu_extension command line argument")
+            sys.exit(1)
+
     required_input_keys = {'im_data', 'im_info'}
     assert required_input_keys == set(mask_rcnn_net.input_info), \
         'Demo supports only topologies with the following input keys: {}'.format(', '.join(required_input_keys))
