@@ -127,8 +127,6 @@ class Model:
         self.net = ie.read_network(model=xml_file_path, weights=bin_file_path)
 
         log.info('Loading network to plugin...')
-        if 'CPU' in device:
-            self.check_cpu_support(ie, self.net)
         self.max_num_requests = max_num_requests
         self.exec_net = ie.load_network(network=self.net, device_name=device, config=plugin_config, num_requests=max_num_requests)
 
@@ -137,21 +135,6 @@ class Model:
         self.completed_request_results = results if results is not None else []
         self.callback_exceptions = caught_exceptions if caught_exceptions is not None else {}
         self.event = threading.Event()
-
-    @staticmethod
-    def check_cpu_support(ie, net):
-        log.info('Check that all layers are supported...')
-        supported_layers = ie.query_network(net, 'CPU')
-        not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
-        if len(not_supported_layers) != 0:
-            unsupported_info = '\n\t'.join('{} ({} with params {})'.format(layer_id,
-                                                                           net.layers[layer_id].type,
-                                                                           str(net.layers[layer_id].params))
-                                           for layer_id in not_supported_layers)
-            log.warning('Following layers are not supported '
-                        'by the CPU plugin:\n\t{}'.format(unsupported_info))
-            log.warning('Please try to specify cpu extensions library path.')
-            raise ValueError('Some of the layers are not supported.')
 
     def unify_inputs(self, inputs):
         if not isinstance(inputs, dict):

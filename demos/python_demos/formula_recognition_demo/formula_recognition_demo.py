@@ -57,12 +57,6 @@ def read_net(model_xml, ie, device):
 
     log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
     model = ie.read_network(model_xml, model_bin)
-
-    supported_layers = ie.query_network(model, device)
-    not_supported_layers = [l for l in model.layers.keys() if l not in supported_layers]
-    if len(not_supported_layers) != 0:
-        log.error("Following layers are not supported by the plugin for specified device {}:\n{}".
-                  format(device, ', '.join(not_supported_layers)))
     return model
 
 
