@@ -143,15 +143,18 @@ def show_interpretation(input_to_net, out_from_net):
                                     [254,224,144], [252,141,89], [215,48,39]])/255
     cm = LinearSegmentedColormap.from_list('custom_cmap', color_list, N=6)
 
-    fig, axs = plt.subplots(1, 2, figsize=(10,5))
-
+    fig, axs = plt.subplots(1, 2, figsize=(13,5))
+    fig.suptitle("Facies classification results", fontsize=22)
     axs[0].imshow(input_to_net, cmap='gray')
     axs[0].set_title('Input slice')
     
     im = axs[1].imshow(res_image, cmap=cm)
     axs[1].set_title('Interpretation of the slice')
-    
-    fig.colorbar(im, ax=axs[1])
+
+    cbaxes = fig.add_axes([0.91, 0.2, 0.01, 0.6]) 
+    cb = fig.colorbar(im, ax=axs[1], ticks=[0.33, 0.45, 0.57, 0.69, 0.82, 0.93], cax = cbaxes) 
+    cb.ax.set_yticklabels(['upper_ns', 'middle_ns', 'lower_ns',
+                   'rijnland_chalk', 'scruff', 'zechstein'], fontsize=9, ha="left")
     plt.savefig('interpretation.png')
 
 
