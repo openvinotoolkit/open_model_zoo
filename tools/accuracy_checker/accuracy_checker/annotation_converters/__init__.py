@@ -162,11 +162,10 @@ __all__ = [
     'ADE20kConverter',
     'LibrispeechConverter',
     'CriteoKaggleDACConverter',
-<<<<<<< HEAD
     'FeaturesRegressionConverter',
     'Im2latexDatasetConverter',
-<<<<<<< HEAD
     'DNASequenceDatasetConverter',
+<<<<<<< HEAD
 <<<<<<< HEAD
     'PlaceRecognitionDatasetConverter',
     'ClutteredMNISTConverter',
@@ -183,4 +182,8 @@ __all__ = [
 >>>>>>> add Cocosnet annotation converter
 >>>>>>> add Cocosnet annotation converter
 >>>>>>> add Cocosnet annotation converter
+=======
+    'PlaceRecognitionDatasetConverter',
+    'CocosnetConverter',
+>>>>>>> Add custom evaluator and delete constants from adapter
 ]

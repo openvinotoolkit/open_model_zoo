@@ -25,7 +25,7 @@ class CocosnetAdapter(Adapter):
 
     def process(self, raw, identifiers, frame_meta):
         result = []
-        raw_outputs = self._extract_predictions(raw, frame_meta)['978']
+        raw_outputs = self._extract_predictions(raw, frame_meta)[self.output_blob]
         for identifier, img in zip(identifiers, raw_outputs):
             img = self._basic_postprocess(img)
             result.append(CocosnetPrediction(identifier, img))

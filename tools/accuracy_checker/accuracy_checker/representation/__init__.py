@@ -186,4 +186,10 @@ __all__ = [
     'DNASequencePrediction',
     'RawTensorAnnotation',
     'RawTensorPrediction',
+    'QualityAssessmentAnnotation',
+    'QualityAssessmentPrediction',
+
+    'CocosnetAnnotation',
+    'CocosnetPrediction'
+
 ]
