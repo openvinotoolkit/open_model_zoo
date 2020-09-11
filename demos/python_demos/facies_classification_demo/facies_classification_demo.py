@@ -90,6 +90,7 @@ def load_data(data_path, slice_index, slice_type):
         assert False, f'Unsupported data format: {data_format}' 
     
 
+    assert slice_index >= 0, 'Invalid slice index argument, slice index must not be negative'
     x, y, z = data.shape
     if slice_type=='inline':
         assert slice_index < x , f'Invalid slice index'
