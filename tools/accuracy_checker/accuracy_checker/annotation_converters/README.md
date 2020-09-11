@@ -403,6 +403,11 @@ The main difference between this converter and `super_resolution` in data organi
   * `convert_images` - allows convert images from raw data stored in npz and save them into provided directory (Optional, default True).
   * `images_dir` - directory for saving converted images (Optional, if not provided, the images will be saved into converted_images directory in the same location, where data_file is stored)
 
+  * `vocab_file` - file containing vocabulary to cast token class indices into human-readable tokens 
+* `cocosnet` - converts ADE20K dataset to `CocosnetAnnotation` according to `reference_dict`.
+  * `images_dir` - path to directory with input images (e.g. `ADEChallengeData2016/images`).
+  * `annotations_dir` - path to directory with annotations (e.g. `ADEChallengeData2016/annotations`).
+  * `reference_dict` - path to dict with pairs key (validation): value (train).
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `background_label` using `dataset_meta_file` argument.

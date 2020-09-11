@@ -43,3 +43,6 @@ Optionally you can provide `module_config` section which contains config for cus
 
 * **I3D Evaluator** demonstrates how to evaluate two-stream I3D model (RGB + Flow).
   <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/i3d_evaluator.py">Evaluator code</a>.
+  <a href="https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/asr_encoder_decoder_evaluator.py">Evaluator code</a>.
+
+* **CoCosNet Evaluator** demonstrates how to evaluate the `CoCosNet` model via Accuracy Checker.
