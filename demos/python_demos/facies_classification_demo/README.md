@@ -8,6 +8,15 @@ Upon the start-up, the demo application reads command-line parameters and loads 
 Inference Engine plugin. When inference is done, the application outputs the image and displays matplotlib window with facies interpretation.
 
 ## Running
+
+### Installation of dependencies
+
+To install required dependencies run
+
+```bash
+pip3 install -r requirements.txt
+```
+
 Running the application with the `-h` option yields the following usage message:
 
 ``` 
@@ -49,6 +58,8 @@ To run the demo, you can use public or pre-trained models. You can download the 
 ## Demo Output
 
 The application uses matplotlib to display resulting instance segmentation masks, saving the picture to the current directory.
+
+![](./facies_classification_demo.png)
 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
