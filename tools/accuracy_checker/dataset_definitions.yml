@@ -402,7 +402,7 @@ datasets:
       use_full_label_map: False
     annotation: crossroad_extra_untagged_person_hb.pickle
     dataset_meta: crossroad_extra_untagged_person_hb.json
-  
+
   - name: crossroad_extra_untagged_vehicle
     data_source: crossroad_extra_untagged/val_data
     annotation_conversion:
@@ -413,7 +413,7 @@ datasets:
       use_full_label_map: False
     annotation: crossroad_extra_untagged_vehicle.pickle
     dataset_meta: crossroad_extra_untagged_vehicle.json
-  
+
   - name: crossroad_extra_untagged_vehicle_labels_from_1
     data_source: crossroad_extra_untagged/val_data
     annotation_conversion:
@@ -422,7 +422,7 @@ datasets:
       has_background: True
     annotation: crossroad_extra_untagged_vehicle_labels_from_1.pickle
     dataset_meta: crossroad_extra_untagged_vehicle_labels_from_1.json
-  
+
   - name: pedestrian_and_vehicle_dataset
     data_source: val2017
     annotation_conversion:
