@@ -29,27 +29,33 @@
 class PipelineBase
 {
 public:
-    struct RequestResult {
-        int64_t frameId;
-        std::map<std::string,InferenceEngine::MemoryBlob::Ptr> outputs;
+    struct ResultBase {
+        int64_t frameId=-1;
+        cv::Mat extraData;
+
+        bool IsEmpty() { return frameId < 0; }
+    };
+
+    struct InferenceResult: public ResultBase {
+        std::map<std::string,InferenceEngine::MemoryBlob::Ptr> outputsData;
         std::chrono::steady_clock::time_point startTime;
 
         /// Returns pointer to first output blob
         /// This function is a useful addition to direct access to outputs list as many models have only one output
         /// @returns pointer to first output blob
         InferenceEngine::MemoryBlob::Ptr getFirstOutputBlob() {
-            if (outputs.empty())
+            if (outputsData.empty())
                 throw std::out_of_range("Outputs map is empty.");
-            return outputs.begin()->second;
+            return outputsData.begin()->second;
         }
 
-        bool IsEmpty() { return outputs.empty(); }
+        bool IsEmpty() { return outputsData.empty(); }
     };
 
     struct PerformanceInfo
     {
         int64_t framesCount = 0;
-        std::chrono::steady_clock::duration latencySum;
+        std::chrono::steady_clock::duration latencySum = std::chrono::steady_clock::duration::zero();
         std::chrono::steady_clock::time_point startTime;
         uint32_t numRequestsInUse;
         double FPS=0;
@@ -84,7 +90,7 @@ public:
     /// Gets available data from the queue and renders it to output frame
     /// This function should be overriden in inherited classes to provide default rendering of processed data
     /// @returns rendered frame, its size corresponds to the size of network output
-    virtual cv::Mat renderData() { return cv::Mat(); }
+    virtual cv::Mat obtainAndRenderData() { return cv::Mat(); }
 
 protected:
     /// This function is called during intialization before loading model to device
@@ -95,16 +101,18 @@ protected:
 
     /// Submit request to network
     /// @param request - request to be submitted (caller function should obtain it using getIdleRequest)
+    /// @param extraData - additional source data. This is optional transparent data not used in inference process directly.
+    /// It is passed to inference result directly and can be used in postprocessing.
     /// @returns unique sequential frame ID for this particular request. Same frame ID will be written in the responce structure.
-    virtual int64_t submitRequest(InferenceEngine::InferRequest::Ptr request);
+    virtual int64_t submitRequest(InferenceEngine::InferRequest::Ptr request,cv::Mat extraData =cv::Mat());
 
     /// Returns processed result, if available
-    /// @returns RequestResult with processed information or empty RequestResult (with negative frameID) if there's no any results yet.
-    virtual RequestResult getResult();
+    /// @returns InferenceResult with processed information or empty InferenceResult (with negative frameID) if there's no any results yet.
+    virtual InferenceResult getInferenceResult();
 
 protected:
     RequestsPool requestsPool;
-    std::unordered_map<int64_t, RequestResult> completedRequestResults;
+    std::unordered_map<int64_t, InferenceResult> completedInferenceResults;
 
     InferenceEngine::ExecutableNetwork execNetwork;
 

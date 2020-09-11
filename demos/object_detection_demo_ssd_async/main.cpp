@@ -129,21 +129,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-void paintResults(cv::Mat& frame, const DetectionPipeline::DetectionResults& results) {
-    for (auto obj : results.objects) {
-        std::ostringstream conf;
-        conf << ":" << std::fixed << std::setprecision(3) << obj.confidence;
-        obj.x *= frame.cols;
-        obj.width *= frame.cols;
-        obj.y *= frame.rows;
-        obj.height *= frame.rows;
-        cv::putText(frame, obj.label + conf.str(),
-            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
-            cv::Scalar(0, 0, 255));
-        cv::rectangle(frame, obj, cv::Scalar(0, 0, 255));
-    }
-}
-
 void paintInfo(cv::Mat& frame, const PipelineBase::PerformanceInfo& info) {
     std::ostringstream out;
 
@@ -168,7 +153,7 @@ int main(int argc, char *argv[]) {
         DetectionPipeline pipeline;
 
         /** This demo covers certain topology and cannot be generalized for any object detection **/
-        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << *InferenceEngine::GetInferenceEngineVersion() << std::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -184,11 +169,11 @@ int main(int argc, char *argv[]) {
             pipeline.loadLabels(FLAGS_labels);
 
         pipeline.init(FLAGS_m, ConfigFactory::GetUserConfig(), (float)FLAGS_t, FLAGS_auto_resize);
-        std::unordered_map<int64_t, cv::Mat> frames;
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();
         while (true){
+            //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
             int64_t frameNum;
             for (unsigned int i = 0; i < FLAGS_nireq; i++) {
                 if (curr_frame.empty()){
@@ -208,21 +193,23 @@ int main(int argc, char *argv[]) {
                 frameNum = pipeline.submitImage(curr_frame);
                 if (frameNum < 0)
                     break;
-                frames[frameNum] = std::move(curr_frame);
+                curr_frame.release();
 
-            DetectionPipeline::DetectionResults results = pipeline.getDetectionResults();
-            if(!results.IsEmpty()) {
-                if (!FLAGS_no_show) {
-                    auto& outFrame = frames.at(results.frameId);
-                    paintResults(outFrame, results);
-                    presenter.drawGraphs(outFrame);
-                    paintInfo(outFrame, pipeline.getPerformanceInfo());
-                    cv::imshow("Detection Results", outFrame);
-                }
+            //--- Checking for results and rendering data if it's ready
+            //--- If you need just plain data without rendering - check for getProcessedResult() function
+            cv::Mat outFrame = pipeline.obtainAndRenderData();
+
+            //--- Showing results and device information
+            if (!outFrame.empty() && !FLAGS_no_show) {
+                presenter.drawGraphs(outFrame);
+                paintInfo(outFrame, pipeline.getPerformanceInfo());
+                cv::imshow("Detection Results", outFrame);
             }
+
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
             pipeline.waitForData();
 
+            //--- Processing keyboard events
             const int key = cv::waitKey(1);
 
             if (!FLAGS_no_show) {
@@ -243,15 +230,6 @@ int main(int argc, char *argv[]) {
         std::cout << std::endl << "Total time: "
             << std::chrono::duration_cast<std::chrono::milliseconds> (std::chrono::steady_clock::now()- startTimePoint).count()
             << " ms" << std::endl;
-
-        //--- Show performace results 
-        //if (FLAGS_pc) {
-        //    if (currentMode == ExecutionMode::USER_SPECIFIED) {
-        //        for (const auto& request: userSpecifiedInferRequests) {
-        //            printPerformanceCounts(*request, std::cout, getFullDeviceName(ie, FLAGS_d));
-        //        }
-        //    } else printPerformanceCounts(*minLatencyInferRequest, std::cout, getFullDeviceName(ie, FLAGS_d));
-        //}
 
         std::cout << "Avg Latency: " << std::fixed << std::setprecision(1) <<
             (std::chrono::duration_cast<std::chrono::milliseconds>(info.latencySum).count() / info.framesCount)

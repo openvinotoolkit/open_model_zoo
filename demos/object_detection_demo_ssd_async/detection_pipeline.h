@@ -21,19 +21,14 @@ class DetectionPipeline :
     public PipelineBase
 {
 public:
-    struct ObjectDesc : public cv::Rect2f
-    {
+    struct ObjectDesc : public cv::Rect2f {
         unsigned int labelID;
         std::string label;
         float confidence;
     };
 
-    struct DetectionResults
-    {
-        int64_t frameId=-1;
+    struct DetectionResult : public ResultBase {
         std::vector<ObjectDesc> objects;
-
-        bool IsEmpty() { return frameId < 0; }
     };
 
 public:
@@ -48,7 +43,9 @@ public:
     virtual void PrepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
 
     int64_t submitImage(cv::Mat img);
-    DetectionResults getDetectionResults();
+    DetectionResult getProcessedResult();
+
+    cv::Mat obtainAndRenderData();
 
     void loadLabels(const std::string& labelFilename);
     std::vector<std::string> labels;

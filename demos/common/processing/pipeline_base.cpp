@@ -79,13 +79,13 @@ void PipelineBase::waitForData()
 {
     std::unique_lock<std::mutex> lock(mtx);
 
-    condVar.wait(lock, [&] {return callbackException != nullptr || requestsPool.getInUseRequestsCount() || !completedRequestResults.empty(); });
+    condVar.wait(lock, [&] {return callbackException != nullptr || requestsPool.getInUseRequestsCount() || !completedInferenceResults.empty(); });
 
     if (callbackException)
         std::rethrow_exception(callbackException);
 }
 
-int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request)
+int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request, cv::Mat extraData)
 {
     perfInfo.numRequestsInUse = (uint32_t)requestsPool.getInUseRequestsCount();
 
@@ -105,19 +105,21 @@ int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request)
     request->SetCompletionCallback([this,
         frameStartTime,
         frameID,
-        request] {
+        request,
+        extraData] {
             {
                 std::lock_guard<std::mutex> lock(mtx);
 
                 try {
-                    RequestResult result;
+                    InferenceResult result;
 
                     result.frameId = frameID;
+                    result.extraData = extraData;
                     for(std::string outName : this->outputsNames)
-                        result.outputs.emplace(outName,std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outName))));
+                        result.outputsData.emplace(outName,std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outName))));
                     result.startTime = frameStartTime;
 
-                    completedRequestResults.emplace(frameID, result);
+                    completedInferenceResults.emplace(frameID, result);
 
                     this->requestsPool.setRequestIdle(request);
 
@@ -153,15 +155,15 @@ int64_t PipelineBase::submitImage(cv::Mat img) {
     return submitRequest(request);
 }
 
-PipelineBase::RequestResult PipelineBase::getResult()
+PipelineBase::InferenceResult PipelineBase::getInferenceResult()
 {
     std::lock_guard<std::mutex> lock(mtx);
 
-    const auto& it = completedRequestResults.find(outputFrameId);
-    if (it != completedRequestResults.end())
+    const auto& it = completedInferenceResults.find(outputFrameId);
+    if (it != completedInferenceResults.end())
     {
         auto retVal = std::move(it->second);
-        completedRequestResults.erase(it);
+        completedInferenceResults.erase(it);
         outputFrameId++;
         if (outputFrameId < 0)
             outputFrameId = 0;
@@ -175,5 +177,5 @@ PipelineBase::RequestResult PipelineBase::getResult()
         return retVal;
     }
 
-    return RequestResult();
+    return InferenceResult();
 }

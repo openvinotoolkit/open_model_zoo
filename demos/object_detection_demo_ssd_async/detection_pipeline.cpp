@@ -89,7 +89,7 @@ void DetectionPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
 
     int num_classes = 0;
 
-    if (auto ngraphFunction = cnnNetwork.getFunction()) {
+/*    if (auto ngraphFunction = cnnNetwork.getFunction()) {
         for (const auto op : ngraphFunction->get_ops()) {
             if (op->get_friendly_name() == outputsNames[0]) {
                 auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
@@ -105,7 +105,7 @@ void DetectionPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     }
     else {
         throw std::logic_error("This demo requires IR version no older than 10");
-    }
+    }*/
     if (labels.size()){
         if (static_cast<int>(labels.size()) == (num_classes - 1)) {  // if network assumes default "background" class, having no label
             labels.insert(labels.begin(), "fake");
@@ -134,7 +134,7 @@ int64_t DetectionPipeline::submitImage(cv::Mat img){
         return -1;
 
     if (useAutoResize) {
-        /* Just set input blob containing read image. Resize and layout conversion will be done automatically */
+        /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
         request->SetBlob(imageInputName, wrapMat2Blob(img));
     }
     else {
@@ -143,20 +143,22 @@ int64_t DetectionPipeline::submitImage(cv::Mat img){
         matU8ToBlob<uint8_t>(img, frameBlob);
     }
 
-    return submitRequest(request);
+    return submitRequest(request,img);
 }
 
-DetectionPipeline::DetectionResults DetectionPipeline::getDetectionResults(){
-    auto reqResult = PipelineBase::getResult();
-    if (reqResult.IsEmpty()){
-        return DetectionResults();
+DetectionPipeline::DetectionResult DetectionPipeline::getProcessedResult(){
+    auto infResult = PipelineBase::getInferenceResult();
+    if (infResult.IsEmpty()){
+        return DetectionResult();
     }
 
-    LockedMemory<const void> outputMapped = reqResult.getFirstOutputBlob()->rmap();
+    LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
     const float *detections = outputMapped.as<float*>();
 
-    DetectionResults results;
-    results.frameId = reqResult.frameId;
+    DetectionResult result;
+    static_cast<ResultBase&>(result) = static_cast<ResultBase>(infResult);
+
+    auto sz = infResult.extraData.size();
 
     for (size_t i = 0; i < maxProposalCount; i++) {
         ObjectDesc desc;
@@ -169,24 +171,44 @@ DetectionPipeline::DetectionResults DetectionPipeline::getDetectionResults(){
         desc.confidence = detections[i * objectSize + 2];
         desc.labelID = static_cast<int>(detections[i * objectSize + 1]);
         desc.label = desc.labelID < labels.size() ? labels[desc.labelID] : std::string("Label #") + std::to_string(desc.labelID);
-        desc.x = detections[i * objectSize + 3];
-        desc.y = detections[i * objectSize + 4];
-        desc.width = detections[i * objectSize + 5] - desc.x;
-        desc.height = detections[i * objectSize + 6] - desc.y;
+        desc.x = detections[i * objectSize + 3] * sz.width;
+        desc.y = detections[i * objectSize + 4] * sz.height;
+        desc.width = detections[i * objectSize + 5] * sz.width - desc.x;
+        desc.height = detections[i * objectSize + 6] * sz.height - desc.y;
 
-        if (false) {
-            std::cout << "[" << i << "," << desc.labelID << "] element, prob = " << desc.confidence <<
-                "    (" << desc.x << "," << desc.y << ")-(" << desc.br().x << "," << desc.br().y << ")"
-                << ((desc.confidence > confidenceThreshold) ? " WILL BE RENDERED!" : "") << std::endl;
-        }
+        //std::cout << "[" << i << "," << desc.labelID << "] element, prob = " << desc.confidence <<
+        //    "    (" << desc.x << "," << desc.y << ")-(" << desc.br().x << "," << desc.br().y << ")"
+        //    << ((desc.confidence > confidenceThreshold) ? " WILL BE RENDERED!" : "") << std::endl;
 
         if (desc.confidence > confidenceThreshold) {
             /** Filtering out objects with confidence < confidence_threshold probability **/
-            results.objects.push_back(desc);
+            result.objects.push_back(desc);
         }
     }
 
-    return results;
+    return result;
+}
+
+cv::Mat DetectionPipeline::obtainAndRenderData()
+{
+    DetectionResult result = getProcessedResult();
+    if (result.IsEmpty()) {
+        return cv::Mat();
+    }
+
+    // Visualizing result data over source image
+    cv::Mat outputImg = result.extraData.clone();
+
+    for (auto obj : result.objects) {
+        std::ostringstream conf;
+        conf << ":" << std::fixed << std::setprecision(3) << obj.confidence;
+        cv::putText(outputImg, obj.label + conf.str(),
+            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
+            cv::Scalar(0, 0, 255));
+        cv::rectangle(outputImg, obj, cv::Scalar(0, 0, 255));
+    }
+
+    return outputImg;
 }
 
 void DetectionPipeline::loadLabels(const std::string & labelFilename){

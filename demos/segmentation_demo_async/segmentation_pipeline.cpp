@@ -77,7 +77,7 @@ void SegmentationPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
 }
 
 SegmentationPipeline::SegmentationResult SegmentationPipeline::getSegmentationResult(){
-    auto reqResult = PipelineBase::getResult();
+    auto reqResult = PipelineBase::getInferenceResult();
     if (reqResult.IsEmpty()){
         return SegmentationResult();
     }
