@@ -481,7 +481,7 @@ int main(int argc, char *argv[]) {
             cv::Mat frame;
             if (!cap.read(frame)) {
                 if (frame.empty()) {
-                    if (FLAGS_loop_input) {
+                    if (FLAGS_loop) {
                         cap.open((FLAGS_i == "cam") ? 0 : FLAGS_i.c_str());
                     } else cap.release();
                     continue;
