@@ -15,16 +15,16 @@ For details about implementation of model, check out the [Semantic Segmentation 
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Segmentation  |
-| GFLOPs            | 81.9930        |
-| MParams           | 66.4768        |
+| GFLOPs            | 81.9930       |
+| MParams           | 66.4768       |
 | Source framework  | PyTorch\*  |
 
 ## Accuracy
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Pixel accuracy  | 77.69%          | 72.81%           |
-| mean IoU  | 33.02%          | 28.44%           |
+| Pixel accuracy  | 77.69%          | 77.69%           |
+| mean IoU        | 33.02%          | 33.02%           |
 
 ## Performance
 

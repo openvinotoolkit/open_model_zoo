@@ -4,7 +4,7 @@ models:
     launchers:
       - framework: onnx_runtime
         device: CPU
-        model:   public/hrnetv2/hrnetv2.onnx
+        model:   public/hrnet-v2-c1/hrnet-v2-c1.onnx
         adapter: segmentation
 
     datasets:
