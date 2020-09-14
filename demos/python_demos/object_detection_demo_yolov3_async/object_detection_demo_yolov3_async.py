@@ -70,7 +70,7 @@ def build_argparser():
     args.add_argument("-nthreads", "--number_threads",
                       help="Optional. Number of threads to use for inference on CPU (including HETERO cases)",
                       default=None, type=int)
-    args.add_argument("-loop_input", "--loop_input", help="Optional. Iterate over input infinitely",
+    args.add_argument("-loop", "--loop", help="Optional. Enable reading the input in a loop",
                       action='store_true')
     args.add_argument("-no_show", "--no_show", help="Optional. Don't show output", action='store_true')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
@@ -444,7 +444,7 @@ def main():
             start_time = perf_counter()
             ret, frame = cap.read()
             if not ret:
-                if args.loop_input:
+                if args.loop:
                     cap.open(input_stream)
                 else:
                     cap.release()
