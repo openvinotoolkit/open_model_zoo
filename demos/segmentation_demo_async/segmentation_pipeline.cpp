@@ -76,13 +76,13 @@ void SegmentationPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
     }
 }
 
-SegmentationPipeline::SegmentationResult SegmentationPipeline::getSegmentationResult(){
-    auto reqResult = PipelineBase::getInferenceResult();
-    if (reqResult.IsEmpty()){
+SegmentationPipeline::SegmentationResult SegmentationPipeline::getProcessedResult(){
+    auto infResult = PipelineBase::getInferenceResult();
+    if (infResult.IsEmpty()){
         return SegmentationResult();
     }
 
-    LockedMemory<const void> outMapped = reqResult.getFirstOutputBlob()->rmap();
+    LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
     const float * const predictions = outMapped.as<float*>();
 
     cv::Mat maskImg(outHeight, outWidth, CV_8UC3);
@@ -107,7 +107,7 @@ SegmentationPipeline::SegmentationResult SegmentationPipeline::getSegmentationRe
         }
     }
 
-    return SegmentationResult(reqResult.frameId,maskImg );
+    return SegmentationResult(infResult.frameId,maskImg,infResult.extraData);
 }
 
 const cv::Vec3b& SegmentationPipeline::class2Color(int classId)
@@ -117,4 +117,19 @@ const cv::Vec3b& SegmentationPipeline::class2Color(int classId)
         colors.push_back(color);
     }
     return colors[classId];
+}
+
+cv::Mat SegmentationPipeline::obtainAndRenderData()
+{
+    SegmentationResult result = getProcessedResult();
+    if (result.IsEmpty()) {
+        return cv::Mat();
+    }
+
+    // Visualizing result data over source image
+    cv::Mat outputImg;
+    cv::resize(result.mask, outputImg, result.extraData.size());
+    outputImg = result.extraData / 2 + outputImg / 2;
+
+    return outputImg;
 }

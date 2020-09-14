@@ -120,12 +120,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-void paintResults(cv::Mat& frame, const cv::Mat& mask) {
-    cv::Mat out;
-    cv::resize(mask, out, frame.size());
-    frame=frame / 2 + out / 2;
-}
-
 void paintInfo(cv::Mat& frame, const PipelineBase::PerformanceInfo& info) {
     std::ostringstream out;
 
@@ -187,15 +181,15 @@ int main(int argc, char *argv[]) {
             if (frameNum >= 0)
                 frames[frameNum] = std::move(curr_frame);
 
-            const auto& result = pipeline.getSegmentationResult();
-            if(!result.IsEmpty()) {
-                if (!FLAGS_no_show) {
-                    auto& outFrame = frames.at(result.frameId);
-                    paintResults(outFrame, result.mask);
-                    presenter.drawGraphs(outFrame);
-                    paintInfo(outFrame, pipeline.getPerformanceInfo());
-                    cv::imshow("Segmentation Results", outFrame);
-                }
+            //--- Checking for results and rendering data if it's ready
+            //--- If you need just plain data without rendering - check for getProcessedResult() function
+            cv::Mat outFrame = pipeline.obtainAndRenderData();
+
+            //--- Showing results and device information
+            if (!outFrame.empty() && !FLAGS_no_show) {
+                presenter.drawGraphs(outFrame);
+                paintInfo(outFrame, pipeline.getPerformanceInfo());
+                cv::imshow("Segmentation Results", outFrame);
             }
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
             pipeline.waitForData();

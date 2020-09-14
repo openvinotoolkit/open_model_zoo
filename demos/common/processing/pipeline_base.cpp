@@ -152,7 +152,7 @@ int64_t PipelineBase::submitImage(cv::Mat img) {
         return -1;
 
     request->SetBlob(imageInputName, wrapMat2Blob(img));
-    return submitRequest(request);
+    return submitRequest(request, img);
 }
 
 PipelineBase::InferenceResult PipelineBase::getInferenceResult()
