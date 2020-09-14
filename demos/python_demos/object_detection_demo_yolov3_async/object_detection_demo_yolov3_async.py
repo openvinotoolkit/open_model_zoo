@@ -287,6 +287,8 @@ def main():
     log.info("Loading network")
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
+    assert len(net.input_info) == 1, "Sample supports only YOLO V3 based single input topologies"
+
     # ---------------------------------------------- 3. Preparing inputs -----------------------------------------------
     log.info("Preparing inputs")
     input_blob = next(iter(net.input_info))

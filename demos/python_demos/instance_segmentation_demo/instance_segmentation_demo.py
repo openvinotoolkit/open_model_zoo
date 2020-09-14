@@ -125,15 +125,8 @@ def main():
     # Read IR
     log.info('Loading network')
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + '.bin')
-    
+
     device_string = format_device_string(args.device)
-    if 'CPU' in device_string:
-        supported_layers = ie.query_network(net, 'CPU')
-        not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
-        if len(not_supported_layers) != 0:
-            log.error('Following layers are not supported by the plugin for specified device {}:\n {}'.
-                      format(device_string, ', '.join(not_supported_layers)))
-            sys.exit(1)
 
     required_input_keys = {'im_data', 'im_info'}
     assert required_input_keys == set(net.input_info), \

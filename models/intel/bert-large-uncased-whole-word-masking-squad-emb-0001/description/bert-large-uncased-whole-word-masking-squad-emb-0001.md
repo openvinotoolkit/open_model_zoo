@@ -69,7 +69,7 @@ Position indexes are sequence of integer values from 0 to 383 (or 31 for questio
 
 The outputs of the net is `1, 1024` floating point-valued embedding vector. These vectors can be used to find better context with answer to the question by simple comparing the context embedding vector with question context embedding vector in 1024D embedding space.
 
-1. Embedding: name: `3157/Fused_Add_`, shape: [1x1024].
+1. Embedding: name: `embedding`, shape: [1x1024].
 embedding vector that represent input context or question.
 
 ## Legal Information

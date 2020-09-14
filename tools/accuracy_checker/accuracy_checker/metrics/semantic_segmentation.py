@@ -88,6 +88,8 @@ class SegmentationMetric(PerImageEvaluationMetric):
     def reset(self):
         self.state = {}
         self._update_iter = 0
+        if self.profiler:
+            self.profiler.reset()
 
 
 class SegmentationAccuracy(SegmentationMetric):
@@ -298,6 +300,68 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         names_median = ['median@{}'.format(name) for name in labels] if self.median else []
         self.meta['names'] = names_mean + names_median
         self.meta['calculate_mean'] = False
+        self.overall_metric = []
+
+
+class SegmentationUnet3D(PerImageEvaluationMetric):
+    __provider__ = 'dice_unet3d'
+    annotation_types = (BrainTumorSegmentationAnnotation, SegmentationAnnotation, OAR3DTilingSegmentationAnnotation)
+    prediction_types = (BrainTumorSegmentationPrediction, SegmentationPrediction, )
+
+    overall_metric = []
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'mean': BoolField(optional=True, default=True, description='Allows calculation mean value.'),
+            'median': BoolField(optional=True, default=False, description='Allows calculation median value.'),
+        })
+
+        return parameters
+
+    def configure(self):
+        self.mean = self.get_value_from_config('mean')
+        self.median = self.get_value_from_config('median')
+        self.output_order = self.get_value_from_config('output_order')
+
+        labels = ['whole tumor', 'tumor core', 'enhancing tumor']
+        self.classes = len(labels)
+
+        names_mean = ['mean@{}'.format(name) for name in labels] if self.mean else []
+        names_median = ['median@{}'.format(name) for name in labels] if self.median else []
+        self.meta['names'] = names_mean + names_median
+
+        self.meta['calculate_mean'] = False
+
+        self.overall_metric = []
+
+    def update(self, annotation, prediction):
+        result = np.zeros(shape=self.classes)
+
+        annotation_data = annotation.mask
+        prediction_data = prediction.mask
+
+        for c in range(self.classes):
+            annotation_data_ = (annotation_data > c)
+            prediction_data_ = (prediction_data > c)
+            intersection_count = np.logical_and(annotation_data_, prediction_data_).sum()
+            union_count = annotation_data_.sum() + prediction_data_.sum()
+            if union_count > 0:
+                result[c] = 2.0*intersection_count / union_count
+            else:
+                result[c] = np.nan
+
+        self.overall_metric.append(result)
+        return result
+
+    def evaluate(self, annotations, predictions):
+        mean = np.nanmean(self.overall_metric, axis=0) if self.mean else []
+        median = np.nanmedian(self.overall_metric, axis=0) if self.median else []
+        result = np.concatenate((mean, median))
+        return result
+
+    def reset(self):
         self.overall_metric = []
 
 

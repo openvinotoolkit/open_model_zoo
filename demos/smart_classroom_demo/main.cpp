@@ -540,7 +540,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 int main(int argc, char* argv[]) {
     try {
         /** This demo covers 4 certain topologies and cannot be generalized **/
-        slog::info << "InferenceEngine: " << GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: " << *GetInferenceEngineVersion() << slog::endl;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;

@@ -1,14 +1,16 @@
 import numpy as np
 import cv2
-try:
-    import h5py
-except ImportError:
-    h5py = None
+
 from ..config import PathField, ConfigError
-from ..utils import contains_all, get_path, check_file_existence
+from ..utils import contains_all, get_path, check_file_existence, UnsupportedPackage
 from ..representation import DepthEstimationAnnotation
 from ..representation.depth_estimation import GTLoader
 from .format_converter import BaseFormatConverter, ConverterReturn
+
+try:
+    import h5py
+except ImportError as import_error:
+    h5py = UnsupportedPackage("h5py", import_error.msg)
 
 class NYUDepthV2Converter(BaseFormatConverter):
     __provider__ = 'nyu_depth_v2'
@@ -36,8 +38,8 @@ class NYUDepthV2Converter(BaseFormatConverter):
             raise ConfigError('data_dir or both images_dir and depth_map_dir should be provided')
         self.images_dir = self.get_value_from_config('images_dir')
         self.depths_dir = self.get_value_from_config('depth_map_dir')
-        if self.data_dir and h5py is None:
-            raise ConfigError('h5py is not installed. Please install it before usage.')
+        if self.data_dir and isinstance(h5py, UnsupportedPackage):
+            h5py.raise_error(self.__provider__)
         if self.images_dir is None:
             self.images_dir = self.data_dir.parent / 'converted/images'
         if self.depths_dir is None:

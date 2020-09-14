@@ -56,6 +56,10 @@ AccuracyChecker supports following set of adapters:
   * `output_format` - setting output layer format - boxes first (`BHW`)(default, also default for generated IRs), boxes last (`HWB`). Applicable only if network output not 3D (4D with batch) tensor.
   * `cells` - sets grid size for each layer, according `outputs` filed. Works only with `do_reshape=True` or when output tensor dimensions not equal 3.
   * `do_reshape` - forces reshape output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on `output_format` value ([B,Cy,Cx] by default). You may need to specify `cells` value.
+* `yolo_v3_onnx` - converting output of ONNX Yolo V3 model to `DetectionPrediction`.
+  * `boxes_out` - the name of layer with bounding boxes
+  * `scores_out` - the name of output layer with detection scores for each class and box pair.
+  * `indices_out` - the name of output layer with indices triplets (class_id, score_id, bbox_id).
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
 * `ssd_mxnet` - converting output of SSD-based models from MXNet framework to `DetectionPrediction` representation.
@@ -184,9 +188,33 @@ AccuracyChecker supports following set of adapters:
   * `softmaxed_probabilities` - indicator that model uses softmax for output layer (default False).
 * `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
   * `blank_label` - index of the CTC blank label (default 0).
+* `ctc_beam_search_decoder` - Python implementation of CTC beam search decoder without LM for speech recognition.
+* `ctc_greedy_decoder` - CTC greedy decoder for speech recognition.
+* `ctc_beam_search_decoder_with_lm` - Python implementation of CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition.
+  * `beam_size` - Size of the beam to use during decoding (default 10).
+  * `logarithmic_prob` - Set to "True" to indicate that network gives natural-logarithmic probabilities. Default is False for plain probabilities (after softmax).
+  * `probability_out` - Name of the network's output with character probabilities (required)
+  * `alphabet` - Alphabet as list of strings. Include an empty string for the CTC blank sybmol. Default is space + 26 English letters + apostrophe + blank.
+  * `sep` - Word separator character. Use an empty string for character-based LM. Default is space.
+  * `lm_file` - Path to LM in binary kenlm format, relative to --model_attributes or --models.  Default is beam search without LM.
+  * `lm_alpha` - LM alpha: weight factor for LM score (required when using LM)
+  * `lm_beta` - LM beta: score bonus for each additional word, in log_e units (required when using LM)
+  * `lm_oov_score` - Replace LM score for out-of-vocabulary words with this value (default -1000, ignored without LM)
+  * `lm_vocabulary_offset` - Start of vocabulary strings section in the LM file.  Default is to not filter candidate words using vocabulary (ignored without LM)
+  * `lm_vocabulary_length` - Size in bytes of vocabulary strings section in the LM file (ignored without LM)
+* `fast_ctc_beam_search_decoder_with_lm` - CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition, depends on [`ctcdecode_numpy` Python module](../../../../demos/python_demos/speech_recognition_demo/ctcdecode-numpy/README.md).
+  * `beam_size` - Size of the beam to use during decoding (default 10).
+  * `logarithmic_prob` - Set to "True" to indicate that network gives natural-logarithmic probabilities. Default is False for plain probabilities (after softmax).
+  * `probability_out` - Name of the network's output with character probabilities (required)
+  * `alphabet` - Alphabet as list of strings. Include an empty string for the CTC blank sybmol. Default is space + 26 English letters + apostrophe + blank.
+  * `sep` - Set to the empty string for character-based LM. Default is space.
+  * `lm_file` - Path to LM in binary kenlm format, relative to --model_attributes or --models.  Default is beam search without LM.
+  * `lm_alpha` - LM alpha: weight factor for LM score (required when using LM)
+  * `lm_beta` - LM beta: score bonus for each additional word, in log_e units (required when using LM)
 * `gaze_estimation` - converting output of gaze estimation model to `GazeVectorPrediction`.
 * `hit_ratio_adapter` - converting output NCF model to `HitRatioPrediction`.
 * `brain_tumor_segmentation` - converting output of brain tumor segmentation model to `BrainTumorSegmentationPrediction`.
+  * `segmentation_out` - segmentation output layer name. (Optional, if not provided default first output blob will be used).
   * `make_argmax`  - allows to apply argmax operation to output values. (default - `False`)
   * `label_order` - sets mapping from output classes to dataset classes. For example: `label_order: [3,1,2]` means that class with id 3 from model's output matches with class with id 1 from dataset,  class with id 1 from model's output matches with class with id 2 from dataset, class with id 2 from model's output matches with class with id 3 from dataset.
 * `nmt` - converting output of neural machine translation model to `MachineTranslationPrediction`.

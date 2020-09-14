@@ -91,6 +91,9 @@ class Launcher(ClassProvider):
             '_list_image_infos': ListField(
                 allow_empty=True, optional=True, default=[], description="List of image information inputs."
             ),
+            '_list_orig_image_infos': ListField(
+                allow_empty=True, optional=True, default=[], description="List of image information inputs."
+            ),
             '_list_lstm_inputs': ListField(
                 allow_empty=True, optional=True, default=[], description="List of lstm inputs."
             )

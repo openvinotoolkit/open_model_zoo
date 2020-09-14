@@ -68,7 +68,7 @@ int clip(int x, int max_val) {
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers one certain topology and cannot be generalized **/
-        std::cout << "InferenceEngine: " << GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
 
         // ----------------------------- Parsing and validating input arguments ------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {

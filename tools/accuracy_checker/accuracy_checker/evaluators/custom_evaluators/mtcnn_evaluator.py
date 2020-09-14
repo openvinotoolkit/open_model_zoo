@@ -895,6 +895,17 @@ def bbreg(boundingbox, reg):
 
     return boundingbox
 
+def filter_valid(dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph):
+    mask = np.ones(len(tmph))
+    tmp_ys_len = (edy + 1) - dy
+    tmp_xs_len = (edx + 1) - dx
+    img_ys_len = (ey + 1) - y
+    img_xs_len = (ex + 1) - x
+    mask = np.logical_and(mask, np.logical_and(tmph > 0, tmpw > 0))
+    mask = np.logical_and(mask, np.logical_and(tmp_ys_len > 0, tmp_xs_len > 0))
+    mask = np.logical_and(mask, np.logical_and(img_xs_len > 0, img_ys_len > 0))
+    mask = np.logical_and(mask, np.logical_and(tmp_xs_len == img_xs_len, tmp_ys_len == img_ys_len))
+    return dy[mask], edy[mask], dx[mask], edx[mask], y[mask], ey[mask], x[mask], ex[mask], tmpw[mask], tmph[mask], mask
 
 def pad(boxesA, h, w):
     boxes = boxesA.copy()
@@ -942,7 +953,7 @@ def pad(boxesA, h, w):
     edx = np.maximum(0, edx - 1)
     ey = np.maximum(0, ey - 1)
     ex = np.maximum(0, ex - 1)
-    return [dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph]
+    return filter_valid(dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph)
 
 
 def rerec(bboxA):
@@ -966,7 +977,8 @@ def cut_roi(image, prediction, dst_size, include_bound=True):
     img = image.data
     bboxes = rerec(bboxes)
     bboxes[:, 0:4] = np.fix(bboxes[:, 0:4])
-    dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph = pad(bboxes, *img.shape[:2])
+    dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph, mask = pad(bboxes, *img.shape[:2])
+    bboxes = bboxes[mask]
     numbox = bboxes.shape[0]
     tempimg = np.zeros((numbox, dst_size, dst_size, 3))
     for k in range(numbox):

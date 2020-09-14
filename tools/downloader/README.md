@@ -507,7 +507,6 @@ driver-action-recognition-adas-0002-decoder
 driver-action-recognition-adas-0002-encoder
 emotions-recognition-retail-0003
 face-detection-adas-0001
-face-detection-adas-binary-0001
 face-detection-retail-0004
 face-detection-retail-0005
 [...]

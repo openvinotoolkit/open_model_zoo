@@ -23,15 +23,14 @@ import cv2 as cv
 
 import numpy as np
 
-try:
-    import pycocotools.mask as maskUtils
-except ImportError:
-    maskUtils = None
-
 from .base_representation import BaseRepresentation
 from ..data_readers import BaseReader
-from ..utils import remove_difficult
+from ..utils import remove_difficult, UnsupportedPackage
 
+try:
+    import pycocotools.mask as maskUtils
+except ImportError as import_error:
+    maskUtils = UnsupportedPackage("pycocotools", import_error.msg)
 
 class GTMaskLoader(Enum):
     PILLOW = 0
@@ -219,7 +218,8 @@ class BrainTumorSegmentationPrediction(SegmentationPrediction):
 
 class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
     def __init__(self, identifier, mask, labels):
-        if not maskUtils:
+        if isinstance(maskUtils, UnsupportedPackage):
+            maskUtils.raise_error("CoCoInstanceSegmentationRepresentation")
             raise ValueError('can not create representation')
         super().__init__(identifier)
         self.raw_mask = mask
