@@ -409,6 +409,7 @@ def main():
 
             if args.output:
                 raw_video.write(frame)
+                out_video.write(frame)
 
             origin_im_size = frame.shape[:-1]
             presenter.drawGraphs(frame)
@@ -448,8 +449,8 @@ def main():
                 #                              (10, int(origin_im_size[0] - 50)), cv2.FONT_HERSHEY_COMPLEX, 0.75,
                 #                              (10, 200, 10), 2)
 
-            if args.output:
-                out_video.write(frame)
+            # if args.output:
+            #     out_video.write(frame)
 
             if not args.no_show:
                 cv2.imshow("Detection Results", frame)
