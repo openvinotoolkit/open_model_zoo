@@ -966,6 +966,7 @@ datasets:
       images_dir: nyudepthv2/val/converted/images
       depth_map_dir: nyudepthv2/val/converted/depth
       data_dir: nyudepthv2/val/official
+
   - name: ADEChallengeData2016
     annotation_conversion:
       converter: ade20k
