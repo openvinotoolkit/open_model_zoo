@@ -431,10 +431,10 @@ def main():
                                                                                   obj['ymax'],
                                                                                   color))
 
-                cv2.rectangle(frame, (obj['xmin'], obj['ymin']), (obj['xmax'], obj['ymax']), color, 2)
-                cv2.putText(frame,
-                            "#" + det_label + ' ' + str(round(obj['confidence'] * 100, 1)) + ' %',
-                            (obj['xmin'], obj['ymin'] - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
+                # cv2.rectangle(frame, (obj['xmin'], obj['ymin']), (obj['xmax'], obj['ymax']), color, 2)
+                # cv2.putText(frame,
+                #             "#" + det_label + ' ' + str(round(obj['confidence'] * 100, 1)) + ' %',
+                #             (obj['xmin'], obj['ymin'] - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
             helpers.put_highlighted_text(frame, "{} mode".format(mode.current.name), (10, int(origin_im_size[0] - 20)),
                                          cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
