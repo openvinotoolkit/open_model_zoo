@@ -53,6 +53,8 @@ from .resize_style_transfer import ResizeStyleTransfer
 from .crop_ground_truth_image import CropGTImage
 from .resize import Resize
 from .to_gray_scale_ref_image import RGB2GRAYAnnotation, BGR2GRAYAnnotation
+from .remove_repeats import RemoveRepeatTokens
+from .tokens_to_lower_case import TokensToLowerCase
 
 
 __all__ = [
@@ -107,5 +109,8 @@ __all__ = [
 
     'CropGTImage',
 
-    'Resize'
+    'Resize',
+
+    'RemoveRepeatTokens',
+    'TokensToLowerCase',
 ]
