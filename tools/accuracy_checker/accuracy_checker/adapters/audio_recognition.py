@@ -367,7 +367,7 @@ class CTCBeamSearchDecoderWithLm(Adapter):
             self.lm = kenlm.Model(str(lm_file))
             if lm_vocabulary_offset is not None:
                 self.vocab_prefixes = read_vocabulary_prefixes(
-                    lm_file,
+                    str(lm_file),
                     lm_vocabulary_offset,
                     lm_vocabulary_length,
                 )

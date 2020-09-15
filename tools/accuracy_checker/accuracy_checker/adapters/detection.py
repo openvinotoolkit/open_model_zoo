@@ -429,28 +429,41 @@ class RFCNCaffe(Adapter):
         self.bbox_out = self.get_value_from_config('bbox_out')
         self.rois_out = self.get_value_from_config('rois_out')
 
+    def get_proposals(self, raw_out):
+        predicted_proposals = raw_out.get(self.rois_out)
+        if predicted_proposals is None:
+            if self.rois_out + '.0' in raw_out:
+                predicted_proposals = raw_out[self.rois_out + '.0']
+            else:
+                raise ConfigError("output blobs do not contain {}".format(self.rois_out))
+        return predicted_proposals
+
+    @staticmethod
+    def get_scale(meta):
+        if 'scale_x' in meta:
+            x_scale = meta['scale_x']
+            y_scale = meta['scale_y']
+            return x_scale, y_scale
+        original_image_size = meta['image_size'][:2]
+        image_input = [shape for shape in meta['input_shape'].values() if len(shape) == 4]
+        assert image_input, "image input not found"
+        assert len(image_input) == 1, 'several input images detected'
+        image_input = image_input[0]
+        if image_input[1] == 3:
+            processed_image_size = image_input[2:]
+        else:
+            processed_image_size = image_input[1:3]
+        y_scale = processed_image_size[0] / original_image_size[0]
+        x_scale = processed_image_size[1] / original_image_size[1]
+        return x_scale, y_scale
+
     def process(self, raw, identifiers, frame_meta):
         assert len(identifiers) == 1, '{} adapter support only batch size 1'.format(self.__provider__)
         raw_out = self._extract_predictions(raw, frame_meta)
         predicted_classes = raw_out[self.cls_out]
         predicted_deltas = raw_out[self.bbox_out]
-        predicted_proposals = raw_out[self.rois_out]
-        meta = frame_meta[0]
-        if 'scale_x' in meta:
-            x_scale = meta['scale_x']
-            y_scale = meta['scale_y']
-        else:
-            original_image_size = meta['image_size'][:2]
-            image_input = [shape for shape in meta['input_shape'].values() if len(shape) == 4]
-            assert image_input, "image input not found"
-            assert len(image_input) == 1, 'several input images detected'
-            image_input = image_input[0]
-            if image_input[1] == 3:
-                processed_image_size = image_input[2:]
-            else:
-                processed_image_size = image_input[1:3]
-            y_scale = processed_image_size[0] / original_image_size[0]
-            x_scale = processed_image_size[1] / original_image_size[1]
+        predicted_proposals = self.get_proposals(raw_out)
+        x_scale, y_scale = self.get_scale(frame_meta[0])
         real_det_num = np.argwhere(predicted_proposals[:, 0] == -1)
         if np.size(real_det_num) != 0:
             real_det_num = real_det_num[0, 0]
