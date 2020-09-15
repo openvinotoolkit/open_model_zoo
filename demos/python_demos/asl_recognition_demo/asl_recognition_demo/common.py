@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import os
 from sys import path
 
 from openvino.inference_engine import IECore  # pylint: disable=no-name-in-module

@@ -238,16 +238,6 @@ def main():
         cv2.putText(frame, inf_time_message, (15, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
         cv2.putText(frame, render_time_message, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
 
-        # Print performance counters.
-        if args.perf_counts:
-            perf_counts = exec_net.requests[0].get_perf_counts()
-            log.info('Performance counters:')
-            print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format('name', 'layer_type', 'exet_type', 'status',
-                                                              'real_time, us'))
-            for layer, stats in perf_counts.items():
-                print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
-                                                                  stats['status'], stats['real_time']))
-
         if not args.no_show:
             # Show resulting image.
             cv2.imshow('Results', frame)

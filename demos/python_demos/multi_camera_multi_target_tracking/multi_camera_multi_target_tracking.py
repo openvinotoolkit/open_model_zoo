@@ -35,7 +35,7 @@ from openvino.inference_engine import IECore  # pylint: disable=import-error,E06
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
-
+from ie_config_helper import format_device_string
 
 set_log_config()
 

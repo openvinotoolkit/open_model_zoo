@@ -13,6 +13,7 @@
 """
 
 from argparse import ArgumentParser, SUPPRESS
+import os
 from sys import path
 
 import numpy as np
