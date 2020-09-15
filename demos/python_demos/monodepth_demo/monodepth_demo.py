@@ -65,7 +65,7 @@ def main():
 
     # loading model to the plugin
     log.info("loading model to the plugin")
-    exec_net = ie.load_network(network=net, device_name=device_string, create_default_config(device_string))
+    exec_net = ie.load_network(net, device_string, create_default_config(device_string))
 
     # start sync inference
     log.info("starting inference")

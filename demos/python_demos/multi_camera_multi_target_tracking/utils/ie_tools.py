@@ -82,7 +82,6 @@ def load_ie_model(ie, model_xml, device, plugin_dir, num_reqs=1):
 
     # Loading model to the plugin
     log.info("Loading model to the plugin")
-    exec_net = ie.load_network(network=net, device_name=device, create_default_config(device_string),
-                               num_requests=num_reqs)
+    exec_net = ie.load_network(net, device, create_default_config(device_string), num_reqs)
     model = IEModel(exec_net, net.input_info, input_blob, out_blob)
     return model

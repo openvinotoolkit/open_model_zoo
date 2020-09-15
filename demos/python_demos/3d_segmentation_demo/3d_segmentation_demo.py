@@ -316,8 +316,7 @@ def main():
 
     # ------------------------------------- 4. Loading model to the plugin -------------------------------------
     logger.info("Loading model to the plugin")
-    executable_network = ie.load_network(network=ie_network, device_name=device_string,
-                                         create_default_config(device_string))
+    executable_network = ie.load_network(ie_network, device_string, create_default_config(device_string))
     del ie_network
 
     # ---------------------------------------------- 5. Do inference --------------------------------------------

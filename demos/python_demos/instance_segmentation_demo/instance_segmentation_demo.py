@@ -139,8 +139,7 @@ def main():
     assert n == 1, 'Only batch 1 is supported by the demo application'
 
     log.info('Loading IR to the plugin...')
-    exec_net = ie.load_network(network=net, device_name=device_string, create_default_config(device_string),
-                               num_requests=2)
+    exec_net = ie.load_network(net, device_string, create_default_config(device_string), 2)
 
     try:
         input_source = int(args.input_source)

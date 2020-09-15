@@ -37,7 +37,7 @@ class IEModel(): # pylint: disable=too-few-public-methods
         path = '.'.join(model_path.split('.')[:-1])
         self.net = ie.read_network(path + '.xml', path + '.bin')
         self.output_name = list(self.net.outputs.keys())[0]
-        self.exec_net = ie.load_network(network=self.net, device_name=device, create_default_config(device))
+        self.exec_net = ie.load_network(self.net, device, create_default_config(device))
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''

@@ -83,7 +83,7 @@ class IEModel:
 
         # Loading model to the plugin
         log.info("Loading model to the plugin")
-        self.net = ie.load_network(network=net, device_name=device, create_default_config(device))
+        self.net = ie.load_network(net, device, create_default_config(device))
         self.inputs_info = net.input_info
         self.input_key = input_blob
         self.output_key = out_blob

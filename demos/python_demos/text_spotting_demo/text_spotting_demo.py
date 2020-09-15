@@ -198,12 +198,9 @@ def main():
     assert n == 1, 'Only batch 1 is supported by the demo application'
 
     log.info('Loading IR to the plugin...')
-    mask_rcnn_exec_net = ie.load_network(network=mask_rcnn_net, device_name=device_string,
-                                         create_default_config(device_string), num_requests=2)
-    text_enc_exec_net = ie.load_network(network=text_enc_net, device_name=device_string,
-                                        create_default_config(device_string))
-    text_dec_exec_net = ie.load_network(network=text_dec_net, device_name=device_string,
-                                        create_default_config(device_string))
+    mask_rcnn_exec_net = ie.load_network(mask_rcnn_net, device_string, create_default_config(device_string), 2)
+    text_enc_exec_net = ie.load_network(text_enc_net, device_string, create_default_config(device_string))
+    text_dec_exec_net = ie.load_network(text_dec_net, device_string, create_default_config(device_string))
 
     hidden_shape = text_dec_net.input_info[args.trd_input_prev_hidden].input_data.shape
 

@@ -37,10 +37,7 @@ class IEModel:  # pylint: disable=too-few-public-methods
         self.net = ie_core.read_network(model_path + ".xml", model_path + ".bin")
         assert len(self.net.input_info) == 1, "One input is expected"
 
-        self.exec_net = ie_core.load_network(network=self.net,
-                                             device_name=device,
-                                             create_default_config(device),
-                                             num_requests=num_requests)
+        self.exec_net = ie_core.load_network(self.net, device, create_default_config(device), num_requests)
 
         self.input_name = next(iter(self.net.input_info))
         if len(self.net.outputs) > 1:

@@ -100,7 +100,7 @@ def main():
     # Loading model to the plugin
     log.info("Loading model to the plugin")
     device_string = format_device_string(args.device)
-    exec_net = ie.load_network(network=net, device_name=device_string, create_default_config(device_string))
+    exec_net = ie.load_network(net, device_string, create_default_config(device_string))
 
     # Start sync inference
     log.info("Starting inference ({} iterations)".format(args.number_iter))

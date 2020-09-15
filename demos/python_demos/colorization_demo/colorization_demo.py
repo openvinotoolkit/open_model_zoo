@@ -65,7 +65,7 @@ if __name__ == '__main__':
     load_net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
     load_net.batch_size = 1
     device_string = format_device_string(args.device)
-    exec_net = ie.load_network(network=load_net, device_name=device_string, create_default_config(device_string))
+    exec_net = ie.load_network(load_net, device_string, create_default_config(device_string))
 
     assert len(load_net.input_info) == 1, "Expected number of inputs is equal 1"
     input_blob = next(iter(load_net.input_info))

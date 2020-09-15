@@ -157,8 +157,7 @@ def main():
 
     # load model to the device
     log.info("Loading model to the {}".format(device_string))
-    ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=device_string,
-                                      create_default_config(device_string))
+    ie_encoder_exec = ie.load_network(ie_encoder, device_string, create_default_config(device_string))
 
     # loop on user's questions
     while True:
