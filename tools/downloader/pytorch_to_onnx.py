@@ -28,7 +28,12 @@ def prepare_model_params(module, model_params):
     for key in model_params:
         func = model_params[key].split(".", 1)[0]
         if hasattr(module, func):
-            model_params[key] = eval("module." + model_params[key])
+            try:
+                model_params[key] = eval("module." + model_params[key])
+            except Exception as err:
+                print('ERROR: Module {} contains no function with name {}!'
+                      .format(module, func))
+                sys.exit(err)
 
 
 def model_parameter(parameter):
@@ -67,8 +72,8 @@ def parse_args():
                         help='Pair "name"="value" of model constructor parameter')
     parser.add_argument('--onnx-version', type=int, default=9,
                         help='Version of symbolic opset')
-    parser.add_argument('--prepare-params', type=bool, default=False,
-                        help='Using functions as parameters of models')
+    parser.add_argument('--functions-as-model-params', type=bool, default=False,
+                        help='Using functions as parameters of model')
     return parser.parse_args()
 
 
@@ -96,7 +101,7 @@ def load_model(model_name, weights, model_path, module_name, model_params, prepa
         sys.exit(err)
     
     try:
-        if weights!="":
+        if weights:
             model.load_state_dict(torch.load(weights, map_location='cpu'))
     except RuntimeError as err:
         print('ERROR: Weights from {} cannot be loaded for model {}! Check matching between model and weights'.format(
@@ -136,7 +141,7 @@ def main():
     args = parse_args()
     model = load_model(args.model_name, args.weights,
                        args.model_path, args.import_module,
-                       dict(args.model_param), args.prepare_params)
+                       dict(args.model_param), args.functions_as_model_params)
 
     convert_to_onnx(model, args.input_shape, args.output_file,
                     args.input_names, args.output_names, args.onnx_version)
