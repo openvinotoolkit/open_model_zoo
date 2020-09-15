@@ -25,7 +25,7 @@ class IEModel:
     """Class for inference of models in the Inference Engine format"""
     def __init__(self, ie, model_path, labels_file, conf=.6, device='CPU', ext_path=''):
         self.confidence = conf
-        self.load_ie_model(ie, model_path, device, ext_path)
+        self.load_ie_model(ie, model_path, device)
         with open(labels_file, 'r') as f:
             self.labels = f.readlines()
         self.labels = {num: name.replace('\n', '') for num, name in enumerate(self.labels)}

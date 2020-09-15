@@ -26,7 +26,7 @@ from image_retrieval_demo.common import from_list, crop_resize
 
 from openvino.inference_engine import IECore # pylint: disable=no-name-in-module
 
-path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'common'))
 from ie_config_helper import create_default_config
 
 

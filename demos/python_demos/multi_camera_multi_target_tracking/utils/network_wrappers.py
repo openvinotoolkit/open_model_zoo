@@ -37,8 +37,8 @@ class Detector(DetectorInterface):
     """Wrapper class for detector"""
 
     def __init__(self, ie, model_path, trg_classes, conf=.6,
-                 device='CPU', ext_path='', max_num_frames=1):
-        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=max_num_frames)
+                 device='CPU', max_num_frames=1):
+        self.net = load_ie_model(ie, model_path, device, None, num_reqs=max_num_frames)
         self.trg_classes = trg_classes
         self.confidence = conf
         self.expand_ratio = (1., 1.)
@@ -101,9 +101,9 @@ class Detector(DetectorInterface):
 class VectorCNN:
     """Wrapper class for a network returning a vector"""
 
-    def __init__(self, ie, model_path, device='CPU', ext_path='', max_reqs=100):
+    def __init__(self, ie, model_path, device='CPU', max_reqs=100):
         self.max_reqs = max_reqs
-        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
+        self.net = load_ie_model(ie, model_path, device, None, num_reqs=self.max_reqs)
 
     def forward(self, batch):
         """Performs forward of the underlying network on a given batch"""
@@ -128,11 +128,11 @@ class MaskRCNN(DetectorInterface):
     """Wrapper class for a network returning masks of objects"""
 
     def __init__(self, ie, model_path, trg_classes, conf=.6,
-                 device='CPU', ext_path='', max_reqs=100):
+                 device='CPU', max_reqs=100):
         self.trg_classes = trg_classes
         self.max_reqs = max_reqs
         self.confidence = conf
-        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
+        self.net = load_ie_model(ie, model_path, device, None, num_reqs=self.max_reqs)
 
         required_input_keys = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
         current_input_keys = self.net.input_info.keys()
