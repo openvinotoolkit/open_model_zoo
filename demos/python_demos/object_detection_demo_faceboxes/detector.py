@@ -15,12 +15,13 @@
 """
 import itertools
 import math
+from sys import path
 import numpy as np
 import os
 import cv2
 from collections import namedtuple
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 from ie_config_helper import create_default_config
 
 

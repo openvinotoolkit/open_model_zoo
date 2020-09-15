@@ -25,7 +25,7 @@ from time import time
 from openvino.inference_engine import IECore
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
-from ie_config_helper import create_default_config
+from ie_config_helper import format_device_string, create_default_config
 
 
 classes_color_map = [

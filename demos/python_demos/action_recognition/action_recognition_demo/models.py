@@ -16,11 +16,12 @@
 
 from collections import deque
 from itertools import cycle
+from sys import path
 
 import cv2
 import numpy as np
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 from ie_config_helper import create_default_config
 
 def center_crop(frame, crop_size):

@@ -1,7 +1,8 @@
 import os
+from sys import path
 import cv2
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 from ie_config_helper import create_default_config
 
 

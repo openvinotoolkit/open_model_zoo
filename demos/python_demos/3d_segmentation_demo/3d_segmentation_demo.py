@@ -26,11 +26,11 @@ from datetime import datetime
 from argparse import ArgumentParser, SUPPRESS
 from fnmatch import fnmatch
 from scipy.ndimage import interpolation
-from sys import stdout
+from sys import stdout, path
 
 from openvino.inference_engine import IECore
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 from ie_config_helper import format_device_string, create_default_config
 
 

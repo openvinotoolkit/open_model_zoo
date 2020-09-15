@@ -18,7 +18,7 @@ import logging as log
 import numpy as np
 import cv2 as cv
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'common'))
 from ie_config_helper import create_default_config
 
 

@@ -13,6 +13,7 @@
 """
 
 from argparse import ArgumentParser, SUPPRESS
+from sys import path
 
 import numpy as np
 import cv2
@@ -21,7 +22,7 @@ from openvino.inference_engine import IECore
 from inpainting_gui import InpaintingGUI
 from inpainting import ImageInpainting
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 from ie_config_helper import format_device_string
 
 def build_argparser():
