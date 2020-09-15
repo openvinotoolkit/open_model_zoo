@@ -17,7 +17,7 @@ limitations under the License.
 import re
 from collections import Counter
 import math
-from .metric import PerImageEvaluationMetric, FullDatasetEvaluationMetric
+from .metric import PerImageEvaluationMetric
 from ..config import BoolField, NumberField, StringField
 from ..representation import MachineTranslationPrediction, MachineTranslationAnnotation
 
@@ -49,7 +49,8 @@ class TokenizerRegexp:
 
 
 class Tokenizer:
-    def __init__(self):
+    def __init__(self, lower_case=False):
+        self.lower_case = lower_case
         self._post_tokenizer = TokenizerRegexp()
 
     def __call__(self, line):
@@ -58,6 +59,8 @@ class Tokenizer:
         :param line: a segment to tokenize
         :return: the tokenized line
         """
+        if self.lower_case:
+            line = line.lower()
 
         # language-independent part:
         line = line.replace('<skipped>', '')
@@ -96,7 +99,8 @@ class BilingualEvaluationUnderstudy(PerImageEvaluationMetric):
                     default=4
                 ),
                 'smooth_method': StringField(optional=True, default='exp', choices=SMOOTH_DEFAULTS),
-                'smooth_value': NumberField(optional=True)
+                'smooth_value': NumberField(optional=True),
+                'lower_case': BoolField(optional=True, default=False)
             }
         )
 
@@ -109,7 +113,8 @@ class BilingualEvaluationUnderstudy(PerImageEvaluationMetric):
         self.ref_len = 0
         self.correct = [0] * self.max_order
         self.total = [0] * self.max_order
-        self.tokenizer = Tokenizer()
+        self.lower_case = self.get_value_from_config('lower_case')
+        self.tokenizer = Tokenizer(self.lower_case)
         if self.smooth:
             self.smooth_method = self.get_value_from_config('smooth_method')
             self.smooth_value = self.get_value_from_config('smooth_valoe') or SMOOTH_DEFAULTS[self.smooth_method]
