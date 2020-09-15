@@ -77,7 +77,8 @@ SMOOTH_DEFAULTS = {
         'exp': None,    # No value is required
         'none': None,   # No value is required
 }
-class BilingualEvaluationUnderstudy(PerImageEvaluationMetric, FullDatasetEvaluationMetric):
+
+class BilingualEvaluationUnderstudy(PerImageEvaluationMetric):
     __provider__ = 'bleu'
     annotation_types = (MachineTranslationAnnotation, )
     prediction_types = (MachineTranslationPrediction, )
@@ -123,7 +124,7 @@ class BilingualEvaluationUnderstudy(PerImageEvaluationMetric, FullDatasetEvaluat
             output, *refs = [self.tokenizer(' '.join(x)) for x in lines]
 
             output_len = len(output.split())
-            ref_ngrams, closest_diff, closest_len = self.reference_stats(refs, output_len)
+            ref_ngrams, _, closest_len = self.reference_stats(refs, output_len)
 
             self.sys_len += output_len
             self.ref_len += closest_len
@@ -154,13 +155,11 @@ class BilingualEvaluationUnderstudy(PerImageEvaluationMetric, FullDatasetEvaluat
             if self.correct[n - 1] == 0:
                 if self.smooth_method == 'exp':
                     smooth_mteval *= 2
-                    precisions[n-1] = 1 / (smooth_mteval * self.total[n-1])
+                    precisions[n - 1] = 1 / (smooth_mteval * self.total[n - 1])
                 elif self.smooth_method == 'floor':
-                    precisions[n-1] = self.smooth_value / self.total[n-1]
-                    smooth_mteval *= 2
                     precisions[n - 1] = 1. / (smooth_mteval * self.total[n - 1])
             else:
-                precisions[n - 1] =  self.correct[n - 1] / self.total[n - 1]
+                precisions[n - 1] = self.correct[n - 1] / self.total[n - 1]
 
         if self.sys_len < self.ref_len:
             bp = math.exp(1 - self.ref_len / self.sys_len) if self.sys_len > 0 else 0.0
@@ -177,16 +176,7 @@ class BilingualEvaluationUnderstudy(PerImageEvaluationMetric, FullDatasetEvaluat
 
     @staticmethod
     def extract_ngrams(segment, max_order, min_order=1):
-        """Extracts all n-grams upto a given maximum order from an input segment.
-        Args:
-          segment: text segment from which n-grams will be extracted.
-          max_order: maximum length in tokens of the n-grams returned by this
-              methods.
-        Returns:
-          The Counter containing all n-grams upto max_order in segment
-          with a count of how many times each n-gram occurred.
-        """
-        ngrams = Counter() # type: Counter
+        ngrams = Counter()
         tokens = segment.split()
         for n in range(min_order, max_order + 1):
             for i in range(0, len(tokens) - n + 1):
