@@ -378,8 +378,8 @@ def main():
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between min_latency/user_specified modes, press TAB key in the output window")
 
-    presenter = monitors.Presenter(args.utilization_monitors, 55,
-        (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
+    graph_size = (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8))
+    presenter = monitors.Presenter(args.utilization_monitors, int(cap.get(4)) - graph_size[1] - 10, graph_size)
 
     out_video = cv2.VideoWriter()
     raw_video = cv2.VideoWriter()

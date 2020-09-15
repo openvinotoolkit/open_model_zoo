@@ -16,5 +16,5 @@ CROP_SIZE = {
     # Specified manually.
     # Format: [top, right, bottom, left]
     'object_detection_demo_yolov3_async': [80, 0, 70, 0],
-    'py/object_detection_demo_yolov3_async': [65, 0, 85, 0]
+    'py/object_detection_demo_yolov3_async': [65, 0, 75, 0]
 }
