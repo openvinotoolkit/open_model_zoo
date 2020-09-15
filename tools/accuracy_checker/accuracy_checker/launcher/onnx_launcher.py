@@ -84,7 +84,7 @@ class ONNXLauncher(Launcher):
         if model.is_dir():
             model_list = list(model.glob('{}.onnx'.format(self._model_name)))
             if not model_list:
-                model_list = model.glob('*.onnx')
+                model_list = list(model.glob('*.onnx'))
                 if not model_list:
                     raise ConfigError('Model not found')
             if len(model_list) != 1:
