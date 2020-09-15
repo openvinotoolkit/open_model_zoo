@@ -411,7 +411,7 @@ def main():
                 raw_video.write(frame)
 
             origin_im_size = frame.shape[:-1]
-            #presenter.drawGraphs(frame)
+            presenter.drawGraphs(frame)
             for obj in objects:
                 # Validation bbox of detected object
                 obj['xmax'] = min(obj['xmax'], origin_im_size[1])
@@ -431,22 +431,22 @@ def main():
                                                                                   obj['ymax'],
                                                                                   color))
 
-                # cv2.rectangle(frame, (obj['xmin'], obj['ymin']), (obj['xmax'], obj['ymax']), color, 2)
-                # cv2.putText(frame,
-                #             "#" + det_label + ' ' + str(round(obj['confidence'] * 100, 1)) + ' %',
-                #             (obj['xmin'], obj['ymin'] - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
+                cv2.rectangle(frame, (obj['xmin'], obj['ymin']), (obj['xmax'], obj['ymax']), color, 2)
+                cv2.putText(frame,
+                            "#" + det_label + ' ' + str(round(obj['confidence'] * 100, 1)) + ' %',
+                            (obj['xmin'], obj['ymin'] - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
-            # helpers.put_highlighted_text(frame, "{} mode".format(mode.current.name), (10, int(origin_im_size[0] - 20)),
-            #                              cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
+            helpers.put_highlighted_text(frame, "{} mode".format(mode.current.name), (10, int(origin_im_size[0] - 20)),
+                                         cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
             
             if is_same_mode and prev_mode_active_request_count == 0:
                 mode_metrics[mode.current].update(start_time, frame)
             else:
                 mode_metrics[mode.get_other()].update(start_time, frame)
                 prev_mode_active_request_count -= 1
-                # helpers.put_highlighted_text(frame, "Switching modes, please wait...",
-                #                              (10, int(origin_im_size[0] - 50)), cv2.FONT_HERSHEY_COMPLEX, 0.75,
-                #                              (10, 200, 10), 2)
+                helpers.put_highlighted_text(frame, "Switching modes, please wait...",
+                                             (10, int(origin_im_size[0] - 50)), cv2.FONT_HERSHEY_COMPLEX, 0.75,
+                                             (10, 200, 10), 2)
 
             if args.output:
                 out_video.write(frame)
