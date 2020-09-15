@@ -36,7 +36,7 @@ usage: object_detection_demo_yolov3_async.py [-h] -m MODEL -i INPUT
                                              [-nireq NUM_INFER_REQUESTS]
                                              [-nstreams NUM_STREAMS]
                                              [-nthreads NUMBER_THREADS]
-                                             [-loop_input] [-no_show]
+                                             [-loop] [-no_show]
                                              [-o OUT_FOLDER]
                                              [-u UTILIZATION_MONITORS]
 
@@ -76,8 +76,8 @@ Options:
   -nthreads NUMBER_THREADS, --number_threads NUMBER_THREADS
                         Optional. Number of threads to use for inference on
                         CPU (including HETERO cases)
-  -loop_input, --loop_input
-                        Optional. Iterate over input infinitely
+  -loop, --loop
+                        Optional. Enable reading the input in a loop
   -no_show, --no_show   Optional. Don't show output
   -o OUT_FOLDER, --output OUT_FOLDER
                         Optional. Save results of input processing to the

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: image_processing
 files:
   - name: FP32/single-image-super-resolution-1033.xml
-    size: 53136
-    sha256: 1295b0c647b6dddbb0c48d2820ed02819c60081013df4df663322f7c80a9bd57
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.xml
+    size: 54440
+    sha256: a428df28ea385938c7a935edd771bd3c37538f884f48aab627301e6c256e493f
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.xml
   - name: FP32/single-image-super-resolution-1033.bin
-    size: 121772
-    sha256: 38d59d276acf2ebf3307d4079d1a0aeed23a45756f7174f0ac436298872519da
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
+    size: 121780
+    sha256: ba6247c93395bc0649986f28dec0c745d543afcf667c732877b712e05564fb16
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
   - name: FP16/single-image-super-resolution-1033.xml
-    size: 53097
-    sha256: 075d08862c3380473f0d7be673edbd895922af7b46af2c9f3ab785f4605424b3
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.xml
+    size: 54397
+    sha256: 72ccc8dfd174e21b36320a17725fec8761f02a0b187aeb1cb5630a12309d8801
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.xml
   - name: FP16/single-image-super-resolution-1033.bin
-    size: 60930
-    sha256: 94dccc9df4225512e1cf253413bad614abc862d9273be2ff1d8419524e27945e
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
+    size: 60938
+    sha256: 9a9d5a8cbd9520e4c282600feea95b31228d7de9716e8807acb53c572bd9cd31
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
   - name: FP16-INT8/single-image-super-resolution-1033.xml
-    size: 146187
-    sha256: de06fdb9f32cb5fa5e39cba78008dc8fcedc965cc63195a2b70c0af197fb50c6
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/single-image-super-resolution-1033/FP16-INT8/single-image-super-resolution-1033.xml
+    size: 142518
+    sha256: 105912bdd457b87727d3e7790ba8a6def626de13c0a8ee0401040f1229a6d524
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/single-image-super-resolution-1033/FP16-INT8/single-image-super-resolution-1033.xml
   - name: FP16-INT8/single-image-super-resolution-1033.bin
-    size: 31671
-    sha256: a3996c564de5fe142b6e77a6f89fae671f5383db3b7dbe63043c3ddd0000bd7d
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/single-image-super-resolution-1033/FP16-INT8/single-image-super-resolution-1033.bin
+    size: 31676
+    sha256: 9336f77b49467c5fc6df8c70939b25512b9d934c2c8bb2529ae40cb366e7bd65
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/single-image-super-resolution-1033/FP16-INT8/single-image-super-resolution-1033.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

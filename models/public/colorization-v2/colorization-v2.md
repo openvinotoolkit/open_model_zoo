@@ -84,7 +84,7 @@ Image, name - `class8_313_rh`\*,  shape - `1,313,56,56`, format is `B,C,H,W` whe
 in order for network to work,
 you need to reproduce `class8_ab` layer with the coefficients that
 downloaded separately with the model. More detailed information can be found
->[this](https://github.com/richzhang/colorization/blob/master/demo/colorization_demo_v2.ipynb).
+>[this](https://github.com/richzhang/colorization/blob/caffe/demo/colorization_demo_v2.ipynb).
 
 ## Legal Information
 The original model is distributed under the following

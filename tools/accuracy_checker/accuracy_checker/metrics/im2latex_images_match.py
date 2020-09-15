@@ -12,6 +12,29 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+MIT License
+
+Copyright (c) 2016 Harvard NLP
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
 """
 
 import logging
@@ -22,6 +45,7 @@ import tempfile
 from multiprocessing import cpu_count
 from multiprocessing.dummy import Pool as ThreadPool
 from threading import Timer
+from subprocess import PIPE
 
 import cv2 as cv
 import numpy as np
@@ -29,9 +53,10 @@ import numpy as np
 from ..config import NumberField
 from ..representation import CharacterRecognitionAnnotation, CharacterRecognitionPrediction
 from .metric import FullDatasetEvaluationMetric
-
+from ..logging import print_info
 MAX_PX_ROW_DIFF = 3
 TIMEOUT = 10
+PRINT_FREQ = 100
 
 # replace \pmatrix with \begin{pmatrix}\end{pmatrix}
 # replace \matrix with \begin{matrix}\end{matrix}
@@ -47,6 +72,18 @@ template = r"""
 \end{displaymath}
 \end{document}
 """
+
+
+def check_environment():
+    command = subprocess.run(["pdflatex", "--version"], stdout=PIPE, stderr=PIPE, check=True)
+    if command.stderr:
+        raise EnvironmentError("pdflatex not installed, please install it")
+    command = subprocess.run(["gs", "--version"], stdout=PIPE, stderr=PIPE, check=True)
+    if command.stderr:
+        raise EnvironmentError("ghostscript not installed, please install it")
+    command = subprocess.run(["convert", "--version"], stdout=PIPE, stderr=PIPE, check=True)
+    if command.stderr:
+        raise EnvironmentError("imagemagick not installed, please install it")
 
 
 def crop_image(img, output_path, default_size=None):
@@ -140,7 +177,8 @@ def render_routine(line):
         if not os.path.exists(pdf_filename):
             logging.info('ERROR: %s cannot compile\n', file_idx)
         else:
-            os.system('convert +profile "icc" -density 200 -quality 100 {} {}'.format(pdf_filename, png_filename))
+            subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
+                            pdf_filename, png_filename], check=True, stdout=PIPE, stderr=PIPE)
             if os.path.exists(pdf_filename):
                 os.remove(pdf_filename)
             if os.path.exists(png_filename):
@@ -282,6 +320,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         if self.num_threads is None:
             self.num_threads = cpu_count()
         self.max_pixel_column_diff = self.get_value_from_config('max_pixel_column_diff')
+        check_environment()
 
     def compare_pics(self, images_dir):
         """
@@ -307,7 +346,12 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
             plotfilename = os.path.join(plots_dir, os.path.basename(filename))
             lines.append((filename, filename2, plotfilename,
                           self.max_pixel_column_diff))
-        results = pool.map(match_images, lines)
+        results = []
+        for num, elem in enumerate(pool.imap_unordered(match_images, lines)):
+            if num % PRINT_FREQ == 0 and num != 0:
+                print_info("{} / {} images compared".format(len(results), len(lines)))
+            results.append(elem)
+        print_info("All images compared")
         assert len(results) == len(lines)
         for element in results:
 
@@ -344,10 +388,16 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         lines_gold = [(ann.label, ann.identifier, out_path_gold) for ann in annotations]
         lines_pred = [(pred.label, pred.identifier, out_path_pred) for pred in predictions]
         lines = lines_gold + lines_pred
-        logging.info('Creating pool with %s threads', self.num_threads)
+        logging.info('Creating render pool with %s threads', self.num_threads)
         pool = ThreadPool(self.num_threads)
         logging.info('Jobs running...')
-        pool.map(render_routine, lines)
+        pairs_images_rendered = 0
+        for num, _ in enumerate(pool.imap_unordered(render_routine, lines)):
+            if num % (PRINT_FREQ * 2) == 0 and num != 0:
+                pairs_images_rendered += PRINT_FREQ
+                # 2x PRINT_FREQ because images are rendered by pairs (original + predicted)
+                print_info("{} / {} images rendered".format(pairs_images_rendered, len(lines) // 2))
+        print_info("All images rendered")
         pool.close()
         pool.join()
 

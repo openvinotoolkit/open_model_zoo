@@ -6,32 +6,17 @@ models:
           type: narnmt
           vocabulary_file: tokenizer_tgt/vocab.json
           merges_file: tokenizer_tgt/merges.txt
-          output_name: pred/Squeeze
+          output_name: pred
         inputs:
           - name: "tokens"
             value: 'tokens'
             type: INPUT
 
     datasets:
-      - name: WMT
-        annotation_conversion:
-          converter: wmt
-          input_file: wmt19-ru-en.en.spbpe
-          reference_file: wmt19-ru-en.ru.spbpe
-
-        reader:
-          type: annotation_features_extractor
-          features:
-            - source
-
-        preprocessing:
-          - type: decode_by_sentence_piece_bpe_tokenizer
-            vocabulary_file: tokenizer_src/vocab.json
-            merges_file: tokenizer_src/merges.txt
-
-          - type: pad_with_eos
-            eos_index: 1
-            sequence_len: 192
+      - name: WMT_en_ru
+        postprocessing:
+          - type: to_lower_case
+          - type: remove_repeats
 
         metrics:
           - type: bleu

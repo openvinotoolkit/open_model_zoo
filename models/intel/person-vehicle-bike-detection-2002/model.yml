@@ -1,0 +1,44 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  MobileNetV2-SSD with two heads and clustered priors for 512x512 resolution.
+task_type: detection
+files:
+  - name: FP32/person-vehicle-bike-detection-2002.xml
+    size: 187056
+    sha256: c7b945a33f203198eef1fff49bcc4e3d6ac3facce3a187e1fdb504cbb91c93b8
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-vehicle-bike-detection-2002/FP32/person-vehicle-bike-detection-2002.xml
+  - name: FP32/person-vehicle-bike-detection-2002.bin
+    size: 7285112
+    sha256: 2bf525c551a9a0625bfe7f2fc462b1c1f4bb1218d06472b03c9424d0dc2ea684
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-vehicle-bike-detection-2002/FP32/person-vehicle-bike-detection-2002.bin
+  - name: FP16/person-vehicle-bike-detection-2002.xml
+    size: 186994
+    sha256: b3a6d59770c78685906695b6f30d26314daa019e43f7555f7d86c0fa84fcf619
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-vehicle-bike-detection-2002/FP16/person-vehicle-bike-detection-2002.xml
+  - name: FP16/person-vehicle-bike-detection-2002.bin
+    size: 3642598
+    sha256: 5f1d98f95cdf46dab234d70754a6e8f5b3d770465f8050b9643e3c4fe4bd22d4
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-vehicle-bike-detection-2002/FP16/person-vehicle-bike-detection-2002.bin
+  - name: FP16-INT8/person-vehicle-bike-detection-2002.xml
+    size: 493377
+    sha256: aecb287805507e0afa23b12c82831a0f2bce6b78ac06dfc70d1333c4c1ddceeb
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-vehicle-bike-detection-2002/FP16-INT8/person-vehicle-bike-detection-2002.xml
+  - name: FP16-INT8/person-vehicle-bike-detection-2002.bin
+    size: 1925701
+    sha256: c836b4a0b4d5ba15ac23c52e997e977dc3d742b0bf541f089309f7abac3844e3
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/person-vehicle-bike-detection-2002/FP16-INT8/person-vehicle-bike-detection-2002.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

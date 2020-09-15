@@ -71,7 +71,7 @@ def build_argparser():
     args.add_argument("-nthreads", "--number_threads",
                       help="Optional. Number of threads to use for inference on CPU (including HETERO cases)",
                       default=None, type=int)
-    args.add_argument("-loop_input", "--loop_input", help="Optional. Iterate over input infinitely",
+    args.add_argument("-loop", "--loop", help="Optional. Enable reading the input in a loop",
                       action='store_true')
     args.add_argument("-no_show", "--no_show", help="Optional. Don't show output", action='store_true')
     args.add_argument("-o", "--output", help="Optional. Save results of input processing to the specified folder.",
@@ -316,20 +316,9 @@ def main():
     log.info("Loading network")
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
-    # ---------------------------------- 3. Load CPU extension for support specific layer ------------------------------
-    if "CPU" in args.device:
-        supported_layers = ie.query_network(net, "CPU")
-        not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
-        if len(not_supported_layers) != 0:
-            log.error("Following layers are not supported by the plugin for specified device {}:\n {}".
-                      format(args.device, ', '.join(not_supported_layers)))
-            log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
-                      "or --cpu_extension command line argument")
-            sys.exit(1)
-
     assert len(net.input_info) == 1, "Sample supports only YOLO V3 based single input topologies"
 
-    # ---------------------------------------------- 4. Preparing inputs -----------------------------------------------
+    # ---------------------------------------------- 3. Preparing inputs -----------------------------------------------
     log.info("Preparing inputs")
     input_blob = next(iter(net.input_info))
 
@@ -353,7 +342,7 @@ def main():
     cap = cv2.VideoCapture(input_stream)
     wait_key_time = 1
 
-    # ----------------------------------------- 5. Loading model to the plugin -----------------------------------------
+    # ----------------------------------------- 4. Loading model to the plugin -----------------------------------------
     log.info("Loading model to the plugin")
     exec_nets = {}
 
@@ -373,7 +362,7 @@ def main():
     event = threading.Event()
     callback_exceptions = []
 
-    # ----------------------------------------------- 6. Doing inference -----------------------------------------------
+    # ----------------------------------------------- 5. Doing inference -----------------------------------------------
     log.info("Starting inference...")
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between min_latency/user_specified modes, press TAB key in the output window")
@@ -474,7 +463,7 @@ def main():
             start_time = perf_counter()
             ret, frame = cap.read()
             if not ret:
-                if args.loop_input:
+                if args.loop:
                     cap.open(input_stream)
                 else:
                     cap.release()

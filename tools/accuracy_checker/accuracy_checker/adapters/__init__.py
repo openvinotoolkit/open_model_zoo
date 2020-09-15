@@ -82,7 +82,12 @@ from .image_inpainting import ImageInpaintingAdapter
 from .style_transfer import StyleTransferAdapter
 
 from .attribute_classification import AttributeClassificationAdapter
-from .audio_recognition import CTCBeamSearchDecoder, CTCGreedyDecoder
+from .audio_recognition import (
+    CTCBeamSearchDecoder,
+    CTCGreedyDecoder,
+    CTCBeamSearchDecoderWithLm,
+    FastCTCBeamSearchDecoderWithLm
+)
 
 from .regression import RegressionAdapter
 from .mixed_adapter import MixedAdapter
@@ -175,6 +180,8 @@ __all__ = [
 
     'CTCBeamSearchDecoder',
     'CTCGreedyDecoder',
+    'CTCBeamSearchDecoderWithLm',
+    'FastCTCBeamSearchDecoderWithLm',
 
     'QualityAssessmentAdapter',
 

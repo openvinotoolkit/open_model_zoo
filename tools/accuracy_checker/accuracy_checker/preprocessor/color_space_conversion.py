@@ -132,7 +132,7 @@ class BGR2YUVConverter(Preprocessor):
             y = yuvdata[:, :, 0]
             u = yuvdata[:, :, 1]
             v = yuvdata[:, :, 2]
-            identifier = image.data
+            identifier = image.identifier
             new_identifier = ['{}_y'.format(identifier), '{}_u'.format(identifier), '{}_v'.format(identifier)]
             yuvdata = [np.expand_dims(y, -1), np.expand_dims(u, -1), np.expand_dims(v, -1)]
             image.identifier = new_identifier

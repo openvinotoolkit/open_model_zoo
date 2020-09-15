@@ -881,6 +881,7 @@ datasets:
       doc_stride: 128
       lower_case: true
       vocab_file: vocab.txt
+
   - name: squad_emb_v1_1_msl384_mql32_lowercase
     annotation_conversion:
       converter: squad_emb
@@ -889,3 +890,61 @@ datasets:
       max_seq_length: 384
       max_query_length: 32
       lower_case: true
+
+  - name: librispeech-test-clean
+    data_source: librispeech/test/LibriSpeech/test-clean.wav
+    annotation_conversion:
+      converter: librispeech
+      data_dir: librispeech/test/LibriSpeech/test-clean.wav
+    annotation: librispeech-test-clean.pickle
+    metrics:
+      - name: wer
+
+  - name: librispeech-dev-clean
+    data_source: librispeech/dev/LibriSpeech/dev-clean.wav
+    annotation_conversion:
+      converter: librispeech
+      data_dir: librispeech/dev/LibriSpeech/dev-clean.wav
+    annotation: librispeech-dev-clean.pickle
+    metrics:
+      - name: wer
+
+  - name: WMT_en_ru
+    annotation_conversion:
+      converter: wmt
+      input_file: wmt19-ru-en.en.spbpe
+      reference_file: wmt19-ru-en.ru.spbpe
+
+      reader:
+        type: annotation_features_extractor
+        features:
+          - source
+
+      preprocessing:
+        - type: decode_by_sentence_piece_bpe_tokenizer
+          vocabulary_file: tokenizer_src/vocab.json
+          merges_file: tokenizer_src/merges.txt
+
+        - type: pad_with_eos
+          eos_index: 1
+          sequence_len: 192
+
+  - name: WMT_ru_en
+    annotation_conversion:
+      converter: wmt
+      input_file: wmt19-ru-en.ru.spbpe
+      reference_file: wmt19-ru-en.en.spbpe
+
+    reader:
+      type: annotation_features_extractor
+      features:
+        - source
+
+    preprocessing:
+      - type: decode_by_sentence_piece_bpe_tokenizer
+        vocabulary_file: tokenizer_src/vocab.json
+        merges_file: tokenizer_src/merges.txt
+
+      - type: pad_with_eos
+        eos_index: 1
+        sequence_len: 192

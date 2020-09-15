@@ -35,7 +35,7 @@ class ImageInpaintingAnnotation(ImageInpaintingRepresentation):
         GTLoader.OPENCV: 'opencv_imread'
     }
 
-    def __init__(self, identifier, path_to_gt, gt_loader=GTLoader.PILLOW):
+    def __init__(self, identifier, path_to_gt, gt_loader=GTLoader.OPENCV):
         """
         Args:
             identifier: object identifier (e.g. image name).

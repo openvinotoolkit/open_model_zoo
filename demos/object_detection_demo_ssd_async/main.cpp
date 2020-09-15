@@ -76,7 +76,7 @@ void switchMode(ExecutionMode& mode) {
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers certain topology and cannot be generalized for any object detection **/
-        std::cout << "InferenceEngine: " << GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -481,7 +481,7 @@ int main(int argc, char *argv[]) {
             cv::Mat frame;
             if (!cap.read(frame)) {
                 if (frame.empty()) {
-                    if (FLAGS_loop_input) {
+                    if (FLAGS_loop) {
                         cap.open((FLAGS_i == "cam") ? 0 : FLAGS_i.c_str());
                     } else cap.release();
                     continue;

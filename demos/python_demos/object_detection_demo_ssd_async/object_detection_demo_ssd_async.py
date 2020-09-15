@@ -65,8 +65,7 @@ def build_argparser():
     args.add_argument('-nthreads', '--num_threads',
                       help='Optional. Number of threads to use for inference on CPU (including HETERO cases)',
                       default=None, type=int)
-    args.add_argument('-loop_input', '--loop_input', help='Optional. Number of times to repeat the input.',
-                      type=int, default=0)
+    args.add_argument('-loop', '--loop', help='Optional. Number of times to repeat the input.', type=int, default=0)
     args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
@@ -127,8 +126,6 @@ class Model:
         self.net = ie.read_network(model=xml_file_path, weights=bin_file_path)
 
         log.info('Loading network to plugin...')
-        if 'CPU' in device:
-            self.check_cpu_support(ie, self.net)
         self.max_num_requests = max_num_requests
         self.exec_net = ie.load_network(network=self.net, device_name=device, config=plugin_config, num_requests=max_num_requests)
 
@@ -137,21 +134,6 @@ class Model:
         self.completed_request_results = results if results is not None else []
         self.callback_exceptions = caught_exceptions if caught_exceptions is not None else {}
         self.event = threading.Event()
-
-    @staticmethod
-    def check_cpu_support(ie, net):
-        log.info('Check that all layers are supported...')
-        supported_layers = ie.query_network(net, 'CPU')
-        not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
-        if len(not_supported_layers) != 0:
-            unsupported_info = '\n\t'.join('{} ({} with params {})'.format(layer_id,
-                                                                           net.layers[layer_id].type,
-                                                                           str(net.layers[layer_id].params))
-                                           for layer_id in not_supported_layers)
-            log.warning('Following layers are not supported '
-                        'by the CPU plugin:\n\t{}'.format(unsupported_info))
-            log.warning('Please try to specify cpu extensions library path.')
-            raise ValueError('Some of the layers are not supported.')
 
     def unify_inputs(self, inputs):
         if not isinstance(inputs, dict):
@@ -564,7 +546,7 @@ def main():
             start_time = perf_counter()
             ret, frame = cap.read()
             if not ret:
-                if input_repeats < args.loop_input or args.loop_input < 0:
+                if input_repeats < args.loop or args.loop < 0:
                     cap.open(input_stream)
                     input_repeats += 1
                 else:

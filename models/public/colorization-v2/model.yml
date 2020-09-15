@@ -24,7 +24,7 @@ task_type: "colorization"
 files:
   - name: colorization-v2.prototxt
     sha256: d16418cef8df4ccd703a55ae0ef3960861d5010418f77c90d0a47689998a7169
-    source: https://raw.githubusercontent.com/richzhang/colorization/master/models/colorization_deploy_v2.prototxt
+    source: https://raw.githubusercontent.com/richzhang/colorization/caffe/models/colorization_deploy_v2.prototxt
     size: 9945
   - name: colorization-v2.caffemodel
     size: 128946764
@@ -33,7 +33,7 @@ files:
   - name: colorization-v2.npy
     size: 5088
     sha256: b5dec01315c34f43f1c8c089e84c45ae35d1838d8e77ed0e7ca930f79ffa450e
-    source: https://github.com/richzhang/colorization/raw/master/resources/pts_in_hull.npy
+    source: https://github.com/richzhang/colorization/raw/caffe/resources/pts_in_hull.npy
 model_optimizer_args:
   - --input_shape=[1,1,224,224]
   - --input=data_l
