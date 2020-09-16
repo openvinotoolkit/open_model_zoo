@@ -150,8 +150,6 @@ void paintInfo(cv::Mat& frame, const PipelineBase::PerformanceInfo& info) {
 
 int main(int argc, char *argv[]) {
     try {
-        DetectionPipeline pipeline;
-
         /** This demo covers certain topology and cannot be generalized for any object detection **/
         std::cout << "InferenceEngine: " << *InferenceEngine::GetInferenceEngineVersion() << std::endl;
 
@@ -165,10 +163,11 @@ int main(int argc, char *argv[]) {
         cv::VideoCapture cap;
         cv::Mat curr_frame;
         //------------------------------ Running Detection routines ----------------------------------------------
+        std::vector<std::string> labels;
         if (!FLAGS_labels.empty())
-            pipeline.loadLabels(FLAGS_labels);
+            labels = DetectionPipeline::loadLabels(FLAGS_labels);
 
-        pipeline.init(FLAGS_m, ConfigFactory::GetUserConfig(), (float)FLAGS_t, FLAGS_auto_resize);
+        DetectionPipeline pipeline(FLAGS_m, ConfigFactory::GetUserConfig(), (float)FLAGS_t, FLAGS_auto_resize,labels);
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();

@@ -49,6 +49,8 @@ public:
             return outputsData.begin()->second;
         }
 
+        /// Returns true if object contains no valid data
+        /// @returns true if object contains no valid data
         bool IsEmpty() { return outputsData.empty(); }
     };
 
@@ -67,7 +69,10 @@ public:
 
     /// Loads model and performs required initialization
     /// @param model_name name of model to load
-    virtual void init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine=nullptr);
+    /// @param cnnConfig - fine tuning configuration for CNN model
+    /// @param engine - pointer to InferenceEngine::Core instance to use.
+    /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
+    void init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine = nullptr);
 
     /// Waits until output data becomes available
     ///
@@ -85,7 +90,7 @@ public:
     /// @param image - image to submit for processing
     /// @returns -1 if image cannot be scheduled for processing (there's no any free InferRequest available).
     /// Otherwise reqturns unique sequential frame ID for this particular request. Same frame ID will be written in the responce structure.
-    int64_t submitImage(cv::Mat img);
+    virtual int64_t submitImage(cv::Mat img);
 
     /// Gets available data from the queue and renders it to output frame
     /// This function should be overriden in inherited classes to provide default rendering of processed data

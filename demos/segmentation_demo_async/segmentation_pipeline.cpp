@@ -19,15 +19,14 @@
 
 using namespace InferenceEngine;
 
-SegmentationPipeline::SegmentationPipeline()
+SegmentationPipeline::SegmentationPipeline(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine)
     :distr(0, 255) {
+
+    init(model_name, cnnConfig, engine);
+
     colors.resize(arraySize(CITYSCAPES_COLORS));
     for (std::size_t i = 0; i < colors.size(); ++i)
         colors[i] = { CITYSCAPES_COLORS[i].blue(), CITYSCAPES_COLORS[i].green(), CITYSCAPES_COLORS[i].red() };
-}
-
-
-SegmentationPipeline::~SegmentationPipeline(){
 }
 
 void SegmentationPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork){

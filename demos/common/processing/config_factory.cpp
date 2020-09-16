@@ -81,7 +81,6 @@ CnnConfig ConfigFactory::GetMinLatencyConfig() {
     for (const std::string& device : parseDevices(FLAGS_d)) {
         devices.insert(device);
     }
-    std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(devices, FLAGS_nstreams);
     for (auto & device : devices) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1");

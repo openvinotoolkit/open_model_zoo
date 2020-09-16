@@ -21,19 +21,12 @@
 
 using namespace InferenceEngine;
 
-PipelineBase::PipelineBase():
+PipelineBase::PipelineBase() :
     inputFrameId(0),
-    outputFrameId(0)
-{
+    outputFrameId(0) {
 }
 
-PipelineBase::~PipelineBase()
-{
-    waitForTotalCompletion();
-}
-
-void PipelineBase::init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine)
-{
+void PipelineBase::init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine) {
     auto ie = engine ?
         std::unique_ptr<InferenceEngine::Core, void(*)(InferenceEngine::Core*)>(engine, [](InferenceEngine::Core*) {}) :
         std::unique_ptr<InferenceEngine::Core, void(*)(InferenceEngine::Core*)>(new InferenceEngine::Core, [](InferenceEngine::Core* ptr) {delete ptr; });
@@ -68,12 +61,18 @@ void PipelineBase::init(const std::string& model_name, const CnnConfig& cnnConfi
 
     // --------------------------- 4. Loading model to the device ------------------------------------------
     slog::info << "Loading model to the device" << slog::endl;
-    ExecutableNetwork execNetwork = ie->LoadNetwork(cnnNetwork, cnnConfig.devices, cnnConfig.execNetworkConfig);
+    execNetwork = ie->LoadNetwork(cnnNetwork, cnnConfig.devices, cnnConfig.execNetworkConfig);
     // -----------------------------------------------------------------------------------------------------
 
     // --------------------------- 5. Create infer requests ------------------------------------------------
     requestsPool = std::move(RequestsPool(execNetwork, cnnConfig.maxAsyncRequests));
 }
+
+PipelineBase::~PipelineBase()
+{
+    waitForTotalCompletion();
+}
+
 
 void PipelineBase::waitForData()
 {
@@ -115,8 +114,8 @@ int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request, 
 
                     result.frameId = frameID;
                     result.extraData = extraData;
-                    for(std::string outName : this->outputsNames)
-                        result.outputsData.emplace(outName,std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outName))));
+                    for (std::string outName : this->outputsNames)
+                        result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outName))));
                     result.startTime = frameStartTime;
 
                     completedInferenceResults.emplace(frameID, result);
@@ -135,8 +134,8 @@ int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request, 
     });
 
     inputFrameId++;
-    if(inputFrameId<0)
-        inputFrameId=0;
+    if (inputFrameId < 0)
+        inputFrameId = 0;
 
     request->StartAsync();
     return frameID;

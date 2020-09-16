@@ -141,8 +141,6 @@ void paintInfo(cv::Mat& frame, const PipelineBase::PerformanceInfo& info) {
 
 int main(int argc, char *argv[]) {
     try {
-        SegmentationPipeline pipeline;
-
         /** This demo covers certain topology and cannot be generalized for any object detection **/
         std::cout << "InferenceEngine: " << InferenceEngine::GetInferenceEngineVersion() << std::endl;
 
@@ -168,7 +166,7 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
-        pipeline.init(FLAGS_m, ConfigFactory::GetUserConfig());
+        SegmentationPipeline pipeline(FLAGS_m, ConfigFactory::GetUserConfig());
         std::unordered_map<int64_t, cv::Mat> frames;
         Presenter presenter;
 

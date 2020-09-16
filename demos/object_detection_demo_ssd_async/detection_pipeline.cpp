@@ -19,18 +19,16 @@
 
 using namespace InferenceEngine;
 
-DetectionPipeline::DetectionPipeline(){
-}
-
-
-DetectionPipeline::~DetectionPipeline(){
-}
-
-void DetectionPipeline::init(const std::string& model_name, const CnnConfig& cnnConfig, float confidenceThreshold, bool useAutoResize, InferenceEngine::Core* engine){
-    PipelineBase::init(model_name, cnnConfig, engine);
+DetectionPipeline::DetectionPipeline(const std::string& model_name, const CnnConfig& cnnConfig,
+    float confidenceThreshold, bool useAutoResize,
+    const std::vector<std::string>& labels,
+    InferenceEngine::Core* engine){
 
     this->useAutoResize = useAutoResize;
     this->confidenceThreshold = confidenceThreshold;
+    this->labels = labels;
+
+    init(model_name, cnnConfig, engine);
 
     // --- Setting image info for every request in a pool. We can do it once and reuse this info at every submit -------
     if (!imageInfoInputName.empty()) {
@@ -89,7 +87,7 @@ void DetectionPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
 
     int num_classes = 0;
 
-/*    if (auto ngraphFunction = cnnNetwork.getFunction()) {
+    if (auto ngraphFunction = cnnNetwork.getFunction()) {
         for (const auto op : ngraphFunction->get_ops()) {
             if (op->get_friendly_name() == outputsNames[0]) {
                 auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
@@ -105,7 +103,7 @@ void DetectionPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     }
     else {
         throw std::logic_error("This demo requires IR version no older than 10");
-    }*/
+    }
     if (labels.size()){
         if (static_cast<int>(labels.size()) == (num_classes - 1)) {  // if network assumes default "background" class, having no label
             labels.insert(labels.begin(), "fake");
@@ -211,15 +209,17 @@ cv::Mat DetectionPipeline::obtainAndRenderData()
     return outputImg;
 }
 
-void DetectionPipeline::loadLabels(const std::string & labelFilename){
+std::vector<std::string> DetectionPipeline::loadLabels(const std::string & labelFilename){
+    std::vector<std::string> labelsList;
     /** Read labels (if any)**/
     if (!labelFilename.empty()) {
         std::ifstream inputFile(labelFilename);
         std::string label;
         while (std::getline(inputFile, label)) {
-            labels.push_back(label);
+            labelsList.push_back(label);
         }
-        if (labels.empty())
+        if (labelsList.empty())
             throw std::logic_error("File empty or not found: " + labelFilename);
     }
+    return labelsList;
 }

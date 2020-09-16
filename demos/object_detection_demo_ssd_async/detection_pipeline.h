@@ -32,25 +32,34 @@ public:
     };
 
 public:
-    DetectionPipeline();
-    virtual ~DetectionPipeline();
-
-    /// Loads model and performs required initialization
+    /// Constructor. Loads model and performs required initialization
     /// @param model_name name of model to load
-    virtual void init(const std::string& model_name, const CnnConfig& config,
-        float confidenceThreshold, bool useAutoResize, InferenceEngine::Core* engine = nullptr);
+    /// @param cnnConfig - fine tuning configuration for CNN model
+    /// @param confidenceThreshold - threshold to eleminate low-confidence detections.
+    /// Any detected object with confidence lower than this threshold will be ignored.
+    /// @param useAutoResize - if true, image will be resized by IE.
+    /// Otherwise, image will be preprocessed and resized using OpenCV routines.
+    /// @param labels - array of labels for every class. If this array is empty or contains less elements
+    /// than actual classes number, default "Label #N" will be shown for missing items.
+    /// @param engine - pointer to InferenceEngine::Core instance to use.
+    /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
+    DetectionPipeline(const std::string& model_name, const CnnConfig& cnnconfig,
+        float confidenceThreshold, bool useAutoResize,
+        const std::vector<std::string>& labels = std::vector<std::string>(),
+        InferenceEngine::Core* engine = nullptr);
 
     virtual void PrepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
 
-    int64_t submitImage(cv::Mat img);
+    virtual int64_t submitImage(cv::Mat img);
     DetectionResult getProcessedResult();
 
     cv::Mat obtainAndRenderData();
 
-    void loadLabels(const std::string& labelFilename);
-    std::vector<std::string> labels;
+    static std::vector<std::string> loadLabels(const std::string& labelFilename);
 
 protected:
+    std::vector<std::string> labels;
+
     std::string imageInfoInputName;
     size_t netInputHeight=0;
     size_t netInputWidth=0;
