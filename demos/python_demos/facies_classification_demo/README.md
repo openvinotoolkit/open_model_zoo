@@ -24,16 +24,10 @@ python3 facies_classification_demo.py -h
 ```
 The command yields the following usage message:
 ```
-usage: facies_classification_demo.py [-h] -m MODEL -i DATA_PATH
+usage: facies_classification_demo.py [-h] -m MODEL -i DATA_PATH -l
+                                     CPU_EXTENSION
                                      [-t {inline,crossline,timeline}]
-                                     [-s SLICE_INDEX] [-l CPU_EXTENSION]
-                                     [-d "<device>"]
-
-optional arguments:
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        MKLDNN (CPU)-targeted custom layers. Absolute path to
-                        a shared library with the kernels implementations
+                                     [-s SLICE_INDEX] [-d "<device>"]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -41,6 +35,11 @@ Options:
                         Required. Path to an .xml file with a trained model.
   -i DATA_PATH, --data_path DATA_PATH
                         Required. Path to seismic datafile.
+  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
+                        Required. Required for CPU custom layers. (MaxUnpool
+                        layers in this case) Absolute MKLDNN (CPU)-targeted
+                        custom layers. Absolute path to a shared library with
+                        the kernels implementations
   -t {inline,crossline,timeline}, --slice_type {inline,crossline,timeline}
                         Type of slice .
   -s SLICE_INDEX, --slice_index SLICE_INDEX
@@ -57,7 +56,7 @@ To run the demo, you can use public or pre-trained models. You can download the 
 
 ## Demo Output
 
-The application uses matplotlib to display resulting instance segmentation masks, saving the picture to the current directory.
+The application uses matplotlib to display resulting instance classification masks, saving the picture to the current directory.
 
 ![](./facies_classification_demo.png)
 
