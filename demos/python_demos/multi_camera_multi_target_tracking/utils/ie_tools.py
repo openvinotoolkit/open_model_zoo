@@ -19,7 +19,7 @@ import numpy as np
 import cv2 as cv
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'common'))
-from ie_config_helper import create_default_config
+from ie_config_helper import format_device_string, create_default_config
 
 
 class IEModel:
@@ -82,6 +82,6 @@ def load_ie_model(ie, model_xml, device, plugin_dir, num_reqs=1):
 
     # Loading model to the plugin
     log.info("Loading model to the plugin")
-    exec_net = ie.load_network(net, device, create_default_config(device_string), num_reqs)
+    exec_net = ie.load_network(net, device, create_default_config(format_device_string(device)), num_reqs)
     model = IEModel(exec_net, net.input_info, input_blob, out_blob)
     return model
