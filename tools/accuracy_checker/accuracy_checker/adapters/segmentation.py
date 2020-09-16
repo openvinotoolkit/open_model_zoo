@@ -127,14 +127,20 @@ class BrainTumorSegmentationAdapter(Adapter):
         self.argmax = self.get_value_from_config('make_argmax')
         self.label_order = tuple(self.get_value_from_config('label_order'))
         self.segmentation_out = self.get_value_from_config('segmentation_out')
+        if self.segmentation_out:
+            self.segmentation_out_bias = self.segmentation_out + '/add_'
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        if not self.segmentation_out:
-            self.segmentation_out = self.output_blob
-        for identifier, output in zip(identifiers, raw_outputs[self.segmentation_out]):
+        if self.segmentation_out:
+            if not contains_any(raw_outputs, [self.segmentation_out, self.segmentation_out_bias]):
+                raise ConfigError('segmentation output not found')
+            segmentation_out = self.segmentation_out if self.segmentation_out in raw_outputs else self.segmentation_out_bias
+        else:
+            segmentation_out = self.output_blob
+        for identifier, output in zip(identifiers, raw_outputs[segmentation_out]):
             if self.argmax:
                 output = np.argmax(output, axis=0).astype(np.int8)
                 output = np.expand_dims(output, axis=0)
