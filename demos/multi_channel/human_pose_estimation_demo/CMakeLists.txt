@@ -45,7 +45,7 @@ add_executable(${TARGET_NAME} ${MAIN_SRC} ${MAIN_HEADERS})
 set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_PDB_NAME ${TARGET_NAME})
 
 target_link_libraries(${TARGET_NAME} PRIVATE
-    ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} multi_channel_common monitors)
+    ${TBB_IMPORTED_TARGETS} ${InferenceEngine_LIBRARIES} ngraph::ngraph gflags ${OpenCV_LIBRARIES} multi_channel_common monitors)
 
 if(NOT TARGET ie_samples)
     add_custom_target(ie_samples ALL)

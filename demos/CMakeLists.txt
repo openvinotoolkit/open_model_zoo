@@ -176,8 +176,8 @@ macro(ie_add_sample)
         target_include_directories(${IE_SAMPLE_NAME} PRIVATE ${IE_SAMPLE_INCLUDE_DIRECTORIES})
     endif()
 
-    target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
-                                                    ${IE_SAMPLE_DEPENDENCIES} common gflags)
+    target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${TBB_IMPORTED_TARGETS} ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
+                                                    ngraph::ngraph ${IE_SAMPLE_DEPENDENCIES} common gflags)
 
     if(UNIX)
         target_link_libraries(${IE_SAMPLE_NAME} PRIVATE pthread)
@@ -206,6 +206,7 @@ else()
 endif()
 
 find_package(ngraph REQUIRED)
+find_package(TBB REQUIRED tbb)
 
 # collect all samples subdirectories
 file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
