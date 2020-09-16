@@ -19,15 +19,15 @@ from ..representation import (
     BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction, SegmentationAnnotation, SegmentationPrediction
 )
 from ..config import NumberField
-from ..preprocessor import Crop3D, CropOrPad
+from ..preprocessor import Crop3D, CropOrPad, Crop
 from ..utils import get_size_3d_from_config, get_size_from_config
 
 
 class CropSegmentationMask(PostprocessorWithSpecificTargets):
     __provider__ = 'crop_segmentation_mask'
 
-    annotation_types = (BrainTumorSegmentationAnnotation,)
-    prediction_types = (BrainTumorSegmentationPrediction,)
+    annotation_types = (BrainTumorSegmentationAnnotation, SegmentationAnnotation, )
+    prediction_types = (BrainTumorSegmentationPrediction, SegmentationPrediction, )
 
     @classmethod
     def parameters(cls):
@@ -54,10 +54,22 @@ class CropSegmentationMask(PostprocessorWithSpecificTargets):
 
     def process_image(self, annotation, prediction):
         for target in annotation:
-            target.mask = Crop3D.crop_center(target.mask, self.dst_height, self.dst_width, self.dst_volume)
+            shape = len(target.mask.shape)
+            if shape == 3:
+                target.mask = Crop3D.crop_center(target.mask, self.dst_height, self.dst_width, self.dst_volume)
+            if shape == 2:
+                target.mask = Crop.process_data(target.mask, self.dst_height, self.dst_width, None, False, True, {})
+            else:
+                raise ValueError("'arr' does not have a suitable array shape for any mode.")
 
         for target in prediction:
-            target.mask = Crop3D.crop_center(target.mask, self.dst_height, self.dst_width, self.dst_volume)
+            shape = len(target.mask.shape)
+            if shape == 3:
+                target.mask = Crop3D.crop_center(target.mask, self.dst_height, self.dst_width, self.dst_volume)
+            if shape == 2:
+                target.mask = Crop.process_data(target.mask, self.dst_height, self.dst_width, None, False, True, {})
+            else:
+                raise ValueError("'arr' does not have a suitable array shape for any mode.")
 
         return annotation, prediction
 
