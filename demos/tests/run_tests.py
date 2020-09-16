@@ -47,7 +47,7 @@ from args import ArgContext, ModelArg
 from cases import DEMOS
 from crop_size import CROP_SIZE
 from data_sequences import DATA_SEQUENCES
-from similarity_measurement import getMSSSIM
+from similarity_measurement import getSSIM
 from thresholds import THRESHOLDS
 
 def parse_args():
@@ -63,7 +63,7 @@ def parse_args():
         help='list of demos to run tests for (by default, every demo is tested)')
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
         help='Model Optimizer entry point script')
-    parser.add_argument('--devices', default="CPU GPU", # FOR DEBUG: CPU
+    parser.add_argument('--devices', default="CPU GPU",
         help='list of devices to test')
     parser.add_argument('--report-file', type=Path,
         help='path to report file')
@@ -95,7 +95,6 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
     model_names = {arg.name for arg in model_args}
     model_precisions = {arg.precision for arg in model_args}
 
-    # FOR DEBUG: dl_dir = Path('/home/anthonyquantum') / 'models'
     dl_dir = global_temp_dir / 'models'
     complete_models_lst_path = global_temp_dir / 'models.lst'
 
@@ -228,7 +227,7 @@ def main():
                                 stderr=subprocess.STDOUT, universal_newlines=True)
                             execution_time = timeit.default_timer() - start_time
 
-                            # 'if' is debug-only, won't be needed when all demos will be compatible with ssim test
+                            # 'if' is dev-only, won't be needed when all demos will be compatible with ssim test
                             if '-o' in case_args and case_args[case_args.index('-o') + 1] != '.':
                                 similarity_res = []
 
@@ -250,7 +249,7 @@ def main():
                                         out_frame = out_frame[crop[0] : height - crop[2], crop[3] : width - crop[1]]
                                         raw_frame = raw_frame[crop[0] : height - crop[2], crop[3] : width - crop[1]]
                                         similarity = list(map(lambda x: round(x, 3),
-                                                              getMSSSIM(out_frame, raw_frame)[:-1]))
+                                                              getSSIM(out_frame, raw_frame)[:-1]))
                                         similarity_res.append(similarity)
                                     else:
                                       break
@@ -270,12 +269,11 @@ def main():
                                     similarity_reference = reference_values[demo.full_name][model_name]
                                     threshold = THRESHOLDS[demo.full_name][model_name]
                                     for i in range(len(similarity_res)):
-                                        print("res: {}, ref: {}".format(similarity_res[i], similarity_reference[i]))
-                                        # for j in range(len(similarity_res[0])):
-                                            # if abs(similarity_res[i][j] - similarity_reference[i][j]) > threshold[j]:
-                                                # raise RuntimeError("SSIM test failed: {} != {} with threshold {}."
-                                                #                    .format(similarity_res[i], similarity_reference[i],
-                                                #                            threshold))
+                                        for j in range(len(similarity_res[0])):
+                                            if abs(similarity_res[i][j] - similarity_reference[i][j]) > threshold[j]:
+                                                raise RuntimeError("SSIM test failed: {} != {} with threshold={}."
+                                                                   .format(similarity_res[i], similarity_reference[i],
+                                                                           threshold))
                         except Exception as e:
                             print("Error:")
                             if isinstance(e, subprocess.CalledProcessError):

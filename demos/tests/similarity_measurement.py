@@ -15,7 +15,7 @@
 import cv2 as cv
 import numpy as np
 
-def getMSSSIM(i1, i2):
+def getSSIM(i1, i2):
     C1 = 6.5025
     C2 = 58.5225
 

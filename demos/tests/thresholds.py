@@ -17,10 +17,10 @@ THRESHOLDS = {
         'yolo-v3-tf': [0.005, 0.005, 0.005]
     },
     'py/object_detection_demo_yolov3_async': {
-        'yolo-v1-tiny-tf': [0.005, 0.005, 0.005],
-        'yolo-v2-tiny-tf': [0.005, 0.005, 0.005],
-        'yolo-v2-tf': [0.005, 0.005, 0.005],
-        'yolo-v3-tf': [0.005, 0.005, 0.005],
-        'mobilefacedet-v1-mxnet': [0.005, 0.005, 0.005]
+        'yolo-v1-tiny-tf': [0.007, 0.007, 0.007],
+        'yolo-v2-tiny-tf': [0.007, 0.007, 0.007],
+        'yolo-v2-tf': [0.007, 0.007, 0.007],
+        'yolo-v3-tf': [0.007, 0.007, 0.007],
+        'mobilefacedet-v1-mxnet': [0.007, 0.007, 0.007]
     }
 }

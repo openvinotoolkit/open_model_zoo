@@ -48,7 +48,6 @@ class ModelArg:
         self.precision = precision
 
     def resolve(self, context):
-        # FOR DEBUG: return str(Path('/home/anthonyquantum/models') / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))
         return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))
 
 
