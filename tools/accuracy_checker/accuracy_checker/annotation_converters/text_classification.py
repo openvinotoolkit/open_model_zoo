@@ -287,7 +287,7 @@ class MRPCConverter(BaseGLUETextClassificationConverter):
         self.label_map = dict(enumerate(labels['mrpc']))
         self.label_ind = 0
         self.text_a_ind = 3
-        self.tex_b_ind = 4
+        self.text_b_ind = 4
         super().__init__(config)
 
 
