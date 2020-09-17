@@ -118,7 +118,7 @@ usage: object_detection_demo_ssd_async.py [-h] -m MODEL -i INPUT [-d DEVICE]
                                           [-nireq NUM_INFER_REQUESTS]
                                           [-nstreams NUM_STREAMS]
                                           [-nthreads NUM_THREADS]
-                                          [-loop_input LOOP_INPUT] [-no_show]
+                                          [-loop LOOP] [-no_show]
                                           [-u UTILIZATION_MONITORS]
                                           [--keep_aspect_ratio]
 
@@ -188,7 +188,7 @@ Options:
   -nthreads NUM_THREADS, --num_threads NUM_THREADS
                         Optional. Number of threads to use for inference on
                         CPU (including HETERO cases)
-  -loop_input LOOP_INPUT, --loop_input LOOP_INPUT
+  -loop LOOP, --loop LOOP
                         Optional. Number of times to repeat the input.
   -no_show, --no_show   Optional. Don't show output
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS

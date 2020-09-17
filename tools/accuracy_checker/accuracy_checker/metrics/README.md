@@ -182,8 +182,11 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
   * `mean` - allows calculation mean value (default - `True`).
   * `median` - allows calculation median value (default - `False`).
 * `bleu` - [Bilingual Evaluation Understudy](https://en.wikipedia.org/wiki/BLEU). Supperted representations: `MachineTranslationAnnotation`, `MachineTranslationPrediction`.
-  * `smooth` - Whether or not to apply Lin et al. 2004 smoothing.
+  * `smooth` - Whether or not to apply Lin et al. 2004 smoothing (Optional, default `False`)
   *  `max_order` - Maximum n-gram order to use when computing BLEU score. (Optional, default 4).
+  * `smooth_method` - The smoothing method to use. Supported values: `exp`, `floor`, `add-k`, `none` (Optional, default value is `exp` is `smooth` is enabled and `none` if not).
+  * `smooth_value` - the value for smoothing for `floor` or `add-k` smoothing methods. (Optional, applicable only if specific smoothing methods selected, default values are 0 or 1 for `floor` and `add-k` methods respectively).
+  * `lower_case` - convert annotation and prediction tokens to lower case (Optional, default `False`).
 * `f1` - F1-score for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
 * `exact_match` - Exact matching (EM) metric for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
 * `qa_embedding_accuracy` - Right context detection accuracy metric for question answering task solved by question vs context embeddings comparison. Supported representations: `QuestionAnsweringEmbeddingAnnotation`, `QuestionAnsweringEmbeddingPrediction`.

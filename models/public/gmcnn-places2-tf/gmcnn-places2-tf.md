@@ -46,9 +46,9 @@ python3 freeze_model.py --ckpt_dir path/to/downloaded_weights --save_dir path/to
 Accuracy metrics are obtained on 2000 image subset of VOC2012 dataset. Images were cropped to input size
 and disguised at random positions with pre-generated free-form masks.
 
-| Metric | Original model | Converted model |
-| ------ | -------------- | --------------- |
-| PSNR   | 33.47Db        | 33.47Db         |
+| Metric | Value          |
+| ------ | -------------- |
+| PSNR   | 33.41dB        |
 
 ## Performance
 

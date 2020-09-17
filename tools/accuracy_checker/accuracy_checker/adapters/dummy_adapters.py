@@ -102,10 +102,11 @@ class GVADetectionAdapter(Adapter):
 
 
 class GVAClassificationAdapter(Adapter):
+    __provider__ = 'gva_classification'
     def process(self, raw, identifiers, frame_meta):
         results = []
         for identifier, image_data in zip(identifiers, raw):
-            data = image_data['tensors'][0]["data"]
+            data = image_data['objects'][0]['tensors'][0]["data"]
             results.append(ClassificationPrediction(identifier, data))
 
         return results

@@ -65,8 +65,7 @@ def build_argparser():
     args.add_argument('-nthreads', '--num_threads',
                       help='Optional. Number of threads to use for inference on CPU (including HETERO cases)',
                       default=None, type=int)
-    args.add_argument('-loop_input', '--loop_input', help='Optional. Number of times to repeat the input.',
-                      type=int, default=0)
+    args.add_argument('-loop', '--loop', help='Optional. Number of times to repeat the input.', type=int, default=0)
     args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
@@ -547,7 +546,7 @@ def main():
             start_time = perf_counter()
             ret, frame = cap.read()
             if not ret:
-                if input_repeats < args.loop_input or args.loop_input < 0:
+                if input_repeats < args.loop or args.loop < 0:
                     cap.open(input_stream)
                     input_repeats += 1
                 else:
