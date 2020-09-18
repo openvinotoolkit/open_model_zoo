@@ -439,13 +439,17 @@ describing a single model. Each such object has the following keys:
   * `image_inpainting`
   * `image_processing`
   * `instance_segmentation`
+  * `machine_translation`
   * `monocular_depth_estimation`
   * `object_attributes`
   * `optical_character_recognition`
   * `question_answering`
   * `semantic_segmentation`
   * `sound_classification`
+  * `speech_recognition`
   * `style_transfer`
+  * `token_recognition`
+  *  
 
   Additional possible values might be added in the future.
 
