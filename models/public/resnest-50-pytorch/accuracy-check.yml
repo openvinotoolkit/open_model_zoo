@@ -1,5 +1,5 @@
 models:
-  - name: resnest-50
+  - name: resnest-50-pytorch
 
     launchers:
       - framework: dlsdk
