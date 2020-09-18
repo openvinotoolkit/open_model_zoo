@@ -4,8 +4,6 @@
 
 project(multicam)
 
-set(CMAKE_CXX_STANDARD 11)
-
 find_package(Threads REQUIRED)
 find_package(Boost REQUIRED)
 
