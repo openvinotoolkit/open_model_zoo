@@ -195,15 +195,11 @@ class DUCSegmentationAdapter(Adapter):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         for identifier, output, meta in zip(identifiers, raw_outputs[self.output_blob], frame_meta):
             _, _, h, w = next(iter(meta.get('input_shape', {'data': (1, 3, 800, 800)}).values()))
-            # result_height, result_width = meta['image_size'][:2]
-            # test_height = int((int(image_height) / self.ds_rate) * self.ds_rate)
-            # test_width = int((int(image_width) / self.ds_rate) * self.ds_rate)
             feat_height = math.floor(h / self.ds_rate)
             feat_width = math.floor(w / self.ds_rate)
             labels = output.reshape((self.label_num, 4, 4, feat_height, feat_width))
             labels = np.transpose(labels, (0, 3, 1, 4, 2))
             labels = labels.reshape((self.label_num, int(h / self.cell_width), int(w / self.cell_width)))
-            labels = labels[:, :int(h / self.cell_width), :int(w / self.cell_width)]
             labels = np.transpose(labels, [1, 2, 0])
             labels = cv2.resize(labels, (w, h), interpolation=cv2.INTER_LINEAR)
             labels = np.transpose(labels, [2, 0, 1])
