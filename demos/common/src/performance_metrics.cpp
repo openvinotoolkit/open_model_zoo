@@ -44,7 +44,7 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime) {
     }
 }
 
-void PerformanceMetrics::paintMetrics(cv::Mat & frame, cv::Point position, double fontScale, cv::Scalar color, int thickness) const{
+void PerformanceMetrics::paintMetrics(cv::Mat & frame, cv::Point position, double fontScale, cv::Scalar color, int thickness) const {
     // Draw performance stats over frame
     Metrics metrics = getLast();
 
@@ -56,8 +56,7 @@ void PerformanceMetrics::paintMetrics(cv::Mat & frame, cv::Point position, doubl
     if (!std::isnan(metrics.fps)) {
         out.str("");
         out << "FPS: " << std::fixed << std::setprecision(1) << metrics.fps;
-        putHighlightedText(frame, out.str(), {position.x, position.y + 30}, cv::FONT_HERSHEY_COMPLEX, fontScale, color,
-                           thickness);
+        putHighlightedText(frame, out.str(), {position.x, position.y + 30}, cv::FONT_HERSHEY_COMPLEX, fontScale, color, thickness);
     }
 }
 
