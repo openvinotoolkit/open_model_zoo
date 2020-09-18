@@ -15,6 +15,7 @@ PerformanceMetrics::PerformanceMetrics(Duration timeWindow)
 void PerformanceMetrics::update(TimePoint lastRequestStartTime,
                                 cv::Mat& frame,
                                 cv::Point position,
+                                int fontFace,
                                 double fontScale,
                                 cv::Scalar color,
                                 int thickness) {
@@ -44,13 +45,12 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime,
     std::ostringstream out;
     if (!std::isnan(metrics.latency)) {
         out << "Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms";
-        putHighlightedText(frame, out.str(), position, cv::FONT_HERSHEY_COMPLEX, fontScale, color, thickness);
+        putHighlightedText(frame, out.str(), position, fontFace, fontScale, color, thickness);
     }
     if (!std::isnan(metrics.fps)) {
         out.str("");
         out << "FPS: " << std::fixed << std::setprecision(1) << metrics.fps;
-        putHighlightedText(frame, out.str(), {position.x, position.y + 30}, cv::FONT_HERSHEY_COMPLEX, fontScale, color,
-                           thickness);
+        putHighlightedText(frame, out.str(), {position.x, position.y + 30}, fontFace, fontScale, color, thickness);
     }
 }
 
