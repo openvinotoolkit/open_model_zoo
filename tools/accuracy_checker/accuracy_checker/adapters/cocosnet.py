@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,23 +16,24 @@ limitations under the License.
 
 import numpy as np
 from ..adapters import Adapter
-from ..representation import CocosnetPrediction
+from ..representation import ImageProcessingPrediction
 
 
 class CocosnetAdapter(Adapter):
     __provider__ = 'cocosnet'
-    prediction_types = (CocosnetPrediction, )
+    prediction_types = (ImageProcessingPrediction, )
 
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)[self.output_blob]
         for identifier, img in zip(identifiers, raw_outputs):
             img = self._basic_postprocess(img)
-            result.append(CocosnetPrediction(identifier, img))
+            result.append(ImageProcessingPrediction(identifier, img))
         return result
 
     @classmethod
     def _basic_postprocess(cls, img):
         if img.shape[0] == 3:
             img = np.transpose(img, (1, 2, 0))
+        img = np.uint8(img * 127.5 + 127.5)
         return img

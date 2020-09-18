@@ -1,6 +1,6 @@
 import numpy as np
 from .postprocessor import Postprocessor, PostprocessorWithSpecificTargets
-from ..representation import CocosnetAnnotation, CocosnetPrediction
+from ..representation import ImageProcessingAnnotation, ImageProcessingPrediction
 
 try:
     from PIL import Image
@@ -11,8 +11,8 @@ except ImportError:
 class ResizeCocosnet(PostprocessorWithSpecificTargets):
     __provider__ = 'resize_cocosnet'
 
-    annotation_types = (CocosnetAnnotation, )
-    prediction_types = (CocosnetPrediction, )
+    annotation_types = (ImageProcessingAnnotation, )
+    prediction_types = (ImageProcessingPrediction, )
 
     @classmethod
     def parameters(cls):
@@ -27,10 +27,10 @@ class ResizeCocosnet(PostprocessorWithSpecificTargets):
         self.target_height = self.image_size[0]
         self.target_width = self.image_size[1]
         for target in annotation:
-            target.value = self.resize(np.uint8(target.value))
+            target.value = self.resize(target.value)
 
         for target in prediction:
-            target.value = self.resize(np.uint8(target.value * 127.5 + 127.5))
+            target.value = self.resize(target.value)
 
         return annotation, prediction
 

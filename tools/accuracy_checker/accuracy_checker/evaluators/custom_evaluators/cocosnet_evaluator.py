@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,37 +35,14 @@ from ...config import ConfigError
 from ...data_readers import BaseReader, REQUIRES_ANNOTATIONS, DataRepresentation
 
 
-# pylint: disable=W0223
 class CocosnetEvaluator(BaseEvaluator):
     def __init__(
-            self, launcher, reader, preprocessor, postprocessor, dataset, metric, model
+            self, launcher, reader, preprocessor_mask, preprocessor_image, postprocessor, dataset, metric, model
     ):
         self.launcher = launcher
         self.reader = reader
-        self.preprocessor_mask = [
-            Preprocessor.provide(
-                "bgr_to_gray", config={'type': 'bgr_to_gray'}, name="bgr_to_gray"
-            ),
-            Preprocessor.provide(
-                "resize", config={'type': 'resize', 'size': 256, 'use_pillow': False, 'interpolation': 'NEAREST'}, name="resize"
-            ),
-            Preprocessor.provide(
-                "one_hot_encoding", config={'type': 'one_hot_encoding', 'number_of_classes': 151, 'axis': 2, 'value': 1, 'base': 0},
-                name="one_hot_encoding"
-            )
-        ]
-        self.preprocessor_image = [
-            Preprocessor.provide(
-                "bgr_to_rgb", config={'type': 'bgr_to_rgb'}, name="bgr_to_rgb"
-            ),
-            Preprocessor.provide(
-                "resize", config={'type': 'resize', 'size': 256, 'use_pillow': False, 'interpolation': 'BICUBIC'}, name="resize"
-            ),
-            Preprocessor.provide(
-                "normalization", config={'type': 'normalization', 'mean': [127.5, 127.5, 127.5], 'std': [127.5, 127.5, 127.5]},
-                name="normalization"
-            )
-        ]
+        self.preprocessor_mask = preprocessor_mask
+        self.preprocessor_image = preprocessor_image
         self.postprocessor = postprocessor
         self.dataset = dataset
         self.metric_executor = metric
@@ -98,19 +75,22 @@ class CocosnetEvaluator(BaseEvaluator):
             dataset_config.get('_ie_preprocessing', False)
             if launcher_config['framework'] == 'dlsdk' else False
         )
-        preprocessor = PreprocessingExecutor(
-            dataset_config.get('preprocessing'), dataset_name, dataset.metadata,
+        preprocessor_mask = PreprocessingExecutor(
+            dataset_config.get('preprocessing_mask'), dataset_name, dataset.metadata,
+            enable_ie_preprocessing=enable_ie_preprocessing
+        )
+        preprocessor_image = PreprocessingExecutor(
+            dataset_config.get('preprocessing_image'), dataset_name, dataset.metadata,
             enable_ie_preprocessing=enable_ie_preprocessing
         )
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
         model = CocosnetModel(network_info, launcher)
-        preprocessor.input_shapes = model.correspondence.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
         metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
 
         return cls(
             launcher, data_reader,
-            preprocessor, postprocessor, dataset, metric_dispatcher, model
+            preprocessor_mask, preprocessor_image, postprocessor, dataset, metric_dispatcher, model
         )
 
     @staticmethod
@@ -130,14 +110,14 @@ class CocosnetEvaluator(BaseEvaluator):
         batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
         for annotation, input_data in zip(batch_annotation, batch_input):
             self.dataset.set_annotation_metadata(annotation, input_data, self.reader.data_source)
-        for i,_ in enumerate(batch_input[0].data):
-            preprocessor = self.preprocessor_mask
-            if i % 2:
-                preprocessor = self.preprocessor_image
-            for processor in preprocessor:
-                batch_input[0].data[i] = processor(
-                    image=DataRepresentation(batch_input[0].data[i]), annotation_meta=batch_annotation[0].metadata if batch_annotation else None
-                ).data
+        for i,_ in enumerate(batch_input):
+            for index_of_input,_ in enumerate(batch_input[i].data):
+                preprocessor = self.preprocessor_mask
+                if index_of_input % 2:
+                    preprocessor = self.preprocessor_image
+                batch_input[i].data[index_of_input] = preprocessor.process(
+                                                      images=[DataRepresentation(batch_input[i].data[index_of_input])],
+                                                      batch_annotation=batch_annotation)[0].data
         _, batch_meta = extract_image_representations(batch_input)
 
         return [batch_input], batch_meta, batch_identifiers
@@ -239,8 +219,6 @@ class CocosnetEvaluator(BaseEvaluator):
         del self._annotations
         del self._predictions
         del self._metrics_results
-        if hasattr(self, 'infer_requests_pool'):
-            del self.infer_requests_pool
         self._annotations = []
         self._predictions = []
         self._metrics_results = []
@@ -248,7 +226,6 @@ class CocosnetEvaluator(BaseEvaluator):
         self.reader.reset()
 
     def release(self):
-        self.input_feeder.release()
         self.launcher.release()
         self.model.release()
 
@@ -299,7 +276,6 @@ class CorrespondenceNetwork(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         self.input_blob, self.output_blob = None, None
-        self.launcher = launcher
         self.with_prefix = None
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
@@ -312,6 +288,9 @@ class CorrespondenceNetwork(BaseModel):
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
+        self.input_feeder = InputFeeder(
+            launcher.config.get('inputs', []), self.inputs
+        )
         if log:
             self.print_input_output_info()
     
@@ -321,11 +300,11 @@ class CorrespondenceNetwork(BaseModel):
             self.inputs = OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
         else:
             self.inputs = self.exec_network.inputs
+        self.outputs = self.exec_network.outputs
+        self.key_of_warped_reference = list(self.outputs.keys())[0]
+        self.key_of_input_semantics = list(self.inputs.keys())[0]
 
     def fit_to_input(self, input_data):
-        self.input_feeder = InputFeeder(
-            self.launcher.config.get('inputs', []), self.inputs
-        )
         return self.input_feeder.fill_inputs(input_data)
     
     def inputs_info_for_meta(self):
@@ -334,8 +313,10 @@ class CorrespondenceNetwork(BaseModel):
         }
 
     def automatic_model_search(self, network_info):
-        model = Path(network_info['model'])
-        weights = get_path(network_info.get('weights', model))
+        model = str(Path(network_info['model']))
+        weights = str(get_path(network_info.get('weights', model)))
+        if ".xml" in weights:
+            weights = weights.replace(".xml", ".bin")
         return model, weights
 
     def release(self):
@@ -359,7 +340,7 @@ class GeneratorNetwork(BaseModel):
     def load_model(self, network_info, launcher, log=False):
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
-            self.network = launcher.read_network(str(model), str(weights))
+            self.network = launcher.read_network(model, weights)
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
@@ -368,8 +349,10 @@ class GeneratorNetwork(BaseModel):
             self.print_input_output_info()
 
     def automatic_model_search(self, network_info):
-        model = Path(network_info['model'])
-        weights = get_path(network_info.get('weights', model))
+        model = str(Path(network_info['model']))
+        weights = str(get_path(network_info.get('weights', model)))
+        if ".xml" in weights:
+            weights = weights.replace(".xml", ".bin")
         return model, weights
 
     def set_input_and_output(self):
@@ -405,7 +388,8 @@ class CocosnetModel(BaseModel):
         for input in inputs:
             input = self.correspondence.fit_to_input(input)
             corr_out = self.correspondence.predict(*input)
-            gen_input = np.concatenate((corr_out['1026'], input[0]['input.1']), axis=1)
+            gen_input = np.concatenate((corr_out[self.correspondence.key_of_warped_reference],
+                                        input[0][self.correspondence.key_of_input_semantics]), axis=1)
             result = self.generator.predict(gen_input)
             results.append(result)
         return results

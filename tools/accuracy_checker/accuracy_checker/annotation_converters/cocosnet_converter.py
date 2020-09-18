@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@ limitations under the License.
 """
 
 from ..config import PathField
-from ..representation import CocosnetAnnotation, CocosnetPrediction
+from ..representation import ImageProcessingAnnotation, ImageProcessingPrediction
 from .format_converter import BaseFormatConverter, ConverterReturn
 
 
 class CocosnetConverter(BaseFormatConverter):
     __provider__ = 'cocosnet'
-    annotation_types = (CocosnetAnnotation,)
+    annotation_types = (ImageProcessingAnnotation,)
 
     @classmethod
     def parameters(cls):
@@ -54,11 +54,11 @@ class CocosnetConverter(BaseFormatConverter):
         ref_dict = self.get_ref()
         images = list(im for im in self.image_dir.iterdir())
         for key, value in ref_dict.items():
-            input_mask_filename = self.annotation_dir / "validation" /  key.replace('.jpg', '.png')
-            reference_image_filename = self.image_dir / "training" / value
-            reference_mask_filename = self.annotation_dir / "training" / value.replace('.jpg', '.png')
+            input_mask_filename = "annotations/validation/" +  key.replace('.jpg', '.png')
+            reference_image_filename = "images/training/" + value
+            reference_mask_filename = "annotations/training/" + value.replace('.jpg', '.png')
             identifier = [str(input_mask_filename), str(reference_image_filename), str(reference_mask_filename)]
-            annotation = CocosnetAnnotation(identifier, self.image_dir / "validation" / key)
+            annotation = ImageProcessingAnnotation(identifier, self.image_dir / "validation" / key)
             annotations.append(annotation)
 
         return ConverterReturn(annotations, None, content_check_errors)
@@ -68,9 +68,7 @@ class CocosnetConverter(BaseFormatConverter):
         with open(self.reference_dict) as fd:
             lines = fd.readlines()
         ref_dict = {}
-        for i in range(len(lines)):
-            items = lines[i].strip().split(',')
-            key = items[0]
-            value = items[1]
+        for line in lines:
+            key, value = line.strip().split(',')[:2]
             ref_dict[key] = value
         return ref_dict

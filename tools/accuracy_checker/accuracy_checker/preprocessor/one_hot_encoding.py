@@ -54,10 +54,10 @@ class OneHotEncoding(Preprocessor):
         return parameters
 
     def configure(self):
-        self.value = self.config.get('value')
-        self.base = self.config.get('base')
-        self.classes = self.config.get('number_of_classes')
-        self.axis = self.config.get('axis')
+        self.value = self.get_value_from_config('value')
+        self.base = self.get_value_from_config('base')
+        self.classes = self.get_value_from_config('number_of_classes')
+        self.axis = self.get_value_from_config('axis')
 
     def process(self, image, annotation_meta=None):
         def process_data(data, classes, axis, value, base):

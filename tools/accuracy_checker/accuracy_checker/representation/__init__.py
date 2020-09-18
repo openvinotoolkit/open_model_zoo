@@ -188,8 +188,4 @@ __all__ = [
     'RawTensorPrediction',
     'QualityAssessmentAnnotation',
     'QualityAssessmentPrediction',
-
-    'CocosnetAnnotation',
-    'CocosnetPrediction'
-
 ]
