@@ -1,0 +1,63 @@
+evaluations:
+  - name: cocosnet_onnx
+    module: custom_evaluators.cocosnet_evaluator.CocosnetEvaluator
+    module_config:
+      network_info:
+        correspondence:
+          model: public/Correspondence/Corr_opset11.xml
+        generator:
+          model: public/Generator/Gen_opset11.xml
+          adapter: cocosnet
+
+      launchers:
+        - framework: dlsdk
+          device: CPU
+          inputs:
+            - name: "input.1"
+              type: INPUT
+              value: "(.*)ADE(.*)val(.*).png"
+            - name: "input.70"
+              type: INPUT
+              value: "(.*)train(.*).jpg"
+            - name: "ref_seg_map"
+              type: INPUT
+              value: "(.*)ADE(.*)train(.*).png"
+  
+      datasets:
+        - name: cocosnet
+          annotation_conversion:
+            converter: cocosnet
+            images_dir: ADEChallengeData2016/images
+            annotations_dir: ADEChallengeData2016/annotations
+            reference_dict: public/data/ade20k_ref_test.txt
+          data_source: ADEChallengeData2016
+          preprocessing_mask:
+            - type: bgr_to_gray
+            - type: resize
+              size: 256
+              interpolation: NEAREST
+              use_pillow: False
+            - type: one_hot_encoding
+              number_of_classes: 151
+              axis: 2
+              base: 0
+              value: 1
+
+          preprocessing_image:
+            - type: bgr_to_rgb
+            - type: resize
+              size: 256
+              interpolation: BICUBIC
+              use_pillow: False
+            - type: normalization
+              mean: [127.5, 127.5, 127.5]
+              std: [127.5, 127.5, 127.5]
+
+          postprocessing:
+            - type: resize_cocosnet
+              apply_to: prediction
+          
+          metrics:
+            - type: psnr
+              scale_border: 0
+            - type: ssim
