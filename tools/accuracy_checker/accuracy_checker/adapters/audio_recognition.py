@@ -367,7 +367,7 @@ class CTCBeamSearchDecoderWithLm(Adapter):
             self.lm = kenlm.Model(str(lm_file))
             if lm_vocabulary_offset is not None:
                 self.vocab_prefixes = read_vocabulary_prefixes(
-                    str(lm_file),
+                    lm_file,
                     lm_vocabulary_offset,
                     lm_vocabulary_length,
                 )
@@ -746,7 +746,7 @@ def read_vocabulary_prefixes(lm_filename, vocab_offset, vocab_length):
     elif vocab_offset + vocab_length > lm_filename.stat().st_size:
         raise RuntimeError("lm_vocabulary_offset + lm_vocabulary_length beyond the end of file.")
 
-    with open(lm_filename, 'rb') as lm_file:
+    with open(str(lm_filename), 'rb') as lm_file:
         lm_file.seek(vocab_offset)
         vocab_data = lm_file.read(vocab_length)
 
