@@ -37,6 +37,7 @@ FaceDetectionLayerOutput = namedtuple('FaceDetectionLayerOutput', [
     'win_trans_y'
 ])
 
+
 class TFObjectDetectionAPIAdapter(Adapter):
     """
     Class for converting output of SSD model to DetectionPrediction representation
@@ -172,7 +173,6 @@ class MTCNNPAdapter(Adapter):
                 DetectionPrediction(identifier, np.full_like(scores, 1), scores, x_mins, y_mins, x_maxs, y_maxs)
             )
 
-
         return results
 
     @staticmethod
@@ -225,13 +225,330 @@ class MTCNNPAdapter(Adapter):
         return [total_boxes]
 
 
+class RetinaNetAdapter(Adapter):
+    __provider__ = 'retinanet'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'loc_out': StringField(description='boxes localization output'),
+            'class_out': StringField(description="output with classes probabilities")
+        })
+        return params
+
+    def configure(self):
+        self.loc_out = self.get_value_from_config('loc_out')
+        self.cls_out = self.get_value_from_config('class_out')
+        self.pyramid_levels = [3, 4, 5, 6, 7]
+        self.strides = [2 ** x for x in self.pyramid_levels]
+        self.sizes = [2 ** (x + 2) for x in self.pyramid_levels]
+        self.ratios = np.array([0.5, 1, 2])
+        self.scales = np.array([2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)])
+        self.std = np.array([0.1, 0.1, 0.2, 0.2])
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        results = []
+        for identifier, loc_pred, cls_pred, meta in zip(
+                identifiers, raw_outputs[self.loc_out], raw_outputs[self.cls_out], frame_meta
+        ):
+            _, _, h, w = next(iter(meta.get('input_shape', {'data': (1, 3, 800, 800)}).values()))
+            anchors = self.create_anchors([w, h])
+            transformed_anchors = self.regress_boxes(anchors, loc_pred)
+            labels, scores = np.argmax(cls_pred, axis=1), np.max(cls_pred, axis=1)
+            scores_mask = np.reshape(scores > 0.05, -1)
+            transformed_anchors = transformed_anchors[scores_mask, :]
+            x_mins, y_mins, x_maxs, y_maxs = transformed_anchors.T
+            results.append(DetectionPrediction(
+                identifier, labels[scores_mask], scores[scores_mask], x_mins / w, y_mins / h, x_maxs / w, y_maxs / h
+            ))
+
+        return results
+
+    def create_anchors(self, input_shape):
+        def _generate_anchors(base_size=16):
+            """
+            Generate anchor (reference) windows by enumerating aspect ratios X
+            scales w.r.t. a reference window.
+            """
+            num_anchors = len(self.ratios) * len(self.scales)
+            # initialize output anchors
+            anchors = np.zeros((num_anchors, 4))
+            # scale base_size
+            anchors[:, 2:] = base_size * np.tile(self.scales, (2, len(self.ratios))).T
+            # compute areas of anchors
+            areas = anchors[:, 2] * anchors[:, 3]
+            # correct for ratios
+            anchors[:, 2] = np.sqrt(areas / np.repeat(self.ratios, len(self.scales)))
+            anchors[:, 3] = anchors[:, 2] * np.repeat(self.ratios, len(self.scales))
+            # transform from (x_ctr, y_ctr, w, h) -> (x1, y1, x2, y2)
+            anchors[:, 0::2] -= np.tile(anchors[:, 2] * 0.5, (2, 1)).T
+            anchors[:, 1::2] -= np.tile(anchors[:, 3] * 0.5, (2, 1)).T
+
+            return anchors
+
+        def _shift(shape, stride, anchors):
+            shift_x = (np.arange(0, shape[1]) + 0.5) * stride
+            shift_y = (np.arange(0, shape[0]) + 0.5) * stride
+            shift_x, shift_y = np.meshgrid(shift_x, shift_y)
+
+            shifts = np.vstack((
+                shift_x.ravel(), shift_y.ravel(),
+                shift_x.ravel(), shift_y.ravel()
+            )).transpose()
+            a = anchors.shape[0]
+            k = shifts.shape[0]
+            all_anchors = (anchors.reshape((1, a, 4)) + shifts.reshape((1, k, 4)).transpose((1, 0, 2)))
+            all_anchors = all_anchors.reshape((k * a, 4))
+
+            return all_anchors
+
+        image_shapes = [(np.array(input_shape) + 2 ** x - 1) // (2 ** x) for x in self.pyramid_levels]
+        # compute anchors over all pyramid levels
+        all_anchors = np.zeros((0, 4)).astype(np.float32)
+        for idx, _ in enumerate(self.pyramid_levels):
+            anchors = _generate_anchors(base_size=self.sizes[idx])
+            shifted_anchors = _shift(image_shapes[idx], self.strides[idx], anchors)
+            all_anchors = np.append(all_anchors, shifted_anchors, axis=0)
+
+        return all_anchors
+
+    def regress_boxes(self, boxes, deltas):
+        widths = boxes[:, 2] - boxes[:, 0]
+        heights = boxes[:, 3] - boxes[:, 1]
+        ctr_x = boxes[:, 0] + 0.5 * widths
+        ctr_y = boxes[:, 1] + 0.5 * heights
+
+        dx = deltas[:, 0] * self.std[0]
+        dy = deltas[:, 1] * self.std[1]
+        dw = deltas[:, 2] * self.std[2]
+        dh = deltas[:, 3] * self.std[3]
+
+        pred_ctr_x = ctr_x + dx * widths
+        pred_ctr_y = ctr_y + dy * heights
+        pred_w = np.exp(dw) * widths
+        pred_h = np.exp(dh) * heights
+
+        pred_boxes_x1 = pred_ctr_x - 0.5 * pred_w
+        pred_boxes_y1 = pred_ctr_y - 0.5 * pred_h
+        pred_boxes_x2 = pred_ctr_x + 0.5 * pred_w
+        pred_boxes_y2 = pred_ctr_y + 0.5 * pred_h
+
+        pred_boxes = np.stack([pred_boxes_x1, pred_boxes_y1, pred_boxes_x2, pred_boxes_y2], axis=1)
+
+        return pred_boxes
+
+
+class RetinaNetTF2(Adapter):
+    __provider__ = 'retinanet_tf2'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'boxes_outputs': ListField(description='boxes localization output', value_type=str),
+            'class_outputs': ListField(description="output with classes probabilities"),
+            'min_level': NumberField(optional=True, value_type=int, default=3),
+            'max_level': NumberField(optional=True, value_type=int, default=7)
+        })
+        return params
+
+    def configure(self):
+        self.loc_out = self.get_value_from_config('boxes_outputs')
+        self.cls_out = self.get_value_from_config('class_outputs')
+        self.min_level = self.get_value_from_config('min_level')
+        self.max_level = self.get_value_from_config('max_level')
+        self.num_scales = 3
+        self.aspect_ratios = [1, 2, 0.5]
+        self.anchor_size = 4.0
+
+    def _generate_anchor_boxes(self, image_size):
+        """Generates multiscale anchor boxes.
+        Returns:
+          a Tensor of shape [N, 4], represneting anchor boxes of all levels
+          concatenated together.
+        """
+        boxes_all = []
+        for level in range(self.min_level, self.max_level + 1):
+            boxes_l = []
+            for scale in range(self.num_scales):
+                for aspect_ratio in self.aspect_ratios:
+                    stride = 2 ** level
+                    intermediate_scale = 2 ** (scale / float(self.num_scales))
+                    base_anchor_size = self.anchor_size * stride * intermediate_scale
+                    aspect_x = aspect_ratio ** 0.5
+                    aspect_y = aspect_ratio ** -0.5
+                    half_anchor_size_x = base_anchor_size * aspect_x / 2.0
+                    half_anchor_size_y = base_anchor_size * aspect_y / 2.0
+                    x = np.arange(stride / 2, image_size[1], stride)
+                    y = np.arange(stride / 2, image_size[0], stride)
+                    xv, yv = np.meshgrid(x, y)
+                    xv = np.reshape(xv, -1)
+                    yv = np.reshape(yv, -1)
+                    # Tensor shape Nx4.
+                    boxes = np.stack([
+                        yv - half_anchor_size_y, xv - half_anchor_size_x,
+                        yv + half_anchor_size_y, xv + half_anchor_size_x
+                    ],
+                        axis=1)
+                    boxes_l.append(boxes)
+            # Concat anchors on the same level to tensor shape NxAx4.
+            boxes_l = np.stack(boxes_l, axis=1)
+            boxes_l = np.reshape(boxes_l, [-1, 4])
+            boxes_all.append(boxes_l)
+        return boxes_all
+
+    def prepare_boxes_and_classes(self, raw, batch_id):
+        boxes_outs, classes_outs = [], []
+        for boxes_out, cls_out in zip(self.loc_out, self.cls_out):
+            boxes_outs.append(raw[boxes_out][batch_id])
+            classes_outs.append(raw[cls_out][batch_id])
+        return boxes_outs, classes_outs
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        result = []
+        for batch_id, (identifier, meta) in enumerate(zip(identifiers, frame_meta)):
+            boxes_out, classes_out = self.prepare_boxes_and_classes(raw_outputs, batch_id)
+            input_shape = [shape for shape in meta['input_shape'].values() if len(shape) == 4]
+            input_shape = input_shape[0]
+            image_size = input_shape[2:] if input_shape[1] == 3 else input_shape[1:3]
+            boxes, scores, labels = self.process_single(boxes_out, classes_out, image_size)
+            x_mins, y_mins, x_maxs, y_maxs = boxes.T
+            result.append(
+                DetectionPrediction(
+                    identifier, labels, scores,
+                    x_mins / image_size[1], y_mins / image_size[0], x_maxs / image_size[1], y_maxs / image_size[0]
+                ))
+        return result
+
+    def process_single(self, box_outputs, class_outputs, image_size):
+        def sigmoid(x):
+            return 1 / (1 + np.exp(-x))
+
+        # Collects outputs from all levels into a list.
+        boxes = []
+        scores = []
+        anchor_boxes = self._generate_anchor_boxes(image_size)
+        for i in range(self.min_level, self.max_level + 1):
+            box_outputs_i_shape = np.shape(box_outputs[i - self.min_level])
+            num_anchors_per_locations = box_outputs_i_shape[-1] // 4
+            num_classes = np.shape(class_outputs[i - self.min_level])[-1] // num_anchors_per_locations
+
+            # Applies score transformation and remove the implicit background class.
+            scores_i = sigmoid(np.reshape(class_outputs[i - self.min_level], [-1, num_classes]))
+            scores_i = scores_i[1:, :]
+
+            # Box decoding.
+            # The anchor boxes are shared for all data in a batch.
+            # One stage detector only supports class agnostic box regression.
+            anchor_boxes_i = np.reshape(anchor_boxes[i - self.min_level], [-1, 4])
+            box_outputs_i = np.reshape(box_outputs[i - self.min_level], [-1, 4])
+            boxes_i = self.decode_boxes(box_outputs_i, anchor_boxes_i)
+            boxes_i[:, ::2] = np.clip(boxes_i[:, ::2], a_min=0, a_max=image_size[1] - 1)
+            boxes_i[:, 1::2] = np.clip(boxes_i[:, 1::2], a_min=0, a_max=image_size[0] - 1)
+
+            boxes.append(boxes_i)
+            scores.append(scores_i)
+        boxes = np.concatenate(boxes, axis=0)
+        scores = np.concatenate(scores, axis=0)
+
+        nmsed_boxes, nmsed_scores, nmsed_classes = (
+            self._generate_detections(np.expand_dims(boxes, axis=1), scores))
+
+        return nmsed_boxes, nmsed_scores, nmsed_classes
+
+    @staticmethod
+    def decode_boxes(encoded_boxes, anchors):
+        BBOX_XFORM_CLIP = np.log(1000. / 16.)
+        dy = encoded_boxes[..., 0:1]
+        dx = encoded_boxes[..., 1:2]
+        dh = encoded_boxes[..., 2:3]
+        dw = encoded_boxes[..., 3:4]
+        dh = np.minimum(dh, BBOX_XFORM_CLIP)
+        dw = np.minimum(dw, BBOX_XFORM_CLIP)
+
+        anchor_ymin = anchors[..., 0:1]
+        anchor_xmin = anchors[..., 1:2]
+        anchor_ymax = anchors[..., 2:3]
+        anchor_xmax = anchors[..., 3:4]
+        anchor_h = anchor_ymax - anchor_ymin + 1.0
+        anchor_w = anchor_xmax - anchor_xmin + 1.0
+        anchor_yc = anchor_ymin + 0.5 * anchor_h
+        anchor_xc = anchor_xmin + 0.5 * anchor_w
+
+        decoded_boxes_yc = dy * anchor_h + anchor_yc
+        decoded_boxes_xc = dx * anchor_w + anchor_xc
+        decoded_boxes_h = np.exp(dh) * anchor_h
+        decoded_boxes_w = np.exp(dw) * anchor_w
+
+        decoded_boxes_ymin = decoded_boxes_yc - 0.5 * decoded_boxes_h
+        decoded_boxes_xmin = decoded_boxes_xc - 0.5 * decoded_boxes_w
+        decoded_boxes_ymax = decoded_boxes_ymin + decoded_boxes_h - 1.0
+        decoded_boxes_xmax = decoded_boxes_xmin + decoded_boxes_w - 1.0
+
+        decoded_boxes = np.concatenate([
+            decoded_boxes_xmin, decoded_boxes_ymin, decoded_boxes_xmax,
+            decoded_boxes_ymax
+        ], axis=-1)
+        return decoded_boxes
+
+    def _generate_detections(self,
+                             boxes,
+                             scores,
+                             max_total_size=100,
+                             nms_iou_threshold=0.5,
+                             score_threshold=0.05,
+                             pre_nms_num_boxes=5000):
+
+        nmsed_boxes = []
+        nmsed_classes = []
+        nmsed_scores = []
+        _, num_classes_for_box, _ = boxes.shape
+        total_anchors, num_classes = scores.shape
+        # Selects top pre_nms_num scores and indices before NMS.
+        for i in range(num_classes):
+            boxes_i = boxes[:, min(num_classes_for_box - 1, i), :]
+            scores_i = scores[:, i]
+            indices = np.argsort(scores_i)[::-1]
+            if indices.size < pre_nms_num_boxes:
+                indices = indices[:pre_nms_num_boxes]
+            scores_i = scores_i[indices]
+            # Obtains pre_nms_num_boxes before running NMS.
+            boxes_i = boxes_i[indices, :]
+
+            # Filter out scores.
+            filterd_scores = scores_i > score_threshold
+            boxes_i = boxes_i[filterd_scores]
+            scores_i = scores_i[filterd_scores]
+            if not np.size(scores_i):
+                continue
+
+            keep = NMS.nms(*boxes_i.T, scores_i, nms_iou_threshold, include_boundaries=False, keep_top_k=max_total_size)
+            nmsed_classes_i = np.full(len(keep), i)
+            nmsed_boxes.append(boxes_i[keep, :])
+            nmsed_scores.append(scores_i[keep])
+            nmsed_classes.append(nmsed_classes_i)
+        nmsed_boxes = np.concatenate(nmsed_boxes, axis=0)
+        nmsed_scores = np.concatenate(nmsed_scores, axis=0)
+        nmsed_classes = np.concatenate(nmsed_classes, axis=0)
+        sorted_order = np.argsort(nmsed_scores[::-1])
+        if sorted_order.size > max_total_size:
+            sorted_order = sorted_order[:max_total_size]
+        nmsed_scores = nmsed_scores[sorted_order]
+        nmsed_boxes = nmsed_boxes[sorted_order, :]
+        nmsed_classes = nmsed_classes[sorted_order]
+        return nmsed_boxes, nmsed_scores, nmsed_classes
+
+
 class ClassAgnosticDetectionAdapter(Adapter):
     """
     Class for converting 'boxes' [n,5] output of detection model to
     DetectionPrediction representation
     """
     __provider__ = 'class_agnostic_detection'
-    prediction_types = (DetectionPrediction, )
+    prediction_types = (DetectionPrediction,)
 
     def validate_config(self):
         super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
@@ -363,11 +680,11 @@ class RFCNCaffe(Adapter):
         assert len(predicted_classes.shape) == 2
         assert predicted_deltas.shape[-1] == 8
         predicted_boxes = self.bbox_transform_inv(predicted_proposals, predicted_deltas)
-        num_classes = predicted_classes.shape[-1] - 1 # skip background
+        num_classes = predicted_classes.shape[-1] - 1  # skip background
         x_mins, y_mins, x_maxs, y_maxs = predicted_boxes[:, 4:].T
         detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
         for cls_id in range(num_classes):
-            cls_scores = predicted_classes[:, cls_id+1]
+            cls_scores = predicted_classes[:, cls_id + 1]
             keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, cls_scores, 0.3, include_boundaries=False)
             filtered_score = cls_scores[keep]
             x_cls_mins = x_mins[keep]
@@ -375,7 +692,7 @@ class RFCNCaffe(Adapter):
             x_cls_maxs = x_maxs[keep]
             y_cls_maxs = y_maxs[keep]
             # Save detections
-            labels = np.full_like(filtered_score, cls_id+1)
+            labels = np.full_like(filtered_score, cls_id + 1)
             detections['labels'].extend(labels)
             detections['scores'].extend(filtered_score)
             detections['x_mins'].extend(x_cls_mins)
@@ -386,6 +703,7 @@ class RFCNCaffe(Adapter):
             identifiers[0], detections['labels'], detections['scores'], detections['x_mins'],
             detections['y_mins'], detections['x_maxs'], detections['y_maxs']
         )]
+
     @staticmethod
     def bbox_transform_inv(boxes, deltas):
         if boxes.shape[0] == 0:
@@ -508,7 +826,7 @@ class FaceBoxesAdapter(Adapter):
                             self.steps]
             prior_data = self.prior_boxes(feature_maps, image_info)
 
-             # Boxes
+            # Boxes
             boxes[:, :2] = self.variance[0] * boxes[:, :2]
             boxes[:, 2:] = self.variance[1] * boxes[:, 2:]
             boxes[:, :2] = boxes[:, :2] * prior_data[:, 2:] + prior_data[:, :2]
@@ -569,12 +887,13 @@ class FaceBoxesAdapter(Adapter):
 
         return result
 
+
 class FaceDetectionAdapter(Adapter):
     """
     Class for converting output of Face Detection model to DetectionPrediction representation
     """
     __provider__ = 'face_detection'
-    predcition_types = (DetectionPrediction, )
+    predcition_types = (DetectionPrediction,)
 
     @classmethod
     def parameters(cls):
@@ -670,10 +989,10 @@ class FaceDetectionAdapter(Adapter):
                             candidate_width = layer.win_length
                             candidate_height = layer.win_length
 
-                            reg_x = reg_arr[0][layer.anchor_index*4+0][row][col] * layer.win_length
-                            reg_y = reg_arr[0][layer.anchor_index*4+1][row][col] * layer.win_length
-                            reg_width = reg_arr[0][layer.anchor_index*4+2][row][col] * layer.win_length
-                            reg_height = reg_arr[0][layer.anchor_index*4+3][row][col] * layer.win_length
+                            reg_x = reg_arr[0][layer.anchor_index * 4 + 0][row][col] * layer.win_length
+                            reg_y = reg_arr[0][layer.anchor_index * 4 + 1][row][col] * layer.win_length
+                            reg_width = reg_arr[0][layer.anchor_index * 4 + 2][row][col] * layer.win_length
+                            reg_height = reg_arr[0][layer.anchor_index * 4 + 3][row][col] * layer.win_length
 
                             candidate_x += reg_x
                             candidate_y += reg_y
@@ -704,10 +1023,10 @@ class FaceDetectionAdapter(Adapter):
 
         return result
 
-class FaceDetectionRefinementAdapter(Adapter):
 
+class FaceDetectionRefinementAdapter(Adapter):
     __provider__ = 'face_detection_refinement'
-    prediction_types = (DetectionPrediction, )
+    prediction_types = (DetectionPrediction,)
 
     @classmethod
     def parameters(cls):
@@ -769,8 +1088,8 @@ class FaceDetectionRefinementAdapter(Adapter):
             detections['scores'].append(score)
             detections['x_mins'].append(x)
             detections['y_mins'].append(y)
-            detections['x_maxs'].append(x+width)
-            detections['y_maxs'].append(y+height)
+            detections['x_maxs'].append(x + width)
+            detections['y_maxs'].append(y + height)
 
         return [
             DetectionPrediction(

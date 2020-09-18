@@ -101,7 +101,7 @@ class TFLauncher(Launcher):
         results = []
         for infer_input in inputs:
             with self.tf.device(self.device):
-                with self.tf.Session(graph=self._graph) as session:
+                with self.tf.compat.v1.Session(graph=self._graph) as session:
                     feed_dictionary = {
                         self.node_pattern.format(input_name): input_data
                         for input_name, input_data in infer_input.items()
@@ -116,6 +116,11 @@ class TFLauncher(Launcher):
                     )
 
         return results
+
+    def inputs_info_for_meta(self, feed_dict=None):
+        if feed_dict is None:
+            return super().inputs_info_for_meta()
+        return {input_name: input_data.shape for input_name, input_data in feed_dict.items()}
 
     @property
     def batch(self):
@@ -168,8 +173,8 @@ class TFLauncher(Launcher):
         return graph
 
     def _load_frozen_graph(self, model):
-        with self.tf.gfile.GFile(model, 'rb') as file:
-            graph_def = self.tf.GraphDef()
+        with self.tf.compat.v1.gfile.GFile(model, 'rb') as file:
+            graph_def = self.tf.compat.v1.GraphDef()
             graph_def.ParseFromString(file.read())
 
         with self.tf.Graph().as_default() as graph:
