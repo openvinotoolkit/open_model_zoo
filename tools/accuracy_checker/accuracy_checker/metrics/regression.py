@@ -494,9 +494,9 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
     __provider__ = 'psnr'
 
     annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, ImageProcessingAnnotation,
-                        StyleTransferAnnotation, CocosnetAnnotation)
+                        StyleTransferAnnotation, )
     prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, ImageProcessingPrediction,
-                        StyleTransferPrediction, CocosnetPrediction)
+                        StyleTransferPrediction, )
 
     @classmethod
     def parameters(cls):
@@ -600,9 +600,9 @@ def _ssim(annotation_image, prediction_image):
 class StructuralSimilarity(BaseRegressionMetric):
     __provider__ = 'ssim'
     annotation_types = (ImageInpaintingAnnotation, ImageProcessingAnnotation, SuperResolutionAnnotation,
-                        StyleTransferAnnotation, CocosnetAnnotation)
+                        StyleTransferAnnotation, )
     prediction_types = (ImageInpaintingPrediction, ImageProcessingPrediction, SuperResolutionPrediction,
-                        StyleTransferPrediction, CocosnetPrediction)
+                        StyleTransferPrediction, )
 
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)
