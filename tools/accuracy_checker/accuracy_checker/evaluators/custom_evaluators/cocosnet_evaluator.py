@@ -17,20 +17,17 @@ limitations under the License.
 from pathlib import Path
 import pickle
 import copy
-from functools import partial
 from collections import OrderedDict
 import numpy as np
 
 from ..base_evaluator import BaseEvaluator
-from ..quantization_model_evaluator import create_dataset_attributes
 from ...utils import get_path, extract_image_representations
 from ...dataset import Dataset
-from ...launcher import create_launcher, DummyLauncher, InputFeeder
-from ...launcher.loaders import PickleLoader
-from ...logging import print_info, warning
+from ...launcher import create_launcher, InputFeeder
+from ...logging import print_info
 from ...metrics import MetricsExecutor
 from ...postprocessor import PostprocessingExecutor
-from ...preprocessor import PreprocessingExecutor, Preprocessor
+from ...preprocessor import PreprocessingExecutor
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...data_readers import BaseReader, REQUIRES_ANNOTATIONS, DataRepresentation
@@ -231,6 +228,14 @@ class CocosnetEvaluator(BaseEvaluator):
         self.model.release()
 
 
+def automatic_model_search(network_info):
+    model = str(Path(network_info['model']))
+    weights = str(get_path(network_info.get('weights', model)))
+    if ".xml" in weights:
+        weights = weights.replace(".xml", ".bin")
+    return model, weights
+
+
 class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.network_info = network_info
@@ -282,7 +287,7 @@ class CorrespondenceNetwork(BaseModel):
             self.load_model(network_info, launcher, log=True)
 
     def load_model(self, network_info, launcher, log=False):
-        model, weights = self.automatic_model_search(network_info)
+        model, weights = automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
@@ -313,13 +318,6 @@ class CorrespondenceNetwork(BaseModel):
             layer_name: layer.shape for layer_name, layer in self.inputs.items()
         }
 
-    def automatic_model_search(self, network_info):
-        model = str(Path(network_info['model']))
-        weights = str(get_path(network_info.get('weights', model)))
-        if ".xml" in weights:
-            weights = weights.replace(".xml", ".bin")
-        return model, weights
-
     def release(self):
         del self.exec_network
 
@@ -339,7 +337,7 @@ class GeneratorNetwork(BaseModel):
             self.load_model(network_info, launcher, log=True)
 
     def load_model(self, network_info, launcher, log=False):
-        model, weights = self.automatic_model_search(network_info)
+        model, weights = automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(model, weights)
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
@@ -348,13 +346,6 @@ class GeneratorNetwork(BaseModel):
         self.set_input_and_output()
         if log:
             self.print_input_output_info()
-
-    def automatic_model_search(self, network_info):
-        model = str(Path(network_info['model']))
-        weights = str(get_path(network_info.get('weights', model)))
-        if ".xml" in weights:
-            weights = weights.replace(".xml", ".bin")
-        return model, weights
 
     def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
@@ -386,11 +377,11 @@ class CocosnetModel(BaseModel):
 
     def predict(self, inputs):
         results = []
-        for input in inputs:
-            input = self.correspondence.fit_to_input(input)
-            corr_out = self.correspondence.predict(*input)
+        for inp in inputs:
+            inp = self.correspondence.fit_to_input(inp)
+            corr_out = self.correspondence.predict(inp[0])
             gen_input = np.concatenate((corr_out[self.correspondence.key_of_warped_reference],
-                                        input[0][self.correspondence.key_of_input_semantics]), axis=1)
+                                        inp[0][self.correspondence.key_of_input_semantics]), axis=1)
             result = self.generator.predict(gen_input)
             results.append(result)
         return results

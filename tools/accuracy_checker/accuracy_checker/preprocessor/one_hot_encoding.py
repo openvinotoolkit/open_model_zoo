@@ -76,7 +76,8 @@ class OneHotEncoding(Preprocessor):
 
         image.data = process_data(image.data, self.classes, self.axis, self.value, self.base) \
             if not isinstance(image.data, list) else [
-            process_data(data_fragment, self.classes, self.axis, self.value, self.base) for data_fragment in image.data
-        ]
+                process_data(data_fragment, self.classes, self.axis, self.value, self.base)
+                for data_fragment in image.data
+            ]
 
         return image
