@@ -75,8 +75,9 @@ class FRCNNPostprocessingBboxResize(Postprocessor):
             coeff_y = pad_pref_height / resize_scale_y
 
         else:
-            raise RuntimeError("Unknown case: ""len(image_metadata['geometric_operations']) = {}".format(
-                               len(geometric_operations)))
+            raise RuntimeError(
+                "Unknown case: ""len(image_metadata['geometric_operations']) = {}".format(len(geometric_operations))
+            )
         if rescale:
             input_shape = [value for value in image_metadata['input_shape'].values() if len(value) == 4]
             assert len(input_shape) == 1, 'suitable input shape not found or multi inputs detected'

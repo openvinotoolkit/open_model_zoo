@@ -87,6 +87,15 @@ AccuracyChecker supports following set of adapters:
 * `retinanet` - converting output of RetinaNet-based model.
   * `loc_out` - name of output layer with bounding box deltas.
   * `class_out` - name of output layer with classification probabilities.
+* `retinanet_multihead` - converting output of RetinaNet model with multiple level outputs.
+  * `boxes_outputs` - list of outputs with boxes.
+  * `class_outputs` - list of outputs with class probabilities.
+  **Important note: the number of boxes outputs and class outputs should be equal.**
+  * `ratios` - the list of ratios for anchor generation (Optional, default [1.0, 2.0, 0.5]).
+  * `pre_nms_top_k` - keep top k boxes before NMS applied (Optional, default 1000).
+  * `post_nms_top_k` - final number of detections after NMS applied (Optional, default 100).
+  * `nms_threshold` - threshold for NMS (Optional, default 0.5).
+  * `min_conf` - minimal confidence threshold for detections (Optional, default 0.05).
 * `rfcn_class_agnostic` - convert output of Caffe RFCN model with agnostic bounding box regression approach.
   * `cls_out` - the name of output layer with detected probabilities for each class. The layer shape is [num_boxes, num_classes], where `num_boxes` is number of predicted boxes, `num_classes` - number of classes in the dataset including background.
   * `bbox_out` - the name of output layer with detected boxes deltas. The layer shape is [num_boxes, 8] where  `num_boxes` is number of predicted boxes, 8 (4 for background + 4 for foreground) bouding boxes coordinates.

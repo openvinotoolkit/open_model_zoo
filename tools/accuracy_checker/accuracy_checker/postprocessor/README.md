@@ -21,12 +21,13 @@ Accuracy Checker supports following set of postprocessors:
 * `correct_yolo_v2_boxes` - resizing detection prediction bbox coordinates using specific for Yolo v2 approach. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
   * `dst_width` and `dst_height` - destination width and height respectively. You can also use `size` instead in case when destination sizes are equal.
 * `resize_prediction_boxes` - resizing normalized detection prediction boxes according to image size. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
-  * `rescale` if this option enabled, rescaling boxes on input size will be performed before multiplying on original input size. (Optional, default `False`)
+  * `rescale` if this option enabled, rescaling boxes on input size will be performed before multiplying on original input size. (Optional, default `False`).
 * `faster_rcnn_postprocessing_resize` - resizing normalized detection prediction boxes according to the original image size before preprocessing steps.
     Supported representations: `DetectionAnotation`, `DetectionPrediction`.
     At the moment works in the following cases only:
    - the preprocessing steps contains only one operation changing input image size, and the operation is `resize`
    - the preprocessing steps contains only two operations changing input image size, and the operations are `resize` and then `padding`.
+   * `rescale` if this option enabled, rescaling boxes on input size will be performed before appling postprocessing (Optional, default `False`).
 * `nms` - non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
   * `overlap` - overlap threshold for merging detections.
   * `use_min_area` - boolean value to determine whether to use minimum area of two bounding boxes as base area to calculate overlap.
