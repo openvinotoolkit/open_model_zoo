@@ -12,22 +12,21 @@
 """
 
 import numpy as np
-import sys
 import cv2
-from PIL import Image
 
 
 def scatter(source):
-	out = np.zeros((1, 151, 256, 256))
-	h, w = source.shape
-	for i in range(h):
-		for j in range(w):
-			out[0][source[i][j]][i][j] = 1
-	return out
+    out = np.zeros((1, 151, 256, 256))
+    h, w = source.shape
+    for i in range(h):
+        for j in range(w):
+            out[0][source[i][j]][i][j] = 1
+    return out
 
 
 def preprocess_with_semantics(semantic_mask):
-    semantic_mask = cv2.resize(semantic_mask, dsize=(256, 256), interpolation=cv2.INTER_NEAREST)
+    semantic_mask = cv2.resize(semantic_mask, dsize=(256, 256),
+                               interpolation=cv2.INTER_NEAREST)
     # create one-hot label map
     semantic_mask = scatter(semantic_mask).astype(np.int)
     return semantic_mask
@@ -37,6 +36,7 @@ def normalization(x, mean=127.5, scale=127.5):
     x = np.subtract(x, mean)
     x = np.divide(x, scale)
     return x
+
 
 def preprocess_with_images(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

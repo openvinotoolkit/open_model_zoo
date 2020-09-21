@@ -1,5 +1,5 @@
 import numpy as np
-from .postprocessor import Postprocessor, PostprocessorWithSpecificTargets
+from .postprocessor import PostprocessorWithSpecificTargets
 from ..representation import ImageProcessingAnnotation, ImageProcessingPrediction
 
 try:

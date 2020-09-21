@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 import numpy as np
-from ..config import NumberField, BoolField
+from ..config import NumberField
 from .preprocessor import Preprocessor
 
 
@@ -68,12 +68,14 @@ class OneHotEncoding(Preprocessor):
             base_arr = np.full(shapes, base, np.int)
             expanded_index = []
             for i in range(ndim):
-                arr = data if axis == i else np.arange(base_arr.shape[i]).reshape([-1 if i==j else 1 for j in range(ndim)])
+                arr = data if axis == i \
+                    else np.arange(base_arr.shape[i]).reshape([-1 if i == j else 1 for j in range(ndim)])
                 expanded_index.append(arr)
             base_arr[expanded_index] = value
             return base_arr
 
-        image.data = process_data(image.data, self.classes, self.axis, self.value, self.base) if not isinstance(image.data, list) else [
+        image.data = process_data(image.data, self.classes, self.axis, self.value, self.base) \
+            if not isinstance(image.data, list) else [
             process_data(data_fragment, self.classes, self.axis, self.value, self.base) for data_fragment in image.data
         ]
 

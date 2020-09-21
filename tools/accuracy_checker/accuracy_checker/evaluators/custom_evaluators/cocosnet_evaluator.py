@@ -16,6 +16,7 @@ limitations under the License.
 
 from pathlib import Path
 import pickle
+import copy
 from functools import partial
 from collections import OrderedDict
 import numpy as np
@@ -53,7 +54,6 @@ class CocosnetEvaluator(BaseEvaluator):
 
     @classmethod
     def from_configs(cls, model_config):
-        model_name = "cocosnet"
         network_info = model_config['network_info']
         launcher_config = model_config['launchers'][0]
         dataset_config = model_config['datasets'][0]
@@ -110,14 +110,14 @@ class CocosnetEvaluator(BaseEvaluator):
         batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
         for annotation, input_data in zip(batch_annotation, batch_input):
             self.dataset.set_annotation_metadata(annotation, input_data, self.reader.data_source)
-        for i,_ in enumerate(batch_input):
-            for index_of_input,_ in enumerate(batch_input[i].data):
+        for i, _ in enumerate(batch_input):
+            for index_of_input, _ in enumerate(batch_input[i].data):
                 preprocessor = self.preprocessor_mask
                 if index_of_input % 2:
                     preprocessor = self.preprocessor_image
                 batch_input[i].data[index_of_input] = preprocessor.process(
-                                                      images=[DataRepresentation(batch_input[i].data[index_of_input])],
-                                                      batch_annotation=batch_annotation)[0].data
+                    images=[DataRepresentation(batch_input[i].data[index_of_input])],
+                    batch_annotation=batch_annotation)[0].data
         _, batch_meta = extract_image_representations(batch_input)
 
         return [batch_input], batch_meta, batch_identifiers
@@ -135,7 +135,8 @@ class CocosnetEvaluator(BaseEvaluator):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
             batch_predictions = self.model.predict(filled_inputs)
             if self.model.generator.adapter:
-                batch_predictions = self.model.generator.adapter.process(batch_predictions, batch_identifiers, batch_meta)
+                batch_predictions = self.model.generator.adapter.process(batch_predictions, batch_identifiers,
+                                                                         batch_meta)
 
             if stored_predictions:
                 predictions_to_store.extend(copy.deepcopy(batch_predictions))
@@ -293,7 +294,7 @@ class CorrespondenceNetwork(BaseModel):
         )
         if log:
             self.print_input_output_info()
-    
+
     def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
         if has_info:
@@ -306,7 +307,7 @@ class CorrespondenceNetwork(BaseModel):
 
     def fit_to_input(self, input_data):
         return self.input_feeder.fill_inputs(input_data)
-    
+
     def inputs_info_for_meta(self):
         return {
             layer_name: layer.shape for layer_name, layer in self.inputs.items()

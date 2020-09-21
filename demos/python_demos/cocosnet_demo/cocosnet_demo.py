@@ -11,23 +11,23 @@
  limitations under the License.
 """
 
-import numpy as np
 import sys
-import os
 from argparse import ArgumentParser, SUPPRESS
 import cv2
-from PIL import Image
 import logging as log
 from openvino.inference_engine import IECore
 from models import CorrespondenceModel, GenerativeModel, CocosnetModel
 from preprocessing import preprocess_with_images, preprocess_with_semantics
 from postprocessing import postprocess, save_result
 
+
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
-    args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("-c", "--correspondence_model", help="Required. Path to an .xml file with a trained correspondence model",
+    args.add_argument('-h', '--help', action='help', default=SUPPRESS,
+                      help='Show this help message and exit.')
+    args.add_argument("-c", "--correspondence_model",
+                      help="Path to an .xml file with a trained correspondence model",
                       required=True, type=str)
     args.add_argument("-g", "--generative_model", help="Required. Path to an .xml file with a trained generative model",
                       required=True, type=str)
@@ -57,11 +57,13 @@ def main():
     log.info("Creating CoCosNet Model")
     ie_core = IECore()
     if args.cpu_extension and 'CPU' in args.device:
-        ie.add_extension(args.cpu_extension, "CPU")
+        ie_core.add_extension(args.cpu_extension, "CPU")
     corr_model = CorrespondenceModel(ie_core, args.correspondence_model,
-                                     args.correspondence_model.replace(".xml", ".bin"), args.device)
+                                     args.correspondence_model.replace(".xml", ".bin"),
+                                     args.device)
     gen_model = GenerativeModel(ie_core, args.generative_model,
-                                args.generative_model.replace(".xml", ".bin"), args.device)
+                                args.generative_model.replace(".xml", ".bin"),
+                                args.device)
     model = CocosnetModel(corr_model, gen_model)
 
     log.info("Preparing input data")
@@ -80,13 +82,13 @@ def main():
     log.info("Inference for input")
     out = model.infer(input_data)
     print("Out = ", out)
-    
+
     log.info("Postprocessing for result")
     result = postprocess(out)
     cv2.imshow("Result", result)
     cv2.waitKey()
-    cv2.destroyAllWindows() 
-    
+    cv2.destroyAllWindows()
+
     log.info("Save result")
     save_result(out, args.output_dir)
     log.info("Result image was saved to {}".format(args.output_dir))

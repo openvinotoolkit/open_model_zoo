@@ -12,9 +12,6 @@
 """
 
 import numpy as np
-import sys
-import cv2
-from PIL import Image
 from openvino.inference_engine import IECore
 
 

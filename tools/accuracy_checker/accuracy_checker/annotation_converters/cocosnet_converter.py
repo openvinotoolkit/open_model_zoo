@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from ..config import PathField
-from ..representation import ImageProcessingAnnotation, ImageProcessingPrediction
+from ..representation import ImageProcessingAnnotation
 from .format_converter import BaseFormatConverter, ConverterReturn
 
 
@@ -41,20 +41,17 @@ class CocosnetConverter(BaseFormatConverter):
         })
         return parameters
 
-    
     def configure(self):
         self.image_dir = self.get_value_from_config('images_dir')
         self.annotation_dir = self.get_value_from_config('annotations_dir')
         self.reference_dict = self.get_value_from_config('reference_dict')
 
-    
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_check_errors = [] if check_content else None
         annotations = []
         ref_dict = self.get_ref()
-        images = list(im for im in self.image_dir.iterdir())
         for key, value in ref_dict.items():
-            input_mask_filename = "annotations/validation/" +  key.replace('.jpg', '.png')
+            input_mask_filename = "annotations/validation/" + key.replace('.jpg', '.png')
             reference_image_filename = "images/training/" + value
             reference_mask_filename = "annotations/training/" + value.replace('.jpg', '.png')
             identifier = [str(input_mask_filename), str(reference_image_filename), str(reference_mask_filename)]
@@ -63,7 +60,6 @@ class CocosnetConverter(BaseFormatConverter):
 
         return ConverterReturn(annotations, None, content_check_errors)
 
-    
     def get_ref(self):
         with open(self.reference_dict) as fd:
             lines = fd.readlines()
