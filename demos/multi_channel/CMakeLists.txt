@@ -15,7 +15,7 @@
 option(MULTICHANNEL_DEMO_USE_TBB "Use TBB-based threading in multichannel face detection demo" OFF)
 option(MULTICHANNEL_DEMO_USE_NATIVE_CAM "Use native camera api in multichannel face detection demo" OFF)
 
-if(MULTICHANNEL_DEMO_USE_NATIVE_CAM)
+if(MULTICHANNEL_DEMO_USE_NATIVE_CAM OR MULTICHANNEL_DEMO_USE_TBB)
     set(CMAKE_CXX_STANDARD 14)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
