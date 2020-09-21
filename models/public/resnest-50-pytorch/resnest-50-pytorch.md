@@ -1,4 +1,4 @@
-# resnest-50
+# resnest-50-pytorch
 
 ## Use Case and High-Level Description
 
