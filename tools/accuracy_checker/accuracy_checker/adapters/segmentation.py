@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import cv2
 import math
+import cv2
 import numpy as np
 from ..adapters import Adapter
 from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction
@@ -186,8 +186,8 @@ class DUCSegmentationAdapter(Adapter):
         return parameters
 
     def configure(self):
-        self.ds_rate = self.get_value_from_config('ds_rate')    
-        self.cell_width = self.get_value_from_config('cell_width')  
+        self.ds_rate = self.get_value_from_config('ds_rate')
+        self.cell_width = self.get_value_from_config('cell_width')
         self.label_num = self.get_value_from_config('label_num')
 
     def process(self, raw, identifiers, frame_meta):
