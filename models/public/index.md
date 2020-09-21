@@ -208,9 +208,17 @@ Colorization task is to predict colors of scene from grayscale image.
 
 The task of sound classification is to predict what sounds are in an audio fragment.
 
-| Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
-| ------------------------- | ---------------| -------------- | ------ | ------- |
-| ACLNet                    | [PyTorch\*](./aclnet/aclnet.md) | aclnet | 1.4     | 2.7     |
+| Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
+| ------------------------- | ---------------| -------------- | ------ | ------- | ------- |
+| ACLNet                    | PyTorch\* | [aclnet](./aclnet/aclnet.md) |      | 1.4     | 2.7     |
+
+## Speech Recognition
+
+The task of speech recognition is to recognize and translate spoken language into text.
+
+| Model Name        | Implementation | OMZ Model Name                                               | Accuracy | GFlops | mParams |
+| ----------------- | -------------- | ------------------------------------------------------------ | -------- | ------ | ------- |
+| DeepSpeech V0.6.1 | TensorFlow\*   | [mozilla-deepspeech-0.6.1](./mozilla-deepspeech-0.6.1/mozilla-deepspeech-0.6.1.md) | 7.55%    | 0.0472 | 47.2    |
 
 ## Legal Information
 
