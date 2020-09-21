@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 
 from .adapter import Adapter
-from ..config import ListField, StringField
+from ..config import ListField, StringField, NumberField
 from ..representation import DetectionPrediction
 
 
@@ -32,6 +32,18 @@ class MultiOutRetinaNet(Adapter):
             'class_outputs': ListField(description="outputs with classes probabilities"),
             'ratios': ListField(
                 description='ratio for anchors generation', optional=True, default=[1.0, 2.0, 0.5], value_type=float
+            ),
+            'pre_nms_top_k': NumberField(
+                description='pre nms keep top k boxes', value_type=int, optional=True, default=1000
+            ),
+            'post_nms_top_k':  NumberField(
+                description='post nms keep top k boxes', value_type=int, optional=True, default=100
+            ),
+            'min_conf': NumberField(
+                description='min score for detection filtering', value_type=float, optional=True, default=0.05
+            ),
+            'nms_threshold': NumberField(
+                description='overlap threshold for nms', value_type=float, optional=True, default=0.5
             )
         })
         return params
@@ -44,6 +56,10 @@ class MultiOutRetinaNet(Adapter):
         self.class_outs = self.get_value_from_config('class_outputs')
         self.anchors = {}
         assert len(self.boxes_outs) == len(self.class_outs), 'the number of boxes and classes heads should be equal'
+        self.pre_nms_top_k = self.get_value_from_config('pre_nms_top_k')
+        self.post_nms_top_k = self.get_value_from_config('post_nms_top_k')
+        self.min_conf = self.get_value_from_config('min_conf')
+        self.nms_threshold = self.get_value_from_config('nms_threshold')
 
     def decode_boxes(self, raw_outputs, input_shape):
         def generate_anchors(stride, ratio_vals, scales_vals):
@@ -68,13 +84,17 @@ class MultiOutRetinaNet(Adapter):
                 self.anchors[stride] = generate_anchors(stride, self.ratios, self.scales)
 
             # Decode and filter boxes
-            decoded.append(self.decode(cls_head, box_head, stride, anchors=self.anchors[stride]))
+            decoded.append(
+                self.decode(cls_head, box_head, stride, self.min_conf, self.pre_nms_top_k,
+                            anchors=self.anchors[stride])
+            )
 
         # Perform non-maximum suppression
         decoded = [np.concatenate(tensors, 1) for tensors in zip(*decoded)]
-        return self.nms(*decoded)
+        return self.nms(*decoded, nms=self.nms_threshold, ndetections=self.post_nms_top_k)
 
-    def decode(self, all_cls_head, all_box_head, stride=1, threshold=0.05, top_n=1000, anchors=None, rotated=False):
+    @staticmethod
+    def decode(all_cls_head, all_box_head, stride=1, threshold=0.05, top_n=1000, anchors=None):
         def delta2box(deltas, anchors, size, stride):
             'Convert deltas from anchors to boxes'
 
@@ -91,7 +111,7 @@ class MultiOutRetinaNet(Adapter):
                 clamp(pred_ctr + 0.5 * pred_wh - 1)
             ], 1)
 
-        num_boxes = 4 if not rotated else 6
+        num_boxes = 4
         num_anchors = anchors.shape[0] if anchors is not None else 1
         num_classes = all_cls_head.shape[1] // num_anchors
         height, width = all_cls_head.shape[-2:]
@@ -137,7 +157,8 @@ class MultiOutRetinaNet(Adapter):
 
         return out_scores, out_boxes, out_classes
 
-    def nms(self, all_scores, all_boxes, all_classes, nms=0.5, ndetections=100):
+    @staticmethod
+    def nms(all_scores, all_boxes, all_classes, nms=0.5, ndetections=100):
         'Non Maximum Suppression'
         batch_size = all_scores.shape[0]
         out_scores = np.zeros((batch_size, ndetections))
@@ -157,7 +178,7 @@ class MultiOutRetinaNet(Adapter):
 
             # Sort boxes
             indices = np.argsort(scores)[::-1]
-            boxes, classes, scores[indices] = boxes[indices], classes[indices], scores[indices]
+            boxes, classes, scores = boxes[indices], classes[indices], scores[indices]
             areas = (boxes[:, 2] - boxes[:, 0] + 1) * (boxes[:, 3] - boxes[:, 1] + 1).reshape(-1)
             keep = np.ones(len(scores))
 
@@ -197,7 +218,8 @@ class MultiOutRetinaNet(Adapter):
         out_scores, out_boxes, out_classes = self.decode_boxes(raw_outputs, input_shape)
         result = []
         for identifier, boxes, scores, labels in zip(identifiers, out_boxes, out_scores, out_classes):
-            result.append(DetectionPrediction(identifier, labels, scores, *boxes.T))
+            non_empty = (scores > 0).nonzero()[0]
+            result.append(DetectionPrediction(identifier, labels[non_empty], scores[non_empty], *boxes[non_empty].T))
         return result
 
 

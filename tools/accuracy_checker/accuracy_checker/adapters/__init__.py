@@ -52,7 +52,6 @@ from .detection import (
     FaceDetectionRefinementAdapter,
     FasterRCNNONNX
 )
-from accuracy_checker.adapters.retinanet import RetinaNetAdapter
 from .detection_person_vehicle import (
     PersonVehicleDetectionAdapter,
     PersonVehicleDetectionRefinementAdapter
