@@ -40,9 +40,8 @@ def read_vocab(vocab_path):
     elif vocab_path.suffix == '.json':
         with open(vocab_path, "r") as f:
             vocab_dict = json.load(f)
-            for k, v in vocab_dict['id2sign'].items():
-                del vocab_dict['id2sign'][k]
-                vocab_dict['id2sign'][int(k)] = v
+            id2sign = {int(k): v for k, v in vocab_dict['id2sign'].items()}
+            vocab_dict['id2sign'] = id2sign
     else:
         raise ValueError("Wrong extension of the vocab file")
     return vocab_dict["id2sign"]
