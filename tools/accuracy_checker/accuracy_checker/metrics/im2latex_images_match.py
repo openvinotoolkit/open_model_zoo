@@ -75,13 +75,13 @@ template = r"""
 
 
 def check_environment():
-    command = subprocess.run(["pdflatex", "--version"], stdout=PIPE, stderr=PIPE, check=True)
+    command = subprocess.run(["pdflatex", "--version"], stdout=PIPE, stderr=PIPE, check=True, shell=True)
     if command.stderr:
         raise EnvironmentError("pdflatex not installed, please install it")
-    command = subprocess.run(["gs", "--version"], stdout=PIPE, stderr=PIPE, check=True)
+    command = subprocess.run(["gs", "--version"], stdout=PIPE, stderr=PIPE, check=True, shell=True)
     if command.stderr:
         raise EnvironmentError("ghostscript not installed, please install it")
-    command = subprocess.run(["convert", "--version"], stdout=PIPE, stderr=PIPE, check=True)
+    command = subprocess.run(["convert", "--version"], stdout=PIPE, stderr=PIPE, check=True, shell=True)
     if command.stderr:
         raise EnvironmentError("imagemagick not installed, please install it")
 
