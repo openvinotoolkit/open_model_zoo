@@ -33,6 +33,8 @@ class JSONLoader(DictLoaderMixin, Loader):
         for detection in detection_list:
             if 'timestamp' in detection:
                 idx = int(detection['timestamp']) // 1000000000
+            if identifiers and idx >= len(identifiers):
+                break
             identifier = identifiers[idx] if identifiers else idx
             idx += 1
             data[identifier] = detection
