@@ -75,15 +75,15 @@ template = r"""
 
 
 def check_environment():
-    command = subprocess.run(["pdflatex", "--version"], stdout=PIPE, stderr=PIPE, check=True, shell=True)
+    command = subprocess.run(["pdflatex", "--version"], stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
-        raise EnvironmentError("pdflatex not installed, please install it")
-    command = subprocess.run(["gs", "--version"], stdout=PIPE, stderr=PIPE, check=True, shell=True)
+        raise EnvironmentError("pdflatex not installed, please install it: \n{}".format(command.stderr))
+    command = subprocess.run(["gs", "--version"], stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
-        raise EnvironmentError("ghostscript not installed, please install it")
-    command = subprocess.run(["convert", "--version"], stdout=PIPE, stderr=PIPE, check=True, shell=True)
+        raise EnvironmentError("ghostscript not installed, please install it: \n{}".format(command.stderr))
+    command = subprocess.run(["convert", "--version"], stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
-        raise EnvironmentError("imagemagick not installed, please install it")
+        raise EnvironmentError("imagemagick not installed, please install it: \n{}".format(command.stderr))
 
 
 def crop_image(img, output_path, default_size=None):
