@@ -17,28 +17,28 @@ description: >-
 task_type: image_processing
 files:
   - name: FP32/text-image-super-resolution-0001.xml
-    size: 11171
-    sha256: 192975a81c4ec60ea3226c8308fae4ddd61fc03ca5f501cd140b08e1d5bb0e67
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.xml
+    size: 11187
+    sha256: ff5cb6c719b2798addb0b3a43ed72f6d1c02c88b21ededea2539e72d3e0d0966
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.xml
   - name: FP32/text-image-super-resolution-0001.bin
     size: 10836
     sha256: b9405f0bce254c61f0487b0fa53c89621dc440cbc560c7dc92506900b62d6af5
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.bin
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.bin
   - name: FP16/text-image-super-resolution-0001.xml
-    size: 11161
-    sha256: 66fe1c4a5375fe033644a1d856a9a294564e162ebfae08d96d4028f33671d01f
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.xml
+    size: 11177
+    sha256: ebcc815a463d207579e44d27a1eca875c0e5b00ab48ac72b6bc7e76067f8c48c
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.xml
   - name: FP16/text-image-super-resolution-0001.bin
     size: 5418
     sha256: f203818d73b933e5004aff85aeb84783dbf0be9e5c296d2995fc0678ff719e9c
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.bin
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.bin
   - name: FP16-INT8/text-image-super-resolution-0001.xml
-    size: 25385
-    sha256: 9f9ac6e2a1bad1da2c0bef1e88f269545b8db3b3729f2ee7a2c8378985fe3682
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/text-image-super-resolution-0001/FP16-INT8/text-image-super-resolution-0001.xml
+    size: 25380
+    sha256: 1a46337e08547e47447253dfb458ae1dda0d389f5adbff3056d3869691189e73
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-image-super-resolution-0001/FP16-INT8/text-image-super-resolution-0001.xml
   - name: FP16-INT8/text-image-super-resolution-0001.bin
     size: 4224
     sha256: 8c1ec28bb810a0ad4de8d9c4d2c37939cfe1a64bbb36d4a9379815c154f8339f
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/text-image-super-resolution-0001/FP16-INT8/text-image-super-resolution-0001.bin
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-image-super-resolution-0001/FP16-INT8/text-image-super-resolution-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
