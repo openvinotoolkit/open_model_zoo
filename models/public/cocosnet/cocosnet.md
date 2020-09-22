@@ -2,34 +2,100 @@
 
 ## Use Case and High-Level Description
 
-Cross-domain correspondence network is a exemplar-based image translation model. For details see [paper](https://arxiv.org/pdf/2004.05571).
+Cross-domain correspondence network is a exemplar-based image translation model. \
+Model was pre-trained on ADE20k dataset. The `CoCosNet` architecture comprises two sub-networks: \
+`Correspondence` network and `Translation` network.
+For details see [paper](https://arxiv.org/pdf/2004.05571).
 
 ## Example
 
+## Composite model specification
+
+| Metric                          | Value                                     |
+|---------------------------------|-------------------------------------------|
+| Source framework                | PyTorch*                                  |
+
 ## Specification for Correspondence model
 
-| Metric            | Value                |
-|-------------------|----------------------|
-| Type              | Image Translation    |
-| GFLOPs            | ?                    |
-| MParams           | ?                    |
-| Source framework  | PyTorch\*            |
+The purpose of correspondence model is to establish correspondence between input image and given exemplar. \
+Correspondence network return warped exexplar with semantic from input.
 
-## Specification for Generative model
+### Performance
 
-| Metric            | Value                |
-|-------------------|----------------------|
-| Type              | Image Translation    |
-| GFLOPs            | ?                    |
-| MParams           | ?                    |
-| Source framework  | PyTorch\*            |
+### Inputs
+
+1. name: "input.1", shape: [1x151x256x256] - Input semantic segmentation mask (one-hot label map) in the format [BxCxHxW],
+   where:
+    - B - batch size
+    - C - number of classes (151 for ADE20k)
+    - H - mask height
+    - W - mask width
+
+2. name: "input.70", shape: [1x3x256x256] - An reference image (exemplar) in the format [BxCxHxW],
+   where:
+    - B - batch size
+    - C - number of channels
+    - H - image height
+    - W - image width
+
+    Expected color order is RGB.
+
+3. name: "ref_seg_map", shape: [1x151x256x256] - A mask (one-hot label map) for reference image in the format [BxCxHxW],
+   where:
+    - B - batch size
+    - C - number of classes (151 for ADE20k)
+    - H - mask height
+    - W - mask width
+
+### Outputs
+
+1. name: "2771", shape: [1x3x256x256] - A warped exemplar in the format [BxCxHxW],
+   where:
+    - B - batch size
+    - C - number of channels
+    - H - image height
+    - W - image width
+
+2. name: "2801", shape: [1x151x64x64] - A warped mask in the format [BxCxHxW],
+   where:
+    - B - batch size
+    - C - number of classes (151 for ADE20k)
+    - H - mask height
+    - W - mask width
+
+## Specification for Translation model
+
+Translation model generates the final output based on the warped exemplar according to the correspondence, yielding
+an exemplar-based translation output.
+
+### Performance
+
+### Inputs
+
+1. name: "seg", shape: [1x154x256x256] - A result of concatenate warped exemplar (output 1 of correspondence model) and input image   (input 1 of correspendence model)  in the format [BxCxHxW],
+   where:
+    - B - batch size
+    - C - number of classes and channels (151 for ADE20k + 3 for image)
+    - H - mask height
+    - W - mask width
+
+### Outputs
+
+1. name: "2705", shape: [1x3x256x256] - A result (generated) image based on exemplar in the format [BxCxHxW],
+   where:
+    - B - batch size
+    - C - number of channels
+    - H - image height
+    - W - image width
+
+    Output color order is RGB.
 
 ## Accuracy of composite (CoCosNet) model
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| PSNR   | 12.98dB        | 7.76dB          |
-| SSIM   | 0.238          | 0.3             |
+| PSNR   | 12.99dB        | 7.76dB          |
+| SSIM   | 0.345          | 0.3             |
 
 ## Legal Information
 
