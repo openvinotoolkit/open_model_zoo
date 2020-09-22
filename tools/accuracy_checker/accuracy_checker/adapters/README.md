@@ -153,6 +153,12 @@ AccuracyChecker supports following set of adapters:
   * `u_output` - U channel output layer.
   * `v_output` - V channel output layer.
   * `target_color` - taret color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `bgr`).
+* `super_resolution_gray` - converts output of super resolution model, which return output in GRAY format, to `SuperResolutionPrediction`.
+  * `reverse_channels` - allow switching output image channels BGR to RGB (Optional. Default value is False).
+  * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
+  * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
+  * `cast_to_uint8` - perform casting output image pixels to [0, 255] range.
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations.
 * `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.

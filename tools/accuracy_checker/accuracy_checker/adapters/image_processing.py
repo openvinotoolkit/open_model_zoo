@@ -213,3 +213,32 @@ class SuperResolutionYUV(Adapter):
             results.append(SuperResolutionPrediction(identifier, sr_img))
 
         return results
+
+
+class SuperResolutionGray(ImageProcessingAdapter):
+    __provider__ = 'super_resolution_gray'
+    prediction_types = (SuperResolutionPrediction, )
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        for identifier, img_sr in zip(identifiers, raw_outputs):
+            img_sr = self._basic_postprocess(img_sr)
+            result.append(SuperResolutionPrediction(identifier, img_sr))
+
+        return result
+
+    def _basic_postprocess(self, img):
+        img *= self.std
+        img += self.mean
+        img = img.transpose(1, 2, 0)
+        if self.cast_to_uint8:
+            img = np.clip(img, 0., 255.)
+            img = img.astype(np.uint8)
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        if self.reverse_channels:
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img = Image.fromarray(img, 'RGB') if Image is not None else img
+            img = np.array(img).astype(np.uint8)
+
+        return img
