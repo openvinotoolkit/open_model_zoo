@@ -20,20 +20,20 @@ description: >-
 task_type: question_answering
 files:
   - name: FP32/bert-small-uncased-whole-word-masking-squad-0002.xml
-    size: 771655
-    sha256: 3e770b943cf60959b3d0c6bcb6fc476017db46047695a3d63263c93a72464829
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/bert-small-uncased-whole-word-masking-squad-0002/FP32/bert-small-uncased-whole-word-masking-squad-0002.xml
+    size: 771671
+    sha256: 2db345b5f4bafa6d1e15beeae194277c0adf6ef1c0f6f1dff5c1cd487923fd5b
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/bert-small-uncased-whole-word-masking-squad-0002/FP32/bert-small-uncased-whole-word-masking-squad-0002.xml
   - name: FP32/bert-small-uncased-whole-word-masking-squad-0002.bin
     size: 164528344
     sha256: 93fc8ae8b61a98cca844b7cc90715c086e44543a07c787e17ad8663932d20714
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/bert-small-uncased-whole-word-masking-squad-0002/FP32/bert-small-uncased-whole-word-masking-squad-0002.bin
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/bert-small-uncased-whole-word-masking-squad-0002/FP32/bert-small-uncased-whole-word-masking-squad-0002.bin
   - name: FP16/bert-small-uncased-whole-word-masking-squad-0002.xml
-    size: 771400
-    sha256: 81f2e467f2cef8ad7f9037e1c36f04edfffc5d2d8534f71c3086875183adbab6
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/bert-small-uncased-whole-word-masking-squad-0002/FP16/bert-small-uncased-whole-word-masking-squad-0002.xml
+    size: 771416
+    sha256: df59e572776173e4496bdb62799b04aeb6c2556096f29202b370172abfcacb44
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/bert-small-uncased-whole-word-masking-squad-0002/FP16/bert-small-uncased-whole-word-masking-squad-0002.xml
   - name: FP16/bert-small-uncased-whole-word-masking-squad-0002.bin
     size: 82264250
     sha256: a55f46ac4c364e05a134085cdc7e1e267465705abc81489056f90a808a8c5a88
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/bert-small-uncased-whole-word-masking-squad-0002/FP16/bert-small-uncased-whole-word-masking-squad-0002.bin
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/bert-small-uncased-whole-word-masking-squad-0002/FP16/bert-small-uncased-whole-word-masking-squad-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
