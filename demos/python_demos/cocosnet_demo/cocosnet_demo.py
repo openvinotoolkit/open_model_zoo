@@ -27,7 +27,7 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS,
                       help='Show this help message and exit.')
     args.add_argument("-c", "--correspondence_model",
-                      help="Path to an .xml file with a trained correspondence model",
+                      help="Required. Path to an .xml file with a trained correspondence model",
                       required=True, type=str)
     args.add_argument("-g", "--generative_model", help="Required. Path to an .xml file with a trained generative model",
                       required=True, type=str)
@@ -37,7 +37,7 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument("-rs", "--reference_semantics", help="Required. Path to a folder with reference semantics or path to a reference semantic",
                       required=True, type=str)
-    args.add_argument("-o", "--output_dir", help="Required. Path to directory to save the result",
+    args.add_argument("-o", "--output_dir", help="Path to directory to save the result",
                       required=False, type=str, default="result.jpg")
     args.add_argument("-l", "--cpu_extension",
                       help="Optional. Required for CPU custom layers. "
@@ -89,8 +89,8 @@ def main():
     cv2.waitKey()
     cv2.destroyAllWindows()
 
-    log.info("Save result")
-    save_result(out, args.output_dir)
+    if args.output_dir:
+        save_result(out, args.output_dir)
     log.info("Result image was saved to {}".format(args.output_dir))
 
 
