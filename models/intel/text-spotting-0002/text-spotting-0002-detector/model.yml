@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/text-spotting-0002-detector.xml
-    size: 310296
-    sha256: 057054ca28987ad038601eaf643b63f2e86cc97a0ff9f4ce79251f726b64a8c5
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/text-spotting-0002/text-spotting-0002-detector/FP32/text-spotting-0002-detector.xml
+    size: 310312
+    sha256: 1d2048f2edbe2c1a7760f33eda3586410251e0aa988097116af35d56879a793c
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-detector/FP32/text-spotting-0002-detector.xml
   - name: FP32/text-spotting-0002-detector.bin
     size: 105907024
     sha256: 8150f4ff1f93d286bca4b2683bc779f645961b344b1fd2eed6ea0a5bb78dda4e
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/text-spotting-0002/text-spotting-0002-detector/FP32/text-spotting-0002-detector.bin
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-detector/FP32/text-spotting-0002-detector.bin
   - name: FP16/text-spotting-0002-detector.xml
-    size: 310175
-    sha256: b024882318949ca17cced1191f0d2dd77abf55936be9d2ce5f6518a350bd2247
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/text-spotting-0002/text-spotting-0002-detector/FP16/text-spotting-0002-detector.xml
+    size: 310191
+    sha256: cd4306c0db3d99e53867f9dd7c5bc38e6cd84af2768eddeb84b1bd9491ae5e5d
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-detector/FP16/text-spotting-0002-detector.xml
   - name: FP16/text-spotting-0002-detector.bin
     size: 52953614
     sha256: 18d9d9a074f5bebbbf80890543917437b48b0ecc74673c9aefa9c3b3d92c29f7
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/text-spotting-0002/text-spotting-0002-detector/FP16/text-spotting-0002-detector.bin
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-detector/FP16/text-spotting-0002-detector.bin
   - name: FP16-INT8/text-spotting-0002-detector.xml
-    size: 741763
-    sha256: f9f989d44110c4fcb57b0548c8f5be2a6ad94833b7eab24ea3545cde1d87d972
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/text-spotting-0002/text-spotting-0002-detector/FP16-INT8/text-spotting-0002-detector.xml
+    size: 741907
+    sha256: 8e6dd53011f4c966da5a79f2f9b3bc538fa445bee7ac9502ceb0b28d929932f3
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-detector/FP16-INT8/text-spotting-0002-detector.xml
   - name: FP16-INT8/text-spotting-0002-detector.bin
     size: 26678244
     sha256: b2d123e0796e9fa5e8fe5abb7e5c867adc7b1420738ac84a125bf3fb0e3d7b2c
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/1/text-spotting-0002/text-spotting-0002-detector/FP16-INT8/text-spotting-0002-detector.bin
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-detector/FP16-INT8/text-spotting-0002-detector.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

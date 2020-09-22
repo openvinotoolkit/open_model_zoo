@@ -17,7 +17,7 @@ description: >-
   based on DeepSpeech architecture (CTC decoder with beam search and n-gram language model)
   with modified neural network.
   For details on the original DeepSpeech see paper <https://arxiv.org/abs/1412.5567>.
-task_type: classification
+task_type: speech_recognition
 files:
   - name: deepspeech-0.6.1-models.tar.gz
     size: 1229020343

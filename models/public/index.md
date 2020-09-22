@@ -47,7 +47,7 @@ The models can be downloaded via Model Downloader
 | ResNeXt 101, alpha=0.25     | MXNet\*                            | [octave-resnext-101-0.25](./octave-resnext-101-0.25/octave-resnext-101-0.25.md)   | 79.556%/94.444% | 11.521 | 44.169 |
 | SE-ResNet 50, alpha=0.125   | MXNet\*                            | [octave-se-resnet-50-0.125](./octave-se-resnet-50-0.125/octave-se-resnet-50-0.125.md) | 78.706%/94.09% | 7.246 | 28.082 |
 | open-closed-eye-0001        | PyTorch\*                          | [open-closed-eye-0001](./open-closed-eye-0001/description/open-closed-eye-0001.md) |  95.84%   | 0.0014 | 0.0113|
-| ResNeSt 50                  | PyTorch\*                          | [resnest-50](./resnest-50/resnest-50.md) | 81.11%/95.36% | 10.8148 |  27.4493|
+| ResNeSt 50                  | PyTorch\*                          | [resnest-50-pytorch](./resnest-50-pytorch/resnest-50-pytorch.md) | 81.11%/95.36% | 10.8148 |  27.4493|
 | ResNet 18                   | PyTorch\*                          | [resnet-18-pytorch](./resnet-18-pytorch/resnet-18-pytorch.md) | 69.754%/89.088% | 3.637 |  11.68 |
 | ResNet 34                   | PyTorch\*                          | [resnet-34-pytorch](./resnet-34-pytorch/resnet-34-pytorch.md) | 73.30%/91.42% | 7.3409 | 21.7892 |
 | ResNet 50                   | PyTorch\*<br>Caffe2\*<br>TensorFlow\*| [resnet-50-pytorch](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[resnet-50-caffe2](./resnet-50-caffe2/resnet-50-caffe2.md)<br>[resnet-50-tf](./resnet-50-tf/resnet-50-tf.md)| 75.168%/92.212%<br>76.128%/92.858%<br>76.38%/93.188%<br>76.17%/92.98% | 6.996~8.216 | 25.53 |
@@ -208,9 +208,17 @@ Colorization task is to predict colors of scene from grayscale image.
 
 The task of sound classification is to predict what sounds are in an audio fragment.
 
-| Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
-| ------------------------- | ---------------| -------------- | ------ | ------- |
-| ACLNet                    | [PyTorch\*](./aclnet/aclnet.md) | aclnet | 1.4     | 2.7     |
+| Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
+| ------------------------- | ---------------| -------------- | ------ | ------- | ------- |
+| ACLNet                    | PyTorch\* | [aclnet](./aclnet/aclnet.md) |      | 1.4     | 2.7     |
+
+## Speech Recognition
+
+The task of speech recognition is to recognize and translate spoken language into text.
+
+| Model Name        | Implementation | OMZ Model Name                                               | Accuracy | GFlops | mParams |
+| ----------------- | -------------- | ------------------------------------------------------------ | -------- | ------ | ------- |
+| DeepSpeech V0.6.1 | TensorFlow\*   | [mozilla-deepspeech-0.6.1](./mozilla-deepspeech-0.6.1/mozilla-deepspeech-0.6.1.md) | 7.55%    | 0.0472 | 47.2    |
 
 ## Legal Information
 
