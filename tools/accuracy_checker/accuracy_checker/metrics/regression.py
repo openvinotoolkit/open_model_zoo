@@ -38,12 +38,14 @@ from ..representation import (
     ImageProcessingPrediction,
     StyleTransferAnnotation,
     StyleTransferPrediction,
-    FeaturesRegressionAnnotation
+    FeaturesRegressionAnnotation,
+    PoseEstimationAnnotation,
+    PoseEstimationPrediction
 )
 
 from .metric import PerImageEvaluationMetric
 from ..config import BaseField, NumberField, BoolField, ConfigError, StringField
-from ..utils import string_to_tuple, finalize_metric_result
+from ..utils import string_to_tuple, finalize_metric_result, contains_all
 
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
@@ -602,3 +604,75 @@ class StructuralSimilarity(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)
         self.meta['target'] = 'higher-better'
+
+
+class PercentageCorrectKeypoints(PerImageEvaluationMetric):
+    __provider__ = 'pckh'
+    annotation_types = (PoseEstimationAnnotation, )
+    prediction_types = (PoseEstimationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'threshold': NumberField(optional=True, default=0.5),
+            'score_bias': NumberField(optional=True, default=0.6),
+            'num_joints': NumberField(optional=True, default=16, value_type=int)
+        })
+        return params
+
+    def configure(self):
+        if not self.dataset.metadata or 'joints' not in self.dataset.metadata:
+            raise ConfigError('PCKh metrics require joints providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
+        self.joints = self.dataset.metadata['joints']
+        self.num_joints = self.get_value_from_config('num_joints')
+        self.jnt_count = np.zeros(self.num_joints)
+        self.pck = np.zeros(self.num_joints)
+        self.threshold = self.get_value_from_config('threshold')
+        self.score_bias = self.get_value_from_config('score_bias')
+        self.meta.update({
+            'names': ['head', 'shoulder', 'elbow', 'wrist', 'hip', 'knee', 'ankle', 'mean'],
+            'calculate_mean': False
+        })
+        if not contains_all(
+                self.joints, ['head', 'lsho', 'rsho', 'lwri', 'rwri', 'lhip', 'rhip', 'lkne', 'rkne', 'lank', 'rank']
+        ):
+            raise ConfigError('not all important joints are provided')
+
+    def update(self, annotation, prediction):
+        jnt_visible = annotation.visibility
+        pos_pred = np.array([[x, y] for x, y in zip(prediction.x_values, prediction.y_values)])
+        pos_gt = np.array([[x, y] for x, y in zip(annotation.x_values, annotation.y_values)])
+        uv_error = pos_pred - pos_gt
+        uv_err = np.linalg.norm(uv_error, axis=1)
+        headbox = np.array(annotation.metadata['headbox'])
+        headsizes = headbox[1] - headbox[0]
+        headsizes = np.linalg.norm(headsizes)
+        headsizes *= self.score_bias
+        scale = headsizes
+        scaled_uv_err = np.divide(uv_err, scale)
+        scaled_uv_err = np.multiply(scaled_uv_err, jnt_visible)
+        self.jnt_count += jnt_visible
+        less_than_threshold = np.multiply((scaled_uv_err < self.threshold), jnt_visible)
+        self.pck += less_than_threshold
+        return np.divide(
+            less_than_threshold, jnt_visible, out=np.zeros_like(less_than_threshold), where=jnt_visible != 0
+        )
+
+    def evaluate(self, annotations, predictions):
+        full_score = np.divide(self.pck, self.jnt_count, out=np.zeros_like(self.jnt_count), where=self.jnt_count != 0)
+        return [
+            full_score[self.joints['head']],
+            0.5 * (full_score[self.joints['lsho']] + full_score[self.joints['rsho']]),
+            0.5 * (full_score[self.joints['lelb']] + full_score[self.joints['relb']]),
+            0.5 * (full_score[self.joints['lwri']] + full_score[self.joints['rwri']]),
+            0.5 * (full_score[self.joints['lhip']] + full_score[self.joints['rhip']]),
+            0.5 * (full_score[self.joints['lkne']] + full_score[self.joints['rkne']]),
+            0.5 * (full_score[self.joints['lank']] + full_score[self.joints['rank']]),
+            np.mean(full_score),
+            ]
+
+    def reset(self):
+        self.jnt_count = np.zeros(self.num_joints)
+        self.pck = np.zeros(self.num_joints)
