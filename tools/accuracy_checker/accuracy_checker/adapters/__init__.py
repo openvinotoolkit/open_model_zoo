@@ -30,9 +30,7 @@ from .text_recognition import (
 )
 
 from .image_processing import (
-    ImageProcessingAdapter, SuperResolutionAdapter,
-    MultiSuperResolutionAdapter, SuperResolutionYUV,
-    SuperResolutionGray
+    ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter, SuperResolutionYUV
 )
 from .attributes_recognition import (
     HeadPoseEstimatorAdapter,
@@ -189,5 +187,5 @@ __all__ = [
 
     'GVADetectionAdapter',
     'GVAClassificationAdapter',
-    'SuperResolutionGray'
+
 ]

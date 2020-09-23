@@ -21,6 +21,7 @@ from PIL import Image
 from ..config import StringField, NumberField
 from .postprocessor import Postprocessor
 from ..representation import SuperResolutionPrediction, SuperResolutionAnnotation
+from ..utils import get_size_from_config
 
 
 class SRImageRecovery(Postprocessor):
@@ -34,22 +35,27 @@ class SRImageRecovery(Postprocessor):
         parameters = super().parameters()
         parameters.update({
             'target_color': StringField(optional=True, choices=['bgr', 'rgb'], default='rgb'),
-            'input_size': NumberField(
+            'dst_width': NumberField(
+                value_type=int, optional=True, min_value=1, description="Width of model input before recovering"
+            ),
+            'dst_height': NumberField(
+                value_type=int, optional=True, min_value=1, description="Height of model input before recovering"
+            ),
+            'size': NumberField(
                 value_type=int, optional=True, min_value=1,
-                description="Input size for both dimensions (height and width)"
+                description="Size of model input for both dimensions (height and width) before recovering"
             )
         })
         return parameters
 
     def configure(self):
         self.color = cv2.COLOR_YCrCb2BGR if self.get_value_from_config('target_color') == 'bgr' else cv2.COLOR_YCrCb2RGB
-        self.input_size = self.get_value_from_config('input_size')
+        self.input_height, self.input_width = get_size_from_config(self.config, allow_none=True)
 
     def process_image(self, annotation, prediction):
         for annotation_, prediction_ in zip(annotation, prediction):
-            data = annotation_.value
-            data = Image.fromarray(data, 'RGB')
-            data = data.resize((self.input_size, self.input_size), Image.BICUBIC)
+            data = Image.fromarray(annotation_.value, 'RGB')
+            data = data.resize((self.input_width, self.input_height), Image.BICUBIC)
             data = np.array(data)
             ycrcbdata = cv2.cvtColor(data, cv2.COLOR_RGB2YCrCb)
             cr = ycrcbdata[:, :, 1]

@@ -89,4 +89,5 @@ Accuracy Checker supports following set of postprocessors:
 * `to_lower_case` - convert tokens to lower case. Supported representations: `MachineTranslationPrediction`, `MachineTranslationAnnotation`.
 * `sr_image_recovery` - restores input in YCrCb format and converts prediction to BRG or RGB format, using prediction gray channel and input Cr and Cb channels. Supported representation: `SuperResolutionPrediction`.
   * `target_color` - target color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `rgb`).
-  * `input_size` - size of model input for recovering size of YCrCb image.
+  * `size` - size of model input for recovering YCrCb image.
+  * `dst_width` and `dst_height` - width and height of model input respectively for recovering YCrCb image.
