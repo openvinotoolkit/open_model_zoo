@@ -14,13 +14,54 @@
 
 THRESHOLDS = {
     'object_detection_demo_yolov3_async': {
-        'yolo-v3-tf': [0.005, 0.005, 0.005]
+        'yolo-v3-tf': {
+            'CPU': {
+                'object-detection-demo-ssd-async': [0.005, 0.005, 0.005]
+            }
+        }
+    },
+    'segmentation_demo': {
+        'road-segmentation-adas-0001': {
+            'CPU': {
+                'road-segmentation-adas': [0.01, 0.01, 0.01]
+            }
+        },
+        'semantic-segmentation-adas-0001': {
+            'CPU': {
+                'semantic-segmentation-adas': [0.01, 0.01, 0.01]
+            }
+        },
+        'deeplabv3': {
+            'CPU': {
+                'semantic-segmentation-adas': [0.01, 0.01, 0.01]
+            }
+        }
     },
     'py/object_detection_demo_yolov3_async': {
-        'yolo-v1-tiny-tf': [0.007, 0.007, 0.007],
-        'yolo-v2-tiny-tf': [0.007, 0.007, 0.007],
-        'yolo-v2-tf': [0.007, 0.007, 0.007],
-        'yolo-v3-tf': [0.007, 0.007, 0.007],
-        'mobilefacedet-v1-mxnet': [0.007, 0.007, 0.007]
+        'yolo-v1-tiny-tf': {
+            'CPU': {
+                'object-detection-demo-ssd-async': [0.007, 0.007, 0.007]
+            }
+        },
+        'yolo-v2-tiny-tf': {
+            'CPU': {
+                'object-detection-demo-ssd-async': [0.007, 0.007, 0.007]
+            }
+        },
+        'yolo-v2-tf': {
+            'CPU': {
+                'object-detection-demo-ssd-async': [0.007, 0.007, 0.007]
+            }
+        },
+        'yolo-v3-tf': {
+            'CPU': {
+                'object-detection-demo-ssd-async': [0.007, 0.007, 0.007]
+            }
+        },
+        'mobilefacedet-v1-mxnet': {
+            'CPU': {
+                'object-detection-demo-ssd-async': [0.007, 0.007, 0.007]
+            }
+        }
     }
 }

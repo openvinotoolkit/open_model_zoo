@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -28,6 +28,7 @@ static const char delay_message[] = "Optional. Default is 1. Interval in millise
                                     "exits.";
 static const char no_show_message[] = "Optional. Do not visualize inference results.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+static const char output_message[] = "Optional. Save results to the specified folder.";
 
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
@@ -38,6 +39,7 @@ DEFINE_string(config, "", config_message);
 DEFINE_int32(delay, 1, delay_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_string(o, "", output_message);
 
 static void showUsage() {
     std::cout << std::endl;
@@ -55,4 +57,5 @@ static void showUsage() {
     std::cout << "    -delay                    " << delay_message << std::endl;
     std::cout << "    -no_show                  " << no_show_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
+    std::cout << "    -o \"<path>\"               " << output_message << std::endl;
 }

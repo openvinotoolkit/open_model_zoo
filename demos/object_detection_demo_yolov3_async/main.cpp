@@ -31,14 +31,6 @@
 
 using namespace InferenceEngine;
 
-inline char separator() {
-    #ifdef _WIN32
-    return '\\';
-    #else
-    return '/';
-    #endif
-}
-
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validating the input arguments--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
@@ -310,12 +302,10 @@ int main(int argc, char *argv[]) {
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
 
         cv::VideoWriter outVideo;
-        cv::VideoWriter rawVideo;
         if (!FLAGS_o.empty()) {
-            outVideo.open(FLAGS_o + separator() + "out_%08d.BMP", 0, 0, frame.size());
-            rawVideo.open(FLAGS_o + separator() + "raw_%08d.BMP", 0, 0, frame.size());
+            outVideo.open(FLAGS_o, 0, 0, frame.size());
 
-            if (!outVideo.isOpened() || !rawVideo.isOpened()) {
+            if (!outVideo.isOpened()) {
                 throw std::runtime_error("Can't open VideoWriter.");
             }
         }
@@ -364,10 +354,6 @@ int main(int argc, char *argv[]) {
                 async_infer_request_curr->StartAsync();
             }
 
-            if (!FLAGS_o.empty()) {
-                rawVideo.write(frame);
-            }
-
             if (OK != async_infer_request_curr->Wait(IInferRequest::WaitMode::RESULT_READY)) {
                 throw std::runtime_error("Waiting for inference results error");
             }
@@ -379,23 +365,6 @@ int main(int argc, char *argv[]) {
             wallclock = t0;
 
             t0 = std::chrono::high_resolution_clock::now();
-            presenter.drawGraphs(frame);
-            std::ostringstream out;
-            out << "OpenCV cap/render time: " << std::fixed << std::setprecision(1)
-                << (ocv_decode_time + ocv_render_time) << " ms";
-            cv::putText(frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 255, 0));
-            out.str("");
-            out << "Wallclock time " << (isAsyncMode ? "(TRUE ASYNC):      " : "(SYNC, press Tab): ");
-            out << std::fixed << std::setprecision(1) << wall.count() << " ms (" << 1000.0 / wall.count() << " fps)";
-            cv::putText(frame, out.str(), cv::Point2f(0, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 0, 255));
-            if (!isAsyncMode) {  // In the true async mode, there is no way to measure detection time directly
-                out.str("");
-                out << "Detection time  : " << std::fixed << std::setprecision(1) << detection.count()
-                    << " ms ("
-                    << 1000.0 / detection.count() << " fps)";
-                cv::putText(frame, out.str(), cv::Point2f(0, 75), cv::FONT_HERSHEY_TRIPLEX, 0.6,
-                            cv::Scalar(255, 0, 0));
-            }
 
             // ---------------------------Processing output blobs--------------------------------------------------
             // Processing results of the CURRENT request
@@ -444,6 +413,24 @@ int main(int argc, char *argv[]) {
 
             if (!FLAGS_o.empty()) {
                 outVideo.write(frame);
+            }
+
+            presenter.drawGraphs(frame);
+            std::ostringstream out;
+            out << "OpenCV cap/render time: " << std::fixed << std::setprecision(1)
+                << (ocv_decode_time + ocv_render_time) << " ms";
+            cv::putText(frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 255, 0));
+            out.str("");
+            out << "Wallclock time " << (isAsyncMode ? "(TRUE ASYNC):      " : "(SYNC, press Tab): ");
+            out << std::fixed << std::setprecision(1) << wall.count() << " ms (" << 1000.0 / wall.count() << " fps)";
+            cv::putText(frame, out.str(), cv::Point2f(0, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 0, 255));
+            if (!isAsyncMode) {  // In the true async mode, there is no way to measure detection time directly
+                out.str("");
+                out << "Detection time  : " << std::fixed << std::setprecision(1) << detection.count()
+                    << " ms ("
+                    << 1000.0 / detection.count() << " fps)";
+                cv::putText(frame, out.str(), cv::Point2f(0, 75), cv::FONT_HERSHEY_TRIPLEX, 0.6,
+                            cv::Scalar(255, 0, 0));
             }
 
             if (!FLAGS_no_show) {

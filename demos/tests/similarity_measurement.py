@@ -43,6 +43,4 @@ def getSSIM(i1, i2):
     t2 = sigma1_2 + sigma2_2 + C2
     t1 = t1 * t2
     ssim_map = cv.divide(t3, t1)
-    mssim = cv.mean(ssim_map)
-    
-    return mssim
+    return cv.mean(ssim_map)

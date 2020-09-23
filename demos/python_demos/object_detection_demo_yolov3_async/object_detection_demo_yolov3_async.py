@@ -74,7 +74,7 @@ def build_argparser():
     args.add_argument("-loop", "--loop", help="Optional. Enable reading the input in a loop",
                       action='store_true')
     args.add_argument("-no_show", "--no_show", help="Optional. Don't show output", action='store_true')
-    args.add_argument("-o", "--output", help="Optional. Save results of input processing to the specified folder.",
+    args.add_argument("-o", "--output", help="Optional. Save results to the specified folder.",
                       default="", type=str)
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
@@ -371,14 +371,12 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, int(cap.get(4)) - graph_size[1] - 10, graph_size)
 
     out_video = cv2.VideoWriter()
-    raw_video = cv2.VideoWriter()
     if args.output:
-        frame_size = (int(cap.get(3)), int(cap.get(4)))
-        out_video.open(str(Path(args.output) / 'out_%08d.BMP'), 0, 0, frame_size)
-        raw_video.open(str(Path(args.output) / 'raw_%08d.BMP'), 0, 0, frame_size)
+        frame_size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        out_video.open(args.output, 0, 0, frame_size)
 
-        if not out_video.isOpened() or not raw_video.isOpened():
-            raise RuntimeError('Can\'t open VideoWriter.')
+        if not out_video.isOpened():
+            raise RuntimeError("Can't open VideoWriter.")
 
     while (cap.isOpened() \
            or completed_request_results \
@@ -396,11 +394,7 @@ def main():
             if len(objects) and args.raw_output_message:
                 log.info(" Class ID | Confidence | XMIN | YMIN | XMAX | YMAX | COLOR ")
 
-            if args.output:
-                raw_video.write(frame)
-
             origin_im_size = frame.shape[:-1]
-            presenter.drawGraphs(frame)
             for obj in objects:
                 # Validation bbox of detected object
                 obj['xmax'] = min(obj['xmax'], origin_im_size[1])
@@ -425,6 +419,10 @@ def main():
                             "#" + det_label + ' ' + str(round(obj['confidence'] * 100, 1)) + ' %',
                             (obj['xmin'], obj['ymin'] - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
+            if args.output:
+                out_video.write(frame)
+            
+            presenter.drawGraphs(frame)
             helpers.put_highlighted_text(frame, "{} mode".format(mode.current.name), (10, int(origin_im_size[0] - 20)),
                                          cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
             
@@ -436,9 +434,6 @@ def main():
                 helpers.put_highlighted_text(frame, "Switching modes, please wait...",
                                              (10, int(origin_im_size[0] - 50)), cv2.FONT_HERSHEY_COMPLEX, 0.75,
                                              (10, 200, 10), 2)
-
-            if args.output:
-                out_video.write(frame)
 
             if not args.no_show:
                 cv2.imshow("Detection Results", frame)
@@ -469,7 +464,6 @@ def main():
                     cap.release()
                     if args.output:
                         out_video.release()
-                        raw_video.release()
                 continue
 
             request = empty_requests.popleft()

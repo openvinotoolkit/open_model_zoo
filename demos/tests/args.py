@@ -19,7 +19,7 @@ import tempfile
 from pathlib import Path
 
 ArgContext = collections.namedtuple('ArgContext',
-    ['source_dir', 'test_data_dir', 'dl_dir', 'model_info', 'data_sequences', 'data_sequence_dir'])
+    ['source_dir', 'test_data_dir', 'dl_dir', 'model_info', 'data_sequences', 'data_sequence_dir', 'temp_dir'])
 
 
 class TestDataArg:
@@ -109,12 +109,13 @@ class DemoFileArg:
         return str(context.source_dir / self.file_name)
 
 
-class DemoOutputFileArg:
+class DemoTempOutputArg:
     def __init__(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            self.out_dir = Path(temp_dir) / 'demo_output'
-        if not self.out_dir.is_dir():
-            self.out_dir.mkdir(parents=True)
+        pass
 
     def resolve(self, context):
-        return str(self.out_dir)
+        out_dir = Path(context.temp_dir) / 'demo_output'
+        if not out_dir.is_dir():
+            out_dir.mkdir(parents=True)
+        
+        return str(out_dir / 'out_%04d.BMP')

@@ -50,7 +50,7 @@ Options:
     -auto_resize              Optional. Enable resizable input with support of ROI crop and auto resize.
     -no_show                  Optional. Do not show processed video.
     -u                        Optional. List of monitors to show initially.
-    -o                        Optional. Save results of input processing to the specified folder.
+    -o                        Optional. Save results to the specified folder.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

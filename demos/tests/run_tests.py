@@ -39,13 +39,13 @@ import subprocess
 import sys
 import tempfile
 import timeit
+from pathlib import Path
+
 import cv2 as cv
 import numpy as np
-from pathlib import Path
 
 from args import ArgContext, ModelArg
 from cases import DEMOS
-from crop_size import CROP_SIZE
 from data_sequences import DATA_SEQUENCES
 from similarity_measurement import getSSIM
 from thresholds import THRESHOLDS
@@ -159,9 +159,10 @@ def main():
 
         num_failures = 0
         if args.generate_reference:
-            reference_values = {}
+            nested_dict = lambda: collections.defaultdict(nested_dict)
+            reference_values = nested_dict()
         else:
-            json_file = open(os.path.join(sys.path[0], 'reference_values.json'), 'r')
+            json_file = open(Path(sys.path[0]) / 'reference_values.json', 'r')
             reference_values = json.load(json_file)
 
         os.putenv('PYTHONPATH',  "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir))
@@ -184,6 +185,7 @@ def main():
                     data_sequences=DATA_SEQUENCES,
                     model_info=model_info,
                     test_data_dir=args.test_data_dir,
+                    temp_dir=temp_dir,
                 )
 
                 def resolve_arg(arg):
@@ -218,7 +220,7 @@ def main():
                         continue
 
                     for device, dev_arg in device_args.items():
-                        print('\nTest case #{}/{}:'.format(test_case_index, device),
+                        print('Test case #{}/{}:'.format(test_case_index, device),
                             ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
                         print(flush=True)
                         try:
@@ -231,11 +233,9 @@ def main():
                             if '-o' in case_args and case_args[case_args.index('-o') + 1] != '.':
                                 similarity_res = []
 
-                                out_folder = case_args[case_args.index('-o') + 1]
-                                demo_out_file = str(Path(out_folder) / 'out_%08d.BMP')
-                                demo_raw_file = str(Path(out_folder) / 'raw_%08d.BMP')
-                                out_cap = cv.VideoCapture(demo_out_file)
-                                raw_cap = cv.VideoCapture(demo_raw_file)
+                                out_file = case_args[case_args.index('-o') + 1]
+                                out_cap = cv.VideoCapture(out_file)
+                                raw_cap = cv.VideoCapture(case_args[case_args.index('-i') + 1])
                                 if not out_cap.isOpened() or not raw_cap.isOpened():
                                     raise RuntimeError("Unable to open input files.")
                             
@@ -244,10 +244,6 @@ def main():
                                     raw_ret, raw_frame = raw_cap.read()
 
                                     if out_ret and raw_ret:
-                                        crop = CROP_SIZE[demo.full_name]
-                                        height, width = out_frame.shape[:2]
-                                        out_frame = out_frame[crop[0] : height - crop[2], crop[3] : width - crop[1]]
-                                        raw_frame = raw_frame[crop[0] : height - crop[2], crop[3] : width - crop[1]]
                                         similarity = list(map(lambda x: round(x, 3),
                                                               getSSIM(out_frame, raw_frame)[:-1]))
                                         similarity_res.append(similarity)
@@ -256,18 +252,18 @@ def main():
 
                                 out_cap.release()
                                 raw_cap.release()
-                                tmp_files = glob.glob(str(Path(out_folder) / '*'))
+                                tmp_files = glob.glob(str(Path(out_file).parents[0] / '*'))
                                 for file_path in tmp_files:
                                     os.remove(file_path)
 
                                 model_name = test_case.options['-m'].name
+                                input_name = Path(case_args[case_args.index('-i') + 1]).parent.name
                                 if args.generate_reference:
-                                    if demo.full_name not in reference_values:
-                                        reference_values[demo.full_name] = {}
-                                    reference_values[demo.full_name][model_name] = similarity_res
+                                    reference_values[demo.full_name][model_name][device][input_name] = similarity_res
                                 else:
-                                    similarity_reference = reference_values[demo.full_name][model_name]
-                                    threshold = THRESHOLDS[demo.full_name][model_name]
+                                    similarity_reference = reference_values[demo.full_name][model_name][device]\
+                                                                           [input_name]
+                                    threshold = THRESHOLDS[demo.full_name][model_name][device][input_name]
                                     for i in range(len(similarity_res)):
                                         for j in range(len(similarity_res[0])):
                                             if abs(similarity_res[i][j] - similarity_reference[i][j]) > threshold[j]:
@@ -278,7 +274,7 @@ def main():
                             print("Error:")
                             if isinstance(e, subprocess.CalledProcessError):
                                 print(e.output)
-                                print('Exit code:', e.returncode)
+                                print('Exit code:', e.returncode, '\n')
                             else:
                                 print(e)
 
@@ -293,7 +289,7 @@ def main():
     print("Failures: {}".format(num_failures))
 
     if args.generate_reference:
-        with open(os.path.join(sys.path[0], 'reference_values.json'), 'w') as outfile:
+        with open(Path(sys.path[0]) / 'reference_values.json', 'w') as outfile:
             json.dump(reference_values, outfile, indent=2)
             outfile.write("\n")
             print("File reference_values.json was generated.")

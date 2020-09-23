@@ -32,6 +32,7 @@ Options:
     -delay                    Optional. Default is 1. Interval in milliseconds of waiting for a key to be pressed. For a negative value the demo loads a model, opens an input and exits.
     -no_show                  Optional. Do not visualize inference results.
     -u                        Optional. List of monitors to show initially.
+    -o                        Optional. Save results to the specified folder.
 ```
 
 Running the application with the empty list of options yields an error message.

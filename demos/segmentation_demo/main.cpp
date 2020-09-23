@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2020 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -141,6 +141,15 @@ int main(int argc, char *argv[]) {
         int delay = FLAGS_delay;
         Presenter presenter(FLAGS_u, 10, {inImg.cols / 4, 60});
 
+        cv::VideoWriter outVideo;
+        if (!FLAGS_o.empty()) {
+            outVideo.open(FLAGS_o, 0, 0, inImg.size());
+
+            if (!outVideo.isOpened()) {
+                throw std::runtime_error("Can't open VideoWriter.");
+            }
+        }
+
         std::chrono::steady_clock::duration latencySum{0};
         unsigned latencySamplesNum = 0;
         std::ostringstream latencyStream;
@@ -178,6 +187,11 @@ int main(int argc, char *argv[]) {
             }
             cv::resize(maskImg, resImg, inImg.size());
             resImg = inImg * blending + resImg * (1 - blending);
+
+            if (!FLAGS_o.empty()) {
+                outVideo.write(resImg);
+            }
+
             presenter.drawGraphs(resImg);
 
             latencySum += std::chrono::steady_clock::now() - t0;

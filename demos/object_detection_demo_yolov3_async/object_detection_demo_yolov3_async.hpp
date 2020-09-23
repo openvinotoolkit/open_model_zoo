@@ -30,7 +30,7 @@ static const char raw_output_message[] = "Optional. Output inference results raw
 static const char input_resizable_message[] = "Optional. Enable resizable input with support of ROI crop and auto resize.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-static const char output_message[] = "Optional. Save results of input processing to the specified folder.";
+static const char output_message[] = "Optional. Save results to the specified folder.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(m, "", model_message);

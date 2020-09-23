@@ -80,8 +80,7 @@ Options:
                         Optional. Enable reading the input in a loop
   -no_show, --no_show   Optional. Don't show output
   -o OUT_FOLDER, --output OUT_FOLDER
-                        Optional. Save results of input processing to the
-                        specified folder.
+                        Optional. Save results to the specified folder.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
   --keep_aspect_ratio   Optional. Keeps aspect ratio on resize.

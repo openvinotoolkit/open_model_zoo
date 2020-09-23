@@ -213,7 +213,7 @@ NATIVE_DEMOS = [
 
     NativeDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
-            '-o': DemoOutputFileArg(),
+            '-o': DemoTempOutputArg(),
             **MONITORS,
             '-i': DataPatternArg('object-detection-demo-ssd-async')}),
         TestCase(options={'-m': ModelArg('yolo-v3-tf')})
@@ -249,7 +249,9 @@ NATIVE_DEMOS = [
     )),
 
     NativeDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-no_show': None, **MONITORS}),
+        TestCase(options={'-no_show': None,
+            '-o': DemoTempOutputArg(),
+            **MONITORS}),
         [
             TestCase(options={
                 '-m': ModelArg('road-segmentation-adas-0001'),
@@ -391,7 +393,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
-            '-o': DemoOutputFileArg(),
+            '-o': DemoTempOutputArg(),
             **MONITORS,
             '-i': DataPatternArg('object-detection-demo-ssd-async')}),
         single_option_cases('-m',
