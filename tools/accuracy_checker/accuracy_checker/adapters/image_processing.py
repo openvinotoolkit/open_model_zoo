@@ -235,10 +235,4 @@ class SuperResolutionGray(ImageProcessingAdapter):
         if self.cast_to_uint8:
             img = np.clip(img, 0., 255.)
             img = img.astype(np.uint8)
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        if self.reverse_channels:
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            img = Image.fromarray(img, 'RGB') if Image is not None else img
-            img = np.array(img).astype(np.uint8)
-
         return img
