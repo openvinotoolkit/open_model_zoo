@@ -16,7 +16,6 @@ limitations under the License.
 
 import cv2
 import numpy as np
-from PIL import Image
 from ..config import NumberField, BoolField
 
 from .preprocessor import Preprocessor
@@ -244,6 +243,6 @@ class BGR2YCrCbConverter(Preprocessor):
         return image
 
 
-class RGB2YCrCbConverter(BGR2YUVConverter):
+class RGB2YCrCbConverter(BGR2YCrCbConverter):
     __provider__ = 'rgb_to_ycrcb'
     color = cv2.COLOR_RGB2YCrCb
