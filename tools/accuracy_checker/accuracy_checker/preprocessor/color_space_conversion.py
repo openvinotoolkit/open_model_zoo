@@ -16,6 +16,7 @@ limitations under the License.
 
 import cv2
 import numpy as np
+from PIL import Image
 from ..config import NumberField, BoolField
 
 from .preprocessor import Preprocessor
@@ -208,3 +209,41 @@ class NV12toRGBConverter(Preprocessor):
     def process(self, image, annotation_meta=None):
         image.data = cv2.cvtColor(image.data, cv2.COLOR_YUV2RGB_NV12)
         return image
+
+
+class BGR2YCrCbConverter(Preprocessor):
+    __provider__ = 'bgr_to_ycrcb'
+    color = cv2.COLOR_BGR2YCrCb
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'split_channels': BoolField(
+                optional=True, default=False, description='Allow treat channels as independent input'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.split_channels = self.get_value_from_config('split_channels')
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        ycrcbdata = cv2.cvtColor(data, self.color)
+        if self.split_channels:
+            y = ycrcbdata[:, :, 0]
+            cr = ycrcbdata[:, :, 1]
+            cb = ycrcbdata[:, :, 2]
+            identifier = image.identifier
+            new_identifier = ['{}_y'.format(identifier), '{}_cr'.format(identifier), '{}_cb'.format(identifier)]
+            ycrcbdata = [np.expand_dims(y, -1), np.expand_dims(cr, -1), np.expand_dims(cb, -1)]
+            image.identifier = new_identifier
+        image.data = ycrcbdata
+
+        return image
+
+
+class RGB2YCrCbConverter(BGR2YUVConverter):
+    __provider__ = 'rgb_to_ycrcb'
+    color = cv2.COLOR_RGB2YCrCb

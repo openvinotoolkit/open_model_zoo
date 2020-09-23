@@ -71,6 +71,10 @@ Accuracy Checker supports following set of preprocessors:
 * `rgb_to_nv12` - converting RGB image to NV12 format.
 * `nv12_to_bgr` - converting NV12 data to BGR format.
 * `nv12_to_rgb` - converting NV12 data to RGB format.
+* `bgr_to_ycrcb` - converting image in BGR to YCrCb.
+  * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+* `rgb_to_ycrcb` - converting image in RGB to YCrCb.
+  * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
 * `select_channel` - select channel only one specified channel from multichannel image.
   * `channel` - channel id in image (e.g. if you read image in RGB and want to select green channel, you need to specify 1 as channel)
 * `flip` - image mirroring around specified axis.
@@ -86,7 +90,7 @@ Accuracy Checker supports following set of preprocessors:
   * `draw_points` - allows visualize points.
   * `normalize` - allows to use normalization for keypoints.
   * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
-* `corner_crop` - Corner crop of the image. 
+* `corner_crop` - Corner crop of the image.
   * `dst_width` and `dst_heigth` are destination width and height
   * `corner_type` is type of the corner crop. Options are:
     * `top-left`
