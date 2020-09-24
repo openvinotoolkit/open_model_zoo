@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 import pytest
-pytest.importorskip('accuracy_checker.launcher.mxnet_launcher')
+pytest.importorskip('mxnet')
 import cv2
 import numpy as np
 
