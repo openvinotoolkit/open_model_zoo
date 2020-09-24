@@ -18,7 +18,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from ..config import StringField, NumberField
+from ..config import StringField, NumberField, ConfigError
 from .postprocessor import Postprocessor
 from ..representation import SuperResolutionPrediction, SuperResolutionAnnotation
 from ..utils import get_size_from_config
@@ -50,7 +50,9 @@ class SRImageRecovery(Postprocessor):
 
     def configure(self):
         self.color = cv2.COLOR_YCrCb2BGR if self.get_value_from_config('target_color') == 'bgr' else cv2.COLOR_YCrCb2RGB
-        self.input_height, self.input_width = get_size_from_config(self.config, allow_none=True)
+        self.input_height, self.input_width = get_size_from_config(self.config)
+        if not self.input_height or not self.input_width:
+            raise ConfigError('Neither size nor dst_width and dst_height are correct. Please check config values')
 
     def process_image(self, annotation, prediction):
         for annotation_, prediction_ in zip(annotation, prediction):
