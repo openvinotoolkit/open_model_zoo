@@ -119,7 +119,8 @@ class VideoStream:
         cap = cv2.VideoCapture(input_source)
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
-        source_fps = cap.get(cv2.CAP_PROP_FPS)
+        source_fps = cap.get(cv2.CAP_PROP_FPS) if source_fps > 0 else 1
+
         trg_time_step = 1.0 / float(source_fps)
 
         while True:
