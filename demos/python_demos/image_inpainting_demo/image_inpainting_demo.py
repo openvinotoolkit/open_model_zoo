@@ -33,10 +33,6 @@ def build_arg_parser():
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU", default="CPU", type=str)
-    args.add_argument("-r", "--rnd",
-                      help="Optional. Use random mask for inpainting (with parameters set by -p, -mbw, -mk and -mv)."
-                      " Ignored in GUI mode",
-                      action='store_true')
     args.add_argument("-p", "--parts", help="Optional. Number of parts to draw mask. Ignored in GUI mode",
                       default=8, type=int)
     args.add_argument("-mbw", "--max_brush_width", help="Optional. Max width of brush to draw mask."
@@ -46,13 +42,16 @@ def build_arg_parser():
                       default=100, type=int)
     args.add_argument("-mv", "--max_vertex", help="Optional. Max number of vertex to draw mask. Ignored in GUI mode",
                       default=20, type=int)
-    args.add_argument("-mc", "--mask_color",
-                      help="Optional. Color to be treated as mask (provide 3 RGB components in range of 0...255)."
-                      " Default is 0 0 0. Ignored in GUI mode", default=[0, 0, 0], type=int, nargs=3)
     args.add_argument("--no_show", help="Optional. Don't show output. Cannot be used in GUI mode", action='store_true')
     args.add_argument("-o", "--output", help="Optional. Save output to the file with provided filename."
                       " Ignored in GUI mode", default="", type=str)
-    args.add_argument("-a", "--auto", help="Optional. Use automatic (non-interactive) mode instead of GUI",
+    args.add_argument("-am", "--auto_mask", help="Optional. Use automatic (non-interactive) mode with color mask."
+                      "Provide color to be treated as mask (3 RGB components in range of 0...255). "
+                      "Cannot be used together with -ar.",
+                      default = None, type=int, nargs=3)
+    args.add_argument("-ar", "--auto_rnd",
+                      help="Optional. Use automatic (non-interactive) mode with random mask for inpainting"
+                      " (with parameters set by -p, -mbw, -mk and -mv). Cannot be used together with -am.",
                       action='store_true')
 
     return parser
@@ -82,23 +81,24 @@ def create_random_mask(parts, max_vertex, max_length, max_brush_width, h, w, max
     return mask
 
 
-def inpaint_random_holes(img, args):
-    mask_color = args.mask_color[::-1] # argument comes in RGB mode, but we will use BGR notation below
-
+def inpaint_auto(img, args):
     ie = IECore()
 
     inpainting_processor = ImageInpainting(ie, args.model, args.device)
 
     #--- Resize to model input and generate random mask
-    img = cv2.resize(img, (inpainting_processor.input_width, inpainting_processor.input_height))
-
-    if args.rnd:
+    if args.auto_rnd:
         mask = create_random_mask(args.parts, args.max_vertex, args.max_length, args.max_brush_width,
                                 inpainting_processor.input_height, inpainting_processor.input_width)
     else:
-        top = np.full(img.shape, mask_color, np.uint8)
-        mask = cv2.inRange(img, top, top) / 255
+        # argument comes in RGB mode, but we will use BGR notation below
+        top = np.full(img.shape, args.auto_mask[::-1], np.uint8) 
+        mask = cv2.inRange(img, top, top)
+        mask = cv2.resize(mask, (inpainting_processor.input_width, inpainting_processor.input_height))
+        _, mask = cv2.threshold(mask,1,1,cv2.THRESH_BINARY)
         mask = np.expand_dims(mask, 2)
+
+    img = cv2.resize(img, (inpainting_processor.input_width, inpainting_processor.input_height))
 
     masked_image = (img * (1 - mask) + 255 * mask).astype(np.uint8)
 
@@ -117,9 +117,13 @@ def main():
         print("Cannot load image " + args.input)
         return -1
 
-    if args.auto:
+    if args.auto_mask and args.auto_rnd:
+        print("Error: -ar and -am options cannot be used together...")
+        return -1
+
+    if args.auto_mask or args.auto_rnd:
         # Command-line inpaining for just one image
-        concat_image, result = inpaint_random_holes(img,args)
+        concat_image, result = inpaint_auto(img,args)
         if args.output != "":
             cv2.imwrite(args.output, result)
         if not args.no_show:

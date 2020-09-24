@@ -12,11 +12,12 @@ This demo can work in 2 modes:
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: image_inpainting_demo.py [-h] -m MODEL [-i INPUT] [-d DEVICE] [-r]
+usage: image_inpainting_demo.py [-h] -m MODEL [-i INPUT] [-d DEVICE]
                                 [-p PARTS] [-mbw MAX_BRUSH_WIDTH]
-                                [-ml MAX_LENGTH] [-mv MAX_VERTEX]
-                                [-mc MASK_COLOR [MASK_COLOR ...]] [--no_show]
-                                [-o OUTPUT] [-a]
+                                [-ml MAX_LENGTH] [-mv MAX_VERTEX] [--no_show]
+                                [-o OUTPUT]
+                                [-am AUTO_MASK AUTO_MASK AUTO_MASK] [-ar]
+
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
@@ -28,31 +29,31 @@ Options:
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
                         look for a suitable plugin for device specified.
                         Default value is CPU
-  -r, --rnd             Optional. Use random mask for inpainting (with
-                        parameters set by -p, -mbw, -mk and -mv).Skipped in
-                        GUI mode
   -p PARTS, --parts PARTS
-                        Optional. Number of parts to draw mask. Skipped in GUI
+                        Optional. Number of parts to draw mask. Ignored in GUI
                         mode
   -mbw MAX_BRUSH_WIDTH, --max_brush_width MAX_BRUSH_WIDTH
-                        Optional. Max width of brush to draw mask. Skipped in
+                        Optional. Max width of brush to draw mask. Ignored in
                         GUI mode
   -ml MAX_LENGTH, --max_length MAX_LENGTH
-                        Optional. Max strokes length to draw mask. Skipped in
+                        Optional. Max strokes length to draw mask. Ignored in
                         GUI mode
   -mv MAX_VERTEX, --max_vertex MAX_VERTEX
-                        Optional. Max number of vertex to draw mask. Skipped
+                        Optional. Max number of vertex to draw mask. Ignored
                         in GUI mode
-  -mc MASK_COLOR [MASK_COLOR ...], --mask_color MASK_COLOR [MASK_COLOR ...]
-                        Optional. Color to be treated as mask (provide 3 RGB
-                        components in range of 0...255). Default is 0 0 0.
-                        Skipped in GUI mode
-  --no_show             Optional. Don't show output. Cannot be used in GUI mode
+  --no_show             Optional. Don't show output. Cannot be used in GUI
+                        mode
   -o OUTPUT, --output OUTPUT
                         Optional. Save output to the file with provided
-                        filename. Skipped in GUI mode
-  -a, --auto            Optional. Use automatic (non-interactive) mode instead
-                        of GUI
+                        filename. Ignored in GUI mode
+  -am AUTO_MASK AUTO_MASK AUTO_MASK, --auto_mask AUTO_MASK AUTO_MASK AUTO_MASK
+                        Optional. Use automatic (non-interactive) mode with
+                        color mask.Provide color to be treated as mask (3 RGB
+                        components in range of 0...255). Cannot be used
+                        together with -ar.
+  -ar, --auto_rnd       Optional. Use automatic (non-interactive) mode with
+                        random mask for inpainting (with parameters set by -p,
+                        -mbw, -mk and -mv). Cannot be used together with -am.
 ```
 
 To run the demo, you can use public or pretrained models. You can download the pretrained models with the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md).
