@@ -34,8 +34,8 @@
 
 #include <gflags/gflags.h>
 #include <iostream>
+#include <samples/images_capture.h>
 #include <samples/default_flags.hpp>
-
 #include <unordered_map>
 
 static const char help_message[] = "Print a usage message.";
@@ -102,7 +102,7 @@ static void showUsage() {
     std::cout << "    -nireq \"<integer>\"        " << num_inf_req_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
-    std::cout << "    -loop_input               " << loop_message << std::endl;
+    std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
@@ -160,8 +160,9 @@ int main(int argc, char *argv[]) {
 
         //------------------------------- Preparing Input ------------------------------------------------------
         slog::info << "Reading input" << slog::endl;
-        cv::VideoCapture cap;
+        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat curr_frame;
+
         //------------------------------ Running Detection routines ----------------------------------------------
         std::vector<std::string> labels;
         if (!FLAGS_labels.empty())
@@ -174,25 +175,16 @@ int main(int argc, char *argv[]) {
         while (true){
             //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
             int64_t frameNum;
-            for (unsigned int i = 0; i < FLAGS_nireq; i++) {
-                if (curr_frame.empty()){
-                    cv::Mat frame;
-                    if (!cap.read(frame)) {
-                        if (frame.empty()) {
-                            if (FLAGS_loop) {
-                                cap.open((FLAGS_i == "cam") ? 0 : FLAGS_i.c_str());
-                            } else cap.release();
-                            continue;
-                        } else {
-                            throw std::logic_error("Failed to get frame from cv::VideoCapture");
-                        }
-                    }
-                }
+            if (curr_frame.empty()) {
+                curr_frame = cap->read();
+                if (curr_frame.empty())
+                    throw std::logic_error("Can't read an image from the input");
+            }
 
-                frameNum = pipeline.submitImage(curr_frame);
-                if (frameNum < 0)
-                    break;
-                curr_frame.release();
+            frameNum = pipeline.submitImage(curr_frame);
+            if (frameNum < 0)
+                break;
+            curr_frame.release();
 
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - check for getProcessedResult() function

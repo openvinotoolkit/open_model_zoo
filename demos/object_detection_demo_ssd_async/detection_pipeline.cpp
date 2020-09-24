@@ -87,7 +87,7 @@ void DetectionPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
 
     int num_classes = 0;
 
-    if (auto ngraphFunction = cnnNetwork.getFunction()) {
+/*    if (auto ngraphFunction = cnnNetwork.getFunction()) {
         for (const auto op : ngraphFunction->get_ops()) {
             if (op->get_friendly_name() == outputsNames[0]) {
                 auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
@@ -103,7 +103,7 @@ void DetectionPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     }
     else {
         throw std::logic_error("This demo requires IR version no older than 10");
-    }
+    }*/
     if (labels.size()){
         if (static_cast<int>(labels.size()) == (num_classes - 1)) {  // if network assumes default "background" class, having no label
             labels.insert(labels.begin(), "fake");
@@ -154,7 +154,7 @@ DetectionPipeline::DetectionResult DetectionPipeline::getProcessedResult(){
     const float *detections = outputMapped.as<float*>();
 
     DetectionResult result;
-    static_cast<ResultBase&>(result) = static_cast<ResultBase>(infResult);
+    static_cast<ResultBase&>(result) = static_cast<ResultBase&>(infResult);
 
     auto sz = infResult.extraData.size();
 

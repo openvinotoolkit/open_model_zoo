@@ -32,6 +32,8 @@
 #include "detection_pipeline.h"
 #include "segmentation_pipeline.h"
 #include "config_factory.h"
+#include <samples/images_capture.h>
+#include <samples/default_flags.hpp>
 
 #include <gflags/gflags.h>
 #include <iostream>
@@ -58,7 +60,6 @@ static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
 "throughput mode (for HETERO and MULTI device cases use format "
 "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
-static const char loop_input_message[] = "Optional. Iterate over input infinitely.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 static const char usecase_message[] = "Type of model: d-detection, s-segmentation.";
@@ -77,7 +78,7 @@ DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nireq, 2, num_inf_req_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
-DEFINE_bool(loop_input, false, loop_input_message);
+DEFINE_bool(loop, false, loop_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_string(use, "", usecase_message);
@@ -105,7 +106,7 @@ static void showUsage() {
     std::cout << "    -nireq \"<integer>\"        " << num_inf_req_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
-    std::cout << "    -loop_input               " << loop_input_message << std::endl;
+    std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
     std::cout << "    -use                      " << usecase_message << std::endl;
@@ -163,20 +164,8 @@ int main(int argc, char *argv[]) {
 
         //------------------------------- Preparing Input ------------------------------------------------------
         slog::info << "Reading input" << slog::endl;
-        cv::VideoCapture cap;
-
-        if (!((FLAGS_i == "cam") ? cap.open(0) : cap.open(FLAGS_i.c_str()))) {
-            throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
-        }
-
-        // read input (video) frame
+        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat curr_frame;
-        cap >> curr_frame;
-
-        if (!cap.grab()) {
-            throw std::logic_error("This demo supports only video (or camera) inputs !!! "
-                "Failed getting next frame from the " + FLAGS_i);
-        }
 
         //------------------------------ Creating pipeline object ------------------------------------------------
         std::unique_ptr<PipelineBase> pipeline;
@@ -203,8 +192,12 @@ int main(int argc, char *argv[]) {
         while (true) {
             //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
             int64_t frameNum;
-            if (curr_frame.empty())
-                cap >> curr_frame;
+            if (curr_frame.empty()) {
+                curr_frame = cap->read();
+                if (curr_frame.empty())
+                    throw std::logic_error("Can't read an image from the input");
+            }
+
             frameNum = pipeline->submitImage(curr_frame);
             if (frameNum >= 0)
                 curr_frame.release();

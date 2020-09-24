@@ -47,6 +47,17 @@ public:
         return std::count_if(requestsPool.begin(), requestsPool.end(), [](std::pair<const InferenceEngine::InferRequest::Ptr, std::atomic_bool>& x) {return (bool)x.second; });
     }
 
+    /// Returns number of requests in use. This function is thread safe.
+    /// @returns number of requests in use
+    bool isIdleRequestAvailable() {
+        for (auto it = requestsPool.begin(); it != requestsPool.end(); it++) {
+            if (!it->second) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// Waits for completion of every non-idle requests in pool.
     /// getIdleRequest should not be called together with this function or after it to avoid race condition or invalid state
     /// @returns number of requests in use

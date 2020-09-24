@@ -68,24 +68,21 @@ void PipelineBase::init(const std::string& model_name, const CnnConfig& cnnConfi
     requestsPool = std::move(RequestsPool(execNetwork, cnnConfig.maxAsyncRequests));
 }
 
-PipelineBase::~PipelineBase()
-{
+PipelineBase::~PipelineBase(){
     waitForTotalCompletion();
 }
 
 
-void PipelineBase::waitForData()
-{
+void PipelineBase::waitForData(){
     std::unique_lock<std::mutex> lock(mtx);
 
-    condVar.wait(lock, [&] {return callbackException != nullptr || requestsPool.getInUseRequestsCount() || !completedInferenceResults.empty(); });
+    condVar.wait(lock, [&] {return callbackException != nullptr || requestsPool.isIdleRequestAvailable() || !completedInferenceResults.empty(); });
 
     if (callbackException)
         std::rethrow_exception(callbackException);
 }
 
-int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request, cv::Mat extraData)
-{
+int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request, cv::Mat extraData){
     perfInfo.numRequestsInUse = (uint32_t)requestsPool.getInUseRequestsCount();
 
     if (outputsNames.empty())
