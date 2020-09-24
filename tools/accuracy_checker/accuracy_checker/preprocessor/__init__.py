@@ -23,7 +23,8 @@ from .color_space_conversion import (
     SelectInputChannel,
     BGR2YUVConverter, RGB2YUVConverter,
     BGRtoNV12Converter, RGBtoNV12Converter,
-    NV12toBGRConverter, NV12toRGBConverter
+    NV12toBGRConverter, NV12toRGBConverter,
+    RGB2YCrCbConverter, BGR2YCrCbConverter
 )
 from .audio_preprocessing import (
     ResampleAudio,
@@ -117,4 +118,6 @@ __all__ = [
     'FreeFormMask',
     'RectMask',
     'CustomMask',
+    'RGB2YCrCbConverter',
+    'BGR2YCrCbConverter',
 ]

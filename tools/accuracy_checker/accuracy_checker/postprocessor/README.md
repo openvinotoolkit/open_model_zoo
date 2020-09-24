@@ -87,3 +87,7 @@ Accuracy Checker supports following set of postprocessors:
 * `bgr_to_gray` - converts reference data stored in BGR format to gray scale. Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `StyleTransferAnnotation`, `StyleTransferPrediction`.
 * `remove_repeats` - removes repeated predicted tokens. Supported representations: `MachineTranslationPrediction`, `MachineTranslationAnnotation`.
 * `to_lower_case` - convert tokens to lower case. Supported representations: `MachineTranslationPrediction`, `MachineTranslationAnnotation`.
+* `sr_image_recovery` - restores input in YCrCb format and converts prediction to BRG or RGB format, using prediction gray channel and input Cr and Cb channels. Supported representation: `SuperResolutionPrediction`.
+  * `target_color` - target color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `rgb`).
+  * `size` - size of model input for recovering YCrCb image.
+  * `dst_width` and `dst_height` - width and height of model input respectively for recovering YCrCb image.

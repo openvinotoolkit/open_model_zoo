@@ -55,6 +55,7 @@ from .resize import Resize
 from .to_gray_scale_ref_image import RGB2GRAYAnnotation, BGR2GRAYAnnotation
 from .remove_repeats import RemoveRepeatTokens
 from .tokens_to_lower_case import TokensToLowerCase
+from .super_resolution_image_recovery import SRImageRecovery
 
 
 __all__ = [
@@ -113,4 +114,5 @@ __all__ = [
 
     'RemoveRepeatTokens',
     'TokensToLowerCase',
+    'SRImageRecovery',
 ]
