@@ -306,3 +306,5 @@ AccuracyChecker supports following set of adapters:
     * `ds_rate` - Specifies downsample rate.
     * `cell_width` - Specifies cell width to extract predictions.
     * `label_num` - Specifies number of output label classes.
+* `stacked_hourglass` - converts output of Stacked Hourglass Networks for single human pose estimation to `PoseEstimationPrediction`.
+   * `score_map_out`- the name of output layers for getting score map (Optional, default output blob will be used if not provided).

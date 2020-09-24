@@ -51,7 +51,7 @@ DEFINE_string(m, "", gaze_estimation_model_message);
 DEFINE_string(m_fd, "", face_detection_model_message);
 DEFINE_string(m_hp, "", head_pose_model_message);
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
-DEFINE_string(m_es, "", facial_landmarks_model_message);
+DEFINE_string(m_es, "", eye_state_model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(d_fd, "CPU", target_device_message_fd);
 DEFINE_string(d_hp, "CPU", target_device_message_hp);

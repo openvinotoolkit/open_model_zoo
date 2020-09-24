@@ -60,7 +60,9 @@ from .regression import (
     PeakSignalToNoiseRatio,
     StructuralSimilarity,
 
-    AngleError
+    AngleError,
+
+    PercentageCorrectKeypoints
 )
 from .multilabel_recognition import MultiLabelRecall, MultiLabelPrecision, MultiLabelAccuracy, F1Score
 from .text_detection import (
@@ -188,4 +190,6 @@ __all__ = [
     'RocAucScore',
 
     'Im2latexRenderBasedMetric',
+
+    'PercentageCorrectKeypoints',
 ]

@@ -63,7 +63,7 @@ from .retinaface import RetinaFaceAdapter
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter
-from .pose_estimation import HumanPoseAdapter
+from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
 from .pose_estimation_3d import HumanPose3dAdapter
 
 from .hit_ratio import HitRatioAdapter
@@ -157,6 +157,8 @@ __all__ = [
 
     'HumanPoseAdapter',
     'HumanPose3dAdapter',
+    'SingleHumanPoseAdapter',
+    'StackedHourGlassNetworkAdapter',
 
     'ActionDetection',
 

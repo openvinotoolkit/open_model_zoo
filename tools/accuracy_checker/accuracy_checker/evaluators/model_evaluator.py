@@ -80,7 +80,7 @@ class ModelEvaluator(BaseEvaluator):
             enable_ie_preprocessing=enable_ie_preprocessing
         )
         if enable_ie_preprocessing:
-            launcher_config['preprocessor'] = preprocessor
+            launcher_kwargs['preprocessor'] = preprocessor
         if launcher_config['framework'] == 'dummy' and launcher_config.get('provide_identifiers', False):
             launcher_kwargs = {'identifiers': dataset.identifiers}
         launcher = create_launcher(launcher_config, model_name, **launcher_kwargs)
