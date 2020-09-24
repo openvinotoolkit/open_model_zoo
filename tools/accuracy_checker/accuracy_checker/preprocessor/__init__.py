@@ -51,7 +51,7 @@ from .geometric_transformations import (
 )
 from .crop import (
     Crop, CropRect, ExtendAroundRect, Crop3D, TransformedCropWithAutoScale,
-    CandidateCrop, CropOrPad, CropWithPadSize, CornerCrop
+    CandidateCrop, CropOrPad, CropWithPadSize, CornerCrop, ObjectCropWithScale
 )
 from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
@@ -101,6 +101,7 @@ __all__ = [
     'CandidateCrop',
     'CropRect',
     'Crop3D',
+    'ObjectCropWithScale',
 
     'Normalize3d',
     'Normalize',

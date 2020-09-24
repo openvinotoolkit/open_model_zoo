@@ -215,6 +215,9 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
 * `im2latex_images_match` - This metric gets formulas in `CharacterRecognitionAnnotation` and `CharacterRecognitionPrediction` format and based on this given text renders images with this formulas. Then for every two corresponding formulas images are getting compared. The result accuracy is percent of the equivalent formulas.
   >Note: this metric requires installed packages texlive and imagemagick. In linux you can do it this way:
   > `sudo apt-get update && apt-get install texlive imagemagick`
+* `pckh` - Percentage of Correct Keypoints normalized by head size.  A detected joint is considered correct if the distance between the predicted and the true joint is within a certain threshold. Supported representations: `PoseEstimationAnnotation`, `PoseEstimationPrediction`.
+  * `threshold` - distance threshold (Optional, default 0.5).
+  * `scale_bias` - bias for scale head size (Optional, default 0.6).
 
 ## Metrics profiling
 Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.

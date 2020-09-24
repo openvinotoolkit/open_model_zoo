@@ -170,6 +170,8 @@ Accuracy Checker supports following set of preprocessors:
 * `candidate_crop` - crops candidates detected in previous stage model from input image with vertical and horizontal scaling.
   * `scale_width` - value to scale width relative to the original candidate width.
   * `scale_height` - value to scale height relative to the original candidate height.
+* `object_crop_with_scale` - crop region from image using `center` coordinate and `scale` from annotation.
+  * `dst_width` and `dst_height` are destination width and height for image cropping respectively. You can also use `size` instead in case when destination sizes are equal.
 
 ## Optimized preprocessing via OpenVINO Inference Engine
 OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`.
