@@ -53,7 +53,7 @@ Accuracy Checker supports following set of postprocessors:
   * `pad_type` - padding space location. Supported: `center`, `left_top`, `right_bottom` (Default is `center`).
 * `zoom_segmentation_mask` - zooming segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
   * `zoom` - size for zoom operation.
-* `crop_segmentation_mask` - cropping 3-d annotation mask. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`.
+* `crop_segmentation_mask` - cropping 2-d, 3-d annotation mask. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`, `SegmentationAnnotation`, `SegmentationPrediction`.
   * `dst_width`, `dst_height` and `dst_volume` are destination width, height and volume for cropped 3D-image respectively.
     You can also use `size` instead in case when destination sizes are equal for all three dimensions.
 * `crop_or_pad-segmentation_mask` - performs central cropping if original mask size greater then destination size and padding in case, when source size lower than destination. Padding filling value is 0, realization - right-bottom.
