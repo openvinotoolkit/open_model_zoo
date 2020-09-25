@@ -35,6 +35,7 @@ sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'commo
 import monitors
 
 from models import *
+from models.model_runner import AsyncModelRunner
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
 log = logging.getLogger()
@@ -134,21 +135,13 @@ class ModeInfo:
         self.latency_sum = 0
 
 
-def get_model(model_name, ie, config, exceptions, completed_request_results, args):
+def get_model(model_name, ie, args):
     if model_name == 'ssd':
-        return SSD(ie, args.model, log, device=args.device, plugin_config=config,
-                   results=completed_request_results, max_num_requests=args.num_infer_requests,
-                   labels_map=labels_map, keep_aspect_ratio_resize=args.keep_aspect_ratio,
-                   caught_exceptions=exceptions)
+        return SSD(ie, args.model, log, labels_map=labels_map, keep_aspect_ratio_resize=args.keep_aspect_ratio)
     elif model_name == 'yolo':
-        return YOLO(ie, args.model, log, device=args.device, plugin_config=config,
-                    results=completed_request_results, max_num_requests=args.num_infer_requests,
-                    keep_aspect_ratio=args.keep_aspect_ratio,
-                    caught_exceptions=exceptions)
+        return YOLO(ie, args.model, log, keep_aspect_ratio=args.keep_aspect_ratio)
     elif model_name == 'faceboxes':
-        return FaceBoxes(ie, args.model, log, device=args.device, plugin_config=config,
-                         results=completed_request_results, max_num_requests=args.num_infer_requests,
-                         caught_exceptions=exceptions)
+        return FaceBoxes(ie, args.model)
     elif model_name == 'centernet':
         return CenterNet(ie, args.model, log, device=args.device, plugin_config=config,
                          results=completed_request_results, max_num_requests=args.num_infer_requests,
@@ -207,10 +200,10 @@ def draw_detections(frame, detections, palette, labels, threshold):
             cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
                         (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
-            for i in range(len(detection.landmarks[0])):
-                x = detection.landmarks[0][i]
-                y = detection.landmarks[1][i]
-                cv2.circle(frame, (x, y), 2, (0, 255, 255), 2)
+            # for i in range(len(detection.landmarks[0])):
+            #     x = detection.landmarks[0][i]
+            #     y = detection.landmarks[1][i]
+            #     cv2.circle(frame, (x, y), 2, (0, 255, 255), 2)
 
     return frame
 
@@ -249,11 +242,17 @@ def main():
     mode_info = {mode: ModeInfo()}
     exceptions = []
 
+    model = get_model(args.type, ie, args)
+
     detectors = {
         Modes.USER_SPECIFIED:
-            get_model(args.type, ie, config_user_specified, exceptions, completed_request_results, args),
+            AsyncModelRunner(ie, model, device=args.device, plugin_config=config_user_specified,
+                             caught_exceptions=exceptions, completed_requests=completed_request_results,
+                             max_num_requests=args.num_infer_requests),
         Modes.MIN_LATENCY:
-            get_model(args.type, ie, config_min_latency, exceptions, completed_request_results, args),
+            AsyncModelRunner(ie, model, device=args.device, plugin_config=config_min_latency,
+                             caught_exceptions=exceptions, completed_requests=completed_request_results,
+                             max_num_requests=args.num_infer_requests)
     }
 
     try:
@@ -276,13 +275,25 @@ def main():
                                    (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4),
                                     round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
-    while (cap.isOpened() \
-           or completed_request_results \
-           or len(detectors[mode].empty_requests) < len(detectors[mode].requests)) \
-        and not exceptions:
-        if next_frame_id_to_show in completed_request_results:
-            frame_meta, raw_outputs = completed_request_results.pop(next_frame_id_to_show)
-            objects = detectors[mode].postprocess(raw_outputs, frame_meta)
+
+    while (cap.isOpened):
+        start_time = perf_counter()
+        ret, frame = cap.read()
+        if not ret:
+            if input_repeats < args.loop_input or args.loop_input < 0:
+                cap.open(input_stream)
+                input_repeats += 1
+            else:
+                cap.release()
+            continue
+
+        detectors[mode](frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+        next_frame_id += 1
+
+        _, results = detectors[mode].get_result(next_frame_id_to_show)
+        if results:
+            frame_meta, raw_outputs = results
+            objects = model.postprocess(raw_outputs, frame_meta)
 
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
@@ -293,7 +304,6 @@ def main():
             origin_im_size = frame.shape[:-1]
             presenter.drawGraphs(frame)
             frame = draw_detections(frame, objects, palette, labels_map, args.prob_threshold)
-
             mode_message = '{} mode'.format(mode.name)
             put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
                                  cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
@@ -335,23 +345,87 @@ def main():
                     log.info('Using {} mode'.format(mode.name))
                 else:
                     presenter.handleKey(key)
+            next_frame_id_to_show += 1
 
-        elif detectors[mode].empty_requests and cap.isOpened():
-            start_time = perf_counter()
-            ret, frame = cap.read()
-            if not ret:
-                if input_repeats < args.loop_input or args.loop_input < 0:
-                    cap.open(input_stream)
-                    input_repeats += 1
-                else:
-                    cap.release()
-                continue
+        detectors[mode].await_any()
 
-            detectors[mode](frame, next_frame_id, {'frame': frame, 'start_time': start_time})
-            next_frame_id += 1
 
-        else:
-            detectors[mode].await_any()
+    # while (cap.isOpened() \
+    #        or completed_request_results \
+    #        or len(detectors[mode].empty_requests) < len(detectors[mode].requests)) \
+    #     and not exceptions:
+    #     if next_frame_id_to_show in completed_request_results:
+    #         frame_meta, raw_outputs = completed_request_results.pop(next_frame_id_to_show)
+    #         objects = detectors[mode].postprocess(raw_outputs, frame_meta)
+    #
+    #         frame = frame_meta['frame']
+    #         start_time = frame_meta['start_time']
+    #
+    #         if len(objects) and args.raw_output_message:
+    #             print_raw_results(objects, labels_map, args.prob_threshold)
+    #
+    #         origin_im_size = frame.shape[:-1]
+    #         presenter.drawGraphs(frame)
+    #         frame = draw_detections(frame, objects, palette, labels_map, args.prob_threshold)
+    #
+    #         mode_message = '{} mode'.format(mode.name)
+    #         put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
+    #                              cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
+    #
+    #         next_frame_id_to_show += 1
+    #         if prev_mode == mode:
+    #             mode_info[mode].frames_count += 1
+    #         elif len(completed_request_results) == 0:
+    #             mode_info[prev_mode].last_end_time = perf_counter()
+    #             prev_mode = mode
+    #
+    #         # Frames count is always zero if mode has just been switched (i.e. prev_mode != mode).
+    #         if mode_info[mode].frames_count != 0:
+    #             fps_message = 'FPS: {:.1f}'.format(mode_info[mode].frames_count / \
+    #                                                (perf_counter() - mode_info[mode].last_start_time))
+    #             mode_info[mode].latency_sum += perf_counter() - start_time
+    #             latency_message = 'Latency: {:.1f} ms'.format((mode_info[mode].latency_sum / \
+    #                                                            mode_info[mode].frames_count) * 1e3)
+    #             # Draw performance stats over frame.
+    #             put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
+    #             put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
+    #
+    #         if not args.no_show:
+    #             cv2.imshow('Detection Results', frame)
+    #             key = cv2.waitKey(wait_key_time)
+    #
+    #             ESC_KEY = 27
+    #             TAB_KEY = 9
+    #             # Quit.
+    #             if key in {ord('q'), ord('Q'), ESC_KEY}:
+    #                 break
+    #             # Switch mode.
+    #             # Disable mode switch if the previous switch has not been finished yet.
+    #             if key == TAB_KEY and mode_info[mode].frames_count > 0:
+    #                 mode = next(modes)
+    #                 detectors[prev_mode].await_all()
+    #                 mode_info[prev_mode].last_end_time = perf_counter()
+    #                 mode_info[mode] = ModeInfo()
+    #                 log.info('Using {} mode'.format(mode.name))
+    #             else:
+    #                 presenter.handleKey(key)
+    #
+    #     elif detectors[mode].empty_requests and cap.isOpened():
+    #         start_time = perf_counter()
+    #         ret, frame = cap.read()
+    #         if not ret:
+    #             if input_repeats < args.loop_input or args.loop_input < 0:
+    #                 cap.open(input_stream)
+    #                 input_repeats += 1
+    #             else:
+    #                 cap.release()
+    #             continue
+    #
+    #         detectors[mode](frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+    #         next_frame_id += 1
+    #
+    #     else:
+    #         detectors[mode].await_any()
 
     if exceptions:
         raise exceptions[0]
