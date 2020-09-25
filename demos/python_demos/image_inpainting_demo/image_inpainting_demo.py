@@ -48,7 +48,7 @@ def build_arg_parser():
     args.add_argument("-am", "--auto_mask", help="Optional. Use automatic (non-interactive) mode with color mask."
                       "Provide color to be treated as mask (3 RGB components in range of 0...255). "
                       "Cannot be used together with -ar.",
-                      default = None, type=int, nargs=3)
+                      default=None, type=int, nargs=3)
     args.add_argument("-ar", "--auto_rnd",
                       help="Optional. Use automatic (non-interactive) mode with random mask for inpainting"
                       " (with parameters set by -p, -mbw, -mk and -mv). Cannot be used together with -am.",
