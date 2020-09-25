@@ -92,7 +92,7 @@ def inpaint_auto(img, args):
                                 inpainting_processor.input_height, inpainting_processor.input_width)
     else:
         # argument comes in RGB mode, but we will use BGR notation below
-        top = np.full(img.shape, args.auto_mask[::-1], np.uint8) 
+        top = np.full(img.shape, args.auto_mask[::-1], np.uint8)
         mask = cv2.inRange(img, top, top)
         mask = cv2.resize(mask, (inpainting_processor.input_width, inpainting_processor.input_height))
         _, mask = cv2.threshold(mask, 1, 1, cv2.THRESH_BINARY)
