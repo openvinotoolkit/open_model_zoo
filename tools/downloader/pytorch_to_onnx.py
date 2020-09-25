@@ -83,7 +83,7 @@ def load_model(model_name, weights, model_path, module_name, model_params):
         print('ERROR: Module {} contains no class or function with name {}!'
               .format(module_name, model_name))
         sys.exit(err)
-    
+
     try:
         if weights:
             model.load_state_dict(torch.load(weights, map_location='cpu'))
