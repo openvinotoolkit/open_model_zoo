@@ -7,7 +7,7 @@ to fill holes in images.
 This demo can work in 2 modes: 
 
 * GUI mode: areas for inpainting can be marked interactively using mouse painting
-* Auto mode (use -a option for it): image will be processed automatically using randomly applied mask (-r option) or using specific color-based mask (-mc option to set mask color)
+* Auto mode (use -am or -ar option for it): image will be processed automatically using randomly applied mask (-ar option) or using specific color-based mask (-am option)
 
 Running the application with the `-h` option yields the following usage message:
 
@@ -15,8 +15,7 @@ Running the application with the `-h` option yields the following usage message:
 usage: image_inpainting_demo.py [-h] -m MODEL [-i INPUT] [-d DEVICE]
                                 [-p PARTS] [-mbw MAX_BRUSH_WIDTH]
                                 [-ml MAX_LENGTH] [-mv MAX_VERTEX] [--no_show]
-                                [-o OUTPUT]
-                                [-am AUTO_MASK AUTO_MASK AUTO_MASK] [-ar]
+                                [-o OUTPUT] [-am C C C] [-ar]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -46,12 +45,13 @@ Options:
   -o OUTPUT, --output OUTPUT
                         Optional. Save output to the file with provided
                         filename. Ignored in GUI mode
-  -am AUTO_MASK AUTO_MASK AUTO_MASK, --auto_mask AUTO_MASK AUTO_MASK AUTO_MASK
+  -am C C C, --auto_mask_color C C C
                         Optional. Use automatic (non-interactive) mode with
                         color mask.Provide color to be treated as mask (3 RGB
                         components in range of 0...255). Cannot be used
                         together with -ar.
-  -ar, --auto_rnd       Optional. Use automatic (non-interactive) mode with
+  -ar, --auto_mask_random
+                        Optional. Use automatic (non-interactive) mode with
                         random mask for inpainting (with parameters set by -p,
                         -mbw, -mk and -mv). Cannot be used together with -am.
 ```

@@ -45,11 +45,11 @@ def build_arg_parser():
     args.add_argument("--no_show", help="Optional. Don't show output. Cannot be used in GUI mode", action='store_true')
     args.add_argument("-o", "--output", help="Optional. Save output to the file with provided filename."
                       " Ignored in GUI mode", default="", type=str)
-    args.add_argument("-am", "--auto_mask", help="Optional. Use automatic (non-interactive) mode with color mask."
+    args.add_argument("-am", "--auto_mask_color", help="Optional. Use automatic (non-interactive) mode with color mask."
                       "Provide color to be treated as mask (3 RGB components in range of 0...255). "
                       "Cannot be used together with -ar.",
-                      default=None, type=int, nargs=3)
-    args.add_argument("-ar", "--auto_rnd",
+                      metavar='C', default=None, type=int, nargs=3)
+    args.add_argument("-ar", "--auto_mask_random",
                       help="Optional. Use automatic (non-interactive) mode with random mask for inpainting"
                       " (with parameters set by -p, -mbw, -mk and -mv). Cannot be used together with -am.",
                       action='store_true')
@@ -86,20 +86,20 @@ def inpaint_auto(img, args):
 
     inpainting_processor = ImageInpainting(ie, args.model, args.device)
 
-    #--- Resize to model input and generate random mask
-    if args.auto_rnd:
+    #--- Generating mask
+    if args.auto_mask_random:
         mask = create_random_mask(args.parts, args.max_vertex, args.max_length, args.max_brush_width,
                                 inpainting_processor.input_height, inpainting_processor.input_width)
     else:
         # argument comes in RGB mode, but we will use BGR notation below
-        top = np.full(img.shape, args.auto_mask[::-1], np.uint8)
+        top = np.full(img.shape, args.auto_mask_color[::-1], np.uint8)
         mask = cv2.inRange(img, top, top)
         mask = cv2.resize(mask, (inpainting_processor.input_width, inpainting_processor.input_height))
         _, mask = cv2.threshold(mask, 1, 1, cv2.THRESH_BINARY)
         mask = np.expand_dims(mask, 2)
 
+    #--- Resizing image and removing masked areas from it
     img = cv2.resize(img, (inpainting_processor.input_width, inpainting_processor.input_height))
-
     masked_image = (img * (1 - mask) + 255 * mask).astype(np.uint8)
 
     #--- Inpaint and show results
@@ -117,11 +117,11 @@ def main():
         print("Cannot load image " + args.input)
         return -1
 
-    if args.auto_mask and args.auto_rnd:
+    if args.auto_mask_color and args.auto_mask_random:
         print("Error: -ar and -am options cannot be used together...")
         return -1
 
-    if args.auto_mask or args.auto_rnd:
+    if args.auto_mask_color or args.auto_mask_random:
         # Command-line inpaining for just one image
         concat_image, result = inpaint_auto(img,args)
         if args.output != "":
