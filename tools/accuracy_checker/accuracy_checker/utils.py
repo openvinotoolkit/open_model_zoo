@@ -798,3 +798,14 @@ def loadmat(filename):
         fd.seek(next_position)
     fd.close()
     return mdict
+
+
+class UnsupportedPackage:
+    def __init__(self, package, message):
+        self.package = package
+        self.msg = message
+
+    def raise_error(self, provider):
+        msg = "{package} is not installed. Please install it before using {provider}.\n{message}".format(
+            provider=provider, package=self.package, message=self.msg)
+        raise ImportError(msg)

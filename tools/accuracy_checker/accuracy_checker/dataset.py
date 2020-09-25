@@ -20,8 +20,15 @@ import warnings
 
 from .annotation_converters import BaseFormatConverter, save_annotation, make_subset, analyze_dataset
 from .config import (
-    ConfigValidator, StringField, PathField, ListField,
-    DictField, BaseField, NumberField, ConfigError, BoolField
+    ConfigValidator,
+    StringField,
+    PathField,
+    ListField,
+    DictField,
+    BaseField,
+    NumberField,
+    ConfigError,
+    BoolField
 )
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
 from .representation import BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
@@ -49,6 +56,9 @@ class DatasetConfig(ConfigValidator):
     segmentation_masks_source = PathField(is_directory=True, optional=True)
     additional_data_source = PathField(is_directory=True, optional=True)
     batch = NumberField(value_type=int, min_value=1, optional=True)
+    _profile = BoolField(optional=True, default=False)
+    _report_type = StringField(optional=True, choices=['json', 'csv'])
+    _ie_preprocessing = BoolField(optional=True, default=False)
 
 
 class Dataset:

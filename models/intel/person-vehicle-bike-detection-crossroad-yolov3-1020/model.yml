@@ -1,0 +1,44 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  YOLO v3 finetuned for person-vehicle-bike detection task
+task_type: detection
+files:
+  - name: FP32/person-vehicle-bike-detection-crossroad-yolov3-1020.xml
+    size: 239718
+    sha256: 558fc2965857deb5ce2ab7e141a0561bfc611db9de3aadf69dd70c217c93bd41
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-vehicle-bike-detection-crossroad-yolov3-1020/FP32/person-vehicle-bike-detection-crossroad-yolov3-1020.xml
+  - name: FP32/person-vehicle-bike-detection-crossroad-yolov3-1020.bin
+    size: 247688372
+    sha256: 37501c68ed184a9cd0bff2e4a4a73d7420fe443e2c53a8cfab7c0374c57297cd
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-vehicle-bike-detection-crossroad-yolov3-1020/FP32/person-vehicle-bike-detection-crossroad-yolov3-1020.bin
+  - name: FP16/person-vehicle-bike-detection-crossroad-yolov3-1020.xml
+    size: 239623
+    sha256: e65e060070534080690782d65a451516122d8735783f68b133c776746d5e60a7
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-vehicle-bike-detection-crossroad-yolov3-1020/FP16/person-vehicle-bike-detection-crossroad-yolov3-1020.xml
+  - name: FP16/person-vehicle-bike-detection-crossroad-yolov3-1020.bin
+    size: 123844212
+    sha256: 9625a2d5fcc80a4abeaafefaf670fbb3e32c34e98b8618f27b10dbe699a77028
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-vehicle-bike-detection-crossroad-yolov3-1020/FP16/person-vehicle-bike-detection-crossroad-yolov3-1020.bin
+  - name: FP16-INT8/person-vehicle-bike-detection-crossroad-yolov3-1020.xml
+    size: 606744
+    sha256: 134694600ec642b030f41c7f0b854f8d637bdd54e3cbb82da458345bc76c2eeb
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-vehicle-bike-detection-crossroad-yolov3-1020/FP16-INT8/person-vehicle-bike-detection-crossroad-yolov3-1020.xml
+  - name: FP16-INT8/person-vehicle-bike-detection-crossroad-yolov3-1020.bin
+    size: 62057600
+    sha256: fe45357b0ac98fd138bec6aff5b946a5061e68244fdf5954251045a98f2347fc
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-vehicle-bike-detection-crossroad-yolov3-1020/FP16-INT8/person-vehicle-bike-detection-crossroad-yolov3-1020.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

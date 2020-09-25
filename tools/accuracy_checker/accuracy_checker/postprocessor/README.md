@@ -53,7 +53,7 @@ Accuracy Checker supports following set of postprocessors:
   * `pad_type` - padding space location. Supported: `center`, `left_top`, `right_bottom` (Default is `center`).
 * `zoom_segmentation_mask` - zooming segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
   * `zoom` - size for zoom operation.
-* `crop_segmentation_mask` - cropping 3-d annotation mask. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`.
+* `crop_segmentation_mask` - cropping 2-d, 3-d annotation mask. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`, `SegmentationAnnotation`, `SegmentationPrediction`.
   * `dst_width`, `dst_height` and `dst_volume` are destination width, height and volume for cropped 3D-image respectively.
     You can also use `size` instead in case when destination sizes are equal for all three dimensions.
 * `crop_or_pad-segmentation_mask` - performs central cropping if original mask size greater then destination size and padding in case, when source size lower than destination. Padding filling value is 0, realization - right-bottom.
@@ -66,6 +66,8 @@ Accuracy Checker supports following set of postprocessors:
 * `transform_brats_prediction` - transforms prediction from `WT-TC-ET` format to `NCR/NET-ED-ET`. Sequentially fills one-channel mask with specified `values` for elements passing the threshold (threshold is `0.5`) from each prediction channel in specified `order`.
   * `order` - specifies filling order for channels
   * `values` - specifies values for each channel according to new order
+* `remove_brats_prediction_padding` - process output prediction in two steps: 1) remove padding; 2) extends to annotation size. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`.
+  * `make_argmax` - applies argmax operation to prediction mask (by default `False`).
 * `extract_answers_tokens` - extract predicted sequence of tokens from annotation text. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
   * `max_answer` - maximum answer length (Optional, default value is 30).
   * `n_best_size` - total number of n-best prediction size for the answer (Optional, default value is 20).
@@ -76,10 +78,16 @@ Accuracy Checker supports following set of postprocessors:
     `target` - select target image for resize (`prediction` or `annotation`)
 * `resize_style_transfer` - resizing style transfer predicted image. Supported representations: `StyleTransferAnotation`, `StyleTransferPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resizing respectively.
-* `crop_ground_truth_image` - croping ground truth image. Supported representations: `ImageInpaintingAnnotation`.
+* `crop_ground_truth_image` - cropping ground truth image. Supported representations: `ImageInpaintingAnnotation`.
 * `resize` - resizing image or segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`, `StyleTransferAnotation`, `StyleTransferPrediction`, `SuperResolutionAnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resize respectively. You can also use `size` instead in case when destination sizes are equal.
     If any of these parameters are not specified, image size will be used as default.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
 * `rgb_to_gray` - converts reference data stored in RGB format to gray scale. Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `StyleTransferAnnotation`, `StyleTransferPrediction`.
 * `bgr_to_gray` - converts reference data stored in BGR format to gray scale. Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `StyleTransferAnnotation`, `StyleTransferPrediction`.
+* `remove_repeats` - removes repeated predicted tokens. Supported representations: `MachineTranslationPrediction`, `MachineTranslationAnnotation`.
+* `to_lower_case` - convert tokens to lower case. Supported representations: `MachineTranslationPrediction`, `MachineTranslationAnnotation`.
+* `sr_image_recovery` - restores input in YCrCb format and converts prediction to BRG or RGB format, using prediction gray channel and input Cr and Cb channels. Supported representation: `SuperResolutionPrediction`.
+  * `target_color` - target color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `rgb`).
+  * `size` - size of model input for recovering YCrCb image.
+  * `dst_width` and `dst_height` - width and height of model input respectively for recovering YCrCb image.

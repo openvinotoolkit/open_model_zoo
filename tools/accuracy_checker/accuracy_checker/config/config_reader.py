@@ -47,8 +47,9 @@ PREPROCESSING_PATHS = {
 }
 
 ADAPTERS_PATHS = {
+    'lm_file': ['model_attributes', 'models', 'source'],
     'vocabulary_file': ['model_attributes', 'models', 'source'],
-    'merges_file': ['model_attributes', 'source', 'models']
+    'merges_file': ['model_attributes', 'models', 'source']
 }
 
 ANNOTATION_CONVERSION_PATHS = {
@@ -329,6 +330,8 @@ class ConfigReader:
 
     @staticmethod
     def _provide_cmd_arguments(arguments, config, mode):
+        profile_dataset = 'profile' in arguments and arguments.profile
+        profile_report_type = arguments.profile_report_type if 'profile_report_type' in arguments else 'csv'
         def _add_subset_specific_arg(dataset_entry):
             if 'shuffle' in arguments and arguments.shuffle is not None:
                 dataset_entry['shuffle'] = arguments.shuffle
@@ -359,10 +362,16 @@ class ConfigReader:
                 for launcher_entry in model['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry)
                 model['launchers'] = provide_models(model['launchers'])
+
                 for dataset_entry in model['datasets']:
                     _add_subset_specific_arg(dataset_entry)
+
                     if 'ie_preprocessing' in arguments and arguments.ie_preprocessing:
                         dataset_entry['_ie_preprocessing'] = arguments.ie_preprocessing
+
+                    if profile_dataset:
+                        dataset_entry['_profile'] = profile_dataset
+                        dataset_entry['_report_type'] = profile_report_type
 
         def merge_modules(config, arguments, update_launcher_entry):
             for evaluation in config['evaluations']:
@@ -377,8 +386,13 @@ class ConfigReader:
                     continue
                 for launcher in module_config['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher, update_launcher_entry)
+
+                if 'datasets' not in module_config:
+                    continue
                 for dataset in module_config['datasets']:
                     _add_subset_specific_arg(dataset)
+                    dataset['_profile'] = profile_dataset
+                    dataset['_report_type'] = profile_report_type
 
         functors_by_mode = {
             'models': merge_models,

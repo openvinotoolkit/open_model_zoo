@@ -13,8 +13,9 @@ Every metric has parameters available for configuration.
 Accuracy Checker supports following set of metrics:
 
 * `accuracy` - classification accuracy metric, defined as the number of correct predictions divided by the total number of predictions.
-Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
+Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`, `ArgMaxClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
+  * `match` - Batch-oriented binary classification metric. Metric value calculated for each record in batch. Parameter `top_k` ignored in this mode.
 * `accuracy_per_class` - classification accuracy metric which represents results for each class. Supported representation: `ClassificationAnnotation`, `ClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
@@ -23,6 +24,7 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
 * `classification_f1-score` - [F1 score](https://en.wikipedia.org/wiki/F1_score) metric for classification task. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
 * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
 * `metthews_correlation_coef` - [Matthews correlation coefficient (MCC)](https://en.wikipedia.org/wiki/Matthews_correlation_coefficient) for binary classification. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
+* `roc_auc_score` - [ROC AUC score](https://en.wikipedia.org/wiki/Receiver_operating_characteristic) for binary classification. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction` `ArgMaxClassificationPrediction`.
 * `map` - mean average precision. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
   * `overlap_method` - method for calculation bbox overlap. You can choose between intersection over union (`iou`), defined as area of intersection divided by union of annotation and prediction boxes areas, and intersection over area (`ioa`), defined as area of intersection divided by ara of prediction box.
@@ -95,6 +97,8 @@ More detailed information about calculation segmentation metrics you can find [h
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start`, `step`, `end` - generate range of intervals from `start` to `end` with length `step`.
+* `mape` - [Mean Absolute Percentage Error](https://en.wikipedia.org/wiki/Mean_absolute_percentage_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
+* `log10_error` - Logarithmic mean absolute error. Supported representations: Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
 * `per_point_normed_error` - Normed Error for measurement the quality of landmarks' positions. Estimated results for each point independently. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`, `FacialLandmarks3DAnnotation`, `FacialLandmarks3DPrediction`.
 * `normed_error` - Normed Error for measurement the quality of landmarks' positions. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`, `FacialLandmarks3DAnnotation`, `FacialLandmarks3DPrediction`.
   * `calculate_std` - allows calculation of standard deviation (default value: `False`)
@@ -173,9 +177,16 @@ More detailed information about calculation segmentation metrics you can find [h
 * `dice_index` - [Sørensen–Dice coefficient](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). Supported representations: `BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction`, `SegmentationAnnotation, SegmentationPrediction`. Supports result representation for multiple classes. Metric represents result for each class if `label_map` for used dataset is provided, otherwise it represents overall result. For `brats_numpy` converter file with labels set in `labels_file` tag.
   * `mean` - allows calculation mean value (default - `True`).
   * `median` - allows calculation median value (default - `False`).
+* `dice_unet3d` - [Sørensen–Dice coefficient](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). Supported representations: `BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction`.
+Applied for models trained on brats data with labels in range (0, 1, 2, 3). The metric is quite similar to `dice_index` with only the difference that represents data for three statically defined labels:  1) `whole tumor` - aggregated data for labels (1, 2, 3) of the dataset; 2) `tumor core` - aggregated data for labels (2, 3) of the dataset; 3) `enhancing tumor` - data for label (3) of the dataset.
+  * `mean` - allows calculation mean value (default - `True`).
+  * `median` - allows calculation median value (default - `False`).
 * `bleu` - [Bilingual Evaluation Understudy](https://en.wikipedia.org/wiki/BLEU). Supperted representations: `MachineTranslationAnnotation`, `MachineTranslationPrediction`.
-  * `smooth` - Whether or not to apply Lin et al. 2004 smoothing.
+  * `smooth` - Whether or not to apply Lin et al. 2004 smoothing (Optional, default `False`)
   *  `max_order` - Maximum n-gram order to use when computing BLEU score. (Optional, default 4).
+  * `smooth_method` - The smoothing method to use. Supported values: `exp`, `floor`, `add-k`, `none` (Optional, default value is `exp` is `smooth` is enabled and `none` if not).
+  * `smooth_value` - the value for smoothing for `floor` or `add-k` smoothing methods. (Optional, applicable only if specific smoothing methods selected, default values are 0 or 1 for `floor` and `add-k` methods respectively).
+  * `lower_case` - convert annotation and prediction tokens to lower case (Optional, default `False`).
 * `f1` - F1-score for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
 * `exact_match` - Exact matching (EM) metric for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
 * `qa_embedding_accuracy` - Right context detection accuracy metric for question answering task solved by question vs context embeddings comparison. Supported representations: `QuestionAnsweringEmbeddingAnnotation`, `QuestionAnsweringEmbeddingPrediction`.
@@ -201,3 +212,50 @@ More detailed information about calculation segmentation metrics you can find [h
 * `score_class_comparison` - allows calculate an accuracy of quality score class(low/normal/good). It sorts all quality scores from annotations and predictions and set the k1 highest scores as high class and the k2 lowest scores as low class where k1 is `num_high_quality` and k2 is `num_low_quality`. Supported representations: `QualityAssessmentAnnotation`, `QualityAssessmentPrediction`.
   * `num_high_quality` - the number of high class in total (default value: `1`).
   * `num_low_quality` - the number of low class in total (default value: `1`).
+* `im2latex_images_match` - This metric gets formulas in `CharacterRecognitionAnnotation` and `CharacterRecognitionPrediction` format and based on this given text renders images with this formulas. Then for every two corresponding formulas images are getting compared. The result accuracy is percent of the equivalent formulas.
+  >Note: this metric requires installed packages texlive and imagemagick. In linux you can do it this way:
+  > `sudo apt-get update && apt-get install texlive imagemagick`
+* `pckh` - Percentage of Correct Keypoints normalized by head size.  A detected joint is considered correct if the distance between the predicted and the true joint is within a certain threshold. Supported representations: `PoseEstimationAnnotation`, `PoseEstimationPrediction`.
+  * `threshold` - distance threshold (Optional, default 0.5).
+  * `scale_bias` - bias for scale head size (Optional, default 0.6).
+
+## Metrics profiling
+Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.
+This feature can be useful for debug purposes. For enabling this behaviour you need to provide `--profile True` in accuracy checker command line.
+Additionally, you can specify directory for saving profiling results `--profiler_logs_dir` and select data format in `--profile_report_type` between `csv` (brief) and `json` (more detailed).
+
+Supported for profiling metrics:
+* Classification:
+  * `accuracy`
+  * `accuracy_per_class`
+  * `classification_f1-score`
+  * `metthews_correlation_coef`
+  * `multi_accuracy`
+  * `multi_recall`
+  * `multi_precision`
+  * `f1-score`
+* Regression:
+  * `mae`
+  * `mse`
+  * `rmse`
+  * `mae_on_interval`
+  * `mse_on_interval`
+  * `rmse_on_interval`
+  * `angle_error`
+  * `psnr`
+  * `ssim`
+  * `normed_error`
+  * `per_point_normed_error`
+* Object Detection:
+  * `map`
+  * `recall`
+  * `miss_rate`
+  * `coco_precision`
+  * `coco_recall`
+* Semantic Segmentation
+  * `segmentation_accuracy`
+  * `mean_iou`
+  * `mean_accuracy`
+  * `frequency_weighted_accuracy`
+* Instance Segmentation
+  * `coco_orig_segm_precision`

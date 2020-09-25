@@ -38,12 +38,14 @@ from ..representation import (
     ImageProcessingPrediction,
     StyleTransferAnnotation,
     StyleTransferPrediction,
-    FeaturesRegressionAnnotation
+    FeaturesRegressionAnnotation,
+    PoseEstimationAnnotation,
+    PoseEstimationPrediction
 )
 
 from .metric import PerImageEvaluationMetric
 from ..config import BaseField, NumberField, BoolField, ConfigError, StringField
-from ..utils import string_to_tuple, finalize_metric_result
+from ..utils import string_to_tuple, finalize_metric_result, contains_all
 
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
@@ -64,6 +66,12 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
 
     def update(self, annotation, prediction):
         diff = self.calculate_diff(annotation, prediction)
+        if self.profiler:
+            if isinstance(annotation, RegressionAnnotation):
+                ann_value, pred_value = annotation.value, prediction.value
+                self.profiler.update(annotation.identifier, self.name, diff, ann_value, pred_value)
+            else:
+                self.profiler.update(annotation.identifier, self.name, '', '', diff)
         self.magnitude.append(diff)
         if np.ndim(diff) > 1:
             return np.mean(diff)
@@ -83,10 +91,14 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         return ret
 
     def evaluate(self, annotations, predictions):
+        if self.profiler:
+            self.profiler.finish()
         return np.mean(self.magnitude), np.std(self.magnitude)
 
     def reset(self):
         self.magnitude = []
+        if self.profiler:
+            self.profiler.reset()
 
 
 class BaseRegressionOnIntervals(PerImageEvaluationMetric):
@@ -147,6 +159,8 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         index = find_interval(annotation.value, self.intervals)
         diff = self.value_differ(annotation.value, prediction.value)
         self.magnitude[index].append(diff)
+        if self.profiler:
+            self.profiler.update(annotation.identifier, self.name, diff, annotation.value, prediction.value)
 
         return diff
 
@@ -160,6 +174,9 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         if not result:
             warnings.warn("No values in given interval")
             result.append(0)
+
+        if self.profiler:
+            self.profiler.finish()
 
         return result
 
@@ -179,6 +196,8 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
     def reset(self):
         self.magnitude = [[] for _ in range(len(self.intervals) + 1)]
         self._create_meta()
+        if self.profiler:
+            self.profiler.finish()
 
 
 class MeanAbsoluteError(BaseRegressionMetric):
@@ -195,6 +214,20 @@ class MeanSquaredError(BaseRegressionMetric):
         super().__init__(mse_differ, *args, **kwargs)
 
 
+class Log10Error(BaseRegressionMetric):
+    __provider__ = 'log10_error'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(log10_differ, *args, **kwargs)
+
+
+class MeanAbsolutePercentageError(BaseRegressionMetric):
+    __provider__ = 'mape'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(mape_differ, *args, **kwargs)
+
+
 class RootMeanSquaredError(BaseRegressionMetric):
     __provider__ = 'rmse'
 
@@ -203,11 +236,14 @@ class RootMeanSquaredError(BaseRegressionMetric):
 
     def update(self, annotation, prediction):
         rmse = np.sqrt(self.calculate_diff(annotation, prediction))
+        if self.profiler:
+            if isinstance(annotation, RegressionAnnotation):
+                ann_value, pred_value = annotation.value, prediction.value
+                self.profiler.update(annotation.identifier, self.name, rmse, ann_value, pred_value)
+            else:
+                self.profiler.update(annotation.identifier, self.name, rmse)
         self.magnitude.append(rmse)
         return rmse
-
-    def evaluate(self, annotations, predictions):
-        return np.mean(self.magnitude), np.std(self.magnitude)
 
 
 class MeanAbsoluteErrorOnInterval(BaseRegressionOnIntervals):
@@ -248,6 +284,8 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
         if not result:
             warnings.warn("No values in given interval")
             result.append(0)
+        if self.profiler:
+            self.profiler.finish()
 
         return result
 
@@ -270,6 +308,14 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         )
         result /= np.maximum(annotation.interocular_distance, np.finfo(np.float64).eps)
         self.magnitude.append(result)
+        if self.profiler:
+            self.profiler.update(
+                annotation.identifier,
+                self.name,
+                annotation.x_values, annotation.y_values,
+                prediction.x_values, prediction.y_values,
+                result
+            )
 
         return result
 
@@ -279,11 +325,15 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         self.meta['names'] = [point_result_name_pattern.format(point_id) for point_id in range(num_points)]
         per_point_rmse = np.mean(self.magnitude, axis=0)
         per_point_rmse, self.meta['names'] = finalize_metric_result(per_point_rmse, self.meta['names'])
+        if self.profiler:
+            self.profiler.finish()
 
         return per_point_rmse
 
     def reset(self):
         self.magnitude = []
+        if self.profiler:
+            self.profiler.reset()
 
 
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
@@ -325,6 +375,14 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
         )
         avg_result = np.sum(per_point_result) / len(per_point_result)
         avg_result /= np.maximum(annotation.interocular_distance, np.finfo(np.float64).eps)
+        if self.profiler:
+            self.profiler.update(
+                annotation.identifier,
+                self.name,
+                annotation.x_values, annotation.y_values,
+                prediction.x_values, prediction.y_values,
+                avg_result
+            )
         self.magnitude.append(avg_result)
 
         return avg_result
@@ -343,10 +401,15 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
             result.append(sorted_magnitude[int(index)])
             self.meta['names'].append('{}th percentile'.format(self.percentile))
 
+        if self.profiler:
+            self.profiler.finish()
+
         return result
 
     def reset(self):
         self.magnitude = []
+        if self.profiler:
+            self.profiler.reset()
 
 
 class NormalizedMeanError(PerImageEvaluationMetric):
@@ -381,7 +444,6 @@ class NormalizedMeanError(PerImageEvaluationMetric):
 
         diff = np.square(gt - pred)
         dist = np.sqrt(np.sum(diff[:, 0:2], axis=1)) if self.only_2d else np.sqrt(np.sum(diff, axis=1))
-        #dist /= len(gt)
         normalized_result = dist / annotation.normalization_coef(self.only_2d)
         self.magnitude.append(np.mean(normalized_result))
 
@@ -500,6 +562,12 @@ def angle_differ(gt_gaze_vector, predicted_gaze_vector):
     ) * 180 / np.pi
 
 
+def log10_differ(annotation_val, prediction_val):
+    return np.abs(np.log10(annotation_val) - np.log10(prediction_val))
+
+def mape_differ(annotation_val, prediction_val):
+    return np.abs(annotation_val - prediction_val) / annotation_val
+
 class AngleError(BaseRegressionMetric):
     __provider__ = 'angle_error'
 
@@ -519,9 +587,9 @@ def _ssim(annotation_image, prediction_image):
     mu_y = np.mean(ground_truth)
     var_x = np.var(prediction)
     var_y = np.var(ground_truth)
-    sig_xy = np.mean((prediction - mu_x)*(ground_truth - mu_y))/(np.sqrt(var_x*var_y))
-    c1 = (0.01 * 2**32-1)**2
-    c2 = (0.03 * 2**32-1)**2
+    sig_xy = np.mean((prediction - mu_x)*(ground_truth - mu_y))
+    c1 = (0.01 * 2**8-1)**2
+    c2 = (0.03 * 2**8-1)**2
     mssim = (2*mu_x*mu_y + c1)*(2*sig_xy + c2)/((mu_x**2 + mu_y**2 + c1)*(var_x + var_y + c2))
     return mssim
 
@@ -536,3 +604,75 @@ class StructuralSimilarity(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)
         self.meta['target'] = 'higher-better'
+
+
+class PercentageCorrectKeypoints(PerImageEvaluationMetric):
+    __provider__ = 'pckh'
+    annotation_types = (PoseEstimationAnnotation, )
+    prediction_types = (PoseEstimationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'threshold': NumberField(optional=True, default=0.5),
+            'score_bias': NumberField(optional=True, default=0.6),
+            'num_joints': NumberField(optional=True, default=16, value_type=int)
+        })
+        return params
+
+    def configure(self):
+        if not self.dataset.metadata or 'joints' not in self.dataset.metadata:
+            raise ConfigError('PCKh metrics require joints providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
+        self.joints = self.dataset.metadata['joints']
+        self.num_joints = self.get_value_from_config('num_joints')
+        self.jnt_count = np.zeros(self.num_joints)
+        self.pck = np.zeros(self.num_joints)
+        self.threshold = self.get_value_from_config('threshold')
+        self.score_bias = self.get_value_from_config('score_bias')
+        self.meta.update({
+            'names': ['head', 'shoulder', 'elbow', 'wrist', 'hip', 'knee', 'ankle', 'mean'],
+            'calculate_mean': False
+        })
+        if not contains_all(
+                self.joints, ['head', 'lsho', 'rsho', 'lwri', 'rwri', 'lhip', 'rhip', 'lkne', 'rkne', 'lank', 'rank']
+        ):
+            raise ConfigError('not all important joints are provided')
+
+    def update(self, annotation, prediction):
+        jnt_visible = annotation.visibility
+        pos_pred = np.array([[x, y] for x, y in zip(prediction.x_values, prediction.y_values)])
+        pos_gt = np.array([[x, y] for x, y in zip(annotation.x_values, annotation.y_values)])
+        uv_error = pos_pred - pos_gt
+        uv_err = np.linalg.norm(uv_error, axis=1)
+        headbox = np.array(annotation.metadata['headbox'])
+        headsizes = headbox[1] - headbox[0]
+        headsizes = np.linalg.norm(headsizes)
+        headsizes *= self.score_bias
+        scale = headsizes
+        scaled_uv_err = np.divide(uv_err, scale)
+        scaled_uv_err = np.multiply(scaled_uv_err, jnt_visible)
+        self.jnt_count += jnt_visible
+        less_than_threshold = np.multiply((scaled_uv_err < self.threshold), jnt_visible)
+        self.pck += less_than_threshold
+        return np.divide(
+            less_than_threshold, jnt_visible, out=np.zeros_like(less_than_threshold), where=jnt_visible != 0
+        )
+
+    def evaluate(self, annotations, predictions):
+        full_score = np.divide(self.pck, self.jnt_count, out=np.zeros_like(self.jnt_count), where=self.jnt_count != 0)
+        return [
+            full_score[self.joints['head']],
+            0.5 * (full_score[self.joints['lsho']] + full_score[self.joints['rsho']]),
+            0.5 * (full_score[self.joints['lelb']] + full_score[self.joints['relb']]),
+            0.5 * (full_score[self.joints['lwri']] + full_score[self.joints['rwri']]),
+            0.5 * (full_score[self.joints['lhip']] + full_score[self.joints['rhip']]),
+            0.5 * (full_score[self.joints['lkne']] + full_score[self.joints['rkne']]),
+            0.5 * (full_score[self.joints['lank']] + full_score[self.joints['rank']]),
+            np.mean(full_score),
+            ]
+
+    def reset(self):
+        self.jnt_count = np.zeros(self.num_joints)
+        self.pck = np.zeros(self.num_joints)

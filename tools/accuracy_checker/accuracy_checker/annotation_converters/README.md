@@ -327,6 +327,11 @@ The main difference between this converter and `super_resolution` in data organi
 * `redweb` - converts [ReDWeb](https://sites.google.com/site/redwebcvpr18) dataset for monocular relative depth perception to `DepthEstimationAnnotation`
   * `data_dir` - the dataset root directory, where `imgs` - directory with RGB images and `RD` - directory with relative depth maps are located (Optional, if you want to provide `annotation_file`)
   * `annotation_file`- the file in txt format which contains pairs of image and depth map files. (Optional, if not provided full content of `data_dir` will be considered as dataset.)
+* `nyu_depth_v2` - converts [NYU Depth Dataset V2](https://cs.nyu.edu/~silberman/datasets/nyu_depth_v2.html) for depth estimation to `DepthEstimationAnnotation`. This converter accept preprocessed data stored in HDF5 format, which can be downloaded from this [page](http://datasets.lids.mit.edu/fastdepth/data/)
+  * `data_dir` - directory with HDF5 files. (Optional, can be omitted if you already have converted images and depth maps).
+  * `images_dir` - directory for images. If `data_dir` provided, the directory will be used for saving converted images, otherwise used for data reading. (Optional, can be not provided in conversion case, default value `<data_dir>/converted/images`).
+  * `depth_map_dir` - directory for reference depth maps, stored in numpy format. If `data_dir` provided, the directory will be used for saving converted depth maps, otherwise used for data reading. 
+    (Optional, can be not provided in conversion case, default value `<data_dir>/converted/depth`). Please, note, you need to specify path to directory with depth maps with `additional_data_source` parameter in your config during evaluation.
 * `inpainting` - converts images to `ImageInpaintingAnnotation`.
   * `images_dir` - path to images directory.
   * `masks_dir` - path to mask dataset to be used for inpainting (Optional).
@@ -357,6 +362,23 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotation_file` - path to file which describe the data which should be used in evaluation (`audio_filepath`, `text`, `duration`). Optional, used only for data filtering and sorting audio samples by duration.
   * `use_numpy` - allows to use preprocessed data stored in npy-files instead of audio (Optional, default False).
   * `top_n` - numeric value for getting only the n shortest samples **Note:** applicable only with `annotation_file` providing.
+* `criteo` - converts [Criteo](http://labs.criteo.com/2013/12/download-terabyte-click-logs/) datasets to `ClassificationAnnotation`.
+  * `testing_file` - Path to testing file, terabyte_preprocessed.npz (Criteo Terabyte) or day_6_processed.npz (Criteo Kaggle Dac)
+  * `batch` - Model batch.
+  * `subsample_size` - Subsample size in batches
+  * `validation` - Allows to use half of dataset for validation purposes
+  * `block` - Make batch-oriented annotations
+  * `separator` - Separator between input identifier and file identifier
+  * `preprocessed_dir` - Preprocessed dataset location
+  * `dense_features` - Name of model dense features input
+  * `sparse_features` - Name of model sparse features input. For multiple inputs use comma-separated list in form <name>:<index>
+  * `lso_features` - Name of lS_o-like features input
+
+* `im2latex` - converts im2latex-like datasets to `CharacterRecognitionAnnotation`. [Example of the dataset](http://lstm.seas.harvard.edu/latex/data/)
+  * `images_dir` - path to input images (rendered or scanned formulas)
+  * `formula_file` - path to file containing one formula per line
+  * `split_file` - path to file containing `img_name` and corresponding formula `index` in `formula_file` separated by tab per line
+  * `vocab_file` - file containing vocabulary to cast token class indices into human-readable tokens 
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)

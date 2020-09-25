@@ -16,18 +16,20 @@ limitations under the License.
 
 import re
 import numpy as np
-try:
-    from tokenizers import SentencePieceBPETokenizer
-except ImportError:
-    SentencePieceBPETokenizer = None
+
 from .adapter import Adapter
 from ..representation import (MachineTranslationPrediction,
                               QuestionAnsweringPrediction,
                               QuestionAnsweringEmbeddingPrediction,
                               ClassificationPrediction,
                               LanguageModelingPrediction)
-from ..config import PathField, NumberField, StringField, BoolField, ConfigError
-from ..utils import read_txt
+from ..config import PathField, NumberField, StringField, BoolField
+from ..utils import read_txt, UnsupportedPackage
+
+try:
+    from tokenizers import SentencePieceBPETokenizer
+except ImportError as import_error:
+    SentencePieceBPETokenizer = UnsupportedPackage("tokenizers", import_error.msg)
 
 
 def _clean(sentence, subword_option=None):
@@ -61,11 +63,8 @@ class NonAutoregressiveMachineTranslationAdapter(Adapter):
         return parameters
 
     def configure(self):
-        if SentencePieceBPETokenizer is None:
-            raise ConfigError(
-                'tokenizers is not installed, please install this module before '
-                'using {} adapter'.format(self.__provider__)
-            )
+        if isinstance(SentencePieceBPETokenizer, UnsupportedPackage):
+            SentencePieceBPETokenizer.raise_error(self.__provider__)
         self.tokenizer = SentencePieceBPETokenizer(
             str(self.get_value_from_config('vocabulary_file')),
             str(self.get_value_from_config('merges_file'))

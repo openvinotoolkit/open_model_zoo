@@ -21,10 +21,11 @@ from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, NumberField
 from ..representation import TextDetectionPrediction
 from ..postprocessor import NMS
+from ..utils import UnsupportedPackage
 try:
     from shapely.geometry import Polygon
-except ImportError:
-    Polygon = None
+except ImportError as import_error:
+    Polygon = UnsupportedPackage("shapely", import_error.msg)
 
 
 class TextDetectionAdapter(Adapter):
@@ -305,8 +306,8 @@ class TextProposalsDetectionAdapter(Adapter):
         self.line_min_score = self.get_value_from_config('line_min_score')
         self.text_proposals_width = self.get_value_from_config('text_proposals_width')
         self.min_num_proposals = self.get_value_from_config('min_num_proposals')
-        if Polygon is None:
-            raise ValueError("east_text_detection adapter requires shapely, please install it")
+        if isinstance(Polygon, UnsupportedPackage):
+            Polygon.raise_error(self.__provider__)
         self.text_proposal_connector = TextProposalConnector()
 
     def process(self, raw, identifiers, frame_meta):
@@ -688,8 +689,8 @@ class EASTTextDetectionAdapter(Adapter):
         self.score_map_thresh = self.get_value_from_config('score_map_threshold')
         self.nms_thresh = self.get_value_from_config('nms_threshold')
         self.box_thresh = self.get_value_from_config('box_threshold')
-        if Polygon is None:
-            raise ValueError("east_text_detection adapter requires shapely, please install it")
+        if isinstance(Polygon, UnsupportedPackage):
+            Polygon.raise_error(self.__provider__)
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)

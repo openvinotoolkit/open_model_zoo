@@ -83,7 +83,7 @@ You may use `--precisions` flag to specify comma separated precisions of weights
 to be downloaded.
 
 ```sh
-./downloader.py --name face-detection-retail-0004 --precisions FP16,INT8
+./downloader.py --name face-detection-retail-0004 --precisions FP16,FP16-INT8
 ```
 
 By default, the script will attempt to download each file only once. You can use
@@ -420,8 +420,6 @@ describing a single model. Each such object has the following keys:
   * `FP32`
   * `FP32-INT1`
   * `FP32-INT8`
-  * `INT1`
-  * `INT8`
 
   Additional possible values might be added in the future.
 
@@ -441,13 +439,16 @@ describing a single model. Each such object has the following keys:
   * `image_inpainting`
   * `image_processing`
   * `instance_segmentation`
+  * `machine_translation`
   * `monocular_depth_estimation`
   * `object_attributes`
   * `optical_character_recognition`
   * `question_answering`
   * `semantic_segmentation`
   * `sound_classification`
+  * `speech_recognition`
   * `style_transfer`
+  * `token_recognition`
 
   Additional possible values might be added in the future.
 
@@ -509,7 +510,6 @@ driver-action-recognition-adas-0002-decoder
 driver-action-recognition-adas-0002-encoder
 emotions-recognition-retail-0003
 face-detection-adas-0001
-face-detection-adas-binary-0001
 face-detection-retail-0004
 face-detection-retail-0005
 [...]

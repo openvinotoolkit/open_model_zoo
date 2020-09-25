@@ -16,6 +16,8 @@ This model was pretrained on COCO\* dataset with 80 classes and then finetuned f
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Detection     |
+| mAP               | 88.64%        |
+| coco\_precision   | 94.97%        |
 | GFLOPs            | 5.424         |
 | MParams           | 11.229        |
 | Source framework  | Keras\*       |

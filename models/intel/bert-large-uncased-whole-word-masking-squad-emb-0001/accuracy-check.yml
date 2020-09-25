@@ -4,8 +4,8 @@ models:
       - framework: dlsdk
         allow_reshape_input: True
         adapter:
-            type: bert_question_answering_embedding
-            embedding: "3157/Fused_Add_"
+          type: bert_question_answering_embedding
+          embedding: "embedding"
         inputs:
           - name: "input_ids"
             type: INPUT
@@ -30,6 +30,6 @@ models:
             - segment_ids
             - position_ids
         metrics:
-            - name: 'top_5_acc'
-              type: 'qa_embedding_accuracy'
-              top_k: 5
+          - name: 'top_5_acc'
+            type: 'qa_embedding_accuracy'
+            top_k: 5

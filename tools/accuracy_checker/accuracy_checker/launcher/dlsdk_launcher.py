@@ -39,7 +39,8 @@ from ..utils import (
     contains_any,
     get_parameter_value_from_config,
     string_to_tuple,
-    get_or_parse_value
+    get_or_parse_value,
+    UnsupportedPackage
 )
 from .launcher import Launcher
 from .model_conversion import convert_model
@@ -47,8 +48,8 @@ from ..logging import print_info
 from .input_feeder import PRECISION_TO_DTYPE, DIM_IDS_TO_LAYOUT
 try:
     from cpuinfo import get_cpu_info
-except ImportError:
-    get_cpu_info = None
+except ImportError as import_error:
+    get_cpu_info = UnsupportedPackage("cpuinfo", import_error.msg)
 
 try:
     from openvino.inference_engine import Blob, TensorDesc
@@ -409,9 +410,8 @@ class DLSDKLauncher(Launcher):
                 if extension_list:
                     return extension_list
 
-                if get_cpu_info is None:
-                    raise ValueError('CPU extensions automatic search requires pycpuinfo. '
-                                     'Please install it or set cpu extensions lib directly')
+                if isinstance(get_cpu_info, UnsupportedPackage):
+                    get_cpu_info.raise_error("CPU extensions automatic search")
 
                 cpu_info_flags = get_cpu_info()['flags']
                 supported_flags = ['avx512', 'avx2', 'sse4_1', 'sse4_2']
@@ -823,7 +823,7 @@ class DLSDKLauncher(Launcher):
         return self._align_data_shape(data, layer_name, layout)
 
     @staticmethod
-    def _data_to_blob(layer_shape, data, layout):
+    def _data_to_blob(layer_shape, data, layout): # pylint:disable=R0911
         data_shape = np.shape(data)
         if len(layer_shape) == 4:
             if len(data_shape) == 5:
@@ -837,6 +837,9 @@ class DLSDKLauncher(Launcher):
         if len(layer_shape) == 2:
             if len(data_shape) == 1:
                 return np.transpose([data])
+            if len(data_shape) > 2:
+                if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
+                    return np.resize(data, layer_shape)
 
         if len(layer_shape) == 3 and len(data_shape) == 4:
             data = np.transpose(data, layout)
@@ -844,6 +847,12 @@ class DLSDKLauncher(Launcher):
 
         if len(layer_shape) == len(layout):
             return np.transpose(data, layout)
+
+        if (
+                len(layer_shape) == 1 and len(data_shape) > 1 and
+                len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape)))
+        ):
+            return np.resize(data, layer_shape)
 
         return np.array(data)
 

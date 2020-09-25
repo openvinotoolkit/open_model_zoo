@@ -19,7 +19,6 @@ from collections import OrderedDict
 from pathlib import Path
 
 import numpy as np
-import mxnet
 
 from .launcher import Launcher, LauncherConfigValidator, ListInputsField
 from ..config import PathField, StringField, NumberField, ConfigError
@@ -58,6 +57,13 @@ class MxNetLauncher(Launcher):
         return parameters
 
     def __init__(self, config_entry: dict, *args, **kwargs):
+        try:
+            import mxnet # pylint: disable=C0415
+            self.mxnet = mxnet
+        except ImportError as import_error:
+            raise ValueError(
+                "MXNet isn't installed. Please, install it before using. \n{}".format(import_error.msg)
+            )
         super().__init__(config_entry, *args, **kwargs)
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
@@ -78,9 +84,9 @@ class MxNetLauncher(Launcher):
                 identifier = match.group('identifier')
                 if identifier is None:
                     identifier = 0
-                device_context = mxnet.gpu(int(identifier))
+                device_context = self.mxnet.gpu(int(identifier))
             else:
-                device_context = mxnet.cpu()
+                device_context = self.mxnet.cpu()
 
             # Get batch from config or 1
             self._batch = self.config.get('batch', 1)
@@ -109,7 +115,7 @@ class MxNetLauncher(Launcher):
 
     def fit_to_input(self, data, input_layer, layout, precision):
         data = np.transpose(data, layout)
-        return mxnet.nd.array(data.astype(precision) if precision else data)
+        return self.mxnet.nd.array(data.astype(precision) if precision else data)
 
     @property
     def inputs(self):
@@ -125,9 +131,9 @@ class MxNetLauncher(Launcher):
         """
         results = []
         for infer_input in inputs:
-            data_iter = mxnet.io.NDArrayIter(
+            data_iter = self.mxnet.io.NDArrayIter(
                 data=infer_input, label=None, batch_size=self.batch)
-            data_batch = mxnet.io.DataBatch(data=data_iter.data_list)
+            data_batch = self.mxnet.io.DataBatch(data=data_iter.data_list)
 
             # Infer
             self.module.forward(data_batch)

@@ -1,0 +1,23 @@
+models:
+  - name: machine-translation-nar-ru-en-0001
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: narnmt
+          vocabulary_file: tokenizer_tgt/vocab.json
+          merges_file: tokenizer_tgt/merges.txt
+          output_name: pred
+        inputs:
+          - name: "tokens"
+            value: 'tokens'
+            type: INPUT
+
+    datasets:
+      - name: WMT_ru_en
+        postprocessing:
+          - type: to_lower_case
+          - type: remove_repeats
+
+        metrics:
+          - type: bleu
+            smooth: True

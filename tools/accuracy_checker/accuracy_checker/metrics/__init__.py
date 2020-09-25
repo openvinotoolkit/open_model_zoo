@@ -22,7 +22,8 @@ from .classification import (
     ClassificationAccuracyClasses,
     ClipAccuracy,
     ClassificationF1Score,
-    MetthewsCorrelation
+    MetthewsCorrelation,
+    RocAucScore
 )
 from .detection import (
     DetectionMAP,
@@ -47,6 +48,8 @@ from .regression import (
 
     MeanAbsoluteError,
     MeanSquaredError,
+    Log10Error,
+    MeanAbsolutePercentageError,
 
     RootMeanSquaredErrorOnInterval,
     RootMeanSquaredError,
@@ -57,7 +60,9 @@ from .regression import (
     PeakSignalToNoiseRatio,
     StructuralSimilarity,
 
-    AngleError
+    AngleError,
+
+    PercentageCorrectKeypoints
 )
 from .multilabel_recognition import MultiLabelRecall, MultiLabelPrecision, MultiLabelAccuracy, F1Score
 from .text_detection import (
@@ -89,6 +94,7 @@ from .attribute_classification import (
     AttributeClassificationPrecision,
     AttributeClassificationAccuracy
 )
+from .im2latex_images_match import Im2latexRenderBasedMetric
 
 from .speech_recognition import SpeechRecognitionWER, SpeechRecognitionCER
 from .score_class_comparison import ScoreClassComparisonMetric
@@ -134,6 +140,8 @@ __all__ = [
     'PeakSignalToNoiseRatio',
     'StructuralSimilarity',
     'AngleError',
+    'MeanAbsolutePercentageError',
+    'Log10Error',
 
     'MultiLabelAccuracy',
     'MultiLabelRecall',
@@ -178,4 +186,10 @@ __all__ = [
     'SpeechRecognitionCER',
 
     'ScoreClassComparisonMetric',
+
+    'RocAucScore',
+
+    'Im2latexRenderBasedMetric',
+
+    'PercentageCorrectKeypoints',
 ]

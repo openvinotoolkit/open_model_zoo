@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 import pytest
-pytest.importorskip('accuracy_checker.launcher.tf_launcher')
+pytest.importorskip('tensorflow')
 
 import cv2
 import numpy as np

@@ -1,0 +1,37 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Neural machine translation model based on Non-Autoregressive Transformer topology
+  (en-ru).
+task_type: machine_translation
+files:
+  - name: FP32/machine-translation-nar-en-ru-0001.xml
+    size: 1040029
+    sha256: 8ab7b24a78d1d79a431b8a6328e813cb740d9e976957348a47379aefc5ae1912
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/machine-translation-nar-en-ru-0001/FP32/machine-translation-nar-en-ru-0001.xml
+  - name: FP32/machine-translation-nar-en-ru-0001.bin
+    size: 251814444
+    sha256: 5006b86467e6a82fb10af6fd2feb0ccb3a67d50c02cc76d031282d3fa043f67e
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/machine-translation-nar-en-ru-0001/FP32/machine-translation-nar-en-ru-0001.bin
+  - name: FP16/machine-translation-nar-en-ru-0001.xml
+    size: 1039484
+    sha256: 1a47a2b48861bad9892a74eed6bac759d879ff69c394b758f7c969cecbe5624c
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/machine-translation-nar-en-ru-0001/FP16/machine-translation-nar-en-ru-0001.xml
+  - name: FP16/machine-translation-nar-en-ru-0001.bin
+    size: 125907336
+    sha256: 265129769fb9f3f167a358520982de6a455473806afa5724c443838816ac1d47
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/machine-translation-nar-en-ru-0001/FP16/machine-translation-nar-en-ru-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

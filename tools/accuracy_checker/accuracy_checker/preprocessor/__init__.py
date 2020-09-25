@@ -23,7 +23,8 @@ from .color_space_conversion import (
     SelectInputChannel,
     BGR2YUVConverter, RGB2YUVConverter,
     BGRtoNV12Converter, RGBtoNV12Converter,
-    NV12toBGRConverter, NV12toRGBConverter
+    NV12toBGRConverter, NV12toRGBConverter,
+    RGB2YCrCbConverter, BGR2YCrCbConverter
 )
 from .audio_preprocessing import (
     ResampleAudio,
@@ -50,7 +51,8 @@ from .geometric_transformations import (
     WarpAffine
 )
 from .crop import (
-    Crop, CropRect, ExtendAroundRect, Crop3D, TransformedCropWithAutoScale, CandidateCrop, CropOrPad, CropWithPadSize
+    Crop, CropRect, ExtendAroundRect, Crop3D, TransformedCropWithAutoScale,
+    CandidateCrop, CropOrPad, CropWithPadSize, CornerCrop, ObjectCropWithScale
 )
 from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
@@ -96,9 +98,11 @@ __all__ = [
     'CropOrPad',
     'CropWithPadSize',
     'Crop',
+    'CornerCrop',
     'CandidateCrop',
     'CropRect',
     'Crop3D',
+    'ObjectCropWithScale',
 
     'Normalize3d',
     'Normalize',
@@ -114,4 +118,6 @@ __all__ = [
     'FreeFormMask',
     'RectMask',
     'CustomMask',
+    'RGB2YCrCbConverter',
+    'BGR2YCrCbConverter',
 ]

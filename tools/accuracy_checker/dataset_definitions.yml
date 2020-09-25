@@ -531,6 +531,30 @@ datasets:
       data_dir: ICDAR13_DET/gt
     annotation: icdar13_detection.pickle
 
+  - name: im2latex_medium_rendered
+    data_source: im2latex_medium_rendered/images_processed
+    annotation_conversion:
+      converter: im2latex_formula_recognition
+      data_dir: im2latex_medium_rendered
+      images_dir: im2latex_medium_rendered/images_processed
+      formula_file: im2latex_medium_rendered/formulas.norm.lst
+      split_file: im2latex_medium_rendered/validate_filter.lst
+      vocab_file: im2latex_medium_rendered/vocab.json
+    annotation: im2latex_medium_rendered.pickle
+    dataset_meta: im2latex_medium_rendered.json
+
+  - name: im2latex_medium_photographed
+    data_source: im2latex_medium_photographed/images_processed
+    annotation_conversion:
+      converter: im2latex_formula_recognition
+      data_dir: im2latex_medium_photographed
+      images_dir: im2latex_medium_photographed/images_processed
+      formula_file: im2latex_medium_photographed/formulas.norm.lst
+      split_file: im2latex_medium_photographed/test_filter.lst
+      vocab_file: im2latex_medium_photographed/vocab.pkl
+    annotation: im2latex_medium_photographed.pickle
+    dataset_meta: im2latex_medium_photographed.json
+
   - name: market1501
     data_source: Market-1501-v15.09.15
     annotation_conversion:
@@ -866,6 +890,64 @@ datasets:
       max_seq_length: 384
       max_query_length: 32
       lower_case: true
+
+  - name: librispeech-test-clean
+    data_source: librispeech/test/LibriSpeech/test-clean.wav
+    annotation_conversion:
+      converter: librispeech
+      data_dir: librispeech/test/LibriSpeech/test-clean.wav
+    annotation: librispeech-test-clean.pickle
+    metrics:
+      - name: wer
+
+  - name: librispeech-dev-clean
+    data_source: librispeech/dev/LibriSpeech/dev-clean.wav
+    annotation_conversion:
+      converter: librispeech
+      data_dir: librispeech/dev/LibriSpeech/dev-clean.wav
+    annotation: librispeech-dev-clean.pickle
+    metrics:
+      - name: wer
+
+  - name: WMT_en_ru
+    annotation_conversion:
+      converter: wmt
+      input_file: wmt19-ru-en.en.spbpe
+      reference_file: wmt19-ru-en.ru.spbpe
+
+      reader:
+        type: annotation_features_extractor
+        features:
+          - source
+
+      preprocessing:
+        - type: decode_by_sentence_piece_bpe_tokenizer
+          vocabulary_file: tokenizer_src/vocab.json
+          merges_file: tokenizer_src/merges.txt
+
+        - type: pad_with_eos
+          eos_index: 1
+          sequence_len: 192
+
+  - name: WMT_ru_en
+    annotation_conversion:
+      converter: wmt
+      input_file: wmt19-ru-en.ru.spbpe
+      reference_file: wmt19-ru-en.en.spbpe
+
+    reader:
+      type: annotation_features_extractor
+      features:
+        - source
+
+    preprocessing:
+      - type: decode_by_sentence_piece_bpe_tokenizer
+        vocabulary_file: tokenizer_src/vocab.json
+        merges_file: tokenizer_src/merges.txt
+
+      - type: pad_with_eos
+        eos_index: 1
+        sequence_len: 192
 
   - name: SCUT_EPT
     data_source: SCUT_EPT/test

@@ -17,15 +17,11 @@ limitations under the License.
 from collections import namedtuple
 import csv
 import numpy as np
-try:
-    import tensorflow as tf
-except ImportError:
-    tf = None
 
 
-from ..config import PathField, StringField, NumberField, BoolField, ConfigError
+from ..config import PathField, StringField, NumberField, BoolField
 from ..representation import TextClassificationAnnotation
-from ..utils import string_to_list
+from ..utils import string_to_list, UnsupportedPackage
 from .format_converter import BaseFormatConverter, ConverterReturn
 from ._nlp_common import get_tokenizer, truncate_seq_pair, SEG_ID_A, SEG_ID_B, SEP_ID, CLS_ID, SEG_ID_CLS, SEG_ID_PAD
 
@@ -230,17 +226,18 @@ class BertTextClassificationTFRecordConverter(BaseFormatConverter):
         return params
 
     def configure(self):
-        if tf is None:
-            raise ConfigError(
-                'bert_tf_record converter requires TensorFlow installation. Please install it first.'
-            )
+        try:
+            import tensorflow as tf # pylint: disable=C0415
+            self.tf = tf
+        except ImportError as import_error:
+            UnsupportedPackage("tf", import_error.msg).raise_error(self.__provider__)
         self.annotation_file = self.get_value_from_config('annotation_file')
 
     def read_tf_record(self):
-        record_iterator = tf.python_io.tf_record_iterator(path=str(self.annotation_file))
+        record_iterator = self.tf.python_io.tf_record_iterator(path=str(self.annotation_file))
         record_list = []
         for string_record in record_iterator:
-            example = tf.train.Example()
+            example = self.tf.train.Example()
             example.ParseFromString(string_record)
             input_ids = example.features.feature['input_ids'].int64_list.value
             input_mask = example.features.feature['input_mask'].int64_list.value
@@ -290,7 +287,7 @@ class MRPCConverter(BaseGLUETextClassificationConverter):
         self.label_map = dict(enumerate(labels['mrpc']))
         self.label_ind = 0
         self.text_a_ind = 3
-        self.tex_b_ind = 4
+        self.text_b_ind = 4
         super().__init__(config)
 
 

@@ -89,7 +89,7 @@ class TextSpottingEvaluator(BaseEvaluator):
             )
             metrics_result = None
             if self.metric_executor:
-                metrics_result = self.metric_executor.update_metrics_on_batch(
+                metrics_result, _ = self.metric_executor.update_metrics_on_batch(
                     batch_input_ids, batch_annotation, batch_prediction
                 )
                 if self.metric_executor.need_store_predictions:
@@ -149,6 +149,9 @@ class TextSpottingEvaluator(BaseEvaluator):
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
             presenter.write_result(metric_result, ignore_results_formatting)
+
+    def set_profiling_dir(self, profiler_dir):
+        self.metric_executor.set_profiling_dir(profiler_dir)
 
     def release(self):
         self.model.release()

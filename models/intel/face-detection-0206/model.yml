@@ -1,0 +1,44 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Face Detection based on ResNet152 (ATSS).
+task_type: detection
+files:
+  - name: FP32/face-detection-0206.xml
+    size: 1437585
+    sha256: 5e058ba8533393e1940b095016ac43536a6e2903d83252e689961c91df28a610
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/face-detection-0206/FP32/face-detection-0206.xml
+  - name: FP32/face-detection-0206.bin
+    size: 254925252
+    sha256: 17639150fdbd81f7c0dca4d292047811c8b069ed322712fcba74d05c8d804f0e
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/face-detection-0206/FP32/face-detection-0206.bin
+  - name: FP16/face-detection-0206.xml
+    size: 1437105
+    sha256: c86c09f2cd5ac897e16ed3241c9e8cbb3da3a6a583891c2031b04df5a857535c
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/face-detection-0206/FP16/face-detection-0206.xml
+  - name: FP16/face-detection-0206.bin
+    size: 127462834
+    sha256: 3ef680d4a3e62e1ca167824929fa0478837e663305467877f2a31654533ec6b0
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/face-detection-0206/FP16/face-detection-0206.bin
+  - name: FP16-INT8/face-detection-0206.xml
+    size: 2701111
+    sha256: f9961a289036984f521796f042f65dc6a1bbcb560f57bf0d509ce3baa83d3160
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/face-detection-0206/FP16-INT8/face-detection-0206.xml
+  - name: FP16-INT8/face-detection-0206.bin
+    size: 64135764
+    sha256: 9f3607e4a5c79b96c3312241d146731c4a1e5f4f686b947ce91dd0ada0db6ac9
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/face-detection-0206/FP16-INT8/face-detection-0206.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

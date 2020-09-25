@@ -25,25 +25,19 @@ from PIL import Image
 import numpy as np
 from numpy.lib.npyio import NpzFile
 
-try:
-    import tensorflow as tf
-except ImportError as import_error:
-    tf = None
+from ..utils import get_path, read_json, read_pickle, contains_all, UnsupportedPackage
+from ..dependency import ClassProvider
+from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField
 
 try:
     import nibabel as nib
-except ImportError:
-    nib = None
+except ImportError as import_error:
+    nib = UnsupportedPackage("nibabel", import_error.msg)
 
 try:
     import pydicom
-except ImportError:
-    pydicom = None
-
-
-from ..utils import get_path, read_json, read_pickle, contains_all
-from ..dependency import ClassProvider
-from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField
+except ImportError as import_error:
+    pydicom = UnsupportedPackage("pydicom", import_error.msg)
 
 REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
 
@@ -336,8 +330,8 @@ class NiftiImageReader(BaseReader):
             config_validator.validate(self.config)
 
     def configure(self):
-        if nib is None:
-            raise ImportError('nifty backend for image reading requires nibabel. Please install it before usage.')
+        if isinstance(nib, UnsupportedPackage):
+            nib.raise_error(self.__provider__)
         self.channels_first = self.config.get('channels_first', False) if self.config else False
         self.multi_infer = self.config.get('multi_infer', False)
         if not self.data_source:
@@ -358,6 +352,9 @@ class NumpyReaderConfig(ConfigValidator):
     type = StringField(optional=True)
     keys = StringField(optional=True, default="")
     separator = StringField(optional=True, default="@")
+    id_sep = StringField(optional=True, default="_")
+    block = BoolField(optional=True, default=False)
+    batch = NumberField(optional=True, default=1)
 
 
 class NumPyReader(BaseReader):
@@ -374,13 +371,17 @@ class NumPyReader(BaseReader):
         self.keys = self.config.get('keys', "") if self.config else ""
         self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
         self.separator = self.config.get('separator')
+        self.id_sep = self.config.get('id_sep', '_')
+        self.block = self.config.get('block', False)
+        self.batch = int(self.config.get('batch', 1))
+
         if self.separator and self.is_text:
             raise ConfigError('text file reading with numpy does')
         self.multi_infer = self.config.get('multi_infer', False)
         if not self.data_source:
             raise ConfigError('data_source parameter is required to create "{}" '
                               'data reader and read data'.format(self.__provider__))
-        self.keyRegex = {k: re.compile(k) for k in self.keys}
+        self.keyRegex = {k: re.compile(k + self.id_sep) for k in self.keys}
         self.valRegex = re.compile(r"([^0-9]+)([0-9]+)")
 
     def read(self, data_id):
@@ -396,11 +397,15 @@ class NumPyReader(BaseReader):
         if field_id is not None:
             key = [k for k, v in self.keyRegex.items() if v.match(field_id)]
             if len(key) > 0:
-                recno = field_id.split('_')[-1]
-                recno = int(recno)
-                start, _ = Path(data_id).name.split('.')
-                start = int(start)
-                return data[key[0]][recno - start, :]
+                if self.block:
+                    res = data[key[0]]
+                else:
+                    recno = field_id.split('_')[-1]
+                    recno = int(recno)
+                    start = Path(data_id).name.split('.')[0]
+                    start = int(start)
+                    res = data[key[0]][recno - start, :]
+                return res
 
         key = next(iter(data.keys()))
         return data[key]
@@ -436,9 +441,13 @@ class TensorflowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        if tf is None:
-            raise ImportError('tf backend for image reading requires TensorFlow. Please install it before usage.')
-
+        try:
+            import tensorflow as tf # pylint: disable=C0415
+        except ImportError as import_error:
+            raise ImportError(
+                'tf backend for image reading requires TensorFlow. '
+                'Please install it before usage. {}'.format(import_error.msg)
+            )
         tf.enable_eager_execution()
 
         def read_func(path):
@@ -521,8 +530,8 @@ class DicomReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        if pydicom is None:
-            raise ImportError('dicom backend for reading requires pydicom. Please install it before usage.')
+        if isinstance(pydicom, UnsupportedPackage):
+            pydicom.raise_error(self.__provider__)
 
     def read(self, data_id):
         dataset = pydicom.dcmread(str(self.data_source / data_id))

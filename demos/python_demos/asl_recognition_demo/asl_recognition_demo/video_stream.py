@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import logging as log
 import time
 from os.path import exists
 from multiprocessing import Process, Value, Array
@@ -120,7 +121,11 @@ class VideoStream:
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
         source_fps = cap.get(cv2.CAP_PROP_FPS)
-        trg_time_step = 1.0 / float(source_fps)
+        if source_fps > 0:
+            trg_time_step = 1.0 / source_fps
+        else:
+            log.warning('Got a non-positive value as FPS of the input. Interpret it as 30 FPS')
+            trg_time_step = 1.0 / 30.0
 
         while True:
             start_time = time.perf_counter()

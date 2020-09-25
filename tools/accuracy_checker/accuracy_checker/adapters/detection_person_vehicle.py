@@ -17,7 +17,7 @@ import math
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import NumberField
+from ..config import NumberField, ConfigError
 from ..representation import DetectionPrediction
 
 class PersonVehicleDetectionAdapter(Adapter):
@@ -39,11 +39,21 @@ class PersonVehicleDetectionAdapter(Adapter):
     def configure(self):
         self.iou_threshold = self.get_value_from_config('iou_threshold')
 
+    @staticmethod
+    def get_raw_proposals(raw_out):
+        predicted_proposals = raw_out.get('proposals')
+        if predicted_proposals is None:
+            if 'proposals.0' in raw_out:
+                predicted_proposals = raw_out['proposals.0']
+            else:
+                raise ConfigError("output blobs do not contain proposals")
+        return predicted_proposals
+
     def process(self, raw, identifiers, frame_meta):
         result = []
         if isinstance(raw, dict):
             bbox_pred = raw['bbox_pred']
-            proposals = raw['proposals']
+            proposals = self.get_raw_proposals(raw)
             cls_score = raw['cls_score']
             props_map = self.output_to_proposals(bbox_pred, proposals, cls_score, frame_meta[0])
             pred_items = self.get_proposals(props_map)

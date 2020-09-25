@@ -14,13 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-try:
-    from tokenizers import SentencePieceBPETokenizer
-except ImportError:
-    SentencePieceBPETokenizer = None
 from .preprocessor import Preprocessor
 from ..config import PathField, NumberField, StringField, BoolField, ConfigError
-from ..utils import read_txt
+from ..utils import read_txt, UnsupportedPackage
+
+try:
+    from tokenizers import SentencePieceBPETokenizer
+except ImportError as import_error:
+    SentencePieceBPETokenizer = UnsupportedPackage("tokenizers", import_error.msg)
 
 class DecodeBySentencePieceBPETokenizer(Preprocessor):
     __provider__ = 'decode_by_sentence_piece_bpe_tokenizer'
@@ -39,11 +40,8 @@ class DecodeBySentencePieceBPETokenizer(Preprocessor):
         return parameters
 
     def configure(self):
-        if SentencePieceBPETokenizer is None:
-            raise ConfigError(
-                'tokenizers is not installed, please install this module before '
-                'using {} preprocessing'.format(self.__provider__)
-            )
+        if isinstance(SentencePieceBPETokenizer, UnsupportedPackage):
+            SentencePieceBPETokenizer.raise_error(self.__provider__)
         self.tokenizer = SentencePieceBPETokenizer(
             str(self.get_value_from_config('vocabulary_file')),
             str(self.get_value_from_config('merges_file'))

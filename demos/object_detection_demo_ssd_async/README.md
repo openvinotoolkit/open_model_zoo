@@ -109,7 +109,7 @@ Options:
     -nireq "<integer>"        Optional. Number of Infer Requests.
     -nthreads "<integer>"     Optional. Number of threads.
     -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
-    -loop_input               Optional. Iterate over input infinitely.
+    -loop                     Optional. Enable reading the input in a loop.
     -no_show                  Optional. Do not show processed video.
     -u                        Optional. List of monitors to show initially.
 ```

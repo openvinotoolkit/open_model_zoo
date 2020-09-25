@@ -60,10 +60,10 @@ from .detection_person_vehicle import (
 from .detection_head import HeadDetectionAdapter
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
-from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
+from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX
 from .classification import ClassificationAdapter
-from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
-from .pose_estimation import HumanPoseAdapter
+from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter
+from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
 from .pose_estimation_3d import HumanPose3dAdapter
 
 from .hit_ratio import HitRatioAdapter
@@ -82,7 +82,12 @@ from .image_inpainting import ImageInpaintingAdapter
 from .style_transfer import StyleTransferAdapter
 
 from .attribute_classification import AttributeClassificationAdapter
-from .audio_recognition import CTCBeamSearchDecoder, CTCGreedyDecoder
+from .audio_recognition import (
+    CTCBeamSearchDecoder,
+    CTCGreedyDecoder,
+    CTCBeamSearchDecoderWithLm,
+    FastCTCBeamSearchDecoderWithLm
+)
 
 from .regression import RegressionAdapter
 from .mixed_adapter import MixedAdapter
@@ -112,8 +117,20 @@ __all__ = [
     'HeadDetectionAdapter',
     'FasterRCNNONNX',
 
+    'TinyYOLOv1Adapter',
+    'YoloV2Adapter',
+    'YoloV3Adapter',
+    'YoloV3ONNX',
+
+    'SSDAdapter',
+    'SSDAdapterMxNet',
+    'SSDONNXAdapter',
+    'PyTorchSSDDecoder',
+    'FacePersonAdapter',
+
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
+    'DUCSegmentationAdapter',
 
     'ReidAdapter',
 
@@ -140,6 +157,8 @@ __all__ = [
 
     'HumanPoseAdapter',
     'HumanPose3dAdapter',
+    'SingleHumanPoseAdapter',
+    'StackedHourGlassNetworkAdapter',
 
     'ActionDetection',
 
@@ -164,6 +183,8 @@ __all__ = [
 
     'CTCBeamSearchDecoder',
     'CTCGreedyDecoder',
+    'CTCBeamSearchDecoderWithLm',
+    'FastCTCBeamSearchDecoderWithLm',
 
     'QualityAssessmentAdapter',
 

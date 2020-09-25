@@ -67,8 +67,8 @@ class TestCaffeLauncher:
             "device": "cpu"
         }
         caffe_model = create_launcher(config, 'SampleNet')
-        assert caffe_model.model == models_dir / 'SampleNet.prototxt'
-        assert caffe_model.weights == models_dir / 'SampleNet.caffemodel'
+        assert caffe_model.model == models_dir / 'SampLeNet.prototxt'
+        assert caffe_model.weights == models_dir / 'SampLeNet.caffemodel'
 
 
 def test_missed_model_in_create_caffe_launcher_raises_config_error_exception():

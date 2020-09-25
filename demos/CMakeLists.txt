@@ -1,8 +1,8 @@
-# Copyright (C) 2018-2019 Intel Corporation
+# Copyright (C) 2018-2020 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.10)
 
 project(Demos)
 
@@ -228,4 +228,5 @@ if(ENABLE_PYTHON)
 
     add_subdirectory(python_demos/human_pose_estimation_3d_demo/pose_extractor)
     add_subdirectory(python_demos/common/monitors_extension)
+    add_subdirectory(python_demos/speech_recognition_demo/ctcdecode-numpy)
 endif()
