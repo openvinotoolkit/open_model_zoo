@@ -95,7 +95,7 @@ def inpaint_auto(img, args):
         top = np.full(img.shape, args.auto_mask[::-1], np.uint8) 
         mask = cv2.inRange(img, top, top)
         mask = cv2.resize(mask, (inpainting_processor.input_width, inpainting_processor.input_height))
-        _, mask = cv2.threshold(mask,1,1,cv2.THRESH_BINARY)
+        _, mask = cv2.threshold(mask, 1, 1, cv2.THRESH_BINARY)
         mask = np.expand_dims(mask, 2)
 
     img = cv2.resize(img, (inpainting_processor.input_width, inpainting_processor.input_height))
