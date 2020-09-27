@@ -81,7 +81,7 @@ The prediction labels for the two tasks can be obtained as argmax(pred1, axis=1)
 
 The model is distributed under theApache License, Version 2.0
 
-Copyright (c) 2020 Debdoot Sheet
+Copyright (c) 2020 Debdoot Sheet, Ramanathan Sethuraman
 
 Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
 
