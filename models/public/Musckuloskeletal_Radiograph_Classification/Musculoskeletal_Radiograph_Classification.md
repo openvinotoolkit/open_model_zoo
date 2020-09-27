@@ -31,8 +31,7 @@ An example for using the onnx models shared in this repository is available here
 
 In this work, we compared the performance of different CNN architectures. The ONNX model for each of them is provided inside the corresponding sub-directories.
 
-|
- | Inception v3 | Xception | DenseNet-121 | ResNet-18 | VGG16 | VGG19 |
+| ----| Inception v3 | Xception | DenseNet-121 | ResNet-18 | VGG16 | VGG19 |
 | --- | --- | --- | --- | --- | --- | --- |
 | GFLOPS\* | 5.73 | 8.44 | 2.90 | 1.83 | 15.53 | 19.69 |
 | Mparams | 21.991 | 21.01 | 7.057 | 11.229 | 134.680 | 139.992 |
