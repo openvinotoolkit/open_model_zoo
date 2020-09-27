@@ -1,5 +1,5 @@
 
-# **Abnormality and Joint Type Detection in Musculoskeletal Radiographs**
+# Abnormality and Joint Type Detection in Musculoskeletal Radiographs
 
 ## **Use Case and High-Level Description**
 
@@ -79,7 +79,7 @@ Similarly, pred2 is of size (B, 7) which consists of the prediction scores for t
 
 The prediction labels for the two tasks can be obtained as argmax(pred1, axis=1) and argmax(pred2, axis=1) respectively.
 
-# Legal Information
+## **Legal Information**
 
 The model is distributed under theApache License, Version 2.0
 
