@@ -1,0 +1,17 @@
+- description: 'VGG-19 CNN architecture adapted and trained to identify 7 different
+    joint or bone types and also detect the presence of abnormalities in Musculoskeletal
+    Radiographs (2D X-ray images). This model was trained as a part of our workshop
+    paper in NeuRIPS 2019 available at: https://profs.etsmtl.ca/hlombaert/public/medneurips2019/66_CameraReadySubmission_Musculoskeletal_cameraready_MedNeurIPS.pdf'
+- task_type: classification
+- files:
+  - name: vgg19.onnx
+    sha256: f0121e824e0868d379aaf44038712dbf4a63d61973b7cedcb55827d8015a70f2
+    size: 560025444
+    source:
+    - $type: google_drive
+      id: 1_6mSQc1pWas5AdoLOmjUOJyW7yQmy64a
+- model_optimizer_args:
+  - --input_shape=[1,1,224,224]
+  - --input_model=$dl_dir/vgg19.onnx
+- framework: onnx
+- license: apache2

@@ -1,0 +1,17 @@
+- description: 'Xception CNN architecture adapted and trained to identify 7 different
+    joint or bone types and also detect the presence of abnormalities in Musculoskeletal
+    Radiographs (2D X-ray images). This model was trained as a part of our workshop
+    paper in NeuRIPS 2019 available at: https://profs.etsmtl.ca/hlombaert/public/medneurips2019/66_CameraReadySubmission_Musculoskeletal_cameraready_MedNeurIPS.pdf'
+- task_type: classification
+- files:
+  - name: xception.onnx
+    sha256: 2aa41950f27eefe2e865167d7c0d18fb68bee2de799e5f6895a7d2b2e2d35580
+    size: 84305991
+    source:
+    - $type: google_drive
+      id: 19Xkt6O7z9pRe-3x5vZp5oMbaqb5IKuuP
+- model_optimizer_args:
+  - --input_shape=[1,1,299,299]
+  - --input_model=$dl_dir/xception.onnx
+- framework: onnx
+- license: apache2

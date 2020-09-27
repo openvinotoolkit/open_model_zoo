@@ -1,0 +1,17 @@
+- description: 'ResNet-18 CNN architecture adapted and trained to identify 7 different
+    joint or bone types and also detect the presence of abnormalities in Musculoskeletal
+    Radiographs (2D X-ray images). This model was trained as a part of our workshop
+    paper in NeuRIPS 2019 available at: https://profs.etsmtl.ca/hlombaert/public/medneurips2019/66_CameraReadySubmission_Musculoskeletal_cameraready_MedNeurIPS.pdf'
+- task_type: classification
+- files:
+  - name: resnet.onnx
+    sha256: 59e456a08f13ab94df1ea04b8f1b922a259bd1fe9c66a40884c0fb960a0f3b36
+    size: 44968586
+    source:
+    - $type: google_drive
+      id: 1c55F9X7Hk9VYqGHLNIFg1Y2d2XvfA5Dn
+- model_optimizer_args:
+  - --input_shape=[1,1,224,224]
+  - --input_model=$dl_dir/resnet.onnx
+- framework: onnx
+- license: apache2

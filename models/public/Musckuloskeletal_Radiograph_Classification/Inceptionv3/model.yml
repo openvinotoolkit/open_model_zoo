@@ -1,0 +1,17 @@
+- description: 'Inception CNN architecture adapted and trained to identify 7 different
+    joint or bone types and also detect the presence of abnormalities in Musculoskeletal
+    Radiographs (2D X-ray images). This model was trained as a part of our workshop
+    paper in NeuRIPS 2019 available at: https://profs.etsmtl.ca/hlombaert/public/medneurips2019/66_CameraReadySubmission_Musculoskeletal_cameraready_MedNeurIPS.pdf'
+- task_type: classification
+- files:
+  - name: inception.onnx
+    sha256: 5b590422f2123dc1c5b1c53b9e6862f2e03e3cf800550c0fe97f655fc3b54962
+    size: 88182778
+    source:
+    - $type: google_drive
+      id: 1tgDmYbsTCN3KY-NfqrIrzRXrvZzm0N4l
+- model_optimizer_args:
+  - --input_shape=[1,1,299,299]
+  - --input_model=$dl_dir/inception.onnx
+- framework: onnx
+- license: apache2
