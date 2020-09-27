@@ -1,5 +1,5 @@
 
-**Abnormality and Joint Type Detection in Musculoskeletal Radiographs**
+# **Abnormality and Joint Type Detection in Musculoskeletal Radiographs**
 
 ## **Use Case and High-Level Description**
 
