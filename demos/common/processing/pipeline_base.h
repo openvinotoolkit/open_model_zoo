@@ -78,13 +78,19 @@ public:
     ///
     void waitForData();
 
+    /// Returns true if there's available infer requests in the pool
+    /// and next frame can be submitted for processing.
+    /// @returns true if there's available infer requests in the pool
+    /// and next frame can be submitted for processing, false otherwise.
+    bool isReadyToProcess() { return requestsPool->isIdleRequestAvailable(); }
+
     /// Returns performance info
     /// @returns performance information structure
     PerformanceInfo getPerformanceInfo() { std::lock_guard<std::mutex> lock(mtx); return perfInfo; }
 
     /// Waits for all currently submitted requests to be completed.
     ///
-    void waitForTotalCompletion() { requestsPool.waitForTotalCompletion(); }
+    void waitForTotalCompletion() { requestsPool->waitForTotalCompletion(); }
 
     /// Submit request to network
     /// @param image - image to submit for processing
@@ -116,7 +122,7 @@ protected:
     virtual InferenceResult getInferenceResult();
 
 protected:
-    RequestsPool requestsPool;
+    std::unique_ptr<RequestsPool> requestsPool;
     std::unordered_map<int64_t, InferenceResult> completedInferenceResults;
 
     InferenceEngine::ExecutableNetwork execNetwork;

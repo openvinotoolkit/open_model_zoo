@@ -37,40 +37,27 @@ public:
     /// Sets particular request to Idle state
     /// This function is thread safe as long as request provided is not used after call to this function
     /// @param request - request to be returned to idle state
-    void setRequestIdle(const InferenceEngine::InferRequest::Ptr& request) {
-        this->requestsPool.at(request) = false;
-    }
+    void setRequestIdle(const InferenceEngine::InferRequest::Ptr& request);
 
     /// Returns number of requests in use. This function is thread safe.
     /// @returns number of requests in use
-    int64_t getInUseRequestsCount() {
-        return std::count_if(requestsPool.begin(), requestsPool.end(), [](std::pair<const InferenceEngine::InferRequest::Ptr, std::atomic_bool>& x) {return (bool)x.second; });
-    }
+    int64_t getInUseRequestsCount();
 
     /// Returns number of requests in use. This function is thread safe.
     /// @returns number of requests in use
-    bool isIdleRequestAvailable() {
-        for (auto it = requestsPool.begin(); it != requestsPool.end(); it++) {
-            if (!it->second) {
-                return true;
-            }
-        }
-        return false;
-    }
+    bool isIdleRequestAvailable();
 
     /// Waits for completion of every non-idle requests in pool.
     /// getIdleRequest should not be called together with this function or after it to avoid race condition or invalid state
     /// @returns number of requests in use
     void waitForTotalCompletion();
 
-    /// Returns iterator pointing to the start of the pool
-    /// @returns iterator pointing to the start of the pool
-    std::map<InferenceEngine::InferRequest::Ptr, std::atomic_bool>::iterator begin() { return requestsPool.begin(); }
-
-    /// Returns iterator pointing to the end of the pool
-    /// @returns iterator pointing to the end of the pool
-    std::map<InferenceEngine::InferRequest::Ptr, std::atomic_bool>::iterator end() { return requestsPool.end(); }
+    /// Returns list of all infer requests in the pool.
+    /// @returns list of all infer requests in the pool.
+    std::vector<InferenceEngine::InferRequest::Ptr> getInferRequestsList();
 
 private:
-    std::map<InferenceEngine::InferRequest::Ptr, std::atomic_bool> requestsPool;
+    std::map<InferenceEngine::InferRequest::Ptr, bool> requests;
+    size_t numRequestsInUse;
+    std::mutex mtx;
 };

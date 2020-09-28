@@ -65,7 +65,7 @@ void PipelineBase::init(const std::string& model_name, const CnnConfig& cnnConfi
     // -----------------------------------------------------------------------------------------------------
 
     // --------------------------- 5. Create infer requests ------------------------------------------------
-    requestsPool = std::move(RequestsPool(execNetwork, cnnConfig.maxAsyncRequests));
+    requestsPool.reset(new RequestsPool(execNetwork, cnnConfig.maxAsyncRequests));
 }
 
 PipelineBase::~PipelineBase(){
@@ -76,14 +76,14 @@ PipelineBase::~PipelineBase(){
 void PipelineBase::waitForData(){
     std::unique_lock<std::mutex> lock(mtx);
 
-    condVar.wait(lock, [&] {return callbackException != nullptr || requestsPool.isIdleRequestAvailable() || !completedInferenceResults.empty(); });
+    condVar.wait(lock, [&] {return callbackException != nullptr || requestsPool->isIdleRequestAvailable() || !completedInferenceResults.empty(); });
 
     if (callbackException)
         std::rethrow_exception(callbackException);
 }
 
 int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request, cv::Mat extraData){
-    perfInfo.numRequestsInUse = (uint32_t)requestsPool.getInUseRequestsCount();
+    perfInfo.numRequestsInUse = (uint32_t)requestsPool->getInUseRequestsCount();
 
     if (outputsNames.empty())
     {
@@ -117,7 +117,7 @@ int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request, 
 
                     completedInferenceResults.emplace(frameID, result);
 
-                    this->requestsPool.setRequestIdle(request);
+                    this->requestsPool->setRequestIdle(request);
 
                     this->onProcessingCompleted(request);
                 }
@@ -143,7 +143,7 @@ int64_t PipelineBase::submitImage(cv::Mat img) {
         throw std::invalid_argument("imageInputName value is not set.");
     }
 
-    auto request = requestsPool.getIdleRequest();
+    auto request = requestsPool->getIdleRequest();
     if (!request)
         return -1;
 

@@ -32,8 +32,8 @@ DetectionPipeline::DetectionPipeline(const std::string& model_name, const CnnCon
 
     // --- Setting image info for every request in a pool. We can do it once and reuse this info at every submit -------
     if (!imageInfoInputName.empty()) {
-        for (auto &pair : requestsPool) {
-            auto blob = pair.first->GetBlob(imageInfoInputName);
+        for (auto &request : requestsPool->getInferRequestsList()) {
+            auto blob = request->GetBlob(imageInfoInputName);
             LockedMemory<void> blobMapped = as<MemoryBlob>(blob)->wmap();
             auto data = blobMapped.as<float *>();
             data[0] = static_cast<float>(netInputHeight);  // height
@@ -127,7 +127,7 @@ void DetectionPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
 }
 
 int64_t DetectionPipeline::submitImage(cv::Mat img){
-    auto request = requestsPool.getIdleRequest();
+    auto request = requestsPool->getIdleRequest();
     if (!request)
         return -1;
 
