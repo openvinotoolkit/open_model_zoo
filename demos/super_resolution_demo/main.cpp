@@ -92,35 +92,49 @@ int main(int argc, char *argv[]) {
         slog::info << "Preparing input blobs" << slog::endl;
 
         /** Taking information about all topology inputs **/
-        InputsDataMap inputInfo(network.getInputsInfo());
+        ICNNNetwork::InputShapes inputShapes(network.getInputShapes());
 
-        if (inputInfo.size() != 1 && inputInfo.size() != 2)
+        if (inputShapes.size() != 1 && inputShapes.size() != 2)
             throw std::logic_error("The demo supports topologies with 1 or 2 inputs only");
-
-        const std::string lrInputBlobName = "0";
+        std::string lrInputBlobName = inputShapes.begin()->first;
+        const SizeVector &lrShape = inputShapes[lrInputBlobName];
+        // A model like single-image-super-resolution-???? may take bicubic interpolation of the input image as the
+        // second input
+        std::string bicInputBlobName;
+        if (inputShapes.size() == 2) {
+            bicInputBlobName = (++inputShapes.begin())->first;
+            const SizeVector &bicShape = inputShapes[bicInputBlobName];
+            if (lrShape.size() != 4 || bicShape.size() != 4) {
+                throw std::logic_error("Number of dimensions for both inputs must be 4");
+            }
+            if (lrShape[2] >= bicShape[2] && lrShape[3] >= bicShape[3]) {
+                lrInputBlobName.swap(bicInputBlobName);
+            } else if (!(lrShape[2] <= bicShape[2] && lrShape[3] <= bicShape[3])) {
+                throw std::logic_error("Each spatial dimension of one input must surpass or be equal to a spatial"
+                    "dimension of another input");
+            }
+        }
 
         /** Collect images**/
         std::vector<cv::Mat> inputImages;
         for (const auto &i : imageNames) {
             /** Get size of low resolution input **/
-            auto lrInputInfoItem = inputInfo[lrInputBlobName];
-            int w = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[3]);
-            int h = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[2]);
-            int c = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[1]);
+            int w = lrShape[3];
+            int h = lrShape[2];
+            int c = lrShape[1];
 
             cv::Mat img = cv::imread(i, c == 1 ? cv::IMREAD_GRAYSCALE : cv::IMREAD_COLOR);
             if (img.empty()) {
                 slog::warn << "Image " + i + " cannot be read!" << slog::endl;
                 continue;
             }
-
-            if (w != img.cols || h != img.rows) {
-                slog::warn << "Size of the image " << i << " is not equal to WxH = " << w << "x" << h << slog::endl;
+            if (c != img.channels()) {
+                slog::warn << "Number of channels of the image " << i << " is not equal to " << c << ". Skip it\n";
                 continue;
             }
-            if (c != img.channels()) {
-                slog::warn << "Number of channels of the image " << i << " is not equal to " << c <<slog::endl;
-                continue;
+            if (w != img.cols || h != img.rows) {
+                slog::warn << "Size of the image " << i << " is not equal to " << w << "x" << h << ". Resize it\n";
+                cv::resize(img, img, {w, h});
             }
 
             inputImages.push_back(img);
@@ -129,7 +143,11 @@ int main(int argc, char *argv[]) {
         if (inputImages.empty()) throw std::logic_error("Valid input images were not found!");
 
         /** Setting batch size using image count **/
-        network.setBatchSize(imageNames.size());
+        inputShapes[lrInputBlobName][0] = inputImages.size();
+        if (!bicInputBlobName.empty()) {
+            inputShapes[bicInputBlobName][0] = inputImages.size();
+        }
+        network.reshape(inputShapes);
         slog::info << "Batch size is " << std::to_string(network.getBatchSize()) << slog::endl;
 
         // ------------------------------ Prepare output blobs -------------------------------------------------
@@ -167,9 +185,7 @@ int main(int argc, char *argv[]) {
             cv::Mat img = inputImages[i];
             matU8ToBlob<float_t>(img, lrInputBlob, i);
 
-            bool twoInputs = inputInfo.size() == 2;
-            if (twoInputs) {
-                const std::string bicInputBlobName = "1";
+            if (!bicInputBlobName.empty()) {
                 Blob::Ptr bicInputBlob = inferRequest.GetBlob(bicInputBlobName);
 
                 int w = bicInputBlob->getTensorDesc().getDims()[3];
