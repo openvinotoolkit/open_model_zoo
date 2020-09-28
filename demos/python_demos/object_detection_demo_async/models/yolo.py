@@ -65,11 +65,6 @@ class YOLO(Model):
                 self.net.layers[self.net.layers[layer_name].parents[0]].out_data[0].shape
             self.yolo_layer_params.update({layer_name: self.Params(self.net.layers[layer_name].params, shape[2])})
 
-    def _get_inputs(self):
-
-        return input_blob
-
-    # def _get_outputs_parser(self):
 
     @staticmethod
     def _resize_image(frame, size, keep_aspect_ratio=False):
@@ -84,11 +79,11 @@ class YOLO(Model):
             scale = min(w / iw, h / ih)
             nw = int(iw * scale)
             nh = int(ih * scale)
-            frame = cv2.resize(frame, (nw, nh))
-            resized_frame = np.full((size[1], size[0], 3), 128, dtype=np.uint8)
-            dx = (w - nw) // 2
-            dy = (h - nh) // 2
-            resized_frame[dy:dy + nh, dx:dx + nw, :] = frame
+            resized_frame = cv2.resize(frame, (nw, nh))
+            # resized_frame = np.full((size[1], size[0], 3), 128, dtype=np.uint8)
+            # dx = (w - nw) // 2
+            # dy = (h - nh) // 2
+            # resized_frame[dy:dy + nh, dx:dx + nw, :] = frame
         return resized_frame
 
     def unify_inputs(self, inputs) -> dict:
@@ -104,8 +99,12 @@ class YOLO(Model):
         meta = {'original_shape': inputs[self.image_blob_name].shape,
                 'resized_shape': img.shape}
         if h != self.h or w != self.w:
-            img = np.pad(img, ((0, self.h - h), (0, self.w - w), (0, 0)),
-                         mode='constant', constant_values=0)
+            resized_frame = np.full((self.h, self.w, 3), 128, dtype=np.uint8)
+            dx = (self.w - w) // 2
+            dy = (self.h - h) // 2
+            resized_frame[dy:dy + h, dx:dx + w, :] = img
+            img = resized_frame
+            meta.update({'scales': (w / self.w, h / self.h)})
         if self.nchw_shape:
             img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         img = img.reshape((self.n, self.c, self.h, self.w))
@@ -173,8 +172,8 @@ class YOLO(Model):
                 continue
             for j in range(i + 1, len(detections)):
                 # We perform IOU only on objects of same class
-                # if detections[i].id != detections[j].id:
-                #     continue
+                if detections[i].id != detections[j].id:
+                     continue
 
                 if iou(detections[i], detections[j]) > iou_threshold:
                     detections[j].score = 0
@@ -182,12 +181,27 @@ class YOLO(Model):
         return [det for det in detections if det.score > 0]
 
     @staticmethod
-    def _resize_detections(detections, scales, aspect_ratio_kept=False):
+    def _resize_detections(detections, input_shape, original_image_shape, resized_image_shape, aspect_ratio_kept=False):
+        if aspect_ratio_kept:
+            scales = (resized_image_shape[0]/input_shape[0], resized_image_shape[1]/input_shape[1])
+            detections = YOLO._resize_detections_letterbox(detections, scales)
+        scales = (original_image_shape[0] , original_image_shape[1] )
         for detection in detections:
-            if aspect_ratio_kept:
-                offset = 0.5 * (np.ones(2) - scale)
-                x, y = (np.array([x, y]) - offset) / scale
-                width, height = np.array([width, height]) / scale
+            detection.xmin *= scales[0]
+            detection.xmax *= scales[0]
+            detection.ymin *= scales[1]
+            detection.ymax *= scales[1]
+        return detections
+
+    @staticmethod
+    def _resize_detections_letterbox(detections, scales):
+        offset = [0.5 * (1 - x) for x in scales]
+        for detection in detections:
+            detection.xmin = (detection.xmin - offset[0]) / scales[0]
+            detection.xmax = (detection.xmax - offset[0]) / scales[0]
+            detection.ymin = (detection.ymin - offset[1]) / scales[1]
+            detection.ymax = (detection.ymax - offset[1]) / scales[1]
+        return detections
 
     def postprocess(self, outputs, meta):
         detections = list()
@@ -198,15 +212,8 @@ class YOLO(Model):
             detections += self._parse_yolo_region(out_blob, meta['resized_shape'], layer_params, self.threshold)
 
         detections = self._filter(detections, self.iou_threshold)
-        #objects = self._resize_detections(objects)
-        original_image_shape = meta['original_shape']
-        resized_image_shape = meta['resized_shape']
-        scale_x = self.w / resized_image_shape[1] * original_image_shape[1]
-        scale_y = self.h / resized_image_shape[0] * original_image_shape[0]
-        for detection in detections:
-            detection.xmin *= scale_x
-            detection.xmax *= scale_x
-            detection.ymin *= scale_y
-            detection.ymax *= scale_y
+        detections = self._resize_detections(detections, (self.w, self.h), meta['original_shape'][1::-1],
+                                             meta['resized_shape'][1::-1], self.keep_aspect_ratio)
+
         return detections
 
