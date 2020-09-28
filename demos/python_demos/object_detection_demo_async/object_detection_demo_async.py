@@ -23,7 +23,7 @@ import random
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from collections import deque, namedtuple
-from itertools import cycle
+from itertools import cycle, islice
 from enum import Enum
 from time import perf_counter
 
@@ -35,7 +35,7 @@ sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'commo
 import monitors
 
 from models import *
-from models.model_runner import AsyncModelRunner
+from models.model_runner import AsyncModelRunner, SyncModelRunner
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
 log = logging.getLogger()
@@ -77,6 +77,7 @@ def build_argparser():
                       help='Optional. List of monitors to show initially.')
     args.add_argument('--keep_aspect_ratio', action='store_true', default=False,
                       help='Optional. Keeps aspect ratio on resize.')
+    args.add_argument('--sync', action='store_true')
 
     return parser
 
@@ -125,6 +126,7 @@ class ColorPalette:
 class Modes(Enum):
     USER_SPECIFIED = 0
     MIN_LATENCY = 1
+    SYNC = 2
 
 
 class ModeInfo:
@@ -235,25 +237,32 @@ def main():
             labels_map = [x.strip() for x in f]
 
     log.info('Loading network...')
-    completed_request_results = {}
-    modes = cycle(Modes)
-    prev_mode = mode = next(modes)
-    log.info('Using {} mode'.format(mode.name))
-    mode_info = {mode: ModeInfo()}
-    exceptions = []
 
     model = get_model(args.type, ie, args)
 
-    detectors = {
-        Modes.USER_SPECIFIED:
-            AsyncModelRunner(ie, model, device=args.device, plugin_config=config_user_specified,
-                             caught_exceptions=exceptions, completed_requests=completed_request_results,
-                             max_num_requests=args.num_infer_requests),
-        Modes.MIN_LATENCY:
-            AsyncModelRunner(ie, model, device=args.device, plugin_config=config_min_latency,
-                             caught_exceptions=exceptions, completed_requests=completed_request_results,
-                             max_num_requests=args.num_infer_requests)
-    }
+    if args.sync:
+        mode = Modes.SYNC
+        mode_info = {mode: ModeInfo()} # For backward compatibility with statistics gatherer
+        detector =  SyncModelRunner(ie, model, device=args.device)
+    else:
+        completed_request_results = {}
+        modes = cycle(islice(Modes,2))
+        prev_mode = mode = next(modes)
+
+        mode_info = {mode: ModeInfo()}
+        exceptions = []
+        detectors = {
+            Modes.USER_SPECIFIED:
+                AsyncModelRunner(ie, model, device=args.device, plugin_config=config_user_specified,
+                                 caught_exceptions=exceptions, completed_requests=completed_request_results,
+                                 max_num_requests=args.num_infer_requests),
+            Modes.MIN_LATENCY:
+                AsyncModelRunner(ie, model, device=args.device, plugin_config=config_min_latency,
+                                 caught_exceptions=exceptions, completed_requests=completed_request_results,
+                                 max_num_requests=args.num_infer_requests)
+        }
+
+    log.info('Using {} mode'.format(mode.name))
 
     try:
         input_stream = int(args.input)
@@ -275,45 +284,32 @@ def main():
                                    (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4),
                                     round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
+    if args.sync:
+        while cap.isOpened:
+            start_time = perf_counter()
+            ret, frame = cap.read()
+            if not ret:
+                if input_repeats < args.loop_input or args.loop_input < 0:
+                    cap.open(input_stream)
+                    input_repeats += 1
+                else:
+                    cap.release()
+                continue
 
-    while (cap.isOpened):
-        start_time = perf_counter()
-        ret, frame = cap.read()
-        if not ret:
-            if input_repeats < args.loop_input or args.loop_input < 0:
-                cap.open(input_stream)
-                input_repeats += 1
-            else:
-                cap.release()
-            continue
+            detections = detector(frame)
 
-        detectors[mode](frame, next_frame_id, {'frame': frame, 'start_time': start_time})
-        next_frame_id += 1
-
-        _, results = detectors[mode].get_result(next_frame_id_to_show)
-        if results:
-            frame_meta, raw_outputs = results
-            objects = model.postprocess(raw_outputs, frame_meta)
-
-            frame = frame_meta['frame']
-            start_time = frame_meta['start_time']
-
-            if len(objects) and args.raw_output_message:
-                print_raw_results(objects, labels_map, args.prob_threshold)
+            if len(detections) and args.raw_output_message:
+                print_raw_results(detections, labels_map, args.prob_threshold)
 
             origin_im_size = frame.shape[:-1]
             presenter.drawGraphs(frame)
-            frame = draw_detections(frame, objects, palette, labels_map, args.prob_threshold)
+            frame = draw_detections(frame, detections, palette, labels_map, args.prob_threshold)
             mode_message = '{} mode'.format(mode.name)
             put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
                                  cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
 
-            next_frame_id_to_show += 1
-            if prev_mode == mode:
-                mode_info[mode].frames_count += 1
-            elif len(completed_request_results) == 0:
-                mode_info[prev_mode].last_end_time = perf_counter()
-                prev_mode = mode
+            mode_info[mode].frames_count += 1
+            mode_info[mode].last_end_time = perf_counter()
 
             # Frames count is always zero if mode has just been switched (i.e. prev_mode != mode).
             if mode_info[mode].frames_count != 0:
@@ -331,107 +327,88 @@ def main():
                 key = cv2.waitKey(wait_key_time)
 
                 ESC_KEY = 27
-                TAB_KEY = 9
                 # Quit.
                 if key in {ord('q'), ord('Q'), ESC_KEY}:
                     break
-                # Switch mode.
-                # Disable mode switch if the previous switch has not been finished yet.
-                if key == TAB_KEY and mode_info[mode].frames_count > 0:
-                    mode = next(modes)
-                    detectors[prev_mode].await_all()
-                    mode_info[prev_mode].last_end_time = perf_counter()
-                    mode_info[mode] = ModeInfo()
-                    log.info('Using {} mode'.format(mode.name))
+    else:
+        while cap.isOpened:
+            start_time = perf_counter()
+            ret, frame = cap.read()
+            if not ret:
+                if input_repeats < args.loop_input or args.loop_input < 0:
+                    cap.open(input_stream)
+                    input_repeats += 1
                 else:
-                    presenter.handleKey(key)
-            next_frame_id_to_show += 1
+                    cap.release()
+                continue
 
-        detectors[mode].await_any()
+            detectors[mode](frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+            next_frame_id += 1
 
+            _, results = detectors[mode].get_result(next_frame_id_to_show)
+            if results:
+                frame_meta, raw_outputs = results
+                objects = model.postprocess(raw_outputs, frame_meta)
 
-    # while (cap.isOpened() \
-    #        or completed_request_results \
-    #        or len(detectors[mode].empty_requests) < len(detectors[mode].requests)) \
-    #     and not exceptions:
-    #     if next_frame_id_to_show in completed_request_results:
-    #         frame_meta, raw_outputs = completed_request_results.pop(next_frame_id_to_show)
-    #         objects = detectors[mode].postprocess(raw_outputs, frame_meta)
-    #
-    #         frame = frame_meta['frame']
-    #         start_time = frame_meta['start_time']
-    #
-    #         if len(objects) and args.raw_output_message:
-    #             print_raw_results(objects, labels_map, args.prob_threshold)
-    #
-    #         origin_im_size = frame.shape[:-1]
-    #         presenter.drawGraphs(frame)
-    #         frame = draw_detections(frame, objects, palette, labels_map, args.prob_threshold)
-    #
-    #         mode_message = '{} mode'.format(mode.name)
-    #         put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
-    #                              cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
-    #
-    #         next_frame_id_to_show += 1
-    #         if prev_mode == mode:
-    #             mode_info[mode].frames_count += 1
-    #         elif len(completed_request_results) == 0:
-    #             mode_info[prev_mode].last_end_time = perf_counter()
-    #             prev_mode = mode
-    #
-    #         # Frames count is always zero if mode has just been switched (i.e. prev_mode != mode).
-    #         if mode_info[mode].frames_count != 0:
-    #             fps_message = 'FPS: {:.1f}'.format(mode_info[mode].frames_count / \
-    #                                                (perf_counter() - mode_info[mode].last_start_time))
-    #             mode_info[mode].latency_sum += perf_counter() - start_time
-    #             latency_message = 'Latency: {:.1f} ms'.format((mode_info[mode].latency_sum / \
-    #                                                            mode_info[mode].frames_count) * 1e3)
-    #             # Draw performance stats over frame.
-    #             put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
-    #             put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
-    #
-    #         if not args.no_show:
-    #             cv2.imshow('Detection Results', frame)
-    #             key = cv2.waitKey(wait_key_time)
-    #
-    #             ESC_KEY = 27
-    #             TAB_KEY = 9
-    #             # Quit.
-    #             if key in {ord('q'), ord('Q'), ESC_KEY}:
-    #                 break
-    #             # Switch mode.
-    #             # Disable mode switch if the previous switch has not been finished yet.
-    #             if key == TAB_KEY and mode_info[mode].frames_count > 0:
-    #                 mode = next(modes)
-    #                 detectors[prev_mode].await_all()
-    #                 mode_info[prev_mode].last_end_time = perf_counter()
-    #                 mode_info[mode] = ModeInfo()
-    #                 log.info('Using {} mode'.format(mode.name))
-    #             else:
-    #                 presenter.handleKey(key)
-    #
-    #     elif detectors[mode].empty_requests and cap.isOpened():
-    #         start_time = perf_counter()
-    #         ret, frame = cap.read()
-    #         if not ret:
-    #             if input_repeats < args.loop_input or args.loop_input < 0:
-    #                 cap.open(input_stream)
-    #                 input_repeats += 1
-    #             else:
-    #                 cap.release()
-    #             continue
-    #
-    #         detectors[mode](frame, next_frame_id, {'frame': frame, 'start_time': start_time})
-    #         next_frame_id += 1
-    #
-    #     else:
-    #         detectors[mode].await_any()
+                frame = frame_meta['frame']
+                start_time = frame_meta['start_time']
 
-    if exceptions:
-        raise exceptions[0]
+                if len(objects) and args.raw_output_message:
+                    print_raw_results(objects, labels_map, args.prob_threshold)
 
-    for exec_net in detectors.values():
-        exec_net.await_all()
+                origin_im_size = frame.shape[:-1]
+                presenter.drawGraphs(frame)
+                frame = draw_detections(frame, objects, palette, labels_map, args.prob_threshold)
+                mode_message = '{} mode'.format(mode.name)
+                put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
+                                     cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
+
+                next_frame_id_to_show += 1
+                if prev_mode == mode:
+                    mode_info[mode].frames_count += 1
+                elif len(completed_request_results) == 0:
+                    mode_info[prev_mode].last_end_time = perf_counter()
+                    prev_mode = mode
+
+                # Frames count is always zero if mode has just been switched (i.e. prev_mode != mode).
+                if mode_info[mode].frames_count != 0:
+                    fps_message = 'FPS: {:.1f}'.format(mode_info[mode].frames_count / \
+                                                       (perf_counter() - mode_info[mode].last_start_time))
+                    mode_info[mode].latency_sum += perf_counter() - start_time
+                    latency_message = 'Latency: {:.1f} ms'.format((mode_info[mode].latency_sum / \
+                                                                   mode_info[mode].frames_count) * 1e3)
+                    # Draw performance stats over frame.
+                    put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
+                    put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
+
+                if not args.no_show:
+                    cv2.imshow('Detection Results', frame)
+                    key = cv2.waitKey(wait_key_time)
+
+                    ESC_KEY = 27
+                    TAB_KEY = 9
+                    # Quit.
+                    if key in {ord('q'), ord('Q'), ESC_KEY}:
+                        break
+                    # Switch mode.
+                    # Disable mode switch if the previous switch has not been finished yet.
+                    if key == TAB_KEY and mode_info[mode].frames_count > 0:
+                        mode = next(modes)
+                        detectors[prev_mode].await_all()
+                        mode_info[prev_mode].last_end_time = perf_counter()
+                        mode_info[mode] = ModeInfo()
+                        log.info('Using {} mode'.format(mode.name))
+                    else:
+                        presenter.handleKey(key)
+                next_frame_id_to_show += 1
+
+            detectors[mode].await_any()
+
+        if exceptions:
+            raise exceptions[0]
+
+        for exec_net in detectors.values():
+            exec_net.await_all()
 
     for mode_value, mode_stats in mode_info.items():
         log.info('')
