@@ -7,7 +7,7 @@ to fill holes in images.
 This demo can work in 2 modes: 
 
 * GUI mode: areas for inpainting can be marked interactively using mouse painting
-* Auto mode (use -am or -ar option for it): image will be processed automatically using randomly applied mask (-ar option) or using specific color-based mask (-am option)
+* Auto mode (use -ac or -ar option for it): image will be processed automatically using randomly applied mask (-ar option) or using specific color-based mask (-ac option)
 
 Running the application with the `-h` option yields the following usage message:
 
@@ -15,7 +15,7 @@ Running the application with the `-h` option yields the following usage message:
 usage: image_inpainting_demo.py [-h] -m MODEL [-i INPUT] [-d DEVICE]
                                 [-p PARTS] [-mbw MAX_BRUSH_WIDTH]
                                 [-ml MAX_LENGTH] [-mv MAX_VERTEX] [--no_show]
-                                [-o OUTPUT] [-am C C C] [-ar]
+                                [-o OUTPUT] [-ac C C C] [-ar]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -45,7 +45,7 @@ Options:
   -o OUTPUT, --output OUTPUT
                         Optional. Save output to the file with provided
                         filename. Ignored in GUI mode
-  -am C C C, --auto_mask_color C C C
+  -ac C C C, --auto_mask_color C C C
                         Optional. Use automatic (non-interactive) mode with
                         color mask.Provide color to be treated as mask (3 RGB
                         components in range of 0...255). Cannot be used
@@ -53,7 +53,7 @@ Options:
   -ar, --auto_mask_random
                         Optional. Use automatic (non-interactive) mode with
                         random mask for inpainting (with parameters set by -p,
-                        -mbw, -mk and -mv). Cannot be used together with -am.
+                        -mbw, -mk and -mv). Cannot be used together with -ac.
 ```
 
 To run the demo, you can use public or pretrained models. You can download the pretrained models with the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md).

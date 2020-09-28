@@ -45,13 +45,13 @@ def build_arg_parser():
     args.add_argument("--no_show", help="Optional. Don't show output. Cannot be used in GUI mode", action='store_true')
     args.add_argument("-o", "--output", help="Optional. Save output to the file with provided filename."
                       " Ignored in GUI mode", default="", type=str)
-    args.add_argument("-am", "--auto_mask_color", help="Optional. Use automatic (non-interactive) mode with color mask."
+    args.add_argument("-ac", "--auto_mask_color", help="Optional. Use automatic (non-interactive) mode with color mask."
                       "Provide color to be treated as mask (3 RGB components in range of 0...255). "
                       "Cannot be used together with -ar.",
                       metavar='C', default=None, type=int, nargs=3)
     args.add_argument("-ar", "--auto_mask_random",
                       help="Optional. Use automatic (non-interactive) mode with random mask for inpainting"
-                      " (with parameters set by -p, -mbw, -mk and -mv). Cannot be used together with -am.",
+                      " (with parameters set by -p, -mbw, -mk and -mv). Cannot be used together with -ac.",
                       action='store_true')
 
     return parser
@@ -118,7 +118,7 @@ def main():
         return -1
 
     if args.auto_mask_color and args.auto_mask_random:
-        print("Error: -ar and -am options cannot be used together...")
+        print("Error: -ar and -ac options cannot be used together...")
         return -1
 
     if args.auto_mask_color or args.auto_mask_random:
