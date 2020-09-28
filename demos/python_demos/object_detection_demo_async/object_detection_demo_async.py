@@ -48,7 +48,7 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=str)
     args.add_argument('--type', help='Required. Specify model type',
-                      type=str, choices=('ssd', 'yolo', 'faceboxes', 'centernet'))
+                      type=str, choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
     args.add_argument('-i', '--input', help='Required. Path to an image, video file or a numeric camera ID.',
                       required=True, type=str)
     args.add_argument('-d', '--device',
@@ -145,9 +145,9 @@ def get_model(model_name, ie, args):
     elif model_name == 'faceboxes':
         return FaceBoxes(ie, args.model)
     elif model_name == 'centernet':
-        return CenterNet(ie, args.model, log, device=args.device, plugin_config=config,
-                         results=completed_request_results, max_num_requests=args.num_infer_requests,
-                         caught_exceptions=exceptions)
+        return CenterNet(ie, args.model)
+    elif model_name == 'retina':
+        return RetinaFace(ie, args.model)
 
 
 def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
