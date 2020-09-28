@@ -217,7 +217,7 @@ class BrainTumorSegmentationPrediction(SegmentationPrediction):
 
 
 class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
-    def __init__(self, identifier, mask, labels):
+    def __init__(self, identifier, mask, labels, semantic_only=False):
         if isinstance(maskUtils, UnsupportedPackage):
             maskUtils.raise_error("CoCoInstanceSegmentationRepresentation")
             raise ValueError('can not create representation')
@@ -225,6 +225,7 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
         self.raw_mask = mask
         self.labels = labels
         self._mask = None
+        self.semantic_only = semantic_only
 
     @property
     def mask(self):
@@ -239,6 +240,20 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
             masks.append(converted_mask)
 
         self._mask = masks
+
+        if self.semantic_only:
+            masks = []
+            for polygon in self._mask:
+                mask = maskUtils.decode(polygon)
+                if len(mask.shape) < 3:
+                    mask = np.expand_dims(mask, axis=-1)
+                masks.append(mask)
+            if masks:
+                masks = np.stack(masks, axis=-1)
+            else:
+                masks = np.zeros((height, width, 0), dtype=np.uint8)
+            masks = (masks * np.asarray(self.labels, dtype=np.uint8)).max(axis=-1)
+            self._mask = np.squeeze(masks)
 
         return self._mask
 

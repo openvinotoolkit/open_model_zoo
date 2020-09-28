@@ -23,13 +23,14 @@ from ..representation import (
     BrainTumorSegmentationAnnotation,
     BrainTumorSegmentationPrediction,
     OAR3DTilingSegmentationAnnotation,
+    CoCoInstanceSegmentationAnnotation,
 )
 from .metric import PerImageEvaluationMetric
 from ..utils import finalize_metric_result
 
 
 class SegmentationMetric(PerImageEvaluationMetric):
-    annotation_types = (SegmentationAnnotation, )
+    annotation_types = (SegmentationAnnotation, CoCoInstanceSegmentationAnnotation)
     prediction_types = (SegmentationPrediction, )
 
     CONFUSION_MATRIX_KEY = 'segmentation_confusion_matrix'
@@ -64,6 +65,28 @@ class SegmentationMetric(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         n_classes = len(self.dataset.labels)
         prediction_mask = np.argmax(prediction.mask, axis=0) if self.use_argmax else prediction.mask.astype('int64')
+
+        import matplotlib.pyplot as plt
+
+        # fig = plt.figure()
+        # plt.matshow(annotation.mask)
+        # # plt.savefig("{}_annotation.png".format(annotation.identifier))
+        # plt.savefig("annotation_mask.png")
+        # plt.close(fig)
+
+        # for i in range(n_classes):
+        #     fig = plt.figure()
+        #     plt.matshow(prediction.mask[i,...])
+        #     plt.savefig("{}_prediction_{}.png".format(annotation.identifier, i))
+        #     plt.close(fig)
+
+        # fig = plt.figure()
+        # plt.matshow(prediction_mask)
+        # plt.savefig("prediction_mask.png")
+        # plt.close(fig)
+
+
+        a = 1
 
         def confusion_matrix():
             label_true = annotation.mask.flatten()

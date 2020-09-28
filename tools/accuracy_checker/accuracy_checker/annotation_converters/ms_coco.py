@@ -262,6 +262,25 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
     __provider__ = 'mscoco_segmentation'
     annotation_types = (CoCoInstanceSegmentationAnnotation, )
 
+    @classmethod
+    def parameters(cls):
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
+            'semantic_only': BoolField(
+                optional=True, default=False, description="Semantic segmentation only mode."
+            ),
+            'masks_dir': PathField(
+                is_directory=True, optional=True,
+                description='path to segmentation masks'
+            ),
+        })
+        return configuration_parameters
+
+    def configure(self):
+        super().configure()
+        self.semantic_only = self.get_value_from_config('semantic_only')
+        self.masks_dir = self.get_value_from_config('masks_dir')
+
     def _create_representations(
             self, image_info, annotations, label_id_to_label, check_content, progress_callback, progress_interval
     ):
@@ -276,7 +295,11 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
                 image, annotations,
                 label_id_to_label
             )
-            annotation = CoCoInstanceSegmentationAnnotation(image[1], segmentations, image_labels)
+            annotation = CoCoInstanceSegmentationAnnotation(image[1], segmentations, image_labels,
+                                                            semantic_only=self.semantic_only)
+            # if self.semantic_only:
+            #     annotation,store_mask(self.masks_dir)
+
             if check_content:
                 image_full_path = self.images_dir / image[1]
                 if not check_file_existence(image_full_path):
