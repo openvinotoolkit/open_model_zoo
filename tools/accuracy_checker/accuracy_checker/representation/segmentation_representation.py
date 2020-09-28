@@ -253,7 +253,7 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
             else:
                 masks = np.zeros((height, width, 0), dtype=np.uint8)
             masks = (masks * np.asarray(self.labels, dtype=np.uint8)).max(axis=-1)
-            self._mask = np.squeeze(masks)
+            self._mask = np.squeeze(masks) 
 
         return self._mask
 

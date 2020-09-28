@@ -21,7 +21,7 @@ from PIL import Image
 from ..config import NumberField, BoolField
 from ..utils import get_size_from_config
 from .postprocessor import PostprocessorWithSpecificTargets
-from ..representation import SegmentationPrediction, SegmentationAnnotation
+from ..representation import SegmentationPrediction, SegmentationAnnotation, CoCoInstanceSegmentationAnnotation
 
 
 class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
@@ -78,6 +78,11 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
             return entry
 
         @resize_segmentation_mask.register(SegmentationAnnotation)
+        def _(entry, height, width):
+            entry.mask = self.segm_resize(entry.mask, width, height)
+            return entry
+
+        @resize_segmentation_mask.register(CoCoInstanceSegmentationAnnotation)
         def _(entry, height, width):
             entry.mask = self.segm_resize(entry.mask, width, height)
             return entry
