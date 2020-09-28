@@ -6,7 +6,6 @@ from .centernet import CenterNet
 __all__ = [
     'SSD',
     'YOLO',
-    'FaceBoxes'
     'FaceBoxes',
     'CenterNet',
 ]

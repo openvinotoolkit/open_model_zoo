@@ -10,9 +10,10 @@ class SyncModelRunner:
         self.device = device
         self.model = model
 
-        self.exec_net = ie.load_network(network=model, device_name=self.device)
+        self.exec_net = ie.load_network(network=self.model.net, device_name=self.device)
 
     def __call__(self, inputs):
+        inputs = self.model.unify_inputs(inputs)
         inputs, meta = self.model.preprocess(inputs)
         outputs = self.exec_net.infer(inputs=inputs)
         outputs = self.model.postprocess(outputs, meta)
