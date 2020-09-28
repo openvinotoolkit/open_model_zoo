@@ -14,9 +14,10 @@ The network is able to recognize simplified Chinese text consisting of character
 
 | Metric                                         | Value              |
 |------------------------------------------------|--------------------|
-| GFlops                                         |   120.251          |
-| MParams                                        |   27.19            |
-| Accuracy on partial SCUT-EPT test set          |   75.58%           |
+| GFlops                                         |  134.513        |
+| MParams                                        |   17.270           |
+| Accuracy on SCUT-EPT test subset (excluding images wider than 2000px after resized to height 96px with aspect ratio)                               |   75.31%           |
+| Accuracy on SCUT-EPT test set of the original PyTorch\* model                |   76.16%           |
 | Source framework                               |   PyTorch\*        |
 
 
