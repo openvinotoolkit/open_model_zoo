@@ -125,19 +125,19 @@ void paintInfo(cv::Mat& frame, const PipelineBase::PerformanceInfo& info) {
     std::ostringstream out;
 
     out.str("");
-    out << "FPS: " << std::fixed << std::setprecision(1) << info.FPS;
+    out << "FPS:" << std::fixed << std::setprecision(0) << std::setw(3) << info.movingAverageFPS
+        << " (" << std::setprecision(1) << info.FPS << ")";
     putHighlightedText(frame, out.str(), cv::Point2f(10, 30), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(10, 200, 10), 2);
 
     out.str("");
-    out << "Avg Latency: " << std::fixed << std::setprecision(1) <<
-        (std::chrono::duration_cast<std::chrono::milliseconds>(info.latencySum).count() / info.framesCount)
-        << " ms";
+    out << "Avg Latency:" << std::fixed << std::setprecision(0) << std::setw(4) << info.movingAverageLatencyMs
+        << " (" << std::setprecision(1) << info.getTotalAverageLatencyMs() << ") ms";
     putHighlightedText(frame, out.str(), cv::Point2f(10, 60), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(200, 10, 10), 2);
+
     out.str("");
     out << "Pool: " << std::fixed << std::setprecision(1) <<
         info.numRequestsInUse << "/" << FLAGS_nireq;
-    putHighlightedText(frame, out.str(), cv::Point2f(10, 90), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(128, 128, 128), 2);
-
+    putHighlightedText(frame, out.str(), cv::Point2f(10, 90), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(200, 10, 10), 2);
 }
 
 int main(int argc, char *argv[]) {
@@ -211,8 +211,7 @@ int main(int argc, char *argv[]) {
 
         //--- Show performace results 
         std::cout << "Avg Latency: " << std::fixed << std::setprecision(1) <<
-            (std::chrono::duration_cast<std::chrono::milliseconds>(info.latencySum).count() / info.framesCount)
-            << " ms" << std::endl;
+            info.getTotalAverageLatencyMs() << " ms" << std::endl;
 
         std::cout << "FPS: " << std::fixed << std::setprecision(1) << info.FPS << std::endl;
 

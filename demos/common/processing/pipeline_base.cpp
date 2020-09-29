@@ -176,9 +176,33 @@ PipelineBase::InferenceResult PipelineBase::getInferenceResult(bool shouldKeepOr
 
         // Updating performance info
         auto now = std::chrono::steady_clock::now();
-        perfInfo.latencySum += (now - retVal.startTime);
+        auto latency = now - retVal.startTime;
+
+        auto oldLatency = perfInternals.latenciesMs[perfInternals.currentIndex];
+        auto oldRetrievalTimestamp = perfInternals.retrievalTimestamps[perfInternals.currentIndex];
+
+        perfInternals.latenciesMs[perfInternals.currentIndex] = std::chrono::duration_cast<std::chrono::milliseconds>(latency).count();
+        perfInternals.movingLatenciesSumMs += perfInternals.latenciesMs[perfInternals.currentIndex];
+        perfInternals.retrievalTimestamps[perfInternals.currentIndex] = now;
+        perfInternals.currentIndex = (perfInternals.currentIndex + 1) % MOVING_AVERAGE_SAMPLES;
+
+        perfInfo.latencySum += latency;
         perfInfo.framesCount++;
         perfInfo.FPS = perfInfo.framesCount*1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(now - perfInfo.startTime).count();
+
+        if (perfInfo.framesCount <= MOVING_AVERAGE_SAMPLES) {
+            // History buffer is not full in the beginning, so let's reuse global metrics so far
+            perfInfo.movingAverageLatencyMs = ((double)perfInternals.movingLatenciesSumMs) / perfInfo.framesCount;
+            perfInfo.movingAverageFPS = perfInfo.FPS;
+        }
+        else
+        {
+            // Now history buffer is full, we can use its data
+            perfInternals.movingLatenciesSumMs -= oldLatency;
+            perfInfo.movingAverageLatencyMs = ((double)perfInternals.movingLatenciesSumMs) / MOVING_AVERAGE_SAMPLES;
+            perfInfo.movingAverageFPS = MOVING_AVERAGE_SAMPLES * 1000.0 /
+                std::chrono::duration_cast<std::chrono::milliseconds>(now - oldRetrievalTimestamp).count();
+        }
 
         return retVal;
     }

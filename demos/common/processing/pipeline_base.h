@@ -14,6 +14,8 @@
 // limitations under the License.
 */
 
+#define MOVING_AVERAGE_SAMPLES 5
+
 #pragma once
 #include <string>
 #include <deque>
@@ -59,8 +61,22 @@ public:
         int64_t framesCount = 0;
         std::chrono::steady_clock::duration latencySum = std::chrono::steady_clock::duration::zero();
         std::chrono::steady_clock::time_point startTime;
+        double movingAverageLatencyMs;
         uint32_t numRequestsInUse;
+        double movingAverageFPS;
         double FPS=0;
+
+        double getTotalAverageLatencyMs() const {
+            return ((double)std::chrono::duration_cast<std::chrono::milliseconds>(latencySum).count()) / framesCount;
+        }
+    };
+
+    struct PerformanceInternalCounters
+    {
+        long long latenciesMs[MOVING_AVERAGE_SAMPLES] = {};
+        std::chrono::steady_clock::time_point retrievalTimestamps[MOVING_AVERAGE_SAMPLES] = {};
+        long long movingLatenciesSumMs = 0;
+        int currentIndex = 0;
     };
 
 public:
@@ -131,6 +147,7 @@ protected:
     InferenceEngine::ExecutableNetwork execNetwork;
 
     PerformanceInfo perfInfo;
+    PerformanceInternalCounters perfInternals;
 
     std::mutex mtx;
     std::condition_variable condVar;
