@@ -97,18 +97,22 @@ int main(int argc, char *argv[]) {
         if (inputShapes.size() != 1 && inputShapes.size() != 2)
             throw std::logic_error("The demo supports topologies with 1 or 2 inputs only");
         std::string lrInputBlobName = inputShapes.begin()->first;
-        const SizeVector &lrShape = inputShapes[lrInputBlobName];
+        SizeVector lrShape = inputShapes[lrInputBlobName];
+        if (lrShape.size() != 4) {
+            throw std::logic_error("Number of dimensions for an input must be 4");
+        }
         // A model like single-image-super-resolution-???? may take bicubic interpolation of the input image as the
         // second input
         std::string bicInputBlobName;
         if (inputShapes.size() == 2) {
             bicInputBlobName = (++inputShapes.begin())->first;
-            const SizeVector &bicShape = inputShapes[bicInputBlobName];
-            if (lrShape.size() != 4 || bicShape.size() != 4) {
+            SizeVector bicShape = inputShapes[bicInputBlobName];
+            if (bicShape.size() != 4) {
                 throw std::logic_error("Number of dimensions for both inputs must be 4");
             }
             if (lrShape[2] >= bicShape[2] && lrShape[3] >= bicShape[3]) {
                 lrInputBlobName.swap(bicInputBlobName);
+                lrShape.swap(bicShape);
             } else if (!(lrShape[2] <= bicShape[2] && lrShape[3] <= bicShape[3])) {
                 throw std::logic_error("Each spatial dimension of one input must surpass or be equal to a spatial"
                     "dimension of another input");
