@@ -22,7 +22,7 @@ future releases.
 
 ## Prerequisites
 
-1. Install Python (version 3.5.2 or higher)
+1. Install Python (version 3.6 or higher)
 2. Install the tools' dependencies with the following command:
 
 ```sh
@@ -44,20 +44,6 @@ For models from Caffe2:
 ```sh
 python3 -mpip install --user -r ./requirements-caffe2.in
 ```
-
-When running the model downloader with Python 3.5.x on macOS, you may encounter
-an error similar to the following:
-
-> requests.exceptions.SSLError: [...] (Caused by SSLError(SSLError(1, '[SSL: TLSV1_ALERT_PROTOCOL_VERSION]
-tlsv1 alert protocol version (\_ssl.c:719)'),))
-
-You can work around this by installing additional packages:
-
-```sh
-python3 -mpip install --user 'requests[security]'
-```
-
-Alternatively, upgrade to Python 3.6 or a later version.
 
 ## Model downloader usage
 
