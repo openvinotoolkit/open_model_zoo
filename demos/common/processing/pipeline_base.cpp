@@ -73,10 +73,15 @@ PipelineBase::~PipelineBase(){
 }
 
 
-void PipelineBase::waitForData(){
+void PipelineBase::waitForData(bool shouldKeepOrder){
     std::unique_lock<std::mutex> lock(mtx);
 
-    condVar.wait(lock, [&] {return callbackException != nullptr || requestsPool->isIdleRequestAvailable() || !completedInferenceResults.empty(); });
+    condVar.wait(lock, [&] {return callbackException != nullptr ||
+        requestsPool->isIdleRequestAvailable() ||
+        (shouldKeepOrder ?
+            completedInferenceResults.find(outputFrameId) != completedInferenceResults.end() :
+            !completedInferenceResults.empty());
+    });
 
     if (callbackException)
         std::rethrow_exception(callbackException);
@@ -151,15 +156,20 @@ int64_t PipelineBase::submitImage(cv::Mat img) {
     return submitRequest(request, img);
 }
 
-PipelineBase::InferenceResult PipelineBase::getInferenceResult()
+PipelineBase::InferenceResult PipelineBase::getInferenceResult(bool shouldKeepOrder)
 {
     std::lock_guard<std::mutex> lock(mtx);
 
-    const auto& it = completedInferenceResults.find(outputFrameId);
+    const auto& it = shouldKeepOrder ?
+        completedInferenceResults.find(outputFrameId) :
+        completedInferenceResults.begin();
+
     if (it != completedInferenceResults.end())
     {
         auto retVal = std::move(it->second);
         completedInferenceResults.erase(it);
+
+        outputFrameId = retVal.frameId;
         outputFrameId++;
         if (outputFrameId < 0)
             outputFrameId = 0;

@@ -74,9 +74,10 @@ public:
     /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
     void init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine = nullptr);
 
-    /// Waits until output data becomes available
-    ///
-    void waitForData();
+    /// Waits until either output data becomes available or pipeline allows to submit more input data.
+    /// @param shouldKeepOrder if true, function will treat results as ready only if next sequential result (frame) is
+    /// ready (so results can be extracted in the same order as they were submitted). Otherwise, function will return if any result is ready.
+    void waitForData(bool shouldKeepOrder = true);
 
     /// Returns true if there's available infer requests in the pool
     /// and next frame can be submitted for processing.
@@ -118,8 +119,10 @@ protected:
     virtual int64_t submitRequest(InferenceEngine::InferRequest::Ptr request,cv::Mat extraData =cv::Mat());
 
     /// Returns processed result, if available
+    /// @param shouldKeepOrder if true, function will return processed data sequentially,
+    /// keeping original frames order (as they were submitted). Otherwise, function will return processed data in random order.
     /// @returns InferenceResult with processed information or empty InferenceResult (with negative frameID) if there's no any results yet.
-    virtual InferenceResult getInferenceResult();
+    virtual InferenceResult getInferenceResult(bool shouldKeepOrder=true);
 
 protected:
     std::unique_ptr<RequestsPool> requestsPool;

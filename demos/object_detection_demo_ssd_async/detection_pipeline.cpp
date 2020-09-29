@@ -144,8 +144,8 @@ int64_t DetectionPipeline::submitImage(cv::Mat img){
     return submitRequest(request,img);
 }
 
-DetectionPipeline::DetectionResult DetectionPipeline::getProcessedResult(){
-    auto infResult = PipelineBase::getInferenceResult();
+DetectionPipeline::DetectionResult DetectionPipeline::getProcessedResult(bool shouldKeepOrder){
+    auto infResult = PipelineBase::getInferenceResult(shouldKeepOrder);
     if (infResult.IsEmpty()){
         return DetectionResult();
     }

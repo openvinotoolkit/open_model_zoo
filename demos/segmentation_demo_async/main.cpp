@@ -185,6 +185,7 @@ int main(int argc, char *argv[]) {
                 paintInfo(outFrame, pipeline.getPerformanceInfo());
                 cv::imshow("Segmentation Results", outFrame);
             }
+
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
             pipeline.waitForData();
 

@@ -51,7 +51,7 @@ public:
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
 
     virtual int64_t submitImage(cv::Mat img);
-    DetectionResult getProcessedResult();
+    DetectionResult getProcessedResult(bool shouldKeepOrder = true);
 
     cv::Mat obtainAndRenderData();
 

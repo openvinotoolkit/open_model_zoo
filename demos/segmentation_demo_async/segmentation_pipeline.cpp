@@ -75,8 +75,8 @@ void SegmentationPipeline::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
     }
 }
 
-SegmentationPipeline::SegmentationResult SegmentationPipeline::getProcessedResult(){
-    auto infResult = PipelineBase::getInferenceResult();
+SegmentationPipeline::SegmentationResult SegmentationPipeline::getProcessedResult(bool shouldKeepOrder){
+    auto infResult = PipelineBase::getInferenceResult(shouldKeepOrder);
     if (infResult.IsEmpty()){
         return SegmentationResult();
     }

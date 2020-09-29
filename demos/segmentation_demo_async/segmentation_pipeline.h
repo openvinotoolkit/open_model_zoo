@@ -43,7 +43,7 @@ public:
 
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
 
-    SegmentationResult getProcessedResult();
+    SegmentationResult getProcessedResult(bool shouldKeepOrder=true);
     cv::Mat obtainAndRenderData();
 
 protected:
