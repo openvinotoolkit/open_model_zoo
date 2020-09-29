@@ -48,7 +48,7 @@ public:
         const std::vector<std::string>& labels = std::vector<std::string>(),
         InferenceEngine::Core* engine = nullptr);
 
-    virtual void PrepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
+    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
 
     virtual int64_t submitImage(cv::Mat img);
     DetectionResult getProcessedResult();

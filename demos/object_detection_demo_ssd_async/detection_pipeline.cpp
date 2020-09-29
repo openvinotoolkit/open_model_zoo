@@ -43,7 +43,7 @@ DetectionPipeline::DetectionPipeline(const std::string& model_name, const CnnCon
     }
 }
 
-void DetectionPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork){
+void DetectionPipeline::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork){
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input blobs -----------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;

@@ -41,7 +41,7 @@ public:
     /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
     SegmentationPipeline(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine = nullptr);
 
-    virtual void PrepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
+    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
 
     SegmentationResult getProcessedResult();
     cv::Mat obtainAndRenderData();

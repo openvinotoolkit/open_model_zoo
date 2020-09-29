@@ -29,7 +29,7 @@ SegmentationPipeline::SegmentationPipeline(const std::string& model_name, const 
         colors[i] = { CITYSCAPES_COLORS[i].blue(), CITYSCAPES_COLORS[i].green(), CITYSCAPES_COLORS[i].red() };
 }
 
-void SegmentationPipeline::PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork){
+void SegmentationPipeline::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork){
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input blobs -----------------------------------------------------
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();

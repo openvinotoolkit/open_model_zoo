@@ -161,17 +161,19 @@ int main(int argc, char *argv[]) {
 
         auto startTimePoint = std::chrono::steady_clock::now();
         while (true){
-            //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
             int64_t frameNum;
-            if (curr_frame.empty()) {
-                curr_frame = cap->read();
-                if (curr_frame.empty())
-                    throw std::logic_error("Can't read an image from the input");
-            }
+            if (pipeline.isReadyToProcess()) {
+                //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
+                if (curr_frame.empty()) {
+                    curr_frame = cap->read();
+                    if (curr_frame.empty())
+                        throw std::logic_error("Can't read an image from the input");
+                }
 
-            frameNum = pipeline.submitImage(curr_frame);
-            if (frameNum >= 0)
-                curr_frame.release();
+                frameNum = pipeline.submitImage(curr_frame);
+                if (frameNum >= 0)
+                    curr_frame.release();
+            }
 
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - check for getProcessedResult() function

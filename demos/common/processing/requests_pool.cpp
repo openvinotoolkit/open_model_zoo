@@ -16,7 +16,7 @@
 
 #include "requests_pool.h"
 
-RequestsPool::RequestsPool(InferenceEngine::ExecutableNetwork & execNetwork, unsigned int size):
+RequestsPool::RequestsPool(InferenceEngine::ExecutableNetwork & execNetwork, unsigned int size) :
     numRequestsInUse(0)
 {
     for (unsigned int infReqId = 0; infReqId < size; ++infReqId) {
@@ -41,7 +41,7 @@ InferenceEngine::InferRequest::Ptr RequestsPool::getIdleRequest()
     }
 }
 
-void RequestsPool::setRequestIdle(const InferenceEngine::InferRequest::Ptr & request){
+void RequestsPool::setRequestIdle(const InferenceEngine::InferRequest::Ptr & request) {
     std::lock_guard<std::mutex> lock(mtx);
     this->requests.at(request) = false;
     numRequestsInUse--;
@@ -56,7 +56,7 @@ int64_t RequestsPool::getInUseRequestsCount()
 bool RequestsPool::isIdleRequestAvailable()
 {
     std::lock_guard<std::mutex> lock(mtx);
-    return numRequestsInUse<requests.size();
+    return numRequestsInUse < requests.size();
 }
 
 void RequestsPool::waitForTotalCompletion() {

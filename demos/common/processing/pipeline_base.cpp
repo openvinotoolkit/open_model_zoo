@@ -57,7 +57,7 @@ void PipelineBase::init(const std::string& model_name, const CnnConfig& cnnConfi
     cnnNetwork.setBatchSize(1);
 
     // -------------------------- Reading all outputs names and customizing I/O blobs (in inherited classes)
-    PrepareInputsOutputs(cnnNetwork);
+    prepareInputsOutputs(cnnNetwork);
 
     // --------------------------- 4. Loading model to the device ------------------------------------------
     slog::info << "Loading model to the device" << slog::endl;

@@ -108,7 +108,7 @@ protected:
     /// Inherited classes may override this function to prepare input/output blobs (get names, set precision, etc...)
     /// The value of outputName member variable is also may to be set here (however, it can be done in any other place).
     /// @param cnnNetwork - CNNNetwork object already loaded during initialization
-    virtual void PrepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {}
+    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {}
 
     /// Submit request to network
     /// @param request - request to be submitted (caller function should obtain it using getIdleRequest)
