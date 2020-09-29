@@ -73,7 +73,7 @@ AccuracyChecker supports following set of adapters:
   * `do_softmax` - boolean flag which says should be softmax applied to detection scores or not. (Optional, default True)
 * `ssd_onnx` - converting output of SSD-based model from PyTorch with NonMaxSuppression layer.
   * `labels_out` - name of output layer with labels or regular expression for it searching.
-  * `scores_out`- name of output layer with scores or regular expression for it searching.
+  * `scores_out`- name of output layer with scores or regular expression for it searching. Optional, can be not provided, if your model has concatenation of scores with box coordinates.
   * `bboxes_out` - name of output layer with bboxes or regular expression for it searching.
 * `tf_object_detection` - converting output of detection models from TensorFlow object detection API to `DetectionPrediction`.
   * `classes_out` - name of output layer with predicted classes.
