@@ -402,8 +402,8 @@ class RetinaNetTF2(Adapter):
     def prepare_boxes_and_classes(self, raw, batch_id):
         boxes_outs, classes_outs = [], []
         for boxes_out, cls_out in zip(self.loc_out, self.cls_out):
-            boxes_outs.append(raw[boxes_out][batch_id])
-            classes_outs.append(raw[cls_out][batch_id])
+            boxes_outs.append(np.transpose(raw[boxes_out][batch_id], (1, 2, 0)))
+            classes_outs.append(np.transpose(raw[cls_out][batch_id], (1, 2, 0)))
         return boxes_outs, classes_outs
 
     def process(self, raw, identifiers, frame_meta):
@@ -415,11 +415,18 @@ class RetinaNetTF2(Adapter):
             input_shape = input_shape[0]
             image_size = input_shape[2:] if input_shape[1] == 3 else input_shape[1:3]
             boxes, scores, labels = self.process_single(boxes_out, classes_out, image_size)
-            x_mins, y_mins, x_maxs, y_maxs = boxes.T
+            if np.size(boxes):
+                x_mins, y_mins, x_maxs, y_maxs = boxes.T
+                x_mins /= image_size[1]
+                y_mins /= image_size[0]
+                x_maxs /= image_size[1]
+                y_maxs /= image_size[0]
+            else:
+                x_mins, y_mins, x_maxs, y_maxs = [], [], [], []
             result.append(
                 DetectionPrediction(
                     identifier, labels, scores,
-                    x_mins / image_size[1], y_mins / image_size[0], x_maxs / image_size[1], y_maxs / image_size[0]
+                    x_mins, y_mins, x_maxs, y_maxs
                 ))
         return result
 
@@ -438,7 +445,7 @@ class RetinaNetTF2(Adapter):
 
             # Applies score transformation and remove the implicit background class.
             scores_i = sigmoid(np.reshape(class_outputs[i - self.min_level], [-1, num_classes]))
-            scores_i = scores_i[1:, :]
+            scores_i = scores_i[:, 1:]
 
             # Box decoding.
             # The anchor boxes are shared for all data in a batch.
@@ -502,21 +509,49 @@ class RetinaNetTF2(Adapter):
                              score_threshold=0.05,
                              pre_nms_num_boxes=5000):
 
+        def _select_top_k_scores(scores_in, pre_nms_num_detections):
+            """Select top_k scores and indices for each class.
+
+            Args:
+              scores_in: a Tensor with shape [batch_size, N, num_classes], which stacks
+                class logit outputs on all feature levels. The N is the number of total
+                anchors on all levels. The num_classes is the number of classes predicted
+                by the model.
+              pre_nms_num_detections: Number of candidates before NMS.
+
+            Returns:
+              scores and indices: Tensors with shape [batch_size, pre_nms_num_detections,
+                num_classes].
+            """
+            num_anchors, num_class = scores_in.shape
+            scores_trans = np.transpose(scores_in, [1, 0])
+            scores_trans = np.reshape(scores_trans, [-1, num_anchors])
+
+            indices_ = np.argsort(-scores_trans)
+            top_k_scores = -1 * np.sort(-scores_trans)[:, :pre_nms_num_detections]
+            top_k_indices = indices_[:, :pre_nms_num_detections]
+
+            top_k_scores = np.reshape(top_k_scores,
+                                      [num_class, pre_nms_num_detections])
+            top_k_indices = np.reshape(top_k_indices,
+                                       [num_class, pre_nms_num_detections])
+
+            return np.transpose(top_k_scores,
+                                [1, 0]), np.transpose(top_k_indices, [1, 0])
+
         nmsed_boxes = []
         nmsed_classes = []
         nmsed_scores = []
         _, num_classes_for_box, _ = boxes.shape
         total_anchors, num_classes = scores.shape
+        scores, indices = _select_top_k_scores(
+            scores, min(total_anchors, pre_nms_num_boxes))
         # Selects top pre_nms_num scores and indices before NMS.
         for i in range(num_classes):
             boxes_i = boxes[:, min(num_classes_for_box - 1, i), :]
             scores_i = scores[:, i]
-            indices = np.argsort(scores_i)[::-1]
-            if indices.size < pre_nms_num_boxes:
-                indices = indices[:pre_nms_num_boxes]
-            scores_i = scores_i[indices]
             # Obtains pre_nms_num_boxes before running NMS.
-            boxes_i = boxes_i[indices, :]
+            boxes_i = boxes_i[indices[:, i], :]
 
             # Filter out scores.
             filterd_scores = scores_i > score_threshold
@@ -525,20 +560,21 @@ class RetinaNetTF2(Adapter):
             if not np.size(scores_i):
                 continue
 
-            keep = NMS.nms(*boxes_i.T, scores_i, nms_iou_threshold, include_boundaries=False, keep_top_k=max_total_size)
+            keep = NMS.nms(*boxes_i.T, scores_i, nms_iou_threshold, include_boundaries=True, keep_top_k=max_total_size)
             nmsed_classes_i = np.full(len(keep), i)
             nmsed_boxes.append(boxes_i[keep, :])
             nmsed_scores.append(scores_i[keep])
             nmsed_classes.append(nmsed_classes_i)
-        nmsed_boxes = np.concatenate(nmsed_boxes, axis=0)
-        nmsed_scores = np.concatenate(nmsed_scores, axis=0)
-        nmsed_classes = np.concatenate(nmsed_classes, axis=0)
-        sorted_order = np.argsort(nmsed_scores[::-1])
-        if sorted_order.size > max_total_size:
-            sorted_order = sorted_order[:max_total_size]
-        nmsed_scores = nmsed_scores[sorted_order]
-        nmsed_boxes = nmsed_boxes[sorted_order, :]
-        nmsed_classes = nmsed_classes[sorted_order]
+        if np.size(nmsed_scores):
+            nmsed_boxes = np.concatenate(nmsed_boxes, axis=0)
+            nmsed_scores = np.concatenate(nmsed_scores, axis=0)
+            nmsed_classes = np.concatenate(nmsed_classes, axis=0)
+            sorted_order = np.argsort(nmsed_scores[::-1])
+            if sorted_order.size > max_total_size:
+                sorted_order = sorted_order[:max_total_size]
+            nmsed_scores = nmsed_scores[sorted_order]
+            nmsed_boxes = nmsed_boxes[sorted_order, :]
+            nmsed_classes = nmsed_classes[sorted_order] + 1
         return nmsed_boxes, nmsed_scores, nmsed_classes
 
 
