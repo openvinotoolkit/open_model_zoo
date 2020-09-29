@@ -221,6 +221,8 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
 * `dna_seq_accuracy` - accuracy for DNA sequencing task. Supported representations: `DNASequenceAnnotation`, `DNASequencePrediction`, `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
   * `min_coverage` - minimum sequence coverage between predicted sequence and reference for positive measurement (Optional, default 0.5).
   * `balansed` - balanced accuracy metric (Optional, default false).
+* `inception_score` - [Inception score](https://arxiv.org/pdf/1801.01973) for generated images by GAN models. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+* `fid` - Frechet Inception Distance to measure the distance between the distributions of synthesized images and real images. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
 
 ## Metrics profiling
 Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.
@@ -262,3 +264,6 @@ Supported for profiling metrics:
   * `frequency_weighted_accuracy`
 * Instance Segmentation
   * `coco_orig_segm_precision`
+* GAN:
+  * `inception_score`
+  * `fid`
