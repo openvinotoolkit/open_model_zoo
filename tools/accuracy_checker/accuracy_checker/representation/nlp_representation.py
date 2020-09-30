@@ -105,6 +105,30 @@ class QuestionAnsweringEmbeddingPrediction(QuestionAnswering):
         super().__init__(identifier)
         self.embedding = embedding
 
+
+class QuestionAnsweringBiDAFAnnotation(QuestionAnswering):
+    def __init__(self, identifier, title, context, query, answers, context_word, context_char, query_word, query_char,
+                 question_id, words_idx_in_context):
+        super().__init__(identifier)
+        self.title = title
+        self.context = context
+        self.query = query
+        self.orig_answer_text = answers
+        self.context_word = context_word
+        self.context_char = context_char
+        self.query_word = query_word
+        self.query_char = query_char
+        self.question_id = question_id
+        self.words_idx_in_context = words_idx_in_context
+
+class QuestionAnsweringBiDAFPrediction(QuestionAnswering):
+    def __init__(self, identifier, start_position, end_position, tokens=None):
+        super().__init__(identifier)
+        self.start_position = start_position
+        self.end_position = end_position
+        self.tokens = tokens if tokens is not None else []
+
+
 class TextClassificationAnnotation(ClassificationAnnotation):
     def __init__(self, identifier, label, input_ids, input_mask, segment_ids, tokens):
         super().__init__(identifier, label)

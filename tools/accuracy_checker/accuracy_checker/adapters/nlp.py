@@ -22,7 +22,8 @@ from ..representation import (MachineTranslationPrediction,
                               QuestionAnsweringPrediction,
                               QuestionAnsweringEmbeddingPrediction,
                               ClassificationPrediction,
-                              LanguageModelingPrediction)
+                              LanguageModelingPrediction,
+                              QuestionAnsweringBiDAFPrediction)
 from ..config import PathField, NumberField, StringField, BoolField
 from ..utils import read_txt, UnsupportedPackage
 
@@ -196,7 +197,34 @@ class QuestionAnsweringEmbeddingAdapter(Adapter):
 
         return result
 
+class QuestionAnsweringBiDAFAdapter(Adapter):
+    __provider__ = 'bidaf_question_answering'
+    prediction_types = (QuestionAnsweringBiDAFPrediction, )
 
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'start_pos': StringField(description="Output layer name for answer start position."),
+            'end_pos': StringField(description="Output layer name for answer end position.")
+        })
+        return parameters
+
+    def configure(self):
+        self.start_pos = self.get_value_from_config('start_pos')
+        self.end_pos= self.get_value_from_config('end_pos')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_output = self._extract_predictions(raw, frame_meta)
+        result = []
+        for identifier, start, end in zip(
+                identifiers, raw_output[self.start_pos], raw_output[self.end_pos]
+        ):
+            result.append(
+                QuestionAnsweringBiDAFPrediction(identifier, start, end)
+            )
+
+        return result
 
 class LanguageModelingAdapter(Adapter):
     __provider__ = 'common_language_modeling'

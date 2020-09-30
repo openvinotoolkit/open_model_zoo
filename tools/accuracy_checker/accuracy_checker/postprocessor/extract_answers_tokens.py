@@ -16,7 +16,10 @@ limitations under the License.
 
 from collections import OrderedDict, namedtuple
 from .postprocessor import Postprocessor
-from ..representation import QuestionAnsweringAnnotation, QuestionAnsweringPrediction
+from ..representation import (
+    QuestionAnsweringAnnotation, QuestionAnsweringPrediction,
+    QuestionAnsweringBiDAFAnnotation,QuestionAnsweringBiDAFPrediction
+)
 from ..annotation_converters._nlp_common import WordPieceTokenizer
 from ..config import NumberField
 
@@ -181,3 +184,38 @@ class ExtractSQUADPrediction(Postprocessor):
 
         output_text = orig_text[orig_start_position:(orig_end_position + 1)]
         return output_text
+
+class ExtractSQUADPredictionBiDAF(Postprocessor):
+
+    __provider__ = 'bidaf_extract_answers_tokens'
+
+    annotation_types = (QuestionAnsweringBiDAFAnnotation, )
+    prediction_types = (QuestionAnsweringBiDAFPrediction, )
+
+    def process_image(self, annotation, prediction):
+        def _extended_check_indexes(start, end, annotation):
+            if end >= annotation.context_word.size:
+                return False
+            if start >= len(annotation.words_idx_in_context) or end >= len(annotation.words_idx_in_context):
+                return False
+            if end < start:
+                return False
+            return True
+
+        def _get_text(raw_text, indexes, start, end, end_length):
+            return raw_text[indexes[start]:indexes[end] + end_length]
+
+        for annotation_, prediction_ in zip(annotation, prediction):
+            start_index = prediction_.start_position
+            end_index = prediction_.end_position
+            tokens = []
+            if _extended_check_indexes(start_index, end_index, annotation_):
+                end_length = len(annotation_.context_word.reshape(-1)[end_index])
+                tok_text = _get_text(annotation_.context, annotation_.words_idx_in_context,
+                                     start_index, end_index, end_length)
+                tokens.append(tok_text)
+            else:
+                tokens.append("")
+            prediction_.tokens = tokens
+
+        return annotation, prediction

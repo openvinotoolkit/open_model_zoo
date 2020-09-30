@@ -43,7 +43,7 @@ from .crop_segmentation_mask import CropSegmentationMask, CropOrPadSegmentationM
 from .clip_segmentation_mask import ClipSegmentationMask
 from .normalize_boxes import NormalizeBoxes
 from .brats_postprocessing import SegmentationPredictionResample, TransformBratsPrediction
-from .extract_answers_tokens import ExtractSQUADPrediction
+from .extract_answers_tokens import ExtractSQUADPrediction, ExtractSQUADPredictionBiDAF
 from .translate_3d_poses import Translate3dPoses
 from .normalize_recomendation import MinMaxNormalizeRecommendation, SigmoidNormalizeRecommendation
 from .align_prediction_depth_map import AlignDepth
@@ -115,4 +115,5 @@ __all__ = [
     'RemoveRepeatTokens',
     'TokensToLowerCase',
     'SRImageRecovery',
+    'ExtractSQUADPredictionBiDAF',
 ]
