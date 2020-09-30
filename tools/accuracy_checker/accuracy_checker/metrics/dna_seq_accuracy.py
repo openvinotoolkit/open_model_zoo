@@ -91,3 +91,6 @@ class DNASequenceAccuracy(PerImageEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         return [np.mean(self.accuracy), np.median(self.accuracy)]
+
+    def reset(self):
+        self.accuracy = []

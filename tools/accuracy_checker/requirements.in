@@ -29,3 +29,7 @@ editdistance
 
 # speech recognition with language modeling
 pypi-kenlm
+
+# DNA sequence matching
+parasail
+ctc_fast_decode
