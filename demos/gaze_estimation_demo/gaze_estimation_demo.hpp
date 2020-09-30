@@ -21,8 +21,6 @@ static const char face_detection_model_message[] = "Required. Path to an .xml fi
 static const char head_pose_model_message[] = "Required. Path to an .xml file with a trained Head Pose Estimation model.";
 static const char facial_landmarks_model_message[] = "Required. Path to an .xml file with a trained Facial Landmarks Estimation model.";
 static const char eye_state_model_message[] = "Required. Path to an .xml file with a trained Open/Closed Eye Estimation model.";
-static const char plugin_message[] = "Plugin name. For example, CPU. If this parameter is specified, "
-                                     "the demo will look for this plugin only.";
 static const char target_device_message[] = "Optional. Target device for Gaze Estimation network (the list of available devices is shown below). "
                                             "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                             "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
