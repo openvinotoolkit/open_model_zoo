@@ -67,9 +67,8 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
                     warnings.warn('Annotation mask for {} does not exist. File will be ignored.'.format(file_name))
                 else:
                     content_check_errors.append(
-                        '{}: '.format(str(file_in_dir)) +
-                        'annotation mask does not exist, please remove this file or add gt mask '
-                        '({}).'.format(str(mask))
+                        '{}: annotation mask does not exist, please remove this file or add gt mask ({})'.format(
+                            file_in_dir, mask)
                     )
                 continue
             annotation = BrainTumorSegmentationAnnotation(

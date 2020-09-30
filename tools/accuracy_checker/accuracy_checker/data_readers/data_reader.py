@@ -515,7 +515,7 @@ class WavReader(BaseReader):
             else:
                 raise RuntimeError("Reader {} coudn't process file {}: unsupported sample width {}"
                                    "(reader only supports {})"
-                                   .format(self.__provider__, str(self.data_source / data_id),
+                                   .format(self.__provider__, self.data_source / data_id,
                                            sample_width, [*self._samplewidth_types.keys()]))
             data = data.reshape(-1, wav.getnchannels()).T
 
