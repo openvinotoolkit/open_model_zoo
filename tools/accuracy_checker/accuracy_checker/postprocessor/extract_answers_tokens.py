@@ -18,7 +18,7 @@ from collections import OrderedDict, namedtuple
 from .postprocessor import Postprocessor
 from ..representation import (
     QuestionAnsweringAnnotation, QuestionAnsweringPrediction,
-    QuestionAnsweringBiDAFAnnotation,QuestionAnsweringBiDAFPrediction
+    QuestionAnsweringBiDAFAnnotation, QuestionAnsweringBiDAFPrediction
 )
 from ..annotation_converters._nlp_common import WordPieceTokenizer
 from ..config import NumberField

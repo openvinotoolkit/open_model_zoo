@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import numpy as np
 import re
+import numpy as np
 
 from ..representation import QuestionAnsweringBiDAFAnnotation
 from ..utils import read_json, UnsupportedPackage
@@ -100,17 +100,19 @@ class SQUADConverterBiDAF(BaseFormatConverter):
             additional_separators = (
                 "-", "\u2212", "\u2014", "\u2013", "/", "~", '"', "'", "\u201C", "\u2019", "\u201D", "\u2018",
                 "\u00B0")
-            tokens = []
-            for token in nltk_tokens:
-                tokens.extend([t for t in (re.split("([{}])".format("".join(additional_separators)), token)
-                                           if is_context else [token])])
-            assert (not any([t == '<NULL>' for t in tokens]))
-            assert (not any([' ' in t for t in tokens]))
-            assert (not any(['\t' in t for t in tokens]))
+            if is_context:
+                tokens = []
+                for token in nltk_tokens:
+                    tokens.extend(re.split("([{}])".format("".join(additional_separators)), token))
+            else:
+                tokens = nltk_tokens
+            assert not any([t == '<NULL>' for t in tokens])
+            assert not any([' ' in t for t in tokens])
+            assert not any(['\t' in t for t in tokens])
             return tokens
 
         words = tokenize(text, is_context)
-        chars = [[c for c in w][:16] for w in words]
+        chars = [list(w)[:16] for w in words]
         words = np.asarray([w.lower() for w in words]).reshape(-1, 1)
         chars = np.asarray([cs + [''] * (16 - len(cs)) for cs in chars]).reshape(-1, 1, 1, 16)
         return words, chars
@@ -120,9 +122,9 @@ class SQUADConverterBiDAF(BaseFormatConverter):
         indexes = []
         rem = context.lower()
         offset = 0
-        for i, w in enumerate(words):
+        for w in words:
             idx = rem.find(w)
-            assert (idx >= 0)
+            assert idx >= 0
             indexes.append(idx + offset)
             offset += idx + len(w)
             rem = rem[idx + len(w):]

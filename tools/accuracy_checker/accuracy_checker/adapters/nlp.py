@@ -212,7 +212,7 @@ class QuestionAnsweringBiDAFAdapter(Adapter):
 
     def configure(self):
         self.start_pos = self.get_value_from_config('start_pos')
-        self.end_pos= self.get_value_from_config('end_pos')
+        self.end_pos = self.get_value_from_config('end_pos')
 
     def process(self, raw, identifiers, frame_meta):
         raw_output = self._extract_predictions(raw, frame_meta)
