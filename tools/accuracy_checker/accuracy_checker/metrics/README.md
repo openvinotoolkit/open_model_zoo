@@ -218,6 +218,9 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
 * `pckh` - Percentage of Correct Keypoints normalized by head size.  A detected joint is considered correct if the distance between the predicted and the true joint is within a certain threshold. Supported representations: `PoseEstimationAnnotation`, `PoseEstimationPrediction`.
   * `threshold` - distance threshold (Optional, default 0.5).
   * `scale_bias` - bias for scale head size (Optional, default 0.6).
+* `dna_seq_accuracy` - accuracy for DNA sequencing task. Supported representations: `DNASequenceAnnotation`, `DNASequencePrediction`, `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
+  * `min_coverage` - minimum sequence coverage between predicted sequence and reference for positive measurement (Optional, default 0.5).
+  * `balansed` - balanced accuracy metric (Optional, default false).
 
 ## Metrics profiling
 Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.
