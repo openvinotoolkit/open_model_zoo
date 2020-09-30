@@ -82,6 +82,7 @@ from .librispeech import LibrispeechConverter
 from .criteo_kaggle_dac import CriteoKaggleDACConverter
 from .features_regression import FeaturesRegressionConverter
 from .nyu_depth import NYUDepthV2Converter
+from .dna_seq import DNASequenceDatasetConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -152,5 +153,5 @@ __all__ = [
     'CriteoKaggleDACConverter',
     'FeaturesRegressionConverter',
     'Im2latexDatasetConverter',
-
+    'DNASequenceDatasetConverter',
 ]

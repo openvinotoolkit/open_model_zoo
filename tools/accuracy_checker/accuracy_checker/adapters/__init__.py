@@ -92,6 +92,7 @@ from .audio_recognition import (
 from .regression import RegressionAdapter
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
+from .dna_seq_recognition import DNASeqRecognition
 from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
 
 __all__ = [
@@ -187,6 +188,8 @@ __all__ = [
     'FastCTCBeamSearchDecoderWithLm',
 
     'QualityAssessmentAdapter',
+
+    'DNASeqRecognition',
 
     'GVADetectionAdapter',
     'GVAClassificationAdapter',
