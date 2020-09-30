@@ -32,4 +32,4 @@ pypi-kenlm
 
 # DNA sequence matching
 parasail
-ctc_fast_decode
+fast-ctc-decode
