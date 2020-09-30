@@ -19,11 +19,24 @@ import numpy as np
 from ..config import BoolField, PathField, StringField
 from ..utils import read_json, convert_bboxes_xywh_to_x1y1x2y2, check_file_existence
 from ..representation import (
-    DetectionAnnotation, PoseEstimationAnnotation, CoCoInstanceSegmentationAnnotation, ContainerAnnotation
+    DetectionAnnotation,
+    PoseEstimationAnnotation,
+    CoCoInstanceSegmentationAnnotation,
+    ContainerAnnotation,
+    SegmentationAnnotation,
 )
 from .format_converter import BaseFormatConverter, FileBasedAnnotationConverter, ConverterReturn, verify_label_map
 from ..progress_reporters import PrintProgressReporter
 
+from ..utils import UnsupportedPackage
+
+try:
+    import pycocotools.mask as maskUtils
+except ImportError as import_error:
+    maskUtils = UnsupportedPackage("pycocotools", import_error.msg)
+
+from ..representation.segmentation_representation import GTMaskLoader
+from PIL import Image
 
 def get_image_annotation(image_id, annotations_):
     return list(filter(lambda x: x['image_id'] == image_id, annotations_))
@@ -104,6 +117,7 @@ class MSCocoDetectionConverter(BaseFormatConverter):
         self.sort_key = self.get_value_from_config('sort_key')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
+        self.meta = {}
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         full_annotation = read_json(self.annotation_file)
@@ -119,17 +133,20 @@ class MSCocoDetectionConverter(BaseFormatConverter):
             self.dataset_meta, full_annotation, self.use_full_label_map, self.has_background
         )
 
-        meta = {}
+        self.meta = {}
         if self.has_background:
             label_map[0] = 'background'
-            meta['background_label'] = 0
+            self.meta['background_label'] = 0
 
-        meta.update({'label_map': label_map})
+        self.meta.update({'label_map': label_map})
         detection_annotations, content_errors = self._create_representations(
             image_ids, annotations, label_id_to_label, check_content, progress_callback, progress_interval
         )
 
-        return ConverterReturn(detection_annotations, meta, content_errors)
+        return ConverterReturn(detection_annotations, self.meta, content_errors)
+
+    def meta_update(self, updates):
+        self.meta.update(updates)
 
     def _create_representations(
             self, image_info, annotations, label_id_to_label, check_content, progress_callback, progress_interval
@@ -269,12 +286,17 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
             'semantic_only': BoolField(
                 optional=True, default=False, description="Semantic segmentation only mode."
             ),
+            'masks_dir': PathField(
+                is_directory=True, optional=True,
+                description='path to segmentation masks, used if semantic_only is True'
+            ),
         })
         return configuration_parameters
 
     def configure(self):
         super().configure()
         self.semantic_only = self.get_value_from_config('semantic_only')
+        self.masks_dir = self.get_value_from_config('masks_dir')
 
     def _create_representations(
             self, image_info, annotations, label_id_to_label, check_content, progress_callback, progress_interval
@@ -284,14 +306,30 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
         num_iterations = len(image_info)
         progress_reporter = PrintProgressReporter(print_interval=progress_interval)
         progress_reporter.reset(num_iterations, 'annotations')
+        segmentation_colors = (
+            (0, 0, 0), (128, 0, 0), (0, 128, 0), (128, 128, 0),
+            (0, 0, 128), (128, 0, 128), (0, 128, 128), (128, 128, 128),
+            (64, 0, 0), (192, 0, 0), (64, 128, 0), (192, 128, 0),
+            (64, 0, 128), (192, 0, 128), (64, 128, 128), (192, 128, 128),
+            (0, 64, 0), (128, 64, 0), (0, 192, 0), (128, 192, 0),
+            (0, 64, 128))
+        palette = np.asarray(segmentation_colors, dtype = np.uint8).reshape([21 * 3,])
+
 
         for (image_id, image) in enumerate(image_info):
             image_labels, _, _, _, _, is_crowd, segmentations = self._read_image_annotation(
                 image, annotations,
                 label_id_to_label
             )
-            annotation = CoCoInstanceSegmentationAnnotation(image[1], segmentations, image_labels,
-                                                            semantic_only=self.semantic_only)
+
+            if not self.semantic_only:
+                annotation = CoCoInstanceSegmentationAnnotation(image[1], segmentations, image_labels)
+            else:
+                # print(image_id)
+                h, w, _ = image[2]
+                mask_file = self.masks_dir / "{:012}.png".format(image[0])
+                self.make_mask(h, w, mask_file, image_labels, segmentations, palette)
+                annotation = SegmentationAnnotation(image[1], mask_file, mask_loader=GTMaskLoader.SCIPY)
 
             if check_content:
                 image_full_path = self.images_dir / image[1]
@@ -302,9 +340,39 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
             segmentation_annotations.append(annotation)
             progress_reporter.update(image_id, 1)
 
+        self.meta_update({'segmentation_colors': segmentation_colors})
         progress_reporter.finish()
 
         return segmentation_annotations, content_errors
+
+    def make_mask(self, height, width, path_to_mask, labels, segmentations, segmentation_colors):
+        polygons = []
+        for mask in segmentations:
+            rles = maskUtils.frPyObjects(mask, height, width)
+            rle = maskUtils.merge(rles)
+            polygons.append(rle)
+
+        masks = []
+        for polygon in polygons:
+            mask = maskUtils.decode(polygon)
+            if len(mask.shape) < 3:
+                mask = np.expand_dims(mask, axis=-1)
+            masks.append(mask)
+        if masks:
+            masks = np.stack(masks, axis=-1)
+        else:
+            masks = np.zeros((height, width, 0), dtype=np.uint8)
+        masks = (masks * np.asarray(labels, dtype=np.uint8)).max(axis=-1)
+        mask = np.squeeze(masks)
+
+        palimg = Image.new("P", (16,16))
+        palimg.putpalette(segmentation_colors)
+        image = Image.frombytes('L', (width, height), mask.tostring())
+        im = image.im.convert("P", 0, palimg.im)
+        image = image._new(im)
+        image.save(path_to_mask)
+
+        return mask
 
 
 class MSCocoMaskRCNNConverter(MSCocoDetectionConverter):

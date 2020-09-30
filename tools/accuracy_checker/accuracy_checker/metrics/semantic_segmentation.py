@@ -23,14 +23,13 @@ from ..representation import (
     BrainTumorSegmentationAnnotation,
     BrainTumorSegmentationPrediction,
     OAR3DTilingSegmentationAnnotation,
-    CoCoInstanceSegmentationAnnotation,
 )
 from .metric import PerImageEvaluationMetric
 from ..utils import finalize_metric_result
 
 
 class SegmentationMetric(PerImageEvaluationMetric):
-    annotation_types = (SegmentationAnnotation, CoCoInstanceSegmentationAnnotation)
+    annotation_types = (SegmentationAnnotation, )
     prediction_types = (SegmentationPrediction, )
 
     CONFUSION_MATRIX_KEY = 'segmentation_confusion_matrix'
