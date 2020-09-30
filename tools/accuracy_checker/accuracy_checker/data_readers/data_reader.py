@@ -256,7 +256,7 @@ class OpenCVFrameReader(BaseReader):
             success, frame = self.videocap.read()
             self.current += 1
             if not success:
-                raise EOFError('frame with {} index does not exists in {}'.format(self.current, self.data_source))
+                raise EOFError('frame with {} index does not exist in {}'.format(self.current, self.data_source))
 
         return frame
 
