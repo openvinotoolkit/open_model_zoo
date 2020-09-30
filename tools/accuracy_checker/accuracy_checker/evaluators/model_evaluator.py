@@ -159,7 +159,7 @@ class ModelEvaluator(BaseEvaluator):
 
         compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
         if compute_intermediate_metric_res:
-            metric_interval = kwargs.get('metric_interval', 1000)
+            metric_interval = kwargs.get('metrics_interval', 1000)
             ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
         predictions_to_store = []
         dataset_iterator = iter(enumerate(self.dataset))
@@ -228,7 +228,7 @@ class ModelEvaluator(BaseEvaluator):
             self.metric_executor.enable_profiling(self.dataset, profile_type)
         compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
         if compute_intermediate_metric_res:
-            metric_interval = kwargs.get('metric_interval', 1000)
+            metric_interval = kwargs.get('metrics_interval', 1000)
             ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
         predictions_to_store = []
         for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):

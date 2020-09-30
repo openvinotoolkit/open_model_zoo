@@ -66,7 +66,7 @@ class Im2latexEvaluator(BaseEvaluator):
         self._annotations, self._predictions = [], []
         compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
         if compute_intermediate_metric_res:
-            metric_interval = kwargs.get('metric_interval', 1000)
+            metric_interval = kwargs.get('metrics_interval', 1000)
             ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
 
         if progress_reporter:

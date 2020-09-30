@@ -631,7 +631,7 @@ class MTCNNEvaluator(BaseEvaluator):
         _progress_reporter = self._prepare_progress_reporter(check_progress, kwargs.get('progress_reporter'))
         compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
         if compute_intermediate_metric_res:
-            metric_interval = kwargs.get('metric_interval', 1000)
+            metric_interval = kwargs.get('metrics_interval', 1000)
             ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
