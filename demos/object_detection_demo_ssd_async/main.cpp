@@ -190,15 +190,15 @@ int main(int argc, char *argv[]) {
 
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - check for getProcessedResult() function
-            cv::Mat outFrame = pipeline.obtainAndRenderData();
-
-            //--- Showing results and device information
-            if (!outFrame.empty() && !FLAGS_no_show) {
-                presenter.drawGraphs(outFrame);
-                paintInfo(outFrame, pipeline.getPerformanceInfo());
-                cv::imshow("Detection Results", outFrame);
+            cv::Mat outFrame;
+            while (!(outFrame = pipeline.obtainAndRenderData()).empty()) {
+                //--- Showing results and device information
+                if (!outFrame.empty() && !FLAGS_no_show) {
+                    presenter.drawGraphs(outFrame);
+                    paintInfo(outFrame, pipeline.getPerformanceInfo());
+                    cv::imshow("Detection Results", outFrame);
+                }
             }
-
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
             pipeline.waitForData();
 
