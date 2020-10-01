@@ -71,6 +71,8 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
         self._annotations, self._predictions = [], []
 
         self._create_subset(subset, num_images, allow_pairwise_subset)
+        metric_config = self.configure_intermediate_metrics_results(kwargs)
+        compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
 
         if 'progress_reporter' in kwargs:
             _progress_reporter = kwargs['progress_reporter']
@@ -79,10 +81,6 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
             _progress_reporter = None if not check_progress else self._create_progress_reporter(
                 check_progress, self.dataset.size
             )
-        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
-        if compute_intermediate_metric_res:
-            metric_interval = kwargs.get('metrics_interval', 1000)
-            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             batch_inputs_extr, _ = extract_image_representations(batch_inputs)
@@ -202,6 +200,15 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
             self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
         elif num_images is not None:
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
+
+    @staticmethod
+    def configure_intermediate_metrics_results(config):
+        compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
+        metric_interval, ignore_results_formatting = None, None
+        if compute_intermediate_metric_res:
+            metric_interval = config.get('metrics_interval', 1000)
+            ignore_results_formatting = config.get('ignore_results_formatting', False)
+        return compute_intermediate_metric_res, metric_interval, ignore_results_formatting
 
     def load_network(self, network=None):
         self.model.load_network(network, self.launcher)

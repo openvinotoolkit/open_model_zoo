@@ -140,6 +140,8 @@ class ModelEvaluator(BaseEvaluator):
         def prepare_dataset():
             if self.dataset.batch is None:
                 self.dataset.batch = self.launcher.batch
+            if progress_reporter:
+                progress_reporter.reset(self.dataset.size)
 
         prepare_dataset()
 
@@ -154,13 +156,9 @@ class ModelEvaluator(BaseEvaluator):
         if self._is_stored(stored_predictions) or isinstance(self.launcher, DummyLauncher):
             self._annotations, self._predictions = self._load_stored_predictions(stored_predictions, progress_reporter)
 
-        if progress_reporter:
-            progress_reporter.reset(self.dataset.size)
-
-        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
-        if compute_intermediate_metric_res:
-            metric_interval = kwargs.get('metrics_interval', 1000)
-            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
+        output_callback = kwargs.get('output_callback')
+        metric_config = self._configure_metrics(kwargs, output_callback)
+        _, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
         predictions_to_store = []
         dataset_iterator = iter(enumerate(self.dataset))
         infer_requests_pool = {ir.request_id: ir for ir in self.launcher.get_async_requests()}
@@ -222,14 +220,8 @@ class ModelEvaluator(BaseEvaluator):
         if self.dataset.batch is None:
             self.dataset.batch = self.launcher.batch
         output_callback = kwargs.get('output_callback')
-        enable_profiling = kwargs.get('profile', False)
-        profile_type = 'json' if output_callback and enable_profiling else kwargs.get('profile_report_type')
-        if enable_profiling:
-            self.metric_executor.enable_profiling(self.dataset, profile_type)
-        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
-        if compute_intermediate_metric_res:
-            metric_interval = kwargs.get('metrics_interval', 1000)
-            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
+        metric_config = self._configure_metrics(kwargs, output_callback)
+        enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
         predictions_to_store = []
         for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
@@ -386,6 +378,18 @@ class ModelEvaluator(BaseEvaluator):
 
     def set_profiling_dir(self, profiler_dir):
         self.metric_executor.set_profiling_dir(profiler_dir)
+
+    def _configure_metrics(self, config, output_callback):
+        enable_profiling = config.get('profile', False)
+        profile_type = 'json' if output_callback and enable_profiling else config.get('profile_report_type')
+        if enable_profiling:
+            self.metric_executor.enable_profiling(self.dataset, profile_type)
+        compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
+        metric_interval, ignore_results_formatting = None, None
+        if compute_intermediate_metric_res:
+            metric_interval = config.get('metrics_interval', 1000)
+            ignore_results_formatting = config.get('ignore_results_formatting', False)
+        return enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting
 
     @staticmethod
     def store_predictions(stored_predictions, predictions):
