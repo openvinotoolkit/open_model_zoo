@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import numpy as np
+from PIL import Image
 
 from ..config import BoolField, PathField, StringField
 from ..utils import read_json, convert_bboxes_xywh_to_x1y1x2y2, check_file_existence
@@ -36,7 +37,6 @@ except ImportError as import_error:
     maskUtils = UnsupportedPackage("pycocotools", import_error.msg)
 
 from ..representation.segmentation_representation import GTMaskLoader
-from PIL import Image
 
 def get_image_annotation(image_id, annotations_):
     return list(filter(lambda x: x['image_id'] == image_id, annotations_))
@@ -313,7 +313,7 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
             (64, 0, 128), (192, 0, 128), (64, 128, 128), (192, 128, 128),
             (0, 64, 0), (128, 64, 0), (0, 192, 0), (128, 192, 0),
             (0, 64, 128))
-        palette = np.asarray(segmentation_colors, dtype = np.uint8).reshape([21 * 3,])
+        palette = np.asarray(segmentation_colors, dtype=np.uint8).reshape([21 * 3,])
 
 
         for (image_id, image) in enumerate(image_info):
@@ -365,7 +365,7 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
         masks = (masks * np.asarray(labels, dtype=np.uint8)).max(axis=-1)
         mask = np.squeeze(masks)
 
-        palimg = Image.new("P", (16,16))
+        palimg = Image.new("P", (16, 16))
         palimg.putpalette(segmentation_colors)
         image = Image.frombytes('L', (width, height), mask.tostring())
         im = image.im.convert("P", 0, palimg.im)
