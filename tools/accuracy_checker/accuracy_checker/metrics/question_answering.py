@@ -21,7 +21,7 @@ import numpy
 
 from ..representation import QuestionAnsweringAnnotation, QuestionAnsweringPrediction
 from ..representation import QuestionAnsweringEmbeddingAnnotation, QuestionAnsweringEmbeddingPrediction
-from ..representation import QuestionAnsweringBiDAFAnnotation, QuestionAnsweringBiDAFPrediction
+from ..representation import QuestionAnsweringBiDAFAnnotation
 from .metric import PerImageEvaluationMetric, FullDatasetEvaluationMetric
 from ..config import NumberField
 
@@ -99,7 +99,7 @@ class ExactMatchScore(PerImageEvaluationMetric):
     __provider__ = 'exact_match'
 
     annotation_types = (QuestionAnsweringAnnotation, QuestionAnsweringBiDAFAnnotation, )
-    prediction_types = (QuestionAnsweringPrediction, QuestionAnsweringBiDAFPrediction, )
+    prediction_types = (QuestionAnsweringPrediction, )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

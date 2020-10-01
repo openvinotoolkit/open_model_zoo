@@ -22,8 +22,7 @@ from ..representation import (MachineTranslationPrediction,
                               QuestionAnsweringPrediction,
                               QuestionAnsweringEmbeddingPrediction,
                               ClassificationPrediction,
-                              LanguageModelingPrediction,
-                              QuestionAnsweringBiDAFPrediction)
+                              LanguageModelingPrediction)
 from ..config import PathField, NumberField, StringField, BoolField
 from ..utils import read_txt, UnsupportedPackage
 
@@ -199,7 +198,7 @@ class QuestionAnsweringEmbeddingAdapter(Adapter):
 
 class QuestionAnsweringBiDAFAdapter(Adapter):
     __provider__ = 'bidaf_question_answering'
-    prediction_types = (QuestionAnsweringBiDAFPrediction, )
+    prediction_types = (QuestionAnsweringPrediction, )
 
     @classmethod
     def parameters(cls):
@@ -221,7 +220,7 @@ class QuestionAnsweringBiDAFAdapter(Adapter):
                 identifiers, raw_output[self.start_pos], raw_output[self.end_pos]
         ):
             result.append(
-                QuestionAnsweringBiDAFPrediction(identifier, start, end)
+                QuestionAnsweringPrediction(identifier=identifier, start_index=start, end_index=end)
             )
 
         return result

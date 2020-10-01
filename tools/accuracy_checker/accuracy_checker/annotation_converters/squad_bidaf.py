@@ -134,14 +134,14 @@ class SQUADConverterBiDAF(BaseFormatConverter):
         examples = self._load_examples(self.testing_file)
 
         annotations = []
-        for example in examples:
+        for (example_index, example) in enumerate(examples):
             cw, cc = self._preprocess_text(example.context_text, True)
             qw, qc = self._preprocess_text(example.question_text)
             cw_idx_in_context = self._get_tokens_indexes_in_context(example.context_text, cw.reshape(-1))
-            identifier = ['context_word_{}'.format(0),
-                          'context_char_{}'.format(0),
-                          'query_word_{}'.format(0),
-                          'query_char_{}'.format(0)]
+            identifier = ['context_word_{}'.format(example_index),
+                          'context_char_{}'.format(example_index),
+                          'query_word_{}'.format(example_index),
+                          'query_char_{}'.format(example_index)]
             annotation = QuestionAnsweringBiDAFAnnotation(
                 identifier=identifier,
                 title=example.title,

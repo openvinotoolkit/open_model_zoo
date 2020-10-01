@@ -92,6 +92,7 @@ __all__ = [
     'NormalizeLandmarksPoints',
 
     'ExtractSQUADPrediction',
+    'ExtractSQUADPredictionBiDAF',
 
     'Translate3dPoses',
 
@@ -115,5 +116,4 @@ __all__ = [
     'RemoveRepeatTokens',
     'TokensToLowerCase',
     'SRImageRecovery',
-    'ExtractSQUADPredictionBiDAF',
 ]

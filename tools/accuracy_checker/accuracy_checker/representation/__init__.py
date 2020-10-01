@@ -78,8 +78,7 @@ from .nlp_representation import (
     TextClassificationAnnotation,
     LanguageModelingAnnotation,
     LanguageModelingPrediction,
-    QuestionAnsweringBiDAFAnnotation,
-    QuestionAnsweringBiDAFPrediction
+    QuestionAnsweringBiDAFAnnotation
 )
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
 from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
@@ -169,6 +168,7 @@ __all__ = [
     'QuestionAnsweringPrediction',
     'QuestionAnsweringEmbeddingAnnotation',
     'QuestionAnsweringEmbeddingPrediction',
+    'QuestionAnsweringBiDAFAnnotation',
     'TextClassificationAnnotation',
     'LanguageModelingAnnotation',
     'LanguageModelingPrediction',
@@ -181,7 +181,4 @@ __all__ = [
 
     'DNASequenceAnnotation',
     'DNASequencePrediction',
-
-    'QuestionAnsweringBiDAFAnnotation',
-    'QuestionAnsweringBiDAFPrediction',
 ]

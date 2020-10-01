@@ -18,7 +18,7 @@ from collections import OrderedDict, namedtuple
 from .postprocessor import Postprocessor
 from ..representation import (
     QuestionAnsweringAnnotation, QuestionAnsweringPrediction,
-    QuestionAnsweringBiDAFAnnotation, QuestionAnsweringBiDAFPrediction
+    QuestionAnsweringBiDAFAnnotation
 )
 from ..annotation_converters._nlp_common import WordPieceTokenizer
 from ..config import NumberField
@@ -190,7 +190,7 @@ class ExtractSQUADPredictionBiDAF(Postprocessor):
     __provider__ = 'bidaf_extract_answers_tokens'
 
     annotation_types = (QuestionAnsweringBiDAFAnnotation, )
-    prediction_types = (QuestionAnsweringBiDAFPrediction, )
+    prediction_types = (QuestionAnsweringPrediction, )
 
     def process_image(self, annotation, prediction):
         def _extended_check_indexes(start, end, annotation):
@@ -206,8 +206,8 @@ class ExtractSQUADPredictionBiDAF(Postprocessor):
             return raw_text[indexes[start]:indexes[end] + end_length]
 
         for annotation_, prediction_ in zip(annotation, prediction):
-            start_index = prediction_.start_position
-            end_index = prediction_.end_position
+            start_index = prediction_.start_index
+            end_index = prediction_.end_index
             tokens = []
             if _extended_check_indexes(start_index, end_index, annotation_):
                 end_length = len(annotation_.context_word.reshape(-1)[end_index])

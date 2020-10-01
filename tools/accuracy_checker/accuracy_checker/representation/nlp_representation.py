@@ -81,11 +81,11 @@ class QuestionAnsweringAnnotation(QuestionAnswering):
         self.token_to_orig_map = token_to_orig_map
 
 class QuestionAnsweringPrediction(QuestionAnswering):
-    def __init__(self, identifier, start_logits, end_logits, start_index=None, end_index=None, tokens=None):
+    def __init__(self, identifier, start_logits=None, end_logits=None, start_index=None, end_index=None, tokens=None):
         super().__init__(identifier)
 
-        self.start_logits = start_logits
-        self.end_logits = end_logits
+        self.start_logits = start_logits if start_logits is not None else []
+        self.end_logits = end_logits if end_logits is not None else []
         self.start_index = start_index if start_index is not None else []
         self.end_index = end_index if end_index is not None else []
         self.tokens = tokens if tokens is not None else []
@@ -120,13 +120,6 @@ class QuestionAnsweringBiDAFAnnotation(QuestionAnswering):
         self.query_char = query_char
         self.question_id = question_id
         self.words_idx_in_context = words_idx_in_context
-
-class QuestionAnsweringBiDAFPrediction(QuestionAnswering):
-    def __init__(self, identifier, start_position, end_position, tokens=None):
-        super().__init__(identifier)
-        self.start_position = start_position
-        self.end_position = end_position
-        self.tokens = tokens if tokens is not None else []
 
 
 class TextClassificationAnnotation(ClassificationAnnotation):

@@ -268,7 +268,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `max_query_length` - maximum number of tokens for the question (Optional, default value is 64).
   * `doc_stride` -stride size between chunks for splitting up long document (Optional, default value is 128).
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False)
-* `squad_bidaf` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `QuestionAnsweringBiDAFAnnotation`. **Note:** This converter not only converts data to metric specific format but also tokenize and encodes input for BiDAF.
+* `squad_bidaf` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `QuestionAnsweringBiDAFAnnotation`. **Note:** This converter not only converts data to metric specific format but also tokenize and encodes input for BiDAF using nltk.word_tokenize.
   * `testing_file` - path to testing file.
 * `xnli` - converts The Cross-lingual Natural Language Inference Corpus ([XNLI](https://github.com/facebookresearch/XNLI)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
   * `annotation_file` - path to dataset annotation file in tsv format.
