@@ -29,7 +29,7 @@ def read_vocab(vocab_path):
         vocab_path (str): path to vocab file
 
     Raises:
-        ValueError: If wrong extenson of the file
+        ValueError: If wrong extension of the file
 
     Returns:
         Vocab: Vocab object with sign2id and id2sign dictinaries

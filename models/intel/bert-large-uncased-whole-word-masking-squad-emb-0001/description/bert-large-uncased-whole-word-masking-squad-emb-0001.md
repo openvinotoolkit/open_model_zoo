@@ -21,7 +21,7 @@ Tokenization occurs using the BERT tokenizer (see the demo code for implementati
 | MParams           | 333.96                |
 | Source framework  | PyTorch\*             |
 
-GOps is calculated for for [1,384] input size that is sutable for long context
+GOps is calculated for for [1,384] input size that is suitable for long context
 
 ## Accuracy
 

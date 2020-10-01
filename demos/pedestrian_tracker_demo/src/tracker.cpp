@@ -511,11 +511,11 @@ float PedestrianTracker::TimeAffinity(float weight, const float &trk_time,
 
 void PedestrianTracker::ComputeFastDesciptors(
     const cv::Mat &frame, const TrackedObjects &detections,
-    std::vector<cv::Mat> *desriptors) {
-    *desriptors = std::vector<cv::Mat>(detections.size(), cv::Mat());
+    std::vector<cv::Mat> *descriptors) {
+    *descriptors = std::vector<cv::Mat>(detections.size(), cv::Mat());
     for (size_t i = 0; i < detections.size(); i++) {
         descriptor_fast_->Compute(frame(detections[i].rect).clone(),
-                                  &((*desriptors)[i]));
+                                  &((*descriptors)[i]));
     }
 }
 

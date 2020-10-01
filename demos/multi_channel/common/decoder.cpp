@@ -654,12 +654,12 @@ struct Decoder::HwContext {
                     JPEG_DEBUG(std::cout << "  height " << height << std::endl);
                     JPEG_DEBUG(std::cout << "  width "  << width  << std::endl);
 
-                    auto componets = reader.read<int8_t>();
+                    auto components = reader.read<int8_t>();
                     JPEG_DEBUG(
                         std::cout << "  components "
-                                  << static_cast<int>(componets) << std::endl);
-                    params->num_components = static_cast<uint8_t>(componets);
-                    for (int i = 0; i < componets; ++i) {
+                                  << static_cast<int>(components) << std::endl);
+                    params->num_components = static_cast<uint8_t>(components);
+                    for (int i = 0; i < components; ++i) {
                         int id = reader.read<int8_t>();
                         auto b = reader.read<int8_t>();
                         auto sampv = static_cast<int>(b & 0xf);

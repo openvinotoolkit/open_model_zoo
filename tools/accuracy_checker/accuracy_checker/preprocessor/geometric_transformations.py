@@ -83,7 +83,7 @@ class PointAligner(Preprocessor):
                 optional=True, default=True, description="Allows to use normalization for keypoints."),
             'size': NumberField(
                 value_type=int, optional=True, min_value=1,
-                description="Destination size for keypoints resizing for both destination dimentions."
+                description="Destination size for keypoints resizing for both destination dimensions."
             ),
             'dst_width': NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination width for keypoints resizing."
@@ -302,7 +302,7 @@ class Tiling(Preprocessor):
             'margin': NumberField(value_type=int, min_value=1, description="Margin for tiled fragment of image."),
             'size': NumberField(
                 value_type=int, optional=True, min_value=1,
-                description="Destination size of tiled fragment for both dimentions."
+                description="Destination size of tiled fragment for both dimensions."
             ),
             'dst_width'  : NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination width of tiled fragment."

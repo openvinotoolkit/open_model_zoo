@@ -150,7 +150,7 @@ class QuestionAnsweringEmbeddingAccurcay(FullDatasetEvaluationMetric):
 
         ap_pairs = list(zip(annotations, predictions))
 
-        #check data aligment
+        #check data alignment
         assert all(a.identifier is p.identifier for a, p in ap_pairs), "annotations and predictions are not aligned"
 
         q_pairs = [(a, p) for a, p in ap_pairs if a.context_pos_indetifier is not None]
@@ -163,7 +163,7 @@ class QuestionAnsweringEmbeddingAccurcay(FullDatasetEvaluationMetric):
         true_pos = 0
         for q_a, q_p in q_pairs:
 
-            #calc distance between question embedding with all conext embeddings
+            #calc distance between question embedding with all context embeddings
             d = c_vecs - q_p.embedding[None, :]
             dist = numpy.linalg.norm(d, ord=2, axis=1)
             index = dist.argsort()

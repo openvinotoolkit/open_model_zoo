@@ -142,7 +142,7 @@ def main():
                 position = sorted_classes.index(
                     img_retrieval.text_label_to_class_id[args.ground_truth])
                 positions.append(position)
-                log.info("ROI detected, found: %d, postion of target: %d",
+                log.info("ROI detected, found: %d, position of target: %d",
                          sorted_classes[0], position)
             else:
                 log.info("ROI detected, found: %s", sorted_classes[0])

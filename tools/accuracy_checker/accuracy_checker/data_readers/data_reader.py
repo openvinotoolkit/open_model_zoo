@@ -513,7 +513,7 @@ class WavReader(BaseReader):
             if self._samplewidth_types.get(sample_width):
                 data = np.frombuffer(data, dtype=self._samplewidth_types[sample_width])
             else:
-                raise RuntimeError("Reader {} coudn't process file {}: unsupported sample width {}"
+                raise RuntimeError("Reader {} couldn't process file {}: unsupported sample width {}"
                                    "(reader only supports {})"
                                    .format(self.__provider__, self.data_source / data_id,
                                            sample_width, [*self._samplewidth_types.keys()]))

@@ -150,7 +150,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 Human pose estimation task is to predict a pose: body skeleton, which consists
 of keypoints and connections between them, for every person in an input image or
 video. Keypoints are body joints, i.e. ears, eyes, nose, shoulders, knees, etc.
-There are two major groups of such metods: top-down and bottom-up.  The first
+There are two major groups of such methods: top-down and bottom-up.  The first
 detects persons in a given frame, crops or rescales detections, then runs pose
 estimation network for every detection. These methods are very accurate. The
 second finds all keypoints in a given frame, then groups them by person

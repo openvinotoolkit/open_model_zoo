@@ -141,7 +141,7 @@ def scale_bbox(x, y, height, width, class_id, confidence, im_h, im_w, is_proport
 def parse_yolo_region(predictions, resized_image_shape, original_im_shape, params, threshold, is_proportional):
     # ------------------------------------------ Validating output parameters ------------------------------------------
     _, _, out_blob_h, out_blob_w = predictions.shape
-    assert out_blob_w == out_blob_h, "Invalid size of output blob. It sould be in NCHW layout and height should " \
+    assert out_blob_w == out_blob_h, "Invalid size of output blob. It should be in NCHW layout and height should " \
                                      "be equal to width. Current height = {}, current width = {}" \
                                      "".format(out_blob_h, out_blob_w)
 
