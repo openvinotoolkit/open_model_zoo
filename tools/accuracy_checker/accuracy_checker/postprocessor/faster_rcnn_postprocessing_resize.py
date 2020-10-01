@@ -79,7 +79,7 @@ class FRCNNPostprocessingBboxResize(Postprocessor):
                                len(geometric_operations)))
 
     def process_image(self, annotations, predictions):
-        raise RuntimeError("Since `process_image_with_metadata` is overriden, this method MUST NOT be called")
+        raise RuntimeError("Since `process_image_with_metadata` is overridden, this method MUST NOT be called")
 
     def process_image_with_metadata(self, annotations, predictions, image_metadata=None):
         assert image_metadata and 'geometric_operations' in image_metadata, (

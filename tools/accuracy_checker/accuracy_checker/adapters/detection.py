@@ -706,7 +706,7 @@ class FaceDetectionAdapter(Adapter):
                 description='Window scales for each base output layer'),
             'window_lengths': ListField(
                 value_type=int, optional=False,
-                description='Window lenghts for each base output layer'),
+                description='Window lengths for each base output layer'),
         })
         return parameters
 

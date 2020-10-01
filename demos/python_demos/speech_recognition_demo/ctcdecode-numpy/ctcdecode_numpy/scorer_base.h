@@ -47,7 +47,7 @@ public:
   // return the dictionary size of language model
   size_t get_dict_size() const { return dict_size_; }
 
-  // retrun true if the language model is character based
+  // return true if the language model is character based
   bool is_character_based() const { return is_character_based_; }
 
   // reset params alpha & beta

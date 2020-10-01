@@ -183,7 +183,7 @@ build_demos_msvc.bat
 ```
 
 By default, the script automatically detects the highest Microsoft Visual Studio version installed on the machine and uses it to create and build
-a solution for a demo code. Optionally, you can also specify the preffered Microsoft Visual Studio version to be used by the script. Supported
+a solution for a demo code. Optionally, you can also specify the preferred Microsoft Visual Studio version to be used by the script. Supported
 versions are: `VS2015`, `VS2017`, `VS2019`. For example, to build the demos using the Microsoft Visual Studio 2017, use the following command:
 ```bat
 build_demos_msvc.bat VS2017

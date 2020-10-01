@@ -836,7 +836,7 @@ int main(int argc, char *argv[]) {
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
         slog::info << "Total Inference time: " << total.count() << slog::endl;
 
-        /** Show performace results **/
+        /** Show performance results **/
         if (FLAGS_pc) {
             std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, deviceNames);
             std::cout << "Performance counts for person detection: " << std::endl;

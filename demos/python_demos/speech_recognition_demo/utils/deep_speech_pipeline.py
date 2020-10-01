@@ -22,7 +22,7 @@ class DeepSpeechPipeline:
         """
             Args:
         model (str), filename of IE IR .xml file of the network
-        model_bin (str), filename of IE IR .xml file of the network (deafult (None) is the same as :model:, but
+        model_bin (str), filename of IE IR .xml file of the network (default (None) is the same as :model:, but
             with extension replaced with .bin)
         lm (str), filename of LM (language model)
         alphabet (None or str or list(str)), alphabet matching the model (default None):

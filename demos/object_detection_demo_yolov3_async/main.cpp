@@ -451,7 +451,7 @@ int main(int argc, char *argv[]) {
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
         std::cout << "Total Inference time: " << total.count() << std::endl;
 
-        /** Showing performace results **/
+        /** Showing performance results **/
         if (FLAGS_pc) {
             printPerformanceCounts(*async_infer_request_curr, std::cout, getFullDeviceName(ie, FLAGS_d));
         }
