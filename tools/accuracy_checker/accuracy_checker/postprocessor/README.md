@@ -91,3 +91,4 @@ Accuracy Checker supports following set of postprocessors:
   * `target_color` - target color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `rgb`).
   * `size` - size of model input for recovering YCrCb image.
   * `dst_width` and `dst_height` - width and height of model input respectively for recovering YCrCb image.
+* `argmax_segmentation_mask` - translates categorical annotation segmentation mask to numerical. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
