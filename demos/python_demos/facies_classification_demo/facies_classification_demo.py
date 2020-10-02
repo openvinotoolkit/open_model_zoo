@@ -45,7 +45,12 @@ def build_argparser():
                       Absolute MKLDNN (CPU)-targeted custom layers. "
                       "Absolute path to a shared library \
                       with the kernels implementations",
-                      required=True, type=str)
+                      required=False, default = 'libuser_cpu_extension_for_max_unpool.so',
+                      type=str)
+    args.add_argument('-v', '--show',
+                      help='Matplotlib window will be displayed\
+                      if a flag was given then  .',
+                      action='store_true')
     args.add_argument('-t', '--slice_type',
                       help='Type of slice .',
                       choices=['inline', 'crossline', 'timeline'],
@@ -154,7 +159,7 @@ def decode_segmap(label_mask):
     return rgb
 
 
-def show_interpretation(input_to_net, out_from_net):
+def show_interpretation(input_to_net, out_from_net, show=False):
     from matplotlib.colors import LinearSegmentedColormap
 
     res = np.argmax(out_from_net, axis=1).squeeze()
@@ -180,6 +185,8 @@ def show_interpretation(input_to_net, out_from_net):
                           'rijnland_chalk', 'scruff', 'zechstein'],
                           fontsize=9, ha="left")
     plt.savefig('interpretation.png')
+    if show:
+        plt.show()
 
 
 def main(args, logger):
@@ -211,7 +218,7 @@ def main(args, logger):
     out = exec_net.infer(inputs={'input': inp})['output']
 
     logger.info("Showing results")
-    show_interpretation(inp, out)
+    show_interpretation(inp, out, args.show)
 
 
 if __name__ == '__main__':
