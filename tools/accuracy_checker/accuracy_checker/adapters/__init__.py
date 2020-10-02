@@ -72,7 +72,7 @@ from .mask_rcnn import MaskRCNNAdapter
 from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
 from .yolact import YolactAdapter
 
-from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
+from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter, QuestionAnsweringBiDAFAdapter
 
 from .centernet import CTDETAdapter
 
@@ -171,6 +171,7 @@ __all__ = [
 
     'MachineTranslationAdapter',
     'QuestionAnsweringAdapter',
+    'QuestionAnsweringBiDAFAdapter',
 
     'MonoDepthAdapter',
 

@@ -23,6 +23,7 @@ pydicom
 # nlp, tokenization
 sentencepiece
 tokenizers
+nltk
 
 # editdistance calculation
 editdistance

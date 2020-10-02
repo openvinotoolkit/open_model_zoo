@@ -54,6 +54,7 @@ PRECISION_TO_DTYPE = {
     'I16': np.int16,  # signed short
     'I32': np.int32,  # signed int
     'I64': np.int64,  # signed long int
+    'STR': np.str,  # string
 }
 
 

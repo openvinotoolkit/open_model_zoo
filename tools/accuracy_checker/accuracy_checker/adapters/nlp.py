@@ -196,7 +196,34 @@ class QuestionAnsweringEmbeddingAdapter(Adapter):
 
         return result
 
+class QuestionAnsweringBiDAFAdapter(Adapter):
+    __provider__ = 'bidaf_question_answering'
+    prediction_types = (QuestionAnsweringPrediction, )
 
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'start_pos_output': StringField(description="Output layer name for answer start position."),
+            'end_pos_output': StringField(description="Output layer name for answer end position.")
+        })
+        return parameters
+
+    def configure(self):
+        self.start_pos = self.get_value_from_config('start_pos_output')
+        self.end_pos = self.get_value_from_config('end_pos_output')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_output = self._extract_predictions(raw, frame_meta)
+        result = []
+        for identifier, start, end in zip(
+                identifiers, raw_output[self.start_pos], raw_output[self.end_pos]
+        ):
+            result.append(
+                QuestionAnsweringPrediction(identifier=identifier, start_index=start, end_index=end)
+            )
+
+        return result
 
 class LanguageModelingAdapter(Adapter):
     __provider__ = 'common_language_modeling'

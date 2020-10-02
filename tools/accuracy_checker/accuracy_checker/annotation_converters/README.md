@@ -268,6 +268,8 @@ The main difference between this converter and `super_resolution` in data organi
   * `max_query_length` - maximum number of tokens for the question (Optional, default value is 64).
   * `doc_stride` -stride size between chunks for splitting up long document (Optional, default value is 128).
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False)
+* `squad_bidaf` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `QuestionAnsweringBiDAFAnnotation`. **Note:** This converter not only converts data to metric specific format but also tokenize and encodes input for BiDAF using nltk.word_tokenize.
+  * `testing_file` - path to testing file.
 * `xnli` - converts The Cross-lingual Natural Language Inference Corpus ([XNLI](https://github.com/facebookresearch/XNLI)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
   * `annotation_file` - path to dataset annotation file in tsv format.
   * `vocab_file` -  path to model vocabulary file for WordPiece tokinezation (Optional in case, when another tokenization approach used).
@@ -330,7 +332,7 @@ The main difference between this converter and `super_resolution` in data organi
 * `nyu_depth_v2` - converts [NYU Depth Dataset V2](https://cs.nyu.edu/~silberman/datasets/nyu_depth_v2.html) for depth estimation to `DepthEstimationAnnotation`. This converter accept preprocessed data stored in HDF5 format, which can be downloaded from this [page](http://datasets.lids.mit.edu/fastdepth/data/)
   * `data_dir` - directory with HDF5 files. (Optional, can be omitted if you already have converted images and depth maps).
   * `images_dir` - directory for images. If `data_dir` provided, the directory will be used for saving converted images, otherwise used for data reading. (Optional, can be not provided in conversion case, default value `<data_dir>/converted/images`).
-  * `depth_map_dir` - directory for reference depth maps, stored in numpy format. If `data_dir` provided, the directory will be used for saving converted depth maps, otherwise used for data reading. 
+  * `depth_map_dir` - directory for reference depth maps, stored in numpy format. If `data_dir` provided, the directory will be used for saving converted depth maps, otherwise used for data reading.
     (Optional, can be not provided in conversion case, default value `<data_dir>/converted/depth`). Please, note, you need to specify path to directory with depth maps with `additional_data_source` parameter in your config during evaluation.
 * `inpainting` - converts images to `ImageInpaintingAnnotation`.
   * `images_dir` - path to images directory.
@@ -377,7 +379,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `images_dir` - path to input images (rendered or scanned formulas)
   * `formula_file` - path to file containing one formula per line
   * `split_file` - path to file containing `img_name` and corresponding formula `index` in `formula_file` separated by tab per line
-  * `vocab_file` - file containing vocabulary to cast token class indices into human-readable tokens 
+  * `vocab_file` - file containing vocabulary to cast token class indices into human-readable tokens
 * `dna_sequence` - converts dataset for DNA sequencing to `DNASequenceAnnotation`.
   * `chunks_file` - npy file with input chunks.
   * `ref_file` - npy file with reference sequence.
