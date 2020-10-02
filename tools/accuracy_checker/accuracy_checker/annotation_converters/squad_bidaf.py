@@ -63,8 +63,6 @@ class SQUADConverterBiDAF(BaseFormatConverter):
                 for qa in paragraph["qas"]:
                     qas_id = qa["id"]
                     question_text = preprocess(qa["question"])
-                    start_position_character = None
-                    answer_text = None
                     answers = []
 
                     if "is_impossible" in qa:
@@ -83,8 +81,6 @@ class SQUADConverterBiDAF(BaseFormatConverter):
                         qas_id=qas_id,
                         question_text=question_text,
                         context_text=context_text,
-                        answer_text=answer_text,
-                        start_position_character=start_position_character,
                         title=title,
                         is_impossible=is_impossible,
                         answers=answers,
@@ -134,7 +130,7 @@ class SQUADConverterBiDAF(BaseFormatConverter):
         examples = self._load_examples(self.testing_file)
 
         annotations = []
-        for (example_index, example) in enumerate(examples):
+        for example_index, example in enumerate(examples):
             cw, cc = self._preprocess_text(example.context_text, True)
             qw, qc = self._preprocess_text(example.question_text)
             cw_idx_in_context = self._get_tokens_indexes_in_context(example.context_text, cw.reshape(-1))

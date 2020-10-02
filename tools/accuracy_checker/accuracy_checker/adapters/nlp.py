@@ -204,14 +204,14 @@ class QuestionAnsweringBiDAFAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'start_pos': StringField(description="Output layer name for answer start position."),
-            'end_pos': StringField(description="Output layer name for answer end position.")
+            'start_pos_output': StringField(description="Output layer name for answer start position."),
+            'end_pos_output': StringField(description="Output layer name for answer end position.")
         })
         return parameters
 
     def configure(self):
-        self.start_pos = self.get_value_from_config('start_pos')
-        self.end_pos = self.get_value_from_config('end_pos')
+        self.start_pos = self.get_value_from_config('start_pos_output')
+        self.end_pos = self.get_value_from_config('end_pos_output')
 
     def process(self, raw, identifiers, frame_meta):
         raw_output = self._extract_predictions(raw, frame_meta)

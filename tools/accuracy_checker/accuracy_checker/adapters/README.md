@@ -231,8 +231,8 @@ AccuracyChecker supports following set of adapters:
   * `remove_extra_symbols` - remove sos/eos/pad symbols from predicted string (default=True)
 * `bert_question_answering` - converting output of BERT model trained to solve question answering task to `QuestionAnsweringPrediction`.
 * `bidaf_question_answering` - converting output of BiDAF model trained to solve question answering task to `QuestionAnsweringPrediction`.
-  * `start_pos` - name of output layer with answer start position.
-  * `end_pos` - name of output layer with answer end position.
+  * `start_pos_output` - name of output layer with answer start position.
+  * `end_pos_output` - name of output layer with answer end position.
 * `bert_classification` - converting output of BERT model trained for classification task to `ClassificationPrediction`.
   * `num_classes` - number of predicted classes.
   * `classification_out` - name of output layer with classification probabilities. (Optional, if not provided default first output blob will be used).
