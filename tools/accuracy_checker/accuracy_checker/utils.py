@@ -111,6 +111,12 @@ def string_to_list(string):
     return list(entry for entry in processed)
 
 
+def validate_print_interval(value, min_value=0, max_value=None):
+    if value <= min_value:
+        raise ValueError('{} less than minimum required {}'.format(value, min_value))
+    if max_value and value >= max_value:
+        raise ValueError('{} greater than maximum required {}'.format(value, max_value))
+
 class JSONDecoderWithAutoConversion(json.JSONDecoder):
     """
     Custom json decoder to convert all strings into numbers (int, float) during reading json file.

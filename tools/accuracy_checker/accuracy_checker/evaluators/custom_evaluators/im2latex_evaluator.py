@@ -64,6 +64,10 @@ class Im2latexEvaluator(BaseEvaluator):
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         self._annotations, self._predictions = [], []
+        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
+        if compute_intermediate_metric_res:
+            metric_interval = kwargs.get('metrics_interval', 1000)
+            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
 
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
@@ -80,7 +84,10 @@ class Im2latexEvaluator(BaseEvaluator):
             self._annotations.extend(batch_annotation)
             self._predictions.extend(batch_prediction)
 
-            progress_reporter.update(batch_id, len(batch_input))
+            if progress_reporter:
+                progress_reporter.update(batch_id, len(batch_input))
+                if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting)
 
         if progress_reporter:
             progress_reporter.finish()
