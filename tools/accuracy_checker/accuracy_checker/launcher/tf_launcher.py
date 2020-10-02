@@ -112,6 +112,7 @@ class TFLauncher(Launcher):
             if metadata is not None:
                 for meta_ in metadata:
                     meta_['input_shape'] = self.inputs_info_for_meta()
+                    meta_['input_shape'].update({name: data.shape for name, data in infer_input.items()})
 
         return results
 

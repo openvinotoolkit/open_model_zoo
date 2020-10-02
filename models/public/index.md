@@ -135,6 +135,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/yolo-v2-tf.md) | 53.1453%/56.483% | 63.0301	 |	50.9526 |
 | YOLO v3                              | Keras\*                  | [yolo-v3-tf](./yolo-v3-tf/yolo-v3-tf.md) | 62.2759%/67.7221% | 65.9843	 |	61.9221 |
 | YOLO v3 Tiny                         | Keras\*                  | [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/yolo-v3-tiny-tf.md) | 35.9%/39.7% | 5.582  | 8.848 |
+| YOLO v4                              | Keras\*                  | [yolo-v4-tf](./yolo-v4-tf/yolo-v4-tf.md) | -/- | -	 |	- |
 
 ## Face Recognition
 
