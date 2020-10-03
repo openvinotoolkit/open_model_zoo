@@ -7,6 +7,33 @@ The `conv-decondnet` model is designed to perform facies classification. The mod
 The model input is a blob that consists of a single array with the [1x255x401] shape
 
 The model output for `conv-deconvnet` is a typical object-classifier output for six different classifications matching each input pixel.
+
+### Steps to Reproduce PyTorch to ONNX Conversion
+Model is provided in ONNX format, which was obtained by the following steps.
+
+1. Clone the original repository
+```sh
+git clone https://github.com/yalaudah/facies_classification_benchmark.git
+cd facies_classification_benchmark
+```
+2. Checkout the commit that the conversion was tested on:
+```sh
+git checkout 2d03135
+```
+3. Apply the `pytorch-onnx.patch` patch
+```sh
+git apply /path/to/pytorch-onnx.patch
+```
+4. Install requirements by the following command:
+```sh
+pip install -r requirements.txt
+```
+5. Download the [pretrained weights] <-(link)
+6. Run
+```sh
+python torch2onnx.py -i /path/to/downloaded/weights.pth
+```
+
 ## Example
 
 ![](./facies_classification_exapmle.png)
