@@ -133,20 +133,17 @@ class MSCocoDetectionConverter(BaseFormatConverter):
             self.dataset_meta, full_annotation, self.use_full_label_map, self.has_background
         )
 
-        self.meta = {}
+        meta = {}
         if self.has_background:
             label_map[0] = 'background'
-            self.meta['background_label'] = 0
+            meta['background_label'] = 0
 
-        self.meta.update({'label_map': label_map})
+        meta.update({'label_map': label_map})
         detection_annotations, content_errors = self._create_representations(
             image_ids, annotations, label_id_to_label, check_content, progress_callback, progress_interval
         )
 
-        return ConverterReturn(detection_annotations, self.meta, content_errors)
-
-    def meta_update(self, updates):
-        self.meta.update(updates)
+        return ConverterReturn(detection_annotations, meta, content_errors)
 
     def _create_representations(
             self, image_info, annotations, label_id_to_label, check_content, progress_callback, progress_interval
@@ -306,15 +303,6 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
         num_iterations = len(image_info)
         progress_reporter = PrintProgressReporter(print_interval=progress_interval)
         progress_reporter.reset(num_iterations, 'annotations')
-        segmentation_colors = (
-            (0, 0, 0), (128, 0, 0), (0, 128, 0), (128, 128, 0),
-            (0, 0, 128), (128, 0, 128), (0, 128, 128), (128, 128, 128),
-            (64, 0, 0), (192, 0, 0), (64, 128, 0), (192, 128, 0),
-            (64, 0, 128), (192, 0, 128), (64, 128, 128), (192, 128, 128),
-            (0, 64, 0), (128, 64, 0), (0, 192, 0), (128, 192, 0),
-            (0, 64, 128))
-        palette = np.asarray(segmentation_colors, dtype=np.uint8).reshape([21 * 3,])
-
 
         for (image_id, image) in enumerate(image_info):
             image_labels, _, _, _, _, is_crowd, segmentations = self._read_image_annotation(
@@ -325,11 +313,12 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
             if not self.semantic_only:
                 annotation = CoCoInstanceSegmentationAnnotation(image[1], segmentations, image_labels)
             else:
-                # print(image_id)
                 h, w, _ = image[2]
                 mask_file = self.masks_dir / "{:012}.png".format(image[0])
-                self.make_mask(h, w, mask_file, image_labels, segmentations, palette)
-                annotation = SegmentationAnnotation(image[1], mask_file, mask_loader=GTMaskLoader.SCIPY)
+                self.make_mask(h, w, mask_file, image_labels, segmentations)
+                annotation = SegmentationAnnotation(image[1],
+                                                    str(mask_file.relative_to(self.masks_dir.parent)),
+                                                    mask_loader=GTMaskLoader.SCIPY)
 
             if check_content:
                 image_full_path = self.images_dir / image[1]
@@ -340,12 +329,11 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
             segmentation_annotations.append(annotation)
             progress_reporter.update(image_id, 1)
 
-        self.meta_update({'segmentation_colors': segmentation_colors})
         progress_reporter.finish()
 
         return segmentation_annotations, content_errors
 
-    def make_mask(self, height, width, path_to_mask, labels, segmentations, segmentation_colors):
+    def make_mask(self, height, width, path_to_mask, labels, segmentations):
         polygons = []
         for mask in segmentations:
             rles = maskUtils.frPyObjects(mask, height, width)
@@ -365,11 +353,7 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
         masks = (masks * np.asarray(labels, dtype=np.uint8)).max(axis=-1)
         mask = np.squeeze(masks)
 
-        palimg = Image.new("P", (16, 16))
-        palimg.putpalette(segmentation_colors)
         image = Image.frombytes('L', (width, height), mask.tostring())
-        im = image.im.convert("P", 0, palimg.im)
-        image = image._new(im)
         image.save(path_to_mask)
 
         return mask
