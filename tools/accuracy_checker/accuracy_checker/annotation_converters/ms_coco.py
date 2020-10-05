@@ -271,6 +271,31 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
 
         return ConverterReturn(keypoints_annotations, {'label_map': label_map}, None)
 
+def make_segmentation_mask(height, width, path_to_mask, labels, segmentations):
+    polygons = []
+    for mask in segmentations:
+        rles = maskUtils.frPyObjects(mask, height, width)
+        rle = maskUtils.merge(rles)
+        polygons.append(rle)
+
+    masks = []
+    for polygon in polygons:
+        mask = maskUtils.decode(polygon)
+        if len(mask.shape) < 3:
+            mask = np.expand_dims(mask, axis=-1)
+        masks.append(mask)
+    if masks:
+        masks = np.stack(masks, axis=-1)
+    else:
+        masks = np.zeros((height, width, 0), dtype=np.uint8)
+    masks = (masks * np.asarray(labels, dtype=np.uint8)).max(axis=-1)
+    mask = np.squeeze(masks)
+
+    image = Image.frombytes('L', (width, height), mask.tostring())
+    image.save(path_to_mask)
+
+    return mask
+
 
 class MSCocoSegmentationConverter(MSCocoDetectionConverter):
     __provider__ = 'mscoco_segmentation'
@@ -315,7 +340,7 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
             else:
                 h, w, _ = image[2]
                 mask_file = self.masks_dir / "{:012}.png".format(image[0])
-                self.make_mask(h, w, mask_file, image_labels, segmentations)
+                make_segmentation_mask(h, w, mask_file, image_labels, segmentations)
                 annotation = SegmentationAnnotation(image[1],
                                                     str(mask_file.relative_to(self.masks_dir.parent)),
                                                     mask_loader=GTMaskLoader.SCIPY)
@@ -332,31 +357,6 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
         progress_reporter.finish()
 
         return segmentation_annotations, content_errors
-
-    def make_mask(self, height, width, path_to_mask, labels, segmentations):
-        polygons = []
-        for mask in segmentations:
-            rles = maskUtils.frPyObjects(mask, height, width)
-            rle = maskUtils.merge(rles)
-            polygons.append(rle)
-
-        masks = []
-        for polygon in polygons:
-            mask = maskUtils.decode(polygon)
-            if len(mask.shape) < 3:
-                mask = np.expand_dims(mask, axis=-1)
-            masks.append(mask)
-        if masks:
-            masks = np.stack(masks, axis=-1)
-        else:
-            masks = np.zeros((height, width, 0), dtype=np.uint8)
-        masks = (masks * np.asarray(labels, dtype=np.uint8)).max(axis=-1)
-        mask = np.squeeze(masks)
-
-        image = Image.frombytes('L', (width, height), mask.tostring())
-        image.save(path_to_mask)
-
-        return mask
 
 
 class MSCocoMaskRCNNConverter(MSCocoDetectionConverter):
