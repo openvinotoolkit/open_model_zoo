@@ -37,6 +37,7 @@ import subprocess
 import sys
 import tempfile
 import timeit
+import re
 
 from pathlib import Path
 
@@ -63,14 +64,14 @@ def parse_args():
         help='path to report file')
     return parser.parse_args()
 
-def collect_result(demo_name, device, pipeline, execution_time, report_file):
+def collect_result(demo_name, device, pipeline, execution_time, fps, report_file):
     first_time = not report_file.exists()
 
     with report_file.open('a+', newline='') as csvfile:
         testwriter = csv.writer(csvfile)
         if first_time:
-            testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime"])
-        testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time])
+            testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime", "FPS"])
+        testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time, fps])
 
 @contextlib.contextmanager
 def temp_dir_as_path():
@@ -212,19 +213,26 @@ def main():
                             ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
                         print(flush=True)
                         try:
+                            fps_finder = re.compile(r'(?<=FPS:\s|fps:\s)[0-9]+\.?[0-9]*(?=\s)|(?<=\s)[0-9]+\.?[0-9]*(?= ?FPS| ?fps)')
                             start_time = timeit.default_timer()
-                            subprocess.check_output(fixed_args + dev_arg + case_args,
+                            demo_output = subprocess.check_output(fixed_args + dev_arg + case_args,
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
                                 env=demo_environment)
                             execution_time = timeit.default_timer() - start_time
+                            match_fps = fps_finder.search(demo_output)
+                            if match_fps is not None:
+                                fps = match_fps.group(0)
+                            else:
+                                fps = 'N/A'
                         except subprocess.CalledProcessError as e:
                             print(e.output)
                             print('Exit code:', e.returncode)
                             num_failures += 1
                             execution_time = -1
+                            fps = -1
 
                         if args.report_file:
-                            collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
+                            collect_result(demo.full_name, device, case_model_names, execution_time, fps, args.report_file)
 
             print()
 
