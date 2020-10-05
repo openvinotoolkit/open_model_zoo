@@ -91,6 +91,7 @@ from .cluttered_mnist import ClutteredMNISTConverter
 from .mpii import MPIIDatasetConverter
 from .mapillary_20 import Mapillary20Converter
 from .cocosnet_converter import CocosnetConverter
+from .ade20k_image_translation import ADE20kImageTranslationConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -184,6 +185,10 @@ __all__ = [
 >>>>>>> add Cocosnet annotation converter
 =======
     'PlaceRecognitionDatasetConverter',
+<<<<<<< HEAD
     'CocosnetConverter',
 >>>>>>> Add custom evaluator and delete constants from adapter
+=======
+    'ADE20kImageTranslationConverter',
+>>>>>>> Fix segmentation fault error and add GanCheckModel for calculate gan metrics
 ]

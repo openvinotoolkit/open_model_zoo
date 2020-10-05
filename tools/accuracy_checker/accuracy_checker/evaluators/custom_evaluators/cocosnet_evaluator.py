@@ -19,11 +19,13 @@ import pickle
 import copy
 from collections import OrderedDict
 import numpy as np
+import cv2
 
 from ..base_evaluator import BaseEvaluator
 from ...utils import get_path, extract_image_representations
 from ...dataset import Dataset
-from ...launcher import create_launcher, InputFeeder
+from ...launcher import create_launcher, InputFeeder, DummyLauncher
+from ...launcher.loaders import PickleLoader
 from ...logging import print_info
 from ...metrics import MetricsExecutor
 from ...postprocessor import PostprocessingExecutor
@@ -31,11 +33,13 @@ from ...preprocessor import PreprocessingExecutor
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...data_readers import BaseReader, REQUIRES_ANNOTATIONS, DataRepresentation
+from ...representation import RawTensorPrediction, RawTensorAnnotation
 
 
 class CocosnetEvaluator(BaseEvaluator):
     def __init__(
-            self, launcher, reader, preprocessor_mask, preprocessor_image, postprocessor, dataset, metric, model
+            self, launcher, reader, preprocessor_mask, preprocessor_image, postprocessor,
+            dataset, metric, model, model_for_metric
     ):
         self.launcher = launcher
         self.reader = reader
@@ -45,6 +49,7 @@ class CocosnetEvaluator(BaseEvaluator):
         self.dataset = dataset
         self.metric_executor = metric
         self.model = model
+        self.model_for_metric = model_for_metric
         self._annotations = []
         self._predictions = []
         self._metrics_results = []
@@ -82,12 +87,13 @@ class CocosnetEvaluator(BaseEvaluator):
         )
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
         model = CocosnetModel(network_info, launcher)
+        model_for_metric = GanCheckModel(network_info.get('verification_network', {}), launcher)
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
         metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
 
         return cls(
             launcher, data_reader,
-            preprocessor_mask, preprocessor_image, postprocessor, dataset, metric_dispatcher, model
+            preprocessor_mask, preprocessor_image, postprocessor, dataset, metric_dispatcher, model, model_for_metric
         )
 
     @staticmethod
@@ -117,7 +123,7 @@ class CocosnetEvaluator(BaseEvaluator):
                     batch_annotation=batch_annotation)[0].data
         _, batch_meta = extract_image_representations(batch_input)
 
-        return [batch_input], batch_meta, batch_identifiers
+        return batch_input, batch_meta, batch_identifiers
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         if progress_reporter:
@@ -130,22 +136,30 @@ class CocosnetEvaluator(BaseEvaluator):
         predictions_to_store = []
         for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
-            batch_predictions = self.model.predict(filled_inputs)
-            if self.model.generator.adapter:
-                batch_predictions = self.model.generator.adapter.process(batch_predictions, batch_identifiers,
-                                                                         batch_meta)
-
+            batch_predictions = self.model.predict(batch_identifiers, batch_meta, filled_inputs)
             if stored_predictions:
                 predictions_to_store.extend(copy.deepcopy(batch_predictions))
             annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
             self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
+            gan_annotations = []
+            gan_predictions = []
+            for index_of_metric in range(self.model_for_metric.number_of_metrics):
+                gan_annotations.extend(self.model_for_metric.predict(batch_identifiers, batch_meta,
+                                                                     annotations, index_of_metric))
+                gan_predictions.extend(self.model_for_metric.predict(batch_identifiers, batch_meta,
+                                                                     predictions, index_of_metric))
+            batch_identifiers.extend(batch_identifiers)
+            gan_annotations = [RawTensorAnnotation(batch_identifier, item)
+                               for batch_identifier, item in zip(batch_identifiers, gan_annotations)]
+            gan_predictions = [RawTensorPrediction(batch_identifier, item)
+                               for batch_identifier, item in zip(batch_identifiers, gan_predictions)]
+
             if output_callback:
                 output_callback(annotations, predictions)
 
             if self.metric_executor.need_store_predictions:
-                self._annotations.extend(annotations)
-                self._predictions.extend(predictions)
-
+                self._annotations.extend(gan_annotations)
+                self._predictions.extend(gan_predictions)
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_predictions))
 
@@ -154,6 +168,7 @@ class CocosnetEvaluator(BaseEvaluator):
 
         if stored_predictions:
             self.store_predictions(stored_predictions, predictions_to_store)
+
         return self._annotations, self._predictions
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
@@ -224,26 +239,59 @@ class CocosnetEvaluator(BaseEvaluator):
         self.reader.reset()
 
     def release(self):
-        self.launcher.release()
         self.model.release()
-
-
-def automatic_model_search(network_info):
-    model = str(Path(network_info['model']))
-    weights = str(get_path(network_info.get('weights', model)))
-    if ".xml" in weights:
-        weights = weights.replace(".xml", ".bin")
-    return model, weights
+        self.launcher.release()
 
 
 class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
-        self.network_info = network_info
+        self.input_blob, self.output_blob = None, None
+        self.with_prefix = None
+        if not delayed_model_loading:
+            self.load_model(network_info, launcher, log=True)
+
+    @staticmethod
+    def auto_model_search(network_info, net_type=""):
+        model = Path(network_info['model'])
+        is_blob = network_info.get('_model_is_blob')
+        if model.is_dir():
+            if is_blob:
+                model_list = list(model.glob('*.blob'))
+            else:
+                model_list = list(model.glob('*.xml'))
+                if not model_list and is_blob is None:
+                    model_list = list(model.glob('*.blob'))
+            if not model_list:
+                raise ConfigError('Suitable model not found')
+            if len(model_list) > 1:
+                raise ConfigError('Several suitable models found')
+            model = model_list[0]
+            print_info('{} - Found model: {}'.format(net_type, model))
+        if model.suffix == '.blob':
+            return model, None
+        weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        print_info('{} - Found weights: {}'.format(net_type, weights))
+
+        return model, weights
 
     def predict(self, idenitifiers, input_data):
         raise NotImplementedError
 
     def release(self):
+        pass
+
+    def load_model(self, network_info, launcher, log=False):
+        model, weights = self.auto_model_search(network_info, self.net_type)
+        if weights is not None:
+            self.network = launcher.read_network(model, weights)
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+        else:
+            self.exec_network = launcher.ie_core.import_network(str(model))
+        self.set_input_and_output()
+        if log:
+            self.print_input_output_info()
+
+    def set_input_and_output(self):
         pass
 
     def print_input_output_info(self):
@@ -280,25 +328,11 @@ class CorrespondenceNetwork(BaseModel):
     default_model_suffix = 'corr'
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
+        self.net_type = "correspondence_network"
         super().__init__(network_info, launcher)
-        self.input_blob, self.output_blob = None, None
-        self.with_prefix = None
-        if not delayed_model_loading:
-            self.load_model(network_info, launcher, log=True)
-
-    def load_model(self, network_info, launcher, log=False):
-        model, weights = automatic_model_search(network_info)
-        if weights is not None:
-            self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-        else:
-            self.exec_network = launcher.ie_core.import_network(str(model))
-        self.set_input_and_output()
         self.input_feeder = InputFeeder(
             launcher.config.get('inputs', []), self.inputs
         )
-        if log:
-            self.print_input_output_info()
 
     def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
@@ -319,6 +353,7 @@ class CorrespondenceNetwork(BaseModel):
         }
 
     def release(self):
+        del self.network
         del self.exec_network
 
     def predict(self, input_data):
@@ -329,17 +364,66 @@ class GeneratorNetwork(BaseModel):
     default_model_suffix = 'gen'
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
+        self.net_type = "generarative_network"
         super().__init__(network_info, launcher)
-        self.input_blob, self.output_blob = None, None
         self.adapter = create_adapter(network_info.get('adapter'))
-        self.with_prefix = None
-        if not delayed_model_loading:
-            self.load_model(network_info, launcher, log=True)
+        self.adapter.output_blob = self.output_blob
+
+    def set_input_and_output(self):
+        has_info = hasattr(self.exec_network, 'input_info')
+        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        self.input_blob = next(iter(input_info))
+        self.output_blob = next(iter(self.exec_network.outputs))
+
+    def fit_to_input(self, input_data):
+        return {self.input_blob: input_data}
+
+    def release(self):
+        del self.network
+        del self.exec_network
+
+    def predict(self, identifiers, meta, input_data):
+        predictions = self.exec_network.infer(self.fit_to_input(input_data))
+        result = self.adapter.process(predictions, identifiers, meta)
+        return result
+
+
+class CocosnetModel(BaseModel):
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
+        self.correspondence = CorrespondenceNetwork(network_info['correspondence'], launcher,
+                                                    delayed_model_loading)
+        self.generator = GeneratorNetwork(network_info['generator'], launcher, delayed_model_loading)
+
+    def release(self):
+        self.correspondence.release()
+        self.generator.release()
+
+    def predict(self, identifiers, meta, inputs):
+        results = []
+        for inp in inputs:
+            inp = self.correspondence.fit_to_input([inp])
+            corr_out = self.correspondence.predict(inp[0])
+            gen_input = np.concatenate((corr_out[self.correspondence.key_of_warped_reference],
+                                        inp[0][self.correspondence.key_of_input_semantics]), axis=1)
+            result = self.generator.predict(identifiers, meta, gen_input)
+            results.append(*result)
+        return results
+
+
+class GanCheckModel(BaseModel):
+    default_model_suffix = 'check'
+
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
+        self.net_type = "verification_network"
+        self.additional_layers = network_info.get('additional_layers')
+        super().__init__(network_info, launcher)
 
     def load_model(self, network_info, launcher, log=False):
-        model, weights = automatic_model_search(network_info)
+        model, weights = self.auto_model_search(network_info, self.net_type)
         if weights is not None:
             self.network = launcher.read_network(model, weights)
+            for layer in self.additional_layers:
+                self.network.add_outputs(layer)
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
@@ -351,37 +435,26 @@ class GeneratorNetwork(BaseModel):
         has_info = hasattr(self.exec_network, 'input_info')
         input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
         self.input_blob = next(iter(input_info))
-        self.output_blob = next(iter(self.exec_network.outputs))
-        self.adapter.output_blob = self.output_blob
+        self.output_blob = list(self.exec_network.outputs.keys())
+        self.number_of_metrics = len(self.output_blob)
 
     def fit_to_input(self, input_data):
+        input_data = cv2.cvtColor(input_data, cv2.COLOR_RGB2BGR)
+        input_data = cv2.resize(input_data, dsize=(299, 299))
+        input_data = np.expand_dims(input_data, 0)
+        input_data = np.transpose(input_data, (0, 3, 1, 2))
         return {self.input_blob: input_data}
 
     def release(self):
+        del self.network
         del self.exec_network
 
-    def predict(self, input_data):
-        return self.exec_network.infer(self.fit_to_input(input_data))
+    def postprocessing(self, output):
+        return np.squeeze(output)
 
-
-class CocosnetModel(BaseModel):
-    def __init__(self, network_info, launcher, delayed_model_loading=False):
-        super().__init__(network_info, launcher)
-        self.correspondence = CorrespondenceNetwork(network_info['correspondence'], launcher,
-                                                    delayed_model_loading)
-        self.generator = GeneratorNetwork(network_info['generator'], launcher, delayed_model_loading)
-
-    def release(self):
-        self.correspondence.release()
-        self.generator.release()
-
-    def predict(self, inputs):
+    def predict(self, identifiers, meta, input_data, index_of_key):
         results = []
-        for inp in inputs:
-            inp = self.correspondence.fit_to_input(inp)
-            corr_out = self.correspondence.predict(inp[0])
-            gen_input = np.concatenate((corr_out[self.correspondence.key_of_warped_reference],
-                                        inp[0][self.correspondence.key_of_input_semantics]), axis=1)
-            result = self.generator.predict(gen_input)
-            results.append(result)
+        for data in input_data:
+            prediction = self.exec_network.infer(self.fit_to_input(data.value))
+            results.append(self.postprocessing(prediction[self.output_blob[index_of_key]]))
         return results

@@ -19,8 +19,8 @@ from ..representation import ImageProcessingAnnotation
 from .format_converter import BaseFormatConverter, ConverterReturn
 
 
-class CocosnetConverter(BaseFormatConverter):
-    __provider__ = 'cocosnet'
+class ADE20kImageTranslationConverter(BaseFormatConverter):
+    __provider__ = 'ade20k_image_translation'
     annotation_types = (ImageProcessingAnnotation,)
 
     @classmethod

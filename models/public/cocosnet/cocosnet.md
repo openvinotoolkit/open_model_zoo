@@ -91,11 +91,15 @@ an exemplar-based translation output.
     Output color order is RGB.
 
 ## Accuracy of composite (CoCosNet) model
+Metrics was calculated between generated images by model and real validation images from ADE20k dataset.
+The classification model Inception-V3 was used to calculate IS and FID metrics.
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| PSNR   | 12.99dB        | 7.76dB          |
-| SSIM   | 0.345          | 0.3             |
+| PSNR   | 12.99dB        | 12.98dB         |
+| SSIM   | 0.34           | 0.34            |
+| IS     | 13.34          | 13.2            |
+| FID    | 33.27          | 33.5            |
 
 ## Legal Information
 
