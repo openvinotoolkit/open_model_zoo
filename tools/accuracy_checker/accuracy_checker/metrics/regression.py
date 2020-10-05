@@ -40,10 +40,8 @@ from ..representation import (
     StyleTransferPrediction,
     FeaturesRegressionAnnotation,
     PoseEstimationAnnotation,
-    PoseEstimationPrediction
-    FeaturesRegressionAnnotation
-    CocosnetAnnotation,
-    CocosnetPrediction
+    PoseEstimationPrediction,
+    FeaturesRegressionAnnotation,
 )
 
 from .metric import PerImageEvaluationMetric
