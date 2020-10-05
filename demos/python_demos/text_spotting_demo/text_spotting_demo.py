@@ -213,20 +213,23 @@ def main():
     del text_enc_net
     del text_dec_net
 
-    try:
-        input_source = int(args.input_source)
-        cap = cv2.VideoCapture(input_source)
-    except ValueError:
-        input_source = args.input_source
-        if os.path.isdir(input_source):
-            cap = FolderCapture(input_source)
-        else:
+    input_source = args.input_source
+    if os.path.isdir(input_source):
+        cap = FolderCapture(input_source)
+    else:
+        try:
+            input_source = int(args.input_source)
+            cap = cv2.VideoCapture(input_source)
+            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        except ValueError:
             cap = cv2.VideoCapture(input_source)
 
     if not cap.isOpened():
-        log.error('Failed to open "{}"'.format(args.input_source))
-    if isinstance(cap, cv2.VideoCapture):
-        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        raise RuntimeError('Failed to open "{}"'.format(input_source))
+
+    ret, frame = cap.read()
+    if not ret:
+        raise RuntimeError("Can't read an image form the input")
 
     if args.no_track:
         tracker = None
@@ -237,15 +240,10 @@ def main():
 
     render_time = 0
 
-    presenter = monitors.Presenter(args.utilization_monitors, 45,
-        (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
+    presenter = monitors.Presenter(args.utilization_monitors, 45, (frame.shape[1] // 4, frame.shape[0] // 8))
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-
+    while ret:
         if not args.keep_aspect_ratio:
             # Resize the image to a target size.
             scale_x = w / frame.shape[1]
@@ -366,6 +364,8 @@ def main():
             if key == esc_code:
                 break
             presenter.handleKey(key)
+
+        ret, frame = cap.read()
 
     print(presenter.reportMeans())
     cv2.destroyAllWindows()
