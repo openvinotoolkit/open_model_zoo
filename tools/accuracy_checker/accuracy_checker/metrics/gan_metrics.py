@@ -1,12 +1,9 @@
 """
 Copyright (c) 2018-2020 Intel Corporation
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,10 +12,11 @@ limitations under the License.
 """
 
 import numpy as np
+from scipy.linalg import sqrtm
 
 from ..representation import (
-    ImageProcessingAnnotation,
-    ImageProcessingPrediction,
+    RawTensorAnnotation,
+    RawTensorPrediction,
 )
 
 from .metric import FullDatasetEvaluationMetric
@@ -26,13 +24,34 @@ from ..config import NumberField
 
 
 class BaseGanMetric(FullDatasetEvaluationMetric):
-    annotation_types = (ImageProcessingAnnotation, )
-    prediction_types = (ImageProcessingPrediction, )
+    annotation_types = (RawTensorAnnotation, )
+    prediction_types = (RawTensorPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'eps': NumberField(
+                optional=True, default=1E-16,
+                description="Epsilon to avoid nan during calculations",
+                value_type=float
+            )
+        })
+        parameters.update({
+            'length': NumberField(
+                default=1001, description="Length of input feature vector for metric",
+                value_type=int
+            )
+        })
+
+        return parameters
 
     def configure(self):
         self.meta.update({
             'scale': 1, 'postfix': ' ', 'target': 'higher-worse'
         })
+        self.eps = self.get_value_from_config('eps')
+        self.length = self.get_value_from_config('length')
 
     def get_values(self, representation):
         items = [item.value for item in representation]
@@ -44,7 +63,12 @@ class BaseGanMetric(FullDatasetEvaluationMetric):
     def evaluate(self, annotations, predictions):
         annotations = self.get_values(annotations)
         predictions = self.get_values(predictions)
-        return self.score_calc(annotations, predictions)
+
+        real = [item for item in annotations if item.size == self.length]
+        real = np.stack(real)
+        generated = [item for item in predictions if item.size == self.length]
+        generated = np.stack(generated)
+        return self.score_calc(real, generated)
 
 
 class InceptionScore(BaseGanMetric):
@@ -54,30 +78,15 @@ class InceptionScore(BaseGanMetric):
 
     __provider__ = 'inception_score'
 
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'eps': NumberField(
-                optional=True, default=1E-16,
-                description="Epsilon to avoid nan when trying to calculate the log of a zero probability",
-                value_type=float
-            )
-        })
-
-    def configure(self):
-        super().configure()
-        self.eps = self.get_value_from_config('eps')
-
     def score_calc(self, annotations, predictions):
         """
         Calculate IS metric for prediction labels.
         """
 
-        probabilities = np.stack(predictions)
-        mean_probabilities_of_classes = np.expand_dims(np.mean(probabilities, axis=0), axis=0)
-        KL_d = probabilities * (np.log(probabilities + self.eps) - np.log(mean_probabilities_of_classes + self.eps))
+        mean_probabilities_of_classes = np.expand_dims(np.mean(predictions, axis=0), axis=0)
+        KL_d = predictions * (np.log(predictions + self.eps) - np.log(mean_probabilities_of_classes + self.eps))
         KL_D = KL_d.sum(axis=1)
+
         score = np.exp(np.mean(KL_D))
         return score
 
@@ -93,14 +102,19 @@ class FrechetInceptionDistance(BaseGanMetric):
         """
         Calculate FID between feature vector of the real and generated images.
         """
-        real = np.stack(annotations)
-        generated = np.stack(predictions)
 
-        assert real.shape[1] == generated.shape[1], "Expected equal length of feature vectors"
+        assert annotations.shape[1] == predictions.shape[1], "Expected equal length of feature vectors"
 
-        mu_real, mu_gen = real.mean(axis=0), generated.mean(axis=0)
-        cov_real, cov_gen = real.cov(rowvar=False), generated.cov(rowvar=False)
-        mdiff = np.sum((mu_real - mu_gen)**2)
-        cov = np.sqrt(cov_real.dot(cov_gen))
-        FID = mdiff + np.trace(cov_real + cov_gen - 2 * cov)
+        mu_real, mu_gen = annotations.mean(axis=0), predictions.mean(axis=0)
+        cov_real, cov_gen = np.cov(annotations, rowvar=False), np.cov(predictions, rowvar=False)
+        mdiff = mu_real - mu_gen
+
+        covmean = sqrtm(cov_real.dot(cov_gen))
+        if not np.isfinite(covmean).all():
+            offset = np.eye(cov_real.shape[0]) * self.eps
+            covmean = sqrtm((cov_real + offset).dot(cov_gen + offset))
+        if np.iscomplexobj(covmean):
+            covmean = covmean.real
+
+        FID = mdiff.dot(mdiff) + np.trace(cov_real + cov_gen - 2 * covmean)
         return FID
