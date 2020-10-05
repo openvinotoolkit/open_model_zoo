@@ -229,7 +229,7 @@ def main():
 
     ret, frame = cap.read()
     if not ret:
-        raise RuntimeError("Can't read an image form the input")
+        raise RuntimeError("Can't read an image from the input")
 
     if args.no_track:
         tracker = None
