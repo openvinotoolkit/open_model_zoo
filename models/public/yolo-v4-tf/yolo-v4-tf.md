@@ -71,11 +71,11 @@ Channel order is `BGR`.
 
 ### Original model
 
-1. The array of detection summary info, name - `conv2d_93/BiasAdd`,  shape - `1,19,19,255`. The anchor values are `116,90,  156,198,  373,326`.
+1. The array of detection summary info, name - `conv2d_93/BiasAdd`, shape - `1,76,76,255`. The anchor values are `12,16, 19,36, 40,28`.
 
-2. The array of detection summary info, name - `conv2d_101/BiasAdd`,  shape - `1,38,38,255`. The anchor values are `30,61,  62,45,  59,119`.
+2. The array of detection summary info, name - `conv2d_101/BiasAdd`, shape - `1,38,38,255`. The anchor values are `36,75, 76,55, 72,146`.
 
-3. The array of detection summary info, name - `conv2d_109/BiasAdd`,  shape - `1,38,38,255`. The anchor values are `10,13,  16,30,  33,23`.
+3. The array of detection summary info, name - `conv2d_109/BiasAdd`, shape - `1,19,19,255`. The anchor values are `142,110, 192,243, 459,401`.
 
 For each case format is `B,Cx,Cy,N*85,`, where
     - `B` - batch size
@@ -90,11 +90,11 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 
 ### Converted model
 
-1. The array of detection summary info, name - `conv2d_93/BiasAdd/Add`,  shape - `1,19,19,255`. The anchor values are `116,90,  156,198,  373,326`.
+1. The array of detection summary info, name - `conv2d_93/BiasAdd/Add`, shape - `1,76,76,255`. The anchor values are `12,16, 19,36, 40,28`.
 
-2. The array of detection summary info, name - `conv2d_101/BiasAdd/Add`,  shape - `1,38,38,255`. The anchor values are `30,61,  62,45,  59,119`.
+2. The array of detection summary info, name - `conv2d_101/BiasAdd/Add`, shape - `1,38,38,255`. The anchor values are `36,75, 76,55, 72,146`.
 
-3. The array of detection summary info, name - `conv2d_109/BiasAdd/Add`,  shape - `1,38,38,255`. The anchor values are `10,13,  16,30,  33,23`.
+3. The array of detection summary info, name - `conv2d_109/BiasAdd/Add`, shape - `1,19,19,255`. The anchor values are `142,110, 192,243, 459,401`.
 
 For each case format is `B,N*85,Cx,Cy`, where
 - `B` - batch size
