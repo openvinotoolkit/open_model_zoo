@@ -60,6 +60,7 @@ public:
     {
         int64_t framesCount = 0;
         std::chrono::steady_clock::duration latencySum = std::chrono::steady_clock::duration::zero();
+        std::chrono::steady_clock::duration lastInferenceLatency = std::chrono::steady_clock::duration::zero();
         std::chrono::steady_clock::time_point startTime;
         double movingAverageLatencyMs;
         uint32_t numRequestsInUse;
@@ -69,6 +70,11 @@ public:
         double getTotalAverageLatencyMs() const {
             return ((double)std::chrono::duration_cast<std::chrono::milliseconds>(latencySum).count()) / framesCount;
         }
+
+        double getLastInferenceLatencyMs() const {
+            return ((double)std::chrono::duration_cast<std::chrono::milliseconds>(lastInferenceLatency).count());
+        }
+
     };
 
     struct PerformanceInternalCounters
@@ -82,13 +88,6 @@ public:
 public:
     PipelineBase();
     virtual ~PipelineBase();
-
-    /// Loads model and performs required initialization
-    /// @param model_name name of model to load
-    /// @param cnnConfig - fine tuning configuration for CNN model
-    /// @param engine - pointer to InferenceEngine::Core instance to use.
-    /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
-    void init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine = nullptr);
 
     /// Waits until either output data becomes available or pipeline allows to submit more input data.
     /// @param shouldKeepOrder if true, function will treat results as ready only if next sequential result (frame) is
@@ -107,7 +106,7 @@ public:
 
     /// Waits for all currently submitted requests to be completed.
     ///
-    void waitForTotalCompletion() { requestsPool->waitForTotalCompletion(); }
+    void waitForTotalCompletion() { if(requestsPool.get())requestsPool->waitForTotalCompletion(); }
 
     /// Submit request to network
     /// @param image - image to submit for processing
@@ -121,6 +120,13 @@ public:
     virtual cv::Mat obtainAndRenderData() { return cv::Mat(); }
 
 protected:
+    /// Loads model and performs required initialization
+    /// @param model_name name of model to load
+    /// @param cnnConfig - fine tuning configuration for CNN model
+    /// @param engine - pointer to InferenceEngine::Core instance to use.
+    /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
+    virtual void init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine = nullptr);
+
     /// This function is called during intialization before loading model to device
     /// Inherited classes may override this function to prepare input/output blobs (get names, set precision, etc...)
     /// The value of outputName member variable is also may to be set here (however, it can be done in any other place).
@@ -138,7 +144,7 @@ protected:
     /// @param shouldKeepOrder if true, function will return processed data sequentially,
     /// keeping original frames order (as they were submitted). Otherwise, function will return processed data in random order.
     /// @returns InferenceResult with processed information or empty InferenceResult (with negative frameID) if there's no any results yet.
-    virtual InferenceResult getInferenceResult(bool shouldKeepOrder=true);
+    virtual InferenceResult getInferenceResult(bool shouldKeepOrder);
 
 protected:
     std::unique_ptr<RequestsPool> requestsPool;
@@ -152,12 +158,12 @@ protected:
     std::mutex mtx;
     std::condition_variable condVar;
 
-    int64_t inputFrameId;
-    int64_t outputFrameId;
+    int64_t inputFrameId=0;
+    int64_t outputFrameId=0;
 
     std::string imageInputName;
     std::vector<std::string> outputsNames;
-    bool useInputAutoResize;
+    bool useInputAutoResize=true;
 
     std::exception_ptr callbackException = nullptr;
 

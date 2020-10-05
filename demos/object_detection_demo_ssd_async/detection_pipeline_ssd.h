@@ -13,33 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
-#pragma once
-#include "pipeline_base.h"
-#include "opencv2/core.hpp"
 
-class DetectionPipeline :
-    public PipelineBase
+#pragma once
+#include "detection_pipeline.h"
+class DetectionPipelineSSD :
+    public DetectionPipeline
 {
 public:
-    struct ObjectDesc : public cv::Rect2f {
-        unsigned int labelID;
-        std::string label;
-        float confidence;
-    };
-
-    struct DetectionResult : public ResultBase {
-        std::vector<ObjectDesc> objects;
-    };
-
-public:
-    virtual int64_t submitImage(cv::Mat img);
-    virtual DetectionResult getProcessedResult(bool shouldKeepOrder = true)=0;
-    
-    cv::Mat obtainAndRenderData();
-
-    static std::vector<std::string> loadLabels(const std::string& labelFilename);
-
-protected:
     /// Loads model and performs required initialization
     /// @param model_name name of model to load
     /// @param cnnConfig - fine tuning configuration for CNN model
@@ -56,18 +36,8 @@ protected:
         const std::vector<std::string>& labels = std::vector<std::string>(),
         InferenceEngine::Core* engine = nullptr);
 
-    std::vector<std::string> labels;
-
-    std::string imageInfoInputName;
-    size_t netInputHeight=0;
-    size_t netInputWidth=0;
-
-    bool useAutoResize=false;
-    size_t maxProposalCount=0;
-    size_t objectSize=0;
-    float confidenceThreshold=0;
-
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork)=0;
-    std::string getLabelName(int labelID) { return labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
+    virtual DetectionResult getProcessedResult(bool shouldKeepOrder = true);
+protected:
+    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
 };
 

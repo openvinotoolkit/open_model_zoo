@@ -6,7 +6,7 @@ FILE(GLOB SRC_FILES ./*.cpp ../common/processing/*.cpp)
 FILE(GLOB H_FILES ./*.h ../common/processing/*.h)
 
 ie_add_sample(NAME async_pipeline_demo
-              SOURCES ${SRC_FILES} ../segmentation_demo_async/segmentation_pipeline.cpp ../object_detection_demo_ssd_async/detection_pipeline.cpp
+              SOURCES ${SRC_FILES} ../segmentation_demo_async/segmentation_pipeline.cpp ../object_detection_demo_ssd_async/detection_pipeline.cpp ../object_detection_demo_ssd_async/detection_pipeline_ssd.cpp ../object_detection_demo_ssd_async/detection_pipeline_yolo.cpp
               HEADERS ${H_FILES}
               DEPENDENCIES monitors
               OPENCV_DEPENDENCIES highgui videoio imgproc)

@@ -29,7 +29,7 @@
 #include <samples/args_helper.hpp>
 #include <samples/slog.hpp>
 
-#include "detection_pipeline.h"
+#include "detection_pipeline_ssd.h"
 #include "segmentation_pipeline.h"
 #include "config_factory.h"
 #include <samples/images_capture.h>
@@ -170,15 +170,18 @@ int main(int argc, char *argv[]) {
         //------------------------------ Creating pipeline object ------------------------------------------------
         std::unique_ptr<PipelineBase> pipeline;
         if (FLAGS_use == "s") {
-            pipeline.reset(new SegmentationPipeline(FLAGS_m, ConfigFactory::GetUserConfig()));
+            auto segmentationPipeline = new SegmentationPipeline;
+            segmentationPipeline->init(FLAGS_m, ConfigFactory::GetUserConfig());
+            pipeline.reset(segmentationPipeline);
         }
         else if (FLAGS_use == "d") {
             auto labels = FLAGS_labels.empty() ?
                 std::vector<std::string>() :
                 DetectionPipeline::loadLabels(FLAGS_labels);
 
-            pipeline.reset(new DetectionPipeline(
-                FLAGS_m, ConfigFactory::GetUserConfig(), (float)FLAGS_t, FLAGS_auto_resize, labels));
+            auto detectionPipeline = new DetectionPipelineSSD;
+            detectionPipeline->init(FLAGS_m, ConfigFactory::GetUserConfig(), (float)FLAGS_t, FLAGS_auto_resize, labels);
+            pipeline.reset(detectionPipeline);
         }
         else {
             printf("\nERROR: Use case mode (-use) is not defined or invalid. Exiting...\n");

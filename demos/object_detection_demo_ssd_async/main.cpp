@@ -29,7 +29,8 @@
 #include <samples/args_helper.hpp>
 #include <samples/slog.hpp>
 
-#include "detection_pipeline.h"
+#include "detection_pipeline_yolo.h"
+#include "detection_pipeline_ssd.h"
 #include "config_factory.h"
 
 #include <gflags/gflags.h>
@@ -60,6 +61,8 @@ static const char num_streams_message[] = "Optional. Number of streams to use fo
 "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes (YOLOv3 only).";
+static const char mt_message[] = "Model type: ssd or yolo";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", video_message);
@@ -71,6 +74,7 @@ DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
+DEFINE_double(iou_t, 0.4, iou_thresh_output_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nireq, 2, num_inf_req_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
@@ -78,6 +82,7 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(loop, false, loop_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_string(mt, "", mt_message);
 
 /**
 * \brief This function shows a help message
@@ -135,17 +140,21 @@ void paintInfo(cv::Mat& frame, const PipelineBase::PerformanceInfo& info) {
     out.str("");
     out << "FPS:" << std::fixed << std::setprecision(0) << std::setw(3) << info.movingAverageFPS
         << " (" << std::setprecision(1) << info.FPS << ")";
-    putHighlightedText(frame, out.str(), cv::Point2f(10, 30), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(10, 200, 10), 2);
+    putHighlightedText(frame, out.str(), cv::Point2f(10, 22), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(10, 200, 10), 2);
 
     out.str("");
     out << "Avg Latency:" << std::fixed << std::setprecision(0) << std::setw(4) << info.movingAverageLatencyMs
         << " (" << std::setprecision(1) << info.getTotalAverageLatencyMs() << ") ms";
-    putHighlightedText(frame, out.str(), cv::Point2f(10, 60), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(200, 10, 10), 2);
+    putHighlightedText(frame, out.str(), cv::Point2f(10, 44), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(200, 10, 10), 2);
+
+    out.str("");
+    out << "Inference Latency:" << std::fixed << std::setprecision(0) << std::setw(4) << info.getLastInferenceLatencyMs() << " ms";
+    putHighlightedText(frame, out.str(), cv::Point2f(10, 66), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(200, 10, 10), 2);
 
     out.str("");
     out << "Pool: " << std::fixed << std::setprecision(1) <<
         info.numRequestsInUse << "/" << FLAGS_nireq;
-    putHighlightedText(frame, out.str(), cv::Point2f(10, 90), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(200, 10, 10), 2);
+    putHighlightedText(frame, out.str(), cv::Point2f(10, 88), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(200, 10, 10), 2);
 }
 
 int main(int argc, char *argv[]) {
@@ -168,13 +177,30 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_labels.empty())
             labels = DetectionPipeline::loadLabels(FLAGS_labels);
 
-        DetectionPipeline pipeline(FLAGS_m, ConfigFactory::GetUserConfig(), (float)FLAGS_t, FLAGS_auto_resize,labels);
+        std::unique_ptr<DetectionPipeline> pipeline;
+        if (FLAGS_mt=="ssd")
+        {
+            auto ssd = new DetectionPipelineSSD;
+            ssd->init(FLAGS_m, ConfigFactory::GetUserConfig(), (float)FLAGS_t, FLAGS_auto_resize, labels);
+            pipeline.reset(ssd);
+        }
+        else if (FLAGS_mt=="yolo")
+        {
+            auto yolo = new DetectionPipelineYolo;
+            yolo->init(FLAGS_m, ConfigFactory::GetUserConfig(), (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, labels);
+            pipeline.reset(yolo);
+        }
+        else
+        {
+            std::cout << "Invalid model type provided: " + FLAGS_mt<<std::endl;
+            return -1;
+        }
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();
         while (true){
             int64_t frameNum;
-            if (pipeline.isReadyToProcess()) {
+            if (pipeline->isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
                 if (curr_frame.empty()) {
                     curr_frame = cap->read();
@@ -182,7 +208,7 @@ int main(int argc, char *argv[]) {
                         throw std::logic_error("Can't read an image from the input");
                 }
 
-                frameNum = pipeline.submitImage(curr_frame);
+                frameNum = pipeline->submitImage(curr_frame);
                 if (frameNum < 0)
                     break;
                 curr_frame.release();
@@ -191,16 +217,16 @@ int main(int argc, char *argv[]) {
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - check for getProcessedResult() function
             cv::Mat outFrame;
-            while (!(outFrame = pipeline.obtainAndRenderData()).empty()) {
+            while (!(outFrame = pipeline->obtainAndRenderData()).empty()) {
                 //--- Showing results and device information
                 if (!outFrame.empty() && !FLAGS_no_show) {
                     presenter.drawGraphs(outFrame);
-                    paintInfo(outFrame, pipeline.getPerformanceInfo());
+                    paintInfo(outFrame, pipeline->getPerformanceInfo());
                     cv::imshow("Detection Results", outFrame);
                 }
             }
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
-            pipeline.waitForData();
+            pipeline->waitForData();
 
             //--- Processing keyboard events
             const int key = cv::waitKey(1);
@@ -216,7 +242,7 @@ int main(int argc, char *argv[]) {
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        auto info = pipeline.getPerformanceInfo();
+        auto info = pipeline->getPerformanceInfo();
         slog::info << slog::endl << "Metric reports:" << slog::endl;
 
         std::cout << std::endl << "Total time: "

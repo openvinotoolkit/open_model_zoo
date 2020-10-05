@@ -34,12 +34,14 @@ public:
     };
 
 public:
-    /// Constructor. Loads model and performs required initialization
+    SegmentationPipeline();
+
+    /// Loads model and performs required initialization
     /// @param model_name name of model to load
     /// @param cnnConfig - fine tuning configuration for CNN model
     /// @param engine - pointer to InferenceEngine::Core instance to use.
     /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
-    SegmentationPipeline(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine = nullptr);
+    virtual void init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine = nullptr);
 
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
 

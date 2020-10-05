@@ -34,3 +34,4 @@ DECLARE_string(nstreams);
 DECLARE_bool(loop_input);
 DECLARE_bool(no_show);
 DECLARE_string(u);
+DECLARE_string(mt)

@@ -13,61 +13,55 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+
 #pragma once
-#include "pipeline_base.h"
-#include "opencv2/core.hpp"
-
-class DetectionPipeline :
-    public PipelineBase
+#include "detection_pipeline.h"
+class DetectionPipelineYolo :
+    public DetectionPipeline
 {
-public:
-    struct ObjectDesc : public cv::Rect2f {
-        unsigned int labelID;
-        std::string label;
-        float confidence;
-    };
-
-    struct DetectionResult : public ResultBase {
-        std::vector<ObjectDesc> objects;
-    };
-
-public:
-    virtual int64_t submitImage(cv::Mat img);
-    virtual DetectionResult getProcessedResult(bool shouldKeepOrder = true)=0;
-    
-    cv::Mat obtainAndRenderData();
-
-    static std::vector<std::string> loadLabels(const std::string& labelFilename);
-
 protected:
-    /// Loads model and performs required initialization
+    class Region {
+    public:
+        int num = 0;
+        int classes = 0;
+        int coords = 0;
+        std::vector<float> anchors;
+
+        Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo);
+    };
+
+public:
+    /// Constructor. Loads model and performs required initialization
     /// @param model_name name of model to load
     /// @param cnnConfig - fine tuning configuration for CNN model
     /// @param confidenceThreshold - threshold to eleminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
+    /// @param boxIOUThreshold - threshold to treat separate output regions as one object for filtering
+    /// during postprocessing (only one of them should stay). The default value is 0.4
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
     /// @param engine - pointer to InferenceEngine::Core instance to use.
     /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
     virtual void init(const std::string& model_name, const CnnConfig& cnnConfig,
-        float confidenceThreshold, bool useAutoResize,
+        float confidenceThreshold, bool useAutoResize, float boxIOUThreshold = 0.4,
         const std::vector<std::string>& labels = std::vector<std::string>(),
         InferenceEngine::Core* engine = nullptr);
 
-    std::vector<std::string> labels;
+    virtual DetectionPipeline::DetectionResult getProcessedResult(bool shouldKeepOrder = true);
 
-    std::string imageInfoInputName;
-    size_t netInputHeight=0;
-    size_t netInputWidth=0;
+protected:
+    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
+    void parseYOLOV3Output(const std::string & output_name, const InferenceEngine::Blob::Ptr & blob,
+        const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,
+        const unsigned long original_im_w, std::vector<DetectionPipeline::ObjectDesc>& objects);
 
-    bool useAutoResize=false;
-    size_t maxProposalCount=0;
-    size_t objectSize=0;
-    float confidenceThreshold=0;
+    static int calculateEntryIndex(int side, int lcoords, int lclasses, int location, int entry);
+    static double intersectionOverUnion(const ObjectDesc& o1, const ObjectDesc& o2);
 
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork)=0;
-    std::string getLabelName(int labelID) { return labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
+    std::map<std::string, Region> regions;
+    double boxIOUThreshold;
+
 };
 

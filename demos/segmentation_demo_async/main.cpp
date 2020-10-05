@@ -156,7 +156,8 @@ int main(int argc, char *argv[]) {
         cv::Mat curr_frame;
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
-        SegmentationPipeline pipeline(FLAGS_m, ConfigFactory::GetUserConfig());
+        SegmentationPipeline pipeline;
+        pipeline.init(FLAGS_m, ConfigFactory::GetUserConfig());
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();

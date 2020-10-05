@@ -18,10 +18,11 @@
 #include <samples/args_helper.hpp>
 
 using namespace InferenceEngine;
+SegmentationPipeline::SegmentationPipeline() :
+    distr(0, 255) {
+}
 
-SegmentationPipeline::SegmentationPipeline(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine)
-    :distr(0, 255) {
-
+void SegmentationPipeline::init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine){
     init(model_name, cnnConfig, engine);
 
     colors.resize(arraySize(CITYSCAPES_COLORS));

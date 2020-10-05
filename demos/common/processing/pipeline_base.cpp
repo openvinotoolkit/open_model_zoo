@@ -21,10 +21,7 @@
 
 using namespace InferenceEngine;
 
-PipelineBase::PipelineBase() :
-    inputFrameId(0),
-    outputFrameId(0) {
-}
+PipelineBase::PipelineBase(){}
 
 void PipelineBase::init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine) {
     auto ie = engine ?
@@ -119,7 +116,7 @@ int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request, 
                     for (std::string outName : this->outputsNames)
                         result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outName))));
                     result.startTime = frameStartTime;
-
+                    perfInfo.lastInferenceLatency = std::chrono::steady_clock::now() - frameStartTime;
                     completedInferenceResults.emplace(frameID, result);
 
                     this->requestsPool->setRequestIdle(request);
