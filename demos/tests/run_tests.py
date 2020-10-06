@@ -157,6 +157,7 @@ def main():
             'PYTHONIOENCODING': 'utf-8',
             'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{python_module_subdir}",
         }
+        fps_finder = re.compile(r'(?<=FPS:\s|fps:\s)[0-9]+\.?[0-9]*(?=\s)|(?<=\s)[0-9]+\.?[0-9]*(?= ?FPS| ?fps)')
 
         for demo in demos_to_test:
             print('Testing {}...'.format(demo.subdirectory))
@@ -213,7 +214,6 @@ def main():
                             ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
                         print(flush=True)
                         try:
-                            fps_finder = re.compile(r'(?<=FPS:\s|fps:\s)[0-9]+\.?[0-9]*(?=\s)|(?<=\s)[0-9]+\.?[0-9]*(?= ?FPS| ?fps)')
                             start_time = timeit.default_timer()
                             demo_output = subprocess.check_output(fixed_args + dev_arg + case_args,
                                 stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
