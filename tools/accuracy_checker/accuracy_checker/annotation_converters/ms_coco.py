@@ -351,7 +351,7 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
                 make_segmentation_mask(h, w, mask_file, image_labels, segmentations)
                 annotation = SegmentationAnnotation(image[1],
                                                     str(mask_file.relative_to(self.masks_dir.parent)),
-                                                    mask_loader=GTMaskLoader.SCIPY)
+                                                    mask_loader=GTMaskLoader.PILLOW)
 
             if check_content:
                 image_full_path = self.images_dir / image[1]
