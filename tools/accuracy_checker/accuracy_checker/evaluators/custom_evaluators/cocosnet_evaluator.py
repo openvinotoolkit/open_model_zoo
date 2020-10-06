@@ -24,8 +24,7 @@ import cv2
 from ..base_evaluator import BaseEvaluator
 from ...utils import get_path, extract_image_representations
 from ...dataset import Dataset
-from ...launcher import create_launcher, InputFeeder, DummyLauncher
-from ...launcher.loaders import PickleLoader
+from ...launcher import create_launcher, InputFeeder
 from ...logging import print_info
 from ...metrics import MetricsExecutor
 from ...postprocessor import PostprocessingExecutor
@@ -388,7 +387,7 @@ class GeneratorNetwork(BaseModel):
         return result
 
 
-class CocosnetModel(BaseModel):
+class CocosnetModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.correspondence = CorrespondenceNetwork(network_info['correspondence'], launcher,
                                                     delayed_model_loading)
@@ -449,12 +448,9 @@ class GanCheckModel(BaseModel):
         del self.network
         del self.exec_network
 
-    def postprocessing(self, output):
-        return np.squeeze(output)
-
     def predict(self, identifiers, meta, input_data, index_of_key):
         results = []
         for data in input_data:
             prediction = self.exec_network.infer(self.fit_to_input(data.value))
-            results.append(self.postprocessing(prediction[self.output_blob[index_of_key]]))
+            results.append(np.squeeze(prediction[self.output_blob[index_of_key]]))
         return results

@@ -41,7 +41,6 @@ from ..representation import (
     FeaturesRegressionAnnotation,
     PoseEstimationAnnotation,
     PoseEstimationPrediction,
-    FeaturesRegressionAnnotation,
 )
 
 from .metric import PerImageEvaluationMetric

@@ -18,7 +18,7 @@ For details see [paper](https://arxiv.org/pdf/2004.05571).
 ## Specification for Correspondence model
 
 The purpose of correspondence model is to establish correspondence between input image and given exemplar. \
-Correspondence network return warped exexplar with semantic from input.
+Correspondence network return warped exemplar with semantic from input.
 
 ### Performance
 
@@ -65,8 +65,7 @@ Correspondence network return warped exexplar with semantic from input.
 
 ## Specification for Translation model
 
-Translation model generates the final output based on the warped exemplar according to the correspondence, yielding
-an exemplar-based translation output.
+Translation model generates the final output based on the warped exemplar according to the correspondence, yielding an exemplar-based translation output.
 
 ### Performance
 
