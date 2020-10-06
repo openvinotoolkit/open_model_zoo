@@ -29,7 +29,6 @@ models:
           - conv2d_109/BiasAdd
     datasets:
       - name: ms_coco_detection_80_class_without_background
-        subsample_size: 100
         preprocessing:
           - type: bgr_to_rgb
           - type: normalization
@@ -57,8 +56,6 @@ models:
   - name: yolo_v4
     launchers:
       - framework: dlsdk
-        model:   FP32/yolo-v4.xml
-        weights: FP32/yolo-v4.bin
         adapter:
           type: yolo_v3
           anchors: 12,16,19,36,40,28,36,75,76,55,72,146,142,110,192,243,459,401
@@ -74,7 +71,6 @@ models:
             - conv2d_109/BiasAdd/Add
     datasets:
       - name: ms_coco_detection_80_class_without_background
-        subsample_size: 100
         preprocessing:
           - type: resize
             size: 608
