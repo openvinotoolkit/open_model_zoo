@@ -29,8 +29,8 @@ YOLO v4 is a real-time object detection model implemented with Keras\* from this
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Detection     |
-| GFLOPs            | -        |
-| MParams           | -        |
+| GFLOPs            | 128.608       |
+| MParams           | 64.33         |
 | Source framework  | Keras\*       |
 
 ## Accuracy
