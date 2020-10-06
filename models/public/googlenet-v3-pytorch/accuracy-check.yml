@@ -28,8 +28,6 @@ models:
             mean: 127.5
             std: 127.5
 
-            # Using accuracy metric, achieved result of public model - 77.45% and 93.56% (top 1 and top 5 respectively)
-
   - name: googlenet-v3-pytorch
 
     # list of launchers
@@ -53,5 +51,3 @@ models:
             use_pillow: true
           # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
           - type: rgb_to_bgr
-
-            # Using accuracy metric, achieved result of public model - 77.45% and 93.56% (top 1 and top 5 respectively)

@@ -4,7 +4,7 @@ models:
     launchers:
       - framework: dlsdk
         adapter:
-           type: class_agnostic_detection
+          type: class_agnostic_detection
     datasets:
       - name: crossroad_extra_untagged_vehicle_labels_from_1
         preprocessing:
@@ -13,7 +13,7 @@ models:
             dst_height: 800
         postprocessing:
           - type: resize_prediction_boxes
-            rescale: True 
+            rescale: True
           - type: clip_boxes
             apply_to: prediction
         metrics:
