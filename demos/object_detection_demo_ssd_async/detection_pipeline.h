@@ -68,6 +68,6 @@ protected:
     float confidenceThreshold=0;
 
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork)=0;
-    std::string getLabelName(int labelID) { return labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
+    std::string getLabelName(int labelID) { return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
 };
 
