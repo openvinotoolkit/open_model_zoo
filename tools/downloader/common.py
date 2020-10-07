@@ -48,7 +48,6 @@ KNOWN_FRAMEWORKS = {
 KNOWN_PRECISIONS = {
     'FP16', 'FP16-INT1', 'FP16-INT8',
     'FP32', 'FP32-INT1', 'FP32-INT8',
-    'INT1', 'INT8',
 }
 KNOWN_TASK_TYPES = {
     'action_recognition',
@@ -62,12 +61,16 @@ KNOWN_TASK_TYPES = {
     'image_inpainting',
     'image_processing',
     'instance_segmentation',
+    'machine_translation',
     'monocular_depth_estimation',
     'object_attributes',
     'optical_character_recognition',
     'question_answering',
     'semantic_segmentation',
+    'sound_classification',
+    'speech_recognition',
     'style_transfer',
+    'token_recognition',
 }
 
 KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}
@@ -170,9 +173,10 @@ class Reporter:
         self.enable_json_output = enable_json_output
         self.event_context = event_context
 
-    def print_group_heading(self, text):
+    def print_group_heading(self, format, *args):
         if not self.enable_human_output: return
-        self.job_context.printf('{} {} {}', self.GROUP_DECORATION, text, self.GROUP_DECORATION[::-1])
+        self.job_context.printf('{} {} {}',
+            self.GROUP_DECORATION, format.format(*args), self.GROUP_DECORATION[::-1])
         self.job_context.print('')
 
     def print_section_heading(self, format, *args):
@@ -272,6 +276,8 @@ class TaggedBase:
             raise DeserializationError('Unknown "$type": "{}"'.format(value['$type']))
 
 class FileSource(TaggedBase):
+    RE_CONTENT_RANGE_VALUE = re.compile(r'bytes (\d+)-\d+/(?:\d+|\*)')
+
     types = {}
 
     @classmethod
@@ -280,26 +286,20 @@ class FileSource(TaggedBase):
             source = {'$type': 'http', 'url': source}
         return super().deserialize(source)
 
-class FileSourceHttp(FileSource):
-    RE_CONTENT_RANGE_VALUE = re.compile(r'bytes (\d+)-\d+/(?:\d+|\*)')
+    @classmethod
+    def http_range_headers(cls, offset):
+        if offset == 0:
+            return {}
 
-    def __init__(self, url):
-        self.url = url
+        return {
+            'Accept-Encoding': 'identity',
+            'Range': 'bytes={}-'.format(offset),
+        }
 
     @classmethod
-    def deserialize(cls, source):
-        return cls(validate_string('"url"', source['url']))
-
-    def start_download(self, session, chunk_size, offset):
-        headers = {}
-        if offset != 0:
-            headers['Range'] = 'bytes={}-'.format(offset)
-
-        response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT, headers=headers)
-        response.raise_for_status()
-
+    def handle_http_response(cls, response, chunk_size):
         if response.status_code == requests.codes.partial_content:
-            match = self.RE_CONTENT_RANGE_VALUE.fullmatch(response.headers.get('Content-Range', ''))
+            match = cls.RE_CONTENT_RANGE_VALUE.fullmatch(response.headers.get('Content-Range', ''))
             if not match:
                 # invalid range reply; return a negative offset to make
                 # the download logic restart the download.
@@ -315,6 +315,22 @@ class FileSourceHttp(FileSource):
 
         return response.iter_content(chunk_size=chunk_size), 0
 
+
+class FileSourceHttp(FileSource):
+    def __init__(self, url):
+        self.url = url
+
+    @classmethod
+    def deserialize(cls, source):
+        return cls(validate_string('"url"', source['url']))
+
+    def start_download(self, session, chunk_size, offset):
+        response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT,
+            headers=self.http_range_headers(offset))
+        response.raise_for_status()
+
+        return self.handle_http_response(response, chunk_size)
+
 FileSource.types['http'] = FileSourceHttp
 
 class FileSourceGoogleDrive(FileSource):
@@ -326,18 +342,20 @@ class FileSourceGoogleDrive(FileSource):
         return cls(validate_string('"id"', source['id']))
 
     def start_download(self, session, chunk_size, offset):
-        # for now the offset is ignored; TODO: try to implement resumption
+        range_headers = self.http_range_headers(offset)
         URL = 'https://docs.google.com/uc?export=download'
-        response = session.get(URL, params={'id' : self.id}, stream=True, timeout=DOWNLOAD_TIMEOUT)
+        response = session.get(URL, params={'id' : self.id}, headers=range_headers,
+            stream=True, timeout=DOWNLOAD_TIMEOUT)
         response.raise_for_status()
 
         for key, value in response.cookies.items():
             if key.startswith('download_warning'):
                 params = {'id': self.id, 'confirm': value}
-                response = session.get(URL, params=params, stream=True, timeout=DOWNLOAD_TIMEOUT)
+                response = session.get(URL, params=params, headers=range_headers,
+                    stream=True, timeout=DOWNLOAD_TIMEOUT)
                 response.raise_for_status()
 
-        return response.iter_content(chunk_size=chunk_size), 0
+        return self.handle_http_response(response, chunk_size)
 
 FileSource.types['google_drive'] = FileSourceGoogleDrive
 

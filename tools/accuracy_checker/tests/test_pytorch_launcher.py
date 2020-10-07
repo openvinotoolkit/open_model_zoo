@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ class TestPytorchLauncher:
         img_raw = cv2.imread(str(data_dir / '1.jpg'))
         img_resized = cv2.resize(img_raw, (32, 32))
         rgb_image = cv2.cvtColor(img_resized, cv2.COLOR_BGR2RGB)
-        input_blob = pytorch_test_model.fit_to_input([rgb_image], 'input', (0, 3, 1, 2))
+        input_blob = pytorch_test_model.fit_to_input([rgb_image], 'input', (0, 3, 1, 2), np.float32)
 
         res = pytorch_test_model.predict([{'input': input_blob}], [{}])
 

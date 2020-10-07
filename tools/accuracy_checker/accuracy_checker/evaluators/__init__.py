@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,14 +15,12 @@ limitations under the License.
 """
 
 from .model_evaluator import ModelEvaluator
-from .pipeline_evaluator import PipeLineEvaluator
 from .module_evaluator import ModuleEvaluator
 from .base_evaluator import BaseEvaluator
 
 
 __all__ = [
     'ModelEvaluator',
-    'PipeLineEvaluator',
     'ModuleEvaluator',
 
     'BaseEvaluator'

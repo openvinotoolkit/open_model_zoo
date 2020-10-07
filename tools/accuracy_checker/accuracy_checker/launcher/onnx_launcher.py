@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -48,6 +48,8 @@ class ONNXLauncher(Launcher):
             self._input_precisions = {}
             for input_info in self._inference_session.get_inputs():
                 dtype = input_info.type.replace('tensor(', '').replace(')', '')
+                if dtype == 'float':
+                    dtype += '32'
                 self._input_precisions[input_info.name] = dtype
 
     @classmethod
@@ -82,7 +84,7 @@ class ONNXLauncher(Launcher):
         if model.is_dir():
             model_list = list(model.glob('{}.onnx'.format(self._model_name)))
             if not model_list:
-                model_list = model.glob('*.onnx')
+                model_list = list(model.glob('*.onnx'))
                 if not model_list:
                     raise ConfigError('Model not found')
             if len(model_list) != 1:

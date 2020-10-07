@@ -1,3 +1,19 @@
+"""
+Copyright (c) 2018-2020 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 from .base_representation import BaseRepresentation
 from .classification_representation import ClassificationAnnotation
 
@@ -40,8 +56,11 @@ class QuestionAnswering(BaseRepresentation):
         super().__init__(identifier)
 
 class QuestionAnsweringAnnotation(QuestionAnswering):
-    def __init__(self, identifier, question_id, unique_id, input_ids, input_mask, segment_ids, cls_index, p_mask,
-                 orig_answer_text=None, paragraph_text=None, doc_tokens=None, is_impossible=False, paragraph_len=None,
+    def __init__(self, identifier, question_id, unique_id,
+                 input_ids, input_mask, segment_ids, position_ids,
+                 cls_index, p_mask,
+                 orig_answer_text=None, paragraph_text=None, doc_tokens=None,
+                 is_impossible=False, paragraph_len=None,
                  tokens=None, token_is_max_context=None, token_to_orig_map=None):
         super().__init__(identifier)
         self.orig_answer_text = orig_answer_text if orig_answer_text is not None else ''
@@ -50,6 +69,7 @@ class QuestionAnsweringAnnotation(QuestionAnswering):
         self.input_ids = input_ids
         self.input_mask = input_mask
         self.segment_ids = segment_ids
+        self.position_ids = position_ids
         self.cls_index = cls_index
         self.tokens = tokens
         self.p_mask = p_mask
@@ -70,6 +90,20 @@ class QuestionAnsweringPrediction(QuestionAnswering):
         self.end_index = end_index if end_index is not None else []
         self.tokens = tokens if tokens is not None else []
 
+
+class QuestionAnsweringEmbeddingAnnotation(QuestionAnswering):
+    def __init__(self, identifier, input_ids, input_mask, segment_ids, position_ids, context_pos_identifier):
+        super().__init__(identifier)
+        self.input_ids = input_ids
+        self.input_mask = input_mask
+        self.segment_ids = segment_ids
+        self.position_ids = position_ids
+        self.context_pos_indetifier = context_pos_identifier
+
+class QuestionAnsweringEmbeddingPrediction(QuestionAnswering):
+    def __init__(self, identifier, embedding):
+        super().__init__(identifier)
+        self.embedding = embedding
 
 class TextClassificationAnnotation(ClassificationAnnotation):
     def __init__(self, identifier, label, input_ids, input_mask, segment_ids, tokens):

@@ -1,0 +1,44 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Horizontal text detector based on FCOS with light MobileNetV2 backbone
+task_type: detection
+files:
+  - name: FP32/horizontal-text-detection-0001.xml
+    size: 691736
+    sha256: 42d6eb8104ffea3ee370767424a4e9a0715dc50786098b27df9d9f6663a00efa
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.xml
+  - name: FP32/horizontal-text-detection-0001.bin
+    size: 7753424
+    sha256: c921d3089987f0ede91cc418c6d06c921305c74203e045d8085c725e695e082d
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.bin
+  - name: FP16/horizontal-text-detection-0001.xml
+    size: 691574
+    sha256: 6519b18299bc1c701e302cfdc73554b05d65b652fe6fc50896cea2213687baa0
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.xml
+  - name: FP16/horizontal-text-detection-0001.bin
+    size: 3876884
+    sha256: f1915fe302bd50d7ee529bd874581cab20cc85e0613a5a09dd1e1e13fef6e94b
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.bin
+  - name: FP16-INT8/horizontal-text-detection-0001.xml
+    size: 1319552
+    sha256: 450dd027b07b888a19027e192c0bc639002c51067df170ad117570fd8f61a487
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/horizontal-text-detection-0001/FP16-INT8/horizontal-text-detection-0001.xml
+  - name: FP16-INT8/horizontal-text-detection-0001.bin
+    size: 2038032
+    sha256: f068bc5a7eaa70bd456e9df05aadf092f2d59048abb217ce89bce2aa2ab42d09
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/horizontal-text-detection-0001/FP16-INT8/horizontal-text-detection-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

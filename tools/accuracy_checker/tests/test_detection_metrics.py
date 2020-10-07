@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class TestBoxMatch:
         pred = make_representation(pred, score=1)
         overlap_evaluator = IOU({})
 
-        tp, fp, _, _ = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp = bbox_match(gt, pred, 0, overlap_evaluator)[:2]
         assert tp[0] == 1
         assert fp[0] == 0
 
@@ -52,7 +52,7 @@ class TestBoxMatch:
         pred[0].metadata['difficult_boxes'] = [0]
         overlap_evaluator = IOU({})
 
-        tp, fp, _, _ = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp = bbox_match(gt, pred, 0, overlap_evaluator)[:2]
         assert tp[0] == 0
         assert fp[0] == 0
 
@@ -65,7 +65,7 @@ class TestBoxMatch:
         pred[0].metadata['difficult_boxes'] = [0]
         overlap_evaluator = IOU({})
 
-        tp, fp, _, _ = bbox_match(gt, pred, 0, overlap_evaluator, use_filtered_tp=True)
+        tp, fp = bbox_match(gt, pred, 0, overlap_evaluator, use_filtered_tp=True)[:2]
         assert tp[0] == 1
         assert fp[0] == 0
 
@@ -74,7 +74,7 @@ class TestBoxMatch:
         pred = make_representation("0 0 0 5 5", score=1)
         overlap_evaluator = IOU({})
 
-        tp, fp, _, _ = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp = bbox_match(gt, pred, 0, overlap_evaluator)[:2]
         assert tp[0] == 0
         assert fp[0] == 1
 
@@ -84,7 +84,7 @@ class TestBoxMatch:
         pred[0].metadata['difficult_boxes'] = [0]
         overlap_evaluator = IOU({})
 
-        tp, fp, _, _ = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp = bbox_match(gt, pred, 0, overlap_evaluator)[:2]
         assert tp[0] == 0
         assert fp[0] == 0
 
@@ -93,7 +93,7 @@ class TestBoxMatch:
         pred = make_representation("0 0 0 5 5; 0 7 7 8 8", score=1)
         overlap_evaluator = IOU({})
 
-        tp, fp, _, _ = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp = bbox_match(gt, pred, 0, overlap_evaluator)[:2]
         assert tp[0] == 1
         assert tp[1] == 1
         assert fp[0] == 0
@@ -104,7 +104,7 @@ class TestBoxMatch:
         pred = make_representation("1 0 0 0 5 5; 0.8 0 7 7 8 8")
         overlap_evaluator = IOU({})
 
-        tp, fp, _, _ = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp = bbox_match(gt, pred, 0, overlap_evaluator)[:2]
         assert tp[0] == 1
         assert tp[1] == 0
         assert fp[0] == 0
@@ -115,12 +115,12 @@ class TestBoxMatch:
         pred = make_representation("1 1 0 0 5 5; 0.8 0 7 7 8 8")
         overlap_evaluator = IOU({})
 
-        tp, fp, _, _ = bbox_match(gt, pred, 1, overlap_evaluator)
+        tp, fp = bbox_match(gt, pred, 1, overlap_evaluator)[:2]
         assert tp.shape[0] == 1
         assert tp[0] == 1
         assert fp[0] == 0
 
-        tp, fp, _, _ = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp = bbox_match(gt, pred, 0, overlap_evaluator)[:2]
         assert tp.shape[0] == 1
         assert tp[0] == 0
         assert fp[0] == 1
@@ -130,7 +130,7 @@ class TestBoxMatch:
         pred = make_representation(["0 0 0 5 5", "0 0 0 5 5"], score=1)
         overlap_evaluator = IOU({})
 
-        tp, fp, _, _ = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp = bbox_match(gt, pred, 0, overlap_evaluator)[:2]
         assert tp[0] == 1
         assert tp[1] == 1
         assert fp[0] == 0
@@ -141,7 +141,7 @@ class TestBoxMatch:
         pred = make_representation("0 0 0 5 5", score=1)
         overlap_evaluator = IOU({})
 
-        tp, fp, _, ngt = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp, _, ngt = bbox_match(gt, pred, 0, overlap_evaluator)[:4]
         assert tp[0] == 1
         assert tp.shape[0] == 1
         assert ngt == 2
@@ -151,7 +151,7 @@ class TestBoxMatch:
         pred = make_representation("1 0 0 0 5 5; 0.9 0 0 0 5 5")
         overlap_evaluator = IOU({})
 
-        tp, fp, _, _ = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp = bbox_match(gt, pred, 0, overlap_evaluator)[:2]
         assert tp[0] == 1
         assert tp[1] == 0
 
@@ -163,7 +163,7 @@ class TestBoxMatch:
         pred = make_representation(pred, score=1)
         overlap_evaluator = IOU({})
 
-        tp, fp, _, _ = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp = bbox_match(gt, pred, 0, overlap_evaluator)[:2]
         assert tp[0] == 0
         assert fp[0] == 1
 
@@ -175,7 +175,7 @@ class TestBoxMatch:
         pred = make_representation(pred, score=1)
         overlap_evaluator = IOU({})
 
-        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)[:4]
         assert n == 1
         assert len(tp) == 0
         assert len(fp) == 0
@@ -189,7 +189,7 @@ class TestBoxMatch:
         overlap_evaluator = IOU({})
 
         with pytest.warns(None) as warnings:
-            tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)
+            tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)[:4]
             assert len(warnings) == 0
             assert n == 1
             assert tp[0] == 0
@@ -204,7 +204,7 @@ class TestBoxMatch:
         overlap_evaluator = IOA({})
 
         with pytest.warns(None) as warnings:
-            tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)
+            tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)[:4]
             assert len(warnings) == 0
             assert n == 1
             assert tp[0] == 0
@@ -219,7 +219,7 @@ class TestBoxMatch:
         overlap_evaluator = IOA({})
 
         with pytest.warns(None) as warnings:
-            tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)
+            tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)[:4]
             assert len(warnings) == 0
             assert n == 1
             assert tp[0] == 0
@@ -234,7 +234,7 @@ class TestBoxMatch:
         gt[0].metadata['difficult_boxes'] = [0]
         overlap_evaluator = IOU({})
 
-        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator, ignore_difficult=True)
+        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator, ignore_difficult=True)[:4]
         assert n == 0
         assert tp[0] == 0
         assert fp[0] == 0
@@ -248,7 +248,7 @@ class TestBoxMatch:
         gt[0].metadata['difficult_boxes'] = [0]
         overlap_evaluator = IOU({})
 
-        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator, ignore_difficult=False)
+        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator, ignore_difficult=False)[:4]
         assert n == 1
         assert tp[0] == 1
         assert fp[0] == 0
@@ -259,7 +259,7 @@ class TestBoxMatch:
         pred = make_representation("0 0 0 5 5", score=1)
         overlap_evaluator = IOU({})
 
-        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)
+        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)[:4]
         assert n == 0
         assert tp[0] == 0
         assert fp[0] == 1
@@ -270,7 +270,7 @@ class TestBoxMatch:
         pred = make_representation("0 0 0 5 5", score=1)
         overlap_evaluator = IOU({})
 
-        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator, ignore_difficult=False)
+        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator, ignore_difficult=False)[:4]
         assert n == 1
         assert tp[0] == 0
         assert fp[0] == 1
@@ -281,7 +281,7 @@ class TestBoxMatch:
         gt[0].metadata['difficult_boxes'] = [0]
         overlap_evaluator = IOU({})
 
-        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator, ignore_difficult=True)
+        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator, ignore_difficult=True)[:4]
         assert n == 0
         assert tp[0] == 0
         assert tp[1] == 0
@@ -294,7 +294,7 @@ class TestBoxMatch:
         gt[0].metadata['difficult_boxes'] = [0]
         overlap_evaluator = IOU({})
 
-        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator, ignore_difficult=False)
+        tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator, ignore_difficult=False)[:4]
         assert n == 1
         assert tp[0] == 1
         assert tp[1] == 0
@@ -310,7 +310,7 @@ class TestBoxMatch:
         tp, fp, _, n = bbox_match(
             gt, pred, 0, overlap_evaluator,
             ignore_difficult=True, allow_multiple_matches_per_ignored=False
-        )
+        )[:4]
 
         assert n == 0
         assert tp[0] == 0

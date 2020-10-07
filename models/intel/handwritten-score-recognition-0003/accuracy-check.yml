@@ -1,0 +1,18 @@
+models:
+  - name: handwritten-score-recognition-0003
+
+    launchers:
+      - framework: dlsdk
+        adapter: beam_search_decoder
+
+    datasets:
+      - name: handwritten_score_recognition
+
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            dst_width: 64
+            dst_height: 32
+
+        metrics:
+          - type: character_recognition_accuracy

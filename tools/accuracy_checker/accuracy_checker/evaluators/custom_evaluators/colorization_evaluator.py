@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
 from pathlib import Path
 from collections import OrderedDict
 import numpy as np
@@ -120,7 +121,7 @@ class ColorizationEvaluator(BaseEvaluator):
                 )
             batch_raw_prediction, batch_prediction = self.check_model.predict(batch_identifiers, batch_out)
             if self.metric_executor:
-                metrics_result = self.metric_executor.update_metrics_on_batch(
+                metrics_result, _ = self.metric_executor.update_metrics_on_batch(
                     batch_input_ids, batch_annotation, batch_prediction
                 )
                 if self.metric_executor.need_store_predictions:
@@ -256,6 +257,9 @@ class ColorizationEvaluator(BaseEvaluator):
             pr_kwargs = {"print_interval": check_progress}
 
         return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
+
+    def set_profiling_dir(self, profiler_dir):
+        self.metric_executor.set_profiling_dir(profiler_dir)
 
 
 class BaseModel:

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,17 +12,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
 """
 
 import cv2
 import numpy as np
 from ..config import NumberField, BoolField
-
-try:
-    import tensorflow as tf
-except ImportError as import_error:
-    tf = None
 
 from .preprocessor import Preprocessor
 
@@ -72,8 +66,13 @@ class TfConvertImageDType(Preprocessor):
 
     def __init__(self, config, name):
         super().__init__(config, name)
-        if tf is None:
-            raise ImportError('*tf_convert_image_dtype* operation requires TensorFlow. Please install it before usage')
+        try:
+            import tensorflow as tf # pylint: disable=C0415
+        except ImportError as import_error:
+            raise ImportError(
+                '*tf_convert_image_dtype* operation requires TensorFlow. '
+                'Please install it before usage. {}'.format(import_error.msg)
+            )
         tf.enable_eager_execution()
         self.converter = tf.image.convert_image_dtype
         self.dtype = tf.float32
@@ -133,7 +132,7 @@ class BGR2YUVConverter(Preprocessor):
             y = yuvdata[:, :, 0]
             u = yuvdata[:, :, 1]
             v = yuvdata[:, :, 2]
-            identifier = image.data
+            identifier = image.identifier
             new_identifier = ['{}_y'.format(identifier), '{}_u'.format(identifier), '{}_v'.format(identifier)]
             yuvdata = [np.expand_dims(y, -1), np.expand_dims(u, -1), np.expand_dims(v, -1)]
             image.identifier = new_identifier
@@ -145,3 +144,67 @@ class BGR2YUVConverter(Preprocessor):
 class RGB2YUVConverter(BGR2YUVConverter):
     __provider__ = 'rgb_to_yuv'
     color = cv2.COLOR_RGB2YUV
+
+
+class BGRtoNV12Converter(Preprocessor):
+    __provider__ = 'bgr_to_nv12'
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        height, width, _ = data.shape
+        y, u, v = cv2.cvtColor(data, cv2.COLOR_BGR2YUV)
+
+        shrunk_u = cv2.resize(u, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+        shrunk_v = cv2.resize(v, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+
+        uv = np.zeros((height // 2, width))
+
+        uv[:, 0::2] = shrunk_u
+        uv[:, 1::2] = shrunk_v
+
+        nv12 = np.vstack((y, uv))
+
+        nv12 = np.floor(nv12 + 0.5).astype(np.uint8)
+        image.data = nv12
+
+        return image
+
+
+class RGBtoNV12Converter(Preprocessor):
+    __provider__ = 'rgb_to_nv12'
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        height, width, _ = data.shape
+        y, u, v = cv2.cvtColor(data, cv2.COLOR_RGB2YUV)
+
+        shrunk_u = cv2.resize(u, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+        shrunk_v = cv2.resize(v, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+
+        uv = np.zeros((height // 2, width))
+
+        uv[:, 0::2] = shrunk_u
+        uv[:, 1::2] = shrunk_v
+
+        nv12 = np.vstack((y, uv))
+
+        nv12 = np.floor(nv12 + 0.5).astype(np.uint8)
+        image.data = nv12
+
+        return image
+
+
+class NV12toBGRConverter(Preprocessor):
+    __provider__ = 'nv12_to_bgr'
+
+    def process(self, image, annotation_meta=None):
+        image.data = cv2.cvtColor(image.data, cv2.COLOR_YUV2BGR_NV12)
+        return image
+
+
+class NV12toRGBConverter(Preprocessor):
+    __provider__ = 'nv12_to_rgb'
+
+    def process(self, image, annotation_meta=None):
+        image.data = cv2.cvtColor(image.data, cv2.COLOR_YUV2RGB_NV12)
+        return image

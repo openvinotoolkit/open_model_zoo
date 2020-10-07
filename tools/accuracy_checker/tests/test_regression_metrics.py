@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -357,7 +357,7 @@ class TestUpdateRegressionMetrics:
         config = [{'type': 'mae'}]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 2
         assert metric_result[1][0].result == 4
 
@@ -367,7 +367,7 @@ class TestUpdateRegressionMetrics:
         config = [{'type': 'mse'}]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 4
         assert metric_result[1][0].result == 16
 
@@ -377,7 +377,7 @@ class TestUpdateRegressionMetrics:
         config = [{'type': 'rmse'}]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 2
         assert metric_result[1][0].result == 4
 
@@ -387,7 +387,7 @@ class TestUpdateRegressionMetrics:
         predictions = [RegressionPrediction('identifier', 5), RegressionPrediction('identifier2', 5)]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 2
         assert metric_result[1][0].result == 4
 
@@ -397,7 +397,7 @@ class TestUpdateRegressionMetrics:
         predictions = [RegressionPrediction('identifier', 5), RegressionPrediction('identifier2', 5)]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 4
         assert metric_result[1][0].result == 16
 
@@ -407,7 +407,7 @@ class TestUpdateRegressionMetrics:
         predictions = [RegressionPrediction('identifier', 5), RegressionPrediction('identifier2', 5)]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 2
         assert metric_result[1][0].result == 4
 
@@ -418,7 +418,7 @@ class TestUpdateRegressionMetrics:
         predictions = [FacialLandmarksPrediction('identifier', np.array([1, 1, 1, 1, 1]), np.array([1, 1, 1, 1, 1]))]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert np.equal(metric_result[0][0].result.all(), np.zeros(5).all())
 
     def test_update_normed_error(self):
@@ -428,5 +428,5 @@ class TestUpdateRegressionMetrics:
         predictions = [FacialLandmarksPrediction('identifier', np.array([1, 1, 1, 1, 1]), np.array([1, 1, 1, 1, 1]))]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 0

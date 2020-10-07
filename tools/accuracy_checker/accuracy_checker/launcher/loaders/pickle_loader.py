@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ class PickleLoader(DictLoaderMixin, Loader):
 
     __provider__ = 'pickle'
 
-    def load(self):
+    def load(self, *args, **kwargs):
         data = read_pickle(self._data_path)
 
         if isinstance(data, list) and all(hasattr(entry, 'identifier') for entry in data):

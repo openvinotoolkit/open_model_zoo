@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,7 +37,8 @@ from ..representation import (
     ImageProcessingAnnotation,
     ImageProcessingPrediction,
     StyleTransferAnnotation,
-    StyleTransferPrediction
+    StyleTransferPrediction,
+    FeaturesRegressionAnnotation
 )
 
 from .metric import PerImageEvaluationMetric
@@ -46,7 +47,7 @@ from ..utils import string_to_tuple, finalize_metric_result
 
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
-    annotation_types = (RegressionAnnotation, DepthEstimationAnnotation)
+    annotation_types = (RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation)
     prediction_types = (RegressionPrediction, DepthEstimationPrediction)
 
     def __init__(self, value_differ, *args, **kwargs):
@@ -63,7 +64,15 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
 
     def update(self, annotation, prediction):
         diff = self.calculate_diff(annotation, prediction)
+        if self.profiler:
+            if isinstance(annotation, RegressionAnnotation):
+                ann_value, pred_value = annotation.value, prediction.value
+                self.profiler.update(annotation.identifier, self.name, diff, ann_value, pred_value)
+            else:
+                self.profiler.update(annotation.identifier, self.name, '', '', diff)
         self.magnitude.append(diff)
+        if np.ndim(diff) > 1:
+            return np.mean(diff)
 
         return diff
 
@@ -80,10 +89,14 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         return ret
 
     def evaluate(self, annotations, predictions):
+        if self.profiler:
+            self.profiler.finish()
         return np.mean(self.magnitude), np.std(self.magnitude)
 
     def reset(self):
         self.magnitude = []
+        if self.profiler:
+            self.profiler.reset()
 
 
 class BaseRegressionOnIntervals(PerImageEvaluationMetric):
@@ -144,6 +157,8 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         index = find_interval(annotation.value, self.intervals)
         diff = self.value_differ(annotation.value, prediction.value)
         self.magnitude[index].append(diff)
+        if self.profiler:
+            self.profiler.update(annotation.identifier, self.name, diff, annotation.value, prediction.value)
 
         return diff
 
@@ -157,6 +172,9 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         if not result:
             warnings.warn("No values in given interval")
             result.append(0)
+
+        if self.profiler:
+            self.profiler.finish()
 
         return result
 
@@ -176,6 +194,8 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
     def reset(self):
         self.magnitude = [[] for _ in range(len(self.intervals) + 1)]
         self._create_meta()
+        if self.profiler:
+            self.profiler.finish()
 
 
 class MeanAbsoluteError(BaseRegressionMetric):
@@ -192,6 +212,20 @@ class MeanSquaredError(BaseRegressionMetric):
         super().__init__(mse_differ, *args, **kwargs)
 
 
+class Log10Error(BaseRegressionMetric):
+    __provider__ = 'log10_error'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(log10_differ, *args, **kwargs)
+
+
+class MeanAbsolutePercentageError(BaseRegressionMetric):
+    __provider__ = 'mape'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(mape_differ, *args, **kwargs)
+
+
 class RootMeanSquaredError(BaseRegressionMetric):
     __provider__ = 'rmse'
 
@@ -200,11 +234,14 @@ class RootMeanSquaredError(BaseRegressionMetric):
 
     def update(self, annotation, prediction):
         rmse = np.sqrt(self.calculate_diff(annotation, prediction))
+        if self.profiler:
+            if isinstance(annotation, RegressionAnnotation):
+                ann_value, pred_value = annotation.value, prediction.value
+                self.profiler.update(annotation.identifier, self.name, rmse, ann_value, pred_value)
+            else:
+                self.profiler.update(annotation.identifier, self.name, rmse)
         self.magnitude.append(rmse)
         return rmse
-
-    def evaluate(self, annotations, predictions):
-        return np.mean(self.magnitude), np.std(self.magnitude)
 
 
 class MeanAbsoluteErrorOnInterval(BaseRegressionOnIntervals):
@@ -245,6 +282,8 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
         if not result:
             warnings.warn("No values in given interval")
             result.append(0)
+        if self.profiler:
+            self.profiler.finish()
 
         return result
 
@@ -267,6 +306,14 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         )
         result /= np.maximum(annotation.interocular_distance, np.finfo(np.float64).eps)
         self.magnitude.append(result)
+        if self.profiler:
+            self.profiler.update(
+                annotation.identifier,
+                self.name,
+                annotation.x_values, annotation.y_values,
+                prediction.x_values, prediction.y_values,
+                result
+            )
 
         return result
 
@@ -276,11 +323,15 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         self.meta['names'] = [point_result_name_pattern.format(point_id) for point_id in range(num_points)]
         per_point_rmse = np.mean(self.magnitude, axis=0)
         per_point_rmse, self.meta['names'] = finalize_metric_result(per_point_rmse, self.meta['names'])
+        if self.profiler:
+            self.profiler.finish()
 
         return per_point_rmse
 
     def reset(self):
         self.magnitude = []
+        if self.profiler:
+            self.profiler.reset()
 
 
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
@@ -322,6 +373,14 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
         )
         avg_result = np.sum(per_point_result) / len(per_point_result)
         avg_result /= np.maximum(annotation.interocular_distance, np.finfo(np.float64).eps)
+        if self.profiler:
+            self.profiler.update(
+                annotation.identifier,
+                self.name,
+                annotation.x_values, annotation.y_values,
+                prediction.x_values, prediction.y_values,
+                avg_result
+            )
         self.magnitude.append(avg_result)
 
         return avg_result
@@ -340,10 +399,15 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
             result.append(sorted_magnitude[int(index)])
             self.meta['names'].append('{}th percentile'.format(self.percentile))
 
+        if self.profiler:
+            self.profiler.finish()
+
         return result
 
     def reset(self):
         self.magnitude = []
+        if self.profiler:
+            self.profiler.reset()
 
 
 class NormalizedMeanError(PerImageEvaluationMetric):
@@ -378,7 +442,6 @@ class NormalizedMeanError(PerImageEvaluationMetric):
 
         diff = np.square(gt - pred)
         dist = np.sqrt(np.sum(diff[:, 0:2], axis=1)) if self.only_2d else np.sqrt(np.sum(diff, axis=1))
-        #dist /= len(gt)
         normalized_result = dist / annotation.normalization_coef(self.only_2d)
         self.magnitude.append(np.mean(normalized_result))
 
@@ -434,7 +497,9 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'scale_border': NumberField(optional=True, min_value=0, default=4, description="Scale border."),
+            'scale_border': NumberField(
+                optional=True, min_value=0, default=4, description="Scale border.", value_type=int
+            ),
             'color_order': StringField(
                 optional=True, choices=['BGR', 'RGB'], default='RGB',
                 description="The field specified which color order BGR or RGB will be used during metric calculation."
@@ -453,7 +518,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
         color_order = self.get_value_from_config('color_order')
         channel_order = {
             'BGR': [2, 1, 0],
-            'RGB': [0, 1, 2]
+            'RGB': [0, 1, 2],
         }
         self.meta['postfix'] = 'Db'
         self.channel_order = channel_order[color_order]
@@ -471,17 +536,19 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             self.scale_border:height - self.scale_border,
             self.scale_border:width - self.scale_border
         ]
-        image_difference = (prediction - ground_truth) / 255.  # rgb color space
+        image_difference = (prediction - ground_truth) / 255
+        if len(ground_truth.shape) == 3 and ground_truth.shape[2] == 3:
+            r_channel_diff = image_difference[:, :, self.channel_order[0]]
+            g_channel_diff = image_difference[:, :, self.channel_order[1]]
+            b_channel_diff = image_difference[:, :, self.channel_order[2]]
 
-        r_channel_diff = image_difference[:, :, self.channel_order[0]]
-        g_channel_diff = image_difference[:, :, self.channel_order[1]]
-        b_channel_diff = image_difference[:, :, self.channel_order[2]]
+            channels_diff = (r_channel_diff * 65.738 + g_channel_diff * 129.057 + b_channel_diff * 25.064) / 256
 
-        channels_diff = (r_channel_diff * 65.738 + g_channel_diff * 129.057 + b_channel_diff * 25.064) / 256
-
-        mse = np.mean(channels_diff ** 2)
-        if mse == 0:
-            return np.Infinity
+            mse = np.mean(channels_diff ** 2)
+            if mse == 0:
+                return np.Infinity
+        else:
+            mse = np.mean(image_difference ** 2)
 
         return -10 * math.log10(mse)
 
@@ -492,6 +559,12 @@ def angle_differ(gt_gaze_vector, predicted_gaze_vector):
         / np.linalg.norm(predicted_gaze_vector)
     ) * 180 / np.pi
 
+
+def log10_differ(annotation_val, prediction_val):
+    return np.abs(np.log10(annotation_val) - np.log10(prediction_val))
+
+def mape_differ(annotation_val, prediction_val):
+    return np.abs(annotation_val - prediction_val) / annotation_val
 
 class AngleError(BaseRegressionMetric):
     __provider__ = 'angle_error'
@@ -506,15 +579,15 @@ class AngleError(BaseRegressionMetric):
 def _ssim(annotation_image, prediction_image):
     prediction = np.asarray(prediction_image)
     ground_truth = np.asarray(annotation_image)
-    if len(ground_truth.shape) < len(prediction) and prediction.shape[-1] == 1:
+    if len(ground_truth.shape) < len(prediction.shape) and prediction.shape[-1] == 1:
         prediction = np.squeeze(prediction)
     mu_x = np.mean(prediction)
     mu_y = np.mean(ground_truth)
     var_x = np.var(prediction)
     var_y = np.var(ground_truth)
-    sig_xy = np.mean((prediction - mu_x)*(ground_truth - mu_y))/(np.sqrt(var_x*var_y))
-    c1 = (0.01 * 2**32-1)**2
-    c2 = (0.03 * 2**32-1)**2
+    sig_xy = np.mean((prediction - mu_x)*(ground_truth - mu_y))
+    c1 = (0.01 * 2**8-1)**2
+    c2 = (0.03 * 2**8-1)**2
     mssim = (2*mu_x*mu_y + c1)*(2*sig_xy + c2)/((mu_x**2 + mu_y**2 + c1)*(var_x + var_y + c2))
     return mssim
 

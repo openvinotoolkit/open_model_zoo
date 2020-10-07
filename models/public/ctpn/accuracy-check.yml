@@ -1,0 +1,45 @@
+models:
+  - name: ctpn
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: ctpn_text_detection
+          cls_prob_out: 'Reshape_2/Transpose'
+          bbox_pred_out: 'rpn_bbox_pred/Reshape_1/Transpose'
+        allow_reshape_input: True
+
+    datasets:
+      - name: ICDAR2013_detection
+
+        preprocessing:
+          - type: resize
+            dst_width: 1200
+            dst_height: 600
+            aspect_ratio_scale: ctpn_keep_aspect_ratio
+          - type: resize
+            dst_width: 1000
+            dst_height: 600
+            aspect_ratio_scale: ctpn_keep_aspect_ratio
+
+        postprocessing:
+          - type: cast_to_int
+            round_policy: lower
+
+        metrics:
+          - type: focused_text_precision
+            name: precision
+            ignore_difficult: True
+            area_recall_constrain: 0.8
+            area_precision_constrain: 0.4
+
+          - type: focused_text_recall
+            name: recall
+            ignore_difficult: True
+            area_recall_constrain: 0.8
+            area_precision_constrain: 0.4
+
+          - type: focused_text_hmean
+            name: hmean
+            ignore_difficult: True
+            area_recall_constrain: 0.8
+            area_precision_constrain: 0.4

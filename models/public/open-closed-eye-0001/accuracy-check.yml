@@ -1,0 +1,27 @@
+models:
+  - name: open-closed-eye-0001
+    launchers:
+      - framework: onnx_runtime
+        model: open-closed-eye.onnx
+        adapter: classification
+    datasets:
+      - name: mrlEyes_2018_01
+        preprocessing:
+          - type: resize
+            size: 32
+          - type: normalization
+            mean: 127.0, 127.0, 127.0
+            std: 255.0, 255.0, 255.0
+        metrics:
+          - type: accuracy
+  - name: open-closed-eye-0001
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+    datasets:
+      - name: mrlEyes_2018_01
+        preprocessing:
+          - type: resize
+            size: 32
+        metrics:
+          - type: accuracy

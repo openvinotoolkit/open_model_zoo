@@ -1,0 +1,26 @@
+evaluations:
+  - name: colorization-v2-norebal
+    module: custom_evaluators.colorization_evaluator.ColorizationEvaluator
+    module_config:
+      network_info:
+        colorization_network:
+          color_coeff: colorization-v2-norebal.npy
+
+        verification_network:
+          adapter: classification
+
+      launchers:
+        - framework: dlsdk
+
+      datasets:
+        - name: imagenet_1000_classes
+          reader: pillow_imread
+
+          preprocessing:
+            - type: resize
+              size: 256
+              aspect_ratio_scale: greater
+            - type: crop
+              size: 224
+            - type: normalization
+              std:  255

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..utils import get_path
+from ..utils import get_path, read_txt
 from ..logging import print_info
-from ..adapters import Adapter
-from ..config import PathField, StringField
+from ..config import PathField, StringField, BoolField
 from .loaders import Loader
 from .launcher import Launcher, LauncherConfigValidator
 
@@ -35,7 +34,8 @@ class DummyLauncher(Launcher):
         parameters.update({
             'loader': StringField(choices=Loader.providers, description="Loader."),
             'data_path': PathField(description="Data path."),
-            'adapter': StringField(choices=Adapter.providers, optional=True, description="Adapter.")
+            'provide_identifiers': BoolField(optional=True, default=False),
+            'identifiers_list': PathField(optional=True)
         })
         return parameters
 
@@ -46,8 +46,11 @@ class DummyLauncher(Launcher):
         dummy_launcher_config.validate(self.config)
 
         self.data_path = get_path(self.get_value_from_config('data_path'))
+        identfiers_file = self.get_value_from_config('identifiers_list')
+        if identfiers_file is not None:
+            kwargs['identifiers'] = read_txt(identfiers_file)
 
-        self._loader = Loader.provide(self.get_value_from_config('loader'), self.data_path)
+        self._loader = Loader.provide(self.get_value_from_config('loader'), self.data_path, **kwargs)
 
         print_info("{} predictions objects loaded from {}".format(len(self._loader), self.data_path))
 
@@ -66,10 +69,13 @@ class DummyLauncher(Launcher):
 
     @property
     def inputs(self):
-        return None
+        return {}
 
     def get_all_inputs(self):
         return self.inputs
+
+    def inputs_info_for_meta(self):
+        return {}
 
     @property
     def output_blob(self):

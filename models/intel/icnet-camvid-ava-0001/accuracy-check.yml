@@ -1,0 +1,24 @@
+models:
+  - name: icnet-camvid-ava-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter: segmentation
+    datasets:
+      - name: CamVid
+
+        preprocessing:
+          - type: resize
+            dst_width: 960
+            dst_height: 720
+            interpolation: LINEAR
+
+        postprocessing:
+          - type: resize_segmentation_mask
+            apply_to: annotation
+            dst_width: 960
+            dst_height: 720
+
+        metrics:
+          - type: mean_iou
+            use_argmax: false

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -71,11 +71,11 @@ class ActionDetection(Adapter):
                 description="Variances to decode SSD prediction."
             ),
             'add_conf_out_count': NumberField(
-                optional=True, min_value=1,
+                optional=True, min_value=1, value_type=int,
                 description="Number of layers with action confidences (optional, you can not provide this argument "
                             "if action confidences contained in one layer)."
             ),
-            'num_action_classes': NumberField(description="Number classes for action recognition."),
+            'num_action_classes': NumberField(description="Number classes for action recognition.", value_type=int),
             'detection_threshold': NumberField(
                 optional=True, value_type=float, min_value=0, max_value=1, default=0,
                 description="Minimal detection confidences level for valid detections."),
@@ -137,7 +137,7 @@ class ActionDetection(Adapter):
                 self.head_sizes = [add_conf_out_count]
                 self.glob_layer_id_map = [list(range(add_conf_out_count))]
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.outputs_verified:

@@ -1,0 +1,29 @@
+models:
+  - name: i3d-rgb-tf
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+        inputs:
+          - name: Placeholder
+            type: INPUT
+            layout: NCDHW
+
+    datasets:
+      - name: kinetics-400-frames-79-400
+        data_source: kinetics/frames_val
+        reader: pillow_imread
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: fit_to_window
+          - type: crop
+            size: 224
+        metrics:
+          - type: clip_accuracy
+            presenter: print_vector
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5

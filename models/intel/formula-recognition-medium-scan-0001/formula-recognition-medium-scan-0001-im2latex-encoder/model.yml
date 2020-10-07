@@ -1,0 +1,36 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Encoder part of latex formula recognition model.
+task_type: feature_extraction
+files:
+  - name: FP32/formula-recognition-medium-scan-0001-im2latex-encoder.xml
+    size: 144594
+    sha256: dfda6869d48019419ea79381ccaedd7b75cd4322b117421c7e54380e49eb83bb
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-encoder/FP32/formula-recognition-medium-scan-0001-im2latex-encoder.xml
+  - name: FP32/formula-recognition-medium-scan-0001-im2latex-encoder.bin
+    size: 12979416
+    sha256: 7a4097c0ac22100d8d84b0dc93208755e4a2ad03acfa037e08545b967023aec3
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-encoder/FP32/formula-recognition-medium-scan-0001-im2latex-encoder.bin
+  - name: FP16/formula-recognition-medium-scan-0001-im2latex-encoder.xml
+    size: 144562
+    sha256: d864607ff19adee42a930d72b46c7db057d5769e86578bf2bccd8cf00604fb02
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-encoder/FP16/formula-recognition-medium-scan-0001-im2latex-encoder.xml
+  - name: FP16/formula-recognition-medium-scan-0001-im2latex-encoder.bin
+    size: 6489816
+    sha256: cb5784c86f9eea9e6f56e84d51b3108cd08f9c6707f93514cd57d9e97f27dc60
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-encoder/FP16/formula-recognition-medium-scan-0001-im2latex-encoder.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -2,56 +2,55 @@
 
 absl-py==0.9.0            # via tensorboard
 attrs==19.3.0             # via pytest
-cachetools==4.1.0         # via google-auth
-certifi==2020.4.5.1       # via requests
+cachetools==4.1.1         # via google-auth
+certifi==2020.6.20        # via requests
 chardet==3.0.4            # via requests
 cycler==0.10.0            # via matplotlib
-entrypoints==0.3          # via flake8
 flake8-import-order==0.18.1  # via motmetrics
-flake8==3.7.9             # via motmetrics
+flake8==3.8.3             # via motmetrics
 google-auth-oauthlib==0.4.1  # via tensorboard
-google-auth==1.14.0       # via google-auth-oauthlib, tensorboard
-grpcio==1.28.1            # via tensorboard
-idna==2.9                 # via requests
-importlib-metadata==1.6.0  # via pluggy, pytest
+google-auth==1.18.0       # via google-auth-oauthlib, tensorboard
+grpcio==1.30.0            # via tensorboard
+idna==2.10                # via requests
+importlib-metadata==1.7.0  # via flake8, markdown, pluggy, pytest
 joblib==0.14.1            # via scikit-learn
 kiwisolver==1.1.0         # via matplotlib
-markdown==3.2.1           # via tensorboard
+markdown==3.2.2           # via tensorboard
 matplotlib==3.0.3         # via -r demos/python_demos/requirements.txt
 mccabe==0.6.1             # via flake8
-more-itertools==8.2.0     # via pytest
+more-itertools==8.4.0     # via pytest
 motmetrics==1.2.0         # via -r demos/python_demos/requirements.txt
 nibabel==3.0.2            # via -r demos/python_demos/requirements.txt
-numpy==1.18.2 ; python_version >= "3.4"  # via -r ${INTEL_OPENVINO_DIR}/python/requirements.txt, -r demos/python_demos/requirements.txt, matplotlib, motmetrics, nibabel, pandas, scikit-learn, scipy, tensorboard, tensorboardx
+numpy==1.18.5 ; python_version >= "3.4"  # via -r ${INTEL_OPENVINO_DIR}/python/requirements.txt, -r demos/python_demos/requirements.txt, matplotlib, motmetrics, nibabel, pandas, scikit-learn, scipy, tensorboard, tensorboardx
 oauthlib==3.1.0           # via requests-oauthlib
-packaging==20.3           # via pytest
+packaging==20.4           # via pytest
 pandas==0.24.2            # via motmetrics
 pathlib2==2.3.5           # via pytest
 pluggy==0.13.1            # via pytest
-protobuf==3.11.3          # via tensorboard, tensorboardx
-py-cpuinfo==5.0.0         # via pytest-benchmark
-py==1.8.1                 # via pytest
+protobuf==3.12.2          # via tensorboard, tensorboardx
+py-cpuinfo==7.0.0         # via pytest-benchmark
+py==1.9.0                 # via pytest
 pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.8             # via pyasn1-modules, rsa
-pycodestyle==2.5.0        # via flake8, flake8-import-order
-pyflakes==2.1.1           # via flake8
+pycodestyle==2.6.0        # via flake8, flake8-import-order
+pyflakes==2.2.0           # via flake8
 pyparsing==2.4.7          # via matplotlib, packaging
 pytest-benchmark==3.2.3   # via motmetrics
-pytest==5.4.1             # via motmetrics, pytest-benchmark
+pytest==5.4.3             # via motmetrics, pytest-benchmark
 python-dateutil==2.8.1    # via matplotlib, pandas
-pytz==2019.3              # via pandas
+pytz==2020.1              # via pandas
 requests-oauthlib==1.3.0  # via google-auth-oauthlib
-requests==2.23.0          # via requests-oauthlib, tensorboard
-rsa==4.0                  # via google-auth
+requests==2.24.0          # via requests-oauthlib, tensorboard
+rsa==4.6                  # via google-auth
 scikit-learn==0.22.2.post1  # via -r demos/python_demos/requirements.txt
 scipy==1.4.1              # via -r demos/python_demos/requirements.txt, motmetrics, scikit-learn
-six==1.14.0               # via absl-py, google-auth, grpcio, packaging, pathlib2, protobuf, python-dateutil, tensorboard, tensorboardx
-tensorboard-plugin-wit==1.6.0.post3  # via tensorboard
-tensorboard==2.2.0        # via -r demos/python_demos/requirements.txt
-tensorboardx==2.0         # via -r demos/python_demos/requirements.txt
-tqdm==4.45.0              # via -r demos/python_demos/requirements.txt
-urllib3==1.25.8           # via requests
-wcwidth==0.1.9            # via pytest
+six==1.15.0               # via absl-py, google-auth, grpcio, packaging, pathlib2, protobuf, python-dateutil, tensorboard, tensorboardx
+tensorboard-plugin-wit==1.7.0  # via tensorboard
+tensorboard==2.2.2        # via -r demos/python_demos/requirements.txt
+tensorboardx==2.1         # via -r demos/python_demos/requirements.txt
+tqdm==4.47.0              # via -r demos/python_demos/requirements.txt
+urllib3==1.25.9           # via requests
+wcwidth==0.2.5            # via pytest
 werkzeug==1.0.1           # via tensorboard
 wheel==0.34.2             # via tensorboard
 xmltodict==0.12.0         # via motmetrics

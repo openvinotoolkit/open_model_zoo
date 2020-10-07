@@ -1,0 +1,14 @@
+models:
+  - name: road-segmentation-adas-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter: segmentation
+
+    datasets:
+      - name: road_segmentation
+        metrics:
+          - type: mean_iou
+            presenter: print_vector
+          - type: mean_accuracy
+            presenter: print_vector

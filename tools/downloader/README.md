@@ -1,5 +1,4 @@
-Model Downloader and other automation tools
-===========================================
+# Model Downloader and other automation tools
 
 This directory contains scripts that automate certain model-related tasks
 based on configuration files in the models' directories.
@@ -21,8 +20,7 @@ Please use these tools instead of attempting to parse the configuration files
 directly. Their format is undocumented and may change in incompatible ways in
 future releases.
 
-Prerequisites
--------------
+## Prerequisites
 
 1. Install Python (version 3.5.2 or higher)
 2. Install the tools' dependencies with the following command:
@@ -61,8 +59,7 @@ python3 -mpip install --user 'requests[security]'
 
 Alternatively, upgrade to Python 3.6 or a later version.
 
-Model downloader usage
-----------------------
+## Model downloader usage
 
 The basic usage is to run the script like this:
 
@@ -86,7 +83,7 @@ You may use `--precisions` flag to specify comma separated precisions of weights
 to be downloaded.
 
 ```sh
-./downloader.py --name face-detection-retail-0004 --precisions FP16,INT8
+./downloader.py --name face-detection-retail-0004 --precisions FP16,FP16-INT8
 ```
 
 By default, the script will attempt to download each file only once. You can use
@@ -220,8 +217,7 @@ In particular:
   is set to a value greater than 1, event sequences for different files or models
   may get interleaved.
 
-Model converter usage
----------------------
+## Model converter usage
 
 The basic usage is to run the script like this:
 
@@ -307,8 +303,7 @@ To do this, use the `--dry_run` option:
 See the "Shared options" section for information on other options accepted by
 the script.
 
-Model Quantizer Usage
----------------------
+## Model Quantizer Usage
 
 Before you run the model quantizer, you must prepare a directory with
 the datasets required for the quantization process. This directory will be
@@ -389,8 +384,7 @@ Toolkit will still be created, so that you can inspect it.
 See the "Shared options" section for information on other options accepted by
 the script.
 
-Model information dumper usage
-------------------------------
+## Model information dumper usage
 
 The basic usage is to run the script like this:
 
@@ -426,8 +420,6 @@ describing a single model. Each such object has the following keys:
   * `FP32`
   * `FP32-INT1`
   * `FP32-INT8`
-  * `INT1`
-  * `INT8`
 
   Additional possible values might be added in the future.
 
@@ -447,17 +439,20 @@ describing a single model. Each such object has the following keys:
   * `image_inpainting`
   * `image_processing`
   * `instance_segmentation`
+  * `machine_translation`
   * `monocular_depth_estimation`
   * `object_attributes`
   * `optical_character_recognition`
   * `question_answering`
   * `semantic_segmentation`
+  * `sound_classification`
+  * `speech_recognition`
   * `style_transfer`
+  * `token_recognition`
 
   Additional possible values might be added in the future.
 
-Shared options
---------------
+## Shared options
 
 The are certain options that all tools accept.
 
@@ -515,7 +510,6 @@ driver-action-recognition-adas-0002-decoder
 driver-action-recognition-adas-0002-encoder
 emotions-recognition-retail-0003
 face-detection-adas-0001
-face-detection-adas-binary-0001
 face-detection-retail-0004
 face-detection-retail-0005
 [...]

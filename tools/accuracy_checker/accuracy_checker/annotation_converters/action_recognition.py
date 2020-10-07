@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019-2020 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
+from collections import OrderedDict
 
 from ..utils import read_json, read_txt, check_file_existence
 from ..representation import ClassificationAnnotation
@@ -68,7 +70,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
         self.num_samples = self.get_value_from_config('num_samples')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        full_annotation = read_json(self.annotation_file)
+        full_annotation = read_json(self.annotation_file, object_pairs_hook=OrderedDict)
         data_ext = 'jpg' if not self.numpy_input else 'npy'
         label_map = dict(enumerate(full_annotation['labels']))
         if self.dataset_meta:
@@ -135,7 +137,8 @@ class ActionRecognitionConverter(BaseFormatConverter):
 
     @staticmethod
     def get_clips(video, clips_per_video, clip_duration, temporal_stride=1, file_ext='jpg'):
-        num_frames = video['n_frames']
+        shift = int(file_ext == 'npy')
+        num_frames = video['n_frames'] - shift
         clip_duration *= temporal_stride
 
         if clips_per_video == 0:

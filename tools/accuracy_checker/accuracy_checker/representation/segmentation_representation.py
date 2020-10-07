@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,18 +17,20 @@ limitations under the License.
 from enum import Enum
 from pathlib import Path
 from copy import deepcopy
+from collections import defaultdict
+import warnings
+import cv2 as cv
 
 import numpy as np
 
-try:
-    import pycocotools.mask as maskUtils
-except ImportError:
-    maskUtils = None
-
 from .base_representation import BaseRepresentation
 from ..data_readers import BaseReader
-from ..utils import remove_difficult
+from ..utils import remove_difficult, UnsupportedPackage
 
+try:
+    import pycocotools.mask as maskUtils
+except ImportError as import_error:
+    maskUtils = UnsupportedPackage("pycocotools", import_error.msg)
 
 class GTMaskLoader(Enum):
     PILLOW = 0
@@ -87,7 +89,7 @@ class SegmentationAnnotation(SegmentationRepresentation):
     def _load_mask(self):
         if self._mask is None:
             loader_config = self.LOADERS.get(self._mask_loader)
-            data_source = self.metadata.get('segmentation_masks_source')
+            data_source = self.metadata.get('segmentation_masks_source') or self.metadata.get('additional_data_source')
             if data_source is None:
                 data_source = self.metadata['data_source']
             if isinstance(loader_config, str):
@@ -100,6 +102,50 @@ class SegmentationAnnotation(SegmentationRepresentation):
             return mask.astype(np.uint8)
 
         return self._mask
+
+    @staticmethod
+    def _encode_mask(mask, segmentation_colors):
+        if len(mask.shape) != 3:
+            return mask
+
+        mask = mask.astype(int)
+        num_channels = len(mask.shape)
+        encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.uint8)
+        for label, color in enumerate(segmentation_colors):
+            encoded_mask[np.where(
+                np.all(mask == color, axis=-1) if num_channels >= 3 else mask == color
+            )[:2]] = label
+
+        return encoded_mask
+
+    def to_polygon(self, segmentation_colors=None, label_map=None):
+        if self.mask is None or self.mask.size == 0:
+            warnings.warn("Polygon can be found only for non-empty mask")
+            return {}
+
+        if self.metadata.get('dataset_meta'):
+            if not segmentation_colors and self.metadata['dataset_meta'].get('segmentation_colors'):
+                segmentation_colors = self.metadata['dataset_meta']['segmentation_colors']
+            if not label_map and self.metadata['dataset_meta'].get('label_map'):
+                label_map = self.metadata['dataset_meta']['label_map']
+
+        if not segmentation_colors and len(self.mask.shape) == 3:
+            raise ValueError("Mask should be decoded, but there is no segmentation colors")
+
+        mask = self._encode_mask(self.mask, segmentation_colors) if segmentation_colors else self.mask
+
+        polygons = defaultdict(list)
+        indexes = np.unique(mask) if not label_map else set(np.unique(mask))&set(label_map.keys())
+        for i in indexes:
+            binary_mask = np.uint8(mask == i)
+            contours, _ = cv.findContours(binary_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+            for contour in contours:
+                if contour.size < 6:
+                    continue
+                contour = np.squeeze(contour, axis=1)
+                polygons[i].append(contour)
+
+        return polygons
 
 
 class SegmentationPrediction(SegmentationRepresentation):
@@ -131,6 +177,32 @@ class SegmentationPrediction(SegmentationRepresentation):
 
         return annotation
 
+    def to_polygon(self):
+        if self.mask is None or self.mask.size == 0:
+            warnings.warn("Polygon can be found only for non-empty mask")
+            return {}
+
+        polygons = defaultdict(list)
+
+        mask = self.mask
+
+        if len(mask.shape) == 3:
+            if 1 not in mask.shape:
+                mask = np.argmax(mask, axis=0)
+            else:
+                mask = np.squeeze(mask)
+        indexes = np.unique(mask)
+        for i in indexes:
+            binary_mask = np.uint8(mask == i)
+            contours, _ = cv.findContours(binary_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+            for contour in contours:
+                if contour.size < 6:
+                    continue
+                contour = np.squeeze(contour, axis=1)
+                polygons[i].append(contour)
+
+        return polygons
+
 
 class BrainTumorSegmentationAnnotation(SegmentationAnnotation):
     def __init__(self, identifier, path_to_mask, loader=GTMaskLoader.NIFTI, box=None):
@@ -146,7 +218,8 @@ class BrainTumorSegmentationPrediction(SegmentationPrediction):
 
 class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
     def __init__(self, identifier, mask, labels):
-        if not maskUtils:
+        if isinstance(maskUtils, UnsupportedPackage):
+            maskUtils.raise_error("CoCoInstanceSegmentationRepresentation")
             raise ValueError('can not create representation')
         super().__init__(identifier)
         self.raw_mask = mask
@@ -200,6 +273,35 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
         for mask in masks:
             areas.append(maskUtils.area(mask))
         return areas
+
+    def to_polygon(self):
+        if self.raw_mask is None or np.size(self.raw_mask) == 0:
+            warnings.warn("Polygon can be found only for non-empty mask")
+            return {}
+
+        if self.labels is None or np.size(self.labels) == 0:
+            warnings.warn("Polygon can be found only for non-empty labels")
+            return {}
+
+        if all(not isinstance(value, dict) for value in self.raw_mask):
+            polygons = defaultdict(list)
+            for elem, label in zip(self.raw_mask, self.labels):
+                polygons[label].append(elem)
+            return polygons
+
+        polygons = defaultdict(list)
+        for elem, label in zip(self.raw_mask, self.labels):
+            elem = np.uint8(maskUtils.decode(elem))
+            obj_contours = []
+            contours, _ = cv.findContours(elem, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+            for contour in contours:
+                if contour.size < 6:
+                    continue
+                contour = np.squeeze(contour, axis=1)
+                obj_contours.append(contour)
+            polygons[label].append(obj_contours)
+
+        return polygons
 
 
 class CoCoInstanceSegmentationAnnotation(CoCoInstanceSegmentationRepresentation):

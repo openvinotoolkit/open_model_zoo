@@ -1,0 +1,15 @@
+models:
+  - name: faster_rcnn_inception_resnet_v2_atrous_coco
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+        inputs:
+          - name: image_info
+            type: CONST_INPUT
+            value: [[600, 1024, 1]]
+
+    datasets:
+      - name: ms_coco_detection_91_classes
+        metrics:
+          - type: coco_precision
+            max_detections: 100

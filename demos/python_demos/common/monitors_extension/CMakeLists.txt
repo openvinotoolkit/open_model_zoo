@@ -5,9 +5,8 @@
 find_package(OpenCV 4 REQUIRED COMPONENTS core)
 
 add_library(monitors_extension MODULE monitors_extension.cpp)
-target_include_directories(monitors_extension PRIVATE ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIR}
-    "${PROJECT_SOURCE_DIR}/common")
-target_link_libraries(monitors_extension PRIVATE ${PYTHON_LIBRARIES} opencv_core monitors)
+target_include_directories(monitors_extension PRIVATE ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIR})
+target_link_libraries(monitors_extension PRIVATE ${PYTHON_LIBRARIES} opencv_core monitors common)
 set_target_properties(monitors_extension PROPERTIES PREFIX "")
 if(WIN32)
     set_target_properties(monitors_extension PROPERTIES SUFFIX ".pyd")

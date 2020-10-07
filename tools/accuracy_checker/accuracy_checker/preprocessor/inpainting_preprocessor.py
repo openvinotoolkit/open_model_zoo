@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,10 +29,16 @@ class FreeFormMask(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'parts': NumberField(optional=True, default=8, description="Number of parts to draw mask."),
-            'max_brush_width': NumberField(optional=True, default=24, description="Maximum brush width to draw mask."),
-            'max_length': NumberField(optional=True, default=100, description="Maximum line length to draw mask."),
-            "max_vertex": NumberField(optional=True, default=20, description="Maximum number vertex to draw mask.")
+            'parts': NumberField(optional=True, default=8, description="Number of parts to draw mask.", value_type=int),
+            'max_brush_width': NumberField(
+                optional=True, default=24, description="Maximum brush width to draw mask.", value_type=int
+            ),
+            'max_length': NumberField(
+                optional=True, default=100, description="Maximum line length to draw mask.", value_type=int
+            ),
+            "max_vertex": NumberField(
+                optional=True, default=20, description="Maximum number vertex to draw mask.", value_type=int
+            )
         })
         return parameters
 
@@ -89,14 +95,14 @@ class RectMask(Preprocessor):
         parameters = super().parameters()
         parameters.update({
             'mask_height': NumberField(
-                optional=True, default=128, description="Height of mask"
+                optional=True, default=128, description="Height of mask", value_type=int
             ),
             'mask_width': NumberField(
-                optional=True, default=128, description="Width of mask"
+                optional=True, default=128, description="Width of mask", value_type=int
             ),
             'size': NumberField(
                 optional=True, default=128,
-                description="Size of mask, used if both dementions are equal"
+                description="Size of mask, used if both dementions are equal", value_type=int
             )
         })
         return parameters

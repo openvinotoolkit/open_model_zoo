@@ -1,0 +1,32 @@
+models:
+
+  - name: vgg19-caffe2
+    launchers:
+      - framework: onnx_runtime
+        model: vgg19-caffe2.onnx
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 103.939, 116.779, 123.68
+
+  - name: vgg19-caffe2
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224

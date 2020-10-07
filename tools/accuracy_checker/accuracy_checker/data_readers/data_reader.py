@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,33 +21,23 @@ import re
 import wave
 
 import cv2
+from PIL import Image
 import numpy as np
 from numpy.lib.npyio import NpzFile
 
-try:
-    import tensorflow as tf
-except ImportError as import_error:
-    tf = None
-
-try:
-    from PIL import Image
-except ImportError as import_error:
-    Image = None
+from ..utils import get_path, read_json, read_pickle, contains_all, UnsupportedPackage
+from ..dependency import ClassProvider
+from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField
 
 try:
     import nibabel as nib
-except ImportError:
-    nib = None
+except ImportError as import_error:
+    nib = UnsupportedPackage("nibabel", import_error.msg)
 
 try:
     import pydicom
-except ImportError:
-    pydicom = None
-
-
-from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
-from ..dependency import ClassProvider
-from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField
+except ImportError as import_error:
+    pydicom = UnsupportedPackage("pydicom", import_error.msg)
 
 REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
 
@@ -61,6 +51,8 @@ class DataRepresentation:
             self.metadata['image_size'] = 1
         elif isinstance(data, list) and np.isscalar(data[0]):
             self.metadata['image_size'] = len(data)
+        elif isinstance(data, dict):
+            self.metadata['image_size'] = data.values().next().shape
         else:
             self.metadata['image_size'] = data.shape if not isinstance(data, list) else np.shape(data[0])
 
@@ -110,21 +102,8 @@ class BaseReader(ClassProvider):
         self.validate_config()
         self.configure()
 
-    def __call__(self, context=None, identifier=None, **kwargs):
-        if identifier is not None:
-            return self.read_item(identifier)
-
-        if not context:
-            raise ValueError('identifier or context should be specified')
-
-        read_data = [self.read_item(identifier) for identifier in context.identifiers_batch]
-        context.data_batch = read_data
-        context.annotation_batch, context.data_batch = zipped_transform(
-            set_image_metadata,
-            context.annotation_batch,
-            context.data_batch
-        )
-        return context
+    def __call__(self, identifier):
+        return self.read_item(identifier)
 
     def configure(self):
         if not self.data_source:
@@ -234,8 +213,6 @@ class PillowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        if Image is None:
-            raise ValueError('Pillow is not installed, please install it')
         self.convert_to_rgb = True
 
     def read(self, data_id):
@@ -247,11 +224,6 @@ class PillowImageReader(BaseReader):
 
 class ScipyImageReader(BaseReader):
     __provider__ = 'scipy_imread'
-
-    def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config)
-        if Image is None:
-            raise ValueError('Pillow is not installed, please install it')
 
     def read(self, data_id):
         # reimplementation scipy.misc.imread
@@ -358,8 +330,8 @@ class NiftiImageReader(BaseReader):
             config_validator.validate(self.config)
 
     def configure(self):
-        if nib is None:
-            raise ImportError('nifty backend for image reading requires nibabel. Please install it before usage.')
+        if isinstance(nib, UnsupportedPackage):
+            nib.raise_error(self.__provider__)
         self.channels_first = self.config.get('channels_first', False) if self.config else False
         self.multi_infer = self.config.get('multi_infer', False)
         if not self.data_source:
@@ -379,6 +351,10 @@ class NiftiImageReader(BaseReader):
 class NumpyReaderConfig(ConfigValidator):
     type = StringField(optional=True)
     keys = StringField(optional=True, default="")
+    separator = StringField(optional=True, default="@")
+    id_sep = StringField(optional=True, default="_")
+    block = BoolField(optional=True, default=False)
+    batch = NumberField(optional=True, default=1)
 
 
 class NumPyReader(BaseReader):
@@ -390,28 +366,74 @@ class NumPyReader(BaseReader):
             config_validator.validate(self.config)
 
     def configure(self):
+        self.is_text = self.config.get('text_file', False)
         self.multi_infer = self.config.get('multi_infer', False)
         self.keys = self.config.get('keys', "") if self.config else ""
         self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
+        self.separator = self.config.get('separator')
+        self.id_sep = self.config.get('id_sep', '_')
+        self.block = self.config.get('block', False)
+        self.batch = int(self.config.get('batch', 1))
+
+        if self.separator and self.is_text:
+            raise ConfigError('text file reading with numpy does')
         self.multi_infer = self.config.get('multi_infer', False)
         if not self.data_source:
             raise ConfigError('data_source parameter is required to create "{}" '
                               'data reader and read data'.format(self.__provider__))
+        self.keyRegex = {k: re.compile(k + self.id_sep) for k in self.keys}
+        self.valRegex = re.compile(r"([^0-9]+)([0-9]+)")
 
     def read(self, data_id):
+        field_id = None
+        if self.separator:
+            field_id, data_id = data_id.split(self.separator)
+
         data = np.load(str(self.data_source / data_id))
 
         if not isinstance(data, NpzFile):
             return data
 
-        if len(self.keys) > 0:
-            res = []
-            for k in self.keys:
-                res.append(data[k])
-            return res
+        if field_id is not None:
+            key = [k for k, v in self.keyRegex.items() if v.match(field_id)]
+            if len(key) > 0:
+                if self.block:
+                    res = data[key[0]]
+                else:
+                    recno = field_id.split('_')[-1]
+                    recno = int(recno)
+                    start = Path(data_id).name.split('.')[0]
+                    start = int(start)
+                    res = data[key[0]][recno - start, :]
+                return res
 
         key = next(iter(data.keys()))
         return data[key]
+
+
+class NumpyTXTReader(BaseReader):
+    __provider__ = 'numpy_txt_reader'
+
+    def read(self, data_id):
+        return np.loadtxt(str(self.data_source / data_id))
+
+
+class NumpyDictReader(BaseReader):
+    __provider__ = 'numpy_dict_reader'
+
+    def read(self, data_id):
+        return np.load(str(self.data_source / data_id), allow_pickle=True)[()]
+
+    def read_item(self, data_id):
+        dict_data = self.read_dispatcher(data_id)
+        identifier = []
+        data = []
+        for key, value in dict_data.items():
+            identifier.append('{}.{}'.format(data_id, key))
+            data.append(value)
+        if len(data) == 1:
+            return DataRepresentation(data[0], data_id)
+        return DataRepresentation(data, identifier)
 
 
 class TensorflowImageReader(BaseReader):
@@ -419,9 +441,13 @@ class TensorflowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        if tf is None:
-            raise ImportError('tf backend for image reading requires TensorFlow. Please install it before usage.')
-
+        try:
+            import tensorflow as tf # pylint: disable=C0415
+        except ImportError as import_error:
+            raise ImportError(
+                'tf backend for image reading requires TensorFlow. '
+                'Please install it before usage. {}'.format(import_error.msg)
+            )
         tf.enable_eager_execution()
 
         def read_func(path):
@@ -504,9 +530,23 @@ class DicomReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        if pydicom is None:
-            raise ImportError('dicom backend for reading requires pydicom. Please install it before usage.')
+        if isinstance(pydicom, UnsupportedPackage):
+            pydicom.raise_error(self.__provider__)
 
     def read(self, data_id):
         dataset = pydicom.dcmread(str(self.data_source / data_id))
         return dataset.pixel_array
+
+
+class PickleReader(BaseReader):
+    __provider__ = 'pickle_reader'
+
+    def read(self, data_id):
+        data = read_pickle(self.data_source / data_id)
+        if isinstance(data, list) and len(data) == 2 and isinstance(data[1], dict):
+            return data
+
+        return data, {}
+
+    def read_item(self, data_id):
+        return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)

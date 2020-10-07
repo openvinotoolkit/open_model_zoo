@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,28 @@ description: >-
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-0083.xml
-    size: 532421
-    sha256: 235011128a6219ca315dcfd6389ef6fcc7c8e182f0f249dda0683496ec9876b2
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/instance-segmentation-security-0083/FP32/instance-segmentation-security-0083.xml
+    size: 547844
+    sha256: 3de868b63097f040d14dd1d79589d154eb4413f9fcaf0d160721da628aaea536
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/instance-segmentation-security-0083/FP32/instance-segmentation-security-0083.xml
   - name: FP32/instance-segmentation-security-0083.bin
-    size: 564274520
-    sha256: 585dc900a8f7722fdd7b896f1956186dedc4d63580b68844a91205cc3c96afad
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/instance-segmentation-security-0083/FP32/instance-segmentation-security-0083.bin
+    size: 564274600
+    sha256: 744a69478c1aa00de1269b5e0487fedb591c38eca3f5d54b376d584ac0042bd7
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/instance-segmentation-security-0083/FP32/instance-segmentation-security-0083.bin
   - name: FP16/instance-segmentation-security-0083.xml
-    size: 532218
-    sha256: 6a6a3f736db70ab57c03e3fe508999f6074c732114c6513b1cf31e8fb734ae81
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/instance-segmentation-security-0083/FP16/instance-segmentation-security-0083.xml
+    size: 547639
+    sha256: 2edefd1ab69e267c82f4f356cff126faf28947f508625afa0c25cc56707f9852
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/instance-segmentation-security-0083/FP16/instance-segmentation-security-0083.xml
   - name: FP16/instance-segmentation-security-0083.bin
-    size: 282137322
-    sha256: d94d2c2ad4df561d380a71f4fa4fbcfe462c94f3d36098452e39b8b7586572bb
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/instance-segmentation-security-0083/FP16/instance-segmentation-security-0083.bin
+    size: 282137402
+    sha256: 955df4f38d7b9c3ccfd884c524641359b326afe481f08eca3573b5c1669e2386
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/instance-segmentation-security-0083/FP16/instance-segmentation-security-0083.bin
   - name: FP16-INT8/instance-segmentation-security-0083.xml
-    size: 1469339
-    sha256: 1fa5b68317b3c575dfdcd89eb98d8b79f31fe4a79d4488d80fd1f014f1ca5251
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/instance-segmentation-security-0083/FP16-INT8/instance-segmentation-security-0083.xml
+    size: 1481534
+    sha256: 33e37f1bc86b07a42836e513a109e4423d7f6c08e5ca91511572b6ecd71272f3
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/instance-segmentation-security-0083/FP16-INT8/instance-segmentation-security-0083.xml
   - name: FP16-INT8/instance-segmentation-security-0083.bin
-    size: 142099022
-    sha256: aa3f86d96ce3c37c2d76b0735683d8c7405778c0b65828b22b6dde72691c07c4
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/instance-segmentation-security-0083/FP16-INT8/instance-segmentation-security-0083.bin
+    size: 142099102
+    sha256: 64c6e72c200e56426fa1808a2176265731af2445d45fc423462accee431c4b92
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/instance-segmentation-security-0083/FP16-INT8/instance-segmentation-security-0083.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

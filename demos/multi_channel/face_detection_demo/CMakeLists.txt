@@ -44,25 +44,8 @@ add_executable(${TARGET_NAME} ${MAIN_SRC} ${MAIN_HEADERS})
 
 set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_PDB_NAME ${TARGET_NAME})
 
-if(MULTICHANNEL_DEMO_USE_TBB)
-    find_package(TBB REQUIRED tbb)
-    target_link_libraries(${TARGET_NAME} ${TBB_IMPORTED_TARGETS})
-    target_compile_definitions(${TARGET_NAME} PRIVATE
-        USE_TBB=1
-        __TBB_ALLOW_MUTABLE_FUNCTORS=1)
-
-    if(FALSE) # disable task isolation for now due to bugs in tbb
-        target_compile_definitions(${TARGET_NAME} PRIVATE
-            TBB_PREVIEW_TASK_ISOLATION=1
-            TBB_TASK_ISOLATION=1)
-    endif()
-endif()
-
-target_link_libraries(${TARGET_NAME} ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} common)
-
-if(UNIX)
-    target_link_libraries( ${TARGET_NAME} pthread)
-endif()
+target_link_libraries(${TARGET_NAME} PRIVATE
+    ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} multi_channel_common monitors)
 
 if(COMMAND add_cpplint_target)
     add_cpplint_target(${TARGET_NAME}_cpplint FOR_TARGETS ${TARGET_NAME})
@@ -73,5 +56,3 @@ if(NOT TARGET ie_samples)
 endif()
 
 add_dependencies(ie_samples ${TARGET_NAME})
-
-target_link_libraries(${TARGET_NAME} monitors)

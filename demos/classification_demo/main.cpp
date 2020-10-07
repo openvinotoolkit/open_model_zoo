@@ -15,8 +15,6 @@
 
 #include <inference_engine.hpp>
 
-#include <ie_iextension.h>
-
 #include <samples/common.hpp>
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
@@ -66,7 +64,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-cv::Mat resizeImage(cv::Mat& image, int modelInputResolution) {
+cv::Mat resizeImage(const cv::Mat& image, int modelInputResolution) {
     double scale = static_cast<double>(modelInputResolution) / std::min(image.cols, image.rows);
 
     cv::Mat resizedImage;
@@ -108,6 +106,8 @@ std::vector<std::vector<unsigned>> topResults(Blob& inputBlob, unsigned numTop) 
 
 int main(int argc, char *argv[]) {
     try {
+        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
+
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }

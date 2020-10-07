@@ -1,0 +1,27 @@
+evaluations:
+  - name: action-recognition-0001
+    module: custom_evaluators.sequential_action_recognition_evaluator.SequentialActionRecognitionEvaluator
+    module_config:
+      network_info:
+        encoder: {}
+
+        decoder:
+          num_processing_frames: 16
+          adapter: classification
+
+      launchers:
+        - framework: dlsdk
+
+      datasets:
+        - name: kinetics-400
+
+          preprocessing:
+            - type: resize
+              size: 224
+              aspect_ratio_scale: fit_to_window
+            - type: crop
+              size: 224
+
+          metrics:
+            - type: clip_accuracy
+              presenter: print_vector

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@ limitations under the License.
 import numpy as np
 from ..adapters import Adapter
 from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction
-from ..config import ConfigValidator, BoolField, ListField, NumberField
+from ..config import ConfigValidator, BoolField, ListField, NumberField, StringField
+from ..utils import contains_any
 
 
 class SegmentationAdapter(Adapter):
     __provider__ = 'segmentation'
-    prediction_types = (SegmentationPrediction, )
+    prediction_types = (SegmentationPrediction,)
 
     @classmethod
     def parameters(cls):
@@ -40,7 +41,7 @@ class SegmentationAdapter(Adapter):
     def configure(self):
         self.make_argmax = self.launcher_config.get('make_argmax', False)
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
@@ -73,7 +74,7 @@ class SegmentationAdapter(Adapter):
 
 class SegmentationOneClassAdapter(Adapter):
     __provider__ = 'segmentation_one_class'
-    prediction_types = (SegmentationPrediction, )
+    prediction_types = (SegmentationPrediction,)
 
     @classmethod
     def parameters(cls):
@@ -102,7 +103,7 @@ class SegmentationOneClassAdapter(Adapter):
 
 class BrainTumorSegmentationAdapter(Adapter):
     __provider__ = 'brain_tumor_segmentation'
-    prediction_types = (BrainTumorSegmentationPrediction, )
+    prediction_types = (BrainTumorSegmentationPrediction,)
 
     @classmethod
     def parameters(cls):
@@ -114,6 +115,10 @@ class BrainTumorSegmentationAdapter(Adapter):
             'label_order': ListField(
                 optional=True, default=[1, 2, 3], value_type=int, validate_values=True,
                 description="Specifies order of output labels, according to order of dataset labels"
+            ),
+            'segmentation_out': StringField(
+                optional=True,
+                description='Segmentation output layer name. If not provided, first output will be used.'
             )
         })
 
@@ -122,12 +127,21 @@ class BrainTumorSegmentationAdapter(Adapter):
     def configure(self):
         self.argmax = self.get_value_from_config('make_argmax')
         self.label_order = tuple(self.get_value_from_config('label_order'))
+        self.segmentation_out = self.get_value_from_config('segmentation_out')
+        if self.segmentation_out:
+            self.segmentation_out_bias = self.segmentation_out + '/add_'
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
+        if self.segmentation_out:
+            if not contains_any(raw_outputs, [self.segmentation_out, self.segmentation_out_bias]):
+                raise ConfigError('segmentation output not found')
+            segm_out = self.segmentation_out if self.segmentation_out in raw_outputs else self.segmentation_out_bias
+        else:
+            segm_out = self.output_blob
+        for identifier, output in zip(identifiers, raw_outputs[segm_out]):
             if self.argmax:
                 output = np.argmax(output, axis=0).astype(np.int8)
                 output = np.expand_dims(output, axis=0)

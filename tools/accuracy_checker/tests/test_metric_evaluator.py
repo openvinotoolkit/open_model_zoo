@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -365,7 +365,7 @@ class TestMetricPerInstanceResult:
         predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0])]
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         expected_metric_result = PerImageMetricResult('accuracy', 'accuracy', 1.0, 'higher-better')
         assert len(metric_result) == 1
         assert 0 in metric_result
@@ -377,7 +377,7 @@ class TestMetricPerInstanceResult:
         predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0])]
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1, 'name': 'accuracy@top1'}], None)
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         expected_metric_result = PerImageMetricResult('accuracy@top1', 'accuracy', 1.0, 'higher-better')
         assert len(metric_result) == 1
         assert 0 in metric_result
@@ -391,7 +391,7 @@ class TestMetricPerInstanceResult:
         dispatcher = MetricsExecutor([
             {'name': 'top1', 'type': 'accuracy', 'top_k': 1}, {'name': 'top3', 'type': 'accuracy', 'top_k': 3}
         ], None)
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         expected_metric_result = [
             PerImageMetricResult('top1', 'accuracy', 1.0, 'higher-better'),
             PerImageMetricResult('top3', 'accuracy', 1.0, 'higher-better')
@@ -407,7 +407,7 @@ class TestMetricPerInstanceResult:
         predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0]), ClassificationPrediction('identifier2', [1.0, 1.0, 1.0, 4.0])]
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         expected_metric_result = [PerImageMetricResult('accuracy', 'accuracy', 1.0, 'higher-better'),
                                   PerImageMetricResult('accuracy', 'accuracy', 0.0, 'higher-better')]
         assert len(metric_result) == 2
@@ -423,7 +423,7 @@ class TestMetricPerInstanceResult:
         predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0]), ClassificationPrediction('identifier2', [1.0, 1.0, 1.0, 4.0])]
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
-        metric_result = dispatcher.update_metrics_on_batch([42, 17], annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch([42, 17], annotations, predictions)
         expected_metric_result = [PerImageMetricResult('accuracy', 'accuracy', 1.0, 'higher-better'),
                                   PerImageMetricResult('accuracy', 'accuracy', 0.0, 'higher-better')]
         assert len(metric_result) == 2

@@ -22,8 +22,6 @@
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
-#include <ie_iextension.h>
-
 #include "detectors.hpp"
 
 using namespace InferenceEngine;

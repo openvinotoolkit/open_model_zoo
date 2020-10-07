@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,28 @@ description: >-
 task_type: feature_extraction
 files:
   - name: FP32/text-spotting-0002-recognizer-encoder.xml
-    size: 9872
-    sha256: 64bf0782840b07deb70af126f60d1e66b57f661e478faec9ad59fc2c67b9dc37
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.xml
+    size: 9754
+    sha256: 6d9e22767154398b0c1a568e096ef2f5e08d2f00f5b31f78cbd556838c9066cf
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.xml
   - name: FP32/text-spotting-0002-recognizer-encoder.bin
     size: 5311488
     sha256: 018e69d5571190031105fe558684ecafb15699002cc3ffc02e125cf8857f818a
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.bin
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP32/text-spotting-0002-recognizer-encoder.bin
   - name: FP16/text-spotting-0002-recognizer-encoder.xml
-    size: 9869
-    sha256: abfbdc39629f81f57a7e1a08f6421dc8a69c02765cfda17239fcb11273bfc22f
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.xml
+    size: 9751
+    sha256: 2fdebec5af97092af73eb4e0bc529715765318e0616fd2f23ae472ec51ea7e79
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.xml
   - name: FP16/text-spotting-0002-recognizer-encoder.bin
     size: 2655744
     sha256: 1675893bc936c1af5a03b02380212a68fe9391e2b6d563527e75c100b75f12ca
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.bin
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16/text-spotting-0002-recognizer-encoder.bin
   - name: FP16-INT8/text-spotting-0002-recognizer-encoder.xml
-    size: 15945
-    sha256: 69952b2a65bab4eba2ccd52a91124b954adb70905e94070a2e2c3eed0dd8ea7a
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16-INT8/text-spotting-0002-recognizer-encoder.xml
+    size: 12450
+    sha256: 1a3b6befcbb929b2557b52633ff2a764c586e2f6f7640a9f3aa8c6fb551e4128
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16-INT8/text-spotting-0002-recognizer-encoder.xml
   - name: FP16-INT8/text-spotting-0002-recognizer-encoder.bin
     size: 2655744
     sha256: 1675893bc936c1af5a03b02380212a68fe9391e2b6d563527e75c100b75f12ca
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16-INT8/text-spotting-0002-recognizer-encoder.bin
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/text-spotting-0002/text-spotting-0002-recognizer-encoder/FP16-INT8/text-spotting-0002-recognizer-encoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

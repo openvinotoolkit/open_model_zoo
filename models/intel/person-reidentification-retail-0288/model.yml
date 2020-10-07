@@ -1,0 +1,36 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Single embedding-based person reidentification model
+task_type: object_attributes
+files:
+  - name: FP32/person-reidentification-retail-0288.xml
+    size: 503451
+    sha256: 2da638ff5c494198d5e0050fa4b1c8de277304c9a97a4d5006922780edf568ca
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-reidentification-retail-0288/FP32/person-reidentification-retail-0288.xml
+  - name: FP32/person-reidentification-retail-0288.bin
+    size: 728632
+    sha256: 1d50150374cf33e0fb582d7b7affc06feb8fe2c8081e877e6456cc1f8d2eef3e
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-reidentification-retail-0288/FP32/person-reidentification-retail-0288.bin
+  - name: FP16/person-reidentification-retail-0288.xml
+    size: 503202
+    sha256: 8b4954db92b8e3b177cf0e5d90b732969a66af70b98a8d2c0db38d1d8bad0cba
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-reidentification-retail-0288/FP16/person-reidentification-retail-0288.xml
+  - name: FP16/person-reidentification-retail-0288.bin
+    size: 364360
+    sha256: 643492c3d210465d19155a76a4f21f01e74157d2e6afd9a8436685089e538331
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-reidentification-retail-0288/FP16/person-reidentification-retail-0288.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

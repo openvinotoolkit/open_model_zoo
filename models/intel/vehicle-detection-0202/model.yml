@@ -1,0 +1,44 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  MobileNetV2-SSD with two heads and clustered priors for 512x512 resolution.
+task_type: detection
+files:
+  - name: FP32/vehicle-detection-0202.xml
+    size: 187034
+    sha256: f71b2582e4cbedeac4424722a6f74af82f6fd1ae8fb1a2a2f46332676f1da9ee
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/vehicle-detection-0202/FP32/vehicle-detection-0202.xml
+  - name: FP32/vehicle-detection-0202.bin
+    size: 7269168
+    sha256: 5b9c9d0f5d6543fd6c27df7c09d2adc0fd0ae2fb67d803cbfaeabba6861d3de4
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/vehicle-detection-0202/FP32/vehicle-detection-0202.bin
+  - name: FP16/vehicle-detection-0202.xml
+    size: 186971
+    sha256: 4373f2266869175ce8e3ddf547428b978823eca3b1ec4949b8becafefefdf1c2
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/vehicle-detection-0202/FP16/vehicle-detection-0202.xml
+  - name: FP16/vehicle-detection-0202.bin
+    size: 3634626
+    sha256: 6e612af65dd992a3013ffff91739a70b93230ac7a98646a1c274daf93f056edc
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/vehicle-detection-0202/FP16/vehicle-detection-0202.bin
+  - name: FP16-INT8/vehicle-detection-0202.xml
+    size: 493321
+    sha256: b7ca442f89d2309b40d8ed2a7c9cd50a78ee41515162fcfab343e90500cca87d
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/vehicle-detection-0202/FP16-INT8/vehicle-detection-0202.xml
+  - name: FP16-INT8/vehicle-detection-0202.bin
+    size: 1921623
+    sha256: cab370f6bb236b31814311cd6340cfa7d2771115e45c7ed8821d93d8da474b64
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/vehicle-detection-0202/FP16-INT8/vehicle-detection-0202.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

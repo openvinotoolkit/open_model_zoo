@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -246,7 +246,7 @@ class RetinaNetAdapter(Adapter):
         self.scales = np.array([2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)])
         self.std = np.array([0.1, 0.1, 0.2, 0.2])
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         results = []
         for identifier, loc_pred, cls_pred, meta in zip(
@@ -364,11 +364,12 @@ class ClassAgnosticDetectionAdapter(Adapter):
         self.out_blob_name = self.get_value_from_config('output_blob')
         self.scale = self.get_value_from_config('scale')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
             raw: output of model
+            frame_meta: image metadata
         Returns:
             list of DetectionPrediction objects
         """
@@ -428,13 +429,41 @@ class RFCNCaffe(Adapter):
         self.bbox_out = self.get_value_from_config('bbox_out')
         self.rois_out = self.get_value_from_config('rois_out')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def get_proposals(self, raw_out):
+        predicted_proposals = raw_out.get(self.rois_out)
+        if predicted_proposals is None:
+            if self.rois_out + '.0' in raw_out:
+                predicted_proposals = raw_out[self.rois_out + '.0']
+            else:
+                raise ConfigError("output blobs do not contain {}".format(self.rois_out))
+        return predicted_proposals
+
+    @staticmethod
+    def get_scale(meta):
+        if 'scale_x' in meta:
+            x_scale = meta['scale_x']
+            y_scale = meta['scale_y']
+            return x_scale, y_scale
+        original_image_size = meta['image_size'][:2]
+        image_input = [shape for shape in meta['input_shape'].values() if len(shape) == 4]
+        assert image_input, "image input not found"
+        assert len(image_input) == 1, 'several input images detected'
+        image_input = image_input[0]
+        if image_input[1] == 3:
+            processed_image_size = image_input[2:]
+        else:
+            processed_image_size = image_input[1:3]
+        y_scale = processed_image_size[0] / original_image_size[0]
+        x_scale = processed_image_size[1] / original_image_size[1]
+        return x_scale, y_scale
+
+    def process(self, raw, identifiers, frame_meta):
+        assert len(identifiers) == 1, '{} adapter support only batch size 1'.format(self.__provider__)
         raw_out = self._extract_predictions(raw, frame_meta)
         predicted_classes = raw_out[self.cls_out]
         predicted_deltas = raw_out[self.bbox_out]
-        predicted_proposals = raw_out[self.rois_out]
-        x_scale = frame_meta[0]['scale_x']
-        y_scale = frame_meta[0]['scale_y']
+        predicted_proposals = self.get_proposals(raw_out)
+        x_scale, y_scale = self.get_scale(frame_meta[0])
         real_det_num = np.argwhere(predicted_proposals[:, 0] == -1)
         if np.size(real_det_num) != 0:
             real_det_num = real_det_num[0, 0]
@@ -566,11 +595,12 @@ class FaceBoxesAdapter(Adapter):
 
         return anchors
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
             raw: output of model
+            frame_meta: images metadata
         Returns:
             list of DetectionPrediction objects
         """
@@ -727,7 +757,7 @@ class FaceDetectionAdapter(Adapter):
                     k += 1
         return output_layers
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         for batch_index, identifier in enumerate(identifiers):
             detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
@@ -805,30 +835,30 @@ class FaceDetectionRefinementAdapter(Adapter):
     def configure(self):
         self.threshold = self.get_value_from_config('threshold')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
-        result = []
-
+    def process(self, raw, identifiers, frame_meta):
         if isinstance(raw, dict):
             candidates = frame_meta[0]['candidates']
-            self.refine_candidates(candidates.identifier, raw, candidates, result)
+            result = self.refine_candidates(candidates.identifier, [raw], candidates, self.threshold)
         else:
-            for batch_index, identifier in enumerate(identifiers):
-                candidates = frame_meta[batch_index]['candidates']
-                self.refine_candidates(identifier, raw[batch_index], candidates, result)
+            candidates = frame_meta[0]['candidates']
+            result = self.refine_candidates(identifiers[0], raw, candidates, self.threshold)
 
         return result
 
-    def refine_candidates(self, identifier, prediction, candidates, result):
+    @staticmethod
+    def refine_candidates(identifier, raw, candidates, threshold):
         prob_name = 'prob_fd'
         reg_name = 'fc_bb'
         detections = {'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
-        prob_arr = prediction[prob_name]
-        reg_arr = prediction[reg_name]
 
-        for i in range(candidates.x_mins.size):
+        for i, prediction in enumerate(raw):
+            prob_arr = prediction[prob_name]
+            reg_arr = prediction[reg_name]
             score = prob_arr[0, 1, 0, 0]
-            if score < self.threshold:
+
+            if score < threshold:
                 continue
+
             width = candidates.x_maxs[i] - candidates.x_mins[i]
             height = candidates.y_maxs[i] - candidates.y_mins[i]
 
@@ -844,16 +874,17 @@ class FaceDetectionRefinementAdapter(Adapter):
 
             width += reg_width
             height += reg_height
-            x = (center_x + reg_x) - width / 2.0
-            y = (center_y + reg_y) - height / 2.0
-
+            x = (center_x + reg_x) - width / 2.0 + 0.5
+            y = (center_y + reg_y) - height / 2.0 + 0.5
+            width += 0.5
+            height += 0.5
             detections['scores'].append(score)
             detections['x_mins'].append(x)
             detections['y_mins'].append(y)
             detections['x_maxs'].append(x+width)
             detections['y_maxs'].append(y+height)
 
-        result.append(
+        return [
             DetectionPrediction(
                 identifier=identifier,
                 x_mins=detections['x_mins'],
@@ -862,4 +893,38 @@ class FaceDetectionRefinementAdapter(Adapter):
                 y_maxs=detections['y_maxs'],
                 scores=detections['scores']
             )
+        ]
+
+class FasterRCNNONNX(Adapter):
+    __provider__ = 'faster_rcnn_onnx'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update(
+            {
+                'labels_out': StringField(description='name of output layer with labels'),
+                'scores_out': StringField(description='name of output layer with scores'),
+                'boxes_out': StringField(description='name of output layer with bboxes')
+            }
         )
+        return parameters
+
+    def configure(self):
+        self.labels_out = self.get_value_from_config('labels_out')
+        self.scores_out = self.get_value_from_config('scores_out')
+        self.boxes_out = self.get_value_from_config('boxes_out')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        identifier = identifiers[0]
+        boxes = raw_outputs[self.boxes_out]
+        scores = raw_outputs[self.scores_out]
+        labels = raw_outputs[self.labels_out]
+        meta = frame_meta[0]
+        im_scale_x = meta['scale_x']
+        im_scale_y = meta['scale_y']
+        boxes[:, 0::2] /= im_scale_x
+        boxes[:, 1::2] /= im_scale_y
+        x_mins, y_mins, x_maxs, y_maxs = boxes.T
+        return [DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs)]

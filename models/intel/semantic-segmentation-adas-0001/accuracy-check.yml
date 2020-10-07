@@ -1,0 +1,18 @@
+models:
+  - name: semantic-segmentation-adas-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter: segmentation
+        inputs:
+          - name: data
+            type: INPUT
+            precision: U8
+
+    datasets:
+      - name: semantic_segmentation_adas
+
+        metrics:
+          - type: mean_iou
+            use_argmax: False
+            presenter: print_vector

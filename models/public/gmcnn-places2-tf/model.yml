@@ -19,12 +19,17 @@ description: >-
   For details see repository <https://github.com/shepnerd/inpainting_gmcnn>.
 task_type: image_inpainting
 files:
-  - name: frozen_model.pb
-    size: 49774888
-    sha256: 2bef90eb90a11a7bf552df66e6d3c86969c922283236686ef8225dc4ee21c39d
-    source: https://download.01.org/opencv/public_models/022020/gmcnn/frozen_model.pb
+  - name: gmcnn-places2-tf.zip
+    size: 46187310
+    sha256: 18df63c6e244029691a4ad0d33760d92d346df71fe2c5cafe228d1c39e23eb3d
+    source: https://download.01.org/opencv/public_models/092020/gmcnn-places2-tf/gmcnn-places2-tf.zip
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: gmcnn-places2-tf.zip
+
 model_optimizer_args:
-  - --input_model=$dl_dir/frozen_model.pb
+  - --input_model=$dl_dir/gmcnn-places2-tf/frozen_model.pb
   - --input_shape=[1,512,680,3],[1,512,680,1]
   - --input=Placeholder,Placeholder_1
   - --output=Minimum

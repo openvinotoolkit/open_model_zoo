@@ -1,21 +1,32 @@
+"""
+Copyright (c) 2018-2020 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
+import inspect
+
 import cv2
 import numpy as np
+from PIL import Image
 
-from ..config import ConfigError, NumberField, StringField, BoolField
+from ..config import BoolField, ConfigError, NumberField, StringField
 from ..dependency import ClassProvider
 from ..logging import warning
 from ..preprocessor import Preprocessor, GeometricOperationMetadata
-from ..utils import contains_all, get_size_from_config
+from ..utils import contains_all, get_size_from_config, get_parameter_value_from_config, UnsupportedPackage
 
-try:
-    from PIL import Image
-except ImportError:
-    Image = None
 
-try:
-    import tensorflow as tf
-except ImportError:
-    tf = None
 
 def scale_width(dst_width, dst_height, image_width, image_height,):
     return int(dst_width * image_width / image_height), dst_height
@@ -42,7 +53,6 @@ def frcnn_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
     w1, h1 = scale_greater(min_size, min_size, image_width, image_height)
     if max(w1, h1) <= max_size:
         return w1, h1
-
     return scale_fit_to_window(max_size, max_size, image_width, image_height)
 
 
@@ -80,6 +90,26 @@ def east_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
 
     return resize_w, resize_h
 
+class ScaleFactor:
+    def __init__(self, config, parameters):
+        self.scale = get_parameter_value_from_config(config, parameters, 'scale')
+
+    def __call__(self, dst_width, dst_height, image_width, image_height):
+        resize_w = int(image_width * self.scale)
+        resize_h = int(image_height * self.scale)
+        return resize_w, resize_h
+
+
+def min_ratio(dst_width, dst_height, image_width, image_height):
+    ratio = min(float(image_height) / float(dst_height), float(image_width) / float(dst_width))
+    return int(image_width / ratio), int(image_height / ratio)
+
+def mask_rcnn_benchmark_ratio(dst_width, dst_height, image_width, image_height):
+    min_dst_size = min(dst_width, dst_height)
+    ratio = min_dst_size / min(image_width, image_height)
+    return int(image_width * ratio), int(image_height * ratio)
+
+
 
 ASPECT_RATIO_SCALE = {
     'width': scale_width,
@@ -88,7 +118,10 @@ ASPECT_RATIO_SCALE = {
     'fit_to_window': scale_fit_to_window,
     'frcnn_keep_aspect_ratio': frcnn_keep_aspect_ratio,
     'ctpn_keep_aspect_ratio': ctpn_keep_aspect_ratio,
-    'east_keep_aspect_ratio': east_keep_aspect_ratio
+    'east_keep_aspect_ratio': east_keep_aspect_ratio,
+    'min_ratio': min_ratio,
+    'mask_rcnn_benchmark_aspect_ratio': mask_rcnn_benchmark_ratio,
+    'scale_factor': ScaleFactor,
 }
 
 
@@ -131,7 +164,9 @@ class _OpenCVResizer(_Resizer):
     _supported_interpolations = {
         'NEAREST': cv2.INTER_NEAREST,
         'LINEAR': cv2.INTER_LINEAR,
+        'BILINEAR': cv2.INTER_LINEAR,
         'CUBIC': cv2.INTER_CUBIC,
+        'BICUBIC': cv2.INTER_CUBIC,
         'AREA': cv2.INTER_AREA,
         'MAX': cv2.INTER_MAX,
         'BITS': cv2.INTER_BITS,
@@ -153,10 +188,6 @@ class _PillowResizer(_Resizer):
     default_interpolation = 'BILINEAR'
 
     def __init__(self, interpolation):
-        if Image is None:
-            raise ImportError(
-                'pillow backend for resize operation requires TensorFlow. Please install it before usage.'
-            )
         self._supported_interpolations = {
             'NEAREST': Image.NEAREST,
             'NONE': Image.NONE,
@@ -214,8 +245,10 @@ class _TFResizer(_Resizer):
     _supported_interpolations = {}
 
     def __init__(self, interpolation):
-        if tf is None:
-            raise ImportError('tf backend for resize operation requires TensorFlow. Please install it before usage.')
+        try:
+            import tensorflow as tf # pylint: disable=C0415
+        except ImportError as import_error:
+            UnsupportedPackage("tf", import_error.msg).raise_error(self.__provider__)
         tf.enable_eager_execution()
         self._supported_interpolations = {
             'BILINEAR': tf.image.ResizeMethod.BILINEAR,
@@ -233,9 +266,7 @@ class _TFResizer(_Resizer):
 
     @classmethod
     def supported_interpolations(cls):
-        if tf is None:
-            return {}
-        return cls._supported_interpolations
+        return {}
 
 
 def create_resizer(config):
@@ -284,6 +315,9 @@ class Resize(Preprocessor):
             'dst_height': NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination height for image resizing."
             ),
+            'scale': NumberField(
+                value_type=float, optional=True, min_value=0, description="Rescale factor for x & y axes."
+            ),
             'aspect_ratio_scale': StringField(
                 choices=ASPECT_RATIO_SCALE, optional=True,
                 description="Allows save image aspect ratio using one of these ways: "
@@ -305,15 +339,24 @@ class Resize(Preprocessor):
                 optional=True, choices=_Resizer.providers,
                 description="Parameter specifies functionality of which library will be used for resize: "
                             "{}".format(', '.join(_Resizer.providers))
+            ),
+            'factor': NumberField(
+                optional=True, min_value=1,
+                description='destination size must be divisible by a given number without remainder, '
+                            'when aspect ratio resize used', value_type=int
             )
         })
 
         return parameters
 
     def configure(self):
-        self.dst_height, self.dst_width = get_size_from_config(self.config)
+        allow_none = self.get_value_from_config('aspect_ratio_scale') == 'scale_factor'
+        self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=allow_none)
         self.resizer = create_resizer(self.config)
         self.scaling_func = ASPECT_RATIO_SCALE.get(self.get_value_from_config('aspect_ratio_scale'))
+        self.factor = self.get_value_from_config('factor')
+        if inspect.isclass(self.scaling_func):
+            self.scaling_func = self.scaling_func(self.config, self.parameters())
 
     def process(self, image, annotation_meta=None):
         data = image.data
@@ -326,6 +369,13 @@ class Resize(Preprocessor):
             image_h, image_w = data.shape[:2]
             if scale_func:
                 dst_width, dst_height = scale_func(new_width, new_height, image_w, image_h)
+                if self.factor:
+                    dst_width -= (dst_width - 1) % self.factor
+                    dst_height -= (dst_height - 1) % self.factor
+                if new_height is None:
+                    new_height = dst_height
+                if new_width is None:
+                    new_width = dst_width
 
             resize_meta = {}
             resize_meta['preferable_width'] = max(dst_width, new_width)

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -92,8 +92,10 @@ class MultiLabelMetric(PerImageEvaluationMetric):
         self.fp = np.add(self.fp, fp_upd)
         self.tn = np.add(self.tn, tn_upd)
         self.fn = np.add(self.fn, fn_upd)
+        counter_upd = counter(annotation.multi_label)
 
-        self.counter = np.add(self.counter, counter(annotation.multi_label))
+        self.counter = np.add(self.counter, counter_upd)
+        return tp_upd, fp_upd, tn_upd, fn_upd, counter_upd
 
     def evaluate(self, annotations, predictions):
         pass
@@ -118,6 +120,12 @@ class MultiLabelMetric(PerImageEvaluationMetric):
 class MultiLabelAccuracy(MultiLabelMetric):
     __provider__ = 'multi_accuracy'
 
+    def update(self, annotation, prediction):
+        tp_upd, _, tn_upd, _, counter_upd = super().update(annotation, prediction)
+        tp_tn = np.add(tp_upd, tn_upd, dtype=float)
+        average = np.sum(tp_tn) / np.sum(counter_upd)
+        return average
+
     def evaluate(self, annotations, predictions):
         tp_tn = np.add(self.tp, self.tn, dtype=float)
         per_class = np.divide(tp_tn, self.counter, out=np.zeros_like(tp_tn, dtype=float), where=self.counter != 0)
@@ -128,6 +136,12 @@ class MultiLabelAccuracy(MultiLabelMetric):
 
 class MultiLabelPrecision(MultiLabelMetric):
     __provider__ = 'multi_precision'
+
+    def update(self, annotation, prediction):
+        tp_upd, fp_upd, _, _, _ = super().update(annotation, prediction)
+        tp_fp = np.add(tp_upd, fp_upd, dtype=float)
+        average = np.sum(tp_upd) / np.sum(tp_fp)
+        return average
 
     def evaluate(self, annotations, predictions):
         tp_fp = np.add(self.tp, self.fp, dtype=float)
@@ -141,6 +155,12 @@ class MultiLabelPrecision(MultiLabelMetric):
 
 class MultiLabelRecall(MultiLabelMetric):
     __provider__ = 'multi_recall'
+
+    def update(self, annotation, prediction):
+        tp_upd, _, _, fn_upd, _ = super().update(annotation, prediction)
+        tp_fn = np.add(tp_upd, fn_upd, dtype=float)
+        average = np.sum(tp_upd) / np.sum(tp_fn)
+        return average
 
     def evaluate(self, annotations, predictions):
         tp_fn = np.add(self.tp, self.fn, dtype=float)
@@ -197,8 +217,9 @@ class F1Score(PerImageEvaluationMetric):
         self._create_meta()
 
     def update(self, annotation, prediction):
-        self.precision.update(annotation, prediction)
-        self.recall.update(annotation, prediction)
+        avg_precision = self.precision.update(annotation, prediction)
+        avg_recall = self.recall.update(annotation, prediction)
+        return 2 * avg_precision * avg_recall / (avg_precision + avg_recall)
 
     def evaluate(self, annotations, predictions):
         precisions = self.precision.evaluate(annotations, predictions)
