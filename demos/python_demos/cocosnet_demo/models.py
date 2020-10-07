@@ -39,22 +39,28 @@ class CorrespondenceModel:
         return result
 
 
-class GenerativeModel:
+class SingleInputModel:
     def __init__(self, ie_core, model_xml, model_bin, device='CPU'):
-        print("Reading IR for generative model ....")
+        print("Reading IR for {} model ....".format(self.model_type))
         self.network = ie_core.read_network(model_xml, model_bin)
         assert len(self.network.input_info) == 1, "One input is expected"
         assert len(self.network.outputs) == 1, "One input is expected"
         self.input_name = next(iter(self.network.input_info))
         self.output_name = next(iter(self.network.outputs))
 
-        print("Loading Generator IR to the plugin...")
+        print("Loading IR to the plugin...")
         self.exec_net = ie_core.load_network(network=self.network, device_name=device)
 
     def infer(self, input):
         input_data = {self.input_name: input}
         result = self.exec_net.infer(input_data)
         return result[self.output_name]
+
+
+class GenerativeModel(SingleInputModel):
+    def __init__(self, ie_core, model_xml, model_bin, device='CPU'):
+        self.model_type = "generative"
+        super().__init__(ie_core, model_xml, model_bin, device='CPU')
 
 
 class CocosnetModel:
@@ -68,3 +74,9 @@ class CocosnetModel:
             gen_input = np.concatenate((corr_out[self.correspondence.warp_out],
                                         inputs['input_semantics']), axis=1)
             return self.generator.infer(gen_input)
+
+
+class SegmentationModel(SingleInputModel):
+    def __init__(self, ie_core, model_xml, model_bin, device='CPU'):
+        self.model_type = "semantic_segmentation"
+        super().__init__(ie_core, model_xml, model_bin, device='CPU')

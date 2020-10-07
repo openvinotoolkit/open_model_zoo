@@ -32,15 +32,28 @@ def preprocess_with_semantics(semantic_mask):
     return semantic_mask
 
 
-def normalization(x, mean=127.5, scale=127.5):
-    x = np.subtract(x, mean)
-    x = np.divide(x, scale)
-    return x
+def normalization(img, mean=[127.5], scale=[127.5]):
+    channels = img.shape[0]
+    img = img.astype(np.float)
+    if len(mean) == 1:
+        mean = channels * mean
+        scale = channels * scale
+    for channel in range(channels):
+        channel_val = np.subtract(img[channel, :, :], mean[channel])
+        channel_val /= scale[channel]
+        img[channel, :, :] = channel_val
+    return img
+
+
+def preprocess_for_seg_model(image):
+    image = cv2.resize(image, dsize=(320, 320), interpolation=cv2.INTER_LINEAR)
+    image = np.transpose(image, (2, 0, 1))
+    return image
 
 
 def preprocess_with_images(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     image = cv2.resize(image, dsize=(256, 256), interpolation=cv2.INTER_CUBIC)
     image = np.transpose(image, (2, 0, 1))
-    image = normalization(image, mean=127.5, scale=127.5)
+    image = normalization(image, mean=[127.5], scale=[127.5])
     return image

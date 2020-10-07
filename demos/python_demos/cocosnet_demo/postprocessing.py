@@ -13,6 +13,7 @@
 
 import numpy as np
 import cv2
+import os
 
 
 def postprocess(out):
@@ -23,9 +24,12 @@ def postprocess(out):
     return result
 
 
-def save_result(result, out_path):
+def save_result(results, out_path):
     try:
-        result = postprocess(result)
-        cv2.imwrite(out_path, result)
+        results = [postprocess(result) for result in results]
+        if not os.path.isdir(out_path):
+            os.mkdir(out_path)
+        for index, result in enumerate(results):
+            cv2.imwrite(out_path + '/' + "out_{}.jpg".format(index), result)
     except OSError as err:
         print(err)

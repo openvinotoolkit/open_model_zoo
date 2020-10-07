@@ -12,12 +12,14 @@
 """
 
 import sys
+import os
 from argparse import ArgumentParser, SUPPRESS
 import cv2
+import numpy as np
 import logging as log
 from openvino.inference_engine import IECore
-from models import CorrespondenceModel, GenerativeModel, CocosnetModel
-from preprocessing import preprocess_with_images, preprocess_with_semantics
+from models import CorrespondenceModel, GenerativeModel, CocosnetModel, SegmentationModel
+from preprocessing import preprocess_with_images, preprocess_with_semantics, preprocess_for_seg_model
 from postprocessing import postprocess, save_result
 
 
@@ -29,16 +31,26 @@ def build_argparser():
     args.add_argument("-c", "--correspondence_model",
                       help="Required. Path to an .xml file with a trained correspondence model",
                       required=True, type=str)
-    args.add_argument("-g", "--generative_model", help="Required. Path to an .xml file with a trained generative model",
+    args.add_argument("-g", "--generative_model",
+                      help="Required. Path to an .xml file with a trained generative model",
                       required=True, type=str)
-    args.add_argument("-is", "--input_semantics", help="Required. Path to a folder with semantic images or path to a semantic image",
-                      required=True, type=str)
-    args.add_argument("-ri", "--reference_image", help="Required. Path to a folder with reference images or path to a reference image",
-                      required=True, type=str)
-    args.add_argument("-rs", "--reference_semantics", help="Required. Path to a folder with reference semantics or path to a reference semantic",
-                      required=True, type=str)
-    args.add_argument("-o", "--output_dir", help="Path to directory to save the result",
-                      required=False, type=str, default="result.jpg")
+    args.add_argument("-s", "--segmentation_model",
+                      help="Required. Path to an .xml file with a trained semantic segmentation model",
+                      required=False, default=None, type=str)
+    args.add_argument("-ii", "--input_images",
+                      help="Required. Path to a folder with input images or path to a input image",
+                      default="", type=str)
+    args.add_argument("-is", "--input_semantics",
+                      help="Required. Path to a folder with semantic images or path to a semantic image",
+                      default="", type=str)
+    args.add_argument("-ri", "--reference_images",
+                      help="Required. Path to a folder with reference images or path to a reference image",
+                      default="", type=str)
+    args.add_argument("-rs", "--reference_semantics",
+                      help="Required. Path to a folder with reference semantics or path to a reference semantic",
+                      default="", type=str)
+    args.add_argument("-o", "--output_dir", help="Path to directory to save the results",
+                      required=False, type=str, default="results")
     args.add_argument("-l", "--cpu_extension",
                       help="Optional. Required for CPU custom layers. "
                            "Absolute MKLDNN (CPU)-targeted custom layers. Absolute path to a shared library with the "
@@ -48,6 +60,20 @@ def build_argparser():
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU", type=str)
     return parser
+
+
+def get_files(path):
+    if os.path.isdir(path):
+        return os.listdir(path)
+    return [""]
+
+
+def get_mask_from_image(image, model):
+    image = preprocess_for_seg_model(image)
+    res = model.infer(image)
+    mask = np.argmax(res, axis=1)
+    mask = np.squeeze(mask, 0)
+    return mask + 1
 
 
 def main():
@@ -64,33 +90,51 @@ def main():
     gen_model = GenerativeModel(ie_core, args.generative_model,
                                 args.generative_model.replace(".xml", ".bin"),
                                 args.device)
+    seg_model = SegmentationModel(ie_core, args.segmentation_model,
+                                  args.segmentation_model.replace(".xml", ".bin"),
+                                  args.device) if args.segmentation_model else None
     model = CocosnetModel(corr_model, gen_model)
 
     log.info("Preparing input data")
-    input_semantics = cv2.imread(args.input_semantics, cv2.IMREAD_GRAYSCALE)
-    input_semantics = preprocess_with_semantics(input_semantics)
-    reference_image = cv2.imread(args.reference_image)
-    reference_image = preprocess_with_images(reference_image)
-    reference_semantics = cv2.imread(args.reference_semantics, cv2.IMREAD_GRAYSCALE)
-    reference_semantics = preprocess_with_semantics(reference_semantics)
-    input_data = {
-        'input_semantics': input_semantics,
-        'reference_image': reference_image,
-        'reference_semantics': reference_semantics
-    }
+    input_data = []
+    assert args.reference_images and ((args.input_semantics and
+           args.reference_semantics) or args.input_images), "Not enough data to do inference"
+    input_images = sorted(get_files(args.input_images))
+    input_semantics = sorted(get_files(args.input_semantics))
+    reference_images = sorted(get_files(args.reference_images))
+    reference_semantics = sorted(get_files(args.reference_semantics))
+    n = len(reference_images)
+    if seg_model:
+        players = [input_images, n * [''], reference_images, n * ['']]
+    else:
+        players = [n * [''], input_semantics, reference_images, reference_semantics]
+    for input_img, input_sem, ref_img, ref_sem in zip(*players):
+        if seg_model:
+            input_sem = get_mask_from_image(cv2.imread(args.input_images + input_img), seg_model)
+            ref_sem = get_mask_from_image(cv2.imread(args.reference_images + ref_img), seg_model)
+        else:
+            input_sem = cv2.imread(args.input_semantics + input_sem, cv2.IMREAD_GRAYSCALE)
+            ref_sem = cv2.imread(args.reference_semantics + ref_sem, cv2.IMREAD_GRAYSCALE)
+        input_sem = preprocess_with_semantics(input_sem)
+        ref_img = preprocess_with_images(cv2.imread(args.reference_images + ref_img))
+        ref_sem = preprocess_with_semantics(ref_sem)
+        input_dict = {
+            'input_semantics': input_sem,
+            'reference_image': ref_img,
+            'reference_semantics': ref_sem
+        }
+        input_data.append(input_dict)
 
     log.info("Inference for input")
-    out = model.infer(input_data)
-    print("Out = ", out)
+    outs = []
+    for data in input_data:
+        outs.append(model.infer(data))
 
     log.info("Postprocessing for result")
-    result = postprocess(out)
-    cv2.imshow("Result", result)
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    results = [postprocess(out) for out in outs]
 
     if args.output_dir:
-        save_result(out, args.output_dir)
+        save_result(outs, args.output_dir)
     log.info("Result image was saved to {}".format(args.output_dir))
 
 
