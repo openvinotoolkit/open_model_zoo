@@ -17,15 +17,16 @@ description: >-
 task_type: classification
 files:
   - name: conv-deconvnet.onnx
-    size: 1111
-    sha256: 472d4a06035497b180636d8a82667129960371375bd10fcb6df5c6c7631f25e1
+    size: 336287691
+    sha256: a62ac0587f554e5e56169cacb911d70d2145e3e41b4a4cead605a2b094910893
     source: http
 model_optimizer_args:
   - --input_shape=[1, 1, 255, 401]
   - --input=data
-  - --output=prob
+  - --output=data_out
   - --input_model=$dl_dir/conv-deconvnet.onnx
   - --input_proto=$dl_dir/conv-deconvnet.prototxt
+  - --extensions=./src/models/public/conv-deconvnet/mo_extensions
 framework: onnx
 quantizable: yes
 license: https://github.com/yalaudah/facies_classification_benchmark/blob/master/LICENSE
