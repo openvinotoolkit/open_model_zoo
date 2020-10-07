@@ -4,8 +4,8 @@
 This model is a pair of encoder and decoder. The encoder is HRNetV2-W48 and the decoder is C1 (one convolution module and interpolation).
 HRNetV2-W48 is semantic-segmentation model based on architecture described in paper
 [High-Resolution Representations for Labeling Pixels and Regions](https://arxiv.org/abs/1904.04514).
-This is PyTorch implementation based on retaining high resolution representations throughout the model
-and pretrained on ADE20k dataset. 
+This is PyTorch\* implementation based on retaining high resolution representations throughout the model
+and pretrained on ADE20k dataset.
 For details about implementation of model, check out the [Semantic Segmentation on MIT ADE20K dataset in PyTorch](https://github.com/CSAILVision/semantic-segmentation-pytorch).
 
 ## Example

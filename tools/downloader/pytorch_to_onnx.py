@@ -58,7 +58,7 @@ def parse_args():
                         help='Space separated names of the output layers')
     parser.add_argument('--model-param', type=model_parameter, default=[], action='append',
                         help='Pair "name"="value" of model constructor parameter')
-    parser.add_argument('--onnx-version', type=int, default=9,
+    parser.add_argument('--onnx-version', type=int, default=11,
                         help='Version of symbolic opset')
     return parser.parse_args()
 
