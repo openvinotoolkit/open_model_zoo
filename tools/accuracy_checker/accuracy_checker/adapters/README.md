@@ -81,8 +81,8 @@ AccuracyChecker supports following set of adapters:
   *  `scores_out` - name of output layer with detection scores.
   * `num_detections_out` - name of output layer which contains the number of valid detections.
 * `faster_rcnn_onnx` - converts output of ONNX Faster RCNN model to `DetectionPrediction`
-  * `labels_out` - name of output layer with labels.
-  * `scores_out`- name of output layer with scores.
+  * `labels_out` - name of output layer with labels, optional if lables concatenated with boxes and scores (only boxes output provided and it has shape [N, 6]).
+  * `scores_out`- name of output layer with scores, optional if scores concatenated with boxes (boxes output has shape [N, 5]).
   * `bboxes_out` - name of output layer with bboxes.
 * `retinanet` - converting output of RetinaNet-based model.
   * `loc_out` - name of output layer with bounding box deltas.
