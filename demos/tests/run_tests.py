@@ -225,10 +225,7 @@ def main():
                                 env=demo_environment)
                             execution_time = timeit.default_timer() - start_time
                             match_fps = fps_finder.search(demo_output)
-                            if match_fps is not None:
-                                fps = match_fps.group(0)
-                            else:
-                                fps = 'N/A'
+                            fps = match_fps.group(0) if match_fps else 'N/A'
                         except subprocess.CalledProcessError as e:
                             print(e.output)
                             print('Exit code:', e.returncode)
