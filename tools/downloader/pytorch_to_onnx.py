@@ -42,7 +42,7 @@ def parse_args():
 
     parser.add_argument('--model-name', type=str, required=True,
                         help='Model to convert. May be class name or name of constructor function')
-    parser.add_argument('--weights', type=str, required=False, default="",
+    parser.add_argument('--weights', type=str, required=True,
                         help='Path to the weights in PyTorch\'s format')
     parser.add_argument('--input-shape', metavar='INPUT_DIM', type=positive_int_arg, required=True,
                         help='Shape of the input blob')
@@ -58,8 +58,6 @@ def parse_args():
                         help='Space separated names of the output layers')
     parser.add_argument('--model-param', type=model_parameter, default=[], action='append',
                         help='Pair "name"="value" of model constructor parameter')
-    parser.add_argument('--onnx-version', type=int, default=11,
-                        help='Version of symbolic opset')
     return parser.parse_args()
 
 
@@ -85,8 +83,7 @@ def load_model(model_name, weights, model_path, module_name, model_params):
         sys.exit(err)
 
     try:
-        if weights:
-            model.load_state_dict(torch.load(weights, map_location='cpu'))
+        model.load_state_dict(torch.load(weights, map_location='cpu'))
     except RuntimeError as err:
         print('ERROR: Weights from {} cannot be loaded for model {}! Check matching between model and weights'.format(
             weights, model_name))
@@ -94,14 +91,14 @@ def load_model(model_name, weights, model_path, module_name, model_params):
     return model
 
 
-def convert_to_onnx(model, input_shape, output_file, input_names, output_names, onnx_version):
+def convert_to_onnx(model, input_shape, output_file, input_names, output_names):
     """Convert PyTorch model to ONNX and check the resulting onnx model"""
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     model.eval()
     dummy_input = torch.randn(input_shape)
     model(dummy_input)
-    torch.onnx.export(model, dummy_input, str(output_file), verbose=False, opset_version=onnx_version,
+    torch.onnx.export(model, dummy_input, str(output_file), verbose=False, opset_version=11,
                       input_names=input_names.split(','), output_names=output_names.split(','))
 
     model = onnx.load(str(output_file))
@@ -121,13 +118,13 @@ def convert_to_onnx(model, input_shape, output_file, input_names, output_names, 
 
     onnx.save(model, str(output_file))
 
+
 def main():
     args = parse_args()
     model = load_model(args.model_name, args.weights,
                        args.model_path, args.import_module, dict(args.model_param))
 
-    convert_to_onnx(model, args.input_shape, args.output_file,
-                    args.input_names, args.output_names, args.onnx_version)
+    convert_to_onnx(model, args.input_shape, args.output_file, args.input_names, args.output_names)
 
 
 if __name__ == '__main__':
