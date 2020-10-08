@@ -53,16 +53,12 @@ class BaseGanMetric(FullDatasetEvaluationMetric):
         self.eps = self.get_value_from_config('eps')
         self.length = self.get_value_from_config('length')
 
-    def get_values(self, representation):
-        items = [item.value for item in representation]
-        return items
-
     def score_calc(self, annotations, predictions):
         pass
 
     def evaluate(self, annotations, predictions):
-        annotations = self.get_values(annotations)
-        predictions = self.get_values(predictions)
+        annotations = [item.value for item in annotations]
+        predictions = [item.value for item in predictions]
 
         real = [item for item in annotations if item.size == self.length]
         real = np.stack(real)

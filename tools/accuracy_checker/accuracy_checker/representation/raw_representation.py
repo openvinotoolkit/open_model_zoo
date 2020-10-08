@@ -14,11 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from enum import Enum
-import numpy as np
-
 from .base_representation import BaseRepresentation
-from ..data_readers import BaseReader
 
 
 class RawTensorRepresentation(BaseRepresentation):
