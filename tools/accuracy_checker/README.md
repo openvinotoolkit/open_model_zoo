@@ -78,9 +78,9 @@ pip install --upgrade --force-reinstall .
 
 #### Running the tool inside IDE for development purposes
 
-Accuracy Checker tool has entry point for running in CLI, however majority of popular code editors or IDE expect scripts as starting point of application.
+Accuracy Checker tool has entry point for running in CLI, however majority of popular code editors or IDE expects scripts as starting point of application.
 Sometimes it can be useful to have opportunity to run the tool as script for debugging or enabling new models.
-For usage Accuracy Checker inside the IDE, you need create script in accuracy_checker root directory (e.g. `<open_model_zoo>/tools/accuracy_checker/main.py`)
+For usage Accuracy Checker inside the IDE, you need to create a script in accuracy_checker root directory (e.g. `<open_model_zoo>/tools/accuracy_checker/main.py`)
 with following code:
 ```python
 from accuracy_checker.main import main
