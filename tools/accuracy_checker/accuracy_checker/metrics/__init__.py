@@ -196,7 +196,8 @@ __all__ = [
 
     'PercentageCorrectKeypoints',
 
-    'DNASequenceAccuracy'
+    'DNASequenceAccuracy',
+
     'InceptionScore',
     'FrechetInceptionDistance',
 ]
