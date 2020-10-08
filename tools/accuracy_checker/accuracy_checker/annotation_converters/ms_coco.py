@@ -38,6 +38,8 @@ except ImportError as import_error:
 
 from ..representation.segmentation_representation import GTMaskLoader
 
+from ..logging import warning
+
 def get_image_annotation(image_id, annotations_):
     return list(filter(lambda x: x['image_id'] == image_id, annotations_))
 
@@ -310,6 +312,8 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
             ),
             'masks_dir': PathField(
                 is_directory=True, optional=True,
+                check_exists=False,
+                default='./segmentation_masks',
                 description='path to segmentation masks, used if semantic_only is True'
             ),
         })
@@ -328,6 +332,10 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
         num_iterations = len(image_info)
         progress_reporter = PrintProgressReporter(print_interval=progress_interval)
         progress_reporter.reset(num_iterations, 'annotations')
+        if self.semantic_only:
+            if not self.masks_dir.exists():
+                self.masks_dir.mkdir()
+                warning('Segmentation masks will be located in {} folder'.format(str(self.masks_dir.resolve())))
 
         for (image_id, image) in enumerate(image_info):
             image_labels, _, _, _, _, is_crowd, segmentations = self._read_image_annotation(
