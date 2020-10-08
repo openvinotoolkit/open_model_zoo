@@ -175,6 +175,7 @@ The main difference between this converter and `super_resolution` in data organi
     * `hr_suffix` - high resolution file name's suffix (default hr).
     * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
     * `number_input_frames` - the number of input frames per inference.
+    * `reference_frame` - the id of frame in sample frame sequence used for matching with high resolution. You can define number of frame or choose one of predefined: `first` (first frame used as reference), `middle` (`num_frames` / 2), `last` (last frame in sequence).
 * `multi_target_super_resolution` - converts dataset for single image super resolution task with multiple target resolutions to `ContainerAnnotation` with `SuperResolutionAnnotation` representations for each target resolution.
    * `data_dir` - path to dataset root, where directories with low and high resolutions are located.
    * `lr_path` - path to low resolution images directory relative to `data_dir`.
