@@ -317,8 +317,8 @@ class MetthewsCorrelation(PerImageEvaluationMetric):
         return -1
 
     def evaluate(self, annotations, predictions):
-        delimeter_sum = (self.tp + self.fp) * (self.tp + self.fn) * (self.tn + self.fp) * (self.tn + self.fn)
-        return ((self.tp * self.tn) - (self.fp * self.fn)) / np.sqrt(delimeter_sum) if delimeter_sum != 0 else -1
+        delimiter_sum = (self.tp + self.fp) * (self.tp + self.fn) * (self.tn + self.fp) * (self.tn + self.fn)
+        return ((self.tp * self.tn) - (self.fp * self.fn)) / np.sqrt(delimiter_sum) if delimiter_sum != 0 else -1
 
     def reset(self):
         self.tp = 0

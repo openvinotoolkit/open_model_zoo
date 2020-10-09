@@ -83,7 +83,7 @@ class InputFeeder:
                 raise ConfigError('Network should contain at least one layer for setting variable data.')
 
     def _fill_image_info_inputs(self, data_representation_batch):
-        def prepare_image_info(image_sizes_batch, ommit_scale=False):
+        def prepare_image_info(image_sizes_batch, omit_scale=False):
             image_info = []
             for image_size in image_sizes_batch:
                 if np.isscalar(image_size) or isinstance(image_size, list):
@@ -91,7 +91,7 @@ class InputFeeder:
                     continue
 
                 height, width = image_size[:2]
-                image_info.append([height, width, 1] if not ommit_scale else [height, width])
+                image_info.append([height, width, 1] if not omit_scale else [height, width])
 
             return image_info
         _, meta_batch = extract_image_representations(data_representation_batch)
