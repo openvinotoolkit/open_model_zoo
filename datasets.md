@@ -17,7 +17,7 @@ To download images from ImageNet, you need to have an account and agree to the T
 
 To download annotation files, you need to follow the steps below:
 * `val.txt`
-  1. Download [arhive](http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz)
+  1. Download [archive](http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz)
   2. Unpack `val.txt` from the archive `caffe_ilsvrc12.tar.gz`
 * `val15.txt`
   1. Download [annotation file](https://raw.githubusercontent.com/hujie-frank/SENet/master/ILSVRC2017_val.txt)

@@ -55,6 +55,7 @@ from .cvat_person_detection_action_recognition import CVATPersonDetectionActionR
 from .mrlEyes_2018_01 import mrlEyes_2018_01_Converter
 from .squad import SQUADConverter
 from .squad_emb import SQUADConverterEMB
+from .squad_bidaf import SQUADConverterBiDAF
 from .text_classification import (
     XNLIDatasetConverter,
     BertXNLITFRecordConverter,
@@ -82,6 +83,7 @@ from .librispeech import LibrispeechConverter
 from .criteo_kaggle_dac import CriteoKaggleDACConverter
 from .features_regression import FeaturesRegressionConverter
 from .nyu_depth import NYUDepthV2Converter
+from .dna_seq import DNASequenceDatasetConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -130,6 +132,8 @@ __all__ = [
     'CVATPoseEstimationConverter',
     'CVATPersonDetectionActionRecognitionConverter',
     'SQUADConverter',
+    'SQUADConverterEMB',
+    'SQUADConverterBiDAF',
     'XNLIDatasetConverter',
     'BertXNLITFRecordConverter',
     'IMDBConverter',
@@ -152,5 +156,5 @@ __all__ = [
     'CriteoKaggleDACConverter',
     'FeaturesRegressionConverter',
     'Im2latexDatasetConverter',
-
+    'DNASequenceDatasetConverter',
 ]

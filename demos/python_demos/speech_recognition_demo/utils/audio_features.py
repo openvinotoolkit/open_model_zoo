@@ -178,7 +178,7 @@ def dct_compute(worked_filter, input_length, dct_coefficient_count, cosine):
 
 def mfcc(spectrogram, sample_rate, dct_coefficient_count):
     audio_channels, spectrogram_samples, spectrogram_channels  = spectrogram.shape
-    kFilterbankFloor = 1e-12
+    filterbank_floor = 1e-12
     filterbank_channel_count = 40
 
     mfcc_output = np.zeros((spectrogram_samples, dct_coefficient_count))
@@ -195,8 +195,8 @@ def mfcc(spectrogram, sample_rate, dct_coefficient_count):
             )
             for k in range(mel_filter.shape[0]):
                 val = mel_filter[k]
-                if val < kFilterbankFloor:
-                    val = kFilterbankFloor
+                if val < filterbank_floor:
+                    val = filterbank_floor
 
                 mel_filter[k] = np.log(val)
 

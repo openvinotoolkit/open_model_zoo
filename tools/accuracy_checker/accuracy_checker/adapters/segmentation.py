@@ -92,7 +92,7 @@ class SegmentationOneClassAdapter(Adapter):
     def configure(self):
         self.threshold = self.get_value_from_config('threshold')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
@@ -205,4 +205,3 @@ class DUCSegmentationAdapter(Adapter):
             labels = np.transpose(labels, [2, 0, 1])
             result.append(SegmentationPrediction(identifier, labels))
         return result
-            

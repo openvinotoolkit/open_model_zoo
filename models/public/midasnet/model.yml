@@ -43,10 +43,6 @@ framework: pytorch
 postprocessing:
   - $type: regex_replace
     file: models/blocks.py
-    pattern: 'align_corners=True'
-    replacement: 'align_corners=False'
-  - $type: regex_replace
-    file: models/blocks.py
     pattern: 'import torch.nn as nn'
     replacement: 'import torch.nn as nn\nimport torchvision.models as models'
   - $type: regex_replace

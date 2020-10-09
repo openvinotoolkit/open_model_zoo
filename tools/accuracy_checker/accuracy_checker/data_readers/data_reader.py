@@ -256,7 +256,7 @@ class OpenCVFrameReader(BaseReader):
             success, frame = self.videocap.read()
             self.current += 1
             if not success:
-                raise EOFError('frame with {} index does not exists in {}'.format(self.current, self.data_source))
+                raise EOFError('frame with {} index does not exist in {}'.format(self.current, self.data_source))
 
         return frame
 
@@ -513,9 +513,9 @@ class WavReader(BaseReader):
             if self._samplewidth_types.get(sample_width):
                 data = np.frombuffer(data, dtype=self._samplewidth_types[sample_width])
             else:
-                raise RuntimeError("Reader {} coudn't process file {}: unsupported sample width {}"
+                raise RuntimeError("Reader {} couldn't process file {}: unsupported sample width {}"
                                    "(reader only supports {})"
-                                   .format(self.__provider__, str(self.data_source / data_id),
+                                   .format(self.__provider__, self.data_source / data_id,
                                            sample_width, [*self._samplewidth_types.keys()]))
             data = data.reshape(-1, wav.getnchannels()).T
 

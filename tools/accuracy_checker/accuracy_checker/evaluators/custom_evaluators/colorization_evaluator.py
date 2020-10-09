@@ -93,13 +93,14 @@ class ColorizationEvaluator(BaseEvaluator):
             dump_prediction_to_annotgiation=False,
             **kwargs):
 
-        self._annotations, self._predictions = [], []
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
-        if subset is not None:
-            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
-        elif num_images is not None:
-            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
+
+        self._annotations, self._predictions = [], []
+
+        self._create_subset(subset, num_images, allow_pairwise_subset)
+        metric_config = self.configure_intermediate_metrics_results(kwargs)
+        compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
         if 'progress_reporter' in kwargs:
             _progress_reporter = kwargs['progress_reporter']
             _progress_reporter.reset(self.dataset.size)
@@ -107,6 +108,10 @@ class ColorizationEvaluator(BaseEvaluator):
             _progress_reporter = None if not check_progress else self._create_progress_reporter(
                 check_progress, self.dataset.size
             )
+        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
+        if compute_intermediate_metric_res:
+            metric_interval = kwargs.get('metrics_interval', 1000)
+            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             extr_batch_inputs, _ = extract_image_representations(batch_inputs)
@@ -137,6 +142,10 @@ class ColorizationEvaluator(BaseEvaluator):
                 )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
+                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(
+                        print_results=True, ignore_results_formatting=ignore_results_formatting
+                    )
 
         if _progress_reporter:
             _progress_reporter.finish()
@@ -260,6 +269,23 @@ class ColorizationEvaluator(BaseEvaluator):
 
     def set_profiling_dir(self, profiler_dir):
         self.metric_executor.set_profiling_dir(profiler_dir)
+
+    def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
+        if self.dataset.batch is None:
+            self.dataset.batch = 1
+        if subset is not None:
+            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
+        elif num_images is not None:
+            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
+
+    @staticmethod
+    def configure_intermediate_metrics_results(config):
+        compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
+        metric_interval, ignore_results_formatting = None, None
+        if compute_intermediate_metric_res:
+            metric_interval = config.get('metrics_interval', 1000)
+            ignore_results_formatting = config.get('ignore_results_formatting', False)
+        return compute_intermediate_metric_res, metric_interval, ignore_results_formatting
 
 
 class BaseModel:

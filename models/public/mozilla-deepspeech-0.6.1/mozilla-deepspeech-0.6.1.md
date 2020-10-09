@@ -42,7 +42,7 @@ Increasing beam_width improves WER metric and slows down decoding.  Speech recog
 
     - B - batch size, fixed to 1
     - N - `input_lengths`, number of audio frames in this section of audio
-    - T - context frames: along with the current frame, the network expects 9 preceeding frames and 9 succeeding frames. The absent context frames are filled with zeros.
+    - T - context frames: along with the current frame, the network expects 9 preceding frames and 9 succeeding frames. The absent context frames are filled with zeros.
     - C - 26 MFCC coefficients per each frame
 
    See [`accuracy-check.yml`](accuracy-check.yml) for all audio preprocessing and feature extraction parameters.
@@ -61,7 +61,7 @@ Increasing beam_width improves WER metric and slows down decoding.  Speech recog
 
     - B - batch size, fixed to 1
     - N - number of audio frames in this section of audio, fixed to 16
-    - T - context frames: along with the current frame, the network expects 9 preceeding frames and 9 succeeding frames. The absent context frames are filled with zeros.
+    - T - context frames: along with the current frame, the network expects 9 preceding frames and 9 succeeding frames. The absent context frames are filled with zeros.
     - C - 26 MFCC coefficients in each frame
 
     See [`accuracy-check.yml`](accuracy-check.yml) for all audio preprocessing and feature extraction parameters.

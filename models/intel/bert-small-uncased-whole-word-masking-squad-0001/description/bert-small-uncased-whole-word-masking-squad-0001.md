@@ -61,10 +61,10 @@ The values are equal to:
 The outputs of the net are two `1, 384` floating point-valued logit scores vectors that after soft-max operation are probabilities for start and end positions of answer in the premise of the question.
 
 1. Start position: name: `output_s`, shape: [1x384].
-Start position is floating point-valued logit scores for start postition.
+Start position is floating point-valued logit scores for start position.
 
 2. End position: name: `output_e`, shape: [1x384].
-End position is floating point-valued logit scores for end postition.
+End position is floating point-valued logit scores for end position.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

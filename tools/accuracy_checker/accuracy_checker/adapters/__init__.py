@@ -72,7 +72,7 @@ from .mask_rcnn import MaskRCNNAdapter
 from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
 from .yolact import YolactAdapter
 
-from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
+from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter, QuestionAnsweringBiDAFAdapter
 
 from .centernet import CTDETAdapter
 
@@ -92,6 +92,7 @@ from .audio_recognition import (
 from .regression import RegressionAdapter
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
+from .dna_seq_recognition import DNASeqRecognition
 from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
 
 __all__ = [
@@ -170,6 +171,7 @@ __all__ = [
 
     'MachineTranslationAdapter',
     'QuestionAnsweringAdapter',
+    'QuestionAnsweringBiDAFAdapter',
 
     'MonoDepthAdapter',
 
@@ -187,6 +189,8 @@ __all__ = [
     'FastCTCBeamSearchDecoderWithLm',
 
     'QualityAssessmentAdapter',
+
+    'DNASeqRecognition',
 
     'GVADetectionAdapter',
     'GVAClassificationAdapter',

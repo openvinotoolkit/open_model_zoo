@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
 
             t0 = std::chrono::high_resolution_clock::now();
             // Main sync point:
-            // in the trully Async mode we start the NEXT infer request, while waiting for the CURRENT to complete
+            // in the truly Async mode we start the NEXT infer request, while waiting for the CURRENT to complete
             // in the regular mode we start the CURRENT request and immediately wait for it's completion
             if (isAsyncMode) {
                 if (isModeChanged) {

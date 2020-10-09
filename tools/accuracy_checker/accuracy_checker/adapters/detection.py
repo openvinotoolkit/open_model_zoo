@@ -706,7 +706,7 @@ class FaceDetectionAdapter(Adapter):
                 description='Window scales for each base output layer'),
             'window_lengths': ListField(
                 value_type=int, optional=False,
-                description='Window lenghts for each base output layer'),
+                description='Window lengths for each base output layer'),
         })
         return parameters
 
@@ -895,6 +895,7 @@ class FaceDetectionRefinementAdapter(Adapter):
             )
         ]
 
+
 class FasterRCNNONNX(Adapter):
     __provider__ = 'faster_rcnn_onnx'
 
@@ -903,24 +904,26 @@ class FasterRCNNONNX(Adapter):
         parameters = super().parameters()
         parameters.update(
             {
-                'labels_out': StringField(description='name of output layer with labels'),
-                'scores_out': StringField(description='name of output layer with scores'),
+                'labels_out': StringField(description='name of output layer with labels', optional=True),
+                'scores_out': StringField(description='name of output layer with scores', optional=True),
                 'boxes_out': StringField(description='name of output layer with bboxes')
             }
         )
         return parameters
 
     def configure(self):
+        self.boxes_out = self.get_value_from_config('boxes_out')
         self.labels_out = self.get_value_from_config('labels_out')
         self.scores_out = self.get_value_from_config('scores_out')
-        self.boxes_out = self.get_value_from_config('boxes_out')
+        if self.scores_out and not self.labels_out:
+            raise ConfigError('all three outputs or bixrs_out and labels_out or only boxes_out should be provided')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         identifier = identifiers[0]
-        boxes = raw_outputs[self.boxes_out]
-        scores = raw_outputs[self.scores_out]
-        labels = raw_outputs[self.labels_out]
+        boxes = raw_outputs[self.boxes_out][:, :4]
+        scores = raw_outputs[self.scores_out] if self.scores_out is not None else raw_outputs[self.boxes_out][:, 4]
+        labels = raw_outputs[self.labels_out] if self.labels_out is not None else raw_outputs[self.boxes_out][:, 5]
         meta = frame_meta[0]
         im_scale_x = meta['scale_x']
         im_scale_y = meta['scale_y']

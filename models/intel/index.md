@@ -45,6 +45,9 @@ network to detect objects of the same type better.
 | [vehicle-detection-0200](./vehicle-detection-0200/description/vehicle-detection-0200.md)                                                                                            | 0.786                | 1.817      |       |         | X        |       |                |         |
 | [vehicle-detection-0201](./vehicle-detection-0201/description/vehicle-detection-0201.md)                                                                                            | 1.768                | 1.817      |       |         | X        |       |                |         |
 | [vehicle-detection-0202](./vehicle-detection-0202/description/vehicle-detection-0202.md)                                                                                            | 3.143                | 1.817      |       |         | X        |       |                |         |
+| [vehicle-detection-0203](./vehicle-detection-0203/description/vehicle-detection-0203.md)                                                                                            | 112.34               | 24.11      |       |         | X        |       |                |         |
+| [vehicle-detection-0204](./vehicle-detection-0204/description/vehicle-detection-0204.md)                                                                                            | 190.32               | 34.15      |       |         | X        |       |                |         |
+| [vehicle-detection-0205](./vehicle-detection-0205/description/vehicle-detection-0205.md)                                                                                            | 212.22                | 36.56      |       |         | X        |       |                |         |
 | [person-vehicle-bike-detection-crossroad-0078](./person-vehicle-bike-detection-crossroad-0078/description/person-vehicle-bike-detection-crossroad-0078.md)                          | 3.964                | 1.178      |       | X       | X        | X     |                |         |
 | [person-vehicle-bike-detection-crossroad-1016](./person-vehicle-bike-detection-crossroad-1016/description/person-vehicle-bike-detection-crossroad-1016.md)                          | 3.560                | 2.887      |       | X       | X        | X     |                |         |
 | [person-vehicle-bike-detection-crossroad-yolov3-1020](./person-vehicle-bike-detection-crossroad-yolov3-1020/description/person-vehicle-bike-detection-crossroad-yolov3-1020.md)     | 65.984               | 61.922     |       | X       | X        | X     |                |         |
@@ -146,7 +149,7 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 Human pose estimation task is to predict a pose: body skeleton, which consists
 of keypoints and connections between them, for every person in an input image or
 video.  Keypoints are body joints, i.e. ears, eyes, nose, shoulders, knees, etc.
-There are two major groups of such metods: top-down and bottom-up.  The first
+There are two major groups of such methods: top-down and bottom-up.  The first
 detects persons in a given frame, crops or rescales detections, then runs pose
 estimation network for every detection. These methods are very accurate. The
 second finds all keypoints in a given frame, then groups them by person

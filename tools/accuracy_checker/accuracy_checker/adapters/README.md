@@ -73,7 +73,7 @@ AccuracyChecker supports following set of adapters:
   * `do_softmax` - boolean flag which says should be softmax applied to detection scores or not. (Optional, default True)
 * `ssd_onnx` - converting output of SSD-based model from PyTorch with NonMaxSuppression layer.
   * `labels_out` - name of output layer with labels or regular expression for it searching.
-  * `scores_out`- name of output layer with scores or regular expression for it searching.
+  * `scores_out`- name of output layer with scores or regular expression for it searching. Optional, can be not provided, if your model has concatenation of scores with box coordinates.
   * `bboxes_out` - name of output layer with bboxes or regular expression for it searching.
 * `tf_object_detection` - converting output of detection models from TensorFlow object detection API to `DetectionPrediction`.
   * `classes_out` - name of output layer with predicted classes.
@@ -81,15 +81,15 @@ AccuracyChecker supports following set of adapters:
   *  `scores_out` - name of output layer with detection scores.
   * `num_detections_out` - name of output layer which contains the number of valid detections.
 * `faster_rcnn_onnx` - converts output of ONNX Faster RCNN model to `DetectionPrediction`
-  * `labels_out` - name of output layer with labels.
-  * `scores_out`- name of output layer with scores.
+  * `labels_out` - name of output layer with labels, optional if lables concatenated with boxes and scores (only boxes output provided and it has shape [N, 6]).
+  * `scores_out`- name of output layer with scores, optional if scores concatenated with boxes (boxes output has shape [N, 5]).
   * `bboxes_out` - name of output layer with bboxes.
 * `retinanet` - converting output of RetinaNet-based model.
   * `loc_out` - name of output layer with bounding box deltas.
   * `class_out` - name of output layer with classification probabilities.
 * `rfcn_class_agnostic` - convert output of Caffe RFCN model with agnostic bounding box regression approach.
   * `cls_out` - the name of output layer with detected probabilities for each class. The layer shape is [num_boxes, num_classes], where `num_boxes` is number of predicted boxes, `num_classes` - number of classes in the dataset including background.
-  * `bbox_out` - the name of output layer with detected boxes deltas. The layer shape is [num_boxes, 8] where  `num_boxes` is number of predicted boxes, 8 (4 for background + 4 for foreground) bouding boxes coordinates.
+  * `bbox_out` - the name of output layer with detected boxes deltas. The layer shape is [num_boxes, 8] where  `num_boxes` is number of predicted boxes, 8 (4 for background + 4 for foreground) bounding boxes coordinates.
   * `roid_out` - the name of output layer with regions of interest.
 * `face_person_detection` - converting face person detection model output with 2 detection outputs to `ContainerPredition`, where value of parameters `face_out`and `person_out` are used for identification `DetectionPrediction` in container.
   * `face_out` -  face detection output layer name.
@@ -230,6 +230,9 @@ AccuracyChecker supports following set of adapters:
   * `pad_symbol` - string representation of pad symbol (default='<pad>').
   * `remove_extra_symbols` - remove sos/eos/pad symbols from predicted string (default=True)
 * `bert_question_answering` - converting output of BERT model trained to solve question answering task to `QuestionAnsweringPrediction`.
+* `bidaf_question_answering` - converting output of BiDAF model trained to solve question answering task to `QuestionAnsweringPrediction`.
+  * `start_pos_output` - name of output layer with answer start position.
+  * `end_pos_output` - name of output layer with answer end position.
 * `bert_classification` - converting output of BERT model trained for classification task to `ClassificationPrediction`.
   * `num_classes` - number of predicted classes.
   * `classification_out` - name of output layer with classification probabilities. (Optional, if not provided default first output blob will be used).
@@ -278,8 +281,8 @@ AccuracyChecker supports following set of adapters:
   * `scores_out` - name of output layer with bounding boxes scores.
   * `boxes_out` - name of output layer with bounding boxes coordinates.
 * `prnet` - converting output of PRNet model for 3D landmarks regression task to `FacialLandmarks3DPrediction`
-    * `landmarks_ids_file` - the file with indeces for landmarks extraction from position heatmap. (Optional, default values defined [here](https://github.com/YadiraF/PRNet/blob/master/Data/uv-data/uv_kpt_ind.txt))
-* `person_vehicle_detection` - converts output of person vehicle detection model to `DetectionPrediction` representation. Adapter merges scores, groups predictions into people and vehicles, and assignes labels accordingly.
+    * `landmarks_ids_file` - the file with indices for landmarks extraction from position heatmap. (Optional, default values defined [here](https://github.com/YadiraF/PRNet/blob/master/Data/uv-data/uv_kpt_ind.txt))
+* `person_vehicle_detection` - converts output of person vehicle detection model to `DetectionPrediction` representation. Adapter merges scores, groups predictions into people and vehicles, and assigns labels accordingly.
     * `iou_threshold` - IOU threshold value for NMS operation.
 * `face_detection` - converts output of face detection model to `DetectionPrediction ` representation. Operation is performed by mapping model output to the defined anchors, window scales, window translates, and window lengths to generate a list of face candidates.
     * `score_threshold` - Score threshold value used to discern whether a face is valid.
@@ -302,9 +305,12 @@ AccuracyChecker supports following set of adapters:
     * `window_scales` - Window scales for each base output layer.
     * `window_lengths` - Window lengths for each base output layer.
 * `face_recognition_quality_assessment` - converts output of face recognition quality assessment model to `QualityAssessmentPrediction ` representation.
-* `duc_segmentation` - convert output of DUC semantic segmentation model to `DUCSegmentationAdapter` representation
+* `duc_segmentation` - converts output of DUC semantic segmentation model to `DUCSegmentationAdapter` representation
     * `ds_rate` - Specifies downsample rate.
     * `cell_width` - Specifies cell width to extract predictions.
     * `label_num` - Specifies number of output label classes.
 * `stacked_hourglass` - converts output of Stacked Hourglass Networks for single human pose estimation to `PoseEstimationPrediction`.
    * `score_map_out`- the name of output layers for getting score map (Optional, default output blob will be used if not provided).
+* `dna_seq_beam_search` - converts output of DNA sequencing model to `DNASequencePrediction` using beam search decoding.
+  * `beam_size` - beam size for CTC Beam Search (Optional, default 5).
+  * `threshold` - beam cut threshold (Optional, default 1e-3).

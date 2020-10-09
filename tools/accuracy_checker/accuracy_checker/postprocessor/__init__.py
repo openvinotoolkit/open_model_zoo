@@ -43,7 +43,7 @@ from .crop_segmentation_mask import CropSegmentationMask, CropOrPadSegmentationM
 from .clip_segmentation_mask import ClipSegmentationMask
 from .normalize_boxes import NormalizeBoxes
 from .brats_postprocessing import SegmentationPredictionResample, TransformBratsPrediction
-from .extract_answers_tokens import ExtractSQUADPrediction
+from .extract_answers_tokens import ExtractSQUADPrediction, ExtractSQUADPredictionBiDAF
 from .translate_3d_poses import Translate3dPoses
 from .normalize_recomendation import MinMaxNormalizeRecommendation, SigmoidNormalizeRecommendation
 from .align_prediction_depth_map import AlignDepth
@@ -56,6 +56,7 @@ from .to_gray_scale_ref_image import RGB2GRAYAnnotation, BGR2GRAYAnnotation
 from .remove_repeats import RemoveRepeatTokens
 from .tokens_to_lower_case import TokensToLowerCase
 from .super_resolution_image_recovery import SRImageRecovery
+from .argmax_segmentation_mask import ArgMaxSegmentationMask
 
 
 __all__ = [
@@ -85,6 +86,7 @@ __all__ = [
     'ZoomSegMask',
     'CropSegmentationMask',
     'ClipSegmentationMask',
+    'ArgMaxSegmentationMask',
 
     'SegmentationPredictionResample',
     'TransformBratsPrediction',
@@ -92,6 +94,7 @@ __all__ = [
     'NormalizeLandmarksPoints',
 
     'ExtractSQUADPrediction',
+    'ExtractSQUADPredictionBiDAF',
 
     'Translate3dPoses',
 

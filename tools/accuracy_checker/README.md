@@ -76,6 +76,21 @@ If you see the error about directory/file not found, please try remove manually 
 pip install --upgrade --force-reinstall .
 ```
 
+#### Running the tool inside IDE for development purposes
+
+Accuracy Checker tool has entry point for running in CLI, however majority of popular code editors or IDE expects scripts as starting point of application.
+Sometimes it can be useful to have opportunity to run the tool as script for debugging or enabling new models.
+For usage Accuracy Checker inside the IDE, you need to create a script in accuracy_checker root directory (e.g. `<open_model_zoo>/tools/accuracy_checker/main.py`)
+with following code:
+```python
+from accuracy_checker.main import main
+
+if __name__ == '__main__':
+    main()
+
+```
+Now, you can use this script for running in IDE.
+
 #### Usage
 
 You may test your installation and get familiar with accuracy checker by running [sample](sample/README.md).
@@ -104,9 +119,12 @@ You may refer to `-h, --help` to full list of command line options. Some argumen
 - `--num_requests` number requests for async execution. Allows override provided in config info. Default is `AUTO`
 - `--model_attributes` directory with additional models attributes.
 - `--subsample_size` dataset subsample size.
-- `--shuffle` allow shuffle annotation during creation a subset if subsample_size argument is provided. Default is `True`.
+- `--shuffle` allows shuffle annotation during creation a subset if subsample_size argument is provided. Default is `True`.
+- `--intermediate_metrics_results` enables intermediate metrics results printing. Default is `False`
+- `--metrics_interval` number of iteration for updated metrics result printing if `--intermediate_metrics_results` flag enabled. Default is 1000.
 
 You are also able to replace some command line arguments with environment variables for path prefixing. Supported following list of variables:
+* `DEFINITIONS_FILE` - equivalent of `-d`, `-definitions`.
 * `DATA_DIR` -  equivalent of `-s`, `--source`.
 * `MODELS_DIR` - equivalent of `-m`, `--models`.
 * `EXTENSIONS` - equivalent of `-e`, `--extensions`.

@@ -89,9 +89,9 @@ if __name__ == '__main__':
     color_coeff = np.load(coeffs).astype(np.float32)
     assert color_coeff.shape == (313, 2), "Current shape of color coefficients does not match required shape"
 
-    imshowSize = (640, 480)
-    graphSize = (imshowSize[0] // 2, imshowSize[1] // 4)
-    presenter = monitors.Presenter(args.utilization_monitors, imshowSize[1] * 2 - graphSize[1], graphSize)
+    imshow_size = (640, 480)
+    graph_size = (imshow_size[0] // 2, imshow_size[1] // 4)
+    presenter = monitors.Presenter(args.utilization_monitors, imshow_size[1] * 2 - graph_size[1], graph_size)
 
     while True:
         log.debug("#############################")
@@ -121,10 +121,10 @@ if __name__ == '__main__':
         img_lab_out = np.concatenate((img_lab[:, :, 0][:, :, np.newaxis], out), axis=2)
         img_bgr_out = np.clip(cv.cvtColor(img_lab_out, cv.COLOR_Lab2BGR), 0, 1)
 
-        original_image = cv.resize(original_frame, imshowSize)
-        grayscale_image = cv.resize(frame, imshowSize)
-        colorize_image = (cv.resize(img_bgr_out, imshowSize) * 255).astype(np.uint8)
-        lab_image = (cv.resize(img_lab_out, imshowSize)).astype(np.uint8)
+        original_image = cv.resize(original_frame, imshow_size)
+        grayscale_image = cv.resize(frame, imshow_size)
+        colorize_image = (cv.resize(img_bgr_out, imshow_size) * 255).astype(np.uint8)
+        lab_image = cv.resize(img_lab_out, imshow_size).astype(np.uint8)
 
         original_image = cv.putText(original_image, 'Original', (25, 50),
                                     cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)

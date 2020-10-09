@@ -542,7 +542,7 @@ int main(int argc, char *argv[]) {
         // --------------------------- 8. Report metrics -------------------------------------------------------
         slog::info << slog::endl << "Metric reports:" << slog::endl;
 
-        /** Show performace results **/
+        /** Show performance results **/
         if (FLAGS_pc) {
             if (currentMode == ExecutionMode::USER_SPECIFIED) {
                 for (const auto& request: userSpecifiedInferRequests) {

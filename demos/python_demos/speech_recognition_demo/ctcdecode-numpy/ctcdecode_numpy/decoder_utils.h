@@ -78,7 +78,7 @@ std::vector<std::pair<float, Output>> get_beam_search_result(
     const std::vector<PathTrie *> &prefixes,
     size_t beam_size);
 
-// Functor for prefix comparsion
+// Functor for prefix comparison
 bool prefix_compare(const PathTrie *x, const PathTrie *y);
 
 /* Get length of utf8 encoding string

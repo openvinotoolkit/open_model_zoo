@@ -37,8 +37,6 @@ models:
             mean: (0.485, 0.456, 0.406)
             std: (0.229, 0.224, 0.225)
 
-            # Using accuracy metric, achieved result of public model - 71.8
-
   - name: mobilenet-v2-pytorch
 
     # list of launchers for MobileNetV2.
@@ -64,5 +62,3 @@ models:
 
           # Image channels must be swapped, because "pillow_imread" reads in RGB, but converted model expect BGR
           - type: rgb_to_bgr
-
-            # Using accuracy metric, achieved result of public model - 71.8

@@ -23,9 +23,14 @@ pydicom
 # nlp, tokenization
 sentencepiece
 tokenizers
+nltk
 
 # editdistance calculation
 editdistance
 
 # speech recognition with language modeling
 pypi-kenlm
+
+# DNA sequence matching
+parasail
+fast-ctc-decode

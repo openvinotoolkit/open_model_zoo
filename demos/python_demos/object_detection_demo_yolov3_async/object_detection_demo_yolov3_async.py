@@ -92,18 +92,18 @@ class YoloParams:
                         198.0,
                         373.0, 326.0] if 'anchors' not in param else [float(a) for a in param['anchors'].split(',')]
 
-        self.isYoloV3 = False
+        self.is_yolo_v3 = False
 
         if param.get('mask'):
             mask = [int(idx) for idx in param['mask'].split(',')]
             self.num = len(mask)
 
-            maskedAnchors = []
+            masked_anchors = []
             for idx in mask:
-                maskedAnchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
-            self.anchors = maskedAnchors
+                masked_anchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
+            self.anchors = masked_anchors
 
-            self.isYoloV3 = True # Weak way to determine but the only one.
+            self.is_yolo_v3 = True # Weak way to determine but the only one.
 
 
 class Modes(Enum):
@@ -141,7 +141,7 @@ def scale_bbox(x, y, height, width, class_id, confidence, im_h, im_w, is_proport
 def parse_yolo_region(predictions, resized_image_shape, original_im_shape, params, threshold, is_proportional):
     # ------------------------------------------ Validating output parameters ------------------------------------------
     _, _, out_blob_h, out_blob_w = predictions.shape
-    assert out_blob_w == out_blob_h, "Invalid size of output blob. It sould be in NCHW layout and height should " \
+    assert out_blob_w == out_blob_h, "Invalid size of output blob. It should be in NCHW layout and height should " \
                                      "be equal to width. Current height = {}, current width = {}" \
                                      "".format(out_blob_h, out_blob_w)
 
@@ -149,7 +149,7 @@ def parse_yolo_region(predictions, resized_image_shape, original_im_shape, param
     orig_im_h, orig_im_w = original_im_shape
     resized_image_h, resized_image_w = resized_image_shape
     objects = list()
-    size_normalizer = (resized_image_w, resized_image_h) if params.isYoloV3 else (params.side, params.side)
+    size_normalizer = (resized_image_w, resized_image_h) if params.is_yolo_v3 else (params.side, params.side)
     bbox_size = params.coords + 1 + params.classes
     # ------------------------------------------- Parsing YOLO Region output -------------------------------------------
     for row, col, n in np.ndindex(params.side, params.side, params.num):

@@ -38,7 +38,7 @@ void IEWrapper::setExecPart() {
             layerData->setLayout(Layout::NC);
             layerData->setPrecision(Precision::FP32);
         } else {
-            throw std::runtime_error("Unknow type of input layer layout. Expected either 4 or 2 dimensional inputs");
+            throw std::runtime_error("Unknown type of input layer layout. Expected either 4 or 2 dimensional inputs");
         }
     }
 

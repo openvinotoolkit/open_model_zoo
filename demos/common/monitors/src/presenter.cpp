@@ -306,7 +306,7 @@ std::string Presenter::reportMeans() const {
         collectedDataStream << "Mean swap usage: " << memoryMonitor.getMeanSwap() << " GiB\n";
     }
     std::string collectedData = collectedDataStream.str();
-    // drop last \n because usually it is not expeted that printing an object starts a new line
+    // drop last \n because usually it is not expected that printing an object starts a new line
     if (!collectedData.empty()) {
         return collectedData.substr(0, collectedData.size() - 1);
     }

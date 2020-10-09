@@ -147,7 +147,7 @@ class Crop(Preprocessor):
 
         if not self.central_fraction:
             if self.dst_height is None or self.dst_width is None:
-                raise ConfigError('one from crop dimentions is not provided')
+                raise ConfigError('one from crop dimensions is not provided')
 
     def process(self, image, annotation_meta=None):
         is_simple_case = not isinstance(image.data, list)  # otherwise -- pyramid, tiling, etc
@@ -309,7 +309,7 @@ class Crop3D(Preprocessor):
         parameters.update({
             'size': NumberField(
                 value_type=int, optional=True, min_value=1,
-                description="Destination size for 3d crop for all dimentions."
+                description="Destination size for 3d crop for all dimensions."
             ),
             'dst_width': NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination width for 3d crop."

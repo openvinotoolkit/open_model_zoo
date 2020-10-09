@@ -215,7 +215,7 @@ def preprocess(img):
     Returns:
         np.array: preprocessed image
     """
-    # transpose for more convinient work
+    # transpose for more convenient work
     img = np.transpose(img)
     img = (img >= 160).astype(np.uint8)
     return img
@@ -254,7 +254,7 @@ def match_images(params):
     if (padded_im_1 == padded_im_2).all():
         return True, True
 
-    # check if difference realy is (e.g. it is not shift on 1-2 px)
+    # check if difference really is (e.g. it is not shift on 1-2 px)
     diff = np.zeros((*padded_im_1.shape, 3), dtype=np.uint8)
     diff[(padded_im_1 == 1) * (padded_im_2 == 1), :] = (255, 255, 255)
     diff[(padded_im_1 == 1) * (padded_im_2 == 0), :] = (255, 0, 0)
