@@ -37,7 +37,7 @@ class DNASequenceAccuracy(PerImageEvaluationMetric):
         self.min_coverage = self.get_value_from_config('min_coverage')
         self.accuracy = []
         self.meta.update({
-            'mames': ['mean', 'median'],
+            'names': ['mean', 'median'],
             'calculate_mean': False
         })
 
