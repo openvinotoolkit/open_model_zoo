@@ -21,7 +21,7 @@ files:
   - name: yolo-v4.pb
     size: 257904756
     sha256: 4FB1DBA4A899466E8F796FB3FB58DB046F0FE3ED8D4C6FED6377D69EEA1C05D4
-    source: https://download.01.org/opencv/public_models/TODO.pb
+    source: https://download.01.org/opencv/public_models/102020/yolo-v4-tf/yolo-v4.pb
 model_optimizer_args:
   - --input_shape=[1,608,608,3]
   - --input=image_input
