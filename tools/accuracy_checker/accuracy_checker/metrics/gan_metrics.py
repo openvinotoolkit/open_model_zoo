@@ -12,7 +12,6 @@ limitations under the License.
 """
 
 import numpy as np
-from scipy.linalg import sqrtm
 
 from ..representation import (
     RawTensorAnnotation,
@@ -21,6 +20,12 @@ from ..representation import (
 
 from .metric import FullDatasetEvaluationMetric
 from ..config import NumberField
+from ..utils import UnsupportedPackage
+
+try:
+    from scipy.linalg import sqrtm
+except ImportError as error:
+    sqrtm = UnsupportedPackage('scipy.linalg.sqrtm', error)
 
 
 class BaseGanMetric(FullDatasetEvaluationMetric):
@@ -98,6 +103,8 @@ class FrechetInceptionDistance(BaseGanMetric):
         """
         Calculate FID between feature vector of the real and generated images.
         """
+        if isinstance(sqrtm, UnsupportedPackage):
+            sqrtm.raise_error(self.__provider__)
 
         assert annotations.shape[1] == predictions.shape[1], "Expected equal length of feature vectors"
 
@@ -112,5 +119,5 @@ class FrechetInceptionDistance(BaseGanMetric):
         if np.iscomplexobj(covmean):
             covmean = covmean.real
 
-        FID = mdiff.dot(mdiff) + np.trace(cov_real + cov_gen - 2 * covmean)
-        return FID
+        fid = mdiff.dot(mdiff) + np.trace(cov_real + cov_gen - 2 * covmean)
+        return fid
