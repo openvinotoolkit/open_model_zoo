@@ -22,7 +22,7 @@ import numpy as np
 from modules.inference_engine import InferenceEngine
 from modules.input_reader import InputReader
 from modules.draw import Plotter3d, draw_poses
-from modules.parse_poses import parse_poses
+from modules.parse_2d_poses import parse_poses
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Lightweight 2D human pose estimation demo. '
