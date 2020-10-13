@@ -25,6 +25,25 @@ from pathlib import Path
 import common
 
 
+def run_pre_convert(reporter, model, output_dir, args):
+    script = common.MODEL_ROOT / model.subdirectory / 'pre-convert.py'
+    if not script.exists():
+        return True
+
+    reporter.print_section_heading('{}Running pre-convert script for {}',
+        '(DRY RUN) ' if args.dry_run else '', model.name)
+
+    cmd = [str(args.python), '--', str(script), '--',
+        str(args.download_dir / model.subdirectory), str(output_dir / model.subdirectory)]
+
+    reporter.print('Pre-convert command: {}', common.command_string(cmd))
+    reporter.print(flush=True)
+
+    success = True if args.dry_run else reporter.job_context.subprocess(cmd)
+    reporter.print()
+
+    return success
+
 def convert_to_onnx(reporter, model, output_dir, args):
     reporter.print_section_heading('{}Converting {} to ONNX',
         '(DRY RUN) ' if args.dry_run else '', model.name)
@@ -118,6 +137,11 @@ def main():
             reporter.print_section_heading('Skipping {} (all conversions skipped)', model.name)
             reporter.print()
             return True
+
+        (output_dir / model.subdirectory).mkdir(parents=True, exist_ok=True)
+
+        if not run_pre_convert(reporter, model, output_dir, args):
+            return False
 
         model_format = model.framework
 

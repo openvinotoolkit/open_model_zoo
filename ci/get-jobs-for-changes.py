@@ -52,12 +52,16 @@ def main():
     jobs = {}
 
     for changed_file in changed_files:
-        if models_dir in changed_file.parents and changed_file.name == "model.yml":
+        if models_dir in changed_file.parents and \
+                (changed_file.name == "model.yml" or changed_file.suffix == ".py"):
             if Path(changed_file).exists(): # it might've been deleted in the branch
-                jobs.setdefault("models", []).append(changed_file.parent.name)
+                jobs.setdefault("models", set()).add(changed_file.parent.name)
             else:
                 # make sure no models.lst files reference the deleted model
                 jobs["models_lst"] = True
+
+    if "models" in jobs:
+        jobs["models"] = sorted(jobs["models"]) # JSON can't work with a set
 
     git_check_attr_output = subprocess.run(
         ["git", "check-attr", "--stdin", "-z", "--all"],
