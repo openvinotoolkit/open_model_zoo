@@ -318,17 +318,17 @@ class FileSource(TaggedBase):
 
 class FileSourceHttp(FileSource):
     def __init__(self, url):
-        self.url = url
+        self._url = url
 
-    def __str__(self):
-        return self.url
+    def url(self):
+        return self._url
 
     @classmethod
     def deserialize(cls, source):
         return cls(validate_string('"url"', source['url']))
 
     def start_download(self, session, chunk_size, offset):
-        response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT,
+        response = session.get(self._url, stream=True, timeout=DOWNLOAD_TIMEOUT,
             headers=self.http_range_headers(offset))
         response.raise_for_status()
 
@@ -342,7 +342,7 @@ class FileSourceGoogleDrive(FileSource):
     def __init__(self, id):
         self.id = id
 
-    def __str__(self):
+    def url(self):
         return str(self.URL + '&id=%s' % self.id)
 
     @classmethod
