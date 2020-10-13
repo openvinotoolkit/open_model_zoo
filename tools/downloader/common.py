@@ -320,6 +320,9 @@ class FileSourceHttp(FileSource):
     def __init__(self, url):
         self.url = url
 
+    def __str__(self):
+        return self.url
+
     @classmethod
     def deserialize(cls, source):
         return cls(validate_string('"url"', source['url']))
@@ -334,8 +337,13 @@ class FileSourceHttp(FileSource):
 FileSource.types['http'] = FileSourceHttp
 
 class FileSourceGoogleDrive(FileSource):
+    URL = 'https://docs.google.com/uc?export=download'
+
     def __init__(self, id):
         self.id = id
+
+    def __str__(self):
+        return str(self.URL + '&id=%s' % self.id)
 
     @classmethod
     def deserialize(cls, source):
@@ -343,8 +351,7 @@ class FileSourceGoogleDrive(FileSource):
 
     def start_download(self, session, chunk_size, offset):
         range_headers = self.http_range_headers(offset)
-        URL = 'https://docs.google.com/uc?export=download'
-        response = session.get(URL, params={'id' : self.id}, headers=range_headers,
+        response = session.get(self.URL, params={'id' : self.id}, headers=range_headers,
             stream=True, timeout=DOWNLOAD_TIMEOUT)
         response.raise_for_status()
 
