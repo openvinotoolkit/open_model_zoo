@@ -99,7 +99,7 @@ void IEWrapper::getOutputBlob(const std::string& blobName,
     for (auto dim : blobDims) {
         dataSize *= dim;
     }
-    
+
     LockedMemory<const void> blobMapped = as<MemoryBlob>(request.GetBlob(blobName))->rmap();
     auto buffer = blobMapped.as<float *>();
 

@@ -456,4 +456,3 @@ private:
 
     uint64_t prev_timestamp_;
 };
-

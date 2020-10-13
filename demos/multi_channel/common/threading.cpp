@@ -25,4 +25,3 @@ tbb::task_arena& get_tbb_arena() {
     return *arena_ptr;
 }
 #endif
-
