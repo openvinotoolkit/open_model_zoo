@@ -49,14 +49,14 @@ Correspondence network return warped exemplar with semantic from input.
 
 ### Outputs
 
-1. name: "2771", shape: [1x3x256x256] - A warped exemplar in the format [BxCxHxW],
+1. name: "warped_exemplar", shape: [1x3x256x256] - A warped exemplar in the format [BxCxHxW],
    where:
     - B - batch size
     - C - number of channels
     - H - image height
     - W - image width
 
-2. name: "2801", shape: [1x151x64x64] - A warped mask in the format [BxCxHxW],
+2. name: "warped_mask", shape: [1x151x64x64] - A warped mask in the format [BxCxHxW],
    where:
     - B - batch size
     - C - number of classes (151 for ADE20k)
@@ -80,7 +80,7 @@ Translation model generates the final output based on the warped exemplar accord
 
 ### Outputs
 
-1. name: "2705", shape: [1x3x256x256] - A result (generated) image based on exemplar in the format [BxCxHxW],
+1. name: "exemplar_based_output", shape: [1x3x256x256] - A result (generated) image based on exemplar in the format [BxCxHxW],
    where:
     - B - batch size
     - C - number of channels

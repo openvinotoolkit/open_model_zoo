@@ -225,6 +225,14 @@ The task of speech recognition is to recognize and translate spoken language int
 | ----------------- | -------------- | ------------------------------------------------------------ | -------- | ------ | ------- |
 | DeepSpeech V0.6.1 | TensorFlow\*   | [mozilla-deepspeech-0.6.1](./mozilla-deepspeech-0.6.1/mozilla-deepspeech-0.6.1.md) | 7.55%    | 0.0472 | 47.2    |
 
+## Image Translation
+
+The task of image translation is to generate the output based on exemplar.
+
+| Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops | mParams |
+| -----------| -------------- | ---------------------------------- | -------- | ------ | ------- |
+| CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/cocosnet.md) | 12.98dB  |        |         |
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.
