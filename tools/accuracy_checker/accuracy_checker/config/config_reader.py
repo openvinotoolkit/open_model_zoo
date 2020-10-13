@@ -672,7 +672,7 @@ def filter_modules(config, target_devices, args):
 
 def process_config(
         config_item, entries_paths, args, dataset_identifier='datasets',
-        launchers_identifier='launchers', identifers_mapping=None, pipeline=False
+        launchers_identifier='launchers', identifiers_mapping=None, pipeline=False
 ):
     def process_dataset(datasets_configs):
         for datasets_config in datasets_configs:
@@ -719,7 +719,7 @@ def process_config(
         return updated_launchers
 
     for entry, command_line_arg in entries_paths.items():
-        entry_id = entry if not identifers_mapping else identifers_mapping[entry]
+        entry_id = entry if not identifiers_mapping else identifiers_mapping[entry]
         if entry_id not in config_item:
             continue
 

@@ -165,7 +165,7 @@ class TestAnnotationConversion:
         Dataset(config)
         subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666, True)
 
-    def test_annoation_conversion_subset_more_than_dataset_size(self, mocker):
+    def test_annotation_conversion_subset_more_than_dataset_size(self, mocker):
         addition_options = {
             'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
             'subsample_size': 3,

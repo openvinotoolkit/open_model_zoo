@@ -87,5 +87,5 @@ launchers:
       batch: 4
     mo_flags:
       - reverse_input_channels
-    cpu_extensions: cpu_extentions_avx512.so
+    cpu_extensions: custom_cpu_extensions.so
 ```
