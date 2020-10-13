@@ -1,4 +1,4 @@
-# hrnet-v2-c1
+# semantic-segmentation-hrnet-v2-c1
 
 ## Use Case and High-Level Description
 This model is a pair of encoder and decoder. The encoder is HRNetV2-W48 and the decoder is C1 (one convolution module and interpolation).

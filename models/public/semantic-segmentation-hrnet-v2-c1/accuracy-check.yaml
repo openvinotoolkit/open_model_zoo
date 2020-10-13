@@ -1,10 +1,9 @@
 models:
-  - name: hrnetv2_pytorch
+  - name: semantic-segmentation-hrnet-v2-c1-pytorch
 
     launchers:
       - framework: onnx_runtime
-        device: CPU
-        model:   public/hrnet-v2-c1/hrnet-v2-c1.onnx
+        model:   public/semantic-segmentation-hrnet-v2-c1/hrnet-v2-c1.onnx
         adapter: segmentation
 
     datasets:
@@ -32,7 +31,7 @@ models:
             type: mean_iou
             use_argmax: True
 
-  - name: hrnetv2_pytorch
+  - name: semantic-segmentation-hrnet-v2-c1
 
     launchers:
       - framework: dlsdk
