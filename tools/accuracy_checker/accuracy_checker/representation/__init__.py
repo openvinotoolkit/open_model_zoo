@@ -88,7 +88,6 @@ from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPredicti
 from .image_processing import ImageProcessingAnnotation, ImageProcessingPrediction
 from .quality_assessment import QualityAssessmentAnnotation, QualityAssessmentPrediction
 from .dna_sequence import DNASequenceAnnotation, DNASequencePrediction
-from .raw_representation import RawTensorAnnotation, RawTensorPrediction
 
 from .raw_representation import RawTensorAnnotation, RawTensorPrediction
 __all__ = [
@@ -187,8 +186,4 @@ __all__ = [
     'DNASequencePrediction',
     'RawTensorAnnotation',
     'RawTensorPrediction',
-    'QualityAssessmentAnnotation',
-    'QualityAssessmentPrediction',
-    'RawTensorAnnotation',
-    'RawTensorPrediction'
 ]
