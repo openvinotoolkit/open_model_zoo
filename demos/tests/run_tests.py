@@ -140,7 +140,7 @@ def main():
         [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
         universal_newlines=True))
     model_info = {model['name']: model for model in model_info_list}
-    args.demos = 'classification_demo,object_detection_demo_ssd_async,security_barrier_camera_demo,py/object_detection_demo_ssd_async,py/object_detection_demo_yolov3_async'
+
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
         demos_to_test = [demo for demo in DEMOS if demo.subdirectory in names_of_demos_to_test]
