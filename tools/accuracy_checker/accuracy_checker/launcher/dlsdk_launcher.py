@@ -866,11 +866,6 @@ class DLSDKLauncher(Launcher):
                         self.network.inputs[input_config['name']].precision = input_config['precision']
                     else:
                         self.network.input_info[input_config['name']].precision = input_config['precision']
-                else:
-                    if not has_info:
-                        self.exec_network.inputs[input_config['name']].precision = input_config['precision']
-                    else:
-                        self.exec_network.input_info[input_config['name']].precision = input_config['precision']
 
     def _configure_lstm_inputs(self):
         lstm_mapping = {}
