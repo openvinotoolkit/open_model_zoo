@@ -17,7 +17,7 @@ limitations under the License.
 import itertools
 import math
 import warnings
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 import numpy as np
 
 from ..adapters import Adapter
@@ -397,7 +397,20 @@ class RetinaNetTF2(Adapter):
             boxes_l = np.stack(boxes_l, axis=1)
             boxes_l = np.reshape(boxes_l, [-1, 4])
             boxes_all.append(boxes_l)
-        return boxes_all
+
+        def unpack_labels(labels):
+            """Unpacks an array of labels into multiscales labels."""
+            unpacked_labels = OrderedDict()
+            count = 0
+            for level in range(self.min_level, self.max_level + 1):
+                feat_size_y = int(image_size[0] / 2 ** level)
+                feat_size_x = int(image_size[1] / 2 ** level)
+                steps = feat_size_y * feat_size_x * self.num_scales * len(self.aspect_ratios)
+                unpacked_labels[level] = np.reshape(labels[count:count + steps],
+                                                    [feat_size_y, feat_size_x, -1])
+                count += steps
+            return unpacked_labels
+        return unpack_labels(np.concatenate(boxes_all, axis=0))
 
     def prepare_boxes_and_classes(self, raw, batch_id):
         boxes_outs, classes_outs = [], []
@@ -450,7 +463,7 @@ class RetinaNetTF2(Adapter):
             # Box decoding.
             # The anchor boxes are shared for all data in a batch.
             # One stage detector only supports class agnostic box regression.
-            anchor_boxes_i = np.reshape(anchor_boxes[i - self.min_level], [-1, 4])
+            anchor_boxes_i = np.reshape(anchor_boxes[i], [-1, 4])
             box_outputs_i = np.reshape(box_outputs[i - self.min_level], [-1, 4])
             boxes_i = self.decode_boxes(box_outputs_i, anchor_boxes_i)
             boxes_i[:, ::2] = np.clip(boxes_i[:, ::2], a_min=0, a_max=image_size[1] - 1)
