@@ -95,35 +95,35 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
 
     print('Retrieving models...', flush=True)
 
-    # try:
-    #     subprocess.check_output(
-    #         [
-    #             sys.executable, '--', str(auto_tools_dir / 'downloader.py'),
-    #             '--output_dir', str(dl_dir), '--cache_dir', str(downloader_cache_dir),
-    #             '--list', str(complete_models_lst_path), '--precisions', ','.join(model_precisions),
-    #         ],
-    #         stderr=subprocess.STDOUT, universal_newlines=True)
-    # except subprocess.CalledProcessError as e:
-    #     print(e.output)
-    #     print('Exit code:', e.returncode)
-    #     sys.exit(1)
+    try:
+        subprocess.check_output(
+            [
+                sys.executable, '--', str(auto_tools_dir / 'downloader.py'),
+                '--output_dir', str(dl_dir), '--cache_dir', str(downloader_cache_dir),
+                '--list', str(complete_models_lst_path), '--precisions', ','.join(model_precisions),
+            ],
+            stderr=subprocess.STDOUT, universal_newlines=True)
+    except subprocess.CalledProcessError as e:
+        print(e.output)
+        print('Exit code:', e.returncode)
+        sys.exit(1)
 
     print()
     print('Converting models...', flush=True)
 
-    # try:
-    #     subprocess.check_output(
-    #         [
-    #             sys.executable, '--', str(auto_tools_dir / 'converter.py'),
-    #             '--download_dir', str(dl_dir), '--list', str(complete_models_lst_path),
-    #             '--precisions', ','.join(model_precisions), '--jobs', 'auto',
-    #             *(['--mo', str(mo_path)] if mo_path else []),
-    #         ],
-    #         stderr=subprocess.STDOUT, universal_newlines=True)
-    # except subprocess.CalledProcessError as e:
-    #     print(e.output)
-    #     print('Exit code:', e.returncode)
-    #     sys.exit(1)
+    try:
+        subprocess.check_output(
+            [
+                sys.executable, '--', str(auto_tools_dir / 'converter.py'),
+                '--download_dir', str(dl_dir), '--list', str(complete_models_lst_path),
+                '--precisions', ','.join(model_precisions), '--jobs', 'auto',
+                *(['--mo', str(mo_path)] if mo_path else []),
+            ],
+            stderr=subprocess.STDOUT, universal_newlines=True)
+    except subprocess.CalledProcessError as e:
+        print(e.output)
+        print('Exit code:', e.returncode)
+        sys.exit(1)
 
     print()
 
