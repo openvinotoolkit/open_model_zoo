@@ -24,7 +24,9 @@ from functools import partial
 
 import numpy as np
 
-from ..representation import ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
+from ..representation import (
+    ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
+)
 from ..utils import get_path, OrderedSet
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
@@ -162,7 +164,9 @@ def make_subset_ibl(annotation, size, shuffle=True):
             query_for_place = [query_annotations[idx] for idx in selected_annotation.query_id]
             pairs_set = OrderedSet(query_for_place)
         else:
-            gallery_for_place = [ann for ann in annotation if not ann.query and selected_annotation.query_id in ann.query_id]
+            gallery_for_place = [
+                ann for ann in annotation if not ann.query and selected_annotation.query_id in ann.query_id
+            ]
             pairs_set = OrderedSet(gallery_for_place)
         subsample_set.add(selected_annotation)
         intersection = subsample_set & pairs_set

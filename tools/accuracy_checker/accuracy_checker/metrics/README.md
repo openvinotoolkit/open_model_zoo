@@ -82,6 +82,8 @@ More detailed information about calculation segmentation metrics you can find [h
   * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` value which will be calculated if annotations has training subset.
 * `pairwise_accuracy_subsets` - object reidentification pairwise accuracy with division dataset on test and train subsets for calculation mean score. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
   * `subset_number` - number of subsets for separating.
+* `localization_recall` - recall metric used for evaluation place recogniton task. Supported representations: `PlaceRecognitionAnnotation`, `ReidentificationPrediction`.
+  * `top_k` - number of k highest ranked samples to consider when matching.
 * `mae` - [Mean Absolute Error](https://en.wikipedia.org/wiki/Mean_absolute_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
 * `mae_on_intervals` - Mean Absolute Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
