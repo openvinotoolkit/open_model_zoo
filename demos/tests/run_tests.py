@@ -41,7 +41,7 @@ import re
 
 from pathlib import Path
 
-from args import ArgContext, ModelArg
+from args import ArgContext, ModelArg, NumThreads, NumStreams, NumIRequests
 from cases import DEMOS
 from data_sequences import DATA_SEQUENCES
 
@@ -64,14 +64,14 @@ def parse_args():
         help='path to report file')
     return parser.parse_args()
 
-def collect_result(demo_name, device, pipeline, execution_time, fps, report_file):
+def collect_result(demo_name, device, pipeline, execution_time, num_threads, num_streams, num_ireq, fps, report_file):
     first_time = not report_file.exists()
 
     with report_file.open('a+', newline='') as csvfile:
         testwriter = csv.writer(csvfile)
         if first_time:
-            testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime", "FPS"])
-        testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time, fps])
+            testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime", "NumThreads", "NumStreams", "NumIRequests", "FPS"])
+        testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time, *num_threads, *num_streams, *num_ireq, fps])
 
 @contextlib.contextmanager
 def temp_dir_as_path():
@@ -95,35 +95,35 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
 
     print('Retrieving models...', flush=True)
 
-    try:
-        subprocess.check_output(
-            [
-                sys.executable, '--', str(auto_tools_dir / 'downloader.py'),
-                '--output_dir', str(dl_dir), '--cache_dir', str(downloader_cache_dir),
-                '--list', str(complete_models_lst_path), '--precisions', ','.join(model_precisions),
-            ],
-            stderr=subprocess.STDOUT, universal_newlines=True)
-    except subprocess.CalledProcessError as e:
-        print(e.output)
-        print('Exit code:', e.returncode)
-        sys.exit(1)
+    # try:
+    #     subprocess.check_output(
+    #         [
+    #             sys.executable, '--', str(auto_tools_dir / 'downloader.py'),
+    #             '--output_dir', str(dl_dir), '--cache_dir', str(downloader_cache_dir),
+    #             '--list', str(complete_models_lst_path), '--precisions', ','.join(model_precisions),
+    #         ],
+    #         stderr=subprocess.STDOUT, universal_newlines=True)
+    # except subprocess.CalledProcessError as e:
+    #     print(e.output)
+    #     print('Exit code:', e.returncode)
+    #     sys.exit(1)
 
     print()
     print('Converting models...', flush=True)
 
-    try:
-        subprocess.check_output(
-            [
-                sys.executable, '--', str(auto_tools_dir / 'converter.py'),
-                '--download_dir', str(dl_dir), '--list', str(complete_models_lst_path),
-                '--precisions', ','.join(model_precisions), '--jobs', 'auto',
-                *(['--mo', str(mo_path)] if mo_path else []),
-            ],
-            stderr=subprocess.STDOUT, universal_newlines=True)
-    except subprocess.CalledProcessError as e:
-        print(e.output)
-        print('Exit code:', e.returncode)
-        sys.exit(1)
+    # try:
+    #     subprocess.check_output(
+    #         [
+    #             sys.executable, '--', str(auto_tools_dir / 'converter.py'),
+    #             '--download_dir', str(dl_dir), '--list', str(complete_models_lst_path),
+    #             '--precisions', ','.join(model_precisions), '--jobs', 'auto',
+    #             *(['--mo', str(mo_path)] if mo_path else []),
+    #         ],
+    #         stderr=subprocess.STDOUT, universal_newlines=True)
+    # except subprocess.CalledProcessError as e:
+    #     print(e.output)
+    #     print('Exit code:', e.returncode)
+    #     sys.exit(1)
 
     print()
 
@@ -140,12 +140,14 @@ def main():
         [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
         universal_newlines=True))
     model_info = {model['name']: model for model in model_info_list}
-
+    args.demos = 'classification_demo,object_detection_demo_ssd_async,security_barrier_camera_demo,py/object_detection_demo_ssd_async,py/object_detection_demo_yolov3_async'
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
         demos_to_test = [demo for demo in DEMOS if demo.subdirectory in names_of_demos_to_test]
     else:
         demos_to_test = DEMOS
+
+    fps_finder = re.compile(r'(?<=FPS:\s|fps:\s)[0-9]+\.?[0-9]*(?=\s)|(?<=\s)[0-9]+\.?[0-9]*(?= ?FPS| ?fps)')
 
     with temp_dir_as_path() as global_temp_dir:
         dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test)
@@ -199,6 +201,9 @@ def main():
                         for demo_arg in option_to_args(key, value)]
 
                     case_model_names = {arg.name for arg in test_case.options.values() if isinstance(arg, ModelArg)}
+                    case_nthreads = {arg.name for arg in test_case.options.values() if isinstance(arg, NumThreads)}
+                    case_nstreams = {arg.name for arg in test_case.options.values() if isinstance(arg, NumStreams)}
+                    case_nireq = {arg.name for arg in test_case.options.values() if isinstance(arg, NumIRequests)}
 
                     undeclared_case_model_names = case_model_names - declared_model_names
                     if undeclared_case_model_names:
@@ -232,7 +237,7 @@ def main():
                             fps = -1
 
                         if args.report_file:
-                            collect_result(demo.full_name, device, case_model_names, execution_time, fps, args.report_file)
+                            collect_result(demo.full_name, device, case_model_names, execution_time, case_nthreads, case_nstreams, case_nireq, fps, args.report_file)
 
             print()
 

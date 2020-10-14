@@ -137,6 +137,7 @@ NATIVE_DEMOS = [
             device_keys=['-d'],
             test_cases=combine_cases(
         TestCase(options={
+            '-d': 'CPU',
             '-no_show': None,
             '-time': '5',
             '-i': DataDirectoryOrigFileNamesArg('classification'),
@@ -151,6 +152,9 @@ NATIVE_DEMOS = [
             ModelArg('repvgg-b1'),
             ModelArg('repvgg-b3'),
             ModelArg('resnet-50-caffe2')),
+        single_option_cases('-nthreads', NumThreads(1), NumThreads(2), NumThreads(4), NumThreads(8)),
+        single_option_cases('-nstreams', NumStreams(1), NumStreams(2), NumStreams(4), NumStreams(8)),
+        single_option_cases('-nireq', NumIRequests(1), NumIRequests(2), NumIRequests(4), NumIRequests(8))
     )),
 
     CppDemo(name='interactive_face_detection_demo',
@@ -237,6 +241,9 @@ NATIVE_DEMOS = [
             ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
             ModelArg('yolo-v3-tf'),
             ModelArg('yolo-v3-tiny-tf')),
+        single_option_cases('-nthreads', NumThreads(1), NumThreads(2), NumThreads(4), NumThreads(8)),
+        single_option_cases('-nstreams', NumStreams(1), NumStreams(2), NumStreams(4), NumStreams(8)),
+        single_option_cases('-nireq', NumIRequests(1), NumIRequests(2), NumIRequests(4), NumIRequests(8))
     )),
 
     CppDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -333,6 +340,9 @@ NATIVE_DEMOS = [
             ModelArg('license-plate-recognition-barrier-0001'),
             ModelArg('license-plate-recognition-barrier-0007')),
         single_option_cases('-m_va', None, ModelArg('vehicle-attributes-recognition-barrier-0039')),
+        single_option_cases('-nthreads', NumThreads(1), NumThreads(2), NumThreads(4), NumThreads(8)),
+        single_option_cases('-nstreams', NumStreams(1), NumStreams(2), NumStreams(4), NumStreams(8)),
+        single_option_cases('-nireq', NumIRequests(1), NumIRequests(2), NumIRequests(4), NumIRequests(8))
     )),
 
     CppDemo(name='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -689,6 +699,9 @@ PYTHON_DEMOS = [
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
         ],
+        single_option_cases('-nthreads', NumThreads(1), NumThreads(2), NumThreads(4), NumThreads(8)),
+        single_option_cases('-nstreams', NumStreams(1), NumStreams(2), NumStreams(4), NumStreams(8)),
+        single_option_cases('-nireq', NumIRequests(1), NumIRequests(2), NumIRequests(4), NumIRequests(8))
     )),
 
     PythonDemo(name='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(

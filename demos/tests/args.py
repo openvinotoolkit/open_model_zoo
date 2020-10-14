@@ -42,6 +42,26 @@ def brats_arg(id):
 def image_retrieval_arg(id):
     return TestDataArg('Image_Retrieval/{}'.format(id))
 
+class NumThreads:
+    def __init__(self, name):
+        self.name = name
+
+    def resolve(self, context):
+        return str(self.name)
+
+class NumStreams:
+    def __init__(self, name):
+        self.name = name
+
+    def resolve(self, context):
+        return str(self.name)
+        
+class NumIRequests:
+    def __init__(self, name):
+        self.name = name
+
+    def resolve(self, context):
+        return str(self.name)
 
 class ModelArg:
     def __init__(self, name, precision='FP32'):
