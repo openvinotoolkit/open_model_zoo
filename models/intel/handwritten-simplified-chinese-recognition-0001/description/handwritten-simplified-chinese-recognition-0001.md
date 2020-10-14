@@ -23,7 +23,7 @@ The network is able to recognize simplified Chinese text consisting of character
 
 ## Accuracy Values
 
-This demo adopts [label error rate](https://dl.acm.org/doi/abs/10.1145/1143844.1143891) as the metric for accuracy.
+This model adopts [label error rate](https://dl.acm.org/doi/abs/10.1145/1143844.1143891) as the metric for accuracy.
 
 ## Inputs
 
