@@ -332,6 +332,7 @@ class ConfigReader:
     def _provide_cmd_arguments(arguments, config, mode):
         profile_dataset = 'profile' in arguments and arguments.profile
         profile_report_type = arguments.profile_report_type if 'profile_report_type' in arguments else 'csv'
+        input_precisions = arguments.input_precision if 'input_precision' in arguments else None
         def _add_subset_specific_arg(dataset_entry):
             if 'shuffle' in arguments and arguments.shuffle is not None:
                 dataset_entry['shuffle'] = arguments.shuffle
@@ -341,6 +342,9 @@ class ConfigReader:
 
         def merge_models(config, arguments, update_launcher_entry):
             def provide_models(launchers):
+                if input_precisions:
+                    for launcher in launchers:
+                        launcher['_input_precision'] = input_precisions
                 if 'models' not in arguments or not arguments.models:
                     return launchers
                 model_paths = arguments.models

@@ -27,10 +27,12 @@ class InputInfo_test:
     layout = ''
     precision = ''
     shape = []
-    def __init__(self, layout = '', precision = '', shape = []):
+
+    def __init__(self, layout='', precision='', shape=None):
         self.layout = layout
         self.precision = precision
-        self.shape = shape
+        self.shape = shape or []
+
 
 class TestInputFeeder:
     def test_create_input_feeder_without_inputs_raise_config_error(self):
@@ -90,6 +92,78 @@ class TestInputFeeder:
                 [{'name': '0', 'type': 'INPUT', 'value': '.'}],
                 {'0': (1, 3, 10, 10), '1': (1, 3, 10, 10)}
             )
+
+    def test_create_input_feeder_with_precision_info_as_single_element(self):
+        input_feeder = InputFeeder(
+            [{'name': 'const_data', 'type': 'CONST_INPUT', 'value': [[1, 2, 3, 4]], 'precision': 'FP32'}],
+            {'data': (1, 3, 10, 10), 'const_data': (1, 4)}, input_precisions_list=['U8']
+        )
+        assert 'const_data' in input_feeder.precision_mapping
+        assert input_feeder.precision_mapping['const_data'] == np.uint8
+        assert input_feeder.const_inputs['const_data'].dtype == np.uint8
+        assert 'data' in input_feeder.precision_mapping
+        assert input_feeder.precision_mapping['data'] == np.uint8
+        assert len(input_feeder.inputs_config) == 2
+        assert input_feeder.inputs_config[0]['name'] == 'const_data' and input_feeder.inputs_config[0]['precision'] == 'U8'
+        assert input_feeder.inputs_config[1]['name'] == 'data' and input_feeder.inputs_config[1]['precision'] == 'U8'
+
+    def test_create_input_feeder_with_precision_info_for_specific_layer(self):
+        input_feeder = InputFeeder(
+            [{'name': 'const_data', 'type': 'CONST_INPUT', 'value': [[1, 2, 3, 4]], 'precision': 'FP32'}],
+            {'data': (1, 3, 10, 10), 'const_data': (1, 4)}, input_precisions_list=['data:U8']
+        )
+        assert 'const_data' in input_feeder.precision_mapping
+        assert input_feeder.precision_mapping['const_data'] == np.float32
+        assert input_feeder.const_inputs['const_data'].dtype == np.float32
+        assert len(input_feeder.inputs_config) == 2
+        assert input_feeder.inputs_config[0]['name'] == 'const_data' and input_feeder.inputs_config[0]['precision'] == 'FP32'
+        assert input_feeder.inputs_config[1]['name'] == 'data' and input_feeder.inputs_config[1]['precision'] == 'U8'
+
+    def test_create_input_feeder_with_wrong_precision_info_raises_config_error(self):
+        with pytest.raises(ConfigError):
+            InputFeeder(
+                [{'name': 'const_data', 'type': 'CONST_INPUT', 'value': [[1, 2, 3, 4]], 'precision': 'FP32'}],
+                {'data': (1, 3, 10, 10), 'const_data': (1, 4)}, input_precisions_list=['data:8U']
+            )
+
+    def test_create_input_feeder_with_wrong_input_name_in_precision_info_raises_config_error(self):
+        with pytest.raises(ConfigError):
+            InputFeeder(
+                [{'name': 'const_data', 'type': 'CONST_INPUT', 'value': [[1, 2, 3, 4]], 'precision': 'FP32'}],
+                {'data': (1, 3, 10, 10), 'const_data': (1, 4)}, input_precisions_list=['unknown:U8']
+            )
+
+    def test_create_input_feeder_with_several_precision_info_in_wrong_format_raises_config_error(self):
+        with pytest.raises(ConfigError):
+            InputFeeder(
+                [{'name': 'const_data', 'type': 'CONST_INPUT', 'value': [[1, 2, 3, 4]], 'precision': 'FP32'}],
+                {'data': (1, 3, 10, 10), 'const_data': (1, 4)}, input_precisions_list=['U8', 'FP16']
+            )
+
+    def test_create_input_feeder_with_several_precision_info(self):
+        input_feeder = InputFeeder(
+            [{'name': 'const_data', 'type': 'CONST_INPUT', 'value': [[1, 2, 3, 4]], 'precision': 'FP32'}],
+            {'data': (1, 3, 10, 10), 'const_data': (1, 4)}, input_precisions_list=['data:U8', 'const_data:FP16']
+        )
+        assert 'const_data' in input_feeder.precision_mapping
+        assert input_feeder.precision_mapping['const_data'] == np.float16
+        assert input_feeder.const_inputs['const_data'].dtype == np.float16
+        assert len(input_feeder.inputs_config) == 2
+        assert input_feeder.inputs_config[0]['name'] == 'const_data' and input_feeder.inputs_config[0]['precision'] == 'FP16'
+
+        assert input_feeder.inputs_config[1]['name'] == 'data' and input_feeder.inputs_config[1]['precision'] == 'U8'
+
+    def test_create_input_feeder_without_config_inputs_and_wint_input_precision(self):
+        input_feeder = InputFeeder(
+            [],
+            {'data': (1, 3, 10, 10)}, input_precisions_list=['U8']
+        )
+        assert 'data' in input_feeder.precision_mapping
+        assert input_feeder.precision_mapping['data'] == np.uint8
+        assert len(input_feeder.inputs_config) == 1
+
+        assert input_feeder.inputs_config[0]['name'] == 'data' and input_feeder.inputs_config[0]['precision'] == 'U8'
+
 
     def test_fill_non_constant_input_with_one_input_without_specific_mapping_batch_1(self):
         input_feeder = InputFeeder([], { 'input': InputInfo_test(shape=(1, 3, 10, 10)) })

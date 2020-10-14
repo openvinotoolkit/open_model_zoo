@@ -124,7 +124,9 @@ class DLSDKLauncher(Launcher):
 
         return parameters
 
-    def __init__(self, config_entry, model_name='', delayed_model_loading=False, preprocessor=None):
+    def __init__(
+            self, config_entry, model_name='', delayed_model_loading=False,
+            preprocessor=None, postpone_inputs_configuration=False):
         super().__init__(config_entry, model_name=model_name)
 
         self._set_variable = False
@@ -142,12 +144,14 @@ class DLSDKLauncher(Launcher):
         self._prepare_bitstream_firmware(self.config)
         self._prepare_ie()
         self._delayed_model_loading = delayed_model_loading
+        self._postpone_input_configuration = postpone_inputs_configuration
         self._preprocess_info = {}
         self._preprocess_steps = []
         self.disable_resize_to_input = False
         self._do_reshape = False
         self._use_set_blob = False
         self._output_layouts = dict()
+        self.preprocessor = preprocessor
 
         if not delayed_model_loading:
             if dlsdk_launcher_config.need_conversion:
@@ -779,14 +783,30 @@ class DLSDKLauncher(Launcher):
             self._create_network()
         else:
             self.network = network
-        self._set_precision()
-        if log:
-            self._print_input_output_info()
-        if preprocessing:
-            self._set_preprocess(preprocessing)
+        if not self._postpone_input_configuration:
+            self._set_precision()
+            if log:
+                self._print_input_output_info()
+            if preprocessing:
+                self._set_preprocess(preprocessing)
 
-        if self.network:
-            self.exec_network = self.ie_core.load_network(self.network, self._device, num_requests=self.num_requests)
+            if self.network and not preprocessing:
+                self.exec_network = self.ie_core.load_network(
+                    self.network, self._device, num_requests=self.num_requests
+                )
+
+    def update_input_configuration(self, input_config):
+        self.config['inputs'] = input_config
+        self._set_precision()
+        self._print_input_output_info()
+        if self.preprocessor:
+            self._set_preprocess(self.preprocessor)
+
+        if self.network and not self.preprocessor:
+            self.exec_network = self.ie_core.load_network(
+                self.network, self._device, num_requests=self.num_requests
+            )
+
 
     def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path
