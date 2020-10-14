@@ -332,13 +332,6 @@ class ConfigReader:
     def _provide_cmd_arguments(arguments, config, mode):
         profile_dataset = 'profile' in arguments and arguments.profile
         profile_report_type = arguments.profile_report_type if 'profile_report_type' in arguments else 'csv'
-        input_precisions = arguments.input_precision if 'input_precision' in arguments else None
-        def _add_subset_specific_arg(dataset_entry):
-            if 'shuffle' in arguments and arguments.shuffle is not None:
-                dataset_entry['shuffle'] = arguments.shuffle
-
-            if 'subsample_size' in arguments and arguments.subsample_size is not None:
-                dataset_entry['subsample_size'] = arguments.subsample_size
 
         def merge_models(config, arguments, update_launcher_entry):
             def provide_models(launchers):
@@ -362,13 +355,15 @@ class ConfigReader:
                         updated_launchers.append(copy_launcher)
                 return updated_launchers
 
+            input_precisions = arguments.input_precision if 'input_precision' in arguments else None
+
             for model in config['models']:
                 for launcher_entry in model['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry)
                 model['launchers'] = provide_models(model['launchers'])
 
                 for dataset_entry in model['datasets']:
-                    _add_subset_specific_arg(dataset_entry)
+                    _add_subset_specific_arg(dataset_entry, arguments)
 
                     if 'ie_preprocessing' in arguments and arguments.ie_preprocessing:
                         dataset_entry['_ie_preprocessing'] = arguments.ie_preprocessing
@@ -394,7 +389,7 @@ class ConfigReader:
                 if 'datasets' not in module_config:
                     continue
                 for dataset in module_config['datasets']:
-                    _add_subset_specific_arg(dataset)
+                    _add_subset_specific_arg(dataset, arguments)
                     dataset['_profile'] = profile_dataset
                     dataset['_report_type'] = profile_report_type
 
@@ -854,3 +849,11 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
             launcher_entry['affinity_map'] = arguments.affinity_map
 
     return launcher_entry
+
+
+def _add_subset_specific_arg(dataset_entry, arguments):
+    if 'shuffle' in arguments and arguments.shuffle is not None:
+        dataset_entry['shuffle'] = arguments.shuffle
+
+    if 'subsample_size' in arguments and arguments.subsample_size is not None:
+        dataset_entry['subsample_size'] = arguments.subsample_size

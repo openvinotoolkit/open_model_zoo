@@ -63,6 +63,7 @@ except ImportError:
         Blob, TensorDesc = None, None
 
 
+# pylint:disable=R0904
 class DLSDKLauncher(Launcher):
     """
     Class for infer model using DLSDK framework.
@@ -806,7 +807,6 @@ class DLSDKLauncher(Launcher):
             self.exec_network = self.ie_core.load_network(
                 self.network, self._device, num_requests=self.num_requests
             )
-
 
     def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path

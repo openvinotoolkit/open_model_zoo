@@ -167,48 +167,7 @@ class InputFeeder:
         return inputs
 
     def _parse_inputs_config(self, inputs_entry, default_layout='NCHW', precisions_list=None):
-        def get_layer_precision(input_config, input_name, precision_info):
-            precision = (
-                precision_info.get(input_name) if not isinstance(precision_info, defaultdict)
-                else precision_info[input_name]
-            )
-            if precision is not None:
-                input_config['precision'] = precision
-            if 'precision' not in input_config:
-                return None
-            input_precision = PRECISION_TO_DTYPE.get(input_config['precision'])
-            if input_precision is None:
-                raise ConfigError("unsupported precision {} for layer {}".format(input_config['precision'], input_name))
-            precisions[input_name] = input_precision
-            return input_precision
-
-        def validate_input_precision(precisions_list):
-            if not precisions_list:
-                return {}
-            if len(precisions_list) == 1 and len(precisions_list[0].rsplit(':', 1)) == 1:
-                return defaultdict(lambda: precisions_list[0])
-            precision_dict = {}
-            for input_c in precisions_list:
-                precision_for_layer = input_c.rsplit(':', 1)
-                if len(precision_for_layer) == 1:
-                    raise ConfigError(
-                        'invalid value for input precision {}. Please specify <input_name>:<precision>'.format(input_c)
-                    )
-                layer_name, precision_ = precision_for_layer
-                if layer_name not in self.network_inputs:
-                    raise ConfigError("precision specified for unknown layer: {}".format(layer_name))
-                precision_dict[layer_name] = precision_
-            return precision_dict
-
-        def provide_input_config_for_not_config(inputs_entry, precision_info, not_config_inputs):
-            for input_name in not_config_inputs:
-                input_config = {'name': input_name, 'type': 'INPUT'}
-                precision = get_layer_precision(input_config, input_name, precision_info)
-                if precision is not None:
-                    inputs_entry.append(input_config)
-            return inputs_entry
-
-        precision_info = validate_input_precision(precisions_list)
+        precision_info = self.validate_input_precision(precisions_list)
         constant_inputs = {}
         non_constant_inputs_mapping = {}
         config_non_constant_inputs = []
@@ -225,17 +184,17 @@ class InputFeeder:
 
             if input_['type'] == 'IMAGE_INFO':
                 image_info_inputs.append(name)
-                get_layer_precision(input_, name, precision_info)
+                self.get_layer_precision(input_, name, precision_info, precisions)
                 continue
 
             if input_['type'] == 'ORIG_IMAGE_INFO':
                 orig_image_info_inputs.append(name)
-                get_layer_precision(input_, name, precision_info)
+                self.get_layer_precision(input_, name, precision_info, precisions)
                 continue
 
             if input_['type'] == 'LSTM_INPUT':
                 lstm_inputs.append(name)
-                get_layer_precision(input_, name, precision_info)
+                self.get_layer_precision(input_, name, precision_info, precisions)
                 continue
 
             value = input_.get('value')
@@ -243,7 +202,7 @@ class InputFeeder:
             if input_['type'] == 'CONST_INPUT':
                 if isinstance(value, list):
                     value = np.array(value)
-                    precision = get_layer_precision(input_, name, precision_info)
+                    precision = self.get_layer_precision(input_, name, precision_info, precisions)
                     value = value.astype(precision) if precision is not None else value
                 constant_inputs[name] = value
             else:
@@ -253,7 +212,7 @@ class InputFeeder:
                     non_constant_inputs_mapping[name] = value
                 layout = input_.get('layout', default_layout)
                 layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
-                get_layer_precision(input_, name, precision_info)
+                self.get_layer_precision(input_, name, precision_info, precisions)
 
         all_config_inputs = (
             config_non_constant_inputs + list(constant_inputs.keys()) +
@@ -264,7 +223,9 @@ class InputFeeder:
             raise ConfigError('input value for {} are not presented in config.'.format(','.join(not_config_inputs)))
         non_constant_inputs = not_config_inputs + config_non_constant_inputs
         if not_config_inputs and (precision_info or isinstance(precision_info, defaultdict)):
-           inputs_entry = provide_input_config_for_not_config(inputs_entry, precision_info, not_config_inputs)
+            inputs_entry = self.provide_input_config_for_not_config(
+                inputs_entry, precision_info, not_config_inputs, precisions
+            )
 
         return (
             constant_inputs,
@@ -322,6 +283,48 @@ class InputFeeder:
             )
 
         return [batch_data]
+
+    def validate_input_precision(self, precisions_list):
+        if not precisions_list:
+            return {}
+        if len(precisions_list) == 1 and len(precisions_list[0].rsplit(':', 1)) == 1:
+            return defaultdict(lambda: precisions_list[0])
+        precision_dict = {}
+        for input_c in precisions_list:
+            precision_for_layer = input_c.rsplit(':', 1)
+            if len(precision_for_layer) == 1:
+                raise ConfigError(
+                    'invalid value for input precision {}. Please specify <input_name>:<precision>'.format(input_c)
+                )
+            layer_name, precision_ = precision_for_layer
+            if layer_name not in self.network_inputs:
+                raise ConfigError("precision specified for unknown layer: {}".format(layer_name))
+            precision_dict[layer_name] = precision_
+        return precision_dict
+
+    @staticmethod
+    def get_layer_precision(input_config, input_name, precision_info, precisions):
+        precision = (
+            precision_info.get(input_name) if not isinstance(precision_info, defaultdict)
+            else precision_info[input_name]
+        )
+        if precision is not None:
+            input_config['precision'] = precision
+        if 'precision' not in input_config:
+            return None
+        input_precision = PRECISION_TO_DTYPE.get(input_config['precision'])
+        if input_precision is None:
+            raise ConfigError("unsupported precision {} for layer {}".format(input_config['precision'], input_name))
+        precisions[input_name] = input_precision
+        return input_precision
+
+    def provide_input_config_for_not_config(self, inputs_entry, precision_info, not_config_inputs, precisions):
+        for input_name in not_config_inputs:
+            input_config = {'name': input_name, 'type': 'INPUT'}
+            precision = self.get_layer_precision(input_config, input_name, precision_info, precisions)
+            if precision is not None:
+                inputs_entry.append(input_config)
+        return inputs_entry
 
     def release(self):
         del self.network_inputs
