@@ -21,6 +21,7 @@ import numpy as np
 from ..representation import (
     ReIdentificationClassificationAnnotation,
     ReIdentificationAnnotation,
+    PlaceRecognitionAnnotation,
     ReIdentificationPrediction
 )
 from ..config import BaseField, BoolField, NumberField
@@ -588,3 +589,41 @@ def binary_average_precision(y_true, y_score, interpolated_auc=True):
         return auc(recall, precision)
 
     return _average_binary_score(_average_precision, y_true, y_score)
+
+
+class LocalizationRecall(FullDatasetEvaluationMetric):
+    __provider__ = 'localization_recall'
+    annotation_types = (PlaceRecognitionAnnotation, )
+    prediction_types = (ReIdentificationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({'top_k': NumberField(optional=True, value_type=int, min_value=1, default=1)})
+        return params
+
+    def configure(self):
+        self.top_k = self.get_value_from_config('top_k')
+
+    def evaluate(self, annotations, predictions):
+        query_ann_ids = np.array([ann.query_id for ann in annotations if ann.query])
+        gallery_embeddings = extract_embeddings(annotations, predictions, query=False)
+        gallery_len = np.shape(gallery_embeddings)[0]
+        query_embeddings = extract_embeddings(annotations, predictions, query=True)
+        query_len = np.shape(query_embeddings)[0]
+        not_empty = np.size(gallery_embeddings) > 0 and np.size(query_embeddings) > 0
+        if not not_empty:
+            return 0
+        dist_m = (np.pow(query_embeddings, 2).sum(dim=1, keepdim=True).expand(query_len, gallery_len) +
+                  np.pow(gallery_embeddings, 2).sum(dim=1, keepdim=True).expand(gallery_len, query_len).T)
+        dist_m += -2 * np.matmul(query_embeddings, gallery_embeddings.T)
+        sort_idx = np.argsort(dist_m, axis=1)
+        del dist_m
+        correct_at_n = 0
+
+        for qIx, pred in enumerate(sort_idx):
+            if np.any(np.in1d(query_ann_ids[pred[:self.top_k]], predictions[qIx].query_id)):
+                correct_at_n += 1
+        recall = correct_at_n / query_len
+        del sort_idx
+        return recall

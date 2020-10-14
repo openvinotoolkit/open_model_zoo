@@ -33,6 +33,7 @@ from .detection_representation import (
 from .reid_representation import (
     ReIdentificationAnnotation,
     ReIdentificationClassificationAnnotation,
+    PlaceRecognitionAnnotation,
     ReIdentificationPrediction
 )
 from .segmentation_representation import (
@@ -108,6 +109,7 @@ __all__ = [
 
     'ReIdentificationAnnotation',
     'ReIdentificationClassificationAnnotation',
+    'PlaceRecognitionAnnotation',
     'ReIdentificationPrediction',
 
     'SegmentationRepresentation',
