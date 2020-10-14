@@ -38,7 +38,7 @@ where:
 
 ## Outputs
 
-Name - `outpput`, shape - [186x1x4442], format is [WxBxL], where:
+Name - `output`, shape - [186x1x4442], format is [WxBxL], where:
   - W - output sequence length
   - B - batch size
   - L - confidence distribution across the supported symbols in [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html).
