@@ -137,7 +137,6 @@ NATIVE_DEMOS = [
             device_keys=['-d'],
             test_cases=combine_cases(
         TestCase(options={
-            '-d': 'CPU',
             '-no_show': None,
             '-time': '5',
             '-i': DataDirectoryOrigFileNamesArg('classification'),
