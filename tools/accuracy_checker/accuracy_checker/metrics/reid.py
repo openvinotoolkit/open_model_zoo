@@ -26,7 +26,7 @@ from ..representation import (
 )
 from ..config import BaseField, BoolField, NumberField
 from .metric import FullDatasetEvaluationMetric
-from ..utils import UnsupportedPackage
+from ..utils import UnsupportedPackage, contains_any
 
 try:
     from sklearn.metrics import auc, precision_recall_curve
@@ -607,23 +607,30 @@ class LocalizationRecall(FullDatasetEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         query_ann_ids = np.array([ann.query_id for ann in annotations if ann.query])
+        query_for_gallery = [ann.query_id for ann in annotations if not ann.query]
         gallery_embeddings = extract_embeddings(annotations, predictions, query=False)
         gallery_len = np.shape(gallery_embeddings)[0]
         query_embeddings = extract_embeddings(annotations, predictions, query=True)
         query_len = np.shape(query_embeddings)[0]
         not_empty = np.size(gallery_embeddings) > 0 and np.size(query_embeddings) > 0
         if not not_empty:
+            warnings.warn('No gallery or query embeddings for evaluation')
             return 0
-        dist_m = (np.pow(query_embeddings, 2).sum(dim=1, keepdim=True).expand(query_len, gallery_len) +
-                  np.pow(gallery_embeddings, 2).sum(dim=1, keepdim=True).expand(gallery_len, query_len).T)
+        unique_q = []
+        for q_list in query_for_gallery:
+            unique_q.extend(list(q_list))
+        unique_q = set(unique_q)
+        if not np.sum([np.size(q) for q in query_for_gallery]) or not contains_any(unique_q, query_ann_ids):
+            warnings.warn("No matched query and gallery embeddings pairs")
+        dist_m = (np.repeat(np.sum(np.power(query_embeddings, 2), axis=1, keepdims=True), gallery_len, axis=1) +
+                  np.repeat(np.sum(np.power(gallery_embeddings, 2), axis=1, keepdims=True), query_len, axis=1).T)
         dist_m += -2 * np.matmul(query_embeddings, gallery_embeddings.T)
-        sort_idx = np.argsort(dist_m, axis=1)
-        del dist_m
+        sort_idx = np.argsort(dist_m.T, axis=1)
         correct_at_n = 0
 
         for qIx, pred in enumerate(sort_idx):
-            if np.any(np.in1d(query_ann_ids[pred[:self.top_k]], predictions[qIx].query_id)):
+            if np.any(np.in1d(query_ann_ids[pred[:self.top_k]], query_for_gallery[qIx])):
                 correct_at_n += 1
-        recall = correct_at_n / query_len
+        recall = correct_at_n / len(query_ann_ids)
         del sort_idx
         return recall
