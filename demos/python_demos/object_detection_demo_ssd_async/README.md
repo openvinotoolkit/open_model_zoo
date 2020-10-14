@@ -95,7 +95,7 @@ def callback(status, py_data):
 for i, request in enumerate(exec_net.requests):
     request.set_completion_callback(py_callback=callback, py_data=(request, i))
     request.async_infer(inputs={'data': imgs[i]})
-    
+
 # here you can continue execution on the host until results of requests are really needed
 # ...
 ```

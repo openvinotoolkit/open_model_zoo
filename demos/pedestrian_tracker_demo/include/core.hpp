@@ -50,4 +50,3 @@ using TrackedObjects = std::deque<TrackedObject>;
 
 /// (object id, detected objects) pairs collection.
 using ObjectTracks = std::unordered_map<int, TrackedObjects>;
-

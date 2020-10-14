@@ -123,9 +123,9 @@ class QuestionAnsweringBiDAFAnnotation(QuestionAnswering):
 
 
 class TextClassificationAnnotation(ClassificationAnnotation):
-    def __init__(self, identifier, label, input_ids, input_mask, segment_ids, tokens):
+    def __init__(self, identifier, label, input_ids, input_mask=None, segment_ids=None, tokens=None):
         super().__init__(identifier, label)
         self.input_ids = input_ids
-        self.input_mask = input_mask
-        self.segment_ids = segment_ids
-        self.tokens = tokens
+        self.input_mask = input_mask if input_mask is not None else []
+        self.segment_ids = segment_ids if segment_ids is not None else []
+        self.tokens = tokens if tokens is not None else []

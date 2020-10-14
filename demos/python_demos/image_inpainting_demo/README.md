@@ -4,7 +4,7 @@ This demo showcases Image Inpainting with GMCNN. The task is to estimate suitabl
 to fill holes in images.
 
 ## How It Works
-This demo can work in 2 modes: 
+This demo can work in 2 modes:
 
 * GUI mode: areas for inpainting can be marked interactively using mouse painting
 * Auto mode (use -ac or -ar option for it): image will be processed automatically using randomly applied mask (-ar option) or using specific color-based mask (-ac option)

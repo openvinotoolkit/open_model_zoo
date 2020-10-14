@@ -7,7 +7,7 @@ The demo also relies on the following auxiliary networks:
 * `face-detection-retail-0004` or `face-detection-adas-0001` detection networks for finding faces
 * `head-pose-estimation-adas-0001`, which estimates head pose in Tait-Bryan angles, serving as an input for gaze estimation model
 * `facial-landmarks-35-adas-0002`, which estimates coordinates of facial landmarks for detected faces. The keypoints at the corners of eyes are used to locate eyes regions required for the gaze estimation model
-* `open-closed-eye-0001`, which estimates eyes state of detected faces.  
+* `open-closed-eye-0001`, which estimates eyes state of detected faces.
 
 For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
@@ -72,7 +72,7 @@ For example, to do inference on a CPU, run the following command:
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting frame with marked gaze vectors, text reports of **FPS** (frames per second performance) for the demo, and, optionally, marked facial landmarks, head pose angles, and face bounding boxes. 
+The demo uses OpenCV to display the resulting frame with marked gaze vectors, text reports of **FPS** (frames per second performance) for the demo, and, optionally, marked facial landmarks, head pose angles, and face bounding boxes.
 By default, it shows only gaze estimation results. To see inference results of auxiliary networks, use run-time control keys.
 
 ### Run-Time Control Keys
@@ -82,14 +82,14 @@ The following keys are supported:
 * G - to toggle displaying gaze vector
 * B - to toggle displaying face detector bounding boxes
 * O - to toggle displaying head pose information
-* L - to toggle displaying facial landmarks 
+* L - to toggle displaying facial landmarks
 * E - to toggle displaying eyes state
 * A - to switch on displaying all inference results
 * N - to switch off displaying all inference results
 * F - to flip frames horizontally
 * Esc - to quit the demo
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
 >* `face-detection-adas-0001`
 >* `face-detection-retail-0004`
 >* `facial-landmarks-35-adas-0002`

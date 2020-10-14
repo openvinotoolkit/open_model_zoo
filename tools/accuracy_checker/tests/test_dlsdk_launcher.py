@@ -38,7 +38,7 @@ from accuracy_checker.utils import contains_all
 def no_available_myriad():
     try:
         from openvino.inference_engine import IECore
-        return 'MYRIAD' not in IECore().availabe_devices
+        return 'MYRIAD' not in IECore().available_devices
     except:
         return True
 
@@ -153,7 +153,7 @@ class TestDLSDKLauncherInfer:
         assert np.argmax(result[0][dlsdk_test_model.output_blob]) == 7
         assert image.metadata['input_shape'] == {'data': [1, 3, 32, 32]}
 
-    def test_dlsdk_laucher_model_search(self, models_dir):
+    def test_dlsdk_launcher_model_search(self, models_dir):
         config_update = {
             'model': str(models_dir),
             'weights': str(models_dir)

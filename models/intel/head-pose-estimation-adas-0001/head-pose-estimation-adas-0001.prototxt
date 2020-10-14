@@ -45,7 +45,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 1.0    #learning rate of weights
     decay_mult: 1
@@ -92,7 +92,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 1.0    #learning rate of weights
     decay_mult: 1
@@ -118,7 +118,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 1.0    #learning rate of weights
     decay_mult: 1
@@ -178,7 +178,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 1.0    #learning rate of weights
     decay_mult: 1
@@ -225,7 +225,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 1.0    #learning rate of weights
     decay_mult: 1
@@ -250,7 +250,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 1.0    #learning rate of weights
     decay_mult: 1
@@ -310,7 +310,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 1.0    #learning rate of weights
     decay_mult: 1
@@ -429,7 +429,7 @@ layer {
   type: "InnerProduct"
   bottom: "angle_y"
   top: "fc_y"
-  
+
   param {
     lr_mult: 1
     decay_mult: 1
@@ -438,7 +438,7 @@ layer {
     lr_mult: 2
     decay_mult: 0
   }
-  
+
   inner_product_param {
     num_output: 1
     weight_filler {
@@ -511,7 +511,7 @@ layer {
   type: "InnerProduct"
   bottom: "angle_p"
   top: "fc_p"
-  
+
   param {
     lr_mult: 1
     decay_mult: 1
@@ -520,7 +520,7 @@ layer {
     lr_mult: 2
     decay_mult: 0
   }
-  
+
   inner_product_param {
     num_output: 1
     weight_filler {
@@ -592,7 +592,7 @@ layer {
   type: "InnerProduct"
   bottom: "angle_r"
   top: "fc_r"
-  
+
   param {
     lr_mult: 1
     decay_mult: 1
@@ -601,7 +601,7 @@ layer {
     lr_mult: 2
     decay_mult: 0
   }
-  
+
   inner_product_param {
     num_output: 1
     weight_filler {

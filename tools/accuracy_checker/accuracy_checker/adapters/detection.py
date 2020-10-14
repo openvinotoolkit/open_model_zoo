@@ -57,7 +57,7 @@ class TFObjectDetectionAPIAdapter(Adapter):
         return parameters
 
     def configure(self):
-        self.classe_out = self.get_value_from_config('classes_out')
+        self.classes_out = self.get_value_from_config('classes_out')
         self.boxes_out = self.get_value_from_config('boxes_out')
         self.scores_out = self.get_value_from_config('scores_out')
         self.num_detections_out = self.get_value_from_config('num_detections_out')
@@ -71,7 +71,7 @@ class TFObjectDetectionAPIAdapter(Adapter):
             list of DetectionPrediction objects
         """
         prediction_batch = self._extract_predictions(raw, frame_meta)
-        classes_batch = prediction_batch[self.classe_out]
+        classes_batch = prediction_batch[self.classes_out]
         scores_batch = prediction_batch[self.scores_out]
         boxes_batch = prediction_batch[self.boxes_out]
         num_detections_batch = prediction_batch[self.num_detections_out].astype(int)

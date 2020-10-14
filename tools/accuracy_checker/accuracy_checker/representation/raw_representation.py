@@ -13,3 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
+from .base_representation import BaseRepresentation
+
+
+class RawTensorRepresentation(BaseRepresentation):
+    pass
+
+
+class RawTensorAnnotation(RawTensorRepresentation):
+    def __init__(self, identifier, annotation):
+        super().__init__(identifier)
+        self.value = annotation
+
+
+class RawTensorPrediction(RawTensorRepresentation):
+    def __init__(self, identifiers, prediction):
+        super().__init__(identifiers)
+        self.value = prediction

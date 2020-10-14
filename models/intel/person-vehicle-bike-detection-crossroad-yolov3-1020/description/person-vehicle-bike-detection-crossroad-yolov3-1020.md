@@ -89,7 +89,7 @@ Since the model is finetuned on person/vehicle/bike detection dataset, it return
 * non-vehicle (bike/motorcycle) - the second class score
 * vehicle - the third class score
 Note that the indexes of these 3 classes are aligned with the indexes of the classes `person`, `bike`, and `car` in the
-original COCO\* dataset.  
+original COCO\* dataset.
 Also note that the model returns class scores for all 80 COCO classes for backward compatibility with the original Yolo V3.
 
 ## Legal information

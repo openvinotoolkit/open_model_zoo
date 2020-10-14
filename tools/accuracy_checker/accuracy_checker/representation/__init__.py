@@ -88,6 +88,7 @@ from .image_processing import ImageProcessingAnnotation, ImageProcessingPredicti
 from .quality_assessment import QualityAssessmentAnnotation, QualityAssessmentPrediction
 from .dna_sequence import DNASequenceAnnotation, DNASequencePrediction
 
+from .raw_representation import RawTensorAnnotation, RawTensorPrediction
 __all__ = [
     'BaseRepresentation',
 
@@ -181,4 +182,6 @@ __all__ = [
 
     'DNASequenceAnnotation',
     'DNASequencePrediction',
+    'RawTensorAnnotation',
+    'RawTensorPrediction',
 ]

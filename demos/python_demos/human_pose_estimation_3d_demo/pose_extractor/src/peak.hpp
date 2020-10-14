@@ -53,4 +53,3 @@ std::vector<HumanPose> groupPeaksToPoses(
         const int minJointsNumber,
         const float minSubsetScore);
 } // namespace human_pose_estimation
-

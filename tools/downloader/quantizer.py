@@ -43,6 +43,8 @@ DEFAULT_POT_CONFIG_BASE = {
     },
 }
 
+DATASET_DEFINITIONS_PATH = common.OMZ_ROOT / 'tools/accuracy_checker/dataset_definitions.yml'
+
 def quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
     input_precision = common.KNOWN_QUANTIZED_PRECISIONS[precision]
 
@@ -174,6 +176,7 @@ def main():
         pot_env = {
             'ANNOTATIONS_DIR': str(annotation_dir),
             'DATA_DIR': str(args.dataset_dir),
+            'DEFINITIONS_FILE': str(DATASET_DEFINITIONS_PATH),
         }
 
         for model in models:

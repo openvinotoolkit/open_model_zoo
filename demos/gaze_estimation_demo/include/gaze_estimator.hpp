@@ -28,7 +28,7 @@ private:
     IEWrapper ieWrapper;
     std::string outputBlobName;
     bool rollAlign;
-   
+
     void rotateImageAroundCenter(const cv::Mat& srcImage, cv::Mat& dstImage, float angle) const;
 };
 }  // namespace gaze_estimation

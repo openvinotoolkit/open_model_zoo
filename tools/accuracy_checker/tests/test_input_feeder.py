@@ -49,11 +49,11 @@ class TestInputFeeder:
         with pytest.raises(ConfigError):
             InputFeeder([{'name': 'data2', 'type': 'INPUT', 'value': '.'}], {'data': (1, 3, 10, 10)})
 
-    def test_create_input_feeder_with_config_iamge_info_not_in_network_inputs_raise_config_error(self):
+    def test_create_input_feeder_with_config_image_info_not_in_network_inputs_raise_config_error(self):
         with pytest.raises(ConfigError):
             InputFeeder([{'name': 'info', 'type': 'IMAGE_INFO'}], {'data': (1, 3, 10, 10)})
 
-    def test_create_input_feeder_with_only_iamge_info_in_network_inputs_raise_config_error(self):
+    def test_create_input_feeder_with_only_image_info_in_network_inputs_raise_config_error(self):
         with pytest.raises(ConfigError):
             InputFeeder([{'name': 'info', 'type': 'IMAGE_INFO'}], {'info': (1, 3)})
 
@@ -127,7 +127,7 @@ class TestInputFeeder:
         assert 'input' in result
         assert np.array_equal(result['input'], expected_data)
 
-    def test_fill_non_constant_input_with_specific_mapping_sevaral_image_matched(self):
+    def test_fill_non_constant_input_with_specific_mapping_several_image_matched(self):
         input_feeder = InputFeeder([{'name': 'input', 'type': 'INPUT', 'value': '.'}], {'input': InputInfo_test(shape=(1, 3, 10, 10))})
         result = input_feeder.fill_non_constant_inputs([DataRepresentation([np.zeros((10, 10, 3)), np.ones((10, 10, 3))], identifier=['0', '1'])])[0]
         expected_data = np.zeros((1, 3, 10, 10))

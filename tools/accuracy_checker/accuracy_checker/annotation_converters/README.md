@@ -101,6 +101,8 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
   * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `semantic_only` - converts MS COCO dataset annotation to `SegmentationAnnotation`. (Optional, default value is False)
+  * `masks_dir` - path to store segmentation masks in `semantic_only` mode
 * `mscoco_mask_rcnn` - converts MS COCO dataset to `ContainerAnnotation` with `DetectionAnnotation` and `CocoInstanceSegmentationAnnotation` named `detection_annotation` and `segmentation_annotation` respectively.
   * `annotation_file` - path to annotation file in json format.
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is False).
@@ -389,7 +391,7 @@ The main difference between this converter and `super_resolution` in data organi
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
-You are able to overload parameters such as `label_map`, `segmentation_colors`, `backgound_label` using `dataset_meta_file` argument.
+You are able to overload parameters such as `label_map`, `segmentation_colors`, `background_label` using `dataset_meta_file` argument.
 dataset meta file is JSON file, which can contains following parameters:
   * `label_map` is dictionary where `<CLASS_ID>` is key and `<CLASS_NAME>` - value.
   * `labels` is the list of strings, which represent class names (order is matter, the index of class name used as class id). Can be used instead `label_map`.

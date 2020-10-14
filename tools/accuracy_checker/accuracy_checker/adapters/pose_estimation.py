@@ -70,13 +70,13 @@ class HumanPoseAdapter(Adapter):
                     'and part_affinity_fields_out or not contain them at all (in single output model case)'
                 )
             self._keypoints_heatmap_bias = self.keypoints_heatmap + '/add_'
-            self._part_affinity_fileds_bias = self.part_affinity_fields + '/add_'
+            self._part_affinity_fields_bias = self.part_affinity_fields + '/add_'
 
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.concat_out:
-            if not contains_any(raw_outputs, [self.part_affinity_fields, self._part_affinity_fileds_bias]):
+            if not contains_any(raw_outputs, [self.part_affinity_fields, self._part_affinity_fields_bias]):
                 raise ConfigError('part affinity fields output not found')
             if not contains_any(raw_outputs, [self.keypoints_heatmap, self._keypoints_heatmap_bias]):
                 raise ConfigError('keypoints heatmap output not found')
@@ -85,7 +85,7 @@ class HumanPoseAdapter(Adapter):
             ]
             pafs = raw_outputs[
                 self.part_affinity_fields if self.part_affinity_fields in raw_outputs
-                else self._part_affinity_fileds_bias
+                else self._part_affinity_fields_bias
             ]
             raw_output = zip(identifiers, keypoints_heatmap, pafs, frame_meta)
         else:
@@ -294,8 +294,8 @@ class HumanPoseAdapter(Adapter):
     def group_peaks(self, peaks, pafs, kpt_num=20, threshold=0.05):
         subset = []
         candidates = np.array([item for sublist in peaks for item in sublist])
-        for keypoint_id, maped_keypoints in enumerate(self.map_idx):
-            score_mid = pafs[:, :, [x - 19 for x in maped_keypoints]]
+        for keypoint_id, mapped_keypoints in enumerate(self.map_idx):
+            score_mid = pafs[:, :, [x - 19 for x in mapped_keypoints]]
             candidate_a = peaks[self.limb_seq[keypoint_id][0] - 1]
             candidate_b = peaks[self.limb_seq[keypoint_id][1] - 1]
             idx_joint_a = self.limb_seq[keypoint_id][0] - 1
