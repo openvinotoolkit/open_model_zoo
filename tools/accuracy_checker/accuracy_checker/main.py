@@ -271,6 +271,12 @@ def build_arguments_parser():
     parser.add_argument('--profile_report_type', required=False, choices=['csv', 'json'], default='csv')
     parser.add_argument('--intermediate_metrics_results', required=False, default=False, type=cast_to_bool)
     parser.add_argument('--metrics_interval', required=False, default=1000, type=int)
+    parser.add_argument(
+        '--input_precision', required=False, nargs='+',
+        help='space-separated list of precisions for network inputs. '
+             'Providing several values required <layer_name>:<precision> format. '
+             'If single value without layer_name provided, then it will be applayed to all input layers.'
+    )
 
     return parser
 
@@ -289,7 +295,6 @@ def main():
         evaluator_kwargs['intermediate_metrics_results'] = intermdeiate_metrics
         evaluator_kwargs['metrics_interval'] = args.metrics_interval
         evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
-
 
     config, mode = ConfigReader.merge(args)
     evaluator_class = EVALUATION_MODE.get(mode)
