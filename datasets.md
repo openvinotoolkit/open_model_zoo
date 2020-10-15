@@ -36,7 +36,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 * `imagenet_1000_classes_2015` used for evaluation models trained on ILSVRC 2015 dataset with 1000 classes. (model examples: [`se-resnet-152`](models/public/se-resnet-152/se-resnet-152.md), [`se-resnext-50`](models/public/se-resnext-50/se-resnext-50.md))
 * `imagenet_1001_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1001 classes (background label + original labels). (model examples: [`googlenet-v2-tf`](models/public/googlenet-v2-tf/googlenet-v2-tf.md), [`resnet-50-tf`](models/public/resnet-50-tf/resnet-50-tf.md))
 
-## [Common Objects in Context (COCO)](http://cocodataset.org/#home)
+## [Common Objects in Context (COCO)](https://cocodataset.org/#home)
 
 ### How download dataset
 

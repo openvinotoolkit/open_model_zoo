@@ -17,7 +17,7 @@ The model input is a blob that consists of a single image of `1x3x800x1280` in t
 | MParams                      | 52.79        |
 | Source framework             | TensorFlow\* |
 
-See Average Precision metric description at [COCO: Common Objects in Context](http://cocodataset.org/#detection-eval). The primary challenge metric is used. Tested on the COCO validation dataset.
+See Average Precision metric description at [COCO: Common Objects in Context](https://cocodataset.org/#detection-eval). The primary challenge metric is used. Tested on the COCO validation dataset.
 
 ## Performance
 
