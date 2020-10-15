@@ -214,7 +214,7 @@ list(REMOVE_ITEM samples_dirs common thirdparty)
 add_samples_to_build(${samples_dirs})
 
 if(ENABLE_PYTHON)
-    find_package(PythonInterp 3.5 REQUIRED)
+    find_package(PythonInterp 3.6 REQUIRED)
     find_package(PythonLibs "${PYTHON_VERSION_STRING}" EXACT REQUIRED)
 
     execute_process(

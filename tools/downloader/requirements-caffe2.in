@@ -1,5 +1,2 @@
 future
 onnx
-
-# fix version in order to be compatible with requirements-pytorch.in
-torch<1.5
