@@ -267,10 +267,10 @@ class Detector(Model):
 
     def postprocess(self, outputs, meta):
         detections = self.output_parser(outputs)
-        orginal_image_shape = meta['original_shape']
+        original_image_shape = meta['original_shape']
         resized_image_shape = meta['resized_shape']
-        scale_x = self.w / resized_image_shape[1] * orginal_image_shape[1]
-        scale_y = self.h / resized_image_shape[0] * orginal_image_shape[0]
+        scale_x = self.w / resized_image_shape[1] * original_image_shape[1]
+        scale_y = self.h / resized_image_shape[0] * original_image_shape[0]
         for detection in detections:
             detection.xmin *= scale_x
             detection.xmax *= scale_x
