@@ -1,42 +1,48 @@
 # use update-requirements.py to update this file
 
 atomicwrites==1.4.0       # via -r tools/accuracy_checker/requirements-test.in
-attrs==19.3.0             # via pytest
+attrs==20.2.0             # via pytest
+certifi==2020.6.20        # via matplotlib
+click==7.1.2              # via nltk
 cycler==0.10.0            # via matplotlib
 decorator==4.4.2          # via networkx
 editdistance==0.5.3       # via -r tools/accuracy_checker/requirements.in
+fast-ctc-decode==0.2.5    # via -r tools/accuracy_checker/requirements.in
 imageio==2.9.0            # via scikit-image
-importlib-metadata==1.7.0  # via pluggy, pytest
-joblib==0.14.1            # via scikit-learn
-kiwisolver==1.1.0         # via matplotlib
-matplotlib==3.0.3         # via scikit-image
-more-itertools==8.4.0     # via pytest
-networkx==2.4             # via scikit-image
-nibabel==3.0.2            # via -r tools/accuracy_checker/requirements.in
-numpy==1.17.5             # via -r tools/accuracy_checker/requirements-core.in, imageio, matplotlib, nibabel, pywavelets, scikit-learn, scipy
-packaging==20.4           # via pytest
-pathlib2==2.3.5           # via pytest
-pillow==7.2.0             # via -r tools/accuracy_checker/requirements.in, imageio, scikit-image
+importlib-metadata==2.0.0  # via pluggy, pytest
+joblib==0.17.0            # via nltk, scikit-learn
+kiwisolver==1.2.0         # via matplotlib
+matplotlib==3.3.2         # via scikit-image
+more-itertools==8.5.0     # via pytest
+networkx==2.5             # via scikit-image
+nibabel==3.1.1            # via -r tools/accuracy_checker/requirements.in
+nltk==3.5                 # via -r tools/accuracy_checker/requirements.in
+numpy==1.17.5             # via -r tools/accuracy_checker/requirements-core.in, imageio, matplotlib, nibabel, parasail, pywavelets, scikit-image, scikit-learn, scipy, tifffile
+packaging==20.4           # via nibabel, pytest
+parasail==1.2             # via -r tools/accuracy_checker/requirements.in
+pillow==8.0.0             # via -r tools/accuracy_checker/requirements-core.in, imageio, matplotlib, scikit-image
 pluggy==0.13.1            # via pytest
-py-cpuinfo==4.0.0         # via -r tools/accuracy_checker/requirements.in
+py-cpuinfo==7.0.0         # via -r tools/accuracy_checker/requirements.in
 py==1.9.0                 # via pytest
 pydicom==2.0.0            # via -r tools/accuracy_checker/requirements.in
 pyparsing==2.4.7          # via matplotlib, packaging
+pypi-kenlm==0.1.20190403  # via -r tools/accuracy_checker/requirements.in
 pytest-mock==2.0.0        # via -r tools/accuracy_checker/requirements-test.in
 pytest==5.4.3             # via -r tools/accuracy_checker/requirements-test.in, pytest-mock
 python-dateutil==2.8.1    # via matplotlib
 pywavelets==1.1.1         # via scikit-image
 pyyaml==5.3.1             # via -r tools/accuracy_checker/requirements-core.in
-scikit-image==0.15.0      # via -r tools/accuracy_checker/requirements.in
-scikit-learn==0.22.2.post1  # via -r tools/accuracy_checker/requirements.in
-scipy==1.4.1              # via -r tools/accuracy_checker/requirements.in, scikit-image, scikit-learn
+regex==2020.10.15         # via nltk
+scikit-image==0.17.2      # via -r tools/accuracy_checker/requirements.in
+scikit-learn==0.23.2      # via -r tools/accuracy_checker/requirements.in
+scipy==1.5.2              # via -r tools/accuracy_checker/requirements.in, scikit-image, scikit-learn
 sentencepiece==0.1.91     # via -r tools/accuracy_checker/requirements.in
-shapely==1.7.0            # via -r tools/accuracy_checker/requirements.in
-six==1.15.0               # via packaging, pathlib2, python-dateutil
-tokenizers==0.8.0         # via -r tools/accuracy_checker/requirements.in
-tqdm==4.47.0              # via -r tools/accuracy_checker/requirements.in
+shapely==1.7.1            # via -r tools/accuracy_checker/requirements.in
+six==1.15.0               # via packaging, python-dateutil
+threadpoolctl==2.1.0      # via scikit-learn
+tifffile==2020.9.3        # via scikit-image
+tokenizers==0.9.1         # via -r tools/accuracy_checker/requirements.in
+tqdm==4.50.2              # via -r tools/accuracy_checker/requirements.in, nltk
 wcwidth==0.2.5            # via pytest
-zipp==1.2.0               # via importlib-metadata
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
+wheel==0.35.1             # via parasail
+zipp==3.3.0               # via importlib-metadata
