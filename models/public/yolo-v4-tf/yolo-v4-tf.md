@@ -6,8 +6,8 @@ YOLO v4 is a real-time object detection model implemented with Keras\* from this
 
 ## Conversion
 
-1. Download or clone the official [repository](https://github.com/david8862/keras-YOLOv3-model-set) (tested on `ffede5` commit).
-2. Use the following commands to get original model (named `yolov4` in repository) and convert it to Keras\* format (see details in the [README.md](https://github.com/david8862/keras-YOLOv3-model-set/blob/ffede5d316568479610b75a3424e2a7b81f0209b/README.md)  file in the official repository):
+1. Download or clone the official [repository](https://github.com/david8862/keras-YOLOv3-model-set) (tested on `d38c3d8` commit).
+2. Use the following commands to get original model (named `yolov4` in repository) and convert it to Keras\* format (see details in the [README.md](https://github.com/david8862/keras-YOLOv3-model-set/blob/d38c3d865f7190ee9b19a30e91f2b750a31320c1/README.md)  file in the official repository):
 
    1. Download YOLO v4 weights:
         ```
