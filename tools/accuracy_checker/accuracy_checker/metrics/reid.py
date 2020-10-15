@@ -609,7 +609,6 @@ class LocalizationRecall(FullDatasetEvaluationMetric):
         query_ann_ids = np.array([ann.query_id for ann in annotations if ann.query])
         query_for_gallery = [ann.query_id for ann in annotations if not ann.query]
         gallery_embeddings = extract_embeddings(annotations, predictions, query=False)
-        gallery_len = np.shape(gallery_embeddings)[0]
         query_embeddings = extract_embeddings(annotations, predictions, query=True)
         query_len = np.shape(query_embeddings)[0]
         not_empty = np.size(gallery_embeddings) > 0 and np.size(query_embeddings) > 0
@@ -622,15 +621,17 @@ class LocalizationRecall(FullDatasetEvaluationMetric):
         unique_q = set(unique_q)
         if not np.sum([np.size(q) for q in query_for_gallery]) or not contains_any(unique_q, query_ann_ids):
             warnings.warn("No matched query and gallery embeddings pairs")
-        dist_m = (np.repeat(np.sum(np.power(query_embeddings, 2), axis=1, keepdims=True), gallery_len, axis=1) +
-                  np.repeat(np.sum(np.power(gallery_embeddings, 2), axis=1, keepdims=True), query_len, axis=1).T)
-        dist_m += -2 * np.matmul(query_embeddings, gallery_embeddings.T)
-        sort_idx = np.argsort(dist_m.T, axis=1)
+        A = np.dot(query_embeddings, gallery_embeddings.transpose())
+        B = np.sum(query_embeddings ** 2, axis=1, keepdims=True)
+        C = np.sum(gallery_embeddings ** 2, axis=1)
+        D = B + C - 2 * A
+        D[D < 0] = 0
+        L2_distance = np.sqrt(D)
         correct_at_n = 0
-
-        for qIx, pred in enumerate(sort_idx):
-            if np.any(np.in1d(query_ann_ids[pred[:self.top_k]], query_for_gallery[qIx])):
-                correct_at_n += 1
-        recall = correct_at_n / len(query_ann_ids)
-        del sort_idx
+        for i, q in enumerate(query_ann_ids):
+            indices = np.argsort(L2_distance[i, :])[:self.top_k]
+            for ind in indices:
+                if q in query_for_gallery[ind]:
+                    correct_at_n += 1
+        recall = correct_at_n / query_len
         return recall
