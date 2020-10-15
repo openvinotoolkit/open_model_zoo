@@ -156,7 +156,7 @@ models:
     - name: dataset_name
 ```
 Optionally you can use global configuration. It can be useful for avoiding duplication if you have several models which should be run on the same dataset.
-Example of global definitions file can be found <a href="https://github.com/opencv/open_model_zoo/blob/master/tools/accuracy_checker/dataset_definitions.yml">here</a>. Global definitions will be merged with evaluation config in the runtime by dataset name.
+Example of global definitions file can be found <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/master/tools/accuracy_checker/dataset_definitions.yml">here</a>. Global definitions will be merged with evaluation config in the runtime by dataset name.
 Parameters of global configuration can be overwritten by local config (e.g. if in definitions specified resize with destination size 224 and in the local config used resize with size 227, the value in config - 227 will be used as resize parameter)
 You can use field `global_definitions` for specifying path to global definitions directly in the model config or via command line arguments (`-d`, `--definitions`).
 
@@ -185,7 +185,7 @@ If your dataset data is a well-known competition problem (COCO, Pascal VOC, and 
 it is reasonable to declare it in some global configuration file (*definition* file). This way in your local configuration file you can provide only
 `name` and all required steps will be picked from global one. To pass path to this global configuration use `--definition` argument of CLI.
 
-If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about dataset preparation you can find in <a href="https://github.com/opencv/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.
+If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about dataset preparation you can find in <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.
 
 Each dataset must have:
 

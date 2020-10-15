@@ -294,7 +294,7 @@ the script.
 Before you run the model quantizer, you must prepare a directory with
 the datasets required for the quantization process. This directory will be
 referred to as `<DATASET_DIR>` below. You can find more detailed information
-about dataset preparation in the <a href="https://github.com/opencv/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.
+about dataset preparation in the <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.
 
 The basic usage is to run the script like this:
 
