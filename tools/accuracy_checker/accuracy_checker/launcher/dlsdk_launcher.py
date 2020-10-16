@@ -803,7 +803,7 @@ class DLSDKLauncher(Launcher):
         if self.preprocessor:
             self._set_preprocess(self.preprocessor)
 
-        if self.network and not self.preprocessor:
+        if self.network:
             self.exec_network = self.ie_core.load_network(
                 self.network, self._device, num_requests=self.num_requests
             )
