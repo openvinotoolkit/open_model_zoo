@@ -75,7 +75,7 @@ class ColorizationEvaluator(BaseEvaluator):
             if not contains_all(network_info, ['colorization_network', 'verification_network']):
                 raise ConfigError('configuration for colorization_network/verification_network does not exist')
 
-        if colorization_network['color_coeff']:
+        if 'color_coeff' in colorization_network:
             test_model = ColorizationTestModel(
                 network_info.get('colorization_network', {}), launcher, delayed_model_loading
             )
@@ -388,7 +388,7 @@ class ColorizationTestModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.net_type = 'colorization_network'
         super().__init__(network_info, launcher, delayed_model_loading)
-        if network_info['color_coeff']:
+        if 'color_coeff' in network_info:
             self.color_coeff = np.load(network_info['color_coeff'])
 
     @staticmethod
