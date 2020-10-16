@@ -75,9 +75,14 @@ class ColorizationEvaluator(BaseEvaluator):
             if not contains_all(network_info, ['colorization_network', 'verification_network']):
                 raise ConfigError('configuration for colorization_network/verification_network does not exist')
 
-        test_model = ColorizationTestModel(
-            network_info.get('colorization_network', {}), launcher, delayed_model_loading
-        )
+        if colorization_network['color_coeff']:
+            test_model = ColorizationTestModel(
+                network_info.get('colorization_network', {}), launcher, delayed_model_loading
+            )
+        else:
+            test_model = ColorizationTestModelPytorch(
+                network_info.get('colorization_network', {}), launcher, delayed_model_loading
+            )
         check_model = ColorizationCheckModel(
             network_info.get('verification_network', {}), launcher, delayed_model_loading
         )
@@ -113,10 +118,12 @@ class ColorizationEvaluator(BaseEvaluator):
             metric_interval = kwargs.get('metrics_interval', 1000)
             ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
+            extr_batch_origs, _ = extract_image_representations(batch_inputs)
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             extr_batch_inputs, _ = extract_image_representations(batch_inputs)
             metrics_result = None
-            batch_raw_prediction, batch_out = self.test_model.predict(batch_identifiers, extr_batch_inputs)
+            batch_raw_prediction, batch_out = self.test_model.predict(batch_identifiers, extr_batch_inputs,
+                                                                      extr_batch_origs)
             if output_callback:
                 output_callback(
                     batch_raw_prediction,
@@ -320,7 +327,7 @@ class BaseModel:
 
         return model, weights
 
-    def predict(self, idenitifers, input_data):
+    def predict(self, idenitifers, input_data, orig_data):
         raise NotImplementedError
 
     def release(self):
@@ -381,7 +388,8 @@ class ColorizationTestModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.net_type = 'colorization_network'
         super().__init__(network_info, launcher, delayed_model_loading)
-        self.color_coeff = np.load(network_info['color_coeff'])
+        if network_info['color_coeff']:
+            self.color_coeff = np.load(network_info['color_coeff'])
 
     @staticmethod
     def data_preparation(input_data):
@@ -400,7 +408,7 @@ class ColorizationTestModel(BaseModel):
         new_result = [np.clip(cv2.cvtColor(img_lab_out, cv2.COLOR_Lab2BGR), 0, 1)]
         return new_result
 
-    def predict(self, identifiers, input_data):
+    def predict(self, identifiers, input_data, orig_data=None):
         img_l, img_l_rs = self.data_preparation(input_data)
         h_orig, w_orig = input_data[0].shape[:2]
         res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})
@@ -437,6 +445,52 @@ class ColorizationTestModel(BaseModel):
             self.input_blob = input_blob
             self.output_blob = output_blob
             self.with_prefix = with_prefix
+
+
+class ColorizationTestModelPytorch(ColorizationTestModel):
+    @staticmethod
+    def data_preparation(input_data, orig_data):
+        input_ = orig_data[0].astype(np.float32) / 255.0
+        input_rs = input_data[0].astype(np.float32)
+
+        img_lab = cv2.cvtColor(input_, cv2.COLOR_RGB2Lab)
+        img_lab_rs = cv2.cvtColor(input_rs, cv2.COLOR_RGB2Lab)
+        img_l = img_lab[:, :, 0]
+        img_l_rs = img_lab_rs[:, :, 0]
+        return img_l, img_l_rs
+
+    @staticmethod
+    def central_crop(input_data, crop_size=(224, 224)):
+        h, w = input_data.shape[:2]
+        delta_h = (h - crop_size[0]) // 2
+        delta_w = (w - crop_size[1]) // 2
+        return input_data[delta_h:h - delta_h, delta_w: w - delta_w, :]
+
+    def postprocessing(self, res, img_l):
+        img_l = img_l[:, :, np.newaxis]
+        res = np.squeeze(res, axis=0)
+        h_orig, w_orig = img_l.shape[:2]
+        h, w = res.shape[1:]
+
+        res = res.transpose((1, 2, 0)).astype(np.float32)
+        if(h_orig != h or w_orig != w):
+            img_l_rs = cv2.resize(img_l, dsize=(w, h), interpolation=cv2.INTER_LINEAR)[:, :, np.newaxis]
+        else:
+            img_l_rs = img_l
+
+        out_lab_orig = np.concatenate((img_l_rs, res), axis=2)
+        result_lab = np.clip(cv2.cvtColor(out_lab_orig, cv2.COLOR_Lab2BGR), 0, 1)
+
+        return [self.central_crop(result_lab)]
+
+    def predict(self, identifiers, input_data, orig_data):
+        img_l, img_l_rs = self.data_preparation(input_data, orig_data)
+        h_orig, w_orig = input_data[0].shape[:2]
+
+        res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})
+
+        new_result = self.postprocessing(res[self.output_blob], img_l)
+        return res, np.array(new_result)
 
 
 class ColorizationCheckModel(BaseModel):
