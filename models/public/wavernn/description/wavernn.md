@@ -71,7 +71,7 @@ where:
 1. Processed mel-spectrogram, name: `aux`, shape: [1x102025x128], format: [BxTxC]
 where:
    - B - batch size
-   - T - time in audio (equal to `time in mel spectrogram` * `hop_lenght`)
+   - T - time in audio (equal to `time in mel spectrogram` * `hop_length`)
    - C - number of features in processed mel-spectrogram.
 
 2. Upsampled and processed (by time) mel-spectrogram, name: `upsample_mels`, shape: [1x103125x80], format: [BxT'xC]

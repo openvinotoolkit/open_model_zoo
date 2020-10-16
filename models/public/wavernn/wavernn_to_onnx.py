@@ -76,7 +76,7 @@ class WaveRNNONNX(nn.Module):
 
     def infer(self, m_t, a1_t, a2_t, a3_t, a4_t, h1, h2, x):
         """
-        implement one step forward pass form WaveRNN fatchord version
+        implement one step forward pass from WaveRNN fatchord version
         :return:
         """
         x = torch.cat([x, m_t, a1_t], dim=1)
@@ -154,10 +154,6 @@ def main():
 
     with torch.no_grad():
         mels = np.load(args.mel)
-
-        '''
-        FIRST STEP: Upsample mels to the output wave shape
-        '''
         mels = torch.from_numpy(mels)
         mels = mels.unsqueeze(0)
         mels = voc_upsampler.pad_tensor(mels)
@@ -181,10 +177,6 @@ def main():
         aux_split = voc_infer.split_aux(aux)
 
         b_size, seq_len, _ = mels.size()
-
-        '''
-        SECOND STEP: Iterativelly generate wavs
-        '''
 
         if seq_len:
             m_t = mels[:, 0, :]
