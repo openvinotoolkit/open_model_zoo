@@ -4,7 +4,7 @@
 
 This is a Caffe2\* version of the ResNet-50 model, designed to perform image classification.
 This model was converted from Caffe\* to Caffe2\* format.
-For details see repository <https://github.com/caffe2/models/tree/master/resnet50>,
+For details see repository <https://github.com/facebookarchive/models/tree/master/resnet50>,
 paper <https://arxiv.org/abs/1512.03385>.
 
 ## Example
@@ -71,5 +71,5 @@ Object classifier according to ImageNet classes, name - `gpu_0/softmax`,  shape 
 ## Legal Information
 
 The original model is distributed under the
-[Apache License, Version 2.0](https://raw.githubusercontent.com/caffe2/models/master/LICENSE).
+[Apache License, Version 2.0](https://raw.githubusercontent.com/facebookarchive/models/master/LICENSE).
 A copy of the license is provided in [APACHE-2.0.txt](../licenses/APACHE-2.0.txt).
