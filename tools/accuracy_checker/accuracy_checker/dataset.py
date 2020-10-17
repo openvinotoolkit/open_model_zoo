@@ -31,7 +31,9 @@ from .config import (
     BoolField
 )
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
-from .representation import BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
+from .representation import (
+    BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
+)
 from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS
 from .logging import print_info
 
@@ -194,9 +196,7 @@ class Dataset:
         self.subset = ids if not pairwise_subset else self._make_subset_pairwise(ids, accept_pairs)
 
     def _make_subset_pairwise(self, ids, add_pairs=False):
-        subsample_set = OrderedSet()
-        pairs_set = OrderedSet()
-        if isinstance(self._annotation[0], ReIdentificationClassificationAnnotation):
+        def reid_pairwise_subset(pairs_set, subsample_set, ids):
             identifier_to_index = {annotation.identifier: index for index, annotation in enumerate(self._annotation)}
             for idx in ids:
                 subsample_set.add(idx)
@@ -209,7 +209,9 @@ class Dataset:
                     identifier_to_index[pair_identifier] for pair_identifier in current_annotation.positive_pairs
                 ]
                 pairs_set |= negative_pairs
-        else:
+            return pairs_set, subsample_set
+
+        def reid_subset(pairs_set, subsample_set, ids):
             for idx in ids:
                 subsample_set.add(idx)
                 selected_annotation = self._annotation[idx]
@@ -225,7 +227,18 @@ class Dataset:
                         if annotation.person_id == selected_annotation.person_id and not annotation.query
                     ]
                     pairs_set |= OrderedSet(gallery_for_person)
+            return pairs_set, subsample_set
 
+        realisation = [
+            (ReIdentificationClassificationAnnotation, reid_pairwise_subset),
+            (ReIdentificationAnnotation, reid_subset)
+            ]
+        subsample_set = OrderedSet()
+        pairs_set = OrderedSet()
+        for (dtype, func) in realisation:
+            if isinstance(self._annotation[0], dtype):
+                pairs_set, subsample_set = func(pairs_set, subsample_set, ids)
+                break
         if add_pairs:
             subsample_set |= pairs_set
 
