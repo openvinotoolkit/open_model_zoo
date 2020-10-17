@@ -26,7 +26,7 @@ from ..representation import (
 )
 from ..config import BaseField, BoolField, NumberField
 from .metric import FullDatasetEvaluationMetric
-from ..utils import UnsupportedPackage, contains_any
+from ..utils import UnsupportedPackage
 
 try:
     from sklearn.metrics import auc, precision_recall_curve
@@ -599,39 +599,39 @@ class LocalizationRecall(FullDatasetEvaluationMetric):
     @classmethod
     def parameters(cls):
         params = super().parameters()
-        params.update({'top_k': NumberField(optional=True, value_type=int, min_value=1, default=1)})
+        params.update({
+            'top_k': NumberField(optional=True, value_type=int, min_value=1, default=1),
+            'distance_threshold': NumberField(optional=True, default=25)
+        })
         return params
 
     def configure(self):
         self.top_k = self.get_value_from_config('top_k')
+        self.distance_threshold = self.get_value_from_config('distance_threshold')
 
     def evaluate(self, annotations, predictions):
-        query_ann_ids = np.array([ann.query_id for ann in annotations if ann.query])
-        query_for_gallery = [ann.query_id for ann in annotations if not ann.query]
         gallery_embeddings = extract_embeddings(annotations, predictions, query=False)
         query_embeddings = extract_embeddings(annotations, predictions, query=True)
+        query_ann = [ann for ann in annotations if ann.query]
+        gallery_ann = [ann for ann in annotations if not ann.query]
         query_len = np.shape(query_embeddings)[0]
         not_empty = np.size(gallery_embeddings) > 0 and np.size(query_embeddings) > 0
         if not not_empty:
             warnings.warn('No gallery or query embeddings for evaluation')
             return 0
-        unique_q = []
-        for q_list in query_for_gallery:
-            unique_q.extend(list(q_list))
-        unique_q = set(unique_q)
-        if not np.sum([np.size(q) for q in query_for_gallery]) or not contains_any(unique_q, query_ann_ids):
-            warnings.warn("No matched query and gallery embeddings pairs")
-        A = np.dot(query_embeddings, gallery_embeddings.transpose())
-        B = np.sum(query_embeddings ** 2, axis=1, keepdims=True)
-        C = np.sum(gallery_embeddings ** 2, axis=1)
-        D = B + C - 2 * A
-        D[D < 0] = 0
-        L2_distance = np.sqrt(D)
+        l2_distance = (
+            np.sum(query_embeddings ** 2, axis=1, keepdims=True)
+            + np.sum(gallery_embeddings ** 2, axis=1)
+            - 2 * np.dot(query_embeddings, gallery_embeddings.transpose())
+        )
         correct_at_n = 0
-        for i, q in enumerate(query_ann_ids):
-            indices = np.argsort(L2_distance[i, :])[:self.top_k]
+        for i, q in enumerate(query_ann):
+            indices = np.argsort(l2_distance[i, :])[:self.top_k]
             for ind in indices:
-                if q in query_for_gallery[ind]:
+                g_loc = gallery_ann[ind].coords
+                q_loc = q.coords
+                dist = np.linalg.norm(q_loc - g_loc)
+                if dist < self.distance_threshold:
                     correct_at_n += 1
         recall = correct_at_n / query_len
         return recall

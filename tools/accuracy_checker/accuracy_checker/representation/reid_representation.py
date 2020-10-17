@@ -30,9 +30,9 @@ class ReIdentificationAnnotation(ReIdentification):
 
 
 class PlaceRecognitionAnnotation(ReIdentification):
-    def __init__(self, identifier, query_id, query):
+    def __init__(self, identifier, coords, query):
         super().__init__(identifier)
-        self.query_id = query_id if not query or (query and isinstance(query_id, int)) else query_id[0]
+        self.coords = coords
         self.query = query
 
 

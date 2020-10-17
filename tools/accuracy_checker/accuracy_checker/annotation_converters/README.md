@@ -390,7 +390,6 @@ The main difference between this converter and `super_resolution` in data organi
   * `alphabet` - alphabet for sequence decoding (Optional, default ["N", "A", "C", "G", "T"]).
 * `place_recognition` - converts dataset for image based localization task to `PlaceRecognitionAnnotation`
   * `subset_file` - matlab file contains info about subset used in validation.
-  * `distance_threshold` - distance threshold for creating correspondence between query and gallery images.
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)

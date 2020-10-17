@@ -32,7 +32,7 @@ from .config import (
 )
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
 from .representation import (
-    BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
+    BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
 )
 from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS
 from .logging import print_info
@@ -229,19 +229,8 @@ class Dataset:
                     pairs_set |= OrderedSet(gallery_for_person)
             return pairs_set, subsample_set
 
-        def ibl_subset(pairs_set, subsample_set, ids):
-            query_ann = [ann.query_id for ann in self._annotation if ann.query]
-            for idx in ids:
-                subsample_set.add(idx)
-                selected_annotation = self._annotation[idx]
-                if not selected_annotation.query:
-                    q_id_in_db = [query_ann[i] for i in selected_annotation.query_id]
-                    pairs_set |= OrderedSet(q_id_in_db)
-            return pairs_set, subsample_set
-
         realisation = [
             (ReIdentificationClassificationAnnotation, reid_pairwise_subset),
-            (PlaceRecognitionAnnotation, ibl_subset),
             (ReIdentificationAnnotation, reid_subset)
             ]
         subsample_set = OrderedSet()

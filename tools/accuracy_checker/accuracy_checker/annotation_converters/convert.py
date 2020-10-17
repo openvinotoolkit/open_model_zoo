@@ -25,7 +25,7 @@ from functools import partial
 import numpy as np
 
 from ..representation import (
-    ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
+    ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
 )
 from ..utils import get_path, OrderedSet
 from ..data_analyzer import BaseDataAnalyzer
@@ -76,8 +76,6 @@ def make_subset(annotation, size, seed=666, shuffle=True):
         return make_subset_pairwise(annotation, size, shuffle)
     if isinstance(annotation[-1], ReIdentificationAnnotation):
         return make_subset_reid(annotation, size, shuffle)
-    if isinstance(annotation[-1], PlaceRecognitionAnnotation):
-        return make_subset_ibl(annotation, size, shuffle)
 
     result_annotation = list(np.random.choice(annotation, size=size, replace=False)) if shuffle else annotation[:size]
     return result_annotation

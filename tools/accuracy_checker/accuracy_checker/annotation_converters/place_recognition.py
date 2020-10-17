@@ -16,13 +16,9 @@ limitations under the License.
 import numpy as np
 
 from .format_converter import BaseFormatConverter, ConverterReturn
-from ..utils import loadmat, UnsupportedPackage, check_file_existence
+from ..utils import loadmat, check_file_existence
 from ..representation import PlaceRecognitionAnnotation
-from ..config import PathField, NumberField
-try:
-    from sklearn.neighbors import NearestNeighbors
-except ImportError as import_error:
-    NearestNeighbors = UnsupportedPackage('sklearn.neighbors', import_error)
+from ..config import PathField
 
 
 class PlaceRecognitionDatasetConverter(BaseFormatConverter):
@@ -33,34 +29,30 @@ class PlaceRecognitionDatasetConverter(BaseFormatConverter):
         params = super().parameters()
         params.update({
             'split_file': PathField(),
-            'images_dir': PathField(is_directory=True, optional=True),
-            'distance_threshold': NumberField(optional=True, default=25, min_value=0)
+            'images_dir': PathField(is_directory=True, optional=True)
         })
         return params
 
     def configure(self):
         self.split_file = self.get_value_from_config('split_file')
         self.data_dir = self.get_value_from_config('images_dir') or self.split_file.parent
-        self.distance = self.get_value_from_config('distance_therhold')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         queries, loc_query, gallery, loc_gallery = self.read_db()
-        positives = self.get_positives(loc_gallery, loc_query)
         annotations = []
         num_iterations = len(queries) + len(gallery)
         content_errors = None if not check_content else []
-        for idx, image in enumerate(gallery):
-            positive_q = positives[idx]
+        for idx, (image, utm) in enumerate(zip(gallery, loc_gallery)):
             if check_content and not check_file_existence(self.data_dir / image):
                 content_errors.append('{}: des not exist'.format(self.data_dir / image))
-            annotations.append(PlaceRecognitionAnnotation(image, positive_q, False))
+            annotations.append(PlaceRecognitionAnnotation(image, utm, False))
             if progress_callback and idx % progress_interval == 0:
                 progress_callback(idx * 100 / num_iterations)
-        for idx, image in enumerate(queries):
+        for idx, (image, utm) in enumerate(zip(queries, loc_query)):
             image = 'queries_real/'+image
             if check_content and not check_file_existence(self.data_dir / image):
                 content_errors.append('{}: des not exist'.format(self.data_dir / image))
-            annotations.append(PlaceRecognitionAnnotation(image, idx, True))
+            annotations.append(PlaceRecognitionAnnotation(image, utm, True))
             if progress_callback and (idx + len(gallery)) % progress_callback == 0:
                 progress_callback((idx + len(gallery)) * 100 / num_iterations)
 
@@ -74,10 +66,3 @@ class PlaceRecognitionDatasetConverter(BaseFormatConverter):
         q_image = [f[0] for f in data['qImageFns']]
         utm_q = np.array(data['utmQ']).T
         return q_image, utm_q, db_image, utm_db
-
-    def get_positives(self, query_loc, gallery_loc):
-        knn = NearestNeighbors(n_jobs=-1)
-        knn.fit(gallery_loc)
-        _, positives = knn.radius_neighbors(query_loc, radius=self.distance)
-
-        return positives
