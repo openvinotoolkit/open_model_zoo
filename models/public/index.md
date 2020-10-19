@@ -170,6 +170,7 @@ Since this task contains - in the general setting - some ambiguity, the resultin
 | Model Name                  | Implementation | OMZ Model Name                | Accuracy | GFlops    | mParams |
 | --------------------------- | -------------- | ----------------------------- | -------- | --------- | ------- |
 | midasnet                    | PyTorch\*      | [midasnet](./midasnet/midasnet.md)| 7.5878| 207.4915  |    104.0814     |
+| NYU_FCRN                    | TensorFlow\*   | [nyu-fcrn-tf](./nyu-fcrn-tf/nyu-fcrn-tf.md)| 0.573 | 63.5421 | 34.5255 |
 
 ## Image Inpainting
 
