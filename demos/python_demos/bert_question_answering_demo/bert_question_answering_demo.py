@@ -160,7 +160,7 @@ def main():
     # loop on user's questions
     while True:
         question = input('Type question (empty string to exit):')
-        if not question:
+        if not question or len(question.strip()) == 0:
             break
 
         q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
