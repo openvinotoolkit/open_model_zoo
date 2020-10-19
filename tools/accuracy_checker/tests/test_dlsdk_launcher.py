@@ -196,7 +196,7 @@ class TestDLSDKLauncherAffinity:
             for node in ng_function.get_ordered_ops():
                 if node.get_friendly_name() != 'conv1':
                     continue
-                assert node.get_friendly_name() in affinity_map:
+                assert node.get_friendly_name() in affinity_map
                 assert node.get_runtime_info()['affinity'] == affinity_map[node.get_friendly_name()]
 
     @pytest.mark.usefixtures('mock_file_exists')
