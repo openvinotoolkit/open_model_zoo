@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 NYU-FCRN is a model for monocular depth estimation trained by NYU Depth V2 dataset;
-  as described in the paper [Deeper Depth Prediction with Fully Convolutional Residual Networks](https://arxiv.org/abs/1606.00373) 
+  as described in the paper [Deeper Depth Prediction with Fully Convolutional Residual Networks](https://arxiv.org/abs/1606.00373). 
   The model input is a blob that consists of a single image of "1x228x304x3" in RGB order.
   The model output is an inverse depth map that is defined up to an unknown scale factor. More details can be found in the [following repository](https://github.com/iro-cp/FCRN-DepthPrediction).
 
