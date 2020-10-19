@@ -157,6 +157,9 @@ def main():
             active_object_id = -1
             last_caption = None
 
+        if len(detections) == 1:
+            active_object_id = 0
+
         if active_object_id >= 0:
             cur_det = [det for det in detections if det.id == active_object_id]
             if len(cur_det) != 1:

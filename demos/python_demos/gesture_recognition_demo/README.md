@@ -80,7 +80,7 @@ python gesture_recognition_demo.py \
 -c ./msasl100-classes.json
 ```
 
-The demo starts in person tracking mode and to switch it in the action recognition mode you should press `0-9` button with appropriate detection ID (the number in top-left of each bounding box). After that you can switch back to tracking mode by pressing space button.
+The demo starts in person tracking mode and to switch it in the action recognition mode you should press `0-9` button with appropriate detection ID (the number in top-left of each bounding box). If frame contains only one person, he will be chosen automatically. After that you can switch back to tracking mode by pressing space button.
 
 An example of file with class names can be found [here](./classes.json).
 
