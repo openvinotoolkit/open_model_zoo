@@ -1,4 +1,4 @@
-# midasnet
+# nyu-fcrn-tf
 
 ## Use Case and High-Level Description
 
