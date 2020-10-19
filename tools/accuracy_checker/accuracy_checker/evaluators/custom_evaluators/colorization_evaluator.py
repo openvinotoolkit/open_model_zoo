@@ -327,7 +327,7 @@ class BaseModel:
 
         return model, weights
 
-    def predict(self, idenitifers, input_data, orig_data):
+    def predict(self, idenitifers, input_data):
         raise NotImplementedError
 
     def release(self):
@@ -483,7 +483,7 @@ class ColorizationTestModelPytorch(ColorizationTestModel):
 
         return [self.central_crop(result_lab)]
 
-    def predict(self, identifiers, input_data, orig_data):
+    def predict(self, identifiers, input_data, orig_data=None):
         img_l, img_l_rs = self.data_preparation(input_data, orig_data)
 
         res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})

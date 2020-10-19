@@ -43,6 +43,14 @@ postprocessing:
     file: model/__init__.py
     pattern: 'from .(s|u)(.*) import \*'
     replacement: ''
+  - $type: regex_replace
+    file: model/__init__.py
+    pattern: 'from .eccv16 import \*'
+    replacement: 'from .eccv16 import ECCVGenerator'
+  - $type: regex_replace
+    file: model/eccv16.py
+    pattern: 'from IPython import embed'
+    replacement: ''
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=ECCVGenerator
