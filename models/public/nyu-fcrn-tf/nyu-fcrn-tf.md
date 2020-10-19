@@ -23,9 +23,13 @@ NYU-FCRN is a model for monocular depth estimation trained by NYU Depth V2 datas
 | ------ | ----- |
 | [RMSE](https://en.wikipedia.org/wiki/Root-mean-square_deviation)   | 0.573 |
 | log10  | 0.055 |
-| [rel](https://en.wikipedia.org/wiki/Mean_absolute_percentage_error)    | 0.127 |
+| rel    | 0.127 |
 
-Accuracy numbers obtained on NUY Depth V2 dataset. log10 is logarithmic absolute error, defined as abs(log10(gt) - log10(pred)), where gt - ground truth depth map, pred - predicted depth map.
+Accuracy numbers obtained on NUY Depth V2 dataset. 
+`log10` is logarithmic absolute error, defined as `abs(log10(gt) - log10(pred))`, 
+where `gt` - ground truth depth map, `pred` - predicted depth map.
+`rel` is relative absolute error defined as absolute error normalized on ground truth depth map values 
+(`abs(gt - pred) / gt`, where `gt` - ground truth depth map, `pred` - predicted depth map).
 
 
 ## Input
