@@ -329,7 +329,6 @@ class DLSDKLauncher(Launcher):
                 )
             rt_info = node.get_rt_info()
             rt_info["affinity"] = device
-        del ng_function
 
     def _set_affinity_via_layers(self, custom_affinity, automatic_affinity):
         layers = self.network.layers
