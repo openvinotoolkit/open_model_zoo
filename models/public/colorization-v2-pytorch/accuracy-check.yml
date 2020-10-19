@@ -3,6 +3,8 @@ evaluations:
     module: custom_evaluators.colorization_evaluator.ColorizationEvaluator
     module_config:
       network_info:
+        colorization_network: {}
+
         verification_network:
           adapter: classification
 

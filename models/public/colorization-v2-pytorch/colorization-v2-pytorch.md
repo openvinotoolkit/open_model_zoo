@@ -29,9 +29,9 @@ model and colorization as preprocessing.
 For preprocessing `rgb -> gray -> coloriaztion` recieved values:
 
 | Metric         | Value with preprocessing   | Value without preprocessing |
-|----------------|-----------------------------|-----------------------------|
-| Accuracy top-1 |                      57.53% |                      70.96% |
-| Accuracy top-5 |                      81.28% |                      89.88% |
+|----------------|----------------------------|-----------------------------|
+| Accuracy top-1 |                     57.53% |                      70.96% |
+| Accuracy top-5 |                     81.28% |                      89.88% |
 
 ## Performance
 
@@ -70,6 +70,8 @@ Image, name - `color_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
+Channel order is AB channels of LAB-image.
+
 ### Converted model
 
 Image, name - `color_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
@@ -78,6 +80,8 @@ Image, name - `color_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
 - `C` - channel
 - `H` - height
 - `W` - width
+
+Channel order is AB channels of LAB-image.
 
 ## Legal Information
 The original model is distributed under the following

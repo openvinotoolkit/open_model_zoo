@@ -485,7 +485,6 @@ class ColorizationTestModelPytorch(ColorizationTestModel):
 
     def predict(self, identifiers, input_data, orig_data):
         img_l, img_l_rs = self.data_preparation(input_data, orig_data)
-        h_orig, w_orig = input_data[0].shape[:2]
 
         res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})
 
