@@ -69,7 +69,6 @@ Inverse depth map is defined up to an unknown scale factor.
 Inverse depth map, name - `ConvPred/ConvPred`, shape - `1,128,160`, format is `B,H,W` where:
 
 - `B` - batch size
-- `C` - channels
 - `H` - height
 - `W` - width
 
