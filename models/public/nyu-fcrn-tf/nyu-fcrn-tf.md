@@ -21,7 +21,7 @@ NYU-FCRN is a model for monocular depth estimation trained by NYU Depth V2 datas
 
 | Metric | Value |
 | ------ | ----- |
-| [rmse](https://en.wikipedia.org/wiki/Root-mean-square_deviation)   | 0.573 |
+| [RMSE](https://en.wikipedia.org/wiki/Root-mean-square_deviation)   | 0.573 |
 | log10  | 0.055 |
 | [rel](https://en.wikipedia.org/wiki/Mean_absolute_percentage_error)    | 0.127 |
 
