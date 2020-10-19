@@ -28,7 +28,7 @@ NYU-FCRN is a model for monocular depth estimation trained by NYU Depth V2 datas
 Accuracy numbers obtained on NUY Depth V2 dataset. 
 The `log10` metric is logarithmic absolute error, defined as `abs(log10(gt) - log10(pred))`, 
 where `gt` - ground truth depth map, `pred` - predicted depth map.
-`rel` is relative absolute error defined as absolute error normalized on ground truth depth map values 
+The `rel` metric is relative absolute error defined as absolute error normalized on ground truth depth map values 
 (`abs(gt - pred) / gt`, where `gt` - ground truth depth map, `pred` - predicted depth map).
 
 
