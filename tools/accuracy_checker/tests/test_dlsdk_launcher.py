@@ -33,6 +33,10 @@ from accuracy_checker.launcher.model_conversion import FrameworkParameters
 from tests.common import update_dict
 from accuracy_checker.data_readers import DataRepresentation
 from accuracy_checker.utils import contains_all
+try:
+    import ngraph as ng
+except ImportError:
+    ng = None
 
 
 def no_available_myriad():
@@ -183,9 +187,17 @@ class TestDLSDKLauncherAffinity:
         dlsdk_test_model = get_dlsdk_test_model(models_dir, {
             'device': 'HETERO:CPU,GPU', 'affinity_map': './affinity_map.yml'
         })
-        layers = dlsdk_test_model.network.layers
-        for key, value in affinity_map.items():
-            assert layers[key].affinity == value
+        if ng is None:
+            layers = dlsdk_test_model.network.layers
+            for key, value in affinity_map.items():
+                assert layers[key].affinity == value
+        else:
+            ng_function = ng.function_from_cnn(dlsdk_test_model.network)
+            for node in ng_function.get_ordered_ops():
+                if node.get_friendly_name() != 'conv1':
+                    continue
+                assert node.get_friendly_name() in affinity_map:
+                assert node.get_runtime_info()['affinity'] == affinity_map[node.get_friendly_name()]
 
     @pytest.mark.usefixtures('mock_file_exists')
     def test_dlsdk_launcher_affinity_map_invalid_device(self, mocker, models_dir):
