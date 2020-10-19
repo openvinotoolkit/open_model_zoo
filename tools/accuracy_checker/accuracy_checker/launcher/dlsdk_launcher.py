@@ -62,6 +62,11 @@ except ImportError:
     except ImportError:
         Blob, TensorDesc = None, None
 
+try:
+    import ngraph as ng
+except ImportError as error:
+    ng = UnsupportedPackage('ngraph', error)
+
 
 # pylint:disable=R0904
 class DLSDKLauncher(Launcher):
@@ -301,6 +306,32 @@ class DLSDKLauncher(Launcher):
         for layer in custom_affinity:
             if layer not in automatic_affinity:
                 raise ConfigError('Layer \'{layer}\' is not present in network'.format(layer=layer))
+        if not isinstance(ng, UnsupportedPackage):
+            self._set_affinity_ng(custom_affinity, automatic_affinity)
+            return
+        if not hasattr(self.network, 'layers'):
+            ng.raise_error('affinity setting')
+        self._set_affinity_via_layers(custom_affinity, automatic_affinity)
+
+    def _set_affinity_ng(self, custom_affinity, auto_affinity):
+        ng_function = ng.function_from_cnn(self.network)
+        for node in ng_function.get_ordered_ops():
+            layer_name = node.get_friendly_name()
+            device = custom_affinity.get(layer_name, auto_affinity.get(layer_name))
+            if device is None:
+                continue
+            if device not in self._devices_list():
+                raise ConfigError(
+                    'Device \'{device}\' set for \'{layer}\' layer is not present in '
+                    'provided configuration \'{configuration}\''.format(
+                        device=device, layer=layer_name, configuration=self._device
+                    )
+                )
+            rt_info = node.get_rt_info()
+            rt_info["affinity"] = device
+        self.network = ng.function_to_cnn(ng_function)
+
+    def _set_affinity_via_layers(self, custom_affinity, automatic_affinity):
         layers = self.network.layers
         for layer_name in layers:
             device = custom_affinity.get(layer_name, automatic_affinity.get(layer_name))
