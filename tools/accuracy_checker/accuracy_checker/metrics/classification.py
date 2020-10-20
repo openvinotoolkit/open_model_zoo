@@ -201,7 +201,10 @@ class ClipAccuracy(PerImageEvaluationMetric):
         self.previous_video_label = None
 
     def update(self, annotation, prediction):
-        video_id = annotation.identifier.video
+        if isinstance(annotation.identifier, list):
+            video_id = annotation.identifier[0].video
+        else:
+            video_id = annotation.identifier.video
 
         if self.previous_video_id is not None and video_id != self.previous_video_id:
             video_top_label = np.argmax(self.video_avg_prob.evaluate())
