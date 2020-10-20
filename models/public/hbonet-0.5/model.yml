@@ -13,7 +13,8 @@
 # limitations under the License.
 
 description: >-
-  "hbonet-0.5" is one of HBONet architectures <https://arxiv.org/abs/1908.03888>
+  The "hbonet-0.5" model is one of the classification models from repository <https://github.com/d-li14/HBONet>
+  with "width_mult=0.5"
 task_type: classification
 files:
   - name: hbonet.py
