@@ -15,11 +15,12 @@ limitations under the License.
 """
 
 from collections import OrderedDict
+import warnings
 
 from ..utils import read_json, read_txt, check_file_existence
 from ..representation import ClassificationAnnotation
 from ..data_readers import ClipIdentifier
-from ..config import PathField, NumberField, StringField, BoolField
+from ..config import PathField, NumberField, StringField, BoolField, ConfigError
 
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
@@ -51,7 +52,8 @@ class ActionRecognitionConverter(BaseFormatConverter):
                 description='path to json file with dataset meta (e.g. label_map)', optional=True
             ),
             'numpy_input': BoolField(description='use numpy arrays as input', optional=True, default=False),
-            'image_input': BoolField(description='use images as input', optional=True, default=False),
+            'two_stream_input': BoolField(description='use two streams: images and numpy arrays as input',
+                                          optional=True, default=False),
             'image_subpath': StringField(description="sub-directory for images", optional=True),
             'numpy_subpath': StringField(description="sub-directory for numpy arrays", optional=True),
             'num_samples': NumberField(
@@ -70,10 +72,34 @@ class ActionRecognitionConverter(BaseFormatConverter):
         self.subset = self.get_value_from_config('subset')
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
         self.numpy_input = self.get_value_from_config('numpy_input')
-        self.image_input = self.get_value_from_config('image_input')
+        self.two_stream_input = self.get_value_from_config('two_stream_input')
         self.numpy_subdir = self.get_value_from_config('numpy_subpath')
         self.image_subdir = self.get_value_from_config('image_subpath')
         self.num_samples = self.get_value_from_config('num_samples')
+
+        if self.numpy_subdir and (self.numpy_input or
+                                  self.two_stream_input) and not (self.data_dir / self.numpy_subdir).exists():
+            raise ConfigError('Please check numpy_subpath or data_dir. '
+                              'Path {} does not exist'.format(self.data_dir / self.numpy_subdir))
+
+        if self.image_subdir and (not self.numpy_input or
+                                  self.two_stream_input) and not (self.data_dir / self.image_subdir).exists():
+            raise ConfigError('Please check image_subpath or data_dir. '
+                              'Path {} does not exist'.format(self.data_dir / self.image_subdir))
+
+        if self.two_stream_input:
+            if not self.numpy_subdir:
+                raise ConfigError('numpy_subpath should be provided in case of using two streams')
+
+            if not self.image_subdir:
+                raise ConfigError('image_subpath should be provided in case of using two streams')
+        else:
+            if self.numpy_input and self.numpy_subdir:
+                warnings.warn("numpy_subpath is provided. "
+                              "Make sure that data_source is {}".format(self.data_dir / self.numpy_subdir))
+            if not self.numpy_input and self.image_subdir:
+                warnings.warn("image_subpath is provided. "
+                              "Make sure that data_source is {}".format(self.data_dir / self.image_subdir))
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         full_annotation = read_json(self.annotation_file, object_pairs_hook=OrderedDict)
@@ -120,17 +146,13 @@ class ActionRecognitionConverter(BaseFormatConverter):
         return ConverterReturn(annotations, {'label_map': label_map}, content_errors)
 
     def get_ext_and_dir(self):
-        if self.numpy_input and not self.image_input:
-            data_ext = ['npy']
-            data_dir = [self.data_dir / self.numpy_subdir] if self.numpy_subdir else [self.data_dir]
-        elif self.image_input and not self.numpy_input:
-            data_ext = ['jpg']
-            data_dir = [self.data_dir / self.image_subdir] if self.image_subdir else [self.data_dir]
-        else:
-            data_ext = ['jpg', 'npy']
-            data_dir = [self.data_dir / self.image_subdir, self.data_dir / self.numpy_subdir]
+        if self.two_stream_input:
+            return ['jpg', 'npy'], [self.data_dir / self.image_subdir, self.data_dir / self.numpy_subdir]
 
-        return data_ext, data_dir
+        if self.numpy_input:
+            return ['npy'], [self.data_dir / self.numpy_subdir if self.numpy_subdir else self.data_dir]
+
+        return ['jpg'], [self.data_dir / self.image_subdir if self.image_subdir else self.data_dir]
 
     def get_videos(self, video_names, annotations, class_to_idx, data_dir, data_ext):
         videos = []
