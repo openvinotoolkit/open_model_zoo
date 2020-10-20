@@ -13,8 +13,8 @@
 # limitations under the License.
 
 description: >-
-  Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise
-  head.
+  This is a vehicle detection network based on an SSD framework with tuned MobileNet
+  v1 as a feature extractor.
 task_type: detection
 files:
   - name: FP32/vehicle-detection-adas-0002.xml

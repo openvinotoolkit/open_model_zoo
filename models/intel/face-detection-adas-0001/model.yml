@@ -13,7 +13,9 @@
 # limitations under the License.
 
 description: >-
-  Face Detection (MobileNet with reduced channels + SSD with weights sharing)
+  Face detector for driver monitoring and similar scenarios. The network features
+  a default MobileNet backbone that includes depth-wise convolutions to reduce the
+  amount of computation for the 3x3 convolution block.
 task_type: detection
 files:
   - name: FP32/face-detection-adas-0001.xml

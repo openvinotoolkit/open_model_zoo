@@ -13,9 +13,9 @@
 # limitations under the License.
 
 description: >-
-  General purpose instance segmentation model. Mask R-CNN with ResNet50 backbone -  PANet
-  feature refiner with GroupNorm and DeformableConv operations and Adaptive Feature
-  Pooling in all ROI-wise heads.
+  This model is an instance segmentation network for 80 classes of objects. It is
+  a Mask R-CNN with ResNeXt101-32x8 backbone, PANet feature refiner with GroupNorm
+  and DeformableConv operations and Adaptive Feature Pooling in all ROI-wise heads.
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-0010.xml

@@ -13,8 +13,10 @@
 # limitations under the License.
 
 description: >-
-  Recognizes school marks (e.g '4' or '3.5'). Alphabet is '0123456789._'. Architecture:
-  VGG-like + BiLSTM as an encoder -  BiLSTM as a decoder.
+  This is a network for text recognition scenario. It consists of VGG16-like backbone
+  and bidirectional LSTM encoder-decoder. The network is able to recognize school
+  marks that should have format either "<digit>" or "<digit>.<digit>" (e.g. "4" or
+  "3.5").
 task_type: optical_character_recognition
 files:
   - name: FP32/handwritten-score-recognition-0003.xml

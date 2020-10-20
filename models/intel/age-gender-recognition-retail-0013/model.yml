@@ -13,7 +13,9 @@
 # limitations under the License.
 
 description: >-
-  Age & gender classification. Used in Audience Analytics.
+  Fully convolutional network for simultaneous Age/Gender recognition. The network
+  is able to recognize age of people in [18, 75] years old range, it is not applicable
+  for children since their faces were not in the training set.
 task_type: object_attributes
 files:
   - name: FP32/age-gender-recognition-retail-0013.xml

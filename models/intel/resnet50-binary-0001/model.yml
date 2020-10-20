@@ -13,7 +13,11 @@
 # limitations under the License.
 
 description: >-
-  ResNet-50 Binary
+  This is a classical classification network for 1000 classes trained on ImageNet.
+  The difference is that most convolutional layers were replaced by binary once that
+  can be implemented as XNOR+POPCOUN operations. Only input, final and shortcut layers
+  were kept as FP32, all the rest convolutional layers are replaced by BinaryConvolution
+  layers.
 task_type: classification
 files:
   - name: FP32-INT1/resnet50-binary-0001.xml

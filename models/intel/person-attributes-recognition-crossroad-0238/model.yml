@@ -13,7 +13,10 @@
 # limitations under the License.
 
 description: >-
-  Pedestrian attributes recognition based on Inception V3 backbone
+  This model presents a person attributes classification algorithm analysis scenario.
+  The model consists of the Inception V3 backbone and a head. For an input image with
+  a pedestrian the model returns 7 values that are probabilities of the corresponding
+  7 attributes.
 task_type: object_attributes
 files:
   - name: FP32/person-attributes-recognition-crossroad-0238.xml

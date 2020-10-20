@@ -13,9 +13,47 @@
 # limitations under the License.
 
 description: >-
-  Multiclass (road -  sidewalk -  building -  wall -  fence -  pole -  traffic light
-  -  traffic sign -  vegetation -  terrain -  sky -  person -  rider -  car -  truck
-  -  bus -  train -  motorcycle -  bicycle -  ego-vehicle) segmentation based on ICNet
+  This is a segmentation network to classify each pixel into 20 classes:
+
+  - road
+
+  - sidewalk
+
+  - building
+
+  - wall
+
+  - fence
+
+  - pole
+
+  - traffic light
+
+  - traffic sign
+
+  - vegetation
+
+  - terrain
+
+  - sky
+
+  - person
+
+  - rider
+
+  - car
+
+  - truck
+
+  - bus
+
+  - train
+
+  - motorcycle
+
+  - bicycle
+
+  - ego-vehicle
 task_type: semantic_segmentation
 files:
   - name: FP32/semantic-segmentation-adas-0001.xml

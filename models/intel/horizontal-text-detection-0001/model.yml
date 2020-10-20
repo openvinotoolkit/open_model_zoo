@@ -13,7 +13,12 @@
 # limitations under the License.
 
 description: >-
-  Horizontal text detector based on FCOS with light MobileNetV2 backbone
+  Text detector based on FCOS <https://arxiv.org/abs/1904.01355> architecture with
+  MobileNetV2-like <https://arxiv.org/abs/1801.04381> as a backbone for indoor/outdoor
+  scenes with more or less horizontal text.
+
+  The key benefit of this model compared to the base model <../../text-detection-0003/description/text-detection-0003.md>
+  is its smaller size and faster performance.
 task_type: detection
 files:
   - name: FP32/horizontal-text-detection-0001.xml

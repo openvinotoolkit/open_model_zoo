@@ -13,7 +13,14 @@
 # limitations under the License.
 
 description: >-
-  Faster RCNN with ResNet101 backbone trained on COCO dataset with 0.6 sparsity level.
+  This is a retrained version of the Faster R-CNN <https://arxiv.org/abs/1506.01497>
+  object detection network trained with the COCO* training dataset. The actual implementation
+  is based on Detectron <https://github.com/facebookresearch/detectron2>, with additional
+  network weight pruning <https://arxiv.org/abs/1710.01878> applied to sparsify convolution
+  layers (60% of network parameters are set to zeros).
+
+  The model input is a blob that consists of a single image of "1x3x800x1280" in the
+  BGR order. The pixel values are integers in the [0, 255] range.
 task_type: detection
 files:
   - name: FP32/faster-rcnn-resnet101-coco-sparse-60-0001.xml

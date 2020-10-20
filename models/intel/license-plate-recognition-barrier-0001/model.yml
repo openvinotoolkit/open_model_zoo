@@ -13,7 +13,8 @@
 # limitations under the License.
 
 description: >-
-  Chinese license plate recognition
+  This model uses a small-footprint network trained end-to-end to recognize Chinese
+  license plates in traffic.
 task_type: optical_character_recognition
 files:
   - name: FP32/license-plate-recognition-barrier-0001.xml

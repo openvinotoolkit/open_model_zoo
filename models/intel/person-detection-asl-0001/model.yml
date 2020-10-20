@@ -13,7 +13,9 @@
 # limitations under the License.
 
 description: >-
-  Person detector (ShuffleNetv2 backbone and FCOS head) for ASL scenario
+  This is a person detector for the ASL Recognition scenario. It is based on ShuffleNetV2-like
+  backbone that includes depth-wise convolutions to reduce the amount of computation
+  for the 3x3 convolution block and FCOS  head.
 task_type: detection
 files:
   - name: FP32/person-detection-asl-0001.xml

@@ -13,8 +13,9 @@
 # limitations under the License.
 
 description: >-
-  General purpose instance segmentation model. Mask R-CNN with ResNeXt152 backbone
-  and FPN block.
+  This model is an instance segmentation network for 80 classes of objects. It is
+  a Mask R-CNN model with ResNeXt152 backbone and Feature Pyramid Networks block for
+  feature maps refinement.
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-0083.xml

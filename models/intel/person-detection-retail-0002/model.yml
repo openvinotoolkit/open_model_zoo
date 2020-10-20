@@ -13,7 +13,8 @@
 # limitations under the License.
 
 description: >-
-  Person detection (HyperNet+RFCN+DetectionOutput). Used in Audience Analytics.
+  This is a pedestrian detector based on backbone with hyper-feature + R-FCN for the
+  Retail scenario.
 task_type: detection
 files:
   - name: FP32/person-detection-retail-0002.xml

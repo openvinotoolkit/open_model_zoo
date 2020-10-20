@@ -13,8 +13,8 @@
 # limitations under the License.
 
 description: >-
-  Multiclass (BG -  road -  curbs -  marks) segmentation based on ENET -  using depthwise
-  convolutions and without ELU operations and without concatenation
+  This is a segmentation network to classify each pixel into four classes: BG, road,
+  curb, mark.
 task_type: semantic_segmentation
 files:
   - name: FP32/road-segmentation-adas-0001.xml

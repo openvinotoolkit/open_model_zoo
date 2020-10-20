@@ -13,9 +13,19 @@
 # limitations under the License.
 
 description: >-
-  Transformers's bert-large-uncased-whole-word-masking model fintuned on SQuAD v1.1
-  train set to produce question and context embeddings that are close to each other
-  in case of the question answer in the context and far to each other overwise.
+  This is BERT-large model finetuned on SQuAD v1.1 training set from original bert-large-uncased-whole-word-masking
+  provided by the Transformers <https://github.com/huggingface/transformers> library.
+  The model performs embeddings for context or question for English language; the
+  input is a context or question to them, and the output is the 1024D embedding vectors
+  that allow to find context with answer to the question by simple comparison the
+  context and the question embedding vectors in the 1024D embedding space. For details
+  about the original model, check out BERT: Pre-training of Deep Bidirectional Transformers
+  for Language Understanding <https://arxiv.org/abs/1810.04805>, HuggingFace's Transformers:
+  State-of-the-art Natural Language Processing <https://arxiv.org/abs/1910.03771>.
+
+  Tokenization occurs using the BERT tokenizer (see the demo code for implementation
+  details) and the enclosed "vocab.txt" dictionary file. Input is to be lower-cased
+  before tokenizing.
 task_type: question_answering
 files:
   - name: FP32/bert-large-uncased-whole-word-masking-squad-emb-0001.xml

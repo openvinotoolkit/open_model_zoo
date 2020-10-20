@@ -13,7 +13,9 @@
 # limitations under the License.
 
 description: >-
-  MobileNetV2-SSD with two heads and clustered priors for 256x256 resolution.
+  This is a person, vehicle, bike detector that is based on MobileNetV2 backbone with
+  two SSD heads from 1/16 and 1/8 scale feature maps and clustered prior boxes for
+  256x256 resolution.
 task_type: detection
 files:
   - name: FP32/person-vehicle-bike-detection-2000.xml

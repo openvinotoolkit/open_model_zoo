@@ -13,7 +13,8 @@
 # limitations under the License.
 
 description: >-
-  Vanilla CNN trained from scratch yaw + pitch + roll + landmarks
+  Head pose estimation network based on simple, handmade CNN architecture. Angle regression
+  layers are convolutions + ReLU + batch norm + fully connected with one output.
 task_type: head_pose_estimation
 files:
   - name: FP32/head-pose-estimation-adas-0001.xml

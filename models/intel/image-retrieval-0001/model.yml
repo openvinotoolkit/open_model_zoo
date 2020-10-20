@@ -13,8 +13,8 @@
 # limitations under the License.
 
 description: >-
-  An image retrieval model based on Mobilenet v2 as a backbone. The model produces
-  l2-normalized embeddings with dimension equals to 256.
+  Image retrieval model based on MobileNetV2 <https://arxiv.org/abs/1801.04381> architecture
+  as a backbone.
 task_type: object_attributes
 files:
   - name: FP32/image-retrieval-0001.xml

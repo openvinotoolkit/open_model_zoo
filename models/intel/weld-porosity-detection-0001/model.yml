@@ -13,7 +13,9 @@
 # limitations under the License.
 
 description: >-
-  ResNet18 based network for porosity weld recognition.
+  This is a porosity weld recognition model. It runs on a video stream capturing welding
+  tip and reports whether no welding is happening, produced weld is good or weld is
+  porous.
 task_type: action_recognition
 files:
   - name: FP32/weld-porosity-detection-0001.xml

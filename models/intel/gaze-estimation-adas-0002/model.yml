@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  Gaze estimation for ADAS
+  This is a custom VGG-like convolutional neural network for gaze direction estimation.
 task_type: object_attributes
 files:
   - name: FP32/gaze-estimation-adas-0002.xml

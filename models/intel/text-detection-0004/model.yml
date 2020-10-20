@@ -13,7 +13,9 @@
 # limitations under the License.
 
 description: >-
-  Detects oriented text.
+  Text detector based on PixelLink <https://arxiv.org/abs/1801.01315> architecture
+  with MobileNetV2, depth_multiplier=1.4 <https://arxiv.org/abs/1801.04381> as a backbone
+  for indoor/outdoor scenes.
 task_type: detection
 files:
   - name: FP32/text-detection-0004.xml

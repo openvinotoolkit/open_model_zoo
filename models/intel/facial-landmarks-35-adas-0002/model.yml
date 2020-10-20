@@ -13,7 +13,8 @@
 # limitations under the License.
 
 description: >-
-  Custom-architecture convolutional neural network for 35 facial landmarks estimation.
+  This is a custom-architecture convolutional neural network for 35 facial landmarks
+  estimation.
 task_type: object_attributes
 files:
   - name: FP32/facial-landmarks-35-adas-0002.xml

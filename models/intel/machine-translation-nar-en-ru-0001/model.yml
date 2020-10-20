@@ -13,8 +13,11 @@
 # limitations under the License.
 
 description: >-
-  Neural machine translation model based on Non-Autoregressive Transformer topology
-  (en-ru).
+  This is a English-Russian machine translation model based on non-autoregressive
+  Transformer topology.
+
+  Tokenization occurs using the SentencePieceBPETokenizer (see the demo code for implementation
+  details) and the enclosed tokenizer_src and tokenizer_tgt folders.
 task_type: machine_translation
 files:
   - name: FP32/machine-translation-nar-en-ru-0001.xml

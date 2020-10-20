@@ -13,8 +13,11 @@
 # limitations under the License.
 
 description: >-
-  Landmark's detection. Used in Smart Classroom. The model is identical to 0002 but
-  trained on internal dataset with improved regression loss.
+  This is a lightweight landmarks regressor for the Smart Classroom scenario. It has
+  a classic convolutional design: stacked 3x3 convolutions, batch normalizations,
+  PReLU activations, and poolings. Final regression is done by the global depthwise
+  pooling head and FullyConnected layers. The model predicts five facial landmarks:
+  two eyes, nose, and two lip corners.
 task_type: object_attributes
 files:
   - name: FP32/landmarks-regression-retail-0009.xml

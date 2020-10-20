@@ -13,7 +13,9 @@
 # limitations under the License.
 
 description: >-
-  Face Detection based on MobileNetV2.
+  Face detector based on MobileNetV2 as a backbone with a single SSD head for indoor/outdoor
+  scenes shot by a front-facing camera. The single SSD head from 1/16 scale feature
+  map has nine clustered prior boxes.
 task_type: detection
 files:
   - name: FP32/face-detection-retail-0005.xml

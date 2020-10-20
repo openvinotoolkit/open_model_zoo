@@ -13,7 +13,9 @@
 # limitations under the License.
 
 description: >-
-  Super resolution model
+  An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/abs/1807.06779>
+  but with reduced number of channels and changes in network architecture. It enhances
+  the resolution of the input image by a factor of 4.
 task_type: image_processing
 files:
   - name: FP32/single-image-super-resolution-1032.xml

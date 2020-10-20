@@ -13,7 +13,10 @@
 # limitations under the License.
 
 description: >-
-  YOLO Tiny v2 trained on VOC dataset by AVA team with 0.6 sparsity level.
+  This is a reimplemented and retrained version of the tiny YOLO v2 <https://arxiv.org/abs/1612.08242>
+  object detection network trained with the VOC2012 training dataset. Network weight
+  pruning <https://arxiv.org/abs/1710.01878> is applied to sparsify convolution layers
+  (60% of network parameters are set to zeros).
 task_type: detection
 files:
   - name: FP32/yolo-v2-tiny-ava-sparse-60-0001.xml

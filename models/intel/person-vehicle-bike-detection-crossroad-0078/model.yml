@@ -13,9 +13,10 @@
 # limitations under the License.
 
 description: >-
-  Multiclass (person -  vehicle -  non-vehicle) detector based on SSD detection architecture
-  -  RMNet backbone and learnable image downscale block (person-vehicle-bike-detection-crossroad-0066
-  with extra pooling)
+  Person/Vehicle/Bike detector is based on SSD detection architecture, RMNet backbone,
+  and learnable image downscale block (like person-vehicle-bike-detection-crossroad-0066,
+  but with extra pooling). The model is intended for security surveillance applications
+  and works in a variety of scenes and weather/lighting conditions.
 task_type: detection
 files:
   - name: FP32/person-vehicle-bike-detection-crossroad-0078.xml

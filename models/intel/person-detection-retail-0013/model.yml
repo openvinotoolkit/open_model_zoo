@@ -13,7 +13,10 @@
 # limitations under the License.
 
 description: >-
-  Pedestrian detection (RMNet with lrelu + SSD)
+  This is a pedestrian detector for the Retail scenario. It is based on MobileNetV2-like
+  backbone that includes depth-wise convolutions to reduce the amount of computation
+  for the 3x3 convolution block. The single SSD head from 1/16 scale feature map has
+  12 clustered prior boxes.
 task_type: detection
 files:
   - name: FP32/person-detection-retail-0013.xml

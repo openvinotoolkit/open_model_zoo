@@ -13,7 +13,12 @@
 # limitations under the License.
 
 description: >-
-  Second generation of action detection (SSD-based) model to use in Smart Classroom.
+  This is an action detector for the Smart Classroom scenario. It is based on the
+  RMNet backbone that includes depth-wise convolutions to reduce the amount of computations
+  for the 3x3 convolution block. The first SSD head from 1/16 scale feature map has
+  four clustered prior boxes and outputs detected persons (two class detector). The
+  second SSD-based head predicts actions of the detected persons. Possible actions:
+  sitting, standing, raising hand.
 task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-0005.xml

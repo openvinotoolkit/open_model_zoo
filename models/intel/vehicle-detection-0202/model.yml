@@ -13,7 +13,8 @@
 # limitations under the License.
 
 description: >-
-  MobileNetV2-SSD with two heads and clustered priors for 512x512 resolution.
+  This is a vehicle detector that is based on MobileNetV2 backbone with two SSD heads
+  from 1/16 and 1/8 scale feature maps and clustered prior boxes for 512x512 resolution.
 task_type: detection
 files:
   - name: FP32/vehicle-detection-0202.xml

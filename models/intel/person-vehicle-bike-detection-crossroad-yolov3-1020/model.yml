@@ -13,7 +13,16 @@
 # limitations under the License.
 
 description: >-
-  YOLO v3 finetuned for person-vehicle-bike detection task
+  This is a YOLO V3 network finetuned for Person/Vehicle/Bike detection for security
+  surveillance applications. It works in a variety of scenes and weather/lighting
+  conditions.
+
+  Yolo V3 is a real-time object detection model implemented with Keras* from this
+  repository <https://github.com/david8862/keras-YOLOv3-model-set> and converted to
+  TensorFlow* framework.
+
+  This model was pretrained on COCO* dataset with 80 classes and then finetuned for
+  Person/Vehicle/Bike detection.
 task_type: detection
 files:
   - name: FP32/person-vehicle-bike-detection-crossroad-yolov3-1020.xml

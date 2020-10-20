@@ -13,8 +13,9 @@
 # limitations under the License.
 
 description: >-
-  Recognizes alphanumeric text. Architecture: VGG-like + BiLSTM as an encoder -  BiLSTM
-  as a decoder.
+  This is a network for text recognition scenario. It consists of VGG16-like backbone
+  and bidirectional LSTM encoder-decoder. The network is able to recognize case-insensitive
+  alphanumeric text (36 unique symbols).
 task_type: optical_character_recognition
 files:
   - name: FP32/text-recognition-0012.xml

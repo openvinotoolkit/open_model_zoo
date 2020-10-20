@@ -13,7 +13,12 @@
 # limitations under the License.
 
 description: >-
-  Person Detection and Action Recognition model on TF
+  This is an action detector for the Smart Classroom scenario. It is based on the
+  RMNet backbone that includes depth-wise convolutions to reduce the amount of computations
+  for the 3x3 convolution block. The first SSD head from 1/8 and 1/16 scale feature
+  maps has four clustered prior boxes and outputs detected persons (two class detector).
+  The second SSD-based head predicts actions of the detected persons. Possible actions:
+  sitting, writing, raising hand, standing, turned around, lie on the desk.
 task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-0006.xml

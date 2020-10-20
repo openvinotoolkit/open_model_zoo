@@ -13,7 +13,9 @@
 # limitations under the License.
 
 description: >-
-  Super resolution model
+  A tiny model to upscale scanned images with text. The model used the "ConvTranspose2d"
+  layer instead of the "PixelShuffle" layer. As a result, the model can be launched
+  on GPU and MYRIAD devices and support the "reshape" function.
 task_type: image_processing
 files:
   - name: FP32/text-image-super-resolution-0001.xml

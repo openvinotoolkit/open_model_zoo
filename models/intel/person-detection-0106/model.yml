@@ -13,7 +13,8 @@
 # limitations under the License.
 
 description: >-
-  Person detector based on Cascade R-CNN with ResNet50 backbone
+  This is a person detector that is based on Cascade R-CNN architecture with ResNet50
+  backbone.
 task_type: detection
 files:
   - name: FP32/person-detection-0106.xml

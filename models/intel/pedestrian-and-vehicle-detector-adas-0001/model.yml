@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  Pedestrian and Vehicle detector based on ssd + mobilenet with reduced channels number.
+  Pedestrian and vehicle detection network based on MobileNet v1.0 + SSD.
 task_type: detection
 files:
   - name: FP32/pedestrian-and-vehicle-detector-adas-0001.xml

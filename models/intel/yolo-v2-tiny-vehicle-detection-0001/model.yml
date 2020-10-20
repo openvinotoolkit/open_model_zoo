@@ -13,7 +13,15 @@
 # limitations under the License.
 
 description: >-
-  YOLO Tiny v2 (https://arxiv.org/pdf/1612.08242.pdf) fine-tuned for vehicles detection
+  This is a YOLO v2 Tiny network finetuned for vehicle detection for the "Barrier"
+  use case.
+
+  Tiny Yolo V2 is a real-time object detection model implemented with Keras* from
+  this repository <https://github.com/david8862/keras-YOLOv3-model-set> and converted
+  to TensorFlow* framework.
+
+  This model was pretrained on COCO* dataset with 80 classes and then finetuned for
+  vehicle detection.
 task_type: detection
 files:
   - name: FP32/yolo-v2-tiny-vehicle-detection-0001.xml

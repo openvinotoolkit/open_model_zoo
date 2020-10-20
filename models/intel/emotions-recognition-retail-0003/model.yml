@@ -13,7 +13,8 @@
 # limitations under the License.
 
 description: >-
-  Recognizes 5 emotions for a face. Targeted for Retail Audience Analytics.
+  Fully convolutional network for recognition of five emotions ('neutral', 'happy',
+  'sad', 'surprise', 'anger').
 task_type: object_attributes
 files:
   - name: FP32/emotions-recognition-retail-0003.xml

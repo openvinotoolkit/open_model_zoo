@@ -13,8 +13,8 @@
 # limitations under the License.
 
 description: >-
-  Multiclass (person -  vehicle -  non-vehicle) detector based on SSD detection architecture
-  -  MobileNetV2 backbone)
+  MobileNetV2 + SSD-based network is for Person/Vehicle/Bike detection in security
+  surveillance applications. Works in a variety of scenes and weather/lighting conditions.
 task_type: detection
 files:
   - name: FP32/person-vehicle-bike-detection-crossroad-1016.xml
