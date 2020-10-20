@@ -18,9 +18,9 @@ public:
     EyeStateEstimator(InferenceEngine::Core& ie,
                       const std::string& modelPath,
                       const std::string& deviceName);
-    void virtual estimate(const cv::Mat& image, FaceInferenceResults& outputResults);
-    void virtual printPerformanceCounts() const;
-    virtual ~EyeStateEstimator();
+    void estimate(const cv::Mat& image, FaceInferenceResults& outputResults) override;
+    void printPerformanceCounts() const override;
+    ~EyeStateEstimator() override;
 
 private:
     cv::Rect createEyeBoundingBox(const cv::Point2i& p1, const cv::Point2i& p2, float scale = 1.8) const;
