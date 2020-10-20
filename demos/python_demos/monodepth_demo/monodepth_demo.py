@@ -73,7 +73,7 @@ def main():
 
     # processing output blob
     log.info("processing output blob")
-    disp = res[out_blob][0]
+    disp = np.squeeze(res[out_blob][0])
 
     # resize disp to input resolution
     disp = cv2.resize(disp, (input_width, input_height), cv2.INTER_CUBIC)

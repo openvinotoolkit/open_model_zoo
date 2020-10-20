@@ -957,3 +957,12 @@ datasets:
       - type: pad_with_eos
         eos_index: 1
         sequence_len: 192
+
+  - name: NYU_Depth_V2
+    data_source: nyudepthv2/val/converted/images
+    additional_data_source: nyudepthv2/val/converted/depth
+    annotation_conversion:
+      converter: nyu_depth_v2
+      images_dir: nyudepthv2/val/converted/images
+      depth_map_dir: nyudepthv2/val/converted/depth
+      data_dir: nyudepthv2/val/official
