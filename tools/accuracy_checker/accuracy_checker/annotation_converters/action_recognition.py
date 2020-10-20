@@ -77,15 +77,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         full_annotation = read_json(self.annotation_file, object_pairs_hook=OrderedDict)
-        if self.numpy_input and not self.image_input:
-            data_ext = ['npy']
-            data_dir = [self.data_dir / self.numpy_subdir] if self.numpy_subdir else [self.data_dir]
-        elif self.image_input and not self.numpy_input:
-            data_ext = ['jpg']
-            data_dir = [self.data_dir / self.image_subdir] if self.image_subdir else [self.data_dir]
-        else:
-            data_ext = ['jpg', 'npy']
-            data_dir = [self.data_dir / self.image_subdir, self.data_dir / self.numpy_subdir]
+        data_ext, data_dir = self.get_ext_and_dir()
         label_map = dict(enumerate(full_annotation['labels']))
         if self.dataset_meta:
             dataset_meta = read_json(self.dataset_meta)
@@ -97,6 +89,50 @@ class ActionRecognitionConverter(BaseFormatConverter):
         video_names, annotations = self.get_video_names_and_annotations(full_annotation['database'], self.subset)
         class_to_idx = {v: k for k, v in label_map.items()}
 
+        videos = self.get_videos(video_names, annotations, class_to_idx, data_dir, data_ext)
+        videos = sorted(videos, key=lambda v: v['video_id'].split('/')[-1])
+
+        clips = []
+        for video in videos:
+            clips.extend(self.get_clips(video, self.clips_per_video,
+                                        self.clip_duration, self.temporal_stride, data_ext))
+
+        annotations = []
+        num_iterations = len(clips)
+        content_errors = None if not check_content else []
+        for clip_idx, clip in enumerate(clips):
+            if progress_callback is not None and clip_idx % progress_interval:
+                progress_callback(clip_idx * 100 / num_iterations)
+            identifier = []
+            for ext in data_ext:
+                identifier.append(ClipIdentifier(clip['video_name'], clip_idx, clip['frames_{}'.format(ext)]))
+            if check_content:
+                for ext, dir_ in zip(data_ext, data_dir):
+                    content_errors.extend([
+                        '{}: does not exist'.format(dir_ / frame)
+                        for frame in clip['frames_{}'.format(ext)] if not check_file_existence(dir_ / frame)
+                    ])
+            if len(identifier) == 1:
+                identifier = identifier[0]
+
+            annotations.append(ClassificationAnnotation(identifier, clip['label']))
+
+        return ConverterReturn(annotations, {'label_map': label_map}, content_errors)
+
+    def get_ext_and_dir(self):
+        if self.numpy_input and not self.image_input:
+            data_ext = ['npy']
+            data_dir = [self.data_dir / self.numpy_subdir] if self.numpy_subdir else [self.data_dir]
+        elif self.image_input and not self.numpy_input:
+            data_ext = ['jpg']
+            data_dir = [self.data_dir / self.image_subdir] if self.image_subdir else [self.data_dir]
+        else:
+            data_ext = ['jpg', 'npy']
+            data_dir = [self.data_dir / self.image_subdir, self.data_dir / self.numpy_subdir]
+
+        return data_ext, data_dir
+
+    def get_videos(self, video_names, annotations, class_to_idx, data_dir, data_ext):
         videos = []
         for video_name, annotation in zip(video_names, annotations):
             video_info = {
@@ -104,8 +140,8 @@ class ActionRecognitionConverter(BaseFormatConverter):
                 'video_id': video_name,
                 'label': class_to_idx[annotation['label']]
             }
-            for dir, ext in zip(data_dir, data_ext):
-                video_path = dir / video_name
+            for dir_, ext in zip(data_dir, data_ext):
+                video_path = dir_ / video_name
                 if not video_path.exists():
                     video_info.clear()
                     continue
@@ -132,34 +168,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
                 videos.append(video_info)
             if self.num_samples and len(videos) == self.num_samples:
                 break
-
-        videos = sorted(videos, key=lambda v: v['video_id'].split('/')[-1])
-
-        clips = []
-        for video in videos:
-            clips.extend(self.get_clips(video, self.clips_per_video, self.clip_duration, self.temporal_stride, data_ext))
-
-        annotations = []
-        num_iterations = len(clips)
-        content_errors = None if not check_content else []
-        for clip_idx, clip in enumerate(clips):
-            if progress_callback is not None and clip_idx % progress_interval:
-                progress_callback(clip_idx * 100 / num_iterations)
-            identifier = []
-            for ext in data_ext:
-                identifier.append(ClipIdentifier(clip['video_name'], clip_idx, clip['frames_{}'.format(ext)]))
-            if check_content:
-                for ext, dir in zip(data_ext, data_dir):
-                    content_errors.extend([
-                        '{}: does not exist'.format(dir / frame)
-                        for frame in clip['frames_{}'.format(ext)] if not check_file_existence(dir / frame)
-                    ])
-            if len(identifier) == 1:
-                identifier = identifier[0]
-
-            annotations.append(ClassificationAnnotation(identifier, clip['label']))
-
-        return ConverterReturn(annotations, {'label_map': label_map}, content_errors)
+        return videos
 
     @staticmethod
     def get_clips(video, clips_per_video, clip_duration, temporal_stride=1, file_ext='jpg'):
@@ -180,7 +189,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
                 clip_idxs = list(range(clip_start, clip_end))
 
                 if not clip_idxs:
-                    return
+                    return []
 
                 # loop clip if it is shorter than clip_duration
                 while len(clip_idxs) < clip_duration:
@@ -195,7 +204,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
         clips = []
         for key, value in frames_ext.items():
             if not clips:
-                for i in range(len(value)):
+                for _ in range(len(value)):
                     clips.append(dict(video))
             for val, clip in zip(value, clips):
                 clip['frames_{}'.format(key)] = val

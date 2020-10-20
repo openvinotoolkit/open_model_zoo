@@ -149,13 +149,9 @@ class I3DEvaluator(BaseEvaluator):
 
             batch_prediction = self.adapter.process([batch_raw_out], identifiers, [{}])
 
-            if self.metric_executor:
-                metrics_result, _ = self.metric_executor.update_metrics_on_batch(
-                    [batch_id], [batch_annotation], batch_prediction
-                )
-                if self.metric_executor.need_store_predictions:
-                    self._annotations.extend([batch_annotation])
-                    self._predictions.extend(batch_prediction)
+            if self.metric_executor.need_store_predictions:
+                self._annotations.extend([batch_annotation])
+                self._predictions.extend(batch_prediction)
 
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
@@ -387,17 +383,18 @@ class I3DRGBModel(BaseModel):
     def prepare_data(self, data):
         video = Path(data[0].video)
         frames_identifiers = [video / frame for frame in data[0].frames]
-        input = self.reader(frames_identifiers)
-        input = self.preprocessing(input)
-        input.data = self.fit_to_input(input.data)
-        return input
+        prepared_data = self.reader(frames_identifiers)
+        prepared_data = self.preprocessing(prepared_data)
+        prepared_data.data = self.fit_to_input(prepared_data.data)
+        return prepared_data
 
-    def preprocessing(self, image):
+    @staticmethod
+    def preprocessing(image):
         resizer_config = {'type': 'resize', 'size': 256, 'aspect_ratio_scale': 'fit_to_window'}
         resizer = Resize(resizer_config)
         image = resizer.process(image)
         for i, frame in enumerate(image.data):
-            image.data[i]= Crop.process_data(frame, 224, 224, None, False, True, {})
+            image.data[i] = Crop.process_data(frame, 224, 224, None, False, True, {})
         return image
 
 
@@ -409,6 +406,6 @@ class I3DFlowModel(BaseModel):
     def prepare_data(self, data):
         video = Path(data[1].video)
         frames_identifiers = [video / frame for frame in data[1].frames]
-        input = self.reader(frames_identifiers)
-        input.data = self.fit_to_input(input.data)
-        return input
+        prepared_data = self.reader(frames_identifiers)
+        prepared_data.data = self.fit_to_input(prepared_data.data)
+        return prepared_data
