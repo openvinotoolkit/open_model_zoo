@@ -205,9 +205,9 @@ Colorization task is to predict colors of scene from grayscale image.
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
-| colorization-v2           | Caffe*         | [colorization-v2](./colorization-v2/colorization-v2.md) | | 64.0047 |  32.2354 |
-| colorization-v2-norebal   | Caffe*         | [colorization-v2-norebal](./colorization-v2-norebal/colorization-v2-norebal.md) | | 64.0047 |  32.2354 |
-| colorization-v2-pytorch   | PyTorch*       | [colorization-v2-pytorch](./colorization-v2-pytorch/colorization-v2-pytorch.md) | | 83.6045 |  32.2360 |
+| colorization-v2           | Caffe\*         | [colorization-v2](./colorization-v2/colorization-v2.md) | | 64.0047 |  32.2354 |
+| colorization-v2-norebal   | Caffe\*         | [colorization-v2-norebal](./colorization-v2-norebal/colorization-v2-norebal.md) | | 64.0047 |  32.2354 |
+| colorization-v2-pytorch   | PyTorch\*       | [colorization-v2-pytorch](./colorization-v2-pytorch/colorization-v2-pytorch.md) | | 83.6045 |  32.2360 |
 
 ## Sound Classification
 

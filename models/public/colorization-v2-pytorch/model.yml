@@ -13,12 +13,12 @@
 # limitations under the License.
 
 description: >-
-    The `colorization-v2` model is one of the [colorization](https://arxiv.org/abs/1603.08511)
-    group of models designed to perform image colorization. Model was trained on ImageNet dataset.
-    For details about this family of models, check out the [repository](https://github.com/richzhang/colorization).
+  The "colorization-v2" model is one of the colorization <https://arxiv.org/abs/1603.08511>
+  group of models designed to perform image colorization. Model was trained on ImageNet
+  dataset. For details about this family of models, check out the repository <https://github.com/richzhang/colorization>.
 
-    Model consumes as input L-channel of LAB-image.
-    Model give as output predict A- and B-channels of LAB-image.
+  Model consumes as input L-channel of LAB-image. Model give as output predict A-
+  and B-channels of LAB-image.
 
 task_type: colorization
 files:
