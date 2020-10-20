@@ -42,7 +42,7 @@ def parse_args():
 
     parser.add_argument('--model-name', type=str, required=True,
                         help='Model to convert. May be class name or name of constructor function')
-    parser.add_argument('--weights', type=str, required=True,
+    parser.add_argument('--weights', type=str,
                         help='Path to the weights in PyTorch\'s format')
     parser.add_argument('--input-shape', metavar='INPUT_DIM', type=positive_int_arg, required=True,
                         help='Shape of the input blob')

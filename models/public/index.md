@@ -77,7 +77,7 @@ detect areas with complex shape.
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
 | DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/deeplabv3.md) | 66.85% | 11.469 | 23.819 |
-| Semantic Segmentation HRNet V2 C1   | PyTorch\*      | [semantic-segmentation-hrnet-v2-c1](./semantic-segmentation-hrnet-v2-c1/semantic-segmentation-hrnet-v2-c1.md) | 77.69% | 81.993 | 66.4768 |
+| HRNet V2 C1 Segmentation  | PyTorch\*      | [hrnet-v2-c1-segmentation](./hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md) | 77.69% | 81.993 | 66.4768 |
 
 ### Instance Segmentation
 
