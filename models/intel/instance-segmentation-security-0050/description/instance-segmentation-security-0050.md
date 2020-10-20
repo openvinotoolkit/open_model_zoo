@@ -22,7 +22,7 @@ and light-weight RPN.
 | Source framework                | PyTorch\*                                 |
 
 Average Precision (AP) is defined and measured according to standard
-[MS COCO evaluation procedure](http://cocodataset.org/#detection-eval).
+[MS COCO evaluation procedure](https://cocodataset.org/#detection-eval).
 
 ## Performance
 

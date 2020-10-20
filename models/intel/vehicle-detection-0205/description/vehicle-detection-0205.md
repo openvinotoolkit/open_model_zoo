@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 This is a vehicle detector that is based on ResNet50
-backbone with FPN and CascadeRCNN heads. 
+backbone with FPN and CascadeRCNN heads.
 
 ## Example
 

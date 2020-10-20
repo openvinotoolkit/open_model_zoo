@@ -11,16 +11,16 @@ YOLO v2 Tiny is a real-time object detection model implemented with Keras\* from
 
    1. Download YOLO v2 Tiny weights:
         ```
-        wget -O weights/yolov2_tiny.weights https://pjreddie.com/media/files/yolov2_tiny.weights
+        wget -O weights/yolov2-tiny.weights https://pjreddie.com/media/files/yolov2-tiny.weights
         ```
 
    2. Convert model weights to Keras\*:
         ```
-        python tools/model_converter/convert.py cfg/yolov2_tiny.cfg weights/yolov2_tiny.weights weights/yolov2_tiny.h5
+        python tools/model_converter/convert.py cfg/yolov2-tiny.cfg weights/yolov2-tiny.weights weights/yolov2-tiny.h5
         ```
 3. Convert model to protobuf:
     ```
-    python tools/model_converter/keras_to_tensorflow.py --input_model weights/yolov2_tiny.h5 --output_model=weights/yolo-v2-tiny.pb
+    python tools/model_converter/keras_to_tensorflow.py --input_model weights/yolov2-tiny.h5 --output_model=weights/yolo-v2-tiny.pb
     ```
 
 ## Specification
@@ -39,7 +39,7 @@ Accuracy metrics obtained on COCO\* validation dataset for converted model.
 | Metric | Value |
 | ------ | ------|
 | mAP    | 27.34% |
-| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 29.11%  |
+| [COCO\* mAP](https://cocodataset.org/#detection-eval) | 29.11%  |
 
 ## Input
 

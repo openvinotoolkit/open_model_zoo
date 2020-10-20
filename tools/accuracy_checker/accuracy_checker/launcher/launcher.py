@@ -96,6 +96,9 @@ class Launcher(ClassProvider):
             ),
             '_list_lstm_inputs': ListField(
                 allow_empty=True, optional=True, default=[], description="List of lstm inputs."
+            ),
+            '_input_precision': ListField(
+                allow_empty=True, optional=True, default=[], description='Input precision list from command line.'
             )
         }
 
@@ -152,6 +155,9 @@ class Launcher(ClassProvider):
             layer_name: shape for layer_name, shape in self.inputs.items()
             if layer_name not in self.const_inputs + self.image_info_inputs
         }
+
+    def update_input_configuration(self, input_config):
+        self.config['inputs'] = input_config
 
     @property
     def name(self):

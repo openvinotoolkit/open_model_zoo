@@ -114,7 +114,7 @@ setup(
             "convert_annotation=accuracy_checker.annotation_converters.convert:main",
     ]},
     zip_safe=False,
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     install_requires=requirements if not is_arm else '',
     tests_require=[read("requirements-test.in")],
     cmdclass={'test': PyTest, 'install_core': CoreInstall}

@@ -84,7 +84,7 @@ class ColorPalette:
         candidates_num = 100
         hsv_colors = [(1.0, 1.0, 1.0)]
         for _ in range(1, n):
-            colors_candidates = [(rng.random(), rng.uniform(0.8, 1.0), rng.uniform(0.5, 1.0)) 
+            colors_candidates = [(rng.random(), rng.uniform(0.8, 1.0), rng.uniform(0.5, 1.0))
                                 for _ in range(candidates_num)]
             min_distances = [self.min_distance(hsv_colors, c) for c in colors_candidates]
             arg_max = np.argmax(min_distances)
@@ -267,10 +267,10 @@ class Detector(Model):
 
     def postprocess(self, outputs, meta):
         detections = self.output_parser(outputs)
-        orginal_image_shape = meta['original_shape']
+        original_image_shape = meta['original_shape']
         resized_image_shape = meta['resized_shape']
-        scale_x = self.w / resized_image_shape[1] * orginal_image_shape[1]
-        scale_y = self.h / resized_image_shape[0] * orginal_image_shape[0]
+        scale_x = self.w / resized_image_shape[1] * original_image_shape[1]
+        scale_y = self.h / resized_image_shape[0] * original_image_shape[0]
         for detection in detections:
             detection.xmin *= scale_x
             detection.xmax *= scale_x
@@ -358,7 +358,7 @@ class BoxesLabelsParser:
             labels = outputs[self.labels_layer] + 1
         else:
             labels = np.full(len(bboxes), self.default_label, dtype=bboxes.dtype)
-        
+
         detections = [Detector.Detection(*bbox, score, label) for label, score, bbox in zip(labels, scores, bboxes)]
         return detections
 
@@ -408,7 +408,7 @@ def get_plugin_configs(device, num_streams, num_threads):
                                                               else 'GPU_THROUGHPUT_AUTO'
 
         config_min_latency['GPU_THROUGHPUT_STREAMS'] = '1'
-    
+
     return config_user_specified, config_min_latency
 
 
@@ -456,7 +456,7 @@ def main():
     next_frame_id = 0
     next_frame_id_to_show = 0
     input_repeats = 0
-  
+
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between min_latency/user_specified modes, press TAB key in the output window")

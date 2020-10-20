@@ -14,13 +14,13 @@ Inference Engine plugin. When inference is done, the application outputs the dis
 
 Running the application with the `-h` option yields the following usage message:
 
-``` 
+```
 python3 monodepth_demo.py -h
 ```
 
 The command yields the following usage message:
 
-``` 
+```
 usage: monodepth_demo.py [-h] -m MODEL -i INPUT [-l CPU_EXTENSION] [-d DEVICE]
 
 optional arguments:

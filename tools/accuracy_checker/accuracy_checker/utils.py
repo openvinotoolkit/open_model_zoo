@@ -416,10 +416,6 @@ def set_image_metadata(annotation, images):
     return annotation, images
 
 
-def get_indexs(container, element):
-    return [index for index, container_element in enumerate(container) if container_element == element]
-
-
 def find_nearest(array, value, mode=None):
     if not array:
         return -1

@@ -15,7 +15,7 @@
 description: >-
   This is a Caffe2* version of the ResNet-50 model, designed to perform image classification.
   This model was converted from Caffe* to Caffe2* format.  For details see repository
-  <https://github.com/caffe2/models/tree/master/resnet50>, paper <https://arxiv.org/abs/1512.03385>.
+  <https://github.com/facebookarchive/models/tree/master/resnet50>, paper <https://arxiv.org/abs/1512.03385>.
 task_type: classification
 files:
   - name: predict_net.pb
@@ -41,4 +41,4 @@ model_optimizer_args:
   - --mean_values=gpu_0/data[103.53,116.28,123.675]
   - --scale_values=gpu_0/data[57.375,57.12,58.395]
   - --input_model=$conv_dir/resnet-50-caffe2.onnx
-license: https://raw.githubusercontent.com/caffe2/models/master/LICENSE
+license: https://raw.githubusercontent.com/facebookarchive/models/master/LICENSE

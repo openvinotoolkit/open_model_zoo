@@ -86,12 +86,12 @@ Accuracy Checker supports following set of preprocessors:
 * `crop_rectangle` - cropping region of interest using coordinates given as annotation metadata.
 * `extend_around_rect` - scaling region of interest using annotation metadata.
   * `augmentation_param` is scale factor for augmentation.
-* `point_aligment` - aligning keypoints stored in annotation metadata.
+* `point_alignment` - aligning keypoints stored in annotation metadata.
   * `draw_points` - allows visualize points.
   * `normalize` - allows to use normalization for keypoints.
   * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
 * `corner_crop` - Corner crop of the image.
-  * `dst_width` and `dst_heigth` are destination width and height
+  * `dst_width` and `dst_height` are destination width and height
   * `corner_type` is type of the corner crop. Options are:
     * `top-left`
     * `top-right`

@@ -116,7 +116,7 @@ def main():
     else:
         decoder = DummyDecoder(num_requests=2)
         decoder_seq_size = args.decoder_seq_size
-    
+
     presenter = monitors.Presenter(args.utilization_monitors, 70)
     result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, labels=labels,
                                       label_smoothing_window=args.label_smoothing)

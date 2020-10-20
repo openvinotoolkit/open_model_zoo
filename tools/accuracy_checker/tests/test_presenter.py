@@ -384,7 +384,7 @@ class TestPresenter:
         ]
         mock_write_scalar_res.assert_has_calls(calls)
 
-    def test_vector_presenter_with_vector_data_with_default_formating_compare_with_ref(self, mocker):
+    def test_vector_presenter_with_vector_data_with_default_formatting_compare_with_ref(self, mocker):
         mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',

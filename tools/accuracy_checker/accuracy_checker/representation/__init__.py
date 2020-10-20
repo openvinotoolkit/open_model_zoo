@@ -33,6 +33,7 @@ from .detection_representation import (
 from .reid_representation import (
     ReIdentificationAnnotation,
     ReIdentificationClassificationAnnotation,
+    PlaceRecognitionAnnotation,
     ReIdentificationPrediction
 )
 from .segmentation_representation import (
@@ -88,6 +89,7 @@ from .image_processing import ImageProcessingAnnotation, ImageProcessingPredicti
 from .quality_assessment import QualityAssessmentAnnotation, QualityAssessmentPrediction
 from .dna_sequence import DNASequenceAnnotation, DNASequencePrediction
 
+from .raw_representation import RawTensorAnnotation, RawTensorPrediction
 __all__ = [
     'BaseRepresentation',
 
@@ -107,6 +109,7 @@ __all__ = [
 
     'ReIdentificationAnnotation',
     'ReIdentificationClassificationAnnotation',
+    'PlaceRecognitionAnnotation',
     'ReIdentificationPrediction',
 
     'SegmentationRepresentation',
@@ -181,4 +184,6 @@ __all__ = [
 
     'DNASequenceAnnotation',
     'DNASequencePrediction',
+    'RawTensorAnnotation',
+    'RawTensorPrediction',
 ]

@@ -82,6 +82,9 @@ More detailed information about calculation segmentation metrics you can find [h
   * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` value which will be calculated if annotations has training subset.
 * `pairwise_accuracy_subsets` - object reidentification pairwise accuracy with division dataset on test and train subsets for calculation mean score. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
   * `subset_number` - number of subsets for separating.
+* `localization_recall` - recall metric used for evaluation place recognition task. Supported representations: `PlaceRecognitionAnnotation`, `ReidentificationPrediction`.
+  * `top_k` - number of k highest ranked samples to consider when matching.
+  * `distance_threshold` - distance threshold for search positive matching pairs between query and gallery (Optional, default 25).
 * `mae` - [Mean Absolute Error](https://en.wikipedia.org/wiki/Mean_absolute_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
 * `mae_on_intervals` - Mean Absolute Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
@@ -221,6 +224,12 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
 * `dna_seq_accuracy` - accuracy for DNA sequencing task. Supported representations: `DNASequenceAnnotation`, `DNASequencePrediction`, `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
   * `min_coverage` - minimum sequence coverage between predicted sequence and reference for positive measurement (Optional, default 0.5).
   * `balansed` - balanced accuracy metric (Optional, default false).
+* `inception_score` - [Inception score](https://arxiv.org/pdf/1801.01973) for generated images by GAN models. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+  * `eps` - epsilon to avoid nan during calculate log for metric
+  * `length` - length of input feature vector for metric
+* `fid` - Frechet Inception Distance to measure the distance between the distributions of synthesized images and real images. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+  * `eps` - epsilon to avoid nan during calculate sqrtm for metric
+  * `length` - length of input feature vector for metric
 
 ## Metrics profiling
 Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.
@@ -262,3 +271,6 @@ Supported for profiling metrics:
   * `frequency_weighted_accuracy`
 * Instance Segmentation
   * `coco_orig_segm_precision`
+* GAN:
+  * `inception_score`
+  * `fid`

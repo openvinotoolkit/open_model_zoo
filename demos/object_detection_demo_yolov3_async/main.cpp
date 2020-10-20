@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> labels;
         if (!FLAGS_labels.empty()) {
             std::ifstream inputFile(FLAGS_labels);
-            std::string label; 
+            std::string label;
             while (std::getline(inputFile, label)) {
                 labels.push_back(label);
             }
