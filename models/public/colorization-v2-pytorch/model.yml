@@ -29,15 +29,15 @@ files:
   - name: model/__init__.py
     size: 96
     sha256: 245a5ac3e1cb1705438355f9d9b05b408d796c559d89c8f6d2741799f1b74000
-    source: https://raw.githubusercontent.com/richzhang/colorization/master/colorizers/__init__.py
+    source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/__init__.py
   - name: model/base_color.py
     size: 454
     sha256: 81cea88bb484866478138440f08cc8d6c3e3731652fe57592900e418b278da1d
-    source: https://raw.githubusercontent.com/richzhang/colorization/master/colorizers/base_color.py
+    source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/base_color.py
   - name: model/eccv16.py
     size: 4613
     sha256: 524179cbf9676809a17eead0a5cf72bbc5de962db6bbbd1064407cfd315ae2a4
-    source: https://raw.githubusercontent.com/richzhang/colorization/master/colorizers/eccv16.py
+    source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/eccv16.py
 postprocessing:
   - $type: regex_replace
     file: model/__init__.py
@@ -66,4 +66,4 @@ model_optimizer_args:
   - --output=color_ab
   - --input_model=$conv_dir/colorization-v2-eccv16.onnx
 framework: pytorch
-license: https://raw.githubusercontent.com/richzhang/colorization/master/LICENSE
+license: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/LICENSE

@@ -30,8 +30,8 @@ For preprocessing `rgb -> gray -> coloriaztion` recieved values:
 
 | Metric         | Value with preprocessing   | Value without preprocessing |
 |----------------|----------------------------|-----------------------------|
-| Accuracy top-1 |                     57.53% |                      70.96% |
-| Accuracy top-5 |                     81.28% |                      89.88% |
+| Accuracy top-1 |                     57.75% |                      70.96% |
+| Accuracy top-5 |                     81.50% |                      89.88% |
 
 ## Performance
 
