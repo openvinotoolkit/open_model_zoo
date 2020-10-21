@@ -501,7 +501,7 @@ public:
     }
 
     void PrintPerformanceCounts(
-            const std::string &landmarks_device, const std::string &reid_device) {
+            const std::string &landmarks_device, const std::string &reid_device) override {
         landmarks_detector.PrintPerformanceCounts(landmarks_device);
         face_reid.PrintPerformanceCounts(reid_device);
     }

@@ -18,10 +18,10 @@ public:
     HeadPoseEstimator(InferenceEngine::Core& ie,
                       const std::string& modelPath,
                       const std::string& deviceName);
-    void virtual estimate(const cv::Mat& image,
-                          FaceInferenceResults& outputResults);
-    void virtual printPerformanceCounts() const;
-    virtual ~HeadPoseEstimator();
+    void estimate(const cv::Mat& image,
+                  FaceInferenceResults& outputResults) override;
+    void printPerformanceCounts() const override;
+    ~HeadPoseEstimator() override;
 
 private:
     IEWrapper ieWrapper;
