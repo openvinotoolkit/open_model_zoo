@@ -46,7 +46,6 @@ from .reidentification import ReidAdapter
 from .detection import (
     TFObjectDetectionAPIAdapter,
     MTCNNPAdapter,
-    RetinaNetAdapter,
     ClassAgnosticDetectionAdapter,
     FaceBoxesAdapter,
     FaceDetectionAdapter,
@@ -60,6 +59,7 @@ from .detection_person_vehicle import (
 from .detection_head import HeadDetectionAdapter
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
+from .retinanet import RetinaNetAdapter, MultiOutRetinaNet
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter
@@ -128,6 +128,9 @@ __all__ = [
     'SSDONNXAdapter',
     'PyTorchSSDDecoder',
     'FacePersonAdapter',
+
+    'RetinaNetAdapter',
+    'MultiOutRetinaNet',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
