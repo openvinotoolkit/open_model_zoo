@@ -8,19 +8,29 @@ import onnx
 import torch
 import torch.onnx
 
+import numpy as np
+import ast
+
 
 def positive_int_arg(values):
     """Check positive integer type for input argument"""
+    inputs = ast.literal_eval(values)
+    number_of_inputs = np.ndim(inputs)
     result = []
-    for value in values.split(','):
-        try:
-            ivalue = int(value)
-            if ivalue < 0:
-                raise argparse.ArgumentTypeError('Argument must be a positive integer')
-            result.append(ivalue)
-        except Exception as exc:
-            print(exc)
-            sys.exit('Invalid value for input argument: {!r}, a positive integer is expected'.format(value))
+    if number_of_inputs == 1:
+        inputs = [inputs]
+    for input_ in inputs:
+        input_shape = []
+        for value in input_:
+            try:
+                ivalue = int(value)
+                if ivalue < 0:
+                    raise argparse.ArgumentTypeError('Argument must be a positive integer')
+                input_shape.append(ivalue)
+            except Exception as exc:
+                print(exc)
+                sys.exit('Invalid value for input argument: {!r}, a positive integer is expected'.format(value))
+        result.append(input_shape)
     return result
 
 
@@ -44,8 +54,8 @@ def parse_args():
                         help='Model to convert. May be class name or name of constructor function')
     parser.add_argument('--weights', type=str,
                         help='Path to the weights in PyTorch\'s format')
-    parser.add_argument('--input-shape', metavar='INPUT_DIM', type=positive_int_arg, required=True,
-                        help='Shape of the input blob')
+    parser.add_argument('--input-shapes', metavar='INPUT_DIM', type=positive_int_arg, required=True,
+                        help='Shapes of the input blobs')
     parser.add_argument('--output-file', type=Path, required=True,
                         help='Path to the output ONNX model')
     parser.add_argument('--model-path', type=str,
@@ -92,14 +102,14 @@ def load_model(model_name, weights, model_path, module_name, model_params):
     return model
 
 
-def convert_to_onnx(model, input_shape, output_file, input_names, output_names):
+def convert_to_onnx(model, input_shapes, output_file, input_names, output_names):
     """Convert PyTorch model to ONNX and check the resulting onnx model"""
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     model.eval()
-    dummy_input = torch.randn(input_shape)
-    model(dummy_input)
-    torch.onnx.export(model, dummy_input, str(output_file), verbose=False, opset_version=11,
+    dummy_inputs = [torch.randn(input_shape) for input_shape in input_shapes]
+    model(*dummy_inputs)
+    torch.onnx.export(model, tuple(dummy_inputs), str(output_file), verbose=False, opset_version=11,
                       input_names=input_names.split(','), output_names=output_names.split(','))
 
     model = onnx.load(str(output_file))
@@ -125,7 +135,7 @@ def main():
     model = load_model(args.model_name, args.weights,
                        args.model_path, args.import_module, dict(args.model_param))
 
-    convert_to_onnx(model, args.input_shape, args.output_file, args.input_names, args.output_names)
+    convert_to_onnx(model, args.input_shapes, args.output_file, args.input_names, args.output_names)
 
 
 if __name__ == '__main__':
