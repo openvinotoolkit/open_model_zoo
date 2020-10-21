@@ -75,8 +75,12 @@ postprocessing:
     \n    return preds_out"
   - $type: regex_replace
     file: yolact.py
-    pattern: '<= 1'
-    replacement: '== -1'
+    pattern: 'torch.cuda.device_count\(\) <= 1'
+    replacement: 'False'
+  - $type: regex_replace
+    file: yolact.py
+    pattern: 'torch.cuda.current_device\(\)'
+    replacement: ''
   - $type: regex_replace
     file: yolact.py
     pattern: 'from data.config import cfg, mask_type'
@@ -93,6 +97,10 @@ postprocessing:
     file: yolact.py
     pattern: '__init__\(self\):'
     replacement: "__init__(self, weights=None):"
+  - $type: regex_replace
+    file: yolact.py
+    pattern: 'torch.load\(path\)'
+    replacement: "torch.load(path, map_location=torch.device('cpu'))"
 conversion_to_onnx_args:
   - --model-name=Yolact
   - --model-path=$dl_dir
