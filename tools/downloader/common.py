@@ -409,7 +409,7 @@ class PostprocRegexReplace(Postproc):
 
         reporter.print_section_heading('Replacing text in {}', postproc_file)
 
-        postproc_file_text = postproc_file.read_text()
+        postproc_file_text = postproc_file.read_text(encoding='utf-8')
 
         orig_file = postproc_file.with_name(postproc_file.name + '.orig')
         if not orig_file.exists():
@@ -425,7 +425,7 @@ class PostprocRegexReplace(Postproc):
             raise RuntimeError('Invalid pattern: expected at least {} occurrences, but only {} found'.format(
                 self.count, num_replacements))
 
-        postproc_file.write_text(postproc_file_text)
+        postproc_file.write_text(postproc_file_text, encoding='utf-8')
 
 Postproc.types['regex_replace'] = PostprocRegexReplace
 
