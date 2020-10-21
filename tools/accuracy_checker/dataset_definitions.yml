@@ -966,3 +966,12 @@ datasets:
       images_dir: nyudepthv2/val/converted/images
       depth_map_dir: nyudepthv2/val/converted/depth
       data_dir: nyudepthv2/val/official
+
+  - name: ADEChallengeData2016
+    annotation_conversion:
+      converter: ade20k
+      images_dir: ADEChallengeData2016/images/validation
+      annotations_dir: ADEChallengeData2016/annotations/validation
+      object_categories_file: ADEChallengeData2016/objectInfo150.txt
+    data_source: ADEChallengeData2016/images/validation
+    segmentation_masks_source: ADEChallengeData2016/annotations/validation
