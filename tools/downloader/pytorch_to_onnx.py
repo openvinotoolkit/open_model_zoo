@@ -42,7 +42,7 @@ def parse_args():
 
     parser.add_argument('--model-name', type=str, required=True,
                         help='Model to convert. May be class name or name of constructor function')
-    parser.add_argument('--weights', type=str, required=True,
+    parser.add_argument('--weights', type=str,
                         help='Path to the weights in PyTorch\'s format')
     parser.add_argument('--input-shape', metavar='INPUT_DIM', type=positive_int_arg, required=True,
                         help='Shape of the input blob')
@@ -83,7 +83,8 @@ def load_model(model_name, weights, model_path, module_name, model_params):
         sys.exit(err)
 
     try:
-        model.load_state_dict(torch.load(weights, map_location='cpu'))
+        if weights:
+            model.load_state_dict(torch.load(weights, map_location='cpu'))
     except RuntimeError as err:
         print('ERROR: Weights from {} cannot be loaded for model {}! Check matching between model and weights'.format(
             weights, model_name))
@@ -117,6 +118,7 @@ def convert_to_onnx(model, input_shape, output_file, input_names, output_names):
         sys.exit('ONNX check failed with error: ' + str(exc))
 
     onnx.save(model, str(output_file))
+
 
 def main():
     args = parse_args()
