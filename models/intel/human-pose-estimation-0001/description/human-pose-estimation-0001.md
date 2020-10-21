@@ -19,7 +19,7 @@ The pose may contain up to 18 keypoints: ears, eyes, nose, neck, shoulders, elbo
 | MParams                         | 4.099                                     |
 | Source framework                | Caffe*                                    |
 
-Average Precision metric described in [COCO Keypoint Evaluation site](http://cocodataset.org/#keypoints-eval).
+Average Precision metric described in [COCO Keypoint Evaluation site](https://cocodataset.org/#keypoints-eval).
 
 Tested on a COCO validation subset from the original paper [Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields](https://arxiv.org/abs/1611.08050).
 

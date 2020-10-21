@@ -1,0 +1,20 @@
+models:
+  - name: fcrn-dp-nyu-depth-v2-tf
+    launchers:
+      - framework: dlsdk
+        adapter: mono_depth
+    datasets:
+      - name: NYU_Depth_V2
+        preprocessing:
+          - type: resize
+            use_pillow: true
+            dst_height: 228
+            dst_width: 304
+        postprocessing:
+          - type: resize_prediction_depth_map
+        metrics:
+          - type: rmse
+          - type: log10_error
+            name: log10
+          - type: mape
+            name: rel

@@ -2,7 +2,7 @@
 
 OpenVINO&trade; toolkit provides a set of public models
 that you can use for learning and demo purposes or for developing deep learning
-software. Most recent version is available in the [repo on Github](https://github.com/opencv/open_model_zoo).
+software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
 
 The models can be downloaded via Model Downloader
 (`<OPENVINO_INSTALL_DIR>/deployment_tools/open_model_zoo/tools/downloader`).
@@ -57,6 +57,7 @@ The models can be downloaded via Model Downloader
 | SE-ResNet 152               | Caffe\*                            | [se-resnet-152](./se-resnet-152/se-resnet-152.md) | 78.506%/94.45% | 22.709 | 66.746 |
 | SE-ResNeXt 50               | Caffe\*                            | [se-resnext-50](./se-resnext-50/se-resnext-50.md) | 78.968%/94.63% | 8.533 | 27.526|
 | SE-ResNeXt 101              | Caffe\*                            | [se-resnext-101](./se-resnext-101/se-resnext-101.md) | 80.168%/95.19% | 16.054 | 48.886 |
+| Shufflenet V2 x1.0          | PyTorch\*                          | [shufflenet-v2-x1.0](./shufflenet-v2-x1.0/shufflenet-v2-x1.0.md) | 69.36%/88.32% | 0.2957 | 2.2705 |
 | SqueezeNet v1.0             | Caffe\*                            | [squeezenet1.0](./squeezenet1.0/squeezenet1.0.md)| 57.684%/80.38%| 1.737 | 1.248 |
 | SqueezeNet v1.1             | Caffe\*<br>Caffe2\*                | [squeezenet1.1](./squeezenet1.1/squeezenet1.1.md)<br>[squeezenet1.1-caffe2](./squeezenet1.1-caffe2/squeezenet1.1-caffe2.md)| 58.382%/81%<br>56.502%/79.576% | 0.785 | 1.236 |
 | VGG 16                      | Caffe\*                            | [vgg16](./vgg16/vgg16.md) | 70.968%/89.878% | 30.974 | 138.358 |
@@ -169,6 +170,7 @@ Since this task contains - in the general setting - some ambiguity, the resultin
 | Model Name                  | Implementation | OMZ Model Name                | Accuracy | GFlops    | mParams |
 | --------------------------- | -------------- | ----------------------------- | -------- | --------- | ------- |
 | midasnet                    | PyTorch\*      | [midasnet](./midasnet/midasnet.md)| 7.5878| 207.4915  |    104.0814     |
+| FCRN ResNet50-Upproj          | TensorFlow\*   | [fcrn-dp-nyu-depth-v2-tf](./fcrn-dp-nyu-depth-v2-tf/fcrn-dp-nyu-depth-v2-tf.md)| 0.573 | 63.5421 | 34.5255 |
 
 ## Image Inpainting
 

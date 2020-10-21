@@ -132,7 +132,7 @@ if __name__ == '__main__':
                                      cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
         colorize_image = cv.putText(colorize_image, 'Colorize', (25, 50),
                                     cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-        lab_image = cv.putText(lab_image, 'LAB interpetation', (25, 50),
+        lab_image = cv.putText(lab_image, 'LAB interpretation', (25, 50),
                                cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
 
         ir_image = [cv.hconcat([original_image, grayscale_image]),

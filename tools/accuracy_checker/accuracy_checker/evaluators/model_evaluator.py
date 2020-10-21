@@ -79,18 +79,23 @@ class ModelEvaluator(BaseEvaluator):
             dataset_config.get('preprocessing'), dataset_name, dataset.metadata,
             enable_ie_preprocessing=enable_ie_preprocessing
         )
+        input_precision = launcher_config.get('_input_precision', [])
         if enable_ie_preprocessing:
             launcher_kwargs['preprocessor'] = preprocessor
         if launcher_config['framework'] == 'dummy' and launcher_config.get('provide_identifiers', False):
             launcher_kwargs = {'identifiers': dataset.identifiers}
+        if input_precision:
+            launcher_kwargs['postpone_inputs_configuration'] = True
         launcher = create_launcher(launcher_config, model_name, **launcher_kwargs)
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)
         input_feeder = InputFeeder(
             launcher.config.get('inputs', []), launcher.inputs, launcher.fit_to_input, launcher.default_layout,
-            launcher_config['framework'] == 'dummy'
+            launcher_config['framework'] == 'dummy', input_precision
         )
+        if input_precision:
+            launcher.update_input_configuration(input_feeder.inputs_config)
         preprocessor.input_shapes = launcher.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
         metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)

@@ -21,6 +21,7 @@ import numpy as np
 from ..representation import (
     ReIdentificationClassificationAnnotation,
     ReIdentificationAnnotation,
+    PlaceRecognitionAnnotation,
     ReIdentificationPrediction
 )
 from ..config import BaseField, BoolField, NumberField
@@ -588,3 +589,49 @@ def binary_average_precision(y_true, y_score, interpolated_auc=True):
         return auc(recall, precision)
 
     return _average_binary_score(_average_precision, y_true, y_score)
+
+
+class LocalizationRecall(FullDatasetEvaluationMetric):
+    __provider__ = 'localization_recall'
+    annotation_types = (PlaceRecognitionAnnotation, )
+    prediction_types = (ReIdentificationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'top_k': NumberField(optional=True, value_type=int, min_value=1, default=1),
+            'distance_threshold': NumberField(optional=True, default=25)
+        })
+        return params
+
+    def configure(self):
+        self.top_k = self.get_value_from_config('top_k')
+        self.distance_threshold = self.get_value_from_config('distance_threshold')
+
+    def evaluate(self, annotations, predictions):
+        gallery_embeddings = extract_embeddings(annotations, predictions, query=False)
+        query_embeddings = extract_embeddings(annotations, predictions, query=True)
+        query_ann = [ann for ann in annotations if ann.query]
+        gallery_ann = [ann for ann in annotations if not ann.query]
+        query_len = np.shape(query_embeddings)[0]
+        not_empty = np.size(gallery_embeddings) > 0 and np.size(query_embeddings) > 0
+        if not not_empty:
+            warnings.warn('No gallery or query embeddings for evaluation')
+            return 0
+        l2_distance = (
+            np.sum(query_embeddings ** 2, axis=1, keepdims=True)
+            + np.sum(gallery_embeddings ** 2, axis=1)
+            - 2 * np.dot(query_embeddings, gallery_embeddings.transpose())
+        )
+        correct_at_n = 0
+        for i, q in enumerate(query_ann):
+            indices = np.argsort(l2_distance[i, :])[:self.top_k]
+            for ind in indices:
+                g_loc = gallery_ann[ind].coords
+                q_loc = q.coords
+                dist = np.linalg.norm(q_loc - g_loc)
+                if dist < self.distance_threshold:
+                    correct_at_n += 1
+        recall = correct_at_n / query_len
+        return recall
