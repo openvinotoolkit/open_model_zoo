@@ -628,7 +628,7 @@ void Reader::process() {
 
 int main(int argc, char* argv[]) {
     try {
-        slog::info << "InferenceEngine: " << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         try {
@@ -711,7 +711,7 @@ int main(int argc, char* argv[]) {
             slog::info << "Loading device " << device << slog::endl;
 
             /** Printing device version **/
-            std::cout << ie.GetVersions(device) << std::endl;
+            slog::info << printable(ie.GetVersions(device)) << slog::endl;
 
             if ("CPU" == device) {
                 if (!FLAGS_l.empty()) {

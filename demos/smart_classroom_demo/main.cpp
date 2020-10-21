@@ -539,7 +539,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 int main(int argc, char* argv[]) {
     try {
         /** This demo covers 4 certain topologies and cannot be generalized **/
-        slog::info << "InferenceEngine: " << *GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << slog::endl;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -587,7 +587,7 @@ int main(int argc, char* argv[]) {
             if (loadedDevices.find(device) != loadedDevices.end())
                 continue;
 
-            std::cout << ie.GetVersions(device) << std::endl;
+            slog::info << printable(ie.GetVersions(device)) << slog::endl;
 
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
