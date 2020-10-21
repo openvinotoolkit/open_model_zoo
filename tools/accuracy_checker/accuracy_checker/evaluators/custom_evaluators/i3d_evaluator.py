@@ -83,7 +83,8 @@ class I3DEvaluator(BaseEvaluator):
         )
         if rgb_model.output_blob != flow_model.output_blob:
             warnings.warn("Outputs for rgb and flow models have different names. "
-                          "Output name of rgb model will be used in combined output")
+                          "rgb model's output name: {}. flow model's output name: {}. Output name of rgb model "
+                          "will be used in combined output".format(rgb_model.output_blob, flow_model.output_blob))
         adapter.output_blob = rgb_model.output_blob
         return cls(dataset_config, launcher, adapter, rgb_model, flow_model)
 
@@ -98,11 +99,14 @@ class I3DEvaluator(BaseEvaluator):
     def combine_predictions(output_rgb, output_flow):
         output = {}
         for key_rgb, key_flow in zip(output_rgb.keys(), output_flow.keys()):
-            if key_rgb != key_flow:
-                warnings.warn("Outputs for rgb and flow models have different names. "
-                              "Output name of rgb model will be used in combined output")
             data_rgb = np.asarray(output_rgb[key_rgb])
             data_flow = np.asarray(output_flow[key_flow])
+
+            if data_rgb.shape != data_flow.shape:
+                raise ValueError("Сalculation of combined output is not possible. Outputs for rgb and flow models have "
+                                 "different shapes. rgb model's output shape: {}. "
+                                 "flow model's output shape: {}.".format(data_rgb.shape, data_flow.shape))
+
             result_data = (data_rgb + data_flow) / 2
             output[key_rgb] = result_data
 
@@ -381,9 +385,8 @@ class I3DRGBModel(BaseModel):
         super().__init__(network_info, launcher, data_source, delayed_model_loading)
 
     def prepare_data(self, data):
-        video = Path(data[0].video)
-        frames_identifiers = [video / frame for frame in data[0].frames]
-        prepared_data = self.reader(frames_identifiers)
+        image_data = data[0]
+        prepared_data = self.reader(image_data)
         prepared_data = self.preprocessing(prepared_data)
         prepared_data.data = self.fit_to_input(prepared_data.data)
         return prepared_data
@@ -404,8 +407,7 @@ class I3DFlowModel(BaseModel):
         super().__init__(network_info, launcher, data_source, delayed_model_loading)
 
     def prepare_data(self, data):
-        video = Path(data[1].video)
-        frames_identifiers = [video / frame for frame in data[1].frames]
-        prepared_data = self.reader(frames_identifiers)
+        numpy_data = data[1]
+        prepared_data = self.reader(numpy_data)
         prepared_data.data = self.fit_to_input(prepared_data.data)
         return prepared_data
