@@ -4,6 +4,7 @@ This demo demonstrates an example of using neural networks to colorize a video.
 You can use the following models with the demo:
 
 * `colorization-v2`
+* `colorization-v2-pytorch`
 * `colorization-v2-norebal`
 
 For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
@@ -17,12 +18,14 @@ Once the program receives an image, it performs the following steps:
 2. Uses the L-channel to predict A and B channels.
 3. Restores the image by converting it into the BGR color space.
 
+> **NOTE**: To use `colorization-v2` or `colorization-v2-norebal` model with the demo, you have to specify the path to .npy file with color coefficients. If you want to use `colorization-v2-pytorch` model, you only need to specify the path to the image.
+
 ### Running the Demo
 
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: colorization_demo.py [-h] -m MODEL --coeffs COEFFS [-d DEVICE] -i
+usage: colorization_demo.py [-h] -m MODEL [--coeffs COEFFS] [-d DEVICE] -i
                             "<path>" [--no_show] [-v]
                             [-u UTILIZATION_MONITORS]
 
@@ -30,7 +33,7 @@ Options:
   -h, --help            Help with the script.
   -m MODEL, --model MODEL
                         Required. Path to .xml file with pre-trained model.
-  --coeffs COEFFS       Required. Path to .npy file with color coefficients.
+  --coeffs COEFFS       Optional. Path to .npy file with color coefficients.
   -d DEVICE, --device DEVICE
                         Optional. Specify target device for infer: CPU, GPU,
                         FPGA, HDDL or MYRIAD. Default: CPU
@@ -40,6 +43,7 @@ Options:
   -v, --verbose         Optional. Enable display of processing logs on screen.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+
 ```
 
 To run the demo, you can use public or Intel's pretrained models. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md) or go to the [Intel&reg; Open Source Technology Center](https://download.01.org/opencv/).
