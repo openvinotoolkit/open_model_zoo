@@ -91,6 +91,7 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | Mask R-CNN Inception V2        | TensorFlow\*   | [mask_rcnn_inception_v2_coco](./mask_rcnn_inception_v2_coco/mask_rcnn_inception_v2_coco.md) | 27.1199%/21.4805% | 54.926 | 21.772 |
 | Mask R-CNN ResNet 50           | TensorFlow\*   | [mask_rcnn_resnet50_atrous_coco](./mask_rcnn_resnet50_atrous_coco/mask_rcnn_resnet50_atrous_coco.md)| 	29.7512%/27.4597% | 294.738 | 50.222 |
 | Mask R-CNN ResNet 101          | TensorFlow\*   | [mask_rcnn_resnet101_atrous_coco](./mask_rcnn_resnet101_atrous_coco/mask_rcnn_resnet101_atrous_coco.md) | 34.9191%/31.301% | 674.58 | 69.188 |
+| YOLACT ResNet 50 FPN | Pytorch\* | [yolact-resnet50-fpn-pytorch](./yolact-resnet50-fpn-pytorch/yolact-resnet50-fpn-pytorch.md) | 28.0%/30.69% |  |  |
 
 ### 3D Semantic Segmentation
 

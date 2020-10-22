@@ -13,16 +13,10 @@
 # limitations under the License.
 
 description: >-
-  Shufflenet V2 x1.0 is image classification model pretrained on ImageNet dataset.
-  This is PyTorch implementation based on architecture described in paper "ShuffleNet
-  V2: Practical Guidelines for Efficient CNN Architecture Design" <https://arxiv.org/pdf/1807.11164.pdf>
-  in TorchVision package (see here <https://github.com/pytorch/vision>).
-
-  The model input is a blob that consists of a single image of "1x3x224x224" in RGB
-  order.
-
-  The model output is typical object classifier for the 1000 different classifications
-  matching with those in the ImageNet database.
+  YOLACT ResNet 50 is a simple, fully convolutional model for real-time instance segmentation
+  described in "YOLACT: Real-time Instance Segmentation" paper <https://arxiv.org/abs/1904.02689>.
+  Model pretrained in Pytorch* on COCO dataset. For details, see the repository <https://github.com/dbolya/yolact>.
+  .
 
 task_type: instance_segmentation
 
@@ -62,17 +56,13 @@ postprocessing:
   - $type: regex_replace
     file: yolact.py
     pattern: 'from layers import Detect'
-    replacement: "def detect(preds_out, _):
-    \n    loc, priors = preds_out.pop('loc'), preds_out.pop('priors')
-    \n    variances = [0.1, 0.2]
-    \n    boxes = torch.cat((priors[:, :2] + loc[:, :, :2] * variances[0] * priors[:, 2:],
-        priors[:, 2:] * torch.exp(loc[:, :, 2:] * variances[1])), 2)
-    \n    boxes_copy = boxes.clone()
-    \n    boxes_result1 = boxes_copy[:, :, :2] - boxes[:, :, 2:] / 2
-    \n    boxes_result2 = boxes_copy[:, :, 2:] + boxes_result1
-    \n    boxes_result = torch.cat((boxes_result1, boxes_result2), 2)
-    \n    preds_out['boxes'] = boxes_result
-    \n    return preds_out"
+    replacement: "def detect(preds_out, _): \n    loc, priors = preds_out.pop('loc'),\
+      \ preds_out.pop('priors') \n    variances = [0.1, 0.2] \n    boxes = torch.cat((priors[:,\
+      \ :2] + loc[:, :, :2] * variances[0] * priors[:, 2:], priors[:, 2:] * torch.exp(loc[:,\
+      \ :, 2:] * variances[1])), 2) \n    boxes_copy = boxes.clone() \n    boxes_result1\
+      \ = boxes_copy[:, :, :2] - boxes[:, :, 2:] / 2 \n    boxes_result2 = boxes_copy[:,\
+      \ :, 2:] + boxes_result1 \n    boxes_result = torch.cat((boxes_result1, boxes_result2),\
+      \ 2) \n    preds_out['boxes'] = boxes_result \n    return preds_out"
   - $type: regex_replace
     file: yolact.py
     pattern: 'torch.cuda.device_count\(\) <= 1'
