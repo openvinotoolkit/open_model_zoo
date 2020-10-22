@@ -1,6 +1,7 @@
 import argparse
 import importlib
 import sys
+import ast
 
 from pathlib import Path
 
@@ -8,30 +9,29 @@ import onnx
 import torch
 import torch.onnx
 
-import numpy as np
-import ast
+
+def is_sequence(element):
+    return isinstance(element, (list, tuple))
 
 
 def positive_int_arg(values):
     """Check positive integer type for input argument"""
     inputs = ast.literal_eval(values)
-    number_of_inputs = np.ndim(inputs)
-    result = []
-    if number_of_inputs == 1:
-        inputs = [inputs]
+    if not is_sequence(inputs):
+        sys.exit('Model inputs must be a sequence')
+    if not all(is_sequence(elem) for elem in inputs):
+        inputs = (inputs, )
     for input_ in inputs:
-        input_shape = []
+        if not is_sequence(input_):
+            sys.exit('One of the inputs is not a sequence')
         for value in input_:
             try:
-                ivalue = int(value)
-                if ivalue < 0:
+                if type(value) is not int or value < 0:
                     raise argparse.ArgumentTypeError('Argument must be a positive integer')
-                input_shape.append(ivalue)
             except Exception as exc:
                 print(exc)
                 sys.exit('Invalid value for input argument: {!r}, a positive integer is expected'.format(value))
-        result.append(input_shape)
-    return result
+    return inputs
 
 
 def model_parameter(parameter):
@@ -107,9 +107,9 @@ def convert_to_onnx(model, input_shapes, output_file, input_names, output_names)
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     model.eval()
-    dummy_inputs = [torch.randn(input_shape) for input_shape in input_shapes]
+    dummy_inputs = tuple(torch.randn(input_shape) for input_shape in input_shapes)
     model(*dummy_inputs)
-    torch.onnx.export(model, tuple(dummy_inputs), str(output_file), verbose=False, opset_version=11,
+    torch.onnx.export(model, dummy_inputs, str(output_file), verbose=False, opset_version=11,
                       input_names=input_names.split(','), output_names=output_names.split(','))
 
     model = onnx.load(str(output_file))
