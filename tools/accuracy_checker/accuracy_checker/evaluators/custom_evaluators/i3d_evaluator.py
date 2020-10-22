@@ -157,6 +157,11 @@ class I3DEvaluator(BaseEvaluator):
                 self._annotations.extend([batch_annotation])
                 self._predictions.extend(batch_prediction)
 
+            if self.metric_executor:
+                self.metric_executor.update_metrics_on_batch(
+                    [batch_id], [batch_annotation], batch_prediction
+                )
+
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
                 if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
