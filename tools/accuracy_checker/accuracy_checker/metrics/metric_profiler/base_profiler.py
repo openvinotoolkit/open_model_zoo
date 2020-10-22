@@ -17,7 +17,7 @@ limitations under the License.
 import json
 from csv import DictWriter
 from pathlib import Path
-from collections import defaultdict
+from collections import OrderedDict
 from ...dependency import ClassProvider
 
 PROFILERS_MAPPING = {
@@ -61,7 +61,7 @@ class MetricProfiler(ClassProvider):
         self.report_file = '{}.{}'.format(self.__provider__, report_type)
         self.out_dir = Path()
         self.dump_iterations = dump_iterations
-        self.storage = defaultdict(dict)
+        self.storage = OrderedDict()
         self.write_result = self.write_csv_result if report_type == 'csv' else self.write_json_result
         self._last_profile = None
 
@@ -76,11 +76,17 @@ class MetricProfiler(ClassProvider):
         self._last_profile = profiling_data
         if isinstance(profiling_data, list):
             for data in profiling_data:
-                self.storage[data['identifier']].update(data)
                 last_identifier = data['identifier']
+                if self.storage.get(last_identifier):
+                    self.storage[last_identifier].update(data)
+                else:
+                    self.storage[last_identifier] = data
         else:
-            self.storage[profiling_data['identifier']].update(profiling_data)
             last_identifier = profiling_data['identifier']
+            if self.storage.get(last_identifier):
+                self.storage[last_identifier].update(profiling_data)
+            else:
+                self.storage[last_identifier] = profiling_data
         if len(self.storage) % self.dump_iterations == 0 and len(self.fields) == len(self.storage[last_identifier]):
             self.write_result()
 
@@ -89,7 +95,7 @@ class MetricProfiler(ClassProvider):
             self.write_result()
 
     def reset(self):
-        self.storage = defaultdict(dict)
+        self.storage = OrderedDict()
 
     def write_csv_result(self):
         out_path = self.out_dir / self.report_file
@@ -101,7 +107,7 @@ class MetricProfiler(ClassProvider):
                 writer.writeheader()
             writer.writerows(self.storage.values())
 
-        self.storage = defaultdict(dict)
+        self.storage = OrderedDict()
 
     def write_json_result(self):
         out_path = self.out_dir / self.report_file
@@ -126,7 +132,7 @@ class MetricProfiler(ClassProvider):
         with open(str(out_path), 'w') as f:
             json.dump(out_dict, f)
 
-        self.storage = defaultdict(dict)
+        self.storage = OrderedDict()
 
     def set_output_dir(self, out_dir):
         self.out_dir = out_dir
