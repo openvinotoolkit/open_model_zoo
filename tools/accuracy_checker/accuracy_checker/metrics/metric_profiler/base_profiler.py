@@ -17,6 +17,7 @@ limitations under the License.
 import json
 from csv import DictWriter
 from pathlib import Path
+from collections import defaultdict
 from ...dependency import ClassProvider
 
 PROFILERS_MAPPING = {
@@ -60,7 +61,7 @@ class MetricProfiler(ClassProvider):
         self.report_file = '{}.{}'.format(self.__provider__, report_type)
         self.out_dir = Path()
         self.dump_iterations = dump_iterations
-        self.storage = []
+        self.storage = defaultdict(dict)
         self.write_result = self.write_csv_result if report_type == 'csv' else self.write_json_result
         self._last_profile = None
 
@@ -74,24 +75,21 @@ class MetricProfiler(ClassProvider):
         profiling_data = self.generate_profiling_data(*args, **kwargs)
         self._last_profile = profiling_data
         if isinstance(profiling_data, list):
-            finished = True
-            if finished:
-                self.storage.extend(profiling_data)
+            for data in profiling_data:
+                self.storage[data['identifier']].update(data)
+                last_identifier = data['identifier']
         else:
-            finished = True
-            if finished:
-                self.storage.append(profiling_data)
-
-        if len(self.storage) % self.dump_iterations == 0 and finished:
+            self.storage[profiling_data['identifier']].update(profiling_data)
+            last_identifier = profiling_data['identifier']
+        if len(self.storage) % self.dump_iterations == 0 and len(self.fields) == len(self.storage[last_identifier]):
             self.write_result()
-            self.storage = []
 
     def finish(self):
         if self.storage:
             self.write_result()
 
     def reset(self):
-        self.storage = []
+        self.storage = defaultdict(dict)
 
     def write_csv_result(self):
         out_path = self.out_dir / self.report_file
@@ -101,7 +99,9 @@ class MetricProfiler(ClassProvider):
             writer = DictWriter(f, fieldnames=self.fields)
             if new_file:
                 writer.writeheader()
-            writer.writerows(self.storage)
+            writer.writerows(self.storage.values())
+
+        self.storage = defaultdict(dict)
 
     def write_json_result(self):
         out_path = self.out_dir / self.report_file
@@ -109,7 +109,7 @@ class MetricProfiler(ClassProvider):
         if not new_file:
             with open(str(out_path), 'r') as f:
                 out_dict = json.load(f)
-            out_dict['report'].extend(self.storage)
+            out_dict['report'].extend(list(self.storage.values()))
         else:
             out_dict = {
                 'processing_info': {
@@ -119,12 +119,14 @@ class MetricProfiler(ClassProvider):
                     'device': self.device,
                     'tags': self.tags
                 },
-                'report': self.storage,
+                'report': list(self.storage.values()),
                 'report_type': self.__provider__,
                 'dataset_meta': self.dataset_meta
             }
         with open(str(out_path), 'w') as f:
             json.dump(out_dict, f)
+
+        self.storage = defaultdict(dict)
 
     def set_output_dir(self, out_dir):
         self.out_dir = out_dir
