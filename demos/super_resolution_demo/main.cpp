@@ -46,7 +46,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        slog::info << "InferenceEngine: " << *GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << slog::endl;
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 
         /** Printing device version **/
         slog::info << "Device info: " << slog::endl;
-        std::cout << ie.GetVersions(FLAGS_d) << std::endl;
+        slog::info << printable(ie.GetVersions(FLAGS_d)) << slog::endl;
 
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension

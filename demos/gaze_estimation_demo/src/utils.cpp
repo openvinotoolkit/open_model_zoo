@@ -34,7 +34,7 @@ void initializeIEObject(InferenceEngine::Core& ie,
             continue;
         }
         slog::info << "Loading device " << deviceName << slog::endl;
-        std::cout << ie.GetVersions(deviceName) << std::endl;
+        slog::info << printable(ie.GetVersions(deviceName)) << slog::endl;
 
         /** Loading extensions for the CPU device **/
         if ((deviceName.find("CPU") != std::string::npos)) {
