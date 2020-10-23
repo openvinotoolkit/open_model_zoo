@@ -39,7 +39,7 @@ class DetectionProfiler(MetricProfiler):
         if self._last_profile and self._last_profile == identifier:
             report = self._last_profile
         else:
-            report = self.per_box_result(identifier, metric_result) if self.report_file == 'csv' else {}
+            report = self.per_box_result(identifier, metric_result) if self.report_type == 'csv' else {}
 
         if self.report_type == 'json':
             report = self.generate_json_report(identifier, metric_result, metric_name)
@@ -81,20 +81,19 @@ class DetectionProfiler(MetricProfiler):
 
     def per_box_result(self, identifier, metric_result):
         per_box_results = []
-        for label, per_class_result in enumerate(metric_result):
+        for label, per_class_result in metric_result.items():
             if not np.size(per_class_result['scores']):
                 continue
-            label_id = self.valid_labels[label] if self.valid_labels else label
             scores = per_class_result['scores']
             dt = per_class_result['dt']
             gt = per_class_result['gt']
             matches_result = self.generate_result_matching(per_class_result, '')
-            dt_matched = matches_result['dt_matches']
-            gt_matched = matches_result['gt_matches']
+            dt_matched = matches_result['prediction_matches']
+            gt_matched = matches_result['annotation_matches']
             for dt_id, dt_box in enumerate(dt):
                 box_result = {
                     'identifier': identifier,
-                    'label': label_id,
+                    'label': label,
                     'score': scores[dt_id],
                     'pred': dt_box,
                     'gt': ''
@@ -107,7 +106,7 @@ class DetectionProfiler(MetricProfiler):
                 if gt_matched[gt_id] == -1:
                     box_result = {
                         'identifier': identifier,
-                        'label': label_id,
+                        'label': label,
                         'score': '',
                         'pred': '',
                         'gt': gt_box
