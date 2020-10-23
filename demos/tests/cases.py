@@ -377,6 +377,16 @@ PYTHON_DEMOS = [
         ]
     )),
 
+    PythonDemo(subdirectory='colorization_demo', device_keys=['-d'], test_cases=combine_cases(
+       TestCase(options={
+           '--no_show': None,
+           **MONITORS,
+           '-i': DataPatternArg('classification'),
+           '-m': ModelArg('colorization-v2'),
+           '--coeffs': ModelDirArg('colorization-v2', 'colorization-v2.npy'),
+       })
+    )),
+
     PythonDemo(subdirectory='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
                           **MONITORS,
