@@ -31,6 +31,8 @@ Options:
                         Required. Path to an .xml file with a trained model
   -i INPUT, --input INPUT
                         Required. Url to a page with context
+  --questions [QUESTIONS [QUESTIONS ...]]
+                        Optional. Prepared questions
   --input_names INPUT_NAMES
                         Optional. Inputs names for the  network.
                         Default values are "input_ids,attention_mask,token_type_ids"
