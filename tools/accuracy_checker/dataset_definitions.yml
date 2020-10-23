@@ -846,9 +846,9 @@ datasets:
   - name: Kondate_nakayosi
     data_source: Kondate/test_data
     annotation_conversion:
-      converter: kondate_nakayosi_recognition
-      decoding_char_file: Kondate/kondate_nakayosi_char_list.txt
-      annotation_file: Kondate/test_img_id_gt.txt
+      converter: unicode_character_recognition
+      decoding_char_file: Kondate_nakayosi/kondate_nakayosi_char_list.txt
+      annotation_file: Kondate_nakayosi/test_img_id_gt.txt
     annotation: kondate_nakayosi_recognition.pickle
     dataset_meta: kondate_nakayosi_recognition.json
 
@@ -966,6 +966,15 @@ datasets:
       images_dir: nyudepthv2/val/converted/images
       depth_map_dir: nyudepthv2/val/converted/depth
       data_dir: nyudepthv2/val/official
+
+  - name: SCUT_EPT
+    data_source: SCUT_EPT/test
+    annotation_conversion:
+      converter: unicode_character_recognition
+      decoding_char_file: SCUT_EPT/scut_ept_char_list.txt
+      annotation_file: SCUT_EPT/test_img_id_gt.txt
+    annotation: scut_ept_recognition.pickle
+    dataset_meta: scut_ept_recognition.json
 
   - name: ADEChallengeData2016
     annotation_conversion:

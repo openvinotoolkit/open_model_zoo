@@ -31,7 +31,7 @@ from .super_resolution_converter import (
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
 from .im2latex import Im2latexDatasetConverter
-from .kondate_nakayosi import KondateNakayosiRecognitionDatasetConverter
+from .unicode_character_recognition import UnicodeCharacterRecognitionDatasetConverter
 from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter, MSCocoSingleKeypointsConverter
 from .cityscapes import CityscapesConverter
 from .ncf_converter import MovieLensConverter
@@ -108,7 +108,7 @@ __all__ = [
     'SRDirectoryBased',
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
-    'KondateNakayosiRecognitionDatasetConverter',
+    'UnicodeCharacterRecognitionDatasetConverter',
     'MSCocoKeypointsConverter',
     'MSCocoSingleKeypointsConverter',
     'MSCocoDetectionConverter',
