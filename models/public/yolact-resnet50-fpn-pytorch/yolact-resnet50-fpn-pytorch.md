@@ -4,7 +4,7 @@
 
 YOLACT ResNet 50 is a simple, fully convolutional model for real-time instance segmentation described in "YOLACT: Real-time Instance Segmentation" [paper](https://arxiv.org/abs/1904.02689). Model pretrained in Pytorch\* on COCO dataset.
 For details, see the [repository](https://github.com/dbolya/yolact).
-.
+
 ## Example
 
 ## Specification

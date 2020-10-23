@@ -56,13 +56,17 @@ postprocessing:
   - $type: regex_replace
     file: yolact.py
     pattern: 'from layers import Detect'
-    replacement: "def detect(preds_out, _): \n    loc, priors = preds_out.pop('loc'),\
-      \ preds_out.pop('priors') \n    variances = [0.1, 0.2] \n    boxes = torch.cat((priors[:,\
-      \ :2] + loc[:, :, :2] * variances[0] * priors[:, 2:], priors[:, 2:] * torch.exp(loc[:,\
-      \ :, 2:] * variances[1])), 2) \n    boxes_copy = boxes.clone() \n    boxes_result1\
-      \ = boxes_copy[:, :, :2] - boxes[:, :, 2:] / 2 \n    boxes_result2 = boxes_copy[:,\
-      \ :, 2:] + boxes_result1 \n    boxes_result = torch.cat((boxes_result1, boxes_result2),\
-      \ 2) \n    preds_out['boxes'] = boxes_result \n    return preds_out"
+    replacement: |
+     def detect(preds_out, _):
+         loc, priors = preds_out.pop('loc'), preds_out.pop('priors')
+         variances = [0.1, 0.2]
+         boxes = torch.cat((priors[:, :2] + loc[:, :, :2] * variances[0] * priors[:, 2:], priors[:, 2:] * torch.exp(loc[:, :, 2:] * variances[1])), 2)
+         boxes_copy = boxes.clone()
+         boxes_result1 = boxes_copy[:, :, :2] - boxes[:, :, 2:] / 2
+         boxes_result2 = boxes_copy[:, :, 2:] + boxes_result1
+         boxes_result = torch.cat((boxes_result1, boxes_result2), 2)
+         preds_out['boxes'] = boxes_result
+         return preds_out
   - $type: regex_replace
     file: yolact.py
     pattern: 'torch.cuda.device_count\(\) <= 1'
