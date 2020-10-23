@@ -1,3 +1,4 @@
+<<<<<<< 0c601a2d93429dbe576d4e14a2b95e8b6144e10c
 """
  Copyright (c) 2019 Intel Corporation
 
@@ -97,6 +98,7 @@ def yolact_postprocess(
 
         if cls_scores.shape[0] == 0:
             continue
+
         x1, x2 = sanitize_coordinates(boxes[idx, 0], boxes[idx, 2], frame_width)
         y1, y2 = sanitize_coordinates(boxes[idx, 1], boxes[idx, 3], frame_height)
         keep = nms(x1, y1, x2, y2, cls_scores, 0.5, include_boundaries=False)
@@ -192,6 +194,7 @@ def yolact_segm_postprocess(
         masks_down = cols < y2
 
         crop_mask = masks_left * masks_right * masks_up * masks_down
+
         return masks * crop_mask
 
     if score_threshold > 0:
@@ -251,14 +254,15 @@ def check_model(net):
         assert len(image_info_input) == 1, 'Demo supports only model with single im_info input'
         image_info_input = image_info_input[0]
     model_type = 'mask_rcnn' if image_info_input else 'yolact'
-    model_attreibutes = MODEL_ATTRIBUTES[model_type]
+    model_attributes = MODEL_ATTRIBUTES[model_type]
     assert (
         set(model_attreibutes.required_outputs).issubset(net.outputs.keys()),
         'Demo supports only topologies with the following output keys: '
-        '{}'.format(', '.join(model_attreibutes.required_outputs))
+        '{}'.format(', '.join(model_attributes.required_outputs))
     )
 
     input_shape = net.input_info[image_input].input_data.shape
     assert input_shape[0] == 1, 'Only batch 1 is supported by the demo application'
 
-    return image_input, image_info_input, input_shape, model_attreibutes.postprocessor
+    return image_input, image_info_input, input_shape, model_attributes.postprocessor
+
