@@ -81,6 +81,7 @@ The application uses OpenCV to display found faces' boundary and feature points,
 ![](./data/face_recognition_demo_mtcnn+facenet.jpg)
 
 ## License
+MIT LICENSE
 The models and images used in this demo are authorized by the following licenses.
 https://github.com/davidsandberg/facenet/blob/master/LICENSE.md
 https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection/blob/master/README.md
