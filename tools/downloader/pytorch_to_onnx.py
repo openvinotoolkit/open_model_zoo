@@ -1,7 +1,7 @@
 import argparse
+import ast
 import importlib
 import sys
-import ast
 
 from pathlib import Path
 
@@ -14,24 +14,24 @@ def is_sequence(element):
     return isinstance(element, (list, tuple))
 
 
-def positive_int_arg(values):
-    """Check positive integer type for input argument"""
-    inputs = ast.literal_eval(values)
-    if not is_sequence(inputs):
-        sys.exit('Model inputs must be a sequence')
-    if not all(is_sequence(elem) for elem in inputs):
-        inputs = (inputs, )
-    for input_ in inputs:
-        if not is_sequence(input_):
-            sys.exit('One of the inputs is not a sequence')
-        for value in input_:
+def shapes_arg(values):
+    """Checks that the argument represents a tensor shape or a sequence of tensor shapes"""
+    shapes = ast.literal_eval(values)
+    if not is_sequence(shapes):
+        raise argparse.ArgumentTypeError('{!r}: must be a sequence'.format(shapes))
+    if not all(is_sequence(shape) for shape in shapes):
+        shapes = (shapes, )
+    for shape in shapes:
+        if not is_sequence(shape):
+            raise argparse.ArgumentTypeError('{!r}: must be a sequence'.format(shape))
+        for value in shape:
             try:
                 if type(value) is not int or value < 0:
                     raise argparse.ArgumentTypeError('Argument must be a positive integer')
             except Exception as exc:
                 print(exc)
                 sys.exit('Invalid value for input argument: {!r}, a positive integer is expected'.format(value))
-    return inputs
+    return shapes
 
 
 def model_parameter(parameter):
@@ -54,7 +54,7 @@ def parse_args():
                         help='Model to convert. May be class name or name of constructor function')
     parser.add_argument('--weights', type=str,
                         help='Path to the weights in PyTorch\'s format')
-    parser.add_argument('--input-shapes', metavar='INPUT_DIM', type=positive_int_arg, required=True,
+    parser.add_argument('--input-shapes', metavar='INPUT_DIM', type=shapes_arg, required=True,
                         help='Shapes of the input blobs')
     parser.add_argument('--output-file', type=Path, required=True,
                         help='Path to the output ONNX model')
