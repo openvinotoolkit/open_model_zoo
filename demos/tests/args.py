@@ -41,6 +41,10 @@ def image_retrieval_arg(id):
     return TestDataArg('Image_Retrieval/{}'.format(id))
 
 
+def ms_asl_arg(id):
+    return TestDataArg('msasl/global_crops/{}/clip_0017/img_%05d.jpg'.format(id))
+
+
 class ModelArg:
     def __init__(self, name, precision='FP32'):
         self.name = name
