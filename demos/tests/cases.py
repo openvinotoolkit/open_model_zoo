@@ -330,6 +330,13 @@ PYTHON_DEMOS = [
         ],
     )),
 
+    PythonDemo(subdirectory='asl_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, '-c': DemoFileArg('classes.json'),
+                          '-i': ms_asl_arg('_nz_sivss20'),
+                          '-m_a': ModelArg('asl-recognition-0004'),
+                          '-m_d': ModelArg('person-detection-asl-0001')})
+    )),
+
     PythonDemo(subdirectory='bert_question_answering_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': "https://en.wikipedia.org/wiki/OpenVINO",
                           '--questions': ["Which framework does it support","Who is developers"]}),
