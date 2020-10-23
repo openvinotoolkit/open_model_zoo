@@ -14,6 +14,7 @@
 
 import itertools
 import sys
+from pathlib import Path
 
 from args import *
 from data_sequences import DATA_SEQUENCES
@@ -327,6 +328,46 @@ PYTHON_DEMOS = [
                 '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
             }),
         ],
+    )),
+
+    PythonDemo(subdirectory='bert_question_answering_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': "https://en.wikipedia.org/wiki/OpenVINO",
+                          '--questions': ["Which framework does it support","Who is developers"]}),
+        [
+            TestCase(options={
+                '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
+                '--input_names': "input_ids,attention_mask,token_type_ids",
+                '--output_names': 'output_s,output_e',
+                '--vocab': OmzDirArg('models/intel/bert-small-uncased-whole-word-masking-squad-0001/vocab.txt'),
+            }),
+            TestCase(options={
+                '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0002'),
+                '--input_names': "input_ids,attention_mask,token_type_ids,position_ids",
+                '--output_names': 'output_s,output_e',
+                '--vocab': OmzDirArg('models/intel/bert-small-uncased-whole-word-masking-squad-0002/vocab.txt'),
+            })
+        ]
+    )),
+
+    PythonDemo(subdirectory='bert_question_answering_embedding_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': "https://en.wikipedia.org/wiki/OpenVINO",
+                          '--questions': ["Which framework does it support","Who is developers"]}),
+        [
+            TestCase(options={
+                '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
+                '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
+                '--vocab': OmzDirArg('models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
+                '-m_qa': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
+                '--input_names_qa':  'input_ids,attention_mask,token_type_ids',
+                '--output_names_qa': 'output_s,output_e'
+            }),
+            TestCase(options={
+                '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
+                '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
+                '--vocab': Path(
+                    '../../models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt').resolve(),
+            }),
+        ]
     )),
 
     PythonDemo(subdirectory='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
