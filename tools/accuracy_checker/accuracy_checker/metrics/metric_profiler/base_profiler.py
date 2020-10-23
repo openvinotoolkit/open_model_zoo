@@ -75,19 +75,21 @@ class MetricProfiler(ClassProvider):
         profiling_data = self.generate_profiling_data(*args, **kwargs)
         self._last_profile = profiling_data
         if isinstance(profiling_data, list):
-            for data in profiling_data:
-                last_identifier = data['identifier']
-                if self.storage.get(last_identifier):
-                    self.storage[last_identifier].update(data)
-                else:
-                    self.storage[last_identifier] = data
+            if len(profiling_data) > 0:
+                last_identifier = profiling_data[0]['identifier']
+            else:
+                return
+
+            self.storage[last_identifier] = profiling_data
+            finished = True
         else:
             last_identifier = profiling_data['identifier']
             if self.storage.get(last_identifier):
                 self.storage[last_identifier].update(profiling_data)
             else:
                 self.storage[last_identifier] = profiling_data
-        if len(self.storage) % self.dump_iterations == 0 and len(self.fields) == len(self.storage[last_identifier]):
+            finished = len(self.fields) == len(self.storage[last_identifier])
+        if len(self.storage) % self.dump_iterations == 0 and finished:
             self.write_result()
 
     def finish(self):
@@ -101,11 +103,18 @@ class MetricProfiler(ClassProvider):
         out_path = self.out_dir / self.report_file
         new_file = not out_path.exists()
 
+        data_to_store = []
+        for value in self.storage.values():
+            if isinstance(value, list):
+                data_to_store.extend(value)
+            else:
+                data_to_store.append(value)
+
         with open(str(out_path), 'a+', newline='') as f:
             writer = DictWriter(f, fieldnames=self.fields)
             if new_file:
                 writer.writeheader()
-            writer.writerows(self.storage.values())
+            writer.writerows(data_to_store)
 
         self.storage = OrderedDict()
 
