@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 This is a model for monocular depth estimation trained on the NYU Depth V2 dataset,
-  as described in the paper [Deeper Depth Prediction with Fully Convolutional Residual Networks](https://arxiv.org/abs/1606.00373), where it is referred to as ResNet-UpProj. 
+  as described in the paper [Deeper Depth Prediction with Fully Convolutional Residual Networks](https://arxiv.org/abs/1606.00373), where it is referred to as ResNet-UpProj.
   The model input is a single color image.
   The model output is an inverse depth map that is defined up to an unknown scale factor. More details can be found in the [following repository](https://github.com/iro-cp/FCRN-DepthPrediction).
 
@@ -25,10 +25,10 @@ This is a model for monocular depth estimation trained on the NYU Depth V2 datas
 | log10  | 0.055 |
 | rel    | 0.127 |
 
-Accuracy numbers obtained on NUY Depth V2 dataset. 
-The `log10` metric is logarithmic absolute error, defined as `abs(log10(gt) - log10(pred))`, 
+Accuracy numbers obtained on NUY Depth V2 dataset.
+The `log10` metric is logarithmic absolute error, defined as `abs(log10(gt) - log10(pred))`,
 where `gt` - ground truth depth map, `pred` - predicted depth map.
-The `rel` metric is relative absolute error defined as absolute error normalized on ground truth depth map values 
+The `rel` metric is relative absolute error defined as absolute error normalized on ground truth depth map values
 (`abs(gt - pred) / gt`, where `gt` - ground truth depth map, `pred` - predicted depth map).
 
 
