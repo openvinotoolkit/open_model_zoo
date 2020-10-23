@@ -104,20 +104,11 @@ def convert_to_onnx(model, input_shape, output_file, input_names, output_names):
 
     model = onnx.load(str(output_file))
 
-    # Model Optimizer takes output names from ONNX node names if they exist.
-    # However, the names PyTorch assigns to the ONNX nodes are generic and
-    # non-descriptive (e.g. "Gemm_151"). By deleting these names, we make
-    # MO fall back to the ONNX output names, which we can set to whatever we want.
-    for node in model.graph.node:
-        node.ClearField('name')
-
     try:
         onnx.checker.check_model(model)
         print('ONNX check passed successfully.')
     except onnx.onnx_cpp2py_export.checker.ValidationError as exc:
         sys.exit('ONNX check failed with error: ' + str(exc))
-
-    onnx.save(model, str(output_file))
 
 
 def main():
