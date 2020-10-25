@@ -17,7 +17,7 @@ Once the program receives an image, it performs the following steps:
 2. Uses the L-channel to predict A and B channels.
 3. Restores the image by converting it into the BGR color space.
 
-> **NOTE**: To use `colorization-v2` or `colorization-v2-norebal` model with the demo, you have to specify the path to .npy file with color coefficients. If you want to use `colorization-v2-pytorch` model, you only need to specify the path to the image.
+> **NOTE**: To use `colorization-v2` or `colorization-v2-norebal` model with the demo, you have to specify the path to .npy file with color coefficients. If you want to use `colorization-v2-pytorch` or `colorization-siggraph` model, you only need to specify the path to the image.
 
 ### Running the Demo
 
