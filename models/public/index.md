@@ -206,6 +206,7 @@ Colorization task is to predict colors of scene from grayscale image.
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | colorization-v2           | PyTorch\* | [colorization-v2](./colorization-v2/colorization-v2.md) | 57.75%/81.50% | 83.6045 |  32.2360 |
+| colorization-siggraph     | PyTorch\* | [colorization-siggraph](./colorization-siggraph/colorization-siggraph.md) | 58.25%/81.78% | 150.5441 |  34.0511 |
 
 ## Sound Classification
 
