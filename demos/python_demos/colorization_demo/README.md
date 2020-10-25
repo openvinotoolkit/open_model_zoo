@@ -17,18 +17,30 @@ Once the program receives an image, it performs the following steps:
 2. Uses the L-channel to predict A and B channels.
 3. Restores the image by converting it into the BGR color space.
 
+> **NOTE**: To use `colorization-v2` or `colorization-v2-norebal` model with the demo, you have to specify the path to .npy file with color coefficients. If you want to use `colorization-v2-pytorch` model, you only need to specify the path to the image.
+
 ### Running the Demo
 
 Running the application with the `-h` option yields the following usage message:
 
 ```
+<<<<<<< HEAD
 usage: colorization_demo.py [-h] -m MODEL [-d DEVICE] -i "<path>" [--no_show]
                             [-v] [-u UTILIZATION_MONITORS]
+=======
+usage: colorization_demo.py [-h] -m MODEL [--coeffs COEFFS] [-d DEVICE] -i
+                            "<path>" [--no_show] [-v]
+                            [-u UTILIZATION_MONITORS]
+>>>>>>> add model
 
 Options:
   -h, --help            Help with the script.
   -m MODEL, --model MODEL
                         Required. Path to .xml file with pre-trained model.
+<<<<<<< HEAD
+=======
+  --coeffs COEFFS       Optional. Path to .npy file with color coefficients.
+>>>>>>> add model
   -d DEVICE, --device DEVICE
                         Optional. Specify target device for infer: CPU, GPU,
                         FPGA, HDDL or MYRIAD. Default: CPU
@@ -39,7 +51,10 @@ Options:
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> add model
 ```
 
 To run the demo, you can use public or Intel's pretrained models. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md) or go to the [Intel&reg; Open Source Technology Center](https://download.01.org/opencv/).
