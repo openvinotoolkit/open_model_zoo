@@ -62,7 +62,7 @@ class MetricProfiler(ClassProvider):
         self.report_type = report_type
         self.report_file = '{}_{}.{}'.format(
             self.__provider__, name, report_type) if name is not None else '{}.{}'.format(
-            self.__provider__, report_type)
+                self.__provider__, report_type)
         self.out_dir = Path()
         self.dump_iterations = dump_iterations
         self.storage = OrderedDict()
