@@ -81,9 +81,16 @@ class DetectionProfiler(MetricProfiler):
 
     def per_box_result(self, identifier, metric_result):
         per_box_results = []
-        for label, per_class_result in metric_result.items():
+        if isinstance(metric_result, dict):
+            is_metric_result_dict = True
+            unpacked_result = metric_result.items()
+        else:
+            is_metric_result_dict = False
+            unpacked_result = enumerate(metric_result)
+        for label, per_class_result in unpacked_result:
             if not np.size(per_class_result['scores']):
                 continue
+            label_id = self.valid_labels[label] if self.valid_labels and not is_metric_result_dict else label
             scores = per_class_result['scores']
             dt = per_class_result['dt']
             gt = per_class_result['gt']
@@ -93,7 +100,7 @@ class DetectionProfiler(MetricProfiler):
             for dt_id, dt_box in enumerate(dt):
                 box_result = {
                     'identifier': identifier,
-                    'label': label,
+                    'label': label_id,
                     'score': scores[dt_id],
                     'pred': dt_box,
                     'gt': ''
@@ -106,7 +113,7 @@ class DetectionProfiler(MetricProfiler):
                 if gt_matched[gt_id] == -1:
                     box_result = {
                         'identifier': identifier,
-                        'label': label,
+                        'label': label_id,
                         'score': '',
                         'pred': '',
                         'gt': gt_box
@@ -123,7 +130,7 @@ class DetectionProfiler(MetricProfiler):
 
     @staticmethod
     def generate_result_matching(per_class_result, metric_name):
-        if contains_all(['gt_matches', 'dt_matches'], per_class_result):
+        if contains_all(per_class_result, ['gt_matches', 'dt_matches']):
             matching_result = {
                 'prediction_matches': per_class_result['dt_matches'][0],
                 'annotation_matches':  per_class_result['gt_matches'][0],

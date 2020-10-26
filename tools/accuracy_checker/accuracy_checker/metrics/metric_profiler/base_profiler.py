@@ -97,6 +97,9 @@ class MetricProfiler(ClassProvider):
             self.write_result()
 
     def reset(self):
+        self._reset_storage()
+
+    def _reset_storage(self):
         self.storage = OrderedDict()
 
     def write_csv_result(self):
@@ -116,7 +119,7 @@ class MetricProfiler(ClassProvider):
                 writer.writeheader()
             writer.writerows(data_to_store)
 
-        self.storage = OrderedDict()
+        self._reset_storage()
 
     def write_json_result(self):
         out_path = self.out_dir / self.report_file
@@ -141,7 +144,7 @@ class MetricProfiler(ClassProvider):
         with open(str(out_path), 'w') as f:
             json.dump(out_dict, f)
 
-        self.storage = OrderedDict()
+        self._reset_storage()
 
     def set_output_dir(self, out_dir):
         self.out_dir = out_dir
