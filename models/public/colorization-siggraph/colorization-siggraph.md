@@ -37,40 +37,6 @@ For preprocessing `rgb -> gray -> coloriaztion` recieved values:
 
 ## Input
 
-### Original model
-
-1. Image, name - `data_l`,  shape - `1,1,256,256`, format is `B,C,H,W` where:
-
-   - `B` - batch size
-   - `C` - channel
-   - `H` - height
-   - `W` - width
-
-   Channel order is L-channel.
-
-2. Image, name - `user_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
-
-   - `B` - batch size
-   - `C` - channel
-   - `H` - height
-   - `W` - width
-
-   Channel order is AB channels of LAB-image. Input for user points.
-
-3. Mask, name - `user_map`,  shape - `1,1,256,256`, format is `B,C,H,W` where:
-
-   - `B` - batch size
-   - `C` - number of flags for pixel
-   - `H` - height
-   - `W` - width
-
-   This input is  a binary mask indicating which points are
-   provided by the user. The mask differentiates unspecified points
-   from user-specified gray points with (a,b) = 0.
-   If point(pixel) was specified the flag will be equal to 1.
-
-### Converted model
-
 1. Image, name - `data_l`,  shape - `1,1,256,256`, format is `B,C,H,W` where:
 
    - `B` - batch size
@@ -105,19 +71,6 @@ For preprocessing `rgb -> gray -> coloriaztion` recieved values:
 
 ## Output
 
-### Original model
-
-Image, name - `color_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
-
-- `B` - batch size
-- `C` - channel
-- `H` - height
-- `W` - width
-
-Channel order is AB channels of LAB-image.
-
-### Converted model
-
 Image, name - `color_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
 
 - `B` - batch size
@@ -128,6 +81,7 @@ Image, name - `color_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
 Channel order is AB channels of LAB-image.
 
 ## Legal Information
+
 The original model is distributed under the following
 [license](https://raw.githubusercontent.com/richzhang/colorization/master/LICENSE):
 
