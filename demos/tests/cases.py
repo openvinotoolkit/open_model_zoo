@@ -394,6 +394,13 @@ PYTHON_DEMOS = [
         TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
     )),
 
+    PythonDemo(subdirectory='image_inpainting_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': image_net_arg('00048311'),
+                          '-m': ModelArg('gmcnn-places2-tf'),
+                          '-ar': None})
+    )),
+
     PythonDemo(subdirectory='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show':None,
                           **MONITORS,
