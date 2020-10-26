@@ -25,12 +25,8 @@ def shapes_arg(values):
         if not is_sequence(shape):
             raise argparse.ArgumentTypeError('{!r}: must be a sequence'.format(shape))
         for value in shape:
-            try:
-                if type(value) is not int or value < 0:
-                    raise argparse.ArgumentTypeError('Argument must be a positive integer')
-            except Exception as exc:
-                print(exc)
-                sys.exit('Invalid value for input argument: {!r}, a positive integer is expected'.format(value))
+            if not isinstance(value, int) or value < 0:
+                raise argparse.ArgumentTypeError('Argument {!r} must be a positive integer'.format(value))
     return shapes
 
 
@@ -54,8 +50,8 @@ def parse_args():
                         help='Model to convert. May be class name or name of constructor function')
     parser.add_argument('--weights', type=str,
                         help='Path to the weights in PyTorch\'s format')
-    parser.add_argument('--input-shapes', metavar='INPUT_DIM', type=shapes_arg, required=True,
-                        help='Shapes of the input blobs')
+    parser.add_argument('--input-shapes', metavar='SHAPE[,SHAPE...]', type=shapes_arg, required=True,
+                        help='Space separated shapes of the input blobs. Example: [1,1,256,256],[1,3,256,256],...')
     parser.add_argument('--output-file', type=Path, required=True,
                         help='Path to the output ONNX model')
     parser.add_argument('--model-path', type=str,
