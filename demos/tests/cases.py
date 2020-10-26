@@ -416,6 +416,38 @@ PYTHON_DEMOS = [
             ModelArg('instance-segmentation-security-1025')),
     )),
 
+    PythonDemo(subdirectory='machine_translation_demo', device_keys=[], test_cases=combine_cases(
+       [
+           TestCase(options={
+               '-m': ModelArg("machine-translation-nar-en-ru-0001"),
+               '--tokenizer-src': OmzDirArg('models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
+               '--tokenizer-tgt': OmzDirArg('models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
+               '--output-name': 'pred',
+               '-i': [
+                   "A robot may not injure a human being or, through inaction, allow a human being to come to harm.",
+                   "A robot must obey orders given it by human beings except where such orders would conflict with the "
+                   "First Law.",
+                   "A robot must protect its own existence as long as such protection does not conflict with the First"
+                   " or Second Law."
+               ],
+           }),
+           TestCase(options={
+               '-m': ModelArg("machine-translation-nar-ru-en-0001"),
+               '--tokenizer-src': OmzDirArg('models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
+               '--tokenizer-tgt': OmzDirArg('models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
+               '--output-name': 'pred',
+               '-i': [
+                   u'Робот не может причинить вред человеку или своим бездействием допустить, чтобы человеку был '
+                   'причинён вред.',
+                   u'Робот должен повиноваться всем приказам, которые даёт человек, кроме тех случаев, когда эти '
+                   'приказы противоречат Первому Закону.',
+                   u'Робот должен заботиться о своей безопасности в той мере, в которой это не противоречит Первому '
+                   'или Второму Законам.'
+               ],
+           }),
+       ]
+    )),
+
     PythonDemo(subdirectory='multi_camera_multi_target_tracking', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,

@@ -213,7 +213,7 @@ def main():
                         try:
                             start_time = timeit.default_timer()
                             subprocess.check_output(fixed_args + dev_arg + case_args,
-                                stderr=subprocess.STDOUT, universal_newlines=True)
+                                stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8')
                             execution_time = timeit.default_timer() - start_time
                         except subprocess.CalledProcessError as e:
                             print(e.output)

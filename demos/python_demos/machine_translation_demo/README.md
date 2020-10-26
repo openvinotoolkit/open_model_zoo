@@ -15,6 +15,7 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: machine_translation_demo.py [-h] -m MODEL --tokenizer-src TOKENIZER_SRC
                                    --tokenizer-tgt TOKENIZER_TGT
+                                   [-i [INPUT [INPUT ...]]]
                                    [--output-name OUTPUT_NAME]
 
 optional arguments:
@@ -27,6 +28,8 @@ optional arguments:
   --tokenizer-tgt TOKENIZER_TGT
                         Required. Path to the folder with tgt tokenizer that
                         contains vocab.json and merges.txt.
+  -i [INPUT [INPUT ...]], --input [INPUT [INPUT ...]]
+                        Optional. Text for translation. Shadows console input.
   --output-name OUTPUT_NAME
                         Optional. Name of the models output node.
 ```
