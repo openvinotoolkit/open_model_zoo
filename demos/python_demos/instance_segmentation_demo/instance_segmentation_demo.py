@@ -166,7 +166,8 @@ def main():
         det_time = inf_end - inf_start
 
         # Parse detection results of the current request
-        scores, classes, boxes, masks = postprocessor(outputs, scale_x, scale_y, *frame.shape[:2], args.prob_threshold)
+        scores, classes, boxes, masks = postprocessor(
+            outputs, scale_x, scale_y, *frame.shape[:2], h, w,  args.prob_threshold)
 
         render_start = time.time()
 

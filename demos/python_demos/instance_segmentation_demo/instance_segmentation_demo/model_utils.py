@@ -1,10 +1,24 @@
+"""
+ Copyright (c) 2019 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
+from collections import namedtuple
 import cv2
 import numpy as np
 
-model_required_output_keys = {
-    'mask_rcnn': ('boxes', 'scores', 'classes', 'raw_masks'),
-    'yolact': ('boxes', 'conf', 'proto', 'mask')
-}
+ModelAttributes = namedtuple('ModelAttributes', ['required_outputs', 'postprocessor'])
 
 
 def expand_box(box, scale):
@@ -39,7 +53,9 @@ def segm_postprocess(box, raw_cls_mask, im_h, im_w):
     return im_mask
 
 
-def mask_rcnn_postprocess(outputs, scale_x, scale_y, frame_height, frame_width, conf_threshold):
+def mask_rcnn_postprocess(
+        outputs, scale_x, scale_y, frame_height, frame_width, input_height, input_width, conf_threshold
+):
     boxes = outputs['boxes']
     boxes[:, 0::2] /= scale_x
     boxes[:, 1::2] /= scale_y
@@ -59,13 +75,17 @@ def mask_rcnn_postprocess(outputs, scale_x, scale_y, frame_height, frame_width, 
     return scores, classes, boxes, masks
 
 
-def yolact_postprocess(outputs, scale_x, scale_y, frame_height, frame_width, conf_threshold):
+def yolact_postprocess(
+        outputs, scale_x, scale_y, frame_height, frame_width, input_height, input_width, conf_threshold
+):
     boxes = outputs['boxes'][0]
     conf = np.transpose(outputs['conf'][0])
     masks = outputs['mask'][0]
     proto = outputs['proto'][0]
     num_classes = conf.shape[0]
     idx_lst, cls_lst, scr_lst = [], [], []
+    shift_x = (input_width - (frame_width * scale_x)) / frame_width
+    shift_y = (input_height - (frame_height * scale_y)) / frame_height
 
     for cls in range(1, num_classes):
         cls_scores = conf[cls, :]
@@ -77,8 +97,9 @@ def yolact_postprocess(outputs, scale_x, scale_y, frame_height, frame_width, con
 
         if cls_scores.shape[0] == 0:
             continue
-
-        keep = nms(*boxes.T, cls_scores, 0.5, include_boundaries=False)
+        x1, x2 = sanitize_coordinates(boxes[idx, 0], boxes[idx, 2], frame_width)
+        y1, y2 = sanitize_coordinates(boxes[idx, 1], boxes[idx, 3], frame_height)
+        keep = nms(x1, y1, x2, y2, cls_scores, 0.5, include_boundaries=False)
 
         idx_lst.append(idx[keep])
         cls_lst.append(np.full(len(keep), cls))
@@ -98,7 +119,7 @@ def yolact_postprocess(outputs, scale_x, scale_y, frame_height, frame_width, con
     masks = masks[idx]
     if np.size(boxes) > 0:
         boxes, scores, classes, masks = yolact_segm_postprocess(
-            boxes, masks, scores, classes, proto, frame_width, frame_height
+            boxes, masks, scores, classes, proto, frame_width, frame_height, shift_x=shift_x, shift_y=shift_y
         )
     return scores, classes, boxes, masks
 
@@ -140,20 +161,22 @@ def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None
     return keep
 
 
-def sanitize_coordinates(_x1, _x2, img_size, padding=0):
-    _x1 = _x1 * img_size
-    _x2 = _x2 * img_size
+def sanitize_coordinates(_x1, _x2, img_size, shift=0, padding=0):
+    _x1 = (_x1 + shift  / 2) * img_size
+    _x2 = (_x2 + shift / 2) * img_size
     x1 = np.clip(_x1 - padding, 0, img_size)
     x2 = np.clip(_x2 + padding, 0, img_size)
 
     return x1, x2
 
 
-def yolact_segm_postprocess(boxes, masks, score, classes, proto_data, w, h, crop_masks=True, score_threshold=0):
+def yolact_segm_postprocess(
+        boxes, masks, score, classes, proto_data, w, h,
+        score_threshold=0, shift_x=0, shift_y=0):
     def crop_mask(masks, boxes, padding: int = 1):
         h, w, n = np.shape(masks)
-        x1, x2 = sanitize_coordinates(boxes[:, 0], boxes[:, 2], w, padding)
-        y1, y2 = sanitize_coordinates(boxes[:, 1], boxes[:, 3], h, padding)
+        x1, x2 = sanitize_coordinates(boxes[:, 0], boxes[:, 2], w, padding=padding)
+        y1, y2 = sanitize_coordinates(boxes[:, 1], boxes[:, 3], h, padding=padding)
 
         rows = np.reshape(
             np.repeat(np.reshape(np.repeat(np.arange(w, dtype=x1.dtype), h), (w, h)), n, axis=-1), (h, w, n)
@@ -169,7 +192,6 @@ def yolact_segm_postprocess(boxes, masks, score, classes, proto_data, w, h, crop
         masks_down = cols < y2
 
         crop_mask = masks_left * masks_right * masks_up * masks_down
-
         return masks * crop_mask
 
     if score_threshold > 0:
@@ -184,21 +206,34 @@ def yolact_segm_postprocess(boxes, masks, score, classes, proto_data, w, h, crop
 
     masks = proto_data @ masks.T
     masks = 1 / (1 + np.exp(-masks))
-
-    if crop_masks:
-        masks = crop_mask(masks, boxes)
+    masks = crop_mask(masks, boxes)
 
     masks = np.transpose(masks, (2, 0, 1))
+    x1, x2 = np.ceil(sanitize_coordinates(boxes[:, 0], boxes[:, 2], w)).astype(int)
+    y1, y2 = np.ceil(sanitize_coordinates(boxes[:, 1], boxes[:, 3], h)).astype(int)
+    boxes[:, 0], boxes[:, 2] = sanitize_coordinates(boxes[:, 0], boxes[:, 2], w, shift_x)
+    boxes[:, 1], boxes[:, 3] = sanitize_coordinates(boxes[:, 1], boxes[:, 3], h, shift_y)
     ready_masks = []
 
-    for mask in masks:
+    for mask_id, mask in enumerate(masks):
         mask = cv2.resize(mask, (w, h), cv2.INTER_LINEAR)
         mask = mask > 0.5
-        ready_masks.append(mask.astype(np.uint8))
-    boxes[:, 0], boxes[:, 2] = sanitize_coordinates(boxes[:, 0], boxes[:, 2], w)
-    boxes[:, 1], boxes[:, 3] = sanitize_coordinates(boxes[:, 1], boxes[:, 3], h)
+        b_x1, b_y1, b_x2, b_y2 = np.ceil(boxes[mask_id]).astype(int)
+        im_mask = np.zeros((h, w), dtype=np.uint8)
+        height = max(b_y2 - b_y1, y2[mask_id] - y1[mask_id])
+        width = max(b_x2 - b_x1, x2[mask_id] - x1[mask_id])
+        im_mask[b_y1:b_y1 + height, b_x1:b_x1+width] = mask[
+                                                       y1[mask_id]:y1[mask_id] + height,
+                                                       x1[mask_id]:x1[mask_id] + width]
+        ready_masks.append(im_mask.astype(np.uint8))
 
     return boxes, score, classes, ready_masks
+
+
+MODEL_ATTRIBUTES = {
+    'mask_rcnn': ModelAttributes(('boxes', 'scores', 'classes', 'raw_masks'), mask_rcnn_postprocess),
+    'yolact': ModelAttributes(('boxes', 'conf', 'proto', 'mask'), yolact_postprocess)
+}
 
 
 def check_model(net):
@@ -215,12 +250,15 @@ def check_model(net):
         ]
         assert len(image_info_input) == 1, 'Demo supports only model with single im_info input'
         image_info_input = image_info_input[0]
-    required_output_keys = model_required_output_keys['mask_rcnn' if num_inputs == 2 else 'yolact']
-    assert set(required_output_keys).issubset(net.outputs.keys()), \
-        'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
+    model_type = 'mask_rcnn' if image_info_input else 'yolact'
+    model_attreibutes = MODEL_ATTRIBUTES[model_type]
+    assert (
+        set(model_attreibutes.required_outputs).issubset(net.outputs.keys()),
+        'Demo supports only topologies with the following output keys: '
+        '{}'.format(', '.join(model_attreibutes.required_outputs))
+    )
 
-    n, c, h, w = net.input_info[image_input].input_data.shape
-    assert n == 1, 'Only batch 1 is supported by the demo application'
-    postprocessor = mask_rcnn_postprocess if num_inputs == 2 else yolact_postprocess
+    input_shape = net.input_info[image_input].input_data.shape
+    assert input_shape[0] == 1, 'Only batch 1 is supported by the demo application'
 
-    return image_input, image_info_input, (n, c, h, w), postprocessor
+    return image_input, image_info_input, input_shape, model_attreibutes.postprocessor
