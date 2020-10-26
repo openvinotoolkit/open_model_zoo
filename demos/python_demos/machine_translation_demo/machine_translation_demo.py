@@ -190,6 +190,8 @@ def build_argparser():
                         help='Required. Path to the folder with src tokenizer that contains vocab.json and merges.txt.')
     parser.add_argument('--tokenizer-tgt', type=str, required=True,
                         help='Required. Path to the folder with tgt tokenizer that contains vocab.json and merges.txt.')
+    parser.add_argument('-i', '--input', type=str, required=False, nargs='*',
+                        help='Optional. Text for translation. Shadows console input.')
     parser.add_argument('--output-name', type=str, default='pred/Squeeze',
                         help='Optional. Name of the models output node.')
     return parser
@@ -206,11 +208,14 @@ def main(args):
         tokenizer_tgt=args.tokenizer_tgt,
         output_name=args.output_name
     )
+    inputs = iter(args.input) if args.input else None
     logger.info("enter empty string to exit.")
     while True:
-        sentence = input("> ")
-        if not sentence:
+        sentence = next(inputs, None) if inputs else input("> ")
+        if not sentence or len(sentence.strip()) == 0:
             break
+        if args.input:
+            print("> {}".format(sentence))
         try:
             start = time.perf_counter()
             translation = model(sentence)
