@@ -17,10 +17,17 @@ The demo application expects an instance segmentation model in the Intermediate 
 2. for instance segmentation models based on `YOLACT` approach:
     * Single input for input image.
     * At least four outputs including:
+<<<<<<< 28c3cc99eca54bce429bb71b30bf6e3c0ac3b22e
         * `boxes` with normalized in [0, 1] range bounding box coordinates
         * `conf` with confidence scores for each class for all boxes
         * `mask` with fixed-size mask channels for all boxes.
         * `proto` with fixed-size segmentation heat maps prototypes for all boxes.
+=======
+      * `boxes` with normalized in [0, 1] range bounding box coordinates
+      * `conf` with confidence scores for each class for all boxes
+      * `mask` with fixed-size mask channels for all boxes.
+      * `proto` with fixed-size segmentation heat maps prototypes for all boxes.
+>>>>>>> update demo readme
 
 As input, the demo application takes:
 * a path to a single image file, a video file or a numeric ID of a web camera specified with a command-line argument `-i`
