@@ -14,25 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from pathlib import Path
-import pickle
 import copy
 from collections import OrderedDict
-import numpy as np
 import cv2
+import numpy as np
+from pathlib import Path
+import pickle
 
 from ..base_evaluator import BaseEvaluator
-from ...utils import get_path, extract_image_representations
+from ..quantization_model_evaluator import create_dataset_attributes
+from ...adapters import create_adapter
+from ...config import ConfigError
 from ...dataset import Dataset
+from ...data_readers import BaseReader, REQUIRES_ANNOTATIONS, DataRepresentation
 from ...launcher import create_launcher, InputFeeder
 from ...logging import print_info
 from ...metrics import MetricsExecutor
 from ...postprocessor import PostprocessingExecutor
 from ...preprocessor import PreprocessingExecutor
-from ...adapters import create_adapter
-from ...config import ConfigError
-from ...data_readers import BaseReader, REQUIRES_ANNOTATIONS, DataRepresentation
+from ...progress_reporters import ProgressReporter
 from ...representation import RawTensorPrediction, RawTensorAnnotation
+from ...utils import get_path, extract_image_representations
 
 
 class CocosnetEvaluator(BaseEvaluator):
@@ -49,8 +51,6 @@ class CocosnetEvaluator(BaseEvaluator):
         self.metric_executor = metric
         self.model = model
         self.model_for_metric = model_for_metric
-        self._annotations = []
-        self._predictions = []
         self._metrics_results = []
 
     @classmethod
@@ -98,17 +98,18 @@ class CocosnetEvaluator(BaseEvaluator):
     @staticmethod
     def get_processing_info(config):
         module_specific_params = config.get('module_config')
+        model_name = config['name']
         launcher_config = module_specific_params['launchers'][0]
         dataset_config = module_specific_params['datasets'][0]
 
         return (
-            config['name'],
-            launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
+            model_name, launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
             dataset_config['name']
         )
 
     def _get_batch_input(self, batch_annotation):
         batch_identifiers = [annotation.identifier for annotation in batch_annotation]
+
         batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
         for annotation, input_data in zip(batch_annotation, batch_input):
             self.dataset.set_annotation_metadata(annotation, input_data, self.reader.data_source)
@@ -124,20 +125,35 @@ class CocosnetEvaluator(BaseEvaluator):
 
         return batch_input, batch_meta, batch_identifiers
 
-    def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
-        if progress_reporter:
-            progress_reporter.reset(self.dataset.size)
+    def process_dataset(
+            self, subset=None,
+            num_images=None,
+            check_progress=False,
+            dataset_tag='',
+            output_callback=None,
+            allow_pairwise_subset=False,
+            dump_prediction_to_annotgiation=False,
+            **kwargs):
+        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
+            self.select_dataset(dataset_tag)
 
-        if self.dataset.batch is None:
-            self.dataset.batch = 1
+        self._annotations, self._predictions = [], []
 
-        output_callback = kwargs.get('output_callback')
-        predictions_to_store = []
+        self._create_subset(subset, num_images, allow_pairwise_subset)
+
+        if 'progress_reporter' in kwargs:
+            _progress_reporter = kwargs['progress_reporter']
+            _progress_reporter.reset(self.dataset.size)
+        else:
+            _progress_reporter = None if not check_progress else self._create_progress_reporter(
+                check_progress, self.dataset.size
+            )
+
+        metric_config = self.configure_intermediate_metrics_results(kwargs)
+        compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
         for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
             batch_predictions = self.model.predict(batch_identifiers, batch_meta, filled_inputs)
-            if stored_predictions:
-                predictions_to_store.extend(copy.deepcopy(batch_predictions))
             annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
             self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
             gan_annotations = []
@@ -159,14 +175,16 @@ class CocosnetEvaluator(BaseEvaluator):
             if self.metric_executor.need_store_predictions:
                 self._annotations.extend(gan_annotations)
                 self._predictions.extend(gan_predictions)
-            if progress_reporter:
-                progress_reporter.update(batch_id, len(batch_predictions))
 
-        if progress_reporter:
-            progress_reporter.finish()
+            if _progress_reporter:
+                _progress_reporter.update(batch_id, len(batch_predictions))
+                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(
+                        print_results=True, ignore_results_formatting=ignore_results_formatting
+                    )
 
-        if stored_predictions:
-            self.store_predictions(stored_predictions, predictions_to_store)
+        if _progress_reporter:
+            _progress_reporter.finish()
 
         return self._annotations, self._predictions
 
@@ -227,7 +245,8 @@ class CocosnetEvaluator(BaseEvaluator):
         progress_reporter.reset(self.dataset.size)
 
     def reset(self):
-        self.metric_executor.reset()
+        if self.metric_executor:
+            self.metric_executor.reset()
         del self._annotations
         del self._predictions
         del self._metrics_results
@@ -240,6 +259,37 @@ class CocosnetEvaluator(BaseEvaluator):
     def release(self):
         self.model.release()
         self.launcher.release()
+
+    def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
+        if self.dataset.batch is None:
+            self.dataset.batch = 1
+        if subset is not None:
+            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
+        elif num_images is not None:
+            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
+
+    def select_dataset(self, dataset_tag):
+        if self.dataset is not None and isinstance(self.dataset_config, list):
+            return
+        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
+        self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
+
+    @staticmethod
+    def _create_progress_reporter(check_progress, dataset_size):
+        pr_kwargs = {}
+        if isinstance(check_progress, int) and not isinstance(check_progress, bool):
+            pr_kwargs = {"print_interval": check_progress}
+
+        return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
+
+    @staticmethod
+    def configure_intermediate_metrics_results(config):
+        compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
+        metric_interval, ignore_results_formatting = None, None
+        if compute_intermediate_metric_res:
+            metric_interval = config.get('metrics_interval', 1000)
+            ignore_results_formatting = config.get('ignore_results_formatting', False)
+        return compute_intermediate_metric_res, metric_interval, ignore_results_formatting
 
 
 class BaseModel:
