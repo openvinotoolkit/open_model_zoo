@@ -1,4 +1,3 @@
-<<<<<<< 0c601a2d93429dbe576d4e14a2b95e8b6144e10c
 """
  Copyright (c) 2019 Intel Corporation
 
@@ -98,7 +97,6 @@ def yolact_postprocess(
 
         if cls_scores.shape[0] == 0:
             continue
-
         x1, x2 = sanitize_coordinates(boxes[idx, 0], boxes[idx, 2], frame_width)
         y1, y2 = sanitize_coordinates(boxes[idx, 1], boxes[idx, 3], frame_height)
         keep = nms(x1, y1, x2, y2, cls_scores, 0.5, include_boundaries=False)
@@ -194,7 +192,6 @@ def yolact_segm_postprocess(
         masks_down = cols < y2
 
         crop_mask = masks_left * masks_right * masks_up * masks_down
-
         return masks * crop_mask
 
     if score_threshold > 0:
