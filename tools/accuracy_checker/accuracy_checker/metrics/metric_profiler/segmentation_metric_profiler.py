@@ -22,12 +22,12 @@ class SegmentationMetricProfiler(MetricProfiler):
     __provider__ = 'segmentation'
     fields = ['identifier']
 
-    def __init__(self, dump_iterations=100, report_type='csv'):
+    def __init__(self, dump_iterations=100, report_type='csv', name=None):
         self.updated_fields = False
         self.names = []
         self.metric_names = []
 
-        super().__init__(dump_iterations, report_type)
+        super().__init__(dump_iterations, report_type, name)
 
     def register_metric(self, metric_name):
         self.metric_names.append(metric_name)

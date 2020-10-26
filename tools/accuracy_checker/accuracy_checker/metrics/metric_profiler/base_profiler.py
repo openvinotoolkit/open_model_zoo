@@ -51,14 +51,18 @@ PROFILERS_MAPPING = {
     ('coco_orig_segm_precision', ): 'instance_segmentation'
 }
 
+PROFILERS_WITH_DATA_IS_LIST = {'detection', 'instance_segmentation'}
+
 
 class MetricProfiler(ClassProvider):
     __provider_class__ = 'metric_profiler'
     fields = ['identifier']
 
-    def __init__(self, dump_iterations=100, report_type='csv'):
+    def __init__(self, dump_iterations=100, report_type='csv', name=None):
         self.report_type = report_type
-        self.report_file = '{}.{}'.format(self.__provider__, report_type)
+        self.report_file = '{}_{}.{}'.format(
+            self.__provider__, name, report_type) if name is not None else '{}.{}'.format(
+            self.__provider__, report_type)
         self.out_dir = Path()
         self.dump_iterations = dump_iterations
         self.storage = OrderedDict()

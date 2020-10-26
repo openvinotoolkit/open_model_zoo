@@ -20,7 +20,7 @@ from  .base_profiler import MetricProfiler
 class InstanceSegmentationProfiler(MetricProfiler):
     __provider__ = 'instance_segmentation'
 
-    def __init__(self, dump_iterations=100, report_type='csv'):
+    def __init__(self, dump_iterations=100, report_type='csv', name=None):
         self.names = []
         self.metric_names = []
         if report_type == 'csv':
@@ -29,7 +29,7 @@ class InstanceSegmentationProfiler(MetricProfiler):
             self.fields = ['identifier', 'per_class_result']
         self.updated_fields = False
 
-        super().__init__(dump_iterations, report_type)
+        super().__init__(dump_iterations, report_type, name)
 
     def generate_profiling_data(self, identifier, metric_result, metric_name, final_score):
         if not self.updated_fields:
