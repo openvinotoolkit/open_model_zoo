@@ -510,6 +510,21 @@ PYTHON_DEMOS = [
                     ModelArg('deeplabv3'))),
         ],
     )),
+
+    # NOTE: Demo performance depends on data
+    PythonDemo(subdirectory='single_human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, **MONITORS,
+                           '-i': DataPatternArg('human-pose-estimation'),
+                           '--person_label': '1'}),
+        [
+            *combine_cases(
+                TestCase(options={'-m_hpe': ModelArg('single-human-pose-estimation-0001')}),
+                single_option_cases('-m_od',
+                    ModelArg('mobilenet-ssd'),
+                    ModelArg('person-detection-retail-0013'),
+                    ModelArg('ssd_mobilenet_v1_coco'))),
+        ]
+    ))
 ]
 
 DEMOS = NATIVE_DEMOS + PYTHON_DEMOS
