@@ -78,3 +78,7 @@ class UnicodeCharacterRecognitionDatasetConverter(FileBasedAnnotationConverter):
                 total_symbol.append(line.strip())
             supported_symbols = ''.join(total_symbol)
             return supported_symbols
+
+
+class KondateNakayosiRecognitionDatasetConverter(UnicodeCharacterRecognitionDatasetConverter):
+    __provider__ = 'kondate_nakayosi_recognition'

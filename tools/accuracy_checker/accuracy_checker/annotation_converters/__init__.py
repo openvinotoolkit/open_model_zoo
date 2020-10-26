@@ -31,7 +31,9 @@ from .super_resolution_converter import (
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
 from .im2latex import Im2latexDatasetConverter
-from .unicode_character_recognition import UnicodeCharacterRecognitionDatasetConverter
+from .unicode_character_recognition import (
+    UnicodeCharacterRecognitionDatasetConverter, KondateNakayosiRecognitionDatasetConverter
+)
 from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter, MSCocoSingleKeypointsConverter
 from .cityscapes import CityscapesConverter
 from .ncf_converter import MovieLensConverter
