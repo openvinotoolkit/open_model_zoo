@@ -19,7 +19,7 @@ files:
   - name: wavernn_rnn.onnx
     size: 15333927
     sha256: 84c78bdd9d10a3f593a48a79aa2a77f99aac8d8228e920ad1a9a3efcbf16f351
-    source: https://download.01.org/opencv/public_models/122019/forward_tacoton_wavernn/wavernn_rnn.onnx
+    source: https://download.01.org/opencv/public_models/102020/wavernn/wavernn-rnn.zip
 model_optimizer_args:
   - --input=m_t,a1_t,a2_t,a3_t,a4_t,h1.1,h2.1,x
   - --output=logits,h1,h2

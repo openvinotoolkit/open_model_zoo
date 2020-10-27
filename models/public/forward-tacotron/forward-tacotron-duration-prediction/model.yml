@@ -19,7 +19,7 @@ files:
   - name: forward_tacotron_duration_prediction.onnx
     size: 58971146
     sha256: dd43a78dd821ae76609301f480aff5de3e5d1ce88a016d7a31bd35845a3cae48
-    source: https://download.01.org/opencv/public_models/122019/forward_tacoton_wavernn/forward_tacotron_duration_prediction.onnx
+    source: https://download.01.org/opencv/public_models/102020/forward-tacotron/forward-tacotron-duration-prediction.zip
 model_optimizer_args:
   - --input_shape=[1,241]
   - --input=input_seq
