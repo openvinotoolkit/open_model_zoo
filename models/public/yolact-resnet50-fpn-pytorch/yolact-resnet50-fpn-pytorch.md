@@ -70,7 +70,12 @@ Expected color order: `BGR`.
 - `H` - mask height, 
 - `W` - mask width, 
 - `C` - channels.
-4. Raw instance masks, name: `mask`. Contains segmentation heatmaps of detected objects for all classes for every output bounding box. Output shape is [B, N, C] format, where `B` - batch size, `N` - number of detected boxes, `C` - channels. Final mask prediction can be obtained by matrix multiplication of `proto` and transposed `mask` outputs.
+4. Raw instance masks, name: `mask`. Contains segmentation heatmaps of detected objects for all classes for every output bounding box. Output shape is [B, N, C] format, where 
+- `B` - batch size, 
+- `N` - number of detected boxes, 
+- `C` - channels. 
+
+Final mask prediction can be obtained by matrix multiplication of `proto` and transposed `mask` outputs.
 
 ### Converted Model
 
