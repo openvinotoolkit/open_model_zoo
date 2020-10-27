@@ -70,12 +70,16 @@ Expected color order: `BGR`.
 - `H` - mask height, 
 - `W` - mask width, 
 - `C` - channels.
+<<<<<<< 4f27d51450522ca9580cbb89ec54090bd8a50cd6
 4. Raw instance masks, name: `mask`. Contains segmentation heatmaps of detected objects for all classes for every output bounding box. Output shape is [B, N, C] format, where 
 - `B` - batch size, 
 - `N` - number of detected boxes, 
 - `C` - channels. 
 
 Final mask prediction can be obtained by matrix multiplication of `proto` and transposed `mask` outputs.
+=======
+4. Raw instance masks, name: `mask`. Contains segmentation heatmaps of detected objects for all classes for every output bounding box. Output shape is [B, N, C] format, where `B` - batch size, `N` - number of detected boxes, `C` - channels. Final mask prediction can be obtained by matrix multiplication of `proto` and transposed `mask` outputs.
+>>>>>>> Update models/public/yolact-resnet50-fpn-pytorch/yolact-resnet50-fpn-pytorch.md
 
 ### Converted Model
 
