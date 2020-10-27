@@ -404,10 +404,10 @@ The main difference between this converter and `super_resolution` in data organi
   * `images_dir` - directory for saving converted images (Optional, if not provided, the images will be saved into converted_images directory in the same location, where data_file is stored)
 
   * `vocab_file` - file containing vocabulary to cast token class indices into human-readable tokens 
-* `ade20k_image_translation` - converts ADE20K dataset to `ImageProcessingAnnotation` according to `reference_dict`.
+* `ade20k_image_translation` - converts ADE20K dataset to `ImageProcessingAnnotation` according to `reference_file`.
   * `images_dir` - path to directory with input images (e.g. `ADEChallengeData2016/images`).
   * `annotations_dir` - path to directory with annotations (e.g. `ADEChallengeData2016/annotations`).
-  * `reference_dict` - path to dict with pairs key (validation): value (train).
+  * `reference_file` - path to file with pairs key (validation): value (train).
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `background_label` using `dataset_meta_file` argument.

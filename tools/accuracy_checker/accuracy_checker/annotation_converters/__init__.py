@@ -90,7 +90,6 @@ from .place_recognition import PlaceRecognitionDatasetConverter
 from .cluttered_mnist import ClutteredMNISTConverter
 from .mpii import MPIIDatasetConverter
 from .mapillary_20 import Mapillary20Converter
-from .cocosnet_converter import CocosnetConverter
 from .ade20k_image_translation import ADE20kImageTranslationConverter
 
 __all__ = [

@@ -22,7 +22,7 @@ evaluations:
             - name: "ref_seg_map"
               type: INPUT
               value: "(.*)ADE(.*)train(.*).png"
-  
+
       datasets:
         - name: cocosnet
           annotation_conversion:
