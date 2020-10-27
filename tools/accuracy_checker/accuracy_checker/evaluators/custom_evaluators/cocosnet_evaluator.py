@@ -39,60 +39,43 @@ from ...utils import get_path, extract_image_representations
 
 class CocosnetEvaluator(BaseEvaluator):
     def __init__(
-            self, launcher, reader, preprocessor_mask, preprocessor_image, postprocessor,
-            dataset, metric, model, model_for_metric
+            self, dataset_config, launcher, preprocessor_mask, preprocessor_image,
+            gan_model, check_model
     ):
         self.launcher = launcher
-        self.reader = reader
+        self.dataset_config = dataset_config
         self.preprocessor_mask = preprocessor_mask
         self.preprocessor_image = preprocessor_image
-        self.postprocessor = postprocessor
-        self.dataset = dataset
-        self.metric_executor = metric
-        self.model = model
-        self.model_for_metric = model_for_metric
+        self.postprocessor = None
+        self.dataset = None
+        self.metric_executor = None
+        self.test_model = gan_model
+        self.check_model = check_model
         self._metrics_results = []
+        self._part_by_name = {
+            'gan_network': self.test_model,
+            'verification_network': self.check_model
+        }
 
     @classmethod
-    def from_configs(cls, model_config):
-        network_info = model_config['network_info']
-        launcher_config = model_config['launchers'][0]
-        dataset_config = model_config['datasets'][0]
-        dataset_name = dataset_config['name']
-        data_reader_config = dataset_config.get('reader', 'opencv_imread')
-        data_source = dataset_config.get('data_source')
-        dataset = Dataset(dataset_config)
-        if isinstance(data_reader_config, str):
-            data_reader_type = data_reader_config
-            data_reader_config = None
-        elif isinstance(data_reader_config, dict):
-            data_reader_type = data_reader_config['type']
-        else:
-            raise ConfigError('reader should be dict or string')
-        if data_reader_type in REQUIRES_ANNOTATIONS:
-            data_source = dataset.annotation
-        data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
-        enable_ie_preprocessing = (
-            dataset_config.get('_ie_preprocessing', False)
-            if launcher_config['framework'] == 'dlsdk' else False
-        )
+    def from_configs(cls, config, delayed_model_loading=False):
+        launcher_config = config['launchers'][0]
+        dataset_config = config['datasets']
+
         preprocessor_mask = PreprocessingExecutor(
-            dataset_config.get('preprocessing_mask'), dataset_name, dataset.metadata,
-            enable_ie_preprocessing=enable_ie_preprocessing
+            dataset_config[0].get('preprocessing_mask')
         )
         preprocessor_image = PreprocessingExecutor(
-            dataset_config.get('preprocessing_image'), dataset_name, dataset.metadata,
-            enable_ie_preprocessing=enable_ie_preprocessing
+            dataset_config[0].get('preprocessing_image')
         )
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
-        model = CocosnetModel(network_info, launcher)
-        model_for_metric = GanCheckModel(network_info.get('verification_network', {}), launcher)
-        postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
-        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
+
+        network_info = config['network_info']
+        gan_model = CocosnetModel(network_info, launcher, delayed_model_loading)
+        check_model = GanCheckModel(network_info.get('verification_network', {}), launcher, delayed_model_loading)
 
         return cls(
-            launcher, data_reader,
-            preprocessor_mask, preprocessor_image, postprocessor, dataset, metric_dispatcher, model, model_for_metric
+            dataset_config, launcher, preprocessor_mask, preprocessor_image, gan_model, check_model
         )
 
     @staticmethod
@@ -107,23 +90,17 @@ class CocosnetEvaluator(BaseEvaluator):
             dataset_config['name']
         )
 
-    def _get_batch_input(self, batch_annotation):
-        batch_identifiers = [annotation.identifier for annotation in batch_annotation]
-
-        batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
-        for annotation, input_data in zip(batch_annotation, batch_input):
-            self.dataset.set_annotation_metadata(annotation, input_data, self.reader.data_source)
-        for i, _ in enumerate(batch_input):
-            for index_of_input, _ in enumerate(batch_input[i].data):
+    def _preprocessing_for_batch_input(self, batch_annotation, batch_inputs):
+        for i, _ in enumerate(batch_inputs):
+            for index_of_input, _ in enumerate(batch_inputs[i].data):
                 preprocessor = self.preprocessor_mask
                 if index_of_input % 2:
                     preprocessor = self.preprocessor_image
-                batch_input[i].data[index_of_input] = preprocessor.process(
-                    images=[DataRepresentation(batch_input[i].data[index_of_input])],
+                batch_inputs[i].data[index_of_input] = preprocessor.process(
+                    images=[DataRepresentation(batch_inputs[i].data[index_of_input])],
                     batch_annotation=batch_annotation)[0].data
-        _, batch_meta = extract_image_representations(batch_input)
 
-        return batch_input, batch_meta, batch_identifiers
+        return batch_inputs
 
     def process_dataset(
             self, subset=None,
@@ -151,18 +128,18 @@ class CocosnetEvaluator(BaseEvaluator):
 
         metric_config = self.configure_intermediate_metrics_results(kwargs)
         compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
-        for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
-            filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
-            batch_predictions = self.model.predict(batch_identifiers, batch_meta, filled_inputs)
-            annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
-            self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
+
+        for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
+            batch_inputs = self._preprocessing_for_batch_input(batch_annotation, batch_inputs)
+            extr_batch_inputs, _ = extract_image_representations(batch_inputs)
+            batch_predictions = self.test_model.predict(batch_identifiers, extr_batch_inputs)
+            annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
+            metrics_result, _ = self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
             gan_annotations = []
             gan_predictions = []
-            for index_of_metric in range(self.model_for_metric.number_of_metrics):
-                gan_annotations.extend(self.model_for_metric.predict(batch_identifiers, batch_meta,
-                                                                     annotations, index_of_metric))
-                gan_predictions.extend(self.model_for_metric.predict(batch_identifiers, batch_meta,
-                                                                     predictions, index_of_metric))
+            for index_of_metric in range(self.check_model.number_of_metrics):
+                gan_annotations.extend(self.check_model.predict(batch_identifiers, annotations, index_of_metric))
+                gan_predictions.extend(self.check_model.predict(batch_identifiers, predictions, index_of_metric))
             batch_identifiers.extend(batch_identifiers)
             gan_annotations = [RawTensorAnnotation(batch_identifier, item)
                                for batch_identifier, item in zip(batch_identifiers, gan_annotations)]
@@ -170,7 +147,12 @@ class CocosnetEvaluator(BaseEvaluator):
                                for batch_identifier, item in zip(batch_identifiers, gan_predictions)]
 
             if output_callback:
-                output_callback(annotations, predictions)
+                output_callback(
+                    predictions,
+                    metrics_result=metrics_result,
+                    element_identifiers=batch_identifiers,
+                    dataset_indices=batch_input_ids
+                )
 
             if self.metric_executor.need_store_predictions:
                 self._annotations.extend(gan_annotations)
@@ -227,38 +209,68 @@ class CocosnetEvaluator(BaseEvaluator):
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
             presenter.write_result(metric_result, ignore_results_formatting)
 
-    @property
-    def metrics_results(self):
-        if not self.metrics_results:
-            self.compute_metrics(print_results=False)
-        computed_metrics = copy.deepcopy(self._metrics_results)
-        return computed_metrics
-
-    @staticmethod
-    def store_predictions(stored_predictions, predictions):
-        # since at the first time file does not exist and then created we can not use it as a pathlib.Path object
-        with open(stored_predictions, "wb") as content:
-            pickle.dump(predictions, content)
-            print_info("prediction objects are save to {}".format(stored_predictions))
-
     def reset_progress(self, progress_reporter):
         progress_reporter.reset(self.dataset.size)
+
+    def release(self):
+        self.launcher.release()
 
     def reset(self):
         if self.metric_executor:
             self.metric_executor.reset()
-        del self._annotations
-        del self._predictions
+        if hasattr(self, '_annotations'):
+            del self._annotations
+            del self._predictions
+            del self._input_ids
         del self._metrics_results
         self._annotations = []
         self._predictions = []
+        self._input_ids = []
         self._metrics_results = []
-        self.dataset.reset(self.postprocessor.has_processors)
-        self.reader.reset()
+        if self.dataset:
+            self.dataset.reset(self.postprocessor.has_processors)
 
-    def release(self):
-        self.model.release()
-        self.launcher.release()
+    def load_model(self, network_list, launcher):
+        for network_dict in network_list:
+            self._part_by_name[network_dict['name']].load_network(network_dict, launcher)
+
+    def load_network(self, network_list, launcher):
+        for network_dict in network_list:
+            self._part_by_name[network_dict['name']].load_network(network_dict['model'], launcher)
+
+    def get_network(self):
+        return [
+            {'name': 'gan_network', 'model': self.test_model.network},
+            {'name': 'verification_network', 'model': self.check_model.network}
+        ]
+
+    def get_metrics_attributes(self):
+        if not self.metric_executor:
+            return {}
+        return self.metric_executor.get_metrics_attributes()
+
+    def register_metric(self, metric_config):
+        if isinstance(metric_config, str):
+            self.metric_executor.register_metric({'type': metric_config})
+        elif isinstance(metric_config, dict):
+            self.metric_executor.register_metric(metric_config)
+        else:
+            raise ValueError('Unsupported metric configuration type {}'.format(type(metric_config)))
+
+    def register_postprocessor(self, postprocessing_config):
+        pass
+
+    def register_dumped_annotations(self):
+        pass
+
+    def select_dataset(self, dataset_tag):
+        if self.dataset is not None and isinstance(self.dataset_config, list):
+            return
+        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
+        self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
+
+    def set_profiling_dir(self, profiler_dir):
+        self.metric_executor.set_profiling_dir(profiler_dir)
 
     def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
         if self.dataset.batch is None:
@@ -267,12 +279,6 @@ class CocosnetEvaluator(BaseEvaluator):
             self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
         elif num_images is not None:
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
-
-    def select_dataset(self, dataset_tag):
-        if self.dataset is not None and isinstance(self.dataset_config, list):
-            return
-        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
-        self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
 
     @staticmethod
     def _create_progress_reporter(check_progress, dataset_size):
@@ -331,14 +337,20 @@ class BaseModel:
 
     def load_model(self, network_info, launcher, log=False):
         model, weights = self.auto_model_search(network_info, self.net_type)
-        if weights is not None:
+        if weights:
             self.network = launcher.read_network(model, weights)
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
+            self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
         if log:
             self.print_input_output_info()
+
+    def load_network(self, network, launcher):
+        self.network = network
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+        self.set_input_and_output()
 
     def set_input_and_output(self):
         pass
@@ -378,10 +390,7 @@ class CorrespondenceNetwork(BaseModel):
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.net_type = "correspondence_network"
-        super().__init__(network_info, launcher)
-        self.input_feeder = InputFeeder(
-            launcher.config.get('inputs', []), self.inputs
-        )
+        super().__init__(network_info, launcher, delayed_model_loading)
 
     def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
@@ -394,12 +403,12 @@ class CorrespondenceNetwork(BaseModel):
         self.key_of_input_semantics = list(self.inputs.keys())[0]
 
     def fit_to_input(self, input_data):
-        return self.input_feeder.fill_inputs(input_data)
-
-    def inputs_info_for_meta(self):
-        return {
-            layer_name: layer.shape for layer_name, layer in self.inputs.items()
-        }
+        inputs = {}
+        for value, key in zip(input_data, self.inputs.keys()):
+            value = np.expand_dims(value, 0)
+            value = np.transpose(value, (0, 3, 1, 2))
+            inputs.update({key: value})
+        return inputs
 
     def release(self):
         del self.network
@@ -414,15 +423,27 @@ class GeneratorNetwork(BaseModel):
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.net_type = "generarative_network"
-        super().__init__(network_info, launcher)
         self.adapter = create_adapter(network_info.get('adapter'))
+        super().__init__(network_info, launcher)
         self.adapter.output_blob = self.output_blob
 
     def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
         input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
-        self.input_blob = next(iter(input_info))
-        self.output_blob = next(iter(self.exec_network.outputs))
+        input_blob = next(iter(input_info))
+        with_prefix = input_blob.startswith('verification_network_')
+        if self.input_blob is None or with_prefix != self.with_prefix:
+            if self.input_blob is None:
+                output_blob = next(iter(self.exec_network.outputs))
+            else:
+                output_blob = (
+                    '_'.join(['verification_network', self.output_blob])
+                    if with_prefix else self.output_blob.split('verification_network_')[-1]
+                )
+            self.input_blob = input_blob
+            self.output_blob = output_blob
+            self.with_prefix = with_prefix
+            self.adapter.output_blob = output_blob
 
     def fit_to_input(self, input_data):
         return {self.input_blob: input_data}
@@ -431,9 +452,9 @@ class GeneratorNetwork(BaseModel):
         del self.network
         del self.exec_network
 
-    def predict(self, identifiers, meta, input_data):
+    def predict(self, identifiers, input_data):
         predictions = self.exec_network.infer(self.fit_to_input(input_data))
-        result = self.adapter.process(predictions, identifiers, meta)
+        result = self.adapter.process(predictions, identifiers, [{}])
         return result
 
 
@@ -447,14 +468,14 @@ class CocosnetModel:
         self.correspondence.release()
         self.generator.release()
 
-    def predict(self, identifiers, meta, inputs):
+    def predict(self, identifiers, inputs):
         results = []
-        for inp in inputs:
-            inp = self.correspondence.fit_to_input([inp])
-            corr_out = self.correspondence.predict(inp[0])
+        for current_input in inputs:
+            current_input = self.correspondence.fit_to_input(current_input)
+            corr_out = self.correspondence.predict(current_input)
             gen_input = np.concatenate((corr_out[self.correspondence.key_of_warped_reference],
-                                        inp[0][self.correspondence.key_of_input_semantics]), axis=1)
-            result = self.generator.predict(identifiers, meta, gen_input)
+                                        current_input[self.correspondence.key_of_input_semantics]), axis=1)
+            result = self.generator.predict(identifiers, gen_input)
             results.append(*result)
         return results
 
@@ -469,7 +490,7 @@ class GanCheckModel(BaseModel):
 
     def load_model(self, network_info, launcher, log=False):
         model, weights = self.auto_model_search(network_info, self.net_type)
-        if weights is not None:
+        if weights:
             self.network = launcher.read_network(model, weights)
             for layer in self.additional_layers:
                 self.network.add_outputs(layer)
@@ -498,7 +519,7 @@ class GanCheckModel(BaseModel):
         del self.network
         del self.exec_network
 
-    def predict(self, identifiers, meta, input_data, index_of_key):
+    def predict(self, identifiers, input_data, index_of_key):
         results = []
         for data in input_data:
             prediction = self.exec_network.infer(self.fit_to_input(data.value))
