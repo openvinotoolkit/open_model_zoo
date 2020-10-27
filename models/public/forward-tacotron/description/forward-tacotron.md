@@ -48,8 +48,8 @@ duration in time for every processed embedding.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| GFlops                          |                                           |
-| MParams                         |                                           |
+| GOPs                            | 6.66                                      |
+| MParams                         | 13.81                                     |
 
 
 ### Performance
@@ -79,8 +79,8 @@ The forward-tacotron-regression model accepts aligned by duration processed embe
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| GFlops                          |                                           |
-| MParams                         |                                           |
+| GOPs                            | 4.91                                      |
+| MParams                         | 3.05                                      |
 
 ### Performance
 

@@ -52,8 +52,8 @@ The wavernn-upsampler model accepts mel-spectrogram and produces two feature map
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| GFlops                          |                                           |
-| MParams                         |                                           |
+| GOPs                            | 1.47                                      |
+| MParams                         | 0.4                                       |
 
 ### Performance
 
@@ -86,8 +86,8 @@ The wavernn-rnn model accepts two feature maps from wavernn-upsampler and produc
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| GFlops                          |                                           |
-| MParams                         |                                           |
+| GOps                            | 0.06                                      |
+| MParams                         | 3.83                                      |
 
 ### Performance
 
