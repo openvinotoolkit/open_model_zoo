@@ -14,23 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import copy
 from collections import OrderedDict
-import cv2
-import numpy as np
 from pathlib import Path
-import pickle
+import numpy as np
+import cv2
 
 from ..base_evaluator import BaseEvaluator
 from ..quantization_model_evaluator import create_dataset_attributes
 from ...adapters import create_adapter
 from ...config import ConfigError
-from ...dataset import Dataset
-from ...data_readers import BaseReader, REQUIRES_ANNOTATIONS, DataRepresentation
-from ...launcher import create_launcher, InputFeeder
+from ...data_readers import DataRepresentation
+from ...launcher import create_launcher
 from ...logging import print_info
-from ...metrics import MetricsExecutor
-from ...postprocessor import PostprocessingExecutor
 from ...preprocessor import PreprocessingExecutor
 from ...progress_reporters import ProgressReporter
 from ...representation import RawTensorPrediction, RawTensorAnnotation
