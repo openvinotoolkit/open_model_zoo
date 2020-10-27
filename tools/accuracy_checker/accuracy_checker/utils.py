@@ -274,6 +274,10 @@ def is_single_metric_source(source):
     return np.size(source.split(',')) == 1
 
 
+def is_path(data):
+    return isinstance(data, (Path, str))
+
+
 def read_txt(file: Union[str, Path], sep='\n', **kwargs):
     def is_empty(string):
         return not string or string.isspace()

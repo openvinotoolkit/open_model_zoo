@@ -17,7 +17,7 @@ limitations under the License.
 import copy
 import pickle
 
-from ..utils import get_path, extract_image_representations
+from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
 from ..launcher import create_launcher, DummyLauncher, InputFeeder
 from ..launcher.loaders import PickleLoader
@@ -27,7 +27,7 @@ from ..postprocessor import PostprocessingExecutor
 from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter
 from ..config import ConfigError
-from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS
+from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS, DataRepresentation
 from .base_evaluator import BaseEvaluator
 
 
@@ -298,7 +298,11 @@ class ModelEvaluator(BaseEvaluator):
         return free_irs, queued_irs
 
     def process_single_image(self, image):
-        input_data = [self.reader(identifier=image)]
+        def get_data(image):
+            if is_path(image):
+                return [self.reader(identifier=image)]
+            return [DataRepresentation(image, 'image')]
+        input_data = get_data(image)
         batch_input = self.preprocessor.process(input_data)
         _, batch_meta = extract_image_representations(batch_input)
         filled_inputs = self.input_feeder.fill_inputs(batch_input)
