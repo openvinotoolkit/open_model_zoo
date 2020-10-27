@@ -150,7 +150,7 @@ def main():
     voc_infer.eval()
 
 
-    opset_version = 10
+    opset_version = 11
 
     with torch.no_grad():
         mels = np.load(args.mel)
