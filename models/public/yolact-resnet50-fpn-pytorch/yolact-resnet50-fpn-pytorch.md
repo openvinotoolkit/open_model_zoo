@@ -58,7 +58,7 @@ Expected color order: `BGR`.
 
 ### Original Model
 
-1. Detection scores, name: `conf`. Contains predicted bounding-boxes classes in a range [0, 80]. The model was trained on the Microsoft\* COCO dataset version with 80 categories of objects, 0 class is for background. Output shape is [1, 19248, 81] in [B, N, C] format, where
+1. Detection scores, name: `conf`. Contains score distribution over all classes in the [0,1] range . The model was trained on the Microsoft\* COCO dataset version with 80 categories of objects, 0 class is for background. Output shape is [1, 19248, 81] in [B, N, C] format, where
 - `B` - batch size, 
 - `N` - number of detected boxes, 
 - `C` - number of classes. 
