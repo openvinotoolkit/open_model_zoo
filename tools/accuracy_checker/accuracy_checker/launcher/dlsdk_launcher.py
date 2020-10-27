@@ -320,7 +320,7 @@ class DLSDKLauncher(Launcher):
             device = custom_affinity.get(layer_name, auto_affinity.get(layer_name))
             if device is None:
                 continue
-            if device not in self._devices_list():
+            if not (device in self._devices_list() or device == self._device):
                 raise ConfigError(
                     'Device \'{device}\' set for \'{layer}\' layer is not present in '
                     'provided configuration \'{configuration}\''.format(
