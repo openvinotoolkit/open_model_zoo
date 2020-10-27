@@ -455,6 +455,11 @@ PYTHON_DEMOS = [
        ]
     )),
 
+    PythonDemo(subdirectory='monodepth_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': image_net_arg('00000002'),
+                          '-m': ModelArg('midasnet')})
+    )),
+
     PythonDemo(subdirectory='multi_camera_multi_target_tracking', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
@@ -524,7 +529,20 @@ PYTHON_DEMOS = [
                     ModelArg('person-detection-retail-0013'),
                     ModelArg('ssd_mobilenet_v1_coco'))),
         ]
-    ))
+    )),
+
+    PythonDemo(subdirectory='text_spotting_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, '--delay': 1, **MONITORS,
+                          '-i': DataPatternArg('text-detection')}),
+        [
+            TestCase(options={
+                '-m_m': ModelArg('text-spotting-0002-detector'),
+                '-m_te': ModelArg('text-spotting-0002-recognizer-encoder'),
+                '-m_td': ModelArg('text-spotting-0002-recognizer-decoder'),
+                '--no_track': None
+            }),
+        ]
+    )),
 ]
 
 DEMOS = NATIVE_DEMOS + PYTHON_DEMOS
