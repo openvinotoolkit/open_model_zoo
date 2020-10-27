@@ -332,7 +332,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(subdirectory='asl_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None, '-c': DemoFileArg('classes.json'),
-                          '-i': ms_asl_arg('_nz_sivss20'),
+                          '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
                           '-m_a': ModelArg('asl-recognition-0004'),
                           '-m_d': ModelArg('person-detection-asl-0001')})
     )),
