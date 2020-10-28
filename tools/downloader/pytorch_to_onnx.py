@@ -1,6 +1,7 @@
 import argparse
 import ast
 import importlib
+import os
 import sys
 
 from pathlib import Path
@@ -54,7 +55,7 @@ def parse_args():
                         help='Space separated shapes of the input blobs. Example: [1,1,256,256],[1,3,256,256],...')
     parser.add_argument('--output-file', type=Path, required=True,
                         help='Path to the output ONNX model')
-    parser.add_argument('--model-path', type=str,
+    parser.add_argument('--model-path', type=str, action='append', dest='model_paths',
                         help='Path to PyTorch model\'s source code')
     parser.add_argument('--import-module', type=str, required=True,
                         help='Name of module, which contains model\'s constructor')
@@ -67,19 +68,20 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_model(model_name, weights, model_path, module_name, model_params):
+def load_model(model_name, weights, model_paths, module_name, model_params):
     """Import model and load pretrained weights"""
 
-    if model_path:
-        sys.path.append(model_path)
+    if model_paths:
+        sys.path.extend(model_paths)
 
     try:
         module = importlib.import_module(module_name)
         creator = getattr(module, model_name)
         model = creator(**model_params)
     except ImportError as err:
-        if model_path:
-            print('Module {} in {} doesn\'t exist. Check import path and name'.format(model_name, model_path))
+        if model_paths:
+            print('Module {} in {} doesn\'t exist. Check import path and name'.format(
+                model_name, os.pathsep.join(model_paths)))
         else:
             print('Module {} doesn\'t exist. Check if it is installed'.format(model_name))
         sys.exit(err)
@@ -120,7 +122,7 @@ def convert_to_onnx(model, input_shapes, output_file, input_names, output_names)
 def main():
     args = parse_args()
     model = load_model(args.model_name, args.weights,
-                       args.model_path, args.import_module, dict(args.model_param))
+                       args.model_paths, args.import_module, dict(args.model_param))
 
     convert_to_onnx(model, args.input_shapes, args.output_file, args.input_names, args.output_names)
 
