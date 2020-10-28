@@ -13,56 +13,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
-#include "detection_pipeline.h"
+#include "detection_model.h"
 #include <samples/args_helper.hpp>
 #include <samples/slog.hpp>
 
-#include "detection_pipeline_yolo.h"
-#include "detection_pipeline_ssd.h"
-
 using namespace InferenceEngine;
 
-void DetectionPipeline::init(const std::string& model_name, const CnnConfig& cnnConfig,
-    float confidenceThreshold, bool useAutoResize,
-    const std::vector<std::string>& labels,
-    InferenceEngine::Core* engine){
-
+DetectionModel::DetectionModel(std::string modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels)
+:ModelBase(modelFileName){
     this->useAutoResize = useAutoResize;
     this->confidenceThreshold = confidenceThreshold;
     this->labels = labels;
-
-    PipelineBase::init(model_name, cnnConfig, engine);
 }
 
-int64_t DetectionPipeline::submitImage(cv::Mat img){
-    auto request = requestsPool->getIdleRequest();
-    if (!request)
-        return -1;
+void DetectionModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, MetaData*& metaData)
+{
+    auto imgData = inputData.asPtr<ImageInputData>();
+    auto& img = imgData->inputImage;
 
     if (useAutoResize) {
         /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
-        request->SetBlob(imageInputName, wrapMat2Blob(img));
+        request->SetBlob(inputsNames[0], wrapMat2Blob(img));
     }
     else {
         /* Resize and copy data from the image to the input blob */
-        Blob::Ptr frameBlob = request->GetBlob(imageInputName);
+        Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
         matU8ToBlob<uint8_t>(img, frameBlob);
     }
 
-    return submitRequest(request,img);
+    metaData = new ImageMetaData(img);
 }
 
-cv::Mat DetectionPipeline::obtainAndRenderData()
+cv::Mat DetectionModel::renderData(ResultBase* result)
 {
-    DetectionResult result = getProcessedResult();
-    if (result.IsEmpty()) {
-        return cv::Mat();
-    }
-
     // Visualizing result data over source image
-    cv::Mat outputImg = result.extraData.clone();
+    cv::Mat outputImg = result->metaData.get()->asPtr<ImageMetaData>()->img.clone();
 
-    for (auto obj : result.objects) {
+    for (auto obj : result->asPtr<DetectionResult>()->objects) {
         std::ostringstream conf;
         conf << ":" << std::fixed << std::setprecision(3) << obj.confidence;
         cv::putText(outputImg, obj.label + conf.str(),
@@ -74,7 +61,7 @@ cv::Mat DetectionPipeline::obtainAndRenderData()
     return outputImg;
 }
 
-std::vector<std::string> DetectionPipeline::loadLabels(const std::string & labelFilename){
+std::vector<std::string> DetectionModel::loadLabels(const std::string & labelFilename){
     std::vector<std::string> labelsList;
     /** Read labels (if any)**/
     if (!labelFilename.empty()) {

@@ -15,29 +15,28 @@
 */
 
 #pragma once
-#include "detection_pipeline.h"
-class DetectionPipelineSSD :
-    public DetectionPipeline
+#include "detection_model.h"
+class ModelSSD :
+    public DetectionModel
 {
 public:
-    /// Loads model and performs required initialization
-    /// @param model_name name of model to load
-    /// @param cnnConfig - fine tuning configuration for CNN model
+    /// Constructor
+    /// @param modelFileName name of model to load
     /// @param confidenceThreshold - threshold to eleminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
-    /// @param engine - pointer to InferenceEngine::Core instance to use.
-    /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
-    virtual void init(const std::string& model_name, const CnnConfig& cnnConfig,
+    ModelSSD(const std::string& modelFileName,
         float confidenceThreshold, bool useAutoResize,
-        const std::vector<std::string>& labels = std::vector<std::string>(),
-        InferenceEngine::Core* engine = nullptr);
+        const std::vector<std::string>& labels = std::vector<std::string>());
 
-    virtual DetectionResult getProcessedResult(bool shouldKeepOrder = true);
+    virtual void onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, RequestsPool* requestsPool);
+    std::unique_ptr<ResultBase> postprocess(InferenceResult & infResult);
+
 protected:
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
+    size_t maxProposalCount = 0;
+    size_t objectSize = 0;
 };
-

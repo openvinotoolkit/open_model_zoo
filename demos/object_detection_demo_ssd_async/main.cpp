@@ -29,8 +29,9 @@
 #include <samples/args_helper.hpp>
 #include <samples/slog.hpp>
 
-#include "detection_pipeline_yolo.h"
-#include "detection_pipeline_ssd.h"
+#include "async_pipeline.h"
+#include "detection_model_yolo.h"
+#include "detection_model_ssd.h"
 #include "config_factory.h"
 
 #include <gflags/gflags.h>
@@ -175,32 +176,30 @@ int main(int argc, char *argv[]) {
         //------------------------------ Running Detection routines ----------------------------------------------
         std::vector<std::string> labels;
         if (!FLAGS_labels.empty())
-            labels = DetectionPipeline::loadLabels(FLAGS_labels);
+            labels = DetectionModel::loadLabels(FLAGS_labels);
 
-        std::unique_ptr<DetectionPipeline> pipeline;
+        ModelBase* model;
         if (FLAGS_mt=="ssd")
         {
-            auto ssd = new DetectionPipelineSSD;
-            ssd->init(FLAGS_m, ConfigFactory::GetUserConfig(), (float)FLAGS_t, FLAGS_auto_resize, labels);
-            pipeline.reset(ssd);
+            model = new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels);
         }
         else if (FLAGS_mt=="yolo")
         {
-            auto yolo = new DetectionPipelineYolo;
-            yolo->init(FLAGS_m, ConfigFactory::GetUserConfig(), (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, labels);
-            pipeline.reset(yolo);
+            model = new ModelYolo3(FLAGS_m,(float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, labels);
         }
         else
         {
             std::cout << "Invalid model type provided: " + FLAGS_mt<<std::endl;
             return -1;
         }
+
+        PipelineBase pipeline(model, ConfigFactory::GetUserConfig());
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();
         while (true){
             int64_t frameNum;
-            if (pipeline->isReadyToProcess()) {
+            if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
                 if (curr_frame.empty()) {
                     curr_frame = cap->read();
@@ -208,7 +207,7 @@ int main(int argc, char *argv[]) {
                         throw std::logic_error("Can't read an image from the input");
                 }
 
-                frameNum = pipeline->submitImage(curr_frame);
+                frameNum = pipeline.submitImage(curr_frame);
                 if (frameNum < 0)
                     break;
                 curr_frame.release();
@@ -216,17 +215,18 @@ int main(int argc, char *argv[]) {
 
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - check for getProcessedResult() function
-            cv::Mat outFrame;
-            while (!(outFrame = pipeline->obtainAndRenderData()).empty()) {
+            std::unique_ptr<ResultBase> result;
+            while (result = pipeline.getResult()) {
+                cv::Mat outFrame = model->renderData(result.get());
                 //--- Showing results and device information
                 if (!outFrame.empty() && !FLAGS_no_show) {
                     presenter.drawGraphs(outFrame);
-                    paintInfo(outFrame, pipeline->getPerformanceInfo());
+                    paintInfo(outFrame, pipeline.getPerformanceInfo());
                     cv::imshow("Detection Results", outFrame);
                 }
             }
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
-            pipeline->waitForData();
+            pipeline.waitForData();
 
             //--- Processing keyboard events
             const int key = cv::waitKey(1);
@@ -242,7 +242,7 @@ int main(int argc, char *argv[]) {
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        auto info = pipeline->getPerformanceInfo();
+        auto info = pipeline.getPerformanceInfo();
         slog::info << slog::endl << "Metric reports:" << slog::endl;
 
         std::cout << std::endl << "Total time: "

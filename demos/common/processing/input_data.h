@@ -15,25 +15,33 @@
 */
 
 #pragma once
+#include <samples/ocv_common.hpp>
 
-#include <string>
-#include <gflags/gflags.h>
+struct InputData {
+    virtual ~InputData() {}
 
-DECLARE_bool(h);
-DECLARE_string(i);
-DECLARE_string(m);
-DECLARE_string(d);
-DECLARE_string(labels);
-DECLARE_bool(pc);
-DECLARE_string(c);
-DECLARE_string(l);
-DECLARE_bool(r);
-DECLARE_double(t);
-DECLARE_bool(auto_resize);
-DECLARE_uint32(nireq);
-DECLARE_uint32(nthreads);
-DECLARE_string(nstreams);
-DECLARE_bool(loop_input);
-DECLARE_bool(no_show);
-DECLARE_string(u);
-DECLARE_string(use);
+    template<class T> T* asPtr() {
+        auto dst = dynamic_cast<T*>(this);
+        if (!dst) {
+            throw std::bad_cast();
+        }
+        return dst;
+    }
+
+    template<class T> const T* asPtr() const {
+        auto dst = dynamic_cast<const T*>(this);
+        if (!dst) {
+            throw std::bad_cast();
+        }
+        return dst;
+    }
+};
+
+struct ImageInputData : public InputData{
+    cv::Mat inputImage;
+
+    ImageInputData() {}
+    ImageInputData(const cv::Mat& img) {
+        inputImage = img;
+    }
+};

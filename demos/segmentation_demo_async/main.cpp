@@ -29,7 +29,8 @@
 #include <samples/args_helper.hpp>
 #include <samples/slog.hpp>
 
-#include "segmentation_pipeline.h"
+#include "async_pipeline.h"
+#include "segmentation_model.h"
 #include "config_factory.h"
 #include <samples/images_capture.h>
 #include <samples/default_flags.hpp>
@@ -156,8 +157,8 @@ int main(int argc, char *argv[]) {
         cv::Mat curr_frame;
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
-        SegmentationPipeline pipeline;
-        pipeline.init(FLAGS_m, ConfigFactory::GetUserConfig());
+        SegmentationModel model(FLAGS_m);
+        PipelineBase pipeline(&model,ConfigFactory::GetUserConfig());
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();
@@ -178,8 +179,9 @@ int main(int argc, char *argv[]) {
 
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - check for getProcessedResult() function
-            cv::Mat outFrame;
-            while (!(outFrame = pipeline.obtainAndRenderData()).empty()) {
+            std::unique_ptr<ResultBase> result;
+            while (result = pipeline.getResult()) {
+                cv::Mat outFrame = model.renderData(result.get());
                 //--- Showing results and device information
                 if (!outFrame.empty() && !FLAGS_no_show) {
                     presenter.drawGraphs(outFrame);

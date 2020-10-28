@@ -14,29 +14,27 @@
 // limitations under the License.
 */
 
-#include "segmentation_pipeline.h"
+#include "segmentation_model.h"
 #include <samples/args_helper.hpp>
 
 using namespace InferenceEngine;
-SegmentationPipeline::SegmentationPipeline() :
-    distr(0, 255) {
-}
 
-void SegmentationPipeline::init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine){
-    init(model_name, cnnConfig, engine);
+SegmentationModel::SegmentationModel(const std::string& modelFileName)
+    :ModelBase(modelFileName),
+    distr(0, 255){
 
     colors.resize(arraySize(CITYSCAPES_COLORS));
     for (std::size_t i = 0; i < colors.size(); ++i)
         colors[i] = { CITYSCAPES_COLORS[i].blue(), CITYSCAPES_COLORS[i].green(), CITYSCAPES_COLORS[i].red() };
 }
 
-void SegmentationPipeline::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork){
+void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork){
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input blobs -----------------------------------------------------
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     if (inputShapes.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 input");
-    imageInputName = inputShapes.begin()->first;
+    inputsNames.push_back(inputShapes.begin()->first);
     SizeVector& inSizeVector = inputShapes.begin()->second;
     if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
@@ -76,16 +74,23 @@ void SegmentationPipeline::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
     }
 }
 
-SegmentationPipeline::SegmentationResult SegmentationPipeline::getProcessedResult(bool shouldKeepOrder){
-    auto infResult = PipelineBase::getInferenceResult(shouldKeepOrder);
-    if (infResult.IsEmpty()){
-        return SegmentationResult();
-    }
+void SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr & request, MetaData *& metaData)
+{
+    auto imgData = inputData.asPtr<ImageInputData>();
+    auto& img = imgData->inputImage;
+
+    request->SetBlob(inputsNames[0], wrapMat2Blob(img));
+    metaData = new ImageMetaData(img);
+}
+
+std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult) {
+    SegmentationResult* result = new SegmentationResult;
+    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
     const float * const predictions = outMapped.as<float*>();
 
-    cv::Mat maskImg(outHeight, outWidth, CV_8UC3);
+    result->mask = cv::Mat(outHeight, outWidth, CV_8UC3);
     for (int rowId = 0; rowId < outHeight; ++rowId) {
         for (int colId = 0; colId < outWidth; ++colId) {
             std::size_t classId = 0;
@@ -103,14 +108,14 @@ SegmentationPipeline::SegmentationResult SegmentationPipeline::getProcessedResul
                 }
             }
 
-            maskImg.at<cv::Vec3b>(rowId, colId) = class2Color(classId);
+            result->mask.at<cv::Vec3b>(rowId, colId) = class2Color(classId);
         }
     }
 
-    return SegmentationResult(infResult.frameId,maskImg,infResult.extraData);
+    return std::unique_ptr<ResultBase>(result);
 }
 
-const cv::Vec3b& SegmentationPipeline::class2Color(int classId)
+const cv::Vec3b& SegmentationModel::class2Color(int classId)
 {
     while (classId >= (int)colors.size()) {
         cv::Vec3b color(distr(rng), distr(rng), distr(rng));
@@ -119,17 +124,15 @@ const cv::Vec3b& SegmentationPipeline::class2Color(int classId)
     return colors[classId];
 }
 
-cv::Mat SegmentationPipeline::obtainAndRenderData()
+cv::Mat SegmentationModel::renderData(ResultBase* result)
 {
-    SegmentationResult result = getProcessedResult();
-    if (result.IsEmpty()) {
-        return cv::Mat();
-    }
+    auto segResult = result->asPtr<SegmentationResult>();
+    auto inputImg = segResult->metaData.get()->asPtr<ImageMetaData>()->img;
 
     // Visualizing result data over source image
     cv::Mat outputImg;
-    cv::resize(result.mask, outputImg, result.extraData.size());
-    outputImg = result.extraData / 2 + outputImg / 2;
+    cv::resize(segResult->mask, outputImg, inputImg.size());
+    outputImg = inputImg / 2 + outputImg / 2;
 
     return outputImg;
 }

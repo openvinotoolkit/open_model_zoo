@@ -15,9 +15,11 @@
 */
 
 #pragma once
-#include "detection_pipeline.h"
-class DetectionPipelineYolo :
-    public DetectionPipeline
+#include "detection_model.h"
+#include <ngraph/ngraph.hpp>
+
+class ModelYolo3 :
+    public DetectionModel
 {
 protected:
     class Region {
@@ -31,9 +33,8 @@ protected:
     };
 
 public:
-    /// Constructor. Loads model and performs required initialization
-    /// @param model_name name of model to load
-    /// @param cnnConfig - fine tuning configuration for CNN model
+    /// Constructor.
+    /// @param modelFileName name of model to load
     /// @param confidenceThreshold - threshold to eleminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param useAutoResize - if true, image will be resized by IE.
@@ -42,23 +43,20 @@ public:
     /// during postprocessing (only one of them should stay). The default value is 0.4
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
-    /// @param engine - pointer to InferenceEngine::Core instance to use.
-    /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
-    virtual void init(const std::string& model_name, const CnnConfig& cnnConfig,
-        float confidenceThreshold, bool useAutoResize, float boxIOUThreshold = 0.4,
-        const std::vector<std::string>& labels = std::vector<std::string>(),
-        InferenceEngine::Core* engine = nullptr);
+    ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
+        float boxIOUThreshold = 0.4, const std::vector<std::string>& labels = std::vector<std::string>());
 
-    virtual DetectionPipeline::DetectionResult getProcessedResult(bool shouldKeepOrder = true);
+    std::unique_ptr<ResultBase> postprocess(InferenceResult & infResult);
 
 protected:
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
+
     void parseYOLOV3Output(const std::string & output_name, const InferenceEngine::Blob::Ptr & blob,
         const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,
-        const unsigned long original_im_w, std::vector<DetectionPipeline::ObjectDesc>& objects);
+        const unsigned long original_im_w, std::vector<DetectedObject>& objects);
 
     static int calculateEntryIndex(int side, int lcoords, int lclasses, int location, int entry);
-    static double intersectionOverUnion(const ObjectDesc& o1, const ObjectDesc& o2);
+    static double intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2);
 
     std::map<std::string, Region> regions;
     double boxIOUThreshold;

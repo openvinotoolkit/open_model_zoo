@@ -14,21 +14,18 @@
 // limitations under the License.
 */
 
-#include "detection_pipeline_yolo.h"
+#include "detection_model_yolo.h"
 #include <samples/slog.hpp>
 
 using namespace InferenceEngine;
 
-void DetectionPipelineYolo::init(const std::string& model_name, const CnnConfig& cnnConfig,
-    float confidenceThreshold, bool useAutoResize, float boxIOUThreshold,
-    const std::vector<std::string>& labels,
-    InferenceEngine::Core* engine) {
-
-    this->boxIOUThreshold = boxIOUThreshold;
-    DetectionPipeline::init(model_name, cnnConfig, confidenceThreshold, useAutoResize, labels, engine);
+ModelYolo3::ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
+    float boxIOUThreshold, const std::vector<std::string>& labels)
+    :DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels),
+    boxIOUThreshold(boxIOUThreshold){
 }
 
-void DetectionPipelineYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input blobs -----------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
@@ -36,8 +33,9 @@ void DetectionPipelineYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cn
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
     }
+
     InputInfo::Ptr& input = inputInfo.begin()->second;
-    imageInputName = inputInfo.begin()->first;
+    inputsNames.push_back(inputInfo.begin()->first);
     input->setPrecision(Precision::U8);
     if (useAutoResize) {
         input->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
@@ -48,7 +46,6 @@ void DetectionPipelineYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cn
     }
 
     //--- Reading image input parameters
-    imageInputName = inputInfo.begin()->first;
     const TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
@@ -87,22 +84,18 @@ void DetectionPipelineYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cn
     }
 }
 
-DetectionPipeline::DetectionResult DetectionPipelineYolo::getProcessedResult(bool shouldKeepOrder)
+std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult)
 {
-    DetectionResult result;
-
-    auto infResult = PipelineBase::getInferenceResult(shouldKeepOrder);
-    if (infResult.IsEmpty()) {
-        return result;
-    }
-
-    static_cast<ResultBase&>(result) = static_cast<ResultBase&>(infResult);
-    std::vector<DetectionPipeline::ObjectDesc> objects;
+    DetectionResult* result = new DetectionResult;
+        
+    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    std::vector<DetectedObject> objects;
 
     // Parsing outputs
+    auto& srcImg = infResult.metaData.get()->asPtr<ImageMetaData>()->img;
     for (auto& output : infResult.outputsData) {
         this->parseYOLOV3Output(output.first, output.second, netInputHeight, netInputWidth,
-            infResult.extraData.rows, infResult.extraData.cols, objects);
+            srcImg.rows, srcImg.cols, objects);
     }
 
     //--- Checking IOU threshold conformance
@@ -118,17 +111,17 @@ DetectionPipeline::DetectionResult DetectionPipelineYolo::getProcessedResult(boo
             }
         }
         if (isGoodResult) {
-            result.objects.push_back(obj1);
+            result->objects.push_back(obj1);
         }
     }
-    return result;
+    return std::unique_ptr<ResultBase>(result);
 }
 
-void DetectionPipelineYolo::parseYOLOV3Output(const std::string& output_name,
+void ModelYolo3::parseYOLOV3Output(const std::string& output_name,
     const InferenceEngine::Blob::Ptr& blob, const unsigned long resized_im_h,
     const unsigned long resized_im_w, const unsigned long original_im_h,
     const unsigned long original_im_w,
-    std::vector<DetectionPipeline::ObjectDesc>& objects) {
+    std::vector<DetectedObject>& objects) {
 
     const int out_blob_h = static_cast<int>(blob->getTensorDesc().getDims()[2]);
     const int out_blob_w = static_cast<int>(blob->getTensorDesc().getDims()[3]);
@@ -167,7 +160,7 @@ void DetectionPipelineYolo::parseYOLOV3Output(const std::string& output_name,
                 double height = std::exp(output_blob[box_index + 3 * side_square]) * region.anchors[2 * n + 1] * original_im_h / resized_im_h;
                 double width = std::exp(output_blob[box_index + 2 * side_square]) * region.anchors[2 * n]* original_im_w / resized_im_w;
 
-                ObjectDesc obj;
+                DetectedObject obj;
                 obj.x = (float)(x-width/2);
                 obj.y = (float)(y-height/2);
                 obj.width = (float)width;
@@ -190,14 +183,14 @@ void DetectionPipelineYolo::parseYOLOV3Output(const std::string& output_name,
     }
 }
 
-int DetectionPipelineYolo::calculateEntryIndex(int side, int lcoords, int lclasses, int location, int entry) {
+int ModelYolo3::calculateEntryIndex(int side, int lcoords, int lclasses, int location, int entry) {
     int n = location / (side * side);
     int loc = location % (side * side);
     return n * side * side * (lcoords + lclasses + 1) + entry * side * side + loc;
 }
 
-double DetectionPipelineYolo::intersectionOverUnion(
-    const DetectionPipeline::ObjectDesc& o1, const DetectionPipeline::ObjectDesc& o2) {
+double ModelYolo3::intersectionOverUnion(
+    const DetectedObject& o1, const DetectedObject& o2) {
 
     double overlappingWidth = fmin(o1.x+o1.width, o2.x+o2.width) - fmax(o1.x, o2.x);
     double overlappingHeight = fmin(o1.y + o1.height, o2.y + o2.height) - fmax(o1.y, o2.y);
@@ -206,7 +199,7 @@ double DetectionPipelineYolo::intersectionOverUnion(
     return intersectionArea / unionArea;
 }
 
-DetectionPipelineYolo::Region::Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo)
+ModelYolo3::Region::Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo)
 {
     coords = regionYolo->get_num_coords();
     classes = regionYolo->get_num_classes();

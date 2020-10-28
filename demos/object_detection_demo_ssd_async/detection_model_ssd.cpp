@@ -14,21 +14,25 @@
 // limitations under the License.
 */
 
-#include "detection_pipeline_ssd.h"
+#include "detection_model_ssd.h"
 #include <samples/slog.hpp>
+#include <ngraph/ngraph.hpp>
 
 using namespace InferenceEngine;
-void DetectionPipelineSSD::init(const std::string& model_name, const CnnConfig& cnnConfig,
+ModelSSD::ModelSSD(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize,
-    const std::vector<std::string>& labels,
-    InferenceEngine::Core* engine) {
+    const std::vector<std::string>& labels)
+    :DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
+}
 
-    DetectionPipeline::init(model_name, cnnConfig, confidenceThreshold, useAutoResize, labels, engine);
+void ModelSSD::onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, RequestsPool* requestsPool)
+{
+    DetectionModel::onLoadCompleted(execNetwork, requestsPool);
 
     // --- Setting image info for every request in a pool. We can do it once and reuse this info at every submit -------
-    if (!imageInfoInputName.empty()) {
+    if (inputsNames.size()>1) {
         for (auto &request : requestsPool->getInferRequestsList()) {
-            auto blob = request->GetBlob(imageInfoInputName);
+            auto blob = request->GetBlob(inputsNames[1]);
             LockedMemory<void> blobMapped = as<MemoryBlob>(blob)->wmap();
             auto data = blobMapped.as<float *>();
             data[0] = static_cast<float>(netInputHeight);
@@ -38,23 +42,18 @@ void DetectionPipelineSSD::init(const std::string& model_name, const CnnConfig& 
     }
 }
 
-DetectionPipeline::DetectionResult DetectionPipelineSSD::getProcessedResult(bool shouldKeepOrder)
+std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult)
 {
-    auto infResult = PipelineBase::getInferenceResult(shouldKeepOrder);
-    if (infResult.IsEmpty()) {
-        return DetectionResult();
-    }
-
     LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
     const float *detections = outputMapped.as<float*>();
 
-    DetectionResult result;
-    static_cast<ResultBase&>(result) = static_cast<ResultBase&>(infResult);
+    DetectionResult* result = new DetectionResult;
+    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
-    auto sz = infResult.extraData.size();
+    auto sz = infResult.metaData.get()->asPtr<ImageMetaData>()->img.size();
 
     for (size_t i = 0; i < maxProposalCount; i++) {
-        ObjectDesc desc;
+        DetectedObject desc;
 
         float image_id = detections[i * objectSize + 0];
         if (image_id < 0) {
@@ -71,14 +70,14 @@ DetectionPipeline::DetectionResult DetectionPipelineSSD::getProcessedResult(bool
 
         if (desc.confidence > confidenceThreshold) {
             /** Filtering out objects with confidence < confidence_threshold probability **/
-            result.objects.push_back(desc);
+            result->objects.push_back(desc);
         }
     }
 
-    return result;
+    return std::unique_ptr<ResultBase>(result);
 }
 
-void DetectionPipelineSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork){
+void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork){
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input blobs -----------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
@@ -86,7 +85,13 @@ void DetectionPipelineSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cn
 
     for (const auto & inputInfoItem : inputInfo) {
         if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
-            imageInputName = inputInfoItem.first;
+            if (inputsNames.empty()) {
+                inputsNames.push_back(inputInfoItem.first);
+            }
+            else {
+                inputsNames[1] = inputInfoItem.first;
+            }
+
             inputInfoItem.second->setPrecision(Precision::U8);
             if (useAutoResize) {
                 inputInfoItem.second->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
@@ -100,7 +105,8 @@ void DetectionPipelineSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cn
             netInputWidth = getTensorWidth(inputDesc);
         }
         else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
-            imageInfoInputName = inputInfoItem.first;
+            inputsNames.resize(2);
+            inputsNames[2] = inputInfoItem.first;
             inputInfoItem.second->setPrecision(Precision::FP32);
         }
         else {
@@ -122,7 +128,7 @@ void DetectionPipelineSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cn
 
     int num_classes = 0;
 
-    if (auto ngraphFunction = cnnNetwork.getFunction()) {
+/*    if (auto ngraphFunction = cnnNetwork.getFunction()) {
         for (const auto op : ngraphFunction->get_ops()) {
             if (op->get_friendly_name() == outputsNames[0]) {
                 auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
@@ -138,7 +144,7 @@ void DetectionPipelineSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cn
     }
     else {
         throw std::logic_error("This demo requires IR version no older than 10");
-    }
+    }*/
     if (labels.size()) {
         if (static_cast<int>(labels.size()) == (num_classes - 1)) {  // if network assumes default "background" class, having no label
             labels.insert(labels.begin(), "fake");

@@ -19,43 +19,18 @@
 #pragma once
 #include <string>
 #include <deque>
-#include <ngraph/ngraph.hpp>
-#include <samples/ocv_common.hpp>
 #include <map>
 #include <condition_variable>
 #include "config_factory.h"
 #include "requests_pool.h"
+#include "results.h"
+#include "model_base.h"
 
 /// This is base class for asynchronous pipeline
 /// Derived classes should add functions for data submission and output processing
 class PipelineBase
 {
 public:
-    struct ResultBase {
-        int64_t frameId=-1;
-        cv::Mat extraData;
-
-        bool IsEmpty() { return frameId < 0; }
-    };
-
-    struct InferenceResult: public ResultBase {
-        std::map<std::string,InferenceEngine::MemoryBlob::Ptr> outputsData;
-        std::chrono::steady_clock::time_point startTime;
-
-        /// Returns pointer to first output blob
-        /// This function is a useful addition to direct access to outputs list as many models have only one output
-        /// @returns pointer to first output blob
-        InferenceEngine::MemoryBlob::Ptr getFirstOutputBlob() {
-            if (outputsData.empty())
-                throw std::out_of_range("Outputs map is empty.");
-            return outputsData.begin()->second;
-        }
-
-        /// Returns true if object contains no valid data
-        /// @returns true if object contains no valid data
-        bool IsEmpty() { return outputsData.empty(); }
-    };
-
     struct PerformanceInfo
     {
         int64_t framesCount = 0;
@@ -86,7 +61,12 @@ public:
     };
 
 public:
-    PipelineBase();
+    /// Loads model and performs required initialization
+    /// @param modelInstance pointer to model object. Object it points to should not be destroyed manually after passing pointer to this function.
+    /// @param cnnConfig - fine tuning configuration for CNN model
+    /// @param engine - pointer to InferenceEngine::Core instance to use.
+    /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
+    PipelineBase(ModelBase* modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core* engine = nullptr);
     virtual ~PipelineBase();
 
     /// Waits until either output data becomes available or pipeline allows to submit more input data.
@@ -114,19 +94,16 @@ public:
     /// Otherwise reqturns unique sequential frame ID for this particular request. Same frame ID will be written in the responce structure.
     virtual int64_t submitImage(cv::Mat img);
 
+    /// Gets available data from the queue 
+    /// @param shouldKeepOrder if true, function will treat results as ready only if next sequential result (frame) is
+    /// ready (so results can be extracted in the same order as they were submitted). Otherwise, function will return if any result is ready.
+    virtual std::unique_ptr<ResultBase> getResult(bool shouldKeepOrder=true);
+
     /// Gets available data from the queue and renders it to output frame
     /// This function should be overriden in inherited classes to provide default rendering of processed data
     /// @returns rendered frame, its size corresponds to the size of network output
-    virtual cv::Mat obtainAndRenderData() { return cv::Mat(); }
 
 protected:
-    /// Loads model and performs required initialization
-    /// @param model_name name of model to load
-    /// @param cnnConfig - fine tuning configuration for CNN model
-    /// @param engine - pointer to InferenceEngine::Core instance to use.
-    /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
-    virtual void init(const std::string& model_name, const CnnConfig& cnnConfig, InferenceEngine::Core* engine = nullptr);
-
     /// This function is called during intialization before loading model to device
     /// Inherited classes may override this function to prepare input/output blobs (get names, set precision, etc...)
     /// The value of outputName member variable is also may to be set here (however, it can be done in any other place).
@@ -135,10 +112,10 @@ protected:
 
     /// Submit request to network
     /// @param request - request to be submitted (caller function should obtain it using getIdleRequest)
-    /// @param extraData - additional source data. This is optional transparent data not used in inference process directly.
+    /// @param metaData - additional source data. This is optional transparent data not used in inference process directly.
     /// It is passed to inference result directly and can be used in postprocessing.
     /// @returns unique sequential frame ID for this particular request. Same frame ID will be written in the responce structure.
-    virtual int64_t submitRequest(InferenceEngine::InferRequest::Ptr request,cv::Mat extraData =cv::Mat());
+    virtual int64_t submitRequest(InferenceEngine::InferRequest::Ptr request,std::shared_ptr<MetaData> metaData);
 
     /// Returns processed result, if available
     /// @param shouldKeepOrder if true, function will return processed data sequentially,
@@ -161,15 +138,13 @@ protected:
     int64_t inputFrameId=0;
     int64_t outputFrameId=0;
 
-    std::string imageInputName;
-    std::vector<std::string> outputsNames;
-    bool useInputAutoResize=true;
-
     std::exception_ptr callbackException = nullptr;
 
     /// Callback firing after request is processed by CNN
     /// NOTE: this callback is executed in separate inference engine's thread
     /// So it should not block execution for long time and should use data synchroniztion
     virtual void onProcessingCompleted(InferenceEngine::InferRequest::Ptr request) {}
+
+    std::unique_ptr<ModelBase> model;
 };
 
