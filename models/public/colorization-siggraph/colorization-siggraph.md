@@ -26,7 +26,7 @@ The accuracy metrics calculated on ImageNet
 validation dataset using [VGG16](https://arxiv.org/abs/1409.1556) caffe
 model and colorization as preprocessing.
 
-For preprocessing `rgb -> gray -> coloriaztion` recieved values:
+For preprocessing `rgb -> gray -> colorization` recieved values:
 
 | Metric         | Value with preprocessing   | Value without preprocessing |
 |----------------|----------------------------|-----------------------------|
