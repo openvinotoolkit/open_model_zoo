@@ -59,10 +59,10 @@ def parse_args():
                         help='Path to PyTorch model\'s source code')
     parser.add_argument('--import-module', type=str, required=True,
                         help='Name of module, which contains model\'s constructor')
-    parser.add_argument('--input-names', type=str, metavar='L[,L...]',
-                        help='Space separated names of the input layers')
-    parser.add_argument('--output-names', type=str, metavar='L[,L...]',
-                        help='Space separated names of the output layers')
+    parser.add_argument('--input-names', type=str, metavar='L[,L...]', required=True,
+                        help='Comma-separated names of the input layers')
+    parser.add_argument('--output-names', type=str, metavar='L[,L...]', required=True,
+                        help='Comma-separated names of the output layers')
     parser.add_argument('--model-param', type=model_parameter, default=[], action='append',
                         help='Pair "name"="value" of model constructor parameter')
     return parser.parse_args()
