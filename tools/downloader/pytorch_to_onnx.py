@@ -52,7 +52,7 @@ def parse_args():
     parser.add_argument('--weights', type=str,
                         help='Path to the weights in PyTorch\'s format')
     parser.add_argument('--input-shapes', metavar='SHAPE[,SHAPE...]', type=shapes_arg, required=True,
-                        help='Space separated shapes of the input blobs. Example: [1,1,256,256],[1,3,256,256],...')
+                        help='Comma-separated shapes of the input blobs. Example: [1,1,256,256],[1,3,256,256],...')
     parser.add_argument('--output-file', type=Path, required=True,
                         help='Path to the output ONNX model')
     parser.add_argument('--model-path', type=str, action='append', dest='model_paths',
