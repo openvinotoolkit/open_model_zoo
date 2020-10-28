@@ -63,15 +63,15 @@ class OneHotEncoding(Preprocessor):
         def process_data(data, classes, axis, value, base):
             data = data.astype(np.int32)
             shapes = list(data.shape)
-            ndim = data.ndim
+            ndim = len(shapes)
             shapes[axis] = classes
             base_arr = np.full(shapes, base, np.int)
             expanded_index = []
             for i in range(ndim):
                 arr = (data if axis == i
-                       else np.arange(base_arr.shape[i]).reshape([-1 if i == j else 1 for j in range(ndim)]))
+                       else np.arange(shapes[i]).reshape([shapes[i] if i == j else 1 for j in range(ndim)]))
                 expanded_index.append(arr)
-            base_arr[expanded_index] = value
+            base_arr[tuple(expanded_index)] = value
             return base_arr
 
         image.data = (process_data(image.data, self.classes, self.axis, self.value, self.base)
