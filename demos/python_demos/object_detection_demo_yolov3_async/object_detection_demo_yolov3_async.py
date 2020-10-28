@@ -90,8 +90,8 @@ class YoloParams:
         self.classes = int(param.get('classes', 80))
         self.side = side
         self.anchors = param.get(
-            'anchors', 
-            [10.0, 13.0, 16.0, 30.0, 33.0, 23.0, 30.0, 61.0, 62.0, 45.0, 59.0, 119.0, 116.0, 90.0, 156.0, 
+            'anchors',
+            [10.0, 13.0, 16.0, 30.0, 33.0, 23.0, 30.0, 61.0, 62.0, 45.0, 59.0, 119.0, 116.0, 90.0, 156.0,
             198.0, 373.0, 326.0]
             )
 
@@ -236,7 +236,7 @@ def get_output_info(net):
         shape = list(get_parent(node).shape)
         yolo_params = YoloParams(node._get_attributes(), shape[2])
         output_info[layer_name] = (shape, yolo_params)
-    
+
     return output_info
 
 def get_objects(output, output_info, new_frame_height_width, source_height_width, prob_threshold, is_proportional):
