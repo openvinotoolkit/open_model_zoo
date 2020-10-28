@@ -178,7 +178,7 @@ class TestDLSDKLauncherInfer:
 class TestDLSDKLauncherAffinity:
     @pytest.mark.usefixtures('mock_affinity_map_exists')
     def test_dlsdk_launcher_valid_affinity_map(self, mocker, models_dir):
-        affinity_map = {'conv1': 'GPU'}
+        affinity_map = {'conv1': 'GPU', 'conv1/Dims294/copy_const': 'GPU'}
 
         mocker.patch(
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
@@ -197,7 +197,7 @@ class TestDLSDKLauncherAffinity:
                 if node.get_friendly_name() != 'conv1':
                     continue
                 assert node.get_friendly_name() in affinity_map
-                assert node.get_runtime_info()['affinity'] == affinity_map[node.get_friendly_name()]
+                assert node.get_rt_info()['affinity'] == affinity_map[node.get_friendly_name()]
 
     @pytest.mark.usefixtures('mock_file_exists')
     def test_dlsdk_launcher_affinity_map_invalid_device(self, mocker, models_dir):
