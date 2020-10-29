@@ -158,15 +158,20 @@ def main():
     log.info("Loading model to the {}".format(args.device))
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
 
-    questions = iter(args.questions) if args.questions else None
+    if args.questions:
+        def questions():
+            for question in args.questions:
+                log.info("Question: {}".format(question))
+                yield question
+    else:
+        def questions():
+            while True:
+                yield input('Type question (empty string to exit):')
+
     # loop on user's or prepared questions
-    while True:
-        question = input('Type question (empty string to exit):') if not questions else next(questions, None)
+    for question in questions():
         if not question or len(question.strip()) == 0:
             break
-        # Print prepared question
-        if questions:
-            log.info("Question: {}".format(question))
 
         q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
 

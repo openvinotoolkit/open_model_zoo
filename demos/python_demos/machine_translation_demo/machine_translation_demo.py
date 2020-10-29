@@ -208,14 +208,22 @@ def main(args):
         tokenizer_tgt=args.tokenizer_tgt,
         output_name=args.output_name
     )
-    inputs = iter(args.input) if args.input else None
-    logger.info("enter empty string to exit.")
-    while True:
-        sentence = next(inputs, None) if inputs else input("> ")
+
+    if args.input:
+        def sentences():
+            for sentence in args.inputs:
+                print("> {}".format(sentence))
+                yield sentence
+    else:
+        def sentences():
+            while True:
+                yield input("> ")
+
+    # loop on user's or prepared questions
+    for sentence in sentences():
         if not sentence or len(sentence.strip()) == 0:
             break
-        if args.input:
-            print("> {}".format(sentence))
+
         try:
             start = time.perf_counter()
             translation = model(sentence)
