@@ -17,8 +17,8 @@ description: >-
 task_type: text_to_speech
 files:
   - name: wavernn_upsampler.onnx
-    size: 1604496
-    sha256: cc428b232a9897dcfdd325afe008e10383f48deb8043e9a487586c60804b0bdf
+    size: 1606601
+    sha256: ec722a8556447af24c9005ea1cb359e4a50e0cda8d7a013303d51add12ea043a
     source: https://download.01.org/opencv/public_models/102020/wavernn/wavernn-upsampler.zip
 model_optimizer_args:
   - --input_shape=[1, 793, 80]

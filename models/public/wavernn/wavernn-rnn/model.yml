@@ -17,8 +17,8 @@ description: >-
 task_type: text_to_speech
 files:
   - name: wavernn_rnn.onnx
-    size: 15333927
-    sha256: 84c78bdd9d10a3f593a48a79aa2a77f99aac8d8228e920ad1a9a3efcbf16f351
+    size: 15334285
+    sha256: dfe90b43008b5e50ef8a948716823204999978971c031a9f85a372fca2fb88cb
     source: https://download.01.org/opencv/public_models/102020/wavernn/wavernn-rnn.zip
 model_optimizer_args:
   - --input=m_t,a1_t,a2_t,a3_t,a4_t,h1.1,h2.1,x
