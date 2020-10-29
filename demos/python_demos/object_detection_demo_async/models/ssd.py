@@ -1,12 +1,10 @@
-from collections import namedtuple
-
+from recordtype import recordtype
 import numpy as np
+import cv2
 
 from .model import Model
 
-
-Detection = namedtuple("Detection", "xmin ymin xmax ymax score id")
-
+Detection = recordtype('Detection', 'xmin ymin xmax ymax score id') # namedtuple are immutable, so I change it to recordtype
 
 class SSD(Model):
     class SingleOutputParser:
@@ -47,11 +45,11 @@ class SSD(Model):
     class BoxesLabelsParser:
         def __init__(self, input_size, all_outputs, labels_layer='labels', default_label=1):
             try:
-                self.labels_layer = find_layer_by_name(labels_layer, all_outputs)
-                log.info('Use output "{}" as the one containing labels of detected objects.'
+                self.labels_layer = find_layer_by_name(labels_layer, all_outputs) # ?
+                self.logger.info('Use output "{}" as the one containing labels of detected objects.'
                          .format(self.labels_layer))
             except ValueError:
-                log.warning('Suitable layer for "{}" output is not found. '
+                self.logger.warning('Suitable layer for "{}" output is not found. '
                             'Treating detector as class agnostic with output label {}'
                             .format(labels_layer, default_label))
                 self.labels_layer = None
@@ -59,7 +57,7 @@ class SSD(Model):
 
             self.input_size = input_size
             self.bboxes_layer = self.find_layer_bboxes_output(all_outputs)
-            log.info('Use auto-detected output "{}" as the one containing detected bounding boxes.'
+            self.logger.info('Use auto-detected output "{}" as the one containing detected bounding boxes.'
                      .format(self.bboxes_layer))
 
         @staticmethod

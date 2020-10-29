@@ -22,7 +22,6 @@ import os.path as osp
 import random
 import sys
 from argparse import ArgumentParser, SUPPRESS
-from collections import deque, namedtuple
 from itertools import cycle, islice
 from enum import Enum
 from time import perf_counter
@@ -47,10 +46,10 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=str)
-    args.add_argument('--type', help='Required. Specify model type',
-                      type=str, choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
-    args.add_argument('-i', '--input', help='Required. Path to an image, video file or a numeric camera ID.',
-                      required=True, type=str)
+    args.add_argument('--type', help='Required. Specify model type', type=str, required=True,
+                      choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina')) # req but not required=True
+    args.add_argument('-i', '--input', help='Required. Path to an image, folder with images, video file or a numeric camera ID.',
+                      required=True, type=str) # folder with images is acceptable or not?
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
@@ -70,8 +69,10 @@ def build_argparser():
     args.add_argument('-nthreads', '--num_threads',
                       help='Optional. Number of threads to use for inference on CPU (including HETERO cases)',
                       default=None, type=int)
-    args.add_argument('-loop_input', '--loop_input', help='Optional. Number of times to repeat the input.',
+    args.add_argument('-loop', '--loop', help='Optional. Number of times to repeat the input.',
                       type=int, default=0)
+    args.add_argument('-delay', '--delay', help='Optional. Delay in ms between frames.',
+                      type=int, default=1)
     args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
@@ -137,7 +138,7 @@ class ModeInfo:
         self.latency_sum = 0
 
 
-def get_model(model_name, ie, args):
+def get_model(model_name, labels_map, ie, args):
     if model_name == 'ssd':
         return SSD(ie, args.model, log, labels_map=labels_map, keep_aspect_ratio_resize=args.keep_aspect_ratio)
     elif model_name == 'yolo':
@@ -153,7 +154,6 @@ def get_model(model_name, ie, args):
 def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
     cv2.putText(frame, message, position, font_face, font_scale, (255, 255, 255), thickness + 1)  # white border
     cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
-
 
 def get_plugin_configs(device, num_streams, num_threads):
     config_user_specified = {}
@@ -197,20 +197,14 @@ def draw_detections(frame, detections, palette, labels, threshold):
             class_id = int(detection.id)
             color = palette[class_id]
             det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
-
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
             cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
                         (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
-            # for i in range(len(detection.landmarks[0])):
-            #     x = detection.landmarks[0][i]
-            #     y = detection.landmarks[1][i]
-            #     cv2.circle(frame, (x, y), 2, (0, 255, 255), 2)
-
     return frame
 
 
-def print_raw_results(detections, labels, threshold):
+def print_raw_results(size, detections, labels, threshold):
     log.info(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
     for detection in detections:
         if detection.score > threshold:
@@ -220,7 +214,7 @@ def print_raw_results(detections, labels, threshold):
             ymax = min(int(detection.ymax), size[0])
             class_id = int(detection.id)
             det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
-            log.info('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '.format(det_label, obj.score, xmin, ymin, xmax, ymax))
+            log.info('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '.format(det_label, detection.score, xmin, ymin, xmax, ymax))
 
 
 def main():
@@ -238,7 +232,7 @@ def main():
 
     log.info('Loading network...')
 
-    model = get_model(args.type, ie, args)
+    model = get_model(args.type, labels_map, ie, args)
 
     if args.sync:
         mode = Modes.SYNC
@@ -264,12 +258,20 @@ def main():
 
     log.info('Using {} mode'.format(mode.name))
 
+
     try:
         input_stream = int(args.input)
     except ValueError:
         input_stream = args.input
-    cap = cv2.VideoCapture(input_stream)
-    wait_key_time = 1
+    try:
+        cap = cv2.VideoCapture(input_stream)
+        if not cap.isOpened():
+            raise Exception('Can\'t open camera')
+    except Exception as e:
+        log.error(e)
+        sys.exit(1)
+
+    wait_key_time = args.delay if args.delay > 0 else 1
 
     next_frame_id = 0
     next_frame_id_to_show = 0
@@ -285,11 +287,11 @@ def main():
                                     round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
     if args.sync:
-        while cap.isOpened:
+        while cap.isOpened():
             start_time = perf_counter()
             ret, frame = cap.read()
             if not ret:
-                if input_repeats < args.loop_input or args.loop_input < 0:
+                if input_repeats < args.loop or args.loop < 0:
                     cap.open(input_stream)
                     input_repeats += 1
                 else:
@@ -299,7 +301,7 @@ def main():
             detections = detector(frame)
 
             if len(detections) and args.raw_output_message:
-                print_raw_results(detections, labels_map, args.prob_threshold)
+                print_raw_results(frame.shape[:2], detections, labels_map, args.prob_threshold)
 
             origin_im_size = frame.shape[:-1]
             presenter.drawGraphs(frame)
@@ -331,11 +333,11 @@ def main():
                 if key in {ord('q'), ord('Q'), ESC_KEY}:
                     break
     else:
-        while cap.isOpened:
+        while cap.isOpened():
             start_time = perf_counter()
             ret, frame = cap.read()
             if not ret:
-                if input_repeats < args.loop_input or args.loop_input < 0:
+                if input_repeats < args.loop or args.loop < 0:
                     cap.open(input_stream)
                     input_repeats += 1
                 else:
@@ -349,12 +351,11 @@ def main():
             if results:
                 frame_meta, raw_outputs = results
                 objects = model.postprocess(raw_outputs, frame_meta)
-
                 frame = frame_meta['frame']
                 start_time = frame_meta['start_time']
 
                 if len(objects) and args.raw_output_message:
-                    print_raw_results(objects, labels_map, args.prob_threshold)
+                    print_raw_results(frame.shape[:2], objects, labels_map, args.prob_threshold)
 
                 origin_im_size = frame.shape[:-1]
                 presenter.drawGraphs(frame)
