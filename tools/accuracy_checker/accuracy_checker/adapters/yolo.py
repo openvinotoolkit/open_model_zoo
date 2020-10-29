@@ -397,7 +397,7 @@ class YoloV3Adapter(Adapter):
                         cells = self.cells[layer_id]
                     except IndexError:
                         raise ConfigError('Number of output layers ({}) is more than detection grid size ({}). '
-                                          'Check "cells" option.'.format(len(outputs), len(self.cells)))
+                                          'Check "cells" option.'.format(len(prediction), len(self.cells)))
                     if self.output_format == 'BHW':
                         new_shape = (num * box_size, cells, cells)
                     else:
