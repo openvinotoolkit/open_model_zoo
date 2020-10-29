@@ -1,0 +1,29 @@
+models:
+  - name: anti-spoofing-mn3
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+        tags:
+          - FP32
+        model: anti-spoof-mn3.xml
+        weights: anti-spoof-mn3.bin
+        device: CPU
+        inputs:
+          - name: actual_input_1
+            type: INPUT
+            shape: 1,3,128,128
+
+    datasets:
+      - name: antispoof_test_data
+        annotation: antispoofing_recognition.pickle
+        data_source: antispoof_test_data
+        preprocessing:
+
+          - type: resize
+            size: 128
+            interpolation: CUBIC
+
+        metrics:
+          - name: acer
+            type: acer_score

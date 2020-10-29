@@ -85,6 +85,7 @@ from .features_regression import FeaturesRegressionConverter
 from .nyu_depth import NYUDepthV2Converter
 from .dna_seq import DNASequenceDatasetConverter
 from .place_recognition import PlaceRecognitionDatasetConverter
+from .antispoofing import AntispoofingDatasetConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -158,5 +159,6 @@ __all__ = [
     'FeaturesRegressionConverter',
     'Im2latexDatasetConverter',
     'DNASequenceDatasetConverter',
-    'PlaceRecognitionDatasetConverter'
+    'PlaceRecognitionDatasetConverter',
+    'AntispoofingDatasetConverter'
 ]
