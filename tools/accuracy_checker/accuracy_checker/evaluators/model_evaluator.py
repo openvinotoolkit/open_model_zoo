@@ -301,7 +301,7 @@ class ModelEvaluator(BaseEvaluator):
         def get_data(image):
             if is_path(image):
                 return [self.reader(identifier=image)]
-            return [DataRepresentation(image, 'image')]
+            return [DataRepresentation(image, identifier='image')]
         input_data = get_data(image)
         batch_input = self.preprocessor.process(input_data)
         _, batch_meta = extract_image_representations(batch_input)
