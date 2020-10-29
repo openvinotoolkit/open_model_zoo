@@ -79,7 +79,7 @@ Final mask prediction can be obtained by matrix multiplication of `proto` and tr
 
 ### Converted Model
 
-Converted model outputs are the same like in original model.
+Converted model outputs are the same as in the original model.
 
 ## Legal Information
 
