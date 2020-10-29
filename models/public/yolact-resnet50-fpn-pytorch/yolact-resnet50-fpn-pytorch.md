@@ -14,7 +14,7 @@ For details, see the [repository](https://github.com/dbolya/yolact).
 | Type                            | Instance segmentation                     |
 | GFlops                          | 118.575                                   |
 | MParams                         | 36.829                                    |
-| Source framework                | Pytorch\*                                 |
+| Source framework                | PyTorch\*                                 |
 
 ## Accuracy
 
