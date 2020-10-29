@@ -107,7 +107,7 @@ class BeamSearchDecoder(Adapter):
         times, symbols = probabilities.shape
         # Initialize the beam with the empty sequence, a probability of 1 for ending in blank
         # and zero for ending in non-blank (in log space).
-        beam = [(tuple(), (0.0, -np.inf))]
+        beam = [((), (0.0, -np.inf))]
 
         for time in range(times):
             # A default dictionary to store the next step candidates.

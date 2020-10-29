@@ -77,7 +77,7 @@ def mask_rcnn_postprocess(
     scores = scores[detections_filter]
     classes = classes[detections_filter]
     boxes = boxes[detections_filter]
-    masks = list(segm for segm, is_valid in zip(masks, detections_filter) if is_valid)
+    masks = [segm for segm, is_valid in zip(masks, detections_filter) if is_valid]
     return scores, classes, boxes, masks
 
 
