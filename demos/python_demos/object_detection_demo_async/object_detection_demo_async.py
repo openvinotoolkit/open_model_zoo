@@ -47,9 +47,9 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=str)
     args.add_argument('--type', help='Required. Specify model type', type=str, required=True,
-                      choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina')) # req but not required=True
+                      choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
     args.add_argument('-i', '--input', help='Required. Path to an image, folder with images, video file or a numeric camera ID.',
-                      required=True, type=str) # folder with images is acceptable or not?
+                      required=True, type=str)
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
@@ -266,7 +266,7 @@ def main():
     try:
         cap = cv2.VideoCapture(input_stream)
         if not cap.isOpened():
-            raise Exception('Can\'t open camera')
+            raise Exception('OpenCV: Failed to open capture: ' + str(input_stream))
     except Exception as e:
         log.error(e)
         sys.exit(1)
