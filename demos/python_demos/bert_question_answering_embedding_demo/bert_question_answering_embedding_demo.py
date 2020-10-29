@@ -253,16 +253,20 @@ def main():
             c_s, c_e = c_s -shift_left, c_e-shift_left
             assert c_s >= 0, "start can be left of 0 only with window less than len but in this case we can not be here"
 
-    questions = iter(args.questions) if args.questions else None
-    #loop to ask many questions
-    while True:
-        question = input('Type question (empty string to exit):') if not questions else next(questions, None)
+    if args.questions:
+        def questions():
+            for question in args.questions:
+                log.info("Question: {}".format(question))
+                yield question
+    else:
+        def questions():
+            while True:
+                yield input('Type question (empty string to exit):')
+
+    # loop on user's or prepared questions
+    for question in questions():
         if not question or len(question.strip()) == 0:
             break
-        # Print prepared question
-        if questions:
-            log.info("Question: {}".format(question))
-
 
         log.info("---Stage 1---Calc question embedding and compare with {} context embeddings".format(len(contexts_all)))
         q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
