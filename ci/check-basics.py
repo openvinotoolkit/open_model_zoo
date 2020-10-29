@@ -29,6 +29,8 @@ from pathlib import Path
 
 OMZ_ROOT = Path(__file__).resolve().parents[1]
 
+RE_SHEBANG_LINE = re.compile(r'\#! \s* (\S+) (?: \s+ (\S+))? \s*', re.VERBOSE)
+
 def main():
     all_passed = True
 
@@ -98,8 +100,18 @@ def main():
         if is_executable and not has_shebang:
             complain(f"{path}: is executable, but doesn't have a shebang line")
 
-        if has_shebang and not is_executable:
-            complain(f"{path}: has a shebang line, but isn't executable")
+        if has_shebang:
+            if not is_executable:
+                complain(f"{path}: has a shebang line, but isn't executable")
+
+            shebang_program, shebang_args = \
+                RE_SHEBANG_LINE.fullmatch(lines[0].rstrip('\n')).groups()
+
+            # Python 2 is EOL and OpenVINO doesn't support it anymore. If someone
+            # uses `#!/usr/bin/python` or something similar, it's likely a mistake.
+            if shebang_program.endswith('/python') or (
+                    shebang_program.endswith('/env') and shebang_args == 'python'):
+                complain(f"{path}:1: use 'python3', not 'python'")
 
     if subprocess.run([sys.executable, '-m', 'yamllint', '-s', '.'], cwd=OMZ_ROOT).returncode != 0:
         all_passed = False
