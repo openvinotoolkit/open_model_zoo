@@ -5,6 +5,7 @@
 This is a lung cancer screening composite model which segments the lung region in stage 1. In stage2, model detects the presence of nodules in patches extracted from the previously segmented lung region.
 
 Reference: [Paper](https://arxiv.org/abs/2006.09308)
+           [Dataset](https://luna16.grand-challenge.org/Data/)
 
 ## Multi-Stage model specification
 
