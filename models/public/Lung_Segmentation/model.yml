@@ -1,0 +1,14 @@
+- description: 'Convolutional Neural Network(CNN) for segmenting lung area. '
+- task_type: semantic_segmentation
+- files:
+  - name: lung_segmentation_unet.onnx
+    sha256: 0f32acd114bce3acd5e07427319359a57a8da577faaaef039faa20e3305aac30
+    size: 134940
+    source:
+    - $type: google_drive
+      id: 1NF-2TKrHCi8HpSob_jNi9t4GZpfc21Sz
+- model_optimizer_args:
+  - --input_shape=[1,1,512,512]
+  - --input_model=$dl_dir/lung_segmentation_unet.onnx
+- framework: onnx
+- license: apache2
