@@ -340,6 +340,201 @@ class RetinaNetAdapter(Adapter):
         return pred_boxes
 
 
+NMS_TILE_SIZE = 512
+
+
+def _self_suppression(iou, _, iou_sum):
+    batch_size = np.shape(iou)[0]
+    can_suppress_others = np.reshape(np.max(iou, 1) <= 0.5, [batch_size, -1, 1])
+    iou_suppressed = np.reshape(np.max(can_suppress_others * iou, 1) <= 0.5,[batch_size, -1, 1]) * iou
+    iou_sum_new = np.sum(iou_suppressed, [1, 2])
+    return [
+        iou_suppressed,
+        np.any(iou_sum - iou_sum_new > 0.5), iou_sum_new
+    ]
+
+
+def bbox_overlap(boxes, gt_boxes):
+    """Calculates the overlap between proposal and ground truth boxes.
+
+    Some `gt_boxes` may have been padded.  The returned `iou` tensor for these
+    boxes will be -1.
+
+    Args:
+      boxes: a tensor with a shape of [batch_size, N, 4]. N is the number of
+        proposals before groundtruth assignment (e.g., rpn_post_nms_topn). The
+        last dimension is the pixel coordinates in [ymin, xmin, ymax, xmax] form.
+      gt_boxes: a tensor with a shape of [batch_size, MAX_NUM_INSTANCES, 4]. This
+        tensor might have paddings with a negative value.
+
+    Returns:
+      iou: a tensor with as a shape of [batch_size, N, MAX_NUM_INSTANCES].
+  """
+    bb_y_min, bb_x_min, bb_y_max, bb_x_max = np.split(
+        value=boxes, num_or_size_splits=4, axis=2)
+    gt_y_min, gt_x_min, gt_y_max, gt_x_max = np.split(
+        value=gt_boxes, num_or_size_splits=4, axis=2)
+
+    # Calculates the intersection area.
+    i_xmin = np.maximum(bb_x_min, np.transpose(gt_x_min, [0, 2, 1]))
+    i_xmax = np.minimum(bb_x_max, np.transpose(gt_x_max, [0, 2, 1]))
+    i_ymin = np.maximum(bb_y_min, np.transpose(gt_y_min, [0, 2, 1]))
+    i_ymax = np.minimum(bb_y_max, np.transpose(gt_y_max, [0, 2, 1]))
+    i_area = np.maximum((i_xmax - i_xmin), 0) * np.maximum(
+        (i_ymax - i_ymin), 0)
+
+    # Calculates the union area.
+    bb_area = (bb_y_max - bb_y_min) * (bb_x_max - bb_x_min)
+    gt_area = (gt_y_max - gt_y_min) * (gt_x_max - gt_x_min)
+    # Adds a small epsilon to avoid divide-by-zero.
+    u_area = bb_area + np.transpose(gt_area, [0, 2, 1]) - i_area + 1e-8
+
+    # Calculates IoU.
+    iou = i_area / u_area
+
+    # Fills -1 for IoU entries between the padded ground truth boxes.
+    gt_invalid_mask = np.max(gt_boxes, axis=-1, keepdims=True) < 0.0
+    padding_mask = np.logical_or(
+        np.zeros_like(bb_x_min, dtype=bool),
+        np.transpose(gt_invalid_mask, [0, 2, 1]))
+    iou = np.where(padding_mask, -np.ones_like(iou), iou)
+
+    return iou
+
+
+
+def _cross_suppression(boxes, box_slice, iou_threshold, inner_idx):
+    new_slice = boxes[:, inner_idx * NMS_TILE_SIZE:(inner_idx+1) * NMS_TILE_SIZE, :]
+    iou = bbox_overlap(new_slice, box_slice)
+    ret_slice = np.expand_dims(np.all(iou < iou_threshold, [1]), 2) * box_slice
+    return boxes, ret_slice, iou_threshold, inner_idx + 1
+
+
+def _suppression_loop_body(boxes, iou_threshold, output_size, idx):
+    """Process boxes in the range [idx*NMS_TILE_SIZE, (idx+1)*NMS_TILE_SIZE).
+  Args:
+    boxes: a tensor with a shape of [batch_size, anchors, 4].
+    iou_threshold: a float representing the threshold for deciding whether boxes
+      overlap too much with respect to IOU.
+    output_size: an int32 tensor of size [batch_size]. Representing the number
+      of selected boxes for each batch.
+    idx: an integer scalar representing induction variable.
+  Returns:
+    boxes: updated boxes.
+    iou_threshold: pass down iou_threshold to the next iteration.
+    output_size: the updated output_size.
+    idx: the updated induction variable.
+  """
+    num_tiles = np.shape(boxes)[1] // NMS_TILE_SIZE
+    batch_size = np.shape(boxes)[0]
+
+    # Iterates over tiles that can possibly suppress the current tile.
+    box_slice = boxes[:, idx * NMS_TILE_SIZE:(idx+1) * NMS_TILE_SIZE, :]
+    inner_idx = 0
+    while inner_idx < idx:
+       boxes, box_slice, iou_theshold, inner_idx = _cross_suppression(boxes, box_slice, iou_threshold, inner_idx)
+
+    # Iterates over the current tile to compute self-suppression.
+    iou = bbox_overlap(box_slice, box_slice)
+    mask = np.expand_dims(
+        np.reshape(np.arange(NMS_TILE_SIZE), [1, -1]) > np.reshape(np.arange(NMS_TILE_SIZE), [-1, 1]), 0)
+    iou *= np.logical_and(mask, iou >= iou_threshold)
+    loop_condition = True
+    _iou_sum = np.sum(iou, (1, 2))
+    while loop_condition:
+        iou, _loop_condition, _iou_sum = _self_suppression(iou, loop_condition, _iou_sum)
+    suppressed_box = np.sum(iou, 1) > 0
+    box_slice *= np.expand_dims(1.0 - suppressed_box, box_slice, 2)
+
+    # Uses box_slice to update the input boxes.
+    mask = np.reshape(np.equal(np.arange(num_tiles), idx), [1, -1, 1, 1])
+    boxes = np.tile(np.expand_dims(box_slice, 1), [1, num_tiles, 1, 1]) * mask + np.reshape(
+        boxes, [batch_size, num_tiles, NMS_TILE_SIZE, 4]) * (1 - mask)
+    boxes = np.reshape(boxes, [batch_size, -1, 4])
+
+    # Updates output_size.
+    output_size += np.sum(np.any(box_slice > 0, [2]), 1)
+    return boxes, iou_threshold, output_size, idx + 1
+
+
+def sorted_non_max_suppression_padded(scores,
+                                      boxes,
+                                      max_output_size,
+                                      iou_threshold):
+    """A wrapper that handles non-maximum suppression.
+  Assumption:
+    * The boxes are sorted by scores unless the box is a dot (all coordinates
+      are zero).
+    * Boxes with higher scores can be used to suppress boxes with lower scores.
+  The overal design of the algorithm is to handle boxes tile-by-tile:
+  boxes = boxes.pad_to_multiply_of(tile_size)
+  num_tiles = len(boxes) // tile_size
+  output_boxes = []
+  for i in range(num_tiles):
+    box_tile = boxes[i*tile_size : (i+1)*tile_size]
+    for j in range(i - 1):
+      suppressing_tile = boxes[j*tile_size : (j+1)*tile_size]
+      iou = bbox_overlap(box_tile, suppressing_tile)
+      # if the box is suppressed in iou, clear it to a dot
+      box_tile *= _update_boxes(iou)
+    # Iteratively handle the diagnal tile.
+    iou = _box_overlap(box_tile, box_tile)
+    iou_changed = True
+    while iou_changed:
+      # boxes that are not suppressed by anything else
+      suppressing_boxes = _get_suppressing_boxes(iou)
+      # boxes that are suppressed by suppressing_boxes
+      suppressed_boxes = _get_suppressed_boxes(iou, suppressing_boxes)
+      # clear iou to 0 for boxes that are suppressed, as they cannot be used
+      # to suppress other boxes any more
+      new_iou = _clear_iou(iou, suppressed_boxes)
+      iou_changed = (new_iou != iou)
+      iou = new_iou
+    # remaining boxes that can still suppress others, are selected boxes.
+    output_boxes.append(_get_suppressing_boxes(iou))
+    if len(output_boxes) >= max_output_size:
+      break
+  Args:
+    scores: a tensor with a shape of [batch_size, anchors].
+    boxes: a tensor with a shape of [batch_size, anchors, 4].
+    max_output_size: a scalar integer `Tensor` representing the maximum number
+      of boxes to be selected by non max suppression.
+    iou_threshold: a float representing the threshold for deciding whether boxes
+      overlap too much with respect to IOU.
+  Returns:
+    nms_scores: a tensor with a shape of [batch_size, anchors]. It has same
+      dtype as input scores.
+    nms_proposals: a tensor with a shape of [batch_size, anchors, 4]. It has
+      same dtype as input boxes.
+  """
+    batch_size = np.shape(boxes)[0]
+    num_boxes = np.shape(boxes)[1]
+    pad = int(np.ceil(num_boxes / NMS_TILE_SIZE) * NMS_TILE_SIZE - num_boxes)
+    boxes = np.pad(boxes, [[0, 0], [0, pad], [0, 0]])
+    scores = np.pad(scores, [[0, 0], [0, pad]], constant_values=-1)
+    num_boxes += pad
+
+    def _loop_cond(output_size, idx):
+        return np.logical_and(np.min(output_size) < max_output_size, idx < num_boxes // NMS_TILE_SIZE)
+
+    output_size = np.zeros([batch_size], int)
+    idx = 0
+    while _loop_cond(output_size, idx):
+        boxes, iou_threshold, output_size, idx = _suppression_loop_body(boxes, iou_threshold, output_size, idx)
+
+    idx = num_boxes - np.sort(np.any(boxes > 0, axis=2) * np.expand_dims(np.arange(num_boxes, 0, -1), 0))[::-1][:max_output_size][0]
+    idx = np.minimum(idx, num_boxes - 1)
+    idx = np.reshape(
+        idx + np.reshape(np.arange(batch_size) * num_boxes, [-1, 1]), [-1])
+    boxes = np.reshape(np.reshape(boxes, [-1, 4])[idx], [batch_size, max_output_size, 4])
+    boxes = boxes * np.reshape(np.arange(max_output_size), [1, -1, 1]) < np.reshape(
+            output_size, [-1, 1, 1])
+    scores = np.reshape(np.reshape(scores, [-1, 1])[idx], [batch_size, max_output_size])
+    scores = scores * np.reshape(np.arange(max_output_size), [1, -1]) < np.reshape(
+            output_size, [-1, 1])
+    return scores, boxes
+
+
 class RetinaNetTF2(Adapter):
     __provider__ = 'retinanet_tf2'
 
@@ -410,6 +605,7 @@ class RetinaNetTF2(Adapter):
                                                     [feat_size_y, feat_size_x, -1])
                 count += steps
             return unpacked_labels
+
         return unpack_labels(np.concatenate(boxes_all, axis=0))
 
     def prepare_boxes_and_classes(self, raw, batch_id):
@@ -573,7 +769,7 @@ class RetinaNetTF2(Adapter):
             if not np.size(scores_i):
                 continue
 
-            keep = NMS.nms(*boxes_i.T, scores_i, nms_iou_threshold, include_boundaries=True, keep_top_k=max_total_size)
+            keep = sorted_non_max_suppression_padded(np.expand_dims(scores, 0), np.expand_dims(boxes, 0), max_total_size, nms_iou_threshold)
             nmsed_classes_i = np.full(len(keep), i)
             nmsed_boxes.append(boxes_i[keep, :])
             nmsed_scores.append(scores_i[keep])
