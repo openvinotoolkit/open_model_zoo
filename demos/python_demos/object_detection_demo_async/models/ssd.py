@@ -1,10 +1,16 @@
-from recordtype import recordtype
 import numpy as np
 import cv2
 
 from .model import Model
 
-Detection = recordtype('Detection', 'xmin ymin xmax ymax score id') # namedtuple are immutable, so I change it to recordtype
+class Detection:
+    def __init__(self, xmin, ymin, xmax,ymax,score,id):
+        self.xmin = xmin
+        self.xmax = xmax
+        self.ymin = ymin
+        self.ymax = ymax
+        self.score = score
+        self.id = id
 
 class SSD(Model):
     class SingleOutputParser:
