@@ -69,6 +69,12 @@ def main():
         num_added_lines, num_removed_lines, numstat_path = numstat_line.split('\t', 2)
         assert path == numstat_path, "git diff --raw and --numstat list different files"
 
+        # Overly long paths cause problems in internal infrastructure due to Windows's
+        # 259 character path length limit. Cap the repo path lengths at a known safe value.
+        PATH_LENGTH_LIMIT = 135
+        if len(path) > PATH_LENGTH_LIMIT:
+            complain(f"{path}: path length ({len(path)}) over limit ({PATH_LENGTH_LIMIT})")
+
         mode = raw_diff.split()[1]
 
         if mode not in {'100644', '100755'}: # not a regular or executable file
