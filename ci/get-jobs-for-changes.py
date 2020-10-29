@@ -55,13 +55,18 @@ def main():
     jobs = {}
 
     for changed_file in changed_files:
-        if models_dir in changed_file.parents and \
-                (changed_file.name == "model.yml" or changed_file.suffix == ".py"):
-            if (OMZ_ROOT / changed_file).exists(): # it might've been deleted in the branch
-                jobs.setdefault("models", set()).add(changed_file.parent.name)
-            else:
-                # make sure no models.lst files reference the deleted model
-                jobs["models_lst"] = True
+        if models_dir in changed_file.parents:
+            if changed_file.name == "model.yml":
+                if (OMZ_ROOT / changed_file).exists(): # it might've been deleted in the branch
+                    jobs.setdefault("models", set()).add(changed_file.parent.name)
+                else:
+                    # make sure no models.lst files reference the deleted model
+                    jobs["models_lst"] = True
+
+            if changed_file.suffix == ".py":
+                for parent in changed_file.parents:
+                    if (OMZ_ROOT / parent / "model.yml").exists():
+                        jobs.setdefault("models", set()).add(parent.name)
 
     if "models" in jobs:
         jobs["models"] = sorted(jobs["models"]) # JSON can't work with a set
