@@ -339,7 +339,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(subdirectory='bert_question_answering_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': "https://en.wikipedia.org/wiki/OpenVINO",
-                          '--questions': ["Which framework does it support","Who is developers"]}),
+                          '--questions': ['What frameworks does OpenVINO support', 'Who are developers']}),
         [
             TestCase(options={
                 '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
@@ -358,7 +358,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(subdirectory='bert_question_answering_embedding_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': "https://en.wikipedia.org/wiki/OpenVINO",
-                          '--questions': ["Which framework does it support","Who is developers"]}),
+                          '--questions': ['What frameworks does OpenVINO support', 'Who are developers']}),
         [
             TestCase(options={
                 '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
