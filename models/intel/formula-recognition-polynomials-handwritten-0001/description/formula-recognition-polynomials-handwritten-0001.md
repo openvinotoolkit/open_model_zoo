@@ -20,7 +20,7 @@ Vocabulary file is distributed with the model. Model can predict big and small l
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| im2latex_polynomials_handwritten dataset, im2latex-match-images metric | 71.5% |
+| im2latex_polynomials_handwritten dataset, im2latex-match-images metric | 70.5% |
 | Source framework                              | PyTorch\* |
 
 Im2latex-match-images metric is calculated by [this algorithm](../../../../tools/accuracy_checker/accuracy_checker/metrics/im2latex_images_match.py )
