@@ -76,24 +76,17 @@ postprocessing:
     replacement: ''
   - $type: regex_replace
     file: yolact/yolact.py
-    pattern: 'from data.config import cfg, mask_type'
-    replacement: "from data.config import cfg, mask_type, set_cfg\nset_cfg('yolact_resnet50_config')"
-  - $type: regex_replace
-    file: yolact/yolact.py
     pattern: 'self.detect = Detect\(cfg.num_classes, bkg_label=0, top_k=cfg.nms_top_k,\n            conf_thresh=cfg.nms_conf_thresh, nms_thresh=cfg.nms_thresh\)'
-    replacement: "self.detect = detect\n        if weights: self.load_weights(weights)"
-  - $type: regex_replace
-    file: yolact/yolact.py
-    pattern: '__init__\(self\):'
-    replacement: "__init__(self, weights=None):"
+    replacement: "self.detect = detect"
   - $type: regex_replace
     file: yolact/yolact.py
     pattern: 'torch.load\(path\)'
     replacement: "torch.load(path, map_location=torch.device('cpu'))"
 conversion_to_onnx_args:
-  - --model-name=Yolact
+  - --model-name=create_model
+  - --model-path=$config_dir
   - --model-path=$dl_dir/yolact
-  - --import-module=yolact
+  - --import-module=model
   - --input-shape=1,3,550,550
   - --output-file=$conv_dir/yolact-resnet50-fpn.onnx
   - --model-param=weights="$dl_dir/yolact/yolact_resnet50_54_800000.pth"
