@@ -8,7 +8,7 @@ project(Demos)
 
 option(ENABLE_PYTHON "Whether to build extension modules for Python demos" OFF)
 
-set(DEMOS "ALL" CACHE STRING "Specify demo to build using comma(ex. -DSPECIFIC_DEMOS classification_demo, text_detection_demo), Default is ALL")
+set(DEMOS "ALL" CACHE STRING "Specify demo to build using comma(ex. -DDEMOS=classification_demo,text_detection_demo). Default is ALL")
 string(REPLACE "," ";" DEMOS_LIST ${DEMOS})
 
 if (CMAKE_BUILD_TYPE STREQUAL "")
@@ -126,7 +126,7 @@ function(add_samples_to_build)
                 else()
                     # Include subdirectory to the project.
                     add_subdirectory(${dir})
-                    # message(STATUS "${dir} INCLUDED TO BUILD")
+                    message(STATUS "${dir} INCLUDED TO BUILD")
                 endif()
             endif()
         endif()
