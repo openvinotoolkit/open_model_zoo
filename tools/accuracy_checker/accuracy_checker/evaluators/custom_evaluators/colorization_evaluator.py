@@ -75,14 +75,9 @@ class ColorizationEvaluator(BaseEvaluator):
             if not contains_all(network_info, ['colorization_network', 'verification_network']):
                 raise ConfigError('configuration for colorization_network/verification_network does not exist')
 
-        if 'color_coeff' in colorization_network:
-            test_model = ColorizationTestModel(
-                network_info.get('colorization_network', {}), launcher, delayed_model_loading
-            )
-        else:
-            test_model = ColorizationTestModelPytorch(
-                network_info.get('colorization_network', {}), launcher, delayed_model_loading
-            )
+        test_model = ColorizationTestModel(
+            network_info.get('colorization_network', {}), launcher, delayed_model_loading
+        )
         check_model = ColorizationCheckModel(
             network_info.get('verification_network', {}), launcher, delayed_model_loading
         )
@@ -449,32 +444,6 @@ class ColorizationTestModel(BaseModel):
             self.input_blob = input_blob
             self.output_blob = output_blob
             self.with_prefix = with_prefix
-
-
-class ColorizationTestModelPytorch(ColorizationTestModel):
-    @staticmethod
-    def central_crop(input_data, crop_size=(224, 224)):
-        h, w = input_data.shape[:2]
-        delta_h = (h - crop_size[0]) // 2
-        delta_w = (w - crop_size[1]) // 2
-        return input_data[delta_h:h - delta_h, delta_w: w - delta_w, :]
-
-    def postprocessing(self, res, img_l):
-        res = np.squeeze(res, axis=0)
-        res = res.transpose((1, 2, 0)).astype(np.float32)
-
-        out_lab = np.concatenate((img_l[:, :, np.newaxis], res), axis=2)
-        result_bgr = np.clip(cv2.cvtColor(out_lab, cv2.COLOR_Lab2BGR), 0, 1)
-
-        return [self.central_crop(result_bgr)]
-
-    def predict(self, identifiers, input_data):
-        img_l, img_l_rs = self.data_preparation(input_data)
-
-        res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})
-
-        new_result = self.postprocessing(res[self.output_blob], img_l)
-        return res, np.array(new_result)
 
 
 class ColorizationCheckModel(BaseModel):
