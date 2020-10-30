@@ -1,5 +1,5 @@
 # This file can be used with the --list option of the model downloader.
 formula-recognition-medium-scan-????-im2latex-decoder
 formula-recognition-medium-scan-????-im2latex-encoder
-formula-recognition-polynomials-handwritten-????-im2latex-decoder
-formula-recognition-polynomials-handwritten-????-im2latex-encoder
+# formula-recognition-polynomials-handwritten-????-im2latex-decoder  # TODO: reenable this after the model is added
+# formula-recognition-polynomials-handwritten-????-im2latex-encoder  # TODO: reenable this after the model is added
