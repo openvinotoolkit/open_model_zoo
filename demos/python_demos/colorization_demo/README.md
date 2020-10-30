@@ -4,8 +4,6 @@ This demo demonstrates an example of using neural networks to colorize a video.
 You can use the following models with the demo:
 
 * `colorization-v2`
-* `colorization-v2-pytorch`
-* `colorization-v2-norebal`
 
 For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
 
@@ -14,26 +12,23 @@ For more information about the pre-trained models, refer to the [model documenta
 On the start-up, the application reads command-line parameters and loads one network to the Inference Engine for execution.
 
 Once the program receives an image, it performs the following steps:
+
 1. Converts the frame of video into the LAB color space.
 2. Uses the L-channel to predict A and B channels.
 3. Restores the image by converting it into the BGR color space.
-
-> **NOTE**: To use `colorization-v2` or `colorization-v2-norebal` model with the demo, you have to specify the path to .npy file with color coefficients. If you want to use `colorization-v2-pytorch` model, you only need to specify the path to the image.
 
 ### Running the Demo
 
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: colorization_demo.py [-h] -m MODEL [--coeffs COEFFS] [-d DEVICE] -i
-                            "<path>" [--no_show] [-v]
-                            [-u UTILIZATION_MONITORS]
+usage: colorization_demo.py [-h] -m MODEL [-d DEVICE] -i "<path>" [--no_show]
+                            [-v] [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Help with the script.
   -m MODEL, --model MODEL
                         Required. Path to .xml file with pre-trained model.
-  --coeffs COEFFS       Optional. Path to .npy file with color coefficients.
   -d DEVICE, --device DEVICE
                         Optional. Specify target device for infer: CPU, GPU,
                         FPGA, HDDL or MYRIAD. Default: CPU
@@ -43,6 +38,7 @@ Options:
   -v, --verbose         Optional. Enable display of processing logs on screen.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+
 
 ```
 

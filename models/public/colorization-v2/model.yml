@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,38 +13,57 @@
 # limitations under the License.
 
 description: >-
-    The colorization-v2 model is one of the colorization
-    group of models designed to perform image colorization. For details
-    about this family of models, check out the repository - https://github.com/richzhang/colorization.
+  The "colorization-v2" model is one of the colorization <https://arxiv.org/abs/1603.08511>
+  group of models designed to perform image colorization. Model was trained on ImageNet
+  dataset. For details about this family of models, check out the repository <https://github.com/richzhang/colorization>.
 
-    Model consumes as input L-channel of LAB-image.
-    Model give as output predict A- and B-channels of LAB-image.
+  Model consumes as input L-channel of LAB-image. Model give as output predict A-
+  and B-channels of LAB-image.
 
-task_type: "colorization"
+task_type: colorization
 files:
-  - name: colorization-v2.prototxt
-    sha256: d16418cef8df4ccd703a55ae0ef3960861d5010418f77c90d0a47689998a7169
-    source: https://raw.githubusercontent.com/richzhang/colorization/caffe/models/colorization_deploy_v2.prototxt
-    size: 9945
-  - name: colorization-v2.caffemodel
-    size: 128946764
-    sha256: f5af1e602646328c792e1094f9876fe9cd4c09ac46fa886e5708a1abc89137b1
-    source: http://eecs.berkeley.edu/~rich.zhang/projects/2016_colorization/files/demo_v2/colorization_release_v2.caffemodel
-  - name: colorization-v2.npy
-    size: 5088
-    sha256: b5dec01315c34f43f1c8c089e84c45ae35d1838d8e77ed0e7ca930f79ffa450e
-    source: https://github.com/richzhang/colorization/raw/caffe/resources/pts_in_hull.npy
-model_optimizer_args:
-  - --input_shape=[1,1,224,224]
-  - --input=data_l
-  - --mean_values=data_l[50]
-  - --output=class8_313_rh
-  - --input_model=$dl_dir/colorization-v2.caffemodel
-  - --input_proto=$dl_dir/colorization-v2.prototxt
+  - name: ckpt/colorization-v2-eccv16.pth
+    size: 128976165
+    sha256: 9b330a0bae53f4ded77b1e23defbf78beaa09c10ebc4c4999e8e4f4a160b93f9
+    source: https://colorizers.s3.us-east-2.amazonaws.com/colorization_release_v2-9b330a0b.pth
+  - name: model/__init__.py
+    size: 96
+    sha256: 245a5ac3e1cb1705438355f9d9b05b408d796c559d89c8f6d2741799f1b74000
+    source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/__init__.py
+  - name: model/base_color.py
+    size: 454
+    sha256: 81cea88bb484866478138440f08cc8d6c3e3731652fe57592900e418b278da1d
+    source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/base_color.py
+  - name: model/eccv16.py
+    size: 4613
+    sha256: 524179cbf9676809a17eead0a5cf72bbc5de962db6bbbd1064407cfd315ae2a4
+    source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/eccv16.py
 postprocessing:
   - $type: regex_replace
-    file: colorization-v2.prototxt
-    pattern: 'layer {\n  name: "Silence"\n  type: "Silence"\n  bottom: "class8_ab"\n}'
+    file: model/__init__.py
+    pattern: 'from .(s|u)(.*) import \*'
     replacement: ''
-framework: caffe
-license: https://raw.githubusercontent.com/richzhang/colorization/master/LICENSE
+  - $type: regex_replace
+    file: model/__init__.py
+    pattern: 'from .eccv16 import \*'
+    replacement: 'from .eccv16 import ECCVGenerator'
+  - $type: regex_replace
+    file: model/eccv16.py
+    pattern: 'from IPython import embed'
+    replacement: ''
+conversion_to_onnx_args:
+  - --model-path=$dl_dir
+  - --model-name=ECCVGenerator
+  - --weights=$dl_dir/ckpt/colorization-v2-eccv16.pth
+  - --import-module=model
+  - --input-shape=1,1,256,256
+  - --output-file=$conv_dir/colorization-v2-eccv16.onnx
+  - --input-names=data_l
+  - --output-names=color_ab
+model_optimizer_args:
+  - --input_shape=[1,1,256,256]
+  - --input=data_l
+  - --output=color_ab
+  - --input_model=$conv_dir/colorization-v2-eccv16.onnx
+framework: pytorch
+license: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/LICENSE

@@ -33,8 +33,6 @@ def build_arg():
     in_args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Help with the script.')
     in_args.add_argument("-m", "--model", help="Required. Path to .xml file with pre-trained model.",
                          required=True, type=str)
-    in_args.add_argument("--coeffs", help="Optional. Path to .npy file with color coefficients.",
-                         type=str)
     in_args.add_argument("-d", "--device",
                          help="Optional. Specify target device for infer: CPU, GPU, FPGA, HDDL or MYRIAD. "
                               "Default: CPU",
@@ -53,9 +51,7 @@ def build_arg():
 
 if __name__ == '__main__':
     args = build_arg().parse_args()
-    coeffs = args.coeffs
 
-    # mean is stored in the source caffe model and passed to IR
     log.basicConfig(format="[ %(levelname)s ] %(message)s",
                     level=log.INFO if not args.verbose else log.DEBUG, stream=sys.stdout)
 
@@ -85,10 +81,6 @@ if __name__ == '__main__':
     if not cap.isOpened():
         assert "{} not exist".format(input_source)
 
-    if coeffs:
-        color_coeff = np.load(coeffs).astype(np.float32)
-        assert color_coeff.shape == (313, 2), "Current shape of color coefficients does not match required shape"
-
     imshow_size = (640, 480)
     graph_size = (imshow_size[0] // 2, imshow_size[1] // 4)
     presenter = monitors.Presenter(args.utilization_monitors, imshow_size[1] * 2 - graph_size[1], graph_size)
@@ -113,10 +105,7 @@ if __name__ == '__main__':
         log.debug("Network inference")
         res = exec_net.infer(inputs={input_blob: [img_l_rs]})
 
-        if coeffs:
-            update_res = (res[output_blob] * color_coeff.transpose()[:, :, np.newaxis, np.newaxis]).sum(1)
-        else:
-            update_res = np.squeeze(res[output_blob])
+        update_res = np.squeeze(res[output_blob])
 
         log.debug("Get results")
         out = update_res.transpose((1, 2, 0))
