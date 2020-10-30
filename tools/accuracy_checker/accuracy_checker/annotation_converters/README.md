@@ -390,6 +390,14 @@ The main difference between this converter and `super_resolution` in data organi
   * `alphabet` - alphabet for sequence decoding (Optional, default ["N", "A", "C", "G", "T"]).
 * `place_recognition` - converts dataset for image based localization task to `PlaceRecognitionAnnotation`
   * `subset_file` - matlab file contains info about subset used in validation.
+* `mpii` - converts MPII Human Pose Estimation dataset to `PoseEstimationAnnotation`.
+  * `annotation_file` - json-file with annotation.
+  * `headboxes_file` - file with boxes contained head coordinates for each image.
+* `cluttered_mnist` - converts MNIST dataset from spatial transformer network [example](https://github.com/oarriaga/STN.keras/tree/master/datasets) to `ClassificationAnnotation`.
+  * `data_file` - npz file with dataset.
+  * `split` - dataset split: `train` - for training subset, `valid` - for train-validation subset, `test` - for testing subset (Optional, default test).
+  * `convert_images` - allows convert images from raw data stored in npz and save them into provided directory (Optional, default True).
+  * `images_dir` - directory for saving converted images (Optional, if not provided, the images will be saved into converted_images directory in the same location, where data_file is stored)
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
