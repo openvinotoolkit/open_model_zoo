@@ -18,10 +18,10 @@ For details, see the [repository](https://github.com/dbolya/yolact).
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
-| AP@masks | 28.00%|
-| AP@boxes |30.69%|
+| Metric   | Value  |
+| -------- | ------ |
+| AP@masks | 28.00% |
+| AP@boxes | 30.69% |
 
 ## Performance
 
