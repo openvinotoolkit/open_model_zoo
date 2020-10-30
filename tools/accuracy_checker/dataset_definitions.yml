@@ -54,7 +54,6 @@ datasets:
         dst_height: 800
         dst_width: 1365
 
-
   - name: ms_coco_detection_91_classes
     annotation_conversion:
       converter: mscoco_detection
@@ -88,8 +87,8 @@ datasets:
       has_background: False
       sort_annotations: True
       use_full_label_map: False
-    annotation:  mscoco_det_80.pickle
-    dataset_meta:  mscoco_det_80.json
+    annotation: mscoco_det_80.pickle
+    dataset_meta: mscoco_det_80.json
 
   - name: ms_coco_detection_80_class_with_background
     data_source: val2017
@@ -100,7 +99,7 @@ datasets:
       sort_annotations: True
       use_full_label_map: False
     annotation: mscoco_det_80_bkgr.pickle
-    dataset_meta:  mscoco_det_80_bkgr.json
+    dataset_meta: mscoco_det_80_bkgr.json
 
   - name: ms_coco_keypoints
     data_source: val2017
@@ -200,7 +199,7 @@ datasets:
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       mask_dir: VOCdevkit/VOC2012/SegmentationClass/
     data_source: VOCdevkit/VOC2012/JPEGImages/
-    segmentation_masks_source:  VOCdevkit/VOC2012/SegmentationClass/
+    segmentation_masks_source: VOCdevkit/VOC2012/SegmentationClass/
     annotation: voc2012_segmentation.pickle
     dataset_meta: voc2012_segmentation.json
 
@@ -477,7 +476,6 @@ datasets:
         dst_width: 94
         dst_height: 24
 
-
   - name: image_retrieval
     data_source: textile_crops
     annotation_conversion:
@@ -563,6 +561,18 @@ datasets:
       vocab_file: im2latex_medium_photographed/vocab.pkl
     annotation: im2latex_medium_photographed.pickle
     dataset_meta: im2latex_medium_photographed.json
+
+  - name: im2latex_polynomials_handwritten
+    data_source: im2latex_polynomials_handwritten/images_processed
+    annotation_conversion:
+      converter: im2latex_formula_recognition
+      data_dir: im2latex_polynomials_handwritten
+      images_dir: im2latex_polynomials_handwritten/images_processed
+      formula_file: im2latex_polynomials_handwritten/formulas.norm.lst
+      split_file: im2latex_polynomials_handwritten/validate_filter.lst
+      vocab_file: im2latex_polynomials_handwritten/vocab.json
+    annotation: im2latex_polynomials_handwritten.pickle
+    dataset_meta: im2latex_polynomials_handwritten.json
 
   - name: market1501
     data_source: Market-1501-v15.09.15
