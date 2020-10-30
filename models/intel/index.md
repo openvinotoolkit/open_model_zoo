@@ -191,6 +191,7 @@ Deep Learning models for text recognition in various applications.
 | [handwritten-japanese-recognition-0001](./handwritten-japanese-recognition-0001/description/handwritten-japanese-recognition-0001.md)          | 117.136              | 15.31      |
 | [handwritten-simplified-chinese-recognition-0001](./handwritten-simplified-chinese-recognition-0001/description/handwritten-simplified-chinese-recognition-0001.md)          |       134.513        |    17.270   |
 | [formula-recognition-medium-scan-0001](./formula-recognition-medium-scan-0001/description/formula-recognition-medium-scan-0001.md): <br> encoder <br> decoder | <br>16.56<br>1.86 | <br>1.69<br>2.56 |
+| [formula-recognition-polynomials-handwritten-0001](./formula-recognition-polynomials-handwritten-0001/description/formula-recognition-polynomials-handwritten-0001.md): <br> encoder <br> decoder | <br>12.8447<br>0.2017 | <br>8.6838<br>2.5449 |
 
 ## Text Spotting
 

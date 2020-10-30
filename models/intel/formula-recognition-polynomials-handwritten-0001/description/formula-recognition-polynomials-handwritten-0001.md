@@ -20,19 +20,19 @@ Vocabulary file is distributed with the model. Model can predict big and small l
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| im2latex_polynomials_handwritten dataset, im2latex-match-images metric | 81.5% |
+| im2latex_polynomials_handwritten dataset, im2latex-match-images metric | 71.5% |
 | Source framework                              | PyTorch\* |
 
 Im2latex-match-images metric is calculated by [this algorithm](../../../../tools/accuracy_checker/accuracy_checker/metrics/im2latex_images_match.py )
 
 ## Encoder model specification
 
-The formula-recognition-medium-scan-0001-encoder model is a ResNeXt-50 like backbone with some initialization layers for decoder
+The formula-recognition-polynomials-handwritten-0001-encoder model is a ResNeXt-50 like backbone with some initialization layers for decoder
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| GFlops                                        | 16.56     |
-| MParams                                       | 1.69      |
+| GFlops                                        | 12.8447   |
+| MParams                                       | 8.6838    |
 
 
 ### Performance
@@ -52,12 +52,12 @@ The formula-recognition-medium-scan-0001-encoder model is a ResNeXt-50 like back
 
 ## Decoder model specification
 
-The formula-recognition-medium-scan-0001-decoder model is an LSTM based decoder with attention module.
+The formula-recognition-polynomials-handwritten-0001-decoder model is an LSTM based decoder with attention module.
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| GFlops                                        | 1.86     |
-| MParams                                       | 2.56      |
+| GFlops                                        | 0.2017    |
+| MParams                                       | 2.5449    |
 
 
 
