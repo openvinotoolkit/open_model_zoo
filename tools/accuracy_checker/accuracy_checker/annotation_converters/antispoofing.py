@@ -1,4 +1,3 @@
-
 """
 Copyright (c) 2018-2020 Intel Corporation
 
@@ -76,8 +75,8 @@ class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
             annotations.append(image_annotation)
 
             if check_content:
-                if not check_file_existence(os.path.join(self.data_dir, img_name)):
-                    content_errors.append(f'{img_name}: does not exist')
+                if not check_file_existence(self.data_dir /img_name):
+                    content_errors.append('{}: does not exist'.format(img_name))
             if progress_callback is not None and i % progress_interval == 0:
                     progress_callback(i / num_iterations * 100)
 
@@ -105,6 +104,5 @@ class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
                 target_label = dataset_annotations[index]['labels'][0]
             bbox = dataset_annotations[index].get('bbox')
             annotation_store.append((path, target_label, bbox))
-        # return list((img_path1, label, bbox), (img_name1, label, bbox))
-        # label: int
+
         return annotation_store

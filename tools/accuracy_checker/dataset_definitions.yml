@@ -975,3 +975,12 @@ datasets:
       object_categories_file: ADEChallengeData2016/objectInfo150.txt
     data_source: ADEChallengeData2016/images/validation
     segmentation_masks_source: ADEChallengeData2016/annotations/validation
+
+  - name: antispoof_test_data
+    data_source: antispoof_test_data
+    annotation_conversion:
+      converter: antispoofing
+      data_dir: antispoof_test_data
+      annotations: antispoof_test_data/metas/intra_test/items_test.json
+    annotation: antispoofing.pickle
+    dataset_meta: antispoofing.json

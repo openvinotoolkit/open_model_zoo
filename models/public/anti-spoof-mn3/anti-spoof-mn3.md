@@ -32,7 +32,7 @@ Original repository: https://github.com/kirillProkofiev/light-weight-face-anti-s
 
 ### Original Model
 
-Image, name: `input` , shape: [1x128x128x3], format: [BxCxHxW], where:
+Image, name: `actual_input_1` , shape: [1x3x128x128], format: [BxCxHxW], where:
 
     - B - batch size
     - C - number of channels
@@ -40,11 +40,11 @@ Image, name: `input` , shape: [1x128x128x3], format: [BxCxHxW], where:
     - W - image width
 
    Expected color order: RGB.
-   Mean values: [0.5931,0.4690,0.4229], scale factor: [0.2471,0.2214,0.2157]
+   Mean values: [151.2405,119.5950,107.8395], scale factor: [63.0105,56.4570,55.0035]
 
 ### Converted Model
 
-Image, name: `input` , shape: [1x3x128x128], format: [BxCxHxW], where:
+Image, name: `actual_input_1` , shape: [1x3x128x128], format: [BxCxHxW], where:
 
     - B - batch size
     - C - number of channels
@@ -52,19 +52,8 @@ Image, name: `input` , shape: [1x3x128x128], format: [BxCxHxW], where:
     - W - image width
 
    Expected color order: BGR.
-   Mean values: [151.2405,119.5950,107.8395], scale factor: [63.0105,56.4570,55.0035]
 
 ## Output
-
-### Original Model
-
-Probabilities for two classes (0 class is a real person, 1 - is a spoof image). Shape: [1,2], format: [BxC],
-    where:
-
-    - B - batch size
-    - C - vector of probabilities.
-
-### Converted Model
 
 Probabilities for two classes (0 class is a real person, 1 - is a spoof image). Shape: [1,2], format: [BxC],
     where:
