@@ -64,7 +64,7 @@ class MPIIDatasetConverter(FileBasedAnnotationConverter):
             points = np.array(ann['joint_self'])
             center = ann['objpos']
             scale = float(ann['scale_provided'])
-            x_values, y_values, vis = points.T
+            x_values, y_values, vis = points.T # pylint: disable=E0633
             annotation = PoseEstimationAnnotation(identifier, x_values, y_values, visibility=vis)
             annotation.metadata['center'] = center
             annotation.metadata['scale'] = scale
