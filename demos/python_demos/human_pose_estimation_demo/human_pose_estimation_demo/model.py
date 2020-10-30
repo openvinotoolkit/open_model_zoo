@@ -114,8 +114,6 @@ class HPE(Model):
             adjust=True,
             refine=True,
             delta=0.0,
-            unbiased=False,
-            blur=False,
             max_num_people=30,
             nms_kernel=5,
             tag_per_joint=True,
