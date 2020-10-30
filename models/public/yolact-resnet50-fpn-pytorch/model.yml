@@ -79,12 +79,8 @@ postprocessing:
     replacement: "from data.config import cfg, mask_type, set_cfg\nset_cfg('yolact_resnet50_config')"
   - $type: regex_replace
     file: yolact/yolact.py
-    pattern: 'self.detect = Detect\(cfg.num_classes, bkg_label=0, top_k=cfg.nms_top_k,'
+    pattern: 'self.detect = Detect\(cfg.num_classes, bkg_label=0, top_k=cfg.nms_top_k,\n            conf_thresh=cfg.nms_conf_thresh, nms_thresh=cfg.nms_thresh\)'
     replacement: "self.detect = detect\n        if weights: self.load_weights(weights)"
-  - $type: regex_replace
-    file: yolact/yolact.py
-    pattern: 'conf_thresh=cfg.nms_conf_thresh, nms_thresh=cfg.nms_thresh\)'
-    replacement: ''
   - $type: regex_replace
     file: yolact/yolact.py
     pattern: '__init__\(self\):'
