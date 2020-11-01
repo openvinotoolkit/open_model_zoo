@@ -392,7 +392,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `subset_file` - matlab file contains info about subset used in validation.
 * `antispoofing` - converts dataset for antispoofing classification task to `ClassificationAnnotation`
   * `data_dir` - path to root folder of the dataset
-  * `annotations` - path to json file containing annotations to the dataset ({index: {path:"...", labels:[...], bbox:[...] (optional), ...})
+  * `annotation_file` - path to json file containing annotations to the dataset ({index: {path:"...", labels:[...], bbox:[...] (optional), ...})
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `background_label` using `dataset_meta_file` argument.

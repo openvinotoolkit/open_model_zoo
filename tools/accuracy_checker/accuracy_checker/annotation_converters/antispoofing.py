@@ -19,7 +19,7 @@ import os
 from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
 from ..representation import ClassificationAnnotation, ContainerAnnotation
 from ..utils import read_json, check_file_existence
-from ..config import PathField
+from ..config import PathField, NumberField
 
 class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
     __provider__ = 'antispoofing'
@@ -37,7 +37,10 @@ class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
                 'meta_file': PathField(
                     description='path to json file with dataset meta (e.g. label_map)', optional=True
                 ),
-                'annotations': PathField(
+                'label_id': NumberField(
+                    description='number of label in the annotation file representing spoof/real labels', optional=True, default=43
+                ),
+                'annotation_file': PathField(
                     description='path to json file with dataset annotations ({index : {path: ..., labels: ..., boxes: ... (optional)}})', optional=False
                 )
             }
@@ -47,7 +50,8 @@ class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
     def configure(self):
         super().configure()
         self.data_dir = self.get_value_from_config('data_dir')
-        self.annotations = self.get_value_from_config('annotations')
+        self.annotations = self.get_value_from_config('annotation_file')
+        self.label_id = self.get_value_from_config('label_id')
         self.meta = self.get_value_from_config('meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
@@ -98,10 +102,7 @@ class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
         for index in dataset_annotations:
             path = dataset_annotations[index]['path']
             # this branch will be needed if multi-task labels given to input
-            if len(dataset_annotations[index]['labels']) > 1:
-                target_label = dataset_annotations[index]['labels'][43]
-            else:
-                target_label = dataset_annotations[index]['labels'][0]
+            target_label = dataset_annotations[index]['labels'][int(self.label_id)]
             bbox = dataset_annotations[index].get('bbox')
             annotation_store.append((path, target_label, bbox))
 

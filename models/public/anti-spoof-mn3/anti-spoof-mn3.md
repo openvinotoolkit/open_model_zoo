@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 `anti-spoofing-mn3` is an anti-spoofing binary classificator based on the [MobileNetv3](https://arxiv.org/abs/1905.02244), trained on the [Celeba_Spoof dataset](https://arxiv.org/abs/2007.12342). It's a small, light model, trained to predict whether or not a spoof RGB image given to the input. A lot of advanced techniques have been tried and selected the best suit options for the task.
-Original repository: https://github.com/kirillProkofiev/light-weight-face-anti-spoofing
+For details see original [repository](https://github.com/kirillProkofiev/light-weight-face-anti-spoofing).
 
 ## Example
 
@@ -54,8 +54,17 @@ Image, name: `actual_input_1` , shape: [1x3x128x128], format: [BxCxHxW], where:
    Expected color order: BGR.
 
 ## Output
+### Original model
 
-Probabilities for two classes (0 class is a real person, 1 - is a spoof image). Shape: [1,2], format: [BxC],
+Probabilities for two classes (0 class is a real person, 1 - is a spoof image). Name: `output1` Shape: [1,2], format: [BxC],
+    where:
+
+    - B - batch size
+    - C - vector of probabilities.
+
+### Converted model
+
+Probabilities for two classes (0 class is a real person, 1 - is a spoof image). Name: `output1` Shape: [1,2], format: [BxC],
     where:
 
     - B - batch size

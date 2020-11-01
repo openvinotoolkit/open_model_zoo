@@ -1,5 +1,5 @@
 models:
-  - name: anti-spoofing-mn3
+  - name: anti-spoof-mn3
 
     launchers:
       - framework: dlsdk

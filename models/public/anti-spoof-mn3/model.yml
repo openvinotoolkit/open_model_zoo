@@ -13,12 +13,14 @@
 # limitations under the License.
 
 description: >-
-  Antispoofing model "anti-spoofing-mn3" based on the mobilenetv3 originally trained on PyTorch*
-  then converted to OpenVINO format.  For details about dataset see paper <https://arxiv.org/abs/2007.12342>,
-  repository <https://github.com/kirillProkofiev/light-weight-face-anti-spoofing>.
+  "anti-spoofing-mn3" is an anti-spoofing binary classificator based on the MobileNetv3
+  <https://arxiv.org/abs/1905.02244>, trained on the Celeba_Spoof dataset <https://arxiv.org/abs/2007.12342>.
+  It's a small, light model, trained to predict whether or not a spoof RGB image given
+  to the input. A lot of advanced techniques have been tried and selected the best
+  suit options for the task. For details see original repository <https://github.com/kirillProkofiev/light-weight-face-anti-spoofing>.
 task_type: classification
 files:
-  - name: anti-spoofing-mn3.onnx
+  - name: anti-spoof-mn3.onnx
     size: 12270179
     sha256: c4c99af04603b62d7e44f6f4daeb33e0daeccc696008c0b1d62f6f5cebbb3262
     source:
@@ -30,7 +32,7 @@ model_optimizer_args:
   - --mean_values=actual_input_1[151.2405,119.5950,107.8395]
   - --scale_values=actual_input_1[63.0105,56.4570,55.0035]
   - --reverse_input_channels
-  - --input_model=$dl_dir/anti-spoofing-mn3.onnx
+  - --input_model=$dl_dir/anti-spoof-mn3.onnx
 framework: onnx
 quantizable: yes
 license: https://raw.githubusercontent.com/kirillProkofiev/training_extensions/kp/antispoofing/LICENSE

@@ -981,6 +981,7 @@ datasets:
     annotation_conversion:
       converter: antispoofing
       data_dir: antispoof_test_data
-      annotations: antispoof_test_data/metas/intra_test/items_test.json
+      annotation_file: antispoof_test_data/metas/intra_test/items_test.json
+      label_id: 43
     annotation: antispoofing.pickle
     dataset_meta: antispoofing.json
