@@ -33,12 +33,12 @@ Average Precision (AP) is defined and measured according to standard
 
 ## Outputs
 
-1.	name: `labels`, shape: [1000, ] - Contiguous integer class ID for every
+1.	name: `labels`, shape: [100, ] - Contiguous integer class ID for every
     detected object.
-2.	name: `boxes`, shape: [1000, 5] - Bounding boxes around every detected objects
+2.	name: `boxes`, shape: [100, 5] - Bounding boxes around every detected objects
     in (top_left_x, top_left_y, bottom_right_x, bottom_right_y) format and its
     confidence score in range [0, 1].
-3.	name: `masks`, shape: [1000, 28, 28] - Segmentation heatmaps for every output
+3.	name: `masks`, shape: [100, 28, 28] - Segmentation heatmaps for every output
     bounding box.
 
 ## Legal Information
