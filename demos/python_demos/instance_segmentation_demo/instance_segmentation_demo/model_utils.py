@@ -253,7 +253,7 @@ def check_model(net):
     model_type = 'mask_rcnn' if image_info_input else 'yolact'
     model_attributes = MODEL_ATTRIBUTES[model_type]
     assert (
-        set(model_attreibutes.required_outputs).issubset(net.outputs.keys()),
+        set(model_attributes.required_outputs).issubset(net.outputs.keys()),
         'Demo supports only topologies with the following output keys: '
         '{}'.format(', '.join(model_attributes.required_outputs))
     )
