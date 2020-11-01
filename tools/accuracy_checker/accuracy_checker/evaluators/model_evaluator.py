@@ -298,11 +298,7 @@ class ModelEvaluator(BaseEvaluator):
         return free_irs, queued_irs
 
     def process_single_image(self, image):
-        def get_data(image):
-            if is_path(image):
-                return [self.reader(identifier=image)]
-            return [DataRepresentation(image, identifier='image')]
-        input_data = get_data(image)
+        input_data = self._prepare_data_for_single_inference(image)
         batch_input = self.preprocessor.process(input_data)
         _, batch_meta = extract_image_representations(batch_input)
         filled_inputs = self.input_feeder.fill_inputs(batch_input)
@@ -315,7 +311,24 @@ class ModelEvaluator(BaseEvaluator):
         _, predictions = self.postprocessor.process_batch(
             None, batch_predictions, batch_meta, allow_empty_annotation=True
         )
+        self.input_feeder.ordered_inputs = False
         return predictions[0]
+
+    def _prepare_data_for_single_inference(self, data):
+        def get_data(image, create_representation=True):
+            if is_path(image):
+                return [self.reader(identifier=image) if create_representation else self.reader.read_dispatcher(image)]
+            return [DataRepresentation(image, identifier='image') if create_representation else image]
+
+        if not isinstance(data, list):
+            return get_data(data)
+
+        input_data = []
+        for item in data:
+            input_data.extend(get_data(item, False))
+        self.input_feeder.ordered_inputs = True
+
+        return [DataRepresentation(input_data, identifier=list(range(len(data))))]
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
