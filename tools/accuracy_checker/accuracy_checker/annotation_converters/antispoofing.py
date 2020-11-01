@@ -14,10 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import json
-import os
 from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
-from ..representation import ClassificationAnnotation, ContainerAnnotation
+from ..representation import ClassificationAnnotation
 from ..utils import read_json, check_file_existence
 from ..config import PathField, NumberField
 
@@ -38,10 +36,12 @@ class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
                     description='path to json file with dataset meta (e.g. label_map)', optional=True
                 ),
                 'label_id': NumberField(
-                    description='number of label in the annotation file representing spoof/real labels', optional=True, default=43
+                    description='number of label in the annotation file representing spoof/real labels',
+                    optional=True, default=43
                 ),
                 'annotation_file': PathField(
-                    description='path to json file with dataset annotations ({index : {path: ..., labels: ..., boxes: ... (optional)}})', optional=False
+                    description='path to json file with dataset annotations'
+                    '({index : {path: ..., labels: ..., boxes: ... (optional)}})', optional=False
                 )
             }
         )
@@ -69,7 +69,6 @@ class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
         annotations = []
         content_errors = None if not check_content else []
         meta = self.generate_meta()
-        labels_to_id = meta['label_map']
         num_iterations = len(annotations)
 
         for i, (img_name, label, bbox) in enumerate(annotation_tuple):
