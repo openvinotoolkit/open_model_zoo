@@ -22,6 +22,7 @@ from ..config import NumberField, BoolField, PathField, StringField, ConfigError
 from ..utils import get_size_from_config
 from ..data_readers import BaseReader
 
+
 class FreeFormMask(Preprocessor):
     __provider__ = 'free_form_mask'
 
@@ -72,6 +73,8 @@ class FreeFormMask(Preprocessor):
         return mask
 
     def process(self, image, annotation_meta=None):
+        if len(image.data) == 2:
+            return image
         img = image.data[0]
         img_height, img_width = img.shape[:2]
         mask = np.zeros((img_height, img_width, 1), dtype=np.float32)
@@ -102,7 +105,7 @@ class RectMask(Preprocessor):
             ),
             'size': NumberField(
                 optional=True, default=128,
-                description="Size of mask, used if both dementions are equal", value_type=int
+                description="Size of mask, used if both dimensions are equal", value_type=int
             )
         })
         return parameters
@@ -111,6 +114,8 @@ class RectMask(Preprocessor):
         self.mask_height, self.mask_width = get_size_from_config(self.config, allow_none=True)
 
     def process(self, image, annotation_meta=None):
+        if len(image.data) == 2:
+            return image
         img = image.data[0]
         img_height, img_width = img.shape[:2]
         mp0 = (img_height - self.mask_height)//2
@@ -146,6 +151,9 @@ class CustomMask(Preprocessor):
         self.mask_loader = self.get_value_from_config('mask_loader')
 
     def process(self, image, annotation_meta=None):
+        if len(image.data) == 2:
+            return image
+
         if annotation_meta.get('mask') is None:
             raise ConfigError('Path to mask dataset is not set during annotation conversion.'
                               'Please specify masks_dir parameter')
