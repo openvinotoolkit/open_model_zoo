@@ -5,8 +5,10 @@
 This is an im2latex composite model that recognizes latex formulas.
 The model uses vocabulary file to predict sequence of latex tokens.
 The model is built on the resnext50 backbone with additional attention-based text recognition head.
+The model was trained on internal Intel's dataset containing images of handwritten polynomial equations.
+The equations consist of tokens from the corresponding to this model vocabulary file.
 
-Vocabulary file is distributed with the model. Model can predict big and small letters, numbers, some greek letters, trigonometric functions (e.g. cos, sin, coth), logarithmic function, sqrt and superscript.
+Vocabulary file is distributed with the model. Model can predict letters, numbers and upperscript.
 
 ## Example of the input data
 
@@ -46,7 +48,7 @@ The formula-recognition-polynomials-handwritten-0001-encoder model is a ResNeXt-
 1.	Name: `hidden`, shape: [1x512]. Initial context state of the LSTM cell.
 2.	Name: `context`, shape: [1x512]. Initial hidden state of the LSTM cell.
 3.	Name: `init_0`, shape: [1x256]. Initial state of the decoder.
-4.	Name: `row_enc_out`, shape: [1x7x62x512]. Features from encoder that are fed to a decoder.
+4.	Name: `row_enc_out`, shape: [1x6x62x512]. Features from encoder that are fed to a decoder.
 
 
 
@@ -68,7 +70,7 @@ The formula-recognition-polynomials-handwritten-0001-decoder model is an LSTM ba
 1.	Name: `dec_st_c` , shape: [1x512]. Current context state of the LSTM cell.
 2.	Name: `dec_st_h` , shape: [1x512]. Current hidden state of the LSTM cell.
 3.	Name: `output_prev`, shape: [1x256]. Current state of the decoder.
-4.	Name: `row_enc_out`, shape: [1x7x62x512]. Encoded features.
+4.	Name: `row_enc_out`, shape: [1x6x62x512]. Encoded features.
 5.	Name: `tgt`, shape: [1x1]. Index of the previous symbol.
 
 ### Outputs
