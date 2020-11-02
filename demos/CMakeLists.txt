@@ -121,7 +121,7 @@ function(add_samples_to_build)
                 if (BUILD_SAMPLE_NAME)
                     list(FIND BUILD_SAMPLE_NAME ${dir} index)
                 endif()
-                if ((index EQUAL -1 OR NOT dir IN_LIST DEMOS_LIST) AND NOT DEMOS STREQUAL "ALL")
+                if (index EQUAL -1 OR (NOT dir IN_LIST DEMOS_LIST AND NOT DEMOS STREQUAL "ALL"))
                     message(STATUS "${dir} SKIPPED")
                 else()
                     # Include subdirectory to the project.
