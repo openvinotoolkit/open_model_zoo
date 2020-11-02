@@ -22,7 +22,7 @@ models:
             dst_width: 1344
             dst_height: 800
             pad_type: right_bottom
-            use_numpy: True 
+            use_numpy: True
 
         metrics:
           - name: AP@masks
