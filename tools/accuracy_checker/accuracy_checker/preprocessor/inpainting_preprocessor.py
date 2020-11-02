@@ -54,7 +54,6 @@ class FreeFormMask(Preprocessor):
         num_strokes = np.random.randint(max_vertex)
         start_y = np.random.randint(h)
         start_x = np.random.randint(w)
-        brush_width = 0
         for i in range(num_strokes):
             angle = np.random.random() * np.deg2rad(max_angle)
             if i % 2 == 0:
@@ -74,6 +73,7 @@ class FreeFormMask(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         if len(image.data) == 2:
+            image.data[1] = preprocess_input_mask(image.data[1])
             return image
         img = image.data[0]
         img_height, img_width = img.shape[:2]
@@ -115,7 +115,9 @@ class RectMask(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         if len(image.data) == 2:
+            image.data[1] = preprocess_input_mask(image.data[1])
             return image
+
         img = image.data[0]
         img_height, img_width = img.shape[:2]
         mp0 = (img_height - self.mask_height)//2
@@ -152,6 +154,7 @@ class CustomMask(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         if len(image.data) == 2:
+            image.data[1] = preprocess_input_mask(image.data[1])
             return image
 
         if annotation_meta.get('mask') is None:
@@ -179,3 +182,11 @@ class CustomMask(Preprocessor):
         identifier = image.identifier[0]
         image.identifier = ['{}_image'.format(identifier), '{}_mask'.format(identifier)]
         return image
+
+
+def preprocess_input_mask(mask):
+    if len(mask.shape) == 3 and mask.shape[-1] != 1:
+        mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+    if len(mask.shape) == 2:
+        mask = np.expand_dims(mask, -1)
+    return np.array(mask > 0).astype(np.float32)
