@@ -551,6 +551,9 @@ def load_models(args):
     models = []
     model_names = set()
 
+    if args.model_root is not None:
+        MODEL_ROOT = Path(args.model_root)
+
     for config_path in sorted(MODEL_ROOT.glob('**/model.yml')):
         subdirectory = config_path.parent.relative_to(MODEL_ROOT)
 

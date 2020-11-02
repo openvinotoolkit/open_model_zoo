@@ -78,7 +78,9 @@ def main():
         help='Print the conversion commands without running them')
     parser.add_argument('-j', '--jobs', type=num_jobs_arg, default=1,
         help='number of conversions to run concurrently')
-
+    parser.add_argument('--model_root', type=Path, default=None,
+        help='path to models folder')
+    
     # aliases for backwards compatibility
     parser.add_argument('--add-mo-arg', dest='extra_mo_args', action='append', help=argparse.SUPPRESS)
     parser.add_argument('--dry-run', action='store_true', help=argparse.SUPPRESS)

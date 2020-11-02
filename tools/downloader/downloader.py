@@ -311,6 +311,8 @@ def main():
     # relation to the optimal number of concurrent downloads
     parser.add_argument('-j', '--jobs', type=positive_int_arg, metavar='N', default=1,
         help='how many downloads to perform concurrently')
+    parser.add_argument('--model_root', type=Path, default=None,
+        help='path to models folder')
 
     args = parser.parse_args()
 
