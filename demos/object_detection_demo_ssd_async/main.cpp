@@ -111,6 +111,7 @@ static void showUsage() {
     std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
+    std::cout << "    -mt                       " << mt_message << std::endl;
 }
 
 
@@ -161,7 +162,7 @@ void paintInfo(cv::Mat& frame, const PipelineBase::PerformanceInfo& info) {
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers certain topology and cannot be generalized for any object detection **/
-        std::cout << "InferenceEngine: " << *InferenceEngine::GetInferenceEngineVersion() << std::endl;
+        slog::info << "InferenceEngine: " << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -178,22 +179,22 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_labels.empty())
             labels = DetectionModel::loadLabels(FLAGS_labels);
 
-        ModelBase* model;
+        std::unique_ptr<ModelBase> model;
         if (FLAGS_mt=="ssd")
         {
-            model = new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels);
+            model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
         else if (FLAGS_mt=="yolo")
         {
-            model = new ModelYolo3(FLAGS_m,(float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, labels);
+            model.reset(new ModelYolo3(FLAGS_m,(float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, labels));
         }
         else
         {
-            std::cout << "Invalid model type provided: " + FLAGS_mt<<std::endl;
+            slog::err << "Invalid model type provided: " + FLAGS_mt << slog::endl;
             return -1;
         }
 
-        PipelineBase pipeline(model, ConfigFactory::GetUserConfig());
+        PipelineBase pipeline(std::move(model), ConfigFactory::GetUserConfig());
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();
@@ -201,23 +202,19 @@ int main(int argc, char *argv[]) {
             int64_t frameNum;
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
-                if (curr_frame.empty()) {
-                    curr_frame = cap->read();
-                    if (curr_frame.empty())
-                        throw std::logic_error("Can't read an image from the input");
-                }
+                curr_frame = cap->read();
+                if (curr_frame.empty())
+                    throw std::logic_error("Can't read an image from the input");
 
                 frameNum = pipeline.submitImage(curr_frame);
-                if (frameNum < 0)
-                    break;
-                curr_frame.release();
             }
 
             //--- Checking for results and rendering data if it's ready
-            //--- If you need just plain data without rendering - check for getProcessedResult() function
+            //--- If you need just plain data without rendering - cast result's underlying pointer to DetectionResult*
+            //    and use your own processing instead of calling renderData().
             std::unique_ptr<ResultBase> result;
             while (result = pipeline.getResult()) {
-                cv::Mat outFrame = model->renderData(result.get());
+                cv::Mat outFrame = DetectionModel::renderData(result.get());
                 //--- Showing results and device information
                 if (!outFrame.empty() && !FLAGS_no_show) {
                     presenter.drawGraphs(outFrame);
@@ -245,24 +242,24 @@ int main(int argc, char *argv[]) {
         auto info = pipeline.getPerformanceInfo();
         slog::info << slog::endl << "Metric reports:" << slog::endl;
 
-        std::cout << std::endl << "Total time: "
+        slog::info << slog::endl << "Total time: "
             << std::chrono::duration_cast<std::chrono::milliseconds> (std::chrono::steady_clock::now()- startTimePoint).count()
-            << " ms" << std::endl;
+            << " ms" << slog::endl;
 
-        std::cout << "Avg Latency: " << std::fixed << std::setprecision(1) <<
+        slog::info << "Avg Latency: " << std::fixed << std::setprecision(1) <<
             info.getTotalAverageLatencyMs()
-            << " ms" << std::endl;
+            << " ms" << slog::endl;
 
-        std::cout << "FPS: " << std::fixed << std::setprecision(1) << info.FPS << std::endl;
+        slog::info << "FPS: " << std::fixed << std::setprecision(1) << info.FPS << slog::endl;
 
-        std::cout << presenter.reportMeans() << std::endl;
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
-        std::cerr << "[ ERROR ] " << error.what() << std::endl;
+        slog::err << "[ ERROR ] " << error.what() << slog::endl;
         return 1;
     }
     catch (...) {
-        std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
+        slog::err << "[ ERROR ] Unknown/internal exception happened." << slog::endl;
         return 1;
     }
 

@@ -28,7 +28,7 @@ public:
 
     virtual void preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, MetaData*& metaData);
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult);
-    virtual cv::Mat renderData(ResultBase* result);
+    static cv::Mat renderData(ResultBase* result);
 
 protected:
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);

@@ -47,7 +47,7 @@ void DetectionModel::preprocess(const InputData& inputData, InferenceEngine::Inf
 cv::Mat DetectionModel::renderData(ResultBase* result)
 {
     // Visualizing result data over source image
-    cv::Mat outputImg = result->metaData.get()->asPtr<ImageMetaData>()->img.clone();
+    cv::Mat outputImg = result->metaData->asPtr<ImageMetaData>()->img.clone();
 
     for (auto obj : result->asPtr<DetectionResult>()->objects) {
         std::ostringstream conf;

@@ -66,7 +66,7 @@ public:
     /// @param cnnConfig - fine tuning configuration for CNN model
     /// @param engine - pointer to InferenceEngine::Core instance to use.
     /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
-    PipelineBase(ModelBase* modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core* engine = nullptr);
+    PipelineBase(std::unique_ptr<ModelBase> modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core* engine = nullptr);
     virtual ~PipelineBase();
 
     /// Waits until either output data becomes available or pipeline allows to submit more input data.

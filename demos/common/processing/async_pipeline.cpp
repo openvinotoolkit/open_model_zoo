@@ -20,9 +20,9 @@
 #include <samples/slog.hpp>
 
 using namespace InferenceEngine;
-
-PipelineBase::PipelineBase(ModelBase* modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core* engine){
-    model.reset(modelInstance);
+    
+PipelineBase::PipelineBase(std::unique_ptr<ModelBase> modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core* engine):
+    model(std::move(modelInstance)){
 
     auto ie = engine ?
         std::unique_ptr<InferenceEngine::Core, void(*)(InferenceEngine::Core*)>(engine, [](InferenceEngine::Core*) {}) :
@@ -32,7 +32,7 @@ PipelineBase::PipelineBase(ModelBase* modelInstance, const CnnConfig& cnnConfig,
     slog::info << "Loading Inference Engine" << slog::endl;
 
     slog::info << "Device info: " << slog::endl;
-    std::cout << ie->GetVersions(cnnConfig.devices);
+    slog::info<< ie->GetVersions(cnnConfig.devices);
 
     /** Load extensions for the plugin **/
     if (!cnnConfig.cpuExtensionsPath.empty()) {

@@ -39,6 +39,7 @@
 #include <iostream>
 
 #include <unordered_map>
+#include "samples/slog.hpp"
 
 static const char help_message[] = "Print a usage message.";
 static const char video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
@@ -144,7 +145,7 @@ void paintInfo(cv::Mat& frame, const PipelineBase::PerformanceInfo& info) {
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers certain topology and cannot be generalized for any object detection **/
-        std::cout << "InferenceEngine: " << InferenceEngine::GetInferenceEngineVersion() << std::endl;
+        slog::info << "InferenceEngine: " << InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -157,8 +158,7 @@ int main(int argc, char *argv[]) {
         cv::Mat curr_frame;
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
-        SegmentationModel model(FLAGS_m);
-        PipelineBase pipeline(&model,ConfigFactory::GetUserConfig());
+        PipelineBase pipeline(std::make_unique<SegmentationModel>(FLAGS_m),ConfigFactory::GetUserConfig());
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();
@@ -166,22 +166,19 @@ int main(int argc, char *argv[]) {
             int64_t frameNum;
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
-                if (curr_frame.empty()) {
-                    curr_frame = cap->read();
-                    if (curr_frame.empty())
-                        throw std::logic_error("Can't read an image from the input");
-                }
+                curr_frame = cap->read();
+                if (curr_frame.empty())
+                    throw std::logic_error("Can't read an image from the input");
 
                 frameNum = pipeline.submitImage(curr_frame);
-                if (frameNum >= 0)
-                    curr_frame.release();
             }
 
             //--- Checking for results and rendering data if it's ready
-            //--- If you need just plain data without rendering - check for getProcessedResult() function
+            //--- If you need just plain data without rendering - cast result's underlying pointer to SegmentationResult*
+            //    and use your own processing instead of calling renderData().
             std::unique_ptr<ResultBase> result;
             while (result = pipeline.getResult()) {
-                cv::Mat outFrame = model.renderData(result.get());
+                cv::Mat outFrame = SegmentationModel::renderData(result.get());
                 //--- Showing results and device information
                 if (!outFrame.empty() && !FLAGS_no_show) {
                     presenter.drawGraphs(outFrame);
@@ -193,14 +190,17 @@ int main(int argc, char *argv[]) {
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
             pipeline.waitForData();
 
-            const int key = cv::waitKey(1);
+            if (!FLAGS_no_show)
+            {
+                const int key = cv::waitKey(1);
 
-            if (!FLAGS_no_show) {
-                if (27 == key || 'q' == key || 'Q' == key) {  // Esc
-                    break;
-                }
-                else {
-                    presenter.handleKey(key);
+                if (!FLAGS_no_show) {
+                    if (27 == key || 'q' == key || 'Q' == key) {  // Esc
+                        break;
+                    }
+                    else {
+                        presenter.handleKey(key);
+                    }
                 }
             }
         }
@@ -209,24 +209,24 @@ int main(int argc, char *argv[]) {
         auto info = pipeline.getPerformanceInfo();
         slog::info << slog::endl << "Metric reports:" << slog::endl;
 
-        std::cout << std::endl << "Total time: "
+        slog::info << slog::endl << "Total time: "
             << std::chrono::duration_cast<std::chrono::milliseconds> (std::chrono::steady_clock::now()- startTimePoint).count()
-            << " ms" << std::endl;
+            << " ms" << slog::endl;
 
         //--- Show performace results 
-        std::cout << "Avg Latency: " << std::fixed << std::setprecision(1) <<
-            info.getTotalAverageLatencyMs() << " ms" << std::endl;
+        slog::info << "Avg Latency: " << std::fixed << std::setprecision(1) <<
+            info.getTotalAverageLatencyMs() << " ms" << slog::endl;
 
-        std::cout << "FPS: " << std::fixed << std::setprecision(1) << info.FPS << std::endl;
+        slog::info << "FPS: " << std::fixed << std::setprecision(1) << info.FPS << slog::endl;
 
-        std::cout << presenter.reportMeans() << std::endl;
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
-        std::cerr << "[ ERROR ] " << error.what() << std::endl;
+        slog::err << "[ ERROR ] " << error.what() << slog::endl;
         return 1;
     }
     catch (...) {
-        std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
+        slog::err << "[ ERROR ] Unknown/internal exception happened." << slog::endl;
         return 1;
     }
 

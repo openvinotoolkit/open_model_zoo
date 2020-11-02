@@ -127,7 +127,7 @@ const cv::Vec3b& SegmentationModel::class2Color(int classId)
 cv::Mat SegmentationModel::renderData(ResultBase* result)
 {
     auto segResult = result->asPtr<SegmentationResult>();
-    auto inputImg = segResult->metaData.get()->asPtr<ImageMetaData>()->img;
+    auto inputImg = segResult->metaData->asPtr<ImageMetaData>()->img;
 
     // Visualizing result data over source image
     cv::Mat outputImg;

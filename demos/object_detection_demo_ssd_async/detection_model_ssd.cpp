@@ -50,7 +50,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult)
     DetectionResult* result = new DetectionResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
-    auto sz = infResult.metaData.get()->asPtr<ImageMetaData>()->img.size();
+    auto sz = infResult.metaData->asPtr<ImageMetaData>()->img.size();
 
     for (size_t i = 0; i < maxProposalCount; i++) {
         DetectedObject desc;
@@ -128,7 +128,7 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork){
 
     int num_classes = 0;
 
-/*    if (auto ngraphFunction = cnnNetwork.getFunction()) {
+    if (auto ngraphFunction = cnnNetwork.getFunction()) {
         for (const auto op : ngraphFunction->get_ops()) {
             if (op->get_friendly_name() == outputsNames[0]) {
                 auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
@@ -144,7 +144,7 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork){
     }
     else {
         throw std::logic_error("This demo requires IR version no older than 10");
-    }*/
+    }
     if (labels.size()) {
         if (static_cast<int>(labels.size()) == (num_classes - 1)) {  // if network assumes default "background" class, having no label
             labels.insert(labels.begin(), "fake");
@@ -155,14 +155,17 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork){
     }
 
     const SizeVector outputDims = output->getTensorDesc().getDims();
+
+    if (outputDims.size() != 4) {
+        throw std::logic_error("Incorrect output dimensions for SSD");
+    }
+
     maxProposalCount = outputDims[2];
     objectSize = outputDims[3];
     if (objectSize != 7) {
         throw std::logic_error("Output should have 7 as a last dimension");
     }
-    if (outputDims.size() != 4) {
-        throw std::logic_error("Incorrect output dimensions for SSD");
-    }
+
     output->setPrecision(Precision::FP32);
     output->setLayout(Layout::NCHW);
 }
