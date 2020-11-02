@@ -104,12 +104,6 @@ public:
     /// @returns rendered frame, its size corresponds to the size of network output
 
 protected:
-    /// This function is called during intialization before loading model to device
-    /// Inherited classes may override this function to prepare input/output blobs (get names, set precision, etc...)
-    /// The value of outputName member variable is also may to be set here (however, it can be done in any other place).
-    /// @param cnnNetwork - CNNNetwork object already loaded during initialization
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {}
-
     /// Submit request to network
     /// @param request - request to be submitted (caller function should obtain it using getIdleRequest)
     /// @param metaData - additional source data. This is optional transparent data not used in inference process directly.
@@ -147,4 +141,3 @@ protected:
 
     std::unique_ptr<ModelBase> model;
 };
-
