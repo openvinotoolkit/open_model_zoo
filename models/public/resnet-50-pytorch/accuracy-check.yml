@@ -44,7 +44,6 @@ models:
     launchers:
       - framework: dlsdk
         adapter: classification
-        model: /media/automation/omz_validation_datasets/users/eaidova/kmb_fp16/resnet-50-pytorch/caffe2/FP16/resnet-50-pytorch.xml
 
     datasets:
       - name: imagenet_1000_classes
