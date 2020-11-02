@@ -34,7 +34,9 @@ if not "%1" == "" (
         shift & shift
         goto argParse
     )
-
+    rem to build more than one specific demo use quotation marks,
+    rem list the necessary demos comma-separated and without spaces,
+    rem ex. -DDEMOS="classification_demo,segmentation_demo"
     if "%1" == "-DDEMOS" (
         set EXTRA_CMAKE_OPTS=%EXTRA_CMAKE_OPTS% %1=%2
         shift & shift
