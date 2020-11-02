@@ -244,10 +244,7 @@ class MaskRCNNAdapter(Adapter):
         if raw_mask_for_all_classes:
             per_obj_raw_masks = []
             for cls, raw_mask in zip(classes, raw_masks):
-                if self.scores_out:
-                    per_obj_raw_masks.append(raw_mask[cls, ...])
-                else:
-                    per_obj_raw_masks.append(raw_mask)
+                per_obj_raw_masks.append(raw_mask[cls, ...] if self.scores_out else raw_mask)
         else:
             per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
 
