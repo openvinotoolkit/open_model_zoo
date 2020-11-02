@@ -32,12 +32,12 @@ class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
                     is_directory=True, optional=False,
                     description='path to input images'
                 ),
-                'meta_file': PathField(
+                'dataset_meta_file': PathField(
                     description='path to json file with dataset meta (e.g. label_map)', optional=True
                 ),
                 'label_id': NumberField(
                     description='number of label in the annotation file representing spoof/real labels',
-                    optional=True, default=43
+                    optional=True, default=43, value_type=int
                 ),
                 'annotation_file': PathField(
                     description='path to json file with dataset annotations'
@@ -52,7 +52,7 @@ class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
         self.data_dir = self.get_value_from_config('data_dir')
         self.annotations = self.get_value_from_config('annotation_file')
         self.label_id = self.get_value_from_config('label_id')
-        self.meta = self.get_value_from_config('meta_file')
+        self.meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         """Reads data from disk and returns dataset in converted for AC format
@@ -81,7 +81,7 @@ class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
                 if not check_file_existence(self.data_dir /img_name):
                     content_errors.append('{}: does not exist'.format(img_name))
             if progress_callback is not None and i % progress_interval == 0:
-                    progress_callback(i / num_iterations * 100)
+                progress_callback(i / num_iterations * 100)
 
         return ConverterReturn(annotations, meta, content_errors)
 
@@ -100,8 +100,7 @@ class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
         dataset_annotations = read_json(self.annotations)
         for index in dataset_annotations:
             path = dataset_annotations[index]['path']
-            # this branch will be needed if multi-task labels given to input
-            target_label = dataset_annotations[index]['labels'][int(self.label_id)]
+            target_label = dataset_annotations[index]['labels'][self.label_id]
             bbox = dataset_annotations[index].get('bbox')
             annotation_store.append((path, target_label, bbox))
 

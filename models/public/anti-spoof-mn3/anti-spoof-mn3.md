@@ -20,11 +20,7 @@ For details see original [repository](https://github.com/kirillProkofiev/light-w
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| AUC    | 99.8%          | 99.8%         |
-| EER    | 2.25%          | 2.25%         |
-| APCER  | 0.68%          | 0.68%         |
-| BPCER  | 6.93%          | 6.93%         |
-| ACER   | 3.81%           | 3.81%          |
+| ACER   | 3.81%          | 3.81%           |
 
 ## Performance
 
