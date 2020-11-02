@@ -39,14 +39,14 @@ The formula-recognition-polynomials-handwritten-0001-encoder model is a ResNeXt-
 
 ### Inputs
 
-1.	Name: `imgs` , shape: [1x3x100x990]. An input image in the [1xCxHxW] format.
+1.	Name: `imgs` , shape: [1x3x96x990]. An input image in the [1xCxHxW] format.
     The expected channel order is BGR.
 
 ### Outputs
 1.	Name: `hidden`, shape: [1x512]. Initial context state of the LSTM cell.
 2.	Name: `context`, shape: [1x512]. Initial hidden state of the LSTM cell.
 3.	Name: `init_0`, shape: [1x256]. Initial state of the decoder.
-5.	Name: `row_enc_out`, shape: [1x7x62x512]. Features from encoder that are fed to a decoder.
+4.	Name: `row_enc_out`, shape: [1x7x62x512]. Features from encoder that are fed to a decoder.
 
 
 
@@ -76,7 +76,7 @@ The formula-recognition-polynomials-handwritten-0001-decoder model is an LSTM ba
 1.	Name: `dec_st_c` , shape: [1x512]. Current context state of the LSTM cell.
 2.	Name: `dec_st_h` , shape: [1x512]. Current hidden state of the LSTM cell.
 3.	Name: `output`, shape: [1x256]. Current state of the decoder.
-1.	Name: `logit`, shape: [1xVocab_Size]. Classification confidence scores in the [0, 1] range
+4.	Name: `logit`, shape: [1xVocab_Size]. Classification confidence scores in the [0, 1] range
     for every token.
 
 
