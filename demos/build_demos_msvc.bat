@@ -35,6 +35,12 @@ if not "%1" == "" (
         goto argParse
     )
 
+    if "%1" == "-DDEMOS" (
+        set EXTRA_CMAKE_OPTS=%EXTRA_CMAKE_OPTS% %1=%2
+        shift & shift
+        goto argParse
+    )
+
     if not "%VS_VERSION%" == "" (
         echo Unexpected argument: "%1"
         goto errorHandling

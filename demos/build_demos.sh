@@ -32,6 +32,9 @@ for opt in "$@"; do
     -DENABLE_PYTHON=*)
         extra_cmake_opts+=("$opt")
         ;;
+    -DDEMOS=*)
+        extra_cmake_opts+=("$opt")
+        ;;
     *)
         printf "Unknown option: %q\n" "$opt"
         exit 1
