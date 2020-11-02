@@ -78,7 +78,7 @@ The formula-recognition-polynomials-handwritten-0001-decoder model is an LSTM ba
 1.	Name: `dec_st_c` , shape: [1x512]. Current context state of the LSTM cell.
 2.	Name: `dec_st_h` , shape: [1x512]. Current hidden state of the LSTM cell.
 3.	Name: `output`, shape: [1x256]. Current state of the decoder.
-4.	Name: `logit`, shape: [1xVocab_Size]. Classification confidence scores in the [0, 1] range
+4.	Name: `logit`, shape: [1xN], where `N` is a vocabulary size. Classification confidence scores in the [0, 1] range
     for every token.
 
 
