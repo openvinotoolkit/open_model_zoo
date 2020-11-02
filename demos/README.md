@@ -6,6 +6,7 @@ The Open Model Zoo includes the following demos:
 
 - [3D Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_3d_demo/README.md) - 3D human pose estimation demo.
 - [Action Recognition Python* Demo](./python_demos/action_recognition/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
+- [Gesture Recognition Python* Demo](./python_demos/gesture_recognition_demo/README.md) - Demo application for Gesture Recognition algorithm (e.g. American Sign Language gestures), which classifies gesture actions that are being performed on input video.
 - [BERT Question Answering Python* Demo](./python_demos/bert_question_answering_demo/README.md)
 - [BERT Question Answering Embedding Python* Demo](./python_demos/bert_question_answering_embedding_demo/README.md) - The demo demonstrates how to run BERT based models for question answering task.
 - [Classification C++ Demo](./classification_demo/README.md) - Shows an example of using neural networks for image classification.
