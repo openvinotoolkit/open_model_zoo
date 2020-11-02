@@ -815,3 +815,6 @@ class UnsupportedPackage:
         msg = "{package} is not installed. Please install it before using {provider}.\n{message}".format(
             provider=provider, package=self.package, message=self.msg)
         raise ImportError(msg)
+
+    def __call__(self, *args, **kwargs):
+        self.raise_error('')
