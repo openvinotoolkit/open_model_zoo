@@ -21,7 +21,9 @@ from ..representation import (
     SegmentationPrediction, SegmentationAnnotation,
     StyleTransferAnnotation, StyleTransferPrediction,
     SuperResolutionPrediction, SuperResolutionAnnotation,
-    ImageProcessingPrediction, ImageProcessingAnnotation)
+    ImageProcessingPrediction, ImageProcessingAnnotation,
+    ImageInpaintingAnnotation, ImageInpaintingPrediction
+)
 from ..postprocessor.postprocessor import PostprocessorWithSpecificTargets, ApplyToOption
 from ..postprocessor import ResizeSegmentationMask
 from ..config import NumberField
@@ -33,9 +35,11 @@ class Resize(PostprocessorWithSpecificTargets):
     __provider__ = 'resize'
 
     prediction_types = (StyleTransferPrediction, ImageProcessingPrediction,
-                        SegmentationPrediction, SuperResolutionPrediction, )
+                        SegmentationPrediction, SuperResolutionPrediction,
+                        ImageInpaintingPrediction)
     annotation_types = (StyleTransferAnnotation, ImageProcessingAnnotation,
-                        SegmentationAnnotation, SuperResolutionAnnotation, )
+                        SegmentationAnnotation, SuperResolutionAnnotation,
+                        ImageInpaintingPrediction)
 
     @classmethod
     def parameters(cls):
@@ -69,6 +73,8 @@ class Resize(PostprocessorWithSpecificTargets):
         @resize.register(SuperResolutionPrediction)
         @resize.register(ImageProcessingAnnotation)
         @resize.register(ImageProcessingPrediction)
+        @resize.register(ImageInpaintingAnnotation)
+        @resize.register(ImageInpaintingPrediction)
         def _(entry, height, width):
             entry.value = entry.value.astype(np.uint8)
             data = Image.fromarray(entry.value)
@@ -107,8 +113,8 @@ class Resize(PostprocessorWithSpecificTargets):
         @set_sizes.register(SuperResolutionAnnotation)
         @set_sizes.register(SuperResolutionPrediction)
         def _(entry):
-            height = self.dst_height if self.dst_height else entry.shape[0]
-            width = self.dst_width if self.dst_width else entry.shape[1]
+            height = self.dst_height if self.dst_height else entry.value.shape[0]
+            width = self.dst_width if self.dst_width else entry.value.shape[1]
 
             return height, width
 
