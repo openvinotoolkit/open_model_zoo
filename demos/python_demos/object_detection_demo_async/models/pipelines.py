@@ -5,7 +5,7 @@ from time import perf_counter
 from .model import Model
 
 
-class SyncModelRunner:
+class SyncPipeline:
     def __init__(self, ie, model, device='CPU'):
         self.device = device
         self.model = model
@@ -20,7 +20,7 @@ class SyncModelRunner:
         return outputs
 
 
-class AsyncModelRunner:
+class AsyncPipeline:
     def __init__(self, ie, model, *, device='CPU', plugin_config={}, max_num_requests=1,
                  completed_requests={}, caught_exceptions=None):
         self.model = model
@@ -71,7 +71,6 @@ class AsyncModelRunner:
             return self.completed_request_results.popitem()
         else:
             return None, None
-
 
     def await_all(self):
         for request in self.exec_net.requests:

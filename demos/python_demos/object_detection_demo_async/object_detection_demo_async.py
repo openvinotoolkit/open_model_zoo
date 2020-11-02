@@ -34,7 +34,7 @@ sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'commo
 import monitors
 
 from models import *
-from models.model_runner import AsyncModelRunner, SyncModelRunner
+from models.pipelines import AsyncPipeline, SyncPipeline
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
 log = logging.getLogger()
@@ -201,6 +201,7 @@ def draw_detections(frame, detections, palette, labels, threshold):
             cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
                         (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
+
     return frame
 
 
@@ -237,7 +238,7 @@ def main():
     if args.sync:
         mode = Modes.SYNC
         mode_info = {mode: ModeInfo()} # For backward compatibility with statistics gatherer
-        detector =  SyncModelRunner(ie, model, device=args.device)
+        detector =  SyncPipeline(ie, model, device=args.device)
     else:
         completed_request_results = {}
         modes = cycle(islice(Modes,2))
@@ -247,13 +248,13 @@ def main():
         exceptions = []
         detectors = {
             Modes.USER_SPECIFIED:
-                AsyncModelRunner(ie, model, device=args.device, plugin_config=config_user_specified,
-                                 caught_exceptions=exceptions, completed_requests=completed_request_results,
-                                 max_num_requests=args.num_infer_requests),
+                AsyncPipeline(ie, model, device=args.device, plugin_config=config_user_specified,
+                              caught_exceptions=exceptions, completed_requests=completed_request_results,
+                              max_num_requests=args.num_infer_requests),
             Modes.MIN_LATENCY:
-                AsyncModelRunner(ie, model, device=args.device, plugin_config=config_min_latency,
-                                 caught_exceptions=exceptions, completed_requests=completed_request_results,
-                                 max_num_requests=args.num_infer_requests)
+                AsyncPipeline(ie, model, device=args.device, plugin_config=config_min_latency,
+                              caught_exceptions=exceptions, completed_requests=completed_request_results,
+                              max_num_requests=args.num_infer_requests)
         }
 
     log.info('Using {} mode'.format(mode.name))
