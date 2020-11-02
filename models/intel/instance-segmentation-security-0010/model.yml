@@ -1,0 +1,46 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  General purpose instance segmentation model. Mask R-CNN with ResNet50 backbone -  PANet
+  feature refiner with GroupNorm and DeformableConv operations and Adaptive Feature
+  Pooling in all ROI-wise heads.
+task_type: instance_segmentation
+files:
+  - name: FP32/instance-segmentation-security-0010.xml
+    size: 621532
+    sha256: 2c70bb88967e4381671514ff40add3e479ceffb305eed378a91fde77ef8a5f06
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/instance-segmentation-security-0010/FP32/instance-segmentation-security-0010.xml
+  - name: FP32/instance-segmentation-security-0010.bin
+    size: 688761896
+    sha256: c5bd3d72affcb62f734ed8c8360f89d2048001fae344c1b8dc34224afb459920
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/instance-segmentation-security-0010/FP32/instance-segmentation-security-0010.bin
+  - name: FP16/instance-segmentation-security-0010.xml
+    size: 621321
+    sha256: 9e8c32374deb1ee2120efdc895d162e4b192c9be4651df5b4a5cd1a77532803d
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/instance-segmentation-security-0010/FP16/instance-segmentation-security-0010.xml
+  - name: FP16/instance-segmentation-security-0010.bin
+    size: 344381074
+    sha256: 2a4e95f7bf418ced9a11dd68adb99f600369deef7072fe0d506c3bcc63fc6ee2
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/instance-segmentation-security-0010/FP16/instance-segmentation-security-0010.bin
+  - name: FP16-INT8/instance-segmentation-security-0010.xml
+    size: 1437491
+    sha256: 9d8c9424e188c6dd8cf60a5d9dc5581749b0672c4566570204baf662c4918ef2
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/instance-segmentation-security-0010/FP16-INT8/instance-segmentation-security-0010.xml
+  - name: FP16-INT8/instance-segmentation-security-0010.bin
+    size: 318659054
+    sha256: 4fa096f9ab7da5116ad2c28fb0b479acb55f5f657c1bb66630709e40cd85550a
+    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/instance-segmentation-security-0010/FP16-INT8/instance-segmentation-security-0010.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
