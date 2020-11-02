@@ -165,29 +165,8 @@ __all__ = [
     'FeaturesRegressionConverter',
     'Im2latexDatasetConverter',
     'DNASequenceDatasetConverter',
-<<<<<<< HEAD
-<<<<<<< HEAD
     'PlaceRecognitionDatasetConverter',
     'ClutteredMNISTConverter',
-    'MPIIDatasetConverter'
-=======
-<<<<<<< HEAD
-    'PlaceRecognitionDatasetConverter'
-=======
-=======
-
-=======
-    'CocosnetConverter'
->>>>>>> add Cocosnet annotation converter
->>>>>>> add Cocosnet annotation converter
->>>>>>> add Cocosnet annotation converter
->>>>>>> add Cocosnet annotation converter
-=======
-    'PlaceRecognitionDatasetConverter',
-<<<<<<< HEAD
-    'CocosnetConverter',
->>>>>>> Add custom evaluator and delete constants from adapter
-=======
-    'ADE20kImageTranslationConverter',
->>>>>>> Fix segmentation fault error and add GanCheckModel for calculate gan metrics
+    'MPIIDatasetConverter',
+    'ADE20kImageTranslationConverter'
 ]

@@ -229,9 +229,11 @@ The task of speech recognition is to recognize and translate spoken language int
 
 The task of image translation is to generate the output based on exemplar.
 
-| Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops | mParams |
-| -----------| -------------- | ---------------------------------- | -------- | ------ | ------- |
-| CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/cocosnet.md) | 12.98dB  |        |         |
+| Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops   | mParams |
+| -----------| -------------- | ---------------------------------- | -------- | -------- | ------- |
+| CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/cocosnet.md) | 12.93dB  |          |         |
+| CoCosNet-correspondence |   |                                    |          | 696.2608 | 71.2493 |
+| CoCosNet-translation    |   |                                    |          | 389.5112 | 96.6649 |
 
 ## Legal Information
 

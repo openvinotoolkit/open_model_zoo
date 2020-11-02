@@ -29,7 +29,7 @@ from ...logging import print_info
 from ...preprocessor import PreprocessingExecutor
 from ...progress_reporters import ProgressReporter
 from ...representation import RawTensorPrediction, RawTensorAnnotation
-from ...utils import get_path, extract_image_representations
+from ...utils import extract_image_representations, contains_all, get_path
 
 
 class CocosnetEvaluator(BaseEvaluator):
@@ -65,7 +65,31 @@ class CocosnetEvaluator(BaseEvaluator):
         )
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
 
-        network_info = config['network_info']
+        network_info = config.get('network_info', {})
+        if not delayed_model_loading:
+            correspondence_network = network_info.get('correspondence_network', {})
+            generative_network = network_info.get('generative_network', {})
+            verification_network = network_info.get('verification_network', {})
+            model_args = config.get('_models', [])
+            models_is_blob = config.get('_model_is_blob')
+            if 'model' not in correspondence_network and model_args:
+                correspondence_network['model'] = model_args[0]
+                correspondence_network['_model_is_blob'] = models_is_blob
+            if 'model' not in generative_network and model_args:
+                generative_network['model'] = model_args[1 if len(model_args) > 1 else 0]
+                generative_network['_model_is_blob'] = models_is_blob
+            if 'model' not in verification_network and model_args:
+                verification_network['model'] = model_args[len(model_args) - 1]
+                verification_network['_model_is_blob'] = models_is_blob
+            network_info.update({
+                'correspondence_network': correspondence_network,
+                'generative_network': generative_network,
+                'verification_network': verification_network
+            })
+            if not contains_all(network_info, ['correspondence_network', 'generative_network',
+                                               'verification_network']):
+                raise ConfigError('configuration for correspondence_network/generative_network/'
+                                  'verification_network does not exist')
         gan_model = CocosnetModel(network_info, launcher, delayed_model_loading)
         check_model = GanCheckModel(network_info.get('verification_network', {}), launcher, delayed_model_loading)
 
@@ -208,6 +232,8 @@ class CocosnetEvaluator(BaseEvaluator):
         progress_reporter.reset(self.dataset.size)
 
     def release(self):
+        self.test_model.release()
+        self.check_model.release()
         self.launcher.release()
 
     def reset(self):
@@ -295,8 +321,9 @@ class CocosnetEvaluator(BaseEvaluator):
 
 class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
-        self.input_blob, self.output_blob = None, None
-        self.with_prefix = None
+        self.input_blob = None
+        self.output_blob = None
+        self.with_prefix = False
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
 
@@ -328,7 +355,8 @@ class BaseModel:
         raise NotImplementedError
 
     def release(self):
-        pass
+        del self.network
+        del self.exec_network
 
     def load_model(self, network_info, launcher, log=False):
         model, weights = self.auto_model_search(network_info, self.net_type)
@@ -351,7 +379,7 @@ class BaseModel:
         pass
 
     def print_input_output_info(self):
-        print_info('{} - Input info:'.format(self.default_model_suffix))
+        print_info('{} - Input info:'.format(self.net_type))
         has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
         if self.network:
             if has_info:
@@ -373,7 +401,7 @@ class BaseModel:
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(input_info.precision))
             print_info('\tshape {}\n'.format(input_info.shape))
-        print_info('{} - Output info'.format(self.default_model_suffix))
+        print_info('{} - Output info'.format(self.net_type))
         for name, output_info in network_outputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
@@ -381,8 +409,6 @@ class BaseModel:
 
 
 class CorrespondenceNetwork(BaseModel):
-    default_model_suffix = 'corr'
-
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.net_type = "correspondence_network"
         super().__init__(network_info, launcher, delayed_model_loading)
@@ -390,34 +416,29 @@ class CorrespondenceNetwork(BaseModel):
     def set_input_and_output(self):
         has_info = hasattr(self.exec_network, 'input_info')
         if has_info:
-            self.inputs = OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
+            inputs_data = OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
         else:
-            self.inputs = self.exec_network.inputs
-        self.outputs = self.exec_network.outputs
-        self.key_of_warped_reference = list(self.outputs.keys())[0]
-        self.key_of_input_semantics = list(self.inputs.keys())[0]
+            inputs_data = self.exec_network.inputs
+        self.inputs_names = list(inputs_data.keys())
+        self.outputs_names = list(self.exec_network.outputs.keys())
+        self.key_of_warped_reference = self.outputs_names[0]
+        self.key_of_input_semantics = self.inputs_names[0]
 
     def fit_to_input(self, input_data):
         inputs = {}
-        for value, key in zip(input_data, self.inputs.keys()):
+        for value, key in zip(input_data, self.inputs_names):
             value = np.expand_dims(value, 0)
             value = np.transpose(value, (0, 3, 1, 2))
             inputs.update({key: value})
         return inputs
-
-    def release(self):
-        del self.network
-        del self.exec_network
 
     def predict(self, input_data):
         return self.exec_network.infer(input_data)
 
 
 class GeneratorNetwork(BaseModel):
-    default_model_suffix = 'gen'
-
     def __init__(self, network_info, launcher, delayed_model_loading=False):
-        self.net_type = "generarative_network"
+        self.net_type = "generative_network"
         self.adapter = create_adapter(network_info.get('adapter'))
         super().__init__(network_info, launcher)
         self.adapter.output_blob = self.output_blob
@@ -443,10 +464,6 @@ class GeneratorNetwork(BaseModel):
     def fit_to_input(self, input_data):
         return {self.input_blob: input_data}
 
-    def release(self):
-        del self.network
-        del self.exec_network
-
     def predict(self, identifiers, input_data):
         predictions = self.exec_network.infer(self.fit_to_input(input_data))
         result = self.adapter.process(predictions, identifiers, [{}])
@@ -455,13 +472,13 @@ class GeneratorNetwork(BaseModel):
 
 class CocosnetModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
-        self.correspondence = CorrespondenceNetwork(network_info['correspondence'], launcher,
+        self.correspondence = CorrespondenceNetwork(network_info['correspondence_network'], launcher,
                                                     delayed_model_loading)
-        self.generator = GeneratorNetwork(network_info['generator'], launcher, delayed_model_loading)
+        self.generator = GeneratorNetwork(network_info['generative_network'], launcher, delayed_model_loading)
 
     def release(self):
-        self.correspondence.release()
         self.generator.release()
+        self.correspondence.release()
 
     def predict(self, identifiers, inputs):
         results = []
@@ -476,8 +493,6 @@ class CocosnetModel:
 
 
 class GanCheckModel(BaseModel):
-    default_model_suffix = 'check'
-
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.net_type = "verification_network"
         self.additional_layers = network_info.get('additional_layers')
@@ -491,6 +506,7 @@ class GanCheckModel(BaseModel):
                 self.network.add_outputs(layer)
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
+            self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
         if log:
@@ -509,10 +525,6 @@ class GanCheckModel(BaseModel):
         input_data = np.expand_dims(input_data, 0)
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         return {self.input_blob: input_data}
-
-    def release(self):
-        del self.network
-        del self.exec_network
 
     def predict(self, identifiers, input_data, index_of_key):
         results = []

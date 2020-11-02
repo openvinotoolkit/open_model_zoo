@@ -35,7 +35,7 @@ class ADE20kImageTranslationConverter(BaseFormatConverter):
                 optional=False, is_directory=True,
                 description="Path to directory with masks."
             ),
-            'reference_dict': PathField(
+            'reference_file': PathField(
                 optional=False, description="Path to .txt file with pairs (validation:train)."
             )
         })
@@ -44,7 +44,7 @@ class ADE20kImageTranslationConverter(BaseFormatConverter):
     def configure(self):
         self.image_dir = self.get_value_from_config('images_dir')
         self.annotation_dir = self.get_value_from_config('annotations_dir')
-        self.reference_dict = self.get_value_from_config('reference_dict')
+        self.reference_dict = self.get_value_from_config('reference_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_check_errors = [] if check_content else None

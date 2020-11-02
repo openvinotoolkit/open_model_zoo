@@ -95,10 +95,7 @@ class ColorizationEvaluator(BaseEvaluator):
             **kwargs):
 
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
-<<<<<<< HEAD
 
-=======
->>>>>>> delete cocosnet_evaluator from README
             self.select_dataset(dataset_tag)
 
         self._annotations, self._predictions = [], []
@@ -386,10 +383,6 @@ class ColorizationTestModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.net_type = 'colorization_network'
         super().__init__(network_info, launcher, delayed_model_loading)
-<<<<<<< HEAD
-=======
-        self.color_coeff = np.load(network_info['color_coeff'])
->>>>>>> delete cocosnet_evaluator from README
 
     @staticmethod
     def data_preparation(input_data):
@@ -399,7 +392,6 @@ class ColorizationTestModel(BaseModel):
         img_l_rs = np.copy(img_lab[:, :, 0])
         return img_l, img_l_rs
 
-<<<<<<< HEAD
     @staticmethod
     def central_crop(input_data, crop_size=(224, 224)):
         h, w = input_data.shape[:2]
@@ -422,23 +414,6 @@ class ColorizationTestModel(BaseModel):
         res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})
 
         new_result = self.postprocessing(res[self.output_blob], img_l)
-=======
-    def postprocessing(self, res, img_l, output_blob, img_size):
-        update_res = (res[output_blob] * self.color_coeff.transpose()[:, :, np.newaxis, np.newaxis]).sum(1)
-
-        out = update_res.transpose((1, 2, 0)).astype(np.float32)
-        out = cv2.resize(out, img_size)
-        img_lab_out = np.concatenate((img_l[:, :, np.newaxis], out), axis=2)
-        new_result = [np.clip(cv2.cvtColor(img_lab_out, cv2.COLOR_Lab2BGR), 0, 1)]
-        return new_result
-
-    def predict(self, identifiers, input_data):
-        img_l, img_l_rs = self.data_preparation(input_data)
-        h_orig, w_orig = input_data[0].shape[:2]
-        res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})
-
-        new_result = self.postprocessing(res, img_l, self.output_blob, (w_orig, h_orig))
->>>>>>> delete cocosnet_evaluator from README
         return res, np.array(new_result)
 
     def release(self):

@@ -13,19 +13,22 @@
 # limitations under the License.
 
 description: >-
-  Cross-domain correspondence network is a exemplar-based image translation model.
-  Model was pre-trained on ADE20k dataset. The `CoCosNet` architecture comprises two sub-networks:
-  `Correspondence` network and `Translation` network.
-  For details see paper <https://arxiv.org/pdf/2004.05571>.
+  The purpose of correspondence model is to establish correspondence between input image and given exemplar.
+  Correspondence network return warped exemplar with semantic from input.
 task_type: image_translation
 files:
   - name: corr.onnx
-    size: 237471853
-    sha256: cf2de274232bb9f6ad2acfe84c16aea71b196efd4f260a664ed000a090657f0d
+    size: 237471979
+    sha256: e6ca7650eef0192b7ced574d286c73dd29ec2d3a7b47550183cae5c28ebff52c
     source:
       $type: google_drive
-      id: 1T8g6Lbyl1vRzPByN7dvdf694sSaCbij7
+      id: 1d6oJZwrJKNOnY71sB_yLaBu7kefWlQig
 model_optimizer_args:
   - --input_model=$dl_dir/corr.onnx
+  - --input=input_seg_map,ref_image,ref_seg_map
+  - --output=warped_exemplar,warped_mask
+  - --mean_values=ref_image[127.5,127.5,127.5]
+  - --scale_values=ref_image[127.5,127.5,127.5]
+  - --reverse_input_channels
 framework: onnx
 license: https://raw.githubusercontent.com/microsoft/CoCosNet/master/LICENSE

@@ -3,20 +3,19 @@ evaluations:
     module: custom_evaluators.cocosnet_evaluator.CocosnetEvaluator
     module_config:
       network_info:
-        correspondence:
-        generator:
+        correspondence_network: {}
+        generative_network:
           adapter: cocosnet
         verification_network:
           additional_layers: ["InceptionV3/Logits/AvgPool_1a_8x8/AvgPool"]
 
       launchers:
         - framework: dlsdk
-          device: CPU
           inputs:
-            - name: "input.1"
+            - name: "input_seg_map"
               type: INPUT
               value: "(.*)ADE(.*)val(.*).png"
-            - name: "input.70"
+            - name: "ref_image"
               type: INPUT
               value: "(.*)train(.*).jpg"
             - name: "ref_seg_map"
@@ -24,13 +23,8 @@ evaluations:
               value: "(.*)ADE(.*)train(.*).png"
 
       datasets:
-        - name: cocosnet
-          annotation_conversion:
-            converter: ade20k_image_translation
-            images_dir: ADEChallengeData2016/images
-            annotations_dir: ADEChallengeData2016/annotations
-            reference_dict: public/cocosnet/data/ade20k_ref_test.txt
-          data_source: ADEChallengeData2016/ADE20k
+        - name: cocosnet_image_translation
+
           preprocessing_mask:
             - type: bgr_to_gray
             - type: resize
@@ -44,27 +38,11 @@ evaluations:
               value: 1
 
           preprocessing_image:
-            - type: bgr_to_rgb
             - type: resize
               size: 256
               interpolation: BICUBIC
               use_pillow: False
-            - type: normalization
-              mean: [127.5, 127.5, 127.5]
-              std: [127.5, 127.5, 127.5]
 
           postprocessing:
-            - type: resize_cocosnet
+            - type: resize
               apply_to: prediction
-          
-          metrics:
-            - type: psnr
-              scale_border: 0
-              presenter: print_vector
-            - type: ssim
-              presenter: print_vector
-            - type: fid
-              length: 2048
-              eps: 0.000001
-            - type: inception_score
-              length: 1001

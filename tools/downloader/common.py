@@ -61,6 +61,7 @@ KNOWN_TASK_TYPES = {
     'human_pose_estimation',
     'image_inpainting',
     'image_processing',
+    'image_translation',
     'instance_segmentation',
     'machine_translation',
     'monocular_depth_estimation',
@@ -71,8 +72,7 @@ KNOWN_TASK_TYPES = {
     'sound_classification',
     'speech_recognition',
     'style_transfer',
-    'token_recognition',
-    'image_translation'
+    'token_recognition'
 }
 
 KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}

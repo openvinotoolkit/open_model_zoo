@@ -1,11 +1,9 @@
-# cocosnet
+# cocosnet (composite)
 
 ## Use Case and High-Level Description
 
-Cross-domain correspondence network is a exemplar-based image translation model. \
-Model was pre-trained on ADE20k dataset. The `CoCosNet` architecture comprises two sub-networks: \
-`Correspondence` network and `Translation` network.
-For details see [paper](https://arxiv.org/pdf/2004.05571).
+Cross-domain correspondence network is a exemplar-based image translation composite model, consisting of correspondence and translation parts. Model was pre-trained on ADE20k dataset.
+For details see [paper](https://arxiv.org/pdf/2004.05571) and [repository](https://github.com/microsoft/CoCosNet).
 
 ## Example
 
@@ -13,32 +11,32 @@ For details see [paper](https://arxiv.org/pdf/2004.05571).
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Source framework                | PyTorch*                                  |
+| Source framework                | PyTorch\*                                  |
 
-## Specification for Correspondence model
+## Specification for Correspondence network
 
-The purpose of correspondence model is to establish correspondence between input image and given exemplar. \
+The purpose of correspondence network is to establish correspondence between input image and given exemplar.
 Correspondence network return warped exemplar with semantic from input.
 
 ### Performance
 
 ### Inputs
 
-1. name: "input.1", shape: [1x151x256x256] - Input semantic segmentation mask (one-hot label map) in the format [BxCxHxW],
+1. name: "input_seg_map", shape: [1x151x256x256] - Input semantic segmentation mask (one-hot label map) in the format [BxCxHxW],
    where:
     - B - batch size
     - C - number of classes (151 for ADE20k)
     - H - mask height
     - W - mask width
 
-2. name: "input.70", shape: [1x3x256x256] - An reference image (exemplar) in the format [BxCxHxW],
+2. name: "ref_image", shape: [1x3x256x256] - An reference image (exemplar) in the format [BxCxHxW],
    where:
     - B - batch size
     - C - number of channels
     - H - image height
     - W - image width
 
-    Expected color order is RGB.
+    Expected color order is BGR.
 
 3. name: "ref_seg_map", shape: [1x151x256x256] - A mask (one-hot label map) for reference image in the format [BxCxHxW],
    where:
@@ -63,15 +61,15 @@ Correspondence network return warped exemplar with semantic from input.
     - H - mask height
     - W - mask width
 
-## Specification for Translation model
+## Specification for Translation network
 
-Translation model generates the final output based on the warped exemplar according to the correspondence, yielding an exemplar-based translation output.
+Translation network generates the final output based on the warped exemplar according to the correspondence, yielding an exemplar-based translation output.
 
 ### Performance
 
 ### Inputs
 
-1. name: "seg", shape: [1x154x256x256] - A result of concatenate warped exemplar (output 1 of correspondence model) and input image   (input 1 of correspendence model)  in the format [BxCxHxW],
+1. name: "warped_exemplar", shape: [1x154x256x256] - A result of concatenate warped exemplar (output 1 of correspondence model) and input image   (input 1 of correspendence model)  in the format [BxCxHxW],
    where:
     - B - batch size
     - C - number of classes and channels (151 for ADE20k + 3 for image)
@@ -89,16 +87,17 @@ Translation model generates the final output based on the warped exemplar accord
 
     Output color order is RGB.
 
-## Accuracy of composite (CoCosNet) model
+## Accuracy of CoCosNet model
 Metrics was calculated between generated images by model and real validation images from ADE20k dataset.
-The classification model Inception-V3 was used to calculate IS and FID metrics.
+For some GAN metrics (IS and FID) you need to use classification model as verification network.
+In our case it is [Inception-V3](../googlenet-v3/googlenet-v3.md) model.
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| PSNR   | 12.99dB        | 12.98dB         |
+| PSNR   | 12.99dB        | 12.93dB         |
 | SSIM   | 0.34           | 0.34            |
-| IS     | 13.34          | 13.2            |
-| FID    | 33.27          | 33.5            |
+| IS     | 13.34          | 13.35           |
+| FID    | 33.27          | 33.14           |
 
 ## Legal Information
 
