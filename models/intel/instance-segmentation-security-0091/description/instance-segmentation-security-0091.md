@@ -16,7 +16,7 @@ FPN, RPN, detection and segmentation heads.
 |---------------------------------|-------------------------------------------|
 | MS COCO val2017 box AP          | 45.8%                                     |
 | MS COCO val2017 mask AP         | 39.7%                                     |
-| Max objects to detect           | 1000                                      |
+| Max objects to detect           | 100                                       |
 | GFlops                          | 828.6324                                  |
 | MParams                         | 101.236                                   |
 | Source framework                | PyTorch\*                                 |

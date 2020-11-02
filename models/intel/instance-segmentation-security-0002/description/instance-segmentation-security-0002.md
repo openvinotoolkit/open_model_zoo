@@ -16,7 +16,7 @@ segmentation heads.
 |---------------------------------|-------------------------------------------|
 | MS COCO val2017 box AP          | 40.8%                                     |
 | MS COCO val2017 mask AP         | 36.9%                                     |
-| Max objects to detect           | 1000                                      |
+| Max objects to detect           | 100                                       |
 | GFlops                          | 423.0842                                  |
 | MParams                         | 48.3732                                   |
 | Source framework                | PyTorch\*                                 |
