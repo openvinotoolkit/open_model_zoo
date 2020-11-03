@@ -451,8 +451,11 @@ class YoloV3ONNX(Adapter):
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         result = []
+        indicies_out = raw_outputs[self.indices_out]
+        if len(indicies_out.shape) == 2:
+            indicies_out = np.expand_dims(indicies_out, 0)
         for identifier, boxes, scores, indices in zip(
-                identifiers, raw_outputs[self.boxes_out], raw_outputs[self.scores_out], raw_outputs[self.indices_out]
+                identifiers, raw_outputs[self.boxes_out], raw_outputs[self.scores_out], indicies_out
         ):
             out_boxes, out_scores, out_classes = [], [], []
             for idx_ in indices:

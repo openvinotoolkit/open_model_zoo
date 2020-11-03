@@ -232,7 +232,7 @@ class Dataset:
             subset_id_to_g_id = {s_id: idx for idx, s_id in enumerate(gallery_ids)}
             queries_loc = [ann.coords for ann in self._annotation if ann.query]
             gallery_loc = [ann.coords for ann in self._annotation if not ann.query]
-            dist_mat = np.zeros(len(queries_ids), len(gallery_ids))
+            dist_mat = np.zeros((len(queries_ids), len(gallery_ids)))
             for idx, query_loc in enumerate(queries_loc):
                 dist_mat[idx] = np.linalg.norm(np.array(query_loc) - np.array(gallery_loc), axis=1)
             for idx in ids:
