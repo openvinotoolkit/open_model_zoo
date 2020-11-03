@@ -36,11 +36,11 @@ from accuracy_checker.utils import contains_all
 
 
 def no_available_myriad():
-    try:
-        from openvino.inference_engine import IECore
-        return 'MYRIAD' not in IECore().available_devices
-    except:
-        return True
+    # try:
+    #     from openvino.inference_engine import IECore
+    #     return 'MYRIAD' not in IECore().available_devices
+    # except:
+    return True
 
 
 @pytest.fixture()
