@@ -49,7 +49,7 @@ conversion_to_onnx_args:
   - --model-name=SIGGRAPHGenerator
   - --weights=$dl_dir/ckpt/colorization-siggraph.pth
   - --import-module=model
-  - --input-shape=[1,1,256,256],[1,2,256,256],[1,1,256,256]
+  - --input-shapes=[1,1,256,256],[1,2,256,256],[1,1,256,256]
   - --output-file=$conv_dir/colorization-siggraph.onnx
   - --input-names=data_l,user_ab,user_map
   - --output-names=color_ab

@@ -22,8 +22,8 @@ Model give as output predict A- and B-channels of LAB-image.
 
 ## Accuracy
 
-The accuracy metrics calculated on ImageNet
-validation dataset using [VGG16](https://arxiv.org/abs/1409.1556) caffe
+The accuracy metrics were calculated on the ImageNet
+validation dataset using [VGG16](https://arxiv.org/abs/1409.1556) Caffe
 model and colorization as preprocessing.
 
 For preprocessing `rgb -> gray -> colorization` recieved values:
@@ -37,16 +37,16 @@ For preprocessing `rgb -> gray -> colorization` recieved values:
 
 ## Input
 
-1. Image, name - `data_l`,  shape - `1,1,256,256`, format is `B,C,H,W` where:
+1. Image, name - `data_l`, shape - `1,1,256,256`, format is `B,C,H,W` where:
 
    - `B` - batch size
    - `C` - channel
    - `H` - height
    - `W` - width
 
-   Channel order is L-channel.
+   L-channel of LAB-image.
 
-2. Image, name - `user_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
+2. Image, name - `user_ab`, shape - `1,2,256,256`, format is `B,C,H,W` where:
 
    - `B` - batch size
    - `C` - channel
@@ -55,14 +55,14 @@ For preprocessing `rgb -> gray -> colorization` recieved values:
 
    Channel order is AB channels of LAB-image. Input for user points.
 
-3. Mask, name - `user_map`,  shape - `1,1,256,256`, format is `B,C,H,W` where:
+3. Mask, name - `user_map`, shape - `1,1,256,256`, format is `B,C,H,W` where:
 
    - `B` - batch size
    - `C` - number of flags for pixel
    - `H` - height
    - `W` - width
 
-   This input is  a binary mask indicating which points are
+   This input is a binary mask indicating which points are
    provided by the user. The mask differentiates unspecified points
    from user-specified gray points with (a,b) = 0.
    If point(pixel) was specified the flag will be equal to 1.
@@ -71,7 +71,7 @@ For preprocessing `rgb -> gray -> colorization` recieved values:
 
 ## Output
 
-Image, name - `color_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
+Image, name - `color_ab`, shape - `1,2,256,256`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
