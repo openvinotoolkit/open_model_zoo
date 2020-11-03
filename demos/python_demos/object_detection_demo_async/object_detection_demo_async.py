@@ -350,8 +350,7 @@ def main():
 
             _, results = detectors[mode].get_result(next_frame_id_to_show)
             if results:
-                frame_meta, raw_outputs = results
-                objects = model.postprocess(raw_outputs, frame_meta)
+                objects, frame_meta = results
                 frame = frame_meta['frame']
                 start_time = frame_meta['start_time']
 
