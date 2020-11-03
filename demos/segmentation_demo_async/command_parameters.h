@@ -27,7 +27,6 @@ DECLARE_string(d);
 DECLARE_bool(pc);
 DECLARE_string(c);
 DECLARE_string(l);
-DECLARE_bool(auto_resize);
 DECLARE_uint32(nireq);
 DECLARE_uint32(nthreads);
 DECLARE_string(nstreams);

@@ -20,10 +20,10 @@
 using namespace InferenceEngine;
 
 DetectionModel::DetectionModel(std::string modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels)
-:ModelBase(modelFileName){
-    this->useAutoResize = useAutoResize;
-    this->confidenceThreshold = confidenceThreshold;
-    this->labels = labels;
+    :ModelBase(modelFileName),
+    useAutoResize(useAutoResize),
+    confidenceThreshold(confidenceThreshold),
+    labels(labels) {
 }
 
 void DetectionModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, MetaData*& metaData)

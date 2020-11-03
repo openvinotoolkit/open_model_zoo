@@ -100,7 +100,7 @@ static void showUsage() {
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
-    std::cout << "    -_fil \"<path>\"          " << labels_message << std::endl;
+    std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
     std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
         }
         else
         {
-            slog::err << "Invalid model type provided: " + FLAGS_mt << slog::endl;
+            slog::err << "No model type or invalid model type (-mt) provided: " + FLAGS_mt << slog::endl;
             return -1;
         }
 
@@ -202,8 +202,15 @@ int main(int argc, char *argv[]) {
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
                 curr_frame = cap->read();
-                if (curr_frame.empty())
-                    throw std::logic_error("Can't read an image from the input");
+                if (curr_frame.empty()) {
+                    if (!frameNum) {
+                        throw std::logic_error("Can't read an image from the input");
+                    }
+                    else {
+                        // Input stream is over
+                        break;
+                    }
+                }
 
                 frameNum = pipeline.submitImage(curr_frame);
             }
@@ -215,10 +222,13 @@ int main(int argc, char *argv[]) {
             while (result = pipeline.getResult()) {
                 cv::Mat outFrame = DetectionModel::renderData(result.get());
                 //--- Showing results and device information
-                if (!outFrame.empty() && !FLAGS_no_show) {
+                if (!outFrame.empty()) {
                     presenter.drawGraphs(outFrame);
                     paintInfo(outFrame, pipeline.getPerformanceInfo());
-                    cv::imshow("Detection Results", outFrame);
+                    if (!FLAGS_no_show)
+                    {
+                        cv::imshow("Detection Results", outFrame);
+                    }
                 }
             }
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.

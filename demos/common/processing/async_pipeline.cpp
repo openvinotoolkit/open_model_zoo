@@ -71,22 +71,19 @@ PipelineBase::~PipelineBase(){
     waitForTotalCompletion();
 }
 
-
-void PipelineBase::waitForData(bool shouldKeepOrder){
+void PipelineBase::waitForData(){
     std::unique_lock<std::mutex> lock(mtx);
 
     condVar.wait(lock, [&] {return callbackException != nullptr ||
         requestsPool->isIdleRequestAvailable() ||
-        (shouldKeepOrder ?
-            completedInferenceResults.find(outputFrameId) != completedInferenceResults.end() :
-            !completedInferenceResults.empty());
+        completedInferenceResults.find(outputFrameId) != completedInferenceResults.end();
     });
 
     if (callbackException)
         std::rethrow_exception(callbackException);
 }
 
-int64_t PipelineBase::submitRequest(InferenceEngine::InferRequest::Ptr request, std::shared_ptr<MetaData> metaData){
+int64_t PipelineBase::submitRequest(const InferenceEngine::InferRequest::Ptr& request, const std::shared_ptr<MetaData>& metaData){
     perfInfo.numRequestsInUse = (uint32_t)requestsPool->getInUseRequestsCount();
 
     auto frameStartTime = std::chrono::steady_clock::now();
@@ -149,9 +146,9 @@ int64_t PipelineBase::submitImage(cv::Mat img) {
     return submitRequest(request, std::shared_ptr<MetaData>(md));
 }
 
-std::unique_ptr<ResultBase> PipelineBase::getResult(bool shouldKeepOrder)
+std::unique_ptr<ResultBase> PipelineBase::getResult()
 {
-    auto infResult = PipelineBase::getInferenceResult(shouldKeepOrder);
+    auto infResult = PipelineBase::getInferenceResult();
     if (infResult.IsEmpty()) {
         return std::unique_ptr<ResultBase>();
     }
@@ -162,13 +159,11 @@ std::unique_ptr<ResultBase> PipelineBase::getResult(bool shouldKeepOrder)
     return result;
 }
 
-InferenceResult PipelineBase::getInferenceResult(bool shouldKeepOrder)
+InferenceResult PipelineBase::getInferenceResult()
 {
     std::lock_guard<std::mutex> lock(mtx);
 
-    const auto& it = shouldKeepOrder ?
-        completedInferenceResults.find(outputFrameId) :
-        completedInferenceResults.begin();
+    const auto& it = completedInferenceResults.find(outputFrameId);
 
     if (it != completedInferenceResults.end())
     {

@@ -26,12 +26,12 @@ public:
     /// @param model_nameFileName of model to load
     SegmentationModel(const std::string& modelFileName);
 
-    virtual void preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, MetaData*& metaData);
+    virtual void preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, MetaData*& metaData) override;
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult);
     static cv::Mat renderData(ResultBase* result);
 
 protected:
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
+    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
     const cv::Vec3b& class2Color(int classId);
 
     int outHeight = 0;

@@ -48,33 +48,37 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult)
     const float *detections = outputMapped.as<float*>();
 
     DetectionResult* result = new DetectionResult;
+    auto retVal = std::unique_ptr<ResultBase>(result);
+
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     auto sz = infResult.metaData->asPtr<ImageMetaData>()->img.size();
 
     for (size_t i = 0; i < maxProposalCount; i++) {
-        DetectedObject desc;
 
         float image_id = detections[i * objectSize + 0];
         if (image_id < 0) {
             break;
         }
 
-        desc.confidence = detections[i * objectSize + 2];
-        desc.labelID = static_cast<int>(detections[i * objectSize + 1]);
-        desc.label = getLabelName(desc.labelID);
-        desc.x = detections[i * objectSize + 3] * sz.width;
-        desc.y = detections[i * objectSize + 4] * sz.height;
-        desc.width = detections[i * objectSize + 5] * sz.width - desc.x;
-        desc.height = detections[i * objectSize + 6] * sz.height - desc.y;
+        float confidence = detections[i * objectSize + 2];
+        if (confidence > confidenceThreshold) {
+            DetectedObject desc;
 
-        if (desc.confidence > confidenceThreshold) {
+            desc.confidence = confidence;
+            desc.labelID = static_cast<int>(detections[i * objectSize + 1]);
+            desc.label = getLabelName(desc.labelID);
+            desc.x = detections[i * objectSize + 3] * sz.width;
+            desc.y = detections[i * objectSize + 4] * sz.height;
+            desc.width = detections[i * objectSize + 5] * sz.width - desc.x;
+            desc.height = detections[i * objectSize + 6] * sz.height - desc.y;
+
             /** Filtering out objects with confidence < confidence_threshold probability **/
             result->objects.push_back(desc);
         }
     }
 
-    return std::unique_ptr<ResultBase>(result);
+    return retVal;
 }
 
 void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork){

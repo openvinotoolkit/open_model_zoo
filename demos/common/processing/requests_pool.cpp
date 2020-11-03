@@ -60,9 +60,9 @@ bool RequestsPool::isIdleRequestAvailable()
 }
 
 void RequestsPool::waitForTotalCompletion() {
-    // Do not synchronize here to avoid deadlock
-    // Request status will be changed to idle in callback
-    // upon completion of request we're waiting for
+    // Do not synchronize here to avoid deadlock (despite synchronization in other functions)
+    // Request status will be changed to idle in callback, 
+    // upon completion of request we're waiting for. Synchronization is applied there
     for (auto& pair : requests) {
         if (pair.second) {
             pair.first->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);

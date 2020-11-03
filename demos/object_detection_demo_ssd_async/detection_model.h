@@ -31,7 +31,7 @@ public:
     /// than actual classes number, default "Label #N" will be shown for missing items.
     DetectionModel(std::string modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels);
 
-    void preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, MetaData*& metaData);
+    virtual void preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, MetaData*& metaData) override;
     
     static cv::Mat renderData(ResultBase* result);
 

@@ -23,7 +23,7 @@ struct CnnConfig{
     std::string devices;
     std::string cpuExtensionsPath;
     std::string clKernelsConfigPath;
-    unsigned int maxAsyncRequests=2;
+    unsigned int maxAsyncRequests;
     std::map < std::string, std::string> execNetworkConfig;
 };
 
@@ -34,4 +34,3 @@ public:
 protected:
     static CnnConfig GetCommonConfig();
 };
-

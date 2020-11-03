@@ -32,11 +32,11 @@ public:
         float confidenceThreshold, bool useAutoResize,
         const std::vector<std::string>& labels = std::vector<std::string>());
 
-    virtual void onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, RequestsPool* requestsPool);
-    std::unique_ptr<ResultBase> postprocess(InferenceResult & infResult);
+    virtual void onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, RequestsPool* requestsPool) override;
+    virtual std::unique_ptr<ResultBase> postprocess(InferenceResult & infResult) override;
 
 protected:
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
+    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
     size_t maxProposalCount = 0;
     size_t objectSize = 0;
 };

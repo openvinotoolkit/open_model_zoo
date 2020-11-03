@@ -14,8 +14,6 @@
 // limitations under the License.
 */
 
-#define MOVING_AVERAGE_SAMPLES 5
-
 #pragma once
 #include <string>
 #include <deque>
@@ -31,6 +29,8 @@
 class PipelineBase
 {
 public:
+    static constexpr int MOVING_AVERAGE_SAMPLES = 5;
+
     struct PerformanceInfo
     {
         int64_t framesCount = 0;
@@ -70,9 +70,8 @@ public:
     virtual ~PipelineBase();
 
     /// Waits until either output data becomes available or pipeline allows to submit more input data.
-    /// @param shouldKeepOrder if true, function will treat results as ready only if next sequential result (frame) is
-    /// ready (so results can be extracted in the same order as they were submitted). Otherwise, function will return if any result is ready.
-    void waitForData(bool shouldKeepOrder = true);
+    /// Function will treat results as ready only if next sequential result (frame) is ready.
+    void waitForData();
 
     /// Returns true if there's available infer requests in the pool
     /// and next frame can be submitted for processing.
@@ -95,13 +94,8 @@ public:
     virtual int64_t submitImage(cv::Mat img);
 
     /// Gets available data from the queue 
-    /// @param shouldKeepOrder if true, function will treat results as ready only if next sequential result (frame) is
-    /// ready (so results can be extracted in the same order as they were submitted). Otherwise, function will return if any result is ready.
-    virtual std::unique_ptr<ResultBase> getResult(bool shouldKeepOrder=true);
-
-    /// Gets available data from the queue and renders it to output frame
-    /// This function should be overriden in inherited classes to provide default rendering of processed data
-    /// @returns rendered frame, its size corresponds to the size of network output
+    /// Function will treat results as ready only if next sequential result (frame) is ready.
+    virtual std::unique_ptr<ResultBase> getResult();
 
 protected:
     /// Submit request to network
@@ -109,13 +103,12 @@ protected:
     /// @param metaData - additional source data. This is optional transparent data not used in inference process directly.
     /// It is passed to inference result directly and can be used in postprocessing.
     /// @returns unique sequential frame ID for this particular request. Same frame ID will be written in the responce structure.
-    virtual int64_t submitRequest(InferenceEngine::InferRequest::Ptr request,std::shared_ptr<MetaData> metaData);
+    virtual int64_t submitRequest(const InferenceEngine::InferRequest::Ptr& request,const std::shared_ptr<MetaData>& metaData);
 
     /// Returns processed result, if available
-    /// @param shouldKeepOrder if true, function will return processed data sequentially,
-    /// keeping original frames order (as they were submitted). Otherwise, function will return processed data in random order.
+    /// Function will treat results as ready only if next sequential result (frame) is ready.
     /// @returns InferenceResult with processed information or empty InferenceResult (with negative frameID) if there's no any results yet.
-    virtual InferenceResult getInferenceResult(bool shouldKeepOrder);
+    virtual InferenceResult getInferenceResult();
 
 protected:
     std::unique_ptr<RequestsPool> requestsPool;

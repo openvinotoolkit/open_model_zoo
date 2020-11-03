@@ -46,10 +46,10 @@ public:
     ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
         float boxIOUThreshold = 0.4, const std::vector<std::string>& labels = std::vector<std::string>());
 
-    std::unique_ptr<ResultBase> postprocess(InferenceResult & infResult);
+    std::unique_ptr<ResultBase> postprocess(InferenceResult & infResult) override;
 
 protected:
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
+    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
 
     void parseYOLOV3Output(const std::string & output_name, const InferenceEngine::Blob::Ptr & blob,
         const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,

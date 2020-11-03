@@ -52,7 +52,6 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 "Absolute path to the .xml file with the kernel descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
 "Absolute path to a shared library with the kernel implementations.";
-static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 static const char num_inf_req_message[] = "Optional. Number of infer requests.";
 static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
@@ -68,7 +67,6 @@ DEFINE_string(d, "CPU", target_device_message);
 DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
-DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nireq, 2, num_inf_req_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
@@ -92,7 +90,6 @@ static void showUsage() {
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -pc                       " << performance_counter_message << std::endl;
-    std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << num_inf_req_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
@@ -145,7 +142,7 @@ void paintInfo(cv::Mat& frame, const PipelineBase::PerformanceInfo& info) {
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers certain topology and cannot be generalized for any object detection **/
-        slog::info << "InferenceEngine: " << InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: " << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -167,8 +164,16 @@ int main(int argc, char *argv[]) {
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
                 curr_frame = cap->read();
-                if (curr_frame.empty())
-                    throw std::logic_error("Can't read an image from the input");
+                if (curr_frame.empty()) {
+                    if (!frameNum) {
+                        throw std::logic_error("Can't read an image from the input");
+                    }
+                    else {
+                        // Input stream is over
+                        break;
+                    }
+                }
+
 
                 frameNum = pipeline.submitImage(curr_frame);
             }
@@ -180,10 +185,12 @@ int main(int argc, char *argv[]) {
             while (result = pipeline.getResult()) {
                 cv::Mat outFrame = SegmentationModel::renderData(result.get());
                 //--- Showing results and device information
-                if (!outFrame.empty() && !FLAGS_no_show) {
+                if (!outFrame.empty() ) {
                     presenter.drawGraphs(outFrame);
                     paintInfo(outFrame, pipeline.getPerformanceInfo());
-                    cv::imshow("Segmentation Results", outFrame);
+                    if (!FLAGS_no_show) {
+                        cv::imshow("Segmentation Results", outFrame);
+                    }
                 }
             }
 
