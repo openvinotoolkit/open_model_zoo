@@ -54,6 +54,9 @@ framework: pytorch
 postprocessing:
   - $type: regex_replace
     file: yolact/yolact.py
+    # Original postprocessing https://github.com/dbolya/yolact/blob/33912fb1056fedbbcac8c9cd1b1e357bbb12df7d/layers/functions/detection.py
+    # can not to be converted to ONNX due to some limitations.
+    # Changes: rewritten on PyTorch*, enabled work with batch in boxes decoding, removed dynamic configurable part.
     pattern: 'from layers import Detect'
     replacement: |
       def detect(preds_out, _):

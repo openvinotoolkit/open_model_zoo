@@ -17,8 +17,7 @@ from yolact import Yolact
 
 set_cfg('yolact_resnet50_config')
 
-def create_model(weights=None):
+def create_model(weights):
     yolact = Yolact()
-    if weights:
-        yolact.load_weights(weights)
+    yolact.load_weights(weights)
     return yolact
