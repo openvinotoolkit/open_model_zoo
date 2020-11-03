@@ -3,33 +3,25 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
         adapter:
-          type: class_agnostic_detection
 
-      - framework: dlsdk
-        tags:
-          - FP16
-        adapter:
           type: class_agnostic_detection
+#          scales: [0.0011574, 0.0020833]
 
     datasets:
-      - name: crossroad_extra_untagged_person
+      - name: crossroad_extra_untagged_person_hb
         preprocessing:
           - type: resize
-            dst_width: 352
-            dst_height: 192
+            dst_width: 864
+            dst_height: 480
+
         postprocessing:
           - type: resize_prediction_boxes
           - type: cast_to_int
           - type: nms
-            overlap: 0.5
+            overlap: 0.6
           - type: clip_boxes
             apply_to: prediction
+
         metrics:
           - type: map
-            ignore_difficult: True
-            include_boundaries: False
-            allow_multiple_matches_per_ignored: True
-            distinct_conf: False

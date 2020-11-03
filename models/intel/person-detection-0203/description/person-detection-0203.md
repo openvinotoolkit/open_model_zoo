@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 This is a person detector that is based on MobileNetV2
-backbone with ATSS head for 352x192 resolution.
+backbone with ATSS head for 864x480 resolution.
 
 ## Example
 
@@ -13,9 +13,9 @@ backbone with ATSS head for 352x192 resolution.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP @ [ IoU=0.50:0.95 ]          | 0.290 (internal test set)                 |
-| GFlops                          | 1.063                                     |
-| MParams                         | 2.293                                     |
+| AP @ [ IoU=0.50:0.95 ]          | 0.412 (internal test set)                 |
+| GFlops                          | 6.519                                     |
+| MParams                         | 2.394                                     |
 | Source framework                | PyTorch\*                                 |
 
 Average Precision (AP) is defined as an area under
@@ -26,7 +26,7 @@ curve.
 
 ## Inputs
 
-Name: `input`, shape: [1x3x192x352] - An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x480x864] - An input image in the format [BxCxHxW],
 where:
 
 - B - batch size
@@ -46,7 +46,7 @@ Expected color order is BGR.
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
     - `conf` - confidence for the predicted class
 2. The `labels` is a blob with shape: [N], where N is the number of detected
-   bounding boxes. In case of person detection, it is equal to `0` for each detected box.
+   bounding boxes. In case of person detection, it is equal to `1` for each detected box with person in it and `0` for the background.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
