@@ -204,6 +204,13 @@ datasets:
     annotation: voc2012_segmentation.pickle
     dataset_meta: voc2012_segmentation.json
 
+  - name: mapillary_20
+    annotation_conversion:
+      converter: mapillary_20
+      data_dir: Mapillary_20
+    annotation: mapillary_20.pickle
+    dataset_meta: mapillary_20.json
+
   - name: wider
     data_source: WIDER_val/images
     annotation_conversion:
