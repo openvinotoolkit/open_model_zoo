@@ -129,7 +129,7 @@ public:
         if (cap.open(input)) {
             this->readLengthLimit = readLengthLimit;
             if (!cap.set(cv::CAP_PROP_POS_FRAMES, this->initialImageId))
-                throw std::runtime_error{ "Can't set the frame to begin with" };
+                throw std::runtime_error{"Can't set the frame to begin with"};
             return;
         }
 
