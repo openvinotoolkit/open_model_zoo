@@ -89,6 +89,7 @@ from .dna_seq import DNASequenceDatasetConverter
 from .place_recognition import PlaceRecognitionDatasetConverter
 from .cluttered_mnist import ClutteredMNISTConverter
 from .mpii import MPIIDatasetConverter
+from .mapillary_20 import Mapillary20Converter
 
 __all__ = [
     'BaseFormatConverter',
@@ -117,6 +118,7 @@ __all__ = [
     'MSCocoSingleKeypointsConverter',
     'MSCocoDetectionConverter',
     'CityscapesConverter',
+    'Mapillary20Converter',
     'MovieLensConverter',
     'BratsConverter',
     'BratsNumpyConverter',
