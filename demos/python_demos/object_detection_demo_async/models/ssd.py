@@ -1,16 +1,8 @@
 import numpy as np
-import cv2
 
 from .model import Model
+from .utils import Detection, resize_image
 
-class Detection:
-    def __init__(self, xmin, ymin, xmax,ymax,score,id):
-        self.xmin = xmin
-        self.xmax = xmax
-        self.ymin = ymin
-        self.ymax = ymax
-        self.score = score
-        self.id = id
 
 class SSD(Model):
     class SingleOutputParser:
@@ -142,16 +134,6 @@ class SSD(Model):
             pass
         raise RuntimeError('Unsupported model outputs')
 
-    @staticmethod
-    def _resize_image(frame, size, keep_aspect_ratio=False):
-        if not keep_aspect_ratio:
-            resized_frame = cv2.resize(frame, size)
-        else:
-            h, w = frame.shape[:2]
-            scale = min(size[1] / h, size[0] / w)
-            resized_frame = cv2.resize(frame, None, fx=scale, fy=scale)
-        return resized_frame
-
     def unify_inputs(self, inputs) -> dict:
         if not isinstance(inputs, dict):
             inputs_dict = {self.image_blob_name: inputs}
@@ -160,7 +142,7 @@ class SSD(Model):
         return inputs_dict
 
     def preprocess(self, inputs):
-        img = self._resize_image(inputs[self.image_blob_name], (self.w, self.h), self.keep_aspect_ratio_resize)
+        img = resize_image(inputs[self.image_blob_name], (self.w, self.h), self.keep_aspect_ratio_resize)
         h, w = img.shape[:2]
         if self.image_info_blob_name is not None:
             inputs[self.image_info_blob_name] = [h, w, 1]
