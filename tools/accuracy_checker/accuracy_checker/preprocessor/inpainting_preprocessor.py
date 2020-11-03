@@ -97,10 +97,10 @@ class RectMask(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'mask_height': NumberField(
+            'dst_height': NumberField(
                 optional=True, default=128, description="Height of mask", value_type=int
             ),
-            'mask_width': NumberField(
+            'dst_width': NumberField(
                 optional=True, default=128, description="Width of mask", value_type=int
             ),
             'size': NumberField(
@@ -189,4 +189,4 @@ def preprocess_input_mask(mask):
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
     if len(mask.shape) == 2:
         mask = np.expand_dims(mask, -1)
-    return np.array(mask > 0).astype(np.float32)
+    return np.array(mask == 255).astype(np.float32)
