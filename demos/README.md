@@ -212,7 +212,7 @@ cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON=ON <open_model_zoo>/demos
 
 To build specific demos, follow the instructions for building the demo applications above,
 but add `-DDEMOS=<list of demos>` to either the `cmake` or the `build_demos*` command, depending on which you use.
-Demos must be comma-separated without spaces, for `build_demos_msvc.bat`  list of demos must be eclosed with quotation marks.
+Demos must be comma-separated without spaces, for `build_demos_msvc.bat`  list of demos must be enclosed with quotation marks.
 For example:
 
 ```sh
