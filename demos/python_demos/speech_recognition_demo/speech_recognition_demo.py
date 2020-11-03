@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (C) 2019-2020 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
@@ -6,14 +6,14 @@
 # This file is based in part on deepspeech_openvino_0.5.py by Feng Yen-Chang at
 # https://github.com/openvinotoolkit/open_model_zoo/pull/419, commit 529805d011d9b405f142b2b40f4d202bd403a4f1 on Sep 19, 2019.
 #
-import time
 import wave
 import numpy as np
+import timeit
 import argparse
 
 from tqdm import tqdm
-from contexttimer import Timer
 
+from utils.context_timer import Timer
 from utils.deep_speech_pipeline import DeepSpeechPipeline
 
 
@@ -46,7 +46,7 @@ def build_argparser():
 
 
 def main():
-    start_time = time.time()
+    start_time = timeit.default_timer()
     with Timer() as timer:
         args = build_argparser().parse_args()
 
@@ -86,7 +86,7 @@ def main():
     with Timer() as timer:
         transcription = stt.decode_probs(character_probs)
     print("Beam search time: {} s".format(timer.elapsed))
-    print("Overall time: {} s".format(time.time() - start_time))
+    print("Overall time: {} s".format(timeit.default_timer() - start_time))
 
     print("\nTranscription and confidence score:")
     max_candidates = 1

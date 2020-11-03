@@ -533,7 +533,8 @@ class DLSDKLauncher(Launcher):
         return [AsyncInferRequestWrapper(ireq_id, ireq) for ireq_id, ireq in enumerate(self.exec_network.requests)]
 
     def _reshape_input(self, shapes):
-        del self.exec_network
+        if hasattr(self, 'exec_network'):
+            del self.exec_network
         self.network.reshape(shapes)
 
         self.exec_network = self.ie_core.load_network(self.network, self.device, num_requests=self._num_requests)
@@ -786,6 +787,7 @@ class DLSDKLauncher(Launcher):
             self.network = network
         if not self._postpone_input_configuration:
             self._set_precision()
+            self._set_input_shape()
             if log:
                 self._print_input_output_info()
             if preprocessing:
@@ -799,6 +801,7 @@ class DLSDKLauncher(Launcher):
     def update_input_configuration(self, input_config):
         self.config['inputs'] = input_config
         self._set_precision()
+        self._set_input_shape()
         self._print_input_output_info()
         if self.preprocessor:
             self._set_preprocess(self.preprocessor)
@@ -886,6 +889,20 @@ class DLSDKLauncher(Launcher):
                         self.network.inputs[input_config['name']].precision = input_config['precision']
                     else:
                         self.network.input_info[input_config['name']].precision = input_config['precision']
+
+    def _set_input_shape(self):
+        if not self.network:
+            return
+        config_inputs = self.config.get('inputs', [])
+        input_shapes = {}
+        for input_config in config_inputs:
+            if 'shape' in input_config:
+                input_shapes[input_config['name']] = input_config['shape']
+        if not input_shapes:
+            return
+        orig_input_shapes = {input_name: input_info.shape for input_name, input_info in self.inputs.items()}
+        orig_input_shapes.update(input_shapes)
+        self._reshape_input(orig_input_shapes)
 
     def _configure_lstm_inputs(self):
         lstm_mapping = {}

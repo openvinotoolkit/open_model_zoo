@@ -1,0 +1,8 @@
+# use update-requirements.py to update this file
+
+pathspec==0.8.0           # via yamllint
+pyyaml==5.3.1             # via yamllint
+yamllint==1.25.0          # via -r ci/requirements-check-basics.in
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

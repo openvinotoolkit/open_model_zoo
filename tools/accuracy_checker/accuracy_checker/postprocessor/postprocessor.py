@@ -177,6 +177,7 @@ class PostprocessorWithSpecificTargets(Postprocessor):
 
     def setup(self):
         apply_to = self.get_value_from_config('apply_to')
+        self._required_both = False
         self.apply_to = ApplyToOption(apply_to) if apply_to else None
         self._deprocess_predictions = False
 
@@ -220,7 +221,7 @@ class PostprocessorWithSpecificTargets(Postprocessor):
             apply_to = ApplyToOption.PREDICTION
             self._deprocess_predictions = True
         else:
-            apply_to = self.apply_to
+            apply_to = self.apply_to if not self._required_both else ApplyToOption.ALL
         targets_specification = {
             ApplyToOption.ANNOTATION: (annotations, []),
             ApplyToOption.PREDICTION: ([], predictions),

@@ -520,7 +520,7 @@ struct Load {
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers 3 certain topologies and cannot be generalized **/
-        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -556,7 +556,7 @@ int main(int argc, char *argv[]) {
             slog::info << "Loading device " << flag << slog::endl;
 
             /** Printing device version **/
-            std::cout << ie.GetVersions(flag) << std::endl;
+            slog::info << printable(ie.GetVersions(flag)) << slog::endl;
 
             if ((flag.find("CPU") != std::string::npos)) {
                 if (!FLAGS_l.empty()) {
