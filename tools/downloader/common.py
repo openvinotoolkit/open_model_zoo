@@ -320,6 +320,9 @@ class FileSourceHttp(FileSource):
     def __init__(self, url):
         self.url = url
 
+    def __str__(self):
+        return json.dumps({'$type': 'http', 'url': self.url})
+
     @classmethod
     def deserialize(cls, source):
         return cls(validate_string('"url"', source['url']))
@@ -336,6 +339,9 @@ FileSource.types['http'] = FileSourceHttp
 class FileSourceGoogleDrive(FileSource):
     def __init__(self, id):
         self.id = id
+
+    def __str__(self):
+        return json.dumps({'$type': 'google_drive', 'id': self.id})
 
     @classmethod
     def deserialize(cls, source):
