@@ -41,7 +41,6 @@ TRACKER_SCORE_THRESHOLD = 0.4
 TRACKER_IOU_THRESHOLD = 0.3
 ACTION_NET_INPUT_FPS = 15
 ACTION_IMAGE_SCALE = 256
-ACTION_SCORE_THRESHOLD = 0.8
 SAMPLES_MAX_WINDOW_SIZE = 1000
 SAMPLES_TRG_FPS = 20
 VISUALIZER_TRG_FPS = 60
@@ -72,7 +71,7 @@ def build_argparser():
                       default=None, type=str)
     args.add_argument('-t', '--action_threshold',
                       help='Optional. Threshold for the predicted score of an action.',
-                      default=None, type=float)
+                      default=0.8, type=float)
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL '
                            'or MYRIAD. The demo will look for a suitable plugin for device '
@@ -144,7 +143,6 @@ def main():
     active_object_id = -1
     tracker_labels_map = dict()
     tracker_labels = set()
-    action_score_threshold = args.action_threshold if args.action_threshold else ACTION_SCORE_THRESHOLD
 
     start_time = time.perf_counter()
     while True:
@@ -173,7 +171,7 @@ def main():
                     class_map[action_class_id] if class_map is not None else action_class_id
 
                 action_class_score = np.max(recognizer_result)
-                if action_class_score > action_score_threshold:
+                if action_class_score > args.action_threshold:
                     last_caption = 'Last gesture: {} '.format(action_class_label)
 
         end_time = time.perf_counter()

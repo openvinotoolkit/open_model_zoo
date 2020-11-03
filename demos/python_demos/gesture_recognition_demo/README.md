@@ -63,7 +63,6 @@ Options:
   --no_show             Optional. Do not visualize inference results.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
-
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
@@ -75,7 +74,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 To run the demo, please provide paths to the gesture recognition and person detection models in the IR format, to a file with class names, and to an input video:
 ```bash
 python gesture_recognition_demo.py \
--m_a /home/user/asl-recognition-0003.xml \
+-m_a /home/user/asl-recognition-0004.xml \
 -m_d /home/user/person-detection-asl-0001.xml \
 -i 0 \
 -c ./msasl100-classes.json
