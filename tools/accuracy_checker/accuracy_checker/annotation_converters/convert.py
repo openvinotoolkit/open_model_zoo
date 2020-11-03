@@ -25,7 +25,7 @@ from functools import partial
 import numpy as np
 
 from ..representation import (
-    ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
+    ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
 )
 from ..utils import get_path, OrderedSet
 from ..data_analyzer import BaseDataAnalyzer
@@ -76,6 +76,8 @@ def make_subset(annotation, size, seed=666, shuffle=True):
         return make_subset_pairwise(annotation, size, shuffle)
     if isinstance(annotation[-1], ReIdentificationAnnotation):
         return make_subset_reid(annotation, size, shuffle)
+    if isinstance(annotation[-1], PlaceRecognitionAnnotation):
+        return make_subset_place_recognition(annotation, size, shuffle)
 
     result_annotation = list(np.random.choice(annotation, size=size, replace=False)) if shuffle else annotation[:size]
     return result_annotation
@@ -152,31 +154,30 @@ def make_subset_reid(annotation, size, shuffle=True):
     return list(subsample_set)
 
 
-def make_subset_ibl(annotation, size, shuffle=True):
+def make_subset_place_recognition(annotation, size, shuffle=True):
     subsample_set = OrderedSet()
-    query_annotations = [ann for ann in annotation if ann.query]
     potential_ann_ind = np.random.choice(len(annotation), size, replace=False) if shuffle else np.arange(size)
-    for ann_ind in potential_ann_ind:
-        selected_annotation = annotation[ann_ind]
-        if not selected_annotation.query:
-            query_for_place = [query_annotations[idx] for idx in selected_annotation.query_id]
-            pairs_set = OrderedSet(query_for_place)
+    queries_ids = [idx for idx, ann in enumerate(annotation) if ann.query]
+    gallery_ids = [idx for idx, ann in enumerate(annotation) if not ann.query]
+    subset_id_to_q_id = {s_id: idx for idx, s_id in enumerate(queries_ids)}
+    subset_id_to_g_id = {s_id: idx for idx, s_id in enumerate(gallery_ids)}
+    queries_loc = [ann.coords for ann in annotation if ann.query]
+    gallery_loc = [ann.coords for ann in annotation if not ann.query]
+    dist_mat = np.zeros((len(queries_ids), len(gallery_ids)))
+    for idx, query_loc in enumerate(queries_loc):
+        dist_mat[idx] = np.linalg.norm(np.array(query_loc) - np.array(gallery_loc), axis=1)
+    for idx in potential_ann_ind:
+        if idx in subset_id_to_q_id:
+            pair = gallery_ids[np.argmin(dist_mat[subset_id_to_q_id[idx]])]
         else:
-            gallery_for_place = [
-                ann for ann in annotation if not ann.query and selected_annotation.query_id in ann.query_id
-            ]
-            pairs_set = OrderedSet(gallery_for_place)
-        subsample_set.add(selected_annotation)
-        intersection = subsample_set & pairs_set
-        subsample_set |= pairs_set
+            pair = queries_ids[np.argmin(dist_mat[:, subset_id_to_g_id[idx]])]
+        addition = OrderedSet([idx, pair])
+        subsample_set |= addition
         if len(subsample_set) == size:
             break
         if len(subsample_set) > size:
-            pairs_set.add(selected_annotation)
-            to_delete = pairs_set - intersection
-            subsample_set -= to_delete
-
-    return list(subsample_set)
+            subsample_set -= addition
+    return [annotation[ind] for ind in subsample_set]
 
 
 def main():

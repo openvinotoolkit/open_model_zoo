@@ -17,6 +17,7 @@ limitations under the License.
 from copy import deepcopy
 from pathlib import Path
 import warnings
+import numpy as np
 
 from .annotation_converters import BaseFormatConverter, save_annotation, make_subset, analyze_dataset
 from .config import (
@@ -32,7 +33,7 @@ from .config import (
 )
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
 from .representation import (
-    BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
+    BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
 )
 from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS
 from .logging import print_info
@@ -161,13 +162,6 @@ class Dataset:
     def full_size(self):
         return len(self._annotation)
 
-    def __call__(self, context, *args, **kwargs):
-        batch_input_ids, batch_annotation = self.__getitem__(self.iteration)
-        self.iteration += 1
-        context.annotation_batch = batch_annotation
-        context.identifiers_batch = [annotation.identifier for annotation in batch_annotation]
-        context.input_ids_batch = batch_input_ids
-
     def __getitem__(self, item):
         if self.batch is None:
             self.batch = 1
@@ -185,7 +179,9 @@ class Dataset:
 
     def make_subset(self, ids=None, start=0, step=1, end=None, accept_pairs=False):
         pairwise_subset = isinstance(
-            self._annotation[0], (ReIdentificationAnnotation, ReIdentificationClassificationAnnotation)
+            self._annotation[0], (
+                ReIdentificationAnnotation, ReIdentificationClassificationAnnotation, PlaceRecognitionAnnotation
+            )
         )
         if ids:
             self.subset = ids if not pairwise_subset else self._make_subset_pairwise(ids, accept_pairs)
@@ -229,9 +225,29 @@ class Dataset:
                     pairs_set |= OrderedSet(gallery_for_person)
             return pairs_set, subsample_set
 
+        def ibl_subset(pairs_set, subsample_set, ids):
+            queries_ids = [idx for idx, ann in enumerate(self._annotation) if ann.query]
+            gallery_ids = [idx for idx, ann in enumerate(self._annotation) if not ann.query]
+            subset_id_to_q_id = {s_id: idx for idx, s_id in enumerate(queries_ids)}
+            subset_id_to_g_id = {s_id: idx for idx, s_id in enumerate(gallery_ids)}
+            queries_loc = [ann.coords for ann in self._annotation if ann.query]
+            gallery_loc = [ann.coords for ann in self._annotation if not ann.query]
+            dist_mat = np.zeros(len(queries_ids), len(gallery_ids))
+            for idx, query_loc in enumerate(queries_loc):
+                dist_mat[idx] = np.linalg.norm(np.array(query_loc) - np.array(gallery_loc), axis=1)
+            for idx in ids:
+                if idx in subset_id_to_q_id:
+                    pair = gallery_ids[np.argmin(dist_mat[subset_id_to_q_id[idx]])]
+                else:
+                    pair = queries_ids[np.argmin(dist_mat[:, subset_id_to_g_id[idx]])]
+                subsample_set.add(idx)
+                pairs_set.add(pair)
+            return pairs_set, subsample_set
+
         realisation = [
+            (PlaceRecognitionAnnotation, ibl_subset),
             (ReIdentificationClassificationAnnotation, reid_pairwise_subset),
-            (ReIdentificationAnnotation, reid_subset)
+            (ReIdentificationAnnotation, reid_subset),
             ]
         subsample_set = OrderedSet()
         pairs_set = OrderedSet()
