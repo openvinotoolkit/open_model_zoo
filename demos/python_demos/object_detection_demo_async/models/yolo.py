@@ -1,19 +1,9 @@
-from collections import namedtuple
-
 import cv2
 import numpy as np
 
 from .model import Model
+from .utils import Detection, resize_image, resize_image_letterbox
 
-
-class Detection:
-    def __init__(self, x, y, w, h, score, id):
-        self.xmin = x - w / 2
-        self.xmax = x + w / 2
-        self.ymin = y - h / 2
-        self.ymax = y + h / 2
-        self.score = score
-        self.id = id
 
 
 class YOLO(Model):
@@ -48,6 +38,7 @@ class YOLO(Model):
         self.threshold = 0.5
         self.iou_threshold = 0.5
         self.keep_aspect_ratio = keep_aspect_ratio
+        self.resize = resize_image_letterbox if self.keep_aspect_ratio else resize_image
 
         assert len(self.net.input_info) == 1, "Sample supports only YOLO V* based single input topologies"
         self.image_blob_name = next(iter(self.net.input_info))
@@ -94,7 +85,7 @@ class YOLO(Model):
         return inputs_dict
 
     def preprocess(self, inputs):
-        img = self._resize_image(inputs[self.image_blob_name], (self.w, self.h), self.keep_aspect_ratio)
+        img = self.resize_image(inputs[self.image_blob_name], (self.w, self.h))
         h, w = img.shape[:2]
         meta = {'original_shape': inputs[self.image_blob_name].shape,
                 'resized_shape': img.shape}
@@ -147,10 +138,12 @@ class YOLO(Model):
             confidence = class_probabilities[class_id] * object_probability
             if confidence < threshold:
                 continue
-            detection = Detection(x, y, width, height, confidence.item(), class_id.item())
+            detection = Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
+                                  confidence.item(), class_id.item())
             objects.append(detection)
         return objects
 
+    @staticmethod
     def _filter(self, detections, iou_threshold):
         def iou(box_1, box_2):
             width_of_overlap_area = min(box_1.xmax, box_2.xmax) - max(box_1.xmin, box_2.xmin)

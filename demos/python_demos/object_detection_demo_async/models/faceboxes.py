@@ -16,22 +16,9 @@
 import itertools
 import math
 import numpy as np
-import os
-import cv2
-from collections import namedtuple
 
 from .model import Model
-
-
-# Detection = namedtuple("Detection", "xmin ymin xmax ymax score id")
-class Detection:
-    def __init__(self, xmin, ymin, xmax,ymax,score,id):
-        self.xmin = xmin
-        self.xmax = xmax
-        self.ymin = ymin
-        self.ymax = ymax
-        self.score = score
-        self.id = id
+from .utils import Detection, resize_image
 
 
 class FaceBoxes(Model):
@@ -167,13 +154,9 @@ class FaceBoxes(Model):
         return detections
 
     def preprocess(self, inputs):
-        img = cv2.resize(inputs[self.image_blob_name], (self.w, self.h))
-        # h, w = img.shape[:2]
+        img = resize_image(inputs[self.image_blob_name], (self.w, self.h))
         meta = {'original_shape': inputs[self.image_blob_name].shape,
                 'resized_shape': img.shape}
-        # if h != self.h or w != self.w:
-        #     img = np.pad(img, ((0, self.h - h), (0, self.w - w), (0, 0)),
-        #                  mode='constant', constant_values=0)
         img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         img = img.reshape((self.n, self.c, self.h, self.w))
         inputs[self.image_blob_name] = img

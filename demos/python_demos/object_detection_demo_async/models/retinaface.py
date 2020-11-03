@@ -4,17 +4,7 @@ import cv2
 import numpy as np
 
 from .model import Model
-
-
-class DetectionWithLandmarks:
-    def __init__(self, xmin, ymin, xmax, ymax, score, id, landmarks):
-        self.xmin = xmin
-        self.xmax = xmax
-        self.ymin = ymin
-        self.ymax = ymax
-        self.score = score
-        self.id = id
-        self.landmarks = landmarks
+from .utils import DetectionWithLandmarks, resize_image
 
 
 class RetinaFace(Model):
@@ -28,16 +18,6 @@ class RetinaFace(Model):
         self._output_layer_names = self.net.outputs
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
 
-    @staticmethod
-    def _resize_image(frame, size, keep_aspect_ratio=False):
-        if not keep_aspect_ratio:
-            resized_frame = cv2.resize(frame, size)
-        else:
-            h, w = frame.shape[:2]
-            scale = min(size[1] / h, size[0] / w)
-            resized_frame = cv2.resize(frame, None, fx=scale, fy=scale)
-        return resized_frame
-
     def unify_inputs(self, inputs) -> dict:
         if not isinstance(inputs, dict):
             inputs_dict = {self.image_blob_name: inputs}
@@ -46,13 +26,10 @@ class RetinaFace(Model):
         return inputs_dict
 
     def preprocess(self, inputs):
-        img = self._resize_image(inputs[self.image_blob_name], (self.w, self.h))
+        img = resize_image(inputs[self.image_blob_name], (self.w, self.h))
         h, w = img.shape[:2]
         meta = {'original_shape': inputs[self.image_blob_name].shape,
                 'resized_shape': img.shape}
-        if h != self.h or w != self.w:
-            img = np.pad(img, ((0, self.h - h), (0, self.w - w), (0, 0)),
-                         mode='constant', constant_values=0)
         img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         img = img.reshape((self.n, self.c, self.h, self.w))
         inputs[self.image_blob_name] = img
@@ -213,11 +190,10 @@ class RetinaFacePostprocessor(object):
 
             landmarks_x_coords = np.array(landmarks_list)[:, :, ::2].reshape(len(landmarks_list), -1) / scale_x
             landmarks_y_coords = np.array(landmarks_list)[:, :, 1::2].reshape(len(landmarks_list), -1) / scale_y
-            landmarks_regression = [landmarks_x_coords, landmarks_y_coords]
             result = []
             for i in range(len(scores_list)):
                 result.append(DetectionWithLandmarks(x_mins[i], y_mins[i], x_maxs[i], y_maxs[i], scores[i], 0,
-                                                     [landmarks_x_coords[i], landmarks_y_coords[i]]))
+                                                     landmarks_x_coords[i], landmarks_y_coords[i]))
 
         return result
 
