@@ -24,4 +24,4 @@ models:
             apply_to: prediction
 
         metrics:
-          - type: map
+          - type: coco_orig_precision
