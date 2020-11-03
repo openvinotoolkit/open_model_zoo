@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  "anti-spoofing-mn3" is an anti-spoofing binary classificator based on the MobileNetv3
+  "anti-spoof-mn3" is an anti-spoofing binary classificator based on the MobileNetv3
   <https://arxiv.org/abs/1905.02244>, trained on the Celeba_Spoof dataset <https://arxiv.org/abs/2007.12342>.
   It's a small, light model, trained to predict whether or not a spoof RGB image given
   to the input. A lot of advanced techniques have been tried and selected the best
@@ -34,5 +34,4 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_model=$dl_dir/anti-spoof-mn3.onnx
 framework: onnx
-quantizable: yes
 license: https://raw.githubusercontent.com/kirillProkofiev/training_extensions/kp/antispoofing/LICENSE

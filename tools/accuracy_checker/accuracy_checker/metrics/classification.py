@@ -364,7 +364,7 @@ class AcerScore(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         self.targets.append(annotation.label)
         self.results.append(prediction.label)
-        return 0
+        return (prediction.label == annotation.label)
 
     def evaluate(self, annotations, predictions):
         all_results = np.array(self.results)

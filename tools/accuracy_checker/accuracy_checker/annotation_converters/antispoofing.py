@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
+from .format_converter import  ConverterReturn, FileBasedAnnotationConverter
 from ..representation import ClassificationAnnotation
 from ..utils import read_json, check_file_existence
 from ..config import PathField, NumberField
 
-class AntispoofingDatasetConverter(DirectoryBasedAnnotationConverter):
+class AntispoofingDatasetConverter(FileBasedAnnotationConverter):
     __provider__ = 'antispoofing'
     annotation_types = (ClassificationAnnotation, )
 
