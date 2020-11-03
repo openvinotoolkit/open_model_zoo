@@ -112,10 +112,8 @@ public:
                 cv::Size cameraResolution)
             : ImagesCapture{loop}, nextImgId{0}, initialImageId{static_cast<double>(initialImageId)} {
 
-        try
-        {
-            if (cap.open(std::stoi(input)))
-            {
+        try {
+            if (cap.open(std::stoi(input))) {
                 this->readLengthLimit = loop ? std::numeric_limits<size_t>::max() : readLengthLimit;
                 cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
                 cap.set(cv::CAP_PROP_FRAME_WIDTH, cameraResolution.width);
@@ -134,7 +132,7 @@ public:
                 throw std::runtime_error{ "Can't set the frame to begin with" };
             return;
         }
-        
+
         throw InvalidInput{};
     }
 
