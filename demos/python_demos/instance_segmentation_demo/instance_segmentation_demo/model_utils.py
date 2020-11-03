@@ -262,4 +262,3 @@ def check_model(net):
     assert input_shape[0] == 1, 'Only batch 1 is supported by the demo application'
 
     return image_input, image_info_input, input_shape, model_attributes.postprocessor
-

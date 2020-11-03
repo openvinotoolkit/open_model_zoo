@@ -39,7 +39,7 @@ Image, name: `input.1`, shape: [1x3x550x550], format: [BxCxHxW],
 
    Expected color order: `RGB`.
    Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
-   
+
 
 ### Converted Model
 
@@ -59,21 +59,21 @@ Expected color order: `BGR`.
 ### Original Model
 
 1. Detection scores, name: `conf`. Contains score distribution over all classes in the [0,1] range . The model was trained on the Microsoft\* COCO dataset version with 80 categories of objects, 0 class is for background. Output shape is [1, 19248, 81] in [B, N, C] format, where
-- `B` - batch size, 
-- `N` - number of detected boxes, 
-- `C` - number of classes. 
-2. Detection boxes, name: `boxes`. Contains detection boxes coordinates in a format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates of the top left corner, (`x_max`, `y_max`) are coordinates of the right bottom corner. Coordinates are normalized in [0, 1] range. Output shape is [1, 19248, 4] in [B, N, 4] format, where 
-- `B` - batch size, 
-- `N` - number of detected boxes. 
-3. Masks features prototypes, name: `proto`. Contains the features projection for instance mask decoding. Output shape is [1, 138, 138, 32] in [B, H, W, C], where 
-- `B` - batch size, 
-- `H` - mask height, 
-- `W` - mask width, 
+- `B` - batch size,
+- `N` - number of detected boxes,
+- `C` - number of classes.
+2. Detection boxes, name: `boxes`. Contains detection boxes coordinates in a format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates of the top left corner, (`x_max`, `y_max`) are coordinates of the right bottom corner. Coordinates are normalized in [0, 1] range. Output shape is [1, 19248, 4] in [B, N, 4] format, where
+- `B` - batch size,
+- `N` - number of detected boxes.
+3. Masks features prototypes, name: `proto`. Contains the features projection for instance mask decoding. Output shape is [1, 138, 138, 32] in [B, H, W, C], where
+- `B` - batch size,
+- `H` - mask height,
+- `W` - mask width,
 - `C` - channels.
-4. Raw instance masks, name: `mask`. Contains segmentation heatmaps of detected objects for all classes for every output bounding box. Output shape is [B, N, C] format, where 
-- `B` - batch size, 
-- `N` - number of detected boxes, 
-- `C` - channels. 
+4. Raw instance masks, name: `mask`. Contains segmentation heatmaps of detected objects for all classes for every output bounding box. Output shape is [B, N, C] format, where
+- `B` - batch size,
+- `N` - number of detected boxes,
+- `C` - channels.
 Final mask prediction can be obtained by matrix multiplication of `proto` and transposed `mask` outputs.
 
 ### Converted Model
