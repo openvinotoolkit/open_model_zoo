@@ -13,7 +13,7 @@ The details of the CNN model and our experiments are reported in [1].
 
 # Dataset
 
-The experiments have been performed using the publicly available MURA dataset [2] which can be downloaded from :[https://stanfordmlgroup.github.io/competitions/mura/](https://stanfordmlgroup.github.io/competitions/mura/)
+The experiments have been performed using the publicly available MURA dataset [2]. The dataset is freely available for research and non-commercial use. The details for downloading the dataset as well as the license is available at :[https://stanfordmlgroup.github.io/competitions/mura/](https://stanfordmlgroup.github.io/competitions/mura/)
 
 [2] Rajpurkar, Pranav, Jeremy Irvin, Aarti Bagul, Daisy Ding, Tony Duan, Hershel Mehta, Brandon Yang et al. &quot;Mura: Large dataset for abnormality detection in musculoskeletal radiographs.&quot; _arXiv preprint arXiv:1712.06957_ (2017).
 
