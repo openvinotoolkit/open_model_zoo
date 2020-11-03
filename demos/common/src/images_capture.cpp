@@ -123,8 +123,8 @@ public:
                 return;
             }
         }
-        catch (std::invalid_argument) {} // If stoi conversion failed, let's try another way to open capture device
-        catch (std::out_of_range) {}
+        catch(const std::invalid_argument&) {} // If stoi conversion failed, let's try another way to open capture device
+        catch (const std::out_of_range&) {}
 
         if (cap.open(input)) {
             this->readLengthLimit = readLengthLimit;
