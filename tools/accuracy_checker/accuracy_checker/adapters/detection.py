@@ -241,6 +241,8 @@ class ClassAgnosticDetectionAdapter(Adapter):
         parameters.update({
             'output_blob': StringField(optional=True, default=None, description="Output blob name."),
             'scale': NumberField(optional=True, default=1.0, description="Scale factor for bboxes."),
+            'scales': ListField(optional=True, default=None,
+                                description="List with width and height scale factors for bboxes."),
         })
 
         return parameters
@@ -248,6 +250,7 @@ class ClassAgnosticDetectionAdapter(Adapter):
     def configure(self):
         self.out_blob_name = self.get_value_from_config('output_blob')
         self.scale = self.get_value_from_config('scale')
+        self.scales = self.get_value_from_config('scales')
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -262,6 +265,7 @@ class ClassAgnosticDetectionAdapter(Adapter):
         if self.out_blob_name is None:
             self.out_blob_name = self._find_output(predictions)
         prediction_batch = predictions[self.out_blob_name]
+        self.scale = self.scales * 2 if self.scales else self.scale
 
         result = []
         for identifier in identifiers:
