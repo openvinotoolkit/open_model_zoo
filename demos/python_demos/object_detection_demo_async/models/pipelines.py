@@ -48,7 +48,7 @@ class AsyncPipeline:
             if status != 0:
                 raise RuntimeError('Infer Request has returned status code {}'.format(status))
             raw_outputs = {key: blob.buffer for key, blob in request.output_blobs.items()}
-            self.completed_request_results[id] = (meta, raw_outputs)
+            self.completed_request_results[id] = (raw_outputs, meta)
             self.empty_requests.append(request)
         except Exception as e:
             self.callback_exceptions.append(e)
@@ -64,11 +64,18 @@ class AsyncPipeline:
         self.event.clear()
         request.async_infer(inputs=inputs)
 
-    def get_result(self, id=None):
+    def get_raw_result(self, id=None):
         if id is not None and id in self.completed_request_results:
             return id, self.completed_request_results.pop(id)
         elif self.completed_request_results:
             return self.completed_request_results.popitem()
+        else:
+            return None, None
+
+    def get_result(self, id=None):
+        id, result = self.get_raw_result(id)
+        if result:
+            return id, (self.model.postprocess(*result), result[1])
         else:
             return None, None
 
