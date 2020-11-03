@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "alexnet" model is designed to perform image classification. Just like other
+  Test change The "alexnet" model is designed to perform image classification. Just like other
   common classification models, the "alexnet" model has been pretrained on the ImageNet
   image database. For details about this model, check out the paper <http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf>.
 
