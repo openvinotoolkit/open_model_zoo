@@ -278,8 +278,7 @@ AccuracyChecker supports following set of adapters:
   * `max_detections` - maximum detection used for metrics calculation (Optional, default 100).
 * `class_agnostic_detection` - converting 'boxes' [n, 5] output of detection model to `DetectionPrediction` representation.
   * `output_blob` - name of output layer with bboxes.
-  * `scale` - scalar value to normalize bbox coordinates.
-  * `scales` - list of two scalar values to normalize bbox coordinates by width and height.
+  * `scale` - scalar value or list with 2 values to normalize bbox coordinates.
 * `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.
 * `inpainting` - converting output of Image Inpainting model to `ImageInpaintingPrediction` representation.
 * `style_transfer` - converting output of Style Transfer model to `StyleTransferPrediction` representation.

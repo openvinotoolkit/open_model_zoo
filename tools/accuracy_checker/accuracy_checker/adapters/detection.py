@@ -21,9 +21,10 @@ from collections import namedtuple
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, StringField, ListField, ConfigError
+from ..config import ConfigValidator, BaseField, NumberField, StringField, ListField, ConfigError
 from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction
+from ..utils import get_or_parse_value
 
 FaceDetectionLayerOutput = namedtuple('FaceDetectionLayerOutput', [
     'prob_name',
@@ -240,17 +241,16 @@ class ClassAgnosticDetectionAdapter(Adapter):
         parameters = super().parameters()
         parameters.update({
             'output_blob': StringField(optional=True, default=None, description="Output blob name."),
-            'scale': NumberField(optional=True, default=1.0, description="Scale factor for bboxes."),
-            'scales': ListField(optional=True, default=None,
-                                description="List with width and height scale factors for bboxes."),
+            'scale': BaseField(optional=True, default=1.0, description="Scale factor for bboxes."),
         })
 
         return parameters
 
     def configure(self):
         self.out_blob_name = self.get_value_from_config('output_blob')
-        self.scale = self.get_value_from_config('scale')
-        self.scales = self.get_value_from_config('scales')
+        self.scale = get_or_parse_value(self.get_value_from_config('scale'))
+        if isinstance(self.scale, list):
+            self.scale = self.scale * 2
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -265,7 +265,6 @@ class ClassAgnosticDetectionAdapter(Adapter):
         if self.out_blob_name is None:
             self.out_blob_name = self._find_output(predictions)
         prediction_batch = predictions[self.out_blob_name]
-        self.scale = self.scales * 2 if self.scales else self.scale
 
         result = []
         for identifier in identifiers:
