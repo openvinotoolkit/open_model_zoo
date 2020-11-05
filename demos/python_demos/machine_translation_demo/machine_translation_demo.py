@@ -191,7 +191,7 @@ def build_argparser():
     parser.add_argument('--tokenizer-tgt', type=str, required=True,
                         help='Required. Path to the folder with tgt tokenizer that contains vocab.json and merges.txt.')
     parser.add_argument('-i', '--input', type=str, required=False, nargs='*',
-                        help='Optional. Text for translation. Shadows console input.')
+                        help='Optional. Text for translation. Replaces console input.')
     parser.add_argument('--output-name', type=str, default='pred/Squeeze',
                         help='Optional. Name of the models output node.')
     return parser

@@ -22,6 +22,7 @@ If second (conventional SQuAD-tuned) Bert model is provided as well, it is used 
 Running the application with the `-h` option yields the following usage message:
 ```
 usage: bert_question_answering_embedding_demo.py [-h] -i INPUT
+                                                 [--questions QUESTION [QUESTION ...]]
                                                  [--best_n BEST_N] -v VOCAB
                                                  -m_emb MODEL_EMB
                                                  [--input_names_emb INPUT_NAMES_EMB]
@@ -35,7 +36,7 @@ Options:
   -h, --help            Show this help message and exit.
   -i INPUT, --input INPUT
                         Required. Urls to a wiki pages with context
-  --questions [QUESTIONS [QUESTIONS ...]]
+  --questions QUESTION [QUESTION ...]
                         Optional. Prepared questions
   --best_n BEST_N       Optional. Number of best (closest) contexts selected
   -v VOCAB, --vocab VOCAB

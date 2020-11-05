@@ -29,7 +29,7 @@ optional arguments:
                         Required. Path to the folder with tgt tokenizer that
                         contains vocab.json and merges.txt.
   -i [INPUT [INPUT ...]], --input [INPUT [INPUT ...]]
-                        Optional. Text for translation. Shadows console input.
+                        Optional. Text for translation. Replaces console input.
   --output-name OUTPUT_NAME
                         Optional. Name of the models output node.
 ```
