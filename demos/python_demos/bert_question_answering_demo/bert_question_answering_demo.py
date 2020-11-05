@@ -170,7 +170,7 @@ def main():
 
     # loop on user's or prepared questions
     for question in questions():
-        if not question or len(question.strip()) == 0:
+        if not question.strip():
             break
 
         q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
