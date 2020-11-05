@@ -1,0 +1,36 @@
+models:
+  - name: human-pose-estimation-0002
+
+    launchers:
+      - framework: dlsdk
+        allow_reshape_input: True
+        adapter:
+          type: human_pose_estimation_ae
+          heatmaps_out: heatmaps
+          nms_heatmaps_out: nms_heatmaps
+          embeddings_out: embeddings
+
+    datasets:
+      - name: ms_coco_keypoints
+
+        preprocessing:
+          - type: resize
+            size: 288
+            interpolation: LINEAR
+            aspect_ratio_scale: greater
+          - type: padding
+            stride: 32
+            pad_type: right_bottom
+
+        postprocessing:
+          - type: filter
+            apply_to: annotation
+            area_range: 1, 10000000000
+          - type: filter
+            apply_to: prediction
+            area_range: 1, 10000000000
+
+        metrics:
+          - name: AP
+            type: coco_precision
+            max_detections: 20
