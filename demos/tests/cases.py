@@ -1,6 +1,6 @@
 # Copyright (c) 2019 Intel Corporation
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the 'License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -338,41 +338,40 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(subdirectory='bert_question_answering_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': "https://en.wikipedia.org/wiki/OpenVINO",
-                          '--questions': ['What frameworks does OpenVINO support', 'Who are developers']}),
+        TestCase(options={'-i': 'https://en.wikipedia.org/wiki/OpenVINO',
+                          '--questions': ['What frameworks does OpenVINO support?', 'Who are developers?']}),
         [
             TestCase(options={
                 '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
-                '--input_names': "input_ids,attention_mask,token_type_ids",
+                '--input_names': 'input_ids,attention_mask,token_type_ids',
                 '--output_names': 'output_s,output_e',
-                '--vocab': OmzDirArg('models/intel/bert-small-uncased-whole-word-masking-squad-0001/vocab.txt'),
+                '--vocab': str(OMZ_DIR / 'models/intel/bert-small-uncased-whole-word-masking-squad-0001/vocab.txt'),
             }),
             TestCase(options={
                 '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0002'),
-                '--input_names': "input_ids,attention_mask,token_type_ids,position_ids",
+                '--input_names': 'input_ids,attention_mask,token_type_ids,position_ids',
                 '--output_names': 'output_s,output_e',
-                '--vocab': OmzDirArg('models/intel/bert-small-uncased-whole-word-masking-squad-0002/vocab.txt'),
-            })
+                '--vocab': str(OMZ_DIR / 'models/intel/bert-small-uncased-whole-word-masking-squad-0002/vocab.txt'),
+            }),
         ]
     )),
 
     PythonDemo(subdirectory='bert_question_answering_embedding_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': "https://en.wikipedia.org/wiki/OpenVINO",
-                          '--questions': ['What frameworks does OpenVINO support', 'Who are developers']}),
+        TestCase(options={'-i': 'https://en.wikipedia.org/wiki/OpenVINO',
+                          '--questions': ['What frameworks does OpenVINO support?', 'Who are developers?']}),
         [
             TestCase(options={
                 '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
                 '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
-                '--vocab': OmzDirArg('models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
+                '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
                 '-m_qa': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
-                '--input_names_qa':  'input_ids,attention_mask,token_type_ids',
+                '--input_names_qa': 'input_ids,attention_mask,token_type_ids',
                 '--output_names_qa': 'output_s,output_e'
             }),
             TestCase(options={
                 '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
                 '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
-                '--vocab': Path(
-                    '../../models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt').resolve(),
+                '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
             }),
         ]
     )),
@@ -426,29 +425,29 @@ PYTHON_DEMOS = [
     PythonDemo(subdirectory='machine_translation_demo', device_keys=[], test_cases=combine_cases(
        [
            TestCase(options={
-               '-m': ModelArg("machine-translation-nar-en-ru-0001"),
-               '--tokenizer-src': OmzDirArg('models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
-               '--tokenizer-tgt': OmzDirArg('models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
+               '-m': ModelArg('machine-translation-nar-en-ru-0001'),
+               '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
+               '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
                '--output-name': 'pred',
                '-i': [
-                   "A robot may not injure a human being or, through inaction, allow a human being to come to harm.",
-                   "A robot must obey orders given it by human beings except where such orders would conflict with the "
-                   "First Law.",
-                   "A robot must protect its own existence as long as such protection does not conflict with the First"
-                   " or Second Law."
+                   'A robot may not injure a human being or, through inaction, allow a human being to come to harm.',
+                   'A robot must obey orders given it by human beings except where such orders would conflict with the '
+                   'First Law.',
+                   'A robot must protect its own existence as long as such protection does not conflict with the First'
+                   ' or Second Law.'
                ],
            }),
            TestCase(options={
-               '-m': ModelArg("machine-translation-nar-ru-en-0001"),
-               '--tokenizer-src': OmzDirArg('models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
-               '--tokenizer-tgt': OmzDirArg('models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
+               '-m': ModelArg('machine-translation-nar-ru-en-0001'),
+               '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
+               '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
                '--output-name': 'pred',
                '-i': [
-                   u'Робот не может причинить вред человеку или своим бездействием допустить, чтобы человеку был '
+                   'Робот не может причинить вред человеку или своим бездействием допустить, чтобы человеку был '
                    'причинён вред.',
-                   u'Робот должен повиноваться всем приказам, которые даёт человек, кроме тех случаев, когда эти '
+                   'Робот должен повиноваться всем приказам, которые даёт человек, кроме тех случаев, когда эти '
                    'приказы противоречат Первому Закону.',
-                   u'Робот должен заботиться о своей безопасности в той мере, в которой это не противоречит Первому '
+                   'Робот должен заботиться о своей безопасности в той мере, в которой это не противоречит Первому '
                    'или Второму Законам.'
                ],
            }),
