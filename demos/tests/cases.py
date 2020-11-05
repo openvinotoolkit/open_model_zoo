@@ -366,7 +366,7 @@ PYTHON_DEMOS = [
                 '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
                 '-m_qa': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
                 '--input_names_qa': 'input_ids,attention_mask,token_type_ids',
-                '--output_names_qa': 'output_s,output_e'
+                '--output_names_qa': 'output_s,output_e',
             }),
             TestCase(options={
                 '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
