@@ -61,7 +61,6 @@ if __name__ == '__main__':
     load_net.batch_size = 1
     exec_net = ie.load_network(network=load_net, device_name=args.device)
 
-    assert len(load_net.input_info) == 1, "Expected number of inputs is equal 1"
     input_blob = next(iter(load_net.input_info))
     input_shape = load_net.input_info[input_blob].input_data.shape
     assert input_shape[1] == 1, "Expected model input shape with 1 channel"

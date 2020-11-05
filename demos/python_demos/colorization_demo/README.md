@@ -4,6 +4,7 @@ This demo demonstrates an example of using neural networks to colorize a video.
 You can use the following models with the demo:
 
 * `colorization-v2`
+* `colorization-siggraph`
 
 For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
 
