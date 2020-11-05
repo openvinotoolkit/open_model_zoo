@@ -27,7 +27,7 @@ postprocessing:
 model_optimizer_args:
   - --input=m_t,a1_t,a2_t,a3_t,a4_t,h1.1,h2.1,x
   - --output=logits,h1,h2
-  - --input_model=$dl_dir/wavernn_rnn.onnx
+  - --input_model=$dl_dir/wavernn-rnn/wavernn_rnn.onnx
 framework: onnx
 
 license: https://github.com/fatchord/WaveRNN/blob/master/LICENSE.txt
