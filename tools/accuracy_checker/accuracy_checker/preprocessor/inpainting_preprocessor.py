@@ -22,6 +22,7 @@ from ..config import NumberField, BoolField, PathField, StringField, ConfigError
 from ..utils import get_size_from_config
 from ..data_readers import BaseReader
 
+
 class FreeFormMask(Preprocessor):
     __provider__ = 'free_form_mask'
 
@@ -53,7 +54,6 @@ class FreeFormMask(Preprocessor):
         num_strokes = np.random.randint(max_vertex)
         start_y = np.random.randint(h)
         start_x = np.random.randint(w)
-        brush_width = 0
         for i in range(num_strokes):
             angle = np.random.random() * np.deg2rad(max_angle)
             if i % 2 == 0:
@@ -72,6 +72,9 @@ class FreeFormMask(Preprocessor):
         return mask
 
     def process(self, image, annotation_meta=None):
+        if len(image.data) == 2:
+            image.data[1] = preprocess_input_mask(image.data[1])
+            return image
         img = image.data[0]
         img_height, img_width = img.shape[:2]
         mask = np.zeros((img_height, img_width, 1), dtype=np.float32)
@@ -102,7 +105,7 @@ class RectMask(Preprocessor):
             ),
             'size': NumberField(
                 optional=True, default=128,
-                description="Size of mask, used if both dementions are equal", value_type=int
+                description="Size of mask, used if both dimensions are equal", value_type=int
             )
         })
         return parameters
@@ -111,6 +114,10 @@ class RectMask(Preprocessor):
         self.mask_height, self.mask_width = get_size_from_config(self.config, allow_none=True)
 
     def process(self, image, annotation_meta=None):
+        if len(image.data) == 2:
+            image.data[1] = preprocess_input_mask(image.data[1])
+            return image
+
         img = image.data[0]
         img_height, img_width = img.shape[:2]
         mp0 = (img_height - self.mask_height)//2
@@ -146,6 +153,10 @@ class CustomMask(Preprocessor):
         self.mask_loader = self.get_value_from_config('mask_loader')
 
     def process(self, image, annotation_meta=None):
+        if len(image.data) == 2:
+            image.data[1] = preprocess_input_mask(image.data[1])
+            return image
+
         if annotation_meta.get('mask') is None:
             raise ConfigError('Path to mask dataset is not set during annotation conversion.'
                               'Please specify masks_dir parameter')
@@ -171,3 +182,11 @@ class CustomMask(Preprocessor):
         identifier = image.identifier[0]
         image.identifier = ['{}_image'.format(identifier), '{}_mask'.format(identifier)]
         return image
+
+
+def preprocess_input_mask(mask):
+    if len(mask.shape) == 3 and mask.shape[-1] != 1:
+        mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+    if len(mask.shape) == 2:
+        mask = np.expand_dims(mask, -1)
+    return np.array(mask > 0).astype(np.float32)

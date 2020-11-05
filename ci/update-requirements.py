@@ -67,6 +67,7 @@ def main():
     pc('ci/requirements-ac-test.txt',
         'tools/accuracy_checker/requirements.in', 'tools/accuracy_checker/requirements-test.in',
         'tools/accuracy_checker/requirements-core.in')
+    pc('ci/requirements-check-basics.txt', 'ci/requirements-check-basics.in')
     pc('ci/requirements-conversion.txt',
         'tools/downloader/requirements-pytorch.in', 'tools/downloader/requirements-caffe2.in',
         *(openvino_dir / f'deployment_tools/model_optimizer/requirements_{suffix}.txt'

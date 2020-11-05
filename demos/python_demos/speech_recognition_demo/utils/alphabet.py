@@ -15,12 +15,14 @@ def load_alphabet(filename):
     characters = []
     with codecs.open(filename, 'r', 'utf-8') as f:
         for line in f:
-            line = line.rstrip('\n')  # empty line ends the alphabet
-            if line == '':
+            line = line.rstrip('\r\n')
+            if line == '':  # empty line ends the alphabet
                 break
             if line[0] == '#':  # comment
                 continue
-            if line[0] == '\\':  # escaping, to enter "#" or "\" as the first character
+            if line.startswith('\\s'):  # "\s" for space as the first character
+                line = ' ' + line[2:]
+            elif line[0] == '\\':  # escaping, to enter "#" or "\" as the first character
                 line = line[1:]
             characters.append(line)
     return characters

@@ -75,6 +75,7 @@ class InputFeeder:
         self.network_inputs = network_inputs or []
         self.default_layout = default_layout
         self.dummy = dummy
+        self.ordered_inputs = False
         self.configure(inputs_config, input_precisions_list)
 
     def configure(self, inputs_config, precisions_list):
@@ -121,7 +122,7 @@ class InputFeeder:
         if self.image_info_inputs or self.orig_image_info_inputs:
             image_info_inputs = self._fill_image_info_inputs(data_representation_batch)
             filled_inputs = {**image_info_inputs}
-        for input_layer in self.non_constant_inputs:
+        for idx, input_layer in enumerate(self.non_constant_inputs):
             input_regex = None
             input_batch = []
             if self.inputs_mapping:
@@ -146,6 +147,10 @@ class InputFeeder:
                 else:
                     data = [data] if np.isscalar(identifiers) else data
                     identifiers = [identifiers] if np.isscalar(identifiers) else identifiers
+                    if self.ordered_inputs:
+                        assert idx < len(identifiers), 'number input layers and data is not matched'
+                        input_batch.append(data[idx])
+                        continue
                     for identifier, data_value in zip(identifiers, data):
                         if input_regex.match(identifier):
                             input_data = data_value

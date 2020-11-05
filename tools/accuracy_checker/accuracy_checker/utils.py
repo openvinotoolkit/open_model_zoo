@@ -274,6 +274,10 @@ def is_single_metric_source(source):
     return np.size(source.split(',')) == 1
 
 
+def is_path(data):
+    return isinstance(data, (Path, str))
+
+
 def read_txt(file: Union[str, Path], sep='\n', **kwargs):
     def is_empty(string):
         return not string or string.isspace()
@@ -811,3 +815,6 @@ class UnsupportedPackage:
         msg = "{package} is not installed. Please install it before using {provider}.\n{message}".format(
             provider=provider, package=self.package, message=self.msg)
         raise ImportError(msg)
+
+    def __call__(self, *args, **kwargs):
+        self.raise_error('')
