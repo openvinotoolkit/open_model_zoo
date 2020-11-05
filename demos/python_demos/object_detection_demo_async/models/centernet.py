@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2020 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -14,22 +14,12 @@
  limitations under the License.
 """
 
-import os
 import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
 from .model import Model
-
-
-class Detection:
-    def __init__(self, xmin, ymin, xmax,ymax,score,id):
-        self.xmin = xmin
-        self.xmax = xmax
-        self.ymin = ymin
-        self.ymax = ymax
-        self.score = score
-        self.id = id
+from .utils import Detection, resize_image
 
 
 class CenterNet(Model):
@@ -50,6 +40,63 @@ class CenterNet(Model):
     def _parse_outputs(self):
         pass
 
+    def unify_inputs(self, inputs) -> dict:
+        if not isinstance(inputs, dict):
+            inputs_dict = {self.image_blob_name: inputs}
+        else:
+            inputs_dict = inputs
+        return inputs_dict
+
+    def preprocess(self, inputs):
+        height, width = inputs[self.image_blob_name].shape[0:2]
+        center = np.array([width / 2., height / 2.], dtype=np.float32)
+        scale = max(height, width)
+
+        meta = {'original_shape': inputs[self.image_blob_name].shape,
+                'resized_shape': inputs[self.image_blob_name]}
+
+        trans_input = self.get_affine_transform(center, scale, 0, [self.w, self.h])
+        resized_image = resize_image(inputs[self.image_blob_name], (width, height))
+        inp_image = cv2.warpAffine(
+            resized_image, trans_input, (self.w, self.h),
+            flags=cv2.INTER_LINEAR)
+        inp_image = np.transpose(inp_image, (2, 0, 1))
+        inputs[self.image_blob_name] = inp_image
+
+        return inputs, meta
+
+    def postprocess(self, outputs, meta):
+        heat = outputs[self._output_layer_names[0]][0]
+        reg = outputs[self._output_layer_names[1]][0]
+        wh = outputs[self._output_layer_names[2]][0]
+        heat = np.exp(heat)/(1 + np.exp(heat))
+        height, width = heat.shape[1:3]
+        num_predictions = 100
+
+        heat = self._nms(heat)
+        scores, inds, clses, ys, xs = self._topk(heat, K=num_predictions)
+        reg = self._tranpose_and_gather_feat(reg, inds)
+
+        reg = reg.reshape((num_predictions, 2))
+        xs = xs.reshape((num_predictions, 1)) + reg[:, 0:1]
+        ys = ys.reshape((num_predictions, 1)) + reg[:, 1:2]
+
+        wh = self._tranpose_and_gather_feat(wh, inds)
+        wh = wh.reshape((num_predictions, 2))
+        clses = clses.reshape((num_predictions, 1))
+        scores = scores.reshape((num_predictions, 1))
+        bboxes = np.concatenate((xs - wh[..., 0:1] / 2,
+                                 ys - wh[..., 1:2] / 2,
+                                 xs + wh[..., 0:1] / 2,
+                                 ys + wh[..., 1:2] / 2), axis=1)
+        detections = np.concatenate((bboxes, scores, clses), axis=1)
+        mask = detections[..., 4] >= self._threshold
+        filtered_detections = detections[mask]
+        scale = max(meta['original_shape'])
+        center = np.array(meta['original_shape'][:2])/2.0
+        dets = self._transform(filtered_detections, np.flip(center, 0), scale, height, width)
+        dets = [Detection(x[0], x[1], x[2], x[3], score=x[4], id=x[5]) for x in dets]
+        return dets
 
     @staticmethod
     def get_affine_transform(center, scale, rot, output_size, inv=False):
@@ -169,74 +216,4 @@ class CenterNet(Model):
             dets[:, 2:4], center, scale, (width, height))
         return dets
 
-    def unify_inputs(self, inputs) -> dict:
-        if not isinstance(inputs, dict):
-            inputs_dict = {self.image_blob_name: inputs}
-        else:
-            inputs_dict = inputs
-        return inputs_dict
 
-    def preprocess(self, inputs):
-        height, width = inputs[self.image_blob_name].shape[0:2]
-        center = np.array([width / 2., height / 2.], dtype=np.float32)
-        scale = max(height, width)
-
-        meta = {'original_shape': inputs[self.image_blob_name].shape,
-                'resized_shape': inputs[self.image_blob_name]}
-
-        trans_input = self.get_affine_transform(center, scale, 0, [self.w, self.h])
-        resized_image = cv2.resize(inputs[self.image_blob_name], (width, height))
-        inp_image = cv2.warpAffine(
-            resized_image, trans_input, (self.w, self.h),
-            flags=cv2.INTER_LINEAR)
-        inp_image = np.transpose(inp_image, (2, 0, 1))
-        inputs[self.image_blob_name] = inp_image
-
-        return inputs, meta
-
-    def postprocess(self, outputs, meta):
-        heat = outputs[self._output_layer_names[0]][0]
-        reg = outputs[self._output_layer_names[1]][0]
-        wh = outputs[self._output_layer_names[2]][0]
-        heat = heat = np.exp(heat)/(1 + np.exp(heat))
-        height, width = heat.shape[1:3]
-        num_predictions = 100
-
-        heat = self._nms(heat)
-        scores, inds, clses, ys, xs = self._topk(heat, K=num_predictions)
-        reg = self._tranpose_and_gather_feat(reg, inds)
-
-        reg = reg.reshape((num_predictions, 2))
-        xs = xs.reshape((num_predictions, 1)) + reg[:, 0:1]
-        ys = ys.reshape((num_predictions, 1)) + reg[:, 1:2]
-
-        wh = self._tranpose_and_gather_feat(wh, inds)
-        wh = wh.reshape((num_predictions, 2))
-        clses = clses.reshape((num_predictions, 1))
-        scores = scores.reshape((num_predictions, 1))
-        bboxes = np.concatenate((xs - wh[..., 0:1] / 2,
-                                 ys - wh[..., 1:2] / 2,
-                                 xs + wh[..., 0:1] / 2,
-                                 ys + wh[..., 1:2] / 2), axis=1)
-        detections = np.concatenate((bboxes, scores, clses), axis=1)
-        mask = detections[..., 4] >= self._threshold
-        filtered_detections = detections[mask]
-        scale = max(meta['original_shape'])
-        center = np.array(meta['original_shape'][:2])/2.0
-        dets = self._transform(filtered_detections, np.flip(center, 0), scale, height, width)
-        dets = [Detection(x[0], x[1], x[2], x[3], score=x[4], id=x[5]) for x in dets]
-        return dets
-
-    def infer(self, image):
-        t0 = cv2.getTickCount()
-        output = self._exec_model.infer(inputs={self.image_blob_name: image})
-        self.infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()
-        return output
-
-    def detect(self, image):
-        image_sizes = image.shape[:2]
-        image = self.preprocess(image)
-        image = np.transpose(image, (2, 0, 1))
-        output = self.infer(image)
-        detections = self.postprocess([output[name][0] for name in self._output_layer_names], image_sizes)
-        return detections
