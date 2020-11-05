@@ -17,7 +17,7 @@ class SyncPipeline:
         inputs, meta = self.model.preprocess(inputs)
         outputs = self.exec_net.infer(inputs=inputs)
         outputs = self.model.postprocess(outputs, meta)
-        return outputs
+        return outputs, meta
 
 
 class AsyncPipeline:

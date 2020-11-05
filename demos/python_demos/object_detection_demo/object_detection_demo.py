@@ -155,6 +155,7 @@ def put_highlighted_text(frame, message, position, font_face, font_scale, color,
     cv2.putText(frame, message, position, font_face, font_scale, (255, 255, 255), thickness + 1)  # white border
     cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
 
+
 def get_plugin_configs(device, num_streams, num_threads):
     config_user_specified = {}
     config_min_latency = {}
@@ -301,7 +302,7 @@ def main():
                     cap.release()
                 continue
 
-            detections = detector(frame)
+            detections, _ = detector(frame)
 
             if len(detections) and args.raw_output_message:
                 print_raw_results(frame.shape[:2], detections, labels_map, args.prob_threshold)
