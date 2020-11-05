@@ -382,7 +382,6 @@ PYTHON_DEMOS = [
            **MONITORS,
            '-i': DataPatternArg('classification'),
            '-m': ModelArg('colorization-v2'),
-           '--coeffs': ModelDirArg('colorization-v2', 'colorization-v2.npy'),
        })
     )),
 
