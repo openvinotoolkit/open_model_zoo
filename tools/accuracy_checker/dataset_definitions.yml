@@ -680,6 +680,13 @@ datasets:
       two_streams: True
     annotation: super_resolution_x3.pickle
 
+    preprocessing:
+      - type: auto_resize
+
+    postprocessing:
+      - type: resize
+        apply_to: prediction
+
     metrics:
       - type: psnr
         scale_border: 4
@@ -695,6 +702,13 @@ datasets:
       hr_suffix: hr
       two_streams: True
     annotation: super_resolution_x4.pickle
+
+    preprocessing:
+      - type: auto_resize
+
+    postprocessing:
+      - type: resize
+        apply_to: prediction
 
     metrics:
       - type: psnr
@@ -712,6 +726,11 @@ datasets:
 
     preprocessing:
       - type: bgr_to_gray
+      - type: auto_resize
+
+    postprocessing:
+      - type: resize
+        apply_to: prediction
 
     metrics:
       - type: psnr
@@ -876,6 +895,21 @@ datasets:
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       masks_dir: free_form_masks/masks_2k
     annotation: inpainting_voc12_masks2k.pickle
+
+  - name: inpainting_rect_mask
+    data_source: VOCdevkit/VOC2012/JPEGImages/
+    annotation_conversion:
+      converter: inpainting
+      images_dir: VOCdevkit/VOC2012/JPEGImages/
+    annotation: inpainting_voc12.pickle
+
+    preprocessing:
+      - type: auto_resize
+      - type: rect_mask
+    postprocessing:
+      - type: resize
+        apply_to: prediction
+
 
   - name: mrlEyes_2018_01
     annotation_conversion:
