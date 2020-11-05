@@ -835,6 +835,16 @@ datasets:
       clip_length: 16
     annotation: msasl_action_recognition.pickle
 
+  - name: jester
+    data_source: jester/global_crops
+    annotation_conversion:
+      converter: continuous_clip_action_recognition
+      annotation_file: jester/val.txt
+      data_dir: jester/global_crops
+      out_fps: 15
+      clip_length: 8
+    annotation: jester_action_recognition.pickle
+
   - name: ReDWeb_V1
     data_source: ReDWeb_V1
     annotation_conversion:
