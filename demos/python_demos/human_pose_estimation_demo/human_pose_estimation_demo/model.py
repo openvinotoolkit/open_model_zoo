@@ -152,8 +152,8 @@ class HPE(Model):
         h, w = img.shape[:2]
         divisor = self.size_divisor
         if w % divisor != 0 or h % divisor != 0:
-            img = np.pad(img, ((0, (h + divisor - 1) // divisor * divisor),
-                               (0, (w + divisor - 1) // divisor * divisor),
+            img = np.pad(img, ((0, (h + divisor - 1) // divisor * divisor - h),
+                               (0, (w + divisor - 1) // divisor * divisor - w),
                                (0, 0)))
         # Change data layout from HWC to CHW
         img = img.transpose((2, 0, 1))
