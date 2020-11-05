@@ -90,7 +90,8 @@ class ColorizationEvaluator(BaseEvaluator):
             dataset_tag='',
             output_callback=None,
             allow_pairwise_subset=False,
-            dump_prediction_to_annotgiation=False,
+            dump_prediction_to_annotation=False,
+            calculate_metrics=True,
             **kwargs):
 
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):

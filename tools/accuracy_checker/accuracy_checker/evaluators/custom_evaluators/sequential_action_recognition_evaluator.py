@@ -64,6 +64,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             output_callback=None,
             allow_pairwise_subset=False,
             dump_prediction_to_annotation=False,
+            calculate_metrics=True,
             **kwargs):
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
@@ -95,7 +96,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                 batch_identifiers, batch_inputs_extr, encoder_callback=encoder_callback
             )
             metrics_result = None
-            if self.metric_executor:
+            if self.metric_executor and calculate_metrics:
                 metrics_result, _ = self.metric_executor.update_metrics_on_batch(
                     batch_input_ids, batch_annotation, batch_prediction
                 )
