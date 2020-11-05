@@ -84,7 +84,15 @@ postprocessing:
   # disable imports that aren't needed for this model and code that uses them
   - $type: regex_replace
     file: inference.py
-    pattern: '(import det_model_fn|from (keras import label_util|visualize))'
+    pattern: '(import det_model_fn|from (keras import label_util|visualize)|from PIL)'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: hparams_config.py
+    pattern: 'import yaml|import ast'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: model_inspect.py
+    pattern: 'from PIL'
     replacement: '# \g<0>'
   - $type: regex_replace
     file: backbone/backbone_factory.py
@@ -92,7 +100,7 @@ postprocessing:
     replacement: '# \g<0>'
   - $type: regex_replace
     file: dataloader.py
-    pattern: 'from (object_detection|keras)'
+    pattern: 'from (object_detection|keras|absl)'
     replacement: '# \g<0>'
   - $type: regex_replace
     file: keras/anchors.py
