@@ -20,6 +20,10 @@ files:
     size: 29948456
     sha256: 4a087de0f6126335f804bd4b15b672778d824e0f3538f6cc08710291c753ad29
     source: https://download.01.org/opencv/public_models/102020/forward-tacotron/forward-tacotron-regression.zip
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: forward-tacotron-regression.zip
 model_optimizer_args:
   - --input_shape=[1,805,512]
   - --input=data
