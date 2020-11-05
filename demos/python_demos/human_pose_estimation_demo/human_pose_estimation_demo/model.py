@@ -77,14 +77,14 @@ class Model:
         self.event.set()
 
     def __call__(self, inputs, id, meta):
-        request = self.empty_requests.popleft()
         inputs = self.unify_inputs(inputs)
         inputs, preprocessing_meta = self.preprocess(inputs)
+        self.reshape_net(inputs)
         meta.update(preprocessing_meta)
+        request = self.empty_requests.popleft()
         request.set_completion_callback(py_callback=self.inference_completion_callback,
                                         py_data=(request, id, meta))
         self.event.clear()
-        self.reshape_net(inputs)
         request.async_infer(inputs=inputs)
 
     def await_all(self):
@@ -140,14 +140,12 @@ class HPE(Model):
             resized_frame = cv2.resize(frame, size)
         else:
             h, w = frame.shape[:2]
-            # FIXME.
             scale = max(size[1] / h, size[0] / w)
             resized_frame = cv2.resize(frame, None, fx=scale, fy=scale)
         return resized_frame
 
     def preprocess(self, inputs):
         img = self._resize_image(inputs[self.image_blob_name], (self.target_size, self.target_size), self.keep_aspect_ratio_resize)
-        img = img[:self.target_size, :self.target_size, :]
         meta = {'original_shape': inputs[self.image_blob_name].shape,
                 'resized_shape': img.shape}
         img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
