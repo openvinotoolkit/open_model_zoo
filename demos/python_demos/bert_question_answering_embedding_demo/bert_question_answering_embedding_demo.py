@@ -38,7 +38,7 @@ def build_argparser():
                       help="Required. Urls to a wiki pages with context",
                       action='append',
                       required=True, type=str)
-    args.add_argument("--questions", type=str, nargs='*', help="Optional. Prepared questions")
+    args.add_argument("--questions", type=str, nargs='+', metavar='QUESTION', help="Optional. Prepared questions")
     args.add_argument("--best_n",
                       help="Optional. Number of best (closest) contexts selected",
                       default=10,
