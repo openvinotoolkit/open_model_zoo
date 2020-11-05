@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
             return -1;
         }
 
-        PipelineBase pipeline(std::move(model), ConfigFactory::GetUserConfig());
+        PipelineBase pipeline(std::move(model), ConfigFactory::getUserConfig());
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();
@@ -215,6 +215,11 @@ int main(int argc, char *argv[]) {
                 frameNum = pipeline.submitImage(curr_frame);
             }
 
+            //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
+            pipeline.waitForData();
+
+            int key = 0;
+
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - cast result's underlying pointer to DetectionResult*
             //    and use your own processing instead of calling renderData().
@@ -228,15 +233,19 @@ int main(int argc, char *argv[]) {
                     if (!FLAGS_no_show)
                     {
                         cv::imshow("Detection Results", outFrame);
+
+                        // Showing frame in window and storing key pressed if key variable doesn't contain key code yet
+                        if (key) {
+                            cv::waitKey(1);
+                        }
+                        else {
+                            key = cv::waitKey(1);
+                        }
                     }
                 }
             }
-            //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
-            pipeline.waitForData();
 
             //--- Processing keyboard events
-            const int key = cv::waitKey(1);
-
             if (!FLAGS_no_show) {
                 if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                     break;
@@ -250,10 +259,6 @@ int main(int argc, char *argv[]) {
         //// --------------------------- Report metrics -------------------------------------------------------
         auto info = pipeline.getPerformanceInfo();
         slog::info << slog::endl << "Metric reports:" << slog::endl;
-
-        slog::info << slog::endl << "Total time: "
-            << std::chrono::duration_cast<std::chrono::milliseconds> (std::chrono::steady_clock::now()- startTimePoint).count()
-            << " ms" << slog::endl;
 
         slog::info << "Avg Latency: " << std::fixed << std::setprecision(1) <<
             info.getTotalAverageLatencyMs()

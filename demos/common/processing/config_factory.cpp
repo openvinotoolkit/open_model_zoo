@@ -32,8 +32,8 @@ DECLARE_string(nstreams);
 
 using namespace InferenceEngine;
 
-CnnConfig ConfigFactory::GetUserConfig() {
-    auto config = GetCommonConfig();
+CnnConfig ConfigFactory::getUserConfig() {
+    auto config = getCommonConfig();
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(FLAGS_d)) {
         devices.insert(device);
@@ -75,8 +75,8 @@ CnnConfig ConfigFactory::GetUserConfig() {
     return config;
 }
 
-CnnConfig ConfigFactory::GetMinLatencyConfig() {
-    auto config = GetCommonConfig();
+CnnConfig ConfigFactory::getMinLatencyConfig() {
+    auto config = getCommonConfig();
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(FLAGS_d)) {
         devices.insert(device);
@@ -92,7 +92,7 @@ CnnConfig ConfigFactory::GetMinLatencyConfig() {
     return config;
 }
 
-CnnConfig ConfigFactory::GetCommonConfig() {
+CnnConfig ConfigFactory::getCommonConfig() {
     CnnConfig config;
 
     if (!FLAGS_d.empty()) {

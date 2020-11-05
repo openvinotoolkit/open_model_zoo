@@ -92,7 +92,7 @@ std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult)
     std::vector<DetectedObject> objects;
 
     // Parsing outputs
-    auto& srcImg = infResult.metaData->asPtr<ImageMetaData>()->img;
+    auto& srcImg = infResult.metaData->asRef<ImageMetaData>().img;
     for (auto& output : infResult.outputsData) {
         this->parseYOLOV3Output(output.first, output.second, netInputHeight, netInputWidth,
             srcImg.rows, srcImg.cols, objects);

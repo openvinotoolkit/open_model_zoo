@@ -89,7 +89,7 @@ public:
 
     /// Submit request to network
     /// @param image - image to submit for processing
-    /// @returns -1 if image cannot be scheduled for processing (there's no any free InferRequest available).
+    /// @returns -1 if image cannot be scheduled for processing (there's no free InferRequest available).
     /// Otherwise returns unique sequential frame ID for this particular request. Same frame ID will be written in the response structure.
     virtual int64_t submitImage(cv::Mat img);
 

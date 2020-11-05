@@ -19,6 +19,7 @@
 #include <ngraph/ngraph.hpp>
 
 using namespace InferenceEngine;
+
 ModelSSD::ModelSSD(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize,
     const std::vector<std::string>& labels)
@@ -52,7 +53,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult)
 
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
-    auto sz = infResult.metaData->asPtr<ImageMetaData>()->img.size();
+    auto sz = infResult.metaData->asRef<ImageMetaData>().img.size();
 
     for (size_t i = 0; i < maxProposalCount; i++) {
 
@@ -93,7 +94,7 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork){
                 inputsNames.push_back(inputInfoItem.first);
             }
             else {
-                inputsNames[1] = inputInfoItem.first;
+                inputsNames[0] = inputInfoItem.first;
             }
 
             inputInfoItem.second->setPrecision(Precision::U8);
@@ -110,7 +111,7 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork){
         }
         else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
             inputsNames.resize(2);
-            inputsNames[2] = inputInfoItem.first;
+            inputsNames[1] = inputInfoItem.first;
             inputInfoItem.second->setPrecision(Precision::FP32);
         }
         else {

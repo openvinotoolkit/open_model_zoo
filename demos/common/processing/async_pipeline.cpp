@@ -24,12 +24,12 @@ using namespace InferenceEngine;
 PipelineBase::PipelineBase(std::unique_ptr<ModelBase> modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core* engine):
     model(std::move(modelInstance)){
 
+    // --------------------------- 1. Load inference engine ------------------------------------------------
+    slog::info << "Loading Inference Engine" << slog::endl;
+
     auto ie = engine ?
         std::unique_ptr<InferenceEngine::Core, void(*)(InferenceEngine::Core*)>(engine, [](InferenceEngine::Core*) {}) :
         std::unique_ptr<InferenceEngine::Core, void(*)(InferenceEngine::Core*)>(new InferenceEngine::Core, [](InferenceEngine::Core* ptr) {delete ptr; });
-
-    // --------------------------- 1. Load inference engine ------------------------------------------------
-    slog::info << "Loading Inference Engine" << slog::endl;
 
     slog::info << "Device info: " << slog::endl;
     slog::info<< ie->GetVersions(cnnConfig.devices);
@@ -51,7 +51,12 @@ PipelineBase::PipelineBase(std::unique_ptr<ModelBase> modelInstance, const CnnCo
     InferenceEngine::CNNNetwork cnnNetwork = ie->ReadNetwork(model->getModelFileName());
     /** Set batch size to 1 **/
     slog::info << "Batch size is forced to 1." << slog::endl;
-    cnnNetwork.setBatchSize(1);
+
+    auto shapes = cnnNetwork.getInputShapes();
+    for (auto& shape : shapes) {
+        shape.second[0] = 1;
+    }
+    cnnNetwork.reshape(shapes);
 
     // -------------------------- Reading all outputs names and customizing I/O blobs (in inherited classes)
     model->prepareInputsOutputs(cnnNetwork);
@@ -106,14 +111,15 @@ int64_t PipelineBase::submitRequest(const InferenceEngine::InferRequest::Ptr& re
                 try {
                     InferenceResult result;
 
+                    result.startTime = frameStartTime;
+                    perfInfo.lastInferenceLatency = std::chrono::steady_clock::now() - frameStartTime;
+
                     result.frameId = frameID;
                     result.metaData = std::move(metaData);
                     for (std::string outName : model->getOutputsNames())
                         result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outName))));
-                    result.startTime = frameStartTime;
-                    perfInfo.lastInferenceLatency = std::chrono::steady_clock::now() - frameStartTime;
-                    completedInferenceResults.emplace(frameID, result);
 
+                    completedInferenceResults.emplace(frameID, result);
                     this->requestsPool->setRequestIdle(request);
 
                     this->onProcessingCompleted(request);

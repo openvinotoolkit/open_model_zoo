@@ -20,20 +20,12 @@
 struct InputData {
     virtual ~InputData() {}
 
-    template<class T> T* asPtr() {
-        auto dst = dynamic_cast<T*>(this);
-        if (!dst) {
-            throw std::bad_cast();
-        }
-        return dst;
+    template<class T> T& asRef() {
+        return dynamic_cast<T&>(*this);
     }
 
-    template<class T> const T* asPtr() const {
-        auto dst = dynamic_cast<const T*>(this);
-        if (!dst) {
-            throw std::bad_cast();
-        }
-        return dst;
+    template<class T> const T& asRef() const {
+        return dynamic_cast<const T&>(*this);
     }
 };
 

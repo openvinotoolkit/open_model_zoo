@@ -76,8 +76,8 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
 
 void SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr & request, MetaData *& metaData)
 {
-    auto imgData = inputData.asPtr<ImageInputData>();
-    auto& img = imgData->inputImage;
+    auto imgData = inputData.asRef<ImageInputData>();
+    auto& img = imgData.inputImage;
 
     request->SetBlob(inputsNames[0], wrapMat2Blob(img));
     metaData = new ImageMetaData(img);
@@ -126,12 +126,12 @@ const cv::Vec3b& SegmentationModel::class2Color(int classId)
 
 cv::Mat SegmentationModel::renderData(ResultBase* result)
 {
-    auto segResult = result->asPtr<SegmentationResult>();
-    auto inputImg = segResult->metaData->asPtr<ImageMetaData>()->img;
+    auto& segResult = result->asRef<SegmentationResult>();
+    auto inputImg = segResult.metaData->asRef<ImageMetaData>().img;
 
     // Visualizing result data over source image
     cv::Mat outputImg;
-    cv::resize(segResult->mask, outputImg, inputImg.size());
+    cv::resize(segResult.mask, outputImg, inputImg.size());
     outputImg = inputImg / 2 + outputImg / 2;
 
     return outputImg;

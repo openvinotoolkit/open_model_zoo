@@ -19,7 +19,7 @@
 
 using namespace InferenceEngine;
 
-DetectionModel::DetectionModel(std::string modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels)
+DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels)
     :ModelBase(modelFileName),
     useAutoResize(useAutoResize),
     confidenceThreshold(confidenceThreshold),
@@ -28,8 +28,7 @@ DetectionModel::DetectionModel(std::string modelFileName, float confidenceThresh
 
 void DetectionModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, MetaData*& metaData)
 {
-    auto imgData = inputData.asPtr<ImageInputData>();
-    auto& img = imgData->inputImage;
+    auto& img = inputData.asRef<ImageInputData>().inputImage;
 
     if (useAutoResize) {
         /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
@@ -47,9 +46,9 @@ void DetectionModel::preprocess(const InputData& inputData, InferenceEngine::Inf
 cv::Mat DetectionModel::renderData(ResultBase* result)
 {
     // Visualizing result data over source image
-    cv::Mat outputImg = result->metaData->asPtr<ImageMetaData>()->img.clone();
+    cv::Mat outputImg = result->metaData->asRef<ImageMetaData>().img.clone();
 
-    for (auto obj : result->asPtr<DetectionResult>()->objects) {
+    for (auto obj : result->asRef<DetectionResult>().objects) {
         std::ostringstream conf;
         conf << ":" << std::fixed << std::setprecision(3) << obj.confidence;
         cv::putText(outputImg, obj.label + conf.str(),

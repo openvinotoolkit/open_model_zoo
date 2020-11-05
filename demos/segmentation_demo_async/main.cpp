@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
         cv::Mat curr_frame;
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
-        PipelineBase pipeline(std::make_unique<SegmentationModel>(FLAGS_m),ConfigFactory::GetUserConfig());
+        PipelineBase pipeline(std::make_unique<SegmentationModel>(FLAGS_m),ConfigFactory::getUserConfig());
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();
@@ -178,6 +178,11 @@ int main(int argc, char *argv[]) {
                 frameNum = pipeline.submitImage(curr_frame);
             }
 
+            //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
+            pipeline.waitForData();
+
+            int key = 0;
+
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - cast result's underlying pointer to SegmentationResult*
             //    and use your own processing instead of calling renderData().
@@ -185,29 +190,30 @@ int main(int argc, char *argv[]) {
             while (result = pipeline.getResult()) {
                 cv::Mat outFrame = SegmentationModel::renderData(result.get());
                 //--- Showing results and device information
-                if (!outFrame.empty() ) {
+                if (!outFrame.empty()) {
                     presenter.drawGraphs(outFrame);
                     paintInfo(outFrame, pipeline.getPerformanceInfo());
                     if (!FLAGS_no_show) {
                         cv::imshow("Segmentation Results", outFrame);
+
+                        // Showing frame in window and storing key pressed if key variable doesn't contain key code yet
+                        if (key) {
+                            cv::waitKey(1);
+                        }
+                        else {
+                            key = cv::waitKey(1);
+                        }
                     }
                 }
             }
 
-            //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
-            pipeline.waitForData();
-
-            if (!FLAGS_no_show)
-            {
-                const int key = cv::waitKey(1);
-
-                if (!FLAGS_no_show) {
-                    if (27 == key || 'q' == key || 'Q' == key) {  // Esc
-                        break;
-                    }
-                    else {
-                        presenter.handleKey(key);
-                    }
+            //--- Processing keyboard events
+            if (!FLAGS_no_show) {
+                if (27 == key || 'q' == key || 'Q' == key) {  // Esc
+                    break;
+                }
+                else {
+                    presenter.handleKey(key);
                 }
             }
         }
@@ -215,10 +221,6 @@ int main(int argc, char *argv[]) {
         //// --------------------------- Report metrics -------------------------------------------------------
         auto info = pipeline.getPerformanceInfo();
         slog::info << slog::endl << "Metric reports:" << slog::endl;
-
-        slog::info << slog::endl << "Total time: "
-            << std::chrono::duration_cast<std::chrono::milliseconds> (std::chrono::steady_clock::now()- startTimePoint).count()
-            << " ms" << slog::endl;
 
         //--- Show performace results 
         slog::info << "Avg Latency: " << std::fixed << std::setprecision(1) <<

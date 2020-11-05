@@ -29,8 +29,8 @@ struct CnnConfig{
 
 class ConfigFactory{
 public:
-    static CnnConfig GetUserConfig();
-    static CnnConfig GetMinLatencyConfig();
+    static CnnConfig getUserConfig();
+    static CnnConfig getMinLatencyConfig();
 protected:
-    static CnnConfig GetCommonConfig();
+    static CnnConfig getCommonConfig();
 };
