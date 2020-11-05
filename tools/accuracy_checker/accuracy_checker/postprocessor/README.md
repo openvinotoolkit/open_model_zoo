@@ -94,3 +94,5 @@ Accuracy Checker supports following set of postprocessors:
   * `size` - size of model input for recovering YCrCb image.
   * `dst_width` and `dst_height` - width and height of model input respectively for recovering YCrCb image.
 * `argmax_segmentation_mask` - translates categorical annotation segmentation mask to numerical. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
+* `shift_labels` - shifts predicted detection labels. Supported representation: `DetectionPrediction`.
+  * `offset` - value for shift.

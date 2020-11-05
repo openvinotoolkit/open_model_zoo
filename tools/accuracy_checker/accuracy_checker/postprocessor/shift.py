@@ -16,8 +16,8 @@ limitations under the License.
 
 import numpy as np
 from ..config import NumberField
-from .postprocessor import PostprocessorWithSpecificTargets
-from ..representation import SegmentationAnnotation, SegmentationPrediction
+from .postprocessor import PostprocessorWithSpecificTargets, Postprocessor
+from ..representation import SegmentationAnnotation, SegmentationPrediction, DetectionPrediction, DetectionAnnotation
 
 
 class Shift(PostprocessorWithSpecificTargets):
@@ -53,5 +53,33 @@ class Shift(PostprocessorWithSpecificTargets):
             mask = prediction_.mask
             update_mask = mask + self.shift_value
             prediction_.mask = update_mask.astype(np.int16)
+
+        return annotation, prediction
+
+
+class ShiftLabels(Postprocessor):
+    """
+    Shift predicted detection labels.
+    """
+
+    __provider__ = 'shift_labels'
+
+    prediction_types = (DetectionPrediction, )
+    annotation_types = (DetectionAnnotation, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'offset': NumberField(value_type=int, optional=False, description="Value for shift.")
+        })
+        return parameters
+
+    def configure(self):
+        self.offset = self.get_value_from_config('offset')
+
+    def process_image(self, annotation, prediction):
+        for prediction_ in prediction:
+            prediction_.labels += self.offset
 
         return annotation, prediction

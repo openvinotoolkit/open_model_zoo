@@ -35,7 +35,7 @@ from .faster_rcnn_postprocessing_resize import FRCNNPostprocessingBboxResize
 from .correct_yolo_v2_boxes import CorrectYoloV2Boxes
 from .resize_segmentation_mask import ResizeSegmentationMask
 from .encode_segmentation_mask import EncodeSegMask
-from .shift import Shift
+from .shift import Shift, ShiftLabels
 from .normalize_landmarks_points import NormalizeLandmarksPoints
 from .clip_points import ClipPoints
 from .extend_segmentation_mask import ExtendSegmentationMask
@@ -84,6 +84,7 @@ __all__ = [
     'ResizeSegmentationMask',
     'EncodeSegMask',
     'Shift',
+    'ShiftLabels',
     'ExtendSegmentationMask',
     'ZoomSegMask',
     'CropSegmentationMask',
