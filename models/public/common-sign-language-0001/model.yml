@@ -31,6 +31,6 @@ model_optimizer_args:
   - --output=output
   - --mean_values=[123.675, 116.28, 103.53]
   - --scale_values=[58.395, 57.12, 57.375]
-  - --input_model=$dl_dir/model.onnx
+  - --input_model=$dl_dir/s3d-rgb-mobilenet-v3-large-stream-jester.onnx
 framework: onnx
 license: https://github.com/sovrasov/mmaction2/blob/ote/LICENSE
