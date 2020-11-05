@@ -17,7 +17,6 @@
 
 import colorsys
 import logging
-import threading
 import os.path as osp
 import random
 import sys
@@ -142,17 +141,18 @@ class ModeInfo:
         self.latency_sum = 0
 
 
-def get_model(model_name, labels_map, ie, args):
+def get_model(model_name, ie, args):
     if model_name == 'ssd':
-        return SSD(ie, args.model, log, labels_map=labels_map, keep_aspect_ratio_resize=args.keep_aspect_ratio)
+        return SSD(ie, args.model, log, labels=labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
     elif model_name == 'yolo':
-        return YOLO(ie, args.model, log, keep_aspect_ratio=args.keep_aspect_ratio)
+        return YOLO(ie, args.model, log, labels=args.labels,
+                    threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
     elif model_name == 'faceboxes':
-        return FaceBoxes(ie, args.model)
+        return FaceBoxes(ie, args.model, log, threshold=args.prob_threshold)
     elif model_name == 'centernet':
-        return CenterNet(ie, args.model)
+        return CenterNet(ie, args.model, log, labels=args.labels, threshold=args.prob_threshold)
     elif model_name == 'retina':
-        return RetinaFace(ie, args.model)
+        return RetinaFace(ie, args.model, log, threshold=args.prob_threshold)
 
 
 def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
@@ -309,11 +309,11 @@ def main():
             detections, _ = detector(frame)
 
             if len(detections) and args.raw_output_message:
-                print_raw_results(frame.shape[:2], detections, labels_map, args.prob_threshold)
+                print_raw_results(frame.shape[:2], detections, model.labels, args.prob_threshold)
 
             origin_im_size = frame.shape[:-1]
             presenter.drawGraphs(frame)
-            frame = draw_detections(frame, detections, palette, labels_map, args.prob_threshold, has_landmarks)
+            frame = draw_detections(frame, detections, palette, model.labels, args.prob_threshold, has_landmarks)
             mode_message = '{} mode'.format(mode.name)
             put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
                                  cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
@@ -362,11 +362,11 @@ def main():
                 start_time = frame_meta['start_time']
 
                 if len(objects) and args.raw_output_message:
-                    print_raw_results(frame.shape[:2], objects, labels_map, args.prob_threshold)
+                    print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
 
                 origin_im_size = frame.shape[:-1]
                 presenter.drawGraphs(frame)
-                frame = draw_detections(frame, objects, palette, labels_map, args.prob_threshold, has_landmarks)
+                frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, has_landmarks)
                 mode_message = '{} mode'.format(mode.name)
                 put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
                                      cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)

@@ -32,6 +32,8 @@ class FaceBoxes(Model):
         assert len(self.net.outputs) == 2, "Expected 2 output blobs"
         self.bboxes_blob_name, self.scores_blob_name = self._parse_outputs()
 
+        self.labels = ['Face']
+
         self.infer_time = -1
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
         assert self.c == 3, "Expected 3-channel input"
