@@ -8,7 +8,6 @@ class AssociativeEmbeddingDecoder:
     def __init__(self, num_joints, max_num_people, detection_threshold, use_detection_val,
                  ignore_too_much, tag_threshold, tag_per_joint, nms_kernel,
                  adjust=True, refine=True, delta=0.0):
-
         self.num_joints = num_joints
         self.max_num_people = max_num_people
         self.detection_threshold = detection_threshold
@@ -122,6 +121,9 @@ class AssociativeEmbeddingDecoder:
         heatmaps = heatmaps.reshape(N, K, -1)
         ind = heatmaps.argpartition(-self.max_num_people, axis=2)[:, :, -self.max_num_people:]
         val_k = np.take_along_axis(heatmaps, ind, axis=2)
+        subind = np.argsort(-val_k, axis=2)
+        ind = np.take_along_axis(ind, subind, axis=2)
+        val_k = np.take_along_axis(val_k, subind, axis=2)
 
         tags = tags.reshape(N, K, W * H, -1)
         if not self.tag_per_joint:
@@ -152,24 +154,6 @@ class AssociativeEmbeddingDecoder:
                         ])
                         joint[:2] += np.sign(diff) * .25
         return ans
-
-    def get_peaks(self, tag, prev_tag, heatmap, mask):
-        ids = np.where(mask)[0]
-        if len(ids) == 0:
-            return [], [], []
-        tag = tag[mask]
-        heatmap = heatmap[mask]
-
-        diff = tag[..., 0].copy()
-        diff -= prev_tag
-        np.abs(diff, out=diff)
-        np.floor(diff + 0.5, out=diff)
-        K, H, W = heatmap.shape
-        diff -= heatmap
-        diff = diff.reshape(K, -1)
-        idx = diff.argmin(axis=1)
-        y, x = np.divmod(idx, W)
-        return ids, y, x
 
     def refine(self, heatmap, tag, keypoints, pose_tag=None):
         K, H, W = heatmap.shape
