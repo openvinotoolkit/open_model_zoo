@@ -35,7 +35,7 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
             ),
             'scores_out': StringField(
                 description="Name of output layer with bbox scores.",
-                optional=False
+                optional=True
             ),
             'boxes_out': StringField(
                 description="Name of output layer with bboxes.",
@@ -69,11 +69,19 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
 
-        classes = raw_outputs[self.classes_out]
-        valid_detections_mask = classes > 0
-        classes = classes[valid_detections_mask]
-        boxes = raw_outputs[self.boxes_out][valid_detections_mask]
-        scores = raw_outputs[self.scores_out][valid_detections_mask]
+        if self.scores_out:
+            classes = raw_outputs[self.classes_out]
+            valid_detections_mask = classes > 0
+            classes = classes[valid_detections_mask]
+            boxes = raw_outputs[self.boxes_out][valid_detections_mask]
+            scores = raw_outputs[self.scores_out][valid_detections_mask]
+        else:
+            classes = raw_outputs[self.classes_out]
+            scores = raw_outputs[self.boxes_out][:, 4]
+            valid_detections_mask = scores > 0
+            scores = scores[valid_detections_mask]
+            classes = classes[valid_detections_mask]
+            boxes = raw_outputs[self.boxes_out][valid_detections_mask, :4]
         raw_masks = raw_outputs[self.raw_masks_out][valid_detections_mask]
         texts = raw_outputs[self.texts_out][valid_detections_mask]
 
@@ -82,6 +90,12 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
         boxes = boxes[confidence_filter]
         texts = texts[confidence_filter]
         raw_masks = raw_masks[confidence_filter]
+
+        text_filter = texts != ''
+        classes = classes[text_filter]
+        boxes = boxes[text_filter]
+        texts = texts[text_filter]
+        raw_masks = raw_masks[text_filter]
 
         results = []
 
@@ -101,13 +115,17 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
             boxes[:, 1::2] /= im_scale_y
             classes = classes.astype(np.uint32)
             masks = []
-            raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
-            if raw_mask_for_all_classes:
-                per_obj_raw_masks = []
-                for cls, raw_mask in zip(classes, raw_masks):
-                    per_obj_raw_masks.append(raw_mask[cls, ...])
+
+            if self.scores_out:
+                raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
+                if raw_mask_for_all_classes:
+                    per_obj_raw_masks = []
+                    for cls, raw_mask in zip(classes, raw_masks):
+                        per_obj_raw_masks.append(raw_mask[cls, ...])
+                else:
+                    per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
             else:
-                per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
+                per_obj_raw_masks = raw_masks
 
             for box, raw_cls_mask in zip(boxes, per_obj_raw_masks):
                 mask = self.segm_postprocess(box, raw_cls_mask, *original_image_size, True, False)
