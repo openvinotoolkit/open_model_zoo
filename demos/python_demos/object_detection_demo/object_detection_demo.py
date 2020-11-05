@@ -54,32 +54,36 @@ def build_argparser():
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
                            'Default value is CPU.', default='CPU', type=str)
-    args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
-    args.add_argument('-t', '--prob_threshold', help='Optional. Probability threshold for detections filtering.',
-                      default=0.5, type=float)
-    args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
-                      default=False, action='store_true')
-    args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
-                      default=1, type=int)
-    args.add_argument('-nstreams', '--num_streams',
-                      help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode '
-                           '(for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> '
-                           'or just <nstreams>)',
-                      default='', type=str)
-    args.add_argument('-nthreads', '--num_threads',
-                      help='Optional. Number of threads to use for inference on CPU (including HETERO cases)',
-                      default=None, type=int)
-    args.add_argument('-loop', '--loop', help='Optional. Number of times to repeat the input.',
-                      type=int, default=0)
-    args.add_argument('-delay', '--delay', help='Optional. Delay in ms between frames.',
-                      type=int, default=1)
-    args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
-    args.add_argument('-u', '--utilization_monitors', default='', type=str,
-                      help='Optional. List of monitors to show initially.')
-    args.add_argument('--keep_aspect_ratio', action='store_true', default=False,
-                      help='Optional. Keeps aspect ratio on resize.')
-    args.add_argument('--sync', action='store_true')
 
+    common_model_args = parser.add_argument_group('Common model options')
+    common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
+    common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
+                                   help='Optional. Probability threshold for detections filtering.')
+    common_model_args.add_argument('--keep_aspect_ratio', action='store_true', default=False,
+                                   help='Optional. Keeps aspect ratio on resize.')
+
+    infer_args = parser.add_argument_group('Inference options')
+    infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
+                            default=1, type=int)
+    infer_args.add_argument('-nstreams', '--num_streams',
+                            help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
+                                 'mode (for HETERO and MULTI device cases use format '
+                                 '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)',
+                            default='', type=str)
+    infer_args.add_argument('-nthreads', '--num_threads', default=None, type=int,
+                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases)')
+    infer_args.add_argument('-loop', '--loop', help='Optional. Number of times to repeat the input.',
+                            type=int, default=0)
+    infer_args.add_argument('-delay', '--delay', help='Optional. Delay in ms between frames.',
+                            type=int, default=1)
+    infer_args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
+    infer_args.add_argument('-u', '--utilization_monitors', default='', type=str,
+                      help='Optional. List of monitors to show initially.')
+    infer_args.add_argument('--sync', action='store_true')
+
+    debug_args = parser.add_argument_group('Debug options')
+    debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
+                            default=False, action='store_true')
     return parser
 
 
