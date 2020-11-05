@@ -109,7 +109,7 @@ class HPE(Model):
         self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
         self.embeddings_blob_name = find_layer_by_name('embeddings', self.net.outputs)
 
-        self.decorer = AssociativeEmbeddingDecoder(
+        self.decoder = AssociativeEmbeddingDecoder(
             num_joints=17,
             adjust=True,
             refine=True,
@@ -156,7 +156,7 @@ class HPE(Model):
         heatmaps = outputs[self.heatmaps_blob_name]
         nms_heatmaps = outputs[self.nms_heatmaps_blob_name]
         aembds = outputs[self.embeddings_blob_name]
-        poses, scores = self.decorer(heatmaps, aembds, nms_heatmaps=nms_heatmaps)
+        poses, scores = self.decoder(heatmaps, aembds, nms_heatmaps=nms_heatmaps)
         poses = poses[0]
         scores = scores[0]
         # Rescale poses to the original image.
