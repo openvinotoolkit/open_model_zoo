@@ -19,15 +19,17 @@ import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
 from .model import Model
-from .utils import Detection, resize_image
+from .utils import Detection, resize_image, load_labels
 
 
 class CenterNet(Model):
-    def __init__(self, *args, threshold=0.3, **kwargs):
+    def __init__(self, *args, labels=None, threshold=0.3, **kwargs):
         super().__init__(*args, **kwargs)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         assert len(self.net.outputs) == 3, "Expected 3 output blobs"
+
+        self.labels = load_labels(labels) if labels else None
 
         self.image_blob_name = next(iter(self.net.input_info))
         self._output_layer_names = sorted(self.net.outputs)

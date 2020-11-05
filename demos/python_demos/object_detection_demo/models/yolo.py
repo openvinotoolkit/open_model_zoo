@@ -3,9 +3,7 @@ import numpy as np
 import ngraph
 
 from .model import Model
-from .utils import Detection, resize_image, resize_image_letterbox
-
-
+from .utils import Detection, resize_image, resize_image_letterbox, load_labels
 
 class YOLO(Model):
     class Params:
@@ -33,11 +31,13 @@ class YOLO(Model):
 
                 self.isYoloV3 = True  # Weak way to determine but the only one.
 
-    def __init__(self, *args, keep_aspect_ratio=False, **kwargs):
+    def __init__(self, *args, labels=None, keep_aspect_ratio=False, threshold=0.5, iou_threshold=0.5, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.threshold = 0.5
-        self.iou_threshold = 0.5
+        self.labels = load_labels(labels) if labels else None
+
+        self.threshold = threshold
+        self.iou_threshold = iou_threshold
 
         self.keep_aspect_ratio = keep_aspect_ratio
         self.resize_image = resize_image_letterbox if self.keep_aspect_ratio else resize_image

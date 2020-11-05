@@ -7,11 +7,16 @@ from .utils import DetectionWithLandmarks, resize_image
 
 
 class RetinaFace(Model):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, threshold, **kwargs):
         super().__init__(*args, **kwargs)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         assert len(self.net.outputs) == 12 or len(self.net.outputs) == 9, "Expected 12 or 9 output blobs"
+
+        self.threshold = threshold
+        self.postprocessor = RetinaFacePostprocessor(detect_attributes=len(self.net.outputs) == 12)
+
+        self.labels = ['Face']
 
         self.image_blob_name = next(iter(self.net.input_info))
         self._output_layer_names = self.net.outputs
@@ -35,17 +40,16 @@ class RetinaFace(Model):
         return inputs, meta
 
     def postprocess(self, outputs, meta):
-        postprocessor = RetinaFacePostprocessor(True)
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
         scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
 
-        outputs = postprocessor.process_output(outputs, scale_x, scale_y, 0.8)
+        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold)
         return outputs
 
 
 class RetinaFacePostprocessor:
-    def __init__(self, detect_masks=False):
-        self._detect_masks = detect_masks
+    def __init__(self, detect_attributes=False):
+        self._detect_attributes = detect_attributes
         _ratio = (1.,)
         self._anchor_cfg = {
             32: {'SCALES': (32, 16), 'BASE_SIZE': 16, 'RATIOS': _ratio},
@@ -57,7 +61,7 @@ class RetinaFacePostprocessor:
         self._num_anchors = dict(zip(
             self._features_stride_fpn, [anchors.shape[0] for anchors in self._anchors_fpn.values()]
         ))
-        self.landmark_std = 0.2 if detect_masks else 1.0
+        self.landmark_std = 0.2 if detect_attributes else 1.0
 
     @staticmethod
     def generate_anchors_fpn(cfg):
@@ -145,7 +149,7 @@ class RetinaFacePostprocessor:
 
         landmarks_outputs = [raw_output[name][0] for name in raw_output if re.search('.landmark.', name)]
         landmarks_outputs.sort(key=lambda x: x.shape[1])
-        if self._detect_masks:
+        if self._detect_attributes:
             type_scores_outputs = [raw_output[name][0] for name in raw_output if re.search('.type.', name)]
             type_scores_outputs.sort(key=lambda x: x.shape[1])
 
@@ -171,7 +175,7 @@ class RetinaFacePostprocessor:
                 scores_list.extend(scores[keep])
                 landmarks = self._get_landmarks(landmarks_outputs[idx], anchor_num, anchors)[threshold_mask, :]
                 landmarks_list.extend(landmarks[keep, :])
-                if self._detect_masks:
+                if self._detect_attributes:
                     mask_scores_list.extend(self._get_mask_scores(type_scores_outputs[idx],
                         anchor_num)[threshold_mask][keep])
         detections = []

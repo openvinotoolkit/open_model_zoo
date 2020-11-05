@@ -1,7 +1,7 @@
 import numpy as np
 
 from .model import Model
-from .utils import Detection, resize_image
+from .utils import Detection, resize_image, load_labels
 
 
 class SSD(Model):
@@ -84,10 +84,10 @@ class SSD(Model):
             detections = [Detection(*bbox, score, label) for label, score, bbox in zip(labels, scores, bboxes)]
             return detections
 
-    def __init__(self, *args, labels_map=None, keep_aspect_ratio_resize=False, **kwargs):
+    def __init__(self, *args, labels=None, keep_aspect_ratio_resize=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
-        self.labels_map = labels_map
+        self.labels = load_labels(labels) if labels else None
 
         self.image_blob_name, self.image_info_blob_name = self._get_inputs(self.net)
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
