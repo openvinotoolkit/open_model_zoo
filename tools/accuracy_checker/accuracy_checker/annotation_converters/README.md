@@ -393,6 +393,8 @@ The main difference between this converter and `super_resolution` in data organi
 * `antispoofing` - converts dataset for antispoofing classification task to `ClassificationAnnotation`
   * `data_dir` - path to root folder of the dataset
   * `annotation_file` - path to json file containing annotations to the dataset ({index: {path:"...", labels:[...], bbox:[...] (optional), ...})
+  * `label_id` - number of label in the annotation file representing spoof/real labels
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map)
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `background_label` using `dataset_meta_file` argument.

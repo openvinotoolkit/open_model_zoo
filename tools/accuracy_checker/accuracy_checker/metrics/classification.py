@@ -364,7 +364,7 @@ class AcerScore(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         self.targets.append(annotation.label)
         self.results.append(prediction.label)
-        return (prediction.label == annotation.label)
+        return prediction.label == annotation.label
 
     def evaluate(self, annotations, predictions):
         all_results = np.array(self.results)
@@ -373,8 +373,8 @@ class AcerScore(PerImageEvaluationMetric):
                                           y_pred=all_results,
                                           ).ravel()
 
-        apcer = fp / (tn + fp) if fp != 0 else 0
-        bpcer = fn / (fn + tp) if fn != 0 else 0
+        apcer = fp / (tn + fp)
+        bpcer = fn / (fn + tp)
         acer = (apcer + bpcer) / 2
 
         return acer

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-`anti-spoof-mn3` is an anti-spoofing binary classificator based on the [MobileNetv3](https://arxiv.org/abs/1905.02244), trained on the [Celeba_Spoof dataset](https://arxiv.org/abs/2007.12342). It's a small, light model, trained to predict whether or not a spoof RGB image given to the input. A lot of advanced techniques have been tried and selected the best suit options for the task.
+The `anti-spoof-mn3` model is an anti-spoofing binary classificator based on the [MobileNetv3](https://arxiv.org/abs/1905.02244), trained on the [CelebA-Spoof dataset](https://arxiv.org/abs/2007.12342). It's a small, light model, trained to predict whether or not a spoof RGB image given to the input. A lot of advanced techniques have been tried and selected the best suit options for the task.
 For details see original [repository](https://github.com/kirillProkofiev/light-weight-face-anti-spoofing).
 
 ## Example
@@ -12,8 +12,8 @@ For details see original [repository](https://github.com/kirillProkofiev/light-w
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | Type                            | Classification                            |
-| GFlops                          | 2.93                                    |
-| MParams                         | 0.13                                    |
+| GFlops                          | 0.15                                    |
+| MParams                         | 3.02                                    |
 | Source framework                | PyTorch\*                              |
 
 ## Accuracy
@@ -50,6 +50,7 @@ Image, name: `actual_input_1` , shape: [1x3x128x128], format: [BxCxHxW], where:
    Expected color order: BGR.
 
 ## Output
+
 ### Original model
 
 Probabilities for two classes (0 class is a real person, 1 - is a spoof image). Name: `output1` Shape: [1,2], format: [BxC],

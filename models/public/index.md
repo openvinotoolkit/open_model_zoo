@@ -62,6 +62,7 @@ The models can be downloaded via Model Downloader
 | SqueezeNet v1.1             | Caffe\*<br>Caffe2\*                | [squeezenet1.1](./squeezenet1.1/squeezenet1.1.md)<br>[squeezenet1.1-caffe2](./squeezenet1.1-caffe2/squeezenet1.1-caffe2.md)| 58.382%/81%<br>56.502%/79.576% | 0.785 | 1.236 |
 | VGG 16                      | Caffe\*                            | [vgg16](./vgg16/vgg16.md) | 70.968%/89.878% | 30.974 | 138.358 |
 | VGG 19                      | Caffe\*<br>Caffe2\*                | [vgg19](./vgg19/vgg19.md)<br>[vgg19-caffe2](./vgg19-caffe2/vgg19-caffe2.md) | 71.062%/89.832%<br>71.062%/89.832% | 39.3 | 143.667  |
+| Anti Spoofing               | PyTorch\*                          | [anti-spoof-mn3](./anti-spoof-mn3/anti-spoof-mn3.md) | 3.81% | 0.15 | 3.02 |
 
 ## Segmentation
 
