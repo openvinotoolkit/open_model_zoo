@@ -20,6 +20,7 @@ from pathlib import Path
 ArgContext = collections.namedtuple('ArgContext',
     ['omz_dir', 'source_dir', 'test_data_dir', 'dl_dir', 'model_info', 'data_sequences', 'data_sequence_dir'])
 
+OMZ_DIR = Path(__file__).parents[2].resolve()
 
 class TestDataArg:
     def __init__(self, rel_path):
@@ -115,11 +116,3 @@ class DemoFileArg:
 
     def resolve(self, context):
         return str(context.source_dir / self.file_name)
-
-
-class OmzDirArg:
-    def __init__(self, file_name):
-        self.file_name = file_name
-
-    def resolve(self, context):
-        return str(context.omz_dir / self.file_name)
