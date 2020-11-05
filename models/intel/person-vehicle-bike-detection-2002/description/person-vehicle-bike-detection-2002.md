@@ -19,8 +19,6 @@ prior boxes for 512x512 resolution.
 | MParams                         | 1.821                                     |
 | Source framework                | PyTorch\*                                 |
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x512x512] - An input image in the format [BxCxHxW],

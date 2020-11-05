@@ -50,8 +50,6 @@ python3 freeze.py --ckpt path/to/inception_v2.ckpt --name inception_v2 --num_cla
 | Top 1  | 74.09%          | 74.09%           |
 | Top 5  | 91.80%          | 91.80%          |
 
-## Performance
-
 ## Input
 
 ### Original model

@@ -28,8 +28,6 @@ Average Precision (AP) is defined as an area under the
 curve. Numbers are on
 [Wider Face](http://shuoyang1213.me/WIDERFACE/) validation subset.
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x384x672] - An input image in the format [BxCxHxW],

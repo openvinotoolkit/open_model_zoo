@@ -21,8 +21,6 @@
 | ------ | ----- |
 | LFW accuracy | 98.8321%|
 
-## Performance
-
 ## Input
 
 ### Original model

@@ -30,8 +30,6 @@ Accuracy metrics are obtained on MS COCO val2017 dataset. Images were resized to
 | ------ | -------------- | ---------------------- | ---------------------- |
 | PSNR   | 12.03dB        | 12.03dB                | 12.04dB                |
 
-## Performance
-
 ## Input
 
 ### Original model

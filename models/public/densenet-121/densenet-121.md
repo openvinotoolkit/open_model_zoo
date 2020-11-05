@@ -29,8 +29,6 @@ models, check out the [repository](https://github.com/shicai/DenseNet-Caffe).
 
 See [the original repository](https://github.com/shicai/DenseNet-Caffe).
 
-## Performance
-
 ## Input
 
 The model input is a blob that consists of a single image of 1x3x224x224 in BGR

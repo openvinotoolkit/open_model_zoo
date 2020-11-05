@@ -31,8 +31,6 @@ matching with those in the ImageNet database.
 | Top 1  | 71.9%          | 71.9%           |
 | Top 5  | 90.3%          | 90.3%           |
 
-## Performance
-
 ## Input
 
 ### Original model

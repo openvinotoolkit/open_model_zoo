@@ -28,8 +28,6 @@ For details see [repository](https://github.com/zhanghang1989/ResNeSt) and [pape
 | Top 1  | 81.11% |
 | Top 5  | 95.36% |
 
-## Performance
-
 ## Input
 
 ### Original model

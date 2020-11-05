@@ -23,8 +23,6 @@ The `hbonet-0.5` model is one of the classification models from [repository](htt
 | Top 5  | 86.90%          |
 
 
-## Performance
-
 ## Input
 
 ### Original Model

@@ -22,8 +22,6 @@ The `ssd-resnet-34-1200-onnx` model is a multiscale SSD based on ResNet-34 backb
 | coco_precision | 20.7198%|
 | mAP | 39.2752%	|
 
-## Performance
-
 ## Input
 
 Note that original model expects image in `RGB` format, converted model - in `BGR` format.

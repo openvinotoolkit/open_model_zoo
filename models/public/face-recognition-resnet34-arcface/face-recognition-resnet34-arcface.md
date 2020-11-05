@@ -23,8 +23,6 @@ The original name of the model is [LResNet34E-IR,ArcFace@ms1m-refine-v1](https:/
 | ------ | ----- |
 | LFW accuracy| 98.7488%|
 
-## Performance
-
 ## Input
 
 ### Original Model

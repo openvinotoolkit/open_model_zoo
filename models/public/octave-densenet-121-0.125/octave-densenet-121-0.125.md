@@ -23,8 +23,6 @@ The `octave-densenet-121-0.125` model is a modification of [`densenet-121`](http
 | Top 1  | 76.066%|
 | Top 5  | 93.044%|
 
-## Performance
-
 ## Input
 
 A blob that consists of a single image of `1x3x224x224` in `RGB `order. Before passing the image blob into the network, subtract RGB mean values as follows: [124,117,104]. In addition, values must be divided by 0.0167.

@@ -33,8 +33,6 @@ For preprocessing `rgb -> gray -> colorization` recieved values:
 | Accuracy top-1 |                     58.25% |                      70.96% |
 | Accuracy top-5 |                     81.78% |                      89.88% |
 
-## Performance
-
 ## Input
 
 1. Image, name - `data_l`, shape - `1,1,256,256`, format is `B,C,H,W` where:

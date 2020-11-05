@@ -31,8 +31,6 @@ that are probabilities of the corresponding 7 attributes.
 | `has_longhair`    | 0.77  |
 | `has_coat_jacket` |  NA   |
 
-## Performance
-
 ## Inputs
 
 1.  name: `input` , shape: [1x3x160x80] - An input image in the format [1xCxHxW], where

@@ -26,8 +26,6 @@ The model output for `octave-resnet-50-0.125` is the typical object classifier o
 | Top 1  | 78.19%|
 | Top 5  | 93.862%|
 
-## Performance
-
 ## Input
 
 ### Original Model

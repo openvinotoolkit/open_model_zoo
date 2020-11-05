@@ -24,8 +24,6 @@ and light-weight RPN.
 Average Precision (AP) is defined and measured according to standard
 [MS COCO evaluation procedure](https://cocodataset.org/#detection-eval).
 
-## Performance
-
 ## Inputs
 
 1.	name: `im_data` , shape: [1x3x480x480] - An input image in the format

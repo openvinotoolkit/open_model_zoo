@@ -46,8 +46,6 @@ converted to TensorFlow\* protobuf format. For details, see [paper](https://arxi
 | ------ | ----- |
 | coco_precision | 33.15%|
 
-## Performance
-
 ## Input
 
 ### Original Model

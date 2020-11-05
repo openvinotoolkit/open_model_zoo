@@ -21,8 +21,6 @@ MobileNetV1 FPN is used for object detection. For details, see the [paper](https
 | ------ | ----- |
 | coco_precision | 35.5453%|
 
-## Performance
-
 ## Input
 
 ### Original Model

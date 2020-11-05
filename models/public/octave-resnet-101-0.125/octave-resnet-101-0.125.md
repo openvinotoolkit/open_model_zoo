@@ -23,8 +23,6 @@ The `octave-resnet-101-0.125` model is a modification of [ResNet-101](https://ar
 | Top 1  | 79.182%|
 | Top 5  | 94.42%|
 
-## Performance
-
 ## Input
 
 A blob that consists of a single image of `1x3x224x224` in `RGB` order. Before passing the image blob into the network, subtract RGB mean values as follows: [124,117,104]. In addition, values must be divided by 0.0167.

@@ -70,8 +70,6 @@ The quality metrics calculated on 2000 images:
   - `FN` - number of false negative pixels for given class
   - `FP` - number of false positive pixels for given class
 
-## Performance
-
 ## Inputs
 
 The blob with BGR image in format: [B, C=3, H=1024, W=2048], where:

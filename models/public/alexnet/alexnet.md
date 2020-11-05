@@ -28,8 +28,6 @@ The model output for `alexnet` is the usual object classifier output for the 100
 
 See [the original model's documentation](https://github.com/BVLC/caffe/tree/master/models/bvlc_alexnet).
 
-## Performance
-
 ## Input
 
 ### Original model

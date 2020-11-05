@@ -22,8 +22,6 @@
 | Top 1  | 69.496%|
 | Top 5  | 89.224%|
 
-## Performance
-
 ## Input
 
 ### Original model

@@ -25,8 +25,6 @@ The model output for `AclNet` is the sound classifier output for the 53 differen
 
 See this [publication](http://dcase.community/documents/workshop2019/proceedings/DCASE2019Workshop_Huang_52.pdf) and this [paper](https://arxiv.org/pdf/1811.06669.pdf).
 
-## Performance
-
 ## Input
 
 ### Original Model

@@ -26,8 +26,6 @@ For details about implementation of model, check out the [Semantic Segmentation 
 | Pixel accuracy  | 77.69%          | 77.69%           |
 | mean IoU        | 33.02%          | 33.02%           |
 
-## Performance
-
 ## Input
 
 ### Original Model

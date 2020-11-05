@@ -23,8 +23,6 @@ For details, see the [repository](https://github.com/dbolya/yolact).
 | AP@masks | 28.00% |
 | AP@boxes | 30.69% |
 
-## Performance
-
 ## Input
 
 ### Original Model

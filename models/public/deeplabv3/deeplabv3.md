@@ -21,8 +21,6 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 | ------ | ----- |
 | mean_iou  | 66.85%|
 
-## Performance
-
 ## Input
 
 ### Original model

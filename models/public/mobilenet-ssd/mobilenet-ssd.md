@@ -27,8 +27,6 @@ The model output is a typical vector containing the tracked object data, as prev
 
 See [the original repository](https://github.com/chuanqi305/MobileNet-SSD).
 
-## Performance
-
 ## Input
 
 ### Original model

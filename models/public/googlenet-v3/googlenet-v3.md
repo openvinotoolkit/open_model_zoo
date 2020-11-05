@@ -22,8 +22,6 @@ The `googlenet-v3` model is the first of the Inception family of models designed
 | Top 1  | 77.904% |
 | Top 5  | 93.808%|
 
-## Performance
-
 ## Input
 
 ### Original Model

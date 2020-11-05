@@ -25,8 +25,6 @@ For details see [paper](https://arxiv.org/abs/1905.02244).
 | Top 1  | 75.70%          | 75.70%          |
 | Top 5  | 92.76%          | 92.76%           |
 
-## Performance
-
 ## Input
 
 ### Original Model

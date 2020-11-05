@@ -27,8 +27,6 @@ The quality metrics were calculated on the SQuAD v1.1 dataset ("dev" split). Max
 | Exact match (EM)          |        86.36% |
 
 
-## Performance
-
 ## Input
 
 Input 0: A `1,384` sequence of tokens (integer values) representing the tokenized premise and question ("input_ids"). The sequence structure is as follows (`[CLS]`, `[SEP]` and `[PAD]` should be replaced by corresponding token IDs as specified by the dictionary):

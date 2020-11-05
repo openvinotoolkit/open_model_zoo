@@ -22,8 +22,6 @@ CaffeNet\* model is used for classification. For details see [paper](https://arx
 | Top 1  | 56.714%|
 | Top 5  | 79.916%|
 
-## Performance
-
 ## Input
 
 ### Original Model

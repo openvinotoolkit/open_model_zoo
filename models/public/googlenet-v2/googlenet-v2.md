@@ -28,8 +28,6 @@ The model output for `googlenet-v2` is the typical object classifier output for 
 
 See [the original repository](https://github.com/lim0606/caffe-googlenet-bn).
 
-## Performance
-
 ## Input
 
 ### Original model

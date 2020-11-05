@@ -25,8 +25,6 @@ The model output is a typical vector containing the tracked object data, as prev
 | ------ | ----- |
 | coco_precision | 24.9452%|
 
-## Performance
-
 ## Input
 
 Note that original model expects image in `RGB` format, converted model - in `BGR` format.

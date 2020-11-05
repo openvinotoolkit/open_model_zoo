@@ -26,8 +26,6 @@ paper <https://arxiv.org/abs/1608.06993>.
 | Top 1  | 74.904% |
 | Top 5  | 92.192% |
 
-## Performance
-
 ## Input
 
 ### Original model

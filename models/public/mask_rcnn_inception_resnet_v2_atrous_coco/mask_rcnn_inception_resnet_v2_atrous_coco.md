@@ -22,8 +22,6 @@ Mask R-CNN Inception Resnet V2 Atrous  is trained on COCO dataset and used for o
 | coco_orig_precision | 39.8619%|
 | coco_orig_segm_precision | 35.3628%|
 
-## Performance
-
 ## Input
 
 ### Original Model

@@ -28,8 +28,6 @@ The model output for `googlenet-v1` is the typical object classifier output for 
 
 See [the original repository](https://github.com/BVLC/caffe/tree/master/models/bvlc_googlenet).
 
-## Performance
-
 ## Input
 
 ### Original model

@@ -36,8 +36,6 @@ The following accuracy metrics are measured on a `brain tumor` training subset o
 See [the original repository](https://github.com/lachinov/brats2018-graphlabunn).
 
 
-## Performance
-
 ## Input
 
 The model takes as an input four MRI modalities `T1`, `T2`, `T1ce`, `Flair`. The inputs are cropped, resamped and z-score normalized. You can find additional information on the BraTS 2018 [page](https://www.med.upenn.edu/sbia/brats2018/data.html) and [wiki](https://en.wikipedia.org/wiki/Magnetic_resonance_imaging).

@@ -26,8 +26,6 @@ For details about this family of models, check out the [TensorFlow Cloud TPU rep
 | Top 1  | 83.33%          | 83.33%           |
 | Top 5  | 96.67%          | 96.67%           |
 
-## Performance
-
 ## Input
 
 ### Original Model

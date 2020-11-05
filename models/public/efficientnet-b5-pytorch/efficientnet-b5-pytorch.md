@@ -32,8 +32,6 @@ the 1000 different classifications matching those in the ImageNet database.
 | Top 1  | 83.69%          | 83.69%           |
 | Top 5  | 96.71%          | 96.71%           |
 
-## Performance
-
 ## Input
 
 ### Original Model

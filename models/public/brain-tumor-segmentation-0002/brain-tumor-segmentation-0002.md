@@ -47,8 +47,6 @@ The following accuracy metrics are measured on a `brain tumor` training subset o
 
 > **NOTE**: The accuracy achieved with ONNX\* model adapted for OpenVINO™ can slightly differ from the accuracy achieved with the original PyTorch model since the upsampling operation was changed from the `trilinear` to `nearest` mode.
 
-## Performance
-
 ## Input
 
 The model takes as an input four MRI modalities `T1`, `T1ce`, `T2`, `Flair`. Find additional information on the [BraTS 2019 page](https://www.med.upenn.edu/cbica/brats2019/registration.html) and [wiki](https://en.wikipedia.org/wiki/Magnetic_resonance_imaging).

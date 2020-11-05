@@ -24,8 +24,6 @@ Average Precision (AP) is defined as an area under the
 curve. All numbers were evaluated by taking into account only faces bigger than
 64 x 64 pixels.
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x256x256] - An input image in the format [BxCxHxW],

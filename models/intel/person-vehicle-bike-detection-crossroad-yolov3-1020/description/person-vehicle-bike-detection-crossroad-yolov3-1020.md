@@ -50,8 +50,6 @@ Similarly, training dataset has 17084 images with:
 | Pedestrian      | 119546                   |
 | Bike/Motorcycle | 30220                    |
 
-## Performance
-
 ## Inputs
 
 Name: `image_input` , shape: [1x3x416x416] - An input image in the format [BxCxHxW],

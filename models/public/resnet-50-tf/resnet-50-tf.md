@@ -35,8 +35,6 @@ python3 freeze_saved_model.py --saved_model_dir path/to/downloaded/saved_model -
 | Top 1  | 76.45%          | 76.17%          |
 | Top 5  | 93.05%          | 92.98%           |
 
-## Performance
-
 ## Input
 
 ### Original Model

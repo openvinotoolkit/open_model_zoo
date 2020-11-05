@@ -21,8 +21,6 @@ The `ssdlite_mobilenet_v2` model is used for object detection. For details, see 
 | ------ | ----- |
 | coco_precision | 24.2946%|
 
-## Performance
-
 ## Input
 
 ### Original Model

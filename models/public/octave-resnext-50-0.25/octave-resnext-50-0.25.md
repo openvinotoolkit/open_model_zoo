@@ -22,8 +22,6 @@ The `octave-resnext-50-0.25` model is a modification of [`resnext-50`](https://a
 | Top 1  | 78.772%|
 | Top 5  | 94.18%|
 
-## Performance
-
 ## Input
 
 A blob that consists of a single image of `1x3x224x224` in `RGB` order. Before passing the image blob into the network, subtract RGB mean values as follows: [124,117,104]. In addition, values must be divided by 0.0167.

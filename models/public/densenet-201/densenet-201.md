@@ -38,8 +38,6 @@ the 1000 different classifications matching those in the ImageNet database.
 
 See [the original repository](https://github.com/shicai/DenseNet-Caffe).
 
-## Performance
-
 ## Input
 
 ### Original model

@@ -23,8 +23,6 @@ group of models designed to perform image classification. The weights were conve
 | Top 1  | 76.446% |
 | Top 5  | 93.228%|
 
-## Performance
-
 ## Input
 
 ### Original Model

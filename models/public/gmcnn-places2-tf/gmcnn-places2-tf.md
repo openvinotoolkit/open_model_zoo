@@ -50,8 +50,6 @@ and disguised at random positions with pre-generated free-form masks.
 | ------ | -------------- |
 | PSNR   | 33.41dB        |
 
-## Performance
-
 ## Input
 
 ### Original Model

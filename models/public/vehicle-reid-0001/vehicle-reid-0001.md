@@ -27,8 +27,6 @@ Mean Average Precision (mAP) is the mean across Average Precision (AP) of all qu
 AP is defined as the area under the
 [precision and recall](https://en.wikipedia.org/wiki/Precision_and_recall) curve.
 
-## Performance
-
 ## Input
 
 ### Original Model

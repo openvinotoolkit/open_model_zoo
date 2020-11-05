@@ -24,8 +24,6 @@ and [paper](https://arxiv.org/abs/1708.02002).
 | ------ | ----- |
 | coco_precision | 38.4557% |
 
-## Performance
-
 ## Input
 
 ### Original model

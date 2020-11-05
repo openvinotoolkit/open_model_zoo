@@ -22,8 +22,6 @@ the [repository](https://github.com/zisianw/FaceBoxes.PyTorch), [paper](https://
 | ------ | ----- |
 | mAP   | 83.565%|
 
-## Performance
-
 ## Input
 
 ### Original model

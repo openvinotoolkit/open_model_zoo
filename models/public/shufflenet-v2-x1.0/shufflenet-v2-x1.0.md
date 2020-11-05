@@ -26,8 +26,6 @@ The model output is typical object classifier for the 1000 different classificat
 | Top 1  | 69.36% |
 | Top 5  | 88.32% |
 
-## Performance
-
 ## Input
 
 ### Original model
