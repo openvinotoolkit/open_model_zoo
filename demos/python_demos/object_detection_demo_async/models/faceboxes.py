@@ -28,12 +28,6 @@ class FaceBoxes(Model):
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         self.image_blob_name = next(iter(self.net.input_info))
 
-
-        # assert self.net.outputs[self._output_layer_names[0]].shape[1] == \
-        #        self.net.outputs[self._output_layer_names[1]].shape[1], "Expected the same dimension for boxes and scores"
-        # assert self.net.outputs[self._output_layer_names[0]].shape[2] == 4, "Expected 4-coordinate boxes"
-        # assert self.net.outputs[self._output_layer_names[1]].shape[2] == 2, "Expected 2-class scores(background, face)"
-
         self._output_layer_names = sorted(self.net.outputs)
         assert len(self.net.outputs) == 2, "Expected 2 output blobs"
         self.bboxes_blob_name, self.scores_blob_name = self._parse_outputs()
@@ -71,6 +65,61 @@ class FaceBoxes(Model):
         else:
             inputs_dict = inputs
         return inputs_dict
+
+    def preprocess(self, inputs):
+        img = resize_image(inputs[self.image_blob_name], (self.w, self.h))
+        meta = {'original_shape': inputs[self.image_blob_name].shape,
+                'resized_shape': img.shape}
+        img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+        img = img.reshape((self.n, self.c, self.h, self.w))
+        inputs[self.image_blob_name] = img
+        return inputs, meta
+
+    def postprocess(self, outputs, meta):
+        boxes = outputs[self.bboxes_blob_name][0]
+        scores = outputs[self.scores_blob_name][0]
+
+        detections = []
+
+        feature_maps = [[math.ceil(self.h / step), math.ceil(self.w / step)] for step in
+                        self.steps]
+        prior_data = self.prior_boxes(feature_maps, [self.h, self.w])
+
+        boxes[:, :2] = self.variance[0] * boxes[:, :2]
+        boxes[:, 2:] = self.variance[1] * boxes[:, 2:]
+        boxes[:, :2] = boxes[:, :2] * prior_data[:, 2:] + prior_data[:, :2]
+        boxes[:, 2:] = np.exp(boxes[:, 2:]) * prior_data[:, 2:]
+
+        score = np.transpose(scores)[1]
+
+        mask = score > self.confidence_threshold
+        filtered_boxes, filtered_score = boxes[mask, :], score[mask]
+        if filtered_score.size != 0:
+            x_mins = (filtered_boxes[:, 0] - 0.5 * filtered_boxes[:, 2])
+            y_mins = (filtered_boxes[:, 1] - 0.5 * filtered_boxes[:, 3])
+            x_maxs = (filtered_boxes[:, 0] + 0.5 * filtered_boxes[:, 2])
+            y_maxs = (filtered_boxes[:, 1] + 0.5 * filtered_boxes[:, 3])
+
+            keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.nms_threshold,
+                            include_boundaries=False, keep_top_k=self.keep_top_k)
+
+            filtered_score = filtered_score[keep]
+            x_mins = x_mins[keep]
+            y_mins = y_mins[keep]
+            x_maxs = x_maxs[keep]
+            y_maxs = y_maxs[keep]
+
+            if filtered_score.size > self.keep_top_k:
+                filtered_score = filtered_score[:self.keep_top_k]
+                x_mins = x_mins[:self.keep_top_k]
+                y_mins = y_mins[:self.keep_top_k]
+                x_maxs = x_maxs[:self.keep_top_k]
+                y_maxs = y_maxs[:self.keep_top_k]
+
+            detections = [Detection(*det, 0) for det in zip(x_mins, y_mins, x_maxs, y_maxs, filtered_score)]
+
+        detections = self.resize_boxes(detections, meta['original_shape'][:2])
+        return detections
 
     @staticmethod
     def calculate_anchors(list_x, list_y, min_size, image_size, step):
@@ -153,66 +202,5 @@ class FaceBoxes(Model):
             detection.ymax *= h
         return detections
 
-    def preprocess(self, inputs):
-        img = resize_image(inputs[self.image_blob_name], (self.w, self.h))
-        meta = {'original_shape': inputs[self.image_blob_name].shape,
-                'resized_shape': img.shape}
-        img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        img = img.reshape((self.n, self.c, self.h, self.w))
-        inputs[self.image_blob_name] = img
-        return inputs, meta
 
-    def postprocess(self, outputs, meta):
-        boxes = outputs[self.bboxes_blob_name][0]
-        scores = outputs[self.scores_blob_name][0]
 
-        detections = []
-        image_info = [self.h, self.w]
-
-        feature_maps = [[math.ceil(image_info[0] / step), math.ceil(image_info[1] / step)] for step in
-                        self.steps]
-        prior_data = self.prior_boxes(feature_maps, image_info)
-
-        boxes[:, :2] = self.variance[0] * boxes[:, :2]
-        boxes[:, 2:] = self.variance[1] * boxes[:, 2:]
-        boxes[:, :2] = boxes[:, :2] * prior_data[:, 2:] + prior_data[:, :2]
-        boxes[:, 2:] = np.exp(boxes[:, 2:]) * prior_data[:, 2:]
-
-        score = np.transpose(scores)[1]
-
-        mask = score > self.confidence_threshold
-        filtered_boxes, filtered_score = boxes[mask, :], score[mask]
-        if filtered_score.size != 0:
-            x_mins = (filtered_boxes[:, 0] - 0.5 * filtered_boxes[:, 2])
-            y_mins = (filtered_boxes[:, 1] - 0.5 * filtered_boxes[:, 3])
-            x_maxs = (filtered_boxes[:, 0] + 0.5 * filtered_boxes[:, 2])
-            y_maxs = (filtered_boxes[:, 1] + 0.5 * filtered_boxes[:, 3])
-
-            keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.nms_threshold,
-                            include_boundaries=False, keep_top_k=self.keep_top_k)
-
-            filtered_score = filtered_score[keep]
-            x_mins = x_mins[keep]
-            y_mins = y_mins[keep]
-            x_maxs = x_maxs[keep]
-            y_maxs = y_maxs[keep]
-
-            if filtered_score.size > self.keep_top_k:
-                filtered_score = filtered_score[:self.keep_top_k]
-                x_mins = x_mins[:self.keep_top_k]
-                y_mins = y_mins[:self.keep_top_k]
-                x_maxs = x_maxs[:self.keep_top_k]
-                y_maxs = y_maxs[:self.keep_top_k]
-
-            detections = [Detection(*det, 0) for det in zip(x_mins, y_mins, x_maxs, y_maxs, filtered_score)]
-
-        detections = self.resize_boxes(detections, meta['original_shape'][:2])
-        return detections
-
-    def detect(self, image):
-        image_sizes = image.shape[:2]
-        image = self.preprocess(image)
-        image = np.transpose(image, (2, 0, 1))
-        output = self.infer(image)
-        detections = self.postprocess([output[name][0] for name in self._output_layer_names], image_sizes)
-        return detections

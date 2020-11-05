@@ -1,6 +1,5 @@
 import re
 
-import cv2
 import numpy as np
 
 from .model import Model
@@ -44,7 +43,7 @@ class RetinaFace(Model):
         return outputs
 
 
-class RetinaFacePostprocessor(object):
+class RetinaFacePostprocessor:
     def __init__(self, detect_masks=False):
         self._detect_masks = detect_masks
         _ratio = (1.,)
@@ -176,7 +175,6 @@ class RetinaFacePostprocessor(object):
                     mask_scores_list.extend(self._get_mask_scores(type_scores_outputs[idx],
                         anchor_num)[threshold_mask][keep])
         detections = []
-        landmarks_regression = []
         result = []
         if len(scores_list) != 0:
             scores = np.reshape(scores_list, -1)
@@ -186,7 +184,6 @@ class RetinaFacePostprocessor(object):
             x_maxs /= scale_x
             y_mins /= scale_y
             y_maxs /= scale_y
-            detections = np.array([x_mins / scale_x, y_mins / scale_y, x_maxs / scale_x, y_maxs / scale_y, scores])
 
             landmarks_x_coords = np.array(landmarks_list)[:, :, ::2].reshape(len(landmarks_list), -1) / scale_x
             landmarks_y_coords = np.array(landmarks_list)[:, :, 1::2].reshape(len(landmarks_list), -1) / scale_y
