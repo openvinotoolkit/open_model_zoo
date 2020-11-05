@@ -71,7 +71,7 @@ class ShiftLabels(Postprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'offset': NumberField(value_type=int, optional=True, default=0, description="Value for shift.")
+            'offset': NumberField(value_type=int, optional=False, description="Value for shift.")
         })
         return parameters
 
