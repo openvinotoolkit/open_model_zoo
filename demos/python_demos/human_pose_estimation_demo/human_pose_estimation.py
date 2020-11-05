@@ -50,7 +50,7 @@ def build_argparser():
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
                            'Default value is CPU.', default='CPU', type=str)
-    args.add_argument('-t', '--prob_threshold', help='Optional. Probability threshold for detections filtering.',
+    args.add_argument('-t', '--prob_threshold', help='Optional. Probability threshold for poses filtering.',
                       default=0.5, type=float)
     args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
                       default=False, action='store_true')
@@ -68,8 +68,6 @@ def build_argparser():
     args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
-    args.add_argument('--keep_aspect_ratio', action='store_true', default=False,
-                      help='Optional. Keeps aspect ratio on resize.')
     return parser
 
 
@@ -137,12 +135,10 @@ def main():
         Modes.USER_SPECIFIED:
             HPE(ie, args.model, device=args.device, plugin_config=config_user_specified,
                 results=completed_request_results, max_num_requests=args.num_infer_requests,
-                keep_aspect_ratio_resize=args.keep_aspect_ratio,
                 caught_exceptions=exceptions),
         Modes.MIN_LATENCY:
             HPE(ie, args.model, device=args.device.split(':')[-1].split(',')[0], plugin_config=config_min_latency,
                 results=completed_request_results, max_num_requests=1,
-                keep_aspect_ratio_resize=args.keep_aspect_ratio,
                 caught_exceptions=exceptions)
     }
 
@@ -171,13 +167,25 @@ def main():
         if next_frame_id_to_show in completed_request_results:
             frame_meta, raw_outputs = completed_request_results.pop(next_frame_id_to_show)
             poses, scores = hpes[mode].postprocess(raw_outputs, frame_meta)
+            valid_poses = scores > args.prob_threshold
+            poses = poses[valid_poses]
+            scores = scores[valid_poses]
 
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
 
+            if len(poses) and args.raw_output_message:
+                log.info('Poses:')
+
             origin_im_size = frame.shape[:-1]
             presenter.drawGraphs(frame)
-            show_poses(frame, poses, scores, threshold=args.prob_threshold)
+            show_poses(frame, poses, scores, pose_score_threshold=args.prob_threshold,
+                point_score_threshold=args.prob_threshold)
+
+            if args.raw_output_message:
+                for pose, pose_score in zip(poses, scores):
+                    pose_str = ' '.join('({:.2f}, {:.2f}, {:.2f})'.format(p[0], p[1], p[2]) for p in pose)
+                    log.info('{} | {:.2f}'.format(pose_str, pose_score))
 
             mode_message = '{} mode'.format(mode.name)
             put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
@@ -202,7 +210,7 @@ def main():
                 put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
 
             if not args.no_show:
-                cv2.imshow('Detection Results', frame)
+                cv2.imshow('Pose estimation results', frame)
                 key = cv2.waitKey(wait_key_time)
 
                 ESC_KEY = 27

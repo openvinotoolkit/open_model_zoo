@@ -97,10 +97,10 @@ class Model:
 
 class HPE(Model):
 
-    def __init__(self, *args, labels_map=None, keep_aspect_ratio_resize=False, **kwargs):
+    def __init__(self, *args, keep_aspect_ratio_resize=True, size_divisor=32, **kwargs):
         super().__init__(*args, **kwargs)
         self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
-        self.labels_map = labels_map
+        self.size_divisor = size_divisor
 
         self.image_blob_name = self._get_inputs(self.net)
         self.target_size = self.net.input_info[self.image_blob_name].input_data.shape[-1]
@@ -109,14 +109,15 @@ class HPE(Model):
         self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
         self.embeddings_blob_name = find_layer_by_name('embeddings', self.net.outputs)
 
+        self.num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1]
+        self.output_scale = self.target_size / self.net.outputs[self.heatmaps_blob_name].shape[-1]
+
         self.decoder = AssociativeEmbeddingDecoder(
-            num_joints=17,
+            num_joints=self.num_joints,
             adjust=True,
             refine=True,
             delta=0.0,
             max_num_people=30,
-            nms_kernel=5,
-            tag_per_joint=True,
             detection_threshold=0.1,
             tag_threshold=1,
             use_detection_val=True,
@@ -148,8 +149,15 @@ class HPE(Model):
         img = self._resize_image(inputs[self.image_blob_name], (self.target_size, self.target_size), self.keep_aspect_ratio_resize)
         meta = {'original_shape': inputs[self.image_blob_name].shape,
                 'resized_shape': img.shape}
-        img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        inputs[self.image_blob_name] = img[None, ...]
+        h, w = img.shape[:2]
+        divisor = self.size_divisor
+        if w % divisor != 0 or h % divisor != 0:
+            img = np.pad(img, ((0, (h + divisor - 1) // divisor * divisor),
+                               (0, (w + divisor - 1) // divisor * divisor),
+                               (0, 0)))
+        # Change data layout from HWC to CHW
+        img = img.transpose((2, 0, 1))
+        inputs[self.image_blob_name] = img[None]
         return inputs, meta
 
     def postprocess(self, outputs, meta):
@@ -157,15 +165,13 @@ class HPE(Model):
         nms_heatmaps = outputs[self.nms_heatmaps_blob_name]
         aembds = outputs[self.embeddings_blob_name]
         poses, scores = self.decoder(heatmaps, aembds, nms_heatmaps=nms_heatmaps)
-        poses = poses[0]
-        scores = scores[0]
         # Rescale poses to the original image.
         original_image_shape = meta['original_shape']
         resized_image_shape = meta['resized_shape']
         scale_x = original_image_shape[1] / resized_image_shape[1]
         scale_y = original_image_shape[0] / resized_image_shape[0]
-        poses[:, :, 0] *= scale_x * 2
-        poses[:, :, 1] *= scale_y * 2
+        poses[:, :, 0] *= scale_x * self.output_scale
+        poses[:, :, 1] *= scale_y * self.output_scale
         return poses, scores
 
 

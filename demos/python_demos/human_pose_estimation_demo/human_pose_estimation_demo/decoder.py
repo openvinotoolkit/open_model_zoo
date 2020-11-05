@@ -6,17 +6,15 @@ from scipy.optimize import linear_sum_assignment
 class AssociativeEmbeddingDecoder:
 
     def __init__(self, num_joints, max_num_people, detection_threshold, use_detection_val,
-                 ignore_too_much, tag_threshold, tag_per_joint, nms_kernel,
-                 adjust=True, refine=True, delta=0.0):
+                 ignore_too_much, tag_threshold, adjust=True, refine=True, delta=0.0, joints_order=None):
         self.num_joints = num_joints
         self.max_num_people = max_num_people
         self.detection_threshold = detection_threshold
         self.tag_threshold = tag_threshold
-        self.tag_per_joint = tag_per_joint
         self.use_detection_val = use_detection_val
         self.ignore_too_much = ignore_too_much
 
-        if self.num_joints == 17:
+        if self.num_joints == 17 and joints_order is None:
             self.joint_order = (0, 1, 2, 3, 4, 5, 6, 11, 12, 7, 8, 9, 10, 13, 14, 15, 16)
         else:
             self.joint_order = list(np.arange(self.num_joints))
@@ -126,9 +124,6 @@ class AssociativeEmbeddingDecoder:
         val_k = np.take_along_axis(val_k, subind, axis=2)
 
         tags = tags.reshape(N, K, W * H, -1)
-        if not self.tag_per_joint:
-            # FIXME.
-            tags = tags.expand(-1, self.num_joints, -1, -1)
         tag_k = [np.take_along_axis(tags[..., i], ind, axis=2) for i in range(tags.shape[3])]
         tag_k = np.stack(tag_k, axis=3)
 
@@ -166,14 +161,8 @@ class AssociativeEmbeddingDecoder:
             tags = []
             for i in range(K):
                 if keypoints[i, 2] > 0:
-                    # save tag value of detected keypoint
                     x, y = keypoints[i][:2].astype(int)
-                    try:
-                        tags.append(tag[i, y, x])
-                    except IndexError as ex:
-                        print(x, y, heatmap.shape, tag.shape)
-                        raise ex 
-            # mean tag of current detected person
+                    tags.append(tag[i, y, x])
             prev_tag = np.mean(tags, axis=0)
 
         # Allocate the buffer for tags similarity matrix.
@@ -217,17 +206,13 @@ class AssociativeEmbeddingDecoder:
                     for joint in person:
                         joint[:2] += self.delta
 
-        scores = [i[:, 2].mean() for i in ans[0]]
+        ans = ans[0]
+        scores = np.asarray([i[:, 2].mean() for i in ans])
 
         if self.do_refine:
-            ans = ans[0]
             heatmap_numpy = heatmaps[0]
             tag_numpy = tags[0]
-            if not self.tag_per_joint:
-                tag_numpy = np.tile(tag_numpy, (self.num_joints, 1, 1, 1))
-
             for i in range(len(ans)):
                 ans[i] = self.refine(heatmap_numpy, tag_numpy, ans[i], ans_tags[0][i])
-            ans = [ans]
 
         return ans, scores
