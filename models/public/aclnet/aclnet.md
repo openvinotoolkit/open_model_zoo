@@ -10,8 +10,6 @@ The model input is a segment of PCM audio samples in [N, C, 1, L] format.
 
 The model output for `AclNet` is the sound classifier output for the 53 different environmental sound classes from the internal sound database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

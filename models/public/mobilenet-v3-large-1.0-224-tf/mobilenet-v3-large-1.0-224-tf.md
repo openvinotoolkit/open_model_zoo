@@ -7,8 +7,6 @@ based on a combination of complementary search techniques as well as a novel arc
 `mobilenet-v3-large-1.0-224-tf` is targeted for high resource use cases.
 For details see [paper](https://arxiv.org/abs/1905.02244).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |

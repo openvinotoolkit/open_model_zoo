@@ -4,8 +4,6 @@
 
 [ResNet-50 with Squeeze-and-Excitation blocks](https://arxiv.org/abs/1709.01507)
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

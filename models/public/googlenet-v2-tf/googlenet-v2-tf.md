@@ -32,8 +32,6 @@ pip install tensorflow==1.14.0
 python3 freeze.py --ckpt path/to/inception_v2.ckpt --name inception_v2 --num_classes 1001 --output InceptionV2/Predictions/Softmax
 ```
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

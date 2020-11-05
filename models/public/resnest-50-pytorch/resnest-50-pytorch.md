@@ -10,8 +10,6 @@ The model output is typical object classifier for the 1000 different classificat
 
 For details see [repository](https://github.com/zhanghang1989/ResNeSt) and [paper](https://arxiv.org/pdf/2004.08955.pdf).
 
-## Example
-
 ## Specification
 
 | Metric           | Value          |

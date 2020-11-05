@@ -8,8 +8,6 @@ The model input is a blob that consists of a single image of "1x3x224x224" in RG
 
 The model output is typical object classifier for the 1000 different classifications matching with those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric           | Value          |

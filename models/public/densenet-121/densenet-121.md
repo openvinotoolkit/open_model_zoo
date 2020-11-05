@@ -9,8 +9,6 @@ been pretrained on the ImageNet image database. For details about this family of
 models, check out the [repository](https://github.com/shicai/DenseNet-Caffe).
 
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

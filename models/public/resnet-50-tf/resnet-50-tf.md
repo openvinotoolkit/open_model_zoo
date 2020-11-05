@@ -17,8 +17,6 @@ For details see [paper](https://arxiv.org/abs/1512.03385),
 python3 freeze_saved_model.py --saved_model_dir path/to/downloaded/saved_model --save_file path/to/resulting/frozen_graph.pb
 ```
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

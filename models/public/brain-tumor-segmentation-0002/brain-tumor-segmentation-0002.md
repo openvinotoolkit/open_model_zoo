@@ -4,8 +4,6 @@
 
 This model was created for participation in the [Brain Tumor Segmentation Challenge](https://www.med.upenn.edu/cbica/brats2019/registration.html) (BraTS) 2019. It has the UNet architecture trained with residual blocks.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

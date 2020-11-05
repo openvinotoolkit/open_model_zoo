@@ -8,8 +8,6 @@ was converted from Caffe\* to Caffe2\* format.
 For details see repository <https://github.com/facebookarchive/models/tree/master/densenet121>,
 paper <https://arxiv.org/abs/1608.06993>.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

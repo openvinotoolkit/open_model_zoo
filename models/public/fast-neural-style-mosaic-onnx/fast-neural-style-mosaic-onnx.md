@@ -10,9 +10,6 @@ Transfer and Super-Resolution](https://arxiv.org/abs/1603.08155) along with
 models are provided in the [repository](https://github.com/onnx/models).
 
 
-## Example
-
-
 ## Specification
 
 | Metric            | Value            |

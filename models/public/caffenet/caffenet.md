@@ -4,8 +4,6 @@
 
 CaffeNet\* model is used for classification. For details see [paper](https://arxiv.org/abs/1408.5093).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |

@@ -8,8 +8,6 @@ The model input is a blob that consists of a single image of 1x3x300x300 in BGR 
 
 The model output is a typical vector containing the tracked object data, as previously described.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

@@ -9,8 +9,6 @@ For details about this family of models, check out the [repository](https://gith
 Model consumes as input L-channel of LAB-image (also user points and binary mask as optional inputs).
 Model give as output predict A- and B-channels of LAB-image.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

@@ -32,8 +32,6 @@ pip install tensorflow==1.14.0
 python3 freeze.py --ckpt path/to/inception_v4.ckpt --name inception_v4 --num_classes 1001 --output InceptionV4/Logits/Predictions
 ```
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

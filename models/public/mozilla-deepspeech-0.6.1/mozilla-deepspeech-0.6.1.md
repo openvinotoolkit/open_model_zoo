@@ -10,8 +10,6 @@ For details on the original DeepSpeech, see paper <https://arxiv.org/abs/1412.55
 
 For details on this model, see <https://github.com/mozilla/DeepSpeech/releases/tag/v0.6.1>.
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |

@@ -4,8 +4,6 @@
 
 Faster R-CNN with Inception v2. Used for object detection. For details, see the [paper](https://arxiv.org/abs/1506.01497v3).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |

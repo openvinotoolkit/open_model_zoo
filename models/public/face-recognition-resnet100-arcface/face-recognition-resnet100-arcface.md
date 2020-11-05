@@ -6,8 +6,6 @@ The original name of the model is [LResNet100E-IR,ArcFace@ms1m-refine-v2](https:
 
 [Deep face recognition net with ResNet100 backbone and Arcface loss](https://arxiv.org/abs/1801.07698)
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

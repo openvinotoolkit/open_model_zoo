@@ -4,8 +4,6 @@
 
 [MobileNet V2](https://arxiv.org/abs/1801.04381)
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

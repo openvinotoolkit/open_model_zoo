@@ -4,8 +4,6 @@
 
 The `hbonet-1.0` model is one of the classification models from [repository](https://github.com/d-li14/HBONet) with `width_mult=1.0`
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

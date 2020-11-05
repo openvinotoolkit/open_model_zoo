@@ -8,8 +8,6 @@ The model input is a blob that consists of a single image of 1x3x224x224 in RGB 
 
 The model output for `octave-resnet-50-0.125` is the typical object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |

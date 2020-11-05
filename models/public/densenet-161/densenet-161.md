@@ -18,8 +18,6 @@ by 0.017.
 The model output for `densenet-161` is the typical object classifier output for
 the 1000 different classifications matching those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
