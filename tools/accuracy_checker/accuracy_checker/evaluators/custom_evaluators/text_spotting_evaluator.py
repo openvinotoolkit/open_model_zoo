@@ -531,8 +531,7 @@ class DetectorDLSDKModel(BaseModel):
 
         if self.im_info_name:
             input_data = {self.im_data_name: self.fit_to_input(input_data),
-                          self.im_info_name: np.array(
-                               [[input_data.shape[1], input_data.shape[2], 1.0]])}
+                          self.im_info_name: np.array([[input_data.shape[1], input_data.shape[2], 1.0]])}
         else:
             input_data = {self.im_data_name: self.fit_to_input(input_data)}
 
