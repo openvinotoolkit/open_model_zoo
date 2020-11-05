@@ -238,10 +238,10 @@ def main():
     if args.sync:
         mode = Modes.SYNC
         mode_info = {mode: ModeInfo()} # For backward compatibility with statistics gatherer
-        detector =  SyncPipeline(ie, model, device=args.device)
+        detector = SyncPipeline(ie, model, device=args.device)
     else:
         completed_request_results = {}
-        modes = cycle(islice(Modes,2))
+        modes = cycle(islice(Modes, 2))
         prev_mode = mode = next(modes)
 
         mode_info = {mode: ModeInfo()}
