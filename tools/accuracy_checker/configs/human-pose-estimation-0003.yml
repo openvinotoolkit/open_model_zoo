@@ -1,5 +1,5 @@
 models:
-  - name: human-pose-estimation-0002
+  - name: human-pose-estimation-0003
 
     launchers:
       - framework: dlsdk
@@ -15,7 +15,7 @@ models:
 
         preprocessing:
           - type: resize
-            size: 288
+            size: 352
             interpolation: LINEAR
             aspect_ratio_scale: greater
           - type: padding

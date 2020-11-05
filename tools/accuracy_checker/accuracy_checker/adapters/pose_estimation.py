@@ -655,13 +655,13 @@ class AssociativeEmbeddingAdapter(Adapter):
             poses, scores = self.decoder(heatmap, embedding, nms_heatmaps=nms_heatmap)
             if len(scores) == 0:
                 result.append(PoseEstimationPrediction(identifier,
-                    np.empty((0, 17), dtype=np.float32),
-                    np.empty((0, 17), dtype=np.float32),
-                    np.empty((0, 17), dtype=np.float32),
-                    np.empty((0, ), dtype=np.float32)))
+                    np.empty((0, 17), dtype=float),
+                    np.empty((0, 17), dtype=float),
+                    np.empty((0, 17), dtype=float),
+                    np.empty((0, ), dtype=float)))
                 continue
-            poses = poses[0]
-            scores = np.asarray(scores)
+            poses = poses[0].astype(float)
+            scores = np.asarray(scores).astype(float)
             scale_x = meta['scale_x']
             scale_y = meta['scale_y']
             poses[:, :, 0] /= scale_x / 2
