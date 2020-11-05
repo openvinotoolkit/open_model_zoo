@@ -16,7 +16,7 @@ description: >-
   ForwardTacotron model for text to speech task. Regression part.
 task_type: text_to_speech
 files:
-  - name: forward_tacotron_regression.onnx
+  - name: forward-tacotron-regression.zip
     size: 29948456
     sha256: 4a087de0f6126335f804bd4b15b672778d824e0f3538f6cc08710291c753ad29
     source: https://download.01.org/opencv/public_models/102020/forward-tacotron/forward-tacotron-regression.zip
