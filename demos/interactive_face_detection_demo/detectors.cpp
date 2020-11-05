@@ -285,6 +285,93 @@ void FaceDetection::fetchResults() {
     }
 }
 
+AntispoofingClassificator::AntispoofingClassificator(const std::string& pathToModel,
+    const std::string& deviceForInference,
+    int maxBatch, bool isBatchDynamic, bool isAsync, bool doRawOutputMessages)
+    : BaseDetection("Antispoofing", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
+    enquedFaces(0) {
+}
+
+void AntispoofingClassificator::submitRequest() {
+    if (!enquedFaces)
+        return;
+    if (isBatchDynamic) {
+        request->SetBatch(enquedFaces);
+    }
+    BaseDetection::submitRequest();
+    enquedFaces = 0;
+}
+
+void AntispoofingClassificator::enqueue(const cv::Mat& face) {
+    if (!enabled()) {
+        return;
+    }
+    if (enquedFaces == maxBatch) {
+        slog::warn << "Number of detected faces more than maximum(" << maxBatch << ") processed by Age/Gender Recognition network" << slog::endl;
+        return;
+    }
+    if (!request) {
+        request = net.CreateInferRequestPtr();
+    }
+
+    Blob::Ptr  inputBlob = request->GetBlob(input);
+
+    matU8ToBlob<uint8_t>(face, inputBlob, enquedFaces);
+
+    enquedFaces++;
+}
+
+float AntispoofingClassificator::operator[] (int idx) const {
+
+    Blob::Ptr  ProbBlob = request->GetBlob(prob_output);
+    auto blobsize = ProbBlob->getTensorDesc().getDims();
+    LockedMemory<const void> ProbBlobMapped = as<MemoryBlob>(ProbBlob)->rmap();
+    // use prediction for real face only
+    float r = ProbBlobMapped.as<float*>()[2*idx] * 100;
+    if (doRawOutputMessages) {
+        std::cout << "[" << idx << "] element, real face probability = " << r << std::endl;
+
+    }
+
+    return r;
+}
+
+CNNNetwork AntispoofingClassificator::read(const InferenceEngine::Core& ie) {
+    slog::info << "Loading network files for Antispoofing Classification network" << slog::endl;
+    // Read network
+    auto network = ie.ReadNetwork(pathToModel);
+    // Set maximum batch size to be used.
+    network.setBatchSize(maxBatch);
+    slog::info << "Batch size is set to " << network.getBatchSize() << " for Antispoofing Classification network" << slog::endl;
+
+    // ---------------------------Check inputs -------------------------------------------------------------
+    // Age/Gender Recognition network should have one input and two outputs
+    slog::info << "Checking Antispoofing Classification network inputs" << slog::endl;
+    InputsDataMap inputInfo(network.getInputsInfo());
+    if (inputInfo.size() != 1) {
+        throw std::logic_error("Antispoofing Classification network should have only one input");
+    }
+    InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
+    inputInfoFirst->setPrecision(Precision::U8);
+    input = inputInfo.begin()->first;
+    // -----------------------------------------------------------------------------------------------------
+
+    // ---------------------------Check outputs ------------------------------------------------------------
+    slog::info << "Checking Antispoofing Classification network outputs" << slog::endl;
+    OutputsDataMap outputInfo(network.getOutputsInfo());
+    if (outputInfo.size() != 1) {
+        throw std::logic_error("Antispoofing Classification network should have one output layers");
+    }
+    auto it = outputInfo.begin();
+
+    DataPtr ptrProbOutput = (it++)->second;
+
+    prob_output = ptrProbOutput->getName();
+
+    slog::info << "Loading Antispoofing Classification model to the " << deviceForInference << " plugin" << slog::endl;
+    _enabled = true;
+    return network;
+}
 
 AgeGenderDetection::AgeGenderDetection(const std::string &pathToModel,
                                        const std::string &deviceForInference,

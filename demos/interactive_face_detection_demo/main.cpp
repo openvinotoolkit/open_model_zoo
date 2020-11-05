@@ -18,6 +18,7 @@
 #include <utility>
 #include <algorithm>
 #include <iterator>
+#include <typeinfo>
 #include <map>
 #include <list>
 #include <set>
@@ -84,7 +85,8 @@ int main(int argc, char *argv[]) {
             {FLAGS_d_ag, FLAGS_m_ag},
             {FLAGS_d_hp, FLAGS_m_hp},
             {FLAGS_d_em, FLAGS_m_em},
-            {FLAGS_d_lm, FLAGS_m_lm}
+            {FLAGS_d_lm, FLAGS_m_lm},
+            {FLAGS_d_am, FLAGS_m_am}
         };
         FaceDetection faceDetector(FLAGS_m, FLAGS_d, 1, false, FLAGS_async, FLAGS_t, FLAGS_r,
                                    static_cast<float>(FLAGS_bb_enlarge_coef), static_cast<float>(FLAGS_dx_coef), static_cast<float>(FLAGS_dy_coef));
@@ -92,6 +94,7 @@ int main(int argc, char *argv[]) {
         HeadPoseDetection headPoseDetector(FLAGS_m_hp, FLAGS_d_hp, FLAGS_n_hp, FLAGS_dyn_hp, FLAGS_async, FLAGS_r);
         EmotionsDetection emotionsDetector(FLAGS_m_em, FLAGS_d_em, FLAGS_n_em, FLAGS_dyn_em, FLAGS_async, FLAGS_r);
         FacialLandmarksDetection facialLandmarksDetector(FLAGS_m_lm, FLAGS_d_lm, FLAGS_n_lm, FLAGS_dyn_lm, FLAGS_async, FLAGS_r);
+        AntispoofingClassificator antispoofingClassificator(FLAGS_m_am, FLAGS_d_am, FLAGS_n_am, FLAGS_dyn_am, FLAGS_async, FLAGS_r);
 
         for (auto && option : cmdOptions) {
             auto deviceName = option.first;
@@ -137,10 +140,11 @@ int main(int argc, char *argv[]) {
         Load(headPoseDetector).into(ie, FLAGS_d_hp, FLAGS_dyn_hp);
         Load(emotionsDetector).into(ie, FLAGS_d_em, FLAGS_dyn_em);
         Load(facialLandmarksDetector).into(ie, FLAGS_d_lm, FLAGS_dyn_lm);
+        Load(antispoofingClassificator).into(ie, FLAGS_d_am, FLAGS_dyn_am);
         // ----------------------------------------------------------------------------------------------------
 
         bool isFaceAnalyticsEnabled = ageGenderDetector.enabled() || headPoseDetector.enabled() ||
-                                      emotionsDetector.enabled() || facialLandmarksDetector.enabled();
+                                      emotionsDetector.enabled() || facialLandmarksDetector.enabled() || antispoofingClassificator.enabled();
 
         Timer timer;
         std::ostringstream out;
@@ -213,6 +217,7 @@ int main(int argc, char *argv[]) {
                     headPoseDetector.enqueue(face);
                     emotionsDetector.enqueue(face);
                     facialLandmarksDetector.enqueue(face);
+                    antispoofingClassificator.enqueue(face);
                 }
             }
 
@@ -222,6 +227,7 @@ int main(int argc, char *argv[]) {
                 headPoseDetector.submitRequest();
                 emotionsDetector.submitRequest();
                 facialLandmarksDetector.submitRequest();
+                antispoofingClassificator.submitRequest();
             }
 
             // Read the next frame while waiting for inference results
@@ -232,6 +238,7 @@ int main(int argc, char *argv[]) {
                 headPoseDetector.wait();
                 emotionsDetector.wait();
                 facialLandmarksDetector.wait();
+                antispoofingClassificator.wait();
             }
 
             //  Postprocessing
@@ -292,6 +299,12 @@ int main(int argc, char *argv[]) {
                     face->updateLandmarks(facialLandmarksDetector[i]);
                 }
 
+                face->AntispoofingEnable((antispoofingClassificator.enabled() &&
+                    i < antispoofingClassificator.maxBatch));
+                if (face->isAntispoofingEnabled()) {
+                    face->updateSpoofConfidence(antispoofingClassificator[i]);
+                }
+
                 faces.push_back(face);
             }
 
@@ -332,6 +345,7 @@ int main(int argc, char *argv[]) {
             headPoseDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_hp));
             emotionsDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_em));
             facialLandmarksDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_lm));
+            antispoofingClassificator.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_am));
         }
 
         std::cout << presenter.reportMeans() << '\n';

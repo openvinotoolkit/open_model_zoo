@@ -181,6 +181,24 @@ struct FacialLandmarksDetection : BaseDetection {
     std::vector<float> operator[] (int idx) const;
 };
 
+struct AntispoofingClassificator : BaseDetection {
+
+    std::string input;
+    std::string prob_output;
+    size_t enquedFaces;
+
+    AntispoofingClassificator(const std::string &pathToModel,
+        const std::string &deviceForInference,
+        int maxBatch, bool isBatchDynamic, bool isAsync,
+        bool doRawOutputMessages);
+
+    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
+    void submitRequest() override;
+
+    void enqueue(const cv::Mat& frame);
+    float operator[] (int idx) const;
+};
+
 struct Load {
     BaseDetection& detector;
 

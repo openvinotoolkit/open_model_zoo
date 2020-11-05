@@ -188,14 +188,21 @@ void Visualizer::enableEmotionBar(std::vector<std::string> const& emotionNames) 
 
 void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
     auto genderColor = (f->isAgeGenderEnabled()) ?
-                       ((f->isMale()) ? cv::Scalar(255, 0, 0) :
-                                        cv::Scalar(147, 20, 255)) :
-                                        cv::Scalar(100, 100, 100);
+        ((f->isMale()) ? cv::Scalar(255, 0, 0) :
+            cv::Scalar(147, 20, 255)) :
+            cv::Scalar(192, 192, 192);
 
     std::ostringstream out;
     if (f->isAgeGenderEnabled()) {
         out << (f->isMale() ? "Male" : "Female");
         out << "," << f->getAge();
+    }
+
+    if (f->isAntispoofingEnabled()) {
+        float real_confidence = f->getSpoofConfidence();
+        bool SpoofLabel = f->isSpoof();
+        (SpoofLabel) ? out << ",spoof:" << std::setprecision(4) << 100. - real_confidence << '%' :
+            out << ",real:" << std::setprecision(4) << real_confidence << '%';
     }
 
     if (f->isEmotionsEnabled()) {

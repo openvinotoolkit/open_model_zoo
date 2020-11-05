@@ -26,24 +26,29 @@ public:
     void updateEmotions(std::map<std::string, float> values);
     void updateHeadPose(HeadPoseDetection::Results values);
     void updateLandmarks(std::vector<float> values);
+    void updateSpoofConfidence(float value);
 
     int getAge();
     bool isMale();
+    bool isSpoof();
     std::map<std::string, float> getEmotions();
     std::pair<std::string, float> getMainEmotion();
     HeadPoseDetection::Results getHeadPose();
     const std::vector<float>& getLandmarks();
+    float getSpoofConfidence();
     size_t getId();
 
     void ageGenderEnable(bool value);
     void emotionsEnable(bool value);
     void headPoseEnable(bool value);
     void landmarksEnable(bool value);
+    void AntispoofingEnable(bool value);
 
     bool isAgeGenderEnabled();
     bool isEmotionsEnabled();
     bool isHeadPoseEnabled();
     bool isLandmarksEnabled();
+    bool isAntispoofingEnabled();
 
 public:
     cv::Rect _location;
@@ -54,6 +59,7 @@ private:
     float _age;
     float _maleScore;
     float _femaleScore;
+    float _spoof_confidence;
     std::map<std::string, float> _emotions;
     HeadPoseDetection::Results _headPose;
     std::vector<float> _landmarks;
@@ -62,6 +68,7 @@ private:
     bool _isEmotionsEnabled;
     bool _isHeadPoseEnabled;
     bool _isLandmarksEnabled;
+    bool _isAntispoofingEnabled;
 };
 
 // ----------------------------------- Utils -----------------------------------------------------------------
