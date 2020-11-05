@@ -186,7 +186,7 @@ def get_plugin_configs(device, num_streams, num_threads):
     return config_user_specified, config_min_latency
 
 
-def draw_detections(frame, detections, palette, labels, threshold):
+def draw_detections(frame, detections, palette, labels, threshold, draw_landmarks=False):
     size = frame.shape[:2]
     for detection in detections:
         if detection.score > threshold:
@@ -200,8 +200,9 @@ def draw_detections(frame, detections, palette, labels, threshold):
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
             cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
                         (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
-
-
+            if draw_landmarks:
+                for landmark in detection.landmarks:
+                    cv2.circle(frame, landmark, 2, (0, 255, 255), 2)
     return frame
 
 
@@ -234,6 +235,7 @@ def main():
     log.info('Loading network...')
 
     model = get_model(args.type, labels_map, ie, args)
+    has_landmarks = args.type == 'retina'
 
     if args.sync:
         mode = Modes.SYNC
@@ -306,7 +308,7 @@ def main():
 
             origin_im_size = frame.shape[:-1]
             presenter.drawGraphs(frame)
-            frame = draw_detections(frame, detections, palette, labels_map, args.prob_threshold)
+            frame = draw_detections(frame, detections, palette, labels_map, args.prob_threshold, has_landmarks)
             mode_message = '{} mode'.format(mode.name)
             put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
                                  cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
@@ -359,7 +361,7 @@ def main():
 
                 origin_im_size = frame.shape[:-1]
                 presenter.drawGraphs(frame)
-                frame = draw_detections(frame, objects, palette, labels_map, args.prob_threshold)
+                frame = draw_detections(frame, objects, palette, labels_map, args.prob_threshold, has_landmarks)
                 mode_message = '{} mode'.format(mode.name)
                 put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
                                      cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
