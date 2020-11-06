@@ -19,8 +19,6 @@ and produces a prediction on the input clip.
 | MParams                                 | 4.1128       |
 | Source framework                        | PyTorch\*    |
 
-## Performance
-
 ## Input
 
 ### Original Model
