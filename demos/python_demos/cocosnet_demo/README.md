@@ -19,13 +19,14 @@ Running the application with the `-h` option yields the following usage message:
 ```
 python3 cocosnet_demo.py -h
 ```
+
 The command yields the following usage message:
+
 ```
 usage: cocosnet_demo.py [-h] -c CORRESPONDENCE_MODEL -g GENERATIVE_MODEL
                         [-s SEGMENTATION_MODEL] [-ii INPUT_IMAGES]
-                        [-is INPUT_SEMANTICS] [-ri REFERENCE_IMAGES]
-                        [-rs REFERENCE_SEMANTICS] [-o OUTPUT_DIR]
-                        [-l CPU_EXTENSION] [-d DEVICE]
+                        [-is INPUT_SEMANTICS] -ri REFERENCE_IMAGES
+                        [-rs REFERENCE_SEMANTICS] [-o OUTPUT_DIR] [-d DEVICE]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -36,33 +37,26 @@ Options:
                         Required. Path to an .xml file with a trained
                         generative model
   -s SEGMENTATION_MODEL, --segmentation_model SEGMENTATION_MODEL
-                        Required. Path to an .xml file with a trained semantic
-                        segmentation model
+                        Optional. Path to an .xml file with a trained
+                        semantic segmentation model
   -ii INPUT_IMAGES, --input_images INPUT_IMAGES
-                        Required. Path to a folder with input images or path
+                        Optional. Path to a folder with input images or path
                         to a input image
   -is INPUT_SEMANTICS, --input_semantics INPUT_SEMANTICS
-                        Required. Path to a folder with semantic images or
+                        Optional. Path to a folder with semantic images or
                         path to a semantic image
   -ri REFERENCE_IMAGES, --reference_images REFERENCE_IMAGES
                         Required. Path to a folder with reference images or
                         path to a reference image
   -rs REFERENCE_SEMANTICS, --reference_semantics REFERENCE_SEMANTICS
-                        Required. Path to a folder with reference semantics or
-                        path to a reference semantic
+                        Optional. Path to a folder with reference semantics
+                        or path to a reference semantic
   -o OUTPUT_DIR, --output_dir OUTPUT_DIR
-                        Path to directory to save the results
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        MKLDNN (CPU)-targeted custom layers. Absolute path to
-                        a shared library with the kernels implementations
+                        Optional. Path to directory to save the results
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
-                        GPU, FPGA, HDDL or MYRIAD is acceptable. Sample will
-                        look for a suitable plugin for device specified.
-                        Default value is CPU
-
-
+                        GPU, FPGA, HDDL or MYRIAD is acceptable. Default
+                        value is CPU
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
@@ -72,30 +66,36 @@ To run the demo, you can use public or pre-trained models. You can download the 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 There are two ways to use this demo:
-1. To use only correspondence and generative models (only CoCosNet). \
-In this case user have to set 3 inputs to the model.
-You can use the following command do inference on CPU:
-```
-    python3 cocosnet_demo.py
-    -c <path_to_corr_model>/Corr.xml
-    -g <path_to_gen_model>/Gen.xml
-    -is <path_to_semantic_mask_of_image>/input_mask.png
-    -ri <path_to_exemplar_image>/reference_image.jpg
-    -rs <path_to_exemplar_semantic>/reference_mask.png
-```
 
-2. To use the segmentation model in addition to CoCosNet. \
-In this case user have to set input image (.jpg) and reference image (.jpg) without any masks.
-Segmentation masks will be generated via segmentation model.
-You can use the following command do inference on CPU:
-```
-python3 cocosnet_demo.py
-    -c <path_to_corr_model>/Corr.xml
-    -g <path_to_gen_model>/Gen.xml
-    -s <path_to_seg_model>/Seg.xml
-    -ii <path_to_input_image>/input_image.jpg
-    -ri <path_to_exemplar_image>/reference_image.jpg
-```
+1. To use only correspondence and generative models (only CoCosNet). \
+   In this case user have to set 3 inputs to the model (2 masks and 1 image).
+   You can use the following command do inference on CPU:
+
+   ```
+       python3 cocosnet_demo.py
+       -c <path_to_corr_model>/Corr.xml
+       -g <path_to_gen_model>/Gen.xml
+       -is <path_to_semantic_mask_of_image>/input_mask.png
+       -ri <path_to_exemplar_image>/reference_image.jpg
+       -rs <path_to_exemplar_semantic>/reference_mask.png
+   ```
+
+   > **NOTE**: For segmentation masks you should use mask (with shape: [height x width]) that specifies class for each pixel. Number of classes is 151 (from ADE20k), where '0' - nothing class.
+
+2. To use the segmentation model in addition to CoCosNet. You should use only models trained on ADE20k dataset.     Example: [hrnet-v2-c1-segmentation](../../../models/public/hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md).
+   In this case user have to set input image (.jpg) and reference image (.jpg) without any masks.
+   Segmentation masks will be generated via segmentation model.
+
+   You can use the following command do inference on CPU:
+
+   ```
+   python3 cocosnet_demo.py
+       -c <path_to_corr_model>/Corr.xml
+       -g <path_to_gen_model>/Gen.xml
+       -s <path_to_seg_model>/Seg.xml
+       -ii <path_to_input_image>/input_image.jpg
+       -ri <path_to_exemplar_image>/reference_image.jpg
+   ```
 
 ## Demo Output
 

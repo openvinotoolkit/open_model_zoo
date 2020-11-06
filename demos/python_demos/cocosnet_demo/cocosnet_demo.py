@@ -11,16 +11,18 @@
  limitations under the License.
 """
 
+import logging as log
 import sys
 import os
 from argparse import ArgumentParser, SUPPRESS
+
 import cv2
 import numpy as np
-import logging as log
 from openvino.inference_engine import IECore
-from models import CorrespondenceModel, GenerativeModel, CocosnetModel, SegmentationModel
-from preprocessing import preprocess_with_images, preprocess_with_semantics, preprocess_for_seg_model
-from postprocessing import postprocess, save_result
+
+from cocosnet_demo.models import CorrespondenceModel, GenerativeModel, CocosnetModel, SegmentationModel
+from cocosnet_demo.preprocessing import preprocess_with_images, preprocess_with_semantics, preprocess_for_seg_model
+from cocosnet_demo.postprocessing import postprocess, save_result
 
 
 def build_argparser():
@@ -35,29 +37,25 @@ def build_argparser():
                       help="Required. Path to an .xml file with a trained generative model",
                       required=True, type=str)
     args.add_argument("-s", "--segmentation_model",
-                      help="Required. Path to an .xml file with a trained semantic segmentation model",
-                      required=False, default=None, type=str)
+                      help="Optional. Path to an .xml file with a trained semantic segmentation model",
+                      default=None, type=str)
     args.add_argument("-ii", "--input_images",
-                      help="Required. Path to a folder with input images or path to a input image",
+                      help="Optional. Path to a folder with input images or path to a input image",
                       default="", type=str)
     args.add_argument("-is", "--input_semantics",
-                      help="Required. Path to a folder with semantic images or path to a semantic image",
+                      help="Optional. Path to a folder with semantic images or path to a semantic image",
                       default="", type=str)
     args.add_argument("-ri", "--reference_images",
                       help="Required. Path to a folder with reference images or path to a reference image",
-                      default="", type=str)
+                      required=True, default="", type=str)
     args.add_argument("-rs", "--reference_semantics",
-                      help="Required. Path to a folder with reference semantics or path to a reference semantic",
+                      help="Optional. Path to a folder with reference semantics or path to a reference semantic",
                       default="", type=str)
-    args.add_argument("-o", "--output_dir", help="Path to directory to save the results",
-                      required=False, type=str, default="results")
-    args.add_argument("-l", "--cpu_extension",
-                      help="Optional. Required for CPU custom layers. "
-                           "Absolute MKLDNN (CPU)-targeted custom layers. Absolute path to a shared library with the "
-                           "kernels implementations", type=str, default=None)
+    args.add_argument("-o", "--output_dir", help="Optional. Path to directory to save the results",
+                      type=str, default="results")
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
-                           "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
+                           "acceptable. Default value is CPU",
                       default="CPU", type=str)
     return parser
 
@@ -82,8 +80,7 @@ def main():
 
     log.info("Creating CoCosNet Model")
     ie_core = IECore()
-    if args.cpu_extension and 'CPU' in args.device:
-        ie_core.add_extension(args.cpu_extension, "CPU")
+
     corr_model = CorrespondenceModel(ie_core, args.correspondence_model,
                                      args.correspondence_model.replace(".xml", ".bin"),
                                      args.device)
@@ -134,7 +131,7 @@ def main():
     results = [postprocess(out) for out in outs]
 
     if args.output_dir:
-        save_result(outs, args.output_dir)
+        save_result(results, args.output_dir)
     log.info("Result image was saved to {}".format(args.output_dir))
 
 

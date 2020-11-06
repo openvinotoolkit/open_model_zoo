@@ -26,7 +26,6 @@ def postprocess(out):
 
 def save_result(results, out_path):
     try:
-        results = [postprocess(result) for result in results]
         if not os.path.isdir(out_path):
             os.mkdir(out_path)
         for index, result in enumerate(results):

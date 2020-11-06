@@ -9,6 +9,8 @@ evaluations:
             type: image_processing
             mean: 127.5
             std: 127.5
+        # For some GAN metrics (IS and FID) you need to use classification model as verification network.
+        # In our case it is Inception-V3 (googlenet-v3) model. Additional layer is needed for FID metric.
         verification_network:
           additional_layers: ["InceptionV3/Logits/AvgPool_1a_8x8/AvgPool"]
 
