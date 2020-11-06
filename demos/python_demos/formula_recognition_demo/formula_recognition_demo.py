@@ -209,7 +209,7 @@ def main():
         if args.perf_counts:
             log.info("Encoder performance statistics")
             print_stats(exec_net_encoder)
-            log.info("Decoder perfomanсe statistics")
+            log.info("Decoder performance statistics")
             print_stats(exec_net_decoder)
 
         logits = np.array(logits)

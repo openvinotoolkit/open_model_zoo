@@ -103,7 +103,7 @@ class I3DEvaluator(BaseEvaluator):
             data_flow = np.asarray(output_flow[key_flow])
 
             if data_rgb.shape != data_flow.shape:
-                raise ValueError("Сalculation of combined output is not possible. Outputs for rgb and flow models have "
+                raise ValueError("Calculation of combined output is not possible. Outputs for rgb and flow models have "
                                  "different shapes. rgb model's output shape: {}. "
                                  "flow model's output shape: {}.".format(data_rgb.shape, data_flow.shape))
 
