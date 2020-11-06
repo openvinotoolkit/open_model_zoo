@@ -5,10 +5,10 @@
 FILE(GLOB SRC_FILES ./*.cpp)
 FILE(GLOB H_FILES ./*.h)
 
-ie_add_sample(NAME object_detection_demo_ssd_async
+ie_add_sample(NAME object_detection_demo
               SOURCES ${SRC_FILES}
               HEADERS ${H_FILES}
               DEPENDENCIES monitors processing
               OPENCV_DEPENDENCIES highgui videoio imgproc)
 
-target_link_libraries(object_detection_demo_ssd_async PRIVATE ngraph::ngraph)
+target_link_libraries(object_detection_demo PRIVATE ngraph::ngraph)

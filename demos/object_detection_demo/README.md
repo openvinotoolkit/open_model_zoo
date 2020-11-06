@@ -1,11 +1,11 @@
 # Object Detection SSD C++ Demo, Async API Performance Showcase
 
-This demo showcases Object Detection with SSD and new Async API.
+This demo showcases Object Detection and new Async API.
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the app can continue doing things on the host, while accelerator is busy.
 Specifically, this demo keeps the number of Infer Requests that you have set using `nireq` flag. While some of the Infer Requests are processed by IE, the other ones can be filled with new frame data and asynchronously started or the next output can be taken from the Infer Request and displayed.
 
-> **NOTE:** This topic describes usage of C++ implementation of the Object Detection SSD Demo Async API. For the Python* implementation, refer to [Object Detection SSD Python* Demo, Async API Performance Showcase](../python_demos/object_detection_demo_ssd_async/README.md).
+> **NOTE:** This topic describes usage of C++ implementation of the Object Detection Demo Async API.
 
 The technique can be generalized to any available parallel slack, for example, doing inference and simultaneously encoding the resulting
 (previous) frames or running further inference, like some emotion detection on top of the face detection results.
@@ -17,13 +17,12 @@ on the same GPU in parallel, because the device is already busy.
 This and other performance implications and tips for the Async API are covered in the [Optimization Guide](https://docs.openvinotoolkit.org/latest/_docs_optimization_guide_dldt_optimization_guide.html)
 
 Other demo objectives are:
+
 * Video as input support via OpenCV
 * Visualization of the resulting bounding boxes and text labels (from the labels file, see `-labels` option) or class number (if no file is provided)
 * OpenCV is used to draw resulting bounding boxes, labels, so you can copy paste this code without
 need to pull Inference Engine demos helpers to your app
-* Demonstration of the Async API in action, so the demo features two modes (toggled by the Tab key)
-    - "User specified" mode, where you can set the number of Infer Requests, throughput streams and threads. Inference, starting new requests and displaying the results of completed requests are all performed asynchronously. The purpose of this mode is to get the higher FPS by fully utilizing all available devices.
-    - "Min latency" mode, which uses only one Infer Request. The purpose of this mode is to get the lowest latency.
+* Demonstration of the Async API in action
 
 ## How It Works
 
@@ -35,19 +34,18 @@ Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference 
 New "Async API" operates with new notion of the "Infer Request" that encapsulates the inputs/outputs and separates *scheduling and waiting for result*,
 next section.
 
-The pipeline is the same for both modes. The difference is in the number of Infer Requests used.
 ```cpp
     while (true) {
-        if (Infer Request containing the next video frame has completed) {
+        capture frame
+        populate empty InferRequest
+        set completion callback
+        start InferRequest
+
+        while (Infer Request containing submitted video frame has been completed) {
             get inference results
             process inference results
             display the frame
-        } else if (one of the Infer Requests is idle and it is not the end of the input video) {
-            capture frame
-            populate empty InferRequest
-            set completion callback
-            start InferRequest
-        }
+        } 
     }
 ```
 
@@ -86,7 +84,7 @@ For more details on the requests-based Inference Engine API, including the Async
 
 Running the application with the `-h` option yields the following usage message:
 ```
-./object_detection_demo_ssd_async -h
+./object_detection_demo -h
 InferenceEngine:
     API version ............ <version>
     Build .................. <number>
@@ -106,12 +104,13 @@ Options:
     -r                        Optional. Inference results as raw values.
     -t                        Optional. Probability threshold for detections.
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
-    -nireq "<integer>"        Optional. Number of Infer Requests.
+    -nireq "<integer>"        Optional. Number of infer requests.
     -nthreads "<integer>"     Optional. Number of threads.
     -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
     -loop                     Optional. Enable reading the input in a loop.
     -no_show                  Optional. Do not show processed video.
     -u                        Optional. List of monitors to show initially.
+    -mt                       Model type: ssd or yolo
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
@@ -122,15 +121,14 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 ```sh
-./object_detection_demo_ssd_async -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd.xml -d GPU
+./object_detection_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd.xml -d GPU -mt ssd
 ```
-
-The only GUI knob is using **Tab** to switch between "User specified" mode and "Min latency" mode.
 
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
-The demo reports
+The demo reports:
+
 * **FPS**: average rate of video frame processing (frames per second)
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results)
 You can use both of these metrics to measure application-level performance.
