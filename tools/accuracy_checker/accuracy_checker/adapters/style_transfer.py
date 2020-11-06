@@ -35,4 +35,6 @@ class StyleTransferAdapter(Adapter):
     def _basic_postprocess(cls, img):
         if img.shape[0] == 3:
             img = np.transpose(img, (1, 2, 0))
+        img = np.clip(img, 0., 255.)
+        img = img.astype(np.uint8)
         return img

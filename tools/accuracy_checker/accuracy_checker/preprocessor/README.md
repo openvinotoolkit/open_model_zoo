@@ -141,8 +141,10 @@ Accuracy Checker supports following set of preprocessors:
   * `max_brush_width` - Maximum brush width to draw mask.
   * `max_length` - Maximum line length to draw mask.
   * `max_vertex` - Maximum number vertex to draw mask.
+  * `inverse_mask` - Allows mask inversion (1 - real image, 0 - masked area). Optional, default `False` (0 - real image, 1- masked area).
 * `rect_mask` - Applies rectangle mask to the image.
   * `dst_width` and `dst_height` are width, and height of mask. You can also use `size` instead in case when destination sizes are equal.
+* `inverse_mask` - Allows mask inversion (1 - real image, 0 - masked area). Optional, default `False` (0 - real image, 1- masked areaa).
 * `custom_mask` - Applies masks from custom mask dataset.
   * `mask_dir` - path to mask dataset to be used for inpainting.
   * `inverse_mask` - inverse mask before apply
@@ -152,6 +154,7 @@ Accuracy Checker supports following set of preprocessors:
     * `scipy_imread` - read images using similar approach as in `scipy.misc.imread`.
     * `numpy_reader` - read numpy dumped files.
     * `tf_imread`- read images using TensorFlow. Default color space is RGB. Requires TensorFlow installation.
+    * `inverse_mask` - Allows mask inversion (1 - real image, 0 - masked area). Optional, default `False` (0 - real image, 1- masked areaa).
 * `warp_affine` - warp affine transformation. (supported only with OpenCV)
   * `src_landmarks` - source landmarks to set as markers for the warp affine transformation.
   * `dst_landmarks` - destination and target landmarks to transform `src_landmarks` to.
