@@ -373,8 +373,8 @@ class AcerScore(PerImageEvaluationMetric):
                                           y_pred=all_results,
                                           ).ravel()
 
-        apcer = fp / (tn + fp)
-        bpcer = fn / (fn + tp)
+        apcer = fp / (tn + fp) if (tn + fp) != 0 else 0
+        bpcer = fn / (fn + tp) if (fn + tp) != 0 else 0
         acer = (apcer + bpcer) / 2
 
         return acer
