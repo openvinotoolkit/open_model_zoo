@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """
  Copyright (c) 2020 Intel Corporation
-
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,18 +12,33 @@
  limitations under the License.
 """
 
+import asyncio
 import logging as log
 import os
+import subprocess
 import sys
 from argparse import SUPPRESS, ArgumentParser
 
 import cv2 as cv
 import numpy as np
-from tqdm import tqdm
-
 from openvino.inference_engine import IECore
-
+from tqdm import tqdm
 from utils import END_TOKEN, START_TOKEN, Vocab
+
+
+def check_environment():
+    command = subprocess.run(["pdflatex", "--version"], stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, check=False, shell=True)
+    if command.stderr:
+        raise EnvironmentError("pdflatex not installed, please install it: \n{}".format(command.stderr))
+    command = subprocess.run(["gs", "--version"], stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, check=False, shell=True)
+    if command.stderr:
+        raise EnvironmentError("ghostscript not installed, please install it: \n{}".format(command.stderr))
+    command = subprocess.run(["convert", "--version"], stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, check=False, shell=True)
+    if command.stderr:
+        raise EnvironmentError("imagemagick not installed, please install it: \n{}".format(command.stderr))
 
 
 def crop(img, target_shape):
@@ -80,6 +92,144 @@ def preprocess_image(preprocess, image_raw, tgt_shape):
     return np.expand_dims(image, axis=0)
 
 
+class Demo:
+    def __init__(self, args):
+        self.args = args
+        log.info("Creating Inference Engine")
+        self.ie = IECore()
+        self.ie.set_config(
+            {"PERF_COUNT": "YES" if self.args.perf_counts else "NO"}, args.device)
+        # check_environment()
+        self.encoder = read_net(self.args.m_encoder, self.ie, self.args.device)
+        self.dec_step = read_net(self.args.m_decoder, self.ie, self.args.device)
+        self.exec_net_encoder = self.ie.load_network(network=self.encoder, device_name=self.args.device)
+        self.exec_net_decoder = self.ie.load_network(network=self.dec_step, device_name=self.args.device)
+        self.images_list = []
+        self.vocab = Vocab(self.args.vocab_path)
+        if not args.interactive:
+            self.preprocess_inputs()
+            self.exec_encoder = self.exec_net_encoder.infer
+            self.exec_decoder = self.exec_net_decoder.infer
+        else:
+            self.exec_encoder = self.exec_net_decoder.async_infer
+
+    def preprocess_inputs(self):
+        batch_dim, channels, height, width = self.encoder.input_info['imgs'].input_data.shape
+        assert batch_dim == 1, "Demo only works with batch size 1."
+        assert channels in (1, 3), "Input image is not 1 or 3 channeled image."
+        target_shape = (height, width)
+        if os.path.isdir(self.args.input):
+            inputs = sorted(os.path.join(self.args.input, inp)
+                            for inp in os.listdir(self.args.input))
+        else:
+            inputs = [self.args.input]
+        log.info("Loading and preprocessing images")
+        for filenm in tqdm(inputs):
+            image_raw = cv.imread(filenm)
+            assert image_raw is not None, "Error reading image {}".format(filenm)
+            image = preprocess_image(
+                PREPROCESSING[self.args.preprocessing_type], image_raw, target_shape)
+            record = dict(img_name=filenm, img=image, formula=None)
+            self.images_list.append(record)
+
+    def model(self, image, asynchronous=False):
+        enc_res = self.exec_net_encoder.infer(inputs={self.args.imgs_layer: image})
+        row_enc_out = enc_res[self.args.row_enc_out_layer]
+        dec_states_h = enc_res[self.args.hidden_layer]
+        dec_states_c = enc_res[self.args.context_layer]
+        output = enc_res[self.args.init_0_layer]
+        tgt = np.array([[START_TOKEN]])
+        logits = []
+        for _ in range(self.args.max_formula_len):
+            dec_res = self.exec_net_decoder.infer(inputs={self.args.row_enc_out_layer: row_enc_out,
+                                                          self.args.dec_st_c_layer: dec_states_c,
+                                                          self.args.dec_st_h_layer: dec_states_h,
+                                                          self.args.output_prev_layer: output,
+                                                          self.args.tgt_layer: tgt
+                                                          }
+                                                  )
+
+            dec_states_h = dec_res[self.args.dec_st_h_t_layer]
+            dec_states_c = dec_res[self.args.dec_st_c_t_layer]
+            output = dec_res[self.args.output_layer]
+            logit = dec_res[self.args.logit_layer]
+            logits.append(logit)
+            tgt = np.array([[np.argmax(logit, axis=1)]])
+
+            if tgt[0][0][0] == END_TOKEN:
+                break
+        if self.args.perf_counts:
+            log.info("Encoder perfomance statistics")
+            print_stats(self.exec_net_encoder)
+            log.info("Decoder perfomanсe statistics")
+            print_stats(self.exec_net_decoder)
+
+        logits = np.array(logits)
+        logits = logits.squeeze(axis=1)
+        targets = np.argmax(logits, axis=1)
+        return logits, targets
+
+
+def create_videocapture(resolution=(1600, 900)):
+    capture = cv.VideoCapture(0)
+    capture.set(3, resolution[0])
+    capture.set(4, resolution[1])
+    return capture
+
+
+def create_input_window(input_shape, aspect_ratio):
+    height, width = input_shape
+    default_width = 500
+    height = int(default_width * aspect_ratio)
+    start_point = (int(800 - default_width / 2), int(450 - height / 2))
+    end_point = (int(800 + default_width / 2), int(450 + height / 2))
+    return start_point, end_point
+
+
+def place_crop(frame, start_point, end_point):
+    crop = frame[start_point[1]:end_point[1], start_point[0]:end_point[0], :]
+    crop = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
+    crop = cv.cvtColor(crop, cv.COLOR_GRAY2BGR)
+    ret_val, bin_crop = cv.threshold(crop, 120, 255, type=cv.THRESH_BINARY)
+    height = end_point[1] - start_point[1]
+    frame[0:height, start_point[0]:end_point[0], :] = bin_crop
+    return crop, frame
+
+
+def draw_rectangle(frame, start_point, end_point, color=(0, 0, 255), thickness=2):
+    frame = cv.rectangle(frame, start_point, end_point, color, thickness)
+    return frame
+
+
+def resize_window(action, start_point, end_point, aspect_ratio):
+    if action == 'increase':
+        start_point = (start_point[0]-10, start_point[1] - int(10 * aspect_ratio))
+        end_point = (end_point[0]+10, end_point[1] + int(10 * aspect_ratio))
+    elif action == 'decrease':
+        start_point = (start_point[0]+10, start_point[1] + int(10 * aspect_ratio))
+        end_point = (end_point[0]-10, end_point[1] - int(10 * aspect_ratio))
+    else:
+        raise ValueError(f"wrong action: {action}")
+    return start_point, end_point
+
+
+def render_text(frame, start_point, text):
+    frame = cv.putText(frame, text, start_point, cv.FONT_HERSHEY_SIMPLEX ,
+                   1, (255, 255, 255), 3, cv.LINE_AA)
+    frame = cv.putText(frame, text, start_point, cv.FONT_HERSHEY_SIMPLEX ,
+                   1, (0, 0, 0), 1, cv.LINE_AA)
+    return frame
+
+def prerocess_crop(crop, tgt_shape):
+    height, width = tgt_shape
+    crop = preprocess_image(PREPROCESSING['resize'], crop, tgt_shape)
+    return crop
+
+async def get_phrase(demo, input_image):
+    _, targets = await demo.model(model_input)
+    phrase = demo.vocab.construct_phrase(targets)
+    return targets
+
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
@@ -89,8 +239,10 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument("-m_decoder", help="Required. Path to an .xml file with a trained decoder part of the model",
                       required=True, type=str)
-    args.add_argument("-i", "--input", help="Required. Path to a folder with images or path to an image files",
-                      required=True, type=str)
+    args.add_argument("--interactive", help="Optional. Enables interactive mode. In this mode images are read from the web-camera.",
+                      action='store_true', default=False)
+    args.add_argument("-i", "--input", help="Optional. Path to a folder with images or path to an image files",
+                      required=False, type=str)
     args.add_argument("-o", "--output_file",
                       help="Optional. Path to file where to store output. If not mentioned, result will be stored"
                       "in the console.",
@@ -140,86 +292,45 @@ def build_argparser():
 def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s",
                     level=log.INFO, stream=sys.stdout)
-    args = build_argparser().parse_args()
-    log.info("Creating Inference Engine")
-    ie = IECore()
-    ie.set_config(
-        {"PERF_COUNT": "YES" if args.perf_counts else "NO"}, args.device)
-
-    encoder = read_net(args.m_encoder, ie, args.device)
-    dec_step = read_net(args.m_decoder, ie, args.device)
-
-    batch_dim, channels, height, width = encoder.input_info['imgs'].input_data.shape
-    assert batch_dim == 1, "Demo only works with batch size 1."
-    assert channels in (1, 3), "Input image is not 1 or 3 channeled image."
-    target_shape = (height, width)
-    images_list = []
-    if os.path.isdir(args.input):
-        inputs = sorted(os.path.join(args.input, inp)
-                        for inp in os.listdir(args.input))
-    else:
-        inputs = [args.input]
-    log.info("Loading vocab file")
-    vocab = Vocab(args.vocab_path)
-
-    log.info("Loading and preprocessing images")
-    for filenm in tqdm(inputs):
-        image_raw = cv.imread(filenm)
-        assert image_raw is not None, "Error reading image {}".format(filenm)
-        image = preprocess_image(
-            PREPROCESSING[args.preprocessing_type], image_raw, target_shape)
-        record = dict(img_name=filenm, img=image, formula=None)
-        images_list.append(record)
-
-    log.info("Loading networks")
-    exec_net_encoder = ie.load_network(network=encoder, device_name=args.device)
-    exec_net_decoder = ie.load_network(network=dec_step, device_name=args.device)
 
     log.info("Starting inference")
-    for rec in tqdm(images_list):
-        image = rec['img']
+    args = build_argparser().parse_args()
+    demo = Demo(args)
+    if not args.interactive:
+        for rec in tqdm(demo.images_list):
+            image = rec['img']
+            _, targets = demo.model(image)
+            if args.output_file:
+                with open(args.output_file, 'a') as output_file:
+                    output_file.write(rec['img_name'] + '\t' + demo.vocab.construct_phrase(targets) + '\n')
+            else:
+                print("Image name: {}\nFormula: {}\n".format(rec['img_name'], demo.vocab.construct_phrase(targets)))
+    else:
 
-        enc_res = exec_net_encoder.infer(inputs={args.imgs_layer: image})
-        # get results
-        row_enc_out = enc_res[args.row_enc_out_layer]
-        dec_states_h = enc_res[args.hidden_layer]
-        dec_states_c = enc_res[args.context_layer]
-        output = enc_res[args.init_0_layer]
-
-        tgt = np.array([[START_TOKEN]])
-        logits = []
-        for _ in range(args.max_formula_len):
-            dec_res = exec_net_decoder.infer(inputs={args.row_enc_out_layer: row_enc_out,
-                                                     args.dec_st_c_layer: dec_states_c,
-                                                     args.dec_st_h_layer: dec_states_h,
-                                                     args.output_prev_layer: output,
-                                                     args.tgt_layer: tgt
-                                                     }
-                                             )
-
-            dec_states_h = dec_res[args.dec_st_h_t_layer]
-            dec_states_c = dec_res[args.dec_st_c_t_layer]
-            output = dec_res[args.output_layer]
-            logit = dec_res[args.logit_layer]
-            logits.append(logit)
-            tgt = np.array([[np.argmax(logit, axis=1)]])
-
-            if tgt[0][0][0] == END_TOKEN:
+        capture = create_videocapture()
+        *_, height, width = demo.encoder.input_info['imgs'].input_data.shape
+        aspect_ratio = height / width
+        start_point, end_point = create_input_window((height, width), aspect_ratio)
+        prev_text = ''
+        while True:
+            ret, frame = capture.read()
+            bin_crop, frame = place_crop(frame, start_point, end_point)
+            model_input = prerocess_crop(bin_crop, (height, width))
+            targets = get_phrase(demo.model, model_input)
+            phrase = demo.vocab.construct_phrase(targets)
+            frame = render_text(frame, start_point, phrase)
+            frame = draw_rectangle(frame, start_point, end_point)
+            cv.imshow('Press Q to quit.', frame)
+            key = cv.waitKey(1) & 0xFF
+            if key == ord('q'):
                 break
-        if args.perf_counts:
-            log.info("Encoder performance statistics")
-            print_stats(exec_net_encoder)
-            log.info("Decoder performance statistics")
-            print_stats(exec_net_decoder)
+            elif key == ord('o'):
+                start_point, end_point = resize_window("decrease", start_point, end_point, aspect_ratio)
+            elif key == ord('p'):
+                start_point, end_point = resize_window("increase", start_point, end_point, aspect_ratio)
 
-        logits = np.array(logits)
-        logits = logits.squeeze(axis=1)
-        targets = np.argmax(logits, axis=1)
-        if args.output_file:
-            with open(args.output_file, 'a') as output_file:
-                output_file.write(rec['img_name'] + '\t' + vocab.construct_phrase(targets) + '\n')
-        else:
-            print("Image name: {}\nFormula: {}\n".format(rec['img_name'], vocab.construct_phrase(targets)))
+        capture.release()
+        cv.destroyAllWindows()
 
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
              "from the openVINO toolkit\n")
