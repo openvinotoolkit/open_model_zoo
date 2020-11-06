@@ -27,7 +27,7 @@ DetectionModel::DetectionModel(const std::string& modelFileName, float confidenc
     labels(labels) {
 }
 
-void DetectionModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, MetaData*& metaData)
+void DetectionModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, std::shared_ptr<MetaData>& metaData)
 {
     auto& img = inputData.asRef<ImageInputData>().inputImage;
 
@@ -41,7 +41,7 @@ void DetectionModel::preprocess(const InputData& inputData, InferenceEngine::Inf
         matU8ToBlob<uint8_t>(img, frameBlob);
     }
 
-    metaData = new ImageMetaData(img);
+    metaData = std::make_shared<ImageMetaData>(img);
 }
 
 std::vector<std::string> DetectionModel::loadLabels(const std::string & labelFilename){

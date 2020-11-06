@@ -32,20 +32,20 @@ DECLARE_string(nstreams);
 
 using namespace InferenceEngine;
 
-CnnConfig ConfigFactory::getUserConfig() {
-    auto config = getCommonConfig();
+CnnConfig ConfigFactory::getUserConfig(const std::string& d, const std::string& l, const std::string& c, bool pc, uint32_t nireq, const std::string& nstreams, uint32_t nthreads) {
+    auto config = getCommonConfig(d, l, c, pc, nireq);
     std::set<std::string> devices;
-    for (const std::string& device : parseDevices(FLAGS_d)) {
+    for (const std::string& device : parseDevices(d)) {
         devices.insert(device);
     }
-    std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(devices, FLAGS_nstreams);
+    std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(devices, nstreams);
     for (auto & device : devices) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             // limit threading for CPU portion of inference
-            if (FLAGS_nthreads != 0)
-                config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads));
+            if (nthreads != 0)
+                config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THREADS_NUM), std::to_string(nthreads));
 
-            if (FLAGS_d.find("MULTI") != std::string::npos
+            if (d.find("MULTI") != std::string::npos
                 && devices.find("GPU") != devices.end()) {
                 config.execNetworkConfig.emplace(CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO));
             }
@@ -64,7 +64,7 @@ CnnConfig ConfigFactory::getUserConfig() {
                 (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
                     : CONFIG_VALUE(GPU_THROUGHPUT_AUTO)));
 
-            if (FLAGS_d.find("MULTI") != std::string::npos
+            if (d.find("MULTI") != std::string::npos
                 && devices.find("CPU") != devices.end()) {
                 // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
@@ -75,10 +75,10 @@ CnnConfig ConfigFactory::getUserConfig() {
     return config;
 }
 
-CnnConfig ConfigFactory::getMinLatencyConfig() {
-    auto config = getCommonConfig();
+CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& d, const std::string& l, const std::string& c, bool pc, uint32_t nireq) {
+    auto config = getCommonConfig(d, l, c, pc, nireq);
     std::set<std::string> devices;
-    for (const std::string& device : parseDevices(FLAGS_d)) {
+    for (const std::string& device : parseDevices(d)) {
         devices.insert(device);
     }
     for (auto & device : devices) {
@@ -92,27 +92,27 @@ CnnConfig ConfigFactory::getMinLatencyConfig() {
     return config;
 }
 
-CnnConfig ConfigFactory::getCommonConfig() {
+CnnConfig ConfigFactory::getCommonConfig(const std::string& d, const std::string& l, const std::string& c, bool pc, uint32_t nireq) {
     CnnConfig config;
 
-    if (!FLAGS_d.empty()) {
-        config.devices = FLAGS_d;
+    if (!d.empty()) {
+        config.devices = d;
     }
 
-    if (!FLAGS_l.empty()) {
-        config.cpuExtensionsPath = FLAGS_l;
+    if (!l.empty()) {
+        config.cpuExtensionsPath = l;
     }
 
-    if (!FLAGS_c.empty()) {
-        config.clKernelsConfigPath = FLAGS_c;
+    if (!c.empty()) {
+        config.clKernelsConfigPath = c;
     }
 
-    if (FLAGS_nireq) {
-        config.maxAsyncRequests = FLAGS_nireq;
+    if (nireq) {
+        config.maxAsyncRequests = nireq;
     }
 
     /** Per layer metrics **/
-    if (FLAGS_pc) {
+    if (pc) {
         config.execNetworkConfig.emplace(CONFIG_KEY(PERF_COUNT), PluginConfigParams::YES);
     }
 

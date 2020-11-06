@@ -194,7 +194,10 @@ int main(int argc, char *argv[]) {
             return -1;
         }
 
-        PipelineBase pipeline(std::move(model), ConfigFactory::getUserConfig());
+        InferenceEngine::Core core;
+        PipelineBase pipeline(std::move(model),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+            core);
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();

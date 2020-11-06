@@ -154,7 +154,10 @@ int main(int argc, char *argv[]) {
         cv::Mat curr_frame;
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
-        PipelineBase pipeline(std::make_unique<SegmentationModel>(FLAGS_m),ConfigFactory::getUserConfig());
+        InferenceEngine::Core core;
+        PipelineBase pipeline(std::make_unique<SegmentationModel>(FLAGS_m),
+            ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
+            core);
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();

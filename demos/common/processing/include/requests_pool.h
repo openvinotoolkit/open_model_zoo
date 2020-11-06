@@ -39,7 +39,7 @@ public:
 
     /// Returns number of requests in use. This function is thread safe.
     /// @returns number of requests in use
-    int64_t getInUseRequestsCount();
+    size_t getInUseRequestsCount();
 
     /// Returns number of requests in use. This function is thread safe.
     /// @returns number of requests in use
