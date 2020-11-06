@@ -21,8 +21,6 @@ The pose may contain up to 17 keypoints: ears, eyes, nose, shoulders, elbows, wr
 
 Average Precision metric described in [COCO Keypoint Evaluation site](https://cocodataset.org/#keypoints-eval).
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x448x448]. An input image in the [BxCxHxW] format ,
