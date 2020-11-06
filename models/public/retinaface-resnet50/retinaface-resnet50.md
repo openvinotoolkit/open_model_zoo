@@ -1,7 +1,7 @@
 # retinaface-resnet50
 
 ## Use Case and High-Level Description
-RetinaFace-R50 is a medium size model with ResNet50 backbone for Face Localization. It can output face bounding boxes and five facial landmarks in a single forward pass. More details provided in the [paper](https://arxiv.org/abs/1905.00641) and [repository](https://github.com/deepinsight/insightface/tree/master/RetinaFace)
+RetinaFace-R50 is a medium size model with ResNet50 backbone for Face Localization. It can output face bounding boxes and five facial landmarks in a single forward pass. More details provided in the [paper](https://arxiv.org/abs/1905.00641) and [repository](https://github.com/deepinsight/insightface/tree/master/detection/RetinaFace)
 
 ## Specification
 
@@ -18,7 +18,7 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 64 x 64 pixels.
 
 Accuracy validation approach different from described in the original repo.
-For details about original WIDER results please see [https://github.com/deepinsight/insightface/tree/master/RetinaFace]()
+For details about original WIDER results please see [https://github.com/deepinsight/insightface/tree/master/detection/RetinaFace]()
 
 ## Input
 
