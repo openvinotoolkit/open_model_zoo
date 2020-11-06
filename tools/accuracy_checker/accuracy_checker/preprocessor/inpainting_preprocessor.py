@@ -190,18 +190,18 @@ class CustomMask(Preprocessor):
         return image
 
 
-def preprocess_input_mask(data, inverrse=False):
+def preprocess_input_mask(data, inverse=False):
     img, mask = data.data[0], data.data[1]
     if len(mask.shape) == 3 and mask.shape[-1] != 1:
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
     mask /= 255
     mask[mask >= 0.5] = 1
     mask[mask < 0.5] = 0
-    img = img * (1 - mask) + 255 * mask
-
     if len(mask.shape) == 2:
         mask = np.expand_dims(mask, -1)
+    img = img * (1 - mask) + 255 * mask
+
     data.data[0] = img
-    data.data[1] = mask if not inverrse else 1 - mask
+    data.data[1] = mask if not inverse else 1 - mask
 
     return data
