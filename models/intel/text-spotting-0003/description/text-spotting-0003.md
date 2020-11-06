@@ -7,7 +7,7 @@ recognizes text. The model detects symbol sequences separated by space and perfo
 recognition without a dictionary. The model is built on top of the Mask-RCNN
 framework with additional attention-based text recognition head.
 
-Symbols set is alphanumeric: `0123456789abcdefghijklmnopqrstuvwxyz`.
+Symbols set is alphanumeric: `abcdefghijklmnopqrstuvwxyz0123456789`.
 
 ## Example
 
