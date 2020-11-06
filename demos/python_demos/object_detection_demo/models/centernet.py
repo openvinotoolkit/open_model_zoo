@@ -217,5 +217,3 @@ class CenterNet(Model):
         dets[:, 2:4] = CenterNet._transform_preds(
             dets[:, 2:4], center, scale, (width, height))
         return dets
-
-

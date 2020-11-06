@@ -45,18 +45,18 @@ class SSD(Model):
             try:
                 self.labels_layer = find_layer_by_name(labels_layer, all_outputs) # ?
                 self.logger.info('Use output "{}" as the one containing labels of detected objects.'
-                         .format(self.labels_layer))
+                                 .format(self.labels_layer))
             except ValueError:
                 self.logger.warning('Suitable layer for "{}" output is not found. '
-                            'Treating detector as class agnostic with output label {}'
-                            .format(labels_layer, default_label))
+                                    'Treating detector as class agnostic with output label {}'
+                                    .format(labels_layer, default_label))
                 self.labels_layer = None
                 self.default_label = default_label
 
             self.input_size = input_size
             self.bboxes_layer = self.find_layer_bboxes_output(all_outputs)
             self.logger.info('Use auto-detected output "{}" as the one containing detected bounding boxes.'
-                     .format(self.bboxes_layer))
+                             .format(self.bboxes_layer))
 
         @staticmethod
         def find_layer_bboxes_output(all_outputs):
@@ -89,16 +89,16 @@ class SSD(Model):
         self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
         self.labels = load_labels(labels) if labels else None
 
-        self.image_blob_name, self.image_info_blob_name = self._get_inputs(self.net)
+        self.image_blob_name, self.image_info_blob_name = self._get_inputs()
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
         assert self.n == 1, 'Only batch size == 1 is supported.'
 
         self.output_parser = self._get_output_parser(self.net, self.image_blob_name)
 
-    def _get_inputs(self, net):
+    def _get_inputs(self):
         image_blob_name = None
         image_info_blob_name = None
-        for blob_name, blob in net.input_info.items():
+        for blob_name, blob in self.net.input_info.items():
             if len(blob.input_data.shape) == 4:
                 image_blob_name = blob_name
             elif len(blob.input_data.shape) == 2:
@@ -168,4 +168,3 @@ class SSD(Model):
             detection.ymin *= scale_y
             detection.ymax *= scale_y
         return detections
-

@@ -203,6 +203,3 @@ class FaceBoxes(Model):
             detection.ymin *= h
             detection.ymax *= h
         return detections
-
-
-

@@ -2,8 +2,6 @@ import threading
 from collections import deque
 from time import perf_counter
 
-from .model import Model
-
 
 class SyncPipeline:
     def __init__(self, ie, model, device='CPU'):
@@ -22,7 +20,7 @@ class SyncPipeline:
 
 class AsyncPipeline:
     def __init__(self, ie, model, *, device='CPU', plugin_config={}, max_num_requests=1,
-                 completed_requests={}, caught_exceptions=None):
+                 completed_requests=None, caught_exceptions=None):
         self.model = model
         self.device = device
         verbose = True
@@ -38,7 +36,7 @@ class AsyncPipeline:
 
         self.requests = self.exec_net.requests
         self.empty_requests = deque(self.requests)
-        self.completed_request_results = completed_requests
+        self.completed_request_results = completed_requests if completed_requests else {}
         self.callback_exceptions = caught_exceptions if caught_exceptions is not None else {}
         self.event = threading.Event()
 
@@ -69,15 +67,13 @@ class AsyncPipeline:
             return id, self.completed_request_results.pop(id)
         elif self.completed_request_results:
             return self.completed_request_results.popitem()
-        else:
-            return None, None
+        return None, None
 
     def get_result(self, id=None):
         id, result = self.get_raw_result(id)
         if result:
             return id, (self.model.postprocess(*result), result[1])
-        else:
-            return None, None
+        return None, None
 
     def await_all(self):
         for request in self.exec_net.requests:
