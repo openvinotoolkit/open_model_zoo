@@ -141,7 +141,7 @@ void paintInfo(cv::Mat& frame, const PipelineBase::PerformanceInfo& info) {
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers certain topology and cannot be generalized for any object detection **/
-        slog::info << "InferenceEngine: " << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {

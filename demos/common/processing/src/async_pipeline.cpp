@@ -28,7 +28,7 @@ PipelineBase::PipelineBase(std::unique_ptr<ModelBase> modelInstance, const CnnCo
     slog::info << "Loading Inference Engine" << slog::endl;
 
     slog::info << "Device info: " << slog::endl;
-    slog::info<< engine.GetVersions(cnnConfig.devices);
+    slog::info<< printable(engine.GetVersions(cnnConfig.devices));
 
     /** Load extensions for the plugin **/
     if (!cnnConfig.cpuExtensionsPath.empty()) {
