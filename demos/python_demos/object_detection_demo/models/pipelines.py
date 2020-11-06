@@ -10,7 +10,7 @@ class SyncPipeline:
 
         self.exec_net = ie.load_network(network=self.model.net, device_name=self.device)
 
-    def __call__(self, inputs):
+    def submit_data(self, inputs):
         inputs = self.model.unify_inputs(inputs)
         inputs, meta = self.model.preprocess(inputs)
         outputs = self.exec_net.infer(inputs=inputs)
@@ -19,25 +19,23 @@ class SyncPipeline:
 
 
 class AsyncPipeline:
-    def __init__(self, ie, model, *, device='CPU', plugin_config={}, max_num_requests=1,
+    def __init__(self, ie, model, *, logger=None, device='CPU', plugin_config={}, max_num_requests=1,
                  completed_requests=None, caught_exceptions=None):
         self.model = model
-        self.device = device
-        verbose = True
-        if verbose:
-            print('Loading network to {} plugin...'.format(device))
+        self.logger = logger
+
+        if self.logger:
+            self.logger.info('Loading network to {} plugin...'.format(device))
         loading_time = perf_counter()
-        self.max_num_requests = max_num_requests
         self.exec_net = ie.load_network(network=self.model.net, device_name=device,
                                         config=plugin_config, num_requests=max_num_requests)
         loading_time = (perf_counter() - loading_time)
-        if verbose:
-            print('Loaded in {:.3f} seconds'.format(loading_time))
+        if self.logger:
+            self.logger.info('Loaded in {:.3f} seconds'.format(loading_time))
 
-        self.requests = self.exec_net.requests
-        self.empty_requests = deque(self.requests)
+        self.empty_requests = deque(self.exec_net.requests)
         self.completed_request_results = completed_requests if completed_requests else {}
-        self.callback_exceptions = caught_exceptions if caught_exceptions is not None else {}
+        self.callback_exceptions = caught_exceptions if caught_exceptions else {}
         self.event = threading.Event()
 
     def inference_completion_callback(self, status, callback_args):
@@ -52,7 +50,7 @@ class AsyncPipeline:
             self.callback_exceptions.append(e)
         self.event.set()
 
-    def __call__(self, inputs, id, meta):
+    def submit_data(self, inputs, id, meta):
         request = self.empty_requests.popleft()
         inputs = self.model.unify_inputs(inputs)
         inputs, preprocessing_meta = self.model.preprocess(inputs)
@@ -63,7 +61,7 @@ class AsyncPipeline:
         request.async_infer(inputs=inputs)
 
     def get_raw_result(self, id=None):
-        if id is not None and id in self.completed_request_results:
+        if id in self.completed_request_results:
             return id, self.completed_request_results.pop(id)
         elif self.completed_request_results:
             return self.completed_request_results.popitem()

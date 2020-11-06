@@ -305,7 +305,7 @@ def main():
                     cap.release()
                 continue
 
-            detections, _ = detector(frame)
+            detections, _ = detector.submit_data(frame)
 
             if len(detections) and args.raw_output_message:
                 print_raw_results(frame.shape[:2], detections, model.labels, args.prob_threshold)
@@ -351,7 +351,7 @@ def main():
                     cap.release()
                 continue
 
-            detectors[mode](frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+            detectors[mode].submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
 
             _, results = detectors[mode].get_result(next_frame_id_to_show)
