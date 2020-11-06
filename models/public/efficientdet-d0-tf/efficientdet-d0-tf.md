@@ -25,8 +25,6 @@ For details about this family of models, check out the Google AutoML [repository
 | ------ | --------------- |
 | coco_precision | 31.95%|
 
-## Performance
-
 ## Input
 
 ### Original Model
