@@ -77,7 +77,6 @@ class YOLO(Model):
 
     def preprocess(self, inputs):
         img = self.resize_image(inputs[self.image_blob_name], (self.w, self.h))
-        h, w = img.shape[:2]
         meta = {'original_shape': inputs[self.image_blob_name].shape,
                 'resized_shape': img.shape}
         if self.nchw_shape:
@@ -151,7 +150,7 @@ class YOLO(Model):
             for j in range(i + 1, len(detections)):
                 # We perform IOU only on objects of same class
                 if detections[i].id != detections[j].id:
-                     continue
+                    continue
 
                 if iou(detections[i], detections[j]) > iou_threshold:
                     detections[j].score = 0

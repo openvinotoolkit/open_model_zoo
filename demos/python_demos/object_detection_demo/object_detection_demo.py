@@ -30,10 +30,10 @@ import numpy as np
 from openvino.inference_engine import IECore
 
 sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
-import monitors
 
 from models import *
 from models.pipelines import AsyncPipeline, SyncPipeline
+import monitors
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
 log = logging.getLogger()
@@ -47,8 +47,8 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument('--type', help='Required. Specify model type', type=str, required=True,
                       choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
-    args.add_argument('-i', '--input', help='Required. Path to an image, folder with images, video file or a numeric camera ID.',
-                      required=True, type=str)
+    args.add_argument('-i', '--input', required=True, type=str,
+                      help='Required. Path to an image, folder with images, video file or a numeric camera ID.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
@@ -77,7 +77,7 @@ def build_argparser():
                             type=int, default=1)
     infer_args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
     infer_args.add_argument('-u', '--utilization_monitors', default='', type=str,
-                      help='Optional. List of monitors to show initially.')
+                            help='Optional. List of monitors to show initially.')
     infer_args.add_argument('--sync', action='store_true')
 
     debug_args = parser.add_argument_group('Debug options')
@@ -143,7 +143,7 @@ class ModeInfo:
 
 def get_model(model_name, ie, args):
     if model_name == 'ssd':
-        return SSD(ie, args.model, log, labels=labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
+        return SSD(ie, args.model, log, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
     elif model_name == 'yolo':
         return YOLO(ie, args.model, log, labels=args.labels,
                     threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
@@ -153,6 +153,9 @@ def get_model(model_name, ie, args):
         return CenterNet(ie, args.model, log, labels=args.labels, threshold=args.prob_threshold)
     elif model_name == 'retina':
         return RetinaFace(ie, args.model, log, threshold=args.prob_threshold)
+
+    log.error('No such model type as "{}". See "--type" option for details.'.format(model_name))
+    sys.exit(1)
 
 
 def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
@@ -221,7 +224,8 @@ def print_raw_results(size, detections, labels, threshold):
             ymax = min(int(detection.ymax), size[0])
             class_id = int(detection.id)
             det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
-            log.info('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '.format(det_label, detection.score, xmin, ymin, xmax, ymax))
+            log.info('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '
+                     .format(det_label, detection.score, xmin, ymin, xmax, ymax))
 
 
 def main():
@@ -232,14 +236,9 @@ def main():
 
     config_user_specified, config_min_latency = get_plugin_configs(args.device, args.num_streams, args.num_threads)
 
-    labels_map = None
-    if args.labels:
-        with open(args.labels, 'r') as f:
-            labels_map = [x.strip() for x in f]
-
     log.info('Loading network...')
 
-    model = get_model(args.type, labels_map, ie, args)
+    model = get_model(args.type, ie, args)
     has_landmarks = args.type == 'retina'
 
     if args.sync:
@@ -289,7 +288,7 @@ def main():
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between min_latency/user_specified modes, press TAB key in the output window")
 
-    palette = ColorPalette(len(labels_map) if labels_map is not None else 100)
+    palette = ColorPalette(len(model.labels) if model.labels else 100)
     presenter = monitors.Presenter(args.utilization_monitors, 55,
                                    (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4),
                                     round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
@@ -387,7 +386,8 @@ def main():
                                                                    mode_info[mode].frames_count) * 1e3)
                     # Draw performance stats over frame.
                     put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
-                    put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
+                    put_highlighted_text(frame, latency_message, (15, 50),
+                                         cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
 
                 if not args.no_show:
                     cv2.imshow('Detection Results', frame)

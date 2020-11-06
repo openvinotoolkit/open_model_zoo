@@ -31,7 +31,6 @@ class RetinaFace(Model):
 
     def preprocess(self, inputs):
         img = resize_image(inputs[self.image_blob_name], (self.w, self.h))
-        h, w = img.shape[:2]
         meta = {'original_shape': inputs[self.image_blob_name].shape,
                 'resized_shape': img.shape}
         img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
@@ -178,7 +177,6 @@ class RetinaFacePostprocessor:
                 if self._detect_attributes:
                     mask_scores_list.extend(self._get_mask_scores(type_scores_outputs[idx],
                         anchor_num)[threshold_mask][keep])
-        detections = []
         result = []
         if len(scores_list) != 0:
             scores = np.reshape(scores_list, -1)
