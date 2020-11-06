@@ -25,12 +25,20 @@ class ProvidedWrapper:
 class UnresolvedDependencyException(ValueError):
 
     def __init__(self, provider, missing_dependencies) -> None:
-        super().__init__()
         self.provider = provider
         self.missing_dependencies = missing_dependencies
         self.message = "Unresolved dependencies ({}) for provider {}".format(
             ", ".join(self.missing_dependencies), self.provider
         )
+        super().__init__(self.message)
+
+
+class UnregisteredProviderException(ValueError):
+    def __init__(self, provider, root_provider):
+        self.provider = provider
+        self.root_provider = root_provider
+        self.message = 'Requested provider {} not registered for {}'.format(provider, root_provider)
+        super().__init__(self.message)
 
 
 def get_opts(options):
@@ -69,7 +77,7 @@ class BaseProvider:
     @classmethod
     def resolve(cls, name):
         if name not in cls.providers:
-            raise ValueError("Requested provider not registered")
+            raise UnregisteredProviderException(name, cls.__provider_type__)
         return cls.providers[name]
 
 

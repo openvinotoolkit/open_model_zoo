@@ -621,6 +621,7 @@ class MTCNNEvaluator(BaseEvaluator):
             output_callback=None,
             allow_pairwise_subset=False,
             dump_prediction_to_annotation=False,
+            calculate_metrics=True,
             **kwargs):
         def no_detections(batch_pred):
             return batch_pred[0].size == 0

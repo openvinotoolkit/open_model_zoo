@@ -129,6 +129,8 @@ class ConfigReader:
     @staticmethod
     def _read_configs(arguments):
         local_config = read_yaml(arguments.config)
+        if not isinstance(local_config, dict):
+            raise ConfigError('local config should be dict-like object')
         definitions = os.environ.get(DEFINITION_ENV_VAR) or local_config.get('global_definitions')
         if definitions:
             definitions = read_yaml(Path(arguments.config).parent / definitions)

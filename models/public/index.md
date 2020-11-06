@@ -77,6 +77,7 @@ detect areas with complex shape.
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
 | DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/deeplabv3.md) | 66.85% | 11.469 | 23.819 |
+| HRNet V2 C1 Segmentation  | PyTorch\*      | [hrnet-v2-c1-segmentation](./hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md) | 77.69% | 81.993 | 66.4768 |
 
 ### Instance Segmentation
 
@@ -90,6 +91,7 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | Mask R-CNN Inception V2        | TensorFlow\*   | [mask_rcnn_inception_v2_coco](./mask_rcnn_inception_v2_coco/mask_rcnn_inception_v2_coco.md) | 27.1199%/21.4805% | 54.926 | 21.772 |
 | Mask R-CNN ResNet 50           | TensorFlow\*   | [mask_rcnn_resnet50_atrous_coco](./mask_rcnn_resnet50_atrous_coco/mask_rcnn_resnet50_atrous_coco.md)| 	29.7512%/27.4597% | 294.738 | 50.222 |
 | Mask R-CNN ResNet 101          | TensorFlow\*   | [mask_rcnn_resnet101_atrous_coco](./mask_rcnn_resnet101_atrous_coco/mask_rcnn_resnet101_atrous_coco.md) | 34.9191%/31.301% | 674.58 | 69.188 |
+| YOLACT ResNet 50 FPN | PyTorch\* | [yolact-resnet50-fpn-pytorch](./yolact-resnet50-fpn-pytorch/yolact-resnet50-fpn-pytorch.md) | 28.0%/30.69% | 118.575 |  36.829  |
 
 ### 3D Semantic Segmentation
 
@@ -134,6 +136,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/yolo-v2-tf.md) | 53.1453%/56.483% | 63.0301	 |	50.9526 |
 | YOLO v3                              | Keras\*                  | [yolo-v3-tf](./yolo-v3-tf/yolo-v3-tf.md) | 62.2759%/67.7221% | 65.9843	 |	61.9221 |
 | YOLO v3 Tiny                         | Keras\*                  | [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/yolo-v3-tiny-tf.md) | 35.9%/39.7% | 5.582  | 8.848 |
+| YOLO v4                              | Keras\*                  | [yolo-v4-tf](./yolo-v4-tf/yolo-v4-tf.md) | 71.17%/75.02% | 128.608	 |	64.33 |
 
 ## Face Recognition
 
@@ -170,6 +173,7 @@ Since this task contains - in the general setting - some ambiguity, the resultin
 | Model Name                  | Implementation | OMZ Model Name                | Accuracy | GFlops    | mParams |
 | --------------------------- | -------------- | ----------------------------- | -------- | --------- | ------- |
 | midasnet                    | PyTorch\*      | [midasnet](./midasnet/midasnet.md)| 7.5878| 207.4915  |    104.0814     |
+| FCRN ResNet50-Upproj          | TensorFlow\*   | [fcrn-dp-nyu-depth-v2-tf](./fcrn-dp-nyu-depth-v2-tf/fcrn-dp-nyu-depth-v2-tf.md)| 0.573 | 63.5421 | 34.5255 |
 
 ## Image Inpainting
 
@@ -202,8 +206,8 @@ Colorization task is to predict colors of scene from grayscale image.
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
-| colorization-v2           | Caffe*         | [colorization-v2](./colorization-v2/colorization-v2.md) | | 64.0047 |  32.2354 |
-| colorization-v2-norebal   | Caffe*         | [colorization-v2-norebal](./colorization-v2-norebal/colorization-v2-norebal.md) | | 64.0047 |  32.2354 |
+| colorization-v2           | PyTorch\* | [colorization-v2](./colorization-v2/colorization-v2.md) | 57.75%/81.50% | 83.6045 |  32.2360 |
+| colorization-siggraph     | PyTorch\* | [colorization-siggraph](./colorization-siggraph/colorization-siggraph.md) | 58.25%/81.78% | 150.5441 |  34.0511 |
 
 ## Sound Classification
 

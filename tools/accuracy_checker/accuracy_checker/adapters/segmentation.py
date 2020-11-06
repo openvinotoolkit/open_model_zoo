@@ -19,7 +19,7 @@ import cv2
 import numpy as np
 from ..adapters import Adapter
 from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction
-from ..config import ConfigValidator, BoolField, ListField, NumberField, StringField
+from ..config import ConfigError, ConfigValidator, BoolField, ListField, NumberField, StringField
 from ..utils import contains_any
 
 

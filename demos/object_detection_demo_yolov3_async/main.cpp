@@ -181,7 +181,7 @@ void ParseYOLOV3Output(const YoloParams &params, const std::string & output_name
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers a certain topology and cannot be generalized for any object detection **/
-        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         // ------------------------------ Parsing and validating the input arguments ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
         Core ie;
 
         slog::info << "Device info: " << slog::endl;
-        std::cout << ie.GetVersions(FLAGS_d);
+        slog::info << printable(ie.GetVersions(FLAGS_d)) << slog::endl;
 
         /**Loading extensions to the devices **/
 

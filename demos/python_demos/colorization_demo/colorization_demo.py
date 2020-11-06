@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2018 Intel Corporation
+ Copyright (c) 2018-2020 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -33,8 +33,6 @@ def build_arg():
     in_args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Help with the script.')
     in_args.add_argument("-m", "--model", help="Required. Path to .xml file with pre-trained model.",
                          required=True, type=str)
-    in_args.add_argument("--coeffs", help="Required. Path to .npy file with color coefficients.",
-                         required=True, type=str)
     in_args.add_argument("-d", "--device",
                          help="Optional. Specify target device for infer: CPU, GPU, FPGA, HDDL or MYRIAD. "
                               "Default: CPU",
@@ -53,9 +51,7 @@ def build_arg():
 
 if __name__ == '__main__':
     args = build_arg().parse_args()
-    coeffs = args.coeffs
 
-    # mean is stored in the source caffe model and passed to IR
     log.basicConfig(format="[ %(levelname)s ] %(message)s",
                     level=log.INFO if not args.verbose else log.DEBUG, stream=sys.stdout)
 
@@ -65,7 +61,6 @@ if __name__ == '__main__':
     load_net.batch_size = 1
     exec_net = ie.load_network(network=load_net, device_name=args.device)
 
-    assert len(load_net.input_info) == 1, "Expected number of inputs is equal 1"
     input_blob = next(iter(load_net.input_info))
     input_shape = load_net.input_info[input_blob].input_data.shape
     assert input_shape[1] == 1, "Expected model input shape with 1 channel"
@@ -73,7 +68,6 @@ if __name__ == '__main__':
     assert len(load_net.outputs) == 1, "Expected number of outputs is equal 1"
     output_blob = next(iter(load_net.outputs))
     output_shape = load_net.outputs[output_blob].shape
-    assert output_shape == [1, 313, 56, 56], "Shape of outputs does not match network shape outputs"
 
     _, _, h_in, w_in = input_shape
 
@@ -85,9 +79,6 @@ if __name__ == '__main__':
     cap = cv.VideoCapture(input_source)
     if not cap.isOpened():
         assert "{} not exist".format(input_source)
-
-    color_coeff = np.load(coeffs).astype(np.float32)
-    assert color_coeff.shape == (313, 2), "Current shape of color coefficients does not match required shape"
 
     imshow_size = (640, 480)
     graph_size = (imshow_size[0] // 2, imshow_size[1] // 4)
@@ -113,7 +104,7 @@ if __name__ == '__main__':
         log.debug("Network inference")
         res = exec_net.infer(inputs={input_blob: [img_l_rs]})
 
-        update_res = (res[output_blob] * color_coeff.transpose()[:, :, np.newaxis, np.newaxis]).sum(1)
+        update_res = np.squeeze(res[output_blob])
 
         log.debug("Get results")
         out = update_res.transpose((1, 2, 0))

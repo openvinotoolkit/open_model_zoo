@@ -27,7 +27,6 @@ from ..preprocessor import Preprocessor, GeometricOperationMetadata
 from ..utils import contains_all, get_size_from_config, get_parameter_value_from_config, UnsupportedPackage
 
 
-
 def scale_width(dst_width, dst_height, image_width, image_height,):
     return int(dst_width * image_width / image_height), dst_height
 
@@ -90,6 +89,7 @@ def east_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
 
     return resize_w, resize_h
 
+
 class ScaleFactor:
     def __init__(self, config, parameters):
         self.scale = get_parameter_value_from_config(config, parameters, 'scale')
@@ -103,6 +103,7 @@ class ScaleFactor:
 def min_ratio(dst_width, dst_height, image_width, image_height):
     ratio = min(float(image_height) / float(dst_height), float(image_width) / float(dst_width))
     return int(image_width / ratio), int(image_height / ratio)
+
 
 def mask_rcnn_benchmark_ratio(dst_width, dst_height, image_width, image_height):
     min_dst_size = min(dst_width, dst_height)
@@ -419,30 +420,43 @@ class AutoResize(Preprocessor):
         self.dst_width = None
 
     def set_input_shape(self, input_shape):
-        if input_shape is None or len(input_shape) != 1:
-            raise ConfigError('resize to input size possible, only for one input layer case')
-        input_shape = next(iter(input_shape.values()))
-        self.dst_height, self.dst_width = input_shape[2:]
+        def is_image_input(shape):
+            return len(shape) == 4 and shape[1] in [1, 3, 4]
+        if input_shape is None:
+            raise ConfigError('resize to input size impossible')
+        image_inputs = [value for value in input_shape.values() if is_image_input(value)]
+        if not image_inputs:
+            raise ConfigError('image input is not detected')
+        if len(image_inputs) == 1:
+            self.dst_height, self.dst_width = image_inputs[0][2:]
+        else:
+            self.dst_height = [im_input[2] for im_input in image_inputs]
+            self.dst_width = [im_input[3] for im_input in image_inputs]
 
     def process(self, image, annotation_meta=None):
         is_simple_case = not isinstance(image.data, list)  # otherwise -- pyramid, tiling, etc
         if self.dst_height is None or self.dst_width is None:
             self.set_input_shape(self.input_shapes)
 
-        def process_data(data):
+        def process_data(data, idx=0):
             image_h, image_w = data.shape[:2]
-            data = cv2.resize(data, (self.dst_width, self.dst_height)).astype(np.float32)
+            if isinstance(self.dst_height, list):
+                dst_height, dst_width = self.dst_height[idx], self.dst_width[idx]
+            else:
+                dst_height, dst_width = self.dst_height, self.dst_width
+
+            data = cv2.resize(data, (dst_width, dst_height)).astype(np.float32)
             if len(data.shape) == 2:
                 data = np.expand_dims(data, axis=-1)
 
             if is_simple_case:
                 # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
                 resize_meta = {
-                    'preferable_width': self.dst_width,
-                    'preferable_height': self.dst_height,
-                    'image_info': [self.dst_height, self.dst_width, 1],
-                    'scale_x': float(self.dst_width) / image_w,
-                    'scale_y': float(self.dst_height) / image_h,
+                    'preferable_width': dst_width,
+                    'preferable_height': dst_height,
+                    'image_info': [dst_height, dst_width, 1],
+                    'scale_x': float(dst_width) / image_w,
+                    'scale_y': float(dst_height) / image_h,
                     'original_width': image_w,
                     'original_height': image_h
                 }
@@ -456,7 +470,7 @@ class AutoResize(Preprocessor):
         data = image.data
         image.data = (
             process_data(data) if is_simple_case else [
-                process_data(data_fragment)for data_fragment in data
+                process_data(data_fragment, idx) for idx, data_fragment in enumerate(data)
             ]
         )
 

@@ -54,7 +54,6 @@ datasets:
         dst_height: 800
         dst_width: 1365
 
-
   - name: ms_coco_detection_91_classes
     annotation_conversion:
       converter: mscoco_detection
@@ -88,8 +87,8 @@ datasets:
       has_background: False
       sort_annotations: True
       use_full_label_map: False
-    annotation:  mscoco_det_80.pickle
-    dataset_meta:  mscoco_det_80.json
+    annotation: mscoco_det_80.pickle
+    dataset_meta: mscoco_det_80.json
 
   - name: ms_coco_detection_80_class_with_background
     data_source: val2017
@@ -100,7 +99,7 @@ datasets:
       sort_annotations: True
       use_full_label_map: False
     annotation: mscoco_det_80_bkgr.pickle
-    dataset_meta:  mscoco_det_80_bkgr.json
+    dataset_meta: mscoco_det_80_bkgr.json
 
   - name: ms_coco_keypoints
     data_source: val2017
@@ -200,9 +199,16 @@ datasets:
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       mask_dir: VOCdevkit/VOC2012/SegmentationClass/
     data_source: VOCdevkit/VOC2012/JPEGImages/
-    segmentation_masks_source:  VOCdevkit/VOC2012/SegmentationClass/
+    segmentation_masks_source: VOCdevkit/VOC2012/SegmentationClass/
     annotation: voc2012_segmentation.pickle
     dataset_meta: voc2012_segmentation.json
+
+  - name: mapillary_20
+    annotation_conversion:
+      converter: mapillary_20
+      data_dir: Mapillary_20
+    annotation: mapillary_20.pickle
+    dataset_meta: mapillary_20.json
 
   - name: wider
     data_source: WIDER_val/images
@@ -477,7 +483,6 @@ datasets:
         dst_width: 94
         dst_height: 24
 
-
   - name: image_retrieval
     data_source: textile_crops
     annotation_conversion:
@@ -563,6 +568,18 @@ datasets:
       vocab_file: im2latex_medium_photographed/vocab.pkl
     annotation: im2latex_medium_photographed.pickle
     dataset_meta: im2latex_medium_photographed.json
+
+  - name: im2latex_polynomials_handwritten
+    data_source: im2latex_polynomials_handwritten/images_processed
+    annotation_conversion:
+      converter: im2latex_formula_recognition
+      data_dir: im2latex_polynomials_handwritten
+      images_dir: im2latex_polynomials_handwritten/images_processed
+      formula_file: im2latex_polynomials_handwritten/formulas.norm.lst
+      split_file: im2latex_polynomials_handwritten/validate_filter.lst
+      vocab_file: im2latex_polynomials_handwritten/vocab.json
+    annotation: im2latex_polynomials_handwritten.pickle
+    dataset_meta: im2latex_polynomials_handwritten.json
 
   - name: market1501
     data_source: Market-1501-v15.09.15
@@ -663,6 +680,13 @@ datasets:
       two_streams: True
     annotation: super_resolution_x3.pickle
 
+    preprocessing:
+      - type: auto_resize
+
+    postprocessing:
+      - type: resize
+        apply_to: prediction
+
     metrics:
       - type: psnr
         scale_border: 4
@@ -678,6 +702,13 @@ datasets:
       hr_suffix: hr
       two_streams: True
     annotation: super_resolution_x4.pickle
+
+    preprocessing:
+      - type: auto_resize
+
+    postprocessing:
+      - type: resize
+        apply_to: prediction
 
     metrics:
       - type: psnr
@@ -695,6 +726,11 @@ datasets:
 
     preprocessing:
       - type: bgr_to_gray
+      - type: auto_resize
+
+    postprocessing:
+      - type: resize
+        apply_to: prediction
 
     metrics:
       - type: psnr
@@ -835,6 +871,16 @@ datasets:
       clip_length: 16
     annotation: msasl_action_recognition.pickle
 
+  - name: jester
+    data_source: jester/global_crops
+    annotation_conversion:
+      converter: continuous_clip_action_recognition
+      annotation_file: jester/val.txt
+      data_dir: jester/global_crops
+      out_fps: 15
+      clip_length: 8
+    annotation: jester_action_recognition.pickle
+
   - name: ReDWeb_V1
     data_source: ReDWeb_V1
     annotation_conversion:
@@ -846,9 +892,9 @@ datasets:
   - name: Kondate_nakayosi
     data_source: Kondate/test_data
     annotation_conversion:
-      converter: kondate_nakayosi_recognition
-      decoding_char_file: Kondate/kondate_nakayosi_char_list.txt
-      annotation_file: Kondate/test_img_id_gt.txt
+      converter: unicode_character_recognition
+      decoding_char_file: Kondate_nakayosi/kondate_nakayosi_char_list.txt
+      annotation_file: Kondate_nakayosi/test_img_id_gt.txt
     annotation: kondate_nakayosi_recognition.pickle
     dataset_meta: kondate_nakayosi_recognition.json
 
@@ -859,6 +905,21 @@ datasets:
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       masks_dir: free_form_masks/masks_2k
     annotation: inpainting_voc12_masks2k.pickle
+
+  - name: inpainting_rect_mask
+    data_source: VOCdevkit/VOC2012/JPEGImages/
+    annotation_conversion:
+      converter: inpainting
+      images_dir: VOCdevkit/VOC2012/JPEGImages/
+    annotation: inpainting_voc12.pickle
+
+    preprocessing:
+      - type: auto_resize
+      - type: rect_mask
+    postprocessing:
+      - type: resize
+        apply_to: prediction
+
 
   - name: mrlEyes_2018_01
     annotation_conversion:
@@ -957,3 +1018,30 @@ datasets:
       - type: pad_with_eos
         eos_index: 1
         sequence_len: 192
+
+  - name: NYU_Depth_V2
+    data_source: nyudepthv2/val/converted/images
+    additional_data_source: nyudepthv2/val/converted/depth
+    annotation_conversion:
+      converter: nyu_depth_v2
+      images_dir: nyudepthv2/val/converted/images
+      depth_map_dir: nyudepthv2/val/converted/depth
+      data_dir: nyudepthv2/val/official
+
+  - name: SCUT_EPT
+    data_source: SCUT_EPT/test
+    annotation_conversion:
+      converter: unicode_character_recognition
+      decoding_char_file: SCUT_EPT/scut_ept_char_list.txt
+      annotation_file: SCUT_EPT/test_img_id_gt.txt
+    annotation: scut_ept_recognition.pickle
+    dataset_meta: scut_ept_recognition.json
+
+  - name: ADEChallengeData2016
+    annotation_conversion:
+      converter: ade20k
+      images_dir: ADEChallengeData2016/images/validation
+      annotations_dir: ADEChallengeData2016/annotations/validation
+      object_categories_file: ADEChallengeData2016/objectInfo150.txt
+    data_source: ADEChallengeData2016/images/validation
+    segmentation_masks_source: ADEChallengeData2016/annotations/validation

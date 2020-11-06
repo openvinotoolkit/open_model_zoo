@@ -19,10 +19,10 @@ public:
                   const std::string& modelPath,
                   const std::string& deviceName,
                   bool doRollAlign = true);
-    void virtual estimate(const cv::Mat& image,
-                          FaceInferenceResults& outputResults);
-    void virtual printPerformanceCounts() const;
-    virtual ~GazeEstimator();
+    void estimate(const cv::Mat& image,
+                  FaceInferenceResults& outputResults) override;
+    void printPerformanceCounts() const override;
+    ~GazeEstimator() override;
 
 private:
     IEWrapper ieWrapper;

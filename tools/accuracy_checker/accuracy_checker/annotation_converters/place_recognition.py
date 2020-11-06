@@ -42,19 +42,19 @@ class PlaceRecognitionDatasetConverter(BaseFormatConverter):
         annotations = []
         num_iterations = len(queries) + len(gallery)
         content_errors = None if not check_content else []
+        for idx, (image, utm) in enumerate(zip(queries, loc_query)):
+            image = 'queries_real/' + image
+            if check_content and not check_file_existence(self.data_dir / image):
+                content_errors.append('{}: des not exist'.format(self.data_dir / image))
+            annotations.append(PlaceRecognitionAnnotation(image, utm, True))
+            if progress_callback and idx % progress_interval == 0:
+                progress_callback(idx * 100 / num_iterations)
         for idx, (image, utm) in enumerate(zip(gallery, loc_gallery)):
             if check_content and not check_file_existence(self.data_dir / image):
                 content_errors.append('{}: des not exist'.format(self.data_dir / image))
             annotations.append(PlaceRecognitionAnnotation(image, utm, False))
-            if progress_callback and idx % progress_interval == 0:
-                progress_callback(idx * 100 / num_iterations)
-        for idx, (image, utm) in enumerate(zip(queries, loc_query)):
-            image = 'queries_real/'+image
-            if check_content and not check_file_existence(self.data_dir / image):
-                content_errors.append('{}: des not exist'.format(self.data_dir / image))
-            annotations.append(PlaceRecognitionAnnotation(image, utm, True))
-            if progress_callback and (idx + len(gallery)) % progress_callback == 0:
-                progress_callback((idx + len(gallery)) * 100 / num_iterations)
+            if progress_callback and (idx + len(queries)) % progress_callback == 0:
+                progress_callback((idx + len(queries)) * 100 / num_iterations)
 
         return ConverterReturn(annotations, None, content_errors)
 

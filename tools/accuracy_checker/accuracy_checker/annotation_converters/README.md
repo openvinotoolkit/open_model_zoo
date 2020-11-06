@@ -133,6 +133,10 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `images_suffix` - suffix for image file names (Optional, default `_leftImg8bit`).
   * `use_full_label_map` - allows to use full label map with 33 classes instead train label map with 18 classes (Optional, default `False`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+* `mapillary_20` - converts Mapillary dataset contained 20 classes to `SegmentationAnnotation`.
+  * `data_dir` - path to dataset root folder. Relative paths to images and masks directory determine as `imgs` and `masks` respectively. In way when images and masks are located in non default directories, you can use parameters described below.
+  * `images_dir` - path to images folder.
+  * `mask_dir` - path to ground truth mask folder.
 * `vgg_face` - converts VGG Face 2 dataset for facial landmarks regression task to `FacialLandmarksAnnotation`.
   * `landmarks_csv_file` - path to csv file with coordinates of landmarks points.
   * `bbox_csv_file` - path to cvs file which contains bounding box coordinates for faces (optional parameter).
@@ -187,7 +191,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `word_spotting` - if it is true then transcriptions that have lengths less than 3 symbols or transcriptions containing non-alphanumeric symbols will be marked as difficult.
 * `icdar13_recognition` - converts ICDAR13 dataset for text recognition task to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
-* `kondate_nakayosi_recognition` - converts [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) dataset and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html) for handwritten Japanese text recognition task to `CharacterRecognitionAnnotation`.
+* `unicode_character_recognition` - converts [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) dataset and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html) for handwritten Japanese text recognition task , and [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release) for handwritten simplified Chinese text recognition task to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
   * `decoding_char_file` - path to decoding_char_file, consisting of all supported characters separated by '\n' in txt format.
 * `brats` - converts BraTS dataset format to `BrainTumorSegmentationAnnotation` format.
@@ -390,6 +394,14 @@ The main difference between this converter and `super_resolution` in data organi
   * `alphabet` - alphabet for sequence decoding (Optional, default ["N", "A", "C", "G", "T"]).
 * `place_recognition` - converts dataset for image based localization task to `PlaceRecognitionAnnotation`
   * `subset_file` - matlab file contains info about subset used in validation.
+* `mpii` - converts MPII Human Pose Estimation dataset to `PoseEstimationAnnotation`.
+  * `annotation_file` - json-file with annotation.
+  * `headboxes_file` - file with boxes contained head coordinates for each image.
+* `cluttered_mnist` - converts MNIST dataset from spatial transformer network [example](https://github.com/oarriaga/STN.keras/tree/master/datasets) to `ClassificationAnnotation`.
+  * `data_file` - npz file with dataset.
+  * `split` - dataset split: `train` - for training subset, `valid` - for train-validation subset, `test` - for testing subset (Optional, default test).
+  * `convert_images` - allows convert images from raw data stored in npz and save them into provided directory (Optional, default True).
+  * `images_dir` - directory for saving converted images (Optional, if not provided, the images will be saved into converted_images directory in the same location, where data_file is stored)
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
