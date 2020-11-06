@@ -137,4 +137,3 @@ index d43e6ad..e5f7591 100644
      def __init__(self, rnn_dims, fc_dims, bits, pad, upsample_factors,
 --
 2.7.4
-
