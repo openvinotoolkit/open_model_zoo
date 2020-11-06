@@ -73,8 +73,6 @@ def build_argparser():
                             help='Optional. Number of threads to use for inference on CPU (including HETERO cases)')
     infer_args.add_argument('-loop', '--loop', help='Optional. Number of times to repeat the input.',
                             type=int, default=0)
-    infer_args.add_argument('-delay', '--delay', help='Optional. Delay in ms between frames.',
-                            type=int, default=1)
     infer_args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
     infer_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                             help='Optional. List of monitors to show initially.')
@@ -278,8 +276,6 @@ def main():
         log.error(e)
         sys.exit(1)
 
-    wait_key_time = args.delay if args.delay > 0 else 1
-
     next_frame_id = 0
     next_frame_id_to_show = 0
     input_repeats = 0
@@ -333,7 +329,7 @@ def main():
 
             if not args.no_show:
                 cv2.imshow('Detection Results', frame)
-                key = cv2.waitKey(wait_key_time)
+                key = cv2.waitKey(1)
 
                 ESC_KEY = 27
                 # Quit.
@@ -391,7 +387,7 @@ def main():
 
                 if not args.no_show:
                     cv2.imshow('Detection Results', frame)
-                    key = cv2.waitKey(wait_key_time)
+                    key = cv2.waitKey(1)
 
                     ESC_KEY = 27
                     TAB_KEY = 9
