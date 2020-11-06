@@ -72,7 +72,7 @@ KNOWN_TASK_TYPES = {
     'sound_classification',
     'speech_recognition',
     'style_transfer',
-    'token_recognition'
+    'token_recognition',
 }
 
 KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}

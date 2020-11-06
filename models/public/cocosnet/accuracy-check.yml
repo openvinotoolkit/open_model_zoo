@@ -5,7 +5,10 @@ evaluations:
       network_info:
         correspondence_network: {}
         generative_network:
-          adapter: cocosnet
+          adapter:
+            type: image_processing
+            mean: 127.5
+            std: 127.5
         verification_network:
           additional_layers: ["InceptionV3/Logits/AvgPool_1a_8x8/AvgPool"]
 

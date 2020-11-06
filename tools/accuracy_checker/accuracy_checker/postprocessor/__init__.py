@@ -120,5 +120,5 @@ __all__ = [
 
     'RemoveRepeatTokens',
     'TokensToLowerCase',
-    'SRImageRecovery'
+    'SRImageRecovery',
 ]

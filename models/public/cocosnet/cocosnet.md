@@ -5,8 +5,6 @@
 Cross-domain correspondence network is a exemplar-based image translation composite model, consisting of correspondence and translation parts. Model was pre-trained on ADE20k dataset.
 For details see [paper](https://arxiv.org/pdf/2004.05571) and [repository](https://github.com/microsoft/CoCosNet).
 
-## Example
-
 ## Composite model specification
 
 | Metric                          | Value                                     |
@@ -17,8 +15,6 @@ For details see [paper](https://arxiv.org/pdf/2004.05571) and [repository](https
 
 The purpose of correspondence network is to establish correspondence between input image and given exemplar.
 Correspondence network return warped exemplar with semantic from input.
-
-### Performance
 
 ### Inputs
 
@@ -64,8 +60,6 @@ Correspondence network return warped exemplar with semantic from input.
 ## Specification for Translation network
 
 Translation network generates the final output based on the warped exemplar according to the correspondence, yielding an exemplar-based translation output.
-
-### Performance
 
 ### Inputs
 

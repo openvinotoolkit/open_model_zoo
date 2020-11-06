@@ -94,7 +94,6 @@ from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
 from .dna_seq_recognition import DNASeqRecognition
 from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
-from .cocosnet import CocosnetAdapter
 
 __all__ = [
     'Adapter',
@@ -199,5 +198,4 @@ __all__ = [
     'GVADetectionAdapter',
     'GVAClassificationAdapter',
 
-    'CocosnetAdapter'
 ]

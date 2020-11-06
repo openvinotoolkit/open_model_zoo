@@ -324,4 +324,3 @@ AccuracyChecker supports following set of adapters:
 * `dna_seq_beam_search` - converts output of DNA sequencing model to `DNASequencePrediction` using beam search decoding.
   * `beam_size` - beam size for CTC Beam Search (Optional, default 5).
   * `threshold` - beam cut threshold (Optional, default 1e-3).
-* `cocosnet` - converting output of CoCosNet model to `ImageProcessingPrediction` representations
