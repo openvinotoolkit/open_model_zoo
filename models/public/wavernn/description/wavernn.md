@@ -55,8 +55,6 @@ The wavernn-upsampler model accepts mel-spectrogram and produces two feature map
 | GOPs                            | 1.47                                      |
 | MParams                         | 0.4                                       |
 
-### Performance
-
 ### Input
 
 Mel-spectrogram, name: `mels`, shape: [1x793x80], format: [BxTxC]
@@ -88,8 +86,6 @@ The wavernn-rnn model accepts two feature maps from wavernn-upsampler and produc
 |---------------------------------|-------------------------------------------|
 | GOps                            | 0.06                                      |
 | MParams                         | 3.83                                      |
-
-### Performance
 
 ### Input
 1. Time slice in `upsampled_mels`, name: `m_t`. Shape: [Bx80]

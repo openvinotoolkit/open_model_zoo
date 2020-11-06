@@ -51,9 +51,6 @@ duration in time for every processed embedding.
 | GOPs                            | 6.66                                      |
 | MParams                         | 13.81                                     |
 
-
-### Performance
-
 ### Input
 
 Sequence, name: `input_seq`, shape: [1x241], format: [BxC]
@@ -81,8 +78,6 @@ The forward-tacotron-regression model accepts aligned by duration processed embe
 |---------------------------------|-------------------------------------------|
 | GOPs                            | 4.91                                      |
 | MParams                         | 3.05                                      |
-
-### Performance
 
 ### Input
 
