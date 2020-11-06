@@ -17,7 +17,7 @@ Symbols set is alphanumeric: `0123456789abcdefghijklmnopqrstuvwxyz`.
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| Word spotting hmean ICDAR2015, without a dictionary | TBD |
+| Word spotting hmean ICDAR2015, without a dictionary | 64.81% |
 | Source framework                              | PyTorch\* |
 
 *Hmean Word spotting* is defined and measured according to the
@@ -31,9 +31,6 @@ The text-spotting-0003-detector model is a Mask-RCNN-based text detector with Re
 |-----------------------------------------------|-----------|
 | GFlops                                        | TBD       |
 | MParams                                       | TBD       |
-
-
-### Performance
 
 ### Inputs
 
@@ -54,7 +51,6 @@ The text-spotting-0003-detector model is a Mask-RCNN-based text detector with Re
     classes for every output bounding box.
 5.  Name: `text_features`, shape [100x64x28x28]. Text features that are fed to a text recognition head.
 
-
 ## Encoder model specification
 
 The text-spotting-0003-recognizer-encoder model is a fully-convolutional encoder of text recognition head.
@@ -64,9 +60,6 @@ The text-spotting-0003-recognizer-encoder model is a fully-convolutional encoder
 | GFlops                                        | 2.082     |
 | MParams                                       | 1.328     |
 
-
-### Performance
-
 ### Inputs
 
 Name: `input` , shape: [1x64x28x28]. Text recognition features obtained from detection part.
@@ -75,16 +68,12 @@ Name: `input` , shape: [1x64x28x28]. Text recognition features obtained from det
 
 Name: `output`, shape: [1x256x28x28]. Encoded text recognition features.
 
-
 ## Decoder model specification
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
 | GFlops                                        | 0.002     |
 | MParams                                       | 0.273     |
-
-
-### Performance
 
 ### Inputs
 
