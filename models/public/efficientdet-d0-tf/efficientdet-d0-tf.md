@@ -8,8 +8,6 @@ All the EfficientDet models have been pretrained on the MSCOCO* image database.
 For details about this family of models, check out the Google AutoML [repository]
 (https://github.com/google/automl/tree/master/efficientdet).
 
-## Example
-
 ## Specification
 
 | Metric            | Value           |
