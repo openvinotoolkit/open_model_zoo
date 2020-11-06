@@ -28,17 +28,18 @@
 #include <samples/ocv_common.hpp>
 #include <samples/args_helper.hpp>
 #include <samples/slog.hpp>
+#include <samples/images_capture.h>
+#include <samples/default_flags.hpp>
+#include <unordered_map>
+#include <gflags/gflags.h>
+
+#include <iostream>
 
 #include "async_pipeline.h"
 #include "detection_model_yolo.h"
 #include "detection_model_ssd.h"
 #include "config_factory.h"
-
-#include <gflags/gflags.h>
-#include <iostream>
-#include <samples/images_capture.h>
-#include <samples/default_flags.hpp>
-#include <unordered_map>
+#include "default_renderers.h"
 
 static const char help_message[] = "Print a usage message.";
 static const char video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
@@ -222,10 +223,10 @@ int main(int argc, char *argv[]) {
 
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - cast result's underlying pointer to DetectionResult*
-            //    and use your own processing instead of calling renderData().
+            //    and use your own processing instead of calling renderDetectionData().
             std::unique_ptr<ResultBase> result;
             while (result = pipeline.getResult()) {
-                cv::Mat outFrame = DetectionModel::renderData(result.get());
+                cv::Mat outFrame = DefaultRenderers::renderDetectionData(result->asRef<DetectionResult>());
                 //--- Showing results and device information
                 if (!outFrame.empty()) {
                     presenter.drawGraphs(outFrame);

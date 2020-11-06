@@ -28,18 +28,17 @@
 #include <samples/ocv_common.hpp>
 #include <samples/args_helper.hpp>
 #include <samples/slog.hpp>
+#include <samples/images_capture.h>
+#include <samples/default_flags.hpp>
+#include <gflags/gflags.h>
+
+#include <iostream>
+#include <unordered_map>
 
 #include "async_pipeline.h"
 #include "segmentation_model.h"
 #include "config_factory.h"
-#include <samples/images_capture.h>
-#include <samples/default_flags.hpp>
-
-#include <gflags/gflags.h>
-#include <iostream>
-
-#include <unordered_map>
-#include "samples/slog.hpp"
+#include "default_renderers.h"
 
 static const char help_message[] = "Print a usage message.";
 static const char video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
@@ -185,10 +184,10 @@ int main(int argc, char *argv[]) {
 
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - cast result's underlying pointer to SegmentationResult*
-            //    and use your own processing instead of calling renderData().
+            //    and use your own processing instead of calling renderSegmentationData().
             std::unique_ptr<ResultBase> result;
             while (result = pipeline.getResult()) {
-                cv::Mat outFrame = SegmentationModel::renderData(result.get());
+                cv::Mat outFrame = DefaultRenderers::renderSegmentationData(result->asRef<SegmentationResult>());
                 //--- Showing results and device information
                 if (!outFrame.empty()) {
                     presenter.drawGraphs(outFrame);

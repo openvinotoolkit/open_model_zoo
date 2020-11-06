@@ -123,16 +123,3 @@ const cv::Vec3b& SegmentationModel::class2Color(int classId)
     }
     return colors[classId];
 }
-
-cv::Mat SegmentationModel::renderData(ResultBase* result)
-{
-    auto& segResult = result->asRef<SegmentationResult>();
-    auto inputImg = segResult.metaData->asRef<ImageMetaData>().img;
-
-    // Visualizing result data over source image
-    cv::Mat outputImg;
-    cv::resize(segResult.mask, outputImg, inputImg.size());
-    outputImg = inputImg / 2 + outputImg / 2;
-
-    return outputImg;
-}

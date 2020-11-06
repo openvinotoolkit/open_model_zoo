@@ -32,8 +32,6 @@ public:
     DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels);
 
     virtual void preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, MetaData*& metaData) override;
-    
-    static cv::Mat renderData(ResultBase* result);
 
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
 

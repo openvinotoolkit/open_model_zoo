@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
+
 #include "detection_model.h"
 #include <samples/args_helper.hpp>
 #include <samples/slog.hpp>
@@ -41,23 +42,6 @@ void DetectionModel::preprocess(const InputData& inputData, InferenceEngine::Inf
     }
 
     metaData = new ImageMetaData(img);
-}
-
-cv::Mat DetectionModel::renderData(ResultBase* result)
-{
-    // Visualizing result data over source image
-    cv::Mat outputImg = result->metaData->asRef<ImageMetaData>().img.clone();
-
-    for (auto obj : result->asRef<DetectionResult>().objects) {
-        std::ostringstream conf;
-        conf << ":" << std::fixed << std::setprecision(3) << obj.confidence;
-        cv::putText(outputImg, obj.label + conf.str(),
-            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
-            cv::Scalar(0, 0, 255));
-        cv::rectangle(outputImg, obj, cv::Scalar(0, 0, 255));
-    }
-
-    return outputImg;
 }
 
 std::vector<std::string> DetectionModel::loadLabels(const std::string & labelFilename){

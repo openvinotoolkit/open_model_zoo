@@ -28,7 +28,6 @@ public:
 
     virtual void preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, MetaData*& metaData) override;
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult);
-    static cv::Mat renderData(ResultBase* result);
 
 protected:
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
