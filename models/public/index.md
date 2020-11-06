@@ -12,6 +12,7 @@ The models can be downloaded via Model Downloader
 | Model Name                  | Implementation                     | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------- | -----------------------------------| -------------- | -------- | ------ | ------- |
 | AlexNet                     | Caffe\*                            | [alexnet](./alexnet/alexnet.md)   | 56.598%/79.812% | 1.5 | 60.965 |
+| AntiSpoofNet               | PyTorch\*                          | [anti-spoof-mn3](./anti-spoof-mn3/anti-spoof-mn3.md) | 3.81% | 0.15 | 3.02 |
 | CaffeNet                    | Caffe\*                            | [caffenet](./caffenet/caffenet.md)  | 56.714%/79.916% | 1.5 | 60.965 |
 | DenseNet 121                | Caffe\*<br>TensorFlow\*<br>Caffe2\*| [densenet-121](./densenet-121/densenet-121.md)<br>[densenet-121-tf](./densenet-121-tf/densenet-121-tf.md)<br>[densenet-121-caffe2](./densenet-121-caffe2/densenet-121-caffe2.md) | 74.42%/92.136%<br>74.29%/91.98% <br>74.904%/92.192% | 5.289~5.724    | 7.971 |
 | DenseNet 161                | Caffe\*<br>TensorFlow\*            | [densenet-161](./densenet-161/densenet-161.md)<br>[densenet-161-tf](./densenet-161-tf/densenet-161-tf.md) | 77.55%/93.92%<br>76.446%/93.228%| 14.128~15.561  | 28.666 |
@@ -62,7 +63,6 @@ The models can be downloaded via Model Downloader
 | SqueezeNet v1.1             | Caffe\*<br>Caffe2\*                | [squeezenet1.1](./squeezenet1.1/squeezenet1.1.md)<br>[squeezenet1.1-caffe2](./squeezenet1.1-caffe2/squeezenet1.1-caffe2.md)| 58.382%/81%<br>56.502%/79.576% | 0.785 | 1.236 |
 | VGG 16                      | Caffe\*                            | [vgg16](./vgg16/vgg16.md) | 70.968%/89.878% | 30.974 | 138.358 |
 | VGG 19                      | Caffe\*<br>Caffe2\*                | [vgg19](./vgg19/vgg19.md)<br>[vgg19-caffe2](./vgg19-caffe2/vgg19-caffe2.md) | 71.062%/89.832%<br>71.062%/89.832% | 39.3 | 143.667  |
-| Anti Spoofing               | PyTorch\*                          | [anti-spoof-mn3](./anti-spoof-mn3/anti-spoof-mn3.md) | 3.81% | 0.15 | 3.02 |
 
 ## Segmentation
 
