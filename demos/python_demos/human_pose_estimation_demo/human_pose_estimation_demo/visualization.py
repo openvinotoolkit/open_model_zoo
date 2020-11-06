@@ -1,6 +1,3 @@
-import colorsys
-import random
-
 import cv2
 import numpy as np
 
@@ -16,34 +13,40 @@ def show_poses(img, poses, scores, pose_score_threshold=0.5, point_score_thresho
     if skeleton is None:
         skeleton = default_skeleton
 
-    colors = [[0, 113, 188],
-        [216, 82, 24],
-        [236, 176, 31],
-        [125, 46, 141],
-        [118, 171, 47],
-        [76, 189, 237],
-        [161, 19, 46],
-        [76, 76, 76],
-        [153, 153, 153],
-        [255, 0, 0],
-        [255, 127, 0],
-        [190, 190, 0],
-        [0, 255, 0],
-        [0, 0, 255],
-        [170, 0, 255]]
-            
+    colors = (
+        (255, 0, 0), (255, 0, 255), (170, 0, 255), (255, 0, 85),
+        (255, 0, 170), (85, 255, 0), (255, 170, 0), (0, 255, 0),
+        (255, 255, 0), (0, 255, 85), (170, 255, 0), (0, 85, 255),
+        (0, 255, 170), (0, 0, 255), (0, 255, 255), (85, 0, 255),
+        (0, 170, 255))
+
+    stick_width = 4
+
     for idx, (pose, pose_score) in enumerate(zip(poses, scores)):
         if pose_score <= pose_score_threshold:
             continue
-        points = [(int(p[0]), int(p[1])) for p in pose]
-        points_scores = [p[2] for p in pose]
-        if skeleton is not None:
-            for bone in skeleton:
-                i = bone[0] - 1
-                j = bone[1] - 1
-                if points_scores[i] > point_score_threshold and points_scores[j] > point_score_threshold:
-                    cv2.line(img, points[i], points[j], thickness=2, color=colors[idx % len(colors)])
-        for p, v in zip(points, points_scores):
+        points = pose[:, :2].astype(int)
+        points_scores = pose[:, 2]
+        for i, (p, v) in enumerate(zip(points, points_scores)):
             if v > point_score_threshold:
-                cv2.circle(img, p, 1, (0, 0, 255), 2)
+                cv2.circle(img, tuple(p), 1, colors[i], 2)
+
+    img_x = np.copy(img)
+    for idx, (pose, pose_score) in enumerate(zip(poses, scores)):
+        if pose_score <= pose_score_threshold:
+            continue
+        points = pose[:, :2].astype(int)
+        points_scores = pose[:, 2]
+        for bone in skeleton:
+            i = bone[0] - 1
+            j = bone[1] - 1
+            if points_scores[i] > point_score_threshold and points_scores[j] > point_score_threshold:
+                middle = (points[i] + points[j]) // 2
+                vec = points[i] - points[j]
+                length = np.sqrt((vec * vec).sum())
+                angle = int(np.arctan2(vec[1], vec[0]) * 180 / np.pi)
+                polygon = cv2.ellipse2Poly(tuple(middle), (int(length / 2), min(int(length / 50), stick_width)), angle, 0, 360, 1)
+                cv2.fillConvexPoly(img_x, polygon, colors[j])
+    cv2.addWeighted(img, 0.4, img_x, 0.6, 0, dst=img)
+        
     return img
