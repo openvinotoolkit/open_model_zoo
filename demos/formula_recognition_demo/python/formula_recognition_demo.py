@@ -25,6 +25,8 @@ from openvino.inference_engine import IECore
 from tqdm import tqdm
 from utils import END_TOKEN, START_TOKEN, Vocab
 
+CONFIDENCE_THRESH = 0.8
+
 
 def check_environment():
     command = subprocess.run(["pdflatex", "--version"], stdout=subprocess.PIPE,
@@ -106,12 +108,14 @@ class Demo:
         self.exec_net_decoder = self.ie.load_network(network=self.dec_step, device_name=self.args.device)
         self.images_list = []
         self.vocab = Vocab(self.args.vocab_path)
+        self.encoder_ready = True
+        self.decoder_ready = True
         if not args.interactive:
             self.preprocess_inputs()
-            self.exec_encoder = self.exec_net_encoder.infer
-            self.exec_decoder = self.exec_net_decoder.infer
-        else:
-            self.exec_encoder = self.exec_net_decoder.async_infer
+        #     self.exec_encoder = self.exec_net_encoder.infer
+        #     self.exec_decoder = self.exec_net_decoder.infer
+        # else:
+        #     self.exec_encoder = self.exec_net_decoder.async_infer
 
     def preprocess_inputs(self):
         batch_dim, channels, height, width = self.encoder.input_info['imgs'].input_data.shape
@@ -131,6 +135,75 @@ class Demo:
                 PREPROCESSING[self.args.preprocessing_type], image_raw, target_shape)
             record = dict(img_name=filenm, img=image, formula=None)
             self.images_list.append(record)
+
+    def async_infer_encoder(self, image, req_id):
+        return self.exec_net_encoder.start_async(request_id=req_id, inputs={self.args.imgs_layer: image})
+
+    def wait_request(self, model, req_id):
+        if model.requests[req_id].wait(-1) == 0:
+            return model.requests[req_id].output_blobs
+        else:
+            return None
+
+    def async_infer_decoder(self, row_enc_out, dec_st_c, dec_st_h, output, tgt, req_id):
+        return self.exec_net_decoder.start_async(request_id=req_id, inputs={self.args.row_enc_out_layer: row_enc_out,
+                                                                            self.args.dec_st_c_layer: dec_st_c,
+                                                                            self.args.dec_st_h_layer: dec_st_h,
+                                                                            self.args.output_prev_layer: output,
+                                                                            self.args.tgt_layer: tgt
+                                                                            }
+                                                 )
+
+    def infer_async(self, model_input):
+        model_input = model_input.transpose((2, 0, 1))
+        model_input = np.expand_dims(model_input, axis=0)
+        if self.encoder_ready and self.decoder_ready:
+            self.infer_request_handle_encoder = self.async_infer_encoder(model_input, req_id=0)
+            self.encoder_ready = False
+            return None
+        elif not self.encoder_ready and self.decoder_ready:
+            infer_status_encoder = self.infer_request_handle_encoder.wait(timeout=1)
+            if infer_status_encoder == 0:
+                self.encoder_ready = True
+                enc_res = self.infer_request_handle_encoder.output_blobs
+                self.row_enc_out = enc_res[self.args.row_enc_out_layer].buffer
+                self.dec_states_h = enc_res[self.args.hidden_layer].buffer
+                self.dec_states_c = enc_res[self.args.context_layer].buffer
+                self.output = enc_res[self.args.init_0_layer].buffer
+                self.tgt = np.array([[START_TOKEN]])
+                self.logits = []
+                self.infer_request_handle_decoder = self.async_infer_decoder(
+                    self.row_enc_out, self.dec_states_c, self.dec_states_h, self.output, self.tgt, req_id=0)
+                self.decoder_ready = False
+            return None
+
+        infer_status_decoder = self.infer_request_handle_decoder.wait(1)
+        if infer_status_decoder != 0:
+            return None
+        dec_res = self.infer_request_handle_decoder.output_blobs
+        self.dec_states_h = dec_res[self.args.dec_st_h_t_layer].buffer
+        self.dec_states_c = dec_res[self.args.dec_st_c_t_layer].buffer
+        self.output = dec_res[self.args.output_layer].buffer
+        logit = dec_res[self.args.logit_layer].buffer
+        self.logits.append(logit)
+        self.tgt = np.array([[np.argmax(logit, axis=1)]])
+
+        if self.tgt[0][0][0] == END_TOKEN:
+            self.logits = np.array(self.logits)
+            logits = self.logits.squeeze(axis=1)
+            targets = np.argmax(logits, axis=1)
+            self.encoder_ready = True
+            self.decoder_ready = True
+            return logits, targets
+        self.infer_request_handle_decoder = self.async_infer_decoder(self.row_enc_out,
+                                                                     self.dec_states_c,
+                                                                     self.dec_states_h,
+                                                                     self.output,
+                                                                     self.tgt,
+                                                                     req_id=0
+                                                                     )
+
+        return None
 
     def model(self, image, asynchronous=False):
         enc_res = self.exec_net_encoder.infer(inputs={self.args.imgs_layer: image})
@@ -172,6 +245,7 @@ class Demo:
 
 def create_videocapture(resolution=(1600, 900)):
     capture = cv.VideoCapture(0)
+    capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
     capture.set(3, resolution[0])
     capture.set(4, resolution[1])
     return capture
@@ -186,14 +260,9 @@ def create_input_window(input_shape, aspect_ratio):
     return start_point, end_point
 
 
-def place_crop(frame, start_point, end_point):
+def get_crop(frame, start_point, end_point):
     crop = frame[start_point[1]:end_point[1], start_point[0]:end_point[0], :]
-    crop = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
-    crop = cv.cvtColor(crop, cv.COLOR_GRAY2BGR)
-    ret_val, bin_crop = cv.threshold(crop, 120, 255, type=cv.THRESH_BINARY)
-    height = end_point[1] - start_point[1]
-    frame[0:height, start_point[0]:end_point[0], :] = bin_crop
-    return crop, frame
+    return crop
 
 
 def draw_rectangle(frame, start_point, end_point, color=(0, 0, 255), thickness=2):
@@ -214,21 +283,34 @@ def resize_window(action, start_point, end_point, aspect_ratio):
 
 
 def render_text(frame, start_point, text):
-    frame = cv.putText(frame, text, start_point, cv.FONT_HERSHEY_SIMPLEX ,
-                   1, (255, 255, 255), 3, cv.LINE_AA)
-    frame = cv.putText(frame, text, start_point, cv.FONT_HERSHEY_SIMPLEX ,
-                   1, (0, 0, 0), 1, cv.LINE_AA)
+    start_point = (start_point[0] - 200, start_point[1] - 50)
+    frame = cv.putText(frame, text, start_point, cv.FONT_HERSHEY_SIMPLEX,
+                       1, (255, 255, 255), 3, cv.LINE_AA)
+    frame = cv.putText(frame, text, start_point, cv.FONT_HERSHEY_SIMPLEX,
+                       1, (0, 0, 0), 1, cv.LINE_AA)
     return frame
 
-def prerocess_crop(crop, tgt_shape):
-    height, width = tgt_shape
-    crop = preprocess_image(PREPROCESSING['resize'], crop, tgt_shape)
-    return crop
 
-async def get_phrase(demo, input_image):
-    _, targets = await demo.model(model_input)
-    phrase = demo.vocab.construct_phrase(targets)
-    return targets
+def prerocess_crop(crop, tgt_shape, preprocess_type='crop'):
+    height, width = tgt_shape
+    crop = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
+    crop = cv.cvtColor(crop, cv.COLOR_GRAY2BGR)
+    ret_val, bin_crop = cv.threshold(crop, 120, 255, type=cv.THRESH_BINARY)
+    image_raw = PREPROCESSING[preprocess_type](bin_crop, tgt_shape)
+    img_h, img_w = image_raw.shape[0:2]
+    image_raw = cv.copyMakeBorder(image_raw, 0, height - img_h,
+                                  0, width - img_w, cv.BORDER_CONSTANT,
+                                  None, COLOR_WHITE)
+    return image_raw
+
+
+def put_crop(frame, crop, start_point, end_point):
+    height = end_point[1] - start_point[1]
+    width = end_point[0] - start_point[0]
+    crop = cv.resize(crop, (width, height))
+    frame[0:height, start_point[0]:end_point[0], :] = crop
+    return frame
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -314,11 +396,24 @@ def main():
         prev_text = ''
         while True:
             ret, frame = capture.read()
-            bin_crop, frame = place_crop(frame, start_point, end_point)
+            bin_crop = get_crop(frame, start_point, end_point)
             model_input = prerocess_crop(bin_crop, (height, width))
-            targets = get_phrase(demo.model, model_input)
-            phrase = demo.vocab.construct_phrase(targets)
+            frame = put_crop(frame, model_input, start_point, end_point)
+            model_res = demo.infer_async(model_input)
+            if not model_res:
+                phrase = prev_text
+            else:
+                logits, targets = model_res
+                prob = 1
+                probabilities = np.amax(logits, axis=1)
+                for p in probabilities:
+                    prob *= p
+                log.info("Confidence score is %s\n", prob)
+                if prob >= CONFIDENCE_THRESH:
+                    log.info("Prediction updated\n")
+                    phrase = demo.vocab.construct_phrase(targets)
             frame = render_text(frame, start_point, phrase)
+            prev_text = phrase
             frame = draw_rectangle(frame, start_point, end_point)
             cv.imshow('Press Q to quit.', frame)
             key = cv.waitKey(1) & 0xFF
