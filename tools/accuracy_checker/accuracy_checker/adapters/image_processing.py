@@ -85,9 +85,9 @@ class ImageProcessingAdapter(Adapter):
         return result
 
     def _basic_postprocess(self, img):
+        img = img.transpose((1, 2, 0)) if img.shape[-1] not in [3, 4, 1] else img
         img *= self.std
         img += self.mean
-        img = img.transpose((1, 2, 0)) if img.shape[-1] not in [3, 4, 1] else img
         if self.cast_to_uint8:
             img = np.clip(img, 0., 255.)
             img = img.astype(np.uint8)
