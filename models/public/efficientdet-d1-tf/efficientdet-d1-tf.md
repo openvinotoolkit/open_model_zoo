@@ -13,8 +13,8 @@ For details about this family of models, check out the Google AutoML [repository
 | Metric            | Value           |
 |-------------------|-----------------|
 | Type              | Object detection|
-| GFLOPs            |     -           |
-| MParams           |     -           |
+| GFLOPs            |     6.1         |
+| MParams           |     6.6         |
 | Source framework  | TensorFlow\*    |
 
 ## Accuracy
