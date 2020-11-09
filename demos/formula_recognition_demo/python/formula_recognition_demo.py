@@ -18,6 +18,7 @@ import os
 import subprocess
 import sys
 from argparse import SUPPRESS, ArgumentParser
+from enum import Enum
 
 import cv2 as cv
 import numpy as np
@@ -26,6 +27,12 @@ from tqdm import tqdm
 from utils import END_TOKEN, START_TOKEN, Vocab
 
 CONFIDENCE_THRESH = 0.8
+
+
+class ModelStatus(Enum):
+    ready = 0
+    encoder_infer = 1
+    decoder_infer = 2
 
 
 def check_environment():
@@ -108,14 +115,9 @@ class Demo:
         self.exec_net_decoder = self.ie.load_network(network=self.dec_step, device_name=self.args.device)
         self.images_list = []
         self.vocab = Vocab(self.args.vocab_path)
-        self.encoder_ready = True
-        self.decoder_ready = True
+        self.model_status = ModelStatus.ready
         if not args.interactive:
             self.preprocess_inputs()
-        #     self.exec_encoder = self.exec_net_encoder.infer
-        #     self.exec_decoder = self.exec_net_decoder.infer
-        # else:
-        #     self.exec_encoder = self.exec_net_decoder.async_infer
 
     def preprocess_inputs(self):
         batch_dim, channels, height, width = self.encoder.input_info['imgs'].input_data.shape
@@ -157,14 +159,13 @@ class Demo:
     def infer_async(self, model_input):
         model_input = model_input.transpose((2, 0, 1))
         model_input = np.expand_dims(model_input, axis=0)
-        if self.encoder_ready and self.decoder_ready:
+        if self.model_status == ModelStatus.ready:
             self.infer_request_handle_encoder = self.async_infer_encoder(model_input, req_id=0)
-            self.encoder_ready = False
+            self.model_status = ModelStatus.encoder_infer
             return None
-        elif not self.encoder_ready and self.decoder_ready:
+        elif self.model_status == ModelStatus.encoder_infer:
             infer_status_encoder = self.infer_request_handle_encoder.wait(timeout=1)
             if infer_status_encoder == 0:
-                self.encoder_ready = True
                 enc_res = self.infer_request_handle_encoder.output_blobs
                 self.row_enc_out = enc_res[self.args.row_enc_out_layer].buffer
                 self.dec_states_h = enc_res[self.args.hidden_layer].buffer
@@ -174,7 +175,7 @@ class Demo:
                 self.logits = []
                 self.infer_request_handle_decoder = self.async_infer_decoder(
                     self.row_enc_out, self.dec_states_c, self.dec_states_h, self.output, self.tgt, req_id=0)
-                self.decoder_ready = False
+                self.model_status = ModelStatus.decoder_infer
             return None
 
         infer_status_decoder = self.infer_request_handle_decoder.wait(1)
@@ -192,8 +193,7 @@ class Demo:
             self.logits = np.array(self.logits)
             logits = self.logits.squeeze(axis=1)
             targets = np.argmax(logits, axis=1)
-            self.encoder_ready = True
-            self.decoder_ready = True
+            self.model_status = ModelStatus.ready
             return logits, targets
         self.infer_request_handle_decoder = self.async_infer_decoder(self.row_enc_out,
                                                                      self.dec_states_c,
