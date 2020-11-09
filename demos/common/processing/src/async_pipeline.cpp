@@ -148,7 +148,7 @@ std::unique_ptr<ResultBase> PipelineBase::getResult()
 
     auto result = model->postprocess(infResult);
 
-    *result.get() = static_cast<ResultBase&>(infResult);
+    *result = static_cast<ResultBase&>(infResult);
     return result;
 }
 
