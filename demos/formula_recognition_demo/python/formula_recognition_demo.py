@@ -141,12 +141,6 @@ class Demo:
     def async_infer_encoder(self, image, req_id):
         return self.exec_net_encoder.start_async(request_id=req_id, inputs={self.args.imgs_layer: image})
 
-    def wait_request(self, model, req_id):
-        if model.requests[req_id].wait(-1) == 0:
-            return model.requests[req_id].output_blobs
-        else:
-            return None
-
     def async_infer_decoder(self, row_enc_out, dec_st_c, dec_st_h, output, tgt, req_id):
         return self.exec_net_decoder.start_async(request_id=req_id, inputs={self.args.row_enc_out_layer: row_enc_out,
                                                                             self.args.dec_st_c_layer: dec_st_c,
