@@ -103,7 +103,7 @@ int64_t PipelineBase::submitRequest(const InferenceEngine::InferRequest::Ptr& re
 
                     result.frameId = frameID;
                     result.metaData = std::move(metaData);
-                    for (std::string outName : model->getOutputsNames())
+                    for (const auto& outName : model->getOutputsNames())
                         result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outName))));
 
                     completedInferenceResults.emplace(frameID, result);
