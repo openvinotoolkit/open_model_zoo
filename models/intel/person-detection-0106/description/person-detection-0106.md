@@ -46,7 +46,7 @@ Expected color order is BGR.
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
     - `conf` - confidence for the predicted class
 2. The `labels` is a blob with the shape [N], where N is the number of detected
-   bounding boxes. It contains `label` (1 - person) per each detected box.
+   bounding boxes. It contains `label` (0 - person) per each detected box.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
