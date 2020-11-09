@@ -112,7 +112,7 @@ class BaseReader(ClassProvider):
                 default=cls.__provider__ if hasattr(cls, '__provider__') else None, description='Reader type.'
             ),
             'multi_infer': BoolField(
-                default=False, optional=True, description='Enable multi infer.'
+                default=False, optional=True, description='Allows multi infer.'
             ),
         }
 
@@ -166,7 +166,8 @@ class ReaderCombiner(BaseReader):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'scheme': DictField(value_type=DataReaderField(), key_type=StringField(), allow_empty=False)
+            'scheme': DictField(value_type=DataReaderField(), key_type=StringField(), allow_empty=False,
+                                description='Dictionary for describing reading scheme which depends on file names.')
         })
         return parameters
 
@@ -205,7 +206,8 @@ class OpenCVImageReader(BaseReader):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'reading_flag': StringField(optional=True, choices=OPENCV_IMREAD_FLAGS, default='color')
+            'reading_flag': StringField(optional=True, choices=OPENCV_IMREAD_FLAGS, default='color',
+                                        description='Flag which specifies the way image should be read.')
         })
         return parameters
 
@@ -289,7 +291,8 @@ class JSONReader(BaseReader):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'key': StringField(optional=True, case_sensitive=True)
+            'key': StringField(optional=True, case_sensitive=True,
+                               description='Key for reading from json dictionary.')
         })
         return parameters
 
@@ -331,7 +334,8 @@ class NiftiImageReader(BaseReader):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'channels_first': BoolField(optional=True, default=False)
+            'channels_first': BoolField(optional=True, default=False,
+                                        description='Allows read files and transpose in order where channels first.')
         })
         return parameters
 
@@ -361,11 +365,15 @@ class NumPyReader(BaseReader):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'keys': StringField(optional=True, default=""),
-            'separator': StringField(optional=True, default="@"),
-            'id_sep': StringField(optional=True, default="_"),
-            'block': BoolField(optional=True, default=False),
-            'batch': NumberField(optional=True, default=1)
+            'keys': StringField(optional=True, default="", description='Comma-separated model input names.'),
+            'separator': StringField(optional=True, default="@",
+                                     description='Separator symbol between input identifier and file identifier.'),
+            'id_sep': StringField(
+                optional=True, default="_",
+                description='Separator symbol between input name and record number in input identifier.'
+            ),
+            'block': BoolField(optional=True, default=False, description='Allows block mode.'),
+            'batch': NumberField(optional=True, default=1, description='Batch size')
         })
         return parameters
 
@@ -471,7 +479,7 @@ class AnnotationFeaturesReader(BaseReader):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'features': ListField(allow_empty=False, value_type=StringField)
+            'features': ListField(allow_empty=False, value_type=StringField, description='List of features.')
         })
         return parameters
 
