@@ -276,7 +276,7 @@ def resize_window(action, start_point, end_point, aspect_ratio):
     return start_point, end_point
 
 
-def render_text(frame, start_point, text):
+def put_text(frame, start_point, text):
     start_point = (start_point[0] - 200, start_point[1] - 50)
     frame = cv.putText(frame, text, start_point, cv.FONT_HERSHEY_SIMPLEX,
                        1, (255, 255, 255), 3, cv.LINE_AA)
@@ -305,6 +305,12 @@ def put_crop(frame, crop, start_point, end_point):
     frame[0:height, start_point[0]:end_point[0], :] = crop
     return frame
 
+def calculate_probability(logits):
+    prob = 1
+    probabilities = np.amax(logits, axis=1)
+    for p in probabilities:
+        prob *= p
+    return prob
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -328,6 +334,8 @@ def build_argparser():
     args.add_argument("--max_formula_len",
                       help="Optional. Defines maximum length of the formula (number of tokens to decode)",
                       default="128", type=int)
+    args.add_argument("--conf_thresh", help="Optional. Probability threshold to trat model prediction as meaningful",
+                      default=CONFIDENCE_THRESH, type=float)
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
@@ -375,12 +383,15 @@ def main():
     if not args.interactive:
         for rec in tqdm(demo.images_list):
             image = rec['img']
-            _, targets = demo.model(image)
-            if args.output_file:
-                with open(args.output_file, 'a') as output_file:
-                    output_file.write(rec['img_name'] + '\t' + demo.vocab.construct_phrase(targets) + '\n')
-            else:
-                print("Image name: {}\nFormula: {}\n".format(rec['img_name'], demo.vocab.construct_phrase(targets)))
+            logits, targets = demo.model(image)
+            prob = calculate_probability(logits)
+            log.info("Confidence score is %s\n", prob)
+            if prob >= args.conf_thresh:
+                if args.output_file:
+                    with open(args.output_file, 'a') as output_file:
+                        output_file.write(rec['img_name'] + '\t' + demo.vocab.construct_phrase(targets) + '\n')
+                else:
+                    print("Image name: {}\nFormula: {}\n".format(rec['img_name'], demo.vocab.construct_phrase(targets)))
     else:
 
         capture = create_videocapture()
@@ -398,15 +409,12 @@ def main():
                 phrase = prev_text
             else:
                 logits, targets = model_res
-                prob = 1
-                probabilities = np.amax(logits, axis=1)
-                for p in probabilities:
-                    prob *= p
+                prob = calculate_probability(logits)
                 log.info("Confidence score is %s\n", prob)
-                if prob >= CONFIDENCE_THRESH:
+                if prob >= args.conf_thresh:
                     log.info("Prediction updated\n")
                     phrase = demo.vocab.construct_phrase(targets)
-            frame = render_text(frame, start_point, phrase)
+            frame = put_text(frame, start_point, phrase)
             prev_text = phrase
             frame = draw_rectangle(frame, start_point, end_point)
             cv.imshow('Press Q to quit.', frame)
@@ -423,6 +431,7 @@ def main():
 
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
              "from the openVINO toolkit\n")
+
 
 
 if __name__ == '__main__':
