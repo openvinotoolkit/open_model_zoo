@@ -54,7 +54,7 @@ public:
 
     /// Waits for all currently submitted requests to be completed.
     ///
-    void waitForTotalCompletion() { if(requestsPool.get())requestsPool->waitForTotalCompletion(); }
+    void waitForTotalCompletion() { if (requestsPool) requestsPool->waitForTotalCompletion(); }
 
     /// Submit request to network
     /// @param image - image to submit for processing
