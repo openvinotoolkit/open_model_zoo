@@ -101,7 +101,7 @@ datasets:
     annotation: mscoco_det_80_bkgr.pickle
     dataset_meta: mscoco_det_80_bkgr.json
 
-  - name: ms_coco_detection_90_class_without_backgound
+  - name: ms_coco_detection_90_class_without_background
     data_source: MSCOCO/val2017
     annotation_conversion:
       converter: mscoco_detection

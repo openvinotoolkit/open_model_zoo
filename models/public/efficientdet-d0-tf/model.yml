@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "efficientdet-d0" model is one of the EfficientDet <https://arxiv.org/abs/1911.09070>
+  The "efficientdet-d0-tf" model is one of the EfficientDet <https://arxiv.org/abs/1911.09070>
   models  designed to perform object detection. This model was pretrained in TensorFlow*.
   All the EfficientDet models have been pretrained on the MSCOCO* image database.
   For details about this family of models, check out the Google AutoML repository

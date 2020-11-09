@@ -2,9 +2,9 @@
 
 ## Use Case and High-Level Description
 
-The "efficientdet-d0" model is one of the [EfficientDet](https://arxiv.org/abs/1911.09070)
-models  designed to perform object detection. This model was pretrained in TensorFlow*.
-All the EfficientDet models have been pretrained on the MSCOCO* image database.
+The "efficientdet-d0-tf" model is one of the [EfficientDet](https://arxiv.org/abs/1911.09070)
+models  designed to perform object detection. This model was pretrained in TensorFlow\*.
+All the EfficientDet models have been pretrained on the MSCOCO\* image database.
 For details about this family of models, check out the Google AutoML [repository]
 (https://github.com/google/automl/tree/master/efficientdet).
 
@@ -21,7 +21,7 @@ For details about this family of models, check out the Google AutoML [repository
 
 | Metric | Converted model |
 | ------ | --------------- |
-| coco_precision | 31.95%|
+| [COCO\* mAP (0.5:0.05:0.95)](http://cocodataset.org/#detection-eval) | 31.95%|
 
 ## Input
 
