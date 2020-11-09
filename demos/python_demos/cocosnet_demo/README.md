@@ -69,14 +69,15 @@ There are two ways to use this demo:
 
 1. To use only correspondence and generative models (only CoCosNet). \
    In this case user have to set 3 inputs to the model (2 masks and 1 image).
-   You can use the following command do inference on CPU:
+   You can use the following command run demo on CPU:
 
    ```
-       python3 cocosnet_demo.py
-       -c <path_to_corr_model>/Corr.xml
-       -g <path_to_gen_model>/Gen.xml
-       -is <path_to_semantic_mask_of_image>/input_mask.png
-       -ri <path_to_exemplar_image>/reference_image.jpg
+   python3 cocosnet_demo.py \
+       -d CPU \
+       -c <path_to_corr_model>/Corr.xml \
+       -g <path_to_gen_model>/Gen.xml \
+       -is <path_to_semantic_mask_of_image>/input_mask.png \
+       -ri <path_to_exemplar_image>/reference_image.jpg \
        -rs <path_to_exemplar_semantic>/reference_mask.png
    ```
 
@@ -86,14 +87,15 @@ There are two ways to use this demo:
    In this case user have to set input image (.jpg) and reference image (.jpg) without any masks.
    Segmentation masks will be generated via segmentation model.
 
-   You can use the following command do inference on CPU:
+   You can use the following command run demo on CPU:
 
    ```
-   python3 cocosnet_demo.py
-       -c <path_to_corr_model>/Corr.xml
-       -g <path_to_gen_model>/Gen.xml
-       -s <path_to_seg_model>/Seg.xml
-       -ii <path_to_input_image>/input_image.jpg
+   python3 cocosnet_demo.py \
+       -d CPU \
+       -c <path_to_corr_model>/Corr.xml \
+       -g <path_to_gen_model>/Gen.xml \
+       -s <path_to_seg_model>/Seg.xml \
+       -ii <path_to_input_image>/input_image.jpg \
        -ri <path_to_exemplar_image>/reference_image.jpg
    ```
 
