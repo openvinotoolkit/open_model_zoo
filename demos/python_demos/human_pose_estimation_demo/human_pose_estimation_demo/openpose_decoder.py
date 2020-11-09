@@ -219,19 +219,11 @@ class OpenPoseDecoder:
         x_out = x + delta(det[y, min(x + 1, w - 1)], det[y, max(x - 1, 0)])
         return x_out, y_out
 
-    def linspace2d(self, start, stop, n=10):
-        # return np.linspace(start, stop, n, axis=1)
-        assert n > 0
-        if n == 1:
-            return start[:, None]
-        points = 1 / (n - 1) * (stop - start)
-        arange = self.arange_cache.setdefault(n, np.arange(n))
-        return points[:, None] * arange + start[:, None]
         
     def group_keypoints(self, all_keypoints_by_type, pafs, pose_entry_size=20, min_paf_score=0.05,
                         skeleton=BODY_PARTS_KPT_IDS, bones_to_channels=BODY_PARTS_PAF_IDS):
 
-        all_keypoints = np.asarray([item for sublist in all_keypoints_by_type for item in sublist])
+        all_keypoints = np.asarray([item for sublist in all_keypoints_by_type for item in sublist], dtype=np.float32)
         pose_entries = []
             
         for part_id, paf_channel in enumerate(bones_to_channels):
@@ -248,31 +240,35 @@ class OpenPoseDecoder:
             
             if num_kpts_a == 0 or num_kpts_b == 0:
                 continue
-                
+            
+            a = np.asarray([p[0:2] for p in kpts_a], dtype=np.float32)
+            b = np.asarray([p[0:2] for p in kpts_b], dtype=np.float32)
+            n, m = len(a), len(b)
+            a = np.tile(a, (m, 1))
+            b = np.repeat(b, n, axis=0)
+
+            point_num = 10
+            vec_raw = b - a
+            vec_norm = np.linalg.norm(vec_raw, ord=2, axis=1, keepdims=True)
+            vec = np.repeat(vec_raw / (vec_norm + 1e-6), point_num, axis=0)
+            steps = 1 / (point_num - 1) * vec_raw
+            points = steps[:, None, :] * np.arange(point_num, dtype=np.float32)[None, :, None] + a[:, None, :]
+            points = points.round().astype(dtype=np.int32).reshape(-1, 2)
+
+            x = points[:, 0].ravel()
+            y = points[:, 1].ravel()
+            field = part_pafs[y, x].reshape(-1, 2)
+            dot_prod = (field * vec).sum(1).reshape(-1, point_num)
+
+            valid_prod = dot_prod > min_paf_score
+            success_ratio = valid_prod.sum(axis=1) / point_num
+            score = (dot_prod * valid_prod).sum(1) / (valid_prod.sum(1) + 1e-6)
+
+            valid_limbs = np.where(np.logical_and(score > 0, success_ratio > 0.8))[0]
+            b_idx, a_idx = np.divmod(valid_limbs, n)
             connections = []
-            for i in range(num_kpts_a):
-                kpt_a = np.asarray(kpts_a[i][0:2], dtype=np.float32)
-                for j in range(num_kpts_b):
-                    kpt_b = np.asarray(kpts_b[j][0:2], dtype=np.float32)
-                    vec_raw = kpt_b - kpt_a
-                    vec_norm = np.sqrt(np.sum(vec_raw * vec_raw))
-                    if vec_norm == 0:
-                        continue
-                    vec = vec_raw / vec_norm
-
-                    point_num = 10
-                    x, y = self.linspace2d(kpt_a, kpt_b, n=point_num)
-                    x = x.round().astype(int)
-                    y = y.round().astype(int)
-                    field = part_pafs[y, x].reshape(-1, 2)
-                    dot_prod = np.dot(field, vec)
-                    dot_prod = dot_prod[dot_prod > min_paf_score]
-                    success_ratio = len(dot_prod) / len(x)
-                    score = np.mean(dot_prod) if len(dot_prod) > 0 else 0.0
-
-                    if score > 0 and success_ratio > 0.8:
-                        score_all = score + kpts_a[i][2] + kpts_b[j][2]
-                        connections.append([i, j, score, score_all])
+            for t, i, j in zip(valid_limbs, a_idx, b_idx):
+                connections.append([i, j, score[t], score[t] + kpts_a[i][2] + kpts_b[j][2]])
 
             if len(connections) > 0:
                 connections = sorted(connections, key=itemgetter(2), reverse=True)
