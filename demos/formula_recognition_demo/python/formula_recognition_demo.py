@@ -27,6 +27,8 @@ from tqdm import tqdm
 from utils import END_TOKEN, START_TOKEN, Vocab
 
 CONFIDENCE_THRESH = 0.8
+DEFAULT_RESOLUTION = (1600, 900)
+DEFAULT_WIDTH=800
 
 
 class ModelStatus(Enum):
@@ -89,10 +91,12 @@ def print_stats(module):
         print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
                                                           stats['status'], stats['real_time']))
 
+
 def change_layout(model_input):
     model_input = model_input.transpose((2, 0, 1))
     model_input = np.expand_dims(model_input, axis=0)
     return model_input
+
 
 def preprocess_image(preprocess, image_raw, tgt_shape):
     target_height, target_width = tgt_shape
@@ -157,19 +161,22 @@ class Demo:
     def infer_async(self, model_input):
         model_input = change_layout(model_input)
         timeout = 1 if self.is_async else -1
+
         if self.model_status == ModelStatus.ready:
             self.infer_request_handle_encoder = self.async_infer_encoder(model_input, req_id=0)
             self.model_status = ModelStatus.encoder_infer
             return None
+
         elif self.model_status == ModelStatus.encoder_infer:
             infer_status_encoder = self.infer_request_handle_encoder.wait(timeout=timeout)
             if infer_status_encoder != 0 and self.is_async:
                 return None
+
             enc_res = self.infer_request_handle_encoder.output_blobs
             self.unpack_enc_results(enc_res)
+            self.model_status = ModelStatus.decoder_infer
             self.infer_request_handle_decoder = self.async_infer_decoder(
                 self.row_enc_out, self.dec_states_c, self.dec_states_h, self.output, self.tgt, req_id=0)
-            self.model_status = ModelStatus.decoder_infer
             return None
 
         infer_status_decoder = self.infer_request_handle_decoder.wait(timeout)
@@ -211,47 +218,7 @@ class Demo:
         self.logits = []
 
 
-
-    def model(self, image, asynchronous=False):
-        image = change_layout(image)
-        enc_res = self.exec_net_encoder.infer(inputs={self.args.imgs_layer: image})
-        row_enc_out = enc_res[self.args.row_enc_out_layer]
-        dec_states_h = enc_res[self.args.hidden_layer]
-        dec_states_c = enc_res[self.args.context_layer]
-        output = enc_res[self.args.init_0_layer]
-        tgt = np.array([[START_TOKEN]])
-        logits = []
-        for _ in range(self.args.max_formula_len):
-            dec_res = self.exec_net_decoder.infer(inputs={self.args.row_enc_out_layer: row_enc_out,
-                                                          self.args.dec_st_c_layer: dec_states_c,
-                                                          self.args.dec_st_h_layer: dec_states_h,
-                                                          self.args.output_prev_layer: output,
-                                                          self.args.tgt_layer: tgt
-                                                          }
-                                                  )
-
-            dec_states_h = dec_res[self.args.dec_st_h_t_layer]
-            dec_states_c = dec_res[self.args.dec_st_c_t_layer]
-            output = dec_res[self.args.output_layer]
-            logit = dec_res[self.args.logit_layer]
-            logits.append(logit)
-            tgt = np.array([[np.argmax(logit, axis=1)]])
-
-            if tgt[0][0][0] == END_TOKEN:
-                break
-        if self.args.perf_counts:
-            log.info("Encoder perfomance statistics")
-            print_stats(self.exec_net_encoder)
-            log.info("Decoder perfomanсe statistics")
-            print_stats(self.exec_net_decoder)
-
-        logits = np.array(logits)
-        logits = logits.squeeze(axis=1)
-        targets = np.argmax(logits, axis=1)
-        return logits, targets
-
-
-def create_videocapture(resolution=(1600, 900)):
+def create_videocapture(resolution=DEFAULT_RESOLUTION):
     capture = cv.VideoCapture(0)
     capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
     capture.set(3, resolution[0])
@@ -261,10 +228,10 @@ def create_videocapture(resolution=(1600, 900)):
 
 def create_input_window(input_shape, aspect_ratio):
     height, width = input_shape
-    default_width = 500
+    default_width = DEFAULT_WIDTH
     height = int(default_width * aspect_ratio)
-    start_point = (int(800 - default_width / 2), int(450 - height / 2))
-    end_point = (int(800 + default_width / 2), int(450 + height / 2))
+    start_point = (int(DEFAULT_RESOLUTION[0] / 2 - default_width / 2), int(DEFAULT_RESOLUTION[1] / 2 - height / 2))
+    end_point = (int(DEFAULT_RESOLUTION[0] / 2 + default_width / 2), int(DEFAULT_RESOLUTION[1] / 2 + height / 2))
     return start_point, end_point
 
 
@@ -319,12 +286,14 @@ def put_crop(frame, crop, start_point, end_point):
     frame[0:height, start_point[0]:end_point[0], :] = crop
     return frame
 
+
 def calculate_probability(logits):
     prob = 1
     probabilities = np.amax(logits, axis=1)
     for p in probabilities:
         prob *= p
     return prob
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -448,7 +417,6 @@ def main():
 
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
              "from the openVINO toolkit\n")
-
 
 
 if __name__ == '__main__':
