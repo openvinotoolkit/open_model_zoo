@@ -90,6 +90,7 @@ from .place_recognition import PlaceRecognitionDatasetConverter
 from .cluttered_mnist import ClutteredMNISTConverter
 from .mpii import MPIIDatasetConverter
 from .mapillary_20 import Mapillary20Converter
+from .antispoofing import AntispoofingDatasetConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -166,5 +167,6 @@ __all__ = [
     'DNASequenceDatasetConverter',
     'PlaceRecognitionDatasetConverter',
     'ClutteredMNISTConverter',
-    'MPIIDatasetConverter'
+    'MPIIDatasetConverter',
+    'AntispoofingDatasetConverter'
 ]
