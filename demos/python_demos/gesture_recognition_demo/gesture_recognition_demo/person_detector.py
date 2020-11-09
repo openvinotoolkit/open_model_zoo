@@ -17,7 +17,7 @@
 import cv2
 import numpy as np
 
-from asl_recognition_demo.common import IEModel
+from gesture_recognition_demo.common import IEModel
 
 
 class PersonDetector(IEModel):

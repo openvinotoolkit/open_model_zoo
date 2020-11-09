@@ -1,0 +1,18 @@
+models:
+  - name: anti-spoof-mn3
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: antispoof_test_data
+
+        preprocessing:
+          - type: resize
+            size: 128
+            interpolation: CUBIC
+
+        metrics:
+          - name: acer
+            type: acer_score

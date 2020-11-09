@@ -402,6 +402,11 @@ The main difference between this converter and `super_resolution` in data organi
   * `split` - dataset split: `train` - for training subset, `valid` - for train-validation subset, `test` - for testing subset (Optional, default test).
   * `convert_images` - allows convert images from raw data stored in npz and save them into provided directory (Optional, default True).
   * `images_dir` - directory for saving converted images (Optional, if not provided, the images will be saved into converted_images directory in the same location, where data_file is stored)
+* `antispoofing` - converts dataset for antispoofing classification task to `ClassificationAnnotation`
+  * `data_dir` - path to root folder of the dataset
+  * `annotation_file` - path to json file containing annotations to the dataset ({index: {path:"...", labels:[...], bbox:[...] (optional), ...})
+  * `label_id` - number of label in the annotation file representing spoof/real labels
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map)
 * `ade20k_image_translation` - converts ADE20K dataset to `ImageProcessingAnnotation` according to `reference_file`.
   * `images_dir` - path to directory with input images (e.g. `ADEChallengeData2016/images`).
   * `annotations_dir` - path to directory with annotations (e.g. `ADEChallengeData2016/annotations`).

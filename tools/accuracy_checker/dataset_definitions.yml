@@ -680,6 +680,13 @@ datasets:
       two_streams: True
     annotation: super_resolution_x3.pickle
 
+    preprocessing:
+      - type: auto_resize
+
+    postprocessing:
+      - type: resize
+        apply_to: prediction
+
     metrics:
       - type: psnr
         scale_border: 4
@@ -695,6 +702,13 @@ datasets:
       hr_suffix: hr
       two_streams: True
     annotation: super_resolution_x4.pickle
+
+    preprocessing:
+      - type: auto_resize
+
+    postprocessing:
+      - type: resize
+        apply_to: prediction
 
     metrics:
       - type: psnr
@@ -712,6 +726,11 @@ datasets:
 
     preprocessing:
       - type: bgr_to_gray
+      - type: auto_resize
+
+    postprocessing:
+      - type: resize
+        apply_to: prediction
 
     metrics:
       - type: psnr
@@ -852,6 +871,16 @@ datasets:
       clip_length: 16
     annotation: msasl_action_recognition.pickle
 
+  - name: jester
+    data_source: jester/global_crops
+    annotation_conversion:
+      converter: continuous_clip_action_recognition
+      annotation_file: jester/val.txt
+      data_dir: jester/global_crops
+      out_fps: 15
+      clip_length: 8
+    annotation: jester_action_recognition.pickle
+
   - name: ReDWeb_V1
     data_source: ReDWeb_V1
     annotation_conversion:
@@ -876,6 +905,21 @@ datasets:
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       masks_dir: free_form_masks/masks_2k
     annotation: inpainting_voc12_masks2k.pickle
+
+  - name: inpainting_rect_mask
+    data_source: VOCdevkit/VOC2012/JPEGImages/
+    annotation_conversion:
+      converter: inpainting
+      images_dir: VOCdevkit/VOC2012/JPEGImages/
+    annotation: inpainting_voc12.pickle
+
+    preprocessing:
+      - type: auto_resize
+      - type: rect_mask
+    postprocessing:
+      - type: resize
+        apply_to: prediction
+
 
   - name: mrlEyes_2018_01
     annotation_conversion:
@@ -1001,6 +1045,16 @@ datasets:
       object_categories_file: ADEChallengeData2016/objectInfo150.txt
     data_source: ADEChallengeData2016/images/validation
     segmentation_masks_source: ADEChallengeData2016/annotations/validation
+
+  - name: antispoof_test_data
+    data_source: antispoof_test_data
+    annotation_conversion:
+      converter: antispoofing
+      data_dir: antispoof_test_data
+      annotation_file: antispoof_test_data/metas/intra_test/items_test.json
+      label_id: 43
+    annotation: antispoofing.pickle
+    dataset_meta: antispoofing.json
 
   - name: cocosnet_image_translation
     annotation_conversion:

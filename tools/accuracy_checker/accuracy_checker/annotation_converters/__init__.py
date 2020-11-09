@@ -90,6 +90,7 @@ from .place_recognition import PlaceRecognitionDatasetConverter
 from .cluttered_mnist import ClutteredMNISTConverter
 from .mpii import MPIIDatasetConverter
 from .mapillary_20 import Mapillary20Converter
+from .antispoofing import AntispoofingDatasetConverter
 from .ade20k_image_translation import ADE20kImageTranslationConverter
 
 __all__ = [
@@ -168,5 +169,6 @@ __all__ = [
     'PlaceRecognitionDatasetConverter',
     'ClutteredMNISTConverter',
     'MPIIDatasetConverter',
+    'AntispoofingDatasetConverter',
     'ADE20kImageTranslationConverter'
 ]

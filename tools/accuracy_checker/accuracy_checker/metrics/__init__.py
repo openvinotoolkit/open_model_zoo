@@ -23,7 +23,8 @@ from .classification import (
     ClipAccuracy,
     ClassificationF1Score,
     MetthewsCorrelation,
-    RocAucScore
+    RocAucScore,
+    AcerScore,
 )
 from .detection import (
     DetectionMAP,
@@ -202,4 +203,6 @@ __all__ = [
 
     'InceptionScore',
     'FrechetInceptionDistance',
+
+    'AcerScore',
 ]
