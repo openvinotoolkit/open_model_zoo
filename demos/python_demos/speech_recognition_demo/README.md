@@ -12,7 +12,12 @@ The application accepts
 
 After computing audio features, running a neural network to get per-frame character probabilities, and CTC decoding, the demo prints the decoded text together with the timings of the processing stages.
 
-The app depends on `ctcdecode_numpy` Python\* module, its installation is described below.
+## Prerequisites
+
+The demo depends on the `ctcdecode_numpy` Python extension module,
+which implements CTC decoding in C++ for faster decoding.
+Please refer to [Using Open Model Zoo demos](../../README.md) for instructions
+on how to build the extension module and prepare the environment for running the demo.
 
 ## Model preparation
 
@@ -26,31 +31,6 @@ source <openvino_path>/bin/setupvars.sh
 ```
 
 Please pay attention to the model license, **Mozilla Public License 2.0**.
-
-
-## Installing CTC decoder module
-
-ASR performance depends heavily on beam width (a.k.a. beam size), which is the number of candidate strings maintained by beam search on each iteration.
-Using larger beam results in better recognition, but is slower.
-The demo depends on `ctcdecode_numpy` Python module: it implements CTC decoding in C++ for faster decoding.
-
-To install `ctcdecode_numpy` Python module either follow ["Build the Native Python* Extension Modules"](../../README.md#build_python_extensions),
-or install it with pip:
-
-1. Create and activate a virtualenv, it you haven't already:
-
-    ```shell
-    virtualenv -p python3 --system-site-packages deepspeech-venv
-    . deepspeech-venv/bin/activate
-    ```
-
-1. Build and install `ctcdecode_numpy` Python module:
-
-    ```shell
-    cd ctcdecode-numpy/
-    python -m pip install .
-    ```
-
 
 ## Running Demo
 
