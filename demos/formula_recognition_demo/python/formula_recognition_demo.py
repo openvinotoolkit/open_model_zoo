@@ -89,6 +89,10 @@ def print_stats(module):
         print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
                                                           stats['status'], stats['real_time']))
 
+def change_layout(model_input):
+    model_input = model_input.transpose((2, 0, 1))
+    model_input = np.expand_dims(model_input, axis=0)
+    return model_input
 
 def preprocess_image(preprocess, image_raw, tgt_shape):
     target_height, target_width = tgt_shape
@@ -97,8 +101,7 @@ def preprocess_image(preprocess, image_raw, tgt_shape):
     image_raw = cv.copyMakeBorder(image_raw, 0, target_height - img_h,
                                   0, target_width - img_w, cv.BORDER_CONSTANT,
                                   None, COLOR_WHITE)
-    image = image_raw.transpose((2, 0, 1))
-    return np.expand_dims(image, axis=0)
+    return image_raw
 
 
 class Demo:
@@ -116,6 +119,7 @@ class Demo:
         self.images_list = []
         self.vocab = Vocab(self.args.vocab_path)
         self.model_status = ModelStatus.ready
+        self.is_async = args.interactive
         if not args.interactive:
             self.preprocess_inputs()
 
@@ -151,8 +155,7 @@ class Demo:
                                                  )
 
     def infer_async(self, model_input):
-        model_input = model_input.transpose((2, 0, 1))
-        model_input = np.expand_dims(model_input, axis=0)
+        model_input = change_layout(model_input)
         if self.model_status == ModelStatus.ready:
             self.infer_request_handle_encoder = self.async_infer_encoder(model_input, req_id=0)
             self.model_status = ModelStatus.encoder_infer
@@ -199,7 +202,10 @@ class Demo:
 
         return None
 
+
+
     def model(self, image, asynchronous=False):
+        image = change_layout(image)
         enc_res = self.exec_net_encoder.infer(inputs={self.args.imgs_layer: image})
         row_enc_out = enc_res[self.args.row_enc_out_layer]
         dec_states_h = enc_res[self.args.hidden_layer]
