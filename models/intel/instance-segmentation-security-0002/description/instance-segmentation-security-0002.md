@@ -24,8 +24,6 @@ segmentation heads.
 Average Precision (AP) is defined and measured according to standard
 [MS COCO evaluation procedure](http://cocodataset.org/#detection-eval).
 
-## Performance
-
 ## Inputs
 
 1.	name: `image` , shape: [1x3x768x1024] - An input image in the format
