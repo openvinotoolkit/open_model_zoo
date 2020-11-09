@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 
 from .decoder import AssociativeEmbeddingDecoder
+from .openpose_decoder import OpenPoseDecoder
 
 
 log = logging.getLogger()
@@ -95,7 +96,86 @@ class Model:
         self.event.wait()
 
 
-class HPE(Model):
+class HPEOpenPose(Model):
+
+    def __init__(self, *args, keep_aspect_ratio_resize=True, size_divisor=8, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
+        self.size_divisor = size_divisor
+
+        self.image_blob_name = self._get_inputs(self.net)
+        self.target_size = self.net.input_info[self.image_blob_name].input_data.shape[-1]
+
+        # self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)
+        # self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
+        # self.pafs_blob_name = find_layer_by_name('pafs', self.net.outputs)
+
+        self.pafs_blob_name = 'Mconv7_stage2_L1'
+        self.heatmaps_blob_name = 'Mconv7_stage2_L2'
+        self.nms_heatmaps_blob_name = None
+
+        self.num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1]
+        self.output_scale = self.target_size / self.net.outputs[self.heatmaps_blob_name].shape[-1]
+
+        self.decoder = OpenPoseDecoder(num_joints=self.num_joints)
+
+    def _get_inputs(self, net):
+        image_blob_name = None
+        for blob_name, blob in net.input_info.items():
+            if len(blob.input_data.shape) == 4:
+                image_blob_name = blob_name
+            else:
+                raise RuntimeError('Unsupported {}D input layer "{}". Only 2D and 4D input layers are supported'
+                                   .format(len(blob.shape), blob_name))
+        if image_blob_name is None:
+            raise RuntimeError('Failed to identify the input for the image.')
+        return image_blob_name
+
+    @staticmethod
+    def _resize_image(frame, size, keep_aspect_ratio=False):
+        # FIXME
+        if not keep_aspect_ratio:
+            resized_frame = cv2.resize(frame, size)
+        else:
+            h, w = frame.shape[:2]
+            scale = max(size[1] / h, size[0] / w)
+            resized_frame = cv2.resize(frame, None, fx=scale, fy=scale)
+        return resized_frame
+
+    def preprocess(self, inputs):
+        img = self._resize_image(inputs[self.image_blob_name], (self.target_size, self.target_size), self.keep_aspect_ratio_resize)
+        meta = {'original_shape': inputs[self.image_blob_name].shape,
+                'resized_shape': img.shape}
+        h, w = img.shape[:2]
+        divisor = self.size_divisor
+        if w % divisor != 0 or h % divisor != 0:
+            img = np.pad(img, ((0, (h + divisor - 1) // divisor * divisor - h),
+                               (0, (w + divisor - 1) // divisor * divisor - w),
+                               (0, 0)))
+        # Change data layout from HWC to CHW
+        img = img.transpose((2, 0, 1))
+        inputs[self.image_blob_name] = img[None]
+        return inputs, meta
+
+    def postprocess(self, outputs, meta):
+        heatmaps = outputs[self.heatmaps_blob_name]
+        if self.nms_heatmaps_blob_name:
+            nms_heatmaps = outputs[self.nms_heatmaps_blob_name]
+        else:
+            nms_heatmaps = self.decoder.nms(heatmaps)
+        pafs = outputs[self.pafs_blob_name]
+        poses, scores = self.decoder(heatmaps, nms_heatmaps, pafs)
+        # Rescale poses to the original image.
+        original_image_shape = meta['original_shape']
+        resized_image_shape = meta['resized_shape']
+        scale_x = original_image_shape[1] / resized_image_shape[1]
+        scale_y = original_image_shape[0] / resized_image_shape[0]
+        poses[:, :, 0] *= scale_x
+        poses[:, :, 1] *= scale_y
+        return poses, scores
+
+
+class HPEAssociativeEmbedding(Model):
 
     def __init__(self, *args, keep_aspect_ratio_resize=True, size_divisor=32, **kwargs):
         super().__init__(*args, **kwargs)
@@ -176,9 +256,10 @@ class HPE(Model):
 
 
 def find_layer_by_name(name, all_outputs):
+    all_names = tuple(layer_name for layer_name in all_outputs)
     suitable_layers = [layer_name for layer_name in all_outputs if layer_name.startswith(name)]
     if not suitable_layers:
-        raise ValueError('Suitable layer for "{}" output is not found'.format(name))
+        raise ValueError('Suitable layer for "{}" output is not found in {}'.format(name, all_names))
 
     if len(suitable_layers) > 1:
         raise ValueError('More than 1 layer matched to "{}" output: {}'.format(name, suitable_layers))

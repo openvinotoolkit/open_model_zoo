@@ -27,7 +27,7 @@ import cv2
 import numpy as np
 from openvino.inference_engine import IECore
 
-from human_pose_estimation_demo.model import HPE
+from human_pose_estimation_demo.model import HPEAssociativeEmbedding, HPEOpenPose
 from human_pose_estimation_demo.visualization import show_poses
 
 sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
@@ -68,6 +68,8 @@ def build_argparser():
     args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
+
+    args.add_argument('--type', default='ae', choices=('ae', 'openpose'), type=str, help='Optional.')
     return parser
 
 
@@ -130,6 +132,11 @@ def main():
     log.info('Using {} mode'.format(mode.name))
     mode_info = {mode: ModeInfo()}
     exceptions = []
+
+    if args.type == 'ae':
+        HPE = HPEAssociativeEmbedding
+    else:
+        HPE = HPEOpenPose
 
     hpes = {
         Modes.USER_SPECIFIED:
