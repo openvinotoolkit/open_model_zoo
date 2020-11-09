@@ -156,36 +156,27 @@ class Demo:
 
     def infer_async(self, model_input):
         model_input = change_layout(model_input)
-        timeout = 1 is self.is_async else -1
+        timeout = 1 if self.is_async else -1
         if self.model_status == ModelStatus.ready:
             self.infer_request_handle_encoder = self.async_infer_encoder(model_input, req_id=0)
             self.model_status = ModelStatus.encoder_infer
             return None
         elif self.model_status == ModelStatus.encoder_infer:
             infer_status_encoder = self.infer_request_handle_encoder.wait(timeout=timeout)
-            if infer_status_encoder == 0:
-                enc_res = self.infer_request_handle_encoder.output_blobs
-                self.row_enc_out = enc_res[self.args.row_enc_out_layer].buffer
-                self.dec_states_h = enc_res[self.args.hidden_layer].buffer
-                self.dec_states_c = enc_res[self.args.context_layer].buffer
-                self.output = enc_res[self.args.init_0_layer].buffer
-                self.tgt = np.array([[START_TOKEN]])
-                self.logits = []
-                self.infer_request_handle_decoder = self.async_infer_decoder(
-                    self.row_enc_out, self.dec_states_c, self.dec_states_h, self.output, self.tgt, req_id=0)
-                self.model_status = ModelStatus.decoder_infer
+            if infer_status_encoder != 0 and self.is_async:
+                return None
+            enc_res = self.infer_request_handle_encoder.output_blobs
+            self.unpack_enc_results(enc_res)
+            self.infer_request_handle_decoder = self.async_infer_decoder(
+                self.row_enc_out, self.dec_states_c, self.dec_states_h, self.output, self.tgt, req_id=0)
+            self.model_status = ModelStatus.decoder_infer
             return None
 
         infer_status_decoder = self.infer_request_handle_decoder.wait(timeout)
         if infer_status_decoder != 0:
             return None
         dec_res = self.infer_request_handle_decoder.output_blobs
-        self.dec_states_h = dec_res[self.args.dec_st_h_t_layer].buffer
-        self.dec_states_c = dec_res[self.args.dec_st_c_t_layer].buffer
-        self.output = dec_res[self.args.output_layer].buffer
-        logit = dec_res[self.args.logit_layer].buffer
-        self.logits.append(logit)
-        self.tgt = np.array([[np.argmax(logit, axis=1)]])
+        self.unpack_dec_results(dec_res)
 
         if self.tgt[0][0][0] == END_TOKEN:
             self.logits = np.array(self.logits)
@@ -202,6 +193,22 @@ class Demo:
                                                                      )
 
         return None
+
+    def unpack_dec_results(self, dec_res):
+        self.dec_states_h = dec_res[self.args.dec_st_h_t_layer].buffer
+        self.dec_states_c = dec_res[self.args.dec_st_c_t_layer].buffer
+        self.output = dec_res[self.args.output_layer].buffer
+        logit = dec_res[self.args.logit_layer].buffer
+        self.logits.append(logit)
+        self.tgt = np.array([[np.argmax(logit, axis=1)]])
+
+    def unpack_enc_results(self, enc_res):
+        self.row_enc_out = enc_res[self.args.row_enc_out_layer].buffer
+        self.dec_states_h = enc_res[self.args.hidden_layer].buffer
+        self.dec_states_c = enc_res[self.args.context_layer].buffer
+        self.output = enc_res[self.args.init_0_layer].buffer
+        self.tgt = np.array([[START_TOKEN]])
+        self.logits = []
 
 
 
@@ -392,7 +399,7 @@ def main():
             image = rec['img']
             logits, targets = demo.model(image)
             prob = calculate_probability(logits)
-            log.info("Confidence score is %s\n", prob)
+            log.info("Confidence score is %s", prob)
             if prob >= args.conf_thresh:
                 if args.output_file:
                     with open(args.output_file, 'a') as output_file:
@@ -417,10 +424,13 @@ def main():
             else:
                 logits, targets = model_res
                 prob = calculate_probability(logits)
-                log.info("Confidence score is %s\n", prob)
+                log.info("Confidence score is %s", prob)
                 if prob >= args.conf_thresh:
-                    log.info("Prediction updated\n")
+                    log.info("Prediction updated")
                     phrase = demo.vocab.construct_phrase(targets)
+                else:
+                    log.info("Confidence score is low, prediction is not complete")
+                    phrase = '...'
             frame = put_text(frame, start_point, phrase)
             prev_text = phrase
             frame = draw_rectangle(frame, start_point, end_point)
