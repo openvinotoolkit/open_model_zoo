@@ -387,7 +387,7 @@ class AssociativeEmbeddingDecoder:
             self.joint_order = (0, 1, 2, 3, 4, 5, 6, 11, 12, 7, 8, 9, 10, 13, 14, 15, 16)
         else:
             self.joint_order = list(np.arange(self.num_joints))
-        
+
         self.do_adjust = adjust
         self.do_refine = refine
         self.delta = delta
@@ -462,8 +462,7 @@ class AssociativeEmbeddingDecoder:
                 if num_added > num_grouped:
                     diff_normed = np.concatenate(
                         (diff_normed,
-                        np.zeros((num_added, num_added - num_grouped),
-                                dtype=np.float32) + 1e10),
+                        np.zeros((num_added, num_added - num_grouped), dtype=np.float32) + 1e10),
                         axis=1)
 
                 pairs = self._max_match(diff_normed)
@@ -633,17 +632,20 @@ class AssociativeEmbeddingAdapter(Adapter):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not contains_all(raw_outputs, (self.heatmaps, self.nms_heatmaps, self.embeddings)):
             raise ConfigError('Some of the outputs are not found')
-        raw_output = zip(identifiers, raw_outputs[self.heatmaps][None], raw_outputs[self.nms_heatmaps][None],
-            raw_outputs[self.embeddings][None], frame_meta)
+        raw_output = zip(identifiers, raw_outputs[self.heatmaps][None],
+                         raw_outputs[self.nms_heatmaps][None],
+                         raw_outputs[self.embeddings][None], frame_meta)
 
         for identifier, heatmap, nms_heatmap, embedding, meta in raw_output:
             poses, scores = self.decoder(heatmap, embedding, nms_heatmaps=nms_heatmap)
             if len(scores) == 0:
-                result.append(PoseEstimationPrediction(identifier,
+                result.append(PoseEstimationPrediction(
+                    identifier,
                     np.empty((0, 17), dtype=float),
                     np.empty((0, 17), dtype=float),
                     np.empty((0, 17), dtype=float),
-                    np.empty((0, ), dtype=float)))
+                    np.empty((0, ), dtype=float)
+                ))
                 continue
             poses = poses.astype(float)
             scores = np.asarray(scores).astype(float)
@@ -652,7 +654,12 @@ class AssociativeEmbeddingAdapter(Adapter):
             poses[:, :, 0] /= scale_x / 2
             poses[:, :, 1] /= scale_y / 2
             point_scores = poses[:, :, 2]
-            result.append(PoseEstimationPrediction(identifier, poses[:, :, 0], poses[:, :, 1], point_scores, scores))
+            result.append(PoseEstimationPrediction(
+                identifier,
+                poses[:, :, 0],
+                poses[:, :, 1],
+                point_scores,
+                scores))
         return result
 
 
