@@ -119,25 +119,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-void paintInfo(cv::Mat& frame, const PipelineBase::PerformanceInfo& info) {
-    std::ostringstream out;
-
-    out.str("");
-    out << "FPS:" << std::fixed << std::setprecision(0) << std::setw(3) << info.movingAverageFPS
-        << " (" << std::setprecision(1) << info.FPS << ")";
-    putHighlightedText(frame, out.str(), cv::Point2f(10, 30), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(10, 200, 10), 2);
-
-    out.str("");
-    out << "Avg Latency:" << std::fixed << std::setprecision(0) << std::setw(4) << info.movingAverageLatencyMs
-        << " (" << std::setprecision(1) << info.getTotalAverageLatencyMs() << ") ms";
-    putHighlightedText(frame, out.str(), cv::Point2f(10, 60), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(200, 10, 10), 2);
-
-    out.str("");
-    out << "Pool: " << std::fixed << std::setprecision(1) <<
-        info.numRequestsInUse << "/" << FLAGS_nireq;
-    putHighlightedText(frame, out.str(), cv::Point2f(10, 90), cv::FONT_HERSHEY_TRIPLEX, 0.75, cv::Scalar(200, 10, 10), 2);
-}
-
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers certain topology and cannot be generalized for any object detection **/
@@ -176,7 +157,6 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-
                 frameNum = pipeline.submitImage(curr_frame);
             }
 
@@ -194,7 +174,7 @@ int main(int argc, char *argv[]) {
                 //--- Showing results and device information
                 if (!outFrame.empty()) {
                     presenter.drawGraphs(outFrame);
-                    paintInfo(outFrame, pipeline.getPerformanceInfo());
+                    pipeline.getMetrics().paintMetrics(outFrame, { 10,22 }, 0.6);
                     if (!FLAGS_no_show) {
                         cv::imshow("Segmentation Results", outFrame);
 
@@ -221,14 +201,8 @@ int main(int argc, char *argv[]) {
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        auto info = pipeline.getPerformanceInfo();
         slog::info << slog::endl << "Metric reports:" << slog::endl;
-
-        //--- Show performace results 
-        slog::info << "Avg Latency: " << std::fixed << std::setprecision(1) <<
-            info.getTotalAverageLatencyMs() << " ms" << slog::endl;
-
-        slog::info << "FPS: " << std::fixed << std::setprecision(1) << info.FPS << slog::endl;
+        pipeline.getMetrics().printTotal();
 
         slog::info << presenter.reportMeans() << slog::endl;
     }

@@ -85,15 +85,7 @@ void PipelineBase::waitForData(){
 }
 
 int64_t PipelineBase::submitRequest(const InferenceEngine::InferRequest::Ptr& request, const std::shared_ptr<MetaData>& metaData){
-    perfInfo.numRequestsInUse = (uint32_t)requestsPool->getInUseRequestsCount();
-
     auto frameStartTime = std::chrono::steady_clock::now();
-
-    if (!perfInfo.startTime.time_since_epoch().count())
-    {
-        perfInfo.startTime = frameStartTime;
-    }
-
     auto frameID = inputFrameId;
 
     request->SetCompletionCallback([this,
@@ -108,7 +100,6 @@ int64_t PipelineBase::submitRequest(const InferenceEngine::InferRequest::Ptr& re
                     InferenceResult result;
 
                     result.startTime = frameStartTime;
-                    perfInfo.lastInferenceLatency = std::chrono::steady_clock::now() - frameStartTime;
 
                     result.frameId = frameID;
                     result.metaData = std::move(metaData);
@@ -163,52 +154,29 @@ std::unique_ptr<ResultBase> PipelineBase::getResult()
 
 InferenceResult PipelineBase::getInferenceResult()
 {
-    std::lock_guard<std::mutex> lock(mtx);
+    InferenceResult retVal;
 
-    const auto& it = completedInferenceResults.find(outputFrameId);
-
-    if (it != completedInferenceResults.end())
     {
-        auto retVal = std::move(it->second);
-        completedInferenceResults.erase(it);
+        std::lock_guard<std::mutex> lock(mtx);
 
+        const auto& it = completedInferenceResults.find(outputFrameId);
+
+        if (it != completedInferenceResults.end())
+        {
+            retVal = std::move(it->second);
+            completedInferenceResults.erase(it);
+        }
+    }
+
+    if(!retVal.IsEmpty()) {
         outputFrameId = retVal.frameId;
         outputFrameId++;
         if (outputFrameId < 0)
             outputFrameId = 0;
 
         // Updating performance info
-        auto now = std::chrono::steady_clock::now();
-        auto latency = now - retVal.startTime;
-
-        auto oldLatency = perfInternals.latenciesMs[perfInternals.currentIndex];
-        auto oldRetrievalTimestamp = perfInternals.retrievalTimestamps[perfInternals.currentIndex];
-
-        perfInternals.latenciesMs[perfInternals.currentIndex] = std::chrono::duration_cast<std::chrono::milliseconds>(latency).count();
-        perfInternals.movingLatenciesSumMs += perfInternals.latenciesMs[perfInternals.currentIndex];
-        perfInternals.retrievalTimestamps[perfInternals.currentIndex] = now;
-        perfInternals.currentIndex = (perfInternals.currentIndex + 1) % MOVING_AVERAGE_SAMPLES;
-
-        perfInfo.latencySum += latency;
-        perfInfo.framesCount++;
-        perfInfo.FPS = perfInfo.framesCount*1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(now - perfInfo.startTime).count();
-
-        if (perfInfo.framesCount <= MOVING_AVERAGE_SAMPLES) {
-            // History buffer is not full in the beginning, so let's reuse global metrics so far
-            perfInfo.movingAverageLatencyMs = ((double)perfInternals.movingLatenciesSumMs) / perfInfo.framesCount;
-            perfInfo.movingAverageFPS = perfInfo.FPS;
-        }
-        else
-        {
-            // Now history buffer is full, we can use its data
-            perfInternals.movingLatenciesSumMs -= oldLatency;
-            perfInfo.movingAverageLatencyMs = ((double)perfInternals.movingLatenciesSumMs) / MOVING_AVERAGE_SAMPLES;
-            perfInfo.movingAverageFPS = MOVING_AVERAGE_SAMPLES * 1000.0 /
-                std::chrono::duration_cast<std::chrono::milliseconds>(now - oldRetrievalTimestamp).count();
-        }
-
-        return retVal;
+        perfMetrics.update(retVal.startTime);
     }
 
-    return InferenceResult();
+    return retVal;
 }

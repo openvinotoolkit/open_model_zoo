@@ -13,11 +13,16 @@ PerformanceMetrics::PerformanceMetrics(Duration timeWindow)
 {}
 
 void PerformanceMetrics::update(TimePoint lastRequestStartTime,
-                                cv::Mat& frame,
-                                cv::Point position,
-                                double fontScale,
-                                cv::Scalar color,
-                                int thickness) {
+    cv::Mat& frame,
+    cv::Point position,
+    double fontScale,
+    cv::Scalar color,
+    int thickness) {
+    update(lastRequestStartTime);
+    paintMetrics(frame, position, fontScale, color, thickness);
+}
+
+void PerformanceMetrics::update(TimePoint lastRequestStartTime) {
     TimePoint currentTime = Clock::now();
 
     if (!firstFrameProcessed) {
@@ -37,7 +42,9 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime,
 
         lastUpdateTime = currentTime;
     }
+}
 
+void PerformanceMetrics::paintMetrics(cv::Mat & frame, cv::Point position, double fontScale, cv::Scalar color, int thickness) const{
     // Draw performance stats over frame
     Metrics metrics = getLast();
 
