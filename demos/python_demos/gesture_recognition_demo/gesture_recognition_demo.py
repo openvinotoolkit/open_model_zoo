@@ -25,13 +25,13 @@ from argparse import ArgumentParser, SUPPRESS
 import cv2
 import numpy as np
 
-from asl_recognition_demo.common import load_ie_core
-from asl_recognition_demo.video_stream import VideoStream
-from asl_recognition_demo.video_library import VideoLibrary
-from asl_recognition_demo.person_detector import PersonDetector
-from asl_recognition_demo.tracker import Tracker
-from asl_recognition_demo.action_recognizer import ActionRecognizer
-from asl_recognition_demo.visualizer import Visualizer
+from gesture_recognition_demo.common import load_ie_core
+from gesture_recognition_demo.video_stream import VideoStream
+from gesture_recognition_demo.video_library import VideoLibrary
+from gesture_recognition_demo.person_detector import PersonDetector
+from gesture_recognition_demo.tracker import Tracker
+from gesture_recognition_demo.action_recognizer import ActionRecognizer
+from gesture_recognition_demo.visualizer import Visualizer
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
@@ -40,9 +40,7 @@ DETECTOR_OUTPUT_SHAPE = -1, 5
 TRACKER_SCORE_THRESHOLD = 0.4
 TRACKER_IOU_THRESHOLD = 0.3
 ACTION_NET_INPUT_FPS = 15
-ACTION_NUM_CLASSES = 100
 ACTION_IMAGE_SCALE = 256
-ACTION_SCORE_THRESHOLD = 0.8
 SAMPLES_MAX_WINDOW_SIZE = 1000
 SAMPLES_TRG_FPS = 20
 VISUALIZER_TRG_FPS = 60
@@ -57,7 +55,7 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS,
                       help='Show this help message and exit.')
     args.add_argument('-m_a', '--action_model',
-                      help='Required. Path to an .xml file with a trained asl recognition model.',
+                      help='Required. Path to an .xml file with a trained gesture recognition model.',
                       required=True, type=str)
     args.add_argument('-m_d', '--detection_model',
                       help='Required. Path to an .xml file with a trained person detector model.',
@@ -66,11 +64,14 @@ def build_argparser():
                       help='Required. Path to a video file or a device node of a web-camera.',
                       required=True, type=str)
     args.add_argument('-c', '--class_map',
-                      help='Required. Path to a file with ASL classes.',
+                      help='Required. Path to a file with gesture classes.',
                       required=True, type=str)
     args.add_argument('-s', '--samples_dir',
                       help='Optional. Path to a directory with video samples of gestures.',
                       default=None, type=str)
+    args.add_argument('-t', '--action_threshold',
+                      help='Optional. Threshold for the predicted score of an action.',
+                      default=0.8, type=float)
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL '
                            'or MYRIAD. The demo will look for a suitable plugin for device '
@@ -116,7 +117,7 @@ def main():
                                      num_requests=2, output_shape=DETECTOR_OUTPUT_SHAPE)
     action_recognizer = ActionRecognizer(args.action_model, args.device, ie_core,
                                          num_requests=2, img_scale=ACTION_IMAGE_SCALE,
-                                         num_classes=ACTION_NUM_CLASSES)
+                                         num_classes=len(class_map))
     person_tracker = Tracker(person_detector, TRACKER_SCORE_THRESHOLD, TRACKER_IOU_THRESHOLD)
 
     video_stream = VideoStream(args.input, ACTION_NET_INPUT_FPS, action_recognizer.input_length)
@@ -170,7 +171,7 @@ def main():
                     class_map[action_class_id] if class_map is not None else action_class_id
 
                 action_class_score = np.max(recognizer_result)
-                if action_class_score > ACTION_SCORE_THRESHOLD:
+                if action_class_score > args.action_threshold:
                     last_caption = 'Last gesture: {} '.format(action_class_label)
 
         end_time = time.perf_counter()
