@@ -29,8 +29,8 @@ The text-spotting-0003-detector model is a Mask-RCNN-based text detector with Re
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| GFlops                                        | TBD       |
-| MParams                                       | TBD       |
+| GFlops                                        | 184.495   |
+| MParams                                       | 27.010    |
 
 ### Inputs
 
@@ -72,8 +72,8 @@ Name: `output`, shape: [1x256x28x28]. Encoded text recognition features.
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| GFlops                                        | 0.002     |
-| MParams                                       | 0.273     |
+| GFlops                                        | 0.106     |
+| MParams                                       | 0.283     |
 
 ### Inputs
 
