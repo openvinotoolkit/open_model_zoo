@@ -158,7 +158,7 @@ class Demo:
                                                                             }
                                                  )
 
-    def infer_async(self, model_input):
+    def infer(self, model_input):
         model_input = change_layout(model_input)
         timeout = 1 if self.is_async else -1
 
@@ -387,7 +387,7 @@ def main():
             bin_crop = get_crop(frame, start_point, end_point)
             model_input = prerocess_crop(bin_crop, (height, width))
             frame = put_crop(frame, model_input, start_point, end_point)
-            model_res = demo.infer_async(model_input)
+            model_res = demo.infer(model_input)
             if not model_res:
                 phrase = prev_text
             else:
