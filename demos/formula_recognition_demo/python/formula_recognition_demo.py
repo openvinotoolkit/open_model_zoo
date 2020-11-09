@@ -156,12 +156,13 @@ class Demo:
 
     def infer_async(self, model_input):
         model_input = change_layout(model_input)
+        timeout = 1 is self.is_async else -1
         if self.model_status == ModelStatus.ready:
             self.infer_request_handle_encoder = self.async_infer_encoder(model_input, req_id=0)
             self.model_status = ModelStatus.encoder_infer
             return None
         elif self.model_status == ModelStatus.encoder_infer:
-            infer_status_encoder = self.infer_request_handle_encoder.wait(timeout=1)
+            infer_status_encoder = self.infer_request_handle_encoder.wait(timeout=timeout)
             if infer_status_encoder == 0:
                 enc_res = self.infer_request_handle_encoder.output_blobs
                 self.row_enc_out = enc_res[self.args.row_enc_out_layer].buffer
@@ -175,7 +176,7 @@ class Demo:
                 self.model_status = ModelStatus.decoder_infer
             return None
 
-        infer_status_decoder = self.infer_request_handle_decoder.wait(1)
+        infer_status_decoder = self.infer_request_handle_decoder.wait(timeout)
         if infer_status_decoder != 0:
             return None
         dec_res = self.infer_request_handle_decoder.output_blobs
