@@ -149,6 +149,10 @@ std::unique_ptr<ResultBase> AsyncPipeline::getResult()
     auto result = model->postprocess(infResult);
 
     *result = static_cast<ResultBase&>(infResult);
+
+    // Updating performance info
+    perfMetrics.update(infResult.startTime);
+
     return result;
 }
 
@@ -173,9 +177,6 @@ InferenceResult AsyncPipeline::getInferenceResult()
         outputFrameId++;
         if (outputFrameId < 0)
             outputFrameId = 0;
-
-        // Updating performance info
-        perfMetrics.update(retVal.startTime);
     }
 
     return retVal;

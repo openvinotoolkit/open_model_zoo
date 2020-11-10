@@ -22,8 +22,8 @@ using namespace InferenceEngine;
 
 DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels)
     :ModelBase(modelFileName),
-    useAutoResize(useAutoResize),
     labels(labels),
+    useAutoResize(useAutoResize),
     confidenceThreshold(confidenceThreshold) {
 }
 

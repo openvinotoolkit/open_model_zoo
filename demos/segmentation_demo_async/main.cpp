@@ -142,7 +142,8 @@ int main(int argc, char *argv[]) {
         Presenter presenter;
 
         auto startTimePoint = std::chrono::steady_clock::now();
-        while (true){
+        bool keepRunning = true;
+        while (keepRunning){
             int64_t frameNum;
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
@@ -169,7 +170,7 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to SegmentationResult*
             //    and use your own processing instead of calling renderSegmentationData().
             std::unique_ptr<ResultBase> result;
-            while (result = pipeline.getResult()) {
+            while ((result = pipeline.getResult()) && keepRunning) {
                 cv::Mat outFrame = DefaultRenderers::renderSegmentationData(result->asRef<SegmentationResult>());
                 //--- Showing results and device information
                 if (!outFrame.empty()) {
@@ -178,24 +179,15 @@ int main(int argc, char *argv[]) {
                     if (!FLAGS_no_show) {
                         cv::imshow("Segmentation Results", outFrame);
 
-                        // Showing frame in window and storing key pressed if key variable doesn't contain key code yet
-                        if (key) {
-                            cv::waitKey(1);
+                        //--- Processing keyboard events
+                        auto key = cv::waitKey(1);
+                        if (27 == key || 'q' == key || 'Q' == key) {  // Esc
+                            keepRunning = false;
                         }
                         else {
-                            key = cv::waitKey(1);
+                            presenter.handleKey(key);
                         }
                     }
-                }
-            }
-
-            //--- Processing keyboard events
-            if (!FLAGS_no_show) {
-                if (27 == key || 'q' == key || 'Q' == key) {  // Esc
-                    break;
-                }
-                else {
-                    presenter.handleKey(key);
                 }
             }
         }
