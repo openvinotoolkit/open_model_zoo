@@ -62,13 +62,16 @@ class FaceBoxes(Model):
         return bboxes_blob_name, scores_blob_name
 
     def preprocess(self, inputs):
-        img = resize_image(inputs[self.image_blob_name], (self.w, self.h))
-        meta = {'original_shape': inputs[self.image_blob_name].shape,
-                'resized_shape': img.shape}
-        img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        img = img.reshape((self.n, self.c, self.h, self.w))
-        inputs[self.image_blob_name] = img
-        return inputs, meta
+        image = inputs
+
+        resized_image = resize_image(image, (self.w, self.h))
+        meta = {'original_shape': image.shape,
+                'resized_shape': resized_image.shape}
+        resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+        resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
+
+        dict_inputs = {self.image_blob_name: resized_image}
+        return dict_inputs, meta
 
     def postprocess(self, outputs, meta):
         boxes = outputs[self.bboxes_blob_name][0]
