@@ -112,10 +112,9 @@ postprocessing:
     file: efficientdet-d0.tar.gz
 model_optimizer_args:
   - --input_shape=[1,512,512,3]
-  - --input=convert_image/Cast
+  - --input=image_arrays
   - --reverse_input_channels
   - --input_model=$conv_dir/efficientdet-d0_saved_model/efficientdet-d0_frozen.pb
-  - --output=concat,concat_1
   - --transformations_config=$mo_dir/extensions/front/tf/automl_efficientdet.json
 framework: tf
 license: https://raw.githubusercontent.com/google/automl/master/LICENSE

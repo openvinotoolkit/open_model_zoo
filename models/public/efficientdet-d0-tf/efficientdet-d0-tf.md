@@ -27,7 +27,7 @@ For details about this family of models, check out the Google AutoML [repository
 
 ### Original Model
 
-Image, name - `convert_image/Cast`,  shape - `[1x512x512x3]`, format is `[BxHxWxC]`, where:
+Image, name - `image_arrays`,  shape - `[1x512x512x3]`, format is `[BxHxWxC]`, where:
 
 - `B` - batch size
 - `H` - height
@@ -38,7 +38,7 @@ Channel order is `RGB`.
 
 ### Converted Model
 
-Image, name - `convert_image/Cast/placeholder_port_0`,  shape - `[1x3x512x512]`, format is `[BxCxHxW]`, where:
+Image, name - `image_arrays/placeholder_port_0`,  shape - `[1x3x512x512]`, format is `[BxCxHxW]`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -51,7 +51,7 @@ Channel order is `BGR`.
 
 ### Original Model
 
-The array of summary detection information, name: `detections`, shape: [1, 7, N], where N is the number of detected
+The array of summary detection information, name: `detections`, shape: [1, N, 7], where N is the number of detected
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `y_min`, `x_min`, `y_max`, `x_max`, `confidence`, `label`],
     where:
