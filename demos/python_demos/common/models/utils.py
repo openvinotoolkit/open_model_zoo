@@ -42,9 +42,8 @@ def resize_image(image, size, keep_aspect_ratio=False):
     return resized_frame
 
 
-def resize_image_letterbox(image, size):
-    iw, ih = image.shape[0:2][::-1]
-    w, h = size
+def resize_image_letterbox(image, w, h)):
+    ih, iw = image.shape[0:2]
     scale = min(w / iw, h / ih)
     nw = int(iw * scale)
     nh = int(ih * scale)
