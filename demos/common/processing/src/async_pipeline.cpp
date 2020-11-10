@@ -20,8 +20,8 @@
 #include <samples/slog.hpp>
 
 using namespace InferenceEngine;
-    
-PipelineBase::PipelineBase(std::unique_ptr<ModelBase> modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine) :
+
+AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase> modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine) :
     model(std::move(modelInstance)){
 
     // --------------------------- 1. Load inference engine ------------------------------------------------
@@ -68,11 +68,11 @@ PipelineBase::PipelineBase(std::unique_ptr<ModelBase> modelInstance, const CnnCo
     model->onLoadCompleted(&execNetwork, requestsPool.get());
 }
 
-PipelineBase::~PipelineBase(){
+AsyncPipeline::~AsyncPipeline(){
     waitForTotalCompletion();
 }
 
-void PipelineBase::waitForData(){
+void AsyncPipeline::waitForData(){
     std::unique_lock<std::mutex> lock(mtx);
 
     condVar.wait(lock, [&] {return callbackException != nullptr ||
@@ -84,7 +84,7 @@ void PipelineBase::waitForData(){
         std::rethrow_exception(callbackException);
 }
 
-int64_t PipelineBase::submitRequest(const InferenceEngine::InferRequest::Ptr& request, const std::shared_ptr<MetaData>& metaData){
+int64_t AsyncPipeline::submitRequest(const InferenceEngine::InferRequest::Ptr& request, const std::shared_ptr<MetaData>& metaData){
     auto frameStartTime = std::chrono::steady_clock::now();
     auto frameID = inputFrameId;
 
@@ -128,7 +128,7 @@ int64_t PipelineBase::submitRequest(const InferenceEngine::InferRequest::Ptr& re
     return frameID;
 }
 
-int64_t PipelineBase::submitImage(cv::Mat img) {
+int64_t AsyncPipeline::submitImage(cv::Mat img) {
     auto request = requestsPool->getIdleRequest();
     if (!request)
         return -1;
@@ -139,9 +139,9 @@ int64_t PipelineBase::submitImage(cv::Mat img) {
     return submitRequest(request, md);
 }
 
-std::unique_ptr<ResultBase> PipelineBase::getResult()
+std::unique_ptr<ResultBase> AsyncPipeline::getResult()
 {
-    auto infResult = PipelineBase::getInferenceResult();
+    auto infResult = AsyncPipeline::getInferenceResult();
     if (infResult.IsEmpty()) {
         return std::unique_ptr<ResultBase>();
     }
@@ -152,7 +152,7 @@ std::unique_ptr<ResultBase> PipelineBase::getResult()
     return result;
 }
 
-InferenceResult PipelineBase::getInferenceResult()
+InferenceResult AsyncPipeline::getInferenceResult()
 {
     InferenceResult retVal;
 

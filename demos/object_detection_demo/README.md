@@ -45,7 +45,7 @@ next section.
             get inference results
             process inference results
             display the frame
-        } 
+        }
     }
 ```
 

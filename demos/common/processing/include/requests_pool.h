@@ -21,7 +21,7 @@
 #include <samples/ocv_common.hpp>
 
 /// This is class storing requests pool for asynchronous pipeline
-/// 
+///
 class RequestsPool
 {
 public:

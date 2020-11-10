@@ -41,4 +41,3 @@ protected:
     InferenceEngine::ExecutableNetwork* execNetwork;
     std::string modelFileName;
 };
-

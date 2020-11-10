@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
         }
 
         InferenceEngine::Core core;
-        PipelineBase pipeline(std::move(model),
+        AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter;

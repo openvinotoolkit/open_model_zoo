@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
         InferenceEngine::Core core;
-        PipelineBase pipeline(std::make_unique<SegmentationModel>(FLAGS_m),
+        AsyncPipeline pipeline(std::make_unique<SegmentationModel>(FLAGS_m),
             ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
             core);
         Presenter presenter;

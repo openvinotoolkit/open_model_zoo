@@ -27,7 +27,7 @@
 
 /// This is base class for asynchronous pipeline
 /// Derived classes should add functions for data submission and output processing
-class PipelineBase
+class AsyncPipeline
 {
 public:
     /// Loads model and performs required initialization
@@ -35,8 +35,8 @@ public:
     /// @param cnnConfig - fine tuning configuration for CNN model
     /// @param engine - reference to InferenceEngine::Core instance to use.
     /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
-    PipelineBase(std::unique_ptr<ModelBase> modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine);
-    virtual ~PipelineBase();
+    AsyncPipeline(std::unique_ptr<ModelBase> modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine);
+    virtual ~AsyncPipeline();
 
     /// Waits until either output data becomes available or pipeline allows to submit more input data.
     /// Function will treat results as ready only if next sequential result (frame) is ready.
@@ -62,7 +62,7 @@ public:
     /// Otherwise returns unique sequential frame ID for this particular request. Same frame ID will be written in the response structure.
     virtual int64_t submitImage(cv::Mat img);
 
-    /// Gets available data from the queue 
+    /// Gets available data from the queue
     /// Function will treat results as ready only if next sequential result (frame) is ready.
     virtual std::unique_ptr<ResultBase> getResult();
 
