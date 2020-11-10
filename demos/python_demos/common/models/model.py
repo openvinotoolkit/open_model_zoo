@@ -2,7 +2,7 @@ from time import perf_counter
 
 
 class Model:
-    def __init__(self, ie, model_path, logger=None):
+    def __init__(self, ie, model_path, logger=None, batch_size=None):
         self.logger = logger
         if self.logger:
             self.logger.info('Reading network from IR...')
@@ -11,6 +11,8 @@ class Model:
         loading_time = (perf_counter() - loading_time)
         if self.logger:
             self.logger.info('Read in {:.3f} seconds'.format(loading_time))
+        if batch_size:
+            self.set_batch_size(batch_size)
 
     def preprocess(self, inputs):
         meta = {}
@@ -18,3 +20,10 @@ class Model:
 
     def postprocess(self, outputs, meta):
         return outputs
+
+    def set_batch_size(self, batch):
+        shapes = {}
+        for input_layer in self.net.input_info:
+            new_shape = [1] + self.net.input_info[input_layer].input_data.shape[1:]
+            shapes.update({input_layer: new_shape})
+        self.net.reshape(shapes)

@@ -107,7 +107,6 @@ class SSD(Model):
 
         self.image_blob_name, self.image_info_blob_name = self._get_inputs()
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
-        assert self.n == 1, 'Only batch size == 1 is supported.'
 
         self.output_parser = self._get_output_parser(self.net, self.image_blob_name)
 

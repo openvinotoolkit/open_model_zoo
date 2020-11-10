@@ -35,7 +35,7 @@ class CenterNet(Model):
         self._output_layer_names = sorted(self.net.outputs)
 
         self._threshold = threshold
-        self.infer_time = -1
+
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
         assert self.c == 3, "Expected 3-channel input"
 

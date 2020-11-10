@@ -126,16 +126,17 @@ class ColorPalette:
 
 def get_model(model_name, ie, args):
     if model_name == 'ssd':
-        return SSD(ie, args.model, log, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
+        return SSD(ie, args.model, log, batch_size=1, labels=args.labels,
+                   keep_aspect_ratio_resize=args.keep_aspect_ratio)
     elif model_name == 'yolo':
-        return YOLO(ie, args.model, log, labels=args.labels,
+        return YOLO(ie, args.model, log,  batch_size=1, labels=args.labels,
                     threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
     elif model_name == 'faceboxes':
-        return FaceBoxes(ie, args.model, log, threshold=args.prob_threshold)
+        return FaceBoxes(ie, args.model, log, batch_size=1, threshold=args.prob_threshold)
     elif model_name == 'centernet':
-        return CenterNet(ie, args.model, log, labels=args.labels, threshold=args.prob_threshold)
+        return CenterNet(ie, args.model, log, batch_size=1, labels=args.labels, threshold=args.prob_threshold)
     elif model_name == 'retina':
-        return RetinaFace(ie, args.model, log, threshold=args.prob_threshold)
+        return RetinaFace(ie, args.model, log,  batch_size=1, threshold=args.prob_threshold)
 
     log.error('No such model type as "{}". See "--type" option for details.'.format(model_name))
     sys.exit(1)
