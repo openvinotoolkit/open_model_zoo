@@ -350,7 +350,7 @@ def main():
             detectors[mode].submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
 
-            _, results = detectors[mode].get_result(next_frame_id_to_show)
+            results = detectors[mode].get_result(next_frame_id_to_show)
             if results:
                 objects, frame_meta = results
                 frame = frame_meta['frame']
