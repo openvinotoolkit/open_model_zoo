@@ -58,18 +58,16 @@ class AsyncPipeline:
         self.event.clear()
         request.async_infer(inputs=inputs)
 
-    def get_raw_result(self, id=None):
+    def get_raw_result(self, id):
         if id in self.completed_request_results:
-            return id, self.completed_request_results.pop(id)
-        elif self.completed_request_results:
-            return self.completed_request_results.popitem()
-        return None, None
+            return self.completed_request_results.pop(id)
+        return None
 
-    def get_result(self, id=None):
-        id, result = self.get_raw_result(id)
+    def get_result(self, id):
+        result = self.get_raw_result(id)
         if result:
-            return id, (self.model.postprocess(*result), result[1])
-        return None, None
+            return self.model.postprocess(*result), result[1]
+        return None
 
     def await_all(self):
         for request in self.exec_net.requests:
