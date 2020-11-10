@@ -57,8 +57,6 @@ class OpenPoseDecoder:
         wup = w * self.out_stride
         assert batch_size == 1
 
-        results = []
-
         min_dist = self.min_dist
         if not self.high_res_heatmaps:
             self.min_dist = 6.0 / self.out_stride
@@ -96,51 +94,58 @@ class OpenPoseDecoder:
             scores = np.zeros(0, dtype=np.float32)
 
         return grouped_kpts, scores
-
-
+        
     def extract_points(self, heatmaps, nms_heatmaps):
         batch_size, channels_num, h, w = heatmaps.shape
         assert batch_size == 1, 'Batch size of 1 only supported'
         assert channels_num >= self.num_joints
-        # print(batch_size, channels_num, h, w)
 
         xs, ys, scores = self.top_k(nms_heatmaps)
-        # print(xs.shape)
-        # print(xs)
-        # print(ys.shape)
-        # print(ys)
 
         masks = scores > self.score_threshold
         all_keypoints = []
         keypoint_id = 0
         for k in range(self.num_joints):
+            # Filter low-score points.
             mask = masks[0, k]
             x = xs[0, k][mask].ravel()
             y = ys[0, k][mask].ravel()
             score = scores[0, k][mask].ravel()
-
-            keypoints = []
-
             n = len(x)
+
             if n == 0:
-                all_keypoints.append(keypoints)
+                all_keypoints.append([])
                 continue
-            
-            suppressed = np.zeros(n, np.bool)
-            for i in range(n):
-                if suppressed[i]:
-                    continue
-                xx = x[i]
-                yy = y[i]
-                for j in range(i + 1, n):
-                    if math.sqrt((xx - x[j]) ** 2 + (yy - y[j]) ** 2) < self.min_dist:
-                        suppressed[j] = True
-                xx, yy = self.refine(heatmaps[0, k], (xx, yy))
-                p = [xx, yy, score[i], keypoint_id]
-                p[0] = max(min(p[0], w - 1), 0)
-                p[1] = max(min(p[1], h - 1), 0)
-                keypoints.append(p)
-                keypoint_id += 1
+
+            # Second stage of NMS.
+            xx = x[:, None] - x[None, :]
+            yy = y[:, None] - y[None, :]
+            dists = np.sqrt(xx * xx + yy * yy)
+            dists += np.tri(n, n, dtype=np.float32) * (2 * self.min_dist)
+            keep = dists.min(axis=0) >= self.min_dist
+            x = x[keep]
+            y = y[keep]
+            score = score[keep]
+
+            # Apply quarter offset to improve localization accuracy.
+            x, y = self.refine(heatmaps[0, k], x, y)
+            np.core.umath.clip(x, 0, w - 1, out=x)
+            np.core.umath.clip(y, 0, h - 1, out=y)
+
+            # Pack resulting points.
+            # keypoints = []
+            # for a, b, c in zip(x, y, score):
+            #     keypoints.append([a, b, c, keypoint_id])
+            #     keypoint_id += 1
+            n = len(x)
+            keypoints = np.empty((n, 4), dtype=np.float32)
+            keypoints[:, 0] = x
+            keypoints[:, 1] = y
+            keypoints[:, 2] = score
+            keypoints[:, 3] = np.arange(keypoint_id, keypoint_id + n)
+            # keypoints = np.stack([x, y, score, np.arange(keypoint_id, keypoint_id + n)], axis=1).astype(dtype=np.float32)
+            keypoint_id += n
+
             all_keypoints.append(keypoints)
         return all_keypoints
 
@@ -152,85 +157,35 @@ class OpenPoseDecoder:
         subind = np.argsort(-scores, axis=2)
         ind = np.take_along_axis(ind, subind, axis=2)
         scores = np.take_along_axis(scores, subind, axis=2)
-        x = ind % W
-        y = ind // W
+        y, x = np.divmod(ind, W)
         return x, y, scores
 
-    def top_k_baseline(self, det, total_keypoint_num):
-        h = det.shape[-2]
-        w = det.shape[-1]
-        nms_det = self.nms(det)
-        scores, indices = nms_det.view(-1).topk(self.max_points, dim=0)
-        indices = indices.reshape(-1)
-        scores = scores.reshape(-1)
-        x = indices % w
-        y = (indices / w).long()
+    def refine(self, heatmap, x, y):
+        h, w = heatmap.shape[-2:]
+        valid = np.logical_and(np.logical_and(0 < x, x < w - 1), np.logical_and(0 < y, y < h - 1))
+        xx = x[valid]
+        yy = y[valid]
+        dx = np.sign(heatmap[yy, xx + 1] - heatmap[yy, xx - 1], dtype=np.float32) * 0.25
+        dy = np.sign(heatmap[yy + 1, xx] - heatmap[yy - 1, xx], dtype=np.float32) * 0.25
+        x = x.astype(np.float32)
+        y = y.astype(np.float32)
+        x[valid] += dx
+        y[valid] += dy
+        return x, y
+      
+    
 
-        mask = scores > self.score_threshold
-        x = x[mask]
-        y = y[mask]
-        scores = scores[mask]
-        
-        keypoints_with_score_and_id = []
-
-        if len(x) == 0:
-            return keypoints_with_score_and_id
-
-        x = x.cpu().numpy()
-        y = y.cpu().numpy()
-        scores = scores.cpu().numpy()
-
-        n = len(scores)
-        suppressed = np.zeros(n, np.bool)
-        keypoints_with_score_and_id = []
-        keypoint_num = 0
-        for i in range(n):
-            if suppressed[i]:
-                continue
-            for j in range(i + 1, n):
-                if math.sqrt((x[i] - x[j]) ** 2 + (y[i] - y[j]) ** 2) < self.min_dist:
-                    suppressed[j] = True
-            xx, yy = self.refine(det, (x[i], y[i]))
-            # xx, yy = x[i], y[i]
-            keypoint_with_score_and_id = [xx, yy, scores[i], total_keypoint_num + keypoint_num]
-            # keypoint_with_score_and_id = [x[i] + 0.5, y[i] + 0.5, scores[i], total_keypoint_num + keypoint_num]
-            # keypoint_with_score_and_id = [x[i], y[i], scores[i], total_keypoint_num + keypoint_num]
-            keypoint_with_score_and_id[0] = max(min(keypoint_with_score_and_id[0], w - 1), 0)
-            keypoint_with_score_and_id[1] = max(min(keypoint_with_score_and_id[1], h - 1), 0)
-            keypoints_with_score_and_id.append(keypoint_with_score_and_id)
-            keypoint_num += 1
-
-        return keypoints_with_score_and_id
-
-    def refine(self, det, max_pos):
-
-        def delta(x, y, epsilon=1e-1):
-            if -epsilon < x - y < epsilon:
-                return 0
-            elif x > y:
-                return 0.25
-            else:
-                return -0.25
-        
-        h = det.shape[-2]
-        w = det.shape[-1]
-        x, y = max_pos
-        y_out = y + delta(det[min(y + 1, h - 1), x], det[max(y - 1, 0), x])
-        x_out = x + delta(det[y, min(x + 1, w - 1)], det[y, max(x - 1, 0)])
-        return x_out, y_out
-
-        
     def group_keypoints(self, all_keypoints_by_type, pafs, pose_entry_size=20, min_paf_score=0.05,
                         skeleton=BODY_PARTS_KPT_IDS, bones_to_channels=BODY_PARTS_PAF_IDS):
 
         all_keypoints = np.asarray([item for sublist in all_keypoints_by_type for item in sublist], dtype=np.float32)
         pose_entries = []
+
+        point_num = 10
+        grid = np.arange(point_num, dtype=np.float32).reshape(1, -1, 1)
             
         for part_id, paf_channel in enumerate(bones_to_channels):
-            # print(pafs.shape)
-            # print(paf_channel)
             part_pafs = pafs[0, :, :, paf_channel:paf_channel + 2]
-            # print(part_pafs.shape)
 
             kpt_a_id, kpt_b_id = skeleton[part_id]
             kpts_a = all_keypoints_by_type[kpt_a_id]
@@ -244,25 +199,25 @@ class OpenPoseDecoder:
             a = np.asarray([p[0:2] for p in kpts_a], dtype=np.float32)
             b = np.asarray([p[0:2] for p in kpts_b], dtype=np.float32)
             n, m = len(a), len(b)
-            a = np.tile(a, (m, 1))
-            b = np.repeat(b, n, axis=0)
 
-            point_num = 10
-            vec_raw = b - a
-            vec_norm = np.linalg.norm(vec_raw, ord=2, axis=1, keepdims=True)
-            vec = np.repeat(vec_raw / (vec_norm + 1e-6), point_num, axis=0)
-            steps = 1 / (point_num - 1) * vec_raw
-            points = steps[:, None, :] * np.arange(point_num, dtype=np.float32)[None, :, None] + a[:, None, :]
-            points = points.round().astype(dtype=np.int32).reshape(-1, 2)
+            a = np.broadcast_to(a[None], (m, n, 2))
+            vec_raw = (b[:, None, :] - a).reshape(-1, 1, 2)
 
-            x = points[:, 0].ravel()
-            y = points[:, 1].ravel()
-            field = part_pafs[y, x].reshape(-1, 2)
-            dot_prod = (field * vec).sum(1).reshape(-1, point_num)
+            vec_norm = np.linalg.norm(vec_raw, ord=2, axis=-1, keepdims=True)
+            vec = vec_raw / (vec_norm + 1e-6)
+            steps = (1 / (point_num - 1) * vec_raw)
+            points = steps * grid + a.reshape(-1, 1, 2)
+            points = points.round().astype(dtype=np.int32)
+
+            x = points[..., 0].ravel()
+            y = points[..., 1].ravel()
+            field = part_pafs[y, x].reshape(-1, point_num, 2)
+            dot_prod = (field * vec).sum(-1).reshape(-1, point_num)
 
             valid_prod = dot_prod > min_paf_score
-            success_ratio = valid_prod.sum(axis=1) / point_num
-            score = (dot_prod * valid_prod).sum(1) / (valid_prod.sum(1) + 1e-6)
+            valid_num = valid_prod.sum(1)
+            success_ratio = valid_num / point_num
+            score = (dot_prod * valid_prod).sum(1) / (valid_num + 1e-6)
 
             valid_limbs = np.where(np.logical_and(score > 0, success_ratio > 0.8))[0]
             b_idx, a_idx = np.divmod(valid_limbs, n)
@@ -282,7 +237,7 @@ class OpenPoseDecoder:
                     break
                 i, j, cur_point_score = connections[row][0:3]
                 if not has_kpt_a[i] and not has_kpt_b[j]:
-                    filtered_connections.append([kpts_a[i][3], kpts_b[j][3], cur_point_score])
+                    filtered_connections.append([int(kpts_a[i][3]), int(kpts_b[j][3]), cur_point_score])
                     has_kpt_a[i] = 1
                     has_kpt_b[j] = 1
             connections = filtered_connections
@@ -362,7 +317,6 @@ class OpenPoseDecoder:
         pose_entries = np.asarray(filtered_entries)
         # pose_entries = np.asarray(pose_entries)
         return pose_entries, all_keypoints
-
 
     def convert_to_coco_format(self, pose_entries, all_keypoints, reorder_map=None):
         num_joints = 17
