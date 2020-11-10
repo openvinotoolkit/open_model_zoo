@@ -21,8 +21,6 @@ import os.path as osp
 import random
 import sys
 from argparse import ArgumentParser, SUPPRESS
-from itertools import cycle, islice
-from enum import Enum
 from time import perf_counter
 
 import cv2
@@ -125,12 +123,6 @@ class ColorPalette:
         return len(self.palette)
 
 
-class Modes(Enum):
-    USER_SPECIFIED = 0
-    MIN_LATENCY = 1
-    SYNC = 2
-
-
 class ModeInfo:
     def __init__(self):
         self.last_start_time = perf_counter()
@@ -163,7 +155,6 @@ def put_highlighted_text(frame, message, position, font_face, font_scale, color,
 
 def get_plugin_configs(device, num_streams, num_threads):
     config_user_specified = {}
-    config_min_latency = {}
 
     devices_nstreams = {}
     if num_streams:
@@ -179,17 +170,13 @@ def get_plugin_configs(device, num_streams, num_threads):
                 if int(devices_nstreams['CPU']) > 0 \
                 else 'CPU_THROUGHPUT_AUTO'
 
-        config_min_latency['CPU_THROUGHPUT_STREAMS'] = '1'
-
     if 'GPU' in device:
         if 'GPU' in devices_nstreams:
             config_user_specified['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] \
                 if int(devices_nstreams['GPU']) > 0 \
                 else 'GPU_THROUGHPUT_AUTO'
 
-        config_min_latency['GPU_THROUGHPUT_STREAMS'] = '1'
-
-    return config_user_specified, config_min_latency
+    return config_user_specified
 
 
 def draw_detections(frame, detections, palette, labels, threshold, draw_landmarks=False):
@@ -232,7 +219,7 @@ def main():
     log.info('Initializing Inference Engine...')
     ie = IECore()
 
-    config_user_specified, config_min_latency = get_plugin_configs(args.device, args.num_streams, args.num_threads)
+    plugin_config = get_plugin_configs(args.device, args.num_streams, args.num_threads)
 
     log.info('Loading network...')
 
@@ -240,29 +227,13 @@ def main():
     has_landmarks = args.type == 'retina'
 
     if args.sync:
-        mode = Modes.SYNC
-        mode_info = {mode: ModeInfo()} # For backward compatibility with statistics gatherer
-        detector = SyncPipeline(ie, model, device=args.device)
+        mode_info = ModeInfo()
+        detector_pipeline = SyncPipeline(ie, model, device=args.device)
     else:
-        completed_request_results = {}
-        modes = cycle(islice(Modes, 2))
-        prev_mode = mode = next(modes)
-
-        mode_info = {mode: ModeInfo()}
-        exceptions = []
-        detectors = {
-            Modes.USER_SPECIFIED:
-                AsyncPipeline(ie, model, device=args.device, plugin_config=config_user_specified,
-                              caught_exceptions=exceptions, completed_requests=completed_request_results,
-                              max_num_requests=args.num_infer_requests),
-            Modes.MIN_LATENCY:
-                AsyncPipeline(ie, model, device=args.device, plugin_config=config_min_latency,
-                              caught_exceptions=exceptions, completed_requests=completed_request_results,
-                              max_num_requests=args.num_infer_requests)
-        }
-
-    log.info('Using {} mode'.format(mode.name))
-
+        mode_info = ModeInfo()
+        detector_pipeline = AsyncPipeline(ie, model, device=args.device,
+                                          plugin_config=plugin_config,
+                                          max_num_requests=args.num_infer_requests)
 
     try:
         input_stream = int(args.input)
@@ -282,7 +253,6 @@ def main():
 
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-    print("To switch between min_latency/user_specified modes, press TAB key in the output window")
 
     palette = ColorPalette(len(model.labels) if model.labels else 100)
     presenter = monitors.Presenter(args.utilization_monitors, 55,
@@ -301,28 +271,24 @@ def main():
                     cap.release()
                 continue
 
-            detections, _ = detector.submit_data(frame)
+            detections, _ = detector_pipeline.submit_data(frame)
 
             if len(detections) and args.raw_output_message:
                 print_raw_results(frame.shape[:2], detections, model.labels, args.prob_threshold)
 
-            origin_im_size = frame.shape[:-1]
             presenter.drawGraphs(frame)
             frame = draw_detections(frame, detections, palette, model.labels, args.prob_threshold, has_landmarks)
-            mode_message = '{} mode'.format(mode.name)
-            put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
-                                 cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
 
-            mode_info[mode].frames_count += 1
-            mode_info[mode].last_end_time = perf_counter()
+            mode_info.frames_count += 1
+            mode_info.last_end_time = perf_counter()
 
             # Frames count is always zero if mode has just been switched (i.e. prev_mode != mode).
-            if mode_info[mode].frames_count != 0:
-                fps_message = 'FPS: {:.1f}'.format(mode_info[mode].frames_count / \
-                                                   (perf_counter() - mode_info[mode].last_start_time))
-                mode_info[mode].latency_sum += perf_counter() - start_time
-                latency_message = 'Latency: {:.1f} ms'.format((mode_info[mode].latency_sum / \
-                                                               mode_info[mode].frames_count) * 1e3)
+            if mode_info.frames_count != 0:
+                fps_message = 'FPS: {:.1f}'.format(mode_info.frames_count / \
+                                                   (perf_counter() - mode_info.last_start_time))
+                mode_info.latency_sum += perf_counter() - start_time
+                latency_message = 'Latency: {:.1f} ms'.format((mode_info.latency_sum / \
+                                                               mode_info.frames_count) * 1e3)
                 # Draw performance stats over frame.
                 put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
                 put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
@@ -347,10 +313,10 @@ def main():
                     cap.release()
                 continue
 
-            detectors[mode].submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+            detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
 
-            results = detectors[mode].get_result(next_frame_id_to_show)
+            results = detector_pipeline.get_result(next_frame_id_to_show)
             if results:
                 objects, frame_meta = results
                 frame = frame_meta['frame']
@@ -359,27 +325,19 @@ def main():
                 if len(objects) and args.raw_output_message:
                     print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
 
-                origin_im_size = frame.shape[:-1]
                 presenter.drawGraphs(frame)
                 frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, has_landmarks)
-                mode_message = '{} mode'.format(mode.name)
-                put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
-                                     cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
 
                 next_frame_id_to_show += 1
-                if prev_mode == mode:
-                    mode_info[mode].frames_count += 1
-                elif len(completed_request_results) == 0:
-                    mode_info[prev_mode].last_end_time = perf_counter()
-                    prev_mode = mode
+                mode_info.frames_count += 1
 
                 # Frames count is always zero if mode has just been switched (i.e. prev_mode != mode).
-                if mode_info[mode].frames_count != 0:
-                    fps_message = 'FPS: {:.1f}'.format(mode_info[mode].frames_count / \
-                                                       (perf_counter() - mode_info[mode].last_start_time))
-                    mode_info[mode].latency_sum += perf_counter() - start_time
-                    latency_message = 'Latency: {:.1f} ms'.format((mode_info[mode].latency_sum / \
-                                                                   mode_info[mode].frames_count) * 1e3)
+                if mode_info.frames_count != 0:
+                    fps_message = 'FPS: {:.1f}'.format(
+                        mode_info.frames_count / (perf_counter() - mode_info.last_start_time))
+                    mode_info.latency_sum += perf_counter() - start_time
+                    latency_message = 'Latency: {:.1f} ms'.format(
+                        (mode_info.latency_sum / mode_info.frames_count) * 1e3)
                     # Draw performance stats over frame.
                     put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
                     put_highlighted_text(frame, latency_message, (15, 50),
@@ -390,40 +348,27 @@ def main():
                     key = cv2.waitKey(1)
 
                     ESC_KEY = 27
-                    TAB_KEY = 9
                     # Quit.
                     if key in {ord('q'), ord('Q'), ESC_KEY}:
                         break
-                    # Switch mode.
-                    # Disable mode switch if the previous switch has not been finished yet.
-                    if key == TAB_KEY and mode_info[mode].frames_count > 0:
-                        mode = next(modes)
-                        detectors[prev_mode].await_all()
-                        mode_info[prev_mode].last_end_time = perf_counter()
-                        mode_info[mode] = ModeInfo()
-                        log.info('Using {} mode'.format(mode.name))
-                    else:
-                        presenter.handleKey(key)
+                    presenter.handleKey(key)
                 next_frame_id_to_show += 1
 
-            detectors[mode].await_any()
+            detector_pipeline.await_any()
 
-        if exceptions:
-            raise exceptions[0]
+            if detector_pipeline.callback_exceptions:
+                raise detector_pipeline.callback_exceptions[0]
 
-        for exec_net in detectors.values():
-            exec_net.await_all()
+        detector_pipeline.await_all()
 
-    for mode_value, mode_stats in mode_info.items():
-        log.info('')
-        log.info('Mode: {}'.format(mode_value.name))
+    log.info('')
 
-        end_time = mode_stats.last_end_time if mode_stats.last_end_time is not None \
-            else perf_counter()
-        log.info('FPS: {:.1f}'.format(mode_stats.frames_count / \
-                                      (end_time - mode_stats.last_start_time)))
-        log.info('Latency: {:.1f} ms'.format((mode_stats.latency_sum / \
-                                              mode_stats.frames_count) * 1e3))
+    end_time = mode_info.last_end_time if mode_info.last_end_time is not None \
+        else perf_counter()
+    log.info('FPS: {:.1f}'.format(mode_info.frames_count / \
+                                  (end_time - mode_info.last_start_time)))
+    log.info('Latency: {:.1f} ms'.format((mode_info.latency_sum / \
+                                          mode_info.frames_count) * 1e3))
     print(presenter.reportMeans())
 
 
