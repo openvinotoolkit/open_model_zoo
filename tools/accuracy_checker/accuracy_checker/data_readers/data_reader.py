@@ -366,7 +366,7 @@ class NumPyReader(BaseReader):
         parameters = super().parameters()
         parameters.update({
             'keys': StringField(optional=True, default="", description='Comma-separated model input names.'),
-            'separator': StringField(optional=True, default="@",
+            'separator': StringField(optional=True,
                                      description='Separator symbol between input identifier and file identifier.'),
             'id_sep': StringField(
                 optional=True, default="_",
@@ -398,7 +398,7 @@ class NumPyReader(BaseReader):
     def read(self, data_id):
         field_id = None
         if self.separator:
-            field_id, data_id = data_id.split(self.separator)
+            field_id, data_id = str(data_id).split(self.separator)
 
         data = np.load(str(self.data_source / data_id))
 
