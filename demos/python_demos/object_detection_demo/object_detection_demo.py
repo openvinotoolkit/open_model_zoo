@@ -30,8 +30,9 @@ from openvino.inference_engine import IECore
 sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
 
 from models import *
-from pipelines import AsyncPipeline, SyncPipeline
 import monitors
+from pipelines import AsyncPipeline, SyncPipeline
+from performance_metrics import PerformanceMetrics
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
 log = logging.getLogger()
@@ -255,6 +256,8 @@ def main():
                                    (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4),
                                     round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
+    metrics = PerformanceMetrics()
+
     if args.sync:
         while cap.isOpened():
             start_time = perf_counter()
@@ -274,19 +277,7 @@ def main():
             presenter.drawGraphs(frame)
             frame = draw_detections(frame, detections, palette, model.labels, args.prob_threshold, has_landmarks)
 
-            mode_info.frames_count += 1
-            mode_info.last_end_time = perf_counter()
-
-            # Frames count is always zero if mode has just been switched (i.e. prev_mode != mode).
-            if mode_info.frames_count != 0:
-                fps_message = 'FPS: {:.1f}'.format(mode_info.frames_count / \
-                                                   (perf_counter() - mode_info.last_start_time))
-                mode_info.latency_sum += perf_counter() - start_time
-                latency_message = 'Latency: {:.1f} ms'.format((mode_info.latency_sum / \
-                                                               mode_info.frames_count) * 1e3)
-                # Draw performance stats over frame.
-                put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
-                put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
+            metrics.update(start_time, frame)
 
             if not args.no_show:
                 cv2.imshow('Detection Results', frame)
@@ -321,22 +312,7 @@ def main():
 
                 presenter.drawGraphs(frame)
                 frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, has_landmarks)
-
-                next_frame_id_to_show += 1
-                mode_info.frames_count += 1
-
-                # Frames count is always zero if mode has just been switched (i.e. prev_mode != mode).
-                if mode_info.frames_count != 0:
-                    fps_message = 'FPS: {:.1f}'.format(
-                        mode_info.frames_count / (perf_counter() - mode_info.last_start_time))
-                    mode_info.latency_sum += perf_counter() - start_time
-                    latency_message = 'Latency: {:.1f} ms'.format(
-                        (mode_info.latency_sum / mode_info.frames_count) * 1e3)
-                    # Draw performance stats over frame.
-                    put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
-                    put_highlighted_text(frame, latency_message, (15, 50),
-                                         cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
-
+                metrics.update(start_time, frame)
                 if not args.no_show:
                     cv2.imshow('Detection Results', frame)
                     key = cv2.waitKey(1)
@@ -355,14 +331,7 @@ def main():
 
         detector_pipeline.await_all()
 
-    log.info('')
-
-    end_time = mode_info.last_end_time if mode_info.last_end_time is not None \
-        else perf_counter()
-    log.info('FPS: {:.1f}'.format(mode_info.frames_count / \
-                                  (end_time - mode_info.last_start_time)))
-    log.info('Latency: {:.1f} ms'.format((mode_info.latency_sum / \
-                                          mode_info.frames_count) * 1e3))
+    metrics.print_total()
     print(presenter.reportMeans())
 
 
