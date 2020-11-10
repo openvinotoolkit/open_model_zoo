@@ -101,7 +101,7 @@ MemorySection load_file(const std::string& filename) {
     throw std::runtime_error("Cannot open file: " + filename);
 
   is.seekg(0, std::ios::end);
-  if (is.tellg() >= std::numeric_limits<size_t>::max())
+  if (uintmax_t(is.tellg()) >= std::numeric_limits<size_t>::max())
     throw std::range_error("File size exceeds size_t: " + filename);
   size_t file_length = is.tellg();
   is.seekg(0, std::ios::beg);
@@ -109,7 +109,7 @@ MemorySection load_file(const std::string& filename) {
   std::shared_ptr<ManagedMemory> mm(std::make_shared<ManagedMemory>(file_length));
 
   is.read(reinterpret_cast<char *>(mm->ptr()), file_length);
-  if (is.gcount() != file_length)
+  if (size_t(is.gcount()) != file_length)
     throw std::runtime_error("Some problem while reading file: " + filename);
 
   return MemorySection(mm);

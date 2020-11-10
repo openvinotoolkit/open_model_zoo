@@ -94,7 +94,7 @@ std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
           continue;
         }
         // repeated character
-        if (c == prefix->character) {
+        if (c == size_t(prefix->character)) {
           prefix->log_prob_nb_cur = log_sum_exp(
               prefix->log_prob_nb_cur, log_prob_c + prefix->log_prob_nb_prev);
         }
@@ -104,16 +104,16 @@ std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
         if (prefix_new != nullptr) {
           float log_p = -NUM_FLT_INF;
 
-          if (c == prefix->character &&
+          if (c == size_t(prefix->character) &&
               prefix->log_prob_b_prev > -NUM_FLT_INF) {
             log_p = log_prob_c + prefix->log_prob_b_prev;
-          } else if (c != prefix->character) {
+          } else if (c != size_t(prefix->character)) {
             log_p = log_prob_c + prefix->score;
           }
 
           // language model scoring
           if (ext_scorer != nullptr &&
-              (c == space_id || ext_scorer->is_character_based())) {
+              (c == size_t(space_id) || ext_scorer->is_character_based())) {
             PathTrie *prefix_to_score = nullptr;
             // skip scoring the space
             if (ext_scorer->is_character_based()) {
