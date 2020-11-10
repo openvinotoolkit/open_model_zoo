@@ -47,10 +47,10 @@ def build_argparser():
                       choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
     args.add_argument('-i', '--input', required=True, type=str,
                       help='Required. Path to an image, folder with images, video file or a numeric camera ID.')
-    args.add_argument('-d', '--device',
+    args.add_argument('-d', '--device', default='CPU', type=str,
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
-                           'Default value is CPU.', default='CPU', type=str)
+                           'Default value is CPU.')
 
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
@@ -69,8 +69,8 @@ def build_argparser():
                             default='', type=str)
     infer_args.add_argument('-nthreads', '--num_threads', default=None, type=int,
                             help='Optional. Number of threads to use for inference on CPU (including HETERO cases)')
-    infer_args.add_argument('-loop', '--loop', help='Optional. Number of times to repeat the input.',
-                            type=int, default=0)
+    infer_args.add_argument('-loop', '--loop', help='Optional. Loops input data.',
+                            action='store_true', default=False)
     infer_args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
     infer_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                             help='Optional. List of monitors to show initially.')
@@ -239,17 +239,13 @@ def main():
         input_stream = int(args.input)
     except ValueError:
         input_stream = args.input
-    try:
-        cap = cv2.VideoCapture(input_stream)
-        if not cap.isOpened():
-            raise Exception('OpenCV: Failed to open capture: ' + str(input_stream))
-    except Exception as e:
-        log.error(e)
+    cap = cv2.VideoCapture(input_stream)
+    if not cap.isOpened():
+        log.error('OpenCV: Failed to open capture: ' + str(input_stream))
         sys.exit(1)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
-    input_repeats = 0
 
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
@@ -264,9 +260,8 @@ def main():
             start_time = perf_counter()
             ret, frame = cap.read()
             if not ret:
-                if input_repeats < args.loop or args.loop < 0:
+                if args.loop:
                     cap.open(input_stream)
-                    input_repeats += 1
                 else:
                     cap.release()
                 continue
@@ -306,9 +301,8 @@ def main():
             start_time = perf_counter()
             ret, frame = cap.read()
             if not ret:
-                if input_repeats < args.loop or args.loop < 0:
+                if args.loop:
                     cap.open(input_stream)
-                    input_repeats += 1
                 else:
                     cap.release()
                 continue
