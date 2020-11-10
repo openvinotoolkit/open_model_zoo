@@ -68,13 +68,6 @@ class YOLO(Model):
             output_info[layer_name] = (shape, yolo_params)
         return output_info
 
-    def unify_inputs(self, inputs) -> dict:
-        if not isinstance(inputs, dict):
-            inputs_dict = {self.image_blob_name: inputs}
-        else:
-            inputs_dict = inputs
-        return inputs_dict
-
     def preprocess(self, inputs):
         img = self.resize_image(inputs[self.image_blob_name], (self.w, self.h))
         meta = {'original_shape': inputs[self.image_blob_name].shape,

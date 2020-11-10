@@ -134,13 +134,6 @@ class SSD(Model):
             pass
         raise RuntimeError('Unsupported model outputs')
 
-    def unify_inputs(self, inputs) -> dict:
-        if not isinstance(inputs, dict):
-            inputs_dict = {self.image_blob_name: inputs}
-        else:
-            inputs_dict = inputs
-        return inputs_dict
-
     def preprocess(self, inputs):
         img = resize_image(inputs[self.image_blob_name], (self.w, self.h), self.keep_aspect_ratio_resize)
         h, w = img.shape[:2]

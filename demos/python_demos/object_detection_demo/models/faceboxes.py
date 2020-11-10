@@ -61,13 +61,6 @@ class FaceBoxes(Model):
             "Expected the same dimension for boxes and scores"
         return bboxes_blob_name, scores_blob_name
 
-    def unify_inputs(self, inputs) -> dict:
-        if not isinstance(inputs, dict):
-            inputs_dict = {self.image_blob_name: inputs}
-        else:
-            inputs_dict = inputs
-        return inputs_dict
-
     def preprocess(self, inputs):
         img = resize_image(inputs[self.image_blob_name], (self.w, self.h))
         meta = {'original_shape': inputs[self.image_blob_name].shape,

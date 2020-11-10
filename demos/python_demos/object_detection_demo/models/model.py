@@ -12,9 +12,6 @@ class Model:
         if self.logger:
             self.logger.info('Read in {:.3f} seconds'.format(loading_time))
 
-    def unify_inputs(self, inputs) -> dict:
-        raise NotImplementedError
-
     def preprocess(self, inputs):
         meta = {}
         return inputs, meta

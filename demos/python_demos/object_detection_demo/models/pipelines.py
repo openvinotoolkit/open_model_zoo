@@ -11,7 +11,6 @@ class SyncPipeline:
         self.exec_net = ie.load_network(network=self.model.net, device_name=self.device)
 
     def submit_data(self, inputs):
-        inputs = self.model.unify_inputs(inputs)
         inputs, meta = self.model.preprocess(inputs)
         outputs = self.exec_net.infer(inputs=inputs)
         outputs = self.model.postprocess(outputs, meta)
@@ -52,7 +51,6 @@ class AsyncPipeline:
 
     def submit_data(self, inputs, id, meta):
         request = self.empty_requests.popleft()
-        inputs = self.model.unify_inputs(inputs)
         inputs, preprocessing_meta = self.model.preprocess(inputs)
         meta.update(preprocessing_meta)
         request.set_completion_callback(py_callback=self.inference_completion_callback,
