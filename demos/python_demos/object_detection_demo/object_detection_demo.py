@@ -124,14 +124,6 @@ class ColorPalette:
         return len(self.palette)
 
 
-class ModeInfo:
-    def __init__(self):
-        self.last_start_time = perf_counter()
-        self.last_end_time = None
-        self.frames_count = 0
-        self.latency_sum = 0
-
-
 def get_model(model_name, ie, args):
     if model_name == 'ssd':
         return SSD(ie, args.model, log, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
@@ -228,10 +220,8 @@ def main():
     has_landmarks = args.type == 'retina'
 
     if args.sync:
-        mode_info = ModeInfo()
         detector_pipeline = SyncPipeline(ie, model, device=args.device)
     else:
-        mode_info = ModeInfo()
         detector_pipeline = AsyncPipeline(ie, model, device=args.device,
                                           plugin_config=plugin_config,
                                           max_num_requests=args.num_infer_requests)
