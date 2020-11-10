@@ -30,8 +30,6 @@ git apply /path/to/pytorch-onnx.patch
 python convert.py ctdet --load_model /path/to/downloaded/weights.pth --exp_id coco_dlav0_384 --arch dlav0_34 --input_res 384 --gpus -1
 ```
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -46,8 +44,6 @@ python convert.py ctdet --load_model /path/to/downloaded/weights.pth --exp_id co
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
 | mAP    | 41.81%          | 41.61%            |
-
-## Performance
 
 ## Input
 

@@ -10,8 +10,6 @@ For details on the original DeepSpeech, see paper <https://arxiv.org/abs/1412.55
 
 For details on this model, see <https://github.com/mozilla/DeepSpeech/releases/tag/v0.6.1>.
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -31,8 +29,6 @@ For details on this model, see <https://github.com/mozilla/DeepSpeech/releases/t
 
 *NB*: beam_width=32 is a low value for a CTC decoder, and was used to achieve reasonable evaluation time with Python CTC decoder in Accuracy Checker.
 Increasing beam_width improves WER metric and slows down decoding.  Speech recognition demo has a faster C++ CTC decoder module.
-
-## Performance
 
 ## Input
 

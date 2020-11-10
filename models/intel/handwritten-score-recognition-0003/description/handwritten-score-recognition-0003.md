@@ -20,8 +20,6 @@ The network is able to recognize school marks that should have format either `<d
 | MParams                                        | 5.555              |
 | Source framework                               | TensorFlow         |
 
-## Performance
-
 ## Inputs
 
 Shape: [1x1x32x64] - An input image in the format [BxCxHxW],

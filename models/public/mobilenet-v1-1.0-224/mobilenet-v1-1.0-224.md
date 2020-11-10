@@ -4,8 +4,6 @@
 
 `mobilenet-v1-1.0-224` is one of [MobileNet V1 architecture](https://arxiv.org/abs/1704.04861) with the width multiplier 1.0 and resolution 224. It is small, low-latency, low-power models parameterized to meet the resource constraints of a variety of use cases. They can be built upon for classification, detection, embeddings and segmentation similar to how other popular large scale models are used.
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -21,8 +19,6 @@
 | ------ | ----- |
 | Top 1  | 69.496%|
 | Top 5  | 89.224%|
-
-## Performance
 
 ## Input
 

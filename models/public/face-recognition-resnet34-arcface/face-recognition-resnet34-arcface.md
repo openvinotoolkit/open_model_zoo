@@ -6,8 +6,6 @@ The original name of the model is [LResNet34E-IR,ArcFace@ms1m-refine-v1](https:/
 
 [Deep face recognition net with ResNet34 backbone and Arcface loss](https://arxiv.org/abs/1801.07698)
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -22,8 +20,6 @@ The original name of the model is [LResNet34E-IR,ArcFace@ms1m-refine-v1](https:/
 | Metric | Value |
 | ------ | ----- |
 | LFW accuracy| 98.7488%|
-
-## Performance
 
 ## Input
 

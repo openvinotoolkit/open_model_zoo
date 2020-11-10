@@ -12,8 +12,6 @@ prior boxes for 512x512 resolution.
 
 ## Specification
 
-## Specification
-
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | AP @ [ IoU=0.50:0.95 ]          | 0.369 (internal test set)                 |
@@ -24,8 +22,6 @@ prior boxes for 512x512 resolution.
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve.
-
-## Performance
 
 ## Inputs
 

@@ -8,8 +8,6 @@ The model input is a blob that consists of a single image of 1x3x224x224 in BGR 
 
 The model output for `googlenet-v2` is the typical object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -27,8 +25,6 @@ The model output for `googlenet-v2` is the typical object classifier output for 
 | Top 5  | 90.844%|
 
 See [the original repository](https://github.com/lim0606/caffe-googlenet-bn).
-
-## Performance
 
 ## Input
 

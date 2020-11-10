@@ -6,7 +6,6 @@ This is a Caffe2\* version of `vgg19` model, designed to perform image classific
 This model was converted from Caffe\* to Caffe2\* format.
 For details see repository <https://github.com/facebookarchive/models/tree/master/vgg19>,
 paper <https://arxiv.org/abs/1409.1556>.
-## Example
 
 ## Specification
 
@@ -23,8 +22,6 @@ paper <https://arxiv.org/abs/1409.1556>.
 | ------ | ----- |
 | Top 1  | 71.062%|
 | Top 5  | 89.832%|
-
-## Performance
 
 ## Input
 

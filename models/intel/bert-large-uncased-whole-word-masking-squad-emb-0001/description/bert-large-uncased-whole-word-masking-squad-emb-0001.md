@@ -36,8 +36,6 @@ The top5 is calculated as follow:
 2. For each question from  SQuAD v1.1 dev set the question embedding vector is calculated and compared with each previously calculated context embedding vector. If the right context is in top 5 context embedding closest to question embedding then top5_count increased by 1.
 3. top5 = top5_count / question_number
 
-## Performance
-
 ## Input
 
 1. Token IDs, name: `input_ids`, shape: [1x384] for context and [1x32] for question.

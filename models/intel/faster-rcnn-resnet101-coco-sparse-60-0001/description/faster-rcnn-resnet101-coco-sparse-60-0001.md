@@ -19,8 +19,6 @@ The model input is a blob that consists of a single image of `1x3x800x1280` in t
 
 See Average Precision metric description at [COCO: Common Objects in Context](https://cocodataset.org/#detection-eval). The primary challenge metric is used. Tested on the COCO validation dataset.
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x800x1280] - An input image in the format [BxCxHxW],

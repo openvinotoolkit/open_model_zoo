@@ -32,8 +32,6 @@ Chinese license plates in traffic.
 Only "blue" license plates, which are common in public, were tested
 thoroughly. Other types of license plates may underperform.
 
-## Performance
-
 ## Inputs
 
 1.	name: "data" , shape: [1x3x24x94] - An input image in following format [1xCxHxW]. Expected color order is BGR.

@@ -37,8 +37,6 @@ The formula-recognition-polynomials-handwritten-0001-encoder model is a ResNeXt-
 | MParams                                       | 8.6838    |
 
 
-### Performance
-
 ### Inputs
 
 1.	Name: `imgs` , shape: [1x3x96x990]. An input image in the [1xCxHxW] format.
@@ -62,8 +60,6 @@ The formula-recognition-polynomials-handwritten-0001-decoder model is an LSTM ba
 | MParams                                       | 2.5449    |
 
 
-
-### Performance
 
 ### Inputs
 

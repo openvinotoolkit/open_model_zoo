@@ -42,8 +42,6 @@ Similarly, training dataset has 219,181 images with:
 | Pedestrian     | 1,114,799                |
 | Non-vehicle    | 62,334                   |
 
-## Performance
-
 ## Inputs
 
 1. name: "input.1" , shape: [1x3x512x512] - An input image in the format [BxCxHxW],

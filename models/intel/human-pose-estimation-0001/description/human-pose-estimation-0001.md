@@ -23,8 +23,6 @@ Average Precision metric described in [COCO Keypoint Evaluation site](https://co
 
 Tested on a COCO validation subset from the original paper [Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields](https://arxiv.org/abs/1611.08050).
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x256x456]. An input image in the [BxCxHxW] format ,

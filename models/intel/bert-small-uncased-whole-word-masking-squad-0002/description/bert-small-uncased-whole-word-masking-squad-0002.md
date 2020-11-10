@@ -30,8 +30,6 @@ The quality metrics were calculated on the SQuAD v1.1 dataset ("dev" split). Max
 | F1                        |        91.9%  |
 | Exact match (EM)          |        85.4%  |
 
-## Performance
-
 ## Input
 
 1. Token IDs, name: `input_ids`, shape: [1x384].

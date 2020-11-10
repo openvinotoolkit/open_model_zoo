@@ -32,8 +32,6 @@ Chinese license plates in traffic.
 Only "blue" license plates, which are common in public, were tested
 thoroughly. Other types of license plates may underperform.
 
-## Performance
-
 ## Inputs
 
 ### Original Model

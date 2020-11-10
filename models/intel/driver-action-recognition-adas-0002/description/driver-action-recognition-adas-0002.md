@@ -26,8 +26,6 @@ Video frames should be sampled to cover ~1 second fragment (i.e. skip every seco
 | MParams                         | 2.863                                     |
 
 
-### Performance
-
 ### Inputs
 
 1. name: "0" , shape: [1x3x224x224] - An input image in the format [BxCxHxW],
@@ -53,8 +51,6 @@ The driver-action-recognition-adas-0002-decoder model accepts stack of frame emb
 | GFlops                          | 0.147                                     |
 | MParams                         | 4.205                                     |
 
-
-### Performance
 
 ### Inputs
 

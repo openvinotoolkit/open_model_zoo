@@ -18,8 +18,6 @@ by 0.017.
 The model output for `densenet-169` is the typical object classifier output for
 the 1000 different classifications matching those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -37,8 +35,6 @@ the 1000 different classifications matching those in the ImageNet database.
 | Top 5  | 93.106% |
 
 See [the original repository](https://github.com/shicai/DenseNet-Caffe).
-
-## Performance
 
 ## Input
 
