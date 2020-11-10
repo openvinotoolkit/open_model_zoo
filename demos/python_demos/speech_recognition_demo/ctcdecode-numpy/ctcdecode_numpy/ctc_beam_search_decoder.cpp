@@ -177,7 +177,7 @@ std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
       std::vector<int> output;
       std::vector<int> timesteps;
       prefixes[i]->get_path_vec(output, timesteps);
-      auto prefix_length = output.size();
+      //auto prefix_length = output.size();
       auto words = ext_scorer->split_labels(output);
       // remove word insert
       //approx_ctc = approx_ctc - prefix_length * ext_scorer->beta;
