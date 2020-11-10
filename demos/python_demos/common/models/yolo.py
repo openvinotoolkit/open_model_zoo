@@ -69,7 +69,7 @@ class YOLO(Model):
         return output_info
 
     def preprocess(self, inputs):
-        img = self.resize_image(inputs[self.image_blob_name], (self.w, self.h))
+        img = self.resize_image(inputs[self.image_blob_name], self.w, self.h)
         meta = {'original_shape': inputs[self.image_blob_name].shape,
                 'resized_shape': img.shape}
         if self.nchw_shape:
