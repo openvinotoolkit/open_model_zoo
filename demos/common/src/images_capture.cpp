@@ -162,15 +162,18 @@ public:
 std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input, bool loop, size_t initialImageId,
         size_t readLengthLimit, cv::Size cameraResolution) {
     if (readLengthLimit == 0) throw std::runtime_error{"Read length limit must be positive"};
+    // It is recommended to read an image with imread() instead of VideoCapture, so ImreadWrapper goes before
+    // VideoCapWrapper. VideoCapture can't read dirs. 0 as input can be ambiguous. One can provide ./0 to trigger
+    // DirReader, thus put VideoCapWrapper before DirReader.
     try {
         return std::unique_ptr<ImagesCapture>(new ImreadWrapper{input, loop});
     } catch (const InvalidInput &) {}
     try {
-        return std::unique_ptr<ImagesCapture>(new DirReader{input, loop, initialImageId, readLengthLimit});
-    } catch (const InvalidInput &) {}
-    try {
         return std::unique_ptr<ImagesCapture>(new VideoCapWrapper{input, loop, initialImageId, readLengthLimit,
             cameraResolution});
+    } catch (const InvalidInput &) {}
+    try {
+        return std::unique_ptr<ImagesCapture>(new DirReader{input, loop, initialImageId, readLengthLimit});
     } catch (const InvalidInput &) {}
     throw std::runtime_error{"Can't read " + input};
 }
