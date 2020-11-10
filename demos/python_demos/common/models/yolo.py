@@ -65,7 +65,6 @@ class YOLO(Model):
         else:
             self.n, self.h, self.w, self.c = self.net.input_info[self.image_blob_name].input_data.shape
             self.nchw_shape = False
-        assert self.n == 1, 'Only batch size == 1 is supported.'
 
         self.yolo_layer_params = self._get_output_info()
 

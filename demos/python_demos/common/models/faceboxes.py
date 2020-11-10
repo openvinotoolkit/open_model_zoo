@@ -34,10 +34,8 @@ class FaceBoxes(Model):
 
         self.labels = ['Face']
 
-        self.infer_time = -1
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
         assert self.c == 3, "Expected 3-channel input"
-        assert self.n == 1, "Only batch size == 1 is supported."
 
         self.min_sizes = [[32, 64, 128], [256], [512]]
         self.steps = [32, 64, 128]
