@@ -1055,3 +1055,12 @@ datasets:
       label_id: 43
     annotation: antispoofing.pickle
     dataset_meta: antispoofing.json
+
+  - name: sound_classification
+    data_source: audio_dataset
+    annotation_conversion:
+      converter: sound_classification
+      annotation_file: audio_dataset/validation.csv
+      audio_dir: audio_dataset/data
+    annotation: sound_classification.pickle
+    reader: wav_reader
