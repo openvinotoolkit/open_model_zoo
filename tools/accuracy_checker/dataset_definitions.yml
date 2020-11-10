@@ -906,7 +906,7 @@ datasets:
       masks_dir: free_form_masks/masks_2k
     annotation: inpainting_voc12_masks2k.pickle
 
-  - name: inpainting_rect_mask
+  - name: inpainting_rect_masks
     data_source: VOCdevkit/VOC2012/JPEGImages/
     annotation_conversion:
       converter: inpainting
