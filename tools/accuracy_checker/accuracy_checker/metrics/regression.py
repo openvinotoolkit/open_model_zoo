@@ -40,7 +40,9 @@ from ..representation import (
     StyleTransferPrediction,
     FeaturesRegressionAnnotation,
     PoseEstimationAnnotation,
-    PoseEstimationPrediction
+    PoseEstimationPrediction,
+    OpticalFlowAnnotation,
+    OpticalFlowPrediction
 )
 
 from .metric import PerImageEvaluationMetric
@@ -676,3 +678,14 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
     def reset(self):
         self.jnt_count = np.zeros(self.num_joints)
         self.pck = np.zeros(self.num_joints)
+
+
+class EndPointError(BaseRegressionMetric):
+    __provider__ = 'epe'
+    annotation_types = (OpticalFlowAnnotation, )
+    prediction_types = (OpticalFlowPrediction, )
+
+    def __init__(self, *args, **kwargs):
+        def l2_diff(ann_value, pred_value):
+            return np.mean(np.linalg.norm(ann_value - pred_value, ord=2, axis=2))
+        super().__init__(l2_diff, *args, **kwargs)

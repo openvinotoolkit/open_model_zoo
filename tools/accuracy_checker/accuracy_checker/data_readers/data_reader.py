@@ -39,6 +39,11 @@ try:
 except ImportError as import_error:
     pydicom = UnsupportedPackage("pydicom", import_error.msg)
 
+try:
+    import skimage.io as sk
+except ImportError as import_error:
+    sk = UnsupportedPackage('skimage.io', import_error.msg)
+
 REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
 
 
@@ -59,6 +64,7 @@ class DataRepresentation:
 
 ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
 MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id', 'frames'])
+ImagePairIdentifier = namedtuple('ImagePairIdentifier', ['first', 'second'])
 
 
 def create_reader(config):
@@ -97,6 +103,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(list, self._read_list)
         self.read_dispatcher.register(ClipIdentifier, self._read_clip)
         self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
+        self.read_dispatcher.register(ImagePairIdentifier, self._read_pair)
         self.multi_infer = False
 
         self.validate_config()
@@ -150,6 +157,10 @@ class BaseReader(ClassProvider):
         if self.multi_infer:
             data_rep.metadata['multi_infer'] = True
         return data_rep
+
+    def _read_pair(self, data_id):
+        data = self.read_dispatcher([data_id.first, data_id.second])
+        return data
 
     @property
     def name(self):
@@ -564,3 +575,15 @@ class PickleReader(BaseReader):
 
     def read_item(self, data_id):
         return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)
+
+
+class SkimageReader(BaseReader):
+    __provider__ = 'skimage_imread'
+
+    def __init__(self, data_source, config=None, **kwargs):
+        super().__init__(data_source, config)
+        if isinstance(sk, UnsupportedPackage):
+            sk.raise_error(self.__provider__)
+
+    def read(self, data_id):
+        return sk.imread(str(self.data_source / data_id))
