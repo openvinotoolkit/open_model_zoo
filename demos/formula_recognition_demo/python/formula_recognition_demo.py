@@ -27,8 +27,12 @@ from tqdm import tqdm
 from utils import END_TOKEN, START_TOKEN, Vocab
 
 CONFIDENCE_THRESH = 0.8
-DEFAULT_RESOLUTION = (1600, 900)
-DEFAULT_WIDTH=800
+DEFAULT_RESOLUTION = (1280, 720)
+DEFAULT_WIDTH = 800
+MIN_HEIGHT = 30
+MAX_HEIGHT = 111
+MAX_WIDTH = 970
+MIN_WIDTH = 260
 
 
 class ModelStatus(Enum):
@@ -146,10 +150,10 @@ class Demo:
             record = dict(img_name=filenm, img=image, formula=None)
             self.images_list.append(record)
 
-    def async_infer_encoder(self, image, req_id):
+    def _async_infer_encoder(self, image, req_id):
         return self.exec_net_encoder.start_async(request_id=req_id, inputs={self.args.imgs_layer: image})
 
-    def async_infer_decoder(self, row_enc_out, dec_st_c, dec_st_h, output, tgt, req_id):
+    def _async_infer_decoder(self, row_enc_out, dec_st_c, dec_st_h, output, tgt, req_id):
         return self.exec_net_decoder.start_async(request_id=req_id, inputs={self.args.row_enc_out_layer: row_enc_out,
                                                                             self.args.dec_st_c_layer: dec_st_c,
                                                                             self.args.dec_st_h_layer: dec_st_h,
@@ -158,32 +162,39 @@ class Demo:
                                                                             }
                                                  )
 
-    def infer(self, model_input):
+    def infer_async(self, model_input):
         model_input = change_layout(model_input)
-        timeout = 1 if self.is_async else -1
-
+        assert self.is_async
+        # asynchronous variant
         if self.model_status == ModelStatus.ready:
-            self.infer_request_handle_encoder = self.async_infer_encoder(model_input, req_id=0)
-            self.model_status = ModelStatus.encoder_infer
+            infer_status_encoder = self._run_encoder(model_input)
             return None
 
-        elif self.model_status == ModelStatus.encoder_infer:
-            infer_status_encoder = self.infer_request_handle_encoder.wait(timeout=timeout)
-            if infer_status_encoder != 0 and self.is_async:
-                return None
-
-            enc_res = self.infer_request_handle_encoder.output_blobs
-            self.unpack_enc_results(enc_res)
-            self.model_status = ModelStatus.decoder_infer
-            self.infer_request_handle_decoder = self.async_infer_decoder(
-                self.row_enc_out, self.dec_states_c, self.dec_states_h, self.output, self.tgt, req_id=0)
+        if self.model_status == ModelStatus.encoder_infer:
+            infer_status_encoder = self._infer_request_handle_encoder.wait(timeout=1)
+            if infer_status_encoder == 0:
+                self._run_decoder()
             return None
 
-        infer_status_decoder = self.infer_request_handle_decoder.wait(timeout)
-        if infer_status_decoder != 0:
+        return self._process_decoding_results()
+
+    def infer_sync(self, model_input):
+        assert not self.is_async
+        model_input = change_layout(model_input)
+        self._run_encoder(model_input)
+        self._run_decoder()
+        res = None
+        while res is None:
+            res = self._process_decoding_results()
+        return res
+
+    def _process_decoding_results(self):
+        timeout = 1 if self.is_async else -1
+        infer_status_decoder = self._infer_request_handle_decoder.wait(timeout)
+        if infer_status_decoder != 0 and self.is_async:
             return None
-        dec_res = self.infer_request_handle_decoder.output_blobs
-        self.unpack_dec_results(dec_res)
+        dec_res = self._infer_request_handle_decoder.output_blobs
+        self._unpack_dec_results(dec_res)
 
         if self.tgt[0][0][0] == END_TOKEN:
             self.logits = np.array(self.logits)
@@ -191,17 +202,31 @@ class Demo:
             targets = np.argmax(logits, axis=1)
             self.model_status = ModelStatus.ready
             return logits, targets
-        self.infer_request_handle_decoder = self.async_infer_decoder(self.row_enc_out,
-                                                                     self.dec_states_c,
-                                                                     self.dec_states_h,
-                                                                     self.output,
-                                                                     self.tgt,
-                                                                     req_id=0
-                                                                     )
+        self._infer_request_handle_decoder = self._async_infer_decoder(self.row_enc_out,
+                                                                       self.dec_states_c,
+                                                                       self.dec_states_h,
+                                                                       self.output,
+                                                                       self.tgt,
+                                                                       req_id=0
+                                                                       )
 
         return None
 
-    def unpack_dec_results(self, dec_res):
+    def _run_encoder(self, model_input):
+        timeout = 1 if self.is_async else -1
+        self._infer_request_handle_encoder = self._async_infer_encoder(model_input, req_id=0)
+        self.model_status = ModelStatus.encoder_infer
+        infer_status_encoder = self._infer_request_handle_encoder.wait(timeout=timeout)
+        return infer_status_encoder
+
+    def _run_decoder(self):
+        enc_res = self._infer_request_handle_encoder.output_blobs
+        self._unpack_enc_results(enc_res)
+        self._infer_request_handle_decoder = self._async_infer_decoder(
+            self.row_enc_out, self.dec_states_c, self.dec_states_h, self.output, self.tgt, req_id=0)
+        self.model_status = ModelStatus.decoder_infer
+
+    def _unpack_dec_results(self, dec_res):
         self.dec_states_h = dec_res[self.args.dec_st_h_t_layer].buffer
         self.dec_states_c = dec_res[self.args.dec_st_c_t_layer].buffer
         self.output = dec_res[self.args.output_layer].buffer
@@ -209,7 +234,7 @@ class Demo:
         self.logits.append(logit)
         self.tgt = np.array([[np.argmax(logit, axis=1)]])
 
-    def unpack_enc_results(self, enc_res):
+    def _unpack_enc_results(self, enc_res):
         self.row_enc_out = enc_res[self.args.row_enc_out_layer].buffer
         self.dec_states_h = enc_res[self.args.hidden_layer].buffer
         self.dec_states_c = enc_res[self.args.context_layer].buffer
@@ -227,7 +252,7 @@ def create_videocapture(resolution=DEFAULT_RESOLUTION):
 
 
 def create_input_window(input_shape, aspect_ratio):
-    height, width = input_shape
+    # height, width = input_shape
     default_width = DEFAULT_WIDTH
     height = int(default_width * aspect_ratio)
     start_point = (int(DEFAULT_RESOLUTION[0] / 2 - default_width / 2), int(DEFAULT_RESOLUTION[1] / 2 - height / 2))
@@ -246,10 +271,17 @@ def draw_rectangle(frame, start_point, end_point, color=(0, 0, 255), thickness=2
 
 
 def resize_window(action, start_point, end_point, aspect_ratio):
+    height = end_point[1] - start_point[1]
+    width = end_point[0] - start_point[0]
+
     if action == 'increase':
+        if height >= MAX_HEIGHT or width >= MAX_WIDTH:
+            return start_point, end_point
         start_point = (start_point[0]-10, start_point[1] - int(10 * aspect_ratio))
         end_point = (end_point[0]+10, end_point[1] + int(10 * aspect_ratio))
     elif action == 'decrease':
+        if height <= MIN_HEIGHT or width <= MIN_WIDTH:
+            return start_point, end_point
         start_point = (start_point[0]+10, start_point[1] + int(10 * aspect_ratio))
         end_point = (end_point[0]-10, end_point[1] - int(10 * aspect_ratio))
     else:
@@ -258,7 +290,9 @@ def resize_window(action, start_point, end_point, aspect_ratio):
 
 
 def put_text(frame, start_point, text):
-    start_point = (start_point[0] - 200, start_point[1] - 50)
+    (txt_h, txt_w), baseLine = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 3)
+
+    start_point = (start_point[0] - int(txt_w / 2), start_point[1] - txt_h)
     frame = cv.putText(frame, text, start_point, cv.FONT_HERSHEY_SIMPLEX,
                        1, (255, 255, 255), 3, cv.LINE_AA)
     frame = cv.putText(frame, text, start_point, cv.FONT_HERSHEY_SIMPLEX,
@@ -366,7 +400,7 @@ def main():
     if not args.interactive:
         for rec in tqdm(demo.images_list):
             image = rec['img']
-            logits, targets = demo.model(image)
+            logits, targets = demo.infer_sync(image)
             prob = calculate_probability(logits)
             log.info("Confidence score is %s", prob)
             if prob >= args.conf_thresh:
@@ -387,7 +421,7 @@ def main():
             bin_crop = get_crop(frame, start_point, end_point)
             model_input = prerocess_crop(bin_crop, (height, width))
             frame = put_crop(frame, model_input, start_point, end_point)
-            model_res = demo.infer(model_input)
+            model_res = demo.infer_async(model_input)
             if not model_res:
                 phrase = prev_text
             else:
