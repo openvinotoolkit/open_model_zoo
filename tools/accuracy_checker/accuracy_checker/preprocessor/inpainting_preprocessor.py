@@ -117,6 +117,10 @@ class RectMask(Preprocessor):
 
     def configure(self):
         self.mask_height, self.mask_width = get_size_from_config(self.config, allow_none=True)
+        if self.mask_height is None:
+            self.mask_height = 128
+        if self.mask_width is None:
+            self.mask_width = 128
         self.inverse_mask = self.get_value_from_config('inverse_mask')
 
     def process(self, image, annotation_meta=None):

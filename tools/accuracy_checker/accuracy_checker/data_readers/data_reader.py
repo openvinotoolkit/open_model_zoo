@@ -479,7 +479,7 @@ class AnnotationFeaturesReader(BaseReader):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'features': ListField(allow_empty=False, value_type=StringField, description='List of features.')
+            'features': ListField(allow_empty=False, value_type=str, description='List of features.')
         })
         return parameters
 
