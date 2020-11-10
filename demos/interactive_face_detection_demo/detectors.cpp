@@ -285,14 +285,14 @@ void FaceDetection::fetchResults() {
     }
 }
 
-AntispoofingClassificator::AntispoofingClassificator(const std::string& pathToModel,
+AntispoofingClassifier::AntispoofingClassifier(const std::string& pathToModel,
     const std::string& deviceForInference,
     int maxBatch, bool isBatchDynamic, bool isAsync, bool doRawOutputMessages)
     : BaseDetection("Antispoofing", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
     enquedFaces(0) {
 }
 
-void AntispoofingClassificator::submitRequest() {
+void AntispoofingClassifier::submitRequest() {
     if (!enquedFaces)
         return;
     if (isBatchDynamic) {
@@ -302,12 +302,12 @@ void AntispoofingClassificator::submitRequest() {
     enquedFaces = 0;
 }
 
-void AntispoofingClassificator::enqueue(const cv::Mat& face) {
+void AntispoofingClassifier::enqueue(const cv::Mat& face) {
     if (!enabled()) {
         return;
     }
     if (enquedFaces == maxBatch) {
-        slog::warn << "Number of detected faces more than maximum(" << maxBatch << ") processed by Age/Gender Recognition network" << slog::endl;
+        slog::warn << "Number of detected faces more than maximum(" << maxBatch << ") processed by Antispoofing Classifier network" << slog::endl;
         return;
     }
     if (!request) {
@@ -321,35 +321,32 @@ void AntispoofingClassificator::enqueue(const cv::Mat& face) {
     enquedFaces++;
 }
 
-float AntispoofingClassificator::operator[] (int idx) const {
-
+float AntispoofingClassifier::operator[] (int idx) const {
     Blob::Ptr  ProbBlob = request->GetBlob(prob_output);
-    auto blobsize = ProbBlob->getTensorDesc().getDims();
     LockedMemory<const void> ProbBlobMapped = as<MemoryBlob>(ProbBlob)->rmap();
     // use prediction for real face only
-    float r = ProbBlobMapped.as<float*>()[2*idx] * 100;
+    float r = ProbBlobMapped.as<float*>()[2 * idx] * 100;
     if (doRawOutputMessages) {
         std::cout << "[" << idx << "] element, real face probability = " << r << std::endl;
-
     }
 
     return r;
 }
 
-CNNNetwork AntispoofingClassificator::read(const InferenceEngine::Core& ie) {
-    slog::info << "Loading network files for Antispoofing Classification network" << slog::endl;
+CNNNetwork AntispoofingClassifier::read(const InferenceEngine::Core& ie) {
+    slog::info << "Loading network files for Antispoofing Classifier network" << slog::endl;
     // Read network
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size to be used.
     network.setBatchSize(maxBatch);
-    slog::info << "Batch size is set to " << network.getBatchSize() << " for Antispoofing Classification network" << slog::endl;
+    slog::info << "Batch size is set to " << network.getBatchSize() << " for Antispoofing Classifier network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
-    // Age/Gender Recognition network should have one input and two outputs
-    slog::info << "Checking Antispoofing Classification network inputs" << slog::endl;
+    // Antispoofing Classifier network should have one input and one output
+    slog::info << "Checking Antispoofing Classifier network inputs" << slog::endl;
     InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
-        throw std::logic_error("Antispoofing Classification network should have only one input");
+        throw std::logic_error("Antispoofing Classifier network should have only one input");
     }
     InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
     inputInfoFirst->setPrecision(Precision::U8);
@@ -357,10 +354,10 @@ CNNNetwork AntispoofingClassificator::read(const InferenceEngine::Core& ie) {
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
-    slog::info << "Checking Antispoofing Classification network outputs" << slog::endl;
+    slog::info << "Checking Antispoofing Classifier network outputs" << slog::endl;
     OutputsDataMap outputInfo(network.getOutputsInfo());
     if (outputInfo.size() != 1) {
-        throw std::logic_error("Antispoofing Classification network should have one output layers");
+        throw std::logic_error("Antispoofing Classifier network should have one output layers");
     }
     auto it = outputInfo.begin();
 
@@ -368,7 +365,7 @@ CNNNetwork AntispoofingClassificator::read(const InferenceEngine::Core& ie) {
 
     prob_output = ptrProbOutput->getName();
 
-    slog::info << "Loading Antispoofing Classification model to the " << deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Antispoofing Classifier model to the " << deviceForInference << " plugin" << slog::endl;
     _enabled = true;
     return network;
 }

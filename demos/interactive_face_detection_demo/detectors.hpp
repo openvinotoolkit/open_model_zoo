@@ -181,13 +181,12 @@ struct FacialLandmarksDetection : BaseDetection {
     std::vector<float> operator[] (int idx) const;
 };
 
-struct AntispoofingClassificator : BaseDetection {
-
+struct AntispoofingClassifier : BaseDetection {
     std::string input;
     std::string prob_output;
     size_t enquedFaces;
 
-    AntispoofingClassificator(const std::string &pathToModel,
+    AntispoofingClassifier(const std::string &pathToModel,
         const std::string &deviceForInference,
         int maxBatch, bool isBatchDynamic, bool isAsync,
         bool doRawOutputMessages);

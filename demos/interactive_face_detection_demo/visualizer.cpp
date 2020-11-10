@@ -199,10 +199,8 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
     }
 
     if (f->isAntispoofingEnabled()) {
-        float real_confidence = f->getSpoofConfidence();
-        bool SpoofLabel = f->isSpoof();
-        (SpoofLabel) ? out << ",spoof:" << std::setprecision(4) << 100. - real_confidence << '%' :
-            out << ",real:" << std::setprecision(4) << real_confidence << '%';
+        (f->isReal()) ? out << ",real":
+            out << ",spoof";
     }
 
     if (f->isEmotionsEnabled()) {
