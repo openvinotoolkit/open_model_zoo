@@ -20,8 +20,8 @@ class YOLO(Model):
 
             self.isYoloV3 = False
 
-            if 'mask' in param:
-                mask = [int(idx) for idx in param['mask']]
+            mask = param.get('mask', None)
+            if mask:
                 self.num = len(mask)
 
                 masked_anchors = []
