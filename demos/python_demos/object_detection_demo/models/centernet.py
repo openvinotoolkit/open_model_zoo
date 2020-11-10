@@ -39,16 +39,6 @@ class CenterNet(Model):
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
         assert self.c == 3, "Expected 3-channel input"
 
-    def _parse_outputs(self):
-        pass
-
-    def unify_inputs(self, inputs) -> dict:
-        if not isinstance(inputs, dict):
-            inputs_dict = {self.image_blob_name: inputs}
-        else:
-            inputs_dict = inputs
-        return inputs_dict
-
     def preprocess(self, inputs):
         height, width = inputs[self.image_blob_name].shape[0:2]
         center = np.array([width / 2., height / 2.], dtype=np.float32)

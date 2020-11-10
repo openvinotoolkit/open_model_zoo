@@ -22,13 +22,6 @@ class RetinaFace(Model):
         self._output_layer_names = self.net.outputs
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
 
-    def unify_inputs(self, inputs) -> dict:
-        if not isinstance(inputs, dict):
-            inputs_dict = {self.image_blob_name: inputs}
-        else:
-            inputs_dict = inputs
-        return inputs_dict
-
     def preprocess(self, inputs):
         img = resize_image(inputs[self.image_blob_name], (self.w, self.h))
         meta = {'original_shape': inputs[self.image_blob_name].shape,
