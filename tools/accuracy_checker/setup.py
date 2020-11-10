@@ -44,9 +44,10 @@ class PyTest(test_command):
 
 
 def read(*path):
-    version_file = Path(__file__).parent.joinpath(*path)
+    version_file = Path(__file__).parent.joinpath(*path).resolve()
     with version_file.open() as file:
         return file.read()
+
 
 def check_and_update_numpy(min_acceptable='1.15'):
     try:
@@ -56,6 +57,7 @@ def check_and_update_numpy(min_acceptable='1.15'):
         update_required = True
     if update_required:
         subprocess.call(['pip3', 'install', 'numpy>={}'.format(min_acceptable)])
+
 
 def install_dependencies_with_pip(dependencies):
     for dep in dependencies:
@@ -78,12 +80,14 @@ is_arm = platform.processor() == 'aarch64'
 long_description = read("README.md")
 version = find_version("accuracy_checker", "__init__.py")
 
+
 def prepare_requirements():
     requirements_core = read('requirements-core.in').split('\n')
     if 'install_core' in sys.argv:
         return requirements_core
     requirements = read("requirements.in").split('\n')
     return requirements_core + requirements
+
 
 requirements = prepare_requirements()
 
