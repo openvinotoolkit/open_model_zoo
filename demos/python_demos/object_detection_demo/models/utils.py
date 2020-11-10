@@ -43,17 +43,14 @@ def resize_image(image, size, keep_aspect_ratio=False):
 
 
 def resize_image_letterbox(image, size):
-    # h, w = frame.shape[:2]
-    # scale = min(size[1] / h, size[0] / w)
-    # resized_frame = cv2.resize(frame, None, fx=scale, fy=scale)
     iw, ih = image.shape[0:2][::-1]
     w, h = size
     scale = min(w / iw, h / ih)
     nw = int(iw * scale)
     nh = int(ih * scale)
     image = cv2.resize(image, (nw, nh))
-    resized_image = np.full((size[1], size[0], 3), 128, dtype=np.uint8)
     dx = (w - nw) // 2
     dy = (h - nh) // 2
-    resized_image[dy:dy + nh, dx:dx + nw, :] = image
+    resized_image = np.pad(image, ((dy, dy + (h - nh) % 2), (dx, dx + (w - nw) % 2), (0, 0)),
+                           mode='constant', constant_values=128)
     return resized_image
