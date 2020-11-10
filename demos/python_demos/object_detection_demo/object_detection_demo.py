@@ -32,7 +32,7 @@ from openvino.inference_engine import IECore
 sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
 
 from models import *
-from models.pipelines import AsyncPipeline, SyncPipeline
+from pipelines import AsyncPipeline, SyncPipeline
 import monitors
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
