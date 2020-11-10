@@ -135,19 +135,23 @@ class SSD(Model):
         raise RuntimeError('Unsupported model outputs')
 
     def preprocess(self, inputs):
-        img = resize_image(inputs[self.image_blob_name], (self.w, self.h), self.keep_aspect_ratio_resize)
-        h, w = img.shape[:2]
-        if self.image_info_blob_name is not None:
-            inputs[self.image_info_blob_name] = [h, w, 1]
-        meta = {'original_shape': inputs[self.image_blob_name].shape,
-                'resized_shape': img.shape}
+        image = inputs
+
+        resized_image = resize_image(image, (self.w, self.h), self.keep_aspect_ratio_resize)
+        meta = {'original_shape': image.shape,
+                'resized_shape': resized_image.shape}
+
+        h, w = resized_image.shape[:2]
         if h != self.h or w != self.w:
-            img = np.pad(img, ((0, self.h - h), (0, self.w - w), (0, 0)),
-                         mode='constant', constant_values=0)
-        img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        img = img.reshape((self.n, self.c, self.h, self.w))
-        inputs[self.image_blob_name] = img
-        return inputs, meta
+            resized_image = np.pad(resized_image, ((0, self.h - h), (0, self.w - w), (0, 0)),
+                                   mode='constant', constant_values=0)
+        resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+        resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
+
+        dict_inputs = {self.image_blob_name: resized_image}
+        if self.image_info_blob_name:
+            dict_inputs[self.image_info_blob_name] = [self.h, self.w, 1]
+        return dict_inputs, meta
 
     def postprocess(self, outputs, meta):
         detections = self.output_parser(outputs)

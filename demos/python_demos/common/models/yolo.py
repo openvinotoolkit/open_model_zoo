@@ -69,14 +69,20 @@ class YOLO(Model):
         return output_info
 
     def preprocess(self, inputs):
-        img = self.resize_image(inputs[self.image_blob_name], (self.w, self.h))
-        meta = {'original_shape': inputs[self.image_blob_name].shape,
-                'resized_shape': img.shape}
+        image = inputs
+
+        resized_image = self.resize_image(image, (self.w, self.h))
+        meta = {'original_shape': image.shape,
+                'resized_shape': resized_image.shape}
         if self.nchw_shape:
-            img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        img = img.reshape((self.n, self.c, self.h, self.w))
-        inputs[self.image_blob_name] = img
-        return inputs, meta
+            resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+            resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
+
+        else:
+            resized_image = resized_image.reshape((self.n, self.h, self.w, self.c))
+
+        dict_inputs = {self.image_blob_name: resized_image}
+        return dict_inputs, meta
 
     @staticmethod
     def _parse_yolo_region(predictions, input_size, params, threshold, multiple_labels=True):

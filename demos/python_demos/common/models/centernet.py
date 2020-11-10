@@ -19,7 +19,7 @@ import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
 from .model import Model
-from .utils import Detection, resize_image, load_labels
+from .utils import Detection, load_labels
 
 
 class CenterNet(Model):
@@ -40,22 +40,18 @@ class CenterNet(Model):
         assert self.c == 3, "Expected 3-channel input"
 
     def preprocess(self, inputs):
-        height, width = inputs[self.image_blob_name].shape[0:2]
+        image = inputs
+        meta = {'original_shape': image.shape}
+
+        height, width = image.shape[0:2]
         center = np.array([width / 2., height / 2.], dtype=np.float32)
         scale = max(height, width)
-
-        meta = {'original_shape': inputs[self.image_blob_name].shape,
-                'resized_shape': inputs[self.image_blob_name]}
-
         trans_input = self.get_affine_transform(center, scale, 0, [self.w, self.h])
-        resized_image = resize_image(inputs[self.image_blob_name], (width, height))
-        inp_image = cv2.warpAffine(
-            resized_image, trans_input, (self.w, self.h),
-            flags=cv2.INTER_LINEAR)
-        inp_image = np.transpose(inp_image, (2, 0, 1))
-        inputs[self.image_blob_name] = inp_image
+        resized_image = cv2.warpAffine(image, trans_input, (self.w, self.h), flags=cv2.INTER_LINEAR)
+        resized_image = np.transpose(resized_image, (2, 0, 1))
 
-        return inputs, meta
+        dict_inputs = {self.image_blob_name: resized_image}
+        return dict_inputs, meta
 
     def postprocess(self, outputs, meta):
         heat = outputs[self._output_layer_names[0]][0]
