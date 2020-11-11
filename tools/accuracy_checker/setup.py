@@ -24,7 +24,7 @@ from setuptools import find_packages, setup
 from setuptools.command.test import test as test_command
 from setuptools.command.install import install as install_command
 from distutils.version import LooseVersion
-from pathlib import Path
+from pathlib import PurePath
 
 
 class PyTest(test_command):
@@ -44,8 +44,8 @@ class PyTest(test_command):
 
 
 def read(*path):
-    version_file = Path(__file__).parent.joinpath(*path).resolve()
-    with version_file.open() as file:
+    input_file = PurePath(__file__).parent.joinpath(*path)
+    with open(str(input_file)) as file:
         return file.read()
 
 
