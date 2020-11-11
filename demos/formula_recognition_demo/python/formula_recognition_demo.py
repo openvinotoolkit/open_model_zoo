@@ -19,49 +19,21 @@ import subprocess
 import sys
 import tempfile
 from argparse import SUPPRESS, ArgumentParser
-from enum import Enum
 
 import cv2 as cv
 import numpy as np
-
-#TODO: check sympy rendering
-try:
-    import sympy
-    RENDER=True
-except ImportError:
-    RENDER=False
 from openvino.inference_engine import IECore
 from tqdm import tqdm
-from utils import END_TOKEN, START_TOKEN, Vocab
+from utils import END_TOKEN, START_TOKEN, ModelStatus, Renderer, Vocab, VideoCapture
 
 CONFIDENCE_THRESH = 0.8
-DEFAULT_RESOLUTION = (1280, 720)
-DEFAULT_WIDTH = 800
-MIN_HEIGHT = 30
-MAX_HEIGHT = 111
-MAX_WIDTH = 970
-MIN_WIDTH = 260
-
-
-class ModelStatus(Enum):
-    ready = 0
-    encoder_infer = 1
-    decoder_infer = 2
 
 
 def check_environment():
-    command = subprocess.run(["pdflatex", "--version"], stdout=subprocess.PIPE,
+    command = subprocess.run("pdflatex --version", stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, check=False, shell=True)
-    if command.stderr:
+    if command.returncode != 0:
         raise EnvironmentError("pdflatex not installed, please install it: \n{}".format(command.stderr))
-    command = subprocess.run(["gs", "--version"], stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE, check=False, shell=True)
-    if command.stderr:
-        raise EnvironmentError("ghostscript not installed, please install it: \n{}".format(command.stderr))
-    command = subprocess.run(["convert", "--version"], stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE, check=False, shell=True)
-    if command.stderr:
-        raise EnvironmentError("imagemagick not installed, please install it: \n{}".format(command.stderr))
 
 
 def crop(img, target_shape):
@@ -118,6 +90,14 @@ def preprocess_image(preprocess, image_raw, tgt_shape):
                                   0, target_width - img_w, cv.BORDER_CONSTANT,
                                   None, COLOR_WHITE)
     return image_raw
+
+
+def prerocess_crop(crop, tgt_shape, preprocess_type='crop'):
+    height, width = tgt_shape
+    crop = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
+    crop = cv.cvtColor(crop, cv.COLOR_GRAY2BGR)
+    ret_val, bin_crop = cv.threshold(crop, 120, 255, type=cv.THRESH_BINARY)
+    return preprocess_image(PREPROCESSING[preprocess_type], bin_crop, tgt_shape)
 
 
 class Demo:
@@ -251,84 +231,6 @@ class Demo:
         self.logits = []
 
 
-def create_videocapture(resolution=DEFAULT_RESOLUTION):
-    capture = cv.VideoCapture(0)
-    capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
-    capture.set(3, resolution[0])
-    capture.set(4, resolution[1])
-    return capture
-
-
-def create_input_window(input_shape, aspect_ratio):
-    # height, width = input_shape
-    default_width = DEFAULT_WIDTH
-    height = int(default_width * aspect_ratio)
-    start_point = (int(DEFAULT_RESOLUTION[0] / 2 - default_width / 2), int(DEFAULT_RESOLUTION[1] / 2 - height / 2))
-    end_point = (int(DEFAULT_RESOLUTION[0] / 2 + default_width / 2), int(DEFAULT_RESOLUTION[1] / 2 + height / 2))
-    return start_point, end_point
-
-
-def get_crop(frame, start_point, end_point):
-    crop = frame[start_point[1]:end_point[1], start_point[0]:end_point[0], :]
-    return crop
-
-
-def draw_rectangle(frame, start_point, end_point, color=(0, 0, 255), thickness=2):
-    frame = cv.rectangle(frame, start_point, end_point, color, thickness)
-    return frame
-
-
-def resize_window(action, start_point, end_point, aspect_ratio):
-    height = end_point[1] - start_point[1]
-    width = end_point[0] - start_point[0]
-
-    if action == 'increase':
-        if height >= MAX_HEIGHT or width >= MAX_WIDTH:
-            return start_point, end_point
-        start_point = (start_point[0]-10, start_point[1] - int(10 * aspect_ratio))
-        end_point = (end_point[0]+10, end_point[1] + int(10 * aspect_ratio))
-    elif action == 'decrease':
-        if height <= MIN_HEIGHT or width <= MIN_WIDTH:
-            return start_point, end_point
-        start_point = (start_point[0]+10, start_point[1] + int(10 * aspect_ratio))
-        end_point = (end_point[0]-10, end_point[1] - int(10 * aspect_ratio))
-    else:
-        raise ValueError(f"wrong action: {action}")
-    return start_point, end_point
-
-
-def put_text(frame, start_point, text):
-    (txt_h, txt_w), baseLine = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 3)
-
-    start_point = (start_point[0] - int(txt_w / 2), start_point[1] - txt_h)
-    frame = cv.putText(frame, text, start_point, cv.FONT_HERSHEY_SIMPLEX,
-                       1, (255, 255, 255), 3, cv.LINE_AA)
-    frame = cv.putText(frame, text, start_point, cv.FONT_HERSHEY_SIMPLEX,
-                       1, (0, 0, 0), 1, cv.LINE_AA)
-    return frame
-
-
-def prerocess_crop(crop, tgt_shape, preprocess_type='crop'):
-    height, width = tgt_shape
-    crop = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
-    crop = cv.cvtColor(crop, cv.COLOR_GRAY2BGR)
-    ret_val, bin_crop = cv.threshold(crop, 120, 255, type=cv.THRESH_BINARY)
-    image_raw = PREPROCESSING[preprocess_type](bin_crop, tgt_shape)
-    img_h, img_w = image_raw.shape[0:2]
-    image_raw = cv.copyMakeBorder(image_raw, 0, height - img_h,
-                                  0, width - img_w, cv.BORDER_CONSTANT,
-                                  None, COLOR_WHITE)
-    return image_raw
-
-
-def put_crop(frame, crop, start_point, end_point):
-    height = end_point[1] - start_point[1]
-    width = end_point[0] - start_point[0]
-    crop = cv.resize(crop, (width, height))
-    frame[0:height, start_point[0]:end_point[0], :] = crop
-    return frame
-
-
 def calculate_probability(logits):
     prob = 1
     probabilities = np.amax(logits, axis=1)
@@ -405,6 +307,14 @@ def main():
     log.info("Starting inference")
     args = build_argparser().parse_args()
     demo = Demo(args)
+    try:
+        check_environment()
+    except EnvironmentError:
+        renderer = None
+        log.warning("pdflatex not installed, please, install it to use rendering")
+    else:
+        temp_file = tempfile.NamedTemporaryFile()
+        renderer = Renderer(f"{temp_file.name}.png")
     if not args.interactive:
         for rec in tqdm(demo.images_list):
             image = rec['img']
@@ -417,25 +327,22 @@ def main():
                     with open(args.output_file, 'a') as output_file:
                         output_file.write(rec['img_name'] + '\t' + phrase + '\n')
                 else:
-                    with tempfile.NamedTemporaryFile(mode='wb') as temp_file:
-                        sympy.preview(f'$${phrase}$$', viewer='file',
-                                      filename=f"{temp_file.name}.png", euler=False, dvioptions=['-D', '450'])
-                        print("Image name: {}\nFormula: {}\n".format(rec['img_name'], phrase))
-                        rendered_formula = cv.imread(f"{temp_file.name}.png")
+                    print("\n\tImage name: {}\n\tFormula: {}\n".format(rec['img_name'], phrase))
+                    if renderer is not None:
+                        rendered_formula_file = renderer(phrase)
+                        rendered_formula = cv.imread(rendered_formula_file)
                         cv.imshow("Predicted formula", rendered_formula)
                         cv.waitKey(0)
     else:
 
-        capture = create_videocapture()
         *_, height, width = demo.encoder.input_info['imgs'].input_data.shape
-        aspect_ratio = height / width
-        start_point, end_point = create_input_window((height, width), aspect_ratio)
+        capture = VideoCapture((height, width))
         prev_text = ''
         while True:
-            ret, frame = capture.read()
-            bin_crop = get_crop(frame, start_point, end_point)
+            frame = capture()
+            bin_crop = capture.get_crop(frame)
             model_input = prerocess_crop(bin_crop, (height, width))
-            frame = put_crop(frame, model_input, start_point, end_point)
+            frame = capture.put_crop(frame, model_input)
             model_res = demo.infer_async(model_input)
             if not model_res:
                 phrase = prev_text
@@ -449,17 +356,18 @@ def main():
                 else:
                     log.info("Confidence score is low, prediction is not complete")
                     phrase = '...'
-            frame = put_text(frame, start_point, phrase)
+            frame = capture.put_text(frame, phrase)
+            frame = capture.put_formula(frame, renderer, phrase)
             prev_text = phrase
-            frame = draw_rectangle(frame, start_point, end_point)
+            frame = capture.draw_rectangle(frame)
             cv.imshow('Press Q to quit.', frame)
             key = cv.waitKey(1) & 0xFF
             if key == ord('q'):
                 break
             elif key == ord('o'):
-                start_point, end_point = resize_window("decrease", start_point, end_point, aspect_ratio)
+                capture.resize_window("decrease")
             elif key == ord('p'):
-                start_point, end_point = resize_window("increase", start_point, end_point, aspect_ratio)
+                capture.resize_window("increase")
 
         capture.release()
         cv.destroyAllWindows()
