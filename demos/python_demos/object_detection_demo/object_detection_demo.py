@@ -44,7 +44,7 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=str)
-    args.add_argument('--type', help='Required. Specify model type', type=str, required=True,
+    args.add_argument('-at', '--architecture_type', help='Required. Specify model type', type=str, required=True,
                       choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
     args.add_argument('-i', '--input', required=True, type=str,
                       help='Required. Path to an image, folder with images, video file or a numeric camera ID.')
@@ -124,18 +124,18 @@ class ColorPalette:
         return len(self.palette)
 
 
-def get_model(model_name, ie, args):
-    if model_name == 'ssd':
+def get_model(architecture_type, ie, args):
+    if architecture_type == 'ssd':
         return SSD(ie, args.model, log, batch_size=1, labels=args.labels,
                    keep_aspect_ratio_resize=args.keep_aspect_ratio)
-    elif model_name == 'yolo':
+    elif architecture_type == 'yolo':
         return YOLO(ie, args.model, log,  batch_size=1, labels=args.labels,
                     threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
-    elif model_name == 'faceboxes':
+    elif architecture_type == 'faceboxes':
         return FaceBoxes(ie, args.model, log, batch_size=1, threshold=args.prob_threshold)
-    elif model_name == 'centernet':
+    elif architecture_type == 'centernet':
         return CenterNet(ie, args.model, log, batch_size=1, labels=args.labels, threshold=args.prob_threshold)
-    elif model_name == 'retina':
+    elif architecture_type == 'retina':
         return RetinaFace(ie, args.model, log,  batch_size=1, threshold=args.prob_threshold)
 
     log.error('No such model type as "{}". See "--type" option for details.'.format(model_name))
@@ -217,8 +217,8 @@ def main():
 
     log.info('Loading network...')
 
-    model = get_model(args.type, ie, args)
-    has_landmarks = args.type == 'retina'
+    model = get_model(args.architecture_type, ie, args)
+    has_landmarks = args.architecture_type == 'retina'
 
     if args.sync:
         detector_pipeline = SyncPipeline(ie, model, device=args.device)
