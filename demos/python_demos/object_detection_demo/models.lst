@@ -1,5 +1,5 @@
 # This file can be used with the --list option of the model downloader.
-# with --type==ssd
+# For --architecture_type==ssd
 face-detection-adas-????
 face-detection-retail-????
 pedestrian-and-vehicle-detector-adas-????
@@ -12,7 +12,7 @@ retinanet-tf
 vehicle-detection-adas-????
 vehicle-license-plate-detection-barrier-????
 ssd-resnet34-1200-onnx
-# with --type==yolo
+# For --architecture_type==yolo
 yolo-v1-tiny-tf
 yolo-v2-tiny-tf
 yolo-v2-tf
@@ -20,11 +20,11 @@ yolo-v3-tf
 yolo-v3-tiny-tf
 mobilefacedet-v1-mxnet
 yolo-v2-tiny-vehicle-detection-0001
-# with --type==centernet
+# For --architecture_type==centernet
 ctdet_coco_dlav0_384
 ctdet_coco_dlav0_512
-# with --type==faceboxes
+# For --architecture_type==faceboxes
 faceboxes-pytorch
-# with --type=retina
+# For --architecture_type=retina
 retinaface-anti-cov
 retinaface-resnet50
