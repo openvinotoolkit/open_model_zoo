@@ -44,8 +44,8 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=str)
-    args.add_argument('-at', '--architecture_type', help='Required. Specify model type', type=str, required=True,
-                      choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
+    args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
+                      type=str, required=True, choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
     args.add_argument('-i', '--input', required=True, type=str,
                       help='Required. Path to an image, folder with images, video file or a numeric camera ID.')
     args.add_argument('-d', '--device', default='CPU', type=str,
@@ -61,21 +61,23 @@ def build_argparser():
                                    help='Optional. Keeps aspect ratio on resize.')
 
     infer_args = parser.add_argument_group('Inference options')
+    infer_args.add_argument('--sync', action='store_true',
+                            help='Optional. Use synchronized pipeline.')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
                             default=1, type=int)
     infer_args.add_argument('-nstreams', '--num_streams',
                             help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
                                  'mode (for HETERO and MULTI device cases use format '
-                                 '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)',
+                                 '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).',
                             default='', type=str)
     infer_args.add_argument('-nthreads', '--num_threads', default=None, type=int,
-                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases)')
-    infer_args.add_argument('-loop', '--loop', help='Optional. Loops input data.',
-                            action='store_true', default=False)
-    infer_args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
-    infer_args.add_argument('-u', '--utilization_monitors', default='', type=str,
-                            help='Optional. List of monitors to show initially.')
-    infer_args.add_argument('--sync', action='store_true')
+                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
+
+    io_args = parser.add_argument_group('Input/output options')
+    io_args.add_argument('-loop', '--loop', help='Optional. Loops input data.', action='store_true', default=False)
+    io_args.add_argument('-no_show', '--no_show', help="Optional. Don't show output.", action='store_true')
+    io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
+                         help='Optional. List of monitors to show initially.')
 
     debug_args = parser.add_argument_group('Debug options')
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
