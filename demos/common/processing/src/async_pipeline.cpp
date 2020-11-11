@@ -21,7 +21,7 @@
 
 using namespace InferenceEngine;
 
-AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase> modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine) :
+AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine) :
     model(std::move(modelInstance)){
 
     // --------------------------- 1. Load inference engine ------------------------------------------------

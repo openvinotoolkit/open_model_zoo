@@ -13,5 +13,5 @@ source_group("src" FILES ${SOURCES})
 source_group("include" FILES ${HEADERS})
 
 add_library(processing STATIC ${SOURCES} ${HEADERS})
-target_include_directories(processing PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}/../include")
-target_link_libraries(processing PRIVATE gflags ${InferenceEngine_LIBRARIES} opencv_core opencv_imgproc)
+target_include_directories(processing PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(processing PRIVATE gflags ${InferenceEngine_LIBRARIES} common opencv_core opencv_imgproc)
