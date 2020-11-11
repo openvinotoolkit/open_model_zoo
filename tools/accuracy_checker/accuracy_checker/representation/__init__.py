@@ -90,6 +90,9 @@ from .quality_assessment import QualityAssessmentAnnotation, QualityAssessmentPr
 from .dna_sequence import DNASequenceAnnotation, DNASequencePrediction
 
 from .raw_representation import RawTensorAnnotation, RawTensorPrediction
+
+from .optical_flow import OpticalFlowAnnotation, OpticalFlowPrediction
+
 __all__ = [
     'BaseRepresentation',
 
@@ -184,6 +187,10 @@ __all__ = [
 
     'DNASequenceAnnotation',
     'DNASequencePrediction',
+
     'RawTensorAnnotation',
     'RawTensorPrediction',
+
+    'OpticalFlowAnnotation',
+    'OpticalFlowPrediction',
 ]

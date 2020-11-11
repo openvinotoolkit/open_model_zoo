@@ -31,10 +31,13 @@ from .data_reader import (
     WavReader,
     DicomReader,
     PickleReader,
+    SkimageReader,
 
     DataRepresentation,
     ClipIdentifier,
     MultiFramesInputIdentifier,
+    ImagePairIdentifier,
+
     create_reader,
     REQUIRES_ANNOTATIONS
 )
@@ -57,10 +60,12 @@ __all__ = [
     'NumPyReader',
     'NumpyTXTReader',
     'NumpyDictReader',
+    'SkimageReader',
 
     'DataRepresentation',
     'ClipIdentifier',
     'MultiFramesInputIdentifier',
+    'ImagePairIdentifier',
     'create_reader',
-    'REQUIRES_ANNOTATIONS'
+    'REQUIRES_ANNOTATIONS',
 ]
