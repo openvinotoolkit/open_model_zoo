@@ -64,6 +64,7 @@ from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter
 from .pose_estimation import (
+    OpenPoseAdapter,
     AssociativeEmbeddingAdapter,
     HumanPoseAdapter,
     SingleHumanPoseAdapter,
@@ -165,6 +166,7 @@ __all__ = [
     'LPRAdapter',
     'CTCGreedySearchDecoder',
 
+    'OpenPoseAdapter',
     'AssociativeEmbeddingAdapter',
     'HumanPoseAdapter',
     'HumanPose3dAdapter',
