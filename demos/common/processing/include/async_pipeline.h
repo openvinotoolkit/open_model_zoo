@@ -56,24 +56,17 @@ public:
     ///
     void waitForTotalCompletion() { if (requestsPool) requestsPool->waitForTotalCompletion(); }
 
-    /// Submit request to network
-    /// @param image - image to submit for processing
+    /// Submits data to the network for inference
+    /// @param inputData - input data to be submitted
     /// @returns -1 if image cannot be scheduled for processing (there's no free InferRequest available).
     /// Otherwise returns unique sequential frame ID for this particular request. Same frame ID will be written in the response structure.
-    virtual int64_t submitImage(cv::Mat img);
+    virtual int64_t submitData(const InputData& inputData);
 
     /// Gets available data from the queue
     /// Function will treat results as ready only if next sequential result (frame) is ready.
     virtual std::unique_ptr<ResultBase> getResult();
 
 protected:
-    /// Submit request to network
-    /// @param request - request to be submitted (caller function should obtain it using getIdleRequest)
-    /// @param metaData - additional source data. This is optional transparent data not used in inference process directly.
-    /// It is passed to inference result directly and can be used in postprocessing.
-    /// @returns unique sequential frame ID for this particular request. Same frame ID will be written in the responce structure.
-    virtual int64_t submitRequest(const InferenceEngine::InferRequest::Ptr& request,const std::shared_ptr<MetaData>& metaData);
-
     /// Returns processed result, if available
     /// Function will treat results as ready only if next sequential result (frame) is ready.
     /// @returns InferenceResult with processed information or empty InferenceResult (with negative frameID) if there's no any results yet.
@@ -94,11 +87,6 @@ protected:
     int64_t outputFrameId=0;
 
     std::exception_ptr callbackException = nullptr;
-
-    /// Callback firing after request is processed by CNN
-    /// NOTE: this callback is executed in separate inference engine's thread
-    /// So it should not block execution for long time and should use data synchroniztion
-    virtual void onProcessingCompleted(InferenceEngine::InferRequest::Ptr request) {}
 
     std::unique_ptr<ModelBase> model;
 };

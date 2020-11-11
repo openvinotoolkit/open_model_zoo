@@ -84,9 +84,16 @@ void AsyncPipeline::waitForData(){
         std::rethrow_exception(callbackException);
 }
 
-int64_t AsyncPipeline::submitRequest(const InferenceEngine::InferRequest::Ptr& request, const std::shared_ptr<MetaData>& metaData){
+int64_t AsyncPipeline::submitData(const InputData& inputData){
     auto frameStartTime = std::chrono::steady_clock::now();
     auto frameID = inputFrameId;
+
+    auto request = requestsPool->getIdleRequest();
+    if (!request)
+        return -1;
+
+    std::shared_ptr<MetaData> metaData;
+    model->preprocess(inputData, request, metaData);
 
     request->SetCompletionCallback([this,
         frameStartTime,
@@ -108,8 +115,6 @@ int64_t AsyncPipeline::submitRequest(const InferenceEngine::InferRequest::Ptr& r
 
                     completedInferenceResults.emplace(frameID, result);
                     this->requestsPool->setRequestIdle(request);
-
-                    this->onProcessingCompleted(request);
                 }
                 catch (...) {
                     if (!this->callbackException) {
@@ -126,17 +131,6 @@ int64_t AsyncPipeline::submitRequest(const InferenceEngine::InferRequest::Ptr& r
 
     request->StartAsync();
     return frameID;
-}
-
-int64_t AsyncPipeline::submitImage(cv::Mat img) {
-    auto request = requestsPool->getIdleRequest();
-    if (!request)
-        return -1;
-
-    std::shared_ptr<MetaData> md;
-    model->preprocess(ImageInputData(img), request, md);
-
-    return submitRequest(request, md);
 }
 
 std::unique_ptr<ResultBase> AsyncPipeline::getResult()

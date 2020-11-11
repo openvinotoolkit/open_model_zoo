@@ -66,7 +66,7 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
                 auto regionYolo = std::dynamic_pointer_cast<ngraph::op::RegionYolo>(op);
                 if (!regionYolo) {
                     throw std::runtime_error("Invalid output type: " +
-                        std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
+                        std::string(op->get_type_info().name) + ". RegionYolo expected");
                 }
 
                 regions.emplace(outputLayer->first, Region(regionYolo));;

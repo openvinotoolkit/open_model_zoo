@@ -64,7 +64,7 @@ static const char num_streams_message[] = "Optional. Number of streams to use fo
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes (YOLOv3 only).";
-static const char mt_message[] = "Model type: ssd or yolo";
+static const char at_message[] = "Architecture type: ssd or yolo";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", video_message);
@@ -84,7 +84,7 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(loop, false, loop_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
-DEFINE_string(mt, "", mt_message);
+DEFINE_string(at, "", at_message);
 
 /**
 * \brief This function shows a help message
@@ -112,7 +112,7 @@ static void showUsage() {
     std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
-    std::cout << "    -mt                       " << mt_message << std::endl;
+    std::cout << "    -at                       " << at_message << std::endl;
 }
 
 
@@ -157,17 +157,17 @@ int main(int argc, char *argv[]) {
             labels = DetectionModel::loadLabels(FLAGS_labels);
 
         std::unique_ptr<ModelBase> model;
-        if (FLAGS_mt=="ssd")
+        if (FLAGS_at=="ssd")
         {
             model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
-        else if (FLAGS_mt=="yolo")
+        else if (FLAGS_at=="yolo")
         {
             model.reset(new ModelYolo3(FLAGS_m,(float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, labels));
         }
         else
         {
-            slog::err << "No model type or invalid model type (-mt) provided: " + FLAGS_mt << slog::endl;
+            slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
         }
 
@@ -177,10 +177,9 @@ int main(int argc, char *argv[]) {
             core);
         Presenter presenter;
 
-        auto startTimePoint = std::chrono::steady_clock::now();
         bool keepRunning = true;
         while (keepRunning){
-            int64_t frameNum;
+            int64_t frameNum = 0;
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
                 curr_frame = cap->read();
@@ -194,7 +193,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                frameNum = pipeline.submitImage(curr_frame);
+                frameNum = pipeline.submitData(ImageInputData(curr_frame));
             }
 
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.

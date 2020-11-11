@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
 
         bool keepRunning = true;
         while (keepRunning){
-            int64_t frameNum;
+            int64_t frameNum = 0;
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
                 curr_frame = cap->read();
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                frameNum = pipeline.submitImage(curr_frame);
+                frameNum = pipeline.submitData(ImageInputData(curr_frame));
             }
 
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
