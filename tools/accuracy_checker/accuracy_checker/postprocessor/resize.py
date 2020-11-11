@@ -22,7 +22,8 @@ from ..representation import (
     StyleTransferAnnotation, StyleTransferPrediction,
     SuperResolutionPrediction, SuperResolutionAnnotation,
     ImageProcessingPrediction, ImageProcessingAnnotation,
-    ImageInpaintingAnnotation, ImageInpaintingPrediction
+    ImageInpaintingAnnotation, ImageInpaintingPrediction,
+    SalientRegionAnnotation, SalientRegionPrediction
 )
 from ..postprocessor.postprocessor import PostprocessorWithSpecificTargets, ApplyToOption
 from ..postprocessor import ResizeSegmentationMask
@@ -99,6 +100,7 @@ class Resize(PostprocessorWithSpecificTargets):
             return entry
 
         @resize.register(SegmentationPrediction)
+        @resize.register(SalientRegionPrediction)
         def _(entry, height, width):
             if len(entry.mask.shape) == 2:
                 entry.mask = ResizeSegmentationMask.segm_resize(entry.mask, width, height)
@@ -113,6 +115,7 @@ class Resize(PostprocessorWithSpecificTargets):
             return entry
 
         @resize.register(SegmentationAnnotation)
+        @resize.register(SalientRegionAnnotation)
         def _(entry, height, width):
             entry.mask = ResizeSegmentationMask.segm_resize(entry.mask, width, height)
 
@@ -144,6 +147,7 @@ class Resize(PostprocessorWithSpecificTargets):
             return height, width
 
         @set_sizes.register(SegmentationPrediction)
+        @set_sizes.register(SalientRegionPrediction)
         def _(entry):
             if self._deprocess_predictions:
                 return self.image_size[:2]

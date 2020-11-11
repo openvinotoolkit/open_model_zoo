@@ -45,6 +45,8 @@ from .segmentation_representation import (
     CoCoInstanceSegmentationAnnotation,
     CoCocInstanceSegmentationPrediction,
     OAR3DTilingSegmentationAnnotation,
+    SalientRegionAnnotation,
+    SalientRegionPrediction
 )
 from .character_recognition_representation import (
     CharacterRecognition,
@@ -118,6 +120,9 @@ __all__ = [
     'SegmentationRepresentation',
     'SegmentationAnnotation',
     'SegmentationPrediction',
+
+    'SalientRegionAnnotation',
+    'SalientRegionPrediction',
 
     'BrainTumorSegmentationAnnotation',
     'BrainTumorSegmentationPrediction',

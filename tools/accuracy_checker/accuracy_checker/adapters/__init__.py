@@ -94,6 +94,7 @@ from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
 from .dna_seq_recognition import DNASeqRecognition
 from .optical_flow import PWCNetAdapter
+from .salient_objects_detection import SalientObjectDetection
 from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
 
 __all__ = [
@@ -136,6 +137,7 @@ __all__ = [
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
     'DUCSegmentationAdapter',
+    'SalientObjectDetection',
 
     'ReidAdapter',
 

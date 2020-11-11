@@ -92,6 +92,7 @@ from .mpii import MPIIDatasetConverter
 from .mapillary_20 import Mapillary20Converter
 from .antispoofing import AntispoofingDatasetConverter
 from .sound_classification_converter import SoundClassificationFormatConverter
+from .salient_object_detection import SalientObjectDetectionConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -171,4 +172,5 @@ __all__ = [
     'MPIIDatasetConverter',
     'AntispoofingDatasetConverter',
     'SoundClassificationFormatConverter',
+    'SalientObjectDetectionConverter',
 ]
