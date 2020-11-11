@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            // Running Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, and Facial Landmarks Estimation networks simultaneously
+            // Running Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, Facial Landmarks Estimation and Antispoofing Classifier networks simultaneously
             if (isFaceAnalyticsEnabled) {
                 ageGenderDetector.submitRequest();
                 headPoseDetector.submitRequest();
