@@ -58,10 +58,10 @@ private:
     float _age;
     float _maleScore;
     float _femaleScore;
-    float _realFaceConfidence;
     std::map<std::string, float> _emotions;
     HeadPoseDetection::Results _headPose;
     std::vector<float> _landmarks;
+    float _realFaceConfidence;
 
     bool _isAgeGenderEnabled;
     bool _isEmotionsEnabled;
