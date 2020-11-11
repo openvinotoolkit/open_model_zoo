@@ -424,6 +424,7 @@ describing a single model. Each such object has the following keys:
   * `human_pose_estimation`
   * `image_inpainting`
   * `image_processing`
+  * `image_translation`
   * `instance_segmentation`
   * `machine_translation`
   * `monocular_depth_estimation`

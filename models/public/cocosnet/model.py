@@ -53,7 +53,6 @@ class Pix2PixModel(nn.Module):
         gen_weights = load(gen_weights)
         self.generator.load_state_dict(gen_weights)
         remove_all_spectral_norm(self)
-        print("finish")
 
     def forward(self, input_semantics, ref_image, ref_semantics):
         coor_out = self.correspondence(ref_image, None, input_semantics, ref_semantics, alpha=1)

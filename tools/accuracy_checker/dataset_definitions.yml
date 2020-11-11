@@ -1085,6 +1085,25 @@ datasets:
     annotation: sound_classification.pickle
     reader: wav_reader
 
+  - name: cocosnet_image_translation
+    annotation_conversion:
+      converter: ade20k_image_translation
+      images_dir: ADEChallengeData2016/images
+      annotations_dir: ADEChallengeData2016/annotations
+      reference_file: cocosnet_ade20k_ref_test.txt
+    data_source: ADEChallengeData2016
+    metrics:
+      - type: psnr
+        scale_border: 0
+        presenter: print_vector
+      - type: ssim
+        presenter: print_vector
+      - type: fid
+        length: 2048
+        eps: 0.000001
+      - type: inception_score
+        length: 1001
+
   - name: lfw_bin
     data_source: lfw_bin/images
     annotation_conversion:
