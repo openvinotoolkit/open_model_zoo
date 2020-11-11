@@ -136,12 +136,11 @@ int main(int argc, char *argv[]) {
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
         InferenceEngine::Core core;
-        AsyncPipeline pipeline(std::make_unique<SegmentationModel>(FLAGS_m),
+        AsyncPipeline pipeline(std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m)),
             ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
             core);
         Presenter presenter;
 
-        auto startTimePoint = std::chrono::steady_clock::now();
         bool keepRunning = true;
         while (keepRunning){
             int64_t frameNum;
@@ -163,8 +162,6 @@ int main(int argc, char *argv[]) {
 
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
             pipeline.waitForData();
-
-            int key = 0;
 
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - cast result's underlying pointer to SegmentationResult*
