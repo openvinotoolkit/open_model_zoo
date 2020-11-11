@@ -17,11 +17,19 @@ import logging as log
 import os
 import subprocess
 import sys
+import tempfile
 from argparse import SUPPRESS, ArgumentParser
 from enum import Enum
 
 import cv2 as cv
 import numpy as np
+
+#TODO: check sympy rendering
+try:
+    import sympy
+    RENDER=True
+except ImportError:
+    RENDER=False
 from openvino.inference_engine import IECore
 from tqdm import tqdm
 from utils import END_TOKEN, START_TOKEN, Vocab
@@ -404,11 +412,18 @@ def main():
             prob = calculate_probability(logits)
             log.info("Confidence score is %s", prob)
             if prob >= args.conf_thresh:
+                phrase = demo.vocab.construct_phrase(targets)
                 if args.output_file:
                     with open(args.output_file, 'a') as output_file:
-                        output_file.write(rec['img_name'] + '\t' + demo.vocab.construct_phrase(targets) + '\n')
+                        output_file.write(rec['img_name'] + '\t' + phrase + '\n')
                 else:
-                    print("Image name: {}\nFormula: {}\n".format(rec['img_name'], demo.vocab.construct_phrase(targets)))
+                    with tempfile.NamedTemporaryFile(mode='wb') as temp_file:
+                        sympy.preview(f'$${phrase}$$', viewer='file',
+                                      filename=f"{temp_file.name}.png", euler=False, dvioptions=['-D', '450'])
+                        print("Image name: {}\nFormula: {}\n".format(rec['img_name'], phrase))
+                        rendered_formula = cv.imread(f"{temp_file.name}.png")
+                        cv.imshow("Predicted formula", rendered_formula)
+                        cv.waitKey(0)
     else:
 
         capture = create_videocapture()
