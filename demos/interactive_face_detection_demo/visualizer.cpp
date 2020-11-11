@@ -199,8 +199,7 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
     }
 
     if (f->isAntispoofingEnabled()) {
-        (f->isReal()) ? out << ",real":
-            out << ",spoof";
+        out << (f->isReal() ? ",real" : ",spoof");
     }
 
     if (f->isEmotionsEnabled()) {
