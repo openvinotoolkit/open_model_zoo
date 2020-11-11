@@ -1,0 +1,168 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The purpose of correspondence model is to establish correspondence between input image and given exemplar.
+  Correspondence network return warped exemplar with semantic from input.
+task_type: image_translation
+files:
+  - name: util/__init__.py
+    size: 72
+    sha256: 12b307709a025b0afdfdd9e7ad584fbf21d9170be7c0a3f8432e24abae471af7
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/util/__init__.py
+  - name: util/util.py
+    size: 17551
+    sha256: 9816d52d4d347be3d7006a0399d82414c1bfd514999355478617fcd4aac730d2
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/util/util.py
+  - name: models/networks/__init__.py
+    size: 2676
+    sha256: c720d3133dc08052acd4c8005d2ac76b5db5b2d0d82bc616221e4251b4e3d299
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/models/networks/__init__.py
+  - name: models/pix2pix_model.py
+    size: 20869
+    sha256: 18950c825a72d2d179886cbc98200df4b3f2bf6aa0d7ecaa2867eb19cdd63646
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/models/pix2pix_model.py
+  - name: models/networks/ContextualLoss.py
+    size: 16440
+    sha256: efa30438600003611f270cb3fa286fb44d2d82a6be835470722ca15d26e9051d
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/models/networks/ContextualLoss.py
+  - name: models/networks/architecture.py
+    size: 7985
+    sha256: 22295c075be850b08d0aa46b8c6af2fc0dfdf59930281bfe63a60b8c2445c050
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/models/networks/architecture.py
+  - name: models/networks/base_network.py
+    size: 2466
+    sha256: 52d078a9e6c97586a373708e9de8be57c0636c6ab02a5ae0f01d7c4140894b82
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/models/networks/base_network.py
+  - name: models/networks/correspondence.py
+    size: 18453
+    sha256: 99815130c1fb335595a8a9cba365f8d191aceb971f4c7ac8763620b75e799dd8
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/models/networks/correspondence.py
+  - name: models/networks/discriminator.py
+    size: 7458
+    sha256: 78ab22b64b2a69cd06342c28b7ca99eac7f9afb6f21503fa000ba25ebbfc2d88
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/models/networks/discriminator.py
+  - name: models/networks/generator.py
+    size: 10874
+    sha256: bc25f3d7eb0023558ea9b5bd99f6d4eed4b2577295f0812c69c394faf78c4433
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/models/networks/generator.py
+  - name: models/networks/normalization.py
+    size: 11279
+    sha256: 87c1fd63375380d6a1521a333c8b2fc7f5d21b312172955fb7526e3542951f6a
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/models/networks/normalization.py
+  - name: models/networks/loss.py
+    size: 5187
+    sha256: de96de1cd0b12bcf10b59d5f2406c991b0a838df4c90402d9c4939bac5911120
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/models/networks/loss.py
+  - name: models/__init__.py
+    size: 1417
+    sha256: 67f5b50d89b7f90e1afabc96c2d6498ab99973d2c6d1c69909ac20f7459629f0
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/models/__init__.py
+  - name: models/networks/sync_batchnorm/__init__.py
+    size: 507
+    sha256: 50083d11a5c9710f9b7dbd4ca012f8e3721fd0c78f63a36a6a0a1a0d82a13ede
+    source: https://raw.githubusercontent.com/vacancy/Synchronized-BatchNorm-PyTorch/master/sync_batchnorm/__init__.py
+  - name: models/networks/sync_batchnorm/batchnorm.py
+    size: 15944
+    sha256: 9e474102c34cede3e08663acefbbd898eebd3c93fcf3312f82053950fad05e9e
+    source: https://raw.githubusercontent.com/vacancy/Synchronized-BatchNorm-PyTorch/master/sync_batchnorm/batchnorm.py
+  - name: models/networks/sync_batchnorm/replicate.py
+    size: 3226
+    sha256: 4498b873404fce05202d4f891262e249a95733816d3877e3aee3d2401138a6af
+    source: https://raw.githubusercontent.com/vacancy/Synchronized-BatchNorm-PyTorch/master/sync_batchnorm/replicate.py
+  - name: models/networks/sync_batchnorm/comm.py
+    size: 4449
+    sha256: 9d2e776a0398e5ac29ce13d43b7475300f70f409e56f3c38428029000557a57a
+    source: https://raw.githubusercontent.com/vacancy/Synchronized-BatchNorm-PyTorch/master/sync_batchnorm/comm.py
+  - name: options/__init__.py
+    size: 72
+    sha256: 12b307709a025b0afdfdd9e7ad584fbf21d9170be7c0a3f8432e24abae471af7
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/options/__init__.py
+  - name: options/base_options.py
+    size: 11951
+    sha256: a7516bb137c52857edc5f9dea240bc79eabe7e774820b26f0fef7f793870d475
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/options/base_options.py
+  - name: options/test_options.py
+    size: 1217
+    sha256: 0dad4f1a8541d1316df94fdc41c06295e1601e91613eeeb29416181b7d72205c
+    source: https://raw.githubusercontent.com/microsoft/CoCosNet/master/options/test_options.py
+  # - name: ckpt/latest_net_Corr.pth
+  #   size: 237624725
+  #   sha256: 5deef28927dfc56e18c8510ffcdf0280b558987a38a2b455cda62242ecbe7971
+  #   source:
+  #     $type: google_drive
+  #     id: 1yNCapBY7YqMoKeyVWwTwceqrEKHpUzYN
+  # - name: ckpt/latest_net_G.pth
+  #   size: 387069636
+  #   sha256: 9a77b52d0c34a279d6b4e7eff4bd00077543f7ffc2806b5b2a32222cfbccc655
+  #   source:
+  #     $type: google_drive
+  #     id: 1zVG4SnR1uI8bC8fagZrgxNYCI5GRmJuR
+postprocessing:
+  - $type: regex_replace
+    file: models/networks/normalization.py
+    pattern: 'x.var\(dim=1, keepdim=True\).add\(epsilon\).sqrt\(\)'
+    replacement: 'x.std(dim=1, keepdim=True)'
+  - $type: regex_replace
+    file: models/networks/correspondence.py
+    pattern: '/ self.opt.down\)'
+    replacement: '// self.opt.down)'
+  - $type: regex_replace
+    file: options/base_options.py
+    pattern: 'import data'
+    replacement: ''
+  - $type: regex_replace
+    file: options/base_options.py
+    pattern: '# modify dataset-related parser options'
+    replacement: "'''"
+  - $type: regex_replace
+    file: options/base_options.py
+    pattern: 'parser = dataset_option_setter\(parser, self.isTrain\)'
+    replacement: "'''"
+  - $type: regex_replace
+    file: options/base_options.py
+    pattern: '# set gpu ids'
+    replacement: 'opt.gpu_ids = "-1"'
+  - $type: regex_replace
+    file: options/base_options.py
+    pattern: 'opt = parser.parse_args'
+    replacement: 'opt, _ = parser.parse_known_args'
+  - $type: regex_replace
+    file: util/util.py
+    pattern: '# returns a configuration for creating a generator'
+    replacement: "'''"
+  - $type: regex_replace
+    file: util/util.py
+    pattern: 'return mask'
+    replacement: "'''"
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir
+  - --model-name=Pix2PixModel
+  - --import-module=model
+  - --input-shape=[1,151,256,256],[1,3,256,256],[1,151,256,256]
+  - --output-file=$conv_dir/cocosnet.onnx
+  - --model-param=corr_weights=r"$dl_dir/ckpt/latest_net_Corr.pth"
+  - --model-param=gen_weights=r"$dl_dir/ckpt/latest_net_G.pth"
+  - --input-names=input_seg_map,ref_image,ref_seg_map
+  - --output-names=exemplar_based_output
+model_optimizer_args:
+  - --input_model=$dl_dir/cocosnet.onnx
+  - --input=input_seg_map,ref_image,ref_seg_map
+  - --output=exemplar_based_output
+  - --mean_values=ref_image[127.5,127.5,127.5]
+  - --scale_values=ref_image[127.5,127.5,127.5]
+  - --reverse_input_channels
+framework: pytorch
+license: https://raw.githubusercontent.com/microsoft/CoCosNet/master/LICENSE
