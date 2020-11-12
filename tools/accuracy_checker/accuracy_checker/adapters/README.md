@@ -325,3 +325,4 @@ AccuracyChecker supports following set of adapters:
   * `beam_size` - beam size for CTC Beam Search (Optional, default 5).
   * `threshold` - beam cut threshold (Optional, default 1e-3).
 * `pwcnet` - converts output of PWCNet network to `OpticalFlowPrediction`.
+  * `flow_out` - target output layer name.

@@ -51,6 +51,7 @@ def get_tokens(s):
         return []
     return normalize_answer(s).split()
 
+
 class ScoreF1(PerImageEvaluationMetric):
     __provider__ = 'f1'
 
@@ -127,7 +128,8 @@ class ExactMatchScore(PerImageEvaluationMetric):
         del self.per_question_results
         self.per_question_results = {}
 
-class QuestionAnsweringEmbeddingAccurcay(FullDatasetEvaluationMetric):
+
+class QuestionAnsweringEmbeddingAccuracy(FullDatasetEvaluationMetric):
 
     __provider__ = 'qa_embedding_accuracy'
     annotation_types = (QuestionAnsweringEmbeddingAnnotation,)
