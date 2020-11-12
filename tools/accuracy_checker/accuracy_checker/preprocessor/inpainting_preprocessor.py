@@ -129,8 +129,8 @@ class RectMask(Preprocessor):
 
         img = image.data[0]
         img_height, img_width = img.shape[:2]
-        mp0 = (img_height - self.mask_height)//2
-        mp1 = (img_width - self.mask_width)//2
+        mp0 = max(0, (img_height - self.mask_height)//2)
+        mp1 = max(0, (img_width - self.mask_width)//2)
 
         mask = np.zeros((img_height, img_width)).astype(np.float32)
         mask[mp0:mp0 + self.mask_height, mp1:mp1 + self.mask_width] = 1
