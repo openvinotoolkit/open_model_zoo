@@ -140,7 +140,7 @@ def get_model(architecture_type, ie, args):
     elif architecture_type == 'retina':
         return RetinaFace(ie, args.model, log,  batch_size=1, threshold=args.prob_threshold)
 
-    log.error('No such model type as "{}". See "--type" option for details.'.format(model_name))
+    log.error('No such model type as "{}". See "--architecture_type" option for details.'.format(architecture_type))
     sys.exit(1)
 
 
