@@ -33,6 +33,7 @@ size_t WordPrefixSet::add_words(const std::vector<std::vector<int> >& words) {
 
   trie_chars_.clear();
   trie_starts_.clear();
+  trie_weights_.clear();
 
   // Go through the sorted list, and update children lists at every layer of trie.
   // The new child may only be the last child in each list.
