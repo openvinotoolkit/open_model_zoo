@@ -23,16 +23,18 @@ from .utils import DetectionWithLandmarks, resize_image
 
 
 class RetinaFace(Model):
-    def __init__(self, *args, threshold, **kwargs):
+    def __init__(self, *args, threshold, mask_treshold=0.5, **kwargs):
         super().__init__(*args, **kwargs)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         assert len(self.net.outputs) == 12 or len(self.net.outputs) == 9, "Expected 12 or 9 output blobs"
 
         self.threshold = threshold
+        self.detect_masks = len(self.net.outputs) == 12
+        self.mask_threshold = mask_treshold
         self.postprocessor = RetinaFacePostprocessor(detect_attributes=len(self.net.outputs) == 12)
 
-        self.labels = ['Face']
+        self.labels = ['Face'] if not self.detect_masks else ['Mask', 'No mask']
 
         self.image_blob_name = next(iter(self.net.input_info))
         self._output_layer_names = self.net.outputs
@@ -54,13 +56,13 @@ class RetinaFace(Model):
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
         scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
 
-        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold)
+        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold, self.mask_threshold)
         return outputs
 
 
 class RetinaFacePostprocessor:
     def __init__(self, detect_attributes=False):
-        self._detect_attributes = detect_attributes
+        self._detect_masks = detect_attributes
         _ratio = (1.,)
         self._anchor_cfg = {
             32: {'SCALES': (32, 16), 'BASE_SIZE': 16, 'RATIOS': _ratio},
@@ -151,7 +153,7 @@ class RetinaFacePostprocessor:
 
         return keep
 
-    def process_output(self, raw_output, scale_x, scale_y, face_prob_threshold):
+    def process_output(self, raw_output, scale_x, scale_y, face_prob_threshold, mask_prob_threshold):
         bboxes_outputs = [raw_output[name][0] for name in raw_output if re.search('.bbox.', name)]
         bboxes_outputs.sort(key=lambda x: x.shape[1])
 
@@ -160,7 +162,7 @@ class RetinaFacePostprocessor:
 
         landmarks_outputs = [raw_output[name][0] for name in raw_output if re.search('.landmark.', name)]
         landmarks_outputs.sort(key=lambda x: x.shape[1])
-        if self._detect_attributes:
+        if self._detect_masks:
             type_scores_outputs = [raw_output[name][0] for name in raw_output if re.search('.type.', name)]
             type_scores_outputs.sort(key=lambda x: x.shape[1])
 
@@ -183,7 +185,7 @@ class RetinaFacePostprocessor:
             proposals_list.extend(proposals[threshold_mask, :])
             scores_list.extend(scores[threshold_mask])
             landmarks_list.extend(landmarks[threshold_mask, :])
-            if self._detect_attributes:
+            if self._detect_masks:
                 masks = self._get_mask_scores(type_scores_outputs[idx], anchor_num)
                 mask_scores_list.extend(masks[threshold_mask])
 
@@ -197,7 +199,7 @@ class RetinaFacePostprocessor:
             proposals_list = proposals_list[keep]
             scores_list = scores_list[keep]
             landmarks_list = landmarks_list[keep]
-            if self._detect_attributes:
+            if self._detect_masks:
                 mask_scores_list = mask_scores_list[keep]
 
         result = []
@@ -213,10 +215,15 @@ class RetinaFacePostprocessor:
             landmarks_x_coords = np.array(landmarks_list)[:, :, ::2].reshape(len(landmarks_list), -1) / scale_x
             landmarks_y_coords = np.array(landmarks_list)[:, :, 1::2].reshape(len(landmarks_list), -1) / scale_y
             result = []
-            for i in range(len(scores_list)):
-                result.append(DetectionWithLandmarks(x_mins[i], y_mins[i], x_maxs[i], y_maxs[i], scores[i], 0,
-                                                     landmarks_x_coords[i], landmarks_y_coords[i]))
-
+            if self._detect_masks:
+                for i in range(len(scores_list)):
+                    result.append(DetectionWithLandmarks(x_mins[i], y_mins[i], x_maxs[i], y_maxs[i], scores[i],
+                                                         0 if mask_scores_list[i] > mask_prob_threshold else 1,
+                                                         landmarks_x_coords[i], landmarks_y_coords[i]))
+            else:
+                for i in range(len(scores_list)):
+                    result.append(DetectionWithLandmarks(x_mins[i], y_mins[i], x_maxs[i], y_maxs[i], scores[i], 0,
+                                                         landmarks_x_coords[i], landmarks_y_coords[i]))
         return result
 
     def _get_proposals(self, bbox_deltas, anchor_num, anchors):
