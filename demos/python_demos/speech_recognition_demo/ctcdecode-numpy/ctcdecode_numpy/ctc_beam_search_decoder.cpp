@@ -42,7 +42,7 @@ std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
 
   // assign space id
   auto it = std::find(vocabulary.begin(), vocabulary.end(), " ");
-  int space_id = it - vocabulary.begin();
+  int space_id = int(it - vocabulary.begin());
   // if no space in vocabulary
   if ((size_t)space_id >= vocabulary.size()) {
     space_id = -2;
