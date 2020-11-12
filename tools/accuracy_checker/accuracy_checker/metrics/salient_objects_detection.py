@@ -85,14 +85,13 @@ class SalienceMapFMeasure(PerImageEvaluationMetric):
             self.precisions.append(0)
             self.fmeasure.append(0)
             return 0
-        else:
-            precision = num_and / num_recall if num_recall != 0 else 0
-            recall = num_and / num_obj if num_obj != 0 else 0
-            fmeasure = (1.3 * precision * recall) / (0.3 * precision + recall) if precision + recall != 0 else 0
-            self.recalls.append(recall)
-            self.precisions.append(precision)
-            self.fmeasure.append(fmeasure)
-            return fmeasure
+        precision = num_and / num_recall if num_recall != 0 else 0
+        recall = num_and / num_obj if num_obj != 0 else 0
+        fmeasure = (1.3 * precision * recall) / (0.3 * precision + recall) if precision + recall != 0 else 0
+        self.recalls.append(recall)
+        self.precisions.append(precision)
+        self.fmeasure.append(fmeasure)
+        return fmeasure
 
     def evaluate(self, annotations, predictions):
         return np.mean(self.recalls), np.mean(self.precisions), np.mean(self.fmeasure)

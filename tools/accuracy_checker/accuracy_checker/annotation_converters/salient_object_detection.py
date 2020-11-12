@@ -58,4 +58,3 @@ class SalientObjectDetectionConverter(BaseFormatConverter):
             annotations.append(SalientRegionAnnotation(identifier, map_identifier))
 
         return ConverterReturn(annotations, None, content_errors)
-
