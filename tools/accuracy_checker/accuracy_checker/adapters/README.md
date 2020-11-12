@@ -325,9 +325,7 @@ AccuracyChecker supports following set of adapters:
   * `beam_size` - beam size for CTC Beam Search (Optional, default 5).
   * `threshold` - beam cut threshold (Optional, default 1e-3).
 * `pwcnet` - converts output of PWCNet network to `OpticalFlowPrediction`.
-<<<<<<< 8579bc83f7e3398737e984a6ebef8a63af3e4be8
   * `flow_out` - target output layer name.
-=======
 * `salient_object_detection` - converts output of salient object detection model to `SalientRegionPrediction`
   * `salient_map_output` - target output layer for getting salience map (Optional, if not provided default output blob will be used).
 >>>>>>> docs
