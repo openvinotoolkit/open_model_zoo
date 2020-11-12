@@ -22,7 +22,7 @@ Tokenization occurs using the BERT tokenizer (see the demo code for implementati
 | Source framework  | PyTorch\*             |
 
 Despite number of parameters is the same as for  
-[FP32 version of the model](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/intel/bert-small-uncased-whole-word-masking-squad-0002)
+[FP32 version of the model](../../bert-small-uncased-whole-word-masking-squad-0002/description/bert-small-uncased-whole-word-masking-squad-0002.md)
 the model occupied 4x times less memory due to it uses INT8 weights instead of FP32.
 
 ## Accuracy
