@@ -177,18 +177,29 @@ class RetinaFacePostprocessor:
             anchors = self.anchors_plane(height, width, int(s), anchors_fpn)
             anchors = anchors.reshape((height * width * anchor_num, 4))
             proposals = self._get_proposals(bbox_deltas, anchor_num, anchors)
+            landmarks = self._get_landmarks(landmarks_outputs[idx], anchor_num, anchors)
             threshold_mask = scores >= face_prob_threshold
-            proposals, scores = proposals[threshold_mask, :], scores[threshold_mask]
-            if scores.size != 0:
-                x_mins, y_mins, x_maxs, y_maxs = proposals.T
-                keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, scores, 0.5)
-                proposals_list.extend(proposals[keep])
-                scores_list.extend(scores[keep])
-                landmarks = self._get_landmarks(landmarks_outputs[idx], anchor_num, anchors)[threshold_mask, :]
-                landmarks_list.extend(landmarks[keep, :])
-                if self._detect_attributes:
-                    mask_scores_list.extend(self._get_mask_scores(type_scores_outputs[idx],
-                        anchor_num)[threshold_mask][keep])
+
+            proposals_list.extend(proposals[threshold_mask, :])
+            scores_list.extend(scores[threshold_mask])
+            landmarks_list.extend(landmarks[threshold_mask, :])
+            if self._detect_attributes:
+                masks = self._get_mask_scores(type_scores_outputs[idx], anchor_num)
+                mask_scores_list.extend(masks[threshold_mask])
+
+        if len(scores_list) > 0:
+            proposals_list = np.array(proposals_list)
+            scores_list = np.array(scores_list)
+            landmarks_list = np.array(landmarks_list)
+            mask_scores_list = np.array(mask_scores_list)
+            x_mins, y_mins, x_maxs, y_maxs = proposals_list.T
+            keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, scores_list, 0.5)
+            proposals_list = proposals_list[keep]
+            scores_list = scores_list[keep]
+            landmarks_list = landmarks_list[keep]
+            if self._detect_attributes:
+                mask_scores_list = mask_scores_list[keep]
+
         result = []
         if len(scores_list) != 0:
             scores = np.reshape(scores_list, -1)
