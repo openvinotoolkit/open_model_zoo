@@ -238,7 +238,7 @@ class MSCOCOKeypointsPrecision(MSCOCOKeypointsBaseMetric):
 
 
 class MSCOCOKeypointsRecall(MSCOCOKeypointsBaseMetric):
-    __provider__ = 'coco_keypoints_precision'
+    __provider__ = 'coco_keypoints_recall'
 
     def update(self, annotation, prediction):
         per_class_matching = super().update(annotation, prediction)
