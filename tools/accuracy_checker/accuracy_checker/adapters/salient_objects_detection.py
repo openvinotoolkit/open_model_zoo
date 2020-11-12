@@ -25,6 +25,7 @@ class SalientObjectDetection(Adapter):
         raw_output = self._extract_predictions(raw, frame_meta)
         result = []
         for identifier, mask in zip(identifiers, raw_output[self.output_blob]):
+            mask = 1/(1 + np.exp(-mask))
             result.append(SalientRegionPrediction(identifier, np.round(np.squeeze(mask)).astype(np.uint8)))
 
         return result

@@ -42,19 +42,20 @@ class SalientObjectDetectionConverter(BaseFormatConverter):
         content_errors = [] if check_content else None
         annotations = []
         if self.annotation_file:
-            image_ids = ['{}.png'.format(im_id) for im_id in read_txt(self.annotation_file)]
+            image_ids = ['{}.jpg'.format(im_id) for im_id in read_txt(self.annotation_file)]
         else:
-            image_ids = [image.name for image in self.images_dir.glob('*.png')]
+            image_ids = [image.name for image in self.images_dir.glob('*.jpg')]
         num_iterations = len(image_ids)
         for idx, identifier in enumerate(image_ids):
+            map_identifier = identifier.replace('jpg', 'png')
             if check_content:
                 if not check_file_existence(self.images_dir / identifier):
                     content_errors.append('{}: does not exist'.format(self.images_dir / identifier))
-                if not check_file_existence(self.masks_dir / identifier):
-                    content_errors.append('{}: does not exist'.format(self.masks_dir / identifier))
+                if not check_file_existence(self.masks_dir / map_identifier):
+                    content_errors.append('{}: does not exist'.format(self.masks_dir / map_identifier))
             if progress_callback is not None and idx % progress_interval == 0:
                 progress_callback(idx * 100 / num_iterations)
-            annotations.append(SalientRegionAnnotation(identifier, identifier))
+            annotations.append(SalientRegionAnnotation(identifier, map_identifier))
 
         return ConverterReturn(annotations, None, content_errors)
 

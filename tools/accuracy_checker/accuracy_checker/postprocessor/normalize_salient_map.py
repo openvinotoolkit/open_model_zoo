@@ -19,12 +19,14 @@ from .postprocessor import Postprocessor
 
 
 class SalientMapNormalizer(Postprocessor):
+    __provider__ = 'normalize_salient_map'
+
     def process_image(self, annotation, prediction):
         for ann in annotation:
             gt_mask = ann.mask
             if len(gt_mask.shape) == 3 and gt_mask.shape[-1] == 3:
                 gt_mask = cv2.cvtColor(gt_mask, cv2.COLOR_BGR2GRAY)
-            gt_mask /= 255
+            gt_mask = gt_mask / 255
             gt_mask[gt_mask >= 0.5] = 1
             gt_mask[gt_mask < 0.5] = 0
             ann.mask = gt_mask.astype(np.uint8)
