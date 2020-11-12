@@ -4,7 +4,9 @@ import threading
 from collections import deque
 
 import cv2
+import ngraph as ng
 import numpy as np
+from openvino.inference_engine import IENetwork
 
 from .decoder import AssociativeEmbeddingDecoder
 from .openpose_decoder import OpenPoseDecoder
@@ -45,6 +47,7 @@ class Model:
                 reshape_needed = True
                 break
         if reshape_needed:
+            print('reshape net to ', input_shapes)
             self.await_all()
             self.net.reshape(input_shapes)
             self.exec_net = self.ie.load_network(network=self.net, device_name=self.device, num_requests=self.max_num_requests)
@@ -98,8 +101,32 @@ class Model:
 
 class HPEOpenPose(Model):
 
-    def __init__(self, *args, keep_aspect_ratio_resize=True, size_divisor=8, **kwargs):
+    def __init__(self, *args, keep_aspect_ratio_resize=True, size_divisor=8, device='CPU', max_num_requests=1, **kwargs):
         super().__init__(*args, **kwargs)
+
+        function = ng.function_from_cnn(self.net)
+        paf = function.get_output_op(0)
+        paf = paf.inputs()[0].get_source_output().get_node()
+        paf.set_friendly_name('pafs')
+        heatmap = function.get_output_op(1)
+        heatmap = heatmap.inputs()[0].get_source_output().get_node()
+        heatmap.set_friendly_name('heatmaps')
+        pooled_heatmap = ng.max_pool(heatmap,kernel_shape=(5, 5), pads_begin=(2, 2), pads_end=(2, 2), strides=(1, 1))
+        nms_mask = ng.equal(heatmap, pooled_heatmap)
+        # nms_mask_float = ng.convert_like(nms_mask, heatmap)
+        nms_mask_float = ng.convert(nms_mask, 'f32')
+        nms_heatmap = ng.multiply(heatmap, nms_mask_float, name='nms_heatmaps')
+        f = ng.impl.Function(
+            [ng.result(heatmap, name='heatmaps'),
+             ng.result(nms_heatmap, name='nms_heatmaps'),
+             ng.result(paf, name='pafs')],
+            function.get_parameters(), 'hpe-0001')
+        self.net = IENetwork(ng.impl.Function.to_capsule(f))
+        print(tuple(layer_name for layer_name in self.net.outputs))
+        self.exec_net = self.ie.load_network(network=self.net, device_name=self.device, num_requests=self.max_num_requests)
+        self.requests = self.exec_net.requests
+        self.empty_requests = deque(self.requests)
+
         self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
         self.size_divisor = size_divisor
 
@@ -110,12 +137,15 @@ class HPEOpenPose(Model):
         # self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
         # self.pafs_blob_name = find_layer_by_name('pafs', self.net.outputs)
 
-        self.pafs_blob_name = 'Mconv7_stage2_L1'
-        self.heatmaps_blob_name = 'Mconv7_stage2_L2'
-        self.nms_heatmaps_blob_name = None
+        # self.pafs_blob_name = 'Mconv7_stage2_L1'
+        # self.heatmaps_blob_name = 'Mconv7_stage2_L2'
+        self.pafs_blob_name = 'pafs'
+        self.heatmaps_blob_name = 'heatmaps'
+        self.nms_heatmaps_blob_name = 'nms_heatmaps'
 
-        self.num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1]
+        self.num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1] - 1
         self.output_scale = self.target_size / self.net.outputs[self.heatmaps_blob_name].shape[-1]
+        self.target_size = 256
 
         self.decoder = OpenPoseDecoder(num_joints=self.num_joints)
 
