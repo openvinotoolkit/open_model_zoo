@@ -5,24 +5,12 @@ import numpy as np
 import torch
 
 
-# BODY_PARTS_KPT_IDS = tuple((i - 1, j - 1) for i, j in ((1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), (8, 9), (9, 10), (1, 11),
-#                       (11, 12), (12, 13), (1, 0), (0, 14), (14, 16), (0, 15), (15, 17), (2, 16), (5, 17)))
-# # BODY_PARTS_KPT_IDS = ((1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), (8, 9), (9, 10), (1, 11),
-# #                       (11, 12), (12, 13), (1, 0), (0, 14), (14, 16), (0, 15), (15, 17), (2, 16), (5, 17))
-# BODY_PARTS_PAF_IDS = ((12, 13), (20, 21), (14, 15), (16, 17), (22, 23), (24, 25), (0, 1), (2, 3), (4, 5),
-#                       (6, 7), (8, 9), (10, 11), (28, 29), (30, 31), (34, 35), (32, 33), (36, 37), (18, 19), (26, 27))
-
-
-BODY_PARTS_KPT_IDS = tuple((i - 1, j - 1) for i, j in 
-    [[2, 3], [2, 6], [3, 4], [4, 5], [6, 7], [7, 8], [2, 9], [9, 10], [10, 11], [2, 12], [12, 13],
-    [13, 14], [2, 1], [1, 15], [15, 17], [1, 16], [16, 18], [3, 17], [6, 18]]
-)
-BODY_PARTS_PAF_IDS = tuple(i - 19 for i, _ in [
-    [31, 32], [39, 40], [33, 34], [35, 36], [41, 42], [43, 44], [19, 20], [21, 22], [23, 24], [25, 26],
-    [27, 28], [29, 30], [47, 48], [49, 50], [53, 54], [51, 52], [55, 56], [37, 38], [45, 46]
-])
-
 class OpenPoseDecoder:
+    BODY_PARTS_KPT_IDS = ((1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), (8, 9), (9, 10), (1, 11),
+                          (11, 12), (12, 13), (1, 0), (0, 14), (14, 16), (0, 15), (15, 17), (2, 16), (5, 17))
+    BODY_PARTS_PAF_IDS = ((12, 13), (20, 21), (14, 15), (16, 17), (22, 23), (24, 25), (0, 1), (2, 3), (4, 5),
+                          (6, 7), (8, 9), (10, 11), (28, 29), (30, 31), (34, 35), (32, 33), (36, 37), (18, 19), (26, 27))
+
     def __init__(self, num_joints, max_points=100, score_threshold=0.1, min_dist=6.0, delta=0.5, out_stride=8):
         super().__init__()
         self.num_joints = num_joints
@@ -33,7 +21,6 @@ class OpenPoseDecoder:
         self.out_stride = out_stride
         self.high_res_heatmaps = False
         self.high_res_pafs = False
-        self.arange_cache = {10: np.arange(10)}
         nms_kernel = 5
         self.pool = torch.nn.MaxPool2d(nms_kernel, 1, (nms_kernel - 1) // 2)
 
@@ -173,8 +160,6 @@ class OpenPoseDecoder:
         y[valid] += dy
         return x, y
       
-    
-
     def group_keypoints(self, all_keypoints_by_type, pafs, pose_entry_size=20, min_paf_score=0.05,
                         skeleton=BODY_PARTS_KPT_IDS, bones_to_channels=BODY_PARTS_PAF_IDS):
 

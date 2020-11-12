@@ -21,6 +21,7 @@ import cv2
 import ngraph as ng
 import numpy as np
 import torch
+from openvino.inference_engine import IENetwork, IECore
 from scipy.optimize import linear_sum_assignment
 
 from ..adapters import Adapter
@@ -914,15 +915,38 @@ class StackedHourGlassNetworkAdapter(Adapter):
         return preds
 
 
+class NMS:
+    def __init__(self, kernel):
+        self.ie = IECore()
+        self.net = self.compose(kernel)
+        self.exec_net = self.ie.load_network(network=self.net, device_name='CPU', num_requests=1)
+
+    def __call__(self, heatmap):
+        self.net.reshape({'heatmaps': heatmap.shape})
+        self.exec_net = self.ie.load_network(network=self.net, device_name='CPU', num_requests=1)
+        outputs = self.exec_net.infer({'heatmaps': heatmap})['nms_heatmaps']
+        # print(tuple(outputs.keys()))
+        return outputs
+
+    @staticmethod
+    def compose(kernel):
+        heatmap = ng.parameter(shape=[1, 19, 32, 32], dtype=np.float32, name='heatmaps')
+        pad = (kernel - 1) // 2
+        pooled_heatmap = ng.max_pool(heatmap, kernel_shape=(kernel, kernel), pads_begin=(pad, pad), pads_end=(pad, pad), strides=(1, 1))
+        nms_mask = ng.equal(heatmap, pooled_heatmap)
+        # nms_mask_float = ng.convert_like(nms_mask, heatmap)
+        nms_mask_float = ng.convert(nms_mask, 'f32')
+        nms_heatmap = ng.multiply(heatmap, nms_mask_float, name='nms_heatmaps')
+        f = ng.impl.Function([ng.result(nms_heatmap, name='nms_heatmaps')], [heatmap], 'nms')
+        net = IENetwork(ng.impl.Function.to_capsule(f))
+        return net
+        
+
 class OpenPoseDecoder:
-    BODY_PARTS_KPT_IDS = tuple((i - 1, j - 1) for i, j in 
-        [[2, 3], [2, 6], [3, 4], [4, 5], [6, 7], [7, 8], [2, 9], [9, 10], [10, 11], [2, 12], [12, 13],
-        [13, 14], [2, 1], [1, 15], [15, 17], [1, 16], [16, 18], [3, 17], [6, 18]]
-    )
-    BODY_PARTS_PAF_IDS = tuple(i - 19 for i, _ in [
-        [31, 32], [39, 40], [33, 34], [35, 36], [41, 42], [43, 44], [19, 20], [21, 22], [23, 24], [25, 26],
-        [27, 28], [29, 30], [47, 48], [49, 50], [53, 54], [51, 52], [55, 56], [37, 38], [45, 46]
-    ])
+    BODY_PARTS_KPT_IDS = ((1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), (8, 9), (9, 10), (1, 11),
+                          (11, 12), (12, 13), (1, 0), (0, 14), (14, 16), (0, 15), (15, 17), (2, 16), (5, 17))
+    BODY_PARTS_PAF_IDS = ((12, 13), (20, 21), (14, 15), (16, 17), (22, 23), (24, 25), (0, 1), (2, 3), (4, 5),
+                          (6, 7), (8, 9), (10, 11), (28, 29), (30, 31), (34, 35), (32, 33), (36, 37), (18, 19), (26, 27))
 
     def __init__(self, num_joints, max_points=100, score_threshold=0.1, min_dist=6.0, delta=0.5, out_stride=8):
         super().__init__()
@@ -934,35 +958,35 @@ class OpenPoseDecoder:
         self.out_stride = out_stride
         self.high_res_heatmaps = False
         self.high_res_pafs = False
-        nms_kernel = 3
-        self.pool = torch.nn.MaxPool2d(nms_kernel, 1, (nms_kernel - 1) // 2)
 
-    def nms_openvino_net(self, heatmap, nms_kernel=3):
+        self.nms_kernel = 3
+        self.nms_ov = NMS(self.nms_kernel)
 
-        def compose(input_shape):
-            heatmaps = ng.parameter(shape=heatmap.shape, dtype=heatmap.dtype, name='heatmaps')
-            pooled_heatmap = ng.max_pool(heatmap, kernel_shape=(5, 5), pads_begin=(2, 2), pads_end=(2, 2), strides=(1, 1))
-            nms_mask = ng.equal(heatmap, pooled_heatmap)
-            # nms_mask_float = ng.convert_like(nms_mask, heatmap)
-            nms_mask_float = ng.convert(nms_mask, 'f32')
-            nms_heatmap = ng.multiply(heatmap, nms_mask_float, name='nms_heatmaps')
-            f = ng.impl.Function(ng.result(nms_heatmap, name='nms_heatmaps'), heatmaps, 'nms')
-            net = IENetwork(ng.impl.Function.to_capsule(f))
-            return net
+    def nms_skimage(self, heatmaps, kernel):
+        from skimage.measure import block_reduce
 
-        net = compose(heatmap.shape)
-        self.exec_net = self.ie.load_network(network=net, device_name='CPU', num_requests=1)
-        outputs = self.exec_net.infer(heatmap)
-        print(tuple(outputs.keys()))
-        return outputs
+        # Max pooling kernel x kernel with stride 1 x 1.
+        p = (kernel - 1) // 2
+        pooled = np.zeros(heatmaps.shape, dtype=np.float32)
+        hmap = np.pad(heatmaps, ((0, 0), (0, 0), (p, p), (p, p)))
+        h, w = heatmaps.shape[-2:]
+        for i in range(kernel):
+            si = (h + 2 * p - i) // kernel
+            for j in range(kernel):
+                sj = (w + 2 * p - j) // kernel
+                pooled[..., i::kernel, j::kernel] = block_reduce(hmap[..., i:i + si * kernel, j:j + sj * kernel], (1, 1, kernel, kernel), np.max)
+        return heatmaps * (pooled == heatmaps).astype(heatmaps.dtype)
 
-    def nms(self, heatmaps, device='cuda'):
+    def nms_pytorch(self, heatmaps, kernel, device='cpu'):
         heatmaps = torch.as_tensor(heatmaps, device=device)
-        maxm = self.pool(heatmaps)
+        maxm = torch.nn.functional.max_pool2d(heatmaps, kernel_size=kernel, stride=1, padding=(kernel - 1) // 2)
         maxm = torch.eq(maxm, heatmaps).float()
         return (heatmaps * maxm).cpu().numpy()
-        # self.nms_openvino_net(heatmaps)
-        # return heatmaps
+
+    def nms(self, heatmaps):
+        # return self.nms_ov(heatmaps)
+        return self.nms_skimage(heatmaps, self.nms_kernel)
+        # return self.nms_pytorch(heatmaps, self.nms_kernel)
 
     def scale_kpts(self, kpts, scale, max_v):
         for kpt in kpts:
