@@ -326,3 +326,5 @@ AccuracyChecker supports following set of adapters:
   * `threshold` - beam cut threshold (Optional, default 1e-3).
 * `pwcnet` - converts output of PWCNet network to `OpticalFlowPrediction`.
   * `flow_out` - target output layer name.
+* `salient_object_detection` - converts output of salient object detection model to `SalientRegionPrediction`
+  * `salient_map_output` - target output layer for getting salience map (Optional, if not provided default output blob will be used).

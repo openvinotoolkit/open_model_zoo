@@ -81,7 +81,7 @@ Accuracy Checker supports following set of postprocessors:
 * `resize_style_transfer` - resizing style transfer predicted image. Supported representations: `StyleTransferAnotation`, `StyleTransferPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resizing respectively.
 * `crop_ground_truth_image` - cropping ground truth image. Supported representations: `ImageInpaintingAnnotation`.
-* `resize` - resizing image or segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`, `StyleTransferAnotation`, `StyleTransferPrediction`, `SuperResolutionAnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+* `resize` - resizing image or segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`, `StyleTransferAnotation`, `StyleTransferPrediction`, `SuperResolutionAnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `SalientRegionAnnotation`, `SalientRegionPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resize respectively. You can also use `size` instead in case when destination sizes are equal.
     If any of these parameters are not specified, image size will be used as default.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
@@ -96,3 +96,4 @@ Accuracy Checker supports following set of postprocessors:
 * `argmax_segmentation_mask` - translates categorical annotation segmentation mask to numerical. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
 * `shift_labels` - shifts predicted detection labels. Supported representation: `DetectionPrediction`.
   * `offset` - value for shift.
+* `normalize_salience_map` - converts reference salience map from [0, 255] to [0, 1] range. Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.

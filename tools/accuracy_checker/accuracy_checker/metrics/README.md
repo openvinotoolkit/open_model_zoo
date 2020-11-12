@@ -232,6 +232,10 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
   * `eps` - epsilon to avoid nan during calculate sqrtm for metric.
   * `length` - length of input feature vector for metric.
 * `epe` - Average End Point Error (EPE) metric for optical flow estimation task, defined as Euclidean distance between ground truth and predicted flow. Supported representations: `OpticalFlowAnnotation`, `OpticalFlowPrediction`.
+* `salience_mae` - Mean Absolute Error for salient object detection task. Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
+* `salience_f-measure` - f-measure metric for salient object detection task. Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
+* `salience_e-measure` - enhanced alignment measure for salient object detection task, defined in following [paper](https://arxiv.org/abs/1805.10421). Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
+* `salience_s-measure` - simularity measure for salient object detection task, defined in following [paper](https://arxiv.org/abs/1708.00786). Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
 
 ## Metrics profiling
 Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.

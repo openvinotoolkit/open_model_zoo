@@ -340,6 +340,7 @@ class CoCocInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation
     def to_annotation(self, **kwargs):
         return CoCoInstanceSegmentationAnnotation(self.identifier, self.mask, self.labels)
 
+
 class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
     def __init__(self, identifier, path_to_mask):
         super().__init__(identifier, path_to_mask, GTMaskLoader.NUMPY)
@@ -355,3 +356,10 @@ class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
             return mask
 
         return self._mask
+
+
+class SalientRegionAnnotation(SegmentationAnnotation):
+    pass
+
+class SalientRegionPrediction(SegmentationPrediction):
+    pass

@@ -103,6 +103,9 @@ from .score_class_comparison import ScoreClassComparisonMetric
 from .dna_seq_accuracy import DNASequenceAccuracy
 
 from .gan_metrics import InceptionScore, FrechetInceptionDistance
+
+from .salient_objects_detection import SalienceMapMAE, SalienceEMeasure, SalienceMapFMeasure, SalienceSMeasure
+
 __all__ = [
     'Metric',
     'MetricsExecutor',
@@ -205,4 +208,8 @@ __all__ = [
     'FrechetInceptionDistance',
 
     'AcerScore',
+
+    'SalienceMapMAE',
+    'SalienceMapFMeasure',
+    'SalienceEMeasure'
 ]

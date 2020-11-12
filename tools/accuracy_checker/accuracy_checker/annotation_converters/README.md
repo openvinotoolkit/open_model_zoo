@@ -410,6 +410,12 @@ The main difference between this converter and `super_resolution` in data organi
 * `sound_classification` - converts dataset for sound classification to `ClassificationAnnotation`. The dataset should be represented by directory with input wav files and annotation in 2 column csv format, where first column is audio file name and second is label id from dataset.
   * `annotation_file` - csv file with selected subset for evaluation, file structure described above.
   * `audio_dir` - directory with input data, (optional, required only if you want check file existence during annotation conversion).
+* `salient_object_detection` - converts dataset for salient object detection to `SalientRegionAnnotation`. The dataset should have following structure:
+  1. images have numeric ids like names and `jpg` extension (e.g. image/0.jpg, image/1.jpg, image/2.jpg, ...).
+  2. salience map located in separated directory, have the same ids like images and `png` extension  (e.g. mask/0.png, mask/1.png, mask/2.png).
+  * `images_dir` - directory with input images.
+  * `masks_dir` - directory with reference salience maps.
+  * `annotation_file` - txt file with selected image ids.
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
