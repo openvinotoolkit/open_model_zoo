@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a small BERT-large like model distilled and quantized to INT8 on SQuAD v1.1 training set from larger BERT-large model 
+This is a small BERT-large like model distilled and quantized to INT8 on SQuAD v1.1 training set from larger BERT-large model
 (bert-large-uncased-whole-word-masking) provided by the [Transformers](https://github.com/huggingface/transformers) library) and tuned on SQuAD v1.1 training set.
 The model performs question answering for English language;
 the input is a concatenated premise and question for the premise,
@@ -21,7 +21,7 @@ Tokenization occurs using the BERT tokenizer (see the demo code for implementati
 | MParams           | 41.1                  |
 | Source framework  | PyTorch\*             |
 
-Despite number of parameters is the same as for  
+Despite number of parameters is the same as for
 [FP32 version of the model](../../bert-small-uncased-whole-word-masking-squad-0002/description/bert-small-uncased-whole-word-masking-squad-0002.md)
 the model occupied 4x times less memory due to it uses INT8 weights instead of FP32.
 
