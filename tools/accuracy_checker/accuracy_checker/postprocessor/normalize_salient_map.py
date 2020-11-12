@@ -19,7 +19,7 @@ from .postprocessor import Postprocessor
 
 
 class SalientMapNormalizer(Postprocessor):
-    __provider__ = 'normalize_salient_map'
+    __provider__ = 'normalize_salience_map'
 
     def process_image(self, annotation, prediction):
         for ann in annotation:

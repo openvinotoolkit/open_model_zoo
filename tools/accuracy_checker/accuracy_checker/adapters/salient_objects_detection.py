@@ -16,15 +16,29 @@ limitations under the License.
 import numpy as np
 from .adapter import Adapter
 from ..representation import SalientRegionPrediction
+from ..config import StringField
 
 
 class SalientObjectDetection(Adapter):
-    __provider__ = 'salient_objects_detection'
+    __provider__ = 'salient_object_detection'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'salient_map_output': StringField(optional=True, description='target output layer for getting salience map')
+        })
+        return params
+
+    def configure(self):
+        self.salient_map_output = self.get_value_from_config('salient_map_output')
 
     def process(self, raw, identifiers, frame_meta):
+        if self.salient_map_output is None:
+            self.salient_map_output = self.output_blob
         raw_output = self._extract_predictions(raw, frame_meta)
         result = []
-        for identifier, mask in zip(identifiers, raw_output[self.output_blob]):
+        for identifier, mask in zip(identifiers, raw_output[self.salient_map_output]):
             mask = 1/(1 + np.exp(-mask))
             result.append(SalientRegionPrediction(identifier, np.round(np.squeeze(mask)).astype(np.uint8)))
 

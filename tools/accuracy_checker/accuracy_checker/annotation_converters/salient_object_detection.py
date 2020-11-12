@@ -27,9 +27,9 @@ class SalientObjectDetectionConverter(BaseFormatConverter):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'images_dir': PathField(is_directory=True),
-            'masks_dir': PathField(is_directory=True),
-            'annotation_file': PathField(optional=True)
+            'images_dir': PathField(is_directory=True, description='directory with images'),
+            'masks_dir': PathField(is_directory=True, description='directory with salient region mask'),
+            'annotation_file': PathField(optional=True, description='target image id list')
         })
         return params
 
