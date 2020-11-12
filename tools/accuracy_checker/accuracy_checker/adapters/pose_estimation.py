@@ -18,6 +18,7 @@ import math
 from operator import itemgetter
 
 import cv2
+import ngraph as ng
 import numpy as np
 import torch
 from scipy.optimize import linear_sum_assignment
@@ -103,17 +104,21 @@ class HumanPoseAdapter(Adapter):
             pad = meta.get('padding', [0, 0, 0, 0])
             transpose_order = (1, 2, 0) if heatmap.shape[0] == 19 else (0, 1, 2)
 
+            s = 8
+
             heatmap = np.transpose(np.squeeze(heatmap), transpose_order)
-            heatmap = cv2.resize(heatmap, (0, 0), fx=8, fy=8, interpolation=cv2.INTER_CUBIC)
+            heatmap = cv2.resize(heatmap, (0, 0), fx=s, fy=s, interpolation=cv2.INTER_CUBIC)
             heatmap = heatmap[pad[0]:heatmap.shape[0] - pad[2], pad[1]:heatmap.shape[1] - pad[3]:, :]
-            heatmap = cv2.resize(heatmap, (width, height), interpolation=cv2.INTER_CUBIC)
-            heatmap_avg = heatmap_avg + heatmap
+            # heatmap = cv2.resize(heatmap, (width, height), interpolation=cv2.INTER_CUBIC)
+            # heatmap_avg = heatmap_avg + heatmap
+            heatmap_avg = heatmap
 
             paf = np.transpose(np.squeeze(paf), transpose_order)
-            paf = cv2.resize(paf, (0, 0), fx=8, fy=8, interpolation=cv2.INTER_CUBIC)
+            paf = cv2.resize(paf, (0, 0), fx=s, fy=s, interpolation=cv2.INTER_CUBIC)
             paf = paf[pad[0]:paf.shape[0] - pad[2], pad[1]:paf.shape[1] - pad[3], :]
-            paf = cv2.resize(paf, (width, height), interpolation=cv2.INTER_CUBIC)
-            paf_avg = paf_avg + paf
+            # paf = cv2.resize(paf, (width, height), interpolation=cv2.INTER_CUBIC)
+            # paf_avg = paf_avg + paf
+            paf_avg = paf
 
             peak_counter = 0
             all_peaks = []
@@ -121,7 +126,11 @@ class HumanPoseAdapter(Adapter):
                 peak_counter += self.find_peaks(heatmap_avg[:, :, part], all_peaks, peak_counter)
 
             subset, candidate = self.group_peaks(all_peaks, paf_avg)
-            result.append(PoseEstimationPrediction(identifier, *self.get_poses(subset, candidate)))
+
+            scale_x = meta['scale_x'] / (8 / s)
+            scale_y = meta['scale_y'] / (8 / s)
+            # scale_x = scale_y = 1
+            result.append(PoseEstimationPrediction(identifier, *self.get_poses(subset, candidate, (scale_x, scale_y))))
 
         return result
 
@@ -334,7 +343,7 @@ class HumanPoseAdapter(Adapter):
         return self._filter_subset(subset), candidates
 
     @staticmethod
-    def get_poses(subset, candidate):
+    def get_poses(subset, candidate, scales):
         persons_keypoints_x, persons_keypoints_y, persons_keypoints_v = [], [], []
         scores = []
         for subset_element in subset:
@@ -355,8 +364,8 @@ class HumanPoseAdapter(Adapter):
                     cx = cx - 0.5 + 1  # +1 for matlab consistency, coords start from 1
                     cy = cy - 0.5 + 1
                     visibility = 1
-                keypoints_x[to_coco_map[position_id]] = cx
-                keypoints_y[to_coco_map[position_id]] = cy
+                keypoints_x[to_coco_map[position_id]] = cx / scales[0]
+                keypoints_y[to_coco_map[position_id]] = cy / scales[1]
                 keypoints_v[to_coco_map[position_id]] = visibility
 
             scores.append(person_score * max(0, (subset_element[-1] - 1)))  # -1 for Neck
@@ -433,7 +442,7 @@ class OpenPoseAdapter(Adapter):
             raw_output = zip(identifiers, keypoints_heat_map, pafs, frame_meta)
         for identifier, heatmap, paf, meta in raw_output:
             s = 1
-            if True:
+            if False:
                 s = 8
                 self.decoder.delta = 0
                 self.decoder.out_stride = 1
@@ -925,14 +934,35 @@ class OpenPoseDecoder:
         self.out_stride = out_stride
         self.high_res_heatmaps = False
         self.high_res_pafs = False
-        nms_kernel = 5
+        nms_kernel = 3
         self.pool = torch.nn.MaxPool2d(nms_kernel, 1, (nms_kernel - 1) // 2)
 
-    def nms(self, heatmaps):
-        heatmaps = torch.as_tensor(heatmaps)
+    def nms_openvino_net(self, heatmap, nms_kernel=3):
+
+        def compose(input_shape):
+            heatmaps = ng.parameter(shape=heatmap.shape, dtype=heatmap.dtype, name='heatmaps')
+            pooled_heatmap = ng.max_pool(heatmap, kernel_shape=(5, 5), pads_begin=(2, 2), pads_end=(2, 2), strides=(1, 1))
+            nms_mask = ng.equal(heatmap, pooled_heatmap)
+            # nms_mask_float = ng.convert_like(nms_mask, heatmap)
+            nms_mask_float = ng.convert(nms_mask, 'f32')
+            nms_heatmap = ng.multiply(heatmap, nms_mask_float, name='nms_heatmaps')
+            f = ng.impl.Function(ng.result(nms_heatmap, name='nms_heatmaps'), heatmaps, 'nms')
+            net = IENetwork(ng.impl.Function.to_capsule(f))
+            return net
+
+        net = compose(heatmap.shape)
+        self.exec_net = self.ie.load_network(network=net, device_name='CPU', num_requests=1)
+        outputs = self.exec_net.infer(heatmap)
+        print(tuple(outputs.keys()))
+        return outputs
+
+    def nms(self, heatmaps, device='cuda'):
+        heatmaps = torch.as_tensor(heatmaps, device=device)
         maxm = self.pool(heatmaps)
         maxm = torch.eq(maxm, heatmaps).float()
-        return (heatmaps * maxm).numpy()
+        return (heatmaps * maxm).cpu().numpy()
+        # self.nms_openvino_net(heatmaps)
+        # return heatmaps
 
     def scale_kpts(self, kpts, scale, max_v):
         for kpt in kpts:
@@ -1012,15 +1042,15 @@ class OpenPoseDecoder:
                 all_keypoints.append([])
                 continue
 
-            # Second stage of NMS.
-            xx = x[:, None] - x[None, :]
-            yy = y[:, None] - y[None, :]
-            dists = np.sqrt(xx * xx + yy * yy)
-            dists += np.tri(n, n, dtype=np.float32) * (2 * self.min_dist)
-            keep = dists.min(axis=0) >= self.min_dist
-            x = x[keep]
-            y = y[keep]
-            score = score[keep]
+            # # Second stage of NMS.
+            # xx = x[:, None] - x[None, :]
+            # yy = y[:, None] - y[None, :]
+            # dists = np.sqrt(xx * xx + yy * yy)
+            # dists += np.tri(n, n, dtype=np.float32) * (2 * self.min_dist)
+            # keep = dists.min(axis=0) >= self.min_dist
+            # x = x[keep]
+            # y = y[keep]
+            # score = score[keep]
 
             # Apply quarter offset to improve localization accuracy.
             x, y = self.refine(heatmaps[0, k], x, y)
