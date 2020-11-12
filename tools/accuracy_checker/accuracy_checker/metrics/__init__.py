@@ -104,7 +104,7 @@ from .dna_seq_accuracy import DNASequenceAccuracy
 
 from .gan_metrics import InceptionScore, FrechetInceptionDistance
 
-from .salient_objects_detection import SalienceMapMAE, SalienceEMeasure, SalienceMapFMeasure
+from .salient_objects_detection import SalienceMapMAE, SalienceEMeasure, SalienceMapFMeasure, SalienceSMeasure
 
 __all__ = [
     'Metric',

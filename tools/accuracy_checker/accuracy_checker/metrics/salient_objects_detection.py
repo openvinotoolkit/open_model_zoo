@@ -136,3 +136,106 @@ class SalienceEMeasure(PerImageEvaluationMetric):
 
     def reset(self):
         self.scores = []
+
+
+class SalienceSMeasure(PerImageEvaluationMetric):
+    __provider__ = 'salience_s-measure'
+    annotation_types = (SalientRegionAnnotation, )
+    prediction_types = (SalientRegionPrediction, )
+
+    def configure(self):
+        self.scores = []
+
+    def update(self, annotation, prediction):
+        y = np.mean(annotation.mask)
+        x = np.mean(prediction.mask)
+        if y == 0:
+            self.scores.append(1 - x)
+            return 1 - x
+        if y == 1:
+            self.scores.append(x)
+            return x
+        score = 0.5 * (
+            self.s_object(prediction.mask, annotation.mask) + self.s_region(prediction.mask, annotation.mask)
+        )
+        self.scores.append(score)
+        return score
+
+    @staticmethod
+    def s_object(pred_mask, gt_mask):
+        def obj(pred, gt):
+            x = np.mean(pred[np.where(gt)])
+            x_sigma = np.std(pred(np.where(gt)))
+            return 2 * x / (x ** 2 + 1 + x_sigma + np.finfo(float).eps)
+
+        pred_fg = pred_mask
+        pred_fg[np.where(~gt_mask)] = 0
+        o_fg = obj(pred_fg, gt_mask)
+        pred_bg = 1 - pred_mask
+        pred_bg[np.where(gt_mask)] = 0
+        o_bg = obj(pred_bg, ~gt_mask)
+        union = np.mean(gt_mask)
+        return union * o_fg + (1 - union) * o_bg
+
+    def s_region(self, pred_mask, gt_mask):
+        x, y = self.centroid(gt_mask)
+        g1, g2, g3, g4, w1, w2, w3, w4 = self.get_regions(gt_mask, x, y, True)
+        p1, p2, p3, p4 = self.get_regions(pred_mask, x, y)
+        q1 = self.ssim(p1, g1)
+        q2 = self.ssim(p2, g2)
+        q3 = self.ssim(p3, g3)
+        q4 = self.ssim(p4, g4)
+        return w1 * q1 + w2 * q2 + w3 * q3 + w4 * q4
+
+    @staticmethod
+    def centroid(gt_mask):
+        h, w = gt_mask.shape[:2]
+        area = np.sum(gt_mask)
+        if area == 0:
+            return w // 2, h // 2
+        x = np.ones((h, 1)) @ np.arange(w)
+        y = np.arange(h).T @ np.ones((1, w))
+        x = np.round(np.sum(x * gt_mask)) // area
+        y = np.round(np.sum(y * gt_mask)) // area
+        return x, y
+
+    @staticmethod
+    def get_regions(mask, x, y, get_width=False):
+        height, width = mask.shape[:2]
+        lt = mask[:y, :x]
+        rt = mask[:y, (x + 1):]
+        lb = mask[(y + 1):, :x]
+        rb = mask[(y + 1):, (x + 1):]
+        if not get_width:
+            return lt, rt, lb, rb
+        area = height * width
+        w1 = x*y / area
+        w2 = (width - x) * y / area
+        w3 = (height - y) * x / area
+        w4 = 1 - w1 - w2 - w3
+        return lt, rt, lb, rb, w1, w2, w3, w4
+
+    @staticmethod
+    def ssim(pred, gt):
+        h, w = pred.shape[:2]
+        n = h * w
+        x = np.mean(pred)
+        y = np.mean(gt)
+        sigma_x2 = np.sum((pred - x) ** 2) / (n - 1 + np.finfo(float).eps)
+        sigma_y2 = np.sum((gt - y) ** 2) / (n - 1 + np.finfo(float).eps)
+        sigma_xy = np.sum((pred - x) * (gt - y)) / (n - 1 + np.finfo(float).eps)
+
+        alpha = 4 * x * y * sigma_xy
+        beta = (x ** 2 + y ** 2) * (sigma_x2 + sigma_y2)
+
+        if alpha != 0:
+            return alpha / (beta + np.finfo(float).eps)
+        if alpha == 0 and beta == 0:
+            return 1.0
+        return 0.0
+
+    def evaluate(self, annotations, predictions):
+        return np.mean(self.scores)
+
+    def reset(self):
+        self.scores = []
