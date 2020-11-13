@@ -7,18 +7,19 @@
 # https://github.com/openvinotoolkit/open_model_zoo/pull/419, commit 529805d011d9b405f142b2b40f4d202bd403a4f1 on Sep 19, 2019.
 #
 import wave
-import numpy as np
 import timeit
 import argparse
 
+import yaml
+import numpy as np
 from tqdm import tqdm
 
 from utils.context_timer import Timer
-from utils.deep_speech_pipeline import DeepSpeechPipeline
+from utils.deep_speech_pipeline import DeepSpeechPipeline, PROFILES
 
 
 def build_argparser():
-    parser = argparse.ArgumentParser(description="Speech recognition example")
+    parser = argparse.ArgumentParser(description="Speech recognition demo")
     parser.add_argument('-i', '--input', help="Path to an audio file in WAV PCM 16 kHz mono format",
                         type=str, metavar="FILENAME", required=True)
     parser.add_argument('-d', '--device', default='CPU', type=str,
@@ -31,12 +32,13 @@ def build_argparser():
                         help="Beam width for beam search in CTC decoder (default 500)")
     parser.add_argument('-L', '--lm', type=str, metavar="FILENAME",
                         help="path to language model file (optional)")
-    parser.add_argument('-a', '--alphabet', type=str, metavar="FILENAME",
-                        help="path to alphabet file matching the model (defaults to the 28-symbol alphabet with English letters)")
-    parser.add_argument('--alpha', type=float, default=0.75, metavar="X",
-                        help="Language model weight (default 0.75)")
-    parser.add_argument('--beta', type=float, default=1.85, metavar="X",
-                        help="Word insertion bonus, ignored without LM (default 1.85)")
+
+    parser.add_argument('-p', '--profile', type=str, default='mds08x_en', metavar="NAME",
+                        help="Choose pre/post-processing profile: "
+                             "mds06x_en for Mozilla DeepSpeech v0.6.x, "
+                             "mds07x_en or mds08x_en for Mozilla DeepSpeech v0.7.x/x0.8.x, "
+                             "other: filename of a YAML file "
+                             "(default is mds08x_en)")
 
     parser.add_argument('-l', '--cpu_extension', type=str, metavar="FILENAME",
                         help="Optional. Required for CPU custom layers. "
@@ -45,20 +47,27 @@ def build_argparser():
     return parser
 
 
+def get_profile(profile_name):
+    if profile_name in PROFILES:
+        return PROFILES[profile_name]
+    with open(profile_name, 'rt') as f:
+        profile = yaml.load(f)
+    return profile
+
+
 def main():
     start_time = timeit.default_timer()
     with Timer() as timer:
         args = build_argparser().parse_args()
+        profile = get_profile(args.profile)
 
         stt = DeepSpeechPipeline(
             model = args.model,
             lm = args.lm,
-            alphabet = args.alphabet,
             beam_width = args.beam_width,
-            alpha = args.alpha,
-            beta = args.beta,
+            profile = profile,
             device = args.device,
-            ie_extensions = [(args.device, args.cpu_extension)] if args.device=='CPU' else [],
+            ie_extensions = [(args.device, args.cpu_extension)] if args.device == 'CPU' else [],
         )
 
         wave_read = wave.open(args.input, 'rb')

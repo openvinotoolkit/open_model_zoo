@@ -1,12 +1,12 @@
 # Speech Recognition Demo
 
-This demo demonstrates Automatic Speech Recognition (ASR) with a pretrained Mozilla\* DeepSpeech 0.6.1 model.
+This demo demonstrates Automatic Speech Recognition (ASR) with a pretrained Mozilla\* DeepSpeech 0.8.2 model.
 
 ## How It Works
 
 The application accepts
 
- * Mozilla\* DeepSpeech 0.6.1 neural network in Intermediate Representation (IR) format,
+ * Mozilla\* DeepSpeech 0.8.2 neural network in Intermediate Representation (IR) format,
  * n-gram language model file in kenlm quantized binary format, and
  * an audio file in PCM WAV 16 kHz mono format.
 
@@ -18,16 +18,20 @@ The demo depends on the `ctcdecode_numpy` Python extension module,
 which implements CTC decoding in C++ for faster decoding.
 Please refer to [Using Open Model Zoo demos](../../README.md) for instructions
 on how to build the extension module and prepare the environment for running the demo.
+Alternatively, you can [install ctcdecode-numpy from OpenVINO 2021.1 Open Model Zoo](https://github.com/openvinotoolkit/open_model_zoo/tree/2021.1/demos/python_demos/speech_recognition_demo/ctcdecode-numpy#installation).
 
 ## Model preparation
 
-You can download and convert a pre-trained Mozilla\* DeepSpeech 0.6.1 model with
-OpenVINO [Model Downloader](../../../tools/downloader/README.md).
+You can download and convert a pre-trained Mozilla\* DeepSpeech 0.8.2 model with
+OpenVINO [Model Downloader](../../../tools/downloader/README.md) and the provided conversion scripts.
 This essentially boils down to the following commands:
 ```shell
-source <openvino_path>/bin/setupvars.sh
-<openvino_path>/deployment_tools/open_model_zoo/tools/downloader/downloader.py --name mozilla-deepspeech-0.6.1
-<openvino_path>/deployment_tools/open_model_zoo/tools/downloader/converter.py --name mozilla-deepspeech-0.6.1
+source <openvino_dir>/bin/setupvars.sh
+<openvino_dir>/deployment_tools/open_model_zoo/tools/downloader/downloader.py --name mozilla-deepspeech-0.8.2
+dl_dir=public/mozilla-deepspeech-0.8.2
+<openvino_dir>/deployment_tools/open_model_zoo/models/public/mozilla-deepspeech-0.8.2/pbmm_to_pb.py $dl_dir/deepspeech-0.8.2-models.pbmm $dl_dir/deepspeech-0.8.2-models.pb
+<openvino_dir>/deployment_tools/open_model_zoo/models/public/mozilla-deepspeech-0.8.2/scorer_to_kenlm.py $dl_dir/deepspeech-0.8.2-models.scorer $dl_dir/deepspeech-0.8.2-models.kenlm
+<openvino_dir>/deployment_tools/open_model_zoo/tools/downloader/converter.py --name mozilla-deepspeech-0.8.2
 ```
 
 Please pay attention to the model license, **Mozilla Public License 2.0**.
@@ -39,10 +43,9 @@ Here are the essential options:
 
 ```
 usage: speech_recognition_demo.py [-h] -i FILENAME [-d DEVICE] -m FILENAME
-                                  [-b N] [-L FILENAME] [-a FILENAME]
-                                  [--alpha X] [--beta X] [-l FILENAME]
+                                  [-b N] [-L FILENAME] [-p NAME] [-l FILENAME]
 
-Speech recognition example
+Speech recognition demo
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -59,6 +62,11 @@ optional arguments:
                         500)
   -L FILENAME, --lm FILENAME
                         path to language model file (optional)
+  -p NAME, --profile NAME
+                        Choose pre/post-processing profile: mds06x_en for
+                        Mozilla DeepSpeech v0.6.x, mds07x_en or mds08x_en for
+                        Mozilla DeepSpeech v0.7.x/x0.8.x, other: filename of a
+                        YAML file (default is mds08x_en)
 [...]
 ```
 
@@ -66,18 +74,18 @@ The typical command line is:
 
 ```shell
 pip install -r requirements.txt
-source <openvino_path>/bin/setupvars.sh
+source <openvino_dir>/bin/setupvars.sh
 
 python speech_recognition_demo.py \
-    -m <ir_dir>/mozilla_deepspeech_0.6.1.xml \
-    -L <path_to_tf_model>/lm.binary \
-    <path_to_audio>/audio.wav
+    -m <ir_dir>/FP32/mozilla_deepspeech_0.8.2.xml \
+    -L <path_to_tf_model>/deepspeech-0.8.2-models.kenlm \
+    -i <path_to_audio>/audio.wav
 ```
 
 **Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.**
 
-An example audio file can be taken from `<openvino directory>/deployment_tools/demo/how_are_you_doing.wav`.
+An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/how_are_you_doing.wav`.
 
 ## Demo Output
 
-The application shows the time taken by initialization and processing stages, and the decoded text for the audio file.
+The application shows time taken by the initialization and processing stages, and the decoded text for the audio file.
