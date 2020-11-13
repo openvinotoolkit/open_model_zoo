@@ -24,9 +24,9 @@ from setuptools import find_packages, setup
 from setuptools.command.test import test as test_command
 from setuptools.command.install import install as install_command
 from distutils.version import LooseVersion
-from pathlib import PurePath
+from pathlib import Path
 
-here = PurePath(__file__).parent
+here = Path(__file__).parent
 
 
 class PyTest(test_command):
