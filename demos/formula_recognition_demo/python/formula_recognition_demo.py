@@ -327,7 +327,7 @@ def main():
         capture = VideoCapture((height, width))
         prev_text = ''
         while True:
-            frame = capture()
+            frame = capture.get_frame()
             bin_crop = capture.get_crop(frame)
             model_input = prerocess_crop(bin_crop, (height, width))
             frame = capture.put_crop(frame, model_input)

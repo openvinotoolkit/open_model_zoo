@@ -102,7 +102,7 @@ class VideoCapture:
         self.prev_formula_img = None
         self.renderer = create_renderer()
 
-    def __call__(self):
+    def get_frame(self):
         ret, frame = self.capture.read()
         return frame
 
