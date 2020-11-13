@@ -26,6 +26,8 @@ from setuptools.command.install import install as install_command
 from distutils.version import LooseVersion
 from pathlib import PurePath
 
+here = PurePath(__file__).parent
+
 
 class PyTest(test_command):
     user_options = [('pytest-args=', 'a', "Arguments to pass to pytest")]
@@ -44,7 +46,7 @@ class PyTest(test_command):
 
 
 def read(*path):
-    input_file = PurePath(__file__).parent.joinpath(*path)
+    input_file = here.joinpath(*path)
     with open(str(input_file)) as file:
         return file.read()
 
