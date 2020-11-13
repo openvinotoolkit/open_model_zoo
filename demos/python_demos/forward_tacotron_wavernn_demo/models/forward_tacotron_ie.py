@@ -174,9 +174,3 @@ class ForwardTacotronIE:
             print("MEL shape :{0}".format(res.shape))
 
         return res
-
-
-
-
-
-
