@@ -101,9 +101,13 @@ class Model:
 
 class HPEOpenPose(Model):
 
-    def __init__(self, *args, keep_aspect_ratio_resize=True, size_divisor=8, device='CPU', max_num_requests=1, **kwargs):
+    def __init__(self, *args, keep_aspect_ratio_resize=True, size_divisor=8,
+                 device='CPU', max_num_requests=1, use_cpp_postprocessing=False,
+                 target_size=256, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.use_cpp_postprocessing = use_cpp_postprocessing
+        self.nms_heatmaps_blob_name = None
         function = ng.function_from_cnn(self.net)
         paf = function.get_output_op(0)
         paf = paf.inputs()[0].get_source_output().get_node()
@@ -111,18 +115,28 @@ class HPEOpenPose(Model):
         heatmap = function.get_output_op(1)
         heatmap = heatmap.inputs()[0].get_source_output().get_node()
         heatmap.set_friendly_name('heatmaps')
-        pooled_heatmap = ng.max_pool(heatmap,kernel_shape=(5, 5), pads_begin=(2, 2), pads_end=(2, 2), strides=(1, 1))
-        nms_mask = ng.equal(heatmap, pooled_heatmap)
-        # nms_mask_float = ng.convert_like(nms_mask, heatmap)
-        nms_mask_float = ng.convert(nms_mask, 'f32')
-        nms_heatmap = ng.multiply(heatmap, nms_mask_float, name='nms_heatmaps')
-        f = ng.impl.Function(
-            [ng.result(heatmap, name='heatmaps'),
-             ng.result(nms_heatmap, name='nms_heatmaps'),
-             ng.result(paf, name='pafs')],
-            function.get_parameters(), 'hpe-0001')
-        self.net = IENetwork(ng.impl.Function.to_capsule(f))
-        print(tuple(layer_name for layer_name in self.net.outputs))
+        if not self.use_cpp_postprocessing:
+            pooled_heatmap = ng.max_pool(heatmap,kernel_shape=(5, 5), pads_begin=(2, 2), pads_end=(2, 2), strides=(1, 1))
+            nms_mask = ng.equal(heatmap, pooled_heatmap)
+            # nms_mask_float = ng.convert_like(nms_mask, heatmap)
+            nms_mask_float = ng.convert(nms_mask, 'f32')
+            nms_heatmap = ng.multiply(heatmap, nms_mask_float, name='nms_heatmaps')
+            f = ng.impl.Function(
+                [ng.result(heatmap, name='heatmaps'),
+                ng.result(nms_heatmap, name='nms_heatmaps'),
+                ng.result(paf, name='pafs')],
+                function.get_parameters(), 'hpe-0001')
+            self.net = IENetwork(ng.impl.Function.to_capsule(f))
+            
+            self.nms_heatmaps_blob_name = 'nms_heatmaps'
+        else:
+            self.reorder_map = np.array([0, 15, 14, 17, 16, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10])
+            f = ng.impl.Function(
+                [ng.result(heatmap, name='heatmaps'),
+                ng.result(paf, name='pafs')],
+                function.get_parameters(), 'hpe-0001')
+            self.net = IENetwork(ng.impl.Function.to_capsule(f))
+
         self.exec_net = self.ie.load_network(network=self.net, device_name=self.device, num_requests=self.max_num_requests)
         self.requests = self.exec_net.requests
         self.empty_requests = deque(self.requests)
@@ -133,19 +147,12 @@ class HPEOpenPose(Model):
         self.image_blob_name = self._get_inputs(self.net)
         self.target_size = self.net.input_info[self.image_blob_name].input_data.shape[-1]
 
-        # self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)
-        # self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
-        # self.pafs_blob_name = find_layer_by_name('pafs', self.net.outputs)
-
-        # self.pafs_blob_name = 'Mconv7_stage2_L1'
-        # self.heatmaps_blob_name = 'Mconv7_stage2_L2'
         self.pafs_blob_name = 'pafs'
         self.heatmaps_blob_name = 'heatmaps'
-        self.nms_heatmaps_blob_name = 'nms_heatmaps'
 
         self.num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1] - 1
         self.output_scale = self.target_size / self.net.outputs[self.heatmaps_blob_name].shape[-1]
-        self.target_size = 256
+        self.target_size = target_size
 
         self.decoder = OpenPoseDecoder(num_joints=self.num_joints)
 
@@ -189,12 +196,25 @@ class HPEOpenPose(Model):
 
     def postprocess(self, outputs, meta):
         heatmaps = outputs[self.heatmaps_blob_name]
-        if self.nms_heatmaps_blob_name:
-            nms_heatmaps = outputs[self.nms_heatmaps_blob_name]
-        else:
-            nms_heatmaps = self.decoder.nms(heatmaps)
         pafs = outputs[self.pafs_blob_name]
-        poses, scores = self.decoder(heatmaps, nms_heatmaps, pafs)
+
+        if self.use_cpp_postprocessing:
+            from pose_extractor import extract_poses
+
+            upsample_ratio = 4
+            poses = extract_poses(heatmaps[0], pafs[0], upsample_ratio)
+            # scale coordinates to features space
+            scores = poses[:, -1]
+            poses = poses[:, :-1].reshape(-1, 18, 3)
+            poses = poses[:, self.reorder_map, :]
+            poses[:, :, :2] /= upsample_ratio / 8
+        else:
+            if self.nms_heatmaps_blob_name:
+                nms_heatmaps = outputs[self.nms_heatmaps_blob_name]
+            else:
+                nms_heatmaps = self.decoder.nms(heatmaps)
+            poses, scores = self.decoder(heatmaps, nms_heatmaps, pafs)
+
         # Rescale poses to the original image.
         original_image_shape = meta['original_shape']
         resized_image_shape = meta['resized_shape']
