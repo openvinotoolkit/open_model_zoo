@@ -65,7 +65,7 @@ class OpenPoseDecoder:
                 np.core.umath.clip(kpts[:, 1], 0, h - 1, out=kpts[:, 1])
 
         pose_entries, keypoints = self.group_keypoints(keypoints, pafs, pose_entry_size=self.num_joints + 2)
-        grouped_kpts, scores = self.convert_to_coco_format(pose_entries, keypoints, None)
+        grouped_kpts, scores = self.convert_to_coco_format(pose_entries, keypoints)
         if len(grouped_kpts) > 0:
             grouped_kpts = np.asarray(grouped_kpts, dtype=np.float32)
             grouped_kpts = grouped_kpts.reshape((grouped_kpts.shape[0], -1, 3))
@@ -274,7 +274,7 @@ class OpenPoseDecoder:
         pose_entries = np.asarray(filtered_entries)
         return pose_entries, all_keypoints
 
-    def convert_to_coco_format(self, pose_entries, all_keypoints, reorder_map=None):
+    def convert_to_coco_format(self, pose_entries, all_keypoints):
         num_joints = 17
         coco_keypoints = []
         scores = []
