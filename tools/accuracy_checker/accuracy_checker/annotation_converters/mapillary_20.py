@@ -83,7 +83,7 @@ class Mapillary20Converter(BaseFormatConverter):
 
     def convert(self, *args, **kwargs):
         annotations = []
-        for file_in_dir in self.images_dir.iterdir():
+        for file_in_dir in self.images_dir.glob('*.png'):
             annotation = SegmentationAnnotation(file_in_dir.name, file_in_dir.name, mask_loader=GTMaskLoader.PILLOW)
             annotations.append(annotation)
 
