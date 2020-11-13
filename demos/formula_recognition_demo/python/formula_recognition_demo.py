@@ -26,7 +26,7 @@ from openvino.inference_engine import IECore
 from tqdm import tqdm
 from utils import END_TOKEN, START_TOKEN, ModelStatus, Renderer, Vocab, VideoCapture
 
-CONFIDENCE_THRESH = 0.8
+CONFIDENCE_THRESH = 0.95
 
 
 def check_environment():
@@ -116,6 +116,7 @@ class Demo:
         self.vocab = Vocab(self.args.vocab_path)
         self.model_status = ModelStatus.ready
         self.is_async = args.interactive
+        self.num_infers_decoder = 0
         if not args.interactive:
             self.preprocess_inputs()
 
@@ -142,6 +143,7 @@ class Demo:
         return self.exec_net_encoder.start_async(request_id=req_id, inputs={self.args.imgs_layer: image})
 
     def _async_infer_decoder(self, row_enc_out, dec_st_c, dec_st_h, output, tgt, req_id):
+        self.num_infers_decoder += 1
         return self.exec_net_decoder.start_async(request_id=req_id, inputs={self.args.row_enc_out_layer: row_enc_out,
                                                                             self.args.dec_st_c_layer: dec_st_c,
                                                                             self.args.dec_st_h_layer: dec_st_h,
@@ -184,7 +186,8 @@ class Demo:
         dec_res = self._infer_request_handle_decoder.output_blobs
         self._unpack_dec_results(dec_res)
 
-        if self.tgt[0][0][0] == END_TOKEN:
+        if self.tgt[0][0][0] == END_TOKEN or self.num_infers_decoder >= self.args.max_formula_len:
+            self.num_infers_decoder = 0
             self.logits = np.array(self.logits)
             logits = self.logits.squeeze(axis=1)
             targets = np.argmax(logits, axis=1)
@@ -350,12 +353,12 @@ def main():
                 logits, targets = model_res
                 prob = calculate_probability(logits)
                 log.info("Confidence score is %s", prob)
-                if prob >= args.conf_thresh:
+                if prob >= args.conf_thresh ** len(logits):
                     log.info("Prediction updated")
                     phrase = demo.vocab.construct_phrase(targets)
                 else:
                     log.info("Confidence score is low, prediction is not complete")
-                    phrase = '...'
+                    phrase = ''
             frame = capture.put_text(frame, phrase)
             frame = capture.put_formula(frame, renderer, phrase)
             prev_text = phrase
