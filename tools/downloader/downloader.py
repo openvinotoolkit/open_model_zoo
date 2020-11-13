@@ -160,16 +160,13 @@ class DirCache:
                 cache_size += len(data)
                 if cache_size > model_file.size:
                     reporter.log_error("Cached file is longer than expected ({} B), copying aborted", model_file.size)
-                    reporter.print('Will retry from the original source.')
                     return False
                 cache_sha256.update(data)
                 destination_file.write(data)
         if cache_size < model_file.size:
             reporter.log_error("Cached file is shorter ({} B) than expected ({} B)", cache_size, model_file.size)
-            reporter.print('Will retry from the original source.')
             return False
         if not verify_hash(reporter, cache_sha256.digest(), model_file.sha256, path):
-            reporter.print('Will retry from the original source.')
             return False
         return True
 
@@ -194,6 +191,7 @@ def try_retrieve_from_cache(reporter, cache, files):
 
                 reporter.print_section_heading('Retrieving {} from the cache', destination)
                 if not cache.get(model_file, destination, reporter):
+                    reporter.print('Will retry from the original source.')
                     return False
             reporter.print()
             return True
