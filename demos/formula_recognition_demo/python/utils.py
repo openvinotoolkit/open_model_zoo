@@ -45,7 +45,6 @@ class Renderer:
         self._state = RenderStatus.ready
         self._worker = ThreadPool(processes=1)
         self._async_result = None
-        self._prev_successful = False
 
     def __call__(self, formula):
         if self.prev_formula is None:
@@ -65,13 +64,10 @@ class Renderer:
         if self._state == RenderStatus.rendering:
             if self._async_result.ready() and self._async_result.successful():
                 self._state = RenderStatus.ready
-                self._prev_successful = True
                 return self.output_file
             elif self._async_result.ready() and not self._async_result.successful():
                 self._state = RenderStatus.ready
                 return self.thread_render("Syntax error in predicted formula")
-            if self._prev_successful:
-                return self.output_file
             return None
 
 
@@ -84,6 +80,8 @@ class VideoCapture:
         self.capture.set(4, resolution[1])
         self.tgt_shape = input_model_shape
         self.start_point, self.end_point = self._create_input_window()
+        self.prev_formula = None
+        self.prev_formula_img = None
 
     def __call__(self):
         ret, frame = self.capture.read()
@@ -127,12 +125,14 @@ class VideoCapture:
             raise ValueError(f"wrong action: {action}")
 
     def put_text(self, frame, text):
-        (txt_h, txt_w), baseLine = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 3)
+        if text == '':
+            return frame
+        (txt_w, txt_h), baseLine = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 3)
 
-        start_point = (self.start_point[0] - int(txt_w / 2), self.start_point[1] - txt_h)
-        frame = cv.putText(frame, text, org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
+        start_point = (int(self.resolution[0] / 2 - txt_w /2), self.start_point[1] - txt_h)
+        frame = cv.putText(frame, rf'{text}', org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
                            fontScale=1, color=(255, 255, 255), thickness=3, lineType=cv.LINE_AA)
-        frame = cv.putText(frame, text, org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
+        frame = cv.putText(frame, rf'{text}', org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
                            fontScale=1, color=(0, 0, 0), thickness=1, lineType=cv.LINE_AA)
         return frame
 
@@ -144,15 +144,22 @@ class VideoCapture:
         return frame
 
     def put_formula(self, frame, renderer, formula):
-        if renderer is None:
+        if renderer is None or formula == '':
             return frame
-        result = renderer.thread_render(formula)
-        if result is not None:
-            formula_img = cv.imread(renderer.output_file)
-            height = self.tgt_shape[0]
-            frame[height:height + formula_img.shape[0],
-                  self.start_point[0]:self.start_point[0] + formula_img.shape[1],
-                  :] = formula_img
+        if formula != self.prev_formula:
+            result = renderer.thread_render(formula)
+            if result is not None:
+                self.prev_formula = formula
+                formula_img = cv.imread(renderer.output_file)
+                self.prev_formula_img = formula_img
+            else:
+                return frame
+        else:
+            formula_img = self.prev_formula_img
+        height = self.end_point[1] - self.start_point[1]
+        frame[height:height + formula_img.shape[0],
+              self.start_point[0]:self.start_point[0] + formula_img.shape[1],
+              :] = formula_img
         return frame
 
     def release(self):
