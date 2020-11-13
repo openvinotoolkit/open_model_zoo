@@ -25,10 +25,6 @@ def postprocess(out):
 
 
 def save_result(results, out_path):
-    try:
-        if not os.path.isdir(out_path):
-            os.mkdir(out_path)
-        for index, result in enumerate(results):
-            cv2.imwrite(out_path + '/' + "out_{}.jpg".format(index), result)
-    except OSError as err:
-        print(err)
+    os.makedirs(out_path, exist_ok=True)
+    for index, result in enumerate(results):
+        cv2.imwrite(os.path.join(out_path, "out_{}.jpg".format(index)), result)

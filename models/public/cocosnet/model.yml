@@ -43,10 +43,6 @@ files:
     size: 18453
     sha256: 99815130c1fb335595a8a9cba365f8d191aceb971f4c7ac8763620b75e799dd8
     source: https://raw.githubusercontent.com/microsoft/CoCosNet/33f98d092407094a15a08b0555d6f5359490cd3e/models/networks/correspondence.py
-  - name: model_files/models/networks/discriminator.py
-    size: 7458
-    sha256: 78ab22b64b2a69cd06342c28b7ca99eac7f9afb6f21503fa000ba25ebbfc2d88
-    source: https://raw.githubusercontent.com/microsoft/CoCosNet/33f98d092407094a15a08b0555d6f5359490cd3e/models/networks/discriminator.py
   - name: model_files/models/networks/generator.py
     size: 10874
     sha256: bc25f3d7eb0023558ea9b5bd99f6d4eed4b2577295f0812c69c394faf78c4433
@@ -91,15 +87,11 @@ postprocessing:
   - $type: regex_replace
     file: model_files/models/networks/normalization.py
     pattern: 'x.var\(dim=1, keepdim=True\).add\(epsilon\).sqrt\(\)'
-    replacement: 'x.std(dim=1, keepdim=True)'
+    replacement: '(x.std(dim=1, keepdim=True)**2).add(epsilon).sqrt()'
   - $type: regex_replace
     file: model_files/models/networks/__init__.py
-    pattern: 'from models.networks.ContextualLoss import \*'
-    replacement: '# from models.networks.ContextualLoss import *'
-  - $type: regex_replace
-    file: model_files/models/networks/__init__.py
-    pattern: 'from models.networks.loss import \*'
-    replacement: '# from models.networks.loss import *'
+    pattern: 'from models\.networks\.(ContextualLoss|loss|discriminator) '
+    replacement: '# \g<0>'
   - $type: regex_replace
     file: model_files/models/networks/correspondence.py
     pattern: '/ self.opt.down\)'

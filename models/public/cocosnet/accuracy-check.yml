@@ -50,3 +50,15 @@ evaluations:
           postprocessing:
             - type: resize
               apply_to: prediction
+
+          metrics:
+            - type: psnr
+              scale_border: 0
+              presenter: print_vector
+            - type: ssim
+              presenter: print_vector
+            - type: fid
+              length: 2048
+              eps: 0.000001
+            - type: inception_score
+              length: 1001

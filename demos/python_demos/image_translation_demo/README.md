@@ -1,15 +1,16 @@
-# Cross-domain correspondence network (CoCosNet) Python* Demo
+# Image Translation Demo
 
-This CoCosNet demo application demonstrates how to work Cross-domain correspondence network, which synthesizes a photo-realistic image from the input in a semantic segmentation mask and exemplar image.
+This demo application demonstrates an example of using neural networks to synthesize a photo-realistic image based on exemplar image. You can use the following models with the demo:
+
+* `cocosnet`
 
 ## How It Works
 
-At the start-up the demo application reads command line parameters and loads a network to the Inference Engine plugin. \
-To get the result, the demo performs the following steps:
+At the start-up the demo application reads command line parameters and loads a network to the Inference Engine plugin. To get the result, the demo performs the following steps:
 
 1. Reading input data (semantic segmentation mask of image for translation, exemplar image and mask of exemplar image).
 2. Preprocessing for input image and masks.
-3. Network inference (segmentation network (optional) + CoCosNet network).
+3. Network inference (segmentation network (optional) + translation network).
 4. Save results to folder.
 
 ## Running
@@ -23,16 +24,17 @@ python3 cocosnet_demo.py -h
 The command yields the following usage message:
 
 ```
-usage: cocosnet_demo.py [-h] -c COCOSNET_MODEL [-s SEGMENTATION_MODEL]
-                        [-ii INPUT_IMAGES] [-is INPUT_SEMANTICS] -ri
-                        REFERENCE_IMAGES [-rs REFERENCE_SEMANTICS]
-                        [-o OUTPUT_DIR] [-d DEVICE]
+usage: image_translation_demo.py [-h] -t TRANSLATION_MODEL
+                                 [-s SEGMENTATION_MODEL] [-ii INPUT_IMAGES]
+                                 [-is INPUT_SEMANTICS] -ri REFERENCE_IMAGES
+                                 [-rs REFERENCE_SEMANTICS] -o OUTPUT_DIR
+                                 [-d DEVICE]
 
 Options:
   -h, --help            Show this help message and exit.
-  -c COCOSNET_MODEL, --cocosnet_model COCOSNET_MODEL
+  -t TRANSLATION_MODEL, --translation_model TRANSLATION_MODEL
                         Required. Path to an .xml file with a trained
-                        CoCosNet model
+                        translation model
   -s SEGMENTATION_MODEL, --segmentation_model SEGMENTATION_MODEL
                         Optional. Path to an .xml file with a trained
                         semantic segmentation model
@@ -49,7 +51,8 @@ Options:
                         Optional. Path to a folder with reference semantics
                         or path to a reference semantic
   -o OUTPUT_DIR, --output_dir OUTPUT_DIR
-                        Optional. Path to directory to save the results
+                        Required. Path to a folder where output files will be
+                        saved
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. Default
@@ -65,9 +68,8 @@ To run the demo, you can use public or pre-trained models. You can download the 
 
 There are two ways to use this demo:
 
-1. To use only CoCosNet model. \
-   In this case user have to set 3 inputs to the model (2 masks and 1 image).
-   You can use the following command run demo on CPU:
+1. To use only translation model.
+   You can use the following command run demo on CPU using CoCosNet as translation model:
 
    ```
    python3 cocosnet_demo.py \
@@ -79,13 +81,13 @@ There are two ways to use this demo:
        -rs <path_to_exemplar_semantic>/reference_mask.png
    ```
 
-   > **NOTE**: For segmentation masks you should use mask (with shape: [height x width]) that specifies class for each pixel. Number of classes is 151 (from ADE20k), where '0' - nothing class.
+   > **NOTE**: For segmentation masks you should use mask (with shape: [height x width]) that specifies class for each pixel. Number of classes is 151 (from ADE20k), where '0' - background class.
 
-2. To use the segmentation model in addition to CoCosNet. You should use only models trained on ADE20k dataset.     Example: [hrnet-v2-c1-segmentation](../../../models/public/hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md).
-   In this case user have to set input image (.jpg) and reference image (.jpg) without any masks.
+2. To use the segmentation model in addition to translation. You should use only models trained on ADE20k dataset.     Example: [hrnet-v2-c1-segmentation](../../../models/public/hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md).
+   In this case user have to set input image and reference image without any masks.
    Segmentation masks will be generated via segmentation model.
 
-   You can use the following command run demo on CPU:
+   You can use the following command run demo on CPU using CoCosNet as translation model:
 
    ```
    python3 cocosnet_demo.py \

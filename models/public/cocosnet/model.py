@@ -26,13 +26,6 @@ def remove_all_spectral_norm(item):
             pass
         for child in item.children():
             remove_all_spectral_norm(child)
-    if isinstance(item, nn.ModuleList):
-        for module in item:
-            remove_all_spectral_norm(module)
-    if isinstance(item, nn.Sequential):
-        modules = item.children()
-        for module in modules:
-            remove_all_spectral_norm(module)
 
 
 class Pix2PixModel(nn.Module):

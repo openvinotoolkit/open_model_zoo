@@ -49,8 +49,9 @@ class CocosnetEvaluator(BaseEvaluator):
         self._metrics_results = []
         self._part_by_name = {
             'gan_network': self.test_model,
-            'verification_network': self.check_model
         }
+        if self.check_model:
+            self._part_by_name.update({'verification_network': self.check_model})
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False):
@@ -66,25 +67,30 @@ class CocosnetEvaluator(BaseEvaluator):
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
 
         network_info = config.get('network_info', {})
+        cocosnet_network = network_info.get('cocosnet_network', {})
+        verification_network = network_info.get('verification_network', {})
         if not delayed_model_loading:
-            cocosnet_network = network_info.get('cocosnet_network', {})
-            verification_network = network_info.get('verification_network', {})
             model_args = config.get('_models', [])
             models_is_blob = config.get('_model_is_blob')
+
             if 'model' not in cocosnet_network and model_args:
                 cocosnet_network['model'] = model_args[0]
                 cocosnet_network['_model_is_blob'] = models_is_blob
-            if 'model' not in verification_network and model_args:
+            if verification_network and 'model' not in verification_network and model_args:
                 verification_network['model'] = model_args[1 if len(model_args) > 1 else 0]
                 verification_network['_model_is_blob'] = models_is_blob
             network_info.update({
                 'cocosnet_network': cocosnet_network,
                 'verification_network': verification_network
             })
-            if not contains_all(network_info, ['cocosnet_network', 'verification_network']):
-                raise ConfigError('configuration for cocosnet_network/verification_network does not exist')
+            if not contains_all(network_info, ['cocosnet_network']):
+                raise ConfigError('configuration for cocosnet_network does not exist')
+
         gan_model = CocosnetModel(network_info.get('cocosnet_network', {}), launcher, delayed_model_loading)
-        check_model = GanCheckModel(network_info.get('verification_network', {}), launcher, delayed_model_loading)
+        if verification_network:
+            check_model = GanCheckModel(network_info.get('verification_network', {}), launcher, delayed_model_loading)
+        else:
+            check_model = None
 
         return cls(
             dataset_config, launcher, preprocessor_mask, preprocessor_image, gan_model, check_model
@@ -147,17 +153,31 @@ class CocosnetEvaluator(BaseEvaluator):
             batch_predictions = self.test_model.predict(batch_identifiers, extr_batch_inputs)
             annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
 
-            metrics_result, _ = self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
-            gan_annotations = []
-            gan_predictions = []
-            for index_of_metric in range(self.check_model.number_of_metrics):
-                gan_annotations.extend(self.check_model.predict(batch_identifiers, annotations, index_of_metric))
-                gan_predictions.extend(self.check_model.predict(batch_identifiers, predictions, index_of_metric))
-            batch_identifiers.extend(batch_identifiers)
-            gan_annotations = [RawTensorAnnotation(batch_identifier, item)
-                               for batch_identifier, item in zip(batch_identifiers, gan_annotations)]
-            gan_predictions = [RawTensorPrediction(batch_identifier, item)
-                               for batch_identifier, item in zip(batch_identifiers, gan_predictions)]
+            if self.metric_executor:
+                metrics_result, _ = self.metric_executor.update_metrics_on_batch(
+                    batch_input_ids, annotations, predictions
+                )
+                check_model_annotations = []
+                check_model_predictions = []
+                if self.check_model:
+                    for index_of_metric in range(self.check_model.number_of_metrics):
+                        check_model_annotations.extend(
+                            self.check_model.predict(batch_identifiers, annotations, index_of_metric)
+                        )
+                        check_model_predictions.extend(
+                            self.check_model.predict(batch_identifiers, predictions, index_of_metric)
+                        )
+                    batch_identifiers.extend(batch_identifiers)
+                    check_model_annotations = [
+                        RawTensorAnnotation(batch_identifier, item)
+                        for batch_identifier, item in zip(batch_identifiers, check_model_annotations)]
+                    check_model_predictions = [
+                        RawTensorPrediction(batch_identifier, item)
+                        for batch_identifier, item in zip(batch_identifiers, check_model_predictions)]
+
+                if self.metric_executor.need_store_predictions:
+                    self._annotations.extend(check_model_annotations)
+                    self._predictions.extend(check_model_predictions)
 
             if output_callback:
                 output_callback(
@@ -166,10 +186,6 @@ class CocosnetEvaluator(BaseEvaluator):
                     element_identifiers=batch_identifiers,
                     dataset_indices=batch_input_ids
                 )
-
-            if self.metric_executor.need_store_predictions:
-                self._annotations.extend(gan_annotations)
-                self._predictions.extend(gan_predictions)
 
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_predictions))
@@ -227,7 +243,8 @@ class CocosnetEvaluator(BaseEvaluator):
 
     def release(self):
         self.test_model.release()
-        self.check_model.release()
+        if self.check_model:
+            self.check_model.release()
         self.launcher.release()
 
     def reset(self):
@@ -254,10 +271,7 @@ class CocosnetEvaluator(BaseEvaluator):
             self._part_by_name[network_dict['name']].load_network(network_dict['model'], launcher)
 
     def get_network(self):
-        return [
-            {'name': 'gan_network', 'model': self.test_model.network},
-            {'name': 'verification_network', 'model': self.check_model.network}
-        ]
+        return [{'name': key, 'model': model.network} for key, model in self._part_by_name.items()]
 
     def get_metrics_attributes(self):
         if not self.metric_executor:

@@ -26,6 +26,9 @@ class CocosnetModel:
 
         print("Loading CoCosNet IR to the plugin...")
         self.exec_net = ie_core.load_network(network=self.network, device_name=device)
+        self.input_semantic_size = self.network.input_info[self.input_semantics].input_data.shape
+        self.input_image_size = self.network.input_info[self.reference_image].input_data.shape
+        self.output_size = self.exec_net.outputs[self.output_name].shape
 
     def infer(self, input_semantics, reference_image, reference_semantics):
         input_data = {
@@ -37,7 +40,7 @@ class CocosnetModel:
         return result[self.output_name]
 
 
-class SingleInputModel:
+class SegmentationModel:
     def __init__(self, ie_core, model_xml, model_bin, device='CPU'):
         print("Reading IR for {} model ....".format(self.model_type))
         self.network = ie_core.read_network(model_xml, model_bin)
@@ -48,14 +51,10 @@ class SingleInputModel:
 
         print("Loading IR to the plugin...")
         self.exec_net = ie_core.load_network(network=self.network, device_name=device)
+        self.input_size = self.network.input_info[self.input_name].input_data.shape
+        self.output_size = self.exec_net.outputs[self.output_name].shape
 
     def infer(self, input):
         input_data = {self.input_name: input}
         result = self.exec_net.infer(input_data)
         return result[self.output_name]
-
-
-class SegmentationModel(SingleInputModel):
-    def __init__(self, ie_core, model_xml, model_bin, device='CPU'):
-        self.model_type = "semantic_segmentation"
-        super().__init__(ie_core, model_xml, model_bin, device)
