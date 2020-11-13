@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 WaveRNN is a model for the text-to-speech task originally trained in PyTorch\*
-then converted to ONNX\* format.
+then converted to ONNX\* format. The model was trained on LJSpeech dataset.
 WaveRNN performs waveform regression from mel-spectrogram.
 For details see [paper](https://arxiv.org/pdf/1703.10135.pdf), [repository](https://github.com/as-ideas/ForwardTacotron).
 

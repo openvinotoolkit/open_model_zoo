@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 ForwardTacotron is a model for the text-to-speech task originally trained in PyTorch\*
-then converted to ONNX\* format. ForwardTacotron performs mel-spectrogram regression from text.
+then converted to ONNX\* format. The model was trained on LJSpeech dataset. ForwardTacotron performs mel-spectrogram regression from text.
 For details see [paper](https://arxiv.org/pdf/1703.10135.pdf), [paper](https://arxiv.org/pdf/1905.09263.pdf), [repository](https://github.com/as-ideas/ForwardTacotron).
 
 ## ONNX Models
