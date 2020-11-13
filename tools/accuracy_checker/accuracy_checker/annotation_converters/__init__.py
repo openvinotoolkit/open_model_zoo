@@ -93,6 +93,7 @@ from .mapillary_20 import Mapillary20Converter
 from .antispoofing import AntispoofingDatasetConverter
 from .sound_classification_converter import SoundClassificationFormatConverter
 from .salient_object_detection import SalientObjectDetectionConverter
+from .wflw import WFLWConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -173,4 +174,5 @@ __all__ = [
     'AntispoofingDatasetConverter',
     'SoundClassificationFormatConverter',
     'SalientObjectDetectionConverter',
+    'WFLWConverter',
 ]
