@@ -24,10 +24,6 @@ class ADE20kImageTranslationConverter(BaseFormatConverter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'images_dir': PathField(
-                optional=False, is_directory=True,
-                description="Path to directory with images."
-            ),
             'annotations_dir': PathField(
                 optional=False, is_directory=True,
                 description="Path to directory with masks."
@@ -39,12 +35,10 @@ class ADE20kImageTranslationConverter(BaseFormatConverter):
         return parameters
 
     def configure(self):
-        self.image_dir = self.get_value_from_config('images_dir')
         self.annotation_dir = self.get_value_from_config('annotations_dir')
         self.reference_dict = self.get_value_from_config('reference_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        content_check_errors = [] if check_content else None
         annotations = []
         ref_dict = self.get_ref()
         for key, value in ref_dict.items():
@@ -52,10 +46,10 @@ class ADE20kImageTranslationConverter(BaseFormatConverter):
             reference_image_filename = "images/training/" + value
             reference_mask_filename = "annotations/training/" + value.replace('.jpg', '.png')
             identifier = [str(input_mask_filename), str(reference_image_filename), str(reference_mask_filename)]
-            annotation = ImageProcessingAnnotation(identifier, self.image_dir / "validation" / key)
+            annotation = ImageProcessingAnnotation(identifier, "validation/{}".format(key))
             annotations.append(annotation)
 
-        return ConverterReturn(annotations, None, content_check_errors)
+        return ConverterReturn(annotations, None, None)
 
     def get_ref(self):
         with open(self.reference_dict) as fd:

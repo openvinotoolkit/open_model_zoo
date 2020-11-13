@@ -9,14 +9,14 @@ For details see [paper](https://arxiv.org/pdf/2004.05571) and [repository](https
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Type                            | Image_translation                         |
+| Type                            | Image translation                         |
 | GFLOPs                          | 1080.7032                                 |
 | MParams                         | 167.9141                                  |
 | Source framework                | PyTorch\*                                 |
 
 ## Accuracy
 
-Metrics was calculated between generated images by model and real validation images from ADE20k dataset.
+Metrics were calculated between generated images by model and real validation images from ADE20k dataset.
 For some GAN metrics (IS and FID) you need to use classification model as verification network.
 In our case it is [Inception-V3](../googlenet-v3/googlenet-v3.md) model.
 
@@ -43,7 +43,7 @@ In our case it is [Inception-V3](../googlenet-v3/googlenet-v3.md) model.
     - H - image height
     - W - image width
 
-    Expected color order is BGR.
+    Expected color order is BGR (At original model expected color order is RGB).
 
 3. name: "ref_seg_map", shape: [1x151x256x256] - A mask (one-hot label map) for reference image in the format [BxCxHxW],
    where:
@@ -91,3 +91,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE
 ```
+
+The Synchronized-BatchNorm-PyTorch (dependency for model) is distributed under the following
+[license](https://github.com/vacancy/Synchronized-BatchNorm-PyTorch/blob/master/LICENSE):
+
+'''
+MIT License
+
+Copyright (c) 2018 Jiayuan MAO
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+'''

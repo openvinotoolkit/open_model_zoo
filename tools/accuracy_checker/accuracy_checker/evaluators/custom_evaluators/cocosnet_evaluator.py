@@ -459,12 +459,13 @@ class GanCheckModel(BaseModel):
         has_info = hasattr(self.exec_network, 'input_info')
         input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
         self.input_blob = next(iter(input_info))
+        self.input_shape = tuple(input_info[self.input_blob].input_data.shape)
         self.output_blob = list(self.exec_network.outputs.keys())
         self.number_of_metrics = len(self.output_blob)
 
     def fit_to_input(self, input_data):
         input_data = cv2.cvtColor(input_data, cv2.COLOR_RGB2BGR)
-        input_data = cv2.resize(input_data, dsize=(299, 299))
+        input_data = cv2.resize(input_data, dsize=self.input_shape[2:])
         input_data = np.expand_dims(input_data, 0)
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         return {self.input_blob: input_data}

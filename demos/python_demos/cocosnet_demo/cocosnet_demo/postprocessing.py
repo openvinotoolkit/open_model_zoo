@@ -20,7 +20,7 @@ def postprocess(out):
     out = np.squeeze(out)
     out = np.transpose(out, (1, 2, 0))
     result = np.uint8(127.5 * out + 127.5)
-    result = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
+    result = cv2.cvtColor(result, cv2.COLOR_RGB2BGR)
     return result
 
 

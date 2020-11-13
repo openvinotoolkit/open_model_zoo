@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 from torch import nn, load, cat
-from options.test_options import TestOptions
+
 import models.networks as networks
 
 
@@ -37,15 +38,41 @@ def remove_all_spectral_norm(item):
 class Pix2PixModel(nn.Module):
     def __init__(self, corr_weights, gen_weights):
         super().__init__()
-        opt = TestOptions().parse()
-        opt.name = "ade20k"
-        opt.use_attention = True
-        opt.maskmix = True
-        opt.PONO = True
-        opt.PONO_C = True
-        opt.batchSize = 1
-        opt.warp_mask_losstype = 'direct'
-        opt.semantic_nc = 151
+        opt = argparse.Namespace(adaptor_kernel=3,
+                                 adaptor_nonlocal=False,
+                                 adaptor_res_deeper=False,
+                                 adaptor_se=False,
+                                 apex=False,
+                                 aspect_ratio=1,
+                                 CBN_intype='warp_mask',
+                                 crop_size=256,
+                                 eqlr_sn=False,
+                                 gpu_ids=[],
+                                 isTrain=False,
+                                 init_type='xavier',
+                                 init_variance=0.02,
+                                 maskmix=True,
+                                 mask_noise=False,
+                                 match_kernel=3,
+                                 netG='spade',
+                                 ngf=64,
+                                 norm_E='spectralinstance',
+                                 norm_G='spectralspadesyncbatch3x3',
+                                 noise_for_mask=False,
+                                 PONO=True,
+                                 PONO_C=True,
+                                 semantic_nc=151,
+                                 show_corr=False,
+                                 show_warpmask=False,
+                                 use_attention=True,
+                                 use_coordconv=False,
+                                 warp_bilinear=False,
+                                 warp_cycle_w=0.0,
+                                 warp_mask_losstype=True,
+                                 warp_patch=False,
+                                 warp_stride=4,
+                                 weight_domainC=0.0
+                                 )
         self.correspondence = networks.define_Corr(opt)
         corr_weights = load(corr_weights)
         self.correspondence.load_state_dict(corr_weights)

@@ -1088,10 +1088,10 @@ datasets:
   - name: cocosnet_image_translation
     annotation_conversion:
       converter: ade20k_image_translation
-      images_dir: ADEChallengeData2016/images
       annotations_dir: ADEChallengeData2016/annotations
       reference_file: cocosnet_ade20k_ref_test.txt
     data_source: ADEChallengeData2016
+    additional_data_source: ADEChallengeData2016/images
     metrics:
       - type: psnr
         scale_border: 0
