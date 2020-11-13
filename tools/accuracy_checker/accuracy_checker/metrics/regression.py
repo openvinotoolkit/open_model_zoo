@@ -98,7 +98,10 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
                 return self.value_differ(next(iter(annotation.value.values())), prediction.value)
             diff_dict = OrderedDict()
             for key in annotation.value:
-                diff_dict[key] = self.value_differ(annotation.value[key], prediction.value[key])
+                diff = self.value_differ(annotation.value[key], prediction.value[key])
+                if np.ndim(diff) > 1:
+                    diff = np.mean(diff)
+                diff_dict[key] = diff
             return diff_dict
         if isinstance(prediction.value, dict):
             if len(prediction.value) != 1:

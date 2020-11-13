@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from pathlib import Path
 import numpy as np
 from .base_representation import BaseRepresentation
 from ..data_readers import BaseReader
