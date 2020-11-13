@@ -324,13 +324,13 @@ def main():
     else:
 
         *_, height, width = model.encoder.input_info['imgs'].input_data.shape
-        capture = VideoCapture((height, width))
+        demo = VideoCapture((height, width))
         prev_text = ''
         while True:
-            frame = capture.get_frame()
-            bin_crop = capture.get_crop(frame)
+            frame = demo.get_frame()
+            bin_crop = demo.get_crop(frame)
             model_input = prerocess_crop(bin_crop, (height, width))
-            frame = capture.put_crop(frame, model_input)
+            frame = demo.put_crop(frame, model_input)
             model_res = model.infer_async(model_input)
             if not model_res:
                 phrase = prev_text
@@ -344,21 +344,20 @@ def main():
                 else:
                     log.info("Confidence score is low, prediction is not complete")
                     phrase = ''
-            frame = capture.put_text(frame, phrase)
-            frame = capture.put_formula(frame, phrase)
+            frame = demo.put_text(frame, phrase)
+            frame = demo.put_formula(frame, phrase)
             prev_text = phrase
-            frame = capture.draw_rectangle(frame)
+            frame = demo.draw_rectangle(frame)
             cv.imshow('Press Q to quit.', frame)
             key = cv.waitKey(1) & 0xFF
             if key == ord('q'):
                 break
             elif key == ord('o'):
-                capture.resize_window("decrease")
+                demo.resize_window("decrease")
             elif key == ord('p'):
-                capture.resize_window("increase")
+                demo.resize_window("increase")
 
-        capture.release()
-        cv.destroyAllWindows()
+        demo.finalize()
 
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
              "from the openVINO toolkit\n")

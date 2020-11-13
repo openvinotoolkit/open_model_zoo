@@ -23,7 +23,7 @@ DEFAULT_RESIZE_STEP = 10
 
 def create_renderer():
     command = subprocess.run("pdflatex --version", stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, check=False, shell=True)
+                             stderr=subprocess.PIPE, check=False, shell=True)
     if command.returncode != 0:
         renderer = None
         log.warning("pdflatex not installed, please, install it to use rendering")
@@ -69,7 +69,7 @@ class Renderer:
         self.cur_formula = formula
         try:
             sympy.preview(f'$${formula}$$', viewer='file',
-                      filename=self.output_file, euler=False, dvioptions=['-D', f'{DENSITY}'])
+                          filename=self.output_file, euler=False, dvioptions=['-D', f'{DENSITY}'])
             self.res_img = cv.imread(self.output_file)
         except Exception:
             self.res_img = None
@@ -182,8 +182,9 @@ class VideoCapture:
               :] = formula_img
         return frame
 
-    def release(self):
+    def finalize(self):
         self.capture.release()
+        cv.destroyAllWindows()
 
 
 class Vocab:
