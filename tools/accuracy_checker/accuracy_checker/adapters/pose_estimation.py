@@ -907,7 +907,7 @@ class StackedHourGlassNetworkAdapter(Adapter):
         return preds
 
 
-class NMS:
+class NMSOpenVINO:
     def __init__(self, kernel):
         self.ie = IECore()
         self.net = self.compose(kernel)
@@ -931,6 +931,46 @@ class NMS:
         f = ng.impl.Function([ng.result(nms_heatmap, name='nms_heatmaps')], [heatmap], 'nms')
         net = IENetwork(ng.impl.Function.to_capsule(f))
         return net
+
+
+class NMSSKImage:
+    def __init__(self, kernel):
+        self.kernel = kernel
+        self.pad = (kernel - 1) // 2
+
+    def max_pool(self, x):
+        from skimage.measure import block_reduce
+
+        # Max pooling kernel x kernel with stride 1 x 1.
+        k = self.kernel
+        p = self.pad
+        pooled = np.zeros_like(x)
+        hmap = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)))
+        h, w = x.shape[-2:]
+        for i in range(k):
+            si = (h + 2 * p - i) // k
+            for j in range(k):
+                sj = (w + 2 * p - j) // k
+                hmap_slice = hmap[..., i:i + si * k, j:j + sj * k]
+                pooled[..., i::k, j::k] = block_reduce(hmap_slice, (1, 1, k, k), np.max)
+        return x
+
+    def __call__(self, heatmaps):
+        pooled = self.max_pool(heatmaps)
+        return heatmaps * (pooled == heatmaps).astype(heatmaps.dtype)
+
+
+class NMSPyTorch:
+    def __init__(self, kernel, device='cpu'):
+        self.kernel = kernel
+        self.pad = (kernel - 1) // 2
+        self.device = device
+
+    def __call__(self, heatmaps):
+        heatmaps = torch.as_tensor(heatmaps, device=self.device)
+        maxm = torch.nn.functional.max_pool2d(heatmaps, kernel_size=self.kernel, stride=1, padding=self.pad)
+        maxm = torch.eq(maxm, heatmaps)
+        return (heatmaps * maxm).cpu().numpy()
         
 
 class OpenPoseDecoder:
@@ -948,35 +988,6 @@ class OpenPoseDecoder:
         self.out_stride = out_stride
         self.high_res_heatmaps = False
         self.high_res_pafs = False
-
-        self.nms_kernel = 3
-        self.nms_ov = NMS(self.nms_kernel)
-
-    def nms_skimage(self, heatmaps, kernel):
-        from skimage.measure import block_reduce
-
-        # Max pooling kernel x kernel with stride 1 x 1.
-        p = (kernel - 1) // 2
-        pooled = np.zeros(heatmaps.shape, dtype=np.float32)
-        hmap = np.pad(heatmaps, ((0, 0), (0, 0), (p, p), (p, p)))
-        h, w = heatmaps.shape[-2:]
-        for i in range(kernel):
-            si = (h + 2 * p - i) // kernel
-            for j in range(kernel):
-                sj = (w + 2 * p - j) // kernel
-                pooled[..., i::kernel, j::kernel] = block_reduce(hmap[..., i:i + si * kernel, j:j + sj * kernel], (1, 1, kernel, kernel), np.max)
-        return heatmaps * (pooled == heatmaps).astype(heatmaps.dtype)
-
-    def nms_pytorch(self, heatmaps, kernel, device='cpu'):
-        heatmaps = torch.as_tensor(heatmaps, device=device)
-        maxm = torch.nn.functional.max_pool2d(heatmaps, kernel_size=kernel, stride=1, padding=(kernel - 1) // 2)
-        maxm = torch.eq(maxm, heatmaps).float()
-        return (heatmaps * maxm).cpu().numpy()
-
-    def nms(self, heatmaps):
-        # return self.nms_ov(heatmaps)
-        return self.nms_skimage(heatmaps, self.nms_kernel)
-        # return self.nms_pytorch(heatmaps, self.nms_kernel)
 
     def __call__(self, heatmaps, nms_heatmaps, pafs):
         batch_size, _, h, w = heatmaps.shape
