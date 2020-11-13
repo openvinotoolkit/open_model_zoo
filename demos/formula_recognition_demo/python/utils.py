@@ -1,5 +1,7 @@
 import json
 import pickle as pkl
+import subprocess
+import tempfile
 from enum import Enum
 from multiprocessing.pool import ThreadPool
 
@@ -19,17 +21,23 @@ MIN_WIDTH = 260
 DEFAULT_RESIZE_STEP = 10
 
 
+def create_renderer():
+    command = subprocess.run("pdflatex --version", stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, check=False, shell=True)
+    if command.returncode != 0:
+        renderer = None
+        log.warning("pdflatex not installed, please, install it to use rendering")
+    else:
+        renderer = Renderer()
+    return renderer
+
+
 class Color(Enum):
     red = (0, 0, 255)
     green = (0, 255, 0)
     blue = (255, 0, 0)
     white = (255, 255, 255)
     black = (0, 0, 0)
-
-
-class RenderStatus(Enum):
-    ready = 0
-    rendering = 1
 
 
 class ModelStatus(Enum):
@@ -39,35 +47,45 @@ class ModelStatus(Enum):
 
 
 class Renderer:
-    def __init__(self, output_file):
-        self.prev_formula = None
-        self.output_file = output_file
-        self._state = RenderStatus.ready
+    class Status(Enum):
+        ready = 0
+        rendering = 1
+
+    def __init__(self):
+        with tempfile.NamedTemporaryFile() as temp_file:
+            temp_file_name = temp_file.name
+        self.output_file = f'{temp_file_name}.png'
+        self.cur_formula = None
+        self.res_img = None
+        self._state = Renderer.Status.ready
         self._worker = ThreadPool(processes=1)
         self._async_result = None
 
-    def __call__(self, formula):
-        if self.prev_formula is None:
-            self.prev_formula = formula
-        elif self.prev_formula == formula:
+    def render(self, formula):
+        if self.cur_formula is None:
+            self.cur_formula = formula
+        elif self.cur_formula == formula:
             return self.output_file
-        self.prev_formula = formula
-        sympy.preview(f'$${formula}$$', viewer='file',
+        self.cur_formula = formula
+        try:
+            sympy.preview(f'$${formula}$$', viewer='file',
                       filename=self.output_file, euler=False, dvioptions=['-D', f'{DENSITY}'])
-        return self.output_file
+            self.res_img = cv.imread(self.output_file)
+        except Exception:
+            self.res_img = None
+        return self.res_img, self.cur_formula
 
     def thread_render(self, formula):
-        if self._state == RenderStatus.ready:
-            self._async_result = self._worker.apply_async(self.__call__, args=(formula,))
-            self._state = RenderStatus.rendering
+        if self._state == Renderer.Status.ready:
+            self._async_result = self._worker.apply_async(self.render, args=(formula,))
+            self._state = Renderer.Status.rendering
             return None
-        if self._state == RenderStatus.rendering:
+        if self._state == Renderer.Status.rendering:
             if self._async_result.ready() and self._async_result.successful():
-                self._state = RenderStatus.ready
-                return self.output_file
+                self._state = Renderer.Status.ready
+                return self.res_img, self.cur_formula
             elif self._async_result.ready() and not self._async_result.successful():
-                self._state = RenderStatus.ready
-                return self.thread_render("Syntax error in predicted formula")
+                self._state = Renderer.Status.ready
             return None
 
 
@@ -80,8 +98,9 @@ class VideoCapture:
         self.capture.set(4, resolution[1])
         self.tgt_shape = input_model_shape
         self.start_point, self.end_point = self._create_input_window()
-        self.prev_formula = None
+        self.prev_rendered_formula = None
         self.prev_formula_img = None
+        self.renderer = create_renderer()
 
     def __call__(self):
         ret, frame = self.capture.read()
@@ -129,7 +148,7 @@ class VideoCapture:
             return frame
         (txt_w, txt_h), baseLine = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 3)
 
-        start_point = (int(self.resolution[0] / 2 - txt_w /2), self.start_point[1] - txt_h)
+        start_point = (int(self.resolution[0] / 2 - txt_w / 2), self.start_point[1] - txt_h)
         frame = cv.putText(frame, rf'{text}', org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
                            fontScale=1, color=(255, 255, 255), thickness=3, lineType=cv.LINE_AA)
         frame = cv.putText(frame, rf'{text}', org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
@@ -143,17 +162,17 @@ class VideoCapture:
         frame[0:height, self.start_point[0]:self.end_point[0], :] = crop
         return frame
 
-    def put_formula(self, frame, renderer, formula):
-        if renderer is None or formula == '':
+    def put_formula(self, frame, formula):
+        if self.renderer is None or formula == '':
             return frame
-        if formula != self.prev_formula:
-            result = renderer.thread_render(formula)
-            if result is not None:
-                self.prev_formula = formula
-                formula_img = cv.imread(renderer.output_file)
-                self.prev_formula_img = formula_img
-            else:
+        if formula != self.prev_rendered_formula:
+            result = self.renderer.thread_render(formula)
+            if result is None:
                 return frame
+            formula_img, res_formula = result
+            if res_formula == formula:
+                self.prev_rendered_formula = formula
+                self.prev_formula_img = formula_img
         else:
             formula_img = self.prev_formula_img
         height = self.end_point[1] - self.start_point[1]

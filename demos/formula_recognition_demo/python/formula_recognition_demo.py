@@ -15,7 +15,6 @@
 import asyncio
 import logging as log
 import os
-import subprocess
 import sys
 import tempfile
 from argparse import SUPPRESS, ArgumentParser
@@ -24,16 +23,10 @@ import cv2 as cv
 import numpy as np
 from openvino.inference_engine import IECore
 from tqdm import tqdm
-from utils import END_TOKEN, START_TOKEN, ModelStatus, Renderer, Vocab, VideoCapture
+from utils import (END_TOKEN, START_TOKEN, ModelStatus, Renderer, VideoCapture,
+                   Vocab, create_renderer)
 
 CONFIDENCE_THRESH = 0.95
-
-
-def check_environment():
-    command = subprocess.run("pdflatex --version", stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE, check=False, shell=True)
-    if command.returncode != 0:
-        raise EnvironmentError("pdflatex not installed, please install it: \n{}".format(command.stderr))
 
 
 def crop(img, target_shape):
@@ -100,14 +93,13 @@ def prerocess_crop(crop, tgt_shape, preprocess_type='crop'):
     return preprocess_image(PREPROCESSING[preprocess_type], bin_crop, tgt_shape)
 
 
-class Demo:
+class Model:
     def __init__(self, args):
         self.args = args
         log.info("Creating Inference Engine")
         self.ie = IECore()
         self.ie.set_config(
             {"PERF_COUNT": "YES" if self.args.perf_counts else "NO"}, args.device)
-        # check_environment()
         self.encoder = read_net(self.args.m_encoder, self.ie, self.args.device)
         self.dec_step = read_net(self.args.m_decoder, self.ie, self.args.device)
         self.exec_net_encoder = self.ie.load_network(network=self.encoder, device_name=self.args.device)
@@ -309,36 +301,29 @@ def main():
 
     log.info("Starting inference")
     args = build_argparser().parse_args()
-    demo = Demo(args)
-    try:
-        check_environment()
-    except EnvironmentError:
-        renderer = None
-        log.warning("pdflatex not installed, please, install it to use rendering")
-    else:
-        temp_file = tempfile.NamedTemporaryFile()
-        renderer = Renderer(f"{temp_file.name}.png")
+    model = Model(args)
     if not args.interactive:
-        for rec in tqdm(demo.images_list):
+        renderer = create_renderer()
+        for rec in tqdm(model.images_list):
             image = rec['img']
-            logits, targets = demo.infer_sync(image)
+            logits, targets = model.infer_sync(image)
             prob = calculate_probability(logits)
             log.info("Confidence score is %s", prob)
             if prob >= args.conf_thresh:
-                phrase = demo.vocab.construct_phrase(targets)
+                phrase = model.vocab.construct_phrase(targets)
                 if args.output_file:
                     with open(args.output_file, 'a') as output_file:
                         output_file.write(rec['img_name'] + '\t' + phrase + '\n')
                 else:
                     print("\n\tImage name: {}\n\tFormula: {}\n".format(rec['img_name'], phrase))
                     if renderer is not None:
-                        rendered_formula_file = renderer(phrase)
+                        rendered_formula_file = renderer.render(phrase)
                         rendered_formula = cv.imread(rendered_formula_file)
                         cv.imshow("Predicted formula", rendered_formula)
                         cv.waitKey(0)
     else:
 
-        *_, height, width = demo.encoder.input_info['imgs'].input_data.shape
+        *_, height, width = model.encoder.input_info['imgs'].input_data.shape
         capture = VideoCapture((height, width))
         prev_text = ''
         while True:
@@ -346,7 +331,7 @@ def main():
             bin_crop = capture.get_crop(frame)
             model_input = prerocess_crop(bin_crop, (height, width))
             frame = capture.put_crop(frame, model_input)
-            model_res = demo.infer_async(model_input)
+            model_res = model.infer_async(model_input)
             if not model_res:
                 phrase = prev_text
             else:
@@ -355,12 +340,12 @@ def main():
                 log.info("Confidence score is %s", prob)
                 if prob >= args.conf_thresh ** len(logits):
                     log.info("Prediction updated")
-                    phrase = demo.vocab.construct_phrase(targets)
+                    phrase = model.vocab.construct_phrase(targets)
                 else:
                     log.info("Confidence score is low, prediction is not complete")
                     phrase = ''
             frame = capture.put_text(frame, phrase)
-            frame = capture.put_formula(frame, renderer, phrase)
+            frame = capture.put_formula(frame, phrase)
             prev_text = phrase
             frame = capture.draw_rectangle(frame)
             cv.imshow('Press Q to quit.', frame)
