@@ -27,7 +27,7 @@ def main():
     args = parser.parse_args()
 
     subprocess.run([sys.executable, '--',
-        str(args.input_dir / 'model_inspect.py'),
+        str(args.input_dir / 'model/model_inspect.py'),
         "--runmode=saved_model",
         "--model_name=efficientdet-d1",
         "--ckpt_path={}".format(args.input_dir / "efficientdet-d1"),
