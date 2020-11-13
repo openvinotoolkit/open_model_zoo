@@ -2,80 +2,73 @@ import math
 from operator import itemgetter
 
 import numpy as np
-import torch
 
 
 class OpenPoseDecoder:
+
     BODY_PARTS_KPT_IDS = ((1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), (8, 9), (9, 10), (1, 11),
                           (11, 12), (12, 13), (1, 0), (0, 14), (14, 16), (0, 15), (15, 17), (2, 16), (5, 17))
-    BODY_PARTS_PAF_IDS = ((12, 13), (20, 21), (14, 15), (16, 17), (22, 23), (24, 25), (0, 1), (2, 3), (4, 5),
-                          (6, 7), (8, 9), (10, 11), (28, 29), (30, 31), (34, 35), (32, 33), (36, 37), (18, 19), (26, 27))
+    BODY_PARTS_PAF_IDS = (12, 20, 14, 16, 22, 24, 0, 2, 4, 6, 8, 10, 28, 30, 34, 32, 36, 18, 26)
 
-    def __init__(self, num_joints, max_points=100, score_threshold=0.1, min_dist=6.0, delta=0.5, out_stride=8):
+    def __init__(self, num_joints, max_points=100, score_threshold=0.1, delta=0.5, out_stride=8):
         super().__init__()
         self.num_joints = num_joints
         self.max_points = max_points
         self.score_threshold = score_threshold
-        self.min_dist = min_dist
         self.delta = delta
         self.out_stride = out_stride
         self.high_res_heatmaps = False
         self.high_res_pafs = False
-        nms_kernel = 5
-        self.pool = torch.nn.MaxPool2d(nms_kernel, 1, (nms_kernel - 1) // 2)
+
+        self.nms_kernel = 3
+
+    def nms_skimage(self, heatmaps, kernel):
+        from skimage.measure import block_reduce
+
+        # Max pooling kernel x kernel with stride 1 x 1.
+        p = (kernel - 1) // 2
+        pooled = np.zeros(heatmaps.shape, dtype=np.float32)
+        hmap = np.pad(heatmaps, ((0, 0), (0, 0), (p, p), (p, p)))
+        h, w = heatmaps.shape[-2:]
+        for i in range(kernel):
+            si = (h + 2 * p - i) // kernel
+            for j in range(kernel):
+                sj = (w + 2 * p - j) // kernel
+                pooled[..., i::kernel, j::kernel] = block_reduce(hmap[..., i:i + si * kernel, j:j + sj * kernel], (1, 1, kernel, kernel), np.max)
+        return heatmaps * (pooled == heatmaps).astype(heatmaps.dtype)
+
+    def nms_pytorch(self, heatmaps, kernel, device='cpu'):
+        import torch
+
+        heatmaps = torch.as_tensor(heatmaps, device=device)
+        maxm = torch.nn.functional.max_pool2d(heatmaps, kernel_size=kernel, stride=1, padding=(kernel - 1) // 2)
+        maxm = torch.eq(maxm, heatmaps).float()
+        return (heatmaps * maxm).cpu().numpy()
 
     def nms(self, heatmaps):
-        heatmaps = torch.as_tensor(heatmaps)
-        maxm = self.pool(heatmaps)
-        maxm = torch.eq(maxm, heatmaps).float()
-        return (heatmaps * maxm).numpy()
-
-    def scale_kpts(self, kpts, scale, max_v):
-        for kpt in kpts:
-            kpt[0] = max(0, min(kpt[0] * scale, max_v[0]))
-            kpt[1] = max(0, min(kpt[1] * scale, max_v[1]))
-        return kpts
+        # return self.nms_ov(heatmaps)
+        # return self.nms_skimage(heatmaps, self.nms_kernel)
+        return self.nms_pytorch(heatmaps, self.nms_kernel)
 
     def __call__(self, heatmaps, nms_heatmaps, pafs):
-        pafs = np.transpose(pafs, (0, 2, 3, 1))
-
         batch_size, _, h, w = heatmaps.shape
-        hup = h * self.out_stride
-        wup = w * self.out_stride
-        assert batch_size == 1
+        assert batch_size == 1, 'Batch size of 1 only supported'
 
-        min_dist = self.min_dist
-        if not self.high_res_heatmaps:
-            self.min_dist = 6.0 / self.out_stride
-
+        pafs = np.transpose(pafs, (0, 2, 3, 1))
         keypoints = self.extract_points(heatmaps, nms_heatmaps)
-        self.min_dist = min_dist
-
-        if self.high_res_heatmaps:
-            for kpts in keypoints:
-                self.scale_kpts(kpts, 1 / self.out_stride, (w - 1, h - 1))
 
         if self.delta > 0:
             # To adjust coordinates' flooring in heatmaps target generation.
             for kpts in keypoints:
-                for kpt in kpts:
-                    kpt[0] = min(kpt[0] + self.delta, w - 1)
-                    kpt[1] = min(kpt[1] + self.delta, h - 1)
-
-        if self.high_res_pafs:
-            for kpts in keypoints:
-                self.scale_kpts(kpts, self.out_stride, (wup - 1, hup - 1))
+                kpts[:, :2] += self.delta
+                np.core.umath.clip(kpts[:, 0], 0, w - 1, out=kpts[:, 0])
+                np.core.umath.clip(kpts[:, 1], 0, h - 1, out=kpts[:, 1])
 
         pose_entries, keypoints = self.group_keypoints(keypoints, pafs, pose_entry_size=self.num_joints + 2)
-
         grouped_kpts, scores = self.convert_to_coco_format(pose_entries, keypoints, None)
         if len(grouped_kpts) > 0:
-            grouped_kpts = np.asarray(grouped_kpts)
+            grouped_kpts = np.asarray(grouped_kpts, dtype=np.float32)
             grouped_kpts = grouped_kpts.reshape((grouped_kpts.shape[0], -1, 3))
-            if not self.high_res_pafs:
-                grouped_kpts[:, :, :2] *= self.out_stride
-                grouped_kpts[:, :, 0].clip(0, wup - 1)
-                grouped_kpts[:, :, 1].clip(0, hup - 1)
         else:
             grouped_kpts = np.empty((0, 17, 3), dtype=np.float32)
             scores = np.zeros(0, dtype=np.float32)
@@ -101,18 +94,8 @@ class OpenPoseDecoder:
             n = len(x)
 
             if n == 0:
-                all_keypoints.append([])
+                all_keypoints.append(np.empty((0, 4), dtype=np.float32))
                 continue
-
-            # Second stage of NMS.
-            xx = x[:, None] - x[None, :]
-            yy = y[:, None] - y[None, :]
-            dists = np.sqrt(xx * xx + yy * yy)
-            dists += np.tri(n, n, dtype=np.float32) * (2 * self.min_dist)
-            keep = dists.min(axis=0) >= self.min_dist
-            x = x[keep]
-            y = y[keep]
-            score = score[keep]
 
             # Apply quarter offset to improve localization accuracy.
             x, y = self.refine(heatmaps[0, k], x, y)
@@ -120,17 +103,11 @@ class OpenPoseDecoder:
             np.core.umath.clip(y, 0, h - 1, out=y)
 
             # Pack resulting points.
-            # keypoints = []
-            # for a, b, c in zip(x, y, score):
-            #     keypoints.append([a, b, c, keypoint_id])
-            #     keypoint_id += 1
-            n = len(x)
             keypoints = np.empty((n, 4), dtype=np.float32)
             keypoints[:, 0] = x
             keypoints[:, 1] = y
             keypoints[:, 2] = score
             keypoints[:, 3] = np.arange(keypoint_id, keypoint_id + n)
-            # keypoints = np.stack([x, y, score, np.arange(keypoint_id, keypoint_id + n)], axis=1).astype(dtype=np.float32)
             keypoint_id += n
 
             all_keypoints.append(keypoints)
@@ -163,7 +140,7 @@ class OpenPoseDecoder:
     def group_keypoints(self, all_keypoints_by_type, pafs, pose_entry_size=20, min_paf_score=0.05,
                         skeleton=BODY_PARTS_KPT_IDS, bones_to_channels=BODY_PARTS_PAF_IDS):
 
-        all_keypoints = np.asarray([item for sublist in all_keypoints_by_type for item in sublist], dtype=np.float32)
+        all_keypoints = np.concatenate(all_keypoints_by_type, axis=0)
         pose_entries = []
 
         point_num = 10
@@ -181,8 +158,8 @@ class OpenPoseDecoder:
             if num_kpts_a == 0 or num_kpts_b == 0:
                 continue
             
-            a = np.asarray([p[0:2] for p in kpts_a], dtype=np.float32)
-            b = np.asarray([p[0:2] for p in kpts_b], dtype=np.float32)
+            a = kpts_a[:, :2]
+            b = kpts_b[:, :2]
             n, m = len(a), len(b)
 
             a = np.broadcast_to(a[None], (m, n, 2))
@@ -229,12 +206,8 @@ class OpenPoseDecoder:
             if len(connections) == 0:
                 continue
 
-            # for i in range(len(connections)):
-            #     pose_entries.append(init_pose(kpt_a_id, kpt_b_id, connections[i]))
-            # continue
-
             if part_id == 0:
-                pose_entries = [np.full(pose_entry_size, -1) for _ in range(len(connections))]
+                pose_entries = [np.full(pose_entry_size, -1, dtype=np.float32) for _ in range(len(connections))]
                 for i in range(len(connections)):
                     pose_entries[i][kpt_a_id] = connections[i][0]
                     pose_entries[i][kpt_b_id] = connections[i][1]
@@ -251,7 +224,6 @@ class OpenPoseDecoder:
                         if pose[kpt_b_id] == connection[1]:
                             pose_b_idx = j
                     if pose_a_idx < 0 and pose_b_idx < 0:
-                        # print('CREATE NEW POSE')
                         # Create new pose entry.
                         pose_entry = np.full(pose_entry_size, -1)
                         pose_entry[kpt_a_id] = connection[0]
@@ -296,11 +268,10 @@ class OpenPoseDecoder:
 
         filtered_entries = []
         for i in range(len(pose_entries)):
-            if pose_entries[i][-1] < 3:  # or (pose_entries[i][-2] / pose_entries[i][-1] < 0.2):
+            if pose_entries[i][-1] < 3:
                 continue
             filtered_entries.append(pose_entries[i])
         pose_entries = np.asarray(filtered_entries)
-        # pose_entries = np.asarray(pose_entries)
         return pose_entries, all_keypoints
 
     def convert_to_coco_format(self, pose_entries, all_keypoints, reorder_map=None):
@@ -311,8 +282,6 @@ class OpenPoseDecoder:
             if len(pose_entries[n]) == 0:
                 continue
             keypoints = np.zeros(num_joints * 3)
-            # if reorder_map is None:
-            #     reorder_map = tuple(range(num_joints))
             reorder_map = [0, -1, 6, 8, 10, 5, 7, 9, 12, 14, 16, 11, 13, 15, 2, 1, 4, 3]
             person_score = pose_entries[n][-2]
             for keypoint_id, target_id in zip(pose_entries[n][:-2], reorder_map):
@@ -322,10 +291,9 @@ class OpenPoseDecoder:
                 if keypoint_id != -1:
                     cx, cy, score = all_keypoints[int(keypoint_id), 0:3]
                     visibility = 2
-                keypoints[target_id * 3 + 0] = cx
-                keypoints[target_id * 3 + 1] = cy
+                keypoints[target_id * 3 + 0] = cx * self.out_stride
+                keypoints[target_id * 3 + 1] = cy * self.out_stride
                 keypoints[target_id * 3 + 2] = score
             coco_keypoints.append(keypoints)
             scores.append(person_score * max(0, (pose_entries[n][-1] - 1)))  # -1 for 'neck'
-            # scores.append(person_score * max(0, pose_entries[n][-1]))
         return np.asarray(coco_keypoints), np.asarray(scores)
