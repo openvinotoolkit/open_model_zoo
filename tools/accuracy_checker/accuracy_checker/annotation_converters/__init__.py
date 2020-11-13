@@ -83,7 +83,7 @@ from .ade20k_dataset_converter import ADE20kConverter
 
 from .librispeech import LibrispeechConverter
 from .criteo_kaggle_dac import CriteoKaggleDACConverter
-from .features_regression import FeaturesRegressionConverter
+from .features_regression import FeaturesRegressionConverter, MultiOutputFeaturesRegression
 from .nyu_depth import NYUDepthV2Converter
 from .dna_seq import DNASequenceDatasetConverter
 from .place_recognition import PlaceRecognitionDatasetConverter
@@ -165,6 +165,7 @@ __all__ = [
     'LibrispeechConverter',
     'CriteoKaggleDACConverter',
     'FeaturesRegressionConverter',
+    'MultiOutputFeaturesRegression',
     'Im2latexDatasetConverter',
     'DNASequenceDatasetConverter',
     'PlaceRecognitionDatasetConverter',

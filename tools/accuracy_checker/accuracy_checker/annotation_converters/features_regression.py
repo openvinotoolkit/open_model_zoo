@@ -59,10 +59,10 @@ class MultiOutputFeaturesRegression(BaseFormatConverter):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'data_dir': PathField(is_directory=True),
-            'input_suffix': StringField(optional=True, default='in.npy'),
-            'reference_suffix': StringField(optional=True, default='out.npy'),
-            'prefix': StringField(optional=True, default='')
+            'data_dir': PathField(is_directory=True, description='directory with data'),
+            'input_suffix': StringField(optional=True, default='in.npy', description='suffix for input files search'),
+            'reference_suffix': StringField(optional=True, default='out.npy', description='suffix for ref files'),
+            'prefix': StringField(optional=True, default='', description='prefix for files search')
         })
         return params
 
