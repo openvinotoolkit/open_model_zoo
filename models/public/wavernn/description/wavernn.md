@@ -52,12 +52,12 @@ The wavernn-upsampler model accepts mel-spectrogram and produces two feature map
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| GOPs                            | 1.47                                      |
+| GOPs                            | 0.37                                      |
 | MParams                         | 0.4                                       |
 
 ### Input
 
-Mel-spectrogram, name: `mels`, shape: [1x793x80], format: [BxTxC]
+Mel-spectrogram, name: `mels`, shape: [1x200x80], format: [BxTxC]
 where:
 
    - B - batch size
@@ -66,13 +66,13 @@ where:
 
 ### Output
 
-1. Processed mel-spectrogram, name: `aux`, shape: [1x102025x128], format: [BxTxC]
+1. Processed mel-spectrogram, name: `aux`, shape: [1x53888x128], format: [BxTxC]
 where:
    - B - batch size
    - T - time in audio (equal to `time in mel spectrogram` * `hop_length`)
    - C - number of features in processed mel-spectrogram.
 
-2. Upsampled and processed (by time) mel-spectrogram, name: `upsample_mels`, shape: [1x103125x80], format: [BxT'xC]
+2. Upsampled and processed (by time) mel-spectrogram, name: `upsample_mels`, shape: [1x55008x80], format: [BxT'xC]
 where:
    - B - batch size
    - T' - time in audio padded with number of samples for crossfading between batches
