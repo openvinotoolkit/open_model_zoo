@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import importlib
+import os
 import re
 import sys
 import warnings
@@ -46,7 +47,7 @@ class PyTest(test_command):
 
 
 def read(*path):
-    input_file = here.joinpath(*path)
+    input_file = os.path.join(here, *path)
     with open(str(input_file)) as file:
         return file.read()
 
