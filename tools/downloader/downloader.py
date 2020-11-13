@@ -125,6 +125,7 @@ def verify_hash(reporter, actual_hash, expected_hash, path):
 
 class NullCache:
     def has(self, hash): return False
+    def get(self, model_file, path, reporter): return False 
     def put(self, hash, path): pass
 
 class DirCache:
@@ -166,7 +167,7 @@ class DirCache:
         if cache_size < model_file.size:
             reporter.log_error("Cached file is shorter ({} B) than expected ({} B)", cache_size, model_file.size)
             return False
-        return verify_hash(reporter, cache_sha256.digest(), model_file.sha256, path):
+        return verify_hash(reporter, cache_sha256.digest(), model_file.sha256, path)
 
     def put(self, hash, path):
         # A file in the cache must have the hash implied by its name. So when we upload a file,
@@ -190,6 +191,7 @@ def try_retrieve_from_cache(reporter, cache, files):
                 reporter.print_section_heading('Retrieving {} from the cache', destination)
                 if not cache.get(model_file, destination, reporter):
                     reporter.print('Will retry from the original source.')
+                    reporter.print()
                     return False
             reporter.print()
             return True
