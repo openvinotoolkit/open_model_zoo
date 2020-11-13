@@ -225,6 +225,7 @@ The task of speech recognition is to recognize and translate spoken language int
 | Model Name        | Implementation | OMZ Model Name                                               | Accuracy | GFlops | mParams |
 | ----------------- | -------------- | ------------------------------------------------------------ | -------- | ------ | ------- |
 | DeepSpeech V0.6.1 | TensorFlow\*   | [mozilla-deepspeech-0.6.1](./mozilla-deepspeech-0.6.1/mozilla-deepspeech-0.6.1.md) | 7.55%    | 0.0472 | 47.2    |
+| DeepSpeech V0.8.2 | TensorFlow\*   | [mozilla-deepspeech-0.8.2](./mozilla-deepspeech-0.8.2/mozilla-deepspeech-0.8.2.md) | 6.13%    | 0.0472 | 47.2    |
 
 ## Legal Information
 
