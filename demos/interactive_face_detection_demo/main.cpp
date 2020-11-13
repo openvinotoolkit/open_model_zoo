@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
             {FLAGS_d_hp, FLAGS_m_hp},
             {FLAGS_d_em, FLAGS_m_em},
             {FLAGS_d_lm, FLAGS_m_lm},
-            {FLAGS_d_am, FLAGS_m_am}
+            {FLAGS_d_am, FLAGS_m_am},
         };
         FaceDetection faceDetector(FLAGS_m, FLAGS_d, 1, false, FLAGS_async, FLAGS_t, FLAGS_r,
                                    static_cast<float>(FLAGS_bb_enlarge_coef), static_cast<float>(FLAGS_dx_coef), static_cast<float>(FLAGS_dy_coef));

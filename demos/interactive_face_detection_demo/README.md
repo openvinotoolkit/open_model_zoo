@@ -3,7 +3,7 @@
 This demo showcases Object Detection task applied for face recognition using sequence of neural networks.
 Async API can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the application can continue operating on the host while accelerator is busy.
-This demo executes five parallel infer requests for the Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, Facial Landmarks Detection and Antispoofing Classificator networks that run simultaneously. You can use a set of the following pre-trained models with the demo:
+This demo executes five parallel infer requests for the Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, Facial Landmarks Detection and Antispoofing Classifier networks that run simultaneously. You can use a set of the following pre-trained models with the demo:
 * `face-detection-adas-0001`, which is a primary detection network for finding faces
 * `age-gender-recognition-retail-0013`, which is executed on top of the results of the first model and reports estimated age and gender for each detected face
 * `head-pose-estimation-adas-0001`, which is executed on top of the results of the first model and reports estimated head pose in Tait-Bryan angles
