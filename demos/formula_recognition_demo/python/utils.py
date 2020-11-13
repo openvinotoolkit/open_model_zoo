@@ -146,13 +146,14 @@ class VideoCapture:
     def put_text(self, frame, text):
         if text == '':
             return frame
+        text = text.replace(" ", '')
         (txt_w, txt_h), baseLine = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 3)
 
         start_point = (int(self.resolution[0] / 2 - txt_w / 2), self.start_point[1] - txt_h)
         frame = cv.putText(frame, rf'{text}', org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
-                           fontScale=1, color=(255, 255, 255), thickness=3, lineType=cv.LINE_AA)
+                           fontScale=1, color=(0, 0, 0), thickness=3, lineType=cv.LINE_AA)
         frame = cv.putText(frame, rf'{text}', org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
-                           fontScale=1, color=(0, 0, 0), thickness=1, lineType=cv.LINE_AA)
+                           fontScale=1, color=(255, 255, 255), thickness=2, lineType=cv.LINE_AA)
         return frame
 
     def put_crop(self, frame, crop):
