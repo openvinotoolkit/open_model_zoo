@@ -148,7 +148,7 @@ class DirCache:
         return self._hash_path(hash).exists()
 
     def get(self, model_file, path, reporter):
-        cache_path = str(self._hash_path(model_file.sha256))
+        cache_path = self._hash_path(model_file.sha256)
         cache_sha256 = hashlib.sha256()
         cache_size = 0
         
@@ -166,9 +166,7 @@ class DirCache:
         if cache_size < model_file.size:
             reporter.log_error("Cached file is shorter ({} B) than expected ({} B)", cache_size, model_file.size)
             return False
-        if not verify_hash(reporter, cache_sha256.digest(), model_file.sha256, path):
-            return False
-        return True
+        return verify_hash(reporter, cache_sha256.digest(), model_file.sha256, path):
 
     def put(self, hash, path):
         # A file in the cache must have the hash implied by its name. So when we upload a file,
