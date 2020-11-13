@@ -23,7 +23,7 @@ import cv2 as cv
 import numpy as np
 from openvino.inference_engine import IECore
 from tqdm import tqdm
-from utils import (END_TOKEN, START_TOKEN, ModelStatus, Renderer, VideoCapture,
+from utils import (END_TOKEN, START_TOKEN, ModelStatus, Renderer, InteractiveDemo,
                    Vocab, create_renderer)
 
 CONFIDENCE_THRESH = 0.95
@@ -324,7 +324,7 @@ def main():
     else:
 
         *_, height, width = model.encoder.input_info['imgs'].input_data.shape
-        demo = VideoCapture((height, width))
+        demo = InteractiveDemo((height, width))
         prev_text = ''
         while True:
             frame = demo.get_frame()

@@ -89,7 +89,7 @@ class Renderer:
             return None
 
 
-class VideoCapture:
+class InteractiveDemo:
     def __init__(self, input_model_shape, resolution=DEFAULT_RESOLUTION, device_id=0):
         self.capture = cv.VideoCapture(device_id)
         self.resolution = resolution
