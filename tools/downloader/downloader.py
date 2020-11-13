@@ -187,8 +187,9 @@ def try_retrieve_from_cache(reporter, cache, files):
                         if not data:
                             break
                         cache_sha256.update(data)
-                if not all([cache_sha256.digest(), verify_hash(reporter, cache_sha256.digest(), model_file.sha256, destination),
-                           verify_size(reporter, os.path.getsize(destination), model_file.size, destination)]):
+                if not (verify_hash(reporter, cache_sha256.digest(), model_file.sha256, destination)
+                        and verify_size(reporter, os.path.getsize(destination), model_file.size, destination)):
+                    reporter.print('Will retry from the original source.')
                     return False
             reporter.print()
             return True
