@@ -123,6 +123,14 @@ def verify_hash(reporter, actual_hash, expected_hash, path):
         return False
     return True
 
+def verify_size(reporter, actual_size, expected_size, path):
+    if actual_size != expected_size:
+        reporter.log_error('File size mismatch for "{}"', path)
+        reporter.log_details('Expected: {}', expected_size)
+        reporter.log_details('Actual:   {}', actual_size)
+        return False
+    return True
+
 class NullCache:
     def has(self, hash): return False
     def put(self, hash, path): pass
@@ -165,12 +173,23 @@ class DirCache:
 
 def try_retrieve_from_cache(reporter, cache, files):
     try:
-        if all(cache.has(file[0]) for file in files):
-            for hash, destination in files:
+        if all(cache.has(file[0].sha256) for file in files):
+            for model_file, destination in files:
                 reporter.job_context.check_interrupted()
 
                 reporter.print_section_heading('Retrieving {} from the cache', destination)
-                cache.get(hash, destination)
+                cache.get(model_file.sha256, destination)
+                
+                cache_sha256 = hashlib.sha256()
+                with open(destination, 'rb') as f:
+                    while True:
+                        data = f.read(CHUNK_SIZE)
+                        if not data:
+                            break
+                        cache_sha256.update(data)
+                if not all([cache_sha256.digest(), verify_hash(reporter, cache_sha256.digest(), model_file.sha256, destination),
+                           verify_size(reporter, os.path.getsize(destination), model_file.size, destination)]):
+                    return False
             reporter.print()
             return True
     except Exception:
@@ -188,7 +207,7 @@ def try_update_cache(reporter, cache, hash, source):
 def try_retrieve(reporter, destination, model_file, cache, num_attempts, start_download):
     destination.parent.mkdir(parents=True, exist_ok=True)
 
-    if try_retrieve_from_cache(reporter, cache, [[model_file.sha256, destination]]):
+    if try_retrieve_from_cache(reporter, cache, [[model_file, destination]]):
         return True
 
     reporter.print_section_heading('Downloading {}', destination)
