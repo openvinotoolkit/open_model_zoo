@@ -6,12 +6,3 @@ It includes standard beam search with swappable scorer support enabling KenLM-ba
 KenLM dependency was removed due to licensing concerns, but can be restored manually using Parlance code.
 
 yoklm subcomponent is a library for reading KenLM binary format.  It supports KenLM binary format version 5, with quantization and trie with Bhiksha array representation.
-
-## Installation
-To build and install ctcdecode-numpy, go inside `ctcdecode-numpy/` directory and run:
-
-```shell
-python -m pip install .
-```
-
-We recommended to activate a virtualenv environment before installation.
