@@ -48,19 +48,17 @@ public:
     /// and next frame can be submitted for processing, false otherwise.
     bool isReadyToProcess() { return requestsPool->isIdleRequestAvailable(); }
 
-    /// Returns performance metrics
-    /// @returns performance metrics structure
-    const PerformanceMetrics getMetrics() const { return perfMetrics; }
-
     /// Waits for all currently submitted requests to be completed.
     ///
     void waitForTotalCompletion() { if (requestsPool) requestsPool->waitForTotalCompletion(); }
 
     /// Submits data to the network for inference
     /// @param inputData - input data to be submitted
+    /// @param metaData - shared pointer to metadata container.
+    /// Might be null. This pointer will be passed through pipeline and put to the final result structure.
     /// @returns -1 if image cannot be scheduled for processing (there's no free InferRequest available).
     /// Otherwise returns unique sequential frame ID for this particular request. Same frame ID will be written in the response structure.
-    virtual int64_t submitData(const InputData& inputData);
+    virtual int64_t submitData(const InputData& inputData, const std::shared_ptr<MetaData>& metaData);
 
     /// Gets available data from the queue
     /// Function will treat results as ready only if next sequential result (frame) is ready.
@@ -77,8 +75,6 @@ protected:
     std::unordered_map<int64_t, InferenceResult> completedInferenceResults;
 
     InferenceEngine::ExecutableNetwork execNetwork;
-
-    PerformanceMetrics perfMetrics;
 
     std::mutex mtx;
     std::condition_variable condVar;

@@ -84,21 +84,19 @@ void AsyncPipeline::waitForData(){
         std::rethrow_exception(callbackException);
 }
 
-int64_t AsyncPipeline::submitData(const InputData& inputData){
-    auto frameStartTime = std::chrono::steady_clock::now();
+int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_ptr<MetaData>& metaData){
     auto frameID = inputFrameId;
 
     auto request = requestsPool->getIdleRequest();
     if (!request)
         return -1;
 
-    std::shared_ptr<MetaData> metaData;
-    model->preprocess(inputData, request, metaData);
+    auto internalModelData = model->preprocess(inputData, request);
 
     request->SetCompletionCallback([this,
-        frameStartTime,
         frameID,
         request,
+        internalModelData,
         metaData] {
             {
                 std::lock_guard<std::mutex> lock(mtx);
@@ -106,10 +104,10 @@ int64_t AsyncPipeline::submitData(const InputData& inputData){
                 try {
                     InferenceResult result;
 
-                    result.startTime = frameStartTime;
-
                     result.frameId = frameID;
                     result.metaData = std::move(metaData);
+                    result.internalModelData = std::move(internalModelData);
+
                     for (const auto& outName : model->getOutputsNames())
                         result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outName))));
 
@@ -141,11 +139,7 @@ std::unique_ptr<ResultBase> AsyncPipeline::getResult()
     }
 
     auto result = model->postprocess(infResult);
-
     *result = static_cast<ResultBase&>(infResult);
-
-    // Updating performance info
-    perfMetrics.update(infResult.startTime);
 
     return result;
 }

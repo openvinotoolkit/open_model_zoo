@@ -53,7 +53,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult)
 
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
-    auto sz = infResult.metaData->asRef<ImageMetaData>().img.size();
+    const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
     for (size_t i = 0; i < maxProposalCount; i++) {
 
@@ -69,10 +69,10 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult)
             desc.confidence = confidence;
             desc.labelID = static_cast<int>(detections[i * objectSize + 1]);
             desc.label = getLabelName(desc.labelID);
-            desc.x = detections[i * objectSize + 3] * sz.width;
-            desc.y = detections[i * objectSize + 4] * sz.height;
-            desc.width = detections[i * objectSize + 5] * sz.width - desc.x;
-            desc.height = detections[i * objectSize + 6] * sz.height - desc.y;
+            desc.x = detections[i * objectSize + 3] * internalData.inputImgWidth;
+            desc.y = detections[i * objectSize + 4] * internalData.inputImgHeight;
+            desc.width = detections[i * objectSize + 5] * internalData.inputImgWidth - desc.x;
+            desc.height = detections[i * objectSize + 6] * internalData.inputImgHeight - desc.y;
 
             /** Filtering out objects with confidence < confidence_threshold probability **/
             result->objects.push_back(desc);

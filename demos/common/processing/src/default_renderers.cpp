@@ -21,8 +21,17 @@
 namespace DefaultRenderers {
     cv::Mat renderDetectionData(const DetectionResult& result)
     {
-        // Visualizing result data over source image
+        if (!result.metaData) {
+            throw std::invalid_argument("Renderer: metadata is null");
+        }
+
         auto outputImg = result.metaData->asRef<ImageMetaData>().img.clone();
+
+        if (outputImg.empty()) {
+            throw std::invalid_argument("Renderer: image provided in metadata is empty");
+        }
+
+        // Visualizing result data over source image
 
         for (auto obj : result.objects) {
             std::ostringstream conf;
@@ -37,12 +46,25 @@ namespace DefaultRenderers {
     }
 
     cv::Mat renderSegmentationData(const SegmentationResult& result){
+        if (!result.metaData){
+            throw std::invalid_argument("Renderer: metadata is null");
+        }
+
         auto inputImg = result.metaData->asRef<ImageMetaData>().img;
+
+        if (inputImg.empty()) {
+            throw std::invalid_argument("Renderer: image provided in metadata is empty");
+        }
 
         // Visualizing result data over source image
         cv::Mat outputImg;
-        cv::resize(result.mask, outputImg, inputImg.size());
-        outputImg = inputImg / 2 + outputImg / 2;
+        if (inputImg.size != result.mask.size) {
+            cv::resize(result.mask, outputImg, inputImg.size());
+            outputImg = inputImg / 2 + outputImg / 2;
+        }
+        else {
+            outputImg = inputImg / 2 + result.mask / 2;
+        }
 
         return outputImg;
     }

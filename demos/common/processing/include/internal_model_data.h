@@ -15,12 +15,10 @@
 */
 
 #pragma once
-#include <samples/ocv_common.hpp>
+struct InternalModelData {
+   virtual ~InternalModelData(){}
 
-struct MetaData {
-    virtual ~MetaData() {}
-
-    template<class T> T& asRef() {
+   template<class T> T& asRef() {
         return dynamic_cast<T&>(*this);
     }
 
@@ -29,15 +27,12 @@ struct MetaData {
     }
 };
 
-struct ImageMetaData : public MetaData {
-    cv::Mat img;
-    std::chrono::steady_clock::time_point timeStamp;
-
-    ImageMetaData() {
+struct InternalImageModelData : public InternalModelData {
+    InternalImageModelData(int width, int height) {
+        inputImgWidth = width;
+        inputImgHeight = height;
     }
 
-    ImageMetaData(cv::Mat img, std::chrono::steady_clock::time_point timeStamp):
-        img(img),
-        timeStamp(timeStamp){
-    }
+    int inputImgWidth;
+    int inputImgHeight;
 };

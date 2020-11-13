@@ -26,7 +26,7 @@ public:
     virtual ~ModelBase() {}
 
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) = 0;
-    virtual void preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request, std::shared_ptr<MetaData>& metaData) = 0;
+    virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) = 0;
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
     virtual void onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, RequestsPool* requestsPool) {
         this->execNetwork = execNetwork; }

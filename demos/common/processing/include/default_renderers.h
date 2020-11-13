@@ -20,6 +20,17 @@
 #include "results.h"
 
 namespace DefaultRenderers {
+    /// Renders DetectionResult as over the image provided in metadata
+    /// NOTE: result should contain original image in metadata, metadata should be or derived from ImageMetaData,
+    /// otherwise ans exception will be thrown
+    /// @param result - detection result to be rendered
+    /// @returns newly created image with rendered data
     cv::Mat renderDetectionData(const DetectionResult & result);
+
+    /// Renders SegmentationResult as over the image provided in metadata
+    /// NOTE: result should contain original image in metadata, metadata should be or derived from ImageMetaData,
+    /// otherwise ans exception will be thrown
+    /// @param result - detection result to be rendered
+    /// @returns newly created image with rendered data
     cv::Mat renderSegmentationData(const SegmentationResult& result);
 }

@@ -69,7 +69,7 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
                         std::string(op->get_type_info().name) + ". RegionYolo expected");
                 }
 
-                regions.emplace(outputLayer->first, Region(regionYolo));;
+                regions.emplace(outputLayer->first, Region(regionYolo));
             }
         }
     }
@@ -92,10 +92,11 @@ std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult)
     std::vector<DetectedObject> objects;
 
     // Parsing outputs
-    auto& srcImg = infResult.metaData->asRef<ImageMetaData>().img;
+    const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
+
     for (auto& output : infResult.outputsData) {
         this->parseYOLOV3Output(output.first, output.second, netInputHeight, netInputWidth,
-            srcImg.rows, srcImg.cols, objects);
+            internalData.inputImgHeight, internalData.inputImgWidth, objects);
     }
 
     //--- Checking IOU threshold conformance

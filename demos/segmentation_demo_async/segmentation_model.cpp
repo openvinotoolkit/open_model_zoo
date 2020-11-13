@@ -74,13 +74,13 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     }
 }
 
-void SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr & request, std::shared_ptr<MetaData>& metaData)
+std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr & request)
 {
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 
     request->SetBlob(inputsNames[0], wrapMat2Blob(img));
-    metaData = std::make_shared<ImageMetaData>(img);
+    return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
 }
 
 std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult) {
