@@ -123,14 +123,6 @@ def verify_hash(reporter, actual_hash, expected_hash, path):
         return False
     return True
 
-def verify_size(reporter, actual_size, expected_size, path):
-    if actual_size != expected_size:
-        reporter.log_error('File size mismatch for "{}"', path)
-        reporter.log_details('Expected: {}', expected_size)
-        reporter.log_details('Actual:   {}', actual_size)
-        return False
-    return True
-
 class NullCache:
     def has(self, hash): return False
     def put(self, hash, path): pass
@@ -155,8 +147,31 @@ class DirCache:
     def has(self, hash):
         return self._hash_path(hash).exists()
 
-    def get(self, hash, path):
-        shutil.copyfile(str(self._hash_path(hash)), str(path))
+    def get(self, model_file, path, reporter):
+        cache_path = str(self._hash_path(model_file.sha256))
+        cache_sha256 = hashlib.sha256()
+        cache_size = 0
+        
+        with open(cache_path, 'rb') as cache_file, open(path, 'wb') as destination_file:
+            while True:
+                data = cache_file.read(CHUNK_SIZE)
+                if not data:
+                    break
+                cache_size += len(data)
+                if cache_size > model_file.size:
+                    reporter.log_error("Cached file is longer than expected ({} B), copying aborted", model_file.size)
+                    reporter.print('Will retry from the original source.')
+                    return False
+                cache_sha256.update(data)
+                destination_file.write(data)
+        if cache_size < model_file.size:
+            reporter.log_error("Cached file is shorter ({} B) than expected ({} B)", cache_size, model_file.size)
+            reporter.print('Will retry from the original source.')
+            return False
+        if not verify_hash(reporter, cache_sha256.digest(), model_file.sha256, path):
+            reporter.print('Will retry from the original source.')
+            return False
+        return True
 
     def put(self, hash, path):
         # A file in the cache must have the hash implied by its name. So when we upload a file,
@@ -178,18 +193,7 @@ def try_retrieve_from_cache(reporter, cache, files):
                 reporter.job_context.check_interrupted()
 
                 reporter.print_section_heading('Retrieving {} from the cache', destination)
-                cache.get(model_file.sha256, destination)
-                
-                cache_sha256 = hashlib.sha256()
-                with open(destination, 'rb') as f:
-                    while True:
-                        data = f.read(CHUNK_SIZE)
-                        if not data:
-                            break
-                        cache_sha256.update(data)
-                if not (verify_hash(reporter, cache_sha256.digest(), model_file.sha256, destination)
-                        and verify_size(reporter, os.path.getsize(destination), model_file.size, destination)):
-                    reporter.print('Will retry from the original source.')
+                if not cache.get(model_file, destination, reporter):
                     return False
             reporter.print()
             return True
