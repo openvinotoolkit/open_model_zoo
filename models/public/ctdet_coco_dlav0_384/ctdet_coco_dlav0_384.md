@@ -36,7 +36,7 @@ python convert.py ctdet --load_model /path/to/downloaded/weights.pth --exp_id co
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Type                            | Classification                            |
+| Type                            | Detection                                 |
 | GFlops                          | 34.994                                    |
 | MParams                         | 17.911                                    |
 | Source framework                | PyTorch\*                                 |
