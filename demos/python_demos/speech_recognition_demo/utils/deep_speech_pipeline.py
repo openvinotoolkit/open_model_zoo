@@ -50,8 +50,8 @@ PROFILES['mds08x_en'] = PROFILES['mds07x_en']
 
 
 class DeepSpeechPipeline:
-    def __init__(self, model, model_bin=None, lm=None, beam_width=500, profile=PROFILES['mds08x_en'],
-            ie=None, device='CPU', ie_extensions=[]):
+    def __init__(self, model, model_bin=None, lm=None, beam_width=500, max_candidates=None,
+            profile=PROFILES['mds08x_en'], ie=None, device='CPU', ie_extensions=[]):
         """
             Args:
         model (str), filename of IE IR .xml file of the network
@@ -59,6 +59,7 @@ class DeepSpeechPipeline:
             with extension replaced with .bin)
         lm (str), filename of LM (language model)
         beam_width (int), the number of prefix candidates to retain during decoding in beam search (default 500)
+        max_candidates (int), limit the number of returned candidates; None = do not limit (default None)
         profile (dict): a dict with pre/post-processing parameters
             alphabet (None or str or list(str)), alphabet matching the model (default None):
                 None = [' ', 26 English letters, apostrophe];
@@ -86,6 +87,7 @@ class DeepSpeechPipeline:
         self.num_batch_frames = 16
 
         self.beam_width = beam_width
+        self.max_candidates = max_candidates
         alphabet = self.p['alphabet']
         if alphabet is None:
             self.alphabet = alphabet_module.get_default_alphabet()
@@ -100,7 +102,7 @@ class DeepSpeechPipeline:
         self.ie = ie if ie is not None else IECore()
         self._load_net(model, model_bin_fname=model_bin, device=device, ie_extensions=ie_extensions)
 
-        self.decoder = CtcnumpyBeamSearchDecoder(self.alphabet, self.beam_width,
+        self.decoder = CtcnumpyBeamSearchDecoder(self.alphabet, self.beam_width, max_candidates=max_candidates,
             scorer_lm_fname=lm, alpha=self.p['alpha'], beta=self.p['beta'])
 
         if device is not None:

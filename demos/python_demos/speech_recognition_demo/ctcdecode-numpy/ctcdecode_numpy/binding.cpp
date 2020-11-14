@@ -7,12 +7,13 @@
 **********************************************************************/
 
 #include <algorithm>
-#include <utility>
-#include <iostream>
-#include <string>
-#include <vector>
 #include <exception>
+#include <iostream>
+#include <limits>
 #include <stdlib.h>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "scorer_yoklm.h"
 #include "scorer_base.h"
@@ -26,7 +27,8 @@ void numpy_beam_decode(
         const float * probs,  size_t batch_size, size_t max_frames, size_t num_classes,
         const int * seq_lens,  size_t seq_lens_dim_batch,
         const std::vector<std::string> labels,
-        size_t beam_size,
+        size_t beam_size,                 // limits candidates maintained inside beam search
+        size_t max_candidates_per_batch,  // limits candidates returned from beam search
         size_t num_processes,
         float cutoff_prob,
         size_t cutoff_top_n,
@@ -34,10 +36,11 @@ void numpy_beam_decode(
         bool log_input,
         void *scorer,
         // Output arrays (SWIG memory managed argout, malloc() allocator):
-        int ** tokens, size_t * tokens_dim,  // to be reshaped to (batch_size, beam_size, -1)
-        int ** timesteps, size_t * timesteps_dim,  // to be reshaped to (batch_size, beam_size, -1)
-        float ** scores, size_t * scores_dim,  // to be reshaped to (batch_size, beam_size)
-        int ** tokens_lengths, size_t * tokens_lengths_dim)  // to be reshaped to (batch_size, beam_size)
+        // (here cand_size = max(beam_size, max_candidates_per_batch) )
+        int ** tokens, size_t * tokens_dim,  // to be reshaped to (batch_size, cand_size, -1)
+        int ** timesteps, size_t * timesteps_dim,  // to be reshaped to (batch_size, cand_size, -1)
+        float ** scores, size_t * scores_dim,  // to be reshaped to (batch_size, cand_size)
+        int ** tokens_lengths, size_t * tokens_lengths_dim)  // to be reshaped to (batch_size, cand_size)
 {
     ScorerBase *ext_scorer = NULL;
     if (scorer != NULL) {
@@ -46,6 +49,10 @@ void numpy_beam_decode(
 
     if (seq_lens_dim_batch != batch_size)
         throw std::runtime_error("beam_decode: probs and seq_lens batch sizes differ");
+    if (max_candidates_per_batch > beam_size)
+        max_candidates_per_batch = beam_size;
+    if (max_candidates_per_batch < 1)
+        throw std::runtime_error("numpy_beam_decode: max_candidates_per_batch must be at least 1");
 
     std::vector<std::vector<std::vector<float> > > probs_vec;
     probs_vec.reserve(batch_size);
@@ -69,22 +76,27 @@ void numpy_beam_decode(
         ctc_beam_search_decoder_batch(probs_vec, labels, beam_size, num_processes,
             cutoff_prob, cutoff_top_n, blank_id, log_input, ext_scorer);
 
+    if (batch_results.size() != batch_size)
+        throw std::runtime_error("numpy_beam_decode: internal error: output batch size differs from input batch size");
+
     size_t max_len = 1;
     for (auto&& result_batch_entry : batch_results) {
+        size_t candidate_idx = 0;
         for (auto&& result_candidate : result_batch_entry) {
+            if (candidate_idx++ >= max_candidates_per_batch)
+                break;
             size_t len = result_candidate.second.tokens.size();
             if (max_len < len)
                 max_len = len;
         }
     }
 
-    if ((size_t)-1 / sizeof(**tokens) / batch_size / beam_size / max_len == 0)
+    if ((size_t)-1 / sizeof(**tokens) / batch_size / max_candidates_per_batch / max_len == 0)
         throw std::runtime_error("numpy_beam_decode: dimension of output arg \"tokens\" exceeds size_t");
-    if ((size_t)-1 / sizeof(**timesteps) / batch_size / beam_size / max_len == 0)
+    if ((size_t)-1 / sizeof(**timesteps) / batch_size / max_candidates_per_batch / max_len == 0)
         throw std::runtime_error("numpy_beam_decode: dimension of output arg \"timesteps\" exceeds size_t");
 
-    // TODO: memory consumption not limited here
-    *tokens_dim = *timesteps_dim = batch_size * beam_size * max_len;
+    *tokens_dim = *timesteps_dim = batch_size * max_candidates_per_batch * max_len;
     *tokens = (int *)malloc(sizeof(**tokens) * *tokens_dim);
     if (*tokens == 0)
         throw std::runtime_error("numpy_beam_decode: cannot malloc() tokens");
@@ -93,7 +105,7 @@ void numpy_beam_decode(
     if (*timesteps == 0)
         throw std::runtime_error("numpy_beam_decode: cannot malloc() timesteps");
 
-    *scores_dim = *tokens_lengths_dim = batch_size * beam_size;
+    *scores_dim = *tokens_lengths_dim = batch_size * max_candidates_per_batch;
     *scores = (float *)malloc(sizeof(**scores) * *scores_dim);
     if (*scores == 0)
         throw std::runtime_error("numpy_beam_decode: cannot malloc() scores");
@@ -104,16 +116,23 @@ void numpy_beam_decode(
 
     for (size_t b = 0; b < batch_results.size(); b++) {
         std::vector<std::pair<float, Output> >& results = batch_results[b];
-        for (size_t p = 0; p < results.size(); p++) {
-            const size_t index_bp = b * beam_size + p;
+        size_t p = 0;
+        for (; p < results.size() && p < max_candidates_per_batch; p++) {
+            const size_t index_bp = b * max_candidates_per_batch + p;
             std::pair<float, Output>& n_path_result = results[p];
             Output& output = n_path_result.second;
             for (size_t t = 0; t < output.tokens.size(); t++) {
                 (*tokens)[index_bp * max_len + t] = output.tokens[t]; // fill output tokens
                 (*timesteps)[index_bp * max_len + t] = output.timesteps[t];
             }
-            (*scores)[index_bp] = n_path_result.first;
+            (*scores)[index_bp] = n_path_result.first;  // scores are -log(p), so lower = better
             (*tokens_lengths)[index_bp] = output.tokens.size();
+        }
+        for (; p < max_candidates_per_batch; p++) {
+            const size_t index_bp = b * max_candidates_per_batch + p;
+            // fill the absent candidates with infitite scores and no tokens
+            (*scores)[index_bp] = std::numeric_limits<float>::infinity();
+            (*tokens_lengths)[index_bp] = 0;
         }
     }
 }
@@ -122,7 +141,8 @@ void numpy_beam_decode_no_lm(
         const float * probs,  size_t batch_size, size_t max_frames, size_t num_classes,
         const int * seq_lens,  size_t seq_lens_dim_batch,
         const std::vector<std::string> labels,
-        size_t beam_size,
+        size_t beam_size,                 // limits candidates maintained inside beam search
+        size_t max_candidates_per_batch,  // limits candidates returned from beam search
         size_t num_processes,
         float cutoff_prob,
         size_t cutoff_top_n,
@@ -139,6 +159,7 @@ void numpy_beam_decode_no_lm(
         seq_lens,  seq_lens_dim_batch,
         labels,
         beam_size,
+        max_candidates_per_batch,
         num_processes,
         cutoff_prob,
         cutoff_top_n,

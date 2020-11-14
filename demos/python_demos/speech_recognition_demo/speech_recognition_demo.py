@@ -36,6 +36,8 @@ def build_argparser():
                              "other: filename of a YAML file (required)")
     parser.add_argument('-b', '--beam-width', type=int, default=500, metavar="N",
                         help="Beam width for beam search in CTC decoder (default 500)")
+    parser.add_argument('-c', '--max-candidates', type=int, default=1, metavar="N",
+                        help="Show top N (or less) candidates (default 1)")
 
     parser.add_argument('-l', '--cpu_extension', type=str, metavar="FILENAME",
                         help="Optional. Required for CPU custom layers. "
@@ -62,6 +64,7 @@ def main():
             model = args.model,
             lm = args.lm,
             beam_width = args.beam_width,
+            max_candidates = args.max_candidates,
             profile = profile,
             device = args.device,
             ie_extensions = [(args.device, args.cpu_extension)] if args.device == 'CPU' else [],
@@ -95,8 +98,7 @@ def main():
     print("Overall time: {} s".format(timeit.default_timer() - start_time))
 
     print("\nTranscription and confidence score:")
-    max_candidates = 1
-    for candidate in transcription[:max_candidates]:
+    for candidate in transcription:
         print(
             "{}\t{}".format(
                 candidate['conf'],

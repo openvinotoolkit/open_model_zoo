@@ -462,12 +462,12 @@ ScorerYoklm_swigregister = _impl.ScorerYoklm_swigregister
 ScorerYoklm_swigregister(ScorerYoklm)
 
 
-def numpy_beam_decode(probs, seq_lens, labels, beam_size, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_input, scorer):
-    return _impl.numpy_beam_decode(probs, seq_lens, labels, beam_size, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_input, scorer)
+def numpy_beam_decode(probs, seq_lens, labels, beam_size, max_candidates_per_batch, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_input, scorer):
+    return _impl.numpy_beam_decode(probs, seq_lens, labels, beam_size, max_candidates_per_batch, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_input, scorer)
 numpy_beam_decode = _impl.numpy_beam_decode
 
-def numpy_beam_decode_no_lm(probs, seq_lens, labels, beam_size, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_input):
-    return _impl.numpy_beam_decode_no_lm(probs, seq_lens, labels, beam_size, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_input)
+def numpy_beam_decode_no_lm(probs, seq_lens, labels, beam_size, max_candidates_per_batch, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_input):
+    return _impl.numpy_beam_decode_no_lm(probs, seq_lens, labels, beam_size, max_candidates_per_batch, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_input)
 numpy_beam_decode_no_lm = _impl.numpy_beam_decode_no_lm
 
 def create_scorer_yoklm(alpha, beta, lm_path, labels):
