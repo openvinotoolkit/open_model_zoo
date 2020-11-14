@@ -91,7 +91,7 @@ Chunk processing order must be from early to late audio positions.
 
  1. LSTM out-state vector, name: `new_state_c`, shape: [1x2048], format: [BxC]. See Inputs.
 
- 1. LSTM output vector, names: `new_state_h`, shape: [1x2048], format: [BxC]. See Inputs.
+ 1. LSTM output vector, name: `new_state_h`, shape: [1x2048], format: [BxC]. See Inputs.
 
 ### Converted Model
 

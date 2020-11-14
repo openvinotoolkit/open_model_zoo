@@ -60,7 +60,7 @@ def traverse_fst(fst, alphabet, max_num_words):
     graph = states_arcs_to_arc_dict(fst['states'], fst['arcs'])
     vocabulary = []
 
-    init_state = 0
+    init_state = fst['meta']['start_state']
     cur_word = []
     def print_all_words(state, prefix):
         out_arcs = graph[state].items()
