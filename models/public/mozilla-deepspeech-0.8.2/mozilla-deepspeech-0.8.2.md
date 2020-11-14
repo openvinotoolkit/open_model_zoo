@@ -10,31 +10,6 @@ For details on the original DeepSpeech, see paper <https://arxiv.org/abs/1412.55
 
 For details on this model, see <https://github.com/mozilla/DeepSpeech/releases/tag/v0.8.2>.
 
-## Conversion
-
-1. Download `deepspeech-0.8.2-models.pbmm` and `deepspeech-0.8.2-models.scorer` files from Mozilla's repository (MPL-2.0 license):
-   ```
-   source <openvino_path>/bin/setupvars.sh
-   <openvino_path>/deployment_tools/open_model_zoo/tools/downloader/downloader.py --name mozilla-deepspeech-0.8.2
-   <openvino_path>/deployment_tools/open_model_zoo/tools/downloader/converter.py --name mozilla-deepspeech-0.8.2
-   ```
-1. Install TensorFlow v1 (tested with v1.15.3) and protobuf (tested with 3.13.0):
-   ```
-   python3 -m pip install 'tensorflow>=1.0,<2.0' 'protobuf>=3.13.0,<4.0'
-   ```
-1. Run conversion from .pbmm ("memory-mapped" graph) to .pb (the common GraphDef):
-   ```
-   ./pbmm_to_pb.py <download_path>/deepspeech-0.8.2-models.pbmm <download_path>/deepspeech-0.8.2-models.pb
-   ```
-1. Run Model Converter to convert .pb to IR files:
-   ```
-   <openvino_path>/deployment_tools/open_model_zoo/tools/downloader/converter.py --name mozilla-deepspeech-0.8.2
-   ```
-1. Run conversion from .scorer (language model format in Mozilla DeepSpeech v0.7.x/0.8.x) to .kenlm (LM format used in v0.6.x and by us):
-   ```
-   ./scorer_to_kenlm.py <download_path>/deepspeech-0.8.2-models.scorer <download_path>/deepspeech-0.8.2-models.kenlm
-   ```
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -62,26 +37,28 @@ Increasing beam_width improves WER metric and slows down decoding.  Speech recog
 
 ### Original Model
 
- * **Audio MFCC coefficients**, name: `input_node` , shape: [1x16x19x26], format: [BxNxTxC], where:
+ 1. Audio MFCC coefficients, name: `input_node` , shape: [1x16x19x26], format: [BxNxTxC], where:
 
     - B - batch size, fixed to 1
-    - N - `input_lengths`, number of audio frames in this section of audio
+    - N = `input_lengths` (see below) - number of audio frames in this section of audio
     - T - context frames: along with the current frame, the network expects 9 preceding frames and 9 succeeding frames. The absent context frames are filled with zeros.
     - C - 26 MFCC coefficients per each frame
 
-   See [`accuracy-check.yml`](accuracy-check.yml) for all audio preprocessing and feature extraction parameters.
+    See [`accuracy-check.yml`](accuracy-check.yml) for all audio preprocessing and feature extraction parameters.
 
- * Number of audio frames, INT32 value, name: `input_lengths`, shape [1].
+ 1. Number of audio frames, INT32 value, name: `input_lengths`, shape [1].
 
- * LSTM in-state (*c*) and input (*h*, a.k.a hidden state) vectors. Names: `previous_state_c` and `previous_state_h`, shapes: [1x2048], format: [BxC].
+ 1. LSTM in-state (*c*) vector, name: `previous_state_c`, shape: [1x2048], format: [BxC].
 
-    When splitting a long audio into chunks, these inputs must be fed with the corresponding outputs from the previous chunk.
-    Chunk processing order must be from early to late audio positions.
+ 1. LSTM input (*h*, a.k.a hidden state) vector, name: `previous_state_h`, shape: [1x2048], format: [BxC].
+
+When splitting a long audio into chunks, these two last inputs must be fed with the corresponding outputs from the previous chunk.
+Chunk processing order must be from early to late audio positions.
 
 
 ### Converted Model
 
- * **Audio MFCC coefficients**. Image, name: `input_node` , shape: [1x16x19x26], format: [BxNxTxC], where:
+ 1. Audio MFCC coefficients, name: `input_node` , shape: [1x16x19x26], format: [BxNxTxC], where:
 
     - B - batch size, fixed to 1
     - N - number of audio frames in this section of audio, fixed to 16
@@ -90,15 +67,18 @@ Increasing beam_width improves WER metric and slows down decoding.  Speech recog
 
     See [`accuracy-check.yml`](accuracy-check.yml) for all audio preprocessing and feature extraction parameters.
 
- * LSTM in-state and input vectors. Names: `previous_state_c` and `previous_state_h`, shapes: [1x2048], format: [BxC].
-When splitting a long audio into chunks, these inputs must be fed with the corresponding outputs from the previous chunk.
+ 1. LSTM in-state vector, name: `previous_state_c`, shape: [1x2048], format: [BxC].
+
+ 1. LSTM input vector, name: `previous_state_h`, shape: [1x2048], format: [BxC].
+
+When splitting a long audio into chunks, these two last inputs must be fed with the corresponding outputs from the previous chunk.
 Chunk processing order must be from early to late audio positions.
 
 ## Output
 
 ### Original Model
 
- * Per-frame probabilities (after softmax) for every symbol in the alphabet, name: `logits`, shape: [16x1x29], format: [NxBxC]
+ 1. Per-frame probabilities (after softmax) for every symbol in the alphabet, name: `logits`, shape: [16x1x29], format: [NxBxC]
 
     - N - number of audio frames in this section of audio
     - B - batch size, fixed to 1
@@ -109,11 +89,13 @@ Chunk processing order must be from early to late audio positions.
 
     *NB*: `logits` is probabilities after softmax, despite its name.
 
- * LSTM out-state and output vectors. Names: `new_state_c` and `new_state_h`, shapes: [1x2048], format: [BxC]. See Inputs.
+ 1. LSTM out-state vector, name: `new_state_c`, shape: [1x2048], format: [BxC]. See Inputs.
+
+ 1. LSTM output vector, names: `new_state_h`, shape: [1x2048], format: [BxC]. See Inputs.
 
 ### Converted Model
 
- * Per-frame probabilities (after softmax) for every symbol in the alphabet, name: `logits`, shape: [16x1x29], format: [NxBxC]
+ 1. Per-frame probabilities (after softmax) for every symbol in the alphabet, name: `logits`, shape: [16x1x29], format: [NxBxC]
 
     - N - number of audio frames in this section of audio, fixed to 16
     - B - batch size, fixed to 1
@@ -124,12 +106,9 @@ Chunk processing order must be from early to late audio positions.
 
     *NB*: `logits` is probabilities after softmax, despite its name.
 
- * LSTM out-state and output vectors. Names:
+ 1. LSTM out-state vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.2` (for `new_state_c`), shape: [1x2048], format: [BxC]. See Inputs.
 
-    - `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.2` for `new_state_c`
-    - `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.1` for `new_state_h`
-
-   Shapes: [1x2048], format: [BxC].  See the corresponding Inputs.
+ 1. LSTM output vector, name: `cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.1` (for `new_state_h`), shape: [1x2048], format: [BxC]. See Inputs.
 
 ## Legal Information
 

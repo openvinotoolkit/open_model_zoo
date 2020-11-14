@@ -8,7 +8,6 @@ KenLM dependency was removed due to licensing concerns, but can be restored manu
 yoklm subcomponent is a library for reading KenLM binary format.  It supports KenLM binary format version 5, with quantization and trie with Bhiksha array representation.
 
 ## Installation
-To build ctcdecode-numpy, please refer to [Open Model Zoo demos](../../../README.md) for instructions
+To build ctcdecode-numpy, please refer to [Open Model Zoo demos](../../../README.md#build-the-demo-applications) for instructions
 on how to build the extension module and prepare the environment for running the demo.
-
-Alternatively, you can [install ctcdecode-numpy from OpenVINO 2021.1 Open Model Zoo](https://github.com/openvinotoolkit/open_model_zoo/tree/2021.1/demos/python_demos/speech_recognition_demo/ctcdecode-numpy#installation).
+Alternatively, instead of using `cmake` you can run `python -m pip install .` inside `ctcdecode-numpy` directory to build and install ctcdecode-numpy.

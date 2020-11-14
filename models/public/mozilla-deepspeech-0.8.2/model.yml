@@ -27,13 +27,8 @@ files:
     size: 953363776
     sha256: d0cf926ab9cab54a8a7d70003b931b2d62ebd9105ed392d1ec9c840029867799
     source: https://github.com/mozilla/DeepSpeech/releases/download/v0.8.2/deepspeech-0.8.2-models.scorer
-#
-# Between downloading and conversion:
-# Run: python3 pbmm_to_pb.py $dl_dir/deepspeech-0.8.2-models.pbmm $dl_dir/deepspeech-0.8.2-models.pb
-# Run: python3 scorer_to_kenlm.py $dl_dir/deepspeech-0.8.2-models.scorer $dl_dir/deepspeech-0.8.2-models.kenlm
-#
 model_optimizer_args:
-  - --input_model=$dl_dir/deepspeech-0.8.2-models.pb
+  - --input_model=$conv_dir/deepspeech-0.8.2-models.pb
   - --freeze_placeholder_with_value=input_lengths->[16]
   - --input=input_node,previous_state_h,previous_state_c
   - --input_shape=[1,16,19,26],[1,2048],[1,2048]

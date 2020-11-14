@@ -2,6 +2,8 @@
 
 This demo demonstrates Automatic Speech Recognition (ASR) with a pretrained Mozilla\* DeepSpeech 0.8.2 model.
 
+It works with version 0.6.1 as well, and should also work with other models trained with Mozilla DeepSpeech 0.6.x/0.7.x/0.8.x with ASCII alphabets.
+
 ## How It Works
 
 The application accepts
@@ -16,24 +18,20 @@ After computing audio features, running a neural network to get per-frame charac
 
 The demo depends on the `ctcdecode_numpy` Python extension module,
 which implements CTC decoding in C++ for faster decoding.
-Please refer to [Using Open Model Zoo demos](../../README.md) for instructions
+Please refer to [Open Model Zoo demos](../../README.md#build-the-demo-applications) for instructions
 on how to build the extension module and prepare the environment for running the demo.
-Alternatively, you can [install ctcdecode-numpy from OpenVINO 2021.1 Open Model Zoo](https://github.com/openvinotoolkit/open_model_zoo/tree/2021.1/demos/python_demos/speech_recognition_demo/ctcdecode-numpy#installation).
+Alternatively, instead of using `cmake` you can run `python -m pip install .` inside `ctcdecode-numpy` directory to build and install `ctcdecode-numpy`.
 
 ## Model preparation
 
-You can download and convert a pre-trained Mozilla\* DeepSpeech 0.8.2 model with
+You can download and convert a pre-trained Mozilla\* DeepSpeech 0.8.2 or 0.6.1 model with
 OpenVINO [Model Downloader](../../../tools/downloader/README.md) and the provided conversion scripts.
-This essentially boils down to the following commands:
+This is done with the following commands:
 ```shell
 source <openvino_dir>/bin/setupvars.sh
 <openvino_dir>/deployment_tools/open_model_zoo/tools/downloader/downloader.py --name mozilla-deepspeech-0.8.2
-dl_dir=public/mozilla-deepspeech-0.8.2
-<openvino_dir>/deployment_tools/open_model_zoo/models/public/mozilla-deepspeech-0.8.2/pbmm_to_pb.py $dl_dir/deepspeech-0.8.2-models.pbmm $dl_dir/deepspeech-0.8.2-models.pb
-<openvino_dir>/deployment_tools/open_model_zoo/models/public/mozilla-deepspeech-0.8.2/scorer_to_kenlm.py $dl_dir/deepspeech-0.8.2-models.scorer $dl_dir/deepspeech-0.8.2-models.kenlm
 <openvino_dir>/deployment_tools/open_model_zoo/tools/downloader/converter.py --name mozilla-deepspeech-0.8.2
 ```
-
 Please pay attention to the model license, **Mozilla Public License 2.0**.
 
 ## Running Demo
@@ -43,7 +41,8 @@ Here are the essential options:
 
 ```
 usage: speech_recognition_demo.py [-h] -i FILENAME [-d DEVICE] -m FILENAME
-                                  [-b N] [-L FILENAME] [-p NAME] [-l FILENAME]
+                                  [-L FILENAME] -p NAME [-b N] [-c N]
+                                  [-l FILENAME]
 
 Speech recognition demo
 
@@ -58,15 +57,15 @@ optional arguments:
                         device. (default is CPU)
   -m FILENAME, --model FILENAME
                         Path to an .xml file with a trained model (required)
-  -b N, --beam-width N  Beam width for beam search in CTC decoder (default
-                        500)
   -L FILENAME, --lm FILENAME
                         path to language model file (optional)
   -p NAME, --profile NAME
                         Choose pre/post-processing profile: mds06x_en for
                         Mozilla DeepSpeech v0.6.x, mds07x_en or mds08x_en for
                         Mozilla DeepSpeech v0.7.x/x0.8.x, other: filename of a
-                        YAML file (default is mds08x_en)
+                        YAML file (required)
+  -b N, --beam-width N  Beam width for beam search in CTC decoder (default
+                        500)
 [...]
 ```
 
@@ -77,8 +76,19 @@ pip install -r requirements.txt
 source <openvino_dir>/bin/setupvars.sh
 
 python speech_recognition_demo.py \
+    -p mds08x_en \
     -m <ir_dir>/FP32/mozilla_deepspeech_0.8.2.xml \
     -L <path_to_tf_model>/deepspeech-0.8.2-models.kenlm \
+    -i <path_to_audio>/audio.wav
+```
+
+For version 0.6.1 it is:
+
+```shell
+python speech_recognition_demo.py \
+    -p mds06x_en \
+    -m <ir_dir>/FP32/mozilla_deepspeech_0.6.1.xml \
+    -L <path_to_tf_model>/lm.binary \
     -i <path_to_audio>/audio.wav
 ```
 

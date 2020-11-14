@@ -15,6 +15,7 @@ def parse_args():
         description="Convert memory-mapped Tensorflow protobuf format into plain Tensorflow protobuf (GraphDef)")
     parser.add_argument('input', type=str, help="Input .pbmm filename")
     parser.add_argument('output', type=str, help="Output .pb filename")
+    parser.add_argument('--overwrite', action='store_true', help="Overwrite output file if exists")
     return parser.parse_args()
 
 
@@ -93,7 +94,7 @@ def main():
 
     graph_def = undo_mmap(graph_def, mmfs)
 
-    with open(args.output, 'xb') as f:
+    with open(args.output, 'xb' if not args.overwrite else 'wb') as f:
         f.write(serialize_graph_def(graph_def))
 
 

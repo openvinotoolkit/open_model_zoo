@@ -16,6 +16,8 @@ def parse_args():
     parser.add_argument('--trie-offset', type=int, default=None, help="TRIE section offset (optional)")
     parser.add_argument('--no-drop-space', action='store_true',
                         help="Don't remove space at the end of each vocabulary word")
+    parser.add_argument('--overwrite', action='store_true', help="Overwrite output file if exists")
+    parser.add_argument('--silent', action='store_true', help="Be silent if everything is OK")
     return parser.parse_args()
 
 
@@ -30,13 +32,16 @@ def main():
     data_scorer, vocab_offset = kenlm_v5_insert_vocabulary(data_scorer, vocabulary,
                                                            drop_final_spaces=not args.no_drop_space)
 
-    with open(args.output, 'xb') as f:
+    with open(args.output, 'xb' if not args.overwrite else 'wb') as f:
         f.write(data_scorer)
 
-    print('lm_alpha:', metadata['alpha'])  # pylint: disable=bad-function-call
-    print('lm_beta:', metadata['beta'])  # pylint: disable=bad-function-call
-    if vocab_offset is not None:
-        print('lm_vocabulary_offset:', vocab_offset)  # pylint: disable=bad-function-call
+    if not args.silent:
+        # pylint: disable=bad-function-call
+        print('# Language model parameters:')
+        print('lm_alpha:', metadata['alpha'])
+        print('lm_beta:', metadata['beta'])
+        if vocab_offset is not None:
+            print('lm_vocabulary_offset:', vocab_offset)
 
 
 if __name__ == '__main__':
