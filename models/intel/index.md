@@ -241,12 +241,12 @@ Deep Learning compressed models
 
 | Model Name| Complexity (GFLOPs)|Size (Mp)|
 |-----------|--------------------|---------|
-| [bert-large-uncased-whole-word-masking-squad-fp32-0001](./bert-large-uncased-whole-word-masking-squad-fp32-0001/description/bert-large-uncased-whole-word-masking-squad-fp32-0001.md) | 246.93 | 333.96 |
+| [bert-large-uncased-whole-word-masking-squad-0001](./bert-large-uncased-whole-word-masking-squad-0001/description/bert-large-uncased-whole-word-masking-squad-0001.md) | 246.93 | 333.96 |
 | [bert-large-uncased-whole-word-masking-squad-int8-0001](./bert-large-uncased-whole-word-masking-squad-int8-0001/description/bert-large-uncased-whole-word-masking-squad-int8-0001.md) | 246.93 | 333.96 |
+| [bert-large-uncased-whole-word-masking-squad-emb-0001](./bert-large-uncased-whole-word-masking-squad-emb-0001/description/bert-large-uncased-whole-word-masking-squad-emb-0001.md) | 246.93 (for [1,384] input size) | 333.96 |
 | [bert-small-uncased-whole-word-masking-squad-0001](./bert-small-uncased-whole-word-masking-squad-0001/description/bert-small-uncased-whole-word-masking-squad-0001.md) | 23.9 | 57.94 |
 | [bert-small-uncased-whole-word-masking-squad-0002](./bert-small-uncased-whole-word-masking-squad-0002/description/bert-small-uncased-whole-word-masking-squad-0002.md) | 23.9 | 41.1 |
 | [bert-small-uncased-whole-word-masking-squad-int8-0002](./bert-small-uncased-whole-word-masking-squad-int8-0002/description/bert-small-uncased-whole-word-masking-squad-int8-0002.md) | 23.9 | 41.1 |
-| [bert-large-uncased-whole-word-masking-squad-emb-0001](./bert-large-uncased-whole-word-masking-squad-emb-0001/description/bert-large-uncased-whole-word-masking-squad-emb-0001.md) | 246.93 (for [1,384] input size) | 333.96 |
 | [bert-small-uncased-whole-word-masking-squad-emb-int8-0001](./bert-small-uncased-whole-word-masking-squad-emb-int8-0001/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.md) | 23.9 (for [1,384] input size) | 41.1 |
 
 ## Machine Translation

@@ -83,7 +83,7 @@ from .ade20k_dataset_converter import ADE20kConverter
 
 from .librispeech import LibrispeechConverter
 from .criteo_kaggle_dac import CriteoKaggleDACConverter
-from .features_regression import FeaturesRegressionConverter
+from .features_regression import FeaturesRegressionConverter, MultiOutputFeaturesRegression
 from .nyu_depth import NYUDepthV2Converter
 from .dna_seq import DNASequenceDatasetConverter
 from .place_recognition import PlaceRecognitionDatasetConverter
@@ -93,6 +93,7 @@ from .mapillary_20 import Mapillary20Converter
 from .antispoofing import AntispoofingDatasetConverter
 from .sound_classification_converter import SoundClassificationFormatConverter
 from .salient_object_detection import SalientObjectDetectionConverter
+from .wflw import WFLWConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -165,6 +166,7 @@ __all__ = [
     'LibrispeechConverter',
     'CriteoKaggleDACConverter',
     'FeaturesRegressionConverter',
+    'MultiOutputFeaturesRegression',
     'Im2latexDatasetConverter',
     'DNASequenceDatasetConverter',
     'PlaceRecognitionDatasetConverter',
@@ -173,4 +175,5 @@ __all__ = [
     'AntispoofingDatasetConverter',
     'SoundClassificationFormatConverter',
     'SalientObjectDetectionConverter',
+    'WFLWConverter',
 ]

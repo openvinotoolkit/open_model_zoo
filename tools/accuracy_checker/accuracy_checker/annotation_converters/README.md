@@ -366,6 +366,12 @@ The main difference between this converter and `super_resolution` in data organi
   * `reference_dir` - directory with reference data. **Note: inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.**
   * `input_suffix` - suffix for input files (usually file extension). Optional, default `.txt`.
   * `reference_suffix` - suffix for reference files (usually file extension). Optional, default `.txt`.
+* `multi_feature_regression` - converts dataset stored in format of directories with preprocessed input numeric data (features) in dictionary format, where keys are layer names and values - features and reference data in the same format to `FeatureRegressionAnnotation`.
+ This approach allows comparing output of model from different frameworks (e.g. OpenVINO converted model and source framework realisation). Please note, that input and reference should be stored as dict-like objects in npy files.
+  * `data_dir` - directory with input and reference files.
+   * `input_suffix` - suffix for input files (usually file extension). Optional, default `in.npy`.
+   * `reference_suffix` - suffix for reference files (usually file extension). Optional, default `out.npy`.
+   * `prefix` - prefix for input files selection (Optional, ignored if not provided).
 * `librispeech` - converts [librispeech](http://www.openslr.org/12) dataset to `CharachterRecognitionAnnotation`.
   * `data_dir` - path to dataset directory, which contains converted wav files.
   * `annotation_file` - path to file which describe the data which should be used in evaluation (`audio_filepath`, `text`, `duration`). Optional, used only for data filtering and sorting audio samples by duration.
@@ -416,6 +422,9 @@ The main difference between this converter and `super_resolution` in data organi
   * `images_dir` - directory with input images.
   * `masks_dir` - directory with reference salience maps.
   * `annotation_file` - txt file with selected image ids.
+* `wflw` - converts WFLW dataset for facial landmarks regression task to `FacialLandmarksAnnotation`.
+  * `annotation_file` - path to txt file with ground truth data in WFLW dataset format.
+  * `images_dir` - path to dataset images, used only for content existence check (optional parameter).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)

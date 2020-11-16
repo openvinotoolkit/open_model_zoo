@@ -1,4 +1,4 @@
-# bert-large-uncased-whole-word-masking-squad-fp32-0001
+# bert-large-uncased-whole-word-masking-squad-0001
 
 ## Use Case and High-Level Description
 

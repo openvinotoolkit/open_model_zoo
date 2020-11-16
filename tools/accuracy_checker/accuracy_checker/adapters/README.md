@@ -302,10 +302,12 @@ AccuracyChecker supports following set of adapters:
     * `window_lengths` - Window lengths for each base output layer.
 * `face_detection_refinement` - converts output of face detection refinement model to `DetectionPrediction` representation. Adapter refines candidates generated in previous stage model.
     * `threshold` - Score threshold to determine as valid face candidate.
-* `attribute_classification` - converts output of attributes classifcation model to `ContainerPrediction` which contains multiple `ClassificationPrediction` for attributes with their scores.
+* `attribute_classification` - converts output of attributes classification model to `ContainerPrediction` which contains multiple `ClassificationPrediction` for attributes with their scores.
     * `output_layer_map` - dictionary where keys are output layer names of attribute classification model and values are the names of attributes.
 * `regression` - converting output of regression model to `RegressionPrediction` representation.
     * `keep_shape` - allow keeping shape of predicted multi dimension array (Optional, default False).
+* `multi_output_regression` - converting raw output features to `RegressionPrediction` for regression with gt data.
+  * `output` - list of target output names.
 * `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions.
     * `adapters` - Dict where key is output name and value is adapter config map including `output_blob` key to associate the output of model and this adapter.
 * `person_vehilce_detection_refinement` - converts output of person vehicle detection refinement model to `DetectionPrediction` representation. Adapter refines proposals generated in previous stage model.
