@@ -300,7 +300,7 @@ class Renderer:
         if self.cur_formula is None:
             self.cur_formula = formula
         elif self.cur_formula == formula:
-            return self.output_file
+            return self.res_img, self.cur_formula
         self.cur_formula = formula
         try:
             sympy.preview(f'$${formula}$$', viewer='file',
