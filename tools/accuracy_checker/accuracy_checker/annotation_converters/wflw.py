@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import numpy as np
+
 from ..config import PathField
 from ..representation import FacialLandmarksAnnotation
 from ..utils import read_txt, check_file_existence
@@ -43,6 +45,8 @@ class WFLWConverter(BaseFormatConverter):
     def configure(self):
         self.annotation_file = self.get_value_from_config('annotation_file')
         self.images_dir = self.get_value_from_config('images_dir')
+        self.landmarks_count = 98
+        self.coordinates_count = 2
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         image_annotations = read_txt(self.annotation_file)
@@ -54,13 +58,13 @@ class WFLWConverter(BaseFormatConverter):
             line = line.strip().split()
             identifier = line[-1]
 
-            landmarks = line[:196]
-            x_values = landmarks[::2]
-            y_values = landmarks[1::2]
+            landmarks = [float(val) for val in line[:self.landmarks_count * self.coordinates_count]]
+            x_values = np.array(landmarks[::2])
+            y_values = np.array(landmarks[1::2])
 
             annotation = FacialLandmarksAnnotation(identifier, x_values, y_values)
-            annotation.metadata['left_eye'] = 97
-            annotation.metadata['right_eye'] = 96
+            annotation.metadata['left_eye'] = [68, 72]
+            annotation.metadata['right_eye'] = [60, 64]
 
             annotations.append(annotation)
             if check_content and self.images_dir:
