@@ -21,209 +21,132 @@ from argparse import SUPPRESS, ArgumentParser
 
 import cv2 as cv
 import numpy as np
-from openvino.inference_engine import IECore
-from tqdm import tqdm
-from utils import (END_TOKEN, START_TOKEN, ModelStatus, Renderer, InteractiveDemo,
-                   Vocab, create_renderer)
+from utils import *
 
 CONFIDENCE_THRESH = 0.95
 
 
-def crop(img, target_shape):
-    target_height, target_width = target_shape
-    img_h, img_w = img.shape[0:2]
-    new_w = min(target_width, img_w)
-    new_h = min(target_height, img_h)
-    return img[:new_h, :new_w, :]
+class InteractiveDemo:
+    def __init__(self, input_model_shape, resolution=DEFAULT_RESOLUTION, device_id=0):
+        self.capture = cv.VideoCapture(device_id)
+        self._resolution = resolution
+        self.capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
+        self.capture.set(3, resolution[0])
+        self.capture.set(4, resolution[1])
+        self._tgt_shape = input_model_shape
+        self.start_point, self.end_point = self._create_input_window()
+        self._prev_rendered_formula = None
+        self._prev_formula_img = None
+        self._latex_h = 0
+        self.renderer = create_renderer()
 
+    def get_frame(self):
+        ret, frame = self.capture.read()
+        return frame
 
-def resize(img, target_shape):
-    target_height, target_width = target_shape
-    img_h, img_w = img.shape[0:2]
-    scale = min(target_height / img_h, target_width / img_w)
-    return cv.resize(img, None, fx=scale, fy=scale)
+    def _create_input_window(self):
+        aspect_ratio = self._tgt_shape[0] / self._tgt_shape[1]
+        default_width = DEFAULT_WIDTH
+        height = int(default_width * aspect_ratio)
+        start_point = (int(self._resolution[0] / 2 - default_width / 2), int(self._resolution[1] / 2 - height / 2))
+        end_point = (int(self._resolution[0] / 2 + default_width / 2), int(self._resolution[1] / 2 + height / 2))
+        return start_point, end_point
 
+    def get_crop(self, frame):
+        crop = frame[self.start_point[1]:self.end_point[1], self.start_point[0]:self.end_point[0], :]
+        return crop
 
-PREPROCESSING = {
-    'crop': crop,
-    'resize': resize
-}
+    def draw_rectangle(self, frame):
+        frame = cv.rectangle(frame, self.start_point, self.end_point, color=RED, thickness=2)
+        return frame
 
-COLOR_WHITE = (255, 255, 255)
-
-
-def read_net(model_xml, ie, device):
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
-
-    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
-    model = ie.read_network(model_xml, model_bin)
-    return model
-
-
-def print_stats(module):
-    perf_counts = module.requests[0].get_perf_counts()
-    print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format('name', 'layer_type', 'exet_type', 'status',
-                                                      'real_time, us'))
-    for layer, stats in perf_counts.items():
-        print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
-                                                          stats['status'], stats['real_time']))
-
-
-def change_layout(model_input):
-    model_input = model_input.transpose((2, 0, 1))
-    model_input = np.expand_dims(model_input, axis=0)
-    return model_input
-
-
-def preprocess_image(preprocess, image_raw, tgt_shape):
-    target_height, target_width = tgt_shape
-    image_raw = preprocess(image_raw, tgt_shape)
-    img_h, img_w = image_raw.shape[0:2]
-    image_raw = cv.copyMakeBorder(image_raw, 0, target_height - img_h,
-                                  0, target_width - img_w, cv.BORDER_CONSTANT,
-                                  None, COLOR_WHITE)
-    return image_raw
-
-
-def prerocess_crop(crop, tgt_shape, preprocess_type='crop'):
-    height, width = tgt_shape
-    crop = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
-    crop = cv.cvtColor(crop, cv.COLOR_GRAY2BGR)
-    ret_val, bin_crop = cv.threshold(crop, 120, 255, type=cv.THRESH_BINARY)
-    return preprocess_image(PREPROCESSING[preprocess_type], bin_crop, tgt_shape)
-
-
-class Model:
-    def __init__(self, args):
-        self.args = args
-        log.info("Creating Inference Engine")
-        self.ie = IECore()
-        self.ie.set_config(
-            {"PERF_COUNT": "YES" if self.args.perf_counts else "NO"}, args.device)
-        self.encoder = read_net(self.args.m_encoder, self.ie, self.args.device)
-        self.dec_step = read_net(self.args.m_decoder, self.ie, self.args.device)
-        self.exec_net_encoder = self.ie.load_network(network=self.encoder, device_name=self.args.device)
-        self.exec_net_decoder = self.ie.load_network(network=self.dec_step, device_name=self.args.device)
-        self.images_list = []
-        self.vocab = Vocab(self.args.vocab_path)
-        self.model_status = ModelStatus.ready
-        self.is_async = args.interactive
-        self.num_infers_decoder = 0
-        if not args.interactive:
-            self.preprocess_inputs()
-
-    def preprocess_inputs(self):
-        batch_dim, channels, height, width = self.encoder.input_info['imgs'].input_data.shape
-        assert batch_dim == 1, "Demo only works with batch size 1."
-        assert channels in (1, 3), "Input image is not 1 or 3 channeled image."
-        target_shape = (height, width)
-        if os.path.isdir(self.args.input):
-            inputs = sorted(os.path.join(self.args.input, inp)
-                            for inp in os.listdir(self.args.input))
+    def resize_window(self, action):
+        height = self.end_point[1] - self.start_point[1]
+        width = self.end_point[0] - self.start_point[0]
+        aspect_ratio = height / width
+        if action == 'increase':
+            if height >= MAX_HEIGHT or width >= MAX_WIDTH:
+                return
+            self.start_point = (self.start_point[0]-DEFAULT_RESIZE_STEP,
+                                self.start_point[1] - int(DEFAULT_RESIZE_STEP * aspect_ratio))
+            self.end_point = (self.end_point[0]+DEFAULT_RESIZE_STEP,
+                              self.end_point[1] + int(DEFAULT_RESIZE_STEP * aspect_ratio))
+        elif action == 'decrease':
+            if height <= MIN_HEIGHT or width <= MIN_WIDTH:
+                return
+            self.start_point = (self.start_point[0]+DEFAULT_RESIZE_STEP,
+                                self.start_point[1] + int(DEFAULT_RESIZE_STEP * aspect_ratio))
+            self.end_point = (self.end_point[0]-DEFAULT_RESIZE_STEP,
+                              self.end_point[1] - int(DEFAULT_RESIZE_STEP * aspect_ratio))
         else:
-            inputs = [self.args.input]
-        log.info("Loading and preprocessing images")
-        for filenm in tqdm(inputs):
-            image_raw = cv.imread(filenm)
-            assert image_raw is not None, "Error reading image {}".format(filenm)
-            image = preprocess_image(
-                PREPROCESSING[self.args.preprocessing_type], image_raw, target_shape)
-            record = dict(img_name=filenm, img=image, formula=None)
-            self.images_list.append(record)
+            raise ValueError(f"wrong action: {action}")
 
-    def _async_infer_encoder(self, image, req_id):
-        return self.exec_net_encoder.start_async(request_id=req_id, inputs={self.args.imgs_layer: image})
+    def put_text(self, frame, text):
+        if text == '':
+            return frame
+        text = strip_internal_spaces(text)
+        (txt_w, self._latex_h), baseLine = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 3)
+        start_point = (self.start_point[0],
+                       self.end_point[1] - self.start_point[1] + int(self._latex_h * 1.5))
+        frame = cv.putText(frame, text, org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
+                           fontScale=0.7, color=COLOR_BLACK, thickness=3, lineType=cv.LINE_AA)
+        frame = cv.putText(frame, text, org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
+                           fontScale=0.7, color=COLOR_WHITE, thickness=2, lineType=cv.LINE_AA)
+        comment_coords = (0, self.end_point[1] - self.start_point[1] + int(self._latex_h * 1.5))
+        frame = cv.putText(frame, "Predicted:", comment_coords,
+                           fontFace=cv.FONT_HERSHEY_SIMPLEX, fontScale=0.7, color=COLOR_WHITE, thickness=2, lineType=cv.LINE_AA)
+        return frame
 
-    def _async_infer_decoder(self, row_enc_out, dec_st_c, dec_st_h, output, tgt, req_id):
-        self.num_infers_decoder += 1
-        return self.exec_net_decoder.start_async(request_id=req_id, inputs={self.args.row_enc_out_layer: row_enc_out,
-                                                                            self.args.dec_st_c_layer: dec_st_c,
-                                                                            self.args.dec_st_h_layer: dec_st_h,
-                                                                            self.args.output_prev_layer: output,
-                                                                            self.args.tgt_layer: tgt
-                                                                            }
-                                                 )
+    def put_crop(self, frame, crop):
+        height = self.end_point[1] - self.start_point[1]
+        width = self.end_point[0] - self.start_point[0]
+        crop = cv.resize(crop, (width, height))
+        frame[0:height, self.start_point[0]:self.end_point[0], :] = crop
+        comment_coords = (0, 20)
+        frame = cv.putText(frame, "Model input:", comment_coords, fontFace=cv.FONT_HERSHEY_SIMPLEX,
+                           fontScale=0.7, color=COLOR_WHITE, thickness=2, lineType=cv.LINE_AA)
+        return frame
 
-    def infer_async(self, model_input):
-        model_input = change_layout(model_input)
-        assert self.is_async
-        # asynchronous variant
-        if self.model_status == ModelStatus.ready:
-            infer_status_encoder = self._run_encoder(model_input)
+    def put_formula_img(self, frame, formula):
+        if self.renderer is None or formula == '':
+            return frame
+        formula_img = self._render_formula_async(formula)
+        if formula_img is None:
+            return frame
+        y_start = self.end_point[1] - self.start_point[1] + self._latex_h * 2
+        img_shape = formula_img.shape
+        formula_img = self._resize_if_need(formula_img)
+        frame[y_start:y_start + formula_img.shape[0],
+              self.start_point[0]:self.start_point[0] + formula_img.shape[1],
+              :] = formula_img
+        comment_coords = (0, y_start + (formula_img.shape[0] + self._latex_h) // 2)
+        frame = cv.putText(frame, "Rendered:", comment_coords,
+                           fontFace=cv.FONT_HERSHEY_SIMPLEX, fontScale=0.7, color=COLOR_WHITE, thickness=2, lineType=cv.LINE_AA)
+        return frame
+
+    def _resize_if_need(self, formula_img):
+        if (self.end_point[0] - self.start_point[0]) < formula_img.shape[1]:
+            scale_factor = (self.end_point[0] - self.start_point[0]) / formula_img.shape[1]
+            formula_img = cv.resize(
+                formula_img, fx=scale_factor, fy=scale_factor, dsize=None)
+        return formula_img
+
+    def _render_formula_async(self, formula):
+        if formula == self._prev_rendered_formula:
+            return self._prev_formula_img
+        result = self.renderer.thread_render(formula)
+        if result is None:
             return None
-
-        if self.model_status == ModelStatus.encoder_infer:
-            infer_status_encoder = self._infer_request_handle_encoder.wait(timeout=1)
-            if infer_status_encoder == 0:
-                self._run_decoder()
+        formula_img, res_formula = result
+        if res_formula != formula:
             return None
+        self._prev_rendered_formula = formula
+        self._prev_formula_img = formula_img
+        return formula_img
 
-        return self._process_decoding_results()
-
-    def infer_sync(self, model_input):
-        assert not self.is_async
-        model_input = change_layout(model_input)
-        self._run_encoder(model_input)
-        self._run_decoder()
-        res = None
-        while res is None:
-            res = self._process_decoding_results()
-        return res
-
-    def _process_decoding_results(self):
-        timeout = 1 if self.is_async else -1
-        infer_status_decoder = self._infer_request_handle_decoder.wait(timeout)
-        if infer_status_decoder != 0 and self.is_async:
-            return None
-        dec_res = self._infer_request_handle_decoder.output_blobs
-        self._unpack_dec_results(dec_res)
-
-        if self.tgt[0][0][0] == END_TOKEN or self.num_infers_decoder >= self.args.max_formula_len:
-            self.num_infers_decoder = 0
-            self.logits = np.array(self.logits)
-            logits = self.logits.squeeze(axis=1)
-            targets = np.argmax(logits, axis=1)
-            self.model_status = ModelStatus.ready
-            return logits, targets
-        self._infer_request_handle_decoder = self._async_infer_decoder(self.row_enc_out,
-                                                                       self.dec_states_c,
-                                                                       self.dec_states_h,
-                                                                       self.output,
-                                                                       self.tgt,
-                                                                       req_id=0
-                                                                       )
-
-        return None
-
-    def _run_encoder(self, model_input):
-        timeout = 1 if self.is_async else -1
-        self._infer_request_handle_encoder = self._async_infer_encoder(model_input, req_id=0)
-        self.model_status = ModelStatus.encoder_infer
-        infer_status_encoder = self._infer_request_handle_encoder.wait(timeout=timeout)
-        return infer_status_encoder
-
-    def _run_decoder(self):
-        enc_res = self._infer_request_handle_encoder.output_blobs
-        self._unpack_enc_results(enc_res)
-        self._infer_request_handle_decoder = self._async_infer_decoder(
-            self.row_enc_out, self.dec_states_c, self.dec_states_h, self.output, self.tgt, req_id=0)
-        self.model_status = ModelStatus.decoder_infer
-
-    def _unpack_dec_results(self, dec_res):
-        self.dec_states_h = dec_res[self.args.dec_st_h_t_layer].buffer
-        self.dec_states_c = dec_res[self.args.dec_st_c_t_layer].buffer
-        self.output = dec_res[self.args.output_layer].buffer
-        logit = dec_res[self.args.logit_layer].buffer
-        self.logits.append(logit)
-        self.tgt = np.array([[np.argmax(logit, axis=1)]])
-
-    def _unpack_enc_results(self, enc_res):
-        self.row_enc_out = enc_res[self.args.row_enc_out_layer].buffer
-        self.dec_states_h = enc_res[self.args.hidden_layer].buffer
-        self.dec_states_c = enc_res[self.args.context_layer].buffer
-        self.output = enc_res[self.args.init_0_layer].buffer
-        self.tgt = np.array([[START_TOKEN]])
-        self.logits = []
+    def finalize(self):
+        self.capture.release()
+        cv.destroyAllWindows()
 
 
 def calculate_probability(logits):
@@ -345,7 +268,7 @@ def main():
                     log.info("Confidence score is low, prediction is not complete")
                     phrase = ''
             frame = demo.put_text(frame, phrase)
-            frame = demo.put_formula(frame, phrase)
+            frame = demo.put_formula_img(frame, phrase)
             prev_text = phrase
             frame = demo.draw_rectangle(frame)
             cv.imshow('Press Q to quit.', frame)
