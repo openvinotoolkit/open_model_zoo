@@ -80,8 +80,8 @@ Accuracy Checker supports following set of preprocessors:
 * `flip` - image mirroring around specified axis.
   * `mode` specifies the axis for flipping (`vertical` or `horizontal`).
 * `crop` - central cropping for image.
-  * `dst_width` and `dst_height` are destination width and height for image resizing respectively. You can also use `size` instead in case when destination sizes are equal or
-  `central_fraction` to define fraction of size to crop (float value (0, 1]))
+  * `dst_width` and `dst_height` are destination width and height for image resizing respectively. You can also use `size` instead in case when destination sizes are equal,
+  `central_fraction` to define fraction of size to crop (float value (0, 1])) or `max_square` for cropping central part for image by minimal image size (`True` value for enabling this feature).
   * `use_pillow` parameter specifies usage of Pillow library for cropping.
 * `crop_rectangle` - cropping region of interest using coordinates given as annotation metadata.
 * `extend_around_rect` - scaling region of interest using annotation metadata.

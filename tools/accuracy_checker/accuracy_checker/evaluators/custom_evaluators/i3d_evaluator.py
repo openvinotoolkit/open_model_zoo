@@ -402,7 +402,7 @@ class I3DRGBModel(BaseModel):
         resizer = Resize(resizer_config)
         image = resizer.process(image)
         for i, frame in enumerate(image.data):
-            image.data[i] = Crop.process_data(frame, 224, 224, None, False, True, {})
+            image.data[i] = Crop.process_data(frame, 224, 224, None, False, False, True, {})
         return image
 
 
