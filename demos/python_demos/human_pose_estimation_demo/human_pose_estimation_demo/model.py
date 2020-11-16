@@ -214,28 +214,27 @@ class HPEOpenPose(Model):
         resized_image_shape = meta['resized_shape']
         scale_x = original_image_shape[1] / resized_image_shape[1]
         scale_y = original_image_shape[0] / resized_image_shape[0]
-        poses[:, :, 0] *= scale_x
-        poses[:, :, 1] *= scale_y
+        poses[:, :, 0] *= scale_x * self.output_scale
+        poses[:, :, 1] *= scale_y * self.output_scale
         return poses, scores
 
 
 class HPEAssociativeEmbedding(Model):
 
-    def __init__(self, *args, keep_aspect_ratio_resize=True, size_divisor=32, **kwargs):
+    def __init__(self, *args, target_size=None, size_divisor=32, **kwargs):
         super().__init__(*args, **kwargs)
-        self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
-        self.size_divisor = size_divisor
-
+        
         self.image_blob_name = self._get_inputs(self.net)
-        # TODO. Make target size configurable.
-        self.target_size = self.net.input_info[self.image_blob_name].input_data.shape[-1]
-
         self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)
         self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
         self.embeddings_blob_name = find_layer_by_name('embeddings', self.net.outputs)
 
+        self.size_divisor = size_divisor
         self.num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1]
+        self.target_size = self.net.input_info[self.image_blob_name].input_data.shape[-1]
         self.output_scale = self.target_size / self.net.outputs[self.heatmaps_blob_name].shape[-1]
+        if target_size is not None:
+            self.target_size = target_size
 
         self.decoder = AssociativeEmbeddingDecoder(
             num_joints=self.num_joints,
@@ -261,17 +260,14 @@ class HPEAssociativeEmbedding(Model):
         return image_blob_name
 
     @staticmethod
-    def _resize_image(frame, size, keep_aspect_ratio=False):
-        if not keep_aspect_ratio:
-            resized_frame = cv2.resize(frame, size)
-        else:
-            h, w = frame.shape[:2]
-            scale = max(size[1] / h, size[0] / w)
-            resized_frame = cv2.resize(frame, None, fx=scale, fy=scale)
+    def _resize_image(frame, size):
+        h, w = frame.shape[:2]
+        scale = max(size[1] / h, size[0] / w)
+        resized_frame = cv2.resize(frame, None, fx=scale, fy=scale)
         return resized_frame
 
     def preprocess(self, inputs):
-        img = self._resize_image(inputs[self.image_blob_name], (self.target_size, self.target_size), self.keep_aspect_ratio_resize)
+        img = self._resize_image(inputs[self.image_blob_name], (self.target_size, self.target_size))
         meta = {'original_shape': inputs[self.image_blob_name].shape,
                 'resized_shape': img.shape}
         h, w = img.shape[:2]

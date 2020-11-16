@@ -51,7 +51,7 @@ def build_argparser():
                            'acceptable. The sample will look for a suitable plugin for device specified. '
                            'Default value is CPU.', default='CPU', type=str)
     args.add_argument('-t', '--prob_threshold', help='Optional. Probability threshold for poses filtering.',
-                      default=0.5, type=float)
+                      default=0.1, type=float)
     args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
                       default=False, action='store_true')
     args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -69,7 +69,12 @@ def build_argparser():
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
 
-    args.add_argument('--type', default='ae', choices=('ae', 'openpose'), type=str, help='Optional.')
+    args.add_argument('--type', default='ae', choices=('ae', 'openpose'), type=str,
+                      help='Optional. Type of the network, either "ae" for associative embedding'
+                           'or "openpose" for openpose.' )
+    args.add_argument('--tsize', default=None, type=int,
+                      help='Optional. Target input size. By default target size is derived from image input shape'
+                           'of a provided network and depends on the network type.' )
     return parser
 
 
@@ -140,12 +145,12 @@ def main():
 
     hpes = {
         Modes.USER_SPECIFIED:
-            HPE(ie, args.model, device=args.device, plugin_config=config_user_specified,
+            HPE(ie, args.model, target_size=args.tsize, device=args.device, plugin_config=config_user_specified,
                 results=completed_request_results, max_num_requests=args.num_infer_requests,
                 caught_exceptions=exceptions),
         Modes.MIN_LATENCY:
-            HPE(ie, args.model, device=args.device.split(':')[-1].split(',')[0], plugin_config=config_min_latency,
-                results=completed_request_results, max_num_requests=1,
+            HPE(ie, args.model, target_size=args.tsize, device=args.device.split(':')[-1].split(',')[0],
+                plugin_config=config_min_latency, results=completed_request_results, max_num_requests=1,
                 caught_exceptions=exceptions)
     }
 
