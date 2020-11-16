@@ -111,10 +111,10 @@ class FacialLandmarks3DPrediction(FacialLandmarks3DRepresentation):
 
 
 class FeaturesRegressionAnnotation(BaseRepresentation):
-    def __init__(self, identifier, value_file, dict_fetures=False):
+    def __init__(self, identifier, value_file, dict_features=False):
         super().__init__(identifier)
         self.value_file = value_file
-        self._reader_config = 'numpy_txt_reader' if not dict_fetures else 'numpy_dict_reader'
+        self._reader_config = 'numpy_txt_reader' if not dict_features else 'numpy_dict_reader'
 
     @property
     def value(self):

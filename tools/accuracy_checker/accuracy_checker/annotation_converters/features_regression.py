@@ -76,12 +76,12 @@ class MultiOutputFeaturesRegression(BaseFormatConverter):
         annotations = []
         input_data = list(self.data_dir.glob('{}*{}*'.format(self.prefix, self.input_suffix)))
         content_errors = None if not check_content else []
-        num_iterantions = len(input_data)
+        num_iterations = len(input_data)
         for idx, input_file in enumerate(input_data):
             ref_file = input_file.parent / input_file.name.replace(self.input_suffix, self.output_suffix)
             if check_content and not check_file_existence(ref_file):
                 content_errors.append('{}: does not exist'.format(ref_file))
-            annotations.append(FeaturesRegressionAnnotation(input_file.name, ref_file.name, dict_fetures=True))
+            annotations.append(FeaturesRegressionAnnotation(input_file.name, ref_file.name, dict_features=True))
             if progress_callback and idx % progress_interval == 0:
-                progress_callback(idx * 100 / num_iterantions)
+                progress_callback(idx * 100 / num_iterations)
         return ConverterReturn(annotations, None, None)
