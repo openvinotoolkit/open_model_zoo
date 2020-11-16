@@ -220,6 +220,7 @@ def main():
 
     log.info("Starting inference")
     args = build_argparser().parse_args()
+    assert bool(args.interactive) != bool(args.input), "--interactive option is mutually exclive with -i/--input"
     model = Model(args)
     if not args.interactive:
         renderer = create_renderer()
