@@ -52,19 +52,16 @@ class DataStep(PipelineStep):
             self._video_cycle = iter(self.video_list)
 
     def setup(self):
-        for i, video in enumerate(self.video_list):
-            self.cap = cv2.VideoCapture(video)
-            opened = self.cap.isOpened()
-            if not opened:
-                raise Exception("The input video №{} cannot be opened".format(i+1))
         self._open_video()
-            
+
     def process(self, item):
-        if not self.cap.isOpened() and not self._open_video():
-            return Signal.STOP
         status, frame = self.cap.read()
         if not status:
-            return Signal.STOP
+             try:
+                 self._open_video()
+                 status, frame = self.cap.read()
+             except:
+                 return Signal.STOP
         return frame
 
     def end(self):
@@ -78,8 +75,7 @@ class DataStep(PipelineStep):
             pass
         self.cap = cv2.VideoCapture(next_video)
         if not self.cap.isOpened():
-            return False
-        return True
+            raise Exception("The input video cannot be opened")
 
 
 class EncoderStep(PipelineStep):
