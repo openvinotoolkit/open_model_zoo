@@ -52,8 +52,13 @@ class DataStep(PipelineStep):
             self._video_cycle = iter(self.video_list)
 
     def setup(self):
+        for i, video in enumerate(self.video_list):
+            self.cap = cv2.VideoCapture(video)
+            opened = self.cap.isOpened()
+            if not opened:
+                raise Exception("The input video №{} cannot be opened".format(i+1))
         self._open_video()
-
+            
     def process(self, item):
         if not self.cap.isOpened() and not self._open_video():
             return Signal.STOP
