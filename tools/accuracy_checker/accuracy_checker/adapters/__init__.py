@@ -89,7 +89,7 @@ from .audio_recognition import (
     FastCTCBeamSearchDecoderWithLm
 )
 
-from .regression import RegressionAdapter
+from .regression import RegressionAdapter, MultiOutputRegression
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
 from .dna_seq_recognition import DNASeqRecognition
@@ -187,6 +187,7 @@ __all__ = [
     'AttributeClassificationAdapter',
 
     'RegressionAdapter',
+    'MultiOutputRegression',
     'MixedAdapter',
 
     'CTCBeamSearchDecoder',

@@ -16,6 +16,7 @@ limitations under the License.
 
 from ..config import PathField
 from ..representation import FeaturesRegressionAnnotation
+from ..utils import check_file_existence
 from .format_converter import ConverterReturn, BaseFormatConverter, StringField
 
 
@@ -48,4 +49,39 @@ class FeaturesRegressionConverter(BaseFormatConverter):
             if not input_file.exists():
                 continue
             annotations.append(FeaturesRegressionAnnotation(identifier, ref_file.name))
+        return ConverterReturn(annotations, None, None)
+
+
+class MultiOutputFeaturesRegression(BaseFormatConverter):
+    __provider__ = 'multi_feature_regression'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'data_dir': PathField(is_directory=True, description='directory with data'),
+            'input_suffix': StringField(optional=True, default='in.npy', description='suffix for input files search'),
+            'reference_suffix': StringField(optional=True, default='out.npy', description='suffix for ref files'),
+            'prefix': StringField(optional=True, default='', description='prefix for files search')
+        })
+        return params
+
+    def configure(self):
+        self.data_dir = self.get_value_from_config('data_dir')
+        self.input_suffix = self.get_value_from_config('input_suffix')
+        self.output_suffix = self.get_value_from_config('reference_suffix')
+        self.prefix = self.get_value_from_config('prefix')
+
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        annotations = []
+        input_data = list(self.data_dir.glob('{}*{}*'.format(self.prefix, self.input_suffix)))
+        content_errors = None if not check_content else []
+        num_iterations = len(input_data)
+        for idx, input_file in enumerate(input_data):
+            ref_file = input_file.parent / input_file.name.replace(self.input_suffix, self.output_suffix)
+            if check_content and not check_file_existence(ref_file):
+                content_errors.append('{}: does not exist'.format(ref_file))
+            annotations.append(FeaturesRegressionAnnotation(input_file.name, ref_file.name, dict_features=True))
+            if progress_callback and idx % progress_interval == 0:
+                progress_callback(idx * 100 / num_iterations)
         return ConverterReturn(annotations, None, None)
