@@ -1,7 +1,6 @@
 import json
 import logging as log
 import os
-import pickle as pkl
 import re
 import subprocess
 import tempfile
@@ -11,8 +10,8 @@ from multiprocessing.pool import ThreadPool
 import cv2 as cv
 import numpy as np
 import sympy
-from tqdm import tqdm
 from openvino.inference_engine import IECore
+from tqdm import tqdm
 
 START_TOKEN = 0
 END_TOKEN = 2

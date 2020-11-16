@@ -12,15 +12,11 @@
  limitations under the License.
 """
 
-import asyncio
 import logging as log
-import os
 import sys
-import tempfile
 from argparse import SUPPRESS, ArgumentParser
 
 import cv2 as cv
-import numpy as np
 from utils import *
 
 CONFIDENCE_THRESH = 0.95
