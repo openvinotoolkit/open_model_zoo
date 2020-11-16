@@ -18,11 +18,9 @@ import math
 from operator import itemgetter
 
 import cv2
-import ngraph as ng
 import numpy as np
-import torch
-from openvino.inference_engine import IENetwork, IECore
 from scipy.optimize import linear_sum_assignment
+from skimage.measure import block_reduce
 
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, ConfigError, NumberField
@@ -105,21 +103,17 @@ class HumanPoseAdapter(Adapter):
             pad = meta.get('padding', [0, 0, 0, 0])
             transpose_order = (1, 2, 0) if heatmap.shape[0] == 19 else (0, 1, 2)
 
-            s = 8
-
             heatmap = np.transpose(np.squeeze(heatmap), transpose_order)
-            heatmap = cv2.resize(heatmap, (0, 0), fx=s, fy=s, interpolation=cv2.INTER_CUBIC)
+            heatmap = cv2.resize(heatmap, (0, 0), fx=8, fy=8, interpolation=cv2.INTER_CUBIC)
             heatmap = heatmap[pad[0]:heatmap.shape[0] - pad[2], pad[1]:heatmap.shape[1] - pad[3]:, :]
-            # heatmap = cv2.resize(heatmap, (width, height), interpolation=cv2.INTER_CUBIC)
-            # heatmap_avg = heatmap_avg + heatmap
-            heatmap_avg = heatmap
+            heatmap = cv2.resize(heatmap, (width, height), interpolation=cv2.INTER_CUBIC)
+            heatmap_avg = heatmap_avg + heatmap
 
             paf = np.transpose(np.squeeze(paf), transpose_order)
-            paf = cv2.resize(paf, (0, 0), fx=s, fy=s, interpolation=cv2.INTER_CUBIC)
+            paf = cv2.resize(paf, (0, 0), fx=8, fy=8, interpolation=cv2.INTER_CUBIC)
             paf = paf[pad[0]:paf.shape[0] - pad[2], pad[1]:paf.shape[1] - pad[3], :]
-            # paf = cv2.resize(paf, (width, height), interpolation=cv2.INTER_CUBIC)
-            # paf_avg = paf_avg + paf
-            paf_avg = paf
+            paf = cv2.resize(paf, (width, height), interpolation=cv2.INTER_CUBIC)
+            paf_avg = paf_avg + paf
 
             peak_counter = 0
             all_peaks = []
@@ -127,11 +121,7 @@ class HumanPoseAdapter(Adapter):
                 peak_counter += self.find_peaks(heatmap_avg[:, :, part], all_peaks, peak_counter)
 
             subset, candidate = self.group_peaks(all_peaks, paf_avg)
-
-            scale_x = meta['scale_x'] / (8 / s)
-            scale_y = meta['scale_y'] / (8 / s)
-            # scale_x = scale_y = 1
-            result.append(PoseEstimationPrediction(identifier, *self.get_poses(subset, candidate, (scale_x, scale_y))))
+            result.append(PoseEstimationPrediction(identifier, *self.get_poses(subset, candidate)))
 
         return result
 
@@ -344,7 +334,7 @@ class HumanPoseAdapter(Adapter):
         return self._filter_subset(subset), candidates
 
     @staticmethod
-    def get_poses(subset, candidate, scales):
+    def get_poses(subset, candidate):
         persons_keypoints_x, persons_keypoints_y, persons_keypoints_v = [], [], []
         scores = []
         for subset_element in subset:
@@ -365,8 +355,8 @@ class HumanPoseAdapter(Adapter):
                     cx = cx - 0.5 + 1  # +1 for matlab consistency, coords start from 1
                     cy = cy - 0.5 + 1
                     visibility = 1
-                keypoints_x[to_coco_map[position_id]] = cx / scales[0]
-                keypoints_y[to_coco_map[position_id]] = cy / scales[1]
+                keypoints_x[to_coco_map[position_id]] = cx
+                keypoints_y[to_coco_map[position_id]] = cy
                 keypoints_v[to_coco_map[position_id]] = visibility
 
             scores.append(person_score * max(0, (subset_element[-1] - 1)))  # -1 for Neck
@@ -423,7 +413,7 @@ class OpenPoseAdapter(Adapter):
             self._part_affinity_fields_bias = self.part_affinity_fields + '/add_'
 
         self.decoder = OpenPoseDecoder(num_joints=18, delta=0.5 if self.upscale_factor == 1 else 0.0)
-        self.nms = NMSSKImage(kernel=2 * int(np.round(6 / 7 * self.upscale_factor)) + 1)
+        self.nms = HeatmapNMS(kernel=2 * int(np.round(6 / 7 * self.upscale_factor)) + 1)
 
     def process(self, raw, identifiers, frame_meta):
         result = []
@@ -909,40 +899,12 @@ class StackedHourGlassNetworkAdapter(Adapter):
         return preds
 
 
-class NMSOpenVINO:
-    def __init__(self, kernel):
-        self.ie = IECore()
-        self.net = self.compose(kernel)
-        self.exec_net = self.ie.load_network(network=self.net, device_name='CPU', num_requests=1)
-
-    def __call__(self, heatmap):
-        self.net.reshape({'heatmaps': heatmap.shape})
-        self.exec_net = self.ie.load_network(network=self.net, device_name='CPU', num_requests=1)
-        outputs = self.exec_net.infer({'heatmaps': heatmap})['nms_heatmaps']
-        return outputs
-
-    @staticmethod
-    def compose(kernel):
-        heatmap = ng.parameter(shape=[1, 19, 32, 32], dtype=np.float32, name='heatmaps')
-        pad = (kernel - 1) // 2
-        pooled_heatmap = ng.max_pool(heatmap, kernel_shape=(kernel, kernel), pads_begin=(pad, pad), pads_end=(pad, pad), strides=(1, 1))
-        nms_mask = ng.equal(heatmap, pooled_heatmap)
-        # nms_mask_float = ng.convert_like(nms_mask, heatmap)
-        nms_mask_float = ng.convert(nms_mask, 'f32')
-        nms_heatmap = ng.multiply(heatmap, nms_mask_float, name='nms_heatmaps')
-        f = ng.impl.Function([ng.result(nms_heatmap, name='nms_heatmaps')], [heatmap], 'nms')
-        net = IENetwork(ng.impl.Function.to_capsule(f))
-        return net
-
-
-class NMSSKImage:
+class HeatmapNMS:
     def __init__(self, kernel):
         self.kernel = kernel
         self.pad = (kernel - 1) // 2
 
     def max_pool(self, x):
-        from skimage.measure import block_reduce
-
         # Max pooling kernel x kernel with stride 1 x 1.
         k = self.kernel
         p = self.pad
@@ -960,19 +922,6 @@ class NMSSKImage:
     def __call__(self, heatmaps):
         pooled = self.max_pool(heatmaps)
         return heatmaps * (pooled == heatmaps).astype(heatmaps.dtype)
-
-
-class NMSPyTorch:
-    def __init__(self, kernel, device='cpu'):
-        self.kernel = kernel
-        self.pad = (kernel - 1) // 2
-        self.device = device
-
-    def __call__(self, heatmaps):
-        heatmaps = torch.as_tensor(heatmaps, device=self.device)
-        maxm = torch.nn.functional.max_pool2d(heatmaps, kernel_size=self.kernel, stride=1, padding=self.pad)
-        maxm = torch.eq(maxm, heatmaps)
-        return (heatmaps * maxm).cpu().numpy()
 
 
 
