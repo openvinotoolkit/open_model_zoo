@@ -1,4 +1,4 @@
-# bert-small-uncased-wwm-squad-emb-int8-0001
+# bert-small-uncased-whole-word-masking-squad-emb-int8-0001
 
 ## Use Case and High-Level Description
 

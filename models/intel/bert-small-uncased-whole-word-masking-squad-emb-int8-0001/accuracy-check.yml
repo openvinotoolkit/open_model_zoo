@@ -1,5 +1,5 @@
 models:
-  - name: bert-small-uncased-wwm-squad-emb-int8-0001
+  - name: bert-small-uncased-whole-word-masking-squad-emb-int8-0001
     launchers:
       - framework: dlsdk
         allow_reshape_input: True
