@@ -38,23 +38,11 @@ usage: human_pose_estimation.py [-h] -m MODEL -i INPUT [-d DEVICE]
                                 [-nstreams NUM_STREAMS]
                                 [-nthreads NUM_THREADS] [-loop LOOP]
                                 [-no_show] [-u UTILIZATION_MONITORS]
+                                [--type {ae,openpose}] [--tsize TSIZE]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
-  -i INPUT, --input INPUT
-                        Required. Path to an image, video file or a numeric
-                        camera ID.
-  -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU,
-                        GPU, FPGA, HDDL or MYRIAD is acceptable. The sample
-                        will look for a suitable plugin for device specified.
-                        Default value is CPU.
-  -t PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
-                        Optional. Probability threshold for poses filtering.
-  -r, --raw_output_message
-                        Optional. Output inference results raw values showing.
                         Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
                         Required. Path to an image, video file or a numeric
@@ -84,6 +72,11 @@ Options:
   -no_show, --no_show   Optional. Don't show output
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+  --type {ae,openpose}  Optional. Type of the network, either "ae" for
+                        associative embeddingor "openpose" for openpose.
+  --tsize TSIZE         Optional. Target input size. By default target size is
+                        derived from image input shapeof a provided network
+                        and depends on the network type.
 ```
 
 Running the application with the empty list of options yields the short usage message and an error message.
