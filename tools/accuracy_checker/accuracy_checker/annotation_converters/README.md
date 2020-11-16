@@ -422,6 +422,9 @@ The main difference between this converter and `super_resolution` in data organi
   * `images_dir` - directory with input images.
   * `masks_dir` - directory with reference salience maps.
   * `annotation_file` - txt file with selected image ids.
+* `wflw` - converts WFLW dataset for facial landmarks regression task to `FacialLandmarksAnnotation`.
+  * `annotation_file` - path to txt file with ground truth data in WFLW dataset format.
+  * `images_dir` - path to dataset images, used only for content existence check (optional parameter).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
