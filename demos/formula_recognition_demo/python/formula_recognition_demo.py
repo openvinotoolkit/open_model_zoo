@@ -237,8 +237,9 @@ def main():
                     print("\n\tImage name: {}\n\tFormula: {}\n".format(rec['img_name'], phrase))
                     if renderer is not None:
                         rendered_formula, _ = renderer.render(phrase)
-                        cv.imshow("Predicted formula", rendered_formula)
-                        cv.waitKey(0)
+                        if rendered_formula is not None:
+                            cv.imshow("Predicted formula", rendered_formula)
+                            cv.waitKey(0)
     else:
 
         *_, height, width = model.encoder.input_info['imgs'].input_data.shape
