@@ -4,7 +4,7 @@ models:
       - framework: dlsdk
         adapter:
           type: multi_output_regression
-          outputs:
+        outputs:
           - duration
           - embeddings
         allow_reshape_input: True
