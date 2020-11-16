@@ -241,6 +241,11 @@ def main():
                         if rendered_formula is not None:
                             cv.imshow("Predicted formula", rendered_formula)
                             cv.waitKey(0)
+        if args.perf_counts:
+            log.info("Encoder performance statistics")
+            print_stats(model.exec_net_encoder)
+            log.info("Decoder performance statistics")
+            print_stats(model.exec_net_decoder)
     else:
 
         *_, height, width = model.encoder.input_info['imgs'].input_data.shape
