@@ -973,7 +973,7 @@ class NMSPyTorch:
         maxm = torch.nn.functional.max_pool2d(heatmaps, kernel_size=self.kernel, stride=1, padding=self.pad)
         maxm = torch.eq(maxm, heatmaps)
         return (heatmaps * maxm).cpu().numpy()
-        
+
 
 
 class OpenPoseDecoder:
