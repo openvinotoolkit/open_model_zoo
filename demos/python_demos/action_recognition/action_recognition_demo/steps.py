@@ -57,11 +57,10 @@ class DataStep(PipelineStep):
     def process(self, item):
         status, frame = self.cap.read()
         if not status:
-             try:
-                 self._open_video()
-                 status, frame = self.cap.read()
-             except:
-                 return Signal.STOP
+		    self._open_video()
+            status, frame = self.cap.read()
+            if not status:
+                return Signal.STOP
         return frame
 
     def end(self):
