@@ -25,14 +25,50 @@ Second model is Decoder that takes as input:
 * Target (`tgt`) - previous token (for the first time it is `START_TOKEN` )
 Second model is being executed until current decoded token is `END_TOKEN` or length of the formula is less then `--max_formula_len` producing one token per each decode step.
 
-As input, the demo application takes a path to a folder with images or a path to a single image file with a command-line argument `-i`.
+As input, the demo application takes a path to a folder with images or a path to a single image file with a command-line argument `-i`. Another possible option is interactive mode, which will be explanined in details later.
+> **NOTE**: `--interactive` and `-i/--input` options are mutually exclusive. Please, use one of them, but not both or one of them.
 
-The demo workflow is the following:
+### Non-interactive mode
+Non-interactive mode assumes that demo processes inputs sequentially.
+The demo workflow in non-interactive is the following:
 
 1. The demo application reads a single image or iterates over all images in the given folder, then crops or resizes and inputs to fit into the input image blob of the network (`imgs`). Crop and pad is used to keep size of the font.
 2. For each image, encoder extracts features from the image
 3. While length of the current formula is less then `--max_formula_len` or current token is not `END_TOKEN` Decode Step produces new tokens.
-5. The demo prints the decoded text into the console or in a file if `-o` parameter specified.
+5. The demo prints the decoded text in a file if `-o` parameter specified or into the console and (optionally) renders predicted formula into image.
+
+#### Rendering of the latex formula into image
+User has an option to render predicted by the demo application latex formula into image.
+Regardless of what mode is selected (interactive or non-interactive) the process of the rendering of the formula is the same.
+Prerequisites:
+1. `sympy` python package
+2. `tex-live` on Linux\MacOS or `miktex` on Windows. Other latex systems should also work.
+
+Rendering of the latex formula is performed with the help of `Renderer` class from [utils.py](./utils.py). This class has two interfaces:
+1. `render` method is used as synchronous method. Method returns rendered image and text formula, corresponding to the rendered image when rendering is done.
+2. `thread_render` provides asynchronous interface to the rendering process. In contrast with the previous method, this one returns image and formula only when rendering is complete. If rendering is incomplete at the moment of method call, method returns `None`.
+
+### Interactive mode
+Interactive mode of the demo assumes User has a web-camera.
+Special class `InteractiveDemo` provides Python Context Manager interface to interact with webcamera and recognize latex formulas.
+* The example of the interface:
+![](./interactive_inferface.png)
+When User runs demo application with the `--interactive` option, window with the image simillar to above should pop up.
+
+The window has four main sections:
+1. On the center of this window is placed a red rectangle. This is input window, with the help of which User, moving the camera, can capture formula.
+2. Image from the 1st window will be binarized, preprocessed and fed to the network. Preprocessed and binarized image is placed on the top of the window (near `Model input` label)
+3. If the formula will be predicted with sufficient confidence score, it will be placed right under preprocessed image (near `Predicted` label)
+4. If rendering is available (see the previous Paragraph for details) and predicted formula does not contain latex grammar errors, it will be rendered and places near `Rendered` label.
+
+Navigation buttons:
+  * Use `q` button to quit from program
+  * Use `o` (latin) to decrease the size of the input (red) window
+  * Use `p` (latin) to increase the size of the input widnow
+
+The model inference process on the image is simillar to the Non-interactive mode with the exception that model infers asynchronously.
+The phrase "Demo application works asynchronously" means, that model inference is performed in asynchronous mode and does not block main thread, so the image from the web-camera can move smoothly enough.
+Rendering of the image is also performed in asynchronous mode.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
@@ -44,22 +80,25 @@ The demo has two preprocessing types: Crop and Pad to target shape and Resize an
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder M_DECODER -i
-                        INPUT [-o OUTPUT_FILE] --vocab_path VOCAB_PATH
-                        [--max_formula_len MAX_FORMULA_LEN] [-d DEVICE]
-                        [--preprocessing_type {crop,resize}] [-pc]
-                        [--imgs_layer IMGS_LAYER]
-                        [--row_enc_out_layer ROW_ENC_OUT_LAYER]
-                        [--hidden_layer HIDDEN_LAYER]
-                        [--context_layer CONTEXT_LAYER]
-                        [--init_0_layer INIT_0_LAYER]
-                        [--dec_st_c_layer DEC_ST_C_LAYER]
-                        [--dec_st_h_layer DEC_ST_H_LAYER]
-                        [--dec_st_c_t_layer DEC_ST_C_T_LAYER]
-                        [--dec_st_h_t_layer DEC_ST_H_T_LAYER]
-                        [--output_layer OUTPUT_LAYER]
-                        [--output_prev_layer OUTPUT_PREV_LAYER]
-                        [--logit_layer LOGIT_LAYER] [--tgt_layer TGT_LAYER]
+usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder
+                                   M_DECODER [--interactive] [-i INPUT]
+                                   [-o OUTPUT_FILE] --vocab_path VOCAB_PATH
+                                   [--max_formula_len MAX_FORMULA_LEN]
+                                   [--conf_thresh CONF_THRESH] [-d DEVICE]
+                                   [--preprocessing_type {crop,resize}] [-pc]
+                                   [--imgs_layer IMGS_LAYER]
+                                   [--row_enc_out_layer ROW_ENC_OUT_LAYER]
+                                   [--hidden_layer HIDDEN_LAYER]
+                                   [--context_layer CONTEXT_LAYER]
+                                   [--init_0_layer INIT_0_LAYER]
+                                   [--dec_st_c_layer DEC_ST_C_LAYER]
+                                   [--dec_st_h_layer DEC_ST_H_LAYER]
+                                   [--dec_st_c_t_layer DEC_ST_C_T_LAYER]
+                                   [--dec_st_h_t_layer DEC_ST_H_T_LAYER]
+                                   [--output_layer OUTPUT_LAYER]
+                                   [--output_prev_layer OUTPUT_PREV_LAYER]
+                                   [--logit_layer LOGIT_LAYER]
+                                   [--tgt_layer TGT_LAYER]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -67,8 +106,10 @@ Options:
                         part of the model
   -m_decoder M_DECODER  Required. Path to an .xml file with a trained decoder
                         part of the model
+  --interactive         Optional. Enables interactive mode. In this mode
+                        images are read from the web-camera.
   -i INPUT, --input INPUT
-                        Required. Path to a folder with images or path to an
+                        Optional. Path to a folder with images or path to an
                         image files
   -o OUTPUT_FILE, --output_file OUTPUT_FILE
                         Optional. Path to file where to store output. If not
@@ -79,6 +120,9 @@ Options:
   --max_formula_len MAX_FORMULA_LEN
                         Optional. Defines maximum length of the formula
                         (number of tokens to decode)
+  --conf_thresh CONF_THRESH
+                        Optional. Probability threshold to trat model
+                        prediction as meaningful
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. Sample will
@@ -88,8 +132,8 @@ Options:
                         Optional. Type of the preprocessing
   -pc, --perf_counts
   --imgs_layer IMGS_LAYER
-                        Optional. Encoder input key for images. See README for
-                        details.
+                        Optional. Encoder input name for images. See README
+                        for details.
   --row_enc_out_layer ROW_ENC_OUT_LAYER
                         Optional. Encoder output key for row_enc_out. See
                         README for details.
