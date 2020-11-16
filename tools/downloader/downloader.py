@@ -125,7 +125,7 @@ def verify_hash(reporter, actual_hash, expected_hash, path):
 
 class NullCache:
     def has(self, hash): return False
-    def get(self, model_file, path, reporter): return False 
+    def get(self, model_file, path, reporter): return False
     def put(self, hash, path): pass
 
 class DirCache:
@@ -152,7 +152,7 @@ class DirCache:
         cache_path = self._hash_path(model_file.sha256)
         cache_sha256 = hashlib.sha256()
         cache_size = 0
-        
+
         with open(cache_path, 'rb') as cache_file, open(path, 'wb') as destination_file:
             while True:
                 data = cache_file.read(CHUNK_SIZE)
