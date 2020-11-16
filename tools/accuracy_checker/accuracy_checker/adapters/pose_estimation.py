@@ -442,10 +442,12 @@ class OpenPoseAdapter(Adapter):
             if self.upscale_factor > 1:
                 self.decoder.delta = 0
                 heatmap = np.transpose(heatmap, (1, 2, 0))
-                heatmap = cv2.resize(heatmap, (0, 0), fx=self.upscale_factor, fy=self.upscale_factor, interpolation=cv2.INTER_CUBIC)
+                heatmap = cv2.resize(heatmap, (0, 0), fx=self.upscale_factor, fy=self.upscale_factor,
+                                     interpolation=cv2.INTER_CUBIC)
                 heatmap = np.transpose(heatmap, (2, 0, 1))
                 paf = np.transpose(np.squeeze(paf), (1, 2, 0))
-                paf = cv2.resize(paf, (0, 0), fx=self.upscale_factor, fy=self.upscale_factor, interpolation=cv2.INTER_CUBIC)
+                paf = cv2.resize(paf, (0, 0), fx=self.upscale_factor, fy=self.upscale_factor,
+                                 interpolation=cv2.INTER_CUBIC)
                 paf = np.transpose(paf, (2, 0, 1))
             hmap = heatmap[None]
             nms_hmap = self.nms(hmap)
@@ -503,7 +505,8 @@ class AssociativeEmbeddingDecoder:
     def match(self, tag_k, loc_k, val_k):
         return list(map(self._match_by_tag, zip(tag_k, loc_k, val_k)))
 
-    def _max_match(self, scores):
+    @staticmethod
+    def _max_match(scores):
         r, c = linear_sum_assignment(scores)
         tmp = np.stack((r, c), axis=1)
         return tmp
@@ -531,8 +534,7 @@ class AssociativeEmbeddingDecoder:
             def tag(self):
                 if self.valid_points_num > 0:
                     return self.pose_tag
-                else:
-                    return None
+                return None
 
         all_joints = np.concatenate((loc_k, val_k[..., None], tag_k), -1)
 
@@ -569,8 +571,7 @@ class AssociativeEmbeddingDecoder:
 
                 if num_added > num_grouped:
                     diff_normed = np.concatenate(
-                        (diff_normed,
-                        np.zeros((num_added, num_added - num_grouped), dtype=np.float32) + 1e10),
+                        (diff_normed, np.zeros((num_added, num_added - num_grouped), dtype=np.float32) + 1e10),
                         axis=1)
 
                 pairs = self._max_match(diff_normed)
@@ -582,7 +583,7 @@ class AssociativeEmbeddingDecoder:
                         pose.add(idx, joints[row], tags[row])
                         poses.append(pose)
 
-        if len(poses):
+        if len(poses) > 0:
             ans = np.stack([p.pose for p in poses]).astype(np.float32)
             tags = np.stack([p.tag for p in poses]).astype(np.float32)
         else:
@@ -610,7 +611,8 @@ class AssociativeEmbeddingDecoder:
         ans = {'tag_k': tag_k, 'loc_k': ind_k, 'val_k': val_k}
         return ans
 
-    def adjust(self, ans, heatmaps):
+    @staticmethod
+    def adjust(ans, heatmaps):
         H, W = heatmaps.shape[-2:]
         for n, people in enumerate(ans):
             for person in people:
@@ -626,7 +628,8 @@ class AssociativeEmbeddingDecoder:
                         joint[:2] += np.sign(diff) * .25
         return ans
 
-    def refine(self, heatmap, tag, keypoints, pose_tag=None):
+    @staticmethod
+    def refine(heatmap, tag, keypoints, pose_tag=None):
         K, H, W = heatmap.shape
         if len(tag.shape) == 3:
             tag = tag[..., None]
@@ -1014,9 +1017,10 @@ class OpenPoseDecoder:
         y, x = np.divmod(ind, W)
         return x, y, scores
 
-    def refine(self, heatmap, x, y):
+    @staticmethod
+    def refine(heatmap, x, y):
         h, w = heatmap.shape[-2:]
-        valid = np.logical_and(np.logical_and(0 < x, x < w - 1), np.logical_and(0 < y, y < h - 1))
+        valid = np.logical_and(np.logical_and(x > 0, x < w - 1), np.logical_and(y > 0, y < h - 1))
         xx = x[valid]
         yy = y[valid]
         dx = np.sign(heatmap[yy, xx + 1] - heatmap[yy, xx - 1], dtype=np.float32) * 0.25
@@ -1027,7 +1031,8 @@ class OpenPoseDecoder:
         y[valid] += dy
         return x, y
 
-    def update_poses(self, part_id, kpt_a_id, kpt_b_id, all_keypoints, connections, pose_entries, pose_entry_size):
+    @staticmethod
+    def update_poses(part_id, kpt_a_id, kpt_b_id, all_keypoints, connections, pose_entries, pose_entry_size):
         if part_id == 0:
             pose_entries = [np.full(pose_entry_size, -1, dtype=np.float32) for _ in range(len(connections))]
             for pose, connection in zip(pose_entries, connections):
@@ -1157,24 +1162,25 @@ class OpenPoseDecoder:
 
         # Remove poses with not enough points.
         filtered_entries = []
-        for i in range(len(pose_entries)):
-            if pose_entries[i][-1] < 3:
+        for pose in pose_entries:
+            if pose[-1] < 3:
                 continue
-            filtered_entries.append(pose_entries[i])
+            filtered_entries.append(pose)
         pose_entries = np.asarray(filtered_entries, dtype=np.float32)
         return pose_entries, all_keypoints
 
-    def convert_to_coco_format(self, pose_entries, all_keypoints):
+    @staticmethod
+    def convert_to_coco_format(pose_entries, all_keypoints):
         num_joints = 17
         coco_keypoints = []
         scores = []
-        for n in range(len(pose_entries)):
-            if len(pose_entries[n]) == 0:
+        for pose in pose_entries:
+            if len(pose) == 0:
                 continue
             keypoints = np.zeros(num_joints * 3)
             reorder_map = [0, -1, 6, 8, 10, 5, 7, 9, 12, 14, 16, 11, 13, 15, 2, 1, 4, 3]
-            person_score = pose_entries[n][-2]
-            for keypoint_id, target_id in zip(pose_entries[n][:-2], reorder_map):
+            person_score = pose[-2]
+            for keypoint_id, target_id in zip(pose[:-2], reorder_map):
                 if target_id < 0:
                     continue
                 cx, cy, score = 0, 0, 0  # keypoint not found
@@ -1184,5 +1190,5 @@ class OpenPoseDecoder:
                 keypoints[target_id * 3 + 1] = cy
                 keypoints[target_id * 3 + 2] = score
             coco_keypoints.append(keypoints)
-            scores.append(person_score * max(0, (pose_entries[n][-1] - 1)))  # -1 for 'neck'
+            scores.append(person_score * max(0, (pose[-1] - 1)))  # -1 for 'neck'
         return np.asarray(coco_keypoints), np.asarray(scores)
