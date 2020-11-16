@@ -135,6 +135,13 @@ def change_layout(model_input):
     model_input = np.expand_dims(model_input, axis=0)
     return model_input
 
+def calculate_probability(logits):
+    prob = 1
+    probabilities = np.amax(logits, axis=1)
+    for p in probabilities:
+        prob *= p
+    return prob
+
 
 class Model:
     class Status(Enum):

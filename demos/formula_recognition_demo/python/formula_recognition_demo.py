@@ -28,17 +28,21 @@ CONFIDENCE_THRESH = 0.95
 
 class InteractiveDemo:
     def __init__(self, input_model_shape, resolution=DEFAULT_RESOLUTION, device_id=0):
-        self.capture = cv.VideoCapture(device_id)
         self._resolution = resolution
-        self.capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
-        self.capture.set(3, resolution[0])
-        self.capture.set(4, resolution[1])
+        self._device_id = device_id
         self._tgt_shape = input_model_shape
         self.start_point, self.end_point = self._create_input_window()
         self._prev_rendered_formula = None
         self._prev_formula_img = None
         self._latex_h = 0
-        self.renderer = create_renderer()
+        self._renderer = create_renderer()
+
+    def __enter__(self):
+        self.capture = cv.VideoCapture(self._device_id)
+        self.capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
+        self.capture.set(3, self._resolution[0])
+        self.capture.set(4, self._resolution[1])
+        return self
 
     def get_frame(self):
         ret, frame = self.capture.read()
@@ -108,7 +112,7 @@ class InteractiveDemo:
         return frame
 
     def put_formula_img(self, frame, formula):
-        if self.renderer is None or formula == '':
+        if self._renderer is None or formula == '':
             return frame
         formula_img = self._render_formula_async(formula)
         if formula_img is None:
@@ -134,7 +138,7 @@ class InteractiveDemo:
     def _render_formula_async(self, formula):
         if formula == self._prev_rendered_formula:
             return self._prev_formula_img
-        result = self.renderer.thread_render(formula)
+        result = self._renderer.thread_render(formula)
         if result is None:
             return None
         formula_img, res_formula = result
@@ -144,17 +148,9 @@ class InteractiveDemo:
         self._prev_formula_img = formula_img
         return formula_img
 
-    def finalize(self):
+    def __exit__(self, exc_type, exc_value, exc_traceback):
         self.capture.release()
         cv.destroyAllWindows()
-
-
-def calculate_probability(logits):
-    prob = 1
-    probabilities = np.amax(logits, axis=1)
-    for p in probabilities:
-        prob *= p
-    return prob
 
 
 def build_argparser():
@@ -240,47 +236,44 @@ def main():
                 else:
                     print("\n\tImage name: {}\n\tFormula: {}\n".format(rec['img_name'], phrase))
                     if renderer is not None:
-                        rendered_formula_file = renderer.render(phrase)
-                        rendered_formula = cv.imread(rendered_formula_file)
+                        rendered_formula, _ = renderer.render(phrase)
                         cv.imshow("Predicted formula", rendered_formula)
                         cv.waitKey(0)
     else:
 
         *_, height, width = model.encoder.input_info['imgs'].input_data.shape
-        demo = InteractiveDemo((height, width))
         prev_text = ''
-        while True:
-            frame = demo.get_frame()
-            bin_crop = demo.get_crop(frame)
-            model_input = prerocess_crop(bin_crop, (height, width))
-            frame = demo.put_crop(frame, model_input)
-            model_res = model.infer_async(model_input)
-            if not model_res:
-                phrase = prev_text
-            else:
-                logits, targets = model_res
-                prob = calculate_probability(logits)
-                log.info("Confidence score is %s", prob)
-                if prob >= args.conf_thresh ** len(logits):
-                    log.info("Prediction updated")
-                    phrase = model.vocab.construct_phrase(targets)
+        with InteractiveDemo((height, width)) as demo:
+            while True:
+                frame = demo.get_frame()
+                bin_crop = demo.get_crop(frame)
+                model_input = prerocess_crop(bin_crop, (height, width), preprocess_type=args.preprocessing_type)
+                frame = demo.put_crop(frame, model_input)
+                model_res = model.infer_async(model_input)
+                if not model_res:
+                    phrase = prev_text
                 else:
-                    log.info("Confidence score is low, prediction is not complete")
-                    phrase = ''
-            frame = demo.put_text(frame, phrase)
-            frame = demo.put_formula_img(frame, phrase)
-            prev_text = phrase
-            frame = demo.draw_rectangle(frame)
-            cv.imshow('Press Q to quit.', frame)
-            key = cv.waitKey(1) & 0xFF
-            if key == ord('q'):
-                break
-            elif key == ord('o'):
-                demo.resize_window("decrease")
-            elif key == ord('p'):
-                demo.resize_window("increase")
-
-        demo.finalize()
+                    logits, targets = model_res
+                    prob = calculate_probability(logits)
+                    log.info("Confidence score is %s", prob)
+                    if prob >= args.conf_thresh ** len(logits):
+                        log.info("Prediction updated")
+                        phrase = model.vocab.construct_phrase(targets)
+                    else:
+                        log.info("Confidence score is low, prediction is not complete")
+                        phrase = ''
+                frame = demo.put_text(frame, phrase)
+                frame = demo.put_formula_img(frame, phrase)
+                prev_text = phrase
+                frame = demo.draw_rectangle(frame)
+                cv.imshow('Press Q to quit.', frame)
+                key = cv.waitKey(1) & 0xFF
+                if key == ord('q'):
+                    break
+                elif key == ord('o'):
+                    demo.resize_window("decrease")
+                elif key == ord('p'):
+                    demo.resize_window("increase")
 
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
              "from the openVINO toolkit\n")
