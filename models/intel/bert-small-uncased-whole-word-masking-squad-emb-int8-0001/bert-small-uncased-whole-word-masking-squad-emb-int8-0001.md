@@ -11,7 +11,7 @@ For details about the original model, check out
 
 Tokenization occurs using the BERT tokenizer (see the demo code for implementation details) and the enclosed `vocab.txt` dictionary file. Input is to be lower-cased before tokenizing.
 
-The difference between this model and similar [FP32 version large model](../../bert-large-uncased-whole-word-masking-squad-emb-0001/description/bert-large-uncased-whole-word-masking-squad-emb-0001.md)
+The difference between this model and similar [FP32 version large model](../bert-large-uncased-whole-word-masking-squad-emb-0001/description/bert-large-uncased-whole-word-masking-squad-emb-0001.md)
 is that this model is significantly smaller and quantized to INT8.
 
 The model created by 3 steps:
