@@ -49,6 +49,8 @@ class CropGTImage(Postprocessor):
 
     def process_image(self, annotation, prediction):
         for target in annotation:
-            target.value = Crop.process_data(target.value, self.dst_height, self.dst_width, None, False, True, {})
+            target.value = Crop.process_data(
+                target.value, self.dst_height, self.dst_width, None, False, False, True, {}
+            )
 
         return annotation, prediction
