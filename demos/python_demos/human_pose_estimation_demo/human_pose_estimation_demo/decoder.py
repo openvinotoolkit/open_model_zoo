@@ -18,7 +18,7 @@ class AssociativeEmbeddingDecoder:
             self.joint_order = (0, 1, 2, 3, 4, 5, 6, 11, 12, 7, 8, 9, 10, 13, 14, 15, 16)
         else:
             self.joint_order = list(np.arange(self.num_joints))
-        
+
         self.do_adjust = adjust
         self.do_refine = refine
         self.delta = delta

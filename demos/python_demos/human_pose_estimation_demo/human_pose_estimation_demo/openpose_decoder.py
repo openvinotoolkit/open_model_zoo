@@ -43,7 +43,7 @@ class OpenPoseDecoder:
             scores = np.empty(0, dtype=np.float32)
 
         return poses, scores
-        
+
     def extract_points(self, heatmaps, nms_heatmaps):
         batch_size, channels_num, h, w = heatmaps.shape
         assert batch_size == 1, 'Batch size of 1 only supported'
@@ -180,7 +180,7 @@ class OpenPoseDecoder:
             m = len(kpts_b)
             if n == 0 or m == 0:
                 continue
-            
+
             # Get vectors between all pairs of keypoints, i.e. candidate limb vectors.
             a = kpts_a[:, :2]
             a = np.broadcast_to(a[None], (m, n, 2))

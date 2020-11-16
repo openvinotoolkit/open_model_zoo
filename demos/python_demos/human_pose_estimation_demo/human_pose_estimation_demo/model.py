@@ -223,7 +223,7 @@ class HPEAssociativeEmbedding(Model):
 
     def __init__(self, *args, target_size=None, size_divisor=32, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
         self.image_blob_name = self._get_inputs(self.net)
         self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)
         self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
