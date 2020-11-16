@@ -247,6 +247,7 @@ Deep Learning compressed models
 | [bert-small-uncased-whole-word-masking-squad-0001](./bert-small-uncased-whole-word-masking-squad-0001/description/bert-small-uncased-whole-word-masking-squad-0001.md) | 23.9 | 57.94 |
 | [bert-small-uncased-whole-word-masking-squad-0002](./bert-small-uncased-whole-word-masking-squad-0002/description/bert-small-uncased-whole-word-masking-squad-0002.md) | 23.9 | 41.1 |
 | [bert-small-uncased-whole-word-masking-squad-int8-0002](./bert-small-uncased-whole-word-masking-squad-int8-0002/description/bert-small-uncased-whole-word-masking-squad-int8-0002.md) | 23.9 | 41.1 |
+| [bert-small-uncased-whole-word-masking-squad-emb-int8-0001](./bert-small-uncased-whole-word-masking-squad-emb-int8-0001/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.md) | 23.9 (for [1,384] input size) | 41.1 |
 
 ## Machine Translation
 
