@@ -101,9 +101,9 @@ class Model:
 
 class HPEOpenPose(Model):
 
-    def __init__(self, *args, keep_aspect_ratio_resize=True, size_divisor=8,
-                 device='CPU', max_num_requests=1, use_cpp_postprocessing=False,
-                 target_size=256, **kwargs):
+    def __init__(self, *args, size_divisor=8,
+                 target_size=None, upsample_ratio=1, use_cpp_postprocessing=False,
+                 device='CPU', max_num_requests=1, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.use_cpp_postprocessing = use_cpp_postprocessing
@@ -116,43 +116,44 @@ class HPEOpenPose(Model):
         heatmap = heatmap.inputs()[0].get_source_output().get_node()
         heatmap.set_friendly_name('heatmaps')
         if not self.use_cpp_postprocessing:
-            pooled_heatmap = ng.max_pool(heatmap,kernel_shape=(5, 5), pads_begin=(2, 2), pads_end=(2, 2), strides=(1, 1))
+            # Add keypoints NMS to the network.
+            # Heuristic NMS kernel size adjustment depending on the feature maps upsampling ratio.
+            p = int(np.round(6 / 7 * upsample_ratio))
+            k = 2 * p + 1
+            pooled_heatmap = ng.max_pool(heatmap, kernel_shape=(k, k), pads_begin=(p, p), pads_end=(p, p), strides=(1, 1))
             nms_mask = ng.equal(heatmap, pooled_heatmap)
+            # TODO. Cast to type of the heatmap.
             # nms_mask_float = ng.convert_like(nms_mask, heatmap)
             nms_mask_float = ng.convert(nms_mask, 'f32')
             nms_heatmap = ng.multiply(heatmap, nms_mask_float, name='nms_heatmaps')
             f = ng.impl.Function(
                 [ng.result(heatmap, name='heatmaps'),
-                ng.result(nms_heatmap, name='nms_heatmaps'),
-                ng.result(paf, name='pafs')],
-                function.get_parameters(), 'hpe-0001')
-            self.net = IENetwork(ng.impl.Function.to_capsule(f))
-            
+                 ng.result(nms_heatmap, name='nms_heatmaps'),
+                 ng.result(paf, name='pafs')],
+                function.get_parameters(), 'hpe')
             self.nms_heatmaps_blob_name = 'nms_heatmaps'
         else:
             self.reorder_map = np.array([0, 15, 14, 17, 16, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10])
+            # Just rename the outputs for more convenient postprocessing.
             f = ng.impl.Function(
-                [ng.result(heatmap, name='heatmaps'),
-                ng.result(paf, name='pafs')],
-                function.get_parameters(), 'hpe-0001')
-            self.net = IENetwork(ng.impl.Function.to_capsule(f))
+                [ng.result(heatmap, name='heatmaps'), ng.result(paf, name='pafs')],
+                function.get_parameters(), 'hpe')
 
+        self.net = IENetwork(ng.impl.Function.to_capsule(f))
         self.exec_net = self.ie.load_network(network=self.net, device_name=self.device, num_requests=self.max_num_requests)
         self.requests = self.exec_net.requests
         self.empty_requests = deque(self.requests)
 
-        self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
-        self.size_divisor = size_divisor
-
         self.image_blob_name = self._get_inputs(self.net)
-        self.target_size = self.net.input_info[self.image_blob_name].input_data.shape[-1]
-
         self.pafs_blob_name = 'pafs'
         self.heatmaps_blob_name = 'heatmaps'
 
-        self.num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1] - 1
-        self.output_scale = self.target_size / self.net.outputs[self.heatmaps_blob_name].shape[-1]
-        self.target_size = target_size
+        self.num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1] - 1  # The last channel is for background.
+        self.size_divisor = size_divisor
+        self.target_size = self.net.input_info[self.image_blob_name].input_data.shape[-2]
+        self.output_scale = self.target_size / self.net.outputs[self.heatmaps_blob_name].shape[-2]
+        if target_size is not None:
+            self.target_size = target_size
 
         self.decoder = OpenPoseDecoder(num_joints=self.num_joints)
 
@@ -169,18 +170,14 @@ class HPEOpenPose(Model):
         return image_blob_name
 
     @staticmethod
-    def _resize_image(frame, size, keep_aspect_ratio=False):
-        # FIXME
-        if not keep_aspect_ratio:
-            resized_frame = cv2.resize(frame, size)
-        else:
-            h, w = frame.shape[:2]
-            scale = max(size[1] / h, size[0] / w)
-            resized_frame = cv2.resize(frame, None, fx=scale, fy=scale)
+    def _resize_image(frame, size):
+        h, w = frame.shape[:2]
+        scale = max(size[1] / h, size[0] / w)
+        resized_frame = cv2.resize(frame, None, fx=scale, fy=scale)
         return resized_frame
 
     def preprocess(self, inputs):
-        img = self._resize_image(inputs[self.image_blob_name], (self.target_size, self.target_size), self.keep_aspect_ratio_resize)
+        img = self._resize_image(inputs[self.image_blob_name], (self.target_size, self.target_size))
         meta = {'original_shape': inputs[self.image_blob_name].shape,
                 'resized_shape': img.shape}
         h, w = img.shape[:2]
@@ -209,10 +206,7 @@ class HPEOpenPose(Model):
             poses = poses[:, self.reorder_map, :]
             poses[:, :, :2] /= upsample_ratio / 8
         else:
-            if self.nms_heatmaps_blob_name:
-                nms_heatmaps = outputs[self.nms_heatmaps_blob_name]
-            else:
-                nms_heatmaps = self.decoder.nms(heatmaps)
+            nms_heatmaps = outputs[self.nms_heatmaps_blob_name]
             poses, scores = self.decoder(heatmaps, nms_heatmaps, pafs)
 
         # Rescale poses to the original image.
@@ -233,6 +227,7 @@ class HPEAssociativeEmbedding(Model):
         self.size_divisor = size_divisor
 
         self.image_blob_name = self._get_inputs(self.net)
+        # TODO. Make target size configurable.
         self.target_size = self.net.input_info[self.image_blob_name].input_data.shape[-1]
 
         self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)

@@ -421,7 +421,9 @@ class OpenPoseAdapter(Adapter):
                 )
             self._keypoints_heatmap_bias = self.keypoints_heatmap + '/add_'
             self._part_affinity_fields_bias = self.part_affinity_fields + '/add_'
-        self.decoder = OpenPoseDecoder(num_joints=18, out_stride=1)
+        
+        self.decoder = OpenPoseDecoder(num_joints=18, delta=0.5 if self.upscale_factor == 1 else 0.0)
+        self.nms = NMSSKImage(kernel=2 * int(np.round(6 / 7 * self.upscale_factor)) + 1)
 
     def process(self, raw, identifiers, frame_meta):
         result = []
@@ -456,7 +458,7 @@ class OpenPoseAdapter(Adapter):
                 paf = cv2.resize(paf, (0, 0), fx=self.upscale_factor, fy=self.upscale_factor, interpolation=cv2.INTER_CUBIC)
                 paf = np.transpose(paf, (2, 0, 1))
             hmap = heatmap[None]
-            nms_hmap = self.decoder.nms(hmap)
+            nms_hmap = self.nms(hmap)
             poses, scores = self.decoder(hmap, nms_hmap, paf[None])
             if len(scores) == 0:
                 result.append(PoseEstimationPrediction(
@@ -474,8 +476,8 @@ class OpenPoseAdapter(Adapter):
             input_h, input_w = next(iter(meta['input_shape'].values()))[-2:]
             output_scale_x = input_w / output_w
             output_scale_y = input_h / output_h
-            poses[:, :, 0] /= scale_x / (output_scale_x / self.upscale_factor)
-            poses[:, :, 1] /= scale_y / (output_scale_y / self.upscale_factor)
+            poses[:, :, 0] *= output_scale_x / self.upscale_factor / scale_x
+            poses[:, :, 1] *= output_scale_y / self.upscale_factor / scale_y
             point_scores = poses[:, :, 2]
 
             result.append(PoseEstimationPrediction(
@@ -946,14 +948,14 @@ class NMSSKImage:
         p = self.pad
         pooled = np.zeros_like(x)
         hmap = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)))
-        h, w = x.shape[-2:]
+        h, w = hmap.shape[-2:]
         for i in range(k):
-            si = (h + 2 * p - i) // k
+            n = (h - i) // k * k
             for j in range(k):
-                sj = (w + 2 * p - j) // k
-                hmap_slice = hmap[..., i:i + si * k, j:j + sj * k]
+                m = (w - j) // k * k
+                hmap_slice = hmap[..., i:i + n, j:j + m]
                 pooled[..., i::k, j::k] = block_reduce(hmap_slice, (1, 1, k, k), np.max)
-        return x
+        return pooled
 
     def __call__(self, heatmaps):
         pooled = self.max_pool(heatmaps)
@@ -973,46 +975,49 @@ class NMSPyTorch:
         return (heatmaps * maxm).cpu().numpy()
         
 
+
 class OpenPoseDecoder:
 
     BODY_PARTS_KPT_IDS = ((1, 2), (1, 5), (2, 3), (3, 4), (5, 6), (6, 7), (1, 8), (8, 9), (9, 10), (1, 11),
                           (11, 12), (12, 13), (1, 0), (0, 14), (14, 16), (0, 15), (15, 17), (2, 16), (5, 17))
     BODY_PARTS_PAF_IDS = (12, 20, 14, 16, 22, 24, 0, 2, 4, 6, 8, 10, 28, 30, 34, 32, 36, 18, 26)
 
-    def __init__(self, num_joints, max_points=100, score_threshold=0.1, delta=0.5, out_stride=8):
-        super().__init__()
+    def __init__(self, num_joints=18, skeleton=BODY_PARTS_KPT_IDS, paf_indices=BODY_PARTS_PAF_IDS,
+                 max_points=100, score_threshold=0.1, min_paf_alignment_score=0.05, delta=0.5):
         self.num_joints = num_joints
+        self.skeleton = skeleton
+        self.paf_indices = paf_indices
         self.max_points = max_points
         self.score_threshold = score_threshold
+        self.min_paf_alignment_score = min_paf_alignment_score
         self.delta = delta
-        self.out_stride = out_stride
-        self.high_res_heatmaps = False
-        self.high_res_pafs = False
+
+        self.points_per_limb = 10
+        self.grid = np.arange(self.points_per_limb, dtype=np.float32).reshape(1, -1, 1)
 
     def __call__(self, heatmaps, nms_heatmaps, pafs):
         batch_size, _, h, w = heatmaps.shape
         assert batch_size == 1, 'Batch size of 1 only supported'
 
-        pafs = np.transpose(pafs, (0, 2, 3, 1))
         keypoints = self.extract_points(heatmaps, nms_heatmaps)
+        pafs = np.transpose(pafs, (0, 2, 3, 1))
 
         if self.delta > 0:
-            # To adjust coordinates' flooring in heatmaps target generation.
             for kpts in keypoints:
                 kpts[:, :2] += self.delta
                 np.core.umath.clip(kpts[:, 0], 0, w - 1, out=kpts[:, 0])
                 np.core.umath.clip(kpts[:, 1], 0, h - 1, out=kpts[:, 1])
 
         pose_entries, keypoints = self.group_keypoints(keypoints, pafs, pose_entry_size=self.num_joints + 2)
-        grouped_kpts, scores = self.convert_to_coco_format(pose_entries, keypoints, None)
-        if len(grouped_kpts) > 0:
-            grouped_kpts = np.asarray(grouped_kpts, dtype=np.float32)
-            grouped_kpts = grouped_kpts.reshape((grouped_kpts.shape[0], -1, 3))
+        poses, scores = self.convert_to_coco_format(pose_entries, keypoints)
+        if len(poses) > 0:
+            poses = np.asarray(poses, dtype=np.float32)
+            poses = poses.reshape((poses.shape[0], -1, 3))
         else:
-            grouped_kpts = np.empty((0, 17, 3), dtype=np.float32)
-            scores = np.zeros(0, dtype=np.float32)
+            poses = np.empty((0, 17, 3), dtype=np.float32)
+            scores = np.empty(0, dtype=np.float32)
 
-        return grouped_kpts, scores
+        return poses, scores
         
     def extract_points(self, heatmaps, nms_heatmaps):
         batch_size, channels_num, h, w = heatmaps.shape
@@ -1020,7 +1025,6 @@ class OpenPoseDecoder:
         assert channels_num >= self.num_joints
 
         xs, ys, scores = self.top_k(nms_heatmaps)
-
         masks = scores > self.score_threshold
         all_keypoints = []
         keypoint_id = 0
@@ -1031,16 +1035,13 @@ class OpenPoseDecoder:
             y = ys[0, k][mask].ravel()
             score = scores[0, k][mask].ravel()
             n = len(x)
-
             if n == 0:
                 all_keypoints.append(np.empty((0, 4), dtype=np.float32))
                 continue
-
             # Apply quarter offset to improve localization accuracy.
             x, y = self.refine(heatmaps[0, k], x, y)
             np.core.umath.clip(x, 0, w - 1, out=x)
             np.core.umath.clip(y, 0, h - 1, out=y)
-
             # Pack resulting points.
             keypoints = np.empty((n, 4), dtype=np.float32)
             keypoints[:, 0] = x
@@ -1048,15 +1049,16 @@ class OpenPoseDecoder:
             keypoints[:, 2] = score
             keypoints[:, 3] = np.arange(keypoint_id, keypoint_id + n)
             keypoint_id += n
-
             all_keypoints.append(keypoints)
         return all_keypoints
 
     def top_k(self, heatmaps):
         N, K, _, W = heatmaps.shape
         heatmaps = heatmaps.reshape(N, K, -1)
+        # Get positions with top scores.
         ind = heatmaps.argpartition(-self.max_points, axis=2)[:, :, -self.max_points:]
         scores = np.take_along_axis(heatmaps, ind, axis=2)
+        # Keep top scores sorted.
         subind = np.argsort(-scores, axis=2)
         ind = np.take_along_axis(ind, subind, axis=2)
         scores = np.take_along_axis(scores, subind, axis=2)
@@ -1075,102 +1077,35 @@ class OpenPoseDecoder:
         x[valid] += dx
         y[valid] += dy
         return x, y
-      
-    def group_keypoints(self, all_keypoints_by_type, pafs, pose_entry_size=20, min_paf_score=0.05,
-                        skeleton=BODY_PARTS_KPT_IDS, bones_to_channels=BODY_PARTS_PAF_IDS):
 
-        all_keypoints = np.concatenate(all_keypoints_by_type, axis=0)
-        pose_entries = []
-
-        point_num = 10
-        grid = np.arange(point_num, dtype=np.float32).reshape(1, -1, 1)
-            
-        for part_id, paf_channel in enumerate(bones_to_channels):
-            part_pafs = pafs[0, :, :, paf_channel:paf_channel + 2]
-
-            kpt_a_id, kpt_b_id = skeleton[part_id]
-            kpts_a = all_keypoints_by_type[kpt_a_id]
-            kpts_b = all_keypoints_by_type[kpt_b_id]
-            num_kpts_a = len(kpts_a)
-            num_kpts_b = len(kpts_b)
-            
-            if num_kpts_a == 0 or num_kpts_b == 0:
-                continue
-            
-            a = kpts_a[:, :2]
-            b = kpts_b[:, :2]
-            n, m = len(a), len(b)
-
-            a = np.broadcast_to(a[None], (m, n, 2))
-            vec_raw = (b[:, None, :] - a).reshape(-1, 1, 2)
-
-            vec_norm = np.linalg.norm(vec_raw, ord=2, axis=-1, keepdims=True)
-            vec = vec_raw / (vec_norm + 1e-6)
-            steps = (1 / (point_num - 1) * vec_raw)
-            points = steps * grid + a.reshape(-1, 1, 2)
-            points = points.round().astype(dtype=np.int32)
-
-            x = points[..., 0].ravel()
-            y = points[..., 1].ravel()
-            field = part_pafs[y, x].reshape(-1, point_num, 2)
-            dot_prod = (field * vec).sum(-1).reshape(-1, point_num)
-
-            valid_prod = dot_prod > min_paf_score
-            valid_num = valid_prod.sum(1)
-            success_ratio = valid_num / point_num
-            score = (dot_prod * valid_prod).sum(1) / (valid_num + 1e-6)
-
-            valid_limbs = np.where(np.logical_and(score > 0, success_ratio > 0.8))[0]
-            b_idx, a_idx = np.divmod(valid_limbs, n)
-            connections = []
-            for t, i, j in zip(valid_limbs, a_idx, b_idx):
-                connections.append([i, j, score[t], score[t] + kpts_a[i][2] + kpts_b[j][2]])
-
-            if len(connections) > 0:
-                connections = sorted(connections, key=itemgetter(2), reverse=True)
-
-            num_connections = min(num_kpts_a, num_kpts_b)
-            has_kpt_a = np.zeros(num_kpts_a, dtype=np.int32)
-            has_kpt_b = np.zeros(num_kpts_b, dtype=np.int32)
-            filtered_connections = []
-            for row in range(len(connections)):
-                if len(filtered_connections) == num_connections:
-                    break
-                i, j, cur_point_score = connections[row][0:3]
-                if not has_kpt_a[i] and not has_kpt_b[j]:
-                    filtered_connections.append([int(kpts_a[i][3]), int(kpts_b[j][3]), cur_point_score])
-                    has_kpt_a[i] = 1
-                    has_kpt_b[j] = 1
-            connections = filtered_connections
-            if len(connections) == 0:
-                continue
-
-            if part_id == 0:
-                pose_entries = [np.full(pose_entry_size, -1, dtype=np.float32) for _ in range(len(connections))]
-                for i in range(len(connections)):
-                    pose_entries[i][kpt_a_id] = connections[i][0]
-                    pose_entries[i][kpt_b_id] = connections[i][1]
-                    pose_entries[i][-1] = 2
-                    # pose score = sum of all points' scores + sum of all connections' scores
-                    pose_entries[i][-2] = np.sum(all_keypoints[connections[i][0:2], 2]) + connections[i][2]
-            else:
-                for connection in connections:
-                    pose_a_idx = -1
-                    pose_b_idx = -1
-                    for j, pose in enumerate(pose_entries):
-                        if pose[kpt_a_id] == connection[0]:
-                            pose_a_idx = j
-                        if pose[kpt_b_id] == connection[1]:
-                            pose_b_idx = j
-                    if pose_a_idx < 0 and pose_b_idx < 0:
-                        # Create new pose entry.
-                        pose_entry = np.full(pose_entry_size, -1)
-                        pose_entry[kpt_a_id] = connection[0]
-                        pose_entry[kpt_b_id] = connection[1]
-                        pose_entry[-1] = 2
-                        pose_entry[-2] = np.sum(all_keypoints[connection[0:2], 2]) + connection[2]
-                        pose_entries.append(pose_entry)
-                    elif pose_a_idx >= 0 and pose_b_idx >= 0 and pose_a_idx != pose_b_idx:
+    def update_poses(self, part_id, kpt_a_id, kpt_b_id, all_keypoints, connections, pose_entries, pose_entry_size):
+        if part_id == 0:
+            pose_entries = [np.full(pose_entry_size, -1, dtype=np.float32) for _ in range(len(connections))]
+            for pose, connection in zip(pose_entries, connections):
+                pose[kpt_a_id] = connection[0]
+                pose[kpt_b_id] = connection[1]
+                pose[-1] = 2
+                # pose score = sum of all points' scores + sum of all connections' scores
+                pose[-2] = np.sum(all_keypoints[connection[0:2], 2]) + connection[2]
+        else:
+            for connection in connections:
+                pose_a_idx = -1
+                pose_b_idx = -1
+                for j, pose in enumerate(pose_entries):
+                    if pose[kpt_a_id] == connection[0]:
+                        pose_a_idx = j
+                    if pose[kpt_b_id] == connection[1]:
+                        pose_b_idx = j
+                if pose_a_idx < 0 and pose_b_idx < 0:
+                    # Create new pose entry.
+                    pose_entry = np.full(pose_entry_size, -1)
+                    pose_entry[kpt_a_id] = connection[0]
+                    pose_entry[kpt_b_id] = connection[1]
+                    pose_entry[-1] = 2
+                    pose_entry[-2] = np.sum(all_keypoints[connection[0:2], 2]) + connection[2]
+                    pose_entries.append(pose_entry)
+                elif pose_a_idx >= 0 and pose_b_idx >= 0:
+                    if pose_a_idx != pose_b_idx:
                         # Merge two disjoint components into one pose.
                         pose_a = pose_entries[pose_a_idx]
                         pose_b = pose_entries[pose_b_idx]
@@ -1184,36 +1119,103 @@ class OpenPoseDecoder:
                         for j in range(len(pose_b) - 2):
                             if pose_b[j] >= 0:
                                 pose_a[j] = pose_b[j]
-                        # pose_a[kpt_b_id] = connection[1]
                         pose_a[-1] += pose_b[-1]
                         pose_a[-2] += pose_b[-2] + connection[2]
                         del pose_entries[pose_b_idx]
-                    elif pose_a_idx >= 0:
-                        # Add a new bone into pose.
-                        pose = pose_entries[pose_a_idx]
-                        if pose[kpt_b_id] < 0:
-                            pose[-2] += all_keypoints[connection[1], 2]
-                        pose[kpt_b_id] = connection[1]
-                        pose[-2] += connection[2]
-                        pose[-1] += 1
-                    elif pose_b_idx >= 0:
-                        # Add a new bone into pose.
-                        pose = pose_entries[pose_b_idx]
-                        if pose[kpt_a_id] < 0:
-                            pose[-2] += all_keypoints[connection[0], 2]
-                        pose[kpt_a_id] = connection[0]
-                        pose[-2] += connection[2]
-                        pose[-1] += 1
+                    else:
+                        # Adjust score of a pose.
+                        pose_entries[pose_a_idx][-2] += connection[2]
+                elif pose_a_idx >= 0:
+                    # Add a new limb into pose.
+                    pose = pose_entries[pose_a_idx]
+                    if pose[kpt_b_id] < 0:
+                        pose[-2] += all_keypoints[connection[1], 2]
+                    pose[kpt_b_id] = connection[1]
+                    pose[-2] += connection[2]
+                    pose[-1] += 1
+                elif pose_b_idx >= 0:
+                    # Add a new limb into pose.
+                    pose = pose_entries[pose_b_idx]
+                    if pose[kpt_a_id] < 0:
+                        pose[-2] += all_keypoints[connection[0], 2]
+                    pose[kpt_a_id] = connection[0]
+                    pose[-2] += connection[2]
+                    pose[-1] += 1
+        return pose_entries
 
+    def group_keypoints(self, all_keypoints_by_type, pafs, pose_entry_size=20):
+        all_keypoints = np.concatenate(all_keypoints_by_type, axis=0)
+        pose_entries = []
+        # For every limb.
+        for part_id, paf_channel in enumerate(self.paf_indices):
+            kpt_a_id, kpt_b_id = self.skeleton[part_id]
+            kpts_a = all_keypoints_by_type[kpt_a_id]
+            kpts_b = all_keypoints_by_type[kpt_b_id]
+            n = len(kpts_a)
+            m = len(kpts_b)
+            if n == 0 or m == 0:
+                continue
+            
+            # Get vectors between all pairs of keypoints, i.e. candidate limb vectors.
+            a = kpts_a[:, :2]
+            a = np.broadcast_to(a[None], (m, n, 2))
+            b = kpts_b[:, :2]
+            vec_raw = (b[:, None, :] - a).reshape(-1, 1, 2)
+
+            # Sample points along every candidate limb vector.
+            steps = (1 / (self.points_per_limb - 1) * vec_raw)
+            points = steps * self.grid + a.reshape(-1, 1, 2)
+            points = points.round().astype(dtype=np.int32)
+            x = points[..., 0].ravel()
+            y = points[..., 1].ravel()
+
+            # Compute affinity score between candidate limb vectors and part affinity field.
+            part_pafs = pafs[0, :, :, paf_channel:paf_channel + 2]
+            field = part_pafs[y, x].reshape(-1, self.points_per_limb, 2)
+            vec_norm = np.linalg.norm(vec_raw, ord=2, axis=-1, keepdims=True)
+            vec = vec_raw / (vec_norm + 1e-6)
+            affinity_scores = (field * vec).sum(-1).reshape(-1, self.points_per_limb)
+            valid_affinity_scores = affinity_scores > self.min_paf_alignment_score
+            valid_num = valid_affinity_scores.sum(1)
+            affinity_scores = (affinity_scores * valid_affinity_scores).sum(1) / (valid_num + 1e-6)
+            success_ratio = valid_num / self.points_per_limb
+
+            # Get a list of limbs according to the obtained affinity score.
+            valid_limbs = np.where(np.logical_and(affinity_scores > 0, success_ratio > 0.8))[0]
+            affinity_scores = affinity_scores[valid_limbs]
+            b_idx, a_idx = np.divmod(valid_limbs, n)
+            if len(affinity_scores) == 0:
+                continue
+
+            # From all retrieved connections that share starting/ending keypoints leave only the top-scoring ones.
+            order = affinity_scores.argsort()[::-1]
+            affinity_scores = affinity_scores[order]
+            a_idx = a_idx[order]
+            b_idx = b_idx[order]
+            a_idx_unique = np.unique(a_idx, return_index=True)[1]
+            b_idx_unique = np.unique(b_idx, return_index=True)[1]
+            idx = np.intersect1d(a_idx_unique, b_idx_unique, assume_unique=True)
+            a = kpts_a[a_idx[idx], 3].astype(np.int32)
+            b = kpts_b[b_idx[idx], 3].astype(np.int32)
+            connections = list(zip(a, b, affinity_scores[idx]))
+
+            if len(connections) == 0:
+                continue
+
+            # Update poses with new connections.
+            pose_entries = self.update_poses(part_id, kpt_a_id, kpt_b_id, all_keypoints,
+                                             connections, pose_entries, pose_entry_size)
+
+        # Remove poses with not enough points.
         filtered_entries = []
         for i in range(len(pose_entries)):
             if pose_entries[i][-1] < 3:
                 continue
             filtered_entries.append(pose_entries[i])
-        pose_entries = np.asarray(filtered_entries)
+        pose_entries = np.asarray(filtered_entries, dtype=np.float32)
         return pose_entries, all_keypoints
 
-    def convert_to_coco_format(self, pose_entries, all_keypoints, reorder_map=None):
+    def convert_to_coco_format(self, pose_entries, all_keypoints):
         num_joints = 17
         coco_keypoints = []
         scores = []
@@ -1226,12 +1228,11 @@ class OpenPoseDecoder:
             for keypoint_id, target_id in zip(pose_entries[n][:-2], reorder_map):
                 if target_id < 0:
                     continue
-                cx, cy, score, visibility = 0, 0, 0, 0  # keypoint not found
+                cx, cy, score = 0, 0, 0  # keypoint not found
                 if keypoint_id != -1:
                     cx, cy, score = all_keypoints[int(keypoint_id), 0:3]
-                    visibility = 2
-                keypoints[target_id * 3 + 0] = cx * self.out_stride
-                keypoints[target_id * 3 + 1] = cy * self.out_stride
+                keypoints[target_id * 3 + 0] = cx
+                keypoints[target_id * 3 + 1] = cy
                 keypoints[target_id * 3 + 2] = score
             coco_keypoints.append(keypoints)
             scores.append(person_score * max(0, (pose_entries[n][-1] - 1)))  # -1 for 'neck'
