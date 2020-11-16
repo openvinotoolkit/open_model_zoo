@@ -5,7 +5,10 @@
 #
 import argparse
 
-from tensorflow import GraphDef
+try:
+    from tensorflow import GraphDef
+except ImportError:
+    from tensorflow.compat.v1 import GraphDef
 
 from mds_convert_utils.memmapped_file_system_pb2 import MemmappedFileSystemDirectory
 
