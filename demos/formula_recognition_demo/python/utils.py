@@ -39,11 +39,11 @@ def strip_internal_spaces(text):
     text = text.replace(" }", "}")
     text = text.replace("( ", "(")
     text = text.replace(" )", ")")
-    while re.search(r"([\d]) ([\d])", text):
-        text = re.sub(r"([\d]) ([\d])", r"\1\2", text)
-    text = re.sub(r"([\d]) ([\.])", r"\1\2", text)
-    text = re.sub(r"([\.]) ([\d])", r"\1\2", text)
     text = text.replace(" ^ ", "^")
+    prev_text = ""
+    while prev_text != text:
+        prev_text = text
+        text = re.sub(r"([\d.]) ([\d.])", r"\1\2", text)
     return text
 
 
