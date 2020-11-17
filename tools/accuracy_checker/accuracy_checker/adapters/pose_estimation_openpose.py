@@ -262,21 +262,12 @@ class OpenPoseDecoder:
         return x, y
 
     @staticmethod
-    def merge_poses(pose_a, pose_b):
-        do_merge_poses = True
-        for j in range(len(pose_b) - 2):
-            if pose_a[j] >= 0 and pose_b[j] >= 0 and pose_a[j] != pose_b[j]:
-                do_merge_poses = False
-                break
-        if not do_merge_poses:
-            return False
-        for j in range(len(pose_b) - 2):
-            if pose_b[j] >= 0:
-                pose_a[j] = pose_b[j]
-        pose_a[-1] += pose_b[-1]
-        return True
+    def is_disjoint(pose_a, pose_b):
+        pose_a = pose_a[:-2]
+        pose_b = pose_b[:-2]
+        return np.all(np.logical_or.reduce((pose_a == pose_b, pose_a < 0, pose_b < 0)))
 
-    def update_poses(self, part_id, kpt_a_id, kpt_b_id, all_keypoints, connections, pose_entries, pose_entry_size):
+    def update_poses(self, kpt_a_id, kpt_b_id, all_keypoints, connections, pose_entries, pose_entry_size):
         for connection in connections:
             pose_a_idx = -1
             pose_b_idx = -1
@@ -287,18 +278,20 @@ class OpenPoseDecoder:
                     pose_b_idx = j
             if pose_a_idx < 0 and pose_b_idx < 0:
                 # Create new pose entry.
-                pose_entry = np.full(pose_entry_size, -1)
+                pose_entry = np.full(pose_entry_size, -1, dtype=np.float32)
                 pose_entry[kpt_a_id] = connection[0]
                 pose_entry[kpt_b_id] = connection[1]
                 pose_entry[-1] = 2
                 pose_entry[-2] = np.sum(all_keypoints[connection[0:2], 2]) + connection[2]
                 pose_entries.append(pose_entry)
             elif pose_a_idx >= 0 and pose_b_idx >= 0 and pose_a_idx != pose_b_idx:
-                # Merge two disjoint components into one pose.
+                # Merge two poses are disjoint merge them, otherwise ignore connection.
                 pose_a = pose_entries[pose_a_idx]
                 pose_b = pose_entries[pose_b_idx]
-                if self.merge_poses(pose_a, pose_b):
-                    pose_a[-2] += pose_b[-2] + connection[2]
+                if self.is_disjoint(pose_a, pose_b):
+                    pose_a += pose_b
+                    pose_a[:-2] += 1
+                    pose_a[-2] += connection[2]
                     del pose_entries[pose_b_idx]
             elif pose_a_idx >= 0 and pose_b_idx >= 0:
                 # Adjust score of a pose.
@@ -320,6 +313,24 @@ class OpenPoseDecoder:
                 pose[-2] += connection[2]
                 pose[-1] += 1
         return pose_entries
+
+    @staticmethod
+    def connections_nms(a_idx, b_idx, affinity_scores):
+        # From all retrieved connections that share starting/ending keypoints leave only the top-scoring ones.
+        order = affinity_scores.argsort()[::-1]
+        affinity_scores = affinity_scores[order]
+        a_idx = a_idx[order]
+        b_idx = b_idx[order]
+        idx = []
+        has_kpt_a = set()
+        has_kpt_b = set()
+        for t, (i, j) in enumerate(zip(a_idx, b_idx)):
+            if i not in has_kpt_a and j not in has_kpt_b:
+                idx.append(t)
+                has_kpt_a.add(i)
+                has_kpt_b.add(j)
+        idx = np.asarray(idx, dtype=np.int32)
+        return a_idx[idx], b_idx[idx], affinity_scores[idx]
 
     def group_keypoints(self, all_keypoints_by_type, pafs, pose_entry_size=20):
         all_keypoints = np.concatenate(all_keypoints_by_type, axis=0)
@@ -360,28 +371,21 @@ class OpenPoseDecoder:
 
             # Get a list of limbs according to the obtained affinity score.
             valid_limbs = np.where(np.logical_and(affinity_scores > 0, success_ratio > 0.8))[0]
-            affinity_scores = affinity_scores[valid_limbs]
-            b_idx, a_idx = np.divmod(valid_limbs, n)
-            if len(affinity_scores) == 0:
+            if len(valid_limbs) == 0:
                 continue
+            b_idx, a_idx = np.divmod(valid_limbs, n)
+            affinity_scores = affinity_scores[valid_limbs]
 
-            # From all retrieved connections that share starting/ending keypoints leave only the top-scoring ones.
-            order = affinity_scores.argsort()[::-1]
-            affinity_scores = affinity_scores[order]
-            a_idx = a_idx[order]
-            b_idx = b_idx[order]
-            a_idx_unique = np.unique(a_idx, return_index=True)[1]
-            b_idx_unique = np.unique(b_idx, return_index=True)[1]
-            idx = np.intersect1d(a_idx_unique, b_idx_unique, assume_unique=True)
-            a = kpts_a[a_idx[idx], 3].astype(np.int32)
-            b = kpts_b[b_idx[idx], 3].astype(np.int32)
-            connections = list(zip(a, b, affinity_scores[idx]))
-
+            # Suppress incompatible connections.
+            a_idx, b_idx, affinity_scores = self.connections_nms(a_idx, b_idx, affinity_scores)
+            connections = list(zip(kpts_a[a_idx, 3].astype(np.int32),
+                                   kpts_b[b_idx, 3].astype(np.int32),
+                                   affinity_scores))
             if len(connections) == 0:
                 continue
 
             # Update poses with new connections.
-            pose_entries = self.update_poses(part_id, kpt_a_id, kpt_b_id, all_keypoints,
+            pose_entries = self.update_poses(kpt_a_id, kpt_b_id, all_keypoints,
                                              connections, pose_entries, pose_entry_size)
 
         # Remove poses with not enough points.

@@ -8,8 +8,7 @@ import ngraph as ng
 import numpy as np
 from openvino.inference_engine import IENetwork
 
-from .decoder import AssociativeEmbeddingDecoder
-from .openpose_decoder import OpenPoseDecoder
+from .decoder import AssociativeEmbeddingDecoder, OpenPoseDecoder
 
 
 log = logging.getLogger()
@@ -122,8 +121,6 @@ class HPEOpenPose(Model):
             k = 2 * p + 1
             pooled_heatmap = ng.max_pool(heatmap, kernel_shape=(k, k), pads_begin=(p, p), pads_end=(p, p), strides=(1, 1))
             nms_mask = ng.equal(heatmap, pooled_heatmap)
-            # TODO. Cast to type of the heatmap.
-            # nms_mask_float = ng.convert_like(nms_mask, heatmap)
             nms_mask_float = ng.convert(nms_mask, 'f32')
             nms_heatmap = ng.multiply(heatmap, nms_mask_float, name='nms_heatmaps')
             f = ng.impl.Function(
@@ -204,7 +201,7 @@ class HPEOpenPose(Model):
             scores = poses[:, -1]
             poses = poses[:, :-1].reshape(-1, 18, 3)
             poses = poses[:, self.reorder_map, :]
-            poses[:, :, :2] /= upsample_ratio / 8
+            poses[:, :, :2] /= upsample_ratio
         else:
             nms_heatmaps = outputs[self.nms_heatmaps_blob_name]
             poses, scores = self.decoder(heatmaps, nms_heatmaps, pafs)

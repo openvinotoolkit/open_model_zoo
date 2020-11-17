@@ -71,10 +71,10 @@ def build_argparser():
 
     args.add_argument('--type', default='ae', choices=('ae', 'openpose'), type=str,
                       help='Optional. Type of the network, either "ae" for associative embedding'
-                           'or "openpose" for openpose.' )
+                           'or "openpose" for openpose.')
     args.add_argument('--tsize', default=None, type=int,
                       help='Optional. Target input size. By default target size is derived from image input shape'
-                           'of a provided network and depends on the network type.' )
+                           'of a provided network and depends on the network type.')
     return parser
 
 
