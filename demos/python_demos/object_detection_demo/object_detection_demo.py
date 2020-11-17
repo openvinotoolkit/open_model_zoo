@@ -220,9 +220,8 @@ def main():
     model = get_model(args.architecture_type, ie, args)
     has_landmarks = args.architecture_type == 'retina'
 
-    detector_pipeline = AsyncPipeline(ie, model, device=args.device,
-                                      plugin_config=plugin_config,
-                                      max_num_requests=args.num_infer_requests)
+    detector_pipeline = AsyncPipeline(ie, model, plugin_config, logger=log,
+                                      device=args.device, max_num_requests=args.num_infer_requests)
 
     try:
         input_stream = int(args.input)

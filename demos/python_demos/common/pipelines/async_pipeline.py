@@ -20,8 +20,7 @@ from time import perf_counter
 
 
 class AsyncPipeline:
-    def __init__(self, ie, model, logger=None, device='CPU', plugin_config={}, max_num_requests=1,
-                 completed_requests=None, caught_exceptions=None):
+    def __init__(self, ie, model, plugin_config, logger=None, device='CPU', max_num_requests=1):
         self.model = model
         self.logger = logger
 
@@ -35,8 +34,8 @@ class AsyncPipeline:
             self.logger.info('Loaded in {:.3f} seconds'.format(loading_time))
 
         self.empty_requests = deque(self.exec_net.requests)
-        self.completed_request_results = completed_requests if completed_requests else {}
-        self.callback_exceptions = caught_exceptions if caught_exceptions else {}
+        self.completed_request_results = {}
+        self.callback_exceptions = {}
         self.event = threading.Event()
 
     def inference_completion_callback(self, status, callback_args):
