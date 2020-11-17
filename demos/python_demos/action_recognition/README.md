@@ -43,9 +43,7 @@ Options:
   -h, --help            Show this help message and exit.
   -i INPUT, --input INPUT
                         Required. Id of the video capturing device to open (to
-                        open default camera just pass 0), path to a video or a
-                        .txt file with a list of ids or video files (one
-                        object per line)
+                        open default camera just pass 0), path to a video
   -m_en M_ENCODER, --m_encoder M_ENCODER
                         Required. Path to encoder model
   -m_de M_DECODER, --m_decoder M_DECODER
@@ -64,6 +62,7 @@ Options:
   -lb LABELS, --labels LABELS
                         Optional. Path to file with label names
   --no_show             Optional. Don't show output
+  --loop                Optional. Run a video in cycle mode
   -s LABEL_SMOOTHING, --smooth LABEL_SMOOTHING
                         Optional. Number of frames used for output label
                         smoothing
