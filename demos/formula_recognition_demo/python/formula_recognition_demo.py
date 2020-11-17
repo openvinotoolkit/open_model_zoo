@@ -34,10 +34,10 @@ class InteractiveDemo:
 
     def _create_input_window(self):
         aspect_ratio = self._tgt_shape[0] / self._tgt_shape[1]
-        default_width = DEFAULT_WIDTH
-        height = int(default_width * aspect_ratio)
-        start_point = (int(self.resolution[0] / 2 - default_width / 2), int(self.resolution[1] / 2 - height / 2))
-        end_point = (int(self.resolution[0] / 2 + default_width / 2), int(self.resolution[1] / 2 + height / 2))
+        width = min(DEFAULT_WIDTH, self.resolution[0])
+        height = int(width * aspect_ratio)
+        start_point = (int(self.resolution[0] / 2 - width / 2), int(self.resolution[1] / 2 - height / 2))
+        end_point = (int(self.resolution[0] / 2 + width / 2), int(self.resolution[1] / 2 + height / 2))
         return start_point, end_point
 
     def get_crop(self, frame):
@@ -53,7 +53,8 @@ class InteractiveDemo:
         width = self.end_point[0] - self.start_point[0]
         aspect_ratio = height / width
         if action == 'increase':
-            if height >= MAX_HEIGHT or width >= MAX_WIDTH:
+            max_h, max_w = min(MAX_HEIGHT, self.resolution[1]), min(MAX_WIDTH, self.resolution[0])
+            if height >= max_h or width >= max_w:
                 return
             self.start_point = (self.start_point[0]-DEFAULT_RESIZE_STEP,
                                 self.start_point[1] - int(DEFAULT_RESIZE_STEP * aspect_ratio))
