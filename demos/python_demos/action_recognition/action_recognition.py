@@ -68,12 +68,6 @@ def build_argparser():
 
 def main():
     args = build_argparser().parse_args()
-    input_path = args.input
-    if not input_path:
-        raise ValueError('--input option is expected')
-    if not path.isfile(input_path):
-        raise ValueError('The input file does not exists')
-    video = [input_path]
 
     if args.labels:
         with open(args.labels) as f:
@@ -109,11 +103,11 @@ def main():
     else:
         decoder = DummyDecoder(num_requests=2)
         decoder_seq_size = args.decoder_seq_size
-    
+
     presenter = monitors.Presenter(args.utilization_monitors, 70)
     result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
-    run_pipeline(video, encoder, decoder, result_presenter.render_frame, args.loop, decoder_seq_size=decoder_seq_size, fps=args.fps)
+    run_pipeline(args.input, args.loop, encoder, decoder, result_presenter.render_frame, decoder_seq_size=decoder_seq_size, fps=args.fps)
     print(presenter.reportMeans())
 
 

@@ -16,7 +16,6 @@
 
 import time
 from collections import deque
-from itertools import cycle
 
 import cv2
 import numpy as np
@@ -27,7 +26,7 @@ from .pipeline import AsyncPipeline, PipelineStep
 from .queue import Signal
 
 
-def run_pipeline(video, encoder, decoder, render_fn, loop, decoder_seq_size=16, fps=30):
+def run_pipeline(video, loop, encoder, decoder, render_fn, decoder_seq_size=16, fps=30):
     pipeline = AsyncPipeline()
     pipeline.add_step("Data", DataStep(video, loop), parallel=False)
     pipeline.add_step("Encoder", EncoderStep(encoder), parallel=False)
@@ -41,51 +40,31 @@ def run_pipeline(video, encoder, decoder, render_fn, loop, decoder_seq_size=16, 
 
 class DataStep(PipelineStep):
 
-    def __init__(self, video_filepath, loop):
+    def __init__(self, input, loop):
         super().__init__()
-        self.video = video_filepath
-        self.cap = None
+        self.video = input
         self.loop = loop
-
-        if self.loop:
-            self._video_cycle = cycle(self.video)
-        else:
-            self._video_cycle = iter(self.video)
-
-        try:
-            self._open_video()
-            if not self.loop:
-                self._video_cycle = iter(self.video)
-        except:
+        self.cap = cv2.VideoCapture(self.video)
+        if not self.cap.isOpened():
             print("Error: The input video cannot be opened")
             exit(1)
 
     def setup(self):
-        self._open_video()
+        pass
 
     def process(self, item):
         status, frame = self.cap.read()
         if not status:
-            if self.loop:
-                self._open_video()
-                self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                status, frame = self.cap.read()
-            else:
+            if not self.loop:
+                return Signal.STOP
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            status, frame = self.cap.read()
+            if not status:
                 return Signal.STOP
         return frame
 
     def end(self):
         self.cap.release()
-
-    def _open_video(self):
-        next_video = next(self._video_cycle)
-        try:
-            next_video = int(next_video)
-        except ValueError:
-            pass
-        self.cap = cv2.VideoCapture(next_video)
-        if not self.cap.isOpened():
-            raise Exception("The input video cannot be opened")
 
 
 class EncoderStep(PipelineStep):
