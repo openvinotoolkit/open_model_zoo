@@ -14,8 +14,9 @@
 // limitations under the License.
 */
 
-#include "detection_model_ssd.h"
+#include "models/detection_model_ssd.h"
 #include <samples/slog.hpp>
+#include <samples/common.hpp>
 #include <ngraph/ngraph.hpp>
 
 using namespace InferenceEngine;
@@ -26,13 +27,13 @@ ModelSSD::ModelSSD(const std::string& modelFileName,
     :DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
 }
 
-void ModelSSD::onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, RequestsPool* requestsPool)
+void ModelSSD::onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, const std::vector<InferenceEngine::InferRequest::Ptr>& requests)
 {
-    DetectionModel::onLoadCompleted(execNetwork, requestsPool);
+    DetectionModel::onLoadCompleted(execNetwork, requests);
 
     // --- Setting image info for every request in a pool. We can do it once and reuse this info at every submit -------
     if (inputsNames.size()>1) {
-        for (auto &request : requestsPool->getInferRequestsList()) {
+        for (auto &request : requests) {
             auto blob = request->GetBlob(inputsNames[1]);
             LockedMemory<void> blobMapped = as<MemoryBlob>(blob)->wmap();
             auto data = blobMapped.as<float *>();

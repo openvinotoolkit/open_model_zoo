@@ -14,8 +14,10 @@
 // limitations under the License.
 */
 
-#include "detection_model_yolo.h"
+#include "models/detection_model_yolo.h"
 #include <samples/slog.hpp>
+#include <samples/common.hpp>
+#include <ngraph/ngraph.hpp>
 
 using namespace InferenceEngine;
 

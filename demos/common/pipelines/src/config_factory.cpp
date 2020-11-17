@@ -14,7 +14,7 @@
 // limitations under the License.
 */
 
-#include "config_factory.h"
+#include "pipelines/config_factory.h"
 
 #include <set>
 

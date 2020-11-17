@@ -30,15 +30,16 @@
 #include <samples/slog.hpp>
 #include <samples/images_capture.h>
 #include <samples/default_flags.hpp>
+#include <samples/performance_metrics.hpp>
 #include <gflags/gflags.h>
 
 #include <iostream>
 #include <unordered_map>
 
-#include "async_pipeline.h"
-#include "segmentation_model.h"
-#include "config_factory.h"
-#include "default_renderers.h"
+#include "pipelines/async_pipeline.h"
+#include "models/segmentation_model.h"
+#include "pipelines/config_factory.h"
+#include "pipelines/metadata.h"
 
 static const char help_message[] = "Print a usage message.";
 static const char video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
@@ -119,6 +120,46 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
+cv::Mat applyColorMap(cv::Mat input)
+{
+    // Initializing colors array if needed
+    static cv::Mat colors;
+    static std::mt19937 rng;
+    static std::uniform_int_distribution<int> distr(0, 255);
+
+    if (colors.empty()) {
+        colors = cv::Mat(256, 1, CV_8UC3);
+        std::size_t i = 0;
+        for (; i < arraySize(CITYSCAPES_COLORS); ++i) {
+            colors.at<cv::Vec3b>(i, 0) = { CITYSCAPES_COLORS[i].blue(), CITYSCAPES_COLORS[i].green(), CITYSCAPES_COLORS[i].red() };
+        }
+        for (; i < colors.cols; ++i) {
+            colors.at<cv::Vec3b>(i, 0) = cv::Vec3b(distr(rng), distr(rng), distr(rng));
+        }
+    }
+
+    // Converting class to color
+    cv::Mat out;
+    cv::applyColorMap(input, out, colors);
+    return out;
+}
+
+cv::Mat renderSegmentationData(const SegmentationResult& result) {
+    if (!result.metaData) {
+        throw std::invalid_argument("Renderer: metadata is null");
+    }
+
+    // Input image is stored inside metadata, as we put it there during submission stage
+    auto inputImg = result.metaData->asRef<ImageMetaData>().img;
+
+    if (inputImg.empty()) {
+        throw std::invalid_argument("Renderer: image provided in metadata is empty");
+    }
+
+    // Visualizing result data over source image
+    return inputImg / 2 + applyColorMap(result.mask) / 2;
+}
+
 int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
@@ -171,7 +212,7 @@ int main(int argc, char *argv[]) {
             //    and use your own processing instead of calling renderSegmentationData().
             std::unique_ptr<ResultBase> result;
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = DefaultRenderers::renderSegmentationData(result->asRef<SegmentationResult>());
+                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>());
                 //--- Showing results and device information
                 if (!outFrame.empty()) {
                     presenter.drawGraphs(outFrame);

@@ -35,11 +35,13 @@
 
 #include <iostream>
 
-#include "async_pipeline.h"
-#include "detection_model_yolo.h"
-#include "detection_model_ssd.h"
-#include "config_factory.h"
-#include "default_renderers.h"
+#include <samples/performance_metrics.hpp>
+
+#include "pipelines/async_pipeline.h"
+#include "pipelines/config_factory.h"
+#include "pipelines/metadata.h"
+#include "models/detection_model_yolo.h"
+#include "models/detection_model_ssd.h"
 
 static const char help_message[] = "Print a usage message.";
 static const char video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
@@ -137,6 +139,34 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
+// Input image is stored inside metadata, as we put it there during submission stage
+cv::Mat renderDetectionData(const DetectionResult& result)
+{
+    if (!result.metaData) {
+        throw std::invalid_argument("Renderer: metadata is null");
+    }
+
+    auto outputImg = result.metaData->asRef<ImageMetaData>().img.clone();
+
+    if (outputImg.empty()) {
+        throw std::invalid_argument("Renderer: image provided in metadata is empty");
+    }
+
+    // Visualizing result data over source image
+
+    for (auto obj : result.objects) {
+        std::ostringstream conf;
+        conf << ":" << std::fixed << std::setprecision(3) << obj.confidence;
+        cv::putText(outputImg, obj.label + conf.str(),
+            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
+            cv::Scalar(0, 0, 255));
+        cv::rectangle(outputImg, obj, cv::Scalar(0, 0, 255));
+    }
+
+    return outputImg;
+}
+
+
 int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
@@ -208,7 +238,7 @@ int main(int argc, char *argv[]) {
             //    and use your own processing instead of calling renderDetectionData().
             std::unique_ptr<ResultBase> result;
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = DefaultRenderers::renderDetectionData(result->asRef<DetectionResult>());
+                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
                 //--- Showing results and device information
                 if (!outFrame.empty()) {
                     presenter.drawGraphs(outFrame);

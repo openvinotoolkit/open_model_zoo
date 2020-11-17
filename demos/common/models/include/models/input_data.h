@@ -15,7 +15,7 @@
 */
 
 #pragma once
-#include <samples/ocv_common.hpp>
+#include <opencv2/core.hpp>
 
 struct InputData {
     virtual ~InputData() {}

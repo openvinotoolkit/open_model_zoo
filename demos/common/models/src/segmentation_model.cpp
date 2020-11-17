@@ -14,19 +14,10 @@
 // limitations under the License.
 */
 
-#include "segmentation_model.h"
-#include <samples/args_helper.hpp>
+#include "models/segmentation_model.h"
+#include "samples/ocv_common.hpp"
 
 using namespace InferenceEngine;
-
-SegmentationModel::SegmentationModel(const std::string& modelFileName)
-    :ModelBase(modelFileName),
-    distr(0, 255){
-
-    colors.resize(arraySize(CITYSCAPES_COLORS));
-    for (std::size_t i = 0; i < colors.size(); ++i)
-        colors[i] = { CITYSCAPES_COLORS[i].blue(), CITYSCAPES_COLORS[i].green(), CITYSCAPES_COLORS[i].red() };
-}
 
 void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork){
     // --------------------------- Configure input & output ---------------------------------------------
@@ -87,10 +78,12 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
     SegmentationResult* result = new SegmentationResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
+    const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
+
     LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
     const float * const predictions = outMapped.as<float*>();
 
-    result->mask = cv::Mat(outHeight, outWidth, CV_8UC3);
+    result->mask = cv::Mat(outHeight, outWidth, CV_8UC1);
     for (int rowId = 0; rowId < outHeight; ++rowId) {
         for (int colId = 0; colId < outWidth; ++colId) {
             std::size_t classId = 0;
@@ -108,18 +101,10 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
                 }
             }
 
-            result->mask.at<cv::Vec3b>(rowId, colId) = class2Color(classId);
+            result->mask.at<uint8_t>(rowId, colId) = classId;
         }
     }
+    cv::resize(result->mask, result->mask, cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight),0,0,cv::INTER_NEAREST);
 
     return std::unique_ptr<ResultBase>(result);
-}
-
-const cv::Vec3b& SegmentationModel::class2Color(int classId)
-{
-    while (classId >= (int)colors.size()) {
-        cv::Vec3b color(distr(rng), distr(rng), distr(rng));
-        colors.push_back(color);
-    }
-    return colors[classId];
 }

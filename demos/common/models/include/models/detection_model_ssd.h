@@ -16,49 +16,27 @@
 
 #pragma once
 #include "detection_model.h"
-#include <ngraph/ngraph.hpp>
-
-class ModelYolo3 :
+class ModelSSD :
     public DetectionModel
 {
-protected:
-    class Region {
-    public:
-        int num = 0;
-        int classes = 0;
-        int coords = 0;
-        std::vector<float> anchors;
-
-        Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo);
-    };
-
 public:
-    /// Constructor.
+    /// Constructor
     /// @param modelFileName name of model to load
     /// @param confidenceThreshold - threshold to eleminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
-    /// @param boxIOUThreshold - threshold to treat separate output regions as one object for filtering
-    /// during postprocessing (only one of them should stay). The default value is 0.4
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
-    ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-        float boxIOUThreshold = 0.4, const std::vector<std::string>& labels = std::vector<std::string>());
+    ModelSSD(const std::string& modelFileName,
+        float confidenceThreshold, bool useAutoResize,
+        const std::vector<std::string>& labels = std::vector<std::string>());
 
-    std::unique_ptr<ResultBase> postprocess(InferenceResult & infResult) override;
+    virtual void onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, const std::vector<InferenceEngine::InferRequest::Ptr>& requests) override;
+    virtual std::unique_ptr<ResultBase> postprocess(InferenceResult & infResult) override;
 
 protected:
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
-
-    void parseYOLOV3Output(const std::string & output_name, const InferenceEngine::Blob::Ptr & blob,
-        const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,
-        const unsigned long original_im_w, std::vector<DetectedObject>& objects);
-
-    static int calculateEntryIndex(int side, int lcoords, int lclasses, int location, int entry);
-    static double intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2);
-
-    std::map<std::string, Region> regions;
-    double boxIOUThreshold;
-
+    size_t maxProposalCount = 0;
+    size_t objectSize = 0;
 };

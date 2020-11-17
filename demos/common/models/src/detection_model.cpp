@@ -14,8 +14,8 @@
 // limitations under the License.
 */
 
-#include "detection_model.h"
-#include <samples/args_helper.hpp>
+#include "models/detection_model.h"
+#include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
 using namespace InferenceEngine;

@@ -14,9 +14,9 @@
 // limitations under the License.
 */
 
-#include "async_pipeline.h"
-#include <samples/args_helper.hpp>
+#include "pipelines/async_pipeline.h"
 #include <cldnn/cldnn_config.hpp>
+#include <samples/common.hpp>
 #include <samples/slog.hpp>
 
 using namespace InferenceEngine;
@@ -65,7 +65,7 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
     requestsPool.reset(new RequestsPool(execNetwork, cnnConfig.maxAsyncRequests));
 
     // --------------------------- 6. Call onLoadCompleted to complete initialization of model -------------
-    model->onLoadCompleted(&execNetwork, requestsPool.get());
+    model->onLoadCompleted(&execNetwork, requestsPool->getInferRequestsList());
 }
 
 AsyncPipeline::~AsyncPipeline(){

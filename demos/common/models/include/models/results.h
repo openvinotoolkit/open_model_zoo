@@ -15,10 +15,13 @@
 */
 
 #pragma once
-#include <samples/ocv_common.hpp>
-#include "metadata.h"
+#include <opencv2/core.hpp>
+#include <inference_engine.hpp>
+#include <map>
+//#include "metadata.h"
 #include "internal_model_data.h"
 
+struct MetaData;
 struct ResultBase {
     virtual ~ResultBase() {}
 

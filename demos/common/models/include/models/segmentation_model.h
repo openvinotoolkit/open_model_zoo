@@ -24,20 +24,15 @@ class SegmentationModel :
 public:
     /// Constructor
     /// @param model_nameFileName of model to load
-    SegmentationModel(const std::string& modelFileName);
+    SegmentationModel(const std::string& modelFileName) : ModelBase(modelFileName) {}
 
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult);
 
 protected:
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
-    const cv::Vec3b& class2Color(int classId);
 
     int outHeight = 0;
     int outWidth = 0;
     int outChannels = 0;
-
-    std::vector<cv::Vec3b> colors;
-    std::mt19937 rng;
-    std::uniform_int_distribution<int> distr;
 };

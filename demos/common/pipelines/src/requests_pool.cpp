@@ -14,7 +14,7 @@
 // limitations under the License.
 */
 
-#include "requests_pool.h"
+#include "pipelines/requests_pool.h"
 
 RequestsPool::RequestsPool(InferenceEngine::ExecutableNetwork & execNetwork, unsigned int size) :
     numRequestsInUse(0)

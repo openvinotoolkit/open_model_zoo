@@ -18,7 +18,10 @@
 
 #include <map>
 #include <atomic>
-#include <samples/ocv_common.hpp>
+#include <opencv2/core.hpp>
+#include <inference_engine.hpp>
+#include <map>
+
 
 /// This is class storing requests pool for asynchronous pipeline
 ///
