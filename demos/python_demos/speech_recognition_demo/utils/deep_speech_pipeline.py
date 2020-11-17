@@ -31,7 +31,7 @@ PROFILES = {
         mel_fmax = 4000.,
         num_mfcc_dct_coefs = 26,
         num_context_frames = 19,
-     ),
+    ),
     'mds07x_en': dict(
         alphabet = None,  # the default alphabet
         alpha = 0.93128901720047,

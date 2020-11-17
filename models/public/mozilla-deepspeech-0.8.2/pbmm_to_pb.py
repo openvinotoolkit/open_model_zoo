@@ -5,10 +5,9 @@
 #
 import argparse
 
-try:
-    from tensorflow import GraphDef
-except ImportError:
-    from tensorflow.compat.v1 import GraphDef
+from pathlib import Path
+
+from tensorflow.compat.v1 import GraphDef
 
 from mds_convert_utils.memmapped_file_system_pb2 import MemmappedFileSystemDirectory
 
@@ -16,26 +15,13 @@ from mds_convert_utils.memmapped_file_system_pb2 import MemmappedFileSystemDirec
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Convert memory-mapped Tensorflow protobuf format into plain Tensorflow protobuf (GraphDef)")
-    parser.add_argument('input', type=str, help="Input .pbmm filename")
-    parser.add_argument('output', type=str, help="Output .pb filename")
-    parser.add_argument('--overwrite', action='store_true', help="Overwrite output file if exists")
+    parser.add_argument('input', type=Path, help="Input .pbmm filename")
+    parser.add_argument('output', type=Path, help="Output .pb filename")
     return parser.parse_args()
 
 
-def bytes_to_uint(data):
-    res = 0
-    for digit in reversed(data):
-        res = (res << 8) + digit
-    return res
-
-
 def load_memmapped_fs(data):
-    if isinstance(data, str):
-        # "data" is a filename, open it and read the data
-        with open(data, 'rb') as f:
-            data = f.read()
-
-    data_directory_ofs = bytes_to_uint(data[-8:])
+    data_directory_ofs = int.from_bytes(data[-8:], 'little')
     data_directory = data[data_directory_ofs:-8]
 
     directory_pb = MemmappedFileSystemDirectory()
@@ -45,16 +31,6 @@ def load_memmapped_fs(data):
         entry.name: data[entry.offset : entry.offset + entry.length]
         for entry in directory_pb.element
     }
-
-
-def load_graph_def(data):
-    graph_def = GraphDef()
-    graph_def.ParseFromString(data)
-    return graph_def
-
-
-def serialize_graph_def(graph_def):
-    return graph_def.SerializeToString()
 
 
 def convert_node(node, mmfs):
@@ -90,15 +66,20 @@ def undo_mmap(graph_def, mmfs):
 
 def main():
     args = parse_args()
-    mmfs = load_memmapped_fs(args.input)
+
+    with open(args.input, 'rb') as f:
+        data = f.read()
+
+    mmfs = load_memmapped_fs(data)
     ROOT = 'memmapped_package://.'
 
-    graph_def = load_graph_def(mmfs[ROOT])
+    graph_def = GraphDef()
+    graph_def.ParseFromString(mmfs[ROOT])
 
     graph_def = undo_mmap(graph_def, mmfs)
 
-    with open(args.output, 'xb' if not args.overwrite else 'wb') as f:
-        f.write(serialize_graph_def(graph_def))
+    with open(args.output, 'wb') as f:
+        f.write(graph_def.SerializeToString())
 
 
 if __name__ == '__main__':

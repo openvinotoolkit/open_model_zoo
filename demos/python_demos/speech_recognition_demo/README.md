@@ -18,7 +18,7 @@ After computing audio features, running a neural network to get per-frame charac
 
 The demo depends on the `ctcdecode_numpy` Python extension module,
 which implements CTC decoding in C++ for faster decoding.
-Please refer to [Open Model Zoo demos](../../README.md#build-the-demo-applications) for instructions
+Please refer to [Open Model Zoo demos](../../README.md) for instructions
 on how to build the extension module and prepare the environment for running the demo.
 Alternatively, instead of using `cmake` you can run `python -m pip install .` inside `ctcdecode-numpy` directory to build and install `ctcdecode-numpy`.
 
@@ -31,6 +31,12 @@ This is done with the following commands:
 source <openvino_dir>/bin/setupvars.sh
 <openvino_dir>/deployment_tools/open_model_zoo/tools/downloader/downloader.py --name mozilla-deepspeech-0.8.2
 <openvino_dir>/deployment_tools/open_model_zoo/tools/downloader/converter.py --name mozilla-deepspeech-0.8.2
+```
+or
+```shell
+source <openvino_dir>/bin/setupvars.sh
+<openvino_dir>/deployment_tools/open_model_zoo/tools/downloader/downloader.py --name mozilla-deepspeech-0.6.1
+<openvino_dir>/deployment_tools/open_model_zoo/tools/downloader/converter.py --name mozilla-deepspeech-0.6.1
 ```
 Please pay attention to the model license, **Mozilla Public License 2.0**.
 
