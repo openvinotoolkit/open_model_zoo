@@ -137,6 +137,14 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `data_dir` - path to dataset root folder. Relative paths to images and masks directory determine as `imgs` and `masks` respectively. In way when images and masks are located in non default directories, you can use parameters described below.
   * `images_dir` - path to images folder.
   * `mask_dir` - path to ground truth mask folder.
+  * `images_subfolder` - sub-directory for images(Optional, default `imgs`)
+  * `mask_subfolder` - sub-directory for ground truth mask(Optional, default `masks`)
+* `mapillary_vistas` - converts Mapillary Vistas dataset contained 20 classes to `SegmentationAnnotation`.
+  * `data_dir` - path to dataset root folder. Relative paths to images and masks directory determine as `images` and `labels` respectively. In way when images and masks are located in non default directories, you can use parameters described below.
+  * `images_dir` - path to images folder.
+  * `mask_dir` - path to ground truth mask folder.
+  * `images_subfolder` - sub-directory for images(Optional, default `images`)
+  * `mask_subfolder` - sub-directory for ground truth mask(Optional, default `labels`)
 * `vgg_face` - converts VGG Face 2 dataset for facial landmarks regression task to `FacialLandmarksAnnotation`.
   * `landmarks_csv_file` - path to csv file with coordinates of landmarks points.
   * `bbox_csv_file` - path to cvs file which contains bounding box coordinates for faces (optional parameter).
