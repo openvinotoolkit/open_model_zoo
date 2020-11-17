@@ -27,9 +27,9 @@ from .pipeline import AsyncPipeline, PipelineStep
 from .queue import Signal
 
 
-def run_pipeline(video, encoder, decoder, render_fn, decoder_seq_size=16, fps=30):
+def run_pipeline(video, encoder, decoder, render_fn, loop, decoder_seq_size=16, fps=30):
     pipeline = AsyncPipeline()
-    pipeline.add_step("Data", DataStep(video), parallel=False)
+    pipeline.add_step("Data", DataStep(video, loop), parallel=False)
     pipeline.add_step("Encoder", EncoderStep(encoder), parallel=False)
     pipeline.add_step("Decoder", DecoderStep(decoder, sequence_size=decoder_seq_size), parallel=False)
     pipeline.add_step("Render", RenderStep(render_fn, fps=fps), parallel=True)
@@ -41,15 +41,24 @@ def run_pipeline(video, encoder, decoder, render_fn, decoder_seq_size=16, fps=30
 
 class DataStep(PipelineStep):
 
-    def __init__(self, video_list, loop=True):
+    def __init__(self, video_list, loop):
         super().__init__()
         self.video_list = video_list
         self.cap = None
+        self.loop = loop
 
-        if loop:
+        if self.loop:
             self._video_cycle = cycle(self.video_list)
         else:
             self._video_cycle = iter(self.video_list)
+
+        try:
+            self._open_video()
+            if not self.loop:
+                self._video_cycle = iter(self.video_list)
+        except:
+            print("Error: The input video cannot be opened")
+            exit(1)
 
     def setup(self):
         self._open_video()
@@ -57,9 +66,11 @@ class DataStep(PipelineStep):
     def process(self, item):
         status, frame = self.cap.read()
         if not status:
-		    self._open_video()
-            status, frame = self.cap.read()
-            if not status:
+            if self.loop:
+                self._open_video()
+                self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                status, frame = self.cap.read()
+            else:
                 return Signal.STOP
         return frame
 

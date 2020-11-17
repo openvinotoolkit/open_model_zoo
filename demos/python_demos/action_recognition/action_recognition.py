@@ -59,6 +59,7 @@ def build_argparser():
     args.add_argument('--fps', help='Optional. FPS for renderer', default=30, type=int)
     args.add_argument('-lb', '--labels', help='Optional. Path to file with label names', type=str)
     args.add_argument('--no_show', action='store_true', help="Optional. Don't show output")
+    args.add_argument('--loop', default=False, action='store_true', help='Optional. Run video the video in cycle mode or not')
     args.add_argument('-s', '--smooth', dest='label_smoothing', help='Optional. Number of frames used for output label smoothing',
                       default=30, type=int)
     args.add_argument('-u', '--utilization-monitors', default='', type=str,
@@ -120,7 +121,7 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, 70)
     result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
-    run_pipeline(videos, encoder, decoder, result_presenter.render_frame, decoder_seq_size=decoder_seq_size, fps=args.fps)
+    run_pipeline(videos, encoder, decoder, result_presenter.render_frame, args.loop, decoder_seq_size=decoder_seq_size, fps=args.fps)
     print(presenter.reportMeans())
 
 
