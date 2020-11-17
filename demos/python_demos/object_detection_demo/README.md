@@ -52,7 +52,7 @@ usage: object_detection_demo.py [-h] -m MODEL -at
                                 {ssd,yolo,faceboxes,centernet,retina} -i INPUT
                                 [-d DEVICE] [--labels LABELS]
                                 [-t PROB_THRESHOLD] [--keep_aspect_ratio]
-                                [--sync] [-nireq NUM_INFER_REQUESTS]
+                                [-nireq NUM_INFER_REQUESTS]
                                 [-nstreams NUM_STREAMS]
                                 [-nthreads NUM_THREADS] [-loop] [-no_show]
                                 [-u UTILIZATION_MONITORS] [-r]
@@ -80,7 +80,6 @@ Common model options:
   --keep_aspect_ratio   Optional. Keeps aspect ratio on resize.
 
 Inference options:
-  --sync                Optional. Use synchronized pipeline.
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
                         Optional. Number of infer requests
   -nstreams NUM_STREAMS, --num_streams NUM_STREAMS

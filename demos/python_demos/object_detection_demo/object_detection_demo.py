@@ -31,7 +31,7 @@ sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'commo
 
 from models import *
 import monitors
-from pipelines import AsyncPipeline, SyncPipeline
+from pipelines import AsyncPipeline
 from performance_metrics import PerformanceMetrics
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
@@ -61,8 +61,6 @@ def build_argparser():
                                    help='Optional. Keeps aspect ratio on resize.')
 
     infer_args = parser.add_argument_group('Inference options')
-    infer_args.add_argument('--sync', action='store_true',
-                            help='Optional. Use synchronized pipeline.')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
                             default=1, type=int)
     infer_args.add_argument('-nstreams', '--num_streams',
@@ -222,12 +220,9 @@ def main():
     model = get_model(args.architecture_type, ie, args)
     has_landmarks = args.architecture_type == 'retina'
 
-    if args.sync:
-        detector_pipeline = SyncPipeline(ie, model, device=args.device)
-    else:
-        detector_pipeline = AsyncPipeline(ie, model, device=args.device,
-                                          plugin_config=plugin_config,
-                                          max_num_requests=args.num_infer_requests)
+    detector_pipeline = AsyncPipeline(ie, model, device=args.device,
+                                      plugin_config=plugin_config,
+                                      max_num_requests=args.num_infer_requests)
 
     try:
         input_stream = int(args.input)
@@ -251,27 +246,31 @@ def main():
 
     metrics = PerformanceMetrics()
 
-    if args.sync:
-        while cap.isOpened():
-            start_time = perf_counter()
-            ret, frame = cap.read()
-            if not ret:
-                if args.loop:
-                    cap.open(input_stream)
-                else:
-                    cap.release()
-                continue
+    while cap.isOpened():
+        start_time = perf_counter()
+        ret, frame = cap.read()
+        if not ret:
+            if args.loop:
+                cap.open(input_stream)
+            else:
+                cap.release()
+            continue
 
-            detections, _ = detector_pipeline.submit_data(frame)
+        detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+        next_frame_id += 1
 
-            if len(detections) and args.raw_output_message:
-                print_raw_results(frame.shape[:2], detections, model.labels, args.prob_threshold)
+        results = detector_pipeline.get_result(next_frame_id_to_show)
+        if results:
+            objects, frame_meta = results
+            frame = frame_meta['frame']
+            start_time = frame_meta['start_time']
+
+            if len(objects) and args.raw_output_message:
+                print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
 
             presenter.drawGraphs(frame)
-            frame = draw_detections(frame, detections, palette, model.labels, args.prob_threshold, has_landmarks)
-
+            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, has_landmarks)
             metrics.update(start_time, frame)
-
             if not args.no_show:
                 cv2.imshow('Detection Results', frame)
                 key = cv2.waitKey(1)
@@ -280,49 +279,15 @@ def main():
                 # Quit.
                 if key in {ord('q'), ord('Q'), ESC_KEY}:
                     break
-    else:
-        while cap.isOpened():
-            start_time = perf_counter()
-            ret, frame = cap.read()
-            if not ret:
-                if args.loop:
-                    cap.open(input_stream)
-                else:
-                    cap.release()
-                continue
+                presenter.handleKey(key)
+            next_frame_id_to_show += 1
 
-            detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
-            next_frame_id += 1
+        detector_pipeline.await_any()
 
-            results = detector_pipeline.get_result(next_frame_id_to_show)
-            if results:
-                objects, frame_meta = results
-                frame = frame_meta['frame']
-                start_time = frame_meta['start_time']
+        if detector_pipeline.callback_exceptions:
+            raise detector_pipeline.callback_exceptions[0]
 
-                if len(objects) and args.raw_output_message:
-                    print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
-
-                presenter.drawGraphs(frame)
-                frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, has_landmarks)
-                metrics.update(start_time, frame)
-                if not args.no_show:
-                    cv2.imshow('Detection Results', frame)
-                    key = cv2.waitKey(1)
-
-                    ESC_KEY = 27
-                    # Quit.
-                    if key in {ord('q'), ord('Q'), ESC_KEY}:
-                        break
-                    presenter.handleKey(key)
-                next_frame_id_to_show += 1
-
-            detector_pipeline.await_any()
-
-            if detector_pipeline.callback_exceptions:
-                raise detector_pipeline.callback_exceptions[0]
-
-        detector_pipeline.await_all()
+    detector_pipeline.await_all()
 
     metrics.print_total()
     print(presenter.reportMeans())
