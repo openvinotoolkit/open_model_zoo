@@ -306,11 +306,11 @@ class DLSDKLauncher(Launcher):
         for layer in custom_affinity:
             if layer not in automatic_affinity:
                 raise ConfigError('Layer \'{layer}\' is not present in network'.format(layer=layer))
-        if isinstance(ng, UnsupportedPackage):
-            if not hasattr(self.network, 'layers'):
-                ng.raise_error('affinity setting')
+        if hasattr(self.network, 'layers'):
             self._set_affinity_via_layers(custom_affinity, automatic_affinity)
             return
+        if isinstance(ng, UnsupportedPackage):
+            ng.raise_error('affinity setting')
         self._set_affinity_ng(custom_affinity, automatic_affinity)
 
     def _set_affinity_ng(self, custom_affinity, auto_affinity):

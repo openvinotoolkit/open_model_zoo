@@ -174,7 +174,6 @@ class TestDLSDKLauncherInfer:
         assert dlsdk_test_model.output_blob == 'fc3'
 
 
-
 class TestDLSDKLauncherAffinity:
     @pytest.mark.usefixtures('mock_affinity_map_exists')
     def test_dlsdk_launcher_valid_affinity_map(self, mocker, models_dir):
@@ -187,7 +186,7 @@ class TestDLSDKLauncherAffinity:
         dlsdk_test_model = get_dlsdk_test_model(models_dir, {
             'device': 'HETERO:CPU,GPU', 'affinity_map': './affinity_map.yml'
         })
-        if ng is None:
+        if hasattr(dlsdk_test_model.network, 'layers'):
             layers = dlsdk_test_model.network.layers
             for key, value in affinity_map.items():
                 assert layers[key].affinity == value
