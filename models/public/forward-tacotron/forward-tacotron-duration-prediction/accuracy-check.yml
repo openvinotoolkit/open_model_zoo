@@ -7,7 +7,7 @@ models:
         outputs:
           - duration
           - embeddings
-        allow_reshape_input: True
+        allow_reshape_input: False
     datasets:
       - name: tacotron-io-duration-prediction
         data_source: forward_tacotron_io

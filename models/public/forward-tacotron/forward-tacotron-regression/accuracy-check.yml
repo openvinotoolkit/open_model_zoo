@@ -6,7 +6,7 @@ models:
           type: multi_output_regression
         outputs:
           - mel
-        allow_reshape_input: True
+        allow_reshape_input: False
         inputs:
           - name: 'data'
             type: INPUT
