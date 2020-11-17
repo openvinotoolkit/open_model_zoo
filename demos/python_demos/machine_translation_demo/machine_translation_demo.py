@@ -221,7 +221,7 @@ def main(args):
 
     # loop on user's or prepared questions
     for sentence in sentences():
-        if not sentence or len(sentence.strip()) == 0:
+        if not sentence.strip():
             break
 
         try:

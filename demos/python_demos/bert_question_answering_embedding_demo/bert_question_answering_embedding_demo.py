@@ -265,7 +265,7 @@ def main():
 
     # loop on user's or prepared questions
     for question in questions():
-        if not question or len(question.strip()) == 0:
+        if not question.strip():
             break
 
         log.info("---Stage 1---Calc question embedding and compare with {} context embeddings".format(len(contexts_all)))
