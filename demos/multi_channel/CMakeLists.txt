@@ -20,7 +20,14 @@ if(MULTICHANNEL_DEMO_USE_NATIVE_CAM OR MULTICHANNEL_DEMO_USE_TBB)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
+# format reader must be added after find_package(InferenceEngine) to get
+# exactly the same OpenCV_DIR path which was used for the InferenceEngine build
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/common/format_reader")
+    add_subdirectory(common/format_reader)
+endif()
+
 add_subdirectory(common)
 add_subdirectory(face_detection_demo)
 add_subdirectory(human_pose_estimation_demo)
 add_subdirectory(object_detection_demo_yolov3)
+add_subdirectory(object_detection_demo_yolov4)
