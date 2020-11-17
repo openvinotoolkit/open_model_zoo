@@ -85,6 +85,8 @@ usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder
                                    [-o OUTPUT_FILE] --vocab_path VOCAB_PATH
                                    [--max_formula_len MAX_FORMULA_LEN]
                                    [--conf_thresh CONF_THRESH] [-d DEVICE]
+                                   [--camera_device CAMERA_DEVICE]
+                                   [--resolution RESOLUTION RESOLUTION]
                                    [--preprocessing_type {crop,resize}] [-pc]
                                    [--imgs_layer IMGS_LAYER]
                                    [--row_enc_out_layer ROW_ENC_OUT_LAYER]
@@ -128,6 +130,12 @@ Options:
                         GPU, FPGA, HDDL or MYRIAD is acceptable. Sample will
                         look for a suitable plugin for device specified.
                         Default value is CPU
+  --camera_device CAMERA_DEVICE
+                        Optional. Device id of the web-camera. Change it only
+                        if you have more then one camera
+  --resolution RESOLUTION RESOLUTION
+                        Optional. Resolution of the demo application window.
+                        Default: (1280, 720)
   --preprocessing_type {crop,resize}
                         Optional. Type of the preprocessing
   -pc, --perf_counts
