@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
                         cv::imshow("Detection Results", outFrame);
 
                         //--- Processing keyboard events
-                        auto key = cv::waitKey(1);
+                        int key = cv::waitKey(1);
                         if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                             keepRunning = false;
                         }
