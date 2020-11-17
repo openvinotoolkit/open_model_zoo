@@ -70,7 +70,6 @@ protected:
     /// @returns InferenceResult with processed information or empty InferenceResult (with negative frameID) if there's no any results yet.
     virtual InferenceResult getInferenceResult();
 
-protected:
     std::unique_ptr<RequestsPool> requestsPool;
     std::unordered_map<int64_t, InferenceResult> completedInferenceResults;
 
