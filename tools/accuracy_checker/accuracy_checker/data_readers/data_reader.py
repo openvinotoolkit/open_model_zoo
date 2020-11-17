@@ -454,8 +454,8 @@ class NumpyDictReader(BaseReader):
             identifier.append('{}.{}'.format(data_id, key))
             data.append(value)
         if len(data) == 1:
-            return DataRepresentation(data[0], data_id)
-        return DataRepresentation(data, identifier)
+            return DataRepresentation(data[0], identifier=data_id)
+        return DataRepresentation(data, identifier=identifier)
 
 
 class TensorflowImageReader(BaseReader):

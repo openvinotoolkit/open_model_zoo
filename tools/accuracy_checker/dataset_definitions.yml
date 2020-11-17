@@ -210,6 +210,15 @@ datasets:
     annotation: mapillary_20.pickle
     dataset_meta: mapillary_20.json
 
+  - name: mapillary_vistas
+    data_source: mapillary_vistas/validation/images
+    segmentation_masks_source: mapillary_vistas/validation/labels
+    annotation_conversion:
+      converter: mapillary_vistas
+      data_dir: mapillary_vistas/validation
+    annotation: mapillary_vistas.pickle
+    dataset_meta: mapillary_vistas.json
+
   - name: wider
     data_source: WIDER_val/images
     annotation_conversion:

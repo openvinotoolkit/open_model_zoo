@@ -851,32 +851,28 @@ class DLSDKLauncher(Launcher):
         if len(layer_shape) == 4:
             if len(data_shape) == 5:
                 data = data[0]
-
             if len(data_shape) < 4:
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
             return np.transpose(data, layout)
-
         if len(layer_shape) == 2:
             if len(data_shape) == 1:
                 return np.transpose([data])
             if len(data_shape) > 2:
+                if all([dim == 1 for dim in layer_shape]) and all([dim == 1 for dim in data_shape]):
+                    return np.resize(data, layer_shape)
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
-
         if len(layer_shape) == 3 and len(data_shape) == 4:
             data = np.transpose(data, layout)
             return data[0]
-
         if len(layer_shape) == len(layout):
             return np.transpose(data, layout)
-
         if (
                 len(layer_shape) == 1 and len(data_shape) > 1 and
                 len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape)))
         ):
             return np.resize(data, layer_shape)
-
         return np.array(data)
 
     def _set_precision(self):
@@ -918,7 +914,6 @@ class DLSDKLauncher(Launcher):
             layer_shape = self.inputs[lstm_var].shape
             input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(layer_shape)
             feed_dict[lstm_var] = input_data
-
         return feed_dict
 
     def _print_input_output_info(self):
