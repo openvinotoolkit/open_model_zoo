@@ -1,6 +1,6 @@
 # Copyright (c) 2019 Intel Corporation
 #
-# Licensed under the Apache License, Version 2.0 (the 'License");
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -14,7 +14,6 @@
 
 import itertools
 import sys
-from pathlib import Path
 
 from args import *
 from data_sequences import DATA_SEQUENCES
@@ -429,11 +428,9 @@ PYTHON_DEMOS = [
                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
                '--output-name': 'pred',
                '-i': [
-                   'A robot may not injure a human being or, through inaction, allow a human being to come to harm.',
-                   'A robot must obey orders given it by human beings except where such orders would conflict with the '
-                   'First Law.',
-                   'A robot must protect its own existence as long as such protection does not conflict with the First'
-                   ' or Second Law.'
+                   'The quick brown fox jumps over the lazy dog.',
+                   'The five boxing wizards jump quickly.',
+                   'Jackdaws love my big sphinx of quartz.'
                ],
            }),
            TestCase(options={
@@ -442,12 +439,9 @@ PYTHON_DEMOS = [
                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
                '--output-name': 'pred',
                '-i': [
-                   'Робот не может причинить вред человеку или своим бездействием допустить, чтобы человеку был '
-                   'причинён вред.',
-                   'Робот должен повиноваться всем приказам, которые даёт человек, кроме тех случаев, когда эти '
-                   'приказы противоречат Первому Закону.',
-                   'Робот должен заботиться о своей безопасности в той мере, в которой это не противоречит Первому '
-                   'или Второму Законам.'
+                   'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
+                   'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',
+                   'Съешь же ещё этих мягких французских булок да выпей чаю..'
                ],
            }),
        ]

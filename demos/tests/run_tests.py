@@ -167,7 +167,6 @@ def main():
 
             with temp_dir_as_path() as temp_dir:
                 arg_context = ArgContext(
-                    omz_dir=omz_dir,
                     source_dir=demos_dir / demo.subdirectory,
                     dl_dir=dl_dir,
                     data_sequence_dir=temp_dir / 'data_seq',
