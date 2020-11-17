@@ -39,11 +39,13 @@ class GTMaskLoader(Enum):
     NIFTI = 3
     NUMPY = 4
     NIFTI_CHANNELS_FIRST = 5
+    PILLOW_CONVERT_TO_RGB = 6
 
 
 LOADERS_MAPPING = {
     'opencv': GTMaskLoader.OPENCV,
     'pillow': GTMaskLoader.PILLOW,
+    'pillow_convert_to_rgb': GTMaskLoader.PILLOW_CONVERT_TO_RGB,
     'scipy': GTMaskLoader.SCIPY,
     'nifti': GTMaskLoader.NIFTI,
     'nifti_channels_first': GTMaskLoader.NIFTI_CHANNELS_FIRST,
@@ -58,6 +60,7 @@ class SegmentationRepresentation(BaseRepresentation):
 class SegmentationAnnotation(SegmentationRepresentation):
     LOADERS = {
         GTMaskLoader.PILLOW: 'pillow_imread',
+        GTMaskLoader.PILLOW_CONVERT_TO_RGB: {'type': 'pillow_imread', 'convert_to_rgb': True},
         GTMaskLoader.OPENCV: 'opencv_imread',
         GTMaskLoader.SCIPY: 'scipy_imread',
         GTMaskLoader.NIFTI: 'nifti_reader',

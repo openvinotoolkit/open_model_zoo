@@ -89,7 +89,7 @@ from .dna_seq import DNASequenceDatasetConverter
 from .place_recognition import PlaceRecognitionDatasetConverter
 from .cluttered_mnist import ClutteredMNISTConverter
 from .mpii import MPIIDatasetConverter
-from .mapillary_20 import Mapillary20Converter
+from .mapillary_20 import Mapillary20Converter, MapillaryVistasConverter
 from .antispoofing import AntispoofingDatasetConverter
 from .sound_classification_converter import SoundClassificationFormatConverter
 from .salient_object_detection import SalientObjectDetectionConverter
@@ -123,6 +123,7 @@ __all__ = [
     'MSCocoDetectionConverter',
     'CityscapesConverter',
     'Mapillary20Converter',
+    'MapillaryVistasConverter',
     'MovieLensConverter',
     'BratsConverter',
     'BratsNumpyConverter',
