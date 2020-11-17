@@ -68,15 +68,11 @@ def build_argparser():
 
 def main():
     args = build_argparser().parse_args()
-
     input_path = args.input
-    
     if not input_path:
         raise ValueError('--input option is expected')
-    
     if not path.isfile(input_path):
         raise ValueError('The input file does not exists')
-    
     video = [input_path]
 
     if args.labels:
