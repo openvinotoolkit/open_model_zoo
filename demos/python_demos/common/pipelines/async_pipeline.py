@@ -34,7 +34,7 @@ class SyncPipeline:
 
 
 class AsyncPipeline:
-    def __init__(self, ie, model, *, logger=None, device='CPU', plugin_config={}, max_num_requests=1,
+    def __init__(self, ie, model, logger=None, device='CPU', plugin_config={}, max_num_requests=1,
                  completed_requests=None, caught_exceptions=None):
         self.model = model
         self.logger = logger
