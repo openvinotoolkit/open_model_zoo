@@ -23,9 +23,8 @@ CONFIDENCE_THRESH = 0.95
 
 
 class InteractiveDemo:
-    def __init__(self, input_model_shape, resolution=DEFAULT_RESOLUTION, device_id=0):
-        self._resolution = resolution
-        self._device_id = device_id
+    def __init__(self, input_model_shape, resolution=DEFAULT_RESOLUTION):
+        self.resolution = resolution
         self._tgt_shape = input_model_shape
         self.start_point, self.end_point = self._create_input_window()
         self._prev_rendered_formula = None
@@ -33,30 +32,19 @@ class InteractiveDemo:
         self._latex_h = 0
         self._renderer = create_renderer()
 
-    def __enter__(self):
-        self.capture = cv.VideoCapture(self._device_id)
-        self.capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
-        self.capture.set(3, self._resolution[0])
-        self.capture.set(4, self._resolution[1])
-        return self
-
-    def get_frame(self):
-        ret, frame = self.capture.read()
-        return frame
-
     def _create_input_window(self):
         aspect_ratio = self._tgt_shape[0] / self._tgt_shape[1]
         default_width = DEFAULT_WIDTH
         height = int(default_width * aspect_ratio)
-        start_point = (int(self._resolution[0] / 2 - default_width / 2), int(self._resolution[1] / 2 - height / 2))
-        end_point = (int(self._resolution[0] / 2 + default_width / 2), int(self._resolution[1] / 2 + height / 2))
+        start_point = (int(self.resolution[0] / 2 - default_width / 2), int(self.resolution[1] / 2 - height / 2))
+        end_point = (int(self.resolution[0] / 2 + default_width / 2), int(self.resolution[1] / 2 + height / 2))
         return start_point, end_point
 
     def get_crop(self, frame):
         crop = frame[self.start_point[1]:self.end_point[1], self.start_point[0]:self.end_point[0], :]
         return crop
 
-    def draw_rectangle(self, frame):
+    def _draw_rectangle(self, frame):
         frame = cv.rectangle(frame, self.start_point, self.end_point, color=RED, thickness=2)
         return frame
 
@@ -81,7 +69,7 @@ class InteractiveDemo:
         else:
             raise ValueError(f"wrong action: {action}")
 
-    def put_text(self, frame, text):
+    def _put_text(self, frame, text):
         if text == '':
             return frame
         text = strip_internal_spaces(text)
@@ -107,7 +95,7 @@ class InteractiveDemo:
                            fontScale=0.7, color=COLOR_WHITE, thickness=2, lineType=cv.LINE_AA)
         return frame
 
-    def put_formula_img(self, frame, formula):
+    def _put_formula_img(self, frame, formula):
         if self._renderer is None or formula == '':
             return frame
         formula_img = self._render_formula_async(formula)
@@ -144,10 +132,11 @@ class InteractiveDemo:
         self._prev_formula_img = formula_img
         return formula_img
 
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        self.capture.release()
-        cv.destroyAllWindows()
-
+    def draw(self, frame, phrase):
+        frame = self._put_text(frame, phrase)
+        frame = self._put_formula_img(frame, phrase)
+        frame = self._draw_rectangle(frame)
+        return frame
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -177,6 +166,9 @@ def build_argparser():
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU", type=str)
+    args.add_argument("--camera_device", default=0, type=int,
+                      help='Optional. Device id of the web-camera. Change it only if you have more then one camera')
+    args.add_argument("--resolution", default=DEFAULT_RESOLUTION, type=int, nargs=2)
     args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
                       help="Optional. Type of the preprocessing", default='crop')
     args.add_argument('-pc', '--perf_counts',
@@ -216,70 +208,83 @@ def main():
 
     log.info("Starting inference")
     args = build_argparser().parse_args()
-    assert bool(args.interactive) != bool(args.input), "--interactive option is mutually exclive with -i/--input"
+    assert bool(args.interactive) != bool(args.input), "Choose only one option from [--interactive] and [-i/--input]"
     model = Model(args)
     if not args.interactive:
-        renderer = create_renderer()
-        for rec in tqdm(model.images_list):
-            image = rec['img']
-            logits, targets = model.infer_sync(image)
+        non_interactive_demo(model, args)
+        return
+
+    *_, height, width = model.encoder.input_info['imgs'].input_data.shape
+    prev_text = ''
+    demo = InteractiveDemo((height, width), resolution=args.resolution)
+    capture = create_capture(args, demo.resolution)
+    while True:
+        ret, frame = capture.read()
+        bin_crop = demo.get_crop(frame)
+        model_input = prerocess_crop(bin_crop, (height, width), preprocess_type=args.preprocessing_type)
+        frame = demo.put_crop(frame, model_input)
+        model_res = model.infer_async(model_input)
+        if not model_res:
+            phrase = prev_text
+        else:
+            logits, targets = model_res
             prob = calculate_probability(logits)
             log.info("Confidence score is %s", prob)
-            if prob >= args.conf_thresh:
+            if prob >= args.conf_thresh ** len(logits):
+                log.info("Prediction updated")
                 phrase = model.vocab.construct_phrase(targets)
-                if args.output_file:
-                    with open(args.output_file, 'a') as output_file:
-                        output_file.write(rec['img_name'] + '\t' + phrase + '\n')
-                else:
-                    print("\n\tImage name: {}\n\tFormula: {}\n".format(rec['img_name'], phrase))
-                    if renderer is not None:
-                        rendered_formula, _ = renderer.render(phrase)
-                        if rendered_formula is not None:
-                            cv.imshow("Predicted formula", rendered_formula)
-                            cv.waitKey(0)
-        if args.perf_counts:
-            log.info("Encoder performance statistics")
-            print_stats(model.exec_net_encoder)
-            log.info("Decoder performance statistics")
-            print_stats(model.exec_net_decoder)
-    else:
+            else:
+                log.info("Confidence score is low, prediction is not complete")
+                phrase = ''
+        frame = demo.draw(frame, phrase)
+        prev_text = phrase
+        cv.imshow('Press q to quit.', frame)
+        key = cv.waitKey(1) & 0xFF
+        if key == ord('q'):
+            break
+        elif key == ord('o'):
+            demo.resize_window("decrease")
+        elif key == ord('p'):
+            demo.resize_window("increase")
 
-        *_, height, width = model.encoder.input_info['imgs'].input_data.shape
-        prev_text = ''
-        with InteractiveDemo((height, width)) as demo:
-            while True:
-                frame = demo.get_frame()
-                bin_crop = demo.get_crop(frame)
-                model_input = prerocess_crop(bin_crop, (height, width), preprocess_type=args.preprocessing_type)
-                frame = demo.put_crop(frame, model_input)
-                model_res = model.infer_async(model_input)
-                if not model_res:
-                    phrase = prev_text
-                else:
-                    logits, targets = model_res
-                    prob = calculate_probability(logits)
-                    log.info("Confidence score is %s", prob)
-                    if prob >= args.conf_thresh ** len(logits):
-                        log.info("Prediction updated")
-                        phrase = model.vocab.construct_phrase(targets)
-                    else:
-                        log.info("Confidence score is low, prediction is not complete")
-                        phrase = ''
-                frame = demo.put_text(frame, phrase)
-                frame = demo.put_formula_img(frame, phrase)
-                prev_text = phrase
-                frame = demo.draw_rectangle(frame)
-                cv.imshow('Press Q to quit.', frame)
-                key = cv.waitKey(1) & 0xFF
-                if key == ord('q'):
-                    break
-                elif key == ord('o'):
-                    demo.resize_window("decrease")
-                elif key == ord('p'):
-                    demo.resize_window("increase")
-
+    capture.release()
+    cv.destroyAllWindows()
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
              "from the openVINO toolkit\n")
+
+
+def create_capture(args, demo_resolution):
+    capture = cv.VideoCapture(args.camera_device)
+    capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
+    capture.set(3, demo_resolution[0])
+    capture.set(4, demo_resolution[1])
+    return capture
+
+
+def non_interactive_demo(model, args):
+    renderer = create_renderer()
+    for rec in tqdm(model.images_list):
+        image = rec['img']
+        logits, targets = model.infer_sync(image)
+        prob = calculate_probability(logits)
+        log.info("Confidence score is %s", prob)
+        if prob >= args.conf_thresh:
+            phrase = model.vocab.construct_phrase(targets)
+            if args.output_file:
+                with open(args.output_file, 'a') as output_file:
+                    output_file.write(rec['img_name'] + '\t' + phrase + '\n')
+            else:
+                print("\n\tImage name: {}\n\tFormula: {}\n".format(rec['img_name'], phrase))
+                if renderer is not None:
+                    rendered_formula, _ = renderer.render(phrase)
+                    if rendered_formula is not None:
+                        cv.imshow("Predicted formula", rendered_formula)
+                        cv.waitKey(0)
+    if args.perf_counts:
+        log.info("Encoder performance statistics")
+        print_stats(model.exec_net_encoder)
+        log.info("Decoder performance statistics")
+        print_stats(model.exec_net_decoder)
 
 
 if __name__ == '__main__':
