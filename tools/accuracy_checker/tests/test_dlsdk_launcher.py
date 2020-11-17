@@ -46,6 +46,13 @@ def no_available_myriad():
     except:
         return True
 
+def has_layers():
+    try:
+        from openvino.inference_engine import IENetwork
+        return hasattr(IENetwork, 'layers')
+    except:
+        return False
+
 
 @pytest.fixture()
 def mock_inference_engine(mocker):
@@ -173,11 +180,15 @@ class TestDLSDKLauncherInfer:
         dlsdk_test_model.predict([{'data': input_blob.astype(np.float32)}], [image.metadata])
         assert dlsdk_test_model.output_blob == 'fc3'
 
-
+@pytest.mark.skipif(ng is None and not has_layers(), reason='no functionality to set affinity')
 class TestDLSDKLauncherAffinity:
     @pytest.mark.usefixtures('mock_affinity_map_exists')
     def test_dlsdk_launcher_valid_affinity_map(self, mocker, models_dir):
-        affinity_map = {'conv1': 'GPU', 'conv1/Dims294/copy_const': 'GPU'}
+        affinity_map = {'conv1': 'GPU'}
+        if not has_layers():
+            affinity_map.update({
+                'conv1/Dims294/copy_const': 'GPU'
+            })
 
         mocker.patch(
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
@@ -186,7 +197,7 @@ class TestDLSDKLauncherAffinity:
         dlsdk_test_model = get_dlsdk_test_model(models_dir, {
             'device': 'HETERO:CPU,GPU', 'affinity_map': './affinity_map.yml'
         })
-        if hasattr(dlsdk_test_model.network, 'layers'):
+        if has_layers():
             layers = dlsdk_test_model.network.layers
             for key, value in affinity_map.items():
                 assert layers[key].affinity == value
