@@ -331,7 +331,11 @@ class SSDONNXAdapter(Adapter):
                 x_mins, y_mins, x_maxs, y_maxs = bboxes.T
             else:
                 x_mins, y_mins, x_maxs, y_maxs, scores = bboxes.T
-            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
+            results.append(
+                DetectionPrediction(
+                    identifier,
+                    np.squeeze(labels), np.squeeze(scores),
+                    np.squeeze(x_mins), np.squeeze(y_mins), np.squeeze(x_maxs), np.squeeze(y_maxs)))
 
         return results
 
