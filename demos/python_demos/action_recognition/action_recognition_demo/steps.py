@@ -41,21 +41,21 @@ def run_pipeline(video, encoder, decoder, render_fn, loop, decoder_seq_size=16, 
 
 class DataStep(PipelineStep):
 
-    def __init__(self, video_list, loop):
+    def __init__(self, video_filepath, loop):
         super().__init__()
-        self.video_list = video_list
+        self.video = video_filepath
         self.cap = None
         self.loop = loop
 
         if self.loop:
-            self._video_cycle = cycle(self.video_list)
+            self._video_cycle = cycle(self.video)
         else:
-            self._video_cycle = iter(self.video_list)
+            self._video_cycle = iter(self.video)
 
         try:
             self._open_video()
             if not self.loop:
-                self._video_cycle = iter(self.video_list)
+                self._video_cycle = iter(self.video)
         except:
             print("Error: The input video cannot be opened")
             exit(1)
