@@ -138,6 +138,7 @@ class InteractiveDemo:
         frame = self._draw_rectangle(frame)
         return frame
 
+
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
@@ -168,7 +169,8 @@ def build_argparser():
                       default="CPU", type=str)
     args.add_argument("--camera_device", default=0, type=int,
                       help='Optional. Device id of the web-camera. Change it only if you have more then one camera')
-    args.add_argument("--resolution", default=DEFAULT_RESOLUTION, type=int, nargs=2)
+    args.add_argument("--resolution", default=DEFAULT_RESOLUTION, type=int, nargs=2,
+                      help=f'Optional. Resolution of the demo application window. Default: {DEFAULT_RESOLUTION}')
     args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
                       help="Optional. Type of the preprocessing", default='crop')
     args.add_argument('-pc', '--perf_counts',
