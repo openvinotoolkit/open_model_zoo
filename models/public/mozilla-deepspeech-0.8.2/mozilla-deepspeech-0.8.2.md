@@ -29,7 +29,7 @@ For details on this model, see <https://github.com/mozilla/DeepSpeech/releases/t
 | WER @ LibriSpeech test-clean | **6.15%**  | with LM, **beam_width = 500**, C++ CTC decoder, demo             |
 
 *NB*: beam_width=32 is a low value for a CTC decoder, and was used to achieve reasonable evaluation time with Python CTC decoder in Accuracy Checker.
-Increasing beam_width improves WER metric and slows down decoding.  Speech recognition demo has a faster C++ CTC decoder module.
+Increasing beam_width improves WER metric and slows down decoding. Speech recognition demo has a faster C++ CTC decoder module.
 
 ## Input
 
@@ -38,7 +38,7 @@ Increasing beam_width improves WER metric and slows down decoding.  Speech recog
  1. Audio MFCC coefficients, name: `input_node` , shape: [1x16x19x26], format: [BxNxTxC], where:
 
     - B - batch size, fixed to 1
-    - N = `input_lengths` (see below) - number of audio frames in this section of audio
+    - N - `input_lengths` (see below) - number of audio frames in this section of audio
     - T - context frames: along with the current frame, the network expects 9 preceding frames and 9 succeeding frames. The absent context frames are filled with zeros.
     - C - 26 MFCC coefficients per each frame
 
