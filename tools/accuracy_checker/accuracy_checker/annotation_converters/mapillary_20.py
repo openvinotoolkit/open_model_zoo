@@ -65,6 +65,9 @@ class MapillaryBaseConverter(BaseFormatConverter):
         self.images_dir = get_path(images_path, is_directory=True)
         self.mask_dir = get_path(mask_path, is_directory=True)
 
+    def convert(self, *args, **kwargs):
+        pass
+
 
 class Mapillary20Converter(MapillaryBaseConverter):
     __provider__ = 'mapillary_20'
