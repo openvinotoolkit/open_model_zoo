@@ -524,7 +524,7 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(subdirectory='text_spotting_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None, '--delay': 1, **MONITORS,
+        TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
                           '-i': DataPatternArg('text-detection')}),
         [
             TestCase(options={
