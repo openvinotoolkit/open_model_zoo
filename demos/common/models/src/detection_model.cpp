@@ -27,8 +27,7 @@ DetectionModel::DetectionModel(const std::string& modelFileName, float confidenc
     confidenceThreshold(confidenceThreshold) {
 }
 
-std::shared_ptr<InternalModelData> DetectionModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request)
-{
+std::shared_ptr<InternalModelData> DetectionModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& img = inputData.asRef<ImageInputData>().inputImage;
 
     if (useAutoResize) {

@@ -140,8 +140,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 }
 
 // Input image is stored inside metadata, as we put it there during submission stage
-cv::Mat renderDetectionData(const DetectionResult& result)
-{
+cv::Mat renderDetectionData(const DetectionResult& result) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -189,16 +188,13 @@ int main(int argc, char *argv[]) {
             labels = DetectionModel::loadLabels(FLAGS_labels);
 
         std::unique_ptr<ModelBase> model;
-        if (FLAGS_at=="ssd")
-        {
+        if (FLAGS_at=="ssd") {
             model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
-        else if (FLAGS_at=="yolo")
-        {
+        else if (FLAGS_at=="yolo") {
             model.reset(new ModelYolo3(FLAGS_m,(float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, labels));
         }
-        else
-        {
+        else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
         }

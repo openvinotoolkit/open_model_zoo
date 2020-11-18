@@ -27,8 +27,7 @@ ModelSSD::ModelSSD(const std::string& modelFileName,
     :DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
 }
 
-void ModelSSD::onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, const std::vector<InferenceEngine::InferRequest::Ptr>& requests)
-{
+void ModelSSD::onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, const std::vector<InferenceEngine::InferRequest::Ptr>& requests) {
     DetectionModel::onLoadCompleted(execNetwork, requests);
 
     // --- Setting image info for every request in a pool. We can do it once and reuse this info at every submit -------
@@ -44,8 +43,7 @@ void ModelSSD::onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, 
     }
 }
 
-std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult)
-{
+std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
     LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
     const float *detections = outputMapped.as<float*>();
 

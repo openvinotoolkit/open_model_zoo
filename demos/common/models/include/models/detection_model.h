@@ -18,8 +18,7 @@
 #include "opencv2/core.hpp"
 
 class DetectionModel :
-    public ModelBase
-{
+    public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load

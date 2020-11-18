@@ -17,8 +17,7 @@
 #pragma once
 #include "detection_model.h"
 class ModelSSD :
-    public DetectionModel
-{
+    public DetectionModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load

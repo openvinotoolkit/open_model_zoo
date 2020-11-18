@@ -131,8 +131,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     return frameID;
 }
 
-std::unique_ptr<ResultBase> AsyncPipeline::getResult()
-{
+std::unique_ptr<ResultBase> AsyncPipeline::getResult() {
     auto infResult = AsyncPipeline::getInferenceResult();
     if (infResult.IsEmpty()) {
         return std::unique_ptr<ResultBase>();
@@ -144,17 +143,14 @@ std::unique_ptr<ResultBase> AsyncPipeline::getResult()
     return result;
 }
 
-InferenceResult AsyncPipeline::getInferenceResult()
-{
+InferenceResult AsyncPipeline::getInferenceResult() {
     InferenceResult retVal;
-
     {
         std::lock_guard<std::mutex> lock(mtx);
 
         const auto& it = completedInferenceResults.find(outputFrameId);
 
-        if (it != completedInferenceResults.end())
-        {
+        if (it != completedInferenceResults.end()) {
             retVal = std::move(it->second);
             completedInferenceResults.erase(it);
         }

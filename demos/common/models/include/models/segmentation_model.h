@@ -19,8 +19,7 @@
 
 #pragma once
 class SegmentationModel :
-    public ModelBase
-{
+    public ModelBase {
 public:
     /// Constructor
     /// @param model_nameFileName of model to load

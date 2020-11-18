@@ -120,8 +120,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-cv::Mat applyColorMap(cv::Mat input)
-{
+cv::Mat applyColorMap(cv::Mat input) {
     // Initializing colors array if needed
     static cv::Mat colors;
     static std::mt19937 rng;
@@ -133,7 +132,7 @@ cv::Mat applyColorMap(cv::Mat input)
         for (; i < arraySize(CITYSCAPES_COLORS); ++i) {
             colors.at<cv::Vec3b>(i, 0) = { CITYSCAPES_COLORS[i].blue(), CITYSCAPES_COLORS[i].green(), CITYSCAPES_COLORS[i].red() };
         }
-        for (; i < colors.cols; ++i) {
+        for (; i < (std::size_t)colors.cols; ++i) {
             colors.at<cv::Vec3b>(i, 0) = cv::Vec3b(distr(rng), distr(rng), distr(rng));
         }
     }

@@ -27,8 +27,7 @@ namespace ngraph {
 }
 
 class ModelYolo3 :
-    public DetectionModel
-{
+    public DetectionModel {
 protected:
     class Region {
     public:

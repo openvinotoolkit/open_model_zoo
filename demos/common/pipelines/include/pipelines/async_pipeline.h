@@ -26,8 +26,7 @@
 
 /// This is base class for asynchronous pipeline
 /// Derived classes should add functions for data submission and output processing
-class AsyncPipeline
-{
+class AsyncPipeline {
 public:
     /// Loads model and performs required initialization
     /// @param modelInstance pointer to model object. Object it points to should not be destroyed manually after passing pointer to this function.

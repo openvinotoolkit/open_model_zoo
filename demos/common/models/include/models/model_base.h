@@ -18,8 +18,7 @@
 #include "input_data.h"
 #include "results.h"
 
-class ModelBase
-{
+class ModelBase {
 public:
     ModelBase(const std::string& modelFileName) { this->modelFileName = modelFileName; }
     virtual ~ModelBase() {}

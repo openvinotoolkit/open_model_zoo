@@ -65,8 +65,7 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     }
 }
 
-std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr & request)
-{
+std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr & request) {
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 

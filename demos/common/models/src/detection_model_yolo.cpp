@@ -86,8 +86,7 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     }
 }
 
-std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult)
-{
+std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult) {
     DetectionResult* result = new DetectionResult;
 
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
@@ -107,8 +106,7 @@ std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult)
     for (const auto& obj1 : objects) {
         bool isGoodResult = true;
         for (const auto& obj2 : objects) {
-            if (obj1.confidence < obj2.confidence && intersectionOverUnion(obj1, obj2) >= boxIOUThreshold) // if obj1 is the same as obj2, condition expression will evaluate to false anyway
-            {
+            if (obj1.confidence < obj2.confidence && intersectionOverUnion(obj1, obj2) >= boxIOUThreshold) { // if obj1 is the same as obj2, condition expression will evaluate to false anyway
                 isGoodResult = false;
                 break;
             }
@@ -202,8 +200,7 @@ double ModelYolo3::intersectionOverUnion(
     return intersectionArea / unionArea;
 }
 
-ModelYolo3::Region::Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo)
-{
+ModelYolo3::Region::Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo) {
     coords = regionYolo->get_num_coords();
     classes = regionYolo->get_num_classes();
     auto mask = regionYolo->get_mask();

@@ -25,8 +25,7 @@
 
 /// This is class storing requests pool for asynchronous pipeline
 ///
-class RequestsPool
-{
+class RequestsPool {
 public:
     RequestsPool(InferenceEngine::ExecutableNetwork& execNetwork, unsigned int size);
 
