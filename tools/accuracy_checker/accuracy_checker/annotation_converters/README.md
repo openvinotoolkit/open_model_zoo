@@ -433,6 +433,17 @@ The main difference between this converter and `super_resolution` in data organi
 * `wflw` - converts WFLW dataset for facial landmarks regression task to `FacialLandmarksAnnotation`.
   * `annotation_file` - path to txt file with ground truth data in WFLW dataset format.
   * `images_dir` - path to dataset images, used only for content existence check (optional parameter).
+* `common_object_detection` - converts object detection dataset to `DetectionAnnotation`. Dataset should be stored in following format:
+  1. labels_map defined as text file, where defined labels line by line.
+  2. annotations for each image stored in separated text file. Box is represented by space separated info: <label_id> <x_min> <y_min> <x_max> <y_max>.
+  3. name of annotation file the same like image name (or additional file with file mapping should be defined).
+  * `annotation_dir` - path to directory with annotation files.
+  * `images_dir` - path to directory with images (Optional, used only for content check step).
+  * `labels_file` - path to file with labels.
+  * `pairs_file` - path to file where described image and annotation file pairs (Optional, if not provided list will be created according to annotation_dir content).
+  * `has_background` - flag that background label should be added to label_map (Optional, default False).
+  * `add_background_to_label_id` - flag that label_ids defined in annotation should be shifted if `has_background` enabled.
+
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
