@@ -816,3 +816,36 @@ class FasterRCNNONNX(Adapter):
         boxes[:, 1::2] /= im_scale_y
         x_mins, y_mins, x_maxs, y_maxs = boxes.T
         return [DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs)]
+
+
+class TwoStageDetector(Adapter):
+    __provider__ = 'two_stage_detection'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'boxes_out': StringField(description='boxes output'),
+            'cls_out': StringField(description='classes confidence output')
+        })
+        return params
+
+    def configure(self):
+        self.boxes_out = self.get_value_from_config('boxes_out')
+        self.cls_out = self.get_value_from_config('cls_out')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_output = self._extract_predictions(raw, frame_meta)
+        boxes_outputs = raw_output[self.boxes_out]
+        if len(boxes_outputs.shape) == 2:
+            boxes_outputs = np.expand_dims(boxes_outputs, 0)
+        conf_outputs = raw_output[self.cls_out]
+        if len(conf_outputs.shape) == 2:
+            conf_outputs = np.expand_dims(conf_outputs, 0)
+        result = []
+        for identifier, boxes, conf in zip(identifiers, boxes_outputs, conf_outputs):
+            x_mins, y_mins, w, h = boxes.T
+            labels = np.argmax(conf, axis=1)
+            scores = np.max(conf, axis=1)
+            result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_mins + w, y_mins + h))
+        return result

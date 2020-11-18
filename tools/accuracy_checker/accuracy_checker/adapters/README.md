@@ -330,3 +330,6 @@ AccuracyChecker supports following set of adapters:
   * `flow_out` - target output layer name.
 * `salient_object_detection` - converts output of salient object detection model to `SalientRegionPrediction`
   * `salient_map_output` - target output layer for getting salience map (Optional, if not provided default output blob will be used).
+* `two_stage_detection` - converts output of 2-stage detector to `DetectionPrediction`.
+  * `boxes_out` - output with bounding boxes in format BxNx[x_min, y_min, width, height], where B - network batch size, N - number of detected boxes.
+  * `cls_out` - output with classification probabilities in format [BxNxC], where B - network batch size, N - number of detected boxes, C - number of classed.
