@@ -210,7 +210,6 @@ def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s",
                     level=log.INFO, stream=sys.stdout)
 
-    log.info("Starting inference")
     args = build_argparser().parse_args()
     assert bool(args.interactive) != bool(args.input), "Choose only one option from [--interactive] and [-i/--input]"
     model = Model(args)
@@ -268,6 +267,7 @@ def create_capture(args, demo_resolution):
 def non_interactive_demo(model, args):
     renderer = create_renderer()
     for rec in tqdm(model.images_list):
+        log.info("Starting inference for %s", rec['img_name'])
         image = rec['img']
         logits, targets = model.infer_sync(image)
         prob = calculate_probability(logits)
