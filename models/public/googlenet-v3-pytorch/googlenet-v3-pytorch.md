@@ -26,8 +26,8 @@ matching with those in the ImageNet database.
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 77.45%|
-| Top 5  | 93.56%|
+| Top 1  | 77.69%|
+| Top 5  | 93.7%|
 
 ## Input
 
@@ -43,7 +43,7 @@ Image, name - `data`, shape - [1x3x299x299], format [BxCxHxW],
 
 Expected color order - `RGB`.
 
-Mean values - [127.5, 127.5, 127.5], scale factor for each channel - 127.5
+Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
 
 ### Converted model
 
