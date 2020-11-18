@@ -153,7 +153,7 @@ def build_argparser():
     args.add_argument("-i", "--input", help="Optional. Path to a folder with images or path to an image files",
                       required=False, type=str)
     args.add_argument("-o", "--output_file",
-                      help="Optional. Path to file where to store output. If not mentioned, result will be stored"
+                      help="Optional. Path to file where to store output. If not mentioned, result will be stored "
                       "in the console.",
                       type=str)
     args.add_argument("--vocab_path", help="Required. Path to vocab file to construct meaningful phrase",
