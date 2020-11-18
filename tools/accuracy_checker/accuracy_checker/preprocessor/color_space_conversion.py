@@ -128,12 +128,18 @@ class BGR2YUVConverter(Preprocessor):
         parameters.update({
             'split_channels': BoolField(
                 optional=True, default=False, description='Allow treat channels as independent input'
+            ),
+            'shrink_uv': BoolField(
+                optional=True, default=False, description='Allow shrink uv-channels after split'
             )
         })
         return parameters
 
     def configure(self):
         self.split_channels = self.get_value_from_config('split_channels')
+        self.shrink_uv = self.get_value_from_config('shrink_uv')
+        if self.shrink_uv and not self.split_channels:
+            self.split_channels = True
 
     def process(self, image, annotation_meta=None):
         data = image.data
@@ -144,6 +150,9 @@ class BGR2YUVConverter(Preprocessor):
             v = yuvdata[:, :, 2]
             identifier = image.identifier
             new_identifier = ['{}_y'.format(identifier), '{}_u'.format(identifier), '{}_v'.format(identifier)]
+            if self.shrink_uv:
+                u = cv2.resize(u, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+                v = cv2.resize(v, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
             yuvdata = [np.expand_dims(y, -1), np.expand_dims(u, -1), np.expand_dims(v, -1)]
             image.identifier = new_identifier
         image.data = yuvdata

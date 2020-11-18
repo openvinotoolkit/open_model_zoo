@@ -65,8 +65,10 @@ Accuracy Checker supports following set of preprocessors:
 * `rgb_to_gray` - converting image in RGB to gray scale color space.
 * `bgr_to_yuv` - converting image in BGR to YUV.
   * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+  * `shrink_uv` - resize uv-channels in 1:2 resolution to y-channel (Optional, available only with `split_channels` combination).
 * `rgb_to_yuv` - converting image in RGB to YUV.
   * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+  * `shrink_uv` - resize uv-channels in 1:2 resolution to y-channel (Optional, available only with `split_channels` combination).
 * `bgr_to_nv12` - converting BGR image to NV12 format.
 * `rgb_to_nv12` - converting RGB image to NV12 format.
 * `nv12_to_bgr` - converting NV12 data to BGR format.
