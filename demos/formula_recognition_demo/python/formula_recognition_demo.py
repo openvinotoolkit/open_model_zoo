@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """
  Copyright (c) 2020 Intel Corporation
+
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
+
       http://www.apache.org/licenses/LICENSE-2.0
+
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,11 +22,9 @@ from argparse import SUPPRESS, ArgumentParser
 import cv2 as cv
 from utils import *
 
-CONFIDENCE_THRESH = 0.95
-
 
 class InteractiveDemo:
-    def __init__(self, input_model_shape, resolution=DEFAULT_RESOLUTION):
+    def __init__(self, input_model_shape, resolution):
         self.resolution = resolution
         self._tgt_shape = input_model_shape
         self.start_point, self.end_point = self._create_input_window()
@@ -163,15 +164,15 @@ def build_argparser():
                       help="Optional. Defines maximum length of the formula (number of tokens to decode)",
                       default="128", type=int)
     args.add_argument("--conf_thresh", help="Optional. Probability threshold to trat model prediction as meaningful",
-                      default=CONFIDENCE_THRESH, type=float)
+                      default=0.95, type=float)
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU", type=str)
     args.add_argument("--camera_device", default=0, type=int,
                       help='Optional. Device id of the web-camera. Change it only if you have more then one camera')
-    args.add_argument("--resolution", default=DEFAULT_RESOLUTION, type=int, nargs=2,
-                      help=f'Optional. Resolution of the demo application window. Default: {DEFAULT_RESOLUTION}')
+    args.add_argument("--resolution", default=(1280, 720), type=int, nargs=2,
+                      help=f'Optional. Resolution of the demo application window. Default: 1280 720')
     args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
                       help="Optional. Type of the preprocessing", default='crop')
     args.add_argument('-pc', '--perf_counts',
