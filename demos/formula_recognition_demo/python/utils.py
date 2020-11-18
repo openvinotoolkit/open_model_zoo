@@ -1,3 +1,19 @@
+"""
+ Copyright (c) 2020 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
 import json
 import logging as log
 import os
@@ -132,6 +148,7 @@ def change_layout(model_input):
     model_input = model_input.transpose((2, 0, 1))
     model_input = np.expand_dims(model_input, axis=0)
     return model_input
+
 
 def calculate_probability(logits):
     prob = 1
