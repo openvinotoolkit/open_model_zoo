@@ -15,12 +15,16 @@ limitations under the License.
 """
 
 import numpy as np
-from scipy.optimize import linear_sum_assignment
 
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, ConfigError
 from ..representation import PoseEstimationPrediction
-from ..utils import contains_all
+from ..utils import contains_all, UnsupportedPackage
+
+try:
+    from scipy.optimize import linear_sum_assignment
+except ImportError as error:
+     linear_sum_assignment = UnsupportedPackage('scipy.optimize', error.msg)
 
 
 class AssociativeEmbeddingAdapter(Adapter):
