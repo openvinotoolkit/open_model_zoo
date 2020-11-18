@@ -43,7 +43,7 @@ Please pay attention to the model license, **Mozilla Public License 2.0**.
 ## Running Demo
 
 Run the application with `-h` option to see help message.
-Here are the essential options:
+Here are the available command line options:
 
 ```
 usage: speech_recognition_demo.py [-h] -i FILENAME [-d DEVICE] -m FILENAME
@@ -72,7 +72,12 @@ optional arguments:
                         YAML file (required)
   -b N, --beam-width N  Beam width for beam search in CTC decoder (default
                         500)
-[...]
+  -c N, --max-candidates N
+                        Show top N (or less) candidates (default 1)
+  -l FILENAME, --cpu_extension FILENAME
+                        Optional. Required for CPU custom layers. MKLDNN
+                        (CPU)-targeted custom layers. Absolute path to a
+                        shared library with the kernels implementations.
 ```
 
 The typical command line is:
