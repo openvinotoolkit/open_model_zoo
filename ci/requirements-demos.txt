@@ -45,6 +45,7 @@ rsa==4.6                  # via google-auth
 scikit-learn==0.23.2      # via -r demos/python_demos/requirements.txt
 scipy==1.5.2              # via -r demos/python_demos/requirements.txt, motmetrics, scikit-learn
 six==1.15.0               # via absl-py, google-auth, grpcio, packaging, protobuf, python-dateutil, tensorboard, tensorboardx
+tokenizers==0.8.1rc1      # via -r demos/python_demos/requirements.txt
 tensorboard-plugin-wit==1.7.0  # via tensorboard
 tensorboard==2.3.0        # via -r demos/python_demos/requirements.txt
 tensorboardx==2.1         # via -r demos/python_demos/requirements.txt
