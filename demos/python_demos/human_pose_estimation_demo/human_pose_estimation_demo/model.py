@@ -103,10 +103,10 @@ class HPEOpenPose(Model):
     def __init__(self, *args, size_divisor=8,
                  target_size=None, upsample_ratio=1, use_cpp_postprocessing=False,
                  device='CPU', max_num_requests=1, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, device=device, max_num_requests=max_num_requests, **kwargs)
 
         self.use_cpp_postprocessing = use_cpp_postprocessing
-        self.nms_heatmaps_blob_name = None
+        self.pooled_heatmaps_blob_name = None
         function = ng.function_from_cnn(self.net)
         paf = function.get_output_op(0)
         paf = paf.inputs()[0].get_source_output().get_node()
@@ -119,16 +119,14 @@ class HPEOpenPose(Model):
             # Heuristic NMS kernel size adjustment depending on the feature maps upsampling ratio.
             p = int(np.round(6 / 7 * upsample_ratio))
             k = 2 * p + 1
-            pooled_heatmap = ng.max_pool(heatmap, kernel_shape=(k, k), pads_begin=(p, p), pads_end=(p, p), strides=(1, 1))
-            nms_mask = ng.equal(heatmap, pooled_heatmap)
-            nms_mask_float = ng.convert(nms_mask, 'f32')
-            nms_heatmap = ng.multiply(heatmap, nms_mask_float, name='nms_heatmaps')
+            pooled_heatmap = ng.max_pool(heatmap, kernel_shape=(k, k), pads_begin=(p, p), pads_end=(p, p),
+                                         strides=(1, 1), name='pooled_heatmaps')
             f = ng.impl.Function(
                 [ng.result(heatmap, name='heatmaps'),
-                 ng.result(nms_heatmap, name='nms_heatmaps'),
+                 ng.result(pooled_heatmap, name='pooled_heatmaps'),
                  ng.result(paf, name='pafs')],
                 function.get_parameters(), 'hpe')
-            self.nms_heatmaps_blob_name = 'nms_heatmaps'
+            self.pooled_heatmaps_blob_name = 'pooled_heatmaps'
         else:
             self.reorder_map = np.array([0, 15, 14, 17, 16, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10])
             # Just rename the outputs for more convenient postprocessing.
@@ -188,6 +186,10 @@ class HPEOpenPose(Model):
         inputs[self.image_blob_name] = img[None]
         return inputs, meta
 
+    @staticmethod
+    def heatmap_nms(heatmaps, pooled_heatmaps):
+        return heatmaps * (heatmaps == pooled_heatmaps)
+
     def postprocess(self, outputs, meta):
         heatmaps = outputs[self.heatmaps_blob_name]
         pafs = outputs[self.pafs_blob_name]
@@ -203,7 +205,8 @@ class HPEOpenPose(Model):
             poses = poses[:, self.reorder_map, :]
             poses[:, :, :2] /= upsample_ratio
         else:
-            nms_heatmaps = outputs[self.nms_heatmaps_blob_name]
+            pooled_heatmaps = outputs[self.pooled_heatmaps_blob_name]
+            nms_heatmaps = self.heatmap_nms(heatmaps, pooled_heatmaps)
             poses, scores = self.decoder(heatmaps, nms_heatmaps, pafs)
 
         # Rescale poses to the original image.
