@@ -24,7 +24,7 @@ from ..utils import contains_all, UnsupportedPackage
 try:
     from scipy.optimize import linear_sum_assignment
 except ImportError as error:
-     linear_sum_assignment = UnsupportedPackage('scipy.optimize', error.msg)
+    linear_sum_assignment = UnsupportedPackage('scipy.optimize', error.msg)
 
 
 class AssociativeEmbeddingAdapter(Adapter):
