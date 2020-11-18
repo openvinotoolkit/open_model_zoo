@@ -283,6 +283,8 @@ def non_interactive_demo(model, args):
                     if rendered_formula is not None:
                         cv.imshow("Predicted formula", rendered_formula)
                         cv.waitKey(0)
+        else:
+            log.info("Confidence score is low. The formula was not recognized.")
     if args.perf_counts:
         log.info("Encoder performance statistics")
         print_stats(model.exec_net_encoder)
