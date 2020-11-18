@@ -243,11 +243,11 @@ def main():
         prev_text = phrase
         cv.imshow('Press q to quit.', frame)
         key = cv.waitKey(1) & 0xFF
-        if key == ord('q'):
+        if key in (ord('Q'), ord('q'), ord('\x1b')):
             break
-        elif key == ord('o'):
+        elif key in (ord('o'), ord('O')):
             demo.resize_window("decrease")
-        elif key == ord('p'):
+        elif key in (ord('p'), ord('P')):
             demo.resize_window("increase")
 
     capture.release()
