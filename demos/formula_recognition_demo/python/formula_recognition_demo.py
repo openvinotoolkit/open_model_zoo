@@ -161,7 +161,7 @@ def build_argparser():
     args.add_argument("--max_formula_len",
                       help="Optional. Defines maximum length of the formula (number of tokens to decode)",
                       default="128", type=int)
-    args.add_argument("--conf_thresh", help="Optional. Probability threshold to trat model prediction as meaningful",
+    args.add_argument("--conf_thresh", help="Optional. Probability threshold to treat model prediction as meaningful",
                       default=0.95, type=float)
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
