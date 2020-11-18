@@ -152,23 +152,17 @@ class AssociativeEmbeddingDecoder:
                     tags.append(tag[i, y, x])
             prev_tag = np.mean(tags, axis=0)
 
-        # Allocate the buffer for tags similarity matrix.
-        tag_copy = np.empty_like(tag[0, ..., 0])
         for i, (_heatmap, _tag) in enumerate(zip(heatmap, tag)):
             if keypoints[i, 2] > 0:
                 continue
-            tag_copy[...] = _tag[..., 0]
-            diff = tag_copy
-            diff -= prev_tag
-            np.abs(diff, out=diff)
-            np.floor(diff + 0.5, out=diff)
+            # Get position with the closest tag value to the pose tag.
+            diff = np.abs(_tag[..., 0] - prev_tag) + 0.5
+            diff = diff.astype(np.int32).astype(_heatmap.dtype)
             diff -= _heatmap
             idx = diff.argmin()
             y, x = np.divmod(idx, _heatmap.shape[-1])
-
-            # detection score at maximum position
+            # Corresponding keypoint detection score.
             val = _heatmap[y, x]
-
             if val > 0:
                 keypoints[i, :3] = x, y, val
                 if 1 < x < W - 1 and 1 < y < H - 1:
