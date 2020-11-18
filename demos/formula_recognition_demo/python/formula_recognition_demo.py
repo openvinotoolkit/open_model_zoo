@@ -57,16 +57,16 @@ class InteractiveDemo:
             max_h, max_w = min(MAX_HEIGHT, self.resolution[1]), min(MAX_WIDTH, self.resolution[0])
             if height >= max_h or width >= max_w:
                 return
-            self.start_point = (self.start_point[0]-DEFAULT_RESIZE_STEP,
+            self.start_point = (self.start_point[0] - DEFAULT_RESIZE_STEP,
                                 self.start_point[1] - int(DEFAULT_RESIZE_STEP * aspect_ratio))
-            self.end_point = (self.end_point[0]+DEFAULT_RESIZE_STEP,
+            self.end_point = (self.end_point[0] + DEFAULT_RESIZE_STEP,
                               self.end_point[1] + int(DEFAULT_RESIZE_STEP * aspect_ratio))
         elif action == 'decrease':
             if height <= MIN_HEIGHT or width <= MIN_WIDTH:
                 return
-            self.start_point = (self.start_point[0]+DEFAULT_RESIZE_STEP,
+            self.start_point = (self.start_point[0] + DEFAULT_RESIZE_STEP,
                                 self.start_point[1] + int(DEFAULT_RESIZE_STEP * aspect_ratio))
-            self.end_point = (self.end_point[0]-DEFAULT_RESIZE_STEP,
+            self.end_point = (self.end_point[0] - DEFAULT_RESIZE_STEP,
                               self.end_point[1] - int(DEFAULT_RESIZE_STEP * aspect_ratio))
         else:
             raise ValueError(f"wrong action: {action}")
