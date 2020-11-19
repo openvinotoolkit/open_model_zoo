@@ -304,7 +304,7 @@ class Renderer:
     def __init__(self):
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_name = temp_file.name
-        self.output_file = f'{temp_file_name}.png'
+        self.output_file = '{}.png'.format(temp_file_name)
         self.cur_formula = None
         self.res_img = None
         self._state = Renderer.Status.ready
@@ -318,8 +318,8 @@ class Renderer:
             return self.res_img, self.cur_formula
         self.cur_formula = formula
         try:
-            sympy.preview(f'$${formula}$$', viewer='file',
-                          filename=self.output_file, euler=False, dvioptions=['-D', f'{DENSITY}'])
+            sympy.preview('$${}$$'.format(formula), viewer='file',
+                          filename=self.output_file, euler=False, dvioptions=['-D', '{}'.format(DENSITY)])
             self.res_img = cv.imread(self.output_file)
         except Exception:
             self.res_img = None

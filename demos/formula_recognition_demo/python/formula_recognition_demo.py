@@ -69,7 +69,7 @@ class InteractiveDemo:
             self.end_point = (self.end_point[0] - DEFAULT_RESIZE_STEP,
                               self.end_point[1] - int(DEFAULT_RESIZE_STEP * aspect_ratio))
         else:
-            raise ValueError(f"wrong action: {action}")
+            raise ValueError("wrong action: {}".format(action))
 
     def _put_text(self, frame, text):
         if text == '':
