@@ -182,17 +182,16 @@ class DirCache:
         hash_path.parent.mkdir(parents=True, exist_ok=True)
         staging_path.replace(self._hash_path(hash))
 
-def try_retrieve_from_cache(reporter, cache, files):
+def try_retrieve_from_cache(reporter, cache, model_file, destination):
     try:
-        if all(cache.has(file[0].sha256) for file in files):
-            for model_file, destination in files:
-                reporter.job_context.check_interrupted()
+        if cache.has(model_file.sha256):
+            reporter.job_context.check_interrupted()
 
-                reporter.print_section_heading('Retrieving {} from the cache', destination)
-                if not cache.get(model_file, destination, reporter):
-                    reporter.print('Will retry from the original source.')
-                    reporter.print()
-                    return False
+            reporter.print_section_heading('Retrieving {} from the cache', destination)
+            if not cache.get(model_file, destination, reporter):
+                reporter.print('Will retry from the original source.')
+                reporter.print()
+                return False
             reporter.print()
             return True
     except Exception:
@@ -210,7 +209,7 @@ def try_update_cache(reporter, cache, hash, source):
 def try_retrieve(reporter, destination, model_file, cache, num_attempts, start_download):
     destination.parent.mkdir(parents=True, exist_ok=True)
 
-    if try_retrieve_from_cache(reporter, cache, [[model_file, destination]]):
+    if try_retrieve_from_cache(reporter, cache, model_file, destination):
         return True
 
     reporter.print_section_heading('Downloading {}', destination)
