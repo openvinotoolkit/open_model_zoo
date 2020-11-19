@@ -17,8 +17,7 @@
 #include "models/model_base.h"
 #include "opencv2/core.hpp"
 
-class DetectionModel :
-    public ModelBase {
+class DetectionModel : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
@@ -37,8 +36,8 @@ public:
 protected:
     std::vector<std::string> labels;
 
-    size_t netInputHeight=0;
-    size_t netInputWidth=0;
+    size_t netInputHeight = 0;
+    size_t netInputWidth = 0;
 
     bool useAutoResize;
     float confidenceThreshold;

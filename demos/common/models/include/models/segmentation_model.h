@@ -18,8 +18,7 @@
 #include "opencv2/core.hpp"
 
 #pragma once
-class SegmentationModel :
-    public ModelBase {
+class SegmentationModel : public ModelBase {
 public:
     /// Constructor
     /// @param model_nameFileName of model to load

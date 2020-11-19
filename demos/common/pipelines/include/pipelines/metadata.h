@@ -38,6 +38,6 @@ struct ImageMetaData : public MetaData {
 
     ImageMetaData(cv::Mat img, std::chrono::steady_clock::time_point timeStamp):
         img(img),
-        timeStamp(timeStamp){
+        timeStamp(timeStamp) {
     }
 };

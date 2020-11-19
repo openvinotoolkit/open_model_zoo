@@ -76,8 +76,8 @@ protected:
     std::mutex mtx;
     std::condition_variable condVar;
 
-    int64_t inputFrameId=0;
-    int64_t outputFrameId=0;
+    int64_t inputFrameId = 0;
+    int64_t outputFrameId = 0;
 
     std::exception_ptr callbackException = nullptr;
 

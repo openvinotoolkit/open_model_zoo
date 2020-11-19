@@ -68,11 +68,11 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
     model->onLoadCompleted(&execNetwork, requestsPool->getInferRequestsList());
 }
 
-AsyncPipeline::~AsyncPipeline(){
+AsyncPipeline::~AsyncPipeline() {
     waitForTotalCompletion();
 }
 
-void AsyncPipeline::waitForData(){
+void AsyncPipeline::waitForData() {
     std::unique_lock<std::mutex> lock(mtx);
 
     condVar.wait(lock, [&] {return callbackException != nullptr ||

@@ -20,8 +20,8 @@
 
 using namespace InferenceEngine;
 
-DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels)
-    :ModelBase(modelFileName),
+DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels) :
+    ModelBase(modelFileName),
     labels(labels),
     useAutoResize(useAutoResize),
     confidenceThreshold(confidenceThreshold) {
@@ -43,8 +43,9 @@ std::shared_ptr<InternalModelData> DetectionModel::preprocess(const InputData& i
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
 }
 
-std::vector<std::string> DetectionModel::loadLabels(const std::string & labelFilename){
+std::vector<std::string> DetectionModel::loadLabels(const std::string& labelFilename) {
     std::vector<std::string> labelsList;
+
     /** Read labels (if any)**/
     if (!labelFilename.empty()) {
         std::ifstream inputFile(labelFilename);
@@ -55,5 +56,6 @@ std::vector<std::string> DetectionModel::loadLabels(const std::string & labelFil
         if (labelsList.empty())
             throw std::logic_error("File empty or not found: " + labelFilename);
     }
+
     return labelsList;
 }

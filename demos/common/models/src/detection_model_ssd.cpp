@@ -23,8 +23,8 @@ using namespace InferenceEngine;
 
 ModelSSD::ModelSSD(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize,
-    const std::vector<std::string>& labels)
-    :DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
+    const std::vector<std::string>& labels) :
+    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
 }
 
 void ModelSSD::onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, const std::vector<InferenceEngine::InferRequest::Ptr>& requests) {
@@ -55,7 +55,6 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
     for (size_t i = 0; i < maxProposalCount; i++) {
-
         float image_id = detections[i * objectSize + 0];
         if (image_id < 0) {
             break;
@@ -81,13 +80,13 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
     return retVal;
 }
 
-void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork){
-    // --------------------------- Configure input & output ---------------------------------------------
-    // --------------------------- Prepare input blobs -----------------------------------------------------
+void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+    // --------------------------- Configure input & output -------------------------------------------------
+    // --------------------------- Prepare input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
 
-    for (const auto & inputInfoItem : inputInfo) {
+    for (const auto& inputInfoItem : inputInfo) {
         if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
             if (inputsNames.empty()) {
                 inputsNames.push_back(inputInfoItem.first);
@@ -149,6 +148,7 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork){
     else {
         throw std::logic_error("This demo requires IR version no older than 10");
     }
+
     if (labels.size()) {
         if (static_cast<int>(labels.size()) == (num_classes - 1)) {  // if network assumes default "background" class, having no label
             labels.insert(labels.begin(), "fake");
