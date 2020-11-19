@@ -161,10 +161,10 @@ void ModelYolo3::parseYOLOV3Output(const std::string& output_name,
                 double width = std::exp(output_blob[box_index + 2 * side_square]) * region.anchors[2 * n] * original_im_w / resized_im_w;
 
                 DetectedObject obj;
-                obj.x = static_cast<float>(x-width/2);
-                obj.y = static_cast<float>(y-height/2);
-                obj.width = static_cast<float>(width);
-                obj.height = static_cast<float>(height);
+                obj.x = (float)(x-width/2);
+                obj.y = (float)(y-height/2);
+                obj.width = (float)(width);
+                obj.height = (float)(height);
 
                 for (int j = 0; j < region.classes; ++j) {
                     int class_index = calculateEntryIndex(side, region.coords, region.classes, n * side_square + i, region.coords + 1 + j);
