@@ -94,6 +94,7 @@ Options:
 
     -h                        Print a usage message.
     -i "<path>"               Required. Path to a video file (specify "cam" to work with camera).
+    -at "<type>"              Required. Architecture type: ssd or yolo
     -m "<path>"               Required. Path to an .xml file with a trained model.
       -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
           Or
@@ -110,7 +111,6 @@ Options:
     -loop                     Optional. Enable reading the input in a loop.
     -no_show                  Optional. Do not show processed video.
     -u                        Optional. List of monitors to show initially.
-    -mt                       Model type: ssd or yolo
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
@@ -121,7 +121,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 ```sh
-./object_detection_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd.xml -d GPU -mt ssd
+./object_detection_demo -i <path_to_video>/inputVideo.mp4  -at ssd -m <path_to_model>/ssd.xml -d GPU
 ```
 
 ## Demo Output

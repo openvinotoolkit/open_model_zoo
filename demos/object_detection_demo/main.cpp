@@ -66,7 +66,7 @@ static const char num_streams_message[] = "Optional. Number of streams to use fo
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes (YOLOv3 only).";
-static const char at_message[] = "Architecture type: ssd or yolo";
+static const char at_message[] = "Required. Architecture type: ssd or yolo";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", video_message);
@@ -98,6 +98,7 @@ static void showUsage() {
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
     std::cout << "    -i \"<path>\"               " << video_message << std::endl;
+    std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
@@ -114,7 +115,6 @@ static void showUsage() {
     std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
-    std::cout << "    -at                       " << at_message << std::endl;
 }
 
 
@@ -134,6 +134,10 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
     if (FLAGS_m.empty()) {
         throw std::logic_error("Parameter -m is not set");
+    }
+
+    if (FLAGS_at.empty()) {
+        throw std::logic_error("Parameter -at is not set");
     }
 
     return true;
@@ -242,7 +246,6 @@ int main(int argc, char *argv[]) {
                         outFrame, { 10,22 }, 0.65);
                     if (!FLAGS_no_show) {
                         cv::imshow("Detection Results", outFrame);
-
                         //--- Processing keyboard events
                         int key = cv::waitKey(1);
                         if (27 == key || 'q' == key || 'Q' == key) {  // Esc

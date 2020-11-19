@@ -51,13 +51,13 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     switch (outSizeVector.size()) {
     case 3:
         outChannels = 0;
-        outHeight = (int)outSizeVector[1];
-        outWidth = (int)outSizeVector[2];
+        outHeight = static_cast<int>(outSizeVector[1]);
+        outWidth = static_cast<int>(outSizeVector[2]);
         break;
     case 4:
-        outChannels = (int)outSizeVector[1];
-        outHeight = (int)outSizeVector[2];
-        outWidth = (int)outSizeVector[3];
+        outChannels = static_cast<int>(outSizeVector[1]);
+        outHeight = static_cast<int>(outSizeVector[2]);
+        outWidth = static_cast<int>(outSizeVector[3]);
         break;
     default:
         throw std::runtime_error("Unexpected output blob shape. Only 4D and 3D output blobs are"
@@ -65,7 +65,7 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     }
 }
 
-std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr & request) {
+std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 

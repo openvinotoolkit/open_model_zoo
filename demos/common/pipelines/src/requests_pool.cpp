@@ -16,7 +16,7 @@
 
 #include "pipelines/requests_pool.h"
 
-RequestsPool::RequestsPool(InferenceEngine::ExecutableNetwork & execNetwork, unsigned int size) :
+RequestsPool::RequestsPool(InferenceEngine::ExecutableNetwork& execNetwork, unsigned int size) :
     numRequestsInUse(0) {
     for (unsigned int infReqId = 0; infReqId < size; ++infReqId) {
         requests.emplace(execNetwork.CreateInferRequestPtr(), false);
@@ -37,10 +37,10 @@ InferenceEngine::InferRequest::Ptr RequestsPool::getIdleRequest() {
     }
 }
 
-void RequestsPool::setRequestIdle(const InferenceEngine::InferRequest::Ptr & request) {
+void RequestsPool::setRequestIdle(const InferenceEngine::InferRequest::Ptr& request) {
     std::lock_guard<std::mutex> lock(mtx);
     this->requests.at(request) = false;
-    numRequestsInUse--;
+    --numRequestsInUse;
 }
 
 size_t RequestsPool::getInUseRequestsCount() {
@@ -68,7 +68,7 @@ std::vector<InferenceEngine::InferRequest::Ptr> RequestsPool::getInferRequestsLi
     std::lock_guard<std::mutex> lock(mtx);
     std::vector<InferenceEngine::InferRequest::Ptr> retVal;
     retVal.reserve(requests.size());
-    for (auto &pair : requests) {
+    for (auto& pair : requests) {
         retVal.push_back(pair.first);
     }
     return retVal;

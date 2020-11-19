@@ -24,14 +24,15 @@
 
 using namespace InferenceEngine;
 
-CnnConfig ConfigFactory::getUserConfig(const std::string& d, const std::string& l, const std::string& c, bool pc, uint32_t nireq, const std::string& nstreams, uint32_t nthreads) {
+CnnConfig ConfigFactory::getUserConfig(const std::string& d, const std::string& l, const std::string& c, bool pc,
+    uint32_t nireq, const std::string& nstreams, uint32_t nthreads) {
     auto config = getCommonConfig(d, l, c, pc, nireq);
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(d)) {
         devices.insert(device);
     }
     std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(devices, nstreams);
-    for (auto & device : devices) {
+    for (auto& device : devices) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             // limit threading for CPU portion of inference
             if (nthreads != 0)
@@ -73,7 +74,7 @@ CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& d, const std::st
     for (const std::string& device : parseDevices(d)) {
         devices.insert(device);
     }
-    for (auto & device : devices) {
+    for (auto& device : devices) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1");
         }

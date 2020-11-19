@@ -29,7 +29,7 @@ struct InputData {
     }
 };
 
-struct ImageInputData : public InputData{
+struct ImageInputData : public InputData {
     cv::Mat inputImage;
 
     ImageInputData() {}

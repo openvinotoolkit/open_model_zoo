@@ -19,17 +19,18 @@
 #include <string>
 #include "gflags/gflags.h"
 
-struct CnnConfig{
+struct CnnConfig {
     std::string devices;
     std::string cpuExtensionsPath;
     std::string clKernelsConfigPath;
     unsigned int maxAsyncRequests;
-    std::map < std::string, std::string> execNetworkConfig;
+    std::map<std::string, std::string> execNetworkConfig;
 };
 
-class ConfigFactory{
+class ConfigFactory {
 public:
-    static CnnConfig getUserConfig(const std::string& d, const std::string& l, const std::string& c, bool pc, uint32_t nireq, const std::string& nstreams, uint32_t nthreads);
+    static CnnConfig getUserConfig(const std::string& d, const std::string& l, const std::string& c, bool pc,
+        uint32_t nireq, const std::string& nstreams, uint32_t nthreads);
     static CnnConfig getMinLatencyConfig(const std::string& d, const std::string& l, const std::string& c, bool pc, uint32_t nireq);
 protected:
     static CnnConfig getCommonConfig(const std::string& d, const std::string& l, const std::string& c, bool pc, uint32_t nireq);

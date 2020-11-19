@@ -26,8 +26,7 @@ namespace ngraph {
     }
 }
 
-class ModelYolo3 :
-    public DetectionModel {
+class ModelYolo3 : public DetectionModel {
 protected:
     class Region {
     public:
@@ -53,12 +52,12 @@ public:
     ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
         float boxIOUThreshold = 0.4, const std::vector<std::string>& labels = std::vector<std::string>());
 
-    std::unique_ptr<ResultBase> postprocess(InferenceResult & infResult) override;
+    std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
+    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
 
-    void parseYOLOV3Output(const std::string & output_name, const InferenceEngine::Blob::Ptr & blob,
+    void parseYOLOV3Output(const std::string& output_name, const InferenceEngine::Blob::Ptr& blob,
         const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,
         const unsigned long original_im_w, std::vector<DetectedObject>& objects);
 
