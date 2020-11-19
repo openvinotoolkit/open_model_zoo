@@ -81,6 +81,14 @@ Accuracy Checker supports following set of postprocessors:
 * `resize_style_transfer` - resizing style transfer predicted image. Supported representations: `StyleTransferAnotation`, `StyleTransferPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resizing respectively.
 * `crop_ground_truth_image` - cropping ground truth image. Supported representations: `ImageInpaintingAnnotation`.
+* `corner_crop_ground_truth_image` - Corner crop of the ground truth image. Supported representations: `ImageInpaintingAnnotation`.
+  * `dst_width` and `dst_height` are destination width and height
+  * `corner_type` is type of the corner crop. Options are:
+    * `top-left`
+    * `top-right`
+    * `bottom-left`
+    * `bottom-right`
+  Default choice is `top-left`
 * `resize` - resizing image or segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`, `StyleTransferAnotation`, `StyleTransferPrediction`, `SuperResolutionAnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `SalientRegionAnnotation`, `SalientRegionPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resize respectively. You can also use `size` instead in case when destination sizes are equal.
     If any of these parameters are not specified, image size will be used as default.
