@@ -246,18 +246,7 @@ def main():
     metrics = PerformanceMetrics()
 
     while cap.isOpened():
-        start_time = perf_counter()
-        ret, frame = cap.read()
-        if not ret:
-            if args.loop:
-                cap.open(input_stream)
-            else:
-                cap.release()
-            continue
-
-        detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
-        next_frame_id += 1
-
+        # 1. Process all completed requests
         results = detector_pipeline.get_result(next_frame_id_to_show)
         if results:
             objects, frame_meta = results
@@ -280,8 +269,24 @@ def main():
                     break
                 presenter.handleKey(key)
             next_frame_id_to_show += 1
+            continue
 
+        # 2. Wait for empty request
         detector_pipeline.await_any()
+
+        # 3. Get new image/frame
+        start_time = perf_counter()
+        ret, frame = cap.read()
+        if not ret:
+            if args.loop:
+                cap.open(input_stream)
+            else:
+                cap.release()
+            continue
+
+        # 4. Submit for inference
+        detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+        next_frame_id += 1
 
         if detector_pipeline.callback_exceptions:
             raise detector_pipeline.callback_exceptions[0]
