@@ -51,8 +51,8 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     switch (outSizeVector.size()) {
     case 3:
         outChannels = 0;
-        outHeight = static_cast<int>(outSizeVector[1]);
-        outWidth = static_cast<int>(outSizeVector[2]);
+        outHeight = (int)(outSizeVector[1]);
+        outWidth = (int)(outSizeVector[2]);
         break;
     case 4:
         outChannels = static_cast<int>(outSizeVector[1]);
