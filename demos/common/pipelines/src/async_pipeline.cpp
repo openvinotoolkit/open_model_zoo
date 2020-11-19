@@ -123,7 +123,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
             condVar.notify_one();
     });
 
-    ++inputFrameId;
+    inputFrameId++;
     if (inputFrameId < 0)
         inputFrameId = 0;
 
@@ -158,7 +158,7 @@ InferenceResult AsyncPipeline::getInferenceResult() {
 
     if(!retVal.IsEmpty()) {
         outputFrameId = retVal.frameId;
-        ++outputFrameId;
+        outputFrameId++;
         if (outputFrameId < 0)
             outputFrameId = 0;
     }

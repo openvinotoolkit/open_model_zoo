@@ -54,7 +54,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
-    for (size_t i = 0; i < maxProposalCount; ++i) {
+    for (size_t i = 0; i < maxProposalCount; i++) {
         float image_id = detections[i * objectSize + 0];
         if (image_id < 0) {
             break;
