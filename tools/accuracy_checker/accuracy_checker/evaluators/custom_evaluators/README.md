@@ -43,3 +43,6 @@ Optionally you can provide `module_config` section which contains config for cus
 
 * **I3D Evaluator** demonstrates how to evaluate two-stream I3D model (RGB + Flow).
   <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/i3d_evaluator.py">Evaluator code</a>.
+
+* **Text to speech Evaluator** demonstrates how to evaluate text to speech pipeline for Forward Tacotron and MelGAN upsampler.
+  <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/text_to_speech_evaluator.py">Evaluator code</a>.
