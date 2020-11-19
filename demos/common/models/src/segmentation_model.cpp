@@ -55,9 +55,9 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
         outWidth = (int)(outSizeVector[2]);
         break;
     case 4:
-        outChannels = static_cast<int>(outSizeVector[1]);
-        outHeight = static_cast<int>(outSizeVector[2]);
-        outWidth = static_cast<int>(outSizeVector[3]);
+        outChannels = (int)(outSizeVector[1]);
+        outHeight = (int)(outSizeVector[2]);
+        outWidth = (int)(outSizeVector[3]);
         break;
     default:
         throw std::runtime_error("Unexpected output blob shape. Only 4D and 3D output blobs are"
