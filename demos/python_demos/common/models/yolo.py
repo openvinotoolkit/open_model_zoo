@@ -46,8 +46,9 @@ class YOLO(Model):
 
                 self.isYoloV3 = True  # Weak way to determine but the only one.
 
-    def __init__(self, *args, labels=None, keep_aspect_ratio=False, threshold=0.5, iou_threshold=0.5, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, ie, model_path, logger=None, batch_size=None,
+                 labels=None, keep_aspect_ratio=False, threshold=0.5, iou_threshold=0.5):
+        super().__init__(ie, model_path, logger=logger, batch_size=batch_size)
 
         self.labels = load_labels(labels) if labels else None
 

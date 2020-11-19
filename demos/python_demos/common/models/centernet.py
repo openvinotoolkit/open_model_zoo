@@ -23,8 +23,9 @@ from .utils import Detection, load_labels
 
 
 class CenterNet(Model):
-    def __init__(self, *args, labels=None, threshold=0.3, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, ie, model_path, logger=None, batch_size=None,
+                 labels=None, threshold=0.3):
+        super().__init__(ie, model_path, logger=logger, batch_size=batch_size)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         assert len(self.net.outputs) == 3, "Expected 3 output blobs"
