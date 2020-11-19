@@ -22,8 +22,8 @@ from .utils import Detection, resize_image
 
 
 class FaceBoxes(Model):
-    def __init__(self, *args, threshold=0.5, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, ie, model_path, logger=None, batch_size=None, threshold=0.5):
+        super().__init__(ie, model_path, logger=logger, batch_size=batch_size)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         self.image_blob_name = next(iter(self.net.input_info))
