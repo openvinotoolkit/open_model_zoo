@@ -210,8 +210,8 @@ int main(int argc, char *argv[]) {
         Presenter presenter;
 
         bool keepRunning = true;
+        int64_t frameNum = 0;
         while (keepRunning) {
-            int64_t frameNum = 0;
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
                 auto startTime = std::chrono::steady_clock::now();
@@ -240,20 +240,18 @@ int main(int argc, char *argv[]) {
             while ((result = pipeline.getResult()) && keepRunning) {
                 cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
                 //--- Showing results and device information
-                if (!outFrame.empty()) {
-                    presenter.drawGraphs(outFrame);
-                    metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                        outFrame, { 10,22 }, 0.65);
-                    if (!FLAGS_no_show) {
-                        cv::imshow("Detection Results", outFrame);
-                        //--- Processing keyboard events
-                        int key = cv::waitKey(1);
-                        if (27 == key || 'q' == key || 'Q' == key) {  // Esc
-                            keepRunning = false;
-                        }
-                        else {
-                            presenter.handleKey(key);
-                        }
+                presenter.drawGraphs(outFrame);
+                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                    outFrame, { 10,22 }, 0.65);
+                if (!FLAGS_no_show) {
+                    cv::imshow("Detection Results", outFrame);
+                    //--- Processing keyboard events
+                    int key = cv::waitKey(1);
+                    if (27 == key || 'q' == key || 'Q' == key) {  // Esc
+                        keepRunning = false;
+                    }
+                    else {
+                        presenter.handleKey(key);
                     }
                 }
             }

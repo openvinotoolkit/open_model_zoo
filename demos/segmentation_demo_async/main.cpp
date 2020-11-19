@@ -183,8 +183,8 @@ int main(int argc, char *argv[]) {
         Presenter presenter;
 
         bool keepRunning = true;
-        while (keepRunning){
-            int64_t frameNum = 0;
+        int64_t frameNum = 0;
+        while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
                 auto startTime = std::chrono::steady_clock::now();
@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 frameNum = pipeline.submitData(ImageInputData(curr_frame),
-                    std::shared_ptr<MetaData>(new ImageMetaData(curr_frame, startTime)));
+                    std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
@@ -213,21 +213,18 @@ int main(int argc, char *argv[]) {
             while ((result = pipeline.getResult()) && keepRunning) {
                 cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>());
                 //--- Showing results and device information
-                if (!outFrame.empty()) {
-                    presenter.drawGraphs(outFrame);
-                    metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                        outFrame, { 10,22 }, 0.65);
-                    if (!FLAGS_no_show) {
-                        cv::imshow("Segmentation Results", outFrame);
+                presenter.drawGraphs(outFrame);
+                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                    outFrame, { 10, 22 }, 0.65);
+                if (!FLAGS_no_show) {
+                    cv::imshow("Segmentation Results", outFrame);
 
-                        //--- Processing keyboard events
-                        auto key = cv::waitKey(1);
-                        if (27 == key || 'q' == key || 'Q' == key) {  // Esc
-                            keepRunning = false;
-                        }
-                        else {
-                            presenter.handleKey(key);
-                        }
+                    //--- Processing keyboard events
+                    auto key = cv::waitKey(1);
+                    if (27 == key || 'q' == key || 'Q' == key) { // Esc
+                        keepRunning = false;
+                    } else {
+                        presenter.handleKey(key);
                     }
                 }
             }
