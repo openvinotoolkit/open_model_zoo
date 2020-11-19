@@ -124,22 +124,19 @@ class ColorPalette:
         return len(self.palette)
 
 
-def get_model(architecture_type, ie, args):
-    if architecture_type == 'ssd':
+def get_model(ie, args):
+    if args.architecture_type == 'ssd':
         return SSD(ie, args.model, log, batch_size=1, labels=args.labels,
                    keep_aspect_ratio_resize=args.keep_aspect_ratio)
-    elif architecture_type == 'yolo':
-        return YOLO(ie, args.model, log,  batch_size=1, labels=args.labels,
+    elif args.architecture_type == 'yolo':
+        return YOLO(ie, args.model, log, batch_size=1, labels=args.labels,
                     threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
-    elif architecture_type == 'faceboxes':
+    elif args.architecture_type == 'faceboxes':
         return FaceBoxes(ie, args.model, log, batch_size=1, threshold=args.prob_threshold)
-    elif architecture_type == 'centernet':
+    elif args.architecture_type == 'centernet':
         return CenterNet(ie, args.model, log, batch_size=1, labels=args.labels, threshold=args.prob_threshold)
-    elif architecture_type == 'retina':
-        return RetinaFace(ie, args.model, log,  batch_size=1, threshold=args.prob_threshold)
-
-    log.error('No such model type as "{}". See "--architecture_type" option for details.'.format(architecture_type))
-    sys.exit(1)
+    elif args.architecture_type == 'retina':
+        return RetinaFace(ie, args.model, log, batch_size=1, threshold=args.prob_threshold)
 
 
 def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
@@ -217,7 +214,7 @@ def main():
 
     log.info('Loading network...')
 
-    model = get_model(args.architecture_type, ie, args)
+    model = get_model(ie, args)
     has_landmarks = args.architecture_type == 'retina'
 
     detector_pipeline = AsyncPipeline(ie, model, plugin_config, logger=log,
