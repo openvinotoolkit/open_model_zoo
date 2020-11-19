@@ -150,8 +150,6 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument("-m_decoder", help="Required. Path to an .xml file with a trained decoder part of the model",
                       required=True, type=str)
-    args.add_argument("--interactive", help="Optional. Enables interactive mode. In this mode images are read from the web-camera.",
-                      action='store_true', default=False)
     args.add_argument("-i", "--input", help="Optional. Path to a folder with images or path to an image files",
                       required=False, type=str)
     args.add_argument("-o", "--output_file",
@@ -169,8 +167,6 @@ def build_argparser():
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU", type=str)
-    args.add_argument("--camera_device", default=0, type=int,
-                      help='Optional. Device id of the web-camera. Change it only if you have more then one camera')
     args.add_argument("--resolution", default=(1280, 720), type=int, nargs=2,
                       help=f'Optional. Resolution of the demo application window. Default: 1280 720')
     args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
@@ -211,9 +207,10 @@ def main():
                     level=log.INFO, stream=sys.stdout)
 
     args = build_argparser().parse_args()
-    assert bool(args.interactive) != bool(args.input), "Choose only one option from [--interactive] and [-i/--input]"
+    interactive_mode = not (os.path.isdir(args.input) or args.input.endswith('.png') or args.input.endswith('.jpg'))
+    args.__dict__['interactive_mode'] = interactive_mode
     model = Model(args)
-    if not args.interactive:
+    if not interactive_mode:
         non_interactive_demo(model, args)
         return
 
@@ -221,6 +218,9 @@ def main():
     prev_text = ''
     demo = InteractiveDemo((height, width), resolution=args.resolution)
     capture = create_capture(args, demo.resolution)
+    if not capture.isOpened():
+        log.error("Cannot open camera")
+        return()
     while True:
         ret, frame = capture.read()
         bin_crop = demo.get_crop(frame)
@@ -255,7 +255,14 @@ def main():
 
 
 def create_capture(args, demo_resolution):
-    capture = cv.VideoCapture(args.camera_device)
+    input_source = args.input
+    if not input_source.endswith('.mp4'):
+        try:
+            input_source = int(input_source)
+        except ValueError as e:
+            raise ValueError("\n \tCannot recognize input as .mp4 video or device-id as int \n"
+                             "\tPlease, check the -i\--input arg and try again")
+    capture = cv.VideoCapture(input_source)
     capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
     capture.set(3, demo_resolution[0])
     capture.set(4, demo_resolution[1])

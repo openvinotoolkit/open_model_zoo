@@ -177,9 +177,9 @@ class Model:
         self.images_list = []
         self.vocab = Vocab(self.args.vocab_path)
         self.model_status = Model.Status.ready
-        self.is_async = args.interactive
+        self.is_async = args.interactive_mode
         self.num_infers_decoder = 0
-        if not args.interactive:
+        if not args.interactive_mode:
             self.preprocess_inputs()
 
     def preprocess_inputs(self):
