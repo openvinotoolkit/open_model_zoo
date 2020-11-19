@@ -2,7 +2,7 @@ from time import perf_counter
 
 
 class Model:
-    def __init__(self, ie, model_path, logger=None, batch_size=None):
+    def __init__(self, ie, model_path, logger=None, batch_size=1):
         self.logger = logger
         if self.logger:
             self.logger.info('Reading network from IR...')

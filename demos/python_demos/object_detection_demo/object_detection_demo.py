@@ -126,17 +126,16 @@ class ColorPalette:
 
 def get_model(ie, args):
     if args.architecture_type == 'ssd':
-        return SSD(ie, args.model, log, batch_size=1, labels=args.labels,
-                   keep_aspect_ratio_resize=args.keep_aspect_ratio)
+        return SSD(ie, args.model, log, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
     elif args.architecture_type == 'yolo':
-        return YOLO(ie, args.model, log, batch_size=1, labels=args.labels,
+        return YOLO(ie, args.model, log, labels=args.labels,
                     threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
     elif args.architecture_type == 'faceboxes':
-        return FaceBoxes(ie, args.model, log, batch_size=1, threshold=args.prob_threshold)
+        return FaceBoxes(ie, args.model, log, threshold=args.prob_threshold)
     elif args.architecture_type == 'centernet':
-        return CenterNet(ie, args.model, log, batch_size=1, labels=args.labels, threshold=args.prob_threshold)
+        return CenterNet(ie, args.model, log, labels=args.labels, threshold=args.prob_threshold)
     elif args.architecture_type == 'retina':
-        return RetinaFace(ie, args.model, log, batch_size=1, threshold=args.prob_threshold)
+        return RetinaFace(ie, args.model, log, threshold=args.prob_threshold)
 
 
 def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
