@@ -27,7 +27,7 @@ Second model is Decoder that takes as input:
 Second model is being executed until current decoded token is `END_TOKEN` or length of the formula is less then `--max_formula_len` producing one token per each decode step.
 
 As input, the demo application takes a path to a folder with images or a path to a single image file with a command-line argument `-i`. Another possible option is interactive mode, which will be explanined in details later.
-> **NOTE**: `--interactive` and `-i/--input` options are mutually exclusive. Please, use one of them, but not both or one of them.
+
 
 ### Non-interactive mode
 Non-interactive mode assumes that demo processes inputs sequentially.
@@ -50,11 +50,20 @@ Rendering of the latex formula is performed with the help of `Renderer` class fr
 2. `thread_render` provides asynchronous interface to the rendering process. In contrast with the previous method, this one returns image and formula only when rendering is complete. If rendering is incomplete at the moment of method call, method returns `None`.
 
 ### Interactive mode
-Interactive mode of the demo assumes User has a web-camera.
-Special class `InteractiveDemo` provides Python Context Manager interface to interact with webcamera and recognize latex formulas.
+Special class `InteractiveDemo` provides interface to interact with webcamera and recognize latex formulas.
 * The example of the interface:
 ![](./interactive_inferface.png)
-When User runs demo application with the `--interactive` option, window with the image simillar to above should pop up.
+When User runs demo application with the `-i` option and passes `.mp4` video or number of the web-camera device as an argument (typically 1), window with the image simillar to above should pop up.
+
+Example of usage of the interactive mode:
+```
+python formula_recognition_demo.py <required args> -i 0
+```
+or
+```
+python formula_recognition_demo.py <required args> -i input_video.mp4
+```
+
 
 The window has four main sections:
 1. On the center of this window is placed a red rectangle. This is input window, with the help of which User, moving the camera, can capture formula.
@@ -82,11 +91,10 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder
-                                   M_DECODER [--interactive] [-i INPUT]
-                                   [-o OUTPUT_FILE] --vocab_path VOCAB_PATH
+                                   M_DECODER [-i INPUT] [-o OUTPUT_FILE]
+                                   --vocab_path VOCAB_PATH
                                    [--max_formula_len MAX_FORMULA_LEN]
                                    [--conf_thresh CONF_THRESH] [-d DEVICE]
-                                   [--camera_device CAMERA_DEVICE]
                                    [--resolution RESOLUTION RESOLUTION]
                                    [--preprocessing_type {crop,resize}] [-pc]
                                    [--imgs_layer IMGS_LAYER]
@@ -109,8 +117,6 @@ Options:
                         part of the model
   -m_decoder M_DECODER  Required. Path to an .xml file with a trained decoder
                         part of the model
-  --interactive         Optional. Enables interactive mode. In this mode
-                        images are read from the web-camera.
   -i INPUT, --input INPUT
                         Optional. Path to a folder with images or path to an
                         image files
@@ -131,12 +137,9 @@ Options:
                         GPU, FPGA, HDDL or MYRIAD is acceptable. Sample will
                         look for a suitable plugin for device specified.
                         Default value is CPU
-  --camera_device CAMERA_DEVICE
-                        Optional. Device id of the web-camera. Change it only
-                        if you have more then one camera
   --resolution RESOLUTION RESOLUTION
                         Optional. Resolution of the demo application window.
-                        Default: (1280, 720)
+                        Default: 1280 720
   --preprocessing_type {crop,resize}
                         Optional. Type of the preprocessing
   -pc, --perf_counts
