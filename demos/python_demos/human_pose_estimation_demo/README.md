@@ -80,7 +80,7 @@ Options:
 ```
 
 Running the application with the empty list of options yields the short usage message and an error message.
-You can use the following command to do inference on GPU with a pre-trained human pose estimation model:
+You can use the following command to do inference on CPU with a pre-trained human pose estimation model:
 ```
 python3 human_pose_estimation.py -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/hpe.xml -d CPU
 ```
