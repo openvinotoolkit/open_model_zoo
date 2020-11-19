@@ -50,7 +50,8 @@ from .detection import (
     FaceBoxesAdapter,
     FaceDetectionAdapter,
     FaceDetectionRefinementAdapter,
-    FasterRCNNONNX
+    FasterRCNNONNX,
+    TwoStageDetector
 )
 from .detection_person_vehicle import (
     PersonVehicleDetectionAdapter,
@@ -119,6 +120,7 @@ __all__ = [
     'PersonVehicleDetectionRefinementAdapter',
     'HeadDetectionAdapter',
     'FasterRCNNONNX',
+    'TwoStageDetector',
 
     'TinyYOLOv1Adapter',
     'YoloV2Adapter',
