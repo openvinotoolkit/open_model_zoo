@@ -40,7 +40,7 @@ InferenceEngine::InferRequest::Ptr RequestsPool::getIdleRequest() {
 void RequestsPool::setRequestIdle(const InferenceEngine::InferRequest::Ptr& request) {
     std::lock_guard<std::mutex> lock(mtx);
     this->requests.at(request) = false;
-    --numRequestsInUse;
+    numRequestsInUse--;
 }
 
 size_t RequestsPool::getInUseRequestsCount() {
