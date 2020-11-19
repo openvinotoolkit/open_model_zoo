@@ -22,9 +22,10 @@
 using namespace InferenceEngine;
 
 ModelYolo3::ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-    float boxIOUThreshold, const std::vector<std::string>& labels) :
+    bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels) :
     DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels),
-    boxIOUThreshold(boxIOUThreshold) {
+    boxIOUThreshold(boxIOUThreshold),
+    useAdvancedPostprocessing(useAdvancedPostprocessing) {
 }
 
 void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -99,21 +100,36 @@ std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult)
             internalData.inputImgHeight, internalData.inputImgWidth, objects);
     }
 
-    //--- Checking IOU threshold conformance
-    // For every i-th object we're finding all objects it intersects with, and comparing confidence
-    // If i-th object has greater confidence than all others, we include it into result
-    for (const auto& obj1 : objects) {
-        bool isGoodResult = true;
-        for (const auto& obj2 : objects) {
-            if (obj1.confidence < obj2.confidence && intersectionOverUnion(obj1, obj2) >= boxIOUThreshold) {  // if obj1 is the same as obj2, condition expression will evaluate to false anyway
-                isGoodResult = false;
-                break;
+    if (useAdvancedPostprocessing) {
+        // Advanced postprocessing
+        // Checking IOU threshold conformance
+        // For every i-th object we're finding all objects it intersects with, and comparing confidence
+        // If i-th object has greater confidence than all others, we include it into result
+        for (const auto& obj1 : objects) {
+            bool isGoodResult = true;
+            for (const auto& obj2 : objects) {
+                if (obj1.labelID == obj2.labelID && obj1.confidence < obj2.confidence && intersectionOverUnion(obj1, obj2) >= boxIOUThreshold) { // if obj1 is the same as obj2, condition expression will evaluate to false anyway
+                    isGoodResult = false;
+                    break;
+                }
+            }
+            if (isGoodResult) {
+                result->objects.push_back(obj1);
             }
         }
-        if (isGoodResult) {
-            result->objects.push_back(obj1);
+    } else {
+        // Classic postprocessing
+        std::sort(objects.begin(), objects.end(), [](const DetectedObject& x, const DetectedObject& y) { return x.confidence > y.confidence; });
+        for (size_t i = 0; i < objects.size(); ++i) {
+            if (objects[i].confidence == 0)
+                continue;
+            for (size_t j = i + 1; j < objects.size(); ++j)
+                if (intersectionOverUnion(objects[i], objects[j]) >= boxIOUThreshold)
+                    objects[j].confidence = 0;
+            result->objects.push_back(objects[i]);
         }
     }
+
     return std::unique_ptr<ResultBase>(result);
 }
 

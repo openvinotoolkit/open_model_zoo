@@ -44,6 +44,7 @@
 #include "models/detection_model_ssd.h"
 
 static const char help_message[] = "Print a usage message.";
+static const char at_message[] = "Required. Architecture type: ssd or yolo";
 static const char video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
@@ -66,9 +67,10 @@ static const char num_streams_message[] = "Optional. Number of streams to use fo
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes (YOLOv3 only).";
-static const char at_message[] = "Required. Architecture type: ssd or yolo";
+static const char yolo_af_message[] = "Optional. Use advanced postprocessing/filtering algorithm for YOLO.";
 
 DEFINE_bool(h, false, help_message);
+DEFINE_string(at, "", at_message);
 DEFINE_string(i, "", video_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
@@ -86,7 +88,7 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(loop, false, loop_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
-DEFINE_string(at, "", at_message);
+DEFINE_bool(yolo_af, false, yolo_af_message);
 
 /**
 * \brief This function shows a help message
@@ -97,8 +99,8 @@ static void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
-    std::cout << "    -i \"<path>\"               " << video_message << std::endl;
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
+    std::cout << "    -i \"<path>\"               " << video_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
@@ -115,6 +117,7 @@ static void showUsage() {
     std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
+    std::cout << "    -yolo_af                  " << yolo_af_message << std::endl;
 }
 
 
@@ -196,7 +199,7 @@ int main(int argc, char *argv[]) {
             model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
         else if (FLAGS_at == "yolo") {
-            model.reset(new ModelYolo3(FLAGS_m,(float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, labels));
+            model.reset(new ModelYolo3(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float) FLAGS_iou_t, labels));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
