@@ -46,6 +46,9 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument('-i', '--input', help='Required. Path to an image, video file or a numeric camera ID.',
                       required=True, type=str)
+    args.add_argument('--type', choices=('ae', 'openpose'), required=True, type=str,
+                      help='Required. Type of the network, either "ae" for associative embedding '
+                           'or "openpose" for openpose.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
@@ -69,11 +72,8 @@ def build_argparser():
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
 
-    args.add_argument('--type', default='ae', choices=('ae', 'openpose'), type=str,
-                      help='Optional. Type of the network, either "ae" for associative embedding'
-                           'or "openpose" for openpose.')
     args.add_argument('--tsize', default=None, type=int,
-                      help='Optional. Target input size. By default target size is derived from image input shape'
+                      help='Optional. Target input size. By default target size is derived from an input shape '
                            'of a provided network and depends on the network type.')
     return parser
 
