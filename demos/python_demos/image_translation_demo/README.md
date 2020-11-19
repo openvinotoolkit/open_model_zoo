@@ -3,6 +3,7 @@
 This demo application demonstrates an example of using neural networks to synthesize a photo-realistic image based on exemplar image. You can use the following models with the demo:
 
 * `cocosnet`
+* `hrnet-v2-c1-segmentation`
 
 ## How It Works
 

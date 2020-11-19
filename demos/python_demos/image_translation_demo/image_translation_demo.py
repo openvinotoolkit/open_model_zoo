@@ -58,8 +58,10 @@ def build_argparser():
 
 
 def get_files(path):
-    if path and os.path.isdir(path):
-        file_paths = [path + file for file in os.listdir(path) if os.path.isfile(path + file)]
+    if path is None:
+        return []
+    if os.path.isdir(path):
+        file_paths = [os.path.join(path, file) for file in os.listdir(path) if os.path.isfile(path + file)]
         return sorted(file_paths)
     return [path]
 
@@ -91,7 +93,7 @@ def main():
     assert args.reference_images and ((args.input_semantics and args.reference_semantics)
                                       or (args.input_images and args.segmentation_model)
                                       ), "Not enough data to do inference"
-    use_seg = False if args.reference_images and args.input_semantics and args.reference_semantics else True
+    use_seg = not (args.reference_images and args.input_semantics and args.reference_semantics)
     input_images = get_files(args.input_images)
     input_semantics = get_files(args.input_semantics)
     reference_images = get_files(args.reference_images)
