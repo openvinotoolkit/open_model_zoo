@@ -19,7 +19,7 @@
 
 using namespace InferenceEngine;
 
-void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork){
+void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input blobs -----------------------------------------------------
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();

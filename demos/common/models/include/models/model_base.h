@@ -31,7 +31,7 @@ public:
     const std::vector<std::string>& getOutputsNames() const { return outputsNames; }
     const std::vector<std::string>& getInputsNames() const { return inputsNames; }
 
-    std::string getModelFileName() {return modelFileName; }
+    std::string getModelFileName() { return modelFileName; }
 
 protected:
     std::vector<std::string> inputsNames;

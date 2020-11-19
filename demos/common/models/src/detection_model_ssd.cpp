@@ -31,7 +31,7 @@ void ModelSSD::onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, 
     DetectionModel::onLoadCompleted(execNetwork, requests);
 
     // --- Setting image info for every request in a pool. We can do it once and reuse this info at every submit -------
-    if (inputsNames.size()>1) {
+    if (inputsNames.size() > 1) {
         for (auto &request : requests) {
             auto blob = request->GetBlob(inputsNames[1]);
             LockedMemory<void> blobMapped = as<MemoryBlob>(blob)->wmap();

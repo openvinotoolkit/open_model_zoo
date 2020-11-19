@@ -22,7 +22,7 @@
 using namespace InferenceEngine;
 
 AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine) :
-    model(std::move(modelInstance)){
+    model(std::move(modelInstance)) {
 
     // --------------------------- 1. Load inference engine ------------------------------------------------
     slog::info << "Loading Inference Engine" << slog::endl;

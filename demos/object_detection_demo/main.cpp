@@ -145,7 +145,7 @@ cv::Mat renderDetectionData(const DetectionResult& result) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
 
-    auto outputImg = result.metaData->asRef<ImageMetaData>().img.clone();
+    auto outputImg = result.metaData->asRef<ImageMetaData>().img;
 
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
@@ -188,10 +188,10 @@ int main(int argc, char *argv[]) {
             labels = DetectionModel::loadLabels(FLAGS_labels);
 
         std::unique_ptr<ModelBase> model;
-        if (FLAGS_at=="ssd") {
+        if (FLAGS_at == "ssd") {
             model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
-        else if (FLAGS_at=="yolo") {
+        else if (FLAGS_at == "yolo") {
             model.reset(new ModelYolo3(FLAGS_m,(float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, labels));
         }
         else {
@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
         Presenter presenter;
 
         bool keepRunning = true;
-        while (keepRunning){
+        while (keepRunning) {
             int64_t frameNum = 0;
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 frameNum = pipeline.submitData(ImageInputData(curr_frame),
-                    std::shared_ptr<MetaData>(new ImageMetaData(curr_frame, startTime)));
+                    std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.

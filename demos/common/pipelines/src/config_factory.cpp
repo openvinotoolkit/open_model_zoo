@@ -22,14 +22,6 @@
 #include <samples/common.hpp>
 #include <cldnn/cldnn_config.hpp>
 
-DECLARE_string(d);
-DECLARE_bool(pc);
-DECLARE_string(c);
-DECLARE_string(l);
-DECLARE_uint32(nireq);
-DECLARE_uint32(nthreads);
-DECLARE_string(nstreams);
-
 using namespace InferenceEngine;
 
 CnnConfig ConfigFactory::getUserConfig(const std::string& d, const std::string& l, const std::string& c, bool pc, uint32_t nireq, const std::string& nstreams, uint32_t nthreads) {

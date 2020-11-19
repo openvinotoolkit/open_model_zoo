@@ -24,7 +24,7 @@ using namespace InferenceEngine;
 ModelYolo3::ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
     float boxIOUThreshold, const std::vector<std::string>& labels)
     :DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels),
-    boxIOUThreshold(boxIOUThreshold){
+    boxIOUThreshold(boxIOUThreshold) {
 }
 
 void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
