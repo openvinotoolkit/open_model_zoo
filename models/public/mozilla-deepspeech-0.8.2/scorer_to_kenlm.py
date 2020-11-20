@@ -24,8 +24,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    with open(args.input, 'rb') as f:
-        data_scorer = f.read()
+    data_scorer = args.input.read_bytes()
 
     data_scorer, data_trie, trie_offset = scorer_cut_trie_v6(data_scorer, trie_offset=args.trie_offset)
     vocabulary, metadata = trie_v6_extract_vocabulary(data_trie, base_offset=trie_offset)
@@ -40,8 +39,7 @@ def main():
         print('lm_vocabulary_offset:', vocab_offset)
     # pylint: enable=bad-function-call
 
-    with open(args.output, 'wb') as f:
-        f.write(data_scorer)
+    args.output.write_bytes(data_scorer)
 
 
 if __name__ == '__main__':

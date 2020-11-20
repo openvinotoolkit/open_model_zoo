@@ -14,7 +14,7 @@ def parse_string(data, pos=0):
 
 def parse_header(data, pos=0):
     (magic,), pos = parse_format('<i', data, pos)
-    if magic != 2125659606:
+    if magic != 0x7eb2fdd6:
         raise ValueError("Bad OpenFst TRIE: wrong magic number")
     (fst_type,), pos = parse_string(data, pos)
     (arc_type,), pos = parse_string(data, pos)

@@ -35,7 +35,7 @@ def load_memmapped_fs(data):
 
 def convert_node(node, mmfs):
     """
-    node may be changed in place.
+    node is changed in place.
     """
     node.op = 'Const'
     # region_name is bytes here, while it is string in MemmappedFileSystemDirectory
@@ -48,27 +48,21 @@ def convert_node(node, mmfs):
     node.attr['value'].tensor.dtype = dtype
     node.attr['value'].tensor.tensor_shape.CopyFrom(shape)
     node.attr['value'].tensor.tensor_content = mmfs[region_name]
-    return node
 
 
 def undo_mmap(graph_def, mmfs):
-    nodes = []
+    """
+    graph_def is changed in place.
+    """
     for node in graph_def.node:
-        if node.op != 'ImmutableConst':
-            nodes.append(node)
-            continue
-        node = convert_node(node, mmfs)
-        nodes.append(node)
-    del graph_def.node[:]
-    graph_def.node.extend(nodes)
-    return graph_def
+        if node.op == 'ImmutableConst':
+            convert_node(node, mmfs)
 
 
 def main():
     args = parse_args()
 
-    with open(args.input, 'rb') as f:
-        data = f.read()
+    data = args.input.read_bytes()
 
     mmfs = load_memmapped_fs(data)
     ROOT = 'memmapped_package://.'
@@ -76,10 +70,9 @@ def main():
     graph_def = GraphDef()
     graph_def.ParseFromString(mmfs[ROOT])
 
-    graph_def = undo_mmap(graph_def, mmfs)
+    undo_mmap(graph_def, mmfs)
 
-    with open(args.output, 'wb') as f:
-        f.write(graph_def.SerializeToString())
+    args.output.write_bytes(graph_def.SerializeToString())
 
 
 if __name__ == '__main__':

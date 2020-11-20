@@ -45,7 +45,7 @@ def trie_v6_extract_vocabulary(data, alphabet=None, base_offset=0, max_num_words
 
 def parse_trie_v6(data, pos=0, base_offset=0):
     (magic, version, is_utf8_mode, alpha, beta), pos = parse_format('<Ii?dd', data, pos)
-    if magic != 0x54524945:  # b'EIRT' = reversed 'TRIE'
+    if magic != 0x54524945:
         raise ValueError("Not a ds_ctcdecoder TRIE file: wrong file signature")
     if version != 6:
         raise ValueError("Wrong ds_ctcdecder TRIE file version: version {}, expected version 6".format(version))
