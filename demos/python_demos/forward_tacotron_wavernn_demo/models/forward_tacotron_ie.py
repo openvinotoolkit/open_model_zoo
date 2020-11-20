@@ -21,9 +21,9 @@ class ForwardTacotronIE:
         self.forward_exec = self.create_exec_network(self.forward_net)
 
         # fixed length of the sequence of symbols
-        self.duration_len = self.duration_predictor_net.inputs['input_seq'].shape[1]
+        self.duration_len = self.duration_predictor_net.input_info['input_seq'].input_data.shape[1]
         # fixed length of the input embeddings for forward
-        self.forward_len = self.forward_net.inputs['data'].shape[1]
+        self.forward_len = self.forward_net.input_info['data'].input_data.shape[1]
         if self.verbose:
             print('Forward limitations : {0} symbols and {1} embeddings'.format(self.duration_len, self.forward_len))
 
@@ -61,11 +61,6 @@ class ForwardTacotronIE:
         # Read IR
         log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
-
-        print("#################################################################")
-        print("Model: {0}. Inputs: {1}".format(model_xml, net.inputs))
-        print("#################################################################")
-        print("Model: {0}. Outputs: {1}".format(model_xml, net.outputs))
 
         return net
 

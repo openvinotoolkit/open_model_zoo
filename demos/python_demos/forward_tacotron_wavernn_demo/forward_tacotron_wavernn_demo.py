@@ -36,7 +36,7 @@ def build_argparser():
                       type=str)
 
     args.add_argument("--upsamlper_width", default=-1,
-                      help="Width for rashaping of the model_upsamlpe. If -1 then no reshape. Do not use with FP16 model.",
+                      help="Width for reshaping of the model_upsamlpe. If -1 then no reshape.",
                       required=False,
                       type=int)
 

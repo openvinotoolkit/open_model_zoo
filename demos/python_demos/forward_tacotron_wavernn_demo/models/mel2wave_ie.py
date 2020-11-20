@@ -35,8 +35,8 @@ class WaveRNNIE:
 
         self.upsample_net = self.load_network(model_upsample)
         if upsamlper_width > 0:
-            orig_shape = self.upsample_net.inputs['mels'].shape
-            self.upsample_net.reshape({"mels" : (orig_shape[0], upsamlper_width, orig_shape[2])})
+            orig_shape = self.upsample_net.input_info['mels'].input_data.shape
+            self.upsample_net.reshape({"mels": (orig_shape[0], upsamlper_width, orig_shape[2])})
 
         self.upsample_exec = self.create_exec_network(self.upsample_net)
 
@@ -44,8 +44,8 @@ class WaveRNNIE:
         self.rnn_exec = self.create_exec_network(self.rnn_net, batch_sizes=self.batch_sizes)
 
         # fixed number of the mels in mel-spectrogramm
-        self.mel_len = self.upsample_net.inputs['mels'].shape[1] - 2 * self.pad
-        self.rnn_width = self.rnn_net.inputs['x'].shape[1]
+        self.mel_len = self.upsample_net.input_info['mels'].input_data.shape[1] - 2 * self.pad
+        self.rnn_width = self.rnn_net.input_info['x'].input_data.shape[1]
 
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
@@ -53,11 +53,6 @@ class WaveRNNIE:
         # Read IR
         log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
-
-        print("#################################################################")
-        print("Model: {0}. Inputs: {1}".format(model_xml, net.inputs))
-        print("#################################################################")
-        print("Model: {0}. Outputs: {1}".format(model_xml, net.outputs))
 
         return net
 
@@ -128,6 +123,7 @@ class WaveRNNIE:
         aux_split = [aux[:, :, d * i:d * (i + 1)] for i in range(4)]
 
         b_size, seq_len, _ = upsampled_mels.shape
+        seq_len = min(seq_len, aux_split[0].shape[1])
 
         if b_size not in self.batch_sizes:
             raise Exception('Incorrect batch size {0}. Correct should be 2 ** something'.format(b_size))
