@@ -16,19 +16,19 @@ description: >-
   Decoder part of latex formula recognition model.
 task_type: token_recognition
 files:
-  - name: FP32/formula-recognition-polynomials-handwritten-0001-im2latex-decoder.xml
+  - name: FP32/formula-recognition-polynomials-handwritten-0001-decoder.xml
     size: 48816
     sha256: 73c3ddf42a769f922ca1357930f0acb1023adbbb8b690668920f86ba9f5c555e
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-im2latex-decoder/FP32/formula-recognition-polynomials-handwritten-0001-im2latex-decoder.xml
-  - name: FP32/formula-recognition-polynomials-handwritten-0001-im2latex-decoder.bin
+  - name: FP32/formula-recognition-polynomials-handwritten-0001-decoder.bin
     size: 10179560
     sha256: 5bd55bf08eaee8ef5a6d516b4a7af05a49df26bc9c5f020e9c80533d90a7ca10
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-im2latex-decoder/FP32/formula-recognition-polynomials-handwritten-0001-im2latex-decoder.bin
-  - name: FP16/formula-recognition-polynomials-handwritten-0001-im2latex-decoder.xml
+  - name: FP16/formula-recognition-polynomials-handwritten-0001-decoder.xml
     size: 48807
     sha256: 504b23cd324e4b6a90f6f288eab6f91c4e45c915ba4537e35933b5e8965dd4b9
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-im2latex-decoder/FP16/formula-recognition-polynomials-handwritten-0001-im2latex-decoder.xml
-  - name: FP16/formula-recognition-polynomials-handwritten-0001-im2latex-decoder.bin
+  - name: FP16/formula-recognition-polynomials-handwritten-0001-decoder.bin
     size: 5089834
     sha256: 681683c50d62291ee1a4d50200a8462dbb00f1ea927ff43276b4b3249016df39
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-im2latex-decoder/FP16/formula-recognition-polynomials-handwritten-0001-im2latex-decoder.bin
