@@ -96,7 +96,7 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
                 batch_identifiers, batch_inputs_extr, encoder_callback=encoder_callback
             )
             metrics_result = None
-            if self.metric_executor and calculate_metrcis:
+            if self.metric_executor and calculate_metrics:
                 metrics_result, _ = self.metric_executor.update_metrics_on_batch(
                     batch_input_ids, batch_annotation, batch_prediction
                 )
