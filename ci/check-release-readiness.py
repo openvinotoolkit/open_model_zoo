@@ -45,9 +45,10 @@ def main():
 
     for models_lst_path in OMZ_ROOT.glob('demos/**/models.lst'):
         with models_lst_path.open() as models_lst:
-            for line in models_lst:
+            for line_num, line in enumerate(models_lst):
                 if RE_TODO_COMMENT.search(line):
-                    complain('{} has a TODO comment', models_lst_path.relative_to(OMZ_ROOT))
+                    complain('{}:{}: line contains TODO comment',
+                        models_lst_path.relative_to(OMZ_ROOT), line_num + 1)
 
     sys.exit(0 if all_passed else 1)
 
