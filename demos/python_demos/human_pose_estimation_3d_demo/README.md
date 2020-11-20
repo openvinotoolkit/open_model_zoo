@@ -59,6 +59,7 @@ Options:
                         Optional. Path to file with camera extrinsics.
   --fx FX               Optional. Camera focal length.
   --no_show             Optional. Do not display output.
+  --loop                Optional. Run the input data in a loop.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```

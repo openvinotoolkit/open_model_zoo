@@ -21,12 +21,12 @@ import cv2
 import numpy as np
 
 from modules.inference_engine import InferenceEngine
-from modules.input_reader import InputReader
 from modules.draw import Plotter3d, draw_poses
 from modules.parse_poses import parse_poses
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
+from images_capture import openImagesCapture
 
 
 def rotate_poses(poses_3d, R, t):
@@ -63,6 +63,7 @@ if __name__ == '__main__':
                       type=str, default=None)
     args.add_argument('--fx', type=np.float32, default=-1, help='Optional. Camera focal length.')
     args.add_argument('--no_show', help='Optional. Do not display output.', action='store_true')
+    args.add_argument('--loop', default=False, action='store_true', help='Optional. Run the input data in a loop.')
     args.add_argument("-u", "--utilization_monitors", default='', type=str,
                       help="Optional. List of monitors to show initially.")
     args = parser.parse_args()
@@ -87,8 +88,8 @@ if __name__ == '__main__':
     R = np.array(extrinsics['R'], dtype=np.float32)
     t = np.array(extrinsics['t'], dtype=np.float32)
 
-    frame_provider = InputReader(args.input)
-    is_video = frame_provider.is_video
+    input = openImagesCapture(args.input, args.loop)
+    is_video = input.isVideo
     base_height = args.height_size
     fx = args.fx
 
@@ -98,12 +99,14 @@ if __name__ == '__main__':
     space_code = 32
     mean_time = 0
     presenter = monitors.Presenter(args.utilization_monitors, 0)
-    for frame in frame_provider:
+
+    cap = input.read()    
+    while cap is not None:
         current_time = cv2.getTickCount()
-        input_scale = base_height / frame.shape[0]
-        scaled_img = cv2.resize(frame, dsize=None, fx=input_scale, fy=input_scale)
+        input_scale = base_height / cap.shape[0]
+        scaled_img = cv2.resize(cap, dsize=None, fx=input_scale, fy=input_scale)
         if fx < 0:  # Focal length is unknown
-            fx = np.float32(0.8 * frame.shape[1])
+            fx = np.float32(0.8 * cap.shape[1])
 
         inference_result = inference_engine.infer(scaled_img)
         poses_3d, poses_2d = parse_poses(inference_result, input_scale, stride, fx, is_video)
@@ -120,19 +123,19 @@ if __name__ == '__main__':
             edges = (Plotter3d.SKELETON_EDGES + 19 * np.arange(poses_3d.shape[0]).reshape((-1, 1, 1))).reshape((-1, 2))
         plotter.plot(canvas_3d, poses_3d, edges)
 
-        presenter.drawGraphs(frame)
-        draw_poses(frame, poses_2d)
+        presenter.drawGraphs(cap)
+        draw_poses(cap, poses_2d)
         current_time = (cv2.getTickCount() - current_time) / cv2.getTickFrequency()
         if mean_time == 0:
             mean_time = current_time
         else:
             mean_time = mean_time * 0.95 + current_time * 0.05
-        cv2.putText(frame, 'FPS: {}'.format(int(1 / mean_time * 10) / 10),
+        cv2.putText(cap, 'FPS: {}'.format(int(1 / mean_time * 10) / 10),
                     (40, 80), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255))
         if args.no_show:
             continue
         cv2.imshow(canvas_3d_window_name, canvas_3d)
-        cv2.imshow('3D Human Pose Estimation', frame)
+        cv2.imshow('3D Human Pose Estimation', cap)
 
         key = cv2.waitKey(delay)
         if key == esc_code:
@@ -156,4 +159,5 @@ if __name__ == '__main__':
                 break
             else:
                 delay = 1
+        cap = input.read()
     print(presenter.reportMeans())
