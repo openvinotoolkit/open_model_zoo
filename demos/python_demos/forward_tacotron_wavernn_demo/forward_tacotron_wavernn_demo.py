@@ -35,8 +35,8 @@ def build_argparser():
     args.add_argument("--input", help="Text file with text.", required=True,
                       type=str)
 
-    args.add_argument("--upsamlper_width", default=-1,
-                      help="Width for reshaping of the model_upsamlpe. If -1 then no reshape.",
+    args.add_argument("--upsampler_width", default=-1,
+                      help="Width for reshaping of the model_upsample. If -1 then no reshape. Do not use with FP16 model.",
                       required=False,
                       type=int)
 
@@ -56,7 +56,7 @@ def mel_to_wave(mel_spec, out_name, ap):
 def main():
     args = build_argparser().parse_args()
 
-    vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, device=args.device, upsamlper_width=args.upsamlper_width)
+    vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, device=args.device, upsampler_width=args.upsampler_width)
     forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, args.device, verbose=False)
 
     audio_res = []
