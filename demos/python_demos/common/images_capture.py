@@ -8,30 +8,29 @@ class InvalidInput(Exception):
     pass
 
 
-class ImagesCapture():
+class ImagesCapture:
 
     def __init__(self, loop):
         self.loop = loop
-        self.isVideo = False
 
     def read():
-        pass
+        raise NotImplementedError
 
 
-class ImageReader(ImagesCapture):
+class ImreadWrapper(ImagesCapture):
 
     def __init__(self, input, loop):
         super().__init__(loop)
         self.image = cv2.imread(input, cv2.IMREAD_COLOR)
-        self.canRead = True
+        self.can_read = True
         if self.image is None:
             raise InvalidInput
 
     def read(self):
         if self.loop:
             return copy.deepcopy(self.image)
-        if self.canRead:
-            self.canRead = False
+        if self.can_read:
+            self.can_read = False
             return copy.deepcopy(self.image)
         return None
 
@@ -43,64 +42,65 @@ class DirReader(ImagesCapture):
         self.dir = input
         if not os.path.isdir(self.dir):
             raise InvalidInput
-        self.imageId = 0
         self.names = sorted(os.listdir(self.dir))
-        if not self.names:
+        if not self.names: 
             raise InvalidInput
+        self.file_id = 0
+        read_images = 0
         for name in self.names:
-            path = os.path.join(self.dir, name)
-            image = cv2.imread(path, cv2.IMREAD_COLOR)
-            if image is None:
-                raise InvalidInput
+            filename = os.path.join(self.dir, name)
+            image = cv2.imread(filename, cv2.IMREAD_COLOR)
+            if image is not None:
+                read_images += 1
+        if not read_images:
+            raise RuntimeError("Can't read the first image from {} dir".format(self.dir))
 
     def read(self):
-        while(True):
-            if self.imageId < len(self.names): 
-                path = os.path.join(self.dir, self.names[self.imageId])
-                self.imageId += 1
-                image = cv2.imread(path, cv2.IMREAD_COLOR)
-                if image is None:
-                    raise InvalidInput
-                return copy.deepcopy(image)
-
+        while True:
+            while self.file_id < len(self.names):
+                filename = os.path.join(self.dir, self.names[self.file_id])
+                image = cv2.imread(filename, cv2.IMREAD_COLOR)
+                self.file_id += 1
+                if image is not None:
+                    return copy.deepcopy(image)
             if self.loop:
-                self.imageId = 0
+                self.file_id = 0
                 continue
-
             return None
 
 
-class VideoReader(ImagesCapture):
+class VideoCapWrapper(ImagesCapture):
 
-    def __init__(self, input, loop, cameraResolution):
+    def __init__(self, input, loop, camera_resolution):
         super().__init__(loop)
-        if not os.path.isfile(input):
-            raise InvalidInput
-        self.video = input
-        self.isVideo = True
-        self.cameraResolution = cameraResolution
-        self.cap = cv2.VideoCapture(self.video)
+        self.cap = cv2.VideoCapture()
+        try:
+            self.cap.open(int(input))
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, camera_resolution[0])
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, camera_resolution[1])
+            self.cap.set(cv2.CAP_PROP_AUTOFOCUS, 1)
+            self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+        except:
+            self.cap.open(input)
         if not self.cap.isOpened():
             raise InvalidInput
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.cameraResolution[0])
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.cameraResolution[1])
 
     def read(self):
-        status, frame = self.cap.read()
+        status, image = self.cap.read()
         if not status:
             if not self.loop:
                 return None
             self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            status, frame = self.cap.read()
+            status, image = self.cap.read()
             if not status:
                 return None
-        return frame
+        return image
 
 
-def openImagesCapture(input, loop, cameraResolution=(1280, 720)):
-    input = input[0]
+def open_images_capture(input, loop, camera_resolution=(1280, 720)):
     try:
-        return ImageReader(input, loop)
+        return ImreadWrapper(input, loop)
     except InvalidInput:
         pass
     try:
@@ -108,7 +108,7 @@ def openImagesCapture(input, loop, cameraResolution=(1280, 720)):
     except InvalidInput: 
         pass
     try:
-        return VideoReader(input, loop, cameraResolution)
+        return VideoCapWrapper(input, loop, camera_resolution)
     except InvalidInput:
         pass
-    raise ValueError('Cannot read {}'.format(input))
+    raise RuntimeError("Can't read {}".format(input))
