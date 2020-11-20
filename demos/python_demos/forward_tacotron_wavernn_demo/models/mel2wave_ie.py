@@ -9,7 +9,7 @@ from utils.wav_processing import *
 
 class WaveRNNIE:
     def __init__(self, model_upsample, model_rnn, target=11000, overlap=550, hop_length=275, bits=9, device='CPU',
-                 verbose=False):
+                 verbose=False, upsamlper_width=-1):
         """
         return class provided WaveRNN inference.
 
@@ -34,6 +34,10 @@ class WaveRNNIE:
         self.ie = IECore()
 
         self.upsample_net = self.load_network(model_upsample)
+        if upsamlper_width > 0:
+            orig_shape = self.upsample_net.inputs['mels'].shape
+            self.upsample_net.reshape({"mels" : (orig_shape[0], upsamlper_width, orig_shape[2])})
+
         self.upsample_exec = self.create_exec_network(self.upsample_net)
 
         self.rnn_net = self.load_network(model_rnn)

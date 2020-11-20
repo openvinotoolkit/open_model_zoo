@@ -48,18 +48,21 @@ def fold_with_overlap(x, target, overlap):
 
     # Calculate variables needed
     num_folds = (total_len - overlap) // (target + overlap)
+    if num_folds < 1:
+        raise ValueError('Too short mel-spectrogram with width {0}. Try longer sentence.'.format(total_len))
     log_2 = math.log2(num_folds)
     optimal_batch_sz = 2 ** int(math.ceil(log_2))
 
-    target = (total_len - overlap) // (optimal_batch_sz - 1) - overlap
+    offset = 1 if optimal_batch_sz > 1 else 0
+    target = (total_len - overlap) // (optimal_batch_sz - offset) - overlap
     num_folds = (total_len - overlap) // (target + overlap)
     if num_folds * (overlap + target) + overlap == total_len:
         overlap += 1
-        target = (total_len - overlap) // (optimal_batch_sz - 1) - overlap
+        target = (total_len - overlap) // (optimal_batch_sz - offset) - overlap
 
     while target < overlap:
         overlap = overlap // 2
-        target = (total_len - overlap) // (optimal_batch_sz - 1) - overlap
+        target = (total_len - overlap) // (optimal_batch_sz - offset) - overlap
         if optimal_batch_sz * (overlap + target) + overlap == total_len:
             target = (total_len - overlap) // optimal_batch_sz - overlap
 
