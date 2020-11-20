@@ -100,7 +100,8 @@ class AssociativeEmbeddingDecoder:
             num_added = diff.shape[0]
             num_grouped = diff.shape[1]
             if num_added > num_grouped:
-                diff_normed = np.pad(diff_normed, ((0, 0), (0, num_added - num_grouped)), constant_values=1e10)
+                diff_normed = np.pad(diff_normed, ((0, 0), (0, num_added - num_grouped)),
+                                     mode='constant', constant_values=1e10)
 
             pairs = self._max_match(diff_normed)
             for row, col in pairs:

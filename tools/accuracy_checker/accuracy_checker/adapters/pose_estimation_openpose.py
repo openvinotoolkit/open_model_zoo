@@ -18,6 +18,11 @@ import cv2
 import numpy as np
 from skimage.measure import block_reduce
 
+try:
+    from numpy.core.umath import clip
+except ImportError:
+    from numpy import clip
+
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, ConfigError, NumberField
 from ..representation import PoseEstimationPrediction
@@ -187,8 +192,8 @@ class OpenPoseDecoder:
         if self.delta > 0:
             for kpts in keypoints:
                 kpts[:, :2] += self.delta
-                np.core.umath.clip(kpts[:, 0], 0, w - 1, out=kpts[:, 0])
-                np.core.umath.clip(kpts[:, 1], 0, h - 1, out=kpts[:, 1])
+                clip(kpts[:, 0], 0, w - 1, out=kpts[:, 0])
+                clip(kpts[:, 1], 0, h - 1, out=kpts[:, 1])
 
         pose_entries, keypoints = self.group_keypoints(keypoints, pafs, pose_entry_size=self.num_joints + 2)
         poses, scores = self.convert_to_coco_format(pose_entries, keypoints)
@@ -222,8 +227,8 @@ class OpenPoseDecoder:
                 continue
             # Apply quarter offset to improve localization accuracy.
             x, y = self.refine(heatmaps[0, k], x, y)
-            np.core.umath.clip(x, 0, w - 1, out=x)
-            np.core.umath.clip(y, 0, h - 1, out=y)
+            clip(x, 0, w - 1, out=x)
+            clip(y, 0, h - 1, out=y)
             # Pack resulting points.
             keypoints = np.empty((n, 4), dtype=np.float32)
             keypoints[:, 0] = x
