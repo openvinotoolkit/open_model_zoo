@@ -43,7 +43,7 @@ class DirReader(ImagesCapture):
         if not os.path.isdir(self.dir):
             raise InvalidInput
         self.names = sorted(os.listdir(self.dir))
-        if not self.names: 
+        if not self.names:
             raise InvalidInput
         self.file_id = 0
         read_images = 0
