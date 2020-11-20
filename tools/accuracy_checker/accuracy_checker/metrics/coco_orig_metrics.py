@@ -360,10 +360,10 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
     def _use_original_coco(self):
         subsample_size = self.dataset.config.get('subsample_size')
         if not subsample_size:
-            annotation_conversion_parameters = self.dataset.config.get('annotation_conversion')
-            if annotation_conversion_parameters:
-                annotation_file = annotation_conversion_parameters.get('annotation_file')
-                return annotation_file.is_file()
+            annotation_conversion_parameters = self.dataset.config.get('annotation_conversion', {})
+            if 'annotation_file' in annotation_conversion_parameters:
+                annotation_file = Path(annotation_conversion_parameters['annotation_file'])
+                return annotation_file.is_file() and annotation_file.suffix == '.json'
 
         return False
 
