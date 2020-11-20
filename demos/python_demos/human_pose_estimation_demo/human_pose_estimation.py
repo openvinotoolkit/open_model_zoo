@@ -42,21 +42,29 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=str)
     args.add_argument('-i', '--input', help='Required. Path to an image, video file or a numeric camera ID.',
                       required=True, type=str)
+    args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
+                      required=True, type=str)
     args.add_argument('--type', choices=('ae', 'openpose'), required=True, type=str,
-                      help='Required. Type of the network, either "ae" for associative embedding '
-                           'or "openpose" for openpose.')
-    args.add_argument('-d', '--device',
-                      help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
-                           'acceptable. The sample will look for a suitable plugin for device specified. '
-                           'Default value is CPU.', default='CPU', type=str)
+                      help='Required. Type of the network, either "ae" for Associative Embedding '
+                           'or "openpose" for OpenPose.')
+    args.add_argument('--tsize', default=None, type=int,
+                      help='Optional. Target input size. This demo implements image pre-processing pipeline '
+                           'that is common to human pose estimation approaches. Image is resize first to some '
+                           'target size and then the network is reshaped to fit the input image shape. '
+                           'By default target image size is determined based on the input shape from IR. '
+                           'Alternatively it can be manually set via this parameter. Note that for OpenPose-like '
+                           'nets image is resized to a predefined height, which is the target size in this case. '
+                           'For Associative Embedding-like nets target size is the length of a short image side.')
     args.add_argument('-t', '--prob_threshold', help='Optional. Probability threshold for poses filtering.',
                       default=0.1, type=float)
     args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
                       default=False, action='store_true')
+    args.add_argument('-d', '--device',
+                      help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
+                           'acceptable. The sample will look for a suitable plugin for device specified. '
+                           'Default value is CPU.', default='CPU', type=str)
     args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
                       default=1, type=int)
     args.add_argument('-nstreams', '--num_streams',
@@ -71,10 +79,6 @@ def build_argparser():
     args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
-
-    args.add_argument('--tsize', default=None, type=int,
-                      help='Optional. Target input size. By default target size is derived from an input shape '
-                           'of a provided network and depends on the network type.')
     return parser
 
 
