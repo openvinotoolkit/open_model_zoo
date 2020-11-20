@@ -91,7 +91,7 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder
-                                   M_DECODER [-i INPUT] [-o OUTPUT_FILE]
+                                   M_DECODER -i INPUT [-o OUTPUT_FILE]
                                    --vocab_path VOCAB_PATH
                                    [--max_formula_len MAX_FORMULA_LEN]
                                    [--conf_thresh CONF_THRESH] [-d DEVICE]
@@ -118,11 +118,12 @@ Options:
   -m_decoder M_DECODER  Required. Path to an .xml file with a trained decoder
                         part of the model
   -i INPUT, --input INPUT
-                        Optional. Path to a folder with images or path to an
-                        image files
+                        Required. Path to a folder with images, path to an
+                        image files, integer identificator of the camera or
+                        path to the video. See README.md for details.
   -o OUTPUT_FILE, --output_file OUTPUT_FILE
                         Optional. Path to file where to store output. If not
-                        mentioned, result will be storedin the console.
+                        mentioned, result will be stored in the console.
   --vocab_path VOCAB_PATH
                         Required. Path to vocab file to construct meaningful
                         phrase
@@ -130,7 +131,7 @@ Options:
                         Optional. Defines maximum length of the formula
                         (number of tokens to decode)
   --conf_thresh CONF_THRESH
-                        Optional. Probability threshold to trat model
+                        Optional. Probability threshold to treat model
                         prediction as meaningful
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,

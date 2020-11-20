@@ -150,8 +150,9 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument("-m_decoder", help="Required. Path to an .xml file with a trained decoder part of the model",
                       required=True, type=str)
-    args.add_argument("-i", "--input", help="Optional. Path to a folder with images or path to an image files",
-                      required=False, type=str)
+    args.add_argument("-i", "--input", help="Required. Path to a folder with images, path to an image files, integer "
+                      "identificator of the camera or path to the video. See README.md for details.",
+                      required=True, type=str)
     args.add_argument("-o", "--output_file",
                       help="Optional. Path to file where to store output. If not mentioned, result will be stored "
                       "in the console.",
