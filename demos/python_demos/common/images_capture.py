@@ -105,7 +105,7 @@ def open_images_capture(input, loop, camera_resolution=(1280, 720)):
         pass
     try:
         return DirReader(input, loop)
-    except InvalidInput: 
+    except InvalidInput:
         pass
     try:
         return VideoCapWrapper(input, loop, camera_resolution)
