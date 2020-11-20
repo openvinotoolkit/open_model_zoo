@@ -61,7 +61,7 @@ def get_files(path):
     if path is None:
         return []
     if os.path.isdir(path):
-        file_paths = [os.path.join(path, file) for file in os.listdir(path) if os.path.isfile(path + file)]
+        file_paths = [os.path.join(path, file) for file in os.listdir(path) if os.path.isfile(os.path.join(path, file))]
         return sorted(file_paths)
     return [path]
 
