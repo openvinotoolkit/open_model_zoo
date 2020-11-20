@@ -244,6 +244,8 @@ class LanguageModelingAdapter(Adapter):
         raw_output = self._extract_predictions(raw, frame_meta)
         result = []
         for identifier, token_output in zip(identifiers, raw_output[self.logits_out]):
+            if len(token_output.shape) == 3:
+                token_output = np.squeeze(token_output, axis=0)
             result.append(LanguageModelingPrediction(identifier, token_output))
 
         return result
