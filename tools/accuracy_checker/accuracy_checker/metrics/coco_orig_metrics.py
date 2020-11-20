@@ -363,7 +363,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             annotation_conversion_parameters = self.dataset.config.get('annotation_conversion', {})
             if 'annotation_file' in annotation_conversion_parameters:
                 annotation_file = Path(annotation_conversion_parameters['annotation_file'])
-                return annotation_file.is_file()
+                return annotation_file.is_file() and annotation_file.suffix == '.json'
 
         return False
 
