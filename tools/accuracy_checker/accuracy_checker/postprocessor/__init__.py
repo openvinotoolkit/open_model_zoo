@@ -51,7 +51,7 @@ from .align_prediction_depth_map import AlignDepth
 from .resize_prediction_depth_map import ResizeDepthMap
 from .resize_super_resolution import ResizeSuperResolution
 from .resize_style_transfer import ResizeStyleTransfer
-from .crop_ground_truth_image import CropGTImage
+from .crop_ground_truth_image import CropGTImage, CornerCropGTImage
 from .resize import Resize
 from .to_gray_scale_ref_image import RGB2GRAYAnnotation, BGR2GRAYAnnotation
 from .remove_repeats import RemoveRepeatTokens
@@ -116,6 +116,7 @@ __all__ = [
     'BGR2GRAYAnnotation',
 
     'CropGTImage',
+    'CornerCropGTImage',
 
     'Resize',
 
