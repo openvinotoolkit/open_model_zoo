@@ -149,46 +149,38 @@ class Model:
 
 class HPEOpenPose(Model):
 
-    def __init__(self, *args, upsample_ratio=1, use_cpp_postprocessing=False, **kwargs):
+    def __init__(self, *args, upsample_ratio=1, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.use_cpp_postprocessing = use_cpp_postprocessing
-        self.pooled_heatmaps_blob_name = None
+        self.pooled_heatmaps_blob_name = 'pooled_heatmaps'
+        self.heatmaps_blob_name = 'heatmaps'
+        self.pafs_blob_name = 'pafs'
+
         function = ng.function_from_cnn(self.net)
         paf = function.get_output_op(0)
         paf = paf.inputs()[0].get_source_output().get_node()
-        paf.set_friendly_name('pafs')
+        paf.set_friendly_name(self.pafs_blob_name)
         heatmap = function.get_output_op(1)
         heatmap = heatmap.inputs()[0].get_source_output().get_node()
-        heatmap.set_friendly_name('heatmaps')
-        if not self.use_cpp_postprocessing:
-            # Add keypoints NMS to the network.
-            # Heuristic NMS kernel size adjustment depending on the feature maps upsampling ratio.
-            p = int(np.round(6 / 7 * upsample_ratio))
-            k = 2 * p + 1
-            pooled_heatmap = ng.max_pool(heatmap, kernel_shape=(k, k), pads_begin=(p, p), pads_end=(p, p),
-                                         strides=(1, 1), name='pooled_heatmaps')
-            f = ng.impl.Function(
-                [ng.result(heatmap, name='heatmaps'),
-                 ng.result(pooled_heatmap, name='pooled_heatmaps'),
-                 ng.result(paf, name='pafs')],
-                function.get_parameters(), 'hpe')
-            self.pooled_heatmaps_blob_name = 'pooled_heatmaps'
-        else:
-            self.reorder_map = np.array([0, 15, 14, 17, 16, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10])
-            # Just rename the outputs for more convenient postprocessing.
-            f = ng.impl.Function(
-                [ng.result(heatmap, name='heatmaps'), ng.result(paf, name='pafs')],
-                function.get_parameters(), 'hpe')
+        heatmap.set_friendly_name(self.heatmaps_blob_name)
 
+        # Add keypoints NMS to the network.
+        # Heuristic NMS kernel size adjustment depending on the feature maps upsampling ratio.
+        p = int(np.round(6 / 7 * upsample_ratio))
+        k = 2 * p + 1
+        pooled_heatmap = ng.max_pool(heatmap, kernel_shape=(k, k), pads_begin=(p, p), pads_end=(p, p),
+                                     strides=(1, 1), name=self.pooled_heatmaps_blob_name)
+        f = ng.impl.Function(
+            [ng.result(heatmap, name=self.heatmaps_blob_name),
+             ng.result(pooled_heatmap, name=self.pooled_heatmaps_blob_name),
+             ng.result(paf, name=self.pafs_blob_name)],
+            function.get_parameters(), 'hpe')
+
+        self.image_blob_name = self._get_inputs(self.net)
         self.net = IENetwork(ng.impl.Function.to_capsule(f))
         self.exec_net = self.ie.load_network(network=self.net, device_name=self.device, num_requests=self.max_num_requests)
         self.requests = self.exec_net.requests
         self.empty_requests = deque(self.requests)
-
-        self.image_blob_name = self._get_inputs(self.net)
-        self.pafs_blob_name = 'pafs'
-        self.heatmaps_blob_name = 'heatmaps'
 
         self.num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1] - 1  # The last channel is for background.
         target_size = self.net.input_info[self.image_blob_name].input_data.shape[-2]
@@ -212,22 +204,9 @@ class HPEOpenPose(Model):
     def postprocess(self, outputs, meta):
         heatmaps = outputs[self.heatmaps_blob_name]
         pafs = outputs[self.pafs_blob_name]
-
-        if self.use_cpp_postprocessing:
-            from pose_extractor import extract_poses
-
-            upsample_ratio = 4
-            poses = extract_poses(heatmaps[0], pafs[0], upsample_ratio)
-            # scale coordinates to features space
-            scores = poses[:, -1]
-            poses = poses[:, :-1].reshape(-1, 18, 3)
-            poses = poses[:, self.reorder_map, :]
-            poses[:, :, :2] /= upsample_ratio
-        else:
-            pooled_heatmaps = outputs[self.pooled_heatmaps_blob_name]
-            nms_heatmaps = self.heatmap_nms(heatmaps, pooled_heatmaps)
-            poses, scores = self.decoder(heatmaps, nms_heatmaps, pafs)
-
+        pooled_heatmaps = outputs[self.pooled_heatmaps_blob_name]
+        nms_heatmaps = self.heatmap_nms(heatmaps, pooled_heatmaps)
+        poses, scores = self.decoder(heatmaps, nms_heatmaps, pafs)
         # Rescale poses to the original image.
         original_image_shape = meta['original_shape']
         resized_image_shape = meta['resized_shape']
