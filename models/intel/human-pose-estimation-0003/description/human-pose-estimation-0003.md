@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a multi-person 2D pose estimation network based on the EfficientHRNet approach.
+This is a multi-person 2D pose estimation network based on the EfficientHRNet approach (that follows the Associative Embedding framework).
 For every person in an image, the network detects a human pose: a body skeleton consisting of keypoints and connections between them.
 The pose may contain up to 17 keypoints: ears, eyes, nose, shoulders, elbows, wrists, hips, knees, and ankles.
 

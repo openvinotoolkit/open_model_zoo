@@ -32,30 +32,42 @@ python3 human_pose_estimation.py -h
 ```
 The command yields the following usage message:
 ```
-usage: human_pose_estimation.py [-h] -m MODEL -i INPUT [-d DEVICE]
-                                [-t PROB_THRESHOLD] [-r]
-                                [-nireq NUM_INFER_REQUESTS]
+usage: human_pose_estimation.py [-h] -i INPUT -m MODEL --type {ae,openpose}
+                                [--tsize TSIZE] [-t PROB_THRESHOLD] [-r]
+                                [-d DEVICE] [-nireq NUM_INFER_REQUESTS]
                                 [-nstreams NUM_STREAMS]
                                 [-nthreads NUM_THREADS] [-loop LOOP]
                                 [-no_show] [-u UTILIZATION_MONITORS]
-                                [--type {ae,openpose}] [--tsize TSIZE]
 
 Options:
   -h, --help            Show this help message and exit.
-  -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
                         Required. Path to an image, video file or a numeric
                         camera ID.
+  -m MODEL, --model MODEL
+                        Required. Path to an .xml file with a trained model.
+  --type {ae,openpose}  Required. Type of the network, either "ae" for
+                        Associative Embedding or "openpose" for OpenPose.
+  --tsize TSIZE         Optional. Target input size. This demo implements
+                        image pre-processing pipeline that is common to human
+                        pose estimation approaches. Image is resize first to
+                        some target size and then the network is reshaped to
+                        fit the input image shape. By default target image
+                        size is determined based on the input shape from IR.
+                        Alternatively it can be manually set via this
+                        parameter. Note that for OpenPose-like nets image is
+                        resized to a predefined height, which is the target
+                        size in this case. For Associative Embedding-like nets
+                        target size is the length of a short image side.
+  -t PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
+                        Optional. Probability threshold for poses filtering.
+  -r, --raw_output_message
+                        Optional. Output inference results raw values showing.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The sample
                         will look for a suitable plugin for device specified.
                         Default value is CPU.
-  -t PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
-                        Optional. Probability threshold for poses filtering.
-  -r, --raw_output_message
-                        Optional. Output inference results raw values showing.
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
                         Optional. Number of infer requests
   -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
@@ -72,11 +84,6 @@ Options:
   -no_show, --no_show   Optional. Don't show output
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
-  --type {ae,openpose}  Optional. Type of the network, either "ae" for
-                        associative embeddingor "openpose" for openpose.
-  --tsize TSIZE         Optional. Target input size. By default target size is
-                        derived from image input shapeof a provided network
-                        and depends on the network type.
 ```
 
 Running the application with the empty list of options yields the short usage message and an error message.
