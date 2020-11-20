@@ -126,8 +126,9 @@ class MachineTranslationAdapter(Adapter):
             best_sequence = best_beam[0]
             if self.eos_index is not None:
                 if self.eos_index:
-                    end_of_string = np.argwhere(best_sequence == self.eos_index)[0]
-                    best_sequence = best_sequence[:end_of_string[0]]
+                    end_of_string_args = np.argwhere(best_sequence == self.eos_index)
+                    if np.size(end_of_string_args) != 0:
+                        best_sequence = best_sequence[:end_of_string_args[0][0]]
             encoded_words = []
             for seq_id, idx in enumerate(best_sequence):
                 word = self.encoding_vocab.get(int(idx))
