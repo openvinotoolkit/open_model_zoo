@@ -48,7 +48,6 @@ static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Architecture type: ssd or yolo";
 static const char video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-static const char mt_message[] = "Required. Model type: ssd, yolo or rf";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
@@ -101,11 +100,9 @@ static void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
-    std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -i \"<path>\"               " << video_message << std::endl;
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
-    std::cout << "    -mt \"<path>\"               " <<mt_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;

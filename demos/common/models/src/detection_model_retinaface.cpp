@@ -360,9 +360,6 @@ std::unique_ptr<ResultBase>  ModelRetinaFace::postprocess(InferenceResult& infRe
 
     result->objects.reserve(keep.size());
     result->landmarks.reserve(keep.size());
-    if (shouldDetectMasks) {
-        result->masks.reserve(keep.size());
-    }
     for (auto i : keep) {
         DetectedObject desc;
         desc.confidence = static_cast<float>(scores[i]);
