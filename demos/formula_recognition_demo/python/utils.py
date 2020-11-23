@@ -116,14 +116,13 @@ def prerocess_crop(crop, tgt_shape, preprocess_type='crop'):
     """
     Binarize image and call preprocess_image function
     """
-    height, width = tgt_shape
     crop = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
     crop = cv.cvtColor(crop, cv.COLOR_GRAY2BGR)
-    ret_val, bin_crop = cv.threshold(crop, 120, 255, type=cv.THRESH_BINARY)
+    _, bin_crop = cv.threshold(crop, 120, 255, type=cv.THRESH_BINARY)
     return preprocess_image(PREPROCESSING[preprocess_type], bin_crop, tgt_shape)
 
 
-def read_net(model_xml, ie, device):
+def read_net(model_xml, ie):
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
     log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
@@ -151,11 +150,7 @@ def change_layout(model_input):
 
 
 def calculate_probability(logits):
-    prob = 1
-    probabilities = np.amax(logits, axis=1)
-    for p in probabilities:
-        prob *= p
-    return prob
+    return np.prod(np.amax(logits, axis=1))
 
 
 class Model:

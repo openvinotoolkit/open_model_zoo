@@ -42,12 +42,10 @@ class InteractiveDemo:
         return start_point, end_point
 
     def get_crop(self, frame):
-        crop = frame[self.start_point[1]:self.end_point[1], self.start_point[0]:self.end_point[0], :]
-        return crop
+        return frame[self.start_point[1]:self.end_point[1], self.start_point[0]:self.end_point[0], :]
 
     def _draw_rectangle(self, frame):
-        frame = cv.rectangle(frame, self.start_point, self.end_point, color=RED, thickness=2)
-        return frame
+        return cv.rectangle(frame, self.start_point, self.end_point, color=RED, thickness=2)
 
     def resize_window(self, action):
         height = self.end_point[1] - self.start_point[1]
@@ -116,8 +114,7 @@ class InteractiveDemo:
     def _resize_if_need(self, formula_img):
         if (self.end_point[0] - self.start_point[0]) < formula_img.shape[1]:
             scale_factor = (self.end_point[0] - self.start_point[0]) / formula_img.shape[1]
-            formula_img = cv.resize(
-                formula_img, fx=scale_factor, fy=scale_factor, dsize=None)
+            formula_img = cv.resize(formula_img, fx=scale_factor, fy=scale_factor, dsize=None)
         return formula_img
 
     def _render_formula_async(self, formula):
@@ -168,7 +165,7 @@ def build_argparser():
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU", type=str)
     args.add_argument("--resolution", default=(1280, 720), type=int, nargs=2,
-                      help=f'Optional. Resolution of the demo application window. Default: 1280 720')
+                      help='Optional. Resolution of the demo application window. Default: 1280 720')
     args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
                       help="Optional. Type of the preprocessing", default='crop')
     args.add_argument('-pc', '--perf_counts',
