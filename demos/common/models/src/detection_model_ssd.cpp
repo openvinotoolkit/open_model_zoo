@@ -27,23 +27,20 @@ ModelSSD::ModelSSD(const std::string& modelFileName,
     DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
 }
 
-void ModelSSD::onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, const std::vector<InferenceEngine::InferRequest::Ptr>& requests) {
-    DetectionModel::onLoadCompleted(execNetwork, requests);
-
-    // --- Setting image info for every request in a pool. We can do it once and reuse this info at every submit -------
+std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     if (inputsNames.size() > 1) {
-        for (auto &request : requests) {
-            auto blob = request->GetBlob(inputsNames[1]);
-            LockedMemory<void> blobMapped = as<MemoryBlob>(blob)->wmap();
-            auto data = blobMapped.as<float *>();
-            data[0] = static_cast<float>(netInputHeight);
-            data[1] = static_cast<float>(netInputWidth);
-            data[2] = 1;
-        }
+        auto blob = request->GetBlob(inputsNames[1]);
+        LockedMemory<void> blobMapped = as<MemoryBlob>(blob)->wmap();
+        auto data = blobMapped.as<float*>();
+        data[0] = static_cast<float>(netInputHeight);
+        data[1] = static_cast<float>(netInputWidth);
+        data[2] = 1;
     }
+
+    return DetectionModel::preprocess(inputData, request);
 }
 
-std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
+    std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
     LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
     const float *detections = outputMapped.as<float*>();
 
