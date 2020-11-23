@@ -75,7 +75,7 @@ class InteractiveDemo:
         if text == '':
             return frame
         text = strip_internal_spaces(text)
-        (txt_w, self._latex_h), baseLine = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 3)
+        (txt_w, self._latex_h), _ = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 3)
         start_point = (self.start_point[0],
                        self.end_point[1] - self.start_point[1] + int(self._latex_h * 1.5))
         frame = cv.putText(frame, text, org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
@@ -104,7 +104,6 @@ class InteractiveDemo:
         if formula_img is None:
             return frame
         y_start = self.end_point[1] - self.start_point[1] + self._latex_h * 2
-        img_shape = formula_img.shape
         formula_img = self._resize_if_need(formula_img)
         frame[y_start:y_start + formula_img.shape[0],
               self.start_point[0]:self.start_point[0] + formula_img.shape[1],
@@ -218,12 +217,13 @@ def main():
     *_, height, width = model.encoder.input_info['imgs'].input_data.shape
     prev_text = ''
     demo = InteractiveDemo((height, width), resolution=args.resolution)
-    capture = create_capture(args, demo.resolution)
+    capture = create_capture(args.input, demo.resolution)
     if not capture.isOpened():
         log.error("Cannot open camera")
         return()
     while True:
         ret, frame = capture.read()
+        assert ret, "Error reading image from VideoCapture"
         bin_crop = demo.get_crop(frame)
         model_input = prerocess_crop(bin_crop, (height, width), preprocess_type=args.preprocessing_type)
         frame = demo.put_crop(frame, model_input)
@@ -255,8 +255,7 @@ def main():
              "from the openVINO toolkit\n")
 
 
-def create_capture(args, demo_resolution):
-    input_source = args.input
+def create_capture(input_source, demo_resolution):
     if not input_source.endswith('.mp4'):
         try:
             input_source = int(input_source)
