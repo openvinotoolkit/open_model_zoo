@@ -1,4 +1,4 @@
-# Human Pose Estimation Python* Demo
+# Human Pose Estimation Python\* Demo
 
 This demo showcases the work of multi-person 2D pose estimation algorithms. The task is to predict a pose: body skeleton, which consists of a predefined set of keypoints and connections between them, for every person in an input image/video.
 
