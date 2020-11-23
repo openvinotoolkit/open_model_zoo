@@ -44,11 +44,11 @@ def trie_v6_extract_vocabulary(data, alphabet=None, base_offset=0, max_num_words
 
 
 def parse_trie_v6(data, pos=0, base_offset=0):
-    (magic, version, is_utf8_mode, alpha, beta), pos = parse_format('<Ii?dd', data, pos)
-    if magic != 0x54524945:
+    (magic, version, is_utf8_mode, alpha, beta), pos = parse_format('<4si?dd', data, pos)
+    if magic != b'EIRT':
         raise ValueError("Not a ds_ctcdecoder TRIE file: wrong file signature")
     if version != 6:
-        raise ValueError("Wrong ds_ctcdecder TRIE file version: version {}, expected version 6".format(version))
+        raise ValueError("Wrong ds_ctcdecoder TRIE file version: version {}, expected version 6".format(version))
     if is_utf8_mode:
         raise ValueError("UTF-8 mode language model: UTF-8 mode was not tested, stopping")
     fst, pos = parse_openfst(data, pos, base_offset=base_offset)
