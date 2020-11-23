@@ -17,6 +17,7 @@ The Open Model Zoo includes the following demos:
 - [Image Inpainting Python Demo](./python_demos/image_inpainting_demo/README.md) - Demo application for GMCNN inpainting network.
 - [Image Retrieval Python* Demo](./python_demos/image_retrieval_demo/README.md) - The demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 - [Image Segmentation C++ Demo](./segmentation_demo/README.md) - Inference of image segmentation networks like FCN8 (the demo supports only images as inputs).
+- [Image Segmentation Asynchronous C++ Demo](./segmentation_demo_async/README.md) - Inference of image segmentation networks like FCN8, async API showcase, simple OpenCV interoperability (supports video and camera inputs).
 - [Instance Segmentation Python* Demo](./python_demos/instance_segmentation_demo/README.md) - Inference of instance segmentation networks trained in `Detectron` or `maskrcnn-benchmark`.
 - [Interactive Face Detection C++ Demo](./interactive_face_detection_demo/README.md) - Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
 - [Machine Translation Python* Demo](./python_demos/machine_translation_demo/README.md) - The demo demonstrates how to run non-autoregressive machine translation models.
@@ -27,6 +28,7 @@ The Open Model Zoo includes the following demos:
 - [Object Detection for CenterNet Python* Demo](./python_demos/object_detection_demo_centernet/README.md) - Demo application for CenterNet object detection network.
 - [Object Detection for Faster R-CNN C++ Demo](./object_detection_demo_faster_rcnn/README.md) - Inference of object detection networks like Faster R-CNN (the demo supports only images as inputs).
 - [Object Detection for RetinaFace Python\* Demo](./python_demos/object_detection_demo_retinaface/README.md) - Demo application for RetinaFace face detection model.
+- [Object Detection C++ Demo](./object_detection_demo/README.md) - Demo application for Object Detection networks (different models architectures are supproted), async API showcase,  simple OpenCV interoperability (supports video and camera inputs).
 - [Object Detection for SSD C++ Demo](./object_detection_demo_ssd_async/README.md) - Demo application for SSD-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
 - [Object Detection for YOLO V3 C++ Demo](./object_detection_demo_yolov3_async/README.md) - Demo application for YOLOV3-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
 - [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/README.md) - Demo application for pedestrian tracking scenario.

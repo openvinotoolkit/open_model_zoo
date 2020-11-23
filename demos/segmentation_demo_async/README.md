@@ -1,4 +1,4 @@
-# Image Segmentation C++ Demo
+# Image Segmentation (asynchronous) C++ Demo
 
 This topic demonstrates how to run the Image Segmentation demo application, which does inference using semantic segmentation networks asynchronously.
 
