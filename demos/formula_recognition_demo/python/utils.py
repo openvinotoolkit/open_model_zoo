@@ -165,8 +165,8 @@ class Model:
         self.ie = IECore()
         self.ie.set_config(
             {"PERF_COUNT": "YES" if self.args.perf_counts else "NO"}, args.device)
-        self.encoder = read_net(self.args.m_encoder, self.ie, self.args.device)
-        self.dec_step = read_net(self.args.m_decoder, self.ie, self.args.device)
+        self.encoder = read_net(self.args.m_encoder, self.ie)
+        self.dec_step = read_net(self.args.m_decoder, self.ie)
         self.exec_net_encoder = self.ie.load_network(network=self.encoder, device_name=self.args.device)
         self.exec_net_decoder = self.ie.load_network(network=self.dec_step, device_name=self.args.device)
         self.images_list = []
