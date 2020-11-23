@@ -79,7 +79,26 @@ def main():
 
         mode = raw_diff.split()[1]
 
-        if mode not in {'100644', '100755', '120000'}: # not a regular or executable file or symbolic link
+        if path.startswith('tools/accuracy_checker/configs/') and path.endswith('.yml'):
+            if mode == '120000':
+                try:
+                    if (OMZ_ROOT / path).is_symlink():
+                        real_path = (OMZ_ROOT / path).resolve(strict=True)
+                    else:
+                        with open(OMZ_ROOT / path, 'r', newline='') as file:
+                            link_target = file.read()
+                        real_path = ((OMZ_ROOT / path).parent / link_target).resolve(strict=True)
+                    model_name = (OMZ_ROOT / path).stem
+                    if real_path.name != 'accuracy-check.yml' or real_path.parent.name != model_name:
+                        complain(f"{path}: should be a symbolic link to accuracy-check.yml from {model_name} model "
+                                 "directory")
+                except FileNotFoundError:
+                    complain(f"{path}: should be a symbolic link to existing accuracy-check.yml from models directory")
+            else:
+                complain(f"{path}: isn't a symbolic link but it should be a symbolic link to accuracy-check.yml "
+                         "from models directory")
+
+        if mode not in {'100644', '100755'}: # not a regular or executable file
             continue
 
         if num_added_lines == '-': # binary file
@@ -87,25 +106,6 @@ def main():
 
         if path.startswith('demos/thirdparty/'):
             continue
-
-        if path.startswith('tools/accuracy_checker/configs/') and path.endswith('.yml'):
-            if mode == '120000':
-                try:
-                    if (OMZ_ROOT / path).is_symlink():
-                        real_path = (OMZ_ROOT / path).resolve(strict=True)
-                    else:
-                        with open(OMZ_ROOT / path, 'r') as file:
-                            relative_path = file.readline()
-                        real_path = ((OMZ_ROOT / path).parent / relative_path).resolve(strict=True)
-                    model_name = (OMZ_ROOT / path).stem
-                    if real_path.name != 'accuracy-check.yml' or real_path.parent.name != model_name:
-                        complain(f"{path}: should be a symbolic link to accuracy-check.yml from {model_name} model "
-                                 "directory")
-                except:
-                    complain(f"{path}: should be a symbolic link to existing accuracy-check.yml from models directory")
-            else:
-                complain(f"{path}: isn't a symbolic link but it should be a symbolic link to accuracy-check.yml "
-                         "from models directory")
 
         with open(OMZ_ROOT / path, encoding='UTF-8') as f:
             lines = list(f)
