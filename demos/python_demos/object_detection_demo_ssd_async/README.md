@@ -216,8 +216,7 @@ python3 object_detection_demo_ssd_async.py -i <path_to_video>/inputVideo.mp4 -m 
 ```
 
 To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO
-[Model Downloader](../../../tools/downloader/README.md) or from
-[https://download.01.org/opencv/](https://download.01.org/opencv/).
+[Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine
 format (\*.xml + \*.bin) using the
