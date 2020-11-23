@@ -1,6 +1,6 @@
-# Object Detection SSD C++ Demo, Async API Performance Showcase
+# Object Detection C++ Demo
 
-This demo showcases Object Detection and new Async API.
+This demo showcases Object Detection and Async API.
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the app can continue doing things on the host, while accelerator is busy.
 Specifically, this demo keeps the number of Infer Requests that you have set using `nireq` flag. While some of the Infer Requests are processed by IE, the other ones can be filled with new frame data and asynchronously started or the next output can be taken from the Infer Request and displayed.
@@ -23,6 +23,7 @@ Other demo objectives are:
 * OpenCV is used to draw resulting bounding boxes, labels, so you can copy paste this code without
 need to pull Inference Engine demos helpers to your app
 * Demonstration of the Async API in action
+* Demonstration of multiple models architectures support (including pre- and postprocessing) in one application
 
 ## How It Works
 
@@ -31,51 +32,26 @@ Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference 
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
-New "Async API" operates with new notion of the "Infer Request" that encapsulates the inputs/outputs and separates *scheduling and waiting for result*,
-next section.
+This demo operates in asynchronous manner by using "Infer Requests" that encapsulate the inputs/outputs and separates *scheduling and waiting for result*,
+as shown in code mockup below:
 
 ```cpp
     while (true) {
         capture frame
-        populate empty InferRequest
-        set completion callback
-        start InferRequest
+        take empty InferRequest from pool
+        if(empty InferRequest available) {
+            populate empty InferRequest
+            set completion callback
+            submit InferRequest
+        }
 
-        while (Infer Request containing submitted video frame has been completed) {
-            get inference results
+        while (there're completed InferRequests) {
+            get inference results from InferRequest
             process inference results
             display the frame
         }
     }
 ```
-
-### Async API
-
-The Inference Engine also offers new API based on the notion of Infer Requests. One specific usability upside
-is that the requests encapsulate the inputs and outputs allocation, so you just need to access the blob  with `GetBlob` method.
-
-More importantly, you can execute a request asynchronously (in the background) and wait until ready, when the result is actually needed.
-In a mean time your app can continue :
-
-```cpp
-// load network
-InferenceEngine::Core ie;
-auto network = ie.ReadNetwork("Model.xml");
-// populate inputs etc
-auto input = async_infer_request.GetBlob(input_name);
-...
-// start the async Infer Request (puts the request to the queue and immediately returns)
-async_infer_request->StartAsync();
-// here you can continue execution on the host until results of the current request are really needed
-//...
-async_infer_request.Wait(IInferRequest::WaitMode::RESULT_READY);
-auto output = async_infer_request.GetBlob(output_name);
-```
-Notice that there is no direct way to measure execution time of the Infer Request that is running asynchronously, unless
-you measure the Wait executed immediately after the StartAsync. But this essentially would mean the serialization and synchronous
-execution.
-That is why the inference speed is not reported. It is recommended to use the [Benchmark App](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html) for measuring inference speed of different models.
-
 
 For more details on the requests-based Inference Engine API, including the Async execution, refer to [Integrate the Inference Engine New Request API with Your Application](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
 
@@ -89,7 +65,7 @@ InferenceEngine:
     API version ............ <version>
     Build .................. <number>
 
-object_detection_demo_ssd_async [OPTION]
+object_detection_demo_async [OPTION]
 Options:
 
     -h                        Print a usage message.
@@ -122,7 +98,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 ```sh
-./object_detection_demo -i <path_to_video>/inputVideo.mp4  -at ssd -m <path_to_model>/ssd.xml -d GPU
+./object_detection_demo -i <path_to_video>/inputVideo.mp4 -at ssd -m <path_to_model>/ssd.xml -d GPU
 ```
 
 ## Demo Output
@@ -130,8 +106,8 @@ You can use the following command to do inference on GPU with a pre-trained obje
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
 The demo reports:
 
-* **FPS**: average rate of video frame processing (frames per second)
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results)
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
 You can use both of these metrics to measure application-level performance.
 
 
