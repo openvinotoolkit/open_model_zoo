@@ -50,7 +50,10 @@ class YOLO(Model):
                  labels=None, keep_aspect_ratio=False, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path, logger=logger, batch_size=batch_size)
 
-        self.labels = load_labels(labels) if labels else None
+        if isinstance(labels, (list, tuple)):
+            self.labels = labels
+        else:
+            self.labels = load_labels(labels) if labels else None
 
         self.threshold = threshold
         self.iou_threshold = iou_threshold

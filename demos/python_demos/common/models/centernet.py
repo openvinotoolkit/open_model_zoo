@@ -30,7 +30,10 @@ class CenterNet(Model):
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         assert len(self.net.outputs) == 3, "Expected 3 output blobs"
 
-        self.labels = load_labels(labels) if labels else None
+        if isinstance(labels, (list, tuple)):
+            self.labels = labels
+        else:
+            self.labels = load_labels(labels) if labels else None
 
         self.image_blob_name = next(iter(self.net.input_info))
         self._output_layer_names = sorted(self.net.outputs)

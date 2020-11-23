@@ -105,7 +105,10 @@ class SSD(Model):
         super().__init__(ie, model_path, logger=logger, batch_size=batch_size)
 
         self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
-        self.labels = load_labels(labels) if labels else None
+        if isinstance(labels, (list, tuple)):
+            self.labels = labels
+        else:
+            self.labels = load_labels(labels) if labels else None
 
         self.image_blob_name, self.image_info_blob_name = self._get_inputs()
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
