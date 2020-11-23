@@ -41,9 +41,7 @@ The demo workflow in non-interactive is the following:
 #### Rendering of the latex formula into image
 User has an option to render predicted by the demo application latex formula into image.
 Regardless of what mode is selected (interactive or non-interactive) the process of the rendering of the formula is the same.
-Prerequisites:
-1. `sympy` python package
-2. `tex-live` on Linux\MacOS or `miktex` on Windows. Other latex systems should also work.
+For prerequisites see corresponding requirements file ([requirements_unix.txt](./requirements_unix.txt) or [requirements_windows.txt](./requirements_windows.txt))
 
 Rendering of the latex formula is performed with the help of `Renderer` class from [utils.py](./utils.py). This class has two interfaces:
 1. `render` method is used as synchronous method. Method returns rendered image and text formula, corresponding to the rendered image when rendering is done.

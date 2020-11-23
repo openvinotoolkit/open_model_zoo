@@ -1,0 +1,8 @@
+sympy python package:
+pip install sympy
+tex-live latex system:
+Linux:
+apt-get update && apt-get install texlive
+MacOS:
+brew install texlive
+*Other latex systems should also work.

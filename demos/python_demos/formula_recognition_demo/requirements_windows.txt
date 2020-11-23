@@ -1,0 +1,4 @@
+sympy python package:
+pip install sympy
+miktex latex package
+*Other latex systems should also work.
