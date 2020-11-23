@@ -46,7 +46,7 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=str)
-    args.add_argument('--type', choices=('ae', 'openpose'), required=True, type=str,
+    args.add_argument('-at', '--architecture_type', choices=('ae', 'openpose'), required=True, type=str,
                       help='Required. Type of the network, either "ae" for Associative Embedding '
                            'or "openpose" for OpenPose.')
     args.add_argument('--tsize', default=None, type=int,
@@ -142,7 +142,7 @@ def main():
     mode_info = {mode: ModeInfo()}
     exceptions = []
 
-    if args.type == 'ae':
+    if args.architecture_type == 'ae':
         HPE = HPEAssociativeEmbedding
     else:
         HPE = HPEOpenPose
