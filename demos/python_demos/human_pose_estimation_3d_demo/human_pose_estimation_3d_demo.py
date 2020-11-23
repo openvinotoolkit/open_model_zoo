@@ -51,7 +51,7 @@ if __name__ == '__main__':
                       type=str, required=True)
     args.add_argument('-i', '--input',
                       help='Required. An input to process. The input must be a single image, '
-                           'a folder of images or anything that cv2.VideoCapture() can process.',
+                           'a folder of images or anything that cv2.VideoCapture can process.',
                       required=True)
     args.add_argument('-loop', '--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
@@ -134,33 +134,31 @@ if __name__ == '__main__':
             mean_time = mean_time * 0.95 + current_time * 0.05
         cv2.putText(frame, 'FPS: {}'.format(int(1 / mean_time * 10) / 10),
                     (40, 80), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255))
-        if args.no_show:
-            frame = cap.read()
-            continue
-        cv2.imshow(canvas_3d_window_name, canvas_3d)
-        cv2.imshow('3D Human Pose Estimation', frame)
+        if not args.no_show:
+            cv2.imshow(canvas_3d_window_name, canvas_3d)
+            cv2.imshow('3D Human Pose Estimation', frame)
 
-        key = cv2.waitKey(delay)
-        if key == esc_code:
-            break
-        if key == p_code:
-            if delay == 1:
-                delay = 0
-            else:
-                delay = 1
-        else:
-            presenter.handleKey(key)
-        if delay == 0 or not is_video:  # allow to rotate 3D canvas while on pause
-            key = 0
-            while (key != p_code
-                   and key != esc_code
-                   and key != space_code):
-                plotter.plot(canvas_3d, poses_3d, edges)
-                cv2.imshow(canvas_3d_window_name, canvas_3d)
-                key = cv2.waitKey(33)
+            key = cv2.waitKey(delay)
             if key == esc_code:
                 break
+            if key == p_code:
+                if delay == 1:
+                    delay = 0
+                else:
+                    delay = 1
             else:
-                delay = 1
+                presenter.handleKey(key)
+            if delay == 0 or not is_video:  # allow to rotate 3D canvas while on pause
+                key = 0
+                while (key != p_code
+                       and key != esc_code
+                       and key != space_code):
+                    plotter.plot(canvas_3d, poses_3d, edges)
+                    cv2.imshow(canvas_3d_window_name, canvas_3d)
+                    key = cv2.waitKey(33)
+                if key == esc_code:
+                    break
+                else:
+                    delay = 1
         frame = cap.read()
     print(presenter.reportMeans())
