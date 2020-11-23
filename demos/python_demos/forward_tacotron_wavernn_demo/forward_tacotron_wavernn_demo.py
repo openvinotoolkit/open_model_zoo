@@ -73,6 +73,7 @@ def main():
         for line in f:
             count += 1
             line = line.rstrip()
+            print("Process line {0} with length {1}.".format(count, len(line)))
 
             if len(line) > len_th:
                 texts = []
@@ -85,7 +86,7 @@ def main():
             else:
                 texts = [line]
 
-            for text in texts:
+            for n_part, text in enumerate(texts):
                 time_s = time.time()
                 mel = forward_tacotron.forward(text)
                 time_e = time.time()
@@ -99,6 +100,9 @@ def main():
 
                     mel = np.expand_dims(mel, axis=0)
 
+                if n_part % 10 == 0:
+                    print("\t Process {0}/{1} part of the line.".format(n_part + 1, len(texts)))
+
                 time_s = time.time()
                 audio = vocoder.forward(mel)
                 time_e = time.time()
@@ -106,8 +110,9 @@ def main():
 
                 audio_res.extend(audio)
                 audio_res.extend(silent * min(audio))
-                if count % 5 == 0:
-                    print('WaveRNN time: {:.3f}. ForwardTacotronTime {}'.format(time_wavernn, time_forward))
+
+            if count % 5 == 0:
+                print('WaveRNN time: {:.3f}. ForwardTacotronTime {}'.format(time_wavernn, time_forward))
     time_e_all = time.time()
 
     print('All time {:.3f}. WaveRNN time: {:.3f}. ForwardTacotronTime {}'.format((time_e_all - time_s_all) * 1000,

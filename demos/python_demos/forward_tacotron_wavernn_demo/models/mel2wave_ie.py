@@ -50,10 +50,8 @@ class WaveRNNIE:
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        # Read IR
-        log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+        print("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
-
         return net
 
     def create_exec_network(self, net, batch_sizes=None):
