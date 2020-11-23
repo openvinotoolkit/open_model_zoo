@@ -46,9 +46,9 @@ def trie_v6_extract_vocabulary(data, alphabet=None, base_offset=0, max_num_words
 def parse_trie_v6(data, pos=0, base_offset=0):
     (magic, version, is_utf8_mode, alpha, beta), pos = parse_format('<4si?dd', data, pos)
     if magic != b'EIRT':
-        raise ValueError("Not a ds_ctcdecoder TRIE file: wrong file signature")
+        raise ValueError("Not a ds_ctcdecoder TRIE section: wrong section signature")
     if version != 6:
-        raise ValueError("Wrong ds_ctcdecoder TRIE file version: version {}, expected version 6".format(version))
+        raise ValueError("Wrong ds_ctcdecoder TRIE section version: version {}, expected version 6".format(version))
     if is_utf8_mode:
         raise ValueError("UTF-8 mode language model: UTF-8 mode was not tested, stopping")
     fst, pos = parse_openfst(data, pos, base_offset=base_offset)
@@ -61,8 +61,8 @@ def traverse_fst(fst, alphabet, max_num_words):
     vocabulary = []
 
     init_state = fst['meta']['start_state']
-    cur_word = []
-    def print_all_words(state, prefix):
+    cur_prefix = []
+    def process_words(state, prefix):
         out_arcs = graph[state].items()
         if len(out_arcs) == 0:
             word = b''.join(prefix)
@@ -73,9 +73,9 @@ def traverse_fst(fst, alphabet, max_num_words):
         prefix.append(None)
         for in_label, next_state in out_arcs:
             prefix[-1] = alphabet[in_label - 1]
-            print_all_words(next_state, prefix)
+            process_words(next_state, prefix)
         prefix.pop()
-    print_all_words(init_state, cur_word)
+    process_words(init_state, cur_prefix)
     return vocabulary
 
 
@@ -83,9 +83,7 @@ def states_arcs_to_arc_dict(states, arcs):
     graph = []  # list(state -> dict(in_label -> state))
     for state_desc in states:
         weight, first_arc, num_arcs, num_in_eps, num_out_eps = state_desc  # pylint: disable=unused-variable
-        if num_in_eps != 0:
-            raise ValueError("epsilon arcs are not allowed")
-        if num_out_eps != 0:
+        if num_in_eps != 0 or num_out_eps != 0:
             raise ValueError("epsilon arcs are not allowed")
 
         out_arcs = OrderedDict()
@@ -102,7 +100,7 @@ def states_arcs_to_arc_dict(states, arcs):
 def kenlm_v5_insert_vocabulary(data_kenlm, vocabulary, drop_final_spaces=True):
     kenlm_signature = b'mmap lm http://kheafield.com/code format version 5\n\0'
     with_vocab_offset = 0x64
-    num_words_offset = 0x6C
+    num_words_offset = 0x6c
 
     if not data_kenlm.startswith(kenlm_signature):
         raise ValueError("Wrong signature in kenlm section: either broken file, or unsupported kenlm version")
@@ -120,13 +118,13 @@ def kenlm_v5_insert_vocabulary(data_kenlm, vocabulary, drop_final_spaces=True):
 
     vocab_offset = len(data_kenlm)
     data_kenlm = [data_kenlm[:with_vocab_offset], b'\1', data_kenlm[with_vocab_offset + 1:]]
-    data_kenlm += convert_vocabulary_to_kenlm_format(vocabulary, drop_final_spaces=drop_final_spaces)
+    data_kenlm.append(convert_vocabulary_to_kenlm_format(vocabulary, drop_final_spaces=drop_final_spaces))
 
     return b''.join(data_kenlm), vocab_offset
 
 
 def convert_vocabulary_to_kenlm_format(vocabulary, drop_final_spaces=True):
-    # Unlike kenlm, we don't sort words in MurMurHash order. Our demo doesn't care about this.
+    # Unlike kenlm, we don't sort words in MurMurHash order. Our demo doesn't care about word order.
     data_vocab = [b'<unk>\0<s>\0</s>\0']
 
     if drop_final_spaces:
@@ -136,4 +134,4 @@ def convert_vocabulary_to_kenlm_format(vocabulary, drop_final_spaces=True):
     else:
         data_vocab += [word + b'\0' for word in vocabulary]
 
-    return data_vocab  # return as list(bytes) to concatenate them all at once later
+    return b''.join(data_vocab)
