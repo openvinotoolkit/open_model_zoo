@@ -95,7 +95,7 @@ DEFINE_bool(yolo_af, false, yolo_af_message);
 */
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "object_detection_demo_ssd_async [OPTION]" << std::endl;
+    std::cout << "object_detection_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
