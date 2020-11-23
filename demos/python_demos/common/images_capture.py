@@ -46,27 +46,29 @@ class DirReader(ImagesCapture):
         if not self.names:
             raise InvalidInput
         self.file_id = 0
-        read_images = 0
         for name in self.names:
             filename = os.path.join(self.dir, name)
             image = cv2.imread(filename, cv2.IMREAD_COLOR)
             if image is not None:
-                read_images += 1
-        if not read_images:
-            raise RuntimeError("Can't read the first image from {} dir".format(self.dir))
+                return
+        raise RuntimeError("Can't read the first image from {} dir".format(self.dir))
 
     def read(self):
-        while True:
+        while self.file_id < len(self.names):
+            filename = os.path.join(self.dir, self.names[self.file_id])
+            image = cv2.imread(filename, cv2.IMREAD_COLOR)
+            self.file_id += 1
+            if image is not None:
+                return image
+        if self.loop:
+            self.file_id = 0
             while self.file_id < len(self.names):
                 filename = os.path.join(self.dir, self.names[self.file_id])
                 image = cv2.imread(filename, cv2.IMREAD_COLOR)
                 self.file_id += 1
                 if image is not None:
-                    return copy.deepcopy(image)
-            if self.loop:
-                self.file_id = 0
-                continue
-            return None
+                    return image
+        return None
 
 
 class VideoCapWrapper(ImagesCapture):
@@ -75,15 +77,15 @@ class VideoCapWrapper(ImagesCapture):
         super().__init__(loop)
         self.cap = cv2.VideoCapture()
         try:
-            self.cap.open(int(input))
+            status = self.cap.open(int(input))
             self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, camera_resolution[0])
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, camera_resolution[1])
             self.cap.set(cv2.CAP_PROP_AUTOFOCUS, 1)
             self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-        except:
-            self.cap.open(input)
-        if not self.cap.isOpened():
+        except ValueError:
+            status = self.cap.open(input)
+        if not status:
             raise InvalidInput
 
     def read(self):

@@ -50,10 +50,11 @@ if __name__ == '__main__':
                       help='Required. Path to an .xml file with a trained model.',
                       type=str, required=True)
     args.add_argument('-i', '--input',
-                      help='Required. Path to input image, images, video file or camera id.',
+                      help='Required. An input to process. The input must be a single image, '
+                           'a folder of images or anything that cv::VideoCapture can process.',
                       required=True)
     args.add_argument('-loop', '--loop', default=False, action='store_true',
-                      help='Optional. Run the input data in a loop.')
+                      help='Optional. Enable reading the input in a loop.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
