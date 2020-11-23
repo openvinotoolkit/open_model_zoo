@@ -32,7 +32,7 @@ python3 human_pose_estimation.py -h
 ```
 The command yields the following usage message:
 ```
-usage: human_pose_estimation.py [-h] -i INPUT -m MODEL --type {ae,openpose}
+usage: human_pose_estimation.py [-h] -i INPUT -m MODEL -at {ae,openpose}
                                 [--tsize TSIZE] [-t PROB_THRESHOLD] [-r]
                                 [-d DEVICE] [-nireq NUM_INFER_REQUESTS]
                                 [-nstreams NUM_STREAMS]
@@ -46,7 +46,8 @@ Options:
                         camera ID.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  --type {ae,openpose}  Required. Type of the network, either "ae" for
+  -at {ae,openpose}, --architecture_type {ae,openpose}
+                        Required. Type of the network, either "ae" for
                         Associative Embedding or "openpose" for OpenPose.
   --tsize TSIZE         Optional. Target input size. This demo implements
                         image pre-processing pipeline that is common to human
