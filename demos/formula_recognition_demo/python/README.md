@@ -89,8 +89,8 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder
-                                   M_DECODER -i INPUT [-o OUTPUT_FILE]
-                                   --vocab_path VOCAB_PATH
+                                   M_DECODER -i INPUT [-o OUTPUT_FILE] -v
+                                   VOCAB_PATH
                                    [--max_formula_len MAX_FORMULA_LEN]
                                    [--conf_thresh CONF_THRESH] [-d DEVICE]
                                    [--resolution RESOLUTION RESOLUTION]
@@ -122,7 +122,7 @@ Options:
   -o OUTPUT_FILE, --output_file OUTPUT_FILE
                         Optional. Path to file where to store output. If not
                         mentioned, result will be stored in the console.
-  --vocab_path VOCAB_PATH
+  -v VOCAB_PATH, --vocab_path VOCAB_PATH
                         Required. Path to vocab file to construct meaningful
                         phrase
   --max_formula_len MAX_FORMULA_LEN

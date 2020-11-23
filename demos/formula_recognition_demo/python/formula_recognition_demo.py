@@ -153,7 +153,7 @@ def build_argparser():
                       help="Optional. Path to file where to store output. If not mentioned, result will be stored "
                       "in the console.",
                       type=str)
-    args.add_argument("--vocab_path", help="Required. Path to vocab file to construct meaningful phrase",
+    args.add_argument("-v", "--vocab_path", help="Required. Path to vocab file to construct meaningful phrase",
                       type=str, required=True)
     args.add_argument("--max_formula_len",
                       help="Optional. Defines maximum length of the formula (number of tokens to decode)",
