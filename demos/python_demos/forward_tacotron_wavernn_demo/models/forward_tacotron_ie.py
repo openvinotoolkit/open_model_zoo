@@ -1,18 +1,16 @@
 import os.path as osp
-import logging as log
 
 import numpy as np
-from openvino.inference_engine import IECore
 
 from utils.text_preprocessing import text_to_sequence, _symbol_to_id
 
 
 class ForwardTacotronIE:
-    def __init__(self, model_duration, model_forward, device='CPU', verbose=False):
+    def __init__(self, model_duration, model_forward, ie, device='CPU', verbose=False):
         self.verbose = verbose
         self.device = device
 
-        self.ie = IECore()
+        self.ie = ie
 
         self.duration_predictor_net = self.load_network(model_duration)
         self.duration_predictor_exec = self.create_exec_network(self.duration_predictor_net)

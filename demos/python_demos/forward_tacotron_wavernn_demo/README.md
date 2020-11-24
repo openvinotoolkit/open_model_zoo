@@ -16,12 +16,6 @@ When inference is done, the application outputs the audio to the WAV file with 2
 Running the application with the `-h` option yields the following usage message:
 
 ```
-python3 forward_tacotron_wavernn_demo.py -h
-```
-
-The command yields the following usage message:
-
-```
 usage: forward_tacotron_wavernn_demo.py [-h] --model_duration MODEL_DURATION
                                         --model_forward MODEL_FORWARD [-o OUT]
                                         --model_upsample MODEL_UPSAMPLE

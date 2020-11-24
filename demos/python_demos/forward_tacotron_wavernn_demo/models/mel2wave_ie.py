@@ -1,14 +1,12 @@
 import os.path as osp
-import logging as log
 
-from openvino.inference_engine import IECore
 import numpy as np
 
 from utils.wav_processing import *
 
 
 class WaveRNNIE:
-    def __init__(self, model_upsample, model_rnn, target=11000, overlap=550, hop_length=275, bits=9, device='CPU',
+    def __init__(self, model_upsample, model_rnn, ie, target=11000, overlap=550, hop_length=275, bits=9, device='CPU',
                  verbose=False, upsampler_width=-1):
         """
         return class provided WaveRNN inference.
@@ -31,7 +29,7 @@ class WaveRNNIE:
         self.indent = 550
         self.pad = 2
         self.batch_sizes = [1, 2, 4, 8, 16, 32, 64, 128, 256]
-        self.ie = IECore()
+        self.ie = ie
 
         self.upsample_net = self.load_network(model_upsample)
         if upsampler_width > 0:

@@ -4,8 +4,10 @@ import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
 
+from tqdm import tqdm
 import numpy as np
 import scipy.io.wavfile
+from openvino.inference_engine import IECore
 
 from models.forward_tacotron_ie import ForwardTacotronIE
 from models.mel2wave_ie import WaveRNNIE
@@ -20,19 +22,18 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("--model_duration", help="Required. Path to ForwardTacotron`s duration prediction part (*.xml format).", required=True,
+    args.add_argument("-m_duration", "--model_duration", help="Required. Path to ForwardTacotron`s duration prediction part (*.xml format).", required=True,
                       type=str)
-    args.add_argument("--model_forward", help="Required. Path to ForwardTacotron`s mel-spectrogram regression part (*.xml format).", required=True,
+    args.add_argument("-m_forward", "--model_forward", help="Required. Path to ForwardTacotron`s mel-spectrogram regression part (*.xml format).", required=True,
+                      type=str)
+    args.add_argument("-m_upsample", "--model_upsample", help="Required. Path to WaveRNN`s part for mel-spectrogram upsampling by time axis (*.xml format).", required=True,
+                      type=str)
+    args.add_argument("-m_rnn", "--model_rnn", help="Required. Path to WaveRNN`s part for waveform autoregression (*.xml format).", required=True,
                       type=str)
 
+    args.add_argument("-i", "--input", help="Text file with text.", required=True,
+                      type=str)
     args.add_argument("-o", "--out", help="Required. Path to an output .wav file", default='out.wav',
-                      type=str)
-    args.add_argument("--model_upsample", help="Required. Path to WaveRNN`s part for mel-spectrogram upsampling by time axis (*.xml format).", required=True,
-                      type=str)
-    args.add_argument("--model_rnn", help="Required. Path to WaveRNN`s part for waveform autoregression (*.xml format).", required=True,
-                      type=str)
-
-    args.add_argument("--input", help="Text file with text.", required=True,
                       type=str)
 
     args.add_argument("--upsampler_width", default=-1,
@@ -56,8 +57,9 @@ def mel_to_wave(mel_spec, out_name, ap):
 def main():
     args = build_argparser().parse_args()
 
-    vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, device=args.device, upsampler_width=args.upsampler_width)
-    forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, args.device, verbose=False)
+    ie = IECore()
+    vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, ie, device=args.device, upsampler_width=args.upsampler_width)
+    forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, ie, args.device, verbose=False)
 
     audio_res = []
     silent = np.array([1.0])
@@ -67,7 +69,7 @@ def main():
     time_forward = 0
     time_wavernn = 0
 
-    time_s_all = time.time()
+    time_s_all = time.perf_counter()
     with open(args.input, 'r') as f:
         count = 0
         for line in f:
@@ -86,10 +88,10 @@ def main():
             else:
                 texts = [line]
 
-            for n_part, text in enumerate(texts):
-                time_s = time.time()
+            for text in tqdm(texts):
+                time_s = time.perf_counter()
                 mel = forward_tacotron.forward(text)
-                time_e = time.time()
+                time_e = time.perf_counter()
                 time_forward += (time_e - time_s) * 1000
 
                 mel = (mel + 4) / 8
@@ -100,12 +102,9 @@ def main():
 
                     mel = np.expand_dims(mel, axis=0)
 
-                if n_part % 10 == 0:
-                    print("\t Process {0}/{1} part of the line.".format(n_part + 1, len(texts)))
-
-                time_s = time.time()
+                time_s = time.perf_counter()
                 audio = vocoder.forward(mel)
-                time_e = time.time()
+                time_e = time.perf_counter()
                 time_wavernn += (time_e - time_s) * 1000
 
                 audio_res.extend(audio)
@@ -113,7 +112,7 @@ def main():
 
             if count % 5 == 0:
                 print('WaveRNN time: {:.3f}. ForwardTacotronTime {}'.format(time_wavernn, time_forward))
-    time_e_all = time.time()
+    time_e_all = time.perf_counter()
 
     print('All time {:.3f}. WaveRNN time: {:.3f}. ForwardTacotronTime {}'.format((time_e_all - time_s_all) * 1000,
                                                                                  time_wavernn, time_forward))
