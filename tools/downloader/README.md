@@ -45,6 +45,28 @@ For models from Caffe2:
 python3 -mpip install --user -r ./requirements-caffe2.in
 ```
 
+When converting some TensowFlow models, you may see an error message such as this:
+
+```
+Traceback (most recent call last):
+  ...
+  File "/.../site-packages/tensorflow_core/python/keras/saving/save.py", line 143, in load_model
+    return hdf5_format.load_model_from_hdf5(filepath, custom_objects, compile)
+  File "/.../site-packages/tensorflow_core/python/keras/saving/hdf5_format.py", line 160, in load_model_from_hdf5
+    model_config = json.loads(model_config.decode('utf-8'))
+AttributeError: 'str' object has no attribute 'decode'
+...
+```
+
+As a workaround, you can downgrade the installed version of the h5py package:
+
+```sh
+python3 -mpip install --user "h5py<3"
+```
+
+See [tensorflow/tensorflow#44467](https://github.com/tensorflow/tensorflow/issues/44467)
+for more details.
+
 ## Model downloader usage
 
 The basic usage is to run the script like this:
