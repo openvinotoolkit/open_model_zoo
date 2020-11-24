@@ -81,6 +81,7 @@ Accuracy Checker supports following set of preprocessors:
   * `channel` - channel id in image (e.g. if you read image in RGB and want to select green channel, you need to specify 1 as channel)
 * `flip` - image mirroring around specified axis.
   * `mode` specifies the axis for flipping (`vertical` or `horizontal`).
+  * `merge_with_original` - allows addition flipped image to original (Optional, default `False`, original image will be replaced with flipped).
 * `crop` - central cropping for image.
   * `dst_width` and `dst_height` are destination width and height for image resizing respectively. You can also use `size` instead in case when destination sizes are equal,
   `central_fraction` to define fraction of size to crop (float value (0, 1])) or `max_square` for cropping central part for image by minimal image size (`True` value for enabling this feature).

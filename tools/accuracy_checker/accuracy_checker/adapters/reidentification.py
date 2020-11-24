@@ -57,3 +57,13 @@ class ReidAdapter(Adapter):
         prediction = prediction / np.sqrt(sum_[:, np.newaxis] + GRN_BIAS)
 
         return prediction
+
+    def _extract_predictions(self, outputs_list, meta):
+        if not (meta[-1] or {}).get('multi_infer', False):
+            return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
+
+        if len(outputs_list) == 2:
+            emb1, emb2 = outputs_list[0][self.output_blob], outputs_list[1][self.output_blob]
+            return {self.output_blob: emb1 + emb2}
+
+        return outputs_list[0]

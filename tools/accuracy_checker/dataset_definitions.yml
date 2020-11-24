@@ -1084,3 +1084,11 @@ datasets:
       audio_dir: audio_dataset/data
     annotation: sound_classification.pickle
     reader: wav_reader
+
+  - name: lfw_bin
+    data_source: lfw_bin/images
+    annotation_conversion:
+      converter: face_recognition_bin
+      bin_file:  lfw_bin/lfw.bin
+      images_dir: lfw_bin/images
+      convert_images: True
