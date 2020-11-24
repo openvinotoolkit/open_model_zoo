@@ -16,35 +16,38 @@ When inference is done, the application outputs the audio to the WAV file with 2
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: forward_tacotron_wavernn_demo.py [-h] --model_duration MODEL_DURATION
-                                        --model_forward MODEL_FORWARD [-o OUT]
-                                        --model_upsample MODEL_UPSAMPLE
-                                        --model_rnn MODEL_RNN --input INPUT
+usage: forward_tacotron_wavernn_demo.py [-h] -m_duration MODEL_DURATION
+                                        -m_forward MODEL_FORWARD -m_upsample
+                                        MODEL_UPSAMPLE -m_rnn MODEL_RNN -i
+                                        INPUT [-o OUT]
+                                        [--upsampler_width UPSAMPLER_WIDTH]
                                         [-d DEVICE]
 
 Options:
   -h, --help            Show this help message and exit.
-  --model_duration MODEL_DURATION
+  -m_duration MODEL_DURATION, --model_duration MODEL_DURATION
                         Required. Path to ForwardTacotron`s duration
                         prediction part (*.xml format).
-  --model_forward MODEL_FORWARD
+  -m_forward MODEL_FORWARD, --model_forward MODEL_FORWARD
                         Required. Path to ForwardTacotron`s mel-spectrogram
                         regression part (*.xml format).
-  -o OUT, --out OUT     Required. Path to an output .wav file
-  --model_upsample MODEL_UPSAMPLE
+  -m_upsample MODEL_UPSAMPLE, --model_upsample MODEL_UPSAMPLE
                         Required. Path to WaveRNN`s part for mel-spectrogram
                         upsampling by time axis (*.xml format).
-  --model_rnn MODEL_RNN
+  -m_rnn MODEL_RNN, --model_rnn MODEL_RNN
                         Required. Path to WaveRNN`s part for waveform
                         autoregression (*.xml format).
-  --input INPUT         Text file with text.
+  -i INPUT, --input INPUT
+                        Text file with text.
+  -o OUT, --out OUT     Required. Path to an output .wav file
+  --upsampler_width UPSAMPLER_WIDTH
+                        Width for reshaping of the model_upsample. If -1 then
+                        no reshape. Do not use with FP16 model.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL, MYRIAD or HETERO: is acceptable. The
                         sample will look for a suitable plugin for device
                         specified. Default value is CPU
-
-
 ```
 
 Running the application with the empty list of options yields the usage message and an error message.
