@@ -54,26 +54,25 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
+    args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model.",
                       required=True, type=str)
-    args.add_argument("-i", "--input", help="Required. Path to a folder with images or path to an image files",
+    args.add_argument("-i", "--input", help="Required. Path to a folder with images or path to an image files.",
                       required=True, type=str, nargs="+")
-    args.add_argument("-c", "--classes", help="Optional. Path to a text file containing class labels.",
+    args.add_argument("-lab", "--labels", help="Optional. Path to a text file containing class labels.",
                       type=str)
-    args.add_argument("-col", "--colors", help="Optional. Path to a text file containing colors for classes.",
+    args.add_argument("-c", "--colors", help="Optional. Path to a text file containing colors for classes.",
                       type=str)
     args.add_argument("-lw", "--legend_width", help="Optional. Width of legend.", default=300, type=int)
-    args.add_argument("-o", "--output_dir", help="Optional. Path to a folder where output files will be saved",
+    args.add_argument("-o", "--output_dir", help="Optional. Path to a folder where output files will be saved.",
                       default="results", type=str)
     args.add_argument("-l", "--cpu_extension",
                       help="Optional. Required for CPU custom layers. "
                            "Absolute MKLDNN (CPU)-targeted custom layers. Absolute path to a shared library with the "
-                           "kernels implementations", type=str, default=None)
+                           "kernels implementations.", type=str, default=None)
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
-                           "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
+                           "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU.",
                       default="CPU", type=str)
-    args.add_argument("-nt", "--number_top", help="Optional. Number of top results", default=10, type=int)
     return parser
 
 
@@ -174,7 +173,7 @@ def main():
     else:
         raise Exception("Unexpected output blob shape {}. Only 4D and 3D output blobs are supported".format(res.shape))
 
-    classes = get_info_from_file(args.classes)
+    classes = get_info_from_file(args.labels)
     own_color_map = get_info_from_file(args.colors)
     global classes_color_map
     if own_color_map:
