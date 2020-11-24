@@ -523,6 +523,18 @@ PYTHON_DEMOS = [
         ]
     )),
 
+    PythonDemo(subdirectory='text_spotting_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
+                          '-i': DataPatternArg('text-detection')}),
+        [
+            TestCase(options={
+                '-m_m': ModelArg('text-spotting-0002-detector'),
+                '-m_te': ModelArg('text-spotting-0002-recognizer-encoder'),
+                '-m_td': ModelArg('text-spotting-0002-recognizer-decoder'),
+                '--no_track': None
+            }),
+        ]
+    )),
 ]
 
 DEMOS = NATIVE_DEMOS + PYTHON_DEMOS
