@@ -104,7 +104,7 @@ class ForwardTacotronIE:
         else:
             punctuation = '!\'(),.:;? '
             delimiters = [_symbol_to_id[p] for p in punctuation]
-            # try to found optimal fragmentation for inference
+            # try to find optimal fragmentation for inference
             ranges = [i+1 for i,val in enumerate(sequence) if val in delimiters]
             if len(sequence) not in ranges:
                 ranges.append(len(sequence))

@@ -7,8 +7,8 @@ The text to speech demo based on https://github.com/as-ideas/ForwardTacotron and
 ## How It Works
 
 Upon the start-up, the demo application reads command-line parameters and loads four networks to the
-Inference Engine plugin. The demo pipeline reads text file by lines and divide every line to parts by punctuation marks.
-The heuristic algorithm choose punctuation near to the some threshold by sentence length.
+Inference Engine plugin. The demo pipeline reads text file by lines and divides every line to parts by punctuation marks.
+The heuristic algorithm chooses punctuation near to the some threshold by sentence length.
 When inference is done, the application outputs the audio to the WAV file with 22050 Hz sample rate.
 
 ## Running
@@ -53,7 +53,7 @@ Options:
 
 ```
 
-Running the application with the empty list of options yields the usage message given above and an error message.
+Running the application with the empty list of options yields the usage message and an error message.
 
 ## Example for running with arguments
 ```

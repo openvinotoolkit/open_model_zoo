@@ -60,7 +60,7 @@ def main():
     forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, args.device, verbose=False)
 
     audio_res = []
-    silent = np.array([1.0] * 1)
+    silent = np.array([1.0])
 
     len_th = 512
 
