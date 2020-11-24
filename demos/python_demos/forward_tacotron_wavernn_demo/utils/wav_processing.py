@@ -1,3 +1,22 @@
+"""
+ Copyright (c) 2020 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+This file is based in fatchord_version.py from https://github.com/fatchord/WaveRNN,
+commit 3595219b2f2f5353f0867a7bb59abcb15aba8831 on Nov 27, 2019
+"""
+
 import math
 
 import numpy as np
@@ -152,28 +171,6 @@ def xfade_and_unfold(y, overlap):
 
     return unfolded
 
-def label_2_float(x, bits):
-    return 2 * x / (2**bits - 1.) - 1
-
-def decode_mu_law(y, mu, from_labels=True):
-    # TODO: get rid of log2 - makes no sense
-    if from_labels:
-        y = label_2_float(y, math.log2(mu))
-    mu = mu - 1
-    x = np.sign(y) / mu * ((1 + mu) ** np.abs(y) - 1)
-    return x
-
-
-def np_softmax(x):
-    num = np.exp(x - np.max(x))
-    denum = num.sum(axis=1)
-    return num / denum[:,np.newaxis]
-
-def infer_from_logit(logits, n_classes=2**9):
-    posterior = softmax(logits, axis=1)
-    sample = np.argmax(np.log(posterior) + rnd.gumbel(size=posterior.shape), axis=1)
-    sample = 2.0 * sample / (n_classes - 1.) - 1.0
-    return sample
 
 def get_one_hot(argmaxes, n_classes):
     res = np.eye(n_classes)[np.array(argmaxes).reshape(-1)]
@@ -191,7 +188,6 @@ def infer_from_discretized_mix_logistic(params):
     log_scale_min = float(np.log(1e-14))
     assert params.shape[1] % 3 == 0
     nr_mix = params.shape[1] // 3
-    #print(params.shape)
 
     # B x T x C
     y = params #np.transpose(params, (1, 0))
