@@ -143,9 +143,14 @@ class FaceRecognitionBinary(BaseFormatConverter):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'bin_file': PathField(),
-            'images_dir': PathField(is_directory=True, optional=True, check_exists=False),
-            'convert_images': BoolField(optional=True, default=True)
+            'bin_file': PathField(description='binary data file'),
+            'images_dir': PathField(
+                is_directory=True, optional=True, check_exists=False,
+                description='directory for saving converted images'),
+            'convert_images': BoolField(
+                optional=True, default=True,
+                description='flag that image conversion required or not'
+            )
         })
         return params
 
@@ -184,7 +189,7 @@ class FaceRecognitionBinary(BaseFormatConverter):
                 progress_callback(idx * 100 / num_iterations)
         return ConverterReturn(annotations, None, content_errors)
 
-    def save_image(self, bin, image_name):
-        image = cv2.imdecode(np.frombuffer(bin, dtype=np.uint8), cv2.IMREAD_COLOR)
+    def save_image(self, data, image_name):
+        image = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
         path_to_save = self.images_dir / image_name
         cv2.imwrite(str(path_to_save), image)

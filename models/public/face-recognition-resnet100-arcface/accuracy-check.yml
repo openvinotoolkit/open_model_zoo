@@ -30,4 +30,3 @@ models:
 
         metrics:
           - type: pairwise_accuracy_subsets
-

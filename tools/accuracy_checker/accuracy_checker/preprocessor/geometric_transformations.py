@@ -26,11 +26,10 @@ from ..utils import get_size_from_config, string_to_tuple, UnsupportedPackage
 from ..logging import warning
 
 try:
-    from skimage.transform import estimate_transform, warp, SimilarityTransform as sk_similarity_trans
+    from skimage.transform import estimate_transform, warp
 except ImportError as import_error:
     estimate_transform = UnsupportedPackage("skimage.transform", import_error.msg)
     warp = UnsupportedPackage("skimage.transform", import_error.msg)
-    sk_similarity_trans = UnsupportedPackage('skimage.transform', import_error.msg)
 
 # The field .type should be string, the field .parameters should be dict
 GeometricOperationMetadata = namedtuple('GeometricOperationMetadata', ['type', 'parameters'])
