@@ -23,7 +23,7 @@ from .pascal_voc import PascalVOCDetectionConverter
 from .sample_converter import SampleConverter
 from .wider import WiderFormatConverter
 from .detection_opencv_storage import DetectionOpenCVStorageFormatConverter
-from .lfw import LFWConverter
+from .lfw import LFWConverter, FaceRecognitionBinary
 from .vgg_face_regression import VGGFaceRegressionConverter
 from .super_resolution_converter import (
     SRConverter, SRMultiFrameConverter, MultiTargetSuperResolutionConverter, SRDirectoryBased
@@ -111,6 +111,7 @@ __all__ = [
     'MARSConverter',
     'DetectionOpenCVStorageFormatConverter',
     'LFWConverter',
+    'FaceRecognitionBinary',
     'VGGFaceRegressionConverter',
     'SRConverter',
     'SRMultiFrameConverter',

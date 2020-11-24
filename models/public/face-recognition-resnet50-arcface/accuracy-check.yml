@@ -11,14 +11,7 @@ models:
             shape: 3, 112, 112
 
     datasets:
-      - name: lfw
-
-        preprocessing:
-          - type: bgr_to_rgb
-          - type: point_alignment
-            size: 400
-          - type: resize
-            size: 112
+      - name: lfw_bin
 
         metrics:
           - type: pairwise_accuracy_subsets
@@ -30,10 +23,4 @@ models:
         adapter: reid
 
     datasets:
-      - name: lfw
-
-        preprocessing:
-          - type: point_alignment
-            size: 400
-          - type: resize
-            size: 112
+      - name: lfw_bin

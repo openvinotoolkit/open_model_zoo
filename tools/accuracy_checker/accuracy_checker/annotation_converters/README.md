@@ -152,6 +152,10 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `pairs_file` - path to file with annotation positive and negative pairs.
   * `train_file` - path to file with annotation positive and negative pairs used for network train (optional parameter).
   * `landmarks_file` - path to file with facial landmarks coordinates for annotation images (optional parameter).
+* `face_recognition_bin` - converts preprocessed face recognition dataset stored in binary format to `ReidentificationClassificationAnnotation`.
+  * `bin_file` - file with dataset. Example of datasets can be found [here](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo).
+  * `images_dir` - directory for saving converted images (Optional, used only if `convert_images` enabled, if not provided `<dataset_root>/converted_images` will be used)
+  * `convert_images` - allows decode and save images. 
 * `mars` - converts MARS person reidentification dataset to `ReidentificationAnnotation`.
   * `data_dir` - path to data directory, where gallery (`bbox_test`) and `query` subdirectories are located.
 * `market1501_reid` - converts Market1501 person reidentification dataset to `ReidentificationAnnotation`.
