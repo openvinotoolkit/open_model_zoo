@@ -71,6 +71,12 @@ postprocessing:
     pattern: '(?<=''inception_v2'': inception\.)inception_v3_arg_scope'
     replacement: 'inception_v2_arg_scope'
     file: models/research/slim/nets/nets_factory.py
+
+  # replace deprecated API usage
+  - $type: regex_replace
+    pattern: '\blayer\.apply\b'
+    replacement: 'layer'
+    file: models/research/slim/tf_slim/layers/layers.py
 model_optimizer_args:
   - --input_shape=[1,224,224,3]
   - --input=input

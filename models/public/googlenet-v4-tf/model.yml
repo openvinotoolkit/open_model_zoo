@@ -64,6 +64,16 @@ postprocessing:
     pattern: 'from nets\.inception_(?!v4)'
     replacement: '# \g<0>'
     file: models/research/slim/nets/inception.py
+
+  # replace deprecated API usage
+  - $type: regex_replace
+    pattern: '\blayer\.apply\b'
+    replacement: 'layer'
+    file: models/research/slim/tf_slim/layers/layers.py
+  - $type: regex_replace
+    pattern: '\bcore_layers\.flatten\b'
+    replacement: 'tf.keras.layers.Flatten()'
+    file: models/research/slim/tf_slim/layers/layers.py
 model_optimizer_args:
   - --input_shape=[1,299,299,3]
   - --input=input
