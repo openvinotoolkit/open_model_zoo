@@ -1,0 +1,31 @@
+evaluations:
+  - name: text-to-speech-en-0001
+    module: custom_evaluators.text_to_speech_evaluator.TextToSpeechEvaluator
+    module_config:
+      network_info:
+        forward_tacotron_duration: {}
+
+        forward_tacotron_regression: {}
+
+        melgan: {}
+        max_mel_len: '220'
+
+        adapter:
+          type: regression
+          keep_shape: True
+
+      launchers:
+        - framework: dlsdk
+
+      datasets:
+        - name: forward_tacotron_melgan_io
+          data_source: forward_tacotron_melgan_io
+          reader: numpy_dict_reader
+          annotation_conversion:
+            converter: multi_feature_regression
+            data_dir: forward_tacotron_melgan_io
+            input_suffix: duration_prediction_in_
+            reference_suffix: melgan_out_
+          metrics:
+            - type: mae
+              presenter: print_vector
