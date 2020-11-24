@@ -111,7 +111,7 @@ def main():
                 audio_res.extend(silent * min(audio))
 
             if count % 5 == 0:
-                print('WaveRNN time: {:.3f}. ForwardTacotronTime {}'.format(time_wavernn, time_forward))
+                print('WaveRNN time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'.format(time_wavernn, time_forward))
     time_e_all = time.perf_counter()
 
     print('All time {:.3f}. WaveRNN time: {:.3f}. ForwardTacotronTime {}'.format((time_e_all - time_s_all) * 1000,
