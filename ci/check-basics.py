@@ -79,21 +79,21 @@ def main():
 
         mode = raw_diff.split()[1]
 
-        ABSOLUTE_PATH = OMZ_ROOT / path
+        absolute_path = OMZ_ROOT / path
 
         if path.startswith('tools/accuracy_checker/configs/') and path.endswith('.yml'):
             if mode == '120000':
                 try:
-                    if ABSOLUTE_PATH.is_symlink():
-                        real_path = ABSOLUTE_PATH.resolve(strict=True)
+                    if absolute_path.is_symlink():
+                        real_path = absolute_path.resolve(strict=True)
                     else:
-                        with open(ABSOLUTE_PATH, 'r', newline='') as file:
+                        with open(absolute_path, 'r', newline='') as file:
                             link_target = file.read()
-                        real_path = (ABSOLUTE_PATH.parent / link_target).resolve(strict=True)
+                        real_path = (absolute_path.parent / link_target).resolve(strict=True)
                 except FileNotFoundError:
                     complain(f"{path}: should be a symbolic link to existing accuracy-check.yml from models directory")
                 else:
-                    model_name = ABSOLUTE_PATH.stem
+                    model_name = absolute_path.stem
                     if real_path.name != 'accuracy-check.yml' or real_path.parent.name != model_name:
                         complain(f"{path}: should be a symbolic link to accuracy-check.yml from {model_name} model "
                                  "directory")
@@ -110,7 +110,7 @@ def main():
         if path.startswith('demos/thirdparty/'):
             continue
 
-        with open(ABSOLUTE_PATH, encoding='UTF-8') as f:
+        with open(absolute_path, encoding='UTF-8') as f:
             lines = list(f)
 
         if lines and not lines[-1].endswith('\n'):
