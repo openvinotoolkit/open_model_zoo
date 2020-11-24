@@ -378,10 +378,14 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(subdirectory='gesture_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None, '-c': DemoFileArg('classes.json'),
+        TestCase(options={'--no_show': None,
                           '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
-                          '-m_a': ModelArg('asl-recognition-0004'),
-                          '-m_d': ModelArg('person-detection-asl-0001')})
+                          '-m_d': ModelArg('person-detection-asl-0001')}),
+        [
+            TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': DemoFileArg('msasl100-classes.json')}),
+            TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
+                              '-c': DemoFileArg('jester27-classes.json')}),
+        ],
     )),
 
     PythonDemo(subdirectory='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
