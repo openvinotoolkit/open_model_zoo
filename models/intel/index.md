@@ -203,7 +203,7 @@ Deep Learning models for text spotting (simultaneous detection and recognition).
 | text-spotting-0002-recognizer-encoder                                                                                                          | 2.082                | 1.328      |
 | text-spotting-0002-recognizer-decoder                                                                                                          | 0.002                | 0.273      |
 | [text-spotting-0003](./text-spotting-0003/description/text-spotting-0003.md)                                                                   |                      |            |
-| text-spotting-0003-detector                                                                                                                    | 185.169              | 26.497     |
+| text-spotting-0003-detector                                                                                                                    | 184.495              | 27.010     |
 | text-spotting-0003-recognizer-encoder                                                                                                          | 2.082                | 1.328      |
 | text-spotting-0003-recognizer-decoder                                                                                                          | 0.002                | 0.273      |
 

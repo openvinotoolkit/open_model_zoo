@@ -7,7 +7,7 @@ recognizes text. The model detects symbol sequences separated by space and perfo
 recognition without a dictionary. The model is built on top of the Mask-RCNN
 framework with additional attention-based text recognition head.
 
-Symbols set is alphanumeric: `abcdefghijklmnopqrstuvwxyz0123456789`.
+Alphabet is alphanumeric: `abcdefghijklmnopqrstuvwxyz0123456789`.
 
 ## Example
 
@@ -41,15 +41,12 @@ The text-spotting-0003-detector model is a Mask-RCNN-based text detector with Re
 
 ### Outputs
 
-1.	Name: `classes`, shape: [100]. Contiguous integer class ID for every
-    detected object, `0` for background (no object detected).
-2.	Name: `scores`, shape: [100]. Detection confidence scores in the [0, 1] range
-    for every object.
-3.	Name: `boxes`, shape: [100x4]. Bounding boxes around every detected object
-    in the (top_left_x, top_left_y, bottom_right_x, bottom_right_y) format.
-4.	Name: `raw_masks`, shape: [100x2x28x28]. Segmentation heatmaps for all
-    classes for every output bounding box.
-5.  Name: `text_features`, shape [100x64x28x28]. Text features that are fed to a text recognition head.
+1.	Name: `labels`, shape: [100]. Contiguous integer class ID for every
+    detected object, `0` is for text class.
+3.	Name: `boxes`, shape: [100x5]. Bounding boxes around every detected object
+    in the (top_left_x, top_left_y, bottom_right_x, bottom_right_y, confidence) format.
+4.	Name: `masks`, shape: [100x28x28]. Text segmentation masks for every output bounding box.
+5.  Name: `text_features.0`, shape [100x64x28x28]. Text features that are fed to a text recognition head.
 
 ## Encoder model specification
 
@@ -83,7 +80,8 @@ Name: `output`, shape: [1x256x28x28]. Encoded text recognition features.
 
 ### Outputs
 
-1.	Name: `output`, shape: [1x38]. Encoded text recognition features.
+1.	Name: `output`, shape: [1x38]. Encoded text recognition features. Indices starting from 2 correspond to symbols from the
+alphabet. The 0 and 1 are special Start of Sequence and End of Sequence symbols correspondingly.
 1.	Name: `hidden`, shape: [1x1x256]. Current hidden state of GRU.
 
 
