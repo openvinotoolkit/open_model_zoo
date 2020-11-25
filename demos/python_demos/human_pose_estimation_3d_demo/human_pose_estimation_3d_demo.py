@@ -26,7 +26,7 @@ from modules.parse_poses import parse_poses
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
-from images_capture import VideoCapWrapper, open_images_capture
+from images_capture import open_images_capture
 
 
 def rotate_poses(poses_3d, R, t):
@@ -88,11 +88,10 @@ if __name__ == '__main__':
     t = np.array(extrinsics['t'], dtype=np.float32)
 
     cap = open_images_capture(args.input, args.loop)
-    is_video = isinstance(cap, VideoCapWrapper)
+    is_video = cap.get_type() in ('VIDEO', 'CAMERA')
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
-
     base_height = args.height_size
     fx = args.fx
 
