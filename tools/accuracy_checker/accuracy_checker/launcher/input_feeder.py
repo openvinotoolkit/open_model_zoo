@@ -58,6 +58,8 @@ PRECISION_TO_DTYPE = {
     'STR': np.str,  # string
 }
 
+INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'IGNORE_INPUT', 'LSTM_INPUT']
+
 
 class InputFeeder:
     def __init__(
@@ -183,28 +185,15 @@ class InputFeeder:
         lstm_inputs = []
         ignore_inputs = []
 
+
         for input_ in inputs_entry:
             name = input_['name']
             if name not in self.network_inputs:
                 raise ConfigError('network does not contain input "{}"'.format(name))
-
-            if input_['type'] == 'IMAGE_INFO':
-                image_info_inputs.append(name)
-                self.get_layer_precision(input_, name, precision_info, precisions)
-                continue
-
-            if input_['type'] == 'ORIG_IMAGE_INFO':
-                orig_image_info_inputs.append(name)
-                self.get_layer_precision(input_, name, precision_info, precisions)
-                continue
-
-            if input_['type'] == 'LSTM_INPUT':
-                lstm_inputs.append(name)
-                self.get_layer_precision(input_, name, precision_info, precisions)
-                continue
-
-            if input_['type'] == 'IGNORE_INPUT':
-                ignore_inputs.append(name)
+            if input_['type'] in INPUT_TYPES_WITHOUT_VALUE:
+                self._configure_inputs_without_value(
+                    input_, image_info_inputs, orig_image_info_inputs, lstm_inputs, ignore_inputs,
+                    precision_info, precisions)
                 continue
 
             value = input_.get('value')
@@ -249,6 +238,26 @@ class InputFeeder:
             precisions,
             inputs_entry
         )
+
+    def _configure_inputs_without_value(
+            self, input_config, image_info_inputs,
+            orig_image_info_inputs, lstm_inputs, ignore_inputs,
+            precision_info, precisions):
+        name = input_config['name']
+        if input_config['type'] == 'IMAGE_INFO':
+            image_info_inputs.append(name)
+            self.get_layer_precision(input_config, name, precision_info, precisions)
+
+        if input_config['type'] == 'ORIG_IMAGE_INFO':
+            orig_image_info_inputs.append(name)
+            self.get_layer_precision(input_config, name, precision_info, precisions)
+
+        if input_config['type'] == 'LSTM_INPUT':
+            lstm_inputs.append(name)
+            self.get_layer_precision(input_config, name, precision_info, precisions)
+
+        if input_config['type'] == 'IGNORE_INPUT':
+            ignore_inputs.append(name)
 
     def _transform_batch(self, batch_data, meta):
         def calculate_num_splits(layers_data, batch_size):
