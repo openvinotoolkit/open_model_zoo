@@ -56,7 +56,7 @@ from .resize import Resize
 from .to_gray_scale_ref_image import RGB2GRAYAnnotation, BGR2GRAYAnnotation
 from .remove_repeats import RemoveRepeatTokens
 from .tokens_to_lower_case import TokensToLowerCase
-from .super_resolution_image_recovery import SRImageRecovery
+from .super_resolution_image_recovery import SRImageRecovery, ColorizationLABRecovery
 from .argmax_segmentation_mask import ArgMaxSegmentationMask
 from .normalize_salient_map import SalientMapNormalizer
 
@@ -122,7 +122,9 @@ __all__ = [
 
     'RemoveRepeatTokens',
     'TokensToLowerCase',
+
     'SRImageRecovery',
+    'ColorizationLABRecovery',
 
     'SalientMapNormalizer'
 ]

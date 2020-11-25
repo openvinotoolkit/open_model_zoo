@@ -83,7 +83,7 @@ class InputFeeder:
             parsing_results = self._parse_inputs_config(inputs_config, self.default_layout, precisions_list)
             self.const_inputs, self.non_constant_inputs, self.inputs_mapping = parsing_results[:3]
             self.image_info_inputs, self.orig_image_info_inputs, self.lstm_inputs = parsing_results[3:6]
-            self.layouts_mapping, self.precision_mapping, self.inputs_config = parsing_results[6:]
+            self.ignore_inputs, self.layouts_mapping, self.precision_mapping, self.inputs_config = parsing_results[6:]
             if not self.non_constant_inputs:
                 raise ConfigError('Network should contain at least one layer for setting variable data.')
 
@@ -181,6 +181,7 @@ class InputFeeder:
         image_info_inputs = []
         orig_image_info_inputs = []
         lstm_inputs = []
+        ignore_inputs = []
 
         for input_ in inputs_entry:
             name = input_['name']
@@ -202,6 +203,10 @@ class InputFeeder:
                 self.get_layer_precision(input_, name, precision_info, precisions)
                 continue
 
+            if input_['type'] == 'IGNORE_INPUT':
+                ignore_inputs.append(name)
+                continue
+
             value = input_.get('value')
 
             if input_['type'] == 'CONST_INPUT':
@@ -221,7 +226,7 @@ class InputFeeder:
 
         all_config_inputs = (
             config_non_constant_inputs + list(constant_inputs.keys()) +
-            image_info_inputs + lstm_inputs + orig_image_info_inputs
+            image_info_inputs + lstm_inputs + orig_image_info_inputs + ignore_inputs
         )
         not_config_inputs = [input_layer for input_layer in self.network_inputs if input_layer not in all_config_inputs]
         if config_non_constant_inputs and not_config_inputs:
@@ -239,6 +244,7 @@ class InputFeeder:
             image_info_inputs,
             orig_image_info_inputs,
             lstm_inputs,
+            ignore_inputs,
             layouts,
             precisions,
             inputs_entry

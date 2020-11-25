@@ -71,6 +71,7 @@ Each input description should has following info:
         * `ORIG_IMAGE_INFO` - specific key for setting information about original image size before preprocessing.
     * `INPUT` - network input for main data stream (e. g. images). If you have several data inputs, you should provide regular expression for identifier as `value` for specifying which one data should be provided in specific input.
     * `LSTM_INPUT` - input which should be filled by hidden state from previous iteration. The hidden state layer name should be provided via `value` parameter.
+    * `IGNORE_INPUT` - input which should be stayed empty during evaluation.
     Optionally you can determine `shape` of input (by default DLSDK launcher uses info given from network, this option allows override default. It required for running ONNX\* models with dynamic input shape on devices, where dynamic shape is not supported), `layout` in case when your model was trained with non-standard data layout (For DLSDK default layout is `NCHW`)
     and `precision` (Supported precisions: `FP32` - float, `FP16` - signed shot, `U8`  - unsigned char, `U16` - unsigned short int, `I8` - signed char, `I16` - short int, `I32` - int, `I64` - long int).
 
