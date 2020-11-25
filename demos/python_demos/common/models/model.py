@@ -2,7 +2,7 @@ from time import perf_counter
 
 
 class Model:
-    def __init__(self, ie, model_path, logger=None, batch_size=1):
+    def __init__(self, ie, model_path, logger=None):
         self.logger = logger
         if self.logger:
             self.logger.info('Reading network from IR...')
@@ -11,8 +11,7 @@ class Model:
         loading_time = (perf_counter() - loading_time)
         if self.logger:
             self.logger.info('Read in {:.3f} seconds'.format(loading_time))
-        if batch_size:
-            self.set_batch_size(batch_size)
+        self.set_batch_size(1)
 
     def preprocess(self, inputs):
         meta = {}
