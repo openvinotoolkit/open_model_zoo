@@ -29,7 +29,7 @@ def scatter(source, classes, axis=1, base=0, value=1):
     return label_map
 
 
-def preprocess_with_semantics(semantic_mask, input_size):
+def preprocess_semantics(semantic_mask, input_size):
     semantic_mask = cv2.resize(semantic_mask, dsize=tuple(input_size[2:]),
                                interpolation=cv2.INTER_NEAREST)
     # create one-hot label map
@@ -43,7 +43,7 @@ def preprocess_for_seg_model(image, input_size):
     return image
 
 
-def preprocess_with_images(image, input_size):
+def preprocess_image(image, input_size):
     image = cv2.resize(image, dsize=tuple(input_size[2:]), interpolation=cv2.INTER_CUBIC)
     image = np.transpose(image, (2, 0, 1))
     return image

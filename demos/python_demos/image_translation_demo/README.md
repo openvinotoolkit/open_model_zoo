@@ -63,7 +63,7 @@ Options:
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -75,8 +75,7 @@ There are two ways to use this demo:
    ```
    python3 cocosnet_demo.py \
        -d CPU \
-       -c <path_to_corr_model>/Corr.xml \
-       -g <path_to_gen_model>/Gen.xml \
+       -t  <path_to_translation_model>/CoCosNet.xml \
        -is <path_to_semantic_mask_of_image>/input_mask.png \
        -ri <path_to_exemplar_image>/reference_image.jpg \
        -rs <path_to_exemplar_semantic>/reference_mask.png
@@ -93,9 +92,8 @@ There are two ways to use this demo:
    ```
    python3 cocosnet_demo.py \
        -d CPU \
-       -c <path_to_corr_model>/Corr.xml \
-       -g <path_to_gen_model>/Gen.xml \
-       -s <path_to_seg_model>/Seg.xml \
+       -t <path_to_translation_model>/CoCosNet.xml \
+       -s <path_to_segmentation_model>/Seg.xml \
        -ii <path_to_input_image>/input_image.jpg \
        -ri <path_to_exemplar_image>/reference_image.jpg
    ```

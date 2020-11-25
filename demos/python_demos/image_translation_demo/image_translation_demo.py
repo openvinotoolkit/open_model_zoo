@@ -35,7 +35,7 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument("-s", "--segmentation_model",
                       help="Optional. Path to an .xml file with a trained semantic segmentation model",
-                      default=None, type=str)
+                      type=str)
     args.add_argument("-ii", "--input_images",
                       help="Optional. Path to a folder with input images or path to a input image",
                       type=str)
@@ -90,10 +90,8 @@ def main():
 
     log.info("Preparing input data")
     input_data = []
-    assert args.reference_images and ((args.input_semantics and args.reference_semantics)
-                                      or (args.input_images and args.segmentation_model)
-                                      ), "Not enough data to do inference"
-    use_seg = not (args.reference_images and args.input_semantics and args.reference_semantics)
+    use_seg = bool(args.input_images) and bool(args.segmentation_model)
+    assert use_seg ^ (bool(args.input_semantics) and bool(args.reference_semantics)), "Don't know where to get data"
     input_images = get_files(args.input_images)
     input_semantics = get_files(args.input_semantics)
     reference_images = get_files(args.reference_images)
@@ -101,19 +99,19 @@ def main():
     number_of_objects = len(reference_images)
 
     if use_seg:
-        players = [input_images, number_of_objects * [''], reference_images, number_of_objects * ['']]
+        samples = [input_images, number_of_objects * [''], reference_images, number_of_objects * ['']]
     else:
-        players = [number_of_objects * [''], input_semantics, reference_images, reference_semantics]
-    for input_img, input_sem, ref_img, ref_sem in zip(*players):
+        samples = [number_of_objects * [''], input_semantics, reference_images, reference_semantics]
+    for input_img, input_sem, ref_img, ref_sem in zip(*samples):
         if use_seg:
             input_sem = get_mask_from_image(cv2.imread(input_img), seg_model)
             ref_sem = get_mask_from_image(cv2.imread(ref_img), seg_model)
         else:
             input_sem = cv2.imread(input_sem, cv2.IMREAD_GRAYSCALE)
             ref_sem = cv2.imread(ref_sem, cv2.IMREAD_GRAYSCALE)
-        input_sem = preprocess_with_semantics(input_sem, input_size=gan_model.input_semantic_size)
-        ref_img = preprocess_with_images(cv2.imread(ref_img), input_size=gan_model.input_image_size)
-        ref_sem = preprocess_with_semantics(ref_sem, input_size=gan_model.input_semantic_size)
+        input_sem = preprocess_semantics(input_sem, input_size=gan_model.input_semantic_size)
+        ref_img = preprocess_image(cv2.imread(ref_img), input_size=gan_model.input_image_size)
+        ref_sem = preprocess_semantics(ref_sem, input_size=gan_model.input_semantic_size)
         input_dict = {
             'input_semantics': input_sem,
             'reference_image': ref_img,

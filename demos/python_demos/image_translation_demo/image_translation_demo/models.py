@@ -28,7 +28,6 @@ class CocosnetModel:
         self.exec_net = ie_core.load_network(network=self.network, device_name=device)
         self.input_semantic_size = self.network.input_info[self.input_semantics].input_data.shape
         self.input_image_size = self.network.input_info[self.reference_image].input_data.shape
-        self.output_size = self.exec_net.outputs[self.output_name].shape
 
     def infer(self, input_semantics, reference_image, reference_semantics):
         input_data = {
@@ -42,7 +41,7 @@ class CocosnetModel:
 
 class SegmentationModel:
     def __init__(self, ie_core, model_xml, model_bin, device='CPU'):
-        print("Reading IR for {} model ....".format(self.model_type))
+        print("Reading IR for segmentation model ....")
         self.network = ie_core.read_network(model_xml, model_bin)
         assert len(self.network.input_info) == 1, "One input is expected"
         assert len(self.network.outputs) == 1, "One output is expected"
@@ -52,7 +51,6 @@ class SegmentationModel:
         print("Loading IR to the plugin...")
         self.exec_net = ie_core.load_network(network=self.network, device_name=device)
         self.input_size = self.network.input_info[self.input_name].input_data.shape
-        self.output_size = self.exec_net.outputs[self.output_name].shape
 
     def infer(self, input):
         input_data = {self.input_name: input}
