@@ -52,7 +52,7 @@ class ADE20kImageTranslationConverter(BaseFormatConverter):
         return ConverterReturn(annotations, None, None)
 
     def get_ref(self):
-        with open(self.reference_dict) as fd:
+        with open(self.reference_dict, 'r', encoding="utf-8") as fd:
             lines = fd.readlines()
         ref_dict = {}
         for line in lines:
