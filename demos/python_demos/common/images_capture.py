@@ -129,7 +129,7 @@ class VideoCapWrapper(ImagesCapture):
             status = self.cap.open(input)
             self.type = 'VIDEO'
         if not status:
-            raise OpenError("Can't open the {} from {}".format(self.get_type().lower(), input))
+            raise InvalidInput("Can't open the {} from {}".format(self.get_type().lower(), input))
 
     def read(self):
         status, image = self.cap.read()
