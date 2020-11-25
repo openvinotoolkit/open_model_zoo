@@ -436,6 +436,7 @@ describing a single model. Each such object has the following keys:
   * `speech_recognition`
   * `style_transfer`
   * `token_recognition`
+  * `text_to_speech`
 
   Additional possible values might be added in the future.
 
