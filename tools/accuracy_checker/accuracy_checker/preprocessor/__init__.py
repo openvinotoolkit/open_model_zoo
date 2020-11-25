@@ -24,7 +24,8 @@ from .color_space_conversion import (
     BGR2YUVConverter, RGB2YUVConverter,
     BGRtoNV12Converter, RGBtoNV12Converter,
     NV12toBGRConverter, NV12toRGBConverter,
-    RGB2YCrCbConverter, BGR2YCrCbConverter
+    RGB2YCrCbConverter, BGR2YCrCbConverter,
+    BGRToLAB, RGBToLAB
 )
 from .audio_preprocessing import (
     ResampleAudio,
@@ -94,6 +95,8 @@ __all__ = [
     'RgbToGray',
     'RgbToBgr',
     'BGR2YUVConverter',
+    'BGRToLAB',
+    'RGBToLAB',
     'TfConvertImageDType',
     'SelectInputChannel',
     'CropOrPad',

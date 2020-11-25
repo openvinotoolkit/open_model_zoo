@@ -85,10 +85,10 @@ class ColorizationLABRecovery(Postprocessor):
         for ann, pred in zip(annotation, prediction):
             target = ann.value
             h, w = pred.value.shape[:2]
-            r_target = cv2.resize(target, (w, h))
-            target_l = cv2.cvtColor(r_target, cv2.COLOR_RGB2Lab)[:, :, 0]
+            r_target = cv2.resize(target, (w, h)).astype(np.float32)
+            target_l = cv2.cvtColor(r_target / 255, cv2.COLOR_RGB2LAB)[:, :, 0]
             pred_ab = pred.value
             out_lab = np.concatenate((target_l[:, :, np.newaxis], pred_ab), axis=2)
-            result_rgb = cv2.cvtColor(out_lab, cv2.COLOR_Lab2RGB)
-            pred.value = result_rgb
+            result_rgb = cv2.cvtColor(out_lab, cv2.COLOR_Lab2BGR) * 255
+            pred.value = result_rgb.astype(np.uint8)
         return annotation, prediction

@@ -77,6 +77,8 @@ Accuracy Checker supports following set of preprocessors:
   * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
 * `rgb_to_ycrcb` - converting image in RGB to YCrCb.
   * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+* `bgr_to_lab` - converts image in RGB format to LAB.
+* `rgb_to_lab` - converts image in BGR format to LAB.
 * `select_channel` - select channel only one specified channel from multichannel image.
   * `channel` - channel id in image (e.g. if you read image in RGB and want to select green channel, you need to specify 1 as channel)
 * `flip` - image mirroring around specified axis.
