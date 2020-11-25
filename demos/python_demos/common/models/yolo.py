@@ -46,9 +46,9 @@ class YOLO(Model):
 
                 self.isYoloV3 = True  # Weak way to determine but the only one.
 
-    def __init__(self, ie, model_path, logger=None, batch_size=None,
+    def __init__(self, ie, model_path, logger=None,
                  labels=None, keep_aspect_ratio=False, threshold=0.5, iou_threshold=0.5):
-        super().__init__(ie, model_path, logger=logger, batch_size=batch_size)
+        super().__init__(ie, model_path, logger=logger)
 
         if isinstance(labels, (list, tuple)):
             self.labels = labels
