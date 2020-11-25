@@ -6,12 +6,10 @@ pedestrian-and-vehicle-detector-adas-????
 pedestrian-detection-adas-????
 pelee-coco
 person-detection-????
-person-detection-asl-????
 person-detection-retail-0013
 retinanet-tf
 vehicle-detection-adas-????
 vehicle-license-plate-detection-barrier-????
-ssd-resnet34-1200-onnx
 # For -at yolo
 yolo-v3-tf
 yolo-v3-tiny-tf

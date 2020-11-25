@@ -144,7 +144,7 @@ DATA_SEQUENCES = {
 
     'multi-camera-multi-target-tracking/repeated': [image_net_arg('00000002')] * 11,
 
-    'object-detection-demo-ssd-async': [
+    'object-detection-demo': [
         image_net_arg('00000001'),
         image_net_arg('00000002'),
         image_net_arg('00000003'),

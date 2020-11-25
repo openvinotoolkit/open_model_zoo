@@ -40,8 +40,6 @@ public:
     /// Function will treat results as ready only if next sequential result (frame) is ready.
     void waitForData();
 
-    /// Returns true if there's available infer requests in the pool
-    /// and next frame can be submitted for processing.
     /// @returns true if there's available infer requests in the pool
     /// and next frame can be submitted for processing, false otherwise.
     bool isReadyToProcess() { return requestsPool->isIdleRequestAvailable(); }

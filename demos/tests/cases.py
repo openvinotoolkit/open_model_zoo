@@ -193,6 +193,35 @@ NATIVE_DEMOS = [
             '-m': ModelArg('human-pose-estimation-0001')}),
     )),
 
+    NativeDemo(subdirectory='object_detection_demo', device_keys=[], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('object-detection-demo')}),
+            combine_cases(
+                TestCase(options={'-at': 'ssd'}),
+                single_option_cases('-m',
+                    ModelArg('face-detection-adas-0001'),
+                    ModelArg('face-detection-retail-0004'),
+                    ModelArg('face-detection-retail-0005'),
+                    ModelArg('face-detection-retail-0044'),
+                    ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
+                    ModelArg('pedestrian-detection-adas-0002'),
+                    ModelArg('person-detection-0200'),
+                    ModelArg('person-detection-0201'),
+                    ModelArg('person-detection-0202'),
+                    ModelArg('person-detection-retail-0013'),
+                    ModelArg('vehicle-detection-adas-0002'),
+                    ModelArg('vehicle-license-plate-detection-barrier-0106'),
+                    ModelArg('pelee-coco'),
+                    ModelArg('vehicle-license-plate-detection-barrier-0123'))) +
+            combine_cases(
+                TestCase(options={'-at': 'yolo'}),
+                single_option_cases('-m',
+                    ModelArg('yolo-v3-tf'),
+                    ModelArg('yolo-v3-tiny-tf')))
+        )
+    ),
+
     NativeDemo(subdirectory='object_detection_demo_ssd_async', device_keys=[], test_cases=combine_cases(
         TestCase(options={'-no_show': None, **MONITORS}),
         [
@@ -214,7 +243,7 @@ NATIVE_DEMOS = [
     NativeDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
-            '-i': DataPatternArg('object-detection-demo-ssd-async')}),
+            '-i': DataPatternArg('object-detection-demo')}),
         TestCase(options={'-m': ModelArg('yolo-v3-tf')})
     )),
 
@@ -248,6 +277,21 @@ NATIVE_DEMOS = [
     )),
 
     NativeDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-no_show': None, **MONITORS}),
+        [
+            TestCase(options={
+                '-m': ModelArg('road-segmentation-adas-0001'),
+                '-i': DataPatternArg('road-segmentation-adas'),
+            }),
+            *combine_cases(
+                TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
+                single_option_cases('-m',
+                    ModelArg('semantic-segmentation-adas-0001'),
+                    ModelArg('deeplabv3'))),
+        ],
+    )),
+
+    NativeDemo(subdirectory='segmentation_demo_async', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None, **MONITORS}),
         [
             TestCase(options={
@@ -374,7 +418,7 @@ PYTHON_DEMOS = [
     PythonDemo(subdirectory='object_detection_demo_ssd_async', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
-            '-i': DataPatternArg('object-detection-demo-ssd-async')}),
+            '-i': DataPatternArg('object-detection-demo')}),
         single_option_cases('-m',
             ModelArg('face-detection-adas-0001'),
             ModelArg('face-detection-retail-0004'),
@@ -391,7 +435,7 @@ PYTHON_DEMOS = [
     PythonDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
-            '-i': DataPatternArg('object-detection-demo-ssd-async')}),
+            '-i': DataPatternArg('object-detection-demo')}),
         single_option_cases('-m',
             ModelArg('yolo-v1-tiny-tf'),
             ModelArg('yolo-v2-tiny-tf'),
