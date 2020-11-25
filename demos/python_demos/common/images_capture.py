@@ -126,8 +126,6 @@ class VideoCapWrapper(ImagesCapture):
             self.cap.set(cv2.CAP_PROP_AUTOFOCUS, 1)
             self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
         except ValueError:
-            if not os.path.isfile(input):
-                raise InvalidInput("Can't find the video by {}".format(input))
             status = self.cap.open(input)
             self.type = 'VIDEO'
         if not status:
