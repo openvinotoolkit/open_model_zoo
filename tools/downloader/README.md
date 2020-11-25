@@ -33,16 +33,25 @@ For the model converter, you will also need to install the OpenVINO&trade;
 toolkit and the prerequisite libraries for Model Optimizer. See the
 [OpenVINO toolkit documentation](https://docs.openvinotoolkit.org/) for details.
 
-If you using models from PyTorch or Caffe2 framework, you will also need to use intermediate
-conversion to ONNX format. To use automatic conversion install additional dependencies.
+To convert models from certain frameworks, you will also need to install
+additional dependencies.
+
+For models from Caffe2:
+
+```sh
+python3 -mpip install --user -r ./requirements-caffe2.in
+```
 
 For models from PyTorch:
+
 ```sh
 python3 -mpip install --user -r ./requirements-pytorch.in
 ```
-For models from Caffe2:
+
+For models from TensorFlow:
+
 ```sh
-python3 -mpip install --user -r ./requirements-caffe2.in
+python3 -mpip install --user -r ./requirements-tensorflow.in
 ```
 
 ## Model downloader usage

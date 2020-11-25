@@ -69,7 +69,7 @@ def main():
         'tools/accuracy_checker/requirements-core.in')
     pc('ci/requirements-check-basics.txt', 'ci/requirements-check-basics.in')
     pc('ci/requirements-conversion.txt',
-        'tools/downloader/requirements-pytorch.in', 'tools/downloader/requirements-caffe2.in',
+        *(f'tools/downloader/requirements-{suffix}.in' for suffix in ['caffe2', 'pytorch', 'tensorflow']),
         *(openvino_dir / f'deployment_tools/model_optimizer/requirements_{suffix}.txt'
             for suffix in ['caffe', 'mxnet', 'onnx', 'tf2']))
     pc('ci/requirements-demos.txt',
