@@ -19,7 +19,7 @@ class OpenError(Exception):
 
     def __init__(self, message):
         OpenError.message = message
-    
+
     def __str__(self):
         return 'OpenError'
 
