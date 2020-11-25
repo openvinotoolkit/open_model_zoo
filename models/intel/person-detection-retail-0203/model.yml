@@ -1,0 +1,36 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Person Detection based on MobileNetV2 (ATSS) on 864x480 resolution.
+task_type: detection
+files:
+  - name: FP32/person-detection-retail-0203.xml
+    size: 1068626
+    sha256: b4f7f4e7fb614c9a2a8b46034879bacff36864e1c1b9b547815b1b731ed9731a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/person-detection-retail-0203/FP32/person-detection-retail-0203.xml
+  - name: FP32/person-detection-retail-0203.bin
+    size: 7804876
+    sha256: f7fd0fbf2a29fcc370e561cf499bcecc4d2a684905a7d199c5cea13a896dbd5d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/person-detection-retail-0203/FP32/person-detection-retail-0203.bin
+  - name: FP16/person-detection-retail-0203.xml
+    size: 1068454
+    sha256: 3a3458d8416a07866b94533e4fd593e09fe73f2b86b7b2264e738dc104f0a654
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/person-detection-retail-0203/FP16/person-detection-retail-0203.xml
+  - name: FP16/person-detection-retail-0203.bin
+    size: 3902622
+    sha256: e7ff7f360d42bd24476ce7e83e41bed99d9014058ac6f0ce70cc84f76d78fb12
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/person-detection-retail-0203/FP16/person-detection-retail-0203.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
