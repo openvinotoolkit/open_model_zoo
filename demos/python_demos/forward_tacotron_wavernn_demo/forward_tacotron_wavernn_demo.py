@@ -112,11 +112,8 @@ def main():
 
                 mel = (mel + 4) / 8
                 np.clip(mel, 0, 1, out=mel)
-
-                if len(mel.shape) == 2:
-                    mel = np.transpose(mel)
-
-                    mel = np.expand_dims(mel, axis=0)
+                mel = np.transpose(mel)
+                mel = np.expand_dims(mel, axis=0)
 
                 time_s = time.perf_counter()
                 audio = vocoder.forward(mel)
