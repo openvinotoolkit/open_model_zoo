@@ -39,12 +39,12 @@ class AsyncPipeline:
         self.event = threading.Event()
 
     def inference_completion_callback(self, status, callback_args):
-        request, id, meta = callback_args
+        request, id, meta, preprocessing_meta = callback_args
         try:
             if status != 0:
                 raise RuntimeError('Infer Request has returned status code {}'.format(status))
             raw_outputs = {key: blob.buffer for key, blob in request.output_blobs.items()}
-            self.completed_request_results[id] = (raw_outputs, meta)
+            self.completed_request_results[id] = (raw_outputs, meta, preprocessing_meta)
             self.empty_requests.append(request)
         except Exception as e:
             self.callback_exceptions.append(e)
@@ -55,7 +55,7 @@ class AsyncPipeline:
         inputs, preprocessing_meta = self.model.preprocess(inputs)
         meta.update(preprocessing_meta)
         request.set_completion_callback(py_callback=self.inference_completion_callback,
-                                        py_data=(request, id, meta))
+                                        py_data=(request, id, meta, preprocessing_meta))
         self.event.clear()
         request.async_infer(inputs=inputs)
 
@@ -67,7 +67,8 @@ class AsyncPipeline:
     def get_result(self, id):
         result = self.get_raw_result(id)
         if result:
-            return self.model.postprocess(*result), result[1]
+            raw_result, meta, preprocess_meta = result
+            return self.model.postprocess(raw_result, preprocess_meta), meta
         return None
 
     def await_all(self):
