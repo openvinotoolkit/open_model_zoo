@@ -512,7 +512,6 @@ PYTHON_DEMOS = [
         ],
     )),
 
-    # NOTE: Demo performance depends on data
     PythonDemo(subdirectory='single_human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None, **MONITORS,
                            '-i': DataPatternArg('human-pose-estimation'),
