@@ -16,7 +16,6 @@
 
 import threading
 from collections import deque
-from time import perf_counter
 
 
 class AsyncPipeline:
@@ -26,12 +25,8 @@ class AsyncPipeline:
 
         if self.logger:
             self.logger.info('Loading network to {} plugin...'.format(device))
-        loading_time = perf_counter()
         self.exec_net = ie.load_network(network=self.model.net, device_name=device,
                                         config=plugin_config, num_requests=max_num_requests)
-        loading_time = (perf_counter() - loading_time)
-        if self.logger:
-            self.logger.info('Loaded in {:.3f} seconds'.format(loading_time))
 
         self.empty_requests = deque(self.exec_net.requests)
         self.completed_request_results = {}
