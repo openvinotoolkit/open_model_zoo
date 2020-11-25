@@ -428,6 +428,9 @@ The main difference between this converter and `super_resolution` in data organi
 * `sound_classification` - converts dataset for sound classification to `ClassificationAnnotation`. The dataset should be represented by directory with input wav files and annotation in 2 column csv format, where first column is audio file name and second is label id from dataset.
   * `annotation_file` - csv file with selected subset for evaluation, file structure described above.
   * `audio_dir` - directory with input data, (optional, required only if you want check file existence during annotation conversion).
+* `ade20k_image_translation` - converts ADE20K dataset to `ImageProcessingAnnotation` according to `reference_file`.
+  * `annotations_dir` - path to directory with annotations (e.g. `ADEChallengeData2016/annotations`).
+  * `reference_file` - path to file with pairs key (validation): value (train).
 * `salient_object_detection` - converts dataset for salient object detection to `SalientRegionAnnotation`. The dataset should have following structure:
   1. images have numeric ids like names and `jpg` extension (e.g. image/0.jpg, image/1.jpg, image/2.jpg, ...).
   2. salience map located in separated directory, have the same ids like images and `png` extension  (e.g. mask/0.png, mask/1.png, mask/2.png).
