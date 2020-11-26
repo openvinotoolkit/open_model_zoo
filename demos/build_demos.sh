@@ -26,14 +26,17 @@ error() {
 trap 'error ${LINENO}' ERR
 
 extra_cmake_opts=()
+extra_cmake_build_opts=()
 
 for opt in "$@"; do
     case "$opt" in
     -DENABLE_PYTHON=*)
         extra_cmake_opts+=("$opt")
         ;;
-    -DDEMOS=*)
-        extra_cmake_opts+=("$opt")
+    --target=*)
+        tmp="${opt%\"}"
+        tmp="${tmp#\"}"
+        extra_cmake_build_opts+=("${tmp//=/ }")
         ;;
     *)
         printf "Unknown option: %q\n" "$opt"
@@ -85,6 +88,7 @@ fi
 mkdir -p "$build_dir"
 
 (cd "$build_dir" && cmake -DCMAKE_BUILD_TYPE=Release "${extra_cmake_opts[@]}" "$DEMOS_PATH")
-cmake --build "$build_dir" -- "$NUM_THREADS"
+c="cmake --build $build_dir ${extra_cmake_build_opts[@]} -- $NUM_THREADS"
+eval "$c"
 
-printf "\nBuild completed, you can find binaries for all demos in the %s subfolder.\n\n" "$build_dir/$OS_PATH/Release"
+printf "\nBuild completed, you can find binaries for demos in the %s subfolder.\n\n" "$build_dir/$OS_PATH/Release"
