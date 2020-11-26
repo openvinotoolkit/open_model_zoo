@@ -6,17 +6,15 @@ import cv2
 
 
 class InvalidInput(Exception):
-    message = ''
 
     def __init__(self, message):
-        InvalidInput.message = message
+        self.message = message
 
 
 class OpenError(Exception):
-    message = ''
 
     def __init__(self, message):
-        OpenError.message = message
+        self.message = message
 
 
 class ImagesCapture:
