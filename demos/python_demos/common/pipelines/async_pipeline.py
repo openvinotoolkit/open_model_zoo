@@ -51,6 +51,7 @@ class AsyncPipeline:
         meta.update(preprocessing_meta)
         request.set_completion_callback(py_callback=self.inference_completion_callback,
                                         py_data=(request, id, meta, preprocessing_meta))
+        self.event.clear()
         request.async_infer(inputs=inputs)
 
     def get_raw_result(self, id):
@@ -72,4 +73,3 @@ class AsyncPipeline:
     def await_any(self):
         if len(self.empty_requests) == 0:
             self.event.wait()
-            self.event.clear()
