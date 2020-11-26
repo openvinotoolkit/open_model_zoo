@@ -18,7 +18,7 @@ public:
 
     void updateAge(float value);
     void updateGender(float value);
-    void updateEmotions(std::map<std::string, float> values);
+    void updateEmotions(const std::map<std::string, float>& values);
     void updateHeadPose(double y, double p, double r);
     void updateLandmarks(std::vector<float> values);
 
@@ -45,6 +45,4 @@ public:
 };
 
 // ----------------------------------- Utils -----------------------------------------------------------------
-float calcIoU(cv::Rect& src, cv::Rect& dst);
-float calcMean(const cv::Mat& src);
-Face::Ptr matchFace(cv::Rect rect, std::list<Face::Ptr>& faces);
+Face::Ptr matchFace(cv::Rect rect, const std::list<Face::Ptr>& faces);
