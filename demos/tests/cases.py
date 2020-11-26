@@ -391,11 +391,11 @@ PYTHON_DEMOS = [
             *combine_cases(
                 TestCase(options={'--architecture_type': 'yolo'}),
                 single_option_cases('-m',
+                    ModelArg('mobilefacedet-v1-mxnet'),
                     ModelArg('yolo-v1-tiny-tf'),
                     ModelArg('yolo-v2-tiny-tf'),
                     ModelArg('yolo-v2-tf'),
-                    ModelArg('yolo-v3-tf'),
-                    ModelArg('mobilefacedet-v1-mxnet')),
+                    ModelArg('yolo-v3-tf')),
             ),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'centernet'}),
