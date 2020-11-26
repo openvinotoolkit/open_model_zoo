@@ -29,7 +29,7 @@ from ..utils import contains_any, UnsupportedPackage
 
 try:
     from skimage.measure import block_reduce
-except ImportError as import_error
+except ImportError as import_error:
     block_reduce = UnsupportedPackage('skimage.measure', import_error.msg)
 
 
