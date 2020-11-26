@@ -5,21 +5,19 @@ face-detection-retail-????
 pedestrian-and-vehicle-detector-adas-????
 pedestrian-detection-adas-????
 pelee-coco
-person-detection-????
-person-detection-asl-????
 person-detection-retail-0013
 retinanet-tf
+ssd-resnet34-1200-onnx
 vehicle-detection-adas-????
 vehicle-license-plate-detection-barrier-????
-ssd-resnet34-1200-onnx
 # For --architecture_type=yolo
 mobilefacedet-v1-mxnet
 yolo-v1-tiny-tf
 yolo-v2-tiny-tf
+yolo-v2-tiny-vehicle-detection-0001
 yolo-v2-tf
 yolo-v3-tf
 yolo-v3-tiny-tf
-yolo-v2-tiny-vehicle-detection-0001
 # For --architecture_type=centernet
 ctdet_coco_dlav0_384
 ctdet_coco_dlav0_512
