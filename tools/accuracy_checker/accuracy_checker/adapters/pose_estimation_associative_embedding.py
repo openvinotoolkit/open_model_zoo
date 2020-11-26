@@ -57,6 +57,8 @@ class AssociativeEmbeddingAdapter(Adapter):
         self.heatmaps = self.get_value_from_config('heatmaps_out')
         self.nms_heatmaps = self.get_value_from_config('nms_heatmaps_out')
         self.embeddings = self.get_value_from_config('embeddings_out')
+        if isinstance(linear_sum_assignment, UnsupportedPackage):
+            linear_sum_assignment.raise_error(self.__provider__)
         self.decoder = AssociativeEmbeddingDecoder(
             num_joints=17,
             adjust=True,

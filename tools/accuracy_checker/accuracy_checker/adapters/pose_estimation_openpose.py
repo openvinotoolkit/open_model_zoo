@@ -16,7 +16,6 @@ limitations under the License.
 
 import cv2
 import numpy as np
-from skimage.measure import block_reduce
 
 try:
     from numpy.core.umath import clip
@@ -26,7 +25,12 @@ except ImportError:
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, ConfigError, NumberField
 from ..representation import PoseEstimationPrediction
-from ..utils import contains_any
+from ..utils import contains_any, UnsupportedPackage
+
+try:
+    from skimage.measure import block_reduce
+except ImportError as import_error
+    block_reduce = UnsupportedPackage('skimage.measure', import_error.msg)
 
 
 class OpenPoseAdapter(Adapter):
@@ -70,6 +74,8 @@ class OpenPoseAdapter(Adapter):
             self._part_affinity_fields_bias = self.part_affinity_fields + '/add_'
 
         self.decoder = OpenPoseDecoder(num_joints=18, delta=0.5 if self.upscale_factor == 1 else 0.0)
+        if isinstance(block_reduce, UnsupportedPackage):
+            block_reduce.raise_error(self.__provider__)
         self.nms = HeatmapNMS(kernel=2 * int(np.round(6 / 7 * self.upscale_factor)) + 1)
 
     def process(self, raw, identifiers, frame_meta):
