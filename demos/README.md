@@ -27,9 +27,8 @@ The Open Model Zoo includes the following demos:
 - [Monodepth Python* Demo](./python_demos/monodepth_demo/README.md) - The demo demonstrates how to run monocular depth estimation models.
 - [Multi-Camera Multi-Target Tracking Python* Demo](./python_demos/multi_camera_multi_target_tracking/README.md) Demo application for multiple targets (persons or vehicles) tracking on multiple cameras.
 - [Multi-Channel C++ Demos](./multi_channel/README.md) - Several demo applications for multi-channel scenarios.
-- [Object Detection for CenterNet Python* Demo](./python_demos/object_detection_demo_centernet/README.md) - Demo application for CenterNet object detection network.
+- [Object Detection Python\* Demo](./python_demos/object_detection_demo/README.md) - Demo application for several object detection model types (like SSD, Yolo, etc).
 - [Object Detection for Faster R-CNN C++ Demo](./object_detection_demo_faster_rcnn/README.md) - Inference of object detection networks like Faster R-CNN (the demo supports only images as inputs).
-- [Object Detection for RetinaFace Python\* Demo](./python_demos/object_detection_demo_retinaface/README.md) - Demo application for RetinaFace face detection model.
 - [Object Detection for SSD C++ Demo](./object_detection_demo_ssd_async/README.md) - Demo application for SSD-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
 - [Object Detection for YOLO V3 C++ Demo](./object_detection_demo_yolov3_async/README.md) - Demo application for YOLOV3-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
 - [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/README.md) - Demo application for pedestrian tracking scenario.
@@ -71,7 +70,7 @@ The table below shows the correlation between models, demos, and supported plugi
 | person-reidentification-retail-0079              | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./python_demos/multi_camera_multi_target_tracking/README.md)                            | Supported | Supported | Supported   | Supported       |
 | person-vehicle-bike-detection-crossroad-0078     | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
 | person-vehicle-bike-detection-crossroad-1016 | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)                         | Supported |           |             |                 |
-| person-vehicle-bike-detection-crossroad-yolov3-1020 | [Object Detection for YOLO V3 Python\* Demo](./python_demos/object_detection_demo_yolov3_async/README.md) | Supported |           |             |                 |
+| person-vehicle-bike-detection-crossroad-yolov3-1020 | [Object Detection Python\* Demo](./python_demos/object_detection_demo/README.md) | Supported |           |             |                 |
 | human-pose-estimation-0001                       | [Human Pose Estimation Demo](./human_pose_estimation_demo/README.md)<br>[Human Pose Estimation Python\* Demo](./python_demos/human_pose_estimation_demo/README.md) | Supported | Supported | Supported   | Supported       |
 | human-pose-estimation-0002                       | [Human Pose Estimation Python\* Demo](./python_demos/human_pose_estimation_demo/README.md) | Supported | Supported |             |                 |
 | human-pose-estimation-0003                       | [Human Pose Estimation Python\* Demo](./python_demos/human_pose_estimation_demo/README.md) | Supported | Supported |             |                 |
@@ -116,7 +115,7 @@ The table below shows the correlation between models, demos, and supported plugi
 | road-segmentation-adas-0001                      | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
 | vehicle-detection-adas-binary-0001               | any demo that supports SSD\*-based models, above                                                               | Supported | Supported |             |                 |
 | vehicle-detection-adas-0002                      | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
-| yolo-v2-tiny-vehicle-detection-0001              | [Object Detection for YOLO V3 Python\* Demo](./python_demos/object_detection_demo_yolov3_async/README.md) | Supported |           |             |                 |
+| yolo-v2-tiny-vehicle-detection-0001              | [Object Detection Python\* Demo](./python_demos/object_detection_demo/README.md) | Supported |           |             |                 |
 
 
 Notice that the FPGA support comes through a [heterogeneous execution](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_HETERO.html), for example, when the post-processing is happening on the CPU.

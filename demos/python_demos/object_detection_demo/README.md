@@ -1,4 +1,4 @@
-# Object Detection Python* Demo
+# Object Detection Python\* Demo
 
 This demo showcases Object Detection with Sync and Async API.
 
