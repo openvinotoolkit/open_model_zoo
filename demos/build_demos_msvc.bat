@@ -37,7 +37,6 @@ if not "%1" == "" (
     rem to build more than one specific demo use quotation marks,
     rem list the necessary demos separated by space,
     rem ex. --target="classification_demo segmentation_demo"
-    :target
     if "%1" == "--target" (
         set EXTRA_CMAKE_BUILD_OPTS=%EXTRA_CMAKE_BUILD_OPTS% %1 %~2
         shift & shift
