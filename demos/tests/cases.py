@@ -197,7 +197,8 @@ NATIVE_DEMOS = [
         TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('object-detection-demo')}),
-            combine_cases(
+        [
+            *combine_cases(
                 TestCase(options={'-at': 'ssd'}),
                 single_option_cases('-m',
                     ModelArg('face-detection-adas-0001'),
@@ -213,12 +214,13 @@ NATIVE_DEMOS = [
                     ModelArg('vehicle-detection-adas-0002'),
                     ModelArg('vehicle-license-plate-detection-barrier-0106'),
                     ModelArg('pelee-coco'),
-                    ModelArg('vehicle-license-plate-detection-barrier-0123'))) +
-            combine_cases(
+                    ModelArg('vehicle-license-plate-detection-barrier-0123'))),
+            *combine_cases(
                 TestCase(options={'-at': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('yolo-v3-tf'),
-                    ModelArg('yolo-v3-tiny-tf')))
+                    ModelArg('yolo-v3-tiny-tf'))),
+        ],
         )
     ),
 
