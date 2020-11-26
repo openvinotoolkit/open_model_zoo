@@ -24,7 +24,7 @@ from .utils import DetectionWithLandmarks, resize_image
 
 class RetinaFace(Model):
     def __init__(self, ie, model_path, logger=None,
-                 threshold=0.5, mask_treshold=0.5):
+                 threshold=0.5, mask_threshold=0.5):
         super().__init__(ie, model_path, logger=logger)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
