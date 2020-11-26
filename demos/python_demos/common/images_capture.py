@@ -1,4 +1,5 @@
 import os
+import sys
 import copy
 
 import cv2
@@ -10,9 +11,6 @@ class InvalidInput(Exception):
     def __init__(self, message):
         InvalidInput.message = message
 
-    def __str__(self):
-        return 'InvalidInput'
-
 
 class OpenError(Exception):
     message = ''
@@ -20,25 +18,19 @@ class OpenError(Exception):
     def __init__(self, message):
         OpenError.message = message
 
-    def __str__(self):
-        return 'OpenError'
-
 
 class ImagesCapture:
 
     def __init__(self, loop):
         self.loop = loop
 
-    def get_type(self):
-        return self.type
-
     def read():
         raise NotImplementedError
 
-    def get_fps(self):
-        return 1
+    def fps():
+        raise NotImplementedError
 
-    def get_resolution():
+    def get_type():
         raise NotImplementedError
 
 
@@ -51,7 +43,6 @@ class ImreadWrapper(ImagesCapture):
         self.image = cv2.imread(input, cv2.IMREAD_COLOR)
         if self.image is None:
             raise OpenError("Can't open the image from {}".format(input))
-        self.type = 'IMAGE'
         self.can_read = True
 
     def read(self):
@@ -62,9 +53,11 @@ class ImreadWrapper(ImagesCapture):
             return copy.deepcopy(self.image)
         return None
 
-    def get_resolution(self):
-        height, width, _ = self.image.shape
-        return (width, height)
+    def fps(self):
+        return 1.0
+
+    def get_type(self):
+        return 'IMAGE'
 
 
 class DirReader(ImagesCapture):
@@ -78,7 +71,6 @@ class DirReader(ImagesCapture):
         if not self.names:
             raise OpenError("The dir {} is empty".format(input))
         self.file_id = 0
-        self.type = 'DIR'
         for name in self.names:
             filename = os.path.join(self.dir, name)
             image = cv2.imread(filename, cv2.IMREAD_COLOR)
@@ -103,13 +95,11 @@ class DirReader(ImagesCapture):
                     return image
         return None
 
-    def get_resolution(self):
-        for name in self.names:
-            filename = os.path.join(self.dir, name)
-            image = cv2.imread(filename, cv2.IMREAD_COLOR)
-            if image is not None:
-                height, width, _ = image.shape
-                return (width, height)
+    def fps(self):
+        return 1.0
+
+    def get_type(self):
+        return 'DIR'
 
 
 class VideoCapWrapper(ImagesCapture):
@@ -142,25 +132,26 @@ class VideoCapWrapper(ImagesCapture):
                 return None
         return image
 
-    def get_fps(self):
+    def fps(self):
         return self.cap.get(cv2.CAP_PROP_FPS)
 
-    def get_resolution(self):
-        return (int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    def get_type(self):
+        return self.type
 
 
 def open_images_capture(input, loop, camera_resolution=(1280, 720)):
-    errors = {'InvalidInput': [], 'OpenError': []}
-    for idx, reader in enumerate((DirReader, ImreadWrapper, VideoCapWrapper)):
+    errors = {InvalidInput: [], OpenError: []}
+    for reader in (ImreadWrapper, DirReader):
         try:
-            if idx != 2:
-                return reader(input, loop)
-            return reader(input, loop, camera_resolution)
+            return reader(input, loop)
         except (InvalidInput, OpenError) as e:
-            errors[str(e)].append(e.message)
-    if not errors['OpenError']:
-        print(*errors['InvalidInput'], sep='\n')
+            errors[type(e)].append(e.message)
+    try:
+        return VideoCapWrapper(input, loop, camera_resolution)
+    except (InvalidInput, OpenError) as e:
+        errors[type(e)].append(e.message)
+    if not errors[OpenError]:
+        print(*errors[InvalidInput], file=sys.stderr, sep='\n')
     else:
-        print(*errors['OpenError'], sep='\n')
-    exit(1)
+        print(*errors[OpenError], file=sys.stderr, sep='\n')
+    sys.exit(1)
