@@ -155,7 +155,10 @@ instances, thus faster than previous, because network runs once.
 
 | Model Name                                                                                                                 | Complexity (GFLOPs)  | Size (Mp)       |
 |----------------------------------------------------------------------------------------------------------------------------|--------------------- |---------------- |
-| [human-pose-estimation-0001](./human-pose-estimation-0001/description/human-pose-estimation-0001.md)                       | 15.435               | 4.099      |
+| [human-pose-estimation-0001](./human-pose-estimation-0001/description/human-pose-estimation-0001.md)                       | 15.435               | 4.099           |
+| [human-pose-estimation-0002](./human-pose-estimation-0002/description/human-pose-estimation-0002.md)                       | 5.9393               | 8.1504          |
+| [human-pose-estimation-0003](./human-pose-estimation-0003/description/human-pose-estimation-0003.md)                       | 8.8720               | 8.1504          |
+| [human-pose-estimation-0004](./human-pose-estimation-0004/description/human-pose-estimation-0004.md)                       | 14.3707              | 8.1504          |
 
 ## Image Processing
 
