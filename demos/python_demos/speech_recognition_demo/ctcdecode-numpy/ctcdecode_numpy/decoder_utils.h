@@ -24,7 +24,7 @@
 
 const float NUM_FLT_INF  = std::numeric_limits<float>::max();
 const float NUM_FLT_MIN  = std::numeric_limits<float>::min();
-const float NUM_FLT_LOGE = 0.4342944819;
+const float NUM_FLT_LOGE = 0.4342944819f;
 
 // inline function for validation check
 inline void check(

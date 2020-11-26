@@ -10,9 +10,6 @@ Transfer and Super-Resolution](https://arxiv.org/abs/1603.08155) along with
 models are provided in the [repository](https://github.com/onnx/models).
 
 
-## Example
-
-
 ## Specification
 
 | Metric            | Value            |
@@ -29,8 +26,6 @@ Accuracy metrics are obtained on MS COCO val2017 dataset. Images were resized to
 | Metric | Original model | Converted model (FP32) | Converted model (FP16) |
 | ------ | -------------- | ---------------------- | ---------------------- |
 | PSNR   | 12.03dB        | 12.03dB                | 12.04dB                |
-
-## Performance
 
 ## Input
 

@@ -27,8 +27,6 @@ Video frames should be sampled to cover ~1 second fragment (i.e. skip every seco
 | MParams                         | 21.276                                    |
 
 
-### Performance
-
 ### Inputs
 
 1. name: "0", shape: [1x3x224x224] - An input image in the format [BxCxHxW],
@@ -54,8 +52,6 @@ The action-recognition-0001-decoder model accepts stack of frame embeddings, com
 | GFlops                          | 0.147                                     |
 | MParams                         | 4.405                                     |
 
-
-### Performance
 
 ### Inputs
 

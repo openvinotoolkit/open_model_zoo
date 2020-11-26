@@ -101,6 +101,17 @@ datasets:
     annotation: mscoco_det_80_bkgr.pickle
     dataset_meta: mscoco_det_80_bkgr.json
 
+  - name: ms_coco_detection_90_class_without_background
+    data_source: MSCOCO/val2017
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: MSCOCO/annotations/instances_val2017.json
+      has_background: False
+      sort_annotations: True
+      use_full_label_map: True
+    annotation:  mscoco_det_90.pickle
+    dataset_meta:  mscoco_det_90.json
+
   - name: ms_coco_keypoints
     data_source: val2017
     annotation_conversion:
@@ -209,6 +220,15 @@ datasets:
       data_dir: Mapillary_20
     annotation: mapillary_20.pickle
     dataset_meta: mapillary_20.json
+
+  - name: mapillary_vistas
+    data_source: mapillary_vistas/validation/images
+    segmentation_masks_source: mapillary_vistas/validation/labels
+    annotation_conversion:
+      converter: mapillary_vistas
+      data_dir: mapillary_vistas/validation
+    annotation: mapillary_vistas.pickle
+    dataset_meta: mapillary_vistas.json
 
   - name: wider
     data_source: WIDER_val/images
@@ -906,7 +926,7 @@ datasets:
       masks_dir: free_form_masks/masks_2k
     annotation: inpainting_voc12_masks2k.pickle
 
-  - name: inpainting_rect_mask
+  - name: inpainting_rect_masks
     data_source: VOCdevkit/VOC2012/JPEGImages/
     annotation_conversion:
       converter: inpainting
@@ -1045,3 +1065,38 @@ datasets:
       object_categories_file: ADEChallengeData2016/objectInfo150.txt
     data_source: ADEChallengeData2016/images/validation
     segmentation_masks_source: ADEChallengeData2016/annotations/validation
+
+  - name: antispoof_test_data
+    data_source: antispoof_test_data
+    annotation_conversion:
+      converter: antispoofing
+      data_dir: antispoof_test_data
+      annotation_file: antispoof_test_data/metas/intra_test/items_test.json
+      label_id: 43
+    annotation: antispoofing.pickle
+    dataset_meta: antispoofing.json
+
+  - name: sound_classification
+    data_source: audio_dataset
+    annotation_conversion:
+      converter: sound_classification
+      annotation_file: audio_dataset/validation.csv
+      audio_dir: audio_dataset/data
+    annotation: sound_classification.pickle
+    reader: wav_reader
+
+  - name: cocosnet_image_translation
+    annotation_conversion:
+      converter: ade20k_image_translation
+      annotations_dir: ADEChallengeData2016/annotations
+      reference_file: cocosnet_ade20k_ref_test.txt
+    data_source: ADEChallengeData2016
+    additional_data_source: ADEChallengeData2016/images
+
+  - name: lfw_bin
+    data_source: lfw_bin/images
+    annotation_conversion:
+      converter: face_recognition_bin
+      bin_file:  lfw_bin/lfw.bin
+      images_dir: lfw_bin/images
+      convert_images: True

@@ -23,7 +23,8 @@ from .classification import (
     ClipAccuracy,
     ClassificationF1Score,
     MetthewsCorrelation,
-    RocAucScore
+    RocAucScore,
+    AcerScore,
 )
 from .detection import (
     DetectionMAP,
@@ -86,7 +87,7 @@ from .coco_orig_metrics import (
 )
 from .hit_ratio import HitRatioMetric, NDSGMetric
 from .machine_translation import BilingualEvaluationUnderstudy
-from .question_answering import ExactMatchScore, ScoreF1, QuestionAnsweringEmbeddingAccurcay
+from .question_answering import ExactMatchScore, ScoreF1, QuestionAnsweringEmbeddingAccuracy
 from .mpjpe_multiperson import MpjpeMultiperson
 from .language_modeling import ScorePerplexity
 
@@ -102,6 +103,9 @@ from .score_class_comparison import ScoreClassComparisonMetric
 from .dna_seq_accuracy import DNASequenceAccuracy
 
 from .gan_metrics import InceptionScore, FrechetInceptionDistance
+
+from .salient_objects_detection import SalienceMapMAE, SalienceEMeasure, SalienceMapFMeasure, SalienceSMeasure
+
 __all__ = [
     'Metric',
     'MetricsExecutor',
@@ -177,7 +181,7 @@ __all__ = [
 
     'ScoreF1',
     'ExactMatchScore',
-    'QuestionAnsweringEmbeddingAccurcay',
+    'QuestionAnsweringEmbeddingAccuracy',
 
     'MpjpeMultiperson',
 
@@ -202,4 +206,10 @@ __all__ = [
 
     'InceptionScore',
     'FrechetInceptionDistance',
+
+    'AcerScore',
+
+    'SalienceMapMAE',
+    'SalienceMapFMeasure',
+    'SalienceEMeasure'
 ]

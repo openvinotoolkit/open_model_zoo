@@ -18,9 +18,9 @@ namespace yoklm {
 typedef uint64_t WordHash;
 
 struct VocabularyConfig {
-  int num_words;  // the number of tokens in vocabulary, initialized with counts[0]
+  size_t num_words;  // the number of tokens in vocabulary, initialized with counts[0]
   MemorySectionArray<WordHash> word_hashes;  // sorted
-  int num_word_strings;  // the number of tokens presented as strings. It can be 0 or num_words
+  size_t num_word_strings;  // the number of tokens presented as strings. It can be 0 or num_words
   MemorySectionArray<char> word_strings;
 };
 

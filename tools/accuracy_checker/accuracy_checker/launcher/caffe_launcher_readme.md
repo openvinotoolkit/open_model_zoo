@@ -19,6 +19,7 @@ Each input description should has following info:
     * `IMAGE_INFO` - specific key for setting information about input shape to layer (used in Faster RCNN based topologies). You do not need provide `value`, because it will be calculated in runtime. Format value is `Nx[H, W, S]`, where `N` is batch size, `H` - original image height, `W` - original image width, `S` - scale of original image (default 1).
     * `ORIG_IMAGE_INFO` - specific key for setting information about original image size before preprocessing.
     * `INPUT` - network input for main data stream (e. g. images). If you have several data inputs, you should provide regular expression for identifier as `value` for specifying which one data should be provided in specific input.
+    * `IGNORE_INPUT` - input which should be stayed empty during evaluation.
     Optionally you can determine `shape` of input (actually does not used, Caffe launcher uses info given from network), `layout` in case when your model was trained with non-standard data layout (For Caffe default layout is `NCHW`).
     and `precision` (Supported precisions: `FP32` - float, `FP16` - signed shot, `U8`  - unsigned char, `U16` - unsigned short int, `I8` - signed char, `I16` - short int, `I32` - int, `I64` - long int).
 

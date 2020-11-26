@@ -16,6 +16,7 @@ limitations under the License.
 
 import warnings
 import math
+from collections import OrderedDict
 from functools import singledispatch
 import numpy as np
 
@@ -40,7 +41,9 @@ from ..representation import (
     StyleTransferPrediction,
     FeaturesRegressionAnnotation,
     PoseEstimationAnnotation,
-    PoseEstimationPrediction
+    PoseEstimationPrediction,
+    OpticalFlowAnnotation,
+    OpticalFlowPrediction
 )
 
 from .metric import PerImageEvaluationMetric
@@ -66,6 +69,15 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
 
     def update(self, annotation, prediction):
         diff = self.calculate_diff(annotation, prediction)
+        if isinstance(diff, dict):
+            if not self.magnitude:
+                self.magnitude = OrderedDict()
+            for key, difference in diff.items():
+                v_mag = self.magnitude.get(key, [])
+                v_mag.append(difference)
+                self.magnitude[key] = v_mag
+            return np.mean(next(iter(diff.values())))
+
         if self.profiler:
             if isinstance(annotation, RegressionAnnotation):
                 ann_value, pred_value = annotation.value, prediction.value
@@ -79,6 +91,22 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         return diff
 
     def _calculate_diff_regression_rep(self, annotation, prediction):
+        if isinstance(annotation.value, dict):
+            if not isinstance(prediction.value, dict):
+                if len(annotation.value) != 1:
+                    raise ConfigError('both annotation and prediction should be dict-like in case of multiple outputs')
+                return self.value_differ(next(iter(annotation.value.values())), prediction.value)
+            diff_dict = OrderedDict()
+            for key in annotation.value:
+                diff = self.value_differ(annotation.value[key], prediction.value[key])
+                if np.ndim(diff) > 1:
+                    diff = np.mean(diff)
+                diff_dict[key] = diff
+            return diff_dict
+        if isinstance(prediction.value, dict):
+            if len(prediction.value) != 1:
+                raise ConfigError('annotation for all predictions should be provided')
+            return self.value_differ(annotation.value, next(iter(prediction.value.values())))
         return self.value_differ(annotation.value, prediction.value)
 
     def _calculate_diff_depth_estimation_rep(self, annotation, prediction):
@@ -93,6 +121,14 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         if self.profiler:
             self.profiler.finish()
+        if isinstance(self.magnitude, dict):
+            names, result = [], []
+            for key, values in self.magnitude.items():
+                names.extend(['{}@mean'.format(key), '{}@std'.format(key)])
+                result.extend([np.mean(values), np.std(values)])
+            self.meta['names'] = names
+            return result
+
         return np.mean(self.magnitude), np.std(self.magnitude)
 
     def reset(self):
@@ -676,3 +712,14 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
     def reset(self):
         self.jnt_count = np.zeros(self.num_joints)
         self.pck = np.zeros(self.num_joints)
+
+
+class EndPointError(BaseRegressionMetric):
+    __provider__ = 'epe'
+    annotation_types = (OpticalFlowAnnotation, )
+    prediction_types = (OpticalFlowPrediction, )
+
+    def __init__(self, *args, **kwargs):
+        def l2_diff(ann_value, pred_value):
+            return np.mean(np.linalg.norm(ann_value - pred_value, ord=2, axis=2))
+        super().__init__(l2_diff, *args, **kwargs)

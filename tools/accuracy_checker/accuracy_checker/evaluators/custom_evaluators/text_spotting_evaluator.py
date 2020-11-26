@@ -29,6 +29,11 @@ from ...progress_reporters import ProgressReporter
 from ...logging import print_info
 
 
+def softmax(x):
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum()
+
+
 class TextSpottingEvaluator(BaseEvaluator):
     def __init__(self, dataset_config, launcher, model):
         self.dataset_config = dataset_config
@@ -386,6 +391,7 @@ class SequentialModel:
         self.alphabet = network_info['alphabet']
         self.sos_index = int(network_info['sos_index'])
         self.eos_index = int(network_info['eos_index'])
+        self.confidence_threshold = float(network_info.get('recognizer_confidence_threshold', '0'))
         self.with_prefix = False
         self._part_by_name = {
             'detector': self.detector,
@@ -421,6 +427,7 @@ class SequentialModel:
 
             text = str()
 
+            confidence = 1.0
             for _ in range(self.max_seq_len):
                 input_to_decoder = {
                     self.recognizer_decoder_inputs['prev_symbol']: prev_symbol_index,
@@ -429,16 +436,17 @@ class SequentialModel:
                 decoder_outputs = self.recognizer_decoder.predict(identifiers, input_to_decoder)
                 if callback:
                     callback(decoder_outputs)
-                coder_output = decoder_outputs[self.recognizer_decoder_outputs['symbols_distribution']]
-                prev_symbol_index = np.argmax(coder_output, axis=1)
+                decoder_output = decoder_outputs[self.recognizer_decoder_outputs['symbols_distribution']]
+                softmaxed = softmax(decoder_output[0])
+                prev_symbol_index = np.argmax(decoder_output, axis=1)
+                confidence *= softmaxed[prev_symbol_index]
                 if prev_symbol_index == self.eos_index:
                     break
                 hidden = decoder_outputs[self.recognizer_decoder_outputs['cur_hidden']]
                 text += self.alphabet[int(prev_symbol_index)]
-            texts.append(text)
+            texts.append(text if confidence >= self.confidence_threshold else '')
 
         texts = np.array(texts)
-
         detector_outputs['texts'] = texts
         output = self.adapter.process(detector_outputs, identifiers, frame_meta)
         return detector_outputs, output
@@ -509,19 +517,24 @@ class DetectorDLSDKModel(BaseModel):
                 OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
                 if has_info else self.exec_network.inputs
             )
-            self.im_info_name = [x for x in input_info if len(input_info[x].shape) == 2][0]
+            self.im_info_name = [x for x in input_info if len(input_info[x].shape) == 2]
+            if self.im_info_name:
+                self.im_info_name = self.im_info_name[0]
+                self.text_feats_out = 'text_features'
+            else:
+                self.text_feats_out = 'text_features.0'
             self.im_data_name = [x for x in input_info if len(input_info[x].shape) == 4][0]
-        self.text_feats_out = 'text_features'
 
     def predict(self, identifiers, input_data):
-
         input_data = np.array(input_data)
         assert len(input_data.shape) == 4
         assert input_data.shape[0] == 1
 
-        input_data = {self.im_data_name: self.fit_to_input(input_data),
-                      self.im_info_name: np.array(
-                          [[input_data.shape[1], input_data.shape[2], 1.0]])}
+        if self.im_info_name:
+            input_data = {self.im_data_name: self.fit_to_input(input_data),
+                          self.im_info_name: np.array([[input_data.shape[1], input_data.shape[2], 1.0]])}
+        else:
+            input_data = {self.im_data_name: self.fit_to_input(input_data)}
 
         output = self.exec_network.infer(input_data)
 
@@ -554,8 +567,13 @@ class DetectorDLSDKModel(BaseModel):
             OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
             if has_info else self.exec_network.inputs
         )
-        self.im_info_name = [x for x in input_info if len(input_info[x].shape) == 2][0]
         self.im_data_name = [x for x in input_info if len(input_info[x].shape) == 4][0]
+        self.im_info_name = [x for x in input_info if len(input_info[x].shape) == 2]
+        if self.im_info_name:
+            self.im_info_name = self.im_info_name[0]
+            self.text_feats_out = 'text_features'
+        else:
+            self.text_feats_out = 'text_features.0'
         if log:
             self.print_input_output_info()
 

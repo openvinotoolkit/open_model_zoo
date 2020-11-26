@@ -45,6 +45,8 @@ from .segmentation_representation import (
     CoCoInstanceSegmentationAnnotation,
     CoCocInstanceSegmentationPrediction,
     OAR3DTilingSegmentationAnnotation,
+    SalientRegionAnnotation,
+    SalientRegionPrediction
 )
 from .character_recognition_representation import (
     CharacterRecognition,
@@ -90,6 +92,9 @@ from .quality_assessment import QualityAssessmentAnnotation, QualityAssessmentPr
 from .dna_sequence import DNASequenceAnnotation, DNASequencePrediction
 
 from .raw_representation import RawTensorAnnotation, RawTensorPrediction
+
+from .optical_flow import OpticalFlowAnnotation, OpticalFlowPrediction
+
 __all__ = [
     'BaseRepresentation',
 
@@ -115,6 +120,9 @@ __all__ = [
     'SegmentationRepresentation',
     'SegmentationAnnotation',
     'SegmentationPrediction',
+
+    'SalientRegionAnnotation',
+    'SalientRegionPrediction',
 
     'BrainTumorSegmentationAnnotation',
     'BrainTumorSegmentationPrediction',
@@ -184,6 +192,10 @@ __all__ = [
 
     'DNASequenceAnnotation',
     'DNASequencePrediction',
+
     'RawTensorAnnotation',
     'RawTensorPrediction',
+
+    'OpticalFlowAnnotation',
+    'OpticalFlowPrediction',
 ]

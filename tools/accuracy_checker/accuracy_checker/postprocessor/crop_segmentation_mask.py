@@ -66,11 +66,11 @@ class CropSegmentationMask(PostprocessorWithSpecificTargets):
         def _(entry, height, width, volume):
             shape = len(entry.mask.shape)
             if shape == 2:
-                entry.mask = Crop.process_data(entry.mask, height, width, None, False, True, {})
+                entry.mask = Crop.process_data(entry.mask, height, width, None, False, False, True, {})
             elif shape == 3:
                 entry_mask = []
                 for class_mask in entry.mask:
-                    mask_channel = Crop.process_data(class_mask, height, width, None, False, True, {})
+                    mask_channel = Crop.process_data(class_mask, height, width, None, False, False, True, {})
                     entry_mask.append(mask_channel)
                 entry.mask = np.array(entry_mask)
             else:

@@ -61,6 +61,7 @@ KNOWN_TASK_TYPES = {
     'human_pose_estimation',
     'image_inpainting',
     'image_processing',
+    'image_translation',
     'instance_segmentation',
     'machine_translation',
     'monocular_depth_estimation',
@@ -72,6 +73,7 @@ KNOWN_TASK_TYPES = {
     'speech_recognition',
     'style_transfer',
     'token_recognition',
+    'text_to_speech',
 }
 
 KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}
@@ -446,7 +448,7 @@ class PostprocUnpackArchive(Postproc):
 
         reporter.print_section_heading('Unpacking {}', postproc_file)
 
-        shutil.unpack_archive(str(postproc_file), str(output_dir), self.format)
+        shutil.unpack_archive(str(postproc_file), str(output_dir / postproc_file.parent), self.format)
         postproc_file.unlink()  # Remove the archive
 
 Postproc.types['unpack_archive'] = PostprocUnpackArchive

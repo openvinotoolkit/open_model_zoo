@@ -7,8 +7,6 @@ The model has been trained from the Common Objects in Context (COCO) image datas
 For details see the [repository](https://github.com/tensorflow/models/tree/master/research/object_detection)
 and [paper](https://arxiv.org/abs/1708.02002).
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -23,8 +21,6 @@ and [paper](https://arxiv.org/abs/1708.02002).
 | Metric | Value |
 | ------ | ----- |
 | coco_precision | 38.4557% |
-
-## Performance
 
 ## Input
 

@@ -4,8 +4,6 @@
 
 `mobilenet-v1-0.50-224` is one of MobileNets - small, low-latency, low-power models parameterized to meet the resource constraints of a variety of use cases. They can be built upon for classification, detection, embeddings and segmentation similar to how other popular large scale models are used. For details, see [paper](https://arxiv.org/abs/1704.04861).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -21,8 +19,6 @@
 | ------ | ----- |
 | Top 1  | 63.042%|
 | Top 5  | 84.934%|
-
-## Performance
 
 ## Input
 

@@ -278,7 +278,7 @@ AccuracyChecker supports following set of adapters:
   * `max_detections` - maximum detection used for metrics calculation (Optional, default 100).
 * `class_agnostic_detection` - converting 'boxes' [n, 5] output of detection model to `DetectionPrediction` representation.
   * `output_blob` - name of output layer with bboxes.
-  * `scale` - scalar value to normalize bbox coordinates.
+  * `scale` - scalar value or list with 2 values to normalize bbox coordinates.
 * `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.
 * `inpainting` - converting output of Image Inpainting model to `ImageInpaintingPrediction` representation.
 * `style_transfer` - converting output of Style Transfer model to `StyleTransferPrediction` representation.
@@ -302,10 +302,12 @@ AccuracyChecker supports following set of adapters:
     * `window_lengths` - Window lengths for each base output layer.
 * `face_detection_refinement` - converts output of face detection refinement model to `DetectionPrediction` representation. Adapter refines candidates generated in previous stage model.
     * `threshold` - Score threshold to determine as valid face candidate.
-* `attribute_classification` - converts output of attributes classifcation model to `ContainerPrediction` which contains multiple `ClassificationPrediction` for attributes with their scores.
+* `attribute_classification` - converts output of attributes classification model to `ContainerPrediction` which contains multiple `ClassificationPrediction` for attributes with their scores.
     * `output_layer_map` - dictionary where keys are output layer names of attribute classification model and values are the names of attributes.
 * `regression` - converting output of regression model to `RegressionPrediction` representation.
     * `keep_shape` - allow keeping shape of predicted multi dimension array (Optional, default False).
+* `multi_output_regression` - converting raw output features to `RegressionPrediction` for regression with gt data.
+  * `output` - list of target output names.
 * `mixed` - converts outputs of any model to `ContainerPrediction` which contains multiple types of predictions.
     * `adapters` - Dict where key is output name and value is adapter config map including `output_blob` key to associate the output of model and this adapter.
 * `person_vehilce_detection_refinement` - converts output of person vehicle detection refinement model to `DetectionPrediction` representation. Adapter refines proposals generated in previous stage model.
@@ -324,3 +326,10 @@ AccuracyChecker supports following set of adapters:
 * `dna_seq_beam_search` - converts output of DNA sequencing model to `DNASequencePrediction` using beam search decoding.
   * `beam_size` - beam size for CTC Beam Search (Optional, default 5).
   * `threshold` - beam cut threshold (Optional, default 1e-3).
+* `pwcnet` - converts output of PWCNet network to `OpticalFlowPrediction`.
+  * `flow_out` - target output layer name.
+* `salient_object_detection` - converts output of salient object detection model to `SalientRegionPrediction`
+  * `salient_map_output` - target output layer for getting salience map (Optional, if not provided default output blob will be used).
+* `two_stage_detection` - converts output of 2-stage detector to `DetectionPrediction`.
+  * `boxes_out` - output with bounding boxes in format BxNx[x_min, y_min, width, height], where B - network batch size, N - number of detected boxes.
+  * `cls_out` - output with classification probabilities in format [BxNxC], where B - network batch size, N - number of detected boxes, C - number of classed.

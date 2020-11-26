@@ -33,8 +33,6 @@ The accuracy of gaze direction prediction is evaluated through the use of [MAE](
 | Internal dataset | 6.95 | 3.58 |
 
 
-## Performance
-
 ## Inputs
 
 * Blob in the format [BxCxHxW]

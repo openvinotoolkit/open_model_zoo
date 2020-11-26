@@ -4,8 +4,6 @@
 
 The `inception-resnet-v2` model is one of the Inception family of models designed to perform image classification. For details about this family of models, check out the [paper](https://arxiv.org/abs/1602.07261).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -21,8 +19,6 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 | ------ | ----- |
 | Top 1  | 80.14% |
 | Top 5  | 95.10% |
-
-## Performance
 
 ## Input
 

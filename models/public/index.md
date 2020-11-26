@@ -12,6 +12,7 @@ The models can be downloaded via Model Downloader
 | Model Name                  | Implementation                     | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------- | -----------------------------------| -------------- | -------- | ------ | ------- |
 | AlexNet                     | Caffe\*                            | [alexnet](./alexnet/alexnet.md)   | 56.598%/79.812% | 1.5 | 60.965 |
+| AntiSpoofNet                | PyTorch\*                          | [anti-spoof-mn3](./anti-spoof-mn3/anti-spoof-mn3.md) | 3.81% | 0.15 | 3.02 |
 | CaffeNet                    | Caffe\*                            | [caffenet](./caffenet/caffenet.md)  | 56.714%/79.916% | 1.5 | 60.965 |
 | DenseNet 121                | Caffe\*<br>TensorFlow\*<br>Caffe2\*| [densenet-121](./densenet-121/densenet-121.md)<br>[densenet-121-tf](./densenet-121-tf/densenet-121-tf.md)<br>[densenet-121-caffe2](./densenet-121-caffe2/densenet-121-caffe2.md) | 74.42%/92.136%<br>74.29%/91.98% <br>74.904%/92.192% | 5.289~5.724    | 7.971 |
 | DenseNet 161                | Caffe\*<br>TensorFlow\*            | [densenet-161](./densenet-161/densenet-161.md)<br>[densenet-161-tf](./densenet-161-tf/densenet-161-tf.md) | 77.55%/93.92%<br>76.446%/93.228%| 14.128~15.561  | 28.666 |
@@ -27,7 +28,7 @@ The models can be downloaded via Model Downloader
 | HBONet 0.25                 | PyTorch\*                          | [hbonet-0.25](./hbonet-0.25/hbonet-0.25.md) | 57.3%/79.8% | 0.0758 | 1.9299 |
 | Inception (GoogleNet) V1    | Caffe\*<br>TensorFlow\*            | [googlenet-v1](./googlenet-v1/googlenet-v1.md)<br>[googlenet-v1-tf](./googlenet-v1-tf/googlenet-v1-tf.md) | 68.928%/89.144%<br>69.814%/89.6% | 3.016~3.266 | 6.619~6.999 |
 | Inception (GoogleNet) V2    | Caffe\*<br>TensorFlow\*            | [googlenet-v2](./googlenet-v2/googlenet-v2.md)<br>[googlenet-v2-tf](./googlenet-v2-tf/googlenet-v2-tf.md) | 72.024%/90.844%<br>74.084%/91.798%| 4.058 | 11.185 |
-| Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/googlenet-v3.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | 77.904%/93.808%<br>77.696%/93.696% | 11.469 | 23.817 |
+| Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/googlenet-v3.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | 77.904%/93.808%<br>77.69%/93.7% | 11.469 | 23.817 |
 | Inception (GoogleNet) V4    | TensorFlow\*                       | [googlenet-v4-tf](./googlenet-v4-tf/googlenet-v4-tf.md) | 80.204%/95.21% | 24.584 | 42.648 |
 | Inception-ResNet V2         | TensorFlow\*                       | [inception-resnet-v2-tf](./inception-resnet-v2-tf/inception-resnet-v2-tf.md) | 80.14%/95.10% | 22.227 | 30.223 |
 | MobileNet V1 0.25 128       | Caffe\*                            | [mobilenet-v1-0.25-128](./mobilenet-v1-0.25-128/mobilenet-v1-0.25-128.md)  | 40.54%/65% | 0.028 | 0.468 |
@@ -111,6 +112,8 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | CTPN                                 | TensorFlow\*             | [ctpn](./ctpn/ctpn.md) | 73.67% | 55.813 | 17.237 |
 | CenterNet (CTDET with DLAV0) 384x384 | ONNX\*                   | [ctdet_coco_dlav0_384](./ctdet_coco_dlav0_384/ctdet_coco_dlav0_384.md)| 41.6105%| 34.994 | 17.911 |
 | CenterNet (CTDET with DLAV0) 512x512 | ONNX\*                   | [ctdet_coco_dlav0_512](./ctdet_coco_dlav0_512/ctdet_coco_dlav0_512.md)| 44.2756%| 62.211 | 17.911 |
+| EfficientDet-D0                      | TensorFlow\*             | [efficientdet-d0-tf](./efficientdet-d0-tf/efficientdet-d0-tf.md)| 31.95% | 2.54 | 3.9 |
+| EfficientDet-D1                      | TensorFlow\*             | [efficientdet-d1-tf](./efficientdet-d1-tf/efficientdet-d1-tf.md)| 37.54% | 6.1 | 6.6 |
 | FaceBoxes                            | PyTorch\*                | [faceboxes-pytorch](./faceboxes-pytorch/faceboxes-pytorch.md)|83.565% | 1.8975 | 1.0059 |
 | Faster R-CNN with Inception-ResNet v2| TensorFlow\*             | [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/faster_rcnn_inception_resnet_v2_atrous_coco.md)| 36.76%/52.41% | 30.687 | 13.307 |
 | Faster R-CNN with Inception v2       | TensorFlow\*             | [faster_rcnn_inception_v2_coco](./faster_rcnn_inception_v2_coco/faster_rcnn_inception_v2_coco.md) | 25.65%/40.04%| 30.687 | 13.307 |
@@ -224,6 +227,14 @@ The task of speech recognition is to recognize and translate spoken language int
 | Model Name        | Implementation | OMZ Model Name                                               | Accuracy | GFlops | mParams |
 | ----------------- | -------------- | ------------------------------------------------------------ | -------- | ------ | ------- |
 | DeepSpeech V0.6.1 | TensorFlow\*   | [mozilla-deepspeech-0.6.1](./mozilla-deepspeech-0.6.1/mozilla-deepspeech-0.6.1.md) | 7.55%    | 0.0472 | 47.2    |
+
+## Image Translation
+
+The task of image translation is to generate the output based on exemplar.
+
+| Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops    | mParams  |
+| -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
+| CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/cocosnet.md) | 12.93dB  | 1080.7032 | 167.9141 |
 
 ## Legal Information
 

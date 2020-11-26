@@ -24,7 +24,8 @@ from .color_space_conversion import (
     BGR2YUVConverter, RGB2YUVConverter,
     BGRtoNV12Converter, RGBtoNV12Converter,
     NV12toBGRConverter, NV12toRGBConverter,
-    RGB2YCrCbConverter, BGR2YCrCbConverter
+    RGB2YCrCbConverter, BGR2YCrCbConverter,
+    BGRToLAB, RGBToLAB
 )
 from .audio_preprocessing import (
     ResampleAudio,
@@ -59,6 +60,7 @@ from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 from .centernet_preprocessing import CenterNetAffineTransformation
 from .brats_preprocessing import Resize3D, NormalizeBrats, CropBraTS, SwapModalitiesBrats
 from .inpainting_preprocessor import FreeFormMask, RectMask, CustomMask
+from .one_hot_encoding import OneHotEncoding
 
 __all__ = [
     'PreprocessingExecutor',
@@ -93,6 +95,8 @@ __all__ = [
     'RgbToGray',
     'RgbToBgr',
     'BGR2YUVConverter',
+    'BGRToLAB',
+    'RGBToLAB',
     'TfConvertImageDType',
     'SelectInputChannel',
     'CropOrPad',
@@ -120,4 +124,5 @@ __all__ = [
     'CustomMask',
     'RGB2YCrCbConverter',
     'BGR2YCrCbConverter',
+    'OneHotEncoding'
 ]

@@ -8,8 +8,6 @@ The model input is a blob that consists of a single image of 1x3x300x300 in RGB 
 
 The model output is a typical vector containing the tracked object data, as previously described. Note that the "class_id" data is now significant and should be used to determine the classification for any detected object.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -24,8 +22,6 @@ The model output is a typical vector containing the tracked object data, as prev
 | Metric | Value |
 | ------ | ----- |
 | coco_precision | 24.9452%|
-
-## Performance
 
 ## Input
 

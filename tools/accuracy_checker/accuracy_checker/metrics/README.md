@@ -25,6 +25,7 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
 * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
 * `metthews_correlation_coef` - [Matthews correlation coefficient (MCC)](https://en.wikipedia.org/wiki/Matthews_correlation_coefficient) for binary classification. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
 * `roc_auc_score` - [ROC AUC score](https://en.wikipedia.org/wiki/Receiver_operating_characteristic) for binary classification. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction` `ArgMaxClassificationPrediction`.
+* `acer_score` - metric for the classification tasks. Can be obtained from the following formula: `ACER = (APCER + BPCER)/2 = ((fp / (tn + fp)) + (fn / (fn + tp)))/2`. For more details about metrics see the section 9.3: <https://arxiv.org/pdf/2007.12342.pdf>. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
 * `map` - mean average precision. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
   * `overlap_method` - method for calculation bbox overlap. You can choose between intersection over union (`iou`), defined as area of intersection divided by union of annotation and prediction boxes areas, and intersection over area (`ioa`), defined as area of intersection divided by ara of prediction box.
@@ -225,11 +226,16 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
   * `min_coverage` - minimum sequence coverage between predicted sequence and reference for positive measurement (Optional, default 0.5).
   * `balansed` - balanced accuracy metric (Optional, default false).
 * `inception_score` - [Inception score](https://arxiv.org/pdf/1801.01973) for generated images by GAN models. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
-  * `eps` - epsilon to avoid nan during calculate log for metric
-  * `length` - length of input feature vector for metric
+  * `eps` - epsilon to avoid nan during calculate log for metric.
+  * `length` - length of input feature vector for metric.
 * `fid` - Frechet Inception Distance to measure the distance between the distributions of synthesized images and real images. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
-  * `eps` - epsilon to avoid nan during calculate sqrtm for metric
-  * `length` - length of input feature vector for metric
+  * `eps` - epsilon to avoid nan during calculate sqrtm for metric.
+  * `length` - length of input feature vector for metric.
+* `epe` - Average End Point Error (EPE) metric for optical flow estimation task, defined as Euclidean distance between ground truth and predicted flow. Supported representations: `OpticalFlowAnnotation`, `OpticalFlowPrediction`.
+* `salience_mae` - Mean Absolute Error for salient object detection task. Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
+* `salience_f-measure` - f-measure metric for salient object detection task. Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
+* `salience_e-measure` - enhanced alignment measure for salient object detection task, defined in following [paper](https://arxiv.org/abs/1805.10421). Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
+* `salience_s-measure` - simularity measure for salient object detection task, defined in following [paper](https://arxiv.org/abs/1708.00786). Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
 
 ## Metrics profiling
 Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.

@@ -117,6 +117,10 @@ class RectMask(Preprocessor):
 
     def configure(self):
         self.mask_height, self.mask_width = get_size_from_config(self.config, allow_none=True)
+        if self.mask_height is None:
+            self.mask_height = 128
+        if self.mask_width is None:
+            self.mask_width = 128
         self.inverse_mask = self.get_value_from_config('inverse_mask')
 
     def process(self, image, annotation_meta=None):
@@ -125,8 +129,8 @@ class RectMask(Preprocessor):
 
         img = image.data[0]
         img_height, img_width = img.shape[:2]
-        mp0 = (img_height - self.mask_height)//2
-        mp1 = (img_width - self.mask_width)//2
+        mp0 = max(0, (img_height - self.mask_height)//2)
+        mp1 = max(0, (img_width - self.mask_width)//2)
 
         mask = np.zeros((img_height, img_width)).astype(np.float32)
         mask[mp0:mp0 + self.mask_height, mp1:mp1 + self.mask_width] = 1

@@ -62,6 +62,11 @@ except ImportError:
     except ImportError:
         Blob, TensorDesc = None, None
 
+try:
+    import ngraph as ng
+except ImportError as error:
+    ng = UnsupportedPackage('ngraph', error)
+
 
 # pylint:disable=R0904
 class DLSDKLauncher(Launcher):
@@ -301,6 +306,31 @@ class DLSDKLauncher(Launcher):
         for layer in custom_affinity:
             if layer not in automatic_affinity:
                 raise ConfigError('Layer \'{layer}\' is not present in network'.format(layer=layer))
+        if hasattr(self.network, 'layers'):
+            self._set_affinity_via_layers(custom_affinity, automatic_affinity)
+            return
+        if isinstance(ng, UnsupportedPackage):
+            ng.raise_error('affinity setting')
+        self._set_affinity_ng(custom_affinity, automatic_affinity)
+
+    def _set_affinity_ng(self, custom_affinity, auto_affinity):
+        ng_function = ng.function_from_cnn(self.network)
+        for node in ng_function.get_ordered_ops():
+            layer_name = node.get_friendly_name()
+            device = custom_affinity.get(layer_name, auto_affinity.get(layer_name))
+            if device is None:
+                continue
+            if not (device in self._devices_list() or device == self._device):
+                raise ConfigError(
+                    'Device \'{device}\' set for \'{layer}\' layer is not present in '
+                    'provided configuration \'{configuration}\''.format(
+                        device=device, layer=layer_name, configuration=self._device
+                    )
+                )
+            rt_info = node.get_rt_info()
+            rt_info["affinity"] = device
+
+    def _set_affinity_via_layers(self, custom_affinity, automatic_affinity):
         layers = self.network.layers
         for layer_name in layers:
             device = custom_affinity.get(layer_name, automatic_affinity.get(layer_name))
@@ -462,7 +492,6 @@ class DLSDKLauncher(Launcher):
 
         if not extension_list:
             raise ConfigError('suitable CPU extension lib not found in {}'.format(extensions_path))
-
         return extension_list[0]
 
     @staticmethod
@@ -472,22 +501,18 @@ class DLSDKLauncher(Launcher):
         config_model = config.get('{}_model'.format(framework.name), '')
         config_weights = config.get('{}_weights'.format(framework.name), '')
         config_meta = config.get('{}_meta'.format(framework.name), '')
-
         mo_search_paths = []
         model_optimizer = get_parameter_value_from_config(config, DLSDKLauncher.parameters(), '_model_optimizer')
         if model_optimizer:
             mo_search_paths.append(model_optimizer)
-
         model_optimizer_directory_env = os.environ.get('MO_DIR')
         if model_optimizer_directory_env:
             mo_search_paths.append(model_optimizer_directory_env)
-
         model_name = (
             Path(config_model).name.rsplit('.', 1)[0] or
             Path(config_weights).name.rsplit('.', 1)[0] or
             Path(config_meta).name.rsplit('.', 1)[0]
         )
-
         should_log_mo_cmd = get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'should_log_cmd')
 
         return convert_model(
@@ -536,7 +561,6 @@ class DLSDKLauncher(Launcher):
         if hasattr(self, 'exec_network'):
             del self.exec_network
         self.network.reshape(shapes)
-
         self.exec_network = self.ie_core.load_network(self.network, self.device, num_requests=self._num_requests)
 
     def _set_batch_size(self, batch_size):
@@ -559,14 +583,12 @@ class DLSDKLauncher(Launcher):
             if ind_batch != -1:
                 layer_shape[ind_batch] = batch_size
             new_non_const_input_shapes[layer_name] = layer_shape
-
         self.network.reshape({**const_inputs_shapes, **new_non_const_input_shapes})
 
     def _align_data_shape(self, data, input_blob, data_layout):
         input_shape = self.inputs[input_blob].shape
         data_batch_size = data.shape[0]
         input_batch_size = input_shape[0]
-
         if data_batch_size < input_batch_size:
             warning_message = 'data batch {} is not equal model input batch_size {}.'.format(
                 data_batch_size, input_batch_size
@@ -586,7 +608,6 @@ class DLSDKLauncher(Launcher):
             self._target_layout_mapping[input_blob] = data_layout
             self._use_set_blob = True
             return data
-
         return data.reshape(input_shape) if not self.disable_resize_to_input else data
 
     def _prepare_ie(self, log=True):
@@ -597,7 +618,6 @@ class DLSDKLauncher(Launcher):
         else:
             self.async_mode = self.get_value_from_config('async_mode')
             self._set_nireq()
-
             if log:
                 self._log_versions()
         self._device_specific_configuration()
@@ -649,13 +669,7 @@ class DLSDKLauncher(Launcher):
             print_info('Infer requests number:{}'.format(self.num_requests))
 
     def auto_num_requests(self, return_list=False):
-        concurrency_device = {
-            'CPU': 1,
-            'GPU': 1,
-            'HDDL': 100,
-            'MYRIAD': 4,
-            'FPGA': 3
-        }
+        concurrency_device = {'CPU': 1, 'GPU': 1, 'HDDL': 100, 'MYRIAD': 4, 'FPGA': 3}
         platform_list = self._devices_list()
         if 'CPU' in platform_list and len(platform_list) == 1:
             min_requests = [4, 5, 3]
@@ -669,7 +683,6 @@ class DLSDKLauncher(Launcher):
         per_device_requests = []
         for device in platform_list:
             per_device_requests.append(concurrency_device.get(device, 1))
-
         return per_device_requests if return_list else sum(per_device_requests)
 
     def _prepare_multi_device(self, log=True):
@@ -691,10 +704,8 @@ class DLSDKLauncher(Launcher):
             num_per_device_requests = get_or_parse_value(self.config['num_request'], casting_type=int)
         else:
             num_per_device_requests = self.auto_num_requests(return_list=True)
-
         if len(num_per_device_requests) == 1:
             num_per_device_requests = [num_per_device_requests[0]] * len(device_list)
-
         if num_devices != len(num_per_device_requests):
             raise ConfigError('num requests for all {} should be specified'.format(num_devices))
         self._num_requests = sum(num_per_device_requests) * 2
@@ -762,13 +773,10 @@ class DLSDKLauncher(Launcher):
                 if len(output_tuple) == 1:
                     return output_string
                 return tuple([output_tuple[0], int(output_tuple[1])])
-
             preprocessed_outputs = [output_preprocessing(output) for output in outputs]
             self.network.add_outputs(preprocessed_outputs)
-
         if input_shapes is not None:
             self.network.reshape(input_shapes)
-
         self._batch = self.config.get('batch', self.network.batch_size)
         if self._batch != self.network.batch_size:
             self._set_batch_size(self._batch)
@@ -792,7 +800,6 @@ class DLSDKLauncher(Launcher):
                 self._print_input_output_info()
             if preprocessing:
                 self._set_preprocess(preprocessing)
-
             if self.network and not preprocessing:
                 self.exec_network = self.ie_core.load_network(
                     self.network, self._device, num_requests=self.num_requests
@@ -805,7 +812,6 @@ class DLSDKLauncher(Launcher):
         self._print_input_output_info()
         if self.preprocessor:
             self._set_preprocess(self.preprocessor)
-
         if self.network:
             self.exec_network = self.ie_core.load_network(
                 self.network, self._device, num_requests=self.num_requests
@@ -821,7 +827,6 @@ class DLSDKLauncher(Launcher):
             network = self.ie_core.read_network(model=str(model), weights=str(weights))
         else:
             network = ie.IENetwork(model=str(model), weights=str(weights))
-
         return network
 
     def inputs_info_for_meta(self):
@@ -832,17 +837,14 @@ class DLSDKLauncher(Launcher):
 
     def fit_to_input(self, data, layer_name, layout, precision):
         layer_shape = tuple(self.inputs[layer_name].shape)
-
         data = self._data_to_blob(layer_shape, data, layout)
         if precision:
             data = data.astype(precision)
-
         data_shape = np.shape(data)
         if data_shape != layer_shape:
             if self.allow_reshape_input:
                 self._do_reshape = True
                 return data
-
         return self._align_data_shape(data, layer_name, layout)
 
     @staticmethod
@@ -851,32 +853,28 @@ class DLSDKLauncher(Launcher):
         if len(layer_shape) == 4:
             if len(data_shape) == 5:
                 data = data[0]
-
             if len(data_shape) < 4:
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
             return np.transpose(data, layout)
-
         if len(layer_shape) == 2:
             if len(data_shape) == 1:
                 return np.transpose([data])
             if len(data_shape) > 2:
+                if all([dim == 1 for dim in layer_shape]) and all([dim == 1 for dim in data_shape]):
+                    return np.resize(data, layer_shape)
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
-
         if len(layer_shape) == 3 and len(data_shape) == 4:
             data = np.transpose(data, layout)
             return data[0]
-
         if len(layer_shape) == len(layout):
             return np.transpose(data, layout)
-
         if (
                 len(layer_shape) == 1 and len(data_shape) > 1 and
                 len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape)))
         ):
             return np.resize(data, layer_shape)
-
         return np.array(data)
 
     def _set_precision(self):
@@ -918,7 +916,6 @@ class DLSDKLauncher(Launcher):
             layer_shape = self.inputs[lstm_var].shape
             input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(layer_shape)
             feed_dict[lstm_var] = input_data
-
         return feed_dict
 
     def _print_input_output_info(self):

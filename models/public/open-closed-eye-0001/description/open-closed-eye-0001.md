@@ -23,8 +23,6 @@ Fully convolutional network for recognition of eye state ('open', 'closed').
 
 [MRL Eye Dataset](http://mrl.cs.vsb.cz/eyedataset) is used for training and validation (each 10th image is used for test).
 
-## Performance
-
 ## Inputs
 
 1. name: "input.1" , shape: [1x3x32x32] - An input image in [1xCxHxW] format. Expected color order is BGR.

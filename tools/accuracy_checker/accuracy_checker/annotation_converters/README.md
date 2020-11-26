@@ -137,6 +137,14 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `data_dir` - path to dataset root folder. Relative paths to images and masks directory determine as `imgs` and `masks` respectively. In way when images and masks are located in non default directories, you can use parameters described below.
   * `images_dir` - path to images folder.
   * `mask_dir` - path to ground truth mask folder.
+  * `images_subfolder` - sub-directory for images(Optional, default `imgs`)
+  * `mask_subfolder` - sub-directory for ground truth mask(Optional, default `masks`)
+* `mapillary_vistas` - converts Mapillary Vistas dataset contained 20 classes to `SegmentationAnnotation`.
+  * `data_dir` - path to dataset root folder. Relative paths to images and masks directory determine as `images` and `labels` respectively. In way when images and masks are located in non default directories, you can use parameters described below.
+  * `images_dir` - path to images folder.
+  * `mask_dir` - path to ground truth mask folder.
+  * `images_subfolder` - sub-directory for images(Optional, default `images`)
+  * `mask_subfolder` - sub-directory for ground truth mask(Optional, default `labels`)
 * `vgg_face` - converts VGG Face 2 dataset for facial landmarks regression task to `FacialLandmarksAnnotation`.
   * `landmarks_csv_file` - path to csv file with coordinates of landmarks points.
   * `bbox_csv_file` - path to cvs file which contains bounding box coordinates for faces (optional parameter).
@@ -144,6 +152,10 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `pairs_file` - path to file with annotation positive and negative pairs.
   * `train_file` - path to file with annotation positive and negative pairs used for network train (optional parameter).
   * `landmarks_file` - path to file with facial landmarks coordinates for annotation images (optional parameter).
+* `face_recognition_bin` - converts preprocessed face recognition dataset stored in binary format to `ReidentificationClassificationAnnotation`.
+  * `bin_file` - file with dataset. Example of datasets can be found [here](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo).
+  * `images_dir` - directory for saving converted images (Optional, used only if `convert_images` enabled, if not provided `<dataset_root>/converted_images` will be used)
+  * `convert_images` - allows decode and save images.
 * `mars` - converts MARS person reidentification dataset to `ReidentificationAnnotation`.
   * `data_dir` - path to data directory, where gallery (`bbox_test`) and `query` subdirectories are located.
 * `market1501_reid` - converts Market1501 person reidentification dataset to `ReidentificationAnnotation`.
@@ -366,6 +378,12 @@ The main difference between this converter and `super_resolution` in data organi
   * `reference_dir` - directory with reference data. **Note: inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.**
   * `input_suffix` - suffix for input files (usually file extension). Optional, default `.txt`.
   * `reference_suffix` - suffix for reference files (usually file extension). Optional, default `.txt`.
+* `multi_feature_regression` - converts dataset stored in format of directories with preprocessed input numeric data (features) in dictionary format, where keys are layer names and values - features and reference data in the same format to `FeatureRegressionAnnotation`.
+ This approach allows comparing output of model from different frameworks (e.g. OpenVINO converted model and source framework realisation). Please note, that input and reference should be stored as dict-like objects in npy files.
+  * `data_dir` - directory with input and reference files.
+   * `input_suffix` - suffix for input files (usually file extension). Optional, default `in.npy`.
+   * `reference_suffix` - suffix for reference files (usually file extension). Optional, default `out.npy`.
+   * `prefix` - prefix for input files selection (Optional, ignored if not provided).
 * `librispeech` - converts [librispeech](http://www.openslr.org/12) dataset to `CharachterRecognitionAnnotation`.
   * `data_dir` - path to dataset directory, which contains converted wav files.
   * `annotation_file` - path to file which describe the data which should be used in evaluation (`audio_filepath`, `text`, `duration`). Optional, used only for data filtering and sorting audio samples by duration.
@@ -402,6 +420,37 @@ The main difference between this converter and `super_resolution` in data organi
   * `split` - dataset split: `train` - for training subset, `valid` - for train-validation subset, `test` - for testing subset (Optional, default test).
   * `convert_images` - allows convert images from raw data stored in npz and save them into provided directory (Optional, default True).
   * `images_dir` - directory for saving converted images (Optional, if not provided, the images will be saved into converted_images directory in the same location, where data_file is stored)
+* `antispoofing` - converts dataset for antispoofing classification task to `ClassificationAnnotation`
+  * `data_dir` - path to root folder of the dataset
+  * `annotation_file` - path to json file containing annotations to the dataset ({index: {path:"...", labels:[...], bbox:[...] (optional), ...})
+  * `label_id` - number of label in the annotation file representing spoof/real labels
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map)
+* `sound_classification` - converts dataset for sound classification to `ClassificationAnnotation`. The dataset should be represented by directory with input wav files and annotation in 2 column csv format, where first column is audio file name and second is label id from dataset.
+  * `annotation_file` - csv file with selected subset for evaluation, file structure described above.
+  * `audio_dir` - directory with input data, (optional, required only if you want check file existence during annotation conversion).
+* `ade20k_image_translation` - converts ADE20K dataset to `ImageProcessingAnnotation` according to `reference_file`.
+  * `annotations_dir` - path to directory with annotations (e.g. `ADEChallengeData2016/annotations`).
+  * `reference_file` - path to file with pairs key (validation): value (train).
+* `salient_object_detection` - converts dataset for salient object detection to `SalientRegionAnnotation`. The dataset should have following structure:
+  1. images have numeric ids like names and `jpg` extension (e.g. image/0.jpg, image/1.jpg, image/2.jpg, ...).
+  2. salience map located in separated directory, have the same ids like images and `png` extension  (e.g. mask/0.png, mask/1.png, mask/2.png).
+  * `images_dir` - directory with input images.
+  * `masks_dir` - directory with reference salience maps.
+  * `annotation_file` - txt file with selected image ids.
+* `wflw` - converts WFLW dataset for facial landmarks regression task to `FacialLandmarksAnnotation`.
+  * `annotation_file` - path to txt file with ground truth data in WFLW dataset format.
+  * `images_dir` - path to dataset images, used only for content existence check (optional parameter).
+* `common_object_detection` - converts object detection dataset to `DetectionAnnotation`. Dataset should be stored in following format:
+  1. labels_map defined as text file, where defined labels line by line.
+  2. annotations for each image stored in separated text file. Box is represented by space separated info: <label_id> <x_min> <y_min> <x_max> <y_max>.
+  3. name of annotation file the same like image name (or additional file with file mapping should be defined).
+  * `annotation_dir` - path to directory with annotation files.
+  * `images_dir` - path to directory with images (Optional, used only for content check step).
+  * `labels_file` - path to file with labels.
+  * `pairs_file` - path to file where described image and annotation file pairs (Optional, if not provided list will be created according to annotation_dir content).
+  * `has_background` - flag that background label should be added to label_map (Optional, default False).
+  * `add_background_to_label_id` - flag that label_ids defined in annotation should be shifted if `has_background` enabled.
+
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)

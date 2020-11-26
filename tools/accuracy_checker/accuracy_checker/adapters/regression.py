@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 
 from .adapter import Adapter
-from ..config import BoolField
+from ..config import BoolField, ListField
 from ..representation import RegressionPrediction
 
 
@@ -58,4 +58,30 @@ class RegressionAdapter(Adapter):
             prediction = RegressionPrediction(identifier, output)
             result.append(prediction)
 
+        return result
+
+
+class MultiOutputRegression(Adapter):
+    __provider__ = 'multi_output_regression'
+    prediction_types = (RegressionPrediction,)
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'outputs': ListField(value_type=str, allow_empty=False, description='list of target output names')
+        })
+        return params
+
+    def configure(self):
+        self.output_list = self.get_value_from_config('outputs')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        result = []
+        for batch_id, identfier in enumerate(identifiers):
+            res_dict = {}
+            for output_name in self.output_list:
+                res_dict.update({output_name: raw_outputs[output_name][batch_id]})
+            result.append(RegressionPrediction(identfier, res_dict))
         return result

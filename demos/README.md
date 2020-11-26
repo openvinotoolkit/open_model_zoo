@@ -13,11 +13,13 @@ The Open Model Zoo includes the following demos:
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
 - [Formula Recognition Python* Demo](./python_demos/formula_recognition_demo/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
+- [Gesture Recognition Python* Demo](./python_demos/gesture_recognition_demo/README.md) - Demo application for Gesture Recognition algorithm (e.g. American Sign Language gestures), which classifies gesture actions that are being performed on input video.
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/README.md) - Human pose estimation demo.
 - [Image Inpainting Python Demo](./python_demos/image_inpainting_demo/README.md) - Demo application for GMCNN inpainting network.
 - [Image Retrieval Python* Demo](./python_demos/image_retrieval_demo/README.md) - The demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 - [Image Segmentation C++ Demo](./segmentation_demo/README.md) - Inference of image segmentation networks like FCN8 (the demo supports only images as inputs).
 - [Image Segmentation Asynchronous C++ Demo](./segmentation_demo_async/README.md) - Inference of image segmentation networks like FCN8, async API showcase, simple OpenCV interoperability (supports video and camera inputs).
+- [Image Translation Python* Demo](./python_demos/image_translation_demo/README.md) - Demo application to synthesize a photo-realistic image based on exemplar image.
 - [Instance Segmentation Python* Demo](./python_demos/instance_segmentation_demo/README.md) - Inference of instance segmentation networks trained in `Detectron` or `maskrcnn-benchmark`.
 - [Interactive Face Detection C++ Demo](./interactive_face_detection_demo/README.md) - Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
 - [Machine Translation Python* Demo](./python_demos/machine_translation_demo/README.md) - The demo demonstrates how to run non-autoregressive machine translation models.

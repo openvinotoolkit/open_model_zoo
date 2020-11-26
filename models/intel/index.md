@@ -38,6 +38,7 @@ network to detect objects of the same type better.
 | [person-detection-0200](./person-detection-0200/description/person-detection-0200.md)                                                                                               | 0.786                | 1.817      |       | X       |          |       |                |         |
 | [person-detection-0201](./person-detection-0201/description/person-detection-0201.md)                                                                                               | 1.768                | 1.817      |       | X       |          |       |                |         |
 | [person-detection-0202](./person-detection-0202/description/person-detection-0202.md)                                                                                               | 3.143                | 1.817      |       | X       |          |       |                |         |
+| [person-detection-0203](./person-detection-0203/description/person-detection-0203.md)                                                                                               | 6.519                | 2.394      |       | X       |          |       |                |         |
 | [person-detection-0106](./person-detection-0106/description/person-detection-0106.md)                                                                                               | 404.264              | 71.565     |       | X       |          |       |                |         |
 | [pedestrian-detection-adas-0002](./pedestrian-detection-adas-0002/description/pedestrian-detection-adas-0002.md)                                                                    | 2.836                | 1.165      |       | X       |          |       |                |         |
 | [pedestrian-and-vehicle-detector-adas-0001](./pedestrian-and-vehicle-detector-adas-0001/description/pedestrian-and-vehicle-detector-adas-0001.md)                                   | 3.974                | 1.650      |       | X       | X        |       |                |         |
@@ -200,6 +201,10 @@ Deep Learning models for text spotting (simultaneous detection and recognition).
 | text-spotting-0002-detector                                                                                                                    | 185.169              | 26.497     |
 | text-spotting-0002-recognizer-encoder                                                                                                          | 2.082                | 1.328      |
 | text-spotting-0002-recognizer-decoder                                                                                                          | 0.002                | 0.273      |
+| [text-spotting-0003](./text-spotting-0003/description/text-spotting-0003.md)                                                                   |                      |            |
+| text-spotting-0003-detector                                                                                                                    | 184.495              | 27.010     |
+| text-spotting-0003-recognizer-encoder                                                                                                          | 2.082                | 1.328      |
+| text-spotting-0003-recognizer-decoder                                                                                                          | 0.002                | 0.273      |
 
 ## Action Recognition Models
 
@@ -241,11 +246,13 @@ Deep Learning compressed models
 
 | Model Name| Complexity (GFLOPs)|Size (Mp)|
 |-----------|--------------------|---------|
-| [bert-large-uncased-whole-word-masking-squad-fp32-0001](./bert-large-uncased-whole-word-masking-squad-fp32-0001/description/bert-large-uncased-whole-word-masking-squad-fp32-0001.md) | 246.93 | 333.96 |
+| [bert-large-uncased-whole-word-masking-squad-0001](./bert-large-uncased-whole-word-masking-squad-0001/description/bert-large-uncased-whole-word-masking-squad-0001.md) | 246.93 | 333.96 |
 | [bert-large-uncased-whole-word-masking-squad-int8-0001](./bert-large-uncased-whole-word-masking-squad-int8-0001/description/bert-large-uncased-whole-word-masking-squad-int8-0001.md) | 246.93 | 333.96 |
+| [bert-large-uncased-whole-word-masking-squad-emb-0001](./bert-large-uncased-whole-word-masking-squad-emb-0001/description/bert-large-uncased-whole-word-masking-squad-emb-0001.md) | 246.93 (for [1,384] input size) | 333.96 |
 | [bert-small-uncased-whole-word-masking-squad-0001](./bert-small-uncased-whole-word-masking-squad-0001/description/bert-small-uncased-whole-word-masking-squad-0001.md) | 23.9 | 57.94 |
 | [bert-small-uncased-whole-word-masking-squad-0002](./bert-small-uncased-whole-word-masking-squad-0002/description/bert-small-uncased-whole-word-masking-squad-0002.md) | 23.9 | 41.1 |
-| [bert-large-uncased-whole-word-masking-squad-emb-0001](./bert-large-uncased-whole-word-masking-squad-emb-0001/description/bert-large-uncased-whole-word-masking-squad-emb-0001.md) | 246.93 (for [1,384] input size) | 333.96 |
+| [bert-small-uncased-whole-word-masking-squad-int8-0002](./bert-small-uncased-whole-word-masking-squad-int8-0002/description/bert-small-uncased-whole-word-masking-squad-int8-0002.md) | 23.9 | 41.1 |
+| [bert-small-uncased-whole-word-masking-squad-emb-int8-0001](./bert-small-uncased-whole-word-masking-squad-emb-int8-0001/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.md) | 23.9 (for [1,384] input size) | 41.1 |
 
 ## Machine Translation
 

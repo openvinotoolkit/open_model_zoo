@@ -30,8 +30,6 @@ git apply path/to/freeze_model.patch
 python3 freeze_model.py --ckpt_dir path/to/downloaded_weights --save_dir path/to/save_directory
 ```
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -49,8 +47,6 @@ and disguised at random positions with pre-generated free-form masks.
 | Metric | Value          |
 | ------ | -------------- |
 | PSNR   | 33.41dB        |
-
-## Performance
 
 ## Input
 

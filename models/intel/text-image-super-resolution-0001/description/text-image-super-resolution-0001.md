@@ -31,8 +31,6 @@ support the `reshape` function.
 | Source framework                | PyTorch\*                                  |
 
 
-## Performance
-
 ## Inputs
 
 1. name: `0`, shape: [1x1x360x640] - An input image in the format [BxCxHxW],

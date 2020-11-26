@@ -9,8 +9,6 @@ For details about this family of models, check out the [repository](https://gith
 Model consumes as input L-channel of LAB-image.
 Model give as output predict A- and B-channels of LAB-image.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -32,8 +30,6 @@ For preprocessing `rgb -> gray -> colorization` recieved values:
 |----------------|----------------------------|-----------------------------|
 | Accuracy top-1 |                     57.75% |                      70.96% |
 | Accuracy top-5 |                     81.50% |                      89.88% |
-
-## Performance
 
 ## Input
 

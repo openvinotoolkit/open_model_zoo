@@ -130,7 +130,7 @@ MemorySection KenlmV5Loader::_parse_lm_config(MemorySection mem) {
 
   size_t offset = 0;
   lm_config_.ngram_counts.resize(lm_config_.order);
-  for (int k = 0; k < lm_config_.order; k++, offset += sizeof(uint64_t)) {
+  for (size_t k = 0; k < lm_config_.order; k++, offset += sizeof(uint64_t)) {
     lm_config_.ngram_counts[k] = mem.at<uint64_t>(offset);
     if (debug_print_sections_)
       std::cout << "count[" << k+1 << "]= " << lm_config_.ngram_counts[k] << std::endl;
@@ -198,7 +198,7 @@ MemorySection KenlmV5Loader::_parse_lm_quant(MemorySection mem) {
 
   lm_config_.prob_quant_tables.resize(lm_config_.order - 1);
   lm_config_.backoff_quant_tables.resize(lm_config_.order - 2);
-  for (int order_minus_2 = 0; order_minus_2 < lm_config_.order - 2; order_minus_2++) {
+  for (size_t order_minus_2 = 0; order_minus_2 < lm_config_.order - 2; order_minus_2++) {
     lm_config_.prob_quant_tables[order_minus_2] =    mem.get_and_drop_prefix(sizeof(float) * ((size_t)1 << lm_config_.prob_bits));
     lm_config_.backoff_quant_tables[order_minus_2] = mem.get_and_drop_prefix(sizeof(float) * ((size_t)1 << lm_config_.backoff_bits));
   }
@@ -222,7 +222,7 @@ MemorySection KenlmV5Loader::_parse_trie_medium(MemorySection mem) {
 
   lm_config_.medium_layers.reserve(lm_config_.order - 1);
   lm_config_.medium_layers.resize(lm_config_.order - 2);
-  for (int k = 2; k <= lm_config_.order - 1; k++) {  // trie layer index: k in k-gram
+  for (size_t k = 2; k <= lm_config_.order - 1; k++) {  // trie layer index: k in k-gram
     mem = _parse_bhiksha_highs(mem, lm_config_.medium_layers[k-2], lm_config_.ngram_counts[k-1] + 1, lm_config_.ngram_counts[(k+1)-1]);
     mem = _parse_bitarray(mem, lm_config_.medium_layers[k-2], lm_config_.ngram_counts[k-1] + 1, lm_config_.backoff_bits);
   }
