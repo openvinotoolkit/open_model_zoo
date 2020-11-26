@@ -483,7 +483,8 @@ class SequentialModel:
         if with_prefix != self.with_prefix:
             self.detector.text_feats_out = generate_name('detector_', with_prefix, self.detector.text_feats_out)
             self.adapter.classes_out = generate_name('detector_', with_prefix, self.adapter.classes_out)
-            self.adapter.scores_out = generate_name('detector_', with_prefix, self.adapter.scores_out)
+            if self.adapter.scores_out is not None:
+                self.adapter.scores_out = generate_name('detector_', with_prefix, self.adapter.scores_out)
             self.adapter.boxes_out = generate_name('detector_', with_prefix, self.adapter.boxes_out)
             self.adapter.raw_masks_out = generate_name('detector_', with_prefix, self.adapter.raw_masks_out)
             self.recognizer_encoder_input = generate_name(
