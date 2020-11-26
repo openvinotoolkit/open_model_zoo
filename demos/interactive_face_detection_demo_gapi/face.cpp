@@ -23,7 +23,7 @@ void Face::updateGender(float value) {
     }
 }
 
-void Face::updateEmotions(std::map<std::string, float> values) {
+void Face::updateEmotions(const std::map<std::string, float>& values) {
     for (auto& kv : values) {
         if (_emotions.find(kv.first) == _emotions.end()) {
             _emotions[kv.first] = kv.second;
@@ -60,7 +60,7 @@ std::pair<std::string, float> Face::getMainEmotion() {
         [](const std::pair<std::string, float>& p1, const std::pair<std::string, float>& p2) {
             return p1.second < p2.second; });
 
-    return std::make_pair(x->first, x->second);
+    return *x;
 }
 
 const std::vector<float>& Face::getLandmarks() {
@@ -78,15 +78,7 @@ float calcIoU(cv::Rect& src, cv::Rect& dst) {
     return static_cast<float>(i.area()) / static_cast<float>(u.area());
 }
 
-float calcMean(const cv::Mat& src) {
-    cv::Mat tmp;
-    cv::cvtColor(src, tmp, cv::COLOR_BGR2GRAY);
-    cv::Scalar mean = cv::mean(tmp);
-
-    return static_cast<float>(mean[0]);
-}
-
-Face::Ptr matchFace(cv::Rect rect, std::list<Face::Ptr>& faces) {
+Face::Ptr matchFace(cv::Rect rect, const std::list<Face::Ptr>& faces) {
     Face::Ptr face(nullptr);
     float maxIoU = 0.55f;
 

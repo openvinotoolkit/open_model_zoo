@@ -187,20 +187,27 @@ void rawOutputLandmarks(const int idx, const cv::Mat &out_landmark) {
 }
 
 void rawOutputEmotions(const int idx, const cv::Mat &out_emotion) {
-    static const std::vector<std::string> emotionsVec = {"neutral", "happy", "sad", "surprise", "anger"};
-    size_t emotionsVecSize = emotionsVec.size();
+    size_t emotionsVecSize = EMOTION_VECTOR.size();
 
     const float *em_data = out_emotion.ptr<float>();
 
     std::cout << "[" << idx << "] element, predicted emotions (name = prob):" << std::endl;
     for (size_t i = 0; i < emotionsVecSize; i++) {
-        std::cout << emotionsVec[i] << " = " << em_data[i];
+        std::cout << EMOTION_VECTOR[i] << " = " << em_data[i];
         if (emotionsVecSize - 1 != i) {
             std::cout << ", ";
         } else {
             std::cout << std::endl;
         }
     }
+}
+
+float calcMean(const cv::Mat& src) {
+    cv::Mat tmp;
+    cv::cvtColor(src, tmp, cv::COLOR_BGR2GRAY);
+    cv::Scalar mean = cv::mean(tmp);
+
+    return static_cast<float>(mean[0]);
 }
 
 void faceDataUpdate(const cv::Mat &frame,
@@ -219,7 +226,7 @@ void faceDataUpdate(const cv::Mat &frame,
         intensity_mean += 1.0;
 
         if ((face == nullptr) ||
-            ((face != nullptr) && ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f))) {
+            ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f)) {
             face = std::make_shared<Face>(id++, rect);
         } else {
             prev_faces.remove(face);
@@ -259,24 +266,20 @@ void headPoseDataUpdate(const Face::Ptr &face,
 void emotionsDataUpdate(const Face::Ptr &face, const cv::Mat &out_emotion) {
     const float *em_data = out_emotion.ptr<float>();
 
-    face->updateEmotions({
-                          {"neutral", em_data[0]},
-                          {"happy", em_data[1]} ,
-                          {"sad", em_data[2]} ,
-                          {"surprise", em_data[3]},
-                          {"anger", em_data[4]}
-                          });
+    std::map<std::string, float> em_val_map;
+    for(size_t i = 0; i  < EMOTION_VECTOR.size(); i++) {
+        em_val_map[EMOTION_VECTOR[i]] = em_data[i];
+    }
+
+    face->updateEmotions(em_val_map);
 }
 
 void landmarksDataUpdate(const Face::Ptr &face, const cv::Mat &out_landmark) {
     const float *lm_data = out_landmark.ptr<float>();
 
-    std::vector<float> normedLandmarks;
     size_t n_lm = 70;
-    for (size_t i_lm = 0UL; i_lm < n_lm / 2; ++i_lm) {
-        normedLandmarks.push_back(lm_data[2 * i_lm]);
-        normedLandmarks.push_back(lm_data[2 * i_lm + 1]);
-    }
+    std::vector<float> normedLandmarks;
+    normedLandmarks.insert(normedLandmarks.end(), &lm_data[0], &lm_data[n_lm]);
 
     face->updateLandmarks(normedLandmarks);
 }

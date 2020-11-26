@@ -14,8 +14,6 @@ static const char age_gender_model_message[] = "Optional. Path to an .xml file w
 static const char head_pose_model_message[] = "Optional. Path to an .xml file with a trained Head Pose Estimation model.";
 static const char emotions_model_message[] = "Optional. Path to an .xml file with a trained Emotions Recognition model.";
 static const char facial_landmarks_model_message[] = "Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.";
-static const char plugin_message[] = "Plugin name. For example, CPU. If this parameter is specified, "
-                                     "the demo will look for this plugin only.";
 static const char target_device_message[] = "Optional. Target device for Face Detection network (the list of available devices is shown below). " \
 "Default value is CPU. The demo will look for a suitable plugin for a specified device.";
 static const char target_device_message_ag[] = "Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). " \
