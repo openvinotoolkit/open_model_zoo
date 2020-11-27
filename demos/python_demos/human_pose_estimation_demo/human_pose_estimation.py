@@ -24,7 +24,6 @@ from enum import Enum
 from time import perf_counter
 
 import cv2
-import numpy as np
 from openvino.inference_engine import IECore
 
 from human_pose_estimation_demo.model import HPEAssociativeEmbedding, HPEOpenPose

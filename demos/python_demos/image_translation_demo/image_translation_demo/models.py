@@ -11,9 +11,6 @@
  limitations under the License.
 """
 
-from openvino.inference_engine import IECore
-
-
 class CocosnetModel:
     def __init__(self, ie_core, model_xml, model_bin, device='CPU'):
         print("Reading IR for CoCosNet model ....")

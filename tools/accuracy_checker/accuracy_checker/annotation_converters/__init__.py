@@ -121,6 +121,7 @@ __all__ = [
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
     'UnicodeCharacterRecognitionDatasetConverter',
+    'KondateNakayosiRecognitionDatasetConverter',
     'MSCocoKeypointsConverter',
     'MSCocoSingleKeypointsConverter',
     'MSCocoDetectionConverter',

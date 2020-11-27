@@ -17,13 +17,11 @@
 """
 
 import argparse
-import concurrent.futures
 import contextlib
 import functools
 import hashlib
 import re
 import requests
-import shlex
 import shutil
 import ssl
 import sys

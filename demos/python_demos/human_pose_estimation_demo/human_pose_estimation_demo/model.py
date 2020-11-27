@@ -24,7 +24,8 @@ import ngraph as ng
 import numpy as np
 from openvino.inference_engine import IENetwork
 
-from .decoder import AssociativeEmbeddingDecoder, OpenPoseDecoder
+from .decoder_ae import AssociativeEmbeddingDecoder
+from .decoder_openpose import OpenPoseDecoder
 
 
 log = logging.getLogger()
