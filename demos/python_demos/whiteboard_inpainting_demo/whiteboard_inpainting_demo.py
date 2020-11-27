@@ -28,6 +28,8 @@ from utils.misc import MouseClick, set_log_config, check_pressed_keys
 
 sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
 import monitors
+from images_capture import open_images_capture
+
 
 set_log_config()
 WINNAME = 'Whiteboard_inpainting_demo'
@@ -67,6 +69,8 @@ def main():
     parser = argparse.ArgumentParser(description='Whiteboard inpainting demo')
     parser.add_argument('-i', type=str, help='Input sources (index of camera \
                         or path to a video file)', required=True)
+    parser.add_argument('-loop', '--loop', default=False, action='store_true',
+                      help='Optional. Enable reading the input in a loop')
     parser.add_argument('-m_i', '--m_instance_segmentation', type=str, required=False,
                         help='Path to the instance segmentation model')
     parser.add_argument('-m_s', '--m_semantic_segmentation', type=str, required=False,
@@ -87,14 +91,18 @@ def main():
                         help='Optional. List of monitors to show initially')
     args = parser.parse_args()
 
-    capture = VideoCapture(args.i)
+    cap = open_images_capture(args.input, args.loop)
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
 
     if bool(args.m_instance_segmentation) == bool(args.m_semantic_segmentation):
         raise ValueError('Set up exactly one of segmentation models: '\
                          '--m_instance_segmentation or --m_semantic_segmentation')
 
-    frame_size, fps = capture.get_source_parameters()
-    out_frame_size = (int(frame_size[0]), int(frame_size[1] * 2))
+    frame_size = frame.shape
+    fps = cap.fps()
+    out_frame_size = (int(frame_size[1]), int(frame_size[0] * 2))
     presenter = monitors.Presenter(args.utilization_monitors, 20,
                                    (out_frame_size[0] // 4, out_frame_size[1] // 16))
 
@@ -127,20 +135,15 @@ def main():
     frame_number = 0
     key = -1
 
-    while True:
+    while frame is not None:
         start = time.time()
-        _, frame = capture.get_frame()
-
         mask = None
-        if frame is not None:
-            detections = segmentation.get_detections([frame])
-            expand_mask(detections, frame_size[0] // 27)
-            if len(detections[0]) > 0:
-                mask = detections[0][0][2]
-                for i in range(1, len(detections[0])):
-                    mask = cv2.bitwise_or(mask, detections[0][i][2])
-        else:
-            break
+        detections = segmentation.get_detections([frame])
+        expand_mask(detections, frame_size[0] // 27)
+        if len(detections[0]) > 0:
+            mask = detections[0][0][2]
+            for i in range(1, len(detections[0])):
+                mask = cv2.bitwise_or(mask, detections[0][i][2])
 
         if mask is not None:
             mask = np.stack([mask, mask, mask], axis=-1)
@@ -155,7 +158,7 @@ def main():
 
         if output_video is not None:
             output_video.write(merged_frame)
-        
+
         presenter.drawGraphs(merged_frame)
         if not args.no_show:
             cv2.imshow(WINNAME, merged_frame)
@@ -178,18 +181,19 @@ def main():
             if board.shape[0] > 0 and board.shape[1] > 0:
                 cv2.namedWindow('Board', cv2.WINDOW_KEEPRATIO)
                 cv2.imshow('Board', board)
-            
+
         end = time.time()
         print('\rProcessing frame: {}, fps = {:.3}' \
             .format(frame_number, 1. / (end - start)), end="")
         frame_number += 1
+        frame = cap.read()
     print('')
 
     log.info(presenter.reportMeans())
-    
+
     if output_video is not None:
         output_video.release()
-        
+
 
 if __name__ == '__main__':
     main()
