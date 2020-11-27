@@ -126,16 +126,16 @@ class ColorPalette:
 
 def get_model(ie, args):
     if args.architecture_type == 'ssd':
-        return SSD(ie, args.model, log, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
+        return SSD(ie, args.model, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
     elif args.architecture_type == 'yolo':
-        return YOLO(ie, args.model, log, labels=args.labels,
+        return YOLO(ie, args.model, labels=args.labels,
                     threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
     elif args.architecture_type == 'faceboxes':
-        return FaceBoxes(ie, args.model, log, threshold=args.prob_threshold)
+        return FaceBoxes(ie, args.model, threshold=args.prob_threshold)
     elif args.architecture_type == 'centernet':
-        return CenterNet(ie, args.model, log, labels=args.labels, threshold=args.prob_threshold)
+        return CenterNet(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
     elif args.architecture_type == 'retina':
-        return RetinaFace(ie, args.model, log, threshold=args.prob_threshold)
+        return RetinaFace(ie, args.model, threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
@@ -218,7 +218,7 @@ def main():
     model = get_model(ie, args)
     has_landmarks = args.architecture_type == 'retina'
 
-    detector_pipeline = AsyncPipeline(ie, model, plugin_config, logger=log,
+    detector_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
     try:
