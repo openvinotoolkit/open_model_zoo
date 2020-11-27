@@ -167,7 +167,7 @@ Each launcher configuration starts with setting `framework` name. Currently *caf
 Please view:
 
 - [How to configure Caffe launcher](accuracy_checker/launcher/caffe_launcher_readme.md)
-- [How to configure OpenVINO™ launcher](accuracy_checker/launcher/dlsdk_launcher_readme.md)
+- [How to configure OpenVINO launcher](accuracy_checker/launcher/dlsdk_launcher_readme.md)
 - [How to configure OpenCV launcher](accuracy_checker/launcher/opencv_launcher_readme.md)
 - [How to configure MXNet Launcher](accuracy_checker/launcher/mxnet_launcher_readme.md)
 - [How to configure TensorFlow Launcher](accuracy_checker/launcher/tf_launcher_readme.md)

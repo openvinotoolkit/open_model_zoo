@@ -18,20 +18,20 @@ description: >-
 task_type: machine_translation
 files:
   - name: FP32/machine-translation-nar-en-ru-0001.xml
-    size: 1032741
-    sha256: d9fd6447b6d22afb102e0661e9033d9712985c254c113fa589eb528f11a8d9e9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/machine-translation-nar-en-ru-0001/FP32/machine-translation-nar-en-ru-0001.xml
+    size: 1032757
+    sha256: cfd641e21552e8ec730aa5005010e784a99f98e1ad9c86bd23991bd307fe6d6f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/machine-translation-nar-en-ru-0001/FP32/machine-translation-nar-en-ru-0001.xml
   - name: FP32/machine-translation-nar-en-ru-0001.bin
     size: 251814444
     sha256: 5006b86467e6a82fb10af6fd2feb0ccb3a67d50c02cc76d031282d3fa043f67e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/machine-translation-nar-en-ru-0001/FP32/machine-translation-nar-en-ru-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/machine-translation-nar-en-ru-0001/FP32/machine-translation-nar-en-ru-0001.bin
   - name: FP16/machine-translation-nar-en-ru-0001.xml
-    size: 1032196
-    sha256: b152eb4f546410788f086d435a7a7235b1b8b4a70680b83b9ed44c62692cd7a5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/machine-translation-nar-en-ru-0001/FP16/machine-translation-nar-en-ru-0001.xml
+    size: 1032212
+    sha256: 2655c16237d17fdc7a459036c09b66a84a76b4b6a3da36bff0675e0763c95e1c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/machine-translation-nar-en-ru-0001/FP16/machine-translation-nar-en-ru-0001.xml
   - name: FP16/machine-translation-nar-en-ru-0001.bin
     size: 125907336
     sha256: 265129769fb9f3f167a358520982de6a455473806afa5724c443838816ac1d47
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/machine-translation-nar-en-ru-0001/FP16/machine-translation-nar-en-ru-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/machine-translation-nar-en-ru-0001/FP16/machine-translation-nar-en-ru-0001.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

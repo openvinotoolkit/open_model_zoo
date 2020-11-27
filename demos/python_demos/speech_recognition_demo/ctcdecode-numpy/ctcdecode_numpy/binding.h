@@ -10,7 +10,8 @@ void numpy_beam_decode(
         const float * probs,  size_t batch_size, size_t max_frames, size_t num_classes,
         const int * seq_lens,  size_t seq_lens_dim_batch,
         const std::vector<std::string> labels,
-        size_t beam_size,
+        size_t beam_size,                 // limits candidates maintained inside beam search
+        size_t max_candidates_per_batch,  // limits candidates returned from beam search
         size_t num_processes,
         float cutoff_prob,
         size_t cutoff_top_n,
@@ -27,7 +28,8 @@ void numpy_beam_decode_no_lm(
         const float * probs,  size_t batch_size, size_t max_frames, size_t num_classes,
         const int * seq_lens,  size_t seq_lens_dim_batch,
         const std::vector<std::string> labels,
-        size_t beam_size,
+        size_t beam_size,                 // limits candidates maintained inside beam search
+        size_t max_candidates_per_batch,  // limits candidates returned from beam search
         size_t num_processes,
         float cutoff_prob,
         size_t cutoff_top_n,

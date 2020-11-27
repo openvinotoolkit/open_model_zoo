@@ -155,7 +155,10 @@ instances, thus faster than previous, because network runs once.
 
 | Model Name                                                                                                                 | Complexity (GFLOPs)  | Size (Mp)       |
 |----------------------------------------------------------------------------------------------------------------------------|--------------------- |---------------- |
-| [human-pose-estimation-0001](./human-pose-estimation-0001/description/human-pose-estimation-0001.md)                       | 15.435               | 4.099      |
+| [human-pose-estimation-0001](./human-pose-estimation-0001/description/human-pose-estimation-0001.md)                       | 15.435               | 4.099           |
+| [human-pose-estimation-0002](./human-pose-estimation-0002/description/human-pose-estimation-0002.md)                       | 5.9393               | 8.1504          |
+| [human-pose-estimation-0003](./human-pose-estimation-0003/description/human-pose-estimation-0003.md)                       | 8.8720               | 8.1504          |
+| [human-pose-estimation-0004](./human-pose-estimation-0004/description/human-pose-estimation-0004.md)                       | 14.3707              | 8.1504          |
 
 ## Image Processing
 
@@ -197,10 +200,6 @@ Deep Learning models for text spotting (simultaneous detection and recognition).
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [text-spotting-0002](./text-spotting-0002/description/text-spotting-0002.md)                                                                   |                      |            |
-| text-spotting-0002-detector                                                                                                                    | 185.169              | 26.497     |
-| text-spotting-0002-recognizer-encoder                                                                                                          | 2.082                | 1.328      |
-| text-spotting-0002-recognizer-decoder                                                                                                          | 0.002                | 0.273      |
 | [text-spotting-0003](./text-spotting-0003/description/text-spotting-0003.md)                                                                   |                      |            |
 | text-spotting-0003-detector                                                                                                                    | 184.495              | 27.010     |
 | text-spotting-0003-recognizer-encoder                                                                                                          | 2.082                | 1.328      |

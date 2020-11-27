@@ -15,6 +15,7 @@ The Open Model Zoo includes the following demos:
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
 - [Gesture Recognition Python* Demo](./python_demos/gesture_recognition_demo/README.md) - Demo application for Gesture Recognition algorithm (e.g. American Sign Language gestures), which classifies gesture actions that are being performed on input video.
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/README.md) - Human pose estimation demo.
+- [Human Pose Estimation Python\* Demo](./python_demos/human_pose_estimation_demo/README.md) - Human pose estimation demo.
 - [Image Inpainting Python Demo](./python_demos/image_inpainting_demo/README.md) - Demo application for GMCNN inpainting network.
 - [Image Retrieval Python* Demo](./python_demos/image_retrieval_demo/README.md) - The demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 - [Image Segmentation C++ Demo](./segmentation_demo/README.md) - Inference of image segmentation networks like FCN8 (the demo supports only images as inputs).

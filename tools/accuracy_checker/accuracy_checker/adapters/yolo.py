@@ -459,6 +459,8 @@ class YoloV3ONNX(Adapter):
         ):
             out_boxes, out_scores, out_classes = [], [], []
             for idx_ in indices:
+                if idx_[0] == -1:
+                    break
                 out_classes.append(idx_[1])
                 out_scores.append(scores[tuple(idx_[1:])])
                 out_boxes.append(boxes[idx_[2]])
