@@ -141,6 +141,10 @@ def main():
     if subprocess.run([sys.executable, '-m', 'yamllint', '-s', '.'], cwd=OMZ_ROOT).returncode != 0:
         all_passed = False
 
+    print('running flake8...', flush=True)
+    if subprocess.run([sys.executable, '-m', 'flake8', '--config=.flake8'], cwd=OMZ_ROOT).returncode != 0:
+        all_passed = False
+
     sys.exit(0 if all_passed else 1)
 
 
