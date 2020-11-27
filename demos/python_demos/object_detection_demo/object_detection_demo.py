@@ -136,6 +136,8 @@ def get_model(ie, args):
         return CenterNet(ie, args.model, log, labels=args.labels, threshold=args.prob_threshold)
     elif args.architecture_type == 'retina':
         return RetinaFace(ie, args.model, log, threshold=args.prob_threshold)
+    else:
+        raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
 
 def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
