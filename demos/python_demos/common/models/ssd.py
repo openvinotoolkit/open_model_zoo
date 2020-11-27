@@ -100,9 +100,8 @@ class SSD(Model):
             detections = [Detection(*bbox, score, label) for label, score, bbox in zip(labels, scores, bboxes)]
             return detections
 
-    def __init__(self, ie, model_path, logger=None,
-                 labels=None, keep_aspect_ratio_resize=False):
-        super().__init__(ie, model_path, logger=logger)
+    def __init__(self, ie, model_path, labels=None, keep_aspect_ratio_resize=False):
+        super().__init__(ie, model_path)
 
         self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
         if isinstance(labels, (list, tuple)):

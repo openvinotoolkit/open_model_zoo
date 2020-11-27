@@ -23,9 +23,8 @@ from .utils import DetectionWithLandmarks, resize_image
 
 
 class RetinaFace(Model):
-    def __init__(self, ie, model_path, logger=None,
-                 threshold=0.5, mask_threshold=0.5):
-        super().__init__(ie, model_path, logger=logger)
+    def __init__(self, ie, model_path, threshold=0.5, mask_threshold=0.5):
+        super().__init__(ie, model_path)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         assert len(self.net.outputs) == 12 or len(self.net.outputs) == 9, "Expected 12 or 9 output blobs"
