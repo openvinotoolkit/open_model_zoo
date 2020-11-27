@@ -49,6 +49,8 @@ def main():
         cwd=OMZ_ROOT,
     ).stdout.strip()
 
+    print('running text checks...', flush=True)
+
     if subprocess.run(['git', '--no-pager', 'diff', '--check', empty_tree_hash, '--'],
             cwd=OMZ_ROOT).returncode != 0:
         all_passed = False
@@ -135,6 +137,7 @@ def main():
                     shebang_program.endswith('/env') and shebang_args == 'python'):
                 complain(f"{path}:1: use 'python3', not 'python'")
 
+    print('running yamllint...', flush=True)
     if subprocess.run([sys.executable, '-m', 'yamllint', '-s', '.'], cwd=OMZ_ROOT).returncode != 0:
         all_passed = False
 
