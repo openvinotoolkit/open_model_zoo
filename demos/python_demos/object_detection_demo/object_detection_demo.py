@@ -108,9 +108,9 @@ class ColorPalette:
         dv = abs(c1[2] - c2[2])
         return dh * dh + ds * ds + dv * dv
 
-    @staticmethod
-    def min_distance(colors_set, color_candidate):
-        distances = [__class__.dist(o, color_candidate) for o in colors_set]
+    @classmethod
+    def min_distance(cls, colors_set, color_candidate):
+        distances = [cls.dist(o, color_candidate) for o in colors_set]
         return np.min(distances)
 
     @staticmethod
