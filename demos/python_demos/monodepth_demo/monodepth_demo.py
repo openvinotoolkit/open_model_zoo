@@ -8,6 +8,9 @@ import logging as log
 from openvino.inference_engine import IECore
 import matplotlib.pyplot as plt
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+from images_capture import open_images_capture
+
 
 def main():
     # arguments
@@ -49,7 +52,11 @@ def main():
     # read and pre-process input image
     _, _, height, width = net.input_info[input_blob].input_data.shape
 
-    image = cv2.imread(args.input, cv2.IMREAD_COLOR)
+    cap = open_images_capture(args.input, False)
+    image = cap.read()
+    if image is None:
+        raise RuntimeError("Can't read an image from the input")
+
     (input_height, input_width) = image.shape[:-1]
 
     # resize
@@ -73,7 +80,7 @@ def main():
 
     # processing output blob
     log.info("processing output blob")
-    disp = res[out_blob][0]
+    disp = np.squeeze(res[out_blob][0])
 
     # resize disp to input resolution
     disp = cv2.resize(disp, (input_width, input_height), cv2.INTER_CUBIC)
