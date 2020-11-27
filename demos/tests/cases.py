@@ -531,9 +531,9 @@ PYTHON_DEMOS = [
                           '-i': DataPatternArg('text-detection')}),
         [
             TestCase(options={
-                '-m_m': ModelArg('text-spotting-0002-detector'),
-                '-m_te': ModelArg('text-spotting-0002-recognizer-encoder'),
-                '-m_td': ModelArg('text-spotting-0002-recognizer-decoder'),
+                '-m_m': ModelArg('text-spotting-0003-detector'),
+                '-m_te': ModelArg('text-spotting-0003-recognizer-encoder'),
+                '-m_td': ModelArg('text-spotting-0003-recognizer-decoder'),
                 '--no_track': None
             }),
         ]
