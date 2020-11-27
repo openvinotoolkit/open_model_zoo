@@ -213,14 +213,16 @@ int main(int argc, char *argv[]) {
         Presenter presenter;
 
         bool keepRunning = true;
-        int64_t frameNum = 0;
+        int64_t frameNum = -1;
+        std::unique_ptr<ResultBase> result;
+
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
                 auto startTime = std::chrono::steady_clock::now();
                 curr_frame = cap->read();
                 if (curr_frame.empty()) {
-                    if (!frameNum) {
+                    if (frameNum == -1) {
                         throw std::logic_error("Can't read an image from the input");
                     }
                     else {
@@ -239,7 +241,6 @@ int main(int argc, char *argv[]) {
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - cast result's underlying pointer to DetectionResult*
             //    and use your own processing instead of calling renderDetectionData().
-            std::unique_ptr<ResultBase> result;
             while ((result = pipeline.getResult()) && keepRunning) {
                 cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
                 //--- Showing results and device information
@@ -257,6 +258,21 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
+            }
+        }
+
+        //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
+        pipeline.waitForTotalCompletion();
+        while (result = pipeline.getResult()) {
+            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
+            //--- Showing results and device information
+            presenter.drawGraphs(outFrame);
+            metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                outFrame, { 10, 22 }, 0.65);
+            if (!FLAGS_no_show) {
+                cv::imshow("Detection Results", outFrame);
+                //--- Updating output window
+                cv::waitKey(1);
             }
         }
 
