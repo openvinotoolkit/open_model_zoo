@@ -50,7 +50,6 @@ class AsyncPipeline:
         inputs, preprocessing_meta = self.model.preprocess(inputs)
         request.set_completion_callback(py_callback=self.inference_completion_callback,
                                         py_data=(request, id, meta, preprocessing_meta))
-        self.event.clear()
         request.async_infer(inputs=inputs)
 
     def get_raw_result(self, id):
@@ -65,10 +64,14 @@ class AsyncPipeline:
             return self.model.postprocess(raw_result, preprocess_meta), meta
         return None
 
+    def is_ready(self):
+        return len(self.empty_requests) != 0
+
     def await_all(self):
         for request in self.exec_net.requests:
             request.wait()
 
     def await_any(self):
         if len(self.empty_requests) == 0:
+            self.event.clear()
             self.event.wait()
