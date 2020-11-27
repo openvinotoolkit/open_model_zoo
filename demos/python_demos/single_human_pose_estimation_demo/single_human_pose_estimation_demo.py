@@ -22,7 +22,7 @@ def build_argparser():
 
     parser.add_argument("-m_hpe", "--model_hpe", type=str, required=True,
                         help="path to model of human pose estimator in xml format")
-    parser.add_argument("-i", "--input", 
+    parser.add_argument("-i", "--input",
                         help="Required. An input to process. The input must be a single image, "
                              "a folder of images or anything that cv2.VideoCapture can process.")
     parser.add_argument("-loop", "--loop", default=False, action="store_true",
