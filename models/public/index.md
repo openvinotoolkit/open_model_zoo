@@ -2,7 +2,7 @@
 
 OpenVINO&trade; toolkit provides a set of public models
 that you can use for learning and demo purposes or for developing deep learning
-software. Most recent version is available in the [repo on Github](https://github.com/opencv/open_model_zoo).
+software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
 
 The models can be downloaded via Model Downloader
 (`<OPENVINO_INSTALL_DIR>/deployment_tools/open_model_zoo/tools/downloader`).
@@ -12,6 +12,7 @@ The models can be downloaded via Model Downloader
 | Model Name                  | Implementation                     | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------- | -----------------------------------| -------------- | -------- | ------ | ------- |
 | AlexNet                     | Caffe\*                            | [alexnet](./alexnet/alexnet.md)   | 56.598%/79.812% | 1.5 | 60.965 |
+| AntiSpoofNet                | PyTorch\*                          | [anti-spoof-mn3](./anti-spoof-mn3/anti-spoof-mn3.md) | 3.81% | 0.15 | 3.02 |
 | CaffeNet                    | Caffe\*                            | [caffenet](./caffenet/caffenet.md)  | 56.714%/79.916% | 1.5 | 60.965 |
 | DenseNet 121                | Caffe\*<br>TensorFlow\*<br>Caffe2\*| [densenet-121](./densenet-121/densenet-121.md)<br>[densenet-121-tf](./densenet-121-tf/densenet-121-tf.md)<br>[densenet-121-caffe2](./densenet-121-caffe2/densenet-121-caffe2.md) | 74.42%/92.136%<br>74.29%/91.98% <br>74.904%/92.192% | 5.289~5.724    | 7.971 |
 | DenseNet 161                | Caffe\*<br>TensorFlow\*            | [densenet-161](./densenet-161/densenet-161.md)<br>[densenet-161-tf](./densenet-161-tf/densenet-161-tf.md) | 77.55%/93.92%<br>76.446%/93.228%| 14.128~15.561  | 28.666 |
@@ -27,7 +28,7 @@ The models can be downloaded via Model Downloader
 | HBONet 0.25                 | PyTorch\*                          | [hbonet-0.25](./hbonet-0.25/hbonet-0.25.md) | 57.3%/79.8% | 0.0758 | 1.9299 |
 | Inception (GoogleNet) V1    | Caffe\*<br>TensorFlow\*            | [googlenet-v1](./googlenet-v1/googlenet-v1.md)<br>[googlenet-v1-tf](./googlenet-v1-tf/googlenet-v1-tf.md) | 68.928%/89.144%<br>69.814%/89.6% | 3.016~3.266 | 6.619~6.999 |
 | Inception (GoogleNet) V2    | Caffe\*<br>TensorFlow\*            | [googlenet-v2](./googlenet-v2/googlenet-v2.md)<br>[googlenet-v2-tf](./googlenet-v2-tf/googlenet-v2-tf.md) | 72.024%/90.844%<br>74.084%/91.798%| 4.058 | 11.185 |
-| Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/googlenet-v3.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | 77.904%/93.808%<br>77.696%/93.696% | 11.469 | 23.817 |
+| Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/googlenet-v3.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | 77.904%/93.808%<br>77.69%/93.7% | 11.469 | 23.817 |
 | Inception (GoogleNet) V4    | TensorFlow\*                       | [googlenet-v4-tf](./googlenet-v4-tf/googlenet-v4-tf.md) | 80.204%/95.21% | 24.584 | 42.648 |
 | Inception-ResNet V2         | TensorFlow\*                       | [inception-resnet-v2-tf](./inception-resnet-v2-tf/inception-resnet-v2-tf.md) | 80.14%/95.10% | 22.227 | 30.223 |
 | MobileNet V1 0.25 128       | Caffe\*                            | [mobilenet-v1-0.25-128](./mobilenet-v1-0.25-128/mobilenet-v1-0.25-128.md)  | 40.54%/65% | 0.028 | 0.468 |
@@ -57,6 +58,7 @@ The models can be downloaded via Model Downloader
 | SE-ResNet 152               | Caffe\*                            | [se-resnet-152](./se-resnet-152/se-resnet-152.md) | 78.506%/94.45% | 22.709 | 66.746 |
 | SE-ResNeXt 50               | Caffe\*                            | [se-resnext-50](./se-resnext-50/se-resnext-50.md) | 78.968%/94.63% | 8.533 | 27.526|
 | SE-ResNeXt 101              | Caffe\*                            | [se-resnext-101](./se-resnext-101/se-resnext-101.md) | 80.168%/95.19% | 16.054 | 48.886 |
+| Shufflenet V2 x1.0          | PyTorch\*                          | [shufflenet-v2-x1.0](./shufflenet-v2-x1.0/shufflenet-v2-x1.0.md) | 69.36%/88.32% | 0.2957 | 2.2705 |
 | SqueezeNet v1.0             | Caffe\*                            | [squeezenet1.0](./squeezenet1.0/squeezenet1.0.md)| 57.684%/80.38%| 1.737 | 1.248 |
 | SqueezeNet v1.1             | Caffe\*<br>Caffe2\*                | [squeezenet1.1](./squeezenet1.1/squeezenet1.1.md)<br>[squeezenet1.1-caffe2](./squeezenet1.1-caffe2/squeezenet1.1-caffe2.md)| 58.382%/81%<br>56.502%/79.576% | 0.785 | 1.236 |
 | VGG 16                      | Caffe\*                            | [vgg16](./vgg16/vgg16.md) | 70.968%/89.878% | 30.974 | 138.358 |
@@ -76,6 +78,7 @@ detect areas with complex shape.
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
 | DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/deeplabv3.md) | 66.85% | 11.469 | 23.819 |
+| HRNet V2 C1 Segmentation  | PyTorch\*      | [hrnet-v2-c1-segmentation](./hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md) | 77.69% | 81.993 | 66.4768 |
 
 ### Instance Segmentation
 
@@ -89,6 +92,7 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | Mask R-CNN Inception V2        | TensorFlow\*   | [mask_rcnn_inception_v2_coco](./mask_rcnn_inception_v2_coco/mask_rcnn_inception_v2_coco.md) | 27.1199%/21.4805% | 54.926 | 21.772 |
 | Mask R-CNN ResNet 50           | TensorFlow\*   | [mask_rcnn_resnet50_atrous_coco](./mask_rcnn_resnet50_atrous_coco/mask_rcnn_resnet50_atrous_coco.md)| 	29.7512%/27.4597% | 294.738 | 50.222 |
 | Mask R-CNN ResNet 101          | TensorFlow\*   | [mask_rcnn_resnet101_atrous_coco](./mask_rcnn_resnet101_atrous_coco/mask_rcnn_resnet101_atrous_coco.md) | 34.9191%/31.301% | 674.58 | 69.188 |
+| YOLACT ResNet 50 FPN | PyTorch\* | [yolact-resnet50-fpn-pytorch](./yolact-resnet50-fpn-pytorch/yolact-resnet50-fpn-pytorch.md) | 28.0%/30.69% | 118.575 |  36.829  |
 
 ### 3D Semantic Segmentation
 
@@ -108,6 +112,8 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | CTPN                                 | TensorFlow\*             | [ctpn](./ctpn/ctpn.md) | 73.67% | 55.813 | 17.237 |
 | CenterNet (CTDET with DLAV0) 384x384 | ONNX\*                   | [ctdet_coco_dlav0_384](./ctdet_coco_dlav0_384/ctdet_coco_dlav0_384.md)| 41.6105%| 34.994 | 17.911 |
 | CenterNet (CTDET with DLAV0) 512x512 | ONNX\*                   | [ctdet_coco_dlav0_512](./ctdet_coco_dlav0_512/ctdet_coco_dlav0_512.md)| 44.2756%| 62.211 | 17.911 |
+| EfficientDet-D0                      | TensorFlow\*             | [efficientdet-d0-tf](./efficientdet-d0-tf/efficientdet-d0-tf.md)| 31.95% | 2.54 | 3.9 |
+| EfficientDet-D1                      | TensorFlow\*             | [efficientdet-d1-tf](./efficientdet-d1-tf/efficientdet-d1-tf.md)| 37.54% | 6.1 | 6.6 |
 | FaceBoxes                            | PyTorch\*                | [faceboxes-pytorch](./faceboxes-pytorch/faceboxes-pytorch.md)|83.565% | 1.8975 | 1.0059 |
 | Faster R-CNN with Inception-ResNet v2| TensorFlow\*             | [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/faster_rcnn_inception_resnet_v2_atrous_coco.md)| 36.76%/52.41% | 30.687 | 13.307 |
 | Faster R-CNN with Inception v2       | TensorFlow\*             | [faster_rcnn_inception_v2_coco](./faster_rcnn_inception_v2_coco/faster_rcnn_inception_v2_coco.md) | 25.65%/40.04%| 30.687 | 13.307 |
@@ -133,6 +139,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/yolo-v2-tf.md) | 53.1453%/56.483% | 63.0301	 |	50.9526 |
 | YOLO v3                              | Keras\*                  | [yolo-v3-tf](./yolo-v3-tf/yolo-v3-tf.md) | 62.2759%/67.7221% | 65.9843	 |	61.9221 |
 | YOLO v3 Tiny                         | Keras\*                  | [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/yolo-v3-tiny-tf.md) | 35.9%/39.7% | 5.582  | 8.848 |
+| YOLO v4                              | Keras\*                  | [yolo-v4-tf](./yolo-v4-tf/yolo-v4-tf.md) | 71.17%/75.02% | 128.608	 |	64.33 |
 
 ## Face Recognition
 
@@ -150,7 +157,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 Human pose estimation task is to predict a pose: body skeleton, which consists
 of keypoints and connections between them, for every person in an input image or
 video. Keypoints are body joints, i.e. ears, eyes, nose, shoulders, knees, etc.
-There are two major groups of such metods: top-down and bottom-up.  The first
+There are two major groups of such methods: top-down and bottom-up.  The first
 detects persons in a given frame, crops or rescales detections, then runs pose
 estimation network for every detection. These methods are very accurate. The
 second finds all keypoints in a given frame, then groups them by person
@@ -169,6 +176,7 @@ Since this task contains - in the general setting - some ambiguity, the resultin
 | Model Name                  | Implementation | OMZ Model Name                | Accuracy | GFlops    | mParams |
 | --------------------------- | -------------- | ----------------------------- | -------- | --------- | ------- |
 | midasnet                    | PyTorch\*      | [midasnet](./midasnet/midasnet.md)| 7.5878| 207.4915  |    104.0814     |
+| FCRN ResNet50-Upproj          | TensorFlow\*   | [fcrn-dp-nyu-depth-v2-tf](./fcrn-dp-nyu-depth-v2-tf/fcrn-dp-nyu-depth-v2-tf.md)| 0.573 | 63.5421 | 34.5255 |
 
 ## Image Inpainting
 
@@ -201,8 +209,8 @@ Colorization task is to predict colors of scene from grayscale image.
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
-| colorization-v2           | Caffe*         | [colorization-v2](./colorization-v2/colorization-v2.md) | | 64.0047 |  32.2354 |
-| colorization-v2-norebal   | Caffe*         | [colorization-v2-norebal](./colorization-v2-norebal/colorization-v2-norebal.md) | | 64.0047 |  32.2354 |
+| colorization-v2           | PyTorch\* | [colorization-v2](./colorization-v2/colorization-v2.md) | 57.75%/81.50% | 83.6045 |  32.2360 |
+| colorization-siggraph     | PyTorch\* | [colorization-siggraph](./colorization-siggraph/colorization-siggraph.md) | 58.25%/81.78% | 150.5441 |  34.0511 |
 
 ## Sound Classification
 
@@ -219,6 +227,15 @@ The task of speech recognition is to recognize and translate spoken language int
 | Model Name        | Implementation | OMZ Model Name                                               | Accuracy | GFlops | mParams |
 | ----------------- | -------------- | ------------------------------------------------------------ | -------- | ------ | ------- |
 | DeepSpeech V0.6.1 | TensorFlow\*   | [mozilla-deepspeech-0.6.1](./mozilla-deepspeech-0.6.1/mozilla-deepspeech-0.6.1.md) | 7.55%    | 0.0472 | 47.2    |
+| DeepSpeech V0.8.2 | TensorFlow\*   | [mozilla-deepspeech-0.8.2](./mozilla-deepspeech-0.8.2/mozilla-deepspeech-0.8.2.md) | 6.13%    | 0.0472 | 47.2    |
+
+## Image Translation
+
+The task of image translation is to generate the output based on exemplar.
+
+| Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops    | mParams  |
+| -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
+| CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/cocosnet.md) | 12.93dB  | 1080.7032 | 167.9141 |
 
 ## Legal Information
 

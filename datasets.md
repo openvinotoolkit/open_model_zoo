@@ -2,6 +2,13 @@
 
 If you want to use prepared configs to run the Accuracy Checker tool and the Model Quantizer, you need to organize `<DATASET_DIR>` folder with validation datasets in a certain way. Instructions for preparing validation data are described in this document.
 
+Each dataset description consists of the following sections:
+* instruction for downloading the dataset
+* structure of `<DATASET_DIR>` that matches the dataset definition in the existing global configuration file ([dataset_definitions.yml](tools/accuracy_checker/dataset_definitions.yml))
+* examples of using and presenting the dataset in the global configuration file
+
+More detailed information about using predefined configuration files you can find [here](tools/accuracy_checker/configs/README.md).
+
 ## [ImageNet](http://image-net.org)
 
 ### How download dataset
@@ -17,7 +24,7 @@ To download images from ImageNet, you need to have an account and agree to the T
 
 To download annotation files, you need to follow the steps below:
 * `val.txt`
-  1. Download [arhive](http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz)
+  1. Download [archive](http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz)
   2. Unpack `val.txt` from the archive `caffe_ilsvrc12.tar.gz`
 * `val15.txt`
   1. Download [annotation file](https://raw.githubusercontent.com/hujie-frank/SENet/master/ILSVRC2017_val.txt)
@@ -36,7 +43,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 * `imagenet_1000_classes_2015` used for evaluation models trained on ILSVRC 2015 dataset with 1000 classes. (model examples: [`se-resnet-152`](models/public/se-resnet-152/se-resnet-152.md), [`se-resnext-50`](models/public/se-resnext-50/se-resnext-50.md))
 * `imagenet_1001_classes` used for evaluation models trained on ILSVRC 2012 dataset with 1001 classes (background label + original labels). (model examples: [`googlenet-v2-tf`](models/public/googlenet-v2-tf/googlenet-v2-tf.md), [`resnet-50-tf`](models/public/resnet-50-tf/resnet-50-tf.md))
 
-## [Common Objects in Context (COCO)](http://cocodataset.org/#home)
+## [Common Objects in Context (COCO)](https://cocodataset.org/#home)
 
 ### How download dataset
 

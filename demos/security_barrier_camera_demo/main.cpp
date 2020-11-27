@@ -16,7 +16,7 @@
 
 #include <cldnn/cldnn_config.hpp>
 #include <inference_engine.hpp>
-#include <vpu/vpu_plugin_config.hpp>
+#include <vpu/hddl_config.hpp>
 #include <monitors/presenter.h>
 #include <samples/args_helper.hpp>
 #include <samples/ocv_common.hpp>
@@ -628,7 +628,7 @@ void Reader::process() {
 
 int main(int argc, char* argv[]) {
     try {
-        slog::info << "InferenceEngine: " << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         try {
@@ -711,7 +711,7 @@ int main(int argc, char* argv[]) {
             slog::info << "Loading device " << device << slog::endl;
 
             /** Printing device version **/
-            std::cout << ie.GetVersions(device) << std::endl;
+            slog::info << printable(ie.GetVersions(device)) << slog::endl;
 
             if ("CPU" == device) {
                 if (!FLAGS_l.empty()) {
@@ -760,7 +760,7 @@ int main(int argc, char* argv[]) {
         auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
             std::map<std::string, std::string> config;
             if (FLAGS_tag && deviceName == "HDDL") {
-                config[VPU_HDDL_CONFIG_KEY(GRAPH_TAG)] = "tag" + suffix;
+                config[InferenceEngine::HDDL_GRAPH_TAG] = "tag" + suffix;
             }
             return config;
         };
@@ -856,7 +856,7 @@ int main(int argc, char* argv[]) {
                 std::make_pair(context.platesInfers.getActualInferRequests(), FLAGS_d_lpr)}) {
             for (InferRequest& ir : net.first) {
                 ir.Wait(IInferRequest::WaitMode::RESULT_READY);
-                if (FLAGS_pc) {  // Show performace results
+                if (FLAGS_pc) {  // Show performance results
                     printPerformanceCounts(ir, std::cout, std::string::npos == net.second.find("MULTI") ? getFullDeviceName(mapDevices, net.second)
                                                                                                         : net.second);
                 }

@@ -5,8 +5,6 @@
 The `octave-resnet-101-0.125` model is a modification of [ResNet-101](https://arxiv.org/abs/1512.03385) with Octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.125`.  Like the original model, this model is designed for image classification. For details about family of Octave Convolution models, check out the [repository](https://github.com/facebookresearch/OctConv).
 
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -22,8 +20,6 @@ The `octave-resnet-101-0.125` model is a modification of [ResNet-101](https://ar
 | ------ | ----- |
 | Top 1  | 79.182%|
 | Top 5  | 94.42%|
-
-## Performance
 
 ## Input
 

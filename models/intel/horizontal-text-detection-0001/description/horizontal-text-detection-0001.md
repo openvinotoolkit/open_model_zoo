@@ -19,8 +19,6 @@ The key benefit of this model compared to the [base model](../../text-detection-
 | Source framework                                              | PyTorch\*              |
 
 
-## Performance
-
 ## Inputs
 
 1. Name: `input`, shape: [1x3x704x704] - An input image in the format [1xCxHxW],

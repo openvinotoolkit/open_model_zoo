@@ -47,6 +47,9 @@ class Flip(Preprocessor):
             'mode': StringField(
                 choices=FLIP_MODES.keys(), default='horizontal',
                 description="Specifies the axis for flipping (vertical or horizontal)."
+            ),
+            'merge_with_original': BoolField(
+                optional=True, description='allow joint flipped image to original', default=False
             )
         })
         return parameters
@@ -55,9 +58,16 @@ class Flip(Preprocessor):
         mode = self.get_value_from_config('mode')
         if isinstance(mode, str):
             self.mode = FLIP_MODES[mode]
+        self.merge = self.get_value_from_config('merge_with_original')
 
     def process(self, image, annotation_meta=None):
-        image.data = cv2.flip(image.data, self.mode)
+        flipped_data = cv2.flip(image.data, self.mode)
+        if self.merge:
+            image.data = [image.data, flipped_data]
+            image.metadata['multi_infer'] = True
+        else:
+            image.data = flipped_data
+
         image.metadata.setdefault(
             'geometric_operations', []).append(GeometricOperationMetadata('flip', {'mode': self.mode}))
         return image
@@ -83,7 +93,7 @@ class PointAligner(Preprocessor):
                 optional=True, default=True, description="Allows to use normalization for keypoints."),
             'size': NumberField(
                 value_type=int, optional=True, min_value=1,
-                description="Destination size for keypoints resizing for both destination dimentions."
+                description="Destination size for keypoints resizing for both destination dimensions."
             ),
             'dst_width': NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination width for keypoints resizing."
@@ -302,7 +312,7 @@ class Tiling(Preprocessor):
             'margin': NumberField(value_type=int, min_value=1, description="Margin for tiled fragment of image."),
             'size': NumberField(
                 value_type=int, optional=True, min_value=1,
-                description="Destination size of tiled fragment for both dimentions."
+                description="Destination size of tiled fragment for both dimensions."
             ),
             'dst_width'  : NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination width of tiled fragment."

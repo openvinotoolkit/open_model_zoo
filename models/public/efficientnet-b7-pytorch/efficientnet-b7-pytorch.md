@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `efficientnet-b7-pytorch` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946) 
+The `efficientnet-b7-pytorch` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946)
 models designed to perform image classification. This model was pretrained in TensorFlow\*, then weights were converted to PyTorch\*. All the EfficientNet models have been pretrained on the ImageNet\* image database. For details about this family of models, check out the [EfficientNets for PyTorch repository](https://github.com/rwightman/gen-efficientnet-pytorch).
 
 The model input is a blob that consists of a single image with the [3x600x600] shape in the RGB
@@ -12,8 +12,6 @@ order. Before passing the image blob to the network, do the following:
 
 The model output for `efficientnet-b7-pytorch` is the typical object classifier output for
 the 1000 different classifications matching those in the ImageNet database.
-
-## Example
 
 ## Specification
 
@@ -29,9 +27,7 @@ the 1000 different classifications matching those in the ImageNet database.
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
 | Top 1  | 84.42%         | 84.42%          |
-| Top 5  | 96.91%         | 96.91%          | 
-
-## Performance
+| Top 5  | 96.91%         | 96.91%          |
 
 ## Input
 
@@ -65,14 +61,14 @@ Channel order is `BGR`.
 Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in the [0, 1] range
+- `C` - predicted probabilities for each class in the logits format
 
 ### Converted Model
 
 Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in the [0, 1] range
+- `C` - predicted probabilities for each class in the logits format
 
 ## Legal Information
 

@@ -42,7 +42,7 @@ std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
 
   // assign space id
   auto it = std::find(vocabulary.begin(), vocabulary.end(), " ");
-  int space_id = it - vocabulary.begin();
+  int space_id = int(it - vocabulary.begin());
   // if no space in vocabulary
   if ((size_t)space_id >= vocabulary.size()) {
     space_id = -2;
@@ -94,7 +94,7 @@ std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
           continue;
         }
         // repeated character
-        if (c == prefix->character) {
+        if (c == size_t(prefix->character)) {
           prefix->log_prob_nb_cur = log_sum_exp(
               prefix->log_prob_nb_cur, log_prob_c + prefix->log_prob_nb_prev);
         }
@@ -104,16 +104,16 @@ std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
         if (prefix_new != nullptr) {
           float log_p = -NUM_FLT_INF;
 
-          if (c == prefix->character &&
+          if (c == size_t(prefix->character) &&
               prefix->log_prob_b_prev > -NUM_FLT_INF) {
             log_p = log_prob_c + prefix->log_prob_b_prev;
-          } else if (c != prefix->character) {
+          } else if (c != size_t(prefix->character)) {
             log_p = log_prob_c + prefix->score;
           }
 
           // language model scoring
           if (ext_scorer != nullptr &&
-              (c == space_id || ext_scorer->is_character_based())) {
+              (c == size_t(space_id) || ext_scorer->is_character_based())) {
             PathTrie *prefix_to_score = nullptr;
             // skip scoring the space
             if (ext_scorer->is_character_based()) {
@@ -169,7 +169,7 @@ std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
   size_t num_prefixes = std::min(prefixes.size(), beam_size);
   std::sort(prefixes.begin(), prefixes.begin() + num_prefixes, prefix_compare);
 
-  // compute aproximate ctc score as the return score, without affecting the
+  // compute approximate ctc score as the return score, without affecting the
   // return order of decoding result. To delete when decoder gets stable.
   for (size_t i = 0; i < beam_size && i < prefixes.size(); ++i) {
     float approx_ctc = prefixes[i]->score;
@@ -177,7 +177,7 @@ std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
       std::vector<int> output;
       std::vector<int> timesteps;
       prefixes[i]->get_path_vec(output, timesteps);
-      auto prefix_length = output.size();
+      //auto prefix_length = output.size();
       auto words = ext_scorer->split_labels(output);
       // remove word insert
       //approx_ctc = approx_ctc - prefix_length * ext_scorer->beta;

@@ -43,7 +43,7 @@ class DataStep(PipelineStep):
     def __init__(self, capture):
         super().__init__()
         self.cap = capture
-
+   
     def setup(self):
         pass
 

@@ -29,14 +29,11 @@ from .average_meter import AverageMeter
 from ..utils import UnsupportedPackage
 
 try:
-    from sklearn.metrics import roc_auc_score
-except ImportError as import_error:
-    roc_auc_score = UnsupportedPackage("sklearn.metric.roc_auc_score", import_error.msg)
-
-try:
-    from sklearn.metrics import accuracy_score
+    from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
 except ImportError as import_error:
     accuracy_score = UnsupportedPackage("sklearn.metric.accuracy_score", import_error.msg)
+    confusion_matrix = UnsupportedPackage("sklearn.metric.confusion_matrix", import_error.msg)
+    roc_auc_score = UnsupportedPackage("sklearn.metric.roc_auc_score", import_error.msg)
 
 class ClassificationAccuracy(PerImageEvaluationMetric):
     """
@@ -201,7 +198,10 @@ class ClipAccuracy(PerImageEvaluationMetric):
         self.previous_video_label = None
 
     def update(self, annotation, prediction):
-        video_id = annotation.identifier.video
+        if isinstance(annotation.identifier, list):
+            video_id = annotation.identifier[0].video
+        else:
+            video_id = annotation.identifier.video
 
         if self.previous_video_id is not None and video_id != self.previous_video_id:
             video_top_label = np.argmax(self.video_avg_prob.evaluate())
@@ -317,8 +317,8 @@ class MetthewsCorrelation(PerImageEvaluationMetric):
         return -1
 
     def evaluate(self, annotations, predictions):
-        delimeter_sum = (self.tp + self.fp) * (self.tp + self.fn) * (self.tn + self.fp) * (self.tn + self.fn)
-        return ((self.tp * self.tn) - (self.fp * self.fn)) / np.sqrt(delimeter_sum) if delimeter_sum != 0 else -1
+        delimiter_sum = (self.tp + self.fp) * (self.tp + self.fn) * (self.tn + self.fp) * (self.tn + self.fn)
+        return ((self.tp * self.tn) - (self.fp * self.fn)) / np.sqrt(delimiter_sum) if delimiter_sum != 0 else -1
 
     def reset(self):
         self.tp = 0
@@ -346,6 +346,38 @@ class RocAucScore(PerImageEvaluationMetric):
         all_targets = np.concatenate(self.targets)
         roc_auc = roc_auc_score(all_targets, all_results)
         return roc_auc
+
+    def reset(self):
+        self.targets = []
+        self.results = []
+
+class AcerScore(PerImageEvaluationMetric):
+    __provider__ = 'acer_score'
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
+    prediction_types = (ClassificationPrediction, )
+
+    def configure(self):
+        if isinstance(confusion_matrix, UnsupportedPackage):
+            confusion_matrix.raise_error(self.__provider__)
+        self.reset()
+
+    def update(self, annotation, prediction):
+        self.targets.append(annotation.label)
+        self.results.append(prediction.label)
+        return prediction.label == annotation.label
+
+    def evaluate(self, annotations, predictions):
+        all_results = np.array(self.results)
+        all_targets = np.array(self.targets)
+        tn, fp, fn, tp = confusion_matrix(y_true=all_targets,
+                                          y_pred=all_results,
+                                          ).ravel()
+
+        apcer = fp / (tn + fp) if (tn + fp) != 0 else 0
+        bpcer = fn / (fn + tp) if (fn + tp) != 0 else 0
+        acer = (apcer + bpcer) / 2
+
+        return acer
 
     def reset(self):
         self.targets = []

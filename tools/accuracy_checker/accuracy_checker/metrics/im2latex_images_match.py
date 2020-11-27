@@ -75,13 +75,13 @@ template = r"""
 
 
 def check_environment():
-    command = subprocess.run(["pdflatex", "--version"], stdout=PIPE, stderr=PIPE, check=False, shell=True)
+    command = subprocess.run("pdflatex --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
         raise EnvironmentError("pdflatex not installed, please install it: \n{}".format(command.stderr))
-    command = subprocess.run(["gs", "--version"], stdout=PIPE, stderr=PIPE, check=False, shell=True)
+    command = subprocess.run("gs --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
         raise EnvironmentError("ghostscript not installed, please install it: \n{}".format(command.stderr))
-    command = subprocess.run(["convert", "--version"], stdout=PIPE, stderr=PIPE, check=False, shell=True)
+    command = subprocess.run("convert --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
         raise EnvironmentError("imagemagick not installed, please install it: \n{}".format(command.stderr))
 
@@ -215,7 +215,7 @@ def preprocess(img):
     Returns:
         np.array: preprocessed image
     """
-    # transpose for more convinient work
+    # transpose for more convenient work
     img = np.transpose(img)
     img = (img >= 160).astype(np.uint8)
     return img
@@ -254,7 +254,7 @@ def match_images(params):
     if (padded_im_1 == padded_im_2).all():
         return True, True
 
-    # check if difference realy is (e.g. it is not shift on 1-2 px)
+    # check if difference really is (e.g. it is not shift on 1-2 px)
     diff = np.zeros((*padded_im_1.shape, 3), dtype=np.uint8)
     diff[(padded_im_1 == 1) * (padded_im_2 == 1), :] = (255, 255, 255)
     diff[(padded_im_1 == 1) * (padded_im_2 == 0), :] = (255, 0, 0)

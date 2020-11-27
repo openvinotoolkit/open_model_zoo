@@ -28,6 +28,7 @@ from enum import Enum
 import cv2
 import numpy as np
 from openvino.inference_engine import IECore
+import ngraph as ng
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import helpers
@@ -84,26 +85,28 @@ class YoloParams:
     # ------------------------------------------- Extracting layer parameters ------------------------------------------
     # Magic numbers are copied from yolo samples
     def __init__(self, param, side):
-        self.num = 3 if 'num' not in param else int(param['num'])
-        self.coords = 4 if 'coords' not in param else int(param['coords'])
-        self.classes = 80 if 'classes' not in param else int(param['classes'])
+        self.num = int(param.get('num', 3))
+        self.coords = int(param.get('coords', 4))
+        self.classes = int(param.get('classes', 80))
         self.side = side
-        self.anchors = [10.0, 13.0, 16.0, 30.0, 33.0, 23.0, 30.0, 61.0, 62.0, 45.0, 59.0, 119.0, 116.0, 90.0, 156.0,
-                        198.0,
-                        373.0, 326.0] if 'anchors' not in param else [float(a) for a in param['anchors'].split(',')]
+        self.anchors = param.get(
+            'anchors',
+            [10.0, 13.0, 16.0, 30.0, 33.0, 23.0, 30.0, 61.0, 62.0, 45.0, 59.0, 119.0, 116.0, 90.0, 156.0,
+            198.0, 373.0, 326.0]
+            )
 
-        self.isYoloV3 = False
+        self.is_yolo_v3 = False
 
-        if param.get('mask'):
-            mask = [int(idx) for idx in param['mask'].split(',')]
+        if 'mask' in param:
+            mask = [int(idx) for idx in param['mask']]
             self.num = len(mask)
 
-            maskedAnchors = []
+            masked_anchors = []
             for idx in mask:
-                maskedAnchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
-            self.anchors = maskedAnchors
+                masked_anchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
+            self.anchors = masked_anchors
 
-            self.isYoloV3 = True # Weak way to determine but the only one.
+            self.is_yolo_v3 = True # Weak way to determine but the only one.
 
 
 class Modes(Enum):
@@ -141,7 +144,7 @@ def scale_bbox(x, y, height, width, class_id, confidence, im_h, im_w, is_proport
 def parse_yolo_region(predictions, resized_image_shape, original_im_shape, params, threshold, is_proportional):
     # ------------------------------------------ Validating output parameters ------------------------------------------
     _, _, out_blob_h, out_blob_w = predictions.shape
-    assert out_blob_w == out_blob_h, "Invalid size of output blob. It sould be in NCHW layout and height should " \
+    assert out_blob_w == out_blob_h, "Invalid size of output blob. It should be in NCHW layout and height should " \
                                      "be equal to width. Current height = {}, current width = {}" \
                                      "".format(out_blob_h, out_blob_w)
 
@@ -149,7 +152,7 @@ def parse_yolo_region(predictions, resized_image_shape, original_im_shape, param
     orig_im_h, orig_im_w = original_im_shape
     resized_image_h, resized_image_w = resized_image_shape
     objects = list()
-    size_normalizer = (resized_image_w, resized_image_h) if params.isYoloV3 else (params.side, params.side)
+    size_normalizer = (resized_image_w, resized_image_h) if params.is_yolo_v3 else (params.side, params.side)
     bbox_size = params.coords + 1 + params.classes
     # ------------------------------------------- Parsing YOLO Region output -------------------------------------------
     for row, col, n in np.ndindex(params.side, params.side, params.num):
@@ -221,12 +224,27 @@ def preprocess_frame(frame, input_height, input_width, nchw_shape, keep_aspect_r
     return in_frame
 
 
-def get_objects(output, net, new_frame_height_width, source_height_width, prob_threshold, is_proportional):
+def get_output_info(net):
+    def get_parent(node):
+        return node.inputs()[0].get_source_output().get_node()
+    ng_func = ng.function_from_cnn(net)
+    output_info = {}
+    for node in ng_func.get_ordered_ops():
+        layer_name = node.get_friendly_name()
+        if layer_name not in net.outputs:
+            continue
+        shape = list(get_parent(node).shape)
+        yolo_params = YoloParams(node._get_attributes(), shape[2])
+        output_info[layer_name] = (shape, yolo_params)
+
+    return output_info
+
+def get_objects(output, output_info, new_frame_height_width, source_height_width, prob_threshold, is_proportional):
     objects = list()
 
     for layer_name, out_blob in output.items():
-        out_blob = out_blob.buffer.reshape(net.layers[net.layers[layer_name].parents[0]].out_data[0].shape)
-        layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
+        output_shape, layer_params = output_info[layer_name]
+        out_blob = out_blob.buffer.reshape(output_shape)
         objects += parse_yolo_region(out_blob, new_frame_height_width, source_height_width, layer_params,
                                      prob_threshold, is_proportional)
 
@@ -240,8 +258,8 @@ def filter_objects(objects, iou_threshold, prob_threshold):
         if objects[i]['confidence'] == 0:
             continue
         for j in range(i + 1, len(objects)):
-            # We perform IOU only on objects of same class 
-            if objects[i]['class_id'] != objects[j]['class_id']: 
+            # We perform IOU only on objects of same class
+            if objects[i]['class_id'] != objects[j]['class_id']:
                 continue
 
             if intersection_over_union(objects[i], objects[j]) > iou_threshold:
@@ -312,6 +330,7 @@ def main():
     # -------------------- 2. Reading the IR generated by the Model Optimizer (.xml and .bin files) --------------------
     log.info("Loading network")
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
+    output_info = get_output_info(net)
 
     assert len(net.input_info) == 1, "Sample supports only YOLO V3 based single input topologies"
 
@@ -376,7 +395,7 @@ def main():
 
             next_frame_id_to_show += 1
 
-            objects = get_objects(output, net, (input_height, input_width), frame.shape[:-1], args.prob_threshold,
+            objects = get_objects(output, output_info, (input_height, input_width), frame.shape[:-1], args.prob_threshold,
                                   args.keep_aspect_ratio)
             objects = filter_objects(objects, args.iou_threshold, args.prob_threshold)
 
@@ -411,7 +430,7 @@ def main():
 
             helpers.put_highlighted_text(frame, "{} mode".format(mode.current.name), (10, int(origin_im_size[0] - 20)),
                                          cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
-            
+
             if is_same_mode and prev_mode_active_request_count == 0:
                 mode_metrics[mode.current].update(start_time, frame)
             else:

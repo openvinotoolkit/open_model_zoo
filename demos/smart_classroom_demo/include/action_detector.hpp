@@ -76,7 +76,7 @@ struct ActionDetectorConfig : public CnnConfig {
     /** @brief Suffix of name of output blob with action confidence info */
     std::string new_action_conf_blob_name_suffix{"_anchor_"};
 
-    /** @brief Scale paramter for Soft-NMS algorithm */
+    /** @brief Scale parameter for Soft-NMS algorithm */
     float nms_sigma = 0.6f;
     /** @brief Threshold for detected objects */
     float detection_confidence_threshold = 0.4f;
@@ -204,7 +204,7 @@ private:
     * @brief Carry out Soft Non-Maximum Suppression algorithm under detected actions
     *
     * @param detections Detected actions
-    * @param sigma Scale paramter
+    * @param sigma Scale parameter
     * @param top_k Number of top-score bboxes
     * @param min_det_conf Minimum detection confidence
     * @param out_indices Out indices of valid detections

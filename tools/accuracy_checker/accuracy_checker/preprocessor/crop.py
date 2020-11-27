@@ -131,6 +131,9 @@ class Crop(Preprocessor):
             ),
             'central_fraction': NumberField(
                 value_type=float, min_value=0, max_value=1, optional=True, description="Central Fraction."
+            ),
+            'max_square': BoolField(
+                optional=True, default=False, description='crop center area by shortest side'
             )
         })
 
@@ -140,25 +143,30 @@ class Crop(Preprocessor):
         self.use_pillow = self.get_value_from_config('use_pillow')
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self.central_fraction = self.get_value_from_config('central_fraction')
-        if self.dst_height is None and self.dst_width is None and self.central_fraction is None:
-            raise ConfigError('sizes for crop or central_fraction should be provided')
+        self.max_square = self.get_value_from_config('max_square')
+        if self.dst_height is None and self.dst_width is None and self.central_fraction is None and not self.max_square:
+            raise ConfigError('sizes for crop or central_fraction or max_square should be provided')
         if self.dst_height and self.dst_width and self.central_fraction:
-            raise ConfigError('both sizes and central fraction provided  for cropping')
+            raise ConfigError('both sizes and central fraction provided for cropping')
+        if self.dst_height and self.dst_width and self.max_square:
+            raise ConfigError('both sizes and max_square provided for cropping')
+        if self.central_fraction and self.max_square:
+            raise ConfigError('both central fraction and nax_square provided for cropping')
 
-        if not self.central_fraction:
+        if not self.central_fraction and not self.max_square:
             if self.dst_height is None or self.dst_width is None:
-                raise ConfigError('one from crop dimentions is not provided')
+                raise ConfigError('one from crop dimensions is not provided')
 
     def process(self, image, annotation_meta=None):
         is_simple_case = not isinstance(image.data, list)  # otherwise -- pyramid, tiling, etc
         data = image.data
 
         image.data = self.process_data(
-            data, self.dst_height, self.dst_width, self.central_fraction,
+            data, self.dst_height, self.dst_width, self.central_fraction, self.max_square,
             self.use_pillow, is_simple_case, image.metadata
         ) if not isinstance(data, list) else [
             self.process_data(
-                fragment, self.dst_height, self.dst_width, self.central_fraction,
+                fragment, self.dst_height, self.dst_width, self.central_fraction, self.max_square,
                 self.use_pillow, is_simple_case, image.metadata
             ) for fragment in image.data
         ]
@@ -166,11 +174,14 @@ class Crop(Preprocessor):
         return image
 
     @staticmethod
-    def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata):
+    def process_data(data, dst_height, dst_width, central_fraction, max_square, use_pillow, is_simple_case, metadata):
         height, width = data.shape[:2]
-        if not central_fraction:
+        if not central_fraction and not max_square:
             new_height = dst_height
             new_width = dst_width
+        elif max_square:
+            new_height = min(height, width)
+            new_width = min(height, width)
         else:
             new_height = int(height * central_fraction)
             new_width = int(width * central_fraction)
@@ -309,7 +320,7 @@ class Crop3D(Preprocessor):
         parameters.update({
             'size': NumberField(
                 value_type=int, optional=True, min_value=1,
-                description="Destination size for 3d crop for all dimentions."
+                description="Destination size for 3d crop for all dimensions."
             ),
             'dst_width': NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination width for 3d crop."
@@ -584,3 +595,106 @@ class CropWithPadSize(Preprocessor):
         )
         image.data = cv2.resize(cropped_data, (self.size, self.size))
         return image
+
+
+class ObjectCropWithScale(Preprocessor):
+    __provider__ = 'object_crop_with_scale'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'size': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination size for cropping both dimensions."
+            ),
+            'dst_width': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination width for image cropping respectively."
+            ),
+            'dst_height': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination height for image cropping respectively."
+            )
+        })
+        return params
+
+    def configure(self):
+        self.dst_height, self.dst_width = get_size_from_config(self.config)
+
+    def process(self, image, annotation_meta=None):
+        meta = annotation_meta or {}
+        center = meta.get('center', [-1, 0])
+        scale = meta.get('scale', 1)
+        if center[0] != -1:
+            center[1] = center[1] + 15 * scale
+            scale = scale * 1.25
+
+        image.data = self.crop(image.data, np.array(center), scale)
+        image.metadata['scale'] = scale
+        image.metadata['center'] = center
+
+        return image
+
+    def crop(self, img, center, scale):
+        # Preprocessing for efficient cropping
+        height, width = img.shape[:2]
+        sf = scale * 200.0 / self.dst_width
+        if sf <= 2:
+            new_size = int(np.math.floor(max(height, width) / sf))
+            new_height = int(np.math.floor(height / sf))
+            new_width = int(np.math.floor(width / sf))
+            if new_size < 2:
+                return (
+                    np.zeros((self.dst_width, self.dst_height, img.shape[2])) if len(img.shape) > 2
+                    else np.zeros(self.dst_width, self.dst_height)
+                )
+            img = cv2.resize(img, dsize=(new_width, new_height), interpolation=cv2.INTER_LINEAR)
+            center = center * 1.0 / sf
+            scale = scale / sf
+
+        # Upper left point
+        ul = np.array(self.transform([0, 0], center, scale, [self.dst_width, self.dst_height], invert=1))
+        # Bottom right point
+        br = np.array(
+            self.transform(
+                [self.dst_width, self.dst_height], center, scale, [self.dst_width, self.dst_height], invert=1
+            ))
+
+        new_shape = [br[1] - ul[1], br[0] - ul[0]]
+
+        if len(img.shape) > 2:
+            new_shape += [img.shape[2]]
+        new_img = np.zeros(new_shape)
+        new_x = [max(0, -ul[0]), min(br[0], img.shape[1]) - ul[0]]
+        new_y = [max(0, -ul[1]), min(br[1], img.shape[0]) - ul[1]]
+        old_x = [max(0, ul[0]), min(img.shape[1], br[0])]
+        old_y = [max(0, ul[1]), min(img.shape[0], br[1])]
+
+        if new_x[1] < new_x[0]:
+            tmp_new, tmp_old = new_x[1], old_x[0]
+            new_x[1], old_x[0] = new_x[0], old_x[1]
+            new_x[0], old_x[1] = tmp_new, tmp_old
+        new_img[new_y[0]:new_y[1], new_x[0]:new_x[1]] = img[old_y[0]:old_y[1], old_x[0]:old_x[1]]
+        new_img = cv2.resize(new_img, dsize=(self.dst_width, self.dst_height), interpolation=cv2.INTER_LINEAR)
+        return new_img
+
+    @staticmethod
+    def get_transform(center, scale, res):
+        height = 200 * scale
+        transformation = np.zeros((3, 3))
+        transformation[0, 0], transformation[1, 1] = float(res[1]) / height, float(res[0]) / height
+        transformation[0, 2] = res[1] * (-float(center[0]) / height + .5)
+        transformation[1, 2] = res[0] * (-float(center[1]) / height + .5)
+        transformation[2, 2] = 1
+        return transformation
+
+    @staticmethod
+    def transform(pt, center, scale, res, invert=0):
+        # Transform pixel location to different reference
+        transform_matrix = ObjectCropWithScale.get_transform(center, scale, res)
+        if invert:
+            transform_matrix = np.linalg.inv(transform_matrix)
+        new_pt = np.array([pt[0] - 1, pt[1] - 1, 1.]).T
+        new_pt = np.dot(transform_matrix, new_pt)
+        return new_pt[:2].astype(int) + 1

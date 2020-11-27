@@ -167,4 +167,3 @@ void KuhnMunkres::Run() {
         }
     }
 }
-

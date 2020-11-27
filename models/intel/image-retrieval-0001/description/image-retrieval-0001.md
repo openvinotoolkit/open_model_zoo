@@ -17,8 +17,6 @@ Image retrieval model based on [MobileNetV2](https://arxiv.org/abs/1801.04381) a
 | MParams                                                       | 2.535                   |
 | Source framework                                              | TensorFlow\*            |
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x224x224] — An input image in the format [BxCxHxW],

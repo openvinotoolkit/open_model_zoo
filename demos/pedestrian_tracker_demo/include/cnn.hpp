@@ -109,4 +109,3 @@ public:
 private:
     int result_size_;               ///< Length of result
 };
-

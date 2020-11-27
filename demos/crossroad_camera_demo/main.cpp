@@ -520,7 +520,7 @@ struct Load {
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers 3 certain topologies and cannot be generalized **/
-        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -556,7 +556,7 @@ int main(int argc, char *argv[]) {
             slog::info << "Loading device " << flag << slog::endl;
 
             /** Printing device version **/
-            std::cout << ie.GetVersions(flag) << std::endl;
+            slog::info << printable(ie.GetVersions(flag)) << slog::endl;
 
             if ((flag.find("CPU") != std::string::npos)) {
                 if (!FLAGS_l.empty()) {
@@ -836,7 +836,7 @@ int main(int argc, char *argv[]) {
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
         slog::info << "Total Inference time: " << total.count() << slog::endl;
 
-        /** Show performace results **/
+        /** Show performance results **/
         if (FLAGS_pc) {
             std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, deviceNames);
             std::cout << "Performance counts for person detection: " << std::endl;

@@ -181,7 +181,7 @@ void ParseYOLOV3Output(const YoloParams &params, const std::string & output_name
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers a certain topology and cannot be generalized for any object detection **/
-        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         // ------------------------------ Parsing and validating the input arguments ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
         Core ie;
 
         slog::info << "Device info: " << slog::endl;
-        std::cout << ie.GetVersions(FLAGS_d);
+        slog::info << printable(ie.GetVersions(FLAGS_d)) << slog::endl;
 
         /**Loading extensions to the devices **/
 
@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> labels;
         if (!FLAGS_labels.empty()) {
             std::ifstream inputFile(FLAGS_labels);
-            std::string label; 
+            std::string label;
             while (std::getline(inputFile, label)) {
                 labels.push_back(label);
             }
@@ -451,7 +451,7 @@ int main(int argc, char *argv[]) {
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
         std::cout << "Total Inference time: " << total.count() << std::endl;
 
-        /** Showing performace results **/
+        /** Showing performance results **/
         if (FLAGS_pc) {
             printPerformanceCounts(*async_infer_request_curr, std::cout, getFullDeviceName(ie, FLAGS_d));
         }

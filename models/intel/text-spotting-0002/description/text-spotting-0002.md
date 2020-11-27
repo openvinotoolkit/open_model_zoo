@@ -33,8 +33,6 @@ The text-spotting-0002-detector model is a Mask-RCNN-based text detector with Re
 | MParams                                       | 26.497    |
 
 
-### Performance
-
 ### Inputs
 
 1.	Name: `im_data` , shape: [1x3x768x1280]. An input image in the [1xCxHxW] format.
@@ -65,8 +63,6 @@ The text-spotting-0002-recognizer-encoder model is a fully-convolutional encoder
 | MParams                                       | 1.328     |
 
 
-### Performance
-
 ### Inputs
 
 Name: `input` , shape: [1x64x28x28]. Text recognition features obtained from detection part.
@@ -83,8 +79,6 @@ Name: `output`, shape: [1x256x28x28]. Encoded text recognition features.
 | GFlops                                        | 0.002     |
 | MParams                                       | 0.273     |
 
-
-### Performance
 
 ### Inputs
 

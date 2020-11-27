@@ -21,8 +21,11 @@ from ..representation import (
     SegmentationPrediction, SegmentationAnnotation,
     StyleTransferAnnotation, StyleTransferPrediction,
     SuperResolutionPrediction, SuperResolutionAnnotation,
-    ImageProcessingPrediction, ImageProcessingAnnotation)
-from ..postprocessor.postprocessor import PostprocessorWithSpecificTargets
+    ImageProcessingPrediction, ImageProcessingAnnotation,
+    ImageInpaintingAnnotation, ImageInpaintingPrediction,
+    SalientRegionAnnotation, SalientRegionPrediction
+)
+from ..postprocessor.postprocessor import PostprocessorWithSpecificTargets, ApplyToOption
 from ..postprocessor import ResizeSegmentationMask
 from ..config import NumberField
 from ..utils import get_size_from_config
@@ -33,9 +36,11 @@ class Resize(PostprocessorWithSpecificTargets):
     __provider__ = 'resize'
 
     prediction_types = (StyleTransferPrediction, ImageProcessingPrediction,
-                        SegmentationPrediction, SuperResolutionPrediction, )
+                        SegmentationPrediction, SuperResolutionPrediction,
+                        ImageInpaintingPrediction)
     annotation_types = (StyleTransferAnnotation, ImageProcessingAnnotation,
-                        SegmentationAnnotation, SuperResolutionAnnotation, )
+                        SegmentationAnnotation, SuperResolutionAnnotation,
+                        ImageInpaintingPrediction)
 
     @classmethod
     def parameters(cls):
@@ -56,6 +61,22 @@ class Resize(PostprocessorWithSpecificTargets):
 
     def configure(self):
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
+        self._required_both = True
+
+    def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
+        if self._deprocess_predictions:
+            self._calculate_scale(image_metadata)
+        self.process_image(annotation, prediction)
+
+    def _calculate_scale(self, image_metadata):
+        if image_metadata is None:
+            self.x_scale, self.y_scale = 1, 1
+            return
+        image_h, image_w = image_metadata['image_size'][:2]
+        input_shape = next(iter(image_metadata['input_shape'].values()))
+        input_h, input_w = input_shape[2:] if input_shape[1] in [1, 3, 4] else input_shape[1:3]
+        self.x_scale = image_w / input_w
+        self.y_scale = image_h / input_h
 
     def process_image(self, annotations, predictions):
         @singledispatch
@@ -68,6 +89,8 @@ class Resize(PostprocessorWithSpecificTargets):
         @resize.register(SuperResolutionPrediction)
         @resize.register(ImageProcessingAnnotation)
         @resize.register(ImageProcessingPrediction)
+        @resize.register(ImageInpaintingAnnotation)
+        @resize.register(ImageInpaintingPrediction)
         def _(entry, height, width):
             entry.value = entry.value.astype(np.uint8)
             data = Image.fromarray(entry.value)
@@ -77,6 +100,7 @@ class Resize(PostprocessorWithSpecificTargets):
             return entry
 
         @resize.register(SegmentationPrediction)
+        @resize.register(SalientRegionPrediction)
         def _(entry, height, width):
             if len(entry.mask.shape) == 2:
                 entry.mask = ResizeSegmentationMask.segm_resize(entry.mask, width, height)
@@ -91,6 +115,7 @@ class Resize(PostprocessorWithSpecificTargets):
             return entry
 
         @resize.register(SegmentationAnnotation)
+        @resize.register(SalientRegionAnnotation)
         def _(entry, height, width):
             entry.mask = ResizeSegmentationMask.segm_resize(entry.mask, width, height)
 
@@ -105,22 +130,47 @@ class Resize(PostprocessorWithSpecificTargets):
 
         @set_sizes.register(SuperResolutionAnnotation)
         def _(entry):
-            height = self.dst_height if self.dst_height else entry.shape[0]
-            width = self.dst_width if self.dst_width else entry.shape[1]
+            height = self.dst_height if self.dst_height else entry.value.shape[0]
+            width = self.dst_width if self.dst_width else entry.value.shape[1]
 
             return height, width
 
-        if annotations:
-            for annotation, prediction in zip(annotations, predictions):
-                height, width = set_sizes(annotation)
-                resize(prediction, height, width)
-        else:
-            for prediction in predictions:
-                height, width = set_sizes(None)
-                resize(prediction, height, width)
+        @set_sizes.register(SuperResolutionPrediction)
+        def _(entry):
+            if self._deprocess_predictions:
+                height = int(entry.value.shape[0] * self.y_scale)
+                width = int(entry.value.shape[1] * self.x_scale)
+                return height, width
+            height = self.dst_height if self.dst_height else entry.value.shape[0]
+            width = self.dst_width if self.dst_width else entry.value.shape[1]
 
-        for annotation in annotations:
-            height, width = set_sizes(annotation)
-            resize(annotation, height, width)
+            return height, width
+
+        @set_sizes.register(SegmentationPrediction)
+        @set_sizes.register(SalientRegionPrediction)
+        def _(entry):
+            if self._deprocess_predictions:
+                return self.image_size[:2]
+            height = self.dst_height if self.dst_height else self.image_size[0]
+            width = self.dst_width if self.dst_width else self.image_size[1]
+
+            return height, width
+
+        if self.apply_to is None or self.apply_to in [ApplyToOption.PREDICTION, ApplyToOption.ALL]:
+            if annotations:
+                for annotation, prediction in zip(annotations, predictions):
+                    height, width = set_sizes(annotation or prediction)
+                    resize(prediction, height, width)
+            else:
+                for prediction in predictions:
+                    height, width = set_sizes(prediction)
+                    resize(prediction, height, width)
+
+        if self.apply_to is None or self.apply_to in [ApplyToOption.ANNOTATION, ApplyToOption.ALL]:
+            for annotation in annotations:
+                if annotation is None:
+                    continue
+                height, width = set_sizes(annotation)
+                resize(annotation, height, width)
 
         return annotations, predictions

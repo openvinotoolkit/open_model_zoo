@@ -67,8 +67,8 @@ def check_topology_is_supported(supported_topology_types, filter_topology_types)
     for cls in supported_topology_classes:
         for filter_cls in filter_topology_classes:
             filter_cls_parents = parents(filter_cls, [GenericTopology])
-            filter_cls_childs = inheritors(filter_cls)
-            if cls in filter_cls_childs or cls in filter_cls_parents:
+            filter_cls_children = inheritors(filter_cls)
+            if cls in filter_cls_children or cls in filter_cls_parents:
                 return True
     return False
 

@@ -7,8 +7,6 @@ based on a combination of complementary search techniques as well as a novel arc
 `mobilenet-v3-small-1.0-224-tf` is targeted for low resource use cases.
 For details see [paper](https://arxiv.org/abs/1905.02244).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -24,8 +22,6 @@ For details see [paper](https://arxiv.org/abs/1905.02244).
 | ------ | -------------- | --------------- |
 | Top 1  | 67.36%          | 67.36%           |
 | Top 5  | 87.45%          | 87.45%           |
-
-## Performance
 
 ## Input
 

@@ -173,7 +173,7 @@ The demo provides tools for measure quality of the multi camera multi target tra
 
 For MOT metrics evaluation we use [py-motmetrics](https://github.com/cheind/py-motmetrics) module.
 It is necessary to have ground truth annotation file for the evaluation. Supported format
-of the ground truth annotation can be obtained via the annotation tool [CVAT](https://github.com/opencv/cvat).
+of the ground truth annotation can be obtained via the annotation tool [CVAT](https://github.com/openvinotoolkit/cvat).
 The annotation must includes the following labels and attributes:
 ```json
 [

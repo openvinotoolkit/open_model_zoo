@@ -97,13 +97,13 @@ def main():
     # check input names
     if set(input_names_model_emb) != set(input_names_emb):
         log.error("Unexpected embedding network input names")
-        raise Exception("Unexpected embedding nework input names")
+        raise Exception("Unexpected embedding network input names")
 
     # check outputs
     output_names_model_emb = list(ie_encoder_emb.outputs.keys())
     if len(output_names_model_emb)>1:
-        log.error("Expected only single output in embedding nework but {} outputs detected".format(output_names_model_emb))
-        raise Exception("Unexpected number of embedding nework outputs")
+        log.error("Expected only single output in embedding network but {} outputs detected".format(output_names_model_emb))
+        raise Exception("Unexpected number of embedding network outputs")
 
 
     #reshape embedding model to infer short questions and long contexts
@@ -150,8 +150,8 @@ def main():
         output_names_model_qa = list(ie_encoder_qa.outputs.keys())
         log.info("Network input->output names: {}->{}".format(input_names_model_qa, output_names_model_qa))
         if set(input_names_model_qa) != set(input_names_qa) or set(output_names_model_qa) != set(output_names_qa):
-            log.error("Unexpected nework input or output names")
-            raise Exception("Unexpected nework input or output names")
+            log.error("Unexpected network input or output names")
+            raise Exception("Unexpected network input or output names")
 
         # Loading model to the plugin
         log.info("Loading model to the plugin")
@@ -335,7 +335,7 @@ def main():
                 max_e = c_data.c_tokens_se[max_e][1]
 
                 # check that answers list does not have answer yet
-                # it could be because of context windows overlaping
+                # it could be because of context windows overlapping
                 same = [i for i, a in enumerate(answers) if a[1] == max_s and a[2]==max_e and a[3] is c_data.context]
                 if same:
                     assert len(same) == 1

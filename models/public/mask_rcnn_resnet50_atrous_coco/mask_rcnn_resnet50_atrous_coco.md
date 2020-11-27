@@ -5,8 +5,6 @@
 Mask R-CNN Resnet50 Atrous trained on COCO dataset. It is used for object instance segmentation.
 For details, see the [paper](https://arxiv.org/abs/1703.06870).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -22,8 +20,6 @@ For details, see the [paper](https://arxiv.org/abs/1703.06870).
 | ------ | ----- |
 | coco_orig_precision | 29.7512%|
 | coco_orig_segm_precision | 27.4597%|
-
-## Performance
 
 ## Input
 

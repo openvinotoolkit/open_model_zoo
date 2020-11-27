@@ -1,0 +1,26 @@
+models:
+  - name: common-sign-language-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+        inputs:
+          - type: INPUT
+            name: input
+            layout: NCDHW
+
+    datasets:
+      - name: jester
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224
+          - type: bgr_to_rgb
+
+        metrics:
+          - type: accuracy
+            name: rank@1
+            top_k: 1

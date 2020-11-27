@@ -601,8 +601,6 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
         return output_per_box
 
 
-
-
 class MTCNNEvaluator(BaseEvaluator):
     def __init__(
             self, dataset_config, launcher, stages
@@ -623,12 +621,17 @@ class MTCNNEvaluator(BaseEvaluator):
             output_callback=None,
             allow_pairwise_subset=False,
             dump_prediction_to_annotation=False,
+            calculate_metrics=True,
             **kwargs):
         def no_detections(batch_pred):
             return batch_pred[0].size == 0
         self._prepare_dataset(dataset_tag)
         self._create_subset(subset, num_images, allow_pairwise_subset)
         _progress_reporter = self._prepare_progress_reporter(check_progress, kwargs.get('progress_reporter'))
+        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
+        if compute_intermediate_metric_res:
+            metric_interval = kwargs.get('metrics_interval', 1000)
+            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_prediction = []
@@ -652,9 +655,7 @@ class MTCNNEvaluator(BaseEvaluator):
                 )
                 if no_detections(batch_prediction):
                     break
-
             batch_annotation, batch_prediction = self.postprocessor.process_batch(batch_annotation, batch_prediction)
-
             metrics_result = None
             if self.metric_executor:
                 metrics_result, _ = self.metric_executor.update_metrics_on_batch(
@@ -663,7 +664,6 @@ class MTCNNEvaluator(BaseEvaluator):
                 if self.metric_executor.need_store_predictions:
                     self._annotations.extend(batch_annotation)
                     self._predictions.extend(batch_prediction)
-
             if output_callback:
                 output_callback(
                     list(self.stages.values())[-1].transform_for_callback(batch_size, batch_raw_prediction),
@@ -673,6 +673,10 @@ class MTCNNEvaluator(BaseEvaluator):
                 )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
+                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(
+                        print_results=True, ignore_results_formatting=ignore_results_formatting
+                    )
 
         if _progress_reporter:
             _progress_reporter.finish()
@@ -726,7 +730,6 @@ class MTCNNEvaluator(BaseEvaluator):
         models_info = config['network_info']
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
         stages = build_stages(models_info, [], launcher, config.get('_models'), delayed_model_loading)
-
         return cls(dataset_config, launcher, stages)
 
     @staticmethod
@@ -909,31 +912,25 @@ def filter_valid(dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph):
 
 def pad(boxesA, h, w):
     boxes = boxesA.copy()
-
     tmph = boxes[:, 3] - boxes[:, 1] + 1
     tmpw = boxes[:, 2] - boxes[:, 0] + 1
     numbox = boxes.shape[0]
-
     dx = np.ones(numbox)
     dy = np.ones(numbox)
     edx = tmpw
     edy = tmph
-
     x = boxes[:, 0:1][:, 0]
     y = boxes[:, 1:2][:, 0]
     ex = boxes[:, 2:3][:, 0]
     ey = boxes[:, 3:4][:, 0]
-
     tmp = np.where(ex > w)[0]
     if tmp.shape[0] != 0:
         edx[tmp] = -ex[tmp] + w - 1 + tmpw[tmp]
         ex[tmp] = w - 1
-
     tmp = np.where(ey > h)[0]
     if tmp.shape[0] != 0:
         edy[tmp] = -ey[tmp] + h - 1 + tmph[tmp]
         ey[tmp] = h - 1
-
     tmp = np.where(x < 1)[0]
     if tmp.shape[0] != 0:
         dx[tmp] = 2 - x[tmp]
@@ -943,7 +940,6 @@ def pad(boxesA, h, w):
     if tmp.shape[0] != 0:
         dy[tmp] = 2 - y[tmp]
         y[tmp] = np.ones_like(y[tmp])
-
     # for python index from 0, while matlab from 1
     dy = np.maximum(0, dy - 1)
     dx = np.maximum(0, dx - 1)
@@ -960,11 +956,9 @@ def rerec(bboxA):
     w = bboxA[:, 2] - bboxA[:, 0]
     h = bboxA[:, 3] - bboxA[:, 1]
     l = np.maximum(w, h).T
-
     bboxA[:, 0] = bboxA[:, 0] + w * 0.5 - l * 0.5
     bboxA[:, 1] = bboxA[:, 1] + h * 0.5 - l * 0.5
     bboxA[:, 2:4] = bboxA[:, 0:2] + np.repeat([l], 2, axis=0).T
-
     return bboxA
 
 
@@ -992,5 +986,4 @@ def cut_roi(image, prediction, dst_size, include_bound=True):
         tmp[tmp_ys, tmp_xs] = img[img_ys, img_xs]
         tempimg[k, :, :, :] = cv2.resize(tmp, (dst_size, dst_size))
     image.data = tempimg
-
     return image

@@ -81,7 +81,7 @@ float LanguageModel::find_ngram(LmState& words_backoffs) const {
 
   // Medium trie layers: 2-gram .. (n-1)-gram, and including n-gram.
   const WordIndex not_found = (WordIndex)(-1);
-  for (int k = 2; k <= config_.order && k < words.size() + 1 && l < r; k++) {
+  for (size_t k = 2; k <= config_.order && k < words.size() + 1 && l < r; k++) {
     const WordIndex word = words[k-1];
     const MediumLayer& layer = config_.medium_layers[k-2];
 

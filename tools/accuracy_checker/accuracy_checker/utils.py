@@ -111,6 +111,12 @@ def string_to_list(string):
     return list(entry for entry in processed)
 
 
+def validate_print_interval(value, min_value=0, max_value=None):
+    if value <= min_value:
+        raise ValueError('{} less than minimum required {}'.format(value, min_value))
+    if max_value and value >= max_value:
+        raise ValueError('{} greater than maximum required {}'.format(value, max_value))
+
 class JSONDecoderWithAutoConversion(json.JSONDecoder):
     """
     Custom json decoder to convert all strings into numbers (int, float) during reading json file.
@@ -268,6 +274,10 @@ def is_single_metric_source(source):
     return np.size(source.split(',')) == 1
 
 
+def is_path(data):
+    return isinstance(data, (Path, str))
+
+
 def read_txt(file: Union[str, Path], sep='\n', **kwargs):
     def is_empty(string):
         return not string or string.isspace()
@@ -408,10 +418,6 @@ def set_image_metadata(annotation, images):
     annotation.set_image_size(image_sizes)
 
     return annotation, images
-
-
-def get_indexs(container, element):
-    return [index for index, container_element in enumerate(container) if container_element == element]
 
 
 def find_nearest(array, value, mode=None):
@@ -809,3 +815,6 @@ class UnsupportedPackage:
         msg = "{package} is not installed. Please install it before using {provider}.\n{message}".format(
             provider=provider, package=self.package, message=self.msg)
         raise ImportError(msg)
+
+    def __call__(self, *args, **kwargs):
+        self.raise_error('')

@@ -64,6 +64,7 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
             output_callback=None,
             allow_pairwise_subset=False,
             dump_prediction_to_annotation=False,
+            calculate_metrics=True,
             **kwargs):
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
@@ -71,6 +72,8 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
         self._annotations, self._predictions = [], []
 
         self._create_subset(subset, num_images, allow_pairwise_subset)
+        metric_config = self.configure_intermediate_metrics_results(kwargs)
+        compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
 
         if 'progress_reporter' in kwargs:
             _progress_reporter = kwargs['progress_reporter']
@@ -93,7 +96,7 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
                 batch_identifiers, batch_inputs_extr, encoder_callback=encoder_callback
             )
             metrics_result = None
-            if self.metric_executor:
+            if self.metric_executor and calculate_metrics:
                 metrics_result, _ = self.metric_executor.update_metrics_on_batch(
                     batch_input_ids, batch_annotation, batch_prediction
                 )
@@ -110,6 +113,10 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
                 )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
+                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(
+                        print_results=True, ignore_results_formatting=ignore_results_formatting
+                    )
 
         if _progress_reporter:
             _progress_reporter.finish()
@@ -194,6 +201,15 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
             self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
         elif num_images is not None:
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
+
+    @staticmethod
+    def configure_intermediate_metrics_results(config):
+        compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
+        metric_interval, ignore_results_formatting = None, None
+        if compute_intermediate_metric_res:
+            metric_interval = config.get('metrics_interval', 1000)
+            ignore_results_formatting = config.get('ignore_results_formatting', False)
+        return compute_intermediate_metric_res, metric_interval, ignore_results_formatting
 
     def load_network(self, network=None):
         self.model.load_network(network, self.launcher)

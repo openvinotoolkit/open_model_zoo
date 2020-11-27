@@ -27,7 +27,7 @@ from .config import ConfigReader
 from .logging import print_info, add_file_handler, exception
 from .evaluators import ModelEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
-from .utils import get_path, cast_to_bool, check_file_existence
+from .utils import get_path, cast_to_bool, check_file_existence, validate_print_interval
 from . import __version__
 
 EVALUATION_MODE = {
@@ -269,6 +269,14 @@ def build_arguments_parser():
         '--profiler_logs_dir', required=False, type=partial(get_path, is_directory=True), default=Path.cwd()
     )
     parser.add_argument('--profile_report_type', required=False, choices=['csv', 'json'], default='csv')
+    parser.add_argument('--intermediate_metrics_results', required=False, default=False, type=cast_to_bool)
+    parser.add_argument('--metrics_interval', required=False, default=1000, type=int)
+    parser.add_argument(
+        '--input_precision', required=False, nargs='+',
+        help='space-separated list of precisions for network inputs. '
+             'Providing several values required <layer_name>:<precision> format. '
+             'If single value without layer_name provided, then it will be applayed to all input layers.'
+    )
 
     return parser
 
@@ -280,6 +288,13 @@ def main():
     progress_reporter = ProgressReporter.provide(progress_bar_provider, None, print_interval=args.progress_interval)
     if args.log_file:
         add_file_handler(args.log_file)
+    intermdeiate_metrics = args.intermediate_metrics_results
+    evaluator_kwargs = {}
+    if intermdeiate_metrics:
+        validate_print_interval(args.metrics_interval)
+        evaluator_kwargs['intermediate_metrics_results'] = intermdeiate_metrics
+        evaluator_kwargs['metrics_interval'] = args.metrics_interval
+        evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
 
     config, mode = ConfigReader.merge(args)
     evaluator_class = EVALUATION_MODE.get(mode)
@@ -295,7 +310,9 @@ def main():
                 profiler_dir = args.profiler_logs_dir / _timestamp
                 print_info('Metric profiling activated. Profiler output will be stored in {}'.format(profiler_dir))
                 evaluator.set_profiling_dir(profiler_dir)
-            evaluator.process_dataset(stored_predictions=args.stored_predictions, progress_reporter=progress_reporter)
+            evaluator.process_dataset(
+                stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
+            )
             metrics_results, _ = evaluator.extract_metrics_results(
                 print_results=True, ignore_results_formatting=args.ignore_result_formatting
             )

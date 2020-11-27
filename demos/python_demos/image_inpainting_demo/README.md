@@ -4,7 +4,7 @@ This demo showcases Image Inpainting with GMCNN. The task is to estimate suitabl
 to fill holes in images.
 
 ## How It Works
-This demo can work in 2 modes: 
+This demo can work in 2 modes:
 
 * GUI mode: areas for inpainting can be marked interactively using mouse painting
 * Auto mode (use -ac or -ar option for it): image will be processed automatically using randomly applied mask (-ar option) or using specific color-based mask (-ac option)
@@ -56,7 +56,7 @@ Options:
                         -mbw, -mk and -mv). Cannot be used together with -ac.
 ```
 
-To run the demo, you can use public or pretrained models. You can download the pretrained models with the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md).
+To run the demo, you can use public or pretrained models. You can download the pretrained models with the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

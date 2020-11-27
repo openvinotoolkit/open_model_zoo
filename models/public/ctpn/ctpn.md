@@ -4,8 +4,6 @@
 
 Detecting Text in Natural Image with Connectionist Text Proposal Network. For details see [paper](https://arxiv.org/abs/1609.03605).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -20,8 +18,6 @@ Detecting Text in Natural Image with Connectionist Text Proposal Network. For de
 | Metric | Value |
 | ------ | ----- |
 | hmean  | 73.67%|
-
-## Performance
 
 ## Input
 

@@ -18,10 +18,10 @@ public:
     LandmarksEstimator(InferenceEngine::Core& ie,
                        const std::string& modelPath,
                        const std::string& deviceName);
-    void virtual estimate(const cv::Mat& image,
-                          FaceInferenceResults& outputResults);
-    void virtual printPerformanceCounts() const;
-    virtual ~LandmarksEstimator();
+    void estimate(const cv::Mat& image,
+                  FaceInferenceResults& outputResults) override;
+    void printPerformanceCounts() const override;
+    ~LandmarksEstimator() override;
 
 private:
     IEWrapper ieWrapper;

@@ -69,7 +69,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
 
     def read_tsv(self):
         lines = []
-        with self.annotation_file.open('r') as ann_file:
+        with open(str(self.annotation_file), 'r', encoding="utf-8-sig") as ann_file:
             reader = csv.reader(ann_file, delimiter="\t", quotechar=None)
             for idx, line in enumerate(reader):
                 if idx == 0:

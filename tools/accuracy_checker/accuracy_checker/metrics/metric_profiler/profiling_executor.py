@@ -15,9 +15,9 @@ limitations under the License.
 """
 
 from collections import OrderedDict, namedtuple
-from .base_profiler import PROFILERS_MAPPING, MetricProfiler
+from .base_profiler import PROFILERS_MAPPING, MetricProfiler, PROFILERS_WITH_DATA_IS_LIST
 
-PorfilerID = namedtuple('ProfilerID', ['type', 'annotation_source', 'prediction_source'])
+PorfilerID = namedtuple('ProfilerID', ['type', 'annotation_source', 'prediction_source', 'name'])
 
 
 class ProfilingExecutor:
@@ -30,10 +30,13 @@ class ProfilingExecutor:
         profiler = None
         for metric_types, profiler_type in PROFILERS_MAPPING.items():
             if metric_type in metric_types:
-                profiler_id = PorfilerID(profiler_type, annotation_source, prediction_source)
+                if profiler_type in PROFILERS_WITH_DATA_IS_LIST:
+                    profiler_id = PorfilerID(profiler_type, annotation_source, prediction_source, metric_name)
+                else:
+                    profiler_id = PorfilerID(profiler_type, annotation_source, prediction_source, None)
                 if profiler_id not in self.profilers:
                     self.profilers[profiler_id] = MetricProfiler.provide(
-                        profiler_id.type, report_type=self.profile_report_type
+                        profiler_id.type, report_type=self.profile_report_type, name=profiler_id.name
                     )
                     self.profilers[profiler_id].set_dataset_meta(self.dataset_meta)
                 self.profilers[profiler_id].register_metric(metric_name)

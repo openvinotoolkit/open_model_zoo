@@ -54,7 +54,6 @@ datasets:
         dst_height: 800
         dst_width: 1365
 
-
   - name: ms_coco_detection_91_classes
     annotation_conversion:
       converter: mscoco_detection
@@ -88,8 +87,8 @@ datasets:
       has_background: False
       sort_annotations: True
       use_full_label_map: False
-    annotation:  mscoco_det_80.pickle
-    dataset_meta:  mscoco_det_80.json
+    annotation: mscoco_det_80.pickle
+    dataset_meta: mscoco_det_80.json
 
   - name: ms_coco_detection_80_class_with_background
     data_source: val2017
@@ -100,7 +99,18 @@ datasets:
       sort_annotations: True
       use_full_label_map: False
     annotation: mscoco_det_80_bkgr.pickle
-    dataset_meta:  mscoco_det_80_bkgr.json
+    dataset_meta: mscoco_det_80_bkgr.json
+
+  - name: ms_coco_detection_90_class_without_background
+    data_source: MSCOCO/val2017
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: MSCOCO/annotations/instances_val2017.json
+      has_background: False
+      sort_annotations: True
+      use_full_label_map: True
+    annotation:  mscoco_det_90.pickle
+    dataset_meta:  mscoco_det_90.json
 
   - name: ms_coco_keypoints
     data_source: val2017
@@ -114,6 +124,19 @@ datasets:
       - name: AP
         type: coco_precision
         max_detections: 20
+
+  - name: ms_coco_val2017_keypoints
+    data_source: val2017
+    annotation_conversion:
+      converter: mscoco_keypoints
+      annotation_file: person_keypoints_val2017.json
+      sort_key: image_size
+      images_dir: val2017
+    annotation: mscoco_val2017_keypoints.pickle
+    dataset_meta: mscoco_val2017_keypoints.json
+    metrics:
+      - name: AP
+        type: coco_orig_keypoints_precision
 
   - name: imagenet_1000_classes
     annotation_conversion:
@@ -200,9 +223,25 @@ datasets:
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       mask_dir: VOCdevkit/VOC2012/SegmentationClass/
     data_source: VOCdevkit/VOC2012/JPEGImages/
-    segmentation_masks_source:  VOCdevkit/VOC2012/SegmentationClass/
+    segmentation_masks_source: VOCdevkit/VOC2012/SegmentationClass/
     annotation: voc2012_segmentation.pickle
     dataset_meta: voc2012_segmentation.json
+
+  - name: mapillary_20
+    annotation_conversion:
+      converter: mapillary_20
+      data_dir: Mapillary_20
+    annotation: mapillary_20.pickle
+    dataset_meta: mapillary_20.json
+
+  - name: mapillary_vistas
+    data_source: mapillary_vistas/validation/images
+    segmentation_masks_source: mapillary_vistas/validation/labels
+    annotation_conversion:
+      converter: mapillary_vistas
+      data_dir: mapillary_vistas/validation
+    annotation: mapillary_vistas.pickle
+    dataset_meta: mapillary_vistas.json
 
   - name: wider
     data_source: WIDER_val/images
@@ -414,6 +453,15 @@ datasets:
     annotation: crossroad_extra_untagged_vehicle.pickle
     dataset_meta: crossroad_extra_untagged_vehicle.json
 
+  - name: crossroad_extra_untagged_vehicle_labels_from_1
+    data_source: crossroad_extra_untagged/val_data
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: crossroad_extra_untagged/val_coco_no_bg_vehicle.json
+      has_background: True
+    annotation: crossroad_extra_untagged_vehicle_labels_from_1.pickle
+    dataset_meta: crossroad_extra_untagged_vehicle_labels_from_1.json
+
   - name: pedestrian_and_vehicle_dataset
     data_source: val2017
     annotation_conversion:
@@ -467,7 +515,6 @@ datasets:
       - type: resize
         dst_width: 94
         dst_height: 24
-
 
   - name: image_retrieval
     data_source: textile_crops
@@ -554,6 +601,18 @@ datasets:
       vocab_file: im2latex_medium_photographed/vocab.pkl
     annotation: im2latex_medium_photographed.pickle
     dataset_meta: im2latex_medium_photographed.json
+
+  - name: im2latex_polynomials_handwritten
+    data_source: im2latex_polynomials_handwritten/images_processed
+    annotation_conversion:
+      converter: im2latex_formula_recognition
+      data_dir: im2latex_polynomials_handwritten
+      images_dir: im2latex_polynomials_handwritten/images_processed
+      formula_file: im2latex_polynomials_handwritten/formulas.norm.lst
+      split_file: im2latex_polynomials_handwritten/validate_filter.lst
+      vocab_file: im2latex_polynomials_handwritten/vocab.json
+    annotation: im2latex_polynomials_handwritten.pickle
+    dataset_meta: im2latex_polynomials_handwritten.json
 
   - name: market1501
     data_source: Market-1501-v15.09.15
@@ -654,6 +713,13 @@ datasets:
       two_streams: True
     annotation: super_resolution_x3.pickle
 
+    preprocessing:
+      - type: auto_resize
+
+    postprocessing:
+      - type: resize
+        apply_to: prediction
+
     metrics:
       - type: psnr
         scale_border: 4
@@ -669,6 +735,13 @@ datasets:
       hr_suffix: hr
       two_streams: True
     annotation: super_resolution_x4.pickle
+
+    preprocessing:
+      - type: auto_resize
+
+    postprocessing:
+      - type: resize
+        apply_to: prediction
 
     metrics:
       - type: psnr
@@ -686,6 +759,11 @@ datasets:
 
     preprocessing:
       - type: bgr_to_gray
+      - type: auto_resize
+
+    postprocessing:
+      - type: resize
+        apply_to: prediction
 
     metrics:
       - type: psnr
@@ -826,6 +904,16 @@ datasets:
       clip_length: 16
     annotation: msasl_action_recognition.pickle
 
+  - name: jester
+    data_source: jester/global_crops
+    annotation_conversion:
+      converter: continuous_clip_action_recognition
+      annotation_file: jester/val.txt
+      data_dir: jester/global_crops
+      out_fps: 15
+      clip_length: 8
+    annotation: jester_action_recognition.pickle
+
   - name: ReDWeb_V1
     data_source: ReDWeb_V1
     annotation_conversion:
@@ -837,9 +925,9 @@ datasets:
   - name: Kondate_nakayosi
     data_source: Kondate/test_data
     annotation_conversion:
-      converter: kondate_nakayosi_recognition
-      decoding_char_file: Kondate/kondate_nakayosi_char_list.txt
-      annotation_file: Kondate/test_img_id_gt.txt
+      converter: unicode_character_recognition
+      decoding_char_file: Kondate_nakayosi/kondate_nakayosi_char_list.txt
+      annotation_file: Kondate_nakayosi/test_img_id_gt.txt
     annotation: kondate_nakayosi_recognition.pickle
     dataset_meta: kondate_nakayosi_recognition.json
 
@@ -850,6 +938,21 @@ datasets:
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       masks_dir: free_form_masks/masks_2k
     annotation: inpainting_voc12_masks2k.pickle
+
+  - name: inpainting_rect_masks
+    data_source: VOCdevkit/VOC2012/JPEGImages/
+    annotation_conversion:
+      converter: inpainting
+      images_dir: VOCdevkit/VOC2012/JPEGImages/
+    annotation: inpainting_voc12.pickle
+
+    preprocessing:
+      - type: auto_resize
+      - type: rect_mask
+    postprocessing:
+      - type: resize
+        apply_to: prediction
+
 
   - name: mrlEyes_2018_01
     annotation_conversion:
@@ -870,7 +973,7 @@ datasets:
         presenter: print_vector
       - type: ssim
         presenter: print_vector
-    annotation: style_trasfer_val2017.pickle
+    annotation: style_transfer_val2017.pickle
 
   - name: squad_v1_1_msl384_mql64_ds128_lowercase
     annotation_conversion:
@@ -948,3 +1051,65 @@ datasets:
       - type: pad_with_eos
         eos_index: 1
         sequence_len: 192
+
+  - name: NYU_Depth_V2
+    data_source: nyudepthv2/val/converted/images
+    additional_data_source: nyudepthv2/val/converted/depth
+    annotation_conversion:
+      converter: nyu_depth_v2
+      images_dir: nyudepthv2/val/converted/images
+      depth_map_dir: nyudepthv2/val/converted/depth
+      data_dir: nyudepthv2/val/official
+
+  - name: SCUT_EPT
+    data_source: SCUT_EPT/test
+    annotation_conversion:
+      converter: unicode_character_recognition
+      decoding_char_file: SCUT_EPT/scut_ept_char_list.txt
+      annotation_file: SCUT_EPT/test_img_id_gt.txt
+    annotation: scut_ept_recognition.pickle
+    dataset_meta: scut_ept_recognition.json
+
+  - name: ADEChallengeData2016
+    annotation_conversion:
+      converter: ade20k
+      images_dir: ADEChallengeData2016/images/validation
+      annotations_dir: ADEChallengeData2016/annotations/validation
+      object_categories_file: ADEChallengeData2016/objectInfo150.txt
+    data_source: ADEChallengeData2016/images/validation
+    segmentation_masks_source: ADEChallengeData2016/annotations/validation
+
+  - name: antispoof_test_data
+    data_source: antispoof_test_data
+    annotation_conversion:
+      converter: antispoofing
+      data_dir: antispoof_test_data
+      annotation_file: antispoof_test_data/metas/intra_test/items_test.json
+      label_id: 43
+    annotation: antispoofing.pickle
+    dataset_meta: antispoofing.json
+
+  - name: sound_classification
+    data_source: audio_dataset
+    annotation_conversion:
+      converter: sound_classification
+      annotation_file: audio_dataset/validation.csv
+      audio_dir: audio_dataset/data
+    annotation: sound_classification.pickle
+    reader: wav_reader
+
+  - name: cocosnet_image_translation
+    annotation_conversion:
+      converter: ade20k_image_translation
+      annotations_dir: ADEChallengeData2016/annotations
+      reference_file: cocosnet_ade20k_ref_test.txt
+    data_source: ADEChallengeData2016
+    additional_data_source: ADEChallengeData2016/images
+
+  - name: lfw_bin
+    data_source: lfw_bin/images
+    annotation_conversion:
+      converter: face_recognition_bin
+      bin_file:  lfw_bin/lfw.bin
+      images_dir: lfw_bin/images
+      convert_images: True

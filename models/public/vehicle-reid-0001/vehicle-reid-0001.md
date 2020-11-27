@@ -27,8 +27,6 @@ Mean Average Precision (mAP) is the mean across Average Precision (AP) of all qu
 AP is defined as the area under the
 [precision and recall](https://en.wikipedia.org/wiki/Precision_and_recall) curve.
 
-## Performance
-
 ## Input
 
 ### Original Model
@@ -55,7 +53,7 @@ Channel order is `BGR`.
 
 ## Output
 
-The net outputs a vector decriptor, which can be compared with other descriptors using the
+The net outputs a vector descriptor, which can be compared with other descriptors using the
 [cosine distance](https://en.wikipedia.org/wiki/Cosine_similarity).
 
 ### Original Model

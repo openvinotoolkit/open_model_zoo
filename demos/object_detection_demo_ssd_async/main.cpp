@@ -64,7 +64,7 @@ void frameToBlob(const cv::Mat& frame,
 }
 
 enum class ExecutionMode {USER_SPECIFIED, MIN_LATENCY};
-        
+
 ExecutionMode getOtherMode(ExecutionMode mode) {
     return mode == ExecutionMode::USER_SPECIFIED ? ExecutionMode::MIN_LATENCY : ExecutionMode::USER_SPECIFIED;
 }
@@ -76,7 +76,7 @@ void switchMode(ExecutionMode& mode) {
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers certain topology and cannot be generalized for any object detection **/
-        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
         Core ie;
 
         slog::info << "Device info: " << slog::endl;
-        std::cout << ie.GetVersions(FLAGS_d);
+        slog::info << printable(ie.GetVersions(FLAGS_d)) << slog::endl;
 
         /** Load extensions for the plugin **/
         if (!FLAGS_l.empty()) {
@@ -254,7 +254,7 @@ int main(int argc, char *argv[]) {
                 labels.insert(labels.begin(), "fake");
             else {
                 throw std::logic_error("The number of labels is different from numbers of model classes");
-            }                
+            }
         }
         const SizeVector outputDims = output->getTensorDesc().getDims();
         const size_t maxProposalCount = outputDims[2];
@@ -333,7 +333,7 @@ int main(int argc, char *argv[]) {
         // --------------------------- 7. Do inference ---------------------------------------------------------
         std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and "
                      "press ESC or 'q' key" << std::endl;
-        std::cout << "To switch between min_latency/user_specified modes, press TAB key in the output window" 
+        std::cout << "To switch between min_latency/user_specified modes, press TAB key in the output window"
                   << std::endl;
 
         while (true) {
@@ -413,7 +413,7 @@ int main(int argc, char *argv[]) {
 
                 if (!FLAGS_no_show) {
                     cv::imshow(imshowWindowTitle, requestResult.frame);
-                    
+
                     const int key = cv::waitKey(1);
 
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc
@@ -475,9 +475,9 @@ int main(int argc, char *argv[]) {
                     continue;
                 }
             }
-            
+
             auto startTime = std::chrono::steady_clock::now();
-                
+
             cv::Mat frame;
             if (!cap.read(frame)) {
                 if (frame.empty()) {
@@ -498,7 +498,7 @@ int main(int argc, char *argv[]) {
                 emptyRequests.pop_front();
             }
             frameToBlob(frame, request, imageInputName);
-                
+
             ExecutionMode frameMode = currentMode;
             request->SetCompletionCallback([&mutex,
                                             &completedRequestResults,
@@ -513,7 +513,7 @@ int main(int argc, char *argv[]) {
                                             &condVar] {
                 {
                     std::lock_guard<std::mutex> callbackLock(mutex);
-                
+
                     try {
                         completedRequestResults.insert(
                             std::pair<int, RequestResult>(nextFrameId, RequestResult{
@@ -522,7 +522,7 @@ int main(int argc, char *argv[]) {
                                 startTime,
                                 frameMode
                             }));
-                        
+
                         emptyRequests.push_back(std::move(request));
                     }
                     catch (...) {
@@ -538,11 +538,11 @@ int main(int argc, char *argv[]) {
             nextFrameId++;
         }
         // -----------------------------------------------------------------------------------------------------
-        
+
         // --------------------------- 8. Report metrics -------------------------------------------------------
         slog::info << slog::endl << "Metric reports:" << slog::endl;
 
-        /** Show performace results **/
+        /** Show performance results **/
         if (FLAGS_pc) {
             if (currentMode == ExecutionMode::USER_SPECIFIED) {
                 for (const auto& request: userSpecifiedInferRequests) {

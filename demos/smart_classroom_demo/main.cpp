@@ -501,7 +501,7 @@ public:
     }
 
     void PrintPerformanceCounts(
-            const std::string &landmarks_device, const std::string &reid_device) {
+            const std::string &landmarks_device, const std::string &reid_device) override {
         landmarks_detector.PrintPerformanceCounts(landmarks_device);
         face_reid.PrintPerformanceCounts(reid_device);
     }
@@ -539,7 +539,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 int main(int argc, char* argv[]) {
     try {
         /** This demo covers 4 certain topologies and cannot be generalized **/
-        slog::info << "InferenceEngine: " << *GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << slog::endl;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -587,7 +587,7 @@ int main(int argc, char* argv[]) {
             if (loadedDevices.find(device) != loadedDevices.end())
                 continue;
 
-            std::cout << ie.GetVersions(device) << std::endl;
+            slog::info << printable(ie.GetVersions(device)) << slog::endl;
 
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {

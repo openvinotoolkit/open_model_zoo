@@ -23,7 +23,7 @@ layer {
   param {
      lr_mult: 0
   }
-  
+
   top: "data"
 }
 
@@ -59,7 +59,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 0.0    #learning rate of weights
     decay_mult: 1
@@ -79,7 +79,7 @@ layer {
     use_global_stats: true
     moving_average_fraction: 1.0
   }
-  
+
   param {
       lr_mult: 0
     }
@@ -112,7 +112,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 0.0    #learning rate of weights
     decay_mult: 1
@@ -138,7 +138,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 0.0    #learning rate of weights
     decay_mult: 1
@@ -158,7 +158,7 @@ layer {
     use_global_stats: true
     moving_average_fraction: 1.0
   }
-  
+
   param {
       lr_mult: 0
     }
@@ -192,7 +192,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 0.0    #learning rate of weights
     decay_mult: 1
@@ -217,7 +217,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 0.0    #learning rate of weights
     decay_mult: 1
@@ -237,7 +237,7 @@ layer {
     use_global_stats: true
     moving_average_fraction: 1.0
   }
-  
+
   param {
       lr_mult: 0
     }
@@ -270,7 +270,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 0.0    #learning rate of weights
     decay_mult: 1
@@ -295,7 +295,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 0.0    #learning rate of weights
     decay_mult: 1
@@ -315,7 +315,7 @@ layer {
     use_global_stats: true
     moving_average_fraction: 1.0
   }
-  
+
   param {
       lr_mult: 0
     }
@@ -347,7 +347,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 0.0    #learning rate of weights
     decay_mult: 1
@@ -373,7 +373,7 @@ layer {
       type: "xavier"
     }
   }
-  
+
   param {
     lr_mult: 0.0    #learning rate of weights
     decay_mult: 1
@@ -393,7 +393,7 @@ layer {
     use_global_stats: true
     moving_average_fraction: 1.0
   }
-  
+
   param {
       lr_mult: 0
     }
@@ -478,7 +478,7 @@ layer {
     use_global_stats: true
     moving_average_fraction: 1.0
   }
-  
+
   param {
       lr_mult: 0
     }
@@ -659,7 +659,7 @@ layer {
     use_global_stats: true
     moving_average_fraction: 1.0
   }
-  
+
   param {
       lr_mult: 0
     }
@@ -840,7 +840,7 @@ layer {
     use_global_stats: true
     moving_average_fraction: 1.0
   }
-  
+
   param {
       lr_mult: 0
     }
@@ -1129,7 +1129,7 @@ layer {
     use_global_stats: true
     moving_average_fraction: 1.0
   }
-  
+
   param {
       lr_mult: 0
     }
@@ -1418,7 +1418,7 @@ layer {
     use_global_stats: true
     moving_average_fraction: 1.0
   }
-  
+
   param {
       lr_mult: 0
     }
@@ -1653,7 +1653,7 @@ layer {
     use_global_stats: true
     moving_average_fraction: 1.0
   }
-  
+
   param {
       lr_mult: 0
     }
@@ -3336,7 +3336,7 @@ layer {
 layer {
   name: "raw_predicts"
   type: "Concat"
-  
+
   bottom: "softmax_landmarks_leye_corner_x"
   bottom: "softmax_landmarks_leye_corner_y"
   bottom: "softmax_landmarks_leye_x"
@@ -3407,8 +3407,8 @@ layer {
   bottom: "softmax_landmarks_edge_57_y"
   bottom: "softmax_landmarks_edge_65_x"
   bottom: "softmax_landmarks_edge_65_y"
-  
-  
+
+
   top: "raw_predicts"
 }
 

@@ -13,8 +13,6 @@ in RGB order.
 The model output is typical object classifier for the 1000 different classifications
 matching with those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -30,8 +28,6 @@ matching with those in the ImageNet database.
 | ------ | ----- |
 | Top 1  | 69.754%|
 | Top 5  | 89.088%|
-
-## Performance
 
 ## Input
 

@@ -5,8 +5,6 @@
 This is a TensorFlow\* version of `densenet-121` model, one of the DenseNet\*
 group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details, see [repository](https://github.com/pudae/tensorflow-densenet/) and [paper](https://arxiv.org/abs/1608.06993).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -22,8 +20,6 @@ group of models designed to perform image classification. The weights were conve
 | ------ | ----- |
 | Top 1  | 74.29% |
 | Top 5  | 91.98%|
-
-## Performance
 
 ## Input
 

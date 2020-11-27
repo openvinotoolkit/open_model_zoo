@@ -55,7 +55,7 @@ class IEPreprocessor:
         }
         self.mean_values = None
         self.std_values = None
-        self.config = config
+        self.config = config or []
         self.configure()
 
     def configure(self):

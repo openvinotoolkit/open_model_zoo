@@ -10,8 +10,6 @@ The model output is typical object classifier for the 1000 different classificat
 
 For details see [repository](https://github.com/zhanghang1989/ResNeSt) and [paper](https://arxiv.org/pdf/2004.08955.pdf).
 
-## Example
-
 ## Specification
 
 | Metric           | Value          |
@@ -27,8 +25,6 @@ For details see [repository](https://github.com/zhanghang1989/ResNeSt) and [pape
 | ------ | ----- |
 | Top 1  | 81.11% |
 | Top 5  | 95.36% |
-
-## Performance
 
 ## Input
 

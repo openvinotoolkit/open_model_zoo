@@ -5,8 +5,6 @@
 Mask R-CNN Inception V2 trained on the COCO dataset. The model is used for object instance segmentation.
 For details, see a [paper](https://arxiv.org/abs/1703.06870).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -22,8 +20,6 @@ For details, see a [paper](https://arxiv.org/abs/1703.06870).
 | ------ | ----- |
 | coco_orig_precision | 27.1199%|
 | coco_orig_segm_precision | 21.4805%|
-
-## Performance
 
 ## Input
 
