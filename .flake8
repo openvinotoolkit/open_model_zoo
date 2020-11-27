@@ -11,6 +11,8 @@ select=
     E10,E11,
     # parse errors
     E9,
+    # unused imports
+    F401,
     # formatting errors
     F5,
     # semantic errors
