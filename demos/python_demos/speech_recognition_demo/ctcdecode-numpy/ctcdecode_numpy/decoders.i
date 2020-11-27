@@ -1,9 +1,6 @@
 /*********************************************************************
 * Copyright (c) 2020 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
-*
-* This file is based in part on decoders.i from https://github.com/PaddlePaddle/DeepSpeech,
-* commit 766e96e600795cea4187123b9ed76dcd250f2d04 on Jan 20, 2020, 17:09:14 UTC+8
 **********************************************************************/
 
 // After updating this file or its dependencies, please run
