@@ -16,12 +16,10 @@ When inference is done, the application outputs the audio to the WAV file with 2
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: forward_tacotron_wavernn_demo.py [-h] -m_duration MODEL_DURATION
-                                        -m_forward MODEL_FORWARD -m_upsample
-                                        MODEL_UPSAMPLE -m_rnn MODEL_RNN -i
-                                        INPUT [-o OUT]
-                                        [--upsampler_width UPSAMPLER_WIDTH]
-                                        [-d DEVICE]
+usage: text_to_speech_demo.py [-h] -m_duration MODEL_DURATION -m_forward
+                              MODEL_FORWARD -m_upsample MODEL_UPSAMPLE -m_rnn
+                              MODEL_RNN -i INPUT [-o OUT]
+                              [--upsampler_width UPSAMPLER_WIDTH] [-d DEVICE]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -54,7 +52,7 @@ Running the application with the empty list of options yields the usage message 
 
 ## Example for running with arguments
 ```
-python3 forward_tacotron_wavernn_demo.py --model_upsample weights/wavernn_upsampler.xml --model_rnn weights/wavernn_rnn.xml --model_duration weights/forward_tacotron_duration_prediction.xml --model_forward weights/forward_tacotron_regression.xml --input <path_to_file_with_text.txt>
+python3 text_to_speech_demo.py --model_upsample weights/wavernn_upsampler.xml --model_rnn weights/wavernn_rnn.xml --model_duration weights/forward_tacotron_duration_prediction.xml --model_forward weights/forward_tacotron_regression.xml --input <path_to_file_with_text.txt>
 ```
 
 ## Demo Output
