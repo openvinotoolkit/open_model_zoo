@@ -207,13 +207,13 @@ NATIVE_DEMOS = [
                     ModelArg('face-detection-retail-0044'),
                     ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
                     ModelArg('pedestrian-detection-adas-0002'),
+                    ModelArg('pelee-coco'),
                     ModelArg('person-detection-0200'),
                     ModelArg('person-detection-0201'),
                     ModelArg('person-detection-0202'),
                     ModelArg('person-detection-retail-0013'),
                     ModelArg('vehicle-detection-adas-0002'),
                     ModelArg('vehicle-license-plate-detection-barrier-0106'),
-                    ModelArg('pelee-coco'),
                     ModelArg('vehicle-license-plate-detection-barrier-0123'))),
             *combine_cases(
                 TestCase(options={'-at': 'yolo'}),
@@ -223,31 +223,6 @@ NATIVE_DEMOS = [
         ],
         )
     ),
-
-    NativeDemo(subdirectory='object_detection_demo_ssd_async', device_keys=[], test_cases=combine_cases(
-        TestCase(options={'-no_show': None, **MONITORS}),
-        [
-            TestCase(options={
-                '-m': ModelArg('face-detection-adas-0001'),
-                '-i': DataPatternArg('face-detection-adas'),
-            }),
-            TestCase(options={
-                '-m': ModelArg('person-detection-retail-0002'),
-                '-i': DataPatternArg('person-detection-retail'),
-            }),
-            TestCase(options={
-                '-m': ModelArg('person-detection-retail-0013'),
-                '-i': DataPatternArg('person-detection-retail'),
-            }),
-        ],
-    )),
-
-    NativeDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None,
-            **MONITORS,
-            '-i': DataPatternArg('object-detection-demo')}),
-        TestCase(options={'-m': ModelArg('yolo-v3-tf')})
-    )),
 
     NativeDemo('pedestrian_tracker_demo', device_keys=['-d_det', '-d_reid'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
