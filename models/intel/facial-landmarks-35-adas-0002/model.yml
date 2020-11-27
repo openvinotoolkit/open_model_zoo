@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/facial-landmarks-35-adas-0002.xml
-    size: 239075
-    sha256: c5b1b4f1a426d8b0f02146623de755908cb0949c6cf7df3eb01054987d9374c8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
+    size: 239056
+    sha256: c7fc97662d0b898f90a60233883c926e75b03ab5c32b7340c8b1c6d30fea6845
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
   - name: FP32/facial-landmarks-35-adas-0002.bin
     size: 18381152
     sha256: e1a325159eb1a0a7cd918d1a1d4cde250c2f6626737aa76597fb405e37af87c6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
   - name: FP16/facial-landmarks-35-adas-0002.xml
-    size: 238938
-    sha256: f8b15e2eac54e3df0c3a1218a590ed2939cd075536c7d4078e05a45bd64190b3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
+    size: 238919
+    sha256: 867434fdb5f89c315b884395e2ae06cdb675f4ffc28521b4cbf1d08f8d8bff89
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
   - name: FP16/facial-landmarks-35-adas-0002.bin
     size: 9190584
     sha256: 69952f73ba3239f8692ee41514ceff793a014e2a7a777faa570f0a8aaf17278d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
   - name: FP16-INT8/facial-landmarks-35-adas-0002.xml
-    size: 643206
-    sha256: a12e7c04e5258eb31dfd153e5c0fff267c34c6217924ac03c61a1a0878637588
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.xml
+    size: 645126
+    sha256: 7f447cb0e23d8435e9f41a23de6f248d02a7a31548bf8ca8e7eac5f5c2bdda4e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.xml
   - name: FP16-INT8/facial-landmarks-35-adas-0002.bin
     size: 4634174
     sha256: c592f9f8e764e806c536b61385ed703b153c83b8ef662701e53cd41d3756e9d2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/facial-landmarks-35-adas-0002/FP16-INT8/facial-landmarks-35-adas-0002.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

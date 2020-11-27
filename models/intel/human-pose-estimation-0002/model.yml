@@ -1,0 +1,36 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  2D human pose estimation based on EfficientHRNet.
+task_type: human_pose_estimation
+files:
+  - name: FP32/human-pose-estimation-0002.xml
+    size: 714225
+    sha256: ffa7d2e882ea7421bd87fc62967c68cff3fce6f4a37441250f252b54b9f8e004
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/human-pose-estimation-0002/FP32/human-pose-estimation-0002.xml
+  - name: FP32/human-pose-estimation-0002.bin
+    size: 32601932
+    sha256: e7ab3c30ec909af6b0d93db52b76d20e59ae30da9a37b473699d58936b34f308
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/human-pose-estimation-0002/FP32/human-pose-estimation-0002.bin
+  - name: FP16/human-pose-estimation-0002.xml
+    size: 713975
+    sha256: 3f338d34c96ca35202b55029ac2b3b3dcff385827ff05dd6056a2c3087b0785c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/human-pose-estimation-0002/FP16/human-pose-estimation-0002.xml
+  - name: FP16/human-pose-estimation-0002.bin
+    size: 16301102
+    sha256: 31f89c400a90a286eb2cd8c696246d92f9f8b039c81a539be08376fb328aabc1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/human-pose-estimation-0002/FP16/human-pose-estimation-0002.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

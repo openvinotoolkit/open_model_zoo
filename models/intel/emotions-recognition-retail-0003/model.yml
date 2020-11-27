@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/emotions-recognition-retail-0003.xml
-    size: 37990
-    sha256: 306331a3736de96bb18c651c9f9381da57b2af37dd0d3b1be64e414209e20e96
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
+    size: 38006
+    sha256: 4ea3ddc4a064da702209f4322b33d69497b9f9edcf30c1fa1cb77f6a70a443a8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
   - name: FP32/emotions-recognition-retail-0003.bin
     size: 9930028
     sha256: bcb9b1a910fa3cd18a638bb1dbb0597c4ef7a080d1b83008c8e8c2c3c42b99dd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
   - name: FP16/emotions-recognition-retail-0003.xml
-    size: 37974
-    sha256: 7ff5ad3f7d4c3f2f74242558cd482993cc0d7984ebbd673ff6d5371e925baeb5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
+    size: 37988
+    sha256: 80d8f0a44e57924e9d41b5f7fafb7efb666d1554a29a9b116ef9f6126d63e881
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
   - name: FP16/emotions-recognition-retail-0003.bin
     size: 4965014
     sha256: e62fb4b819b3b3ad8aafcd308d4353db2f164a1a31d78de6cf5970837aeb6f7b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
   - name: FP16-INT8/emotions-recognition-retail-0003.xml
-    size: 114742
-    sha256: 06b8bde9ed4a52f26d235e432598ab94e81b71beaecde8223a20c6d4ddef2aae
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.xml
+    size: 115062
+    sha256: fe65c05e28536140b2c73fdf37e617ad79db3e777dd930afefb44ee3d542e710
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.xml
   - name: FP16-INT8/emotions-recognition-retail-0003.bin
     size: 2494128
     sha256: 210c2a00ae1e977a17c4c2f59c54b3f5f99186b84c9312641ec230e699beb681
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
