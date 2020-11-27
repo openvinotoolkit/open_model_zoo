@@ -1,4 +1,4 @@
-# Forward Tacotron WaveRNN Python* Demo
+# Text-to-speech Python* Demo
 
 ## Description:
 This topic demonstrates how to run the ForwardTacotron + WaveRNN demo application, which produces a audio file for a given input text file.
