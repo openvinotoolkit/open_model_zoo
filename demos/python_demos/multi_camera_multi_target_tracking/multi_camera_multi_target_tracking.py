@@ -35,6 +35,7 @@ from openvino.inference_engine import IECore  # pylint: disable=import-error,E06
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
+from images_capture import open_images_capture
 
 
 set_log_config()
