@@ -122,9 +122,9 @@ def main():
     with open(args.labels, 'rt') as labels_file:
         class_labels = labels_file.read().splitlines()
 
-    frame_size = cap.get_resolution()
+    frame_size = frame.shape
     presenter = monitors.Presenter(args.utilization_monitors, 45,
-                (round(frame_size[0] / 4), round(frame_size[1] / 8)))
+                (round(frame_size[1] / 4), round(frame_size[0] / 8)))
 
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
 
