@@ -14,17 +14,17 @@
  limitations under the License.
 """
 
+import logging
 import threading
 from collections import deque
 
 
 class AsyncPipeline:
-    def __init__(self, ie, model, plugin_config, logger=None, device='CPU', max_num_requests=1):
+    def __init__(self, ie, model, plugin_config, device='CPU', max_num_requests=1):
         self.model = model
-        self.logger = logger
+        self.logger = logging.getLogger()
 
-        if self.logger:
-            self.logger.info('Loading network to {} plugin...'.format(device))
+        self.logger.info('Loading network to {} plugin...'.format(device))
         self.exec_net = ie.load_network(network=self.model.net, device_name=device,
                                         config=plugin_config, num_requests=max_num_requests)
 
