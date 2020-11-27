@@ -34,7 +34,6 @@ class WaveRNNIE:
         :param hop_length: The number of samples between successive frames, e.g., the columns of a spectrogram.
         :return:
         """
-        super().__init__()
         self.verbose = verbose
         self.device = device
         self.target = target

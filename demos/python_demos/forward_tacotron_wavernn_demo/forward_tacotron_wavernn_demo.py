@@ -96,9 +96,9 @@ def main():
             if len(line) > len_th:
                 texts = []
                 prev_begin = 0
-                delimers ='.!?;:'
+                delimiters  ='.!?;:'
                 for i, c in enumerate(line):
-                    if (c in delimers and i - prev_begin > len_th) or i == len(line) - 1:
+                    if (c in delimiters and i - prev_begin > len_th) or i == len(line) - 1:
                         texts.append(line[prev_begin:i+1])
                         prev_begin = i
             else:
