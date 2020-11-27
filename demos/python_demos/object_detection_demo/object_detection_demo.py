@@ -244,6 +244,8 @@ def main():
     metrics = PerformanceMetrics()
 
     while cap.isOpened():
+        if detector_pipeline.callback_exceptions:
+            raise detector_pipeline.callback_exceptions[0]
         # Process all completed requests
         results = detector_pipeline.get_result(next_frame_id_to_show)
         if results:
@@ -284,8 +286,6 @@ def main():
             detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
 
-            if detector_pipeline.callback_exceptions:
-                raise detector_pipeline.callback_exceptions[0]
         else:
             # Wait for empty request
             detector_pipeline.await_any()
