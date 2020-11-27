@@ -30,6 +30,7 @@ from image_retrieval_demo.roi_detector_on_video import RoiDetectorOnVideo
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
+from images_capture import open_images_capture
 
 
 INPUT_SIZE = 224
@@ -113,7 +114,8 @@ def main():
     img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE,
                                    args.cpu_extension)
 
-    frames = RoiDetectorOnVideo(args.i)
+    cap = open_images_capture(args.i, False)
+    frames = RoiDetectorOnVideo(cap)
 
     compute_embeddings_times = []
     search_in_gallery_times = []
@@ -142,7 +144,7 @@ def main():
                 position = sorted_classes.index(
                     img_retrieval.text_label_to_class_id[args.ground_truth])
                 positions.append(position)
-                log.info("ROI detected, found: %d, postion of target: %d",
+                log.info("ROI detected, found: %d, position of target: %d",
                          sorted_classes[0], position)
             else:
                 log.info("ROI detected, found: %s", sorted_classes[0])

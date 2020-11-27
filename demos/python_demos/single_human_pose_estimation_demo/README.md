@@ -24,7 +24,9 @@ optional arguments:
   -m_hpe MODEL_HPE, --model_hpe MODEL_HPE
                         path to model of human pose estimator in xml format
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
-                        path to video or image/images
+                        Required. An input to process. The input must be a single image,
+						a folder of images or anything that cv2.VideoCapture can process
+  -loop                 Optional. Enable reading the input in a loop
   -d DEVICE, --device DEVICE
                         Specify the target to infer on CPU or GPU
   --person_label PERSON_LABEL
@@ -33,7 +35,7 @@ optional arguments:
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO Model Downloader or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 For example, to do inference on a CPU, run the following command:
 
