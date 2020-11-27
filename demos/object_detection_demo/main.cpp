@@ -160,13 +160,34 @@ cv::Mat renderDetectionData(const DetectionResult& result) {
 
     // Visualizing result data over source image
 
+    if (FLAGS_r)
+    {
+        slog::info << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
+    }
+
     for (auto obj : result.objects) {
-        std::ostringstream conf;
-        conf << ":" << std::fixed << std::setprecision(3) << obj.confidence;
-        cv::putText(outputImg, obj.label + conf.str(),
-            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
-            cv::Scalar(0, 0, 255));
-        cv::rectangle(outputImg, obj, cv::Scalar(0, 0, 255));
+        if (obj.confidence > static_cast<float>(FLAGS_t)) {
+
+            if (FLAGS_r)
+            {
+                slog::info << " "
+                           << std::left << std::setw(9) << obj.label << " | "
+                           << std::setw(10) << obj.confidence << " | "
+                           << std::setw(4) << std::max(int(obj.x), 0) << " | "
+                           << std::setw(4) << std::max(int(obj.y), 0) << " | "
+                           << std::setw(4) << std::min(int(obj.width), outputImg.cols) << " | "
+                           << std::setw(4) << std::min(int(obj.height), outputImg.rows)
+                           << slog::endl;
+            }
+
+            std::ostringstream conf;
+            conf << ":" << std::fixed << std::setprecision(3) << obj.confidence;
+
+            cv::putText(outputImg, obj.label + conf.str(),
+                cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
+                cv::Scalar(0, 0, 255));
+            cv::rectangle(outputImg, obj, cv::Scalar(0, 0, 255));
+        }
     }
 
     return outputImg;
