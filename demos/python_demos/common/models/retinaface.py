@@ -32,7 +32,7 @@ class RetinaFace(Model):
 
         self.threshold = threshold
         self.detect_masks = len(self.net.outputs) == 12
-        self.mask_threshold = mask_treshold
+        self.mask_threshold = mask_threshold
         self.postprocessor = RetinaFacePostprocessor(detect_attributes=len(self.net.outputs) == 12)
 
         self.labels = ['Face'] if not self.detect_masks else ['Mask', 'No mask']
