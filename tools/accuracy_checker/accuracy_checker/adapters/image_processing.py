@@ -80,12 +80,12 @@ class ImageProcessingAdapter(Adapter):
 
         for identifier, out_img in zip(identifiers, raw_outputs[self.target_out]):
             out_img = self._basic_postprocess(out_img)
-            result.append(SuperResolutionPrediction(identifier, out_img))
+            result.append(ImageProcessingPrediction(identifier, out_img))
 
         return result
 
     def _basic_postprocess(self, img):
-        img = img.transpose((1, 2, 0)) if img.shape[-1] not in [3, 4, 1] else img
+        img = img.transpose((1, 2, 0)) if img.shape[-1] > 4 else img
         img *= self.std
         img += self.mean
         if self.cast_to_uint8:

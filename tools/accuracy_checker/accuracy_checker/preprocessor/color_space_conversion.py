@@ -71,6 +71,31 @@ class RgbToGray(Preprocessor):
         return image
 
 
+class BGRToLAB(Preprocessor):
+    __provider__ = 'bgr_to_lab'
+
+    def process(self, image, annotation_meta=None):
+        def process_data(data):
+            return cv2.cvtColor(data.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
+
+        image.data = process_data(image.data) if not isinstance(image.data, list) else [
+            process_data(fragment) for fragment in image.data
+        ]
+        return image
+
+
+class RGBToLAB(Preprocessor):
+    __provider__ = 'bgr_to_lab'
+
+    def process(self, image, annotation_meta=None):
+        def process_data(data):
+            return cv2.cvtColor(data.astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
+
+        image.data = process_data(image.data) if not isinstance(image.data, list) else [
+            process_data(fragment) for fragment in image.data
+        ]
+        return image
+
 class TfConvertImageDType(Preprocessor):
     __provider__ = 'tf_convert_image_dtype'
 

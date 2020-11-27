@@ -1,0 +1,23 @@
+models:
+  - name: forward-tacotron-duration-prediction
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: multi_output_regression
+        outputs:
+          - duration
+          - embeddings
+        allow_reshape_input: False
+    datasets:
+      - name: tacotron-io-duration-prediction
+        data_source: forward_tacotron_io
+        reader: numpy_dict_reader
+        annotation_conversion:
+          converter: multi_feature_regression
+          data_dir: forward_tacotron_io
+          prefix: duration_prediction
+          input_suffix: in
+          reference_suffix: out
+        metrics:
+          - type: mae
+            presenter: print_vector

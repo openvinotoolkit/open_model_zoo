@@ -191,6 +191,14 @@ AccuracyChecker supports following set of adapters:
   * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).
   * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
   The output layers can be omitted if model has only one output layer - concatenation of this 2.
+* `human_pose_estimation_openpose` - converting output of OpenPose-like model for human pose estimation to `PoseEstimationPrediction`.
+  * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).
+  * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
+  * `upscale_factor` - upscaling factor for heatmaps and part affinity fields before post-processing.
+* `human_pose_estimation_ae` - converting output of Associative Embedding-like model for human pose estimation to `PoseEstimationPrediction`.
+  * `heatmaps_out` - name of output layer with keypoints heatmaps.
+  * `nms_heatmaps_out` - name of output layer with keypoints heatmaps after non-maximum suppression.
+  * `embeddings_out` - name of output layer with embedding (tag) maps.
 * `beam_search_decoder` - realization CTC Beam Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
   * `beam_size` -  size of the beam to use during decoding (default 10).
   * `blank_label` - index of the CTC blank label.
@@ -278,7 +286,7 @@ AccuracyChecker supports following set of adapters:
   * `max_detections` - maximum detection used for metrics calculation (Optional, default 100).
 * `class_agnostic_detection` - converting 'boxes' [n, 5] output of detection model to `DetectionPrediction` representation.
   * `output_blob` - name of output layer with bboxes.
-  * `scale` - scalar value to normalize bbox coordinates.
+  * `scale` - scalar value or list with 2 values to normalize bbox coordinates.
 * `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.
 * `inpainting` - converting output of Image Inpainting model to `ImageInpaintingPrediction` representation.
 * `style_transfer` - converting output of Style Transfer model to `StyleTransferPrediction` representation.
