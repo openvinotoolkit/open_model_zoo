@@ -22,7 +22,7 @@ from argparse import ArgumentParser, SUPPRESS
 
 from tqdm import tqdm
 import numpy as np
-import scipy.io.wavfile
+import wave
 from openvino.inference_engine import IECore
 
 from models.forward_tacotron_ie import ForwardTacotronIE
@@ -31,7 +31,12 @@ from models.mel2wave_ie import WaveRNNIE
 
 def save_wav(x, path):
     sr = 22050
-    scipy.io.wavfile.write(path, sr, x)
+    audio = (x * (2 ** 15 - 1)).astype("<h")
+    with wave.open(path, "w") as f:
+        f.setnchannels(1)
+        f.setsampwidth(2)
+        f.setframerate(sr)
+        f.writeframes(audio.tobytes())
 
 
 def build_argparser():
@@ -63,11 +68,6 @@ def build_argparser():
                            "value is CPU",
                       default="CPU", type=str)
     return parser
-
-
-def mel_to_wave(mel_spec, out_name, ap):
-    waveform = ap.reconstruct_waveform(mel_spec)
-    ap.save_wav(waveform, out_name)
 
 
 def main():
