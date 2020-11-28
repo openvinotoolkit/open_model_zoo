@@ -1,8 +1,8 @@
-# Text-to-speech Python* Demo
+# Text-to-speech Python\* Demo
 
 ## Description:
-This topic demonstrates how to run the ForwardTacotron + WaveRNN demo application, which produces a audio file for a given input text file.
-The text to speech demo based on https://github.com/as-ideas/ForwardTacotron and https://github.com/fatchord/WaveRNN repositories.
+The text to speech demo show how to run the ForwardTacotron and WaveRNN models to produce an audio file for a given input text file.
+The demo is based on https://github.com/as-ideas/ForwardTacotron and https://github.com/fatchord/WaveRNN repositories.
 
 ## How It Works
 
@@ -52,8 +52,15 @@ Running the application with the empty list of options yields the usage message 
 
 ## Example for running with arguments
 ```
-python3 text_to_speech_demo.py --model_upsample weights/wavernn_upsampler.xml --model_rnn weights/wavernn_rnn.xml --model_duration weights/forward_tacotron_duration_prediction.xml --model_forward weights/forward_tacotron_regression.xml --input <path_to_file_with_text.txt>
+python3 text_to_speech_demo.py --model_upsample wavernn_upsampler.xml --model_rnn wavernn_rnn.xml --model_duration forward_tacotron_duration_prediction.xml --model_forward forward_tacotron_regression.xml --input <path_to_file_with_text.txt>
 ```
+
+To run the demo, you can use public pre-trained models. You can download the pre-trained models with the OpenVINO
+[Model Downloader](../../../tools/downloader/README.md).
+
+> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine
+format (\*.xml + \*.bin) using the
+[Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 ## Demo Output
 

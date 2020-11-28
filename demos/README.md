@@ -11,7 +11,6 @@ The Open Model Zoo includes the following demos:
 - [Colorization Python\* Demo](./python_demos/colorization_demo/README.md) - Colorization demo colorizes input frames.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
 - [Formula Recognition Python\* Demo](./python_demos/formula_recognition_demo/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
-- [Text-to-speech Python* Demo](./python_demos/text_to_speech_demo/README.md) - Shows an example of using Forward Tacotron and WaveRNN neural networks for text to speech task.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
 - [Gesture Recognition Python\* Demo](./python_demos/gesture_recognition_demo/README.md) - Demo application for Gesture Recognition algorithm (e.g. American Sign Language gestures), which classifies gesture actions that are being performed on input video.
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/README.md) - Human pose estimation demo.
@@ -42,6 +41,7 @@ The Open Model Zoo includes the following demos:
 - [Text Detection C++ Demo](./text_detection_demo/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
 - [Text Spotting Python\* Demo](./python_demos/text_spotting_demo/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Handwritten Text Recognition Python\* Demo](./python_demos/handwritten_text_recognition_demo/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models and Handwritten Simplified Chinese Recognition models.
+- [Text-to-speech Python\* Demo](./python_demos/text_to_speech_demo/README.md) - Shows an example of using Forward Tacotron and WaveRNN neural networks for text to speech task.
 
 ## Media Files Available for Demos
 
