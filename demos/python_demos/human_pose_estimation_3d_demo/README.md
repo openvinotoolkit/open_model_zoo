@@ -1,4 +1,4 @@
-# 3D Human Pose Estimation Python* Demo
+# 3D Human Pose Estimation Python\* Demo
 
 This demo demonstrates how to run 3D Human Pose Estimation models using OpenVINO&trade;. The following pre-trained models can be used:
 
