@@ -24,9 +24,8 @@ class MulticamCapture:
         self.fps = []
         for src in sources:
             cap = open_images_capture(src, False)
-            fps = cap.fps()
             self.captures.append(cap)
-            self.fps.append(fps)
+            self.fps.append(fps = cap.fps())
 
     def add_transform(self, t):
         self.transforms.append(t)

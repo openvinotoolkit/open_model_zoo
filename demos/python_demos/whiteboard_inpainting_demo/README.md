@@ -46,8 +46,9 @@ Whiteboard inpainting demo
 
 optional arguments:
   -h, --help            show this help message and exit
-  -i I                  Input sources (index of camera or path to a video
-                        file)
+  -i I                  Required. An input to process. The input must be a single image,
+                        a folder of images or anything that cv2.VideoCapture can process
+  -loop                 Optional. Enable reading the input in a loop
   -m_i M_INSTANCE_SEGMENTATION, --m_instance_segmentation M_INSTANCE_SEGMENTATION
                         Path to the instance segmentation model
   -m_s M_SEMANTIC_SEGMENTATION, --m_semantic_segmentation M_SEMANTIC_SEGMENTATION

@@ -8,9 +8,6 @@ import logging as log
 from openvino.inference_engine import IECore
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
-from images_capture import open_images_capture
-
 
 def main():
     # arguments
@@ -52,11 +49,7 @@ def main():
     # read and pre-process input image
     _, _, height, width = net.input_info[input_blob].input_data.shape
 
-    cap = open_images_capture(args.input, False)
-    image = cap.read()
-    if image is None:
-        raise RuntimeError("Can't read an image from the input")
-
+    image = cv2.imread(args.input, cv2.IMREAD_COLOR)
     (input_height, input_width) = image.shape[:-1]
 
     # resize

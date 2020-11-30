@@ -12,8 +12,6 @@
  limitations under the License.
 """
 
-import sys
-import os
 from argparse import ArgumentParser, SUPPRESS
 
 import numpy as np
@@ -22,9 +20,6 @@ from openvino.inference_engine import IECore
 
 from inpainting_gui import InpaintingGUI
 from inpainting import ImageInpainting
-
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
-from images_capture import open_images_capture
 
 
 def build_arg_parser():
@@ -117,10 +112,10 @@ def main():
     args = build_arg_parser().parse_args()
 
     # Loading source image
-    cap = open_images_capture(args.input, False)
-    image = cap.read()
-    if image is None:
-        raise RuntimeError("Can't read an image from the input")
+    img = cv2.imread(args.input, cv2.IMREAD_COLOR)
+    if img is None:
+        print("Cannot load image " + args.input)
+        return -1
 
     if args.auto_mask_color and args.auto_mask_random:
         print("Error: -ar and -ac options cannot be used together...")

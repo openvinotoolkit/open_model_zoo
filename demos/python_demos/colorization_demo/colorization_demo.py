@@ -86,9 +86,6 @@ if __name__ == '__main__':
 
     while original_frame is not None:
         log.debug("#############################")
-        hasFrame, original_frame = cap.read()
-        if not hasFrame:
-            break
         (h_orig, w_orig) = original_frame.shape[:2]
 
         log.debug("Preprocessing frame")

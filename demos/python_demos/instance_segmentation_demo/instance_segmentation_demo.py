@@ -134,7 +134,6 @@ def main():
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     while frame is not None:
-
         if args.no_keep_aspect_ratio:
             # Resize the image to a target size.
             scale_x = w / frame.shape[1]

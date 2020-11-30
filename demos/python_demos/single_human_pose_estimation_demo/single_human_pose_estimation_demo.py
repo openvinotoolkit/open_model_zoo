@@ -72,13 +72,12 @@ def run_demo(args):
             float(1 / (detector_person.infer_time + single_human_pose_estimator.infer_time * len(human_poses))),
             float(1 / single_human_pose_estimator.infer_time),
             float(1 / detector_person.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
-        if args.no_show:
-            continue
-        cv2.imshow('Human Pose Estimation Demo', frame)
-        key = cv2.waitKey(delay)
-        if key == 27:
-            break
-        presenter.handleKey(key)
+        if not args.no_show:
+            cv2.imshow('Human Pose Estimation Demo', frame)
+            key = cv2.waitKey(delay)
+            if key == 27:
+                break
+            presenter.handleKey(key)
         frame = cap.read()
     print(presenter.reportMeans())
 
