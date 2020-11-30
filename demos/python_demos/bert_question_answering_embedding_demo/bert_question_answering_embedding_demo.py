@@ -29,6 +29,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
 
+
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
@@ -37,6 +38,7 @@ def build_argparser():
                       help="Required. Urls to a wiki pages with context",
                       action='append',
                       required=True, type=str)
+    args.add_argument("--questions", type=str, nargs='+', metavar='QUESTION', help="Optional. Prepared questions")
     args.add_argument("--best_n",
                       help="Optional. Number of best (closest) contexts selected",
                       default=10,
@@ -44,11 +46,12 @@ def build_argparser():
     args.add_argument("-v", "--vocab",
                       help="Required. Path to vocabulary file with tokens",
                       required=True, type=str)
-    args.add_argument("-m_emb","--model_emb",
+    args.add_argument("-m_emb", "--model_emb",
                       help="Required. Path to an .xml file with a trained model to build embeddings",
                       required=True, type=str)
     args.add_argument("--input_names_emb",
-                      help="Optional. Names for inputs in MODEL_EMB network. For example 'input_ids,attention_mask,token_type_ids','position_ids'",
+                      help="Optional. Names for inputs in MODEL_EMB network. "
+                           "For example 'input_ids,attention_mask,token_type_ids','position_ids'",
                       default='input_ids,attention_mask,token_type_ids,position_ids',
                       required=False, type=str)
     args.add_argument("-m_qa","--model_qa",
@@ -56,7 +59,8 @@ def build_argparser():
                       default = None,
                       required=False,type=str)
     args.add_argument("--input_names_qa",
-                      help="Optional. Names for inputs in MODEL_QA network. For example 'input_ids,attention_mask,token_type_ids','position_ids'",
+                      help="Optional. Names for inputs in MODEL_QA network. "
+                           "For example 'input_ids,attention_mask,token_type_ids','position_ids'",
                       default='input_ids,attention_mask,token_type_ids,position_ids',
                       required=False, type=str)
     args.add_argument("--output_names_qa",
@@ -68,14 +72,15 @@ def build_argparser():
                       default=15,
                       required=False, type=int)
     args.add_argument("-d", "--device",
-                      help="Optional. Specify the target device to infer on; CPU is "
-                           "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
+                      help="Optional. Specify the target device to infer on; CPU is acceptable. "
+                           "Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU",
                       required=False, type=str)
     args.add_argument('-c', '--colors', action='store_true',
                       help="Optional. Nice coloring of the questions/answers. "
                            "Might not work on some terminals (like Windows* cmd console)")
     return parser
+
 
 def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
@@ -248,10 +253,19 @@ def main():
             c_s, c_e = c_s -shift_left, c_e-shift_left
             assert c_s >= 0, "start can be left of 0 only with window less than len but in this case we can not be here"
 
-    #loop to ask many questions
-    while True:
-        question = input('Type question (enter to exit):')
-        if not question:
+    if args.questions:
+        def questions():
+            for question in args.questions:
+                log.info("Question: {}".format(question))
+                yield question
+    else:
+        def questions():
+            while True:
+                yield input('Type question (empty string to exit):')
+
+    # loop on user's or prepared questions
+    for question in questions():
+        if not question.strip():
             break
 
         log.info("---Stage 1---Calc question embedding and compare with {} context embeddings".format(len(contexts_all)))

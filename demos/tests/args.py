@@ -20,6 +20,8 @@ from pathlib import Path
 ArgContext = collections.namedtuple('ArgContext',
     ['source_dir', 'test_data_dir', 'dl_dir', 'model_info', 'data_sequences', 'data_sequence_dir'])
 
+OMZ_DIR = Path(__file__).parents[2].resolve()
+
 
 class TestDataArg:
     def __init__(self, rel_path):
