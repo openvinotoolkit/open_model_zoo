@@ -20,12 +20,11 @@ class MulticamCapture:
         assert sources
         self.captures = []
         self.transforms = []
-        self.frame_size = []
         self.fps = []
         for src in sources:
             cap = open_images_capture(src, False)
             self.captures.append(cap)
-            self.fps.append(fps = cap.fps())
+            self.fps.append(cap.fps())
 
     def add_transform(self, t):
         self.transforms.append(t)
@@ -34,21 +33,18 @@ class MulticamCapture:
         frames = []
         for capture in self.captures:
             frame = capture.read()
-            if frame is None:
-                raise RuntimeError("Can't read an image from the input")
-            frame_size = frame.shape
-            self.frame_size.append((frame_size[1], frame_size[0]))
-            for t in self.transforms:
-                frame = t(frame)
-            frames.append(frame)
+            if frame is not None:
+                for t in self.transforms:
+                    frame = t(frame)
+                frames.append(frame)
 
         return len(frames) == len(self.captures), frames
 
     def get_num_sources(self):
         return len(self.captures)
 
-    def get_source_parameters(self):
-        return self.frame_size, self.fps
+    def get_fps(self):
+        return self.fps
 
 
 class NormalizerCLAHE:

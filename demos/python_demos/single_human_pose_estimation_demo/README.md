@@ -25,7 +25,7 @@ optional arguments:
                         path to model of human pose estimator in xml format
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
                         Required. An input to process. The input must be a single image,
-						a folder of images or anything that cv2.VideoCapture can process
+                        a folder of images or anything that cv2.VideoCapture can process.
   -loop                 Optional. Enable reading the input in a loop
   -d DEVICE, --device DEVICE
                         Specify the target to infer on CPU or GPU
