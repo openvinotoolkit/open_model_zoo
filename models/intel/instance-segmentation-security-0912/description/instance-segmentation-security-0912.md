@@ -14,7 +14,7 @@ detection and segmentation heads.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| MS COCO val2017 box AP          | 35.6%                                     |
+| MS COCO val2017 box AP          | 35.55%                                    |
 | MS COCO val2017 mask AP         | 31.3%                                     |
 | Max objects to detect           | 100                                       |
 | GFlops                          | 66.492                                    |

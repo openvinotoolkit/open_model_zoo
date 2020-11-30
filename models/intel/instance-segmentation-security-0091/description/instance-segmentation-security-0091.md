@@ -12,14 +12,16 @@ FPN, RPN, detection and segmentation heads.
 
 ## Specification
 
-| Metric                          | Value                                     |
-|---------------------------------|-------------------------------------------|
-| MS COCO val2017 box AP          | 45.8%                                     |
-| MS COCO val2017 mask AP         | 39.7%                                     |
-| Max objects to detect           | 100                                       |
-| GFlops                          | 828.6324                                  |
-| MParams                         | 101.236                                   |
-| Source framework                | PyTorch\*                                 |
+| Metric                                                              | Value                                     |
+|---------------------------------------------------------------------|-------------------------------------------|
+| MS COCO val2017 box AP (max short side 800, max long side 1344)     | 45.8%                                     |
+| MS COCO val2017 mask AP (max short side 800, max long side 1344)    | 39.7%                                     |
+| MS COCO val2017 box AP (max height 800, max width 1344)             | 43.55%                                    |
+| MS COCO val2017 mask AP (max height 800, max width 1344)            | 38.14%                                    |
+| Max objects to detect                                               | 100                                       |
+| GFlops                                                              | 828.6324                                  |
+| MParams                                                             | 101.236                                   |
+| Source framework                                                    | PyTorch\*                                 |
 
 Average Precision (AP) is defined and measured according to standard
 [MS COCO evaluation procedure](http://cocodataset.org/#detection-eval).

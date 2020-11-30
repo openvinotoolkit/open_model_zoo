@@ -12,14 +12,16 @@ segmentation heads.
 
 ## Specification
 
-| Metric                          | Value                                     |
-|---------------------------------|-------------------------------------------|
-| MS COCO val2017 box AP          | 40.8%                                     |
-| MS COCO val2017 mask AP         | 36.9%                                     |
-| Max objects to detect           | 100                                       |
-| GFlops                          | 423.0842                                  |
-| MParams                         | 48.3732                                   |
-| Source framework                | PyTorch\*                                 |
+| Metric                                                              | Value                                     |
+|---------------------------------------------------------------------|-------------------------------------------|
+| MS COCO val2017 box AP (max short side 768, max long side 1024)     | 40.8%                                     |
+| MS COCO val2017 mask AP (max short side 768, max long side 1024)    | 36.9%                                     |
+| MS COCO val2017 box AP (max height 768, max width 1024)             | 39.86%                                    |
+| MS COCO val2017 mask AP (max height 768, max width 1024)            | 36.44%                                    |
+| Max objects to detect                                               | 100                                       |
+| GFlops                                                              | 423.0842                                  |
+| MParams                                                             | 48.3732                                   |
+| Source framework                                                    | PyTorch\*                                 |
 
 Average Precision (AP) is defined and measured according to standard
 [MS COCO evaluation procedure](http://cocodataset.org/#detection-eval).
