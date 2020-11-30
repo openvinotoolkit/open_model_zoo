@@ -307,6 +307,13 @@ def main():
             metrics.update(start_time, frame)
             if not args.no_show:
                 cv2.imshow('Detection Results', frame)
+                key = cv2.waitKey(1)
+
+                ESC_KEY = 27
+                # Quit.
+                if key in {ord('q'), ord('Q'), ESC_KEY}:
+                    break
+                presenter.handleKey(key)
             next_frame_id_to_show += 1
         else:
             break
