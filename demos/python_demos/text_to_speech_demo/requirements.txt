@@ -1,0 +1,4 @@
+numpy>=1.18.3
+inflect>=4.1.0
+Unidecode>=0.4.20
+tqdm>=4.46.1

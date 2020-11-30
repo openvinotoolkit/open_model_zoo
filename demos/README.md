@@ -41,6 +41,7 @@ The Open Model Zoo includes the following demos:
 - [Text Detection C++ Demo](./text_detection_demo/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
 - [Text Spotting Python\* Demo](./python_demos/text_spotting_demo/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Handwritten Text Recognition Python\* Demo](./python_demos/handwritten_text_recognition_demo/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models and Handwritten Simplified Chinese Recognition models.
+- [Text-to-speech Python\* Demo](./python_demos/text_to_speech_demo/README.md) - Shows an example of using Forward Tacotron and WaveRNN neural networks for text to speech task.
 
 ## Media Files Available for Demos
 
