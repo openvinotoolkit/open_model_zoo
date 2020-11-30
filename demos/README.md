@@ -1,7 +1,6 @@
 # Open Model Zoo Demos
 
-The Open Model Zoo demo applications are console applications that demonstrate how you can use the Inference Engine in your applications to solve specific use-cases.
-
+The Open Model Zoo demo applications are console applications that demonstrate how you can use the Inference Engine in your applications to solve specific use-cases
 The Open Model Zoo includes the following demos:
 
 - [3D Human Pose Estimation Python\* Demo](./python_demos/human_pose_estimation_3d_demo/README.md) - 3D human pose estimation demo.
@@ -19,6 +18,7 @@ The Open Model Zoo includes the following demos:
 - [Image Inpainting Python\* Demo](./python_demos/image_inpainting_demo/README.md) - Demo application for GMCNN inpainting network.
 - [Image Retrieval Python\* Demo](./python_demos/image_retrieval_demo/README.md) - The demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 - [Image Segmentation C++ Demo](./segmentation_demo/README.md) - Inference of image segmentation networks like FCN8 (the demo supports only images as inputs).
+- [Image Segmentation Asynchronous C++ Demo](./segmentation_demo_async/README.md) - Inference of image segmentation networks like FCN8, async API showcase, simple OpenCV interoperability (supports video and camera inputs).
 - [Image Translation Python\* Demo](./python_demos/image_translation_demo/README.md) - Demo application to synthesize a photo-realistic image based on exemplar image.
 - [Instance Segmentation Python\* Demo](./python_demos/instance_segmentation_demo/README.md) - Inference of instance segmentation networks trained in `Detectron` or `maskrcnn-benchmark`.
 - [Interactive Face Detection C++ Demo](./interactive_face_detection_demo/README.md) - Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
@@ -30,8 +30,7 @@ The Open Model Zoo includes the following demos:
 - [Object Detection for CenterNet Python\* Demo](./python_demos/object_detection_demo_centernet/README.md) - Demo application for CenterNet object detection network.
 - [Object Detection for Faster R-CNN C++ Demo](./object_detection_demo_faster_rcnn/README.md) - Inference of object detection networks like Faster R-CNN (the demo supports only images as inputs).
 - [Object Detection for RetinaFace Python\* Demo](./python_demos/object_detection_demo_retinaface/README.md) - Demo application for RetinaFace face detection model.
-- [Object Detection for SSD C++ Demo](./object_detection_demo_ssd_async/README.md) - Demo application for SSD-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
-- [Object Detection for YOLO V3 C++ Demo](./object_detection_demo_yolov3_async/README.md) - Demo application for YOLOV3-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
+- [Object Detection C++ Demo](./object_detection_demo/README.md) - Demo application for Object Detection networks (different models architectures are supproted), async API showcase, simple OpenCV interoperability (supports video and camera inputs).
 - [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/README.md) - Demo application for pedestrian tracking scenario.
 - [Security Barrier Camera C++ Demo](./security_barrier_camera_demo/README.md) - Vehicle Detection followed by the Vehicle Attributes and License-Plate Recognition, supports images/video and camera inputs.
 - [Speech Recognition Python\* Demo](./python_demos/speech_recognition_demo/README.md) - Speech recognition demo: takes audio file with an English phrase on input, and converts it into text.
@@ -117,7 +116,6 @@ The table below shows the correlation between models, demos, and supported plugi
 | vehicle-detection-adas-binary-0001               | any demo that supports SSD\*-based models, above                                                               | Supported | Supported |             |                 |
 | vehicle-detection-adas-0002                      | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
 | yolo-v2-tiny-vehicle-detection-0001              | [Object Detection for YOLO V3 Python\* Demo](./python_demos/object_detection_demo_yolov3_async/README.md) | Supported |           |             |                 |
-
 
 Notice that the FPGA support comes through a [heterogeneous execution](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_HETERO.html), for example, when the post-processing is happening on the CPU.
 
