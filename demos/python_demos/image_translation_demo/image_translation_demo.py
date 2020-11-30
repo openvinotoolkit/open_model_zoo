@@ -106,21 +106,27 @@ def main():
         if use_seg:
             in_img = cv2.imread(input_img)
             if in_img is None:
-                raise IOError('Image {} cannot be read'.format(input_img)
+                raise IOError('Image {} cannot be read'.format(input_img))
             input_sem = get_mask_from_image(in_img, seg_model)
             r_img = cv2.imread(ref_img)
             if r_img is None:
-                raise IOError('Image {} cannot be read'.format(ref_img)
+                raise IOError('Image {} cannot be read'.format(ref_img))
             ref_sem = get_mask_from_image(r_img, seg_model)
         else:
-            input_sem = cv2.imread(input_sem, cv2.IMREAD_GRAYSCALE)
+            input_sem_file = input_sem
+            input_sem = cv2.imread(input_sem_file, cv2.IMREAD_GRAYSCALE)
             if input_sem is None:
-                raise IOError('Image {} cannot be read'.format(input_sem)
+                raise IOError('Image {} cannot be read'.format(input_sem_file))
+            ref_sem_file = ref_sem
             ref_sem = cv2.imread(ref_sem, cv2.IMREAD_GRAYSCALE)
             if ref_sem is None:
-                raise IOError('Image {} cannot be read'.format(ref_sem)
+                raise IOError('Image {} cannot be read'.format(ref_sem_file))
         input_sem = preprocess_semantics(input_sem, input_size=gan_model.input_semantic_size)
-        ref_img = preprocess_image(cv2.imread(ref_img), input_size=gan_model.input_image_size)
+        ref_img_file = ref_img
+        ref_img = cv2.imread(ref_img_file)
+        if ref_img is None:
+            raise IOError('Image {} cannot be read'.format(ref_img_file))
+        ref_img = preprocess_image(ref_img, input_size=gan_model.input_image_size)
         ref_sem = preprocess_semantics(ref_sem, input_size=gan_model.input_semantic_size)
         input_dict = {
             'input_semantics': input_sem,
