@@ -73,5 +73,6 @@ class AsyncPipeline:
 
     def await_any(self):
         if len(self.empty_requests) == 0:
+            self.event.set()
             self.event.clear()
             self.event.wait()
