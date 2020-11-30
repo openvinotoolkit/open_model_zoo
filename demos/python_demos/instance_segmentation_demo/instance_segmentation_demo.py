@@ -125,7 +125,6 @@ def main():
     frame_size = frame.shape
     presenter = monitors.Presenter(args.utilization_monitors, 45,
                 (round(frame_size[1] / 4), round(frame_size[0] / 8)))
-
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
 
     render_time = 0
