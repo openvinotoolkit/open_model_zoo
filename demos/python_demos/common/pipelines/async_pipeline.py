@@ -47,6 +47,8 @@ class AsyncPipeline:
 
     def submit_data(self, inputs, id, meta):
         request = self.empty_requests.popleft()
+        if len(self.empty_requests) == 0:
+            self.event.clear()
         inputs, preprocessing_meta = self.model.preprocess(inputs)
         request.set_completion_callback(py_callback=self.inference_completion_callback,
                                         py_data=(request, id, meta, preprocessing_meta))
@@ -73,6 +75,4 @@ class AsyncPipeline:
 
     def await_any(self):
         if len(self.empty_requests) == 0:
-            self.event.set()
-            self.event.clear()
             self.event.wait()
