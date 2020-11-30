@@ -169,7 +169,7 @@ class ForwardTacotronIE:
                 break
             sub_aligned_emb = aligned_emb[:, start_idx:end_idx, :]
             if sub_aligned_emb.shape[1] < self.forward_len:
-                sub_aligned_emb = np.pad(sub_aligned_emb, 
+                sub_aligned_emb = np.pad(sub_aligned_emb,
                                          ((0, 0), (0, self.forward_len - sub_aligned_emb.shape[1]), (0, 0)),
                                          'constant', constant_values=0)
             if self.verbose:

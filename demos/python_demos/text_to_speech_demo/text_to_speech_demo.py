@@ -43,18 +43,18 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("-m_duration", "--model_duration", 
+    args.add_argument("-m_duration", "--model_duration",
                       help="Required. Path to ForwardTacotron`s duration prediction part (*.xml format).",
                       required=True, type=str)
-    args.add_argument("-m_forward", "--model_forward", 
-                      help="Required. Path to ForwardTacotron`s mel-spectrogram regression part (*.xml format).", 
+    args.add_argument("-m_forward", "--model_forward",
+                      help="Required. Path to ForwardTacotron`s mel-spectrogram regression part (*.xml format).",
                       required=True, type=str)
-    args.add_argument("-m_upsample", "--model_upsample", 
+    args.add_argument("-m_upsample", "--model_upsample",
                       help="Required. Path to WaveRNN`s part for mel-spectrogram upsampling "
                            "by time axis (*.xml format).",
                       required=True, type=str)
-    args.add_argument("-m_rnn", "--model_rnn", 
-                      help="Required. Path to WaveRNN`s part for waveform autoregression (*.xml format).", 
+    args.add_argument("-m_rnn", "--model_rnn",
+                      help="Required. Path to WaveRNN`s part for waveform autoregression (*.xml format).",
                       required=True, type=str)
 
     args.add_argument("-i", "--input", help="Text file with text.", required=True,
@@ -80,7 +80,7 @@ def main():
     args = build_argparser().parse_args()
 
     ie = IECore()
-    vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, ie, device=args.device, 
+    vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, ie, device=args.device,
                         upsampler_width=args.upsampler_width)
     forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, ie, args.device, verbose=False)
 
