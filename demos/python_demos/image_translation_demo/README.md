@@ -88,7 +88,7 @@ There are two ways to use this demo:
    You can use the following command to run demo on CPU using cocosnet as translation model:
 
    ```
-   python3 cocosnet_demo.py \
+   python3 image_translation_demo.py \
        -d CPU \
        -m_trn <path_to_translation_model>/cocosnet.xml \
        -is <path_to_semantic_mask_of_image>/input_mask.png \
