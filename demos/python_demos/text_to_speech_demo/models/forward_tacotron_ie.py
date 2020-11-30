@@ -89,7 +89,7 @@ class ForwardTacotronIE:
 
         if non_empty_symbols is not None:
             duration = duration[:, :non_empty_symbols]
-            preprocessed_embeddings = preprocessed_embeddings[:,:non_empty_symbols]
+            preprocessed_embeddings = preprocessed_embeddings[:, :non_empty_symbols]
         indexes = self.build_index(duration, preprocessed_embeddings)
         if self.verbose:
             print("Index: {0}, duration: {1}, embeddings: {2}, non_empty_symbols: {3}"
@@ -119,7 +119,7 @@ class ForwardTacotronIE:
             punctuation = '!\'(),.:;? '
             delimiters = [_symbol_to_id[p] for p in punctuation]
             # try to find optimal fragmentation for inference
-            ranges = [i+1 for i,val in enumerate(sequence) if val in delimiters]
+            ranges = [i+1 for i, val in enumerate(sequence) if val in delimiters]
             if len(sequence) not in ranges:
                 ranges.append(len(sequence))
             optimal_ranges = []
@@ -163,17 +163,19 @@ class ForwardTacotronIE:
         mels = []
         n_iters = aligned_emb.shape[1] // self.forward_len + 1
         for i in range(n_iters):
-           start_idx = i * self.forward_len
-           end_idx = min((i+1) * self.forward_len, aligned_emb.shape[1])
-           if start_idx >= aligned_emb.shape[1]:
-               break
-           sub_aligned_emb = aligned_emb[:, start_idx:end_idx, :]
-           if sub_aligned_emb.shape[1] < self.forward_len:
-               sub_aligned_emb = np.pad(sub_aligned_emb, ((0, 0), (0, self.forward_len - sub_aligned_emb.shape[1]), (0, 0)), 'constant', constant_values=0)
-           if self.verbose:
-               print("SAEmb shape: {0}".format(sub_aligned_emb.shape))
-           mel = self.infer_mel(sub_aligned_emb)[:, :end_idx - start_idx]
-           mels.append(mel)
+            start_idx = i * self.forward_len
+            end_idx = min((i+1) * self.forward_len, aligned_emb.shape[1])
+            if start_idx >= aligned_emb.shape[1]:
+                break
+            sub_aligned_emb = aligned_emb[:, start_idx:end_idx, :]
+            if sub_aligned_emb.shape[1] < self.forward_len:
+                sub_aligned_emb = np.pad(sub_aligned_emb, 
+                                         ((0, 0), (0, self.forward_len - sub_aligned_emb.shape[1]), (0, 0)),
+                                         'constant', constant_values=0)
+            if self.verbose:
+                print("SAEmb shape: {0}".format(sub_aligned_emb.shape))
+            mel = self.infer_mel(sub_aligned_emb)[:, :end_idx - start_idx]
+            mels.append(mel)
 
         res = np.concatenate(mels, axis=1)
         if self.verbose:

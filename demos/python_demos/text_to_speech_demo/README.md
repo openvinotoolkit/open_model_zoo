@@ -1,6 +1,6 @@
 # Text-to-speech Python\* Demo
 
-## Description:
+## Description
 The text to speech demo show how to run the ForwardTacotron and WaveRNN models to produce an audio file for a given input text file.
 The demo is based on https://github.com/as-ideas/ForwardTacotron and https://github.com/fatchord/WaveRNN repositories.
 

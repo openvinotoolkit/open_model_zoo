@@ -22,6 +22,7 @@ import math
 import numpy as np
 import numpy.random as rnd
 
+
 # for WaveRNN approach (https://github.com/fatchord/WaveRNN), first step before upsample
 def pad_tensor(x, pad, side='both'):
     # NB - this is just a quick method i need right now
@@ -29,11 +30,12 @@ def pad_tensor(x, pad, side='both'):
     b, t, c = x.shape
     total = t + 2 * pad if side == 'both' else t + pad
     padded = np.zeros((b, total, c), dtype=np.float)
-    if side == 'before' or side == 'both':
+    if side in ('before', 'both'):
         padded[:, pad:pad + t, :] = x
     elif side == 'after':
         padded[:, :t, :] = x
     return padded
+
 
 # https://github.com/fatchord/WaveRNN
 def fold_with_overlap(x, target, overlap):
@@ -103,6 +105,7 @@ def fold_with_overlap(x, target, overlap):
         folded[i] = x[:, start:end, :]
 
     return folded, (target, overlap)
+
 
 # https://github.com/fatchord/WaveRNN
 def xfade_and_unfold(y, overlap):
