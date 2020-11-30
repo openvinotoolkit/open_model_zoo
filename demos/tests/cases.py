@@ -491,7 +491,7 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(subdirectory='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('object-detection-demo-ssd-async')}),
+        TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('object-detection-demo')}),
         [
             *combine_cases(
                 TestCase(options={'--architecture_type': 'ssd'}),
