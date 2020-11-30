@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2019-2020 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -14,28 +14,80 @@
  limitations under the License.
 """
 
-import os
 import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
+from .model import Model
+from .utils import Detection, load_labels
 
-class Detector(object):
-    def __init__(self, ie, model_path, threshold=0.3, device='CPU'):
-        model = ie.read_network(model_path, os.path.splitext(model_path)[0] + '.bin')
 
-        assert len(model.input_info) == 1, "Expected 1 input blob"
-        assert len(model.outputs) == 3, "Expected 3 output blobs"
+class CenterNet(Model):
+    def __init__(self, ie, model_path, labels=None, threshold=0.3):
+        super().__init__(ie, model_path)
 
-        self._input_layer_name = next(iter(model.input_info))
-        self._output_layer_names = sorted(model.outputs)
+        assert len(self.net.input_info) == 1, "Expected 1 input blob"
+        assert len(self.net.outputs) == 3, "Expected 3 output blobs"
 
-        self._ie = ie
-        self._exec_model = self._ie.load_network(model, device)
+        if isinstance(labels, (list, tuple)):
+            self.labels = labels
+        else:
+            self.labels = load_labels(labels) if labels else None
+
+        self.image_blob_name = next(iter(self.net.input_info))
+        self._output_layer_names = sorted(self.net.outputs)
+
         self._threshold = threshold
-        self.infer_time = -1
-        _, channels, self.input_height, self.input_width = model.input_info[self._input_layer_name].input_data.shape
-        assert channels == 3, "Expected 3-channel input"
+
+        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
+        assert self.c == 3, "Expected 3-channel input"
+
+    def preprocess(self, inputs):
+        image = inputs
+        meta = {'original_shape': image.shape}
+
+        height, width = image.shape[0:2]
+        center = np.array([width / 2., height / 2.], dtype=np.float32)
+        scale = max(height, width)
+        trans_input = self.get_affine_transform(center, scale, 0, [self.w, self.h])
+        resized_image = cv2.warpAffine(image, trans_input, (self.w, self.h), flags=cv2.INTER_LINEAR)
+        resized_image = np.transpose(resized_image, (2, 0, 1))
+
+        dict_inputs = {self.image_blob_name: resized_image}
+        return dict_inputs, meta
+
+    def postprocess(self, outputs, meta):
+        heat = outputs[self._output_layer_names[0]][0]
+        reg = outputs[self._output_layer_names[1]][0]
+        wh = outputs[self._output_layer_names[2]][0]
+        heat = np.exp(heat)/(1 + np.exp(heat))
+        height, width = heat.shape[1:3]
+        num_predictions = 100
+
+        heat = self._nms(heat)
+        scores, inds, clses, ys, xs = self._topk(heat, K=num_predictions)
+        reg = self._tranpose_and_gather_feat(reg, inds)
+
+        reg = reg.reshape((num_predictions, 2))
+        xs = xs.reshape((num_predictions, 1)) + reg[:, 0:1]
+        ys = ys.reshape((num_predictions, 1)) + reg[:, 1:2]
+
+        wh = self._tranpose_and_gather_feat(wh, inds)
+        wh = wh.reshape((num_predictions, 2))
+        clses = clses.reshape((num_predictions, 1))
+        scores = scores.reshape((num_predictions, 1))
+        bboxes = np.concatenate((xs - wh[..., 0:1] / 2,
+                                 ys - wh[..., 1:2] / 2,
+                                 xs + wh[..., 0:1] / 2,
+                                 ys + wh[..., 1:2] / 2), axis=1)
+        detections = np.concatenate((bboxes, scores, clses), axis=1)
+        mask = detections[..., 4] >= self._threshold
+        filtered_detections = detections[mask]
+        scale = max(meta['original_shape'])
+        center = np.array(meta['original_shape'][:2])/2.0
+        dets = self._transform(filtered_detections, np.flip(center, 0), scale, height, width)
+        dets = [Detection(x[0], x[1], x[2], x[3], score=x[4], id=x[5]) for x in dets]
+        return dets
 
     @staticmethod
     def get_affine_transform(center, scale, rot, output_size, inv=False):
@@ -89,7 +141,7 @@ class Detector(object):
     def _tranpose_and_gather_feat(feat, ind):
         feat = np.transpose(feat, (1, 2, 0))
         feat = feat.reshape((-1, feat.shape[2]))
-        feat = Detector._gather_feat(feat, ind)
+        feat = CenterNet._gather_feat(feat, ind)
         return feat
 
     @staticmethod
@@ -107,10 +159,10 @@ class Detector(object):
         topk_ind = np.argpartition(topk_scores, -K)[-K:]
         topk_score = topk_scores[topk_ind]
         topk_clses = topk_ind / K
-        topk_inds = Detector._gather_feat(
+        topk_inds = CenterNet._gather_feat(
             topk_inds.reshape((-1, 1)), topk_ind).reshape((K))
-        topk_ys = Detector._gather_feat(topk_ys.reshape((-1, 1)), topk_ind).reshape((K))
-        topk_xs = Detector._gather_feat(topk_xs.reshape((-1, 1)), topk_ind).reshape((K))
+        topk_ys = CenterNet._gather_feat(topk_ys.reshape((-1, 1)), topk_ind).reshape((K))
+        topk_xs = CenterNet._gather_feat(topk_xs.reshape((-1, 1)), topk_ind).reshape((K))
 
         return topk_score, topk_inds, topk_clses, topk_ys, topk_xs
 
@@ -142,72 +194,15 @@ class Detector(object):
             return new_pt[:2]
 
         target_coords = np.zeros(coords.shape)
-        trans = Detector.get_affine_transform(center, scale, 0, output_size, inv=True)
+        trans = CenterNet.get_affine_transform(center, scale, 0, output_size, inv=True)
         for p in range(coords.shape[0]):
             target_coords[p, 0:2] = affine_transform(coords[p, 0:2], trans)
         return target_coords
 
     @staticmethod
     def _transform(dets, center, scale, height, width):
-        dets[:, :2] = Detector._transform_preds(
+        dets[:, :2] = CenterNet._transform_preds(
             dets[:, 0:2], center, scale, (width, height))
-        dets[:, 2:4] = Detector._transform_preds(
+        dets[:, 2:4] = CenterNet._transform_preds(
             dets[:, 2:4], center, scale, (width, height))
         return dets
-
-    def preprocess(self, image):
-        height, width = image.shape[0:2]
-        center = np.array([width / 2., height / 2.], dtype=np.float32)
-        scale = max(height, width)
-
-        trans_input = self.get_affine_transform(center, scale, 0, [self.input_width, self.input_height])
-        resized_image = cv2.resize(image, (width, height))
-        inp_image = cv2.warpAffine(
-            resized_image, trans_input, (self.input_width, self.input_height),
-            flags=cv2.INTER_LINEAR)
-
-        return inp_image
-
-    def postprocess(self, raw_output, image_sizes):
-        heat, reg, wh = raw_output
-        heat = heat = np.exp(heat)/(1 + np.exp(heat))
-        height, width = heat.shape[1:3]
-        num_predictions = 100
-
-        heat = self._nms(heat)
-        scores, inds, clses, ys, xs = self._topk(heat, K=num_predictions)
-        reg = self._tranpose_and_gather_feat(reg, inds)
-
-        reg = reg.reshape((num_predictions, 2))
-        xs = xs.reshape((num_predictions, 1)) + reg[:, 0:1]
-        ys = ys.reshape((num_predictions, 1)) + reg[:, 1:2]
-
-        wh = self._tranpose_and_gather_feat(wh, inds)
-        wh = wh.reshape((num_predictions, 2))
-        clses = clses.reshape((num_predictions, 1))
-        scores = scores.reshape((num_predictions, 1))
-        bboxes = np.concatenate((xs - wh[..., 0:1] / 2,
-                                 ys - wh[..., 1:2] / 2,
-                                 xs + wh[..., 0:1] / 2,
-                                 ys + wh[..., 1:2] / 2), axis=1)
-        detections = np.concatenate((bboxes, scores, clses), axis=1)
-        mask = detections[..., 4] >= self._threshold
-        filtered_detections = detections[mask]
-        scale = max(image_sizes)
-        center = np.array(image_sizes[:2])/2.0
-        dets = self._transform(filtered_detections, np.flip(center, 0), scale, height, width)
-        return dets
-
-    def infer(self, image):
-        t0 = cv2.getTickCount()
-        output = self._exec_model.infer(inputs={self._input_layer_name: image})
-        self.infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()
-        return output
-
-    def detect(self, image):
-        image_sizes = image.shape[:2]
-        image = self.preprocess(image)
-        image = np.transpose(image, (2, 0, 1))
-        output = self.infer(image)
-        detections = self.postprocess([output[name][0] for name in self._output_layer_names], image_sizes)
-        return detections
