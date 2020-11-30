@@ -1,4 +1,4 @@
-# Gesture Recognition Python* Demo
+# Gesture Recognition Python\* Demo
 
 This demo demonstrates how to run Gesture (e.g. American Sign Language (ASL) gestures) Recognition models using OpenVINO&trade; toolkit.
 

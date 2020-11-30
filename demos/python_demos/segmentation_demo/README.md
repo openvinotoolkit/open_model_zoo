@@ -1,4 +1,4 @@
-# Image Segmentation Python* Demo
+# Image Segmentation Python\* Demo
 
 This topic demonstrates how to run the Image Segmentation demo application, which does inference using image
 segmentation networks like FCN8.
