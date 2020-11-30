@@ -60,7 +60,7 @@ Rendering of the latex formula is performed with the help of `Renderer` class fr
 ### Interactive mode
 Special class `InteractiveDemo` provides interface to interact with webcamera and recognize latex formulas.
 * The example of the interface:
-![](./interactive_inferface.png)
+![](./interactive_interface.png)
 When User runs demo application with the `-i` option and passes `.mp4` video or number of the web-camera device as an argument (typically 1), window with the image simillar to above should pop up.
 
 Example of usage of the interactive mode:
