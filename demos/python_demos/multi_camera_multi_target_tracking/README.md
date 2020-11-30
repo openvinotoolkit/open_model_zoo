@@ -1,4 +1,4 @@
-# Multi Camera Multi Target Python* Demo
+# Multi Camera Multi Target Python\* Demo
 
 This demo demonstrates how to run Multi Camera Multi Target (e.g. person or vehicle) demo using OpenVINO<sup>TM</sup>.
 
