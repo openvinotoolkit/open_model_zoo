@@ -28,7 +28,6 @@ The Open Model Zoo includes the following demos:
 - [Multi-Camera Multi-Target Tracking Python\* Demo](./python_demos/multi_camera_multi_target_tracking/README.md) Demo application for multiple targets (persons or vehicles) tracking on multiple cameras.
 - [Multi-Channel C++ Demos](./multi_channel/README.md) - Several demo applications for multi-channel scenarios.
 - [Object Detection Python\* Demo](./python_demos/object_detection_demo/README.md) - Demo application for several object detection model types (like SSD, Yolo, etc).
-- [Object Detection for Faster R-CNN C++ Demo](./object_detection_demo_faster_rcnn/README.md) - Inference of object detection networks like Faster R-CNN (the demo supports only images as inputs).
 - [Object Detection C++ Demo](./object_detection_demo/README.md) - Demo application for Object Detection networks (different models architectures are supproted), async API showcase, simple OpenCV interoperability (supports video and camera inputs).
 - [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/README.md) - Demo application for pedestrian tracking scenario.
 - [Security Barrier Camera C++ Demo](./security_barrier_camera_demo/README.md) - Vehicle Detection followed by the Vehicle Attributes and License-Plate Recognition, supports images/video and camera inputs.
