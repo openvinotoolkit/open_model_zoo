@@ -69,6 +69,9 @@ class AsyncPipeline:
     def is_ready(self):
         return len(self.empty_requests) != 0
 
+    def has_completed_request(self):
+        return len(self.completed_request_results) != 0
+
     def await_all(self):
         for request in self.exec_net.requests:
             request.wait()

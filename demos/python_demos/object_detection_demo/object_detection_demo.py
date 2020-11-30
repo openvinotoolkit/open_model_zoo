@@ -291,6 +291,25 @@ def main():
             detector_pipeline.await_any()
 
     detector_pipeline.await_all()
+    # Process completed requests
+    while detector_pipeline.has_completed_request():
+        results = detector_pipeline.get_result(next_frame_id_to_show)
+        if results:
+            objects, frame_meta = results
+            frame = frame_meta['frame']
+            start_time = frame_meta['start_time']
+
+            if len(objects) and args.raw_output_message:
+                print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
+
+            presenter.drawGraphs(frame)
+            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, has_landmarks)
+            metrics.update(start_time, frame)
+            if not args.no_show:
+                cv2.imshow('Detection Results', frame)
+            next_frame_id_to_show += 1
+        else:
+            break
 
     metrics.print_total()
     print(presenter.reportMeans())
