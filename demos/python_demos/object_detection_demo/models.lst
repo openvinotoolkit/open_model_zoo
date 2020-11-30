@@ -32,3 +32,4 @@ faceboxes-pytorch
 # For --architecture_type=retina
 retinaface-anti-cov
 retinaface-resnet50
+ssh

@@ -20,3 +20,4 @@ from .yolo import YOLO
 from .faceboxes import FaceBoxes
 from .centernet import CenterNet
 from .retinaface import RetinaFace
+from .utils import DetectionWithLandmarks
