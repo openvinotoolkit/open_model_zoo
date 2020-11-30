@@ -22,6 +22,7 @@ from ..config import NumberField, BoolField, PathField, StringField, ConfigError
 from ..utils import get_size_from_config
 from ..data_readers import BaseReader
 
+
 class FreeFormMask(Preprocessor):
     __provider__ = 'free_form_mask'
 
@@ -38,7 +39,8 @@ class FreeFormMask(Preprocessor):
             ),
             "max_vertex": NumberField(
                 optional=True, default=20, description="Maximum number vertex to draw mask.", value_type=int
-            )
+            ),
+            'inverse_mask': BoolField(optional=True, default=False, description="Inverse mask"),
         })
         return parameters
 
@@ -47,13 +49,13 @@ class FreeFormMask(Preprocessor):
         self.max_brush_width = self.get_value_from_config('max_brush_width')
         self.max_length = self.get_value_from_config('max_length')
         self.max_vertex = self.get_value_from_config('max_vertex')
+        self.inverse_mask = self.get_value_from_config('inverse_mask')
 
     @staticmethod
     def _free_form_mask(mask, max_vertex, max_length, max_brush_width, h, w, max_angle=360):
         num_strokes = np.random.randint(max_vertex)
         start_y = np.random.randint(h)
         start_x = np.random.randint(w)
-        brush_width = 0
         for i in range(num_strokes):
             angle = np.random.random() * np.deg2rad(max_angle)
             if i % 2 == 0:
@@ -72,6 +74,8 @@ class FreeFormMask(Preprocessor):
         return mask
 
     def process(self, image, annotation_meta=None):
+        if len(image.data) == 2:
+            return preprocess_input_mask(image, self.inverse_mask)
         img = image.data[0]
         img_height, img_width = img.shape[:2]
         mask = np.zeros((img_height, img_width, 1), dtype=np.float32)
@@ -81,6 +85,8 @@ class FreeFormMask(Preprocessor):
                                         img_height, img_width)
 
         img = img * (1 - mask) + 255 * mask
+        if self.inverse_mask:
+            mask = 1 - mask
         image.data = [img, mask]
         identifier = image.identifier[0]
         image.identifier = ['{}_image'.format(identifier), '{}_mask'.format(identifier)]
@@ -94,33 +100,45 @@ class RectMask(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'mask_height': NumberField(
+            'dst_height': NumberField(
                 optional=True, default=128, description="Height of mask", value_type=int
             ),
-            'mask_width': NumberField(
+            'dst_width': NumberField(
                 optional=True, default=128, description="Width of mask", value_type=int
             ),
             'size': NumberField(
                 optional=True, default=128,
-                description="Size of mask, used if both dementions are equal", value_type=int
-            )
+                description="Size of mask, used if both dimensions are equal", value_type=int
+            ),
+            'inverse_mask': BoolField(optional=True, default=False, description="Inverse mask")
+
         })
         return parameters
 
     def configure(self):
         self.mask_height, self.mask_width = get_size_from_config(self.config, allow_none=True)
+        if self.mask_height is None:
+            self.mask_height = 128
+        if self.mask_width is None:
+            self.mask_width = 128
+        self.inverse_mask = self.get_value_from_config('inverse_mask')
 
     def process(self, image, annotation_meta=None):
+        if len(image.data) == 2:
+            return preprocess_input_mask(image, self.inverse_mask)
+
         img = image.data[0]
         img_height, img_width = img.shape[:2]
-        mp0 = (img_height - self.mask_height)//2
-        mp1 = (img_width - self.mask_width)//2
+        mp0 = max(0, (img_height - self.mask_height)//2)
+        mp1 = max(0, (img_width - self.mask_width)//2)
 
         mask = np.zeros((img_height, img_width)).astype(np.float32)
         mask[mp0:mp0 + self.mask_height, mp1:mp1 + self.mask_width] = 1
         mask = np.expand_dims(mask, axis=2)
 
         img = img * (1 - mask) + 255 * mask
+        if self.inverse_mask:
+            mask = 1 - mask
         image.data = [img, mask]
         identifier = image.identifier[0]
         image.identifier = ['{}_image'.format(identifier), '{}_mask'.format(identifier)]
@@ -146,6 +164,9 @@ class CustomMask(Preprocessor):
         self.mask_loader = self.get_value_from_config('mask_loader')
 
     def process(self, image, annotation_meta=None):
+        if len(image.data) == 2:
+            return preprocess_input_mask(image, self.inverse_mask)
+
         if annotation_meta.get('mask') is None:
             raise ConfigError('Path to mask dataset is not set during annotation conversion.'
                               'Please specify masks_dir parameter')
@@ -171,3 +192,20 @@ class CustomMask(Preprocessor):
         identifier = image.identifier[0]
         image.identifier = ['{}_image'.format(identifier), '{}_mask'.format(identifier)]
         return image
+
+
+def preprocess_input_mask(data, inverse=False):
+    img, mask = data.data[0], data.data[1]
+    if len(mask.shape) == 3 and mask.shape[-1] != 1:
+        mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+    mask /= 255
+    mask[mask >= 0.5] = 1
+    mask[mask < 0.5] = 0
+    if len(mask.shape) == 2:
+        mask = np.expand_dims(mask, -1)
+    img = img * (1 - mask) + 255 * mask
+
+    data.data[0] = img
+    data.data[1] = mask if not inverse else 1 - mask
+
+    return data

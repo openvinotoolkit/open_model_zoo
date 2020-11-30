@@ -7,7 +7,7 @@ Chinese license plates in traffic.
 
 ## Validation Dataset - Internal
 
-1165 Chinese plates from different provinces
+300320 Sythetic Chinese plates i.e. the plate text on them consists of symbols generated randomly (but to conform to the plate requirements in terms of the number of characters, sequence, shape, placement, etc.). The “real-looking” appearance of the plates (rotation, dirt, color, lightening, etc.) is achieved by a style transfer procedure.
 
 ## Example
 
@@ -22,7 +22,7 @@ Chinese license plates in traffic.
 | Rotation in-plane      | ±10˚                    |
 | Rotation out-of-plane  | Yaw: ±45˚ / Pitch: ±45˚ |
 | Min plate width        | 94 pixels               |
-| Ratio of correct reads | 90.12%                  |
+| Ratio of correct reads | 98%                     |
 | GFlops                 | 0.347                   |
 | MParams                | 1.435                   |
 | Source framework       | TensorFlow*             |
@@ -31,8 +31,6 @@ Chinese license plates in traffic.
 
 Only "blue" license plates, which are common in public, were tested
 thoroughly. Other types of license plates may underperform.
-
-## Performance
 
 ## Inputs
 

@@ -36,8 +36,6 @@ The formula-recognition-medium-scan-0001-encoder model is a ResNeXt-50 like back
 | MParams                                       | 1.69      |
 
 
-### Performance
-
 ### Inputs
 
 1.	Name: `imgs` , shape: [1x3x160x1400]. An input image in the [1xCxHxW] format.
@@ -62,8 +60,6 @@ The formula-recognition-medium-scan-0001-decoder model is an LSTM based decoder 
 
 
 
-### Performance
-
 ### Inputs
 
 1.	Name: `dec_st_c` , shape: [1x512]. Current context state of the LSTM cell.
@@ -78,7 +74,7 @@ The formula-recognition-medium-scan-0001-decoder model is an LSTM based decoder 
 2.	Name: `dec_st_h` , shape: [1x512]. Current hidden state of the LSTM cell.
 3.	Name: `output`, shape: [1x256]. Current state of the decoder.
 1.	Name: `logit`, shape: [1xVocab_Size]. Classification confidence scores in the [0, 1] range
-    for every token. 
+    for every token.
 
 
 ## Legal Information

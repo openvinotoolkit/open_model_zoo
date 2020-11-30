@@ -112,10 +112,10 @@ class InpaintingGUI:
         if self.is_original_shown:
             backbuffer = self.original_img.copy()
             sz = cv2.getTextSize("Original", cv2.FONT_HERSHEY_COMPLEX, 0.75, 1)[0]
-            imgWidth = backbuffer.shape[1]
-            labelArea = backbuffer[margin:sz[1]+pad*2+margin, imgWidth-margin-(sz[0]+pad*2):imgWidth-margin]
-            labelArea //= 2
-            cv2.putText(backbuffer, "Original", (imgWidth-margin-sz[0]-pad, margin+sz[1]+pad), cv2.FONT_HERSHEY_COMPLEX, 0.75, (128, 255, 128))
+            img_width = backbuffer.shape[1]
+            label_area = backbuffer[margin:sz[1]+pad*2+margin, img_width-margin-(sz[0]+pad*2):img_width-margin]
+            label_area //= 2
+            cv2.putText(backbuffer, "Original", (img_width-margin-sz[0]-pad, margin+sz[1]+pad), cv2.FONT_HERSHEY_COMPLEX, 0.75, (128, 255, 128))
         else:
             backbuffer = self.img.copy()
             backbuffer[np.squeeze(self.mask, -1) > 0] = self.mask_color
@@ -124,10 +124,10 @@ class InpaintingGUI:
             lines = self.label.split("\n")
             count = len(lines)
             w = max(cv2.getTextSize(line, cv2.FONT_HERSHEY_COMPLEX, 0.75, 1)[0][0] for line in lines) + pad*2
-            lineH = cv2.getTextSize(lines[0], cv2.FONT_HERSHEY_COMPLEX, 0.75, 1)[0][1] + pad
-            labelArea = backbuffer[margin:lineH*count+pad*2+margin, margin:w+margin]
-            labelArea //= 2
+            line_h = cv2.getTextSize(lines[0], cv2.FONT_HERSHEY_COMPLEX, 0.75, 1)[0][1] + pad
+            label_area = backbuffer[margin:line_h*count+pad*2+margin, margin:w+margin]
+            label_area //= 2
             for i, line in enumerate(lines):
-                cv2.putText(backbuffer, line, (pad+margin, margin+(i+1)*lineH), cv2.FONT_HERSHEY_COMPLEX, 0.75, (192, 192, 192))
+                cv2.putText(backbuffer, line, (pad+margin, margin+(i+1)*line_h), cv2.FONT_HERSHEY_COMPLEX, 0.75, (192, 192, 192))
 
         cv2.imshow(self.wnd_name, backbuffer)

@@ -14,20 +14,20 @@
 
 description: >-
   YOLO v2 is a real-time object detection model implemented with Keras* from this
-  repository <https://github.com/allanzelener/YAD2K> and converted to TensorFlow*
-  framework. This model was pretrained on COCO* dataset with 80 classes.
+  repository <https://github.com/david8862/keras-YOLOv3-model-set> and converted to
+  TensorFlow* framework. This model was pretrained on COCO* dataset with 80 classes.
 task_type: detection
 files:
   - name: yolo-v2.pb
-    size: 204013999
-    sha256: 973d0d531dace080d7dd8028c875e0224b504d44c279da2da55d1db183bd7f64
-    source: https://download.01.org/opencv/public_models/022020/yolo_v2/yolov2.pb
+    size: 203970473
+    sha256: 37163e414a912ecc44ebdcf40ff172c748cfb08264141eadad1fdaf3f96ba369
+    source: https://download.01.org/opencv/public_models/102020/yolo-v2-tf/yolo-v2.pb
 model_optimizer_args:
   - --input_shape=[1,608,608,3]
-  - --input=input_1
-  - --scale_values=input_1[255]
+  - --input=image_input
+  - --scale_values=image_input[255]
   - --reverse_input_channels
   - --transformations_config=$mo_dir/extensions/front/tf/yolo_v2.json
   - --input_model=$dl_dir/yolo-v2.pb
 framework: tf
-license: https://raw.githubusercontent.com/shaqian/tfjs-yolo/master/LICENSE
+license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

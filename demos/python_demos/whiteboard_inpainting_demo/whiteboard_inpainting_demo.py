@@ -155,7 +155,7 @@ def main():
 
         if output_video is not None:
             output_video.write(merged_frame)
-        
+
         presenter.drawGraphs(merged_frame)
         if not args.no_show:
             cv2.imshow(WINNAME, merged_frame)
@@ -178,7 +178,7 @@ def main():
             if board.shape[0] > 0 and board.shape[1] > 0:
                 cv2.namedWindow('Board', cv2.WINDOW_KEEPRATIO)
                 cv2.imshow('Board', board)
-            
+
         end = time.time()
         print('\rProcessing frame: {}, fps = {:.3}' \
             .format(frame_number, 1. / (end - start)), end="")
@@ -186,10 +186,10 @@ def main():
     print('')
 
     log.info(presenter.reportMeans())
-    
+
     if output_video is not None:
         output_video.release()
-        
+
 
 if __name__ == '__main__':
     main()

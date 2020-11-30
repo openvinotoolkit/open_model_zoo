@@ -1,7 +1,15 @@
 * text=auto
 
+/demos/thirdparty/** -whitespace
+
+# In patches, a context line is prefixed by a space, and if it's empty,
+# that space becomes a trailing space. That's a valid use for trailing spaces,
+# so allow it.
+*.patch whitespace=-blank-at-eol
+
 .git* -omz.package
 .editorconfig -omz.package
+.yamllint -omz.package
 /ci/** -omz.package
 /demos/build_demos.sh omz.package=l,m
 /demos/build_demos_msvc.bat omz.package=w

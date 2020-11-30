@@ -21,8 +21,7 @@ static const char age_gender_model_message[] = "Optional. Path to an .xml file w
 static const char head_pose_model_message[] = "Optional. Path to an .xml file with a trained Head Pose Estimation model.";
 static const char emotions_model_message[] = "Optional. Path to an .xml file with a trained Emotions Recognition model.";
 static const char facial_landmarks_model_message[] = "Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.";
-static const char plugin_message[] = "Plugin name. For example, CPU. If this parameter is specified, "
-                                     "the demo will look for this plugin only.";
+static const char antispoofing_model_message[] = "Optional. Path to an .xml file with a trained Antispoofing Classification model.";
 static const char target_device_message[] = "Optional. Target device for Face Detection network (the list of available devices is shown below). "
                                             "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                             "The demo will look for a suitable plugin for a specified device.";
@@ -38,6 +37,9 @@ static const char target_device_message_em[] = "Optional. Target device for Emot
 static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network "
                                                "(the list of available devices is shown below). Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                "The demo will look for a suitable plugin for a specified device.";
+static const char target_device_message_am[] = "Optional. Target device for Antispoofing Classification network (the list of available devices is shown below). "
+                                               "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
+                                               "The demo will look for a suitable plugin for a specified device.";
 static const char num_batch_ag_message[] = "Optional. Number of maximum simultaneously processed faces for Age/Gender Recognition network "
                                            "(by default, it is 16)";
 static const char num_batch_hp_message[] = "Optional. Number of maximum simultaneously processed faces for Head Pose Estimation network "
@@ -46,10 +48,13 @@ static const char num_batch_em_message[] = "Optional. Number of maximum simultan
                                            "(by default, it is 16)";
 static const char num_batch_lm_message[] = "Optional. Number of maximum simultaneously processed faces for Facial Landmarks Estimation network "
                                            "(by default, it is 16)";
+static const char num_batch_am_message[] = "Optional. Number of maximum simultaneously processed faces for Antispoofing Classification network "
+                                           "(by default, it is 16)";
 static const char dyn_batch_ag_message[] = "Optional. Enable dynamic batch size for Age/Gender Recognition network";
 static const char dyn_batch_hp_message[] = "Optional. Enable dynamic batch size for Head Pose Estimation network";
 static const char dyn_batch_em_message[] = "Optional. Enable dynamic batch size for Emotions Recognition network";
 static const char dyn_batch_lm_message[] = "Optional. Enable dynamic batch size for Facial Landmarks Estimation network";
+static const char dyn_batch_am_message[] = "Optional. Enable dynamic batch size for Antispoofing Classification network";
 static const char performance_counter_message[] = "Optional. Enable per-layer performance report";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
                                            "Absolute path to an .xml file with the kernels description.";
@@ -74,11 +79,13 @@ DEFINE_string(m_ag, "", age_gender_model_message);
 DEFINE_string(m_hp, "", head_pose_model_message);
 DEFINE_string(m_em, "", emotions_model_message);
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
+DEFINE_string(m_am, "", antispoofing_model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(d_ag, "CPU", target_device_message_ag);
 DEFINE_string(d_hp, "CPU", target_device_message_hp);
 DEFINE_string(d_em, "CPU", target_device_message_em);
 DEFINE_string(d_lm, "CPU", target_device_message_lm);
+DEFINE_string(d_am, "CPU", target_device_message_am);
 DEFINE_uint32(n_ag, 16, num_batch_ag_message);
 DEFINE_bool(dyn_ag, false, dyn_batch_ag_message);
 DEFINE_uint32(n_hp, 16, num_batch_hp_message);
@@ -87,6 +94,8 @@ DEFINE_uint32(n_em, 16, num_batch_em_message);
 DEFINE_bool(dyn_em, false, dyn_batch_em_message);
 DEFINE_uint32(n_lm, 16, num_batch_em_message);
 DEFINE_bool(dyn_lm, false, dyn_batch_em_message);
+DEFINE_uint32(n_am, 16, num_batch_am_message);
+DEFINE_bool(dyn_am, false, dyn_batch_am_message);
 DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
@@ -116,11 +125,12 @@ static void showUsage() {
     std::cout << "    -i                         " << input_message << std::endl;
     std::cout << "    -loop                      " << loop_message << std::endl;
     std::cout << "    -o \"<path>\"                " << output_video_message << std::endl;
-    std::cout << "    -m \"<path>\"                " << face_detection_model_message<< std::endl;
+    std::cout << "    -m \"<path>\"                " << face_detection_model_message << std::endl;
     std::cout << "    -m_ag \"<path>\"             " << age_gender_model_message << std::endl;
     std::cout << "    -m_hp \"<path>\"             " << head_pose_model_message << std::endl;
     std::cout << "    -m_em \"<path>\"             " << emotions_model_message << std::endl;
     std::cout << "    -m_lm \"<path>\"             " << facial_landmarks_model_message << std::endl;
+    std::cout << "    -m_am \"<path>\"             " << antispoofing_model_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"     " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"     " << custom_cldnn_message << std::endl;
@@ -129,14 +139,17 @@ static void showUsage() {
     std::cout << "    -d_hp \"<device>\"           " << target_device_message_hp << std::endl;
     std::cout << "    -d_em \"<device>\"           " << target_device_message_em << std::endl;
     std::cout << "    -d_lm \"<device>\"           " << target_device_message_lm << std::endl;
+    std::cout << "    -d_am \"<device>\"           " << target_device_message_am << std::endl;
     std::cout << "    -n_ag \"<num>\"              " << num_batch_ag_message << std::endl;
     std::cout << "    -n_hp \"<num>\"              " << num_batch_hp_message << std::endl;
     std::cout << "    -n_em \"<num>\"              " << num_batch_em_message << std::endl;
     std::cout << "    -n_lm \"<num>\"              " << num_batch_lm_message << std::endl;
+    std::cout << "    -n_am \"<num>\"              " << num_batch_am_message << std::endl;
     std::cout << "    -dyn_ag                    " << dyn_batch_ag_message << std::endl;
     std::cout << "    -dyn_hp                    " << dyn_batch_hp_message << std::endl;
     std::cout << "    -dyn_em                    " << dyn_batch_em_message << std::endl;
     std::cout << "    -dyn_lm                    " << dyn_batch_lm_message << std::endl;
+    std::cout << "    -dyn_am                    " << dyn_batch_am_message << std::endl;
     std::cout << "    -async                     " << async_message << std::endl;
     std::cout << "    -no_show                   " << no_show_processed_video << std::endl;
     std::cout << "    -pc                        " << performance_counter_message << std::endl;

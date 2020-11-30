@@ -67,7 +67,7 @@ int clip(int x, int max_val) {
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers one certain topology and cannot be generalized **/
-        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         // ----------------------------- Parsing and validating input arguments ------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
                 continue;
 
             slog::info << "Device info: " << slog::endl;
-            std::cout << ie.GetVersions(device) << std::endl;
+            slog::info << printable(ie.GetVersions(device)) << slog::endl;
 
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {

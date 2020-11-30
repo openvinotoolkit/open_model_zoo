@@ -39,7 +39,7 @@ class PerformanceMetrics:
         self.current_moving_statistic = Statistic()
         self.total_statistic = Statistic()
         self.last_update_time = None
-    
+
     def update(self, last_request_start_time, frame, position=(15, 30),
                font_scale=0.75, color=(200, 10, 10), thickness=2):
         current_time = perf_counter()
@@ -84,7 +84,7 @@ class PerformanceMetrics:
                 (frame_count / (self.total_statistic.period + self.current_moving_statistic.period))
                 if frame_count != 0
                 else None)
-    
+
     def print_total(self):
         total_latency, total_fps = self.get_total()
         print("Latency: {:.1f} ms".format(total_latency * 1e3) if total_latency is not None else "Latency: N/A")

@@ -451,4 +451,3 @@ void DetectionOutputPostProcessor::nms(const float* conf_data,
         }
     }
 }
-

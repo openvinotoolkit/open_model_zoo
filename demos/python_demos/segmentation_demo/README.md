@@ -1,4 +1,4 @@
-# Image Segmentation Python* Demo
+# Image Segmentation Python\* Demo
 
 This topic demonstrates how to run the Image Segmentation demo application, which does inference using image
 segmentation networks like FCN8.
@@ -13,14 +13,17 @@ Inference Engine plugin. When inference is done, the application creates an outp
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
 python3 segmentation_demo.py -h
 ```
+
 The command yields the following usage message:
+
 ```
-usage: segmentation_demo.py [-h] -m MODEL -i INPUT [INPUT ...]
+usage: segmentation_demo.py [-h] -m MODEL -i INPUT [INPUT ...] [-lab LABELS]
+                            [-c COLORS] [-lw LEGEND_WIDTH] [-o OUTPUT_DIR]
                             [-l CPU_EXTENSION] [-d DEVICE]
-                            [-nt NUMBER_TOP] [-ni NUMBER_ITER] [-pc]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -28,28 +31,37 @@ Options:
                         Required. Path to an .xml file with a trained model.
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
                         Required. Path to a folder with images or path to an
-                        image files
+                        image files.
+  -lab LABELS, --labels LABELS
+                        Optional. Path to a text file containing class labels.
+  -c COLORS, --colors COLORS
+                        Optional. Path to a text file containing colors for
+                        classes.
+  -lw LEGEND_WIDTH, --legend_width LEGEND_WIDTH
+                        Optional. Width of legend.
+  -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                        Optional. Path to a folder where output files will be
+                        saved.
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         Optional. Required for CPU custom layers. Absolute
                         MKLDNN (CPU)-targeted custom layers. Absolute path to
-                        a shared library with the kernels implementations
+                        a shared library with the kernels implementations.
   -d DEVICE, --device DEVICE
-                        Optional. Required for CPU custom layers Specify the target device to infer on; CPU,
+                        Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. Sample will
-                        look for a suitable plugin for device specified (CPU
-                        by default)
-  -nt NUMBER_TOP, --number_top NUMBER_TOP
-                        Optional. Number of top results
+                        look for a suitable plugin for device specified.
+                        Default value is CPU.
+
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
-
 You can use the following command do inference on Intel&reg CPU; Processors on an image using a trained FCN8 network:
+
 ```
     python3 segmentation_demo.py -i <path_to_image>/inputImage.bmp -m <path_to_model>/fcn8.xml
 ```
@@ -58,8 +70,8 @@ You can use the following command do inference on Intel&reg CPU; Processors on a
 
 The application outputs are a segmented image (`out.bmp`).
 
-
 ## See Also
+
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

@@ -21,19 +21,74 @@ import numpy as np
 from ..representation import (
     ReIdentificationClassificationAnnotation,
     ReIdentificationAnnotation,
+    PlaceRecognitionAnnotation,
     ReIdentificationPrediction
 )
 from ..config import BaseField, BoolField, NumberField
 from .metric import FullDatasetEvaluationMetric
-from ..utils import UnsupportedPackage
+
+
+def _auc(x, y):
+    if x.shape[0] < 2:
+        raise ValueError('At least 2 points are needed to compute'
+                         ' area under curve, but x.shape = {}'.format(x.shape))
+    direction = 1
+    dx = np.diff(x)
+    if np.any(dx < 0):
+        if np.all(dx <= 0):
+            direction = -1
+        else:
+            raise ValueError("x is neither increasing nor decreasing "
+                             ": {}.".format(x))
+    area = direction * np.trapz(y, x)
+    return area
+
+
+def _binary_clf_curve(y_true, y_score):
+    pos_label = 1.
+
+    # make y_true a boolean vector
+    y_true = (y_true == pos_label)
+
+    # sort scores and corresponding truth values
+    desc_score_indices = np.argsort(y_score, kind="mergesort")[::-1]
+    y_score = y_score[desc_score_indices]
+    y_true = y_true[desc_score_indices]
+    weight = 1.
+
+    distinct_value_indices = np.where(np.diff(y_score))[0]
+    threshold_idxs = np.r_[distinct_value_indices, y_true.size - 1]
+
+    # accumulate the true positives with decreasing threshold
+    tps = np.cumsum((y_true * weight), axis=None, dtype=np.float64)[threshold_idxs]
+    fps = 1 + threshold_idxs - tps
+    return fps, tps, y_score[threshold_idxs]
+
+
+def _precision_recall_curve(y_true, probas_pred):
+
+    fps, tps, thresholds = _binary_clf_curve(y_true, probas_pred,)
+
+    precision = tps / (tps + fps)
+    precision[np.isnan(precision)] = 0
+    recall = tps / tps[-1]
+
+    # stop when full recall attained
+    # and reverse the outputs so recall is decreasing
+    last_ind = tps.searchsorted(tps[-1])
+    sl = slice(last_ind, None, -1)
+    return np.r_[precision[sl], 1], np.r_[recall[sl], 0], thresholds[sl]
+
 
 try:
     from sklearn.metrics import auc, precision_recall_curve
 except ImportError as import_error:
-    auc = UnsupportedPackage("sklearn.metrics.auc", import_error.msg)
-    precision_recall_curve = UnsupportedPackage("sklearn.metrics.precision_recall_curve", import_error.msg)
+    auc = _auc
+    precision_recall_curve = _precision_recall_curve
+
 
 PairDesc = namedtuple('PairDesc', 'image1 image2 same')
+
 
 def _average_binary_score(binary_metric, y_true, y_score):
     def binary_target(y):
@@ -286,6 +341,7 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
 
         return subset
 
+
 class FaceRecognitionTAFAPairMetric(FullDatasetEvaluationMetric):
     __provider__ = 'face_recognition_tafa_pair_metric'
 
@@ -335,6 +391,7 @@ class FaceRecognitionTAFAPairMetric(FullDatasetEvaluationMetric):
                     fn += 1
 
         return [(tp+tn) / (tp+fp+tn+fn)]
+
 
 class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
     """
@@ -406,6 +463,7 @@ class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
             return 0
         return tp/(tp+fp)
 
+
 def regroup_pairs(annotations, predictions):
     image_indexes = {}
 
@@ -423,9 +481,11 @@ def regroup_pairs(annotations, predictions):
 
     return pairs
 
+
 def extract_embeddings(annotation, prediction, query):
     embeddings = [pred.embedding for pred, ann in zip(prediction, annotation) if ann.query == query]
     return np.stack(embeddings) if embeddings else embeddings
+
 
 def get_gallery_query_pids(annotation):
     gallery_pids = np.asarray([ann.person_id for ann in annotation if not ann.query])
@@ -573,10 +633,6 @@ def get_embedding_distances(annotation, prediction, train=False):
 
 
 def binary_average_precision(y_true, y_score, interpolated_auc=True):
-    if isinstance(auc, UnsupportedPackage):
-        auc.raise_error("reid metric")
-    if isinstance(precision_recall_curve, UnsupportedPackage):
-        precision_recall_curve.raise_error("reid metric")
     def _average_precision(y_true_, y_score_):
         precision, recall, _ = precision_recall_curve(y_true_, y_score_)
         if not interpolated_auc:
@@ -588,3 +644,49 @@ def binary_average_precision(y_true, y_score, interpolated_auc=True):
         return auc(recall, precision)
 
     return _average_binary_score(_average_precision, y_true, y_score)
+
+
+class LocalizationRecall(FullDatasetEvaluationMetric):
+    __provider__ = 'localization_recall'
+    annotation_types = (PlaceRecognitionAnnotation, )
+    prediction_types = (ReIdentificationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'top_k': NumberField(optional=True, value_type=int, min_value=1, default=1),
+            'distance_threshold': NumberField(optional=True, default=25)
+        })
+        return params
+
+    def configure(self):
+        self.top_k = self.get_value_from_config('top_k')
+        self.distance_threshold = self.get_value_from_config('distance_threshold')
+
+    def evaluate(self, annotations, predictions):
+        gallery_embeddings = extract_embeddings(annotations, predictions, query=False)
+        query_embeddings = extract_embeddings(annotations, predictions, query=True)
+        query_ann = [ann for ann in annotations if ann.query]
+        gallery_ann = [ann for ann in annotations if not ann.query]
+        query_len = np.shape(query_embeddings)[0]
+        not_empty = np.size(gallery_embeddings) > 0 and np.size(query_embeddings) > 0
+        if not not_empty:
+            warnings.warn('No gallery or query embeddings for evaluation')
+            return 0
+        l2_distance = (
+            np.sum(query_embeddings ** 2, axis=1, keepdims=True)
+            + np.sum(gallery_embeddings ** 2, axis=1)
+            - 2 * np.dot(query_embeddings, gallery_embeddings.transpose())
+        )
+        correct_at_n = 0
+        for i, q in enumerate(query_ann):
+            indices = np.argsort(l2_distance[i, :])[:self.top_k]
+            for ind in indices:
+                g_loc = gallery_ann[ind].coords
+                q_loc = q.coords
+                dist = np.linalg.norm(q_loc - g_loc)
+                if dist < self.distance_threshold:
+                    correct_at_n += 1
+        recall = correct_at_n / query_len
+        return recall

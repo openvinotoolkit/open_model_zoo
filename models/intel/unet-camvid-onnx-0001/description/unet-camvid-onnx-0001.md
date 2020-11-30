@@ -30,8 +30,6 @@ The quality metrics were calculated on the CamVid validation dataset. The `unlab
   - `FP` - number of false positive pixels for given class
 
 
-## Performance
-
 ## Input
 
 Image, shape - `1,3,368,480`, format is `B,C,H,W` where:

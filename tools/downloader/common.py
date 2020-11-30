@@ -33,7 +33,8 @@ import requests
 import yaml
 
 DOWNLOAD_TIMEOUT = 5 * 60
-MODEL_ROOT = Path(__file__).resolve().parents[2] / 'models'
+OMZ_ROOT = Path(__file__).resolve().parents[2]
+MODEL_ROOT = OMZ_ROOT / 'models'
 
 # make sure to update the documentation if you modify these
 KNOWN_FRAMEWORKS = {
@@ -60,6 +61,7 @@ KNOWN_TASK_TYPES = {
     'human_pose_estimation',
     'image_inpainting',
     'image_processing',
+    'image_translation',
     'instance_segmentation',
     'machine_translation',
     'monocular_depth_estimation',
@@ -71,6 +73,7 @@ KNOWN_TASK_TYPES = {
     'speech_recognition',
     'style_transfer',
     'token_recognition',
+    'text_to_speech',
 }
 
 KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}
@@ -408,7 +411,7 @@ class PostprocRegexReplace(Postproc):
 
         reporter.print_section_heading('Replacing text in {}', postproc_file)
 
-        postproc_file_text = postproc_file.read_text()
+        postproc_file_text = postproc_file.read_text(encoding='utf-8')
 
         orig_file = postproc_file.with_name(postproc_file.name + '.orig')
         if not orig_file.exists():
@@ -424,7 +427,7 @@ class PostprocRegexReplace(Postproc):
             raise RuntimeError('Invalid pattern: expected at least {} occurrences, but only {} found'.format(
                 self.count, num_replacements))
 
-        postproc_file.write_text(postproc_file_text)
+        postproc_file.write_text(postproc_file_text, encoding='utf-8')
 
 Postproc.types['regex_replace'] = PostprocRegexReplace
 
@@ -445,7 +448,7 @@ class PostprocUnpackArchive(Postproc):
 
         reporter.print_section_heading('Unpacking {}', postproc_file)
 
-        shutil.unpack_archive(str(postproc_file), str(output_dir), self.format)
+        shutil.unpack_archive(str(postproc_file), str(output_dir / postproc_file.parent), self.format)
         postproc_file.unlink()  # Remove the archive
 
 Postproc.types['unpack_archive'] = PostprocUnpackArchive

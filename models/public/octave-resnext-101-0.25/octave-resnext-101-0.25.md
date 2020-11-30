@@ -4,8 +4,6 @@
 
 The `octave-resnext-101-0.25` model is a modification of [`resnext-101`](https://arxiv.org/abs/1611.05431) with Octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.25`. Like the original model, this model is designed for image classification. For details about family of Octave Convolution models, check out the [repository](https://github.com/facebookresearch/OctConv).
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -21,8 +19,6 @@ The `octave-resnext-101-0.25` model is a modification of [`resnext-101`](https:/
 | ------ | ----- |
 | Top 1  | 79.556%|
 | Top 5  | 94.444%|
-
-## Performance
 
 ## Input
 

@@ -17,7 +17,7 @@ limitations under the License.
 import copy
 import pickle
 
-from ..utils import get_path, extract_image_representations
+from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
 from ..launcher import create_launcher, DummyLauncher, InputFeeder
 from ..launcher.loaders import PickleLoader
@@ -27,7 +27,7 @@ from ..postprocessor import PostprocessingExecutor
 from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter
 from ..config import ConfigError
-from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS
+from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS, DataRepresentation
 from .base_evaluator import BaseEvaluator
 
 
@@ -79,18 +79,23 @@ class ModelEvaluator(BaseEvaluator):
             dataset_config.get('preprocessing'), dataset_name, dataset.metadata,
             enable_ie_preprocessing=enable_ie_preprocessing
         )
+        input_precision = launcher_config.get('_input_precision', [])
         if enable_ie_preprocessing:
             launcher_kwargs['preprocessor'] = preprocessor
         if launcher_config['framework'] == 'dummy' and launcher_config.get('provide_identifiers', False):
             launcher_kwargs = {'identifiers': dataset.identifiers}
+        if input_precision:
+            launcher_kwargs['postpone_inputs_configuration'] = True
         launcher = create_launcher(launcher_config, model_name, **launcher_kwargs)
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)
         input_feeder = InputFeeder(
             launcher.config.get('inputs', []), launcher.inputs, launcher.fit_to_input, launcher.default_layout,
-            launcher_config['framework'] == 'dummy'
+            launcher_config['framework'] == 'dummy', input_precision
         )
+        if input_precision:
+            launcher.update_input_configuration(input_feeder.inputs_config)
         preprocessor.input_shapes = launcher.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
         metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
@@ -140,6 +145,8 @@ class ModelEvaluator(BaseEvaluator):
         def prepare_dataset():
             if self.dataset.batch is None:
                 self.dataset.batch = self.launcher.batch
+            if progress_reporter:
+                progress_reporter.reset(self.dataset.size)
 
         prepare_dataset()
 
@@ -154,9 +161,9 @@ class ModelEvaluator(BaseEvaluator):
         if self._is_stored(stored_predictions) or isinstance(self.launcher, DummyLauncher):
             self._annotations, self._predictions = self._load_stored_predictions(stored_predictions, progress_reporter)
 
-        if progress_reporter:
-            progress_reporter.reset(self.dataset.size)
-
+        output_callback = kwargs.get('output_callback')
+        metric_config = self._configure_metrics(kwargs, output_callback)
+        _, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
         predictions_to_store = []
         dataset_iterator = iter(enumerate(self.dataset))
         infer_requests_pool = {ir.request_id: ir for ir in self.launcher.get_async_requests()}
@@ -192,6 +199,10 @@ class ModelEvaluator(BaseEvaluator):
 
                     if progress_reporter:
                         progress_reporter.update(batch_id, len(batch_predictions))
+                        if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
+                            self.compute_metrics(
+                                print_results=True, ignore_results_formatting=ignore_results_formatting
+                            )
 
         if progress_reporter:
             progress_reporter.finish()
@@ -214,10 +225,8 @@ class ModelEvaluator(BaseEvaluator):
         if self.dataset.batch is None:
             self.dataset.batch = self.launcher.batch
         output_callback = kwargs.get('output_callback')
-        enable_profiling = kwargs.get('profile', False)
-        profile_type = 'json' if output_callback and enable_profiling else kwargs.get('profile_report_type')
-        if enable_profiling:
-            self.metric_executor.enable_profiling(self.dataset, profile_type)
+        metric_config = self._configure_metrics(kwargs, output_callback)
+        enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
         predictions_to_store = []
         for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
@@ -244,6 +253,8 @@ class ModelEvaluator(BaseEvaluator):
 
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_predictions))
+                if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting)
 
         if progress_reporter:
             progress_reporter.finish()
@@ -287,7 +298,7 @@ class ModelEvaluator(BaseEvaluator):
         return free_irs, queued_irs
 
     def process_single_image(self, image):
-        input_data = [self.reader(identifier=image)]
+        input_data = self._prepare_data_for_single_inference(image)
         batch_input = self.preprocessor.process(input_data)
         _, batch_meta = extract_image_representations(batch_input)
         filled_inputs = self.input_feeder.fill_inputs(batch_input)
@@ -300,7 +311,24 @@ class ModelEvaluator(BaseEvaluator):
         _, predictions = self.postprocessor.process_batch(
             None, batch_predictions, batch_meta, allow_empty_annotation=True
         )
+        self.input_feeder.ordered_inputs = False
         return predictions[0]
+
+    def _prepare_data_for_single_inference(self, data):
+        def get_data(image, create_representation=True):
+            if is_path(image):
+                return [self.reader(identifier=image) if create_representation else self.reader.read_dispatcher(image)]
+            return [DataRepresentation(image, identifier='image') if create_representation else image]
+
+        if not isinstance(data, list):
+            return get_data(data)
+
+        input_data = []
+        for item in data:
+            input_data.extend(get_data(item, False))
+        self.input_feeder.ordered_inputs = True
+
+        return [DataRepresentation(input_data, identifier=list(range(len(data))))]
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
@@ -372,6 +400,18 @@ class ModelEvaluator(BaseEvaluator):
 
     def set_profiling_dir(self, profiler_dir):
         self.metric_executor.set_profiling_dir(profiler_dir)
+
+    def _configure_metrics(self, config, output_callback):
+        enable_profiling = config.get('profile', False)
+        profile_type = 'json' if output_callback and enable_profiling else config.get('profile_report_type')
+        if enable_profiling:
+            self.metric_executor.enable_profiling(self.dataset, profile_type)
+        compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
+        metric_interval, ignore_results_formatting = None, None
+        if compute_intermediate_metric_res:
+            metric_interval = config.get('metrics_interval', 1000)
+            ignore_results_formatting = config.get('ignore_results_formatting', False)
+        return enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting
 
     @staticmethod
     def store_predictions(stored_predictions, predictions):

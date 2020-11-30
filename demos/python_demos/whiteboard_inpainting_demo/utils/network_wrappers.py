@@ -112,4 +112,3 @@ class SemanticSegmentation(IEModel):
                 output.append([[0, 0, out_w - 1, out_h - 1], 1., data.astype('uint8')])
             outputs.append(output)
         return outputs
-        

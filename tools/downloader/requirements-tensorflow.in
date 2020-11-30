@@ -1,0 +1,4 @@
+tensorflow>=2.3
+
+# workaround for https://github.com/tensorflow/tensorflow/issues/44467
+h5py<3

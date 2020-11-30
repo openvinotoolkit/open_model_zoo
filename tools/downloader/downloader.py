@@ -125,6 +125,7 @@ def verify_hash(reporter, actual_hash, expected_hash, path):
 
 class NullCache:
     def has(self, hash): return False
+    def get(self, model_file, path, reporter): return False
     def put(self, hash, path): pass
 
 class DirCache:
@@ -147,8 +148,26 @@ class DirCache:
     def has(self, hash):
         return self._hash_path(hash).exists()
 
-    def get(self, hash, path):
-        shutil.copyfile(str(self._hash_path(hash)), str(path))
+    def get(self, model_file, path, reporter):
+        cache_path = self._hash_path(model_file.sha256)
+        cache_sha256 = hashlib.sha256()
+        cache_size = 0
+
+        with open(cache_path, 'rb') as cache_file, open(path, 'wb') as destination_file:
+            while True:
+                data = cache_file.read(CHUNK_SIZE)
+                if not data:
+                    break
+                cache_size += len(data)
+                if cache_size > model_file.size:
+                    reporter.log_error("Cached file is longer than expected ({} B), copying aborted", model_file.size)
+                    return False
+                cache_sha256.update(data)
+                destination_file.write(data)
+        if cache_size < model_file.size:
+            reporter.log_error("Cached file is shorter ({} B) than expected ({} B)", cache_size, model_file.size)
+            return False
+        return verify_hash(reporter, cache_sha256.digest(), model_file.sha256, path)
 
     def put(self, hash, path):
         # A file in the cache must have the hash implied by its name. So when we upload a file,
@@ -163,14 +182,16 @@ class DirCache:
         hash_path.parent.mkdir(parents=True, exist_ok=True)
         staging_path.replace(self._hash_path(hash))
 
-def try_retrieve_from_cache(reporter, cache, files):
+def try_retrieve_from_cache(reporter, cache, model_file, destination):
     try:
-        if all(cache.has(file[0]) for file in files):
-            for hash, destination in files:
-                reporter.job_context.check_interrupted()
+        if cache.has(model_file.sha256):
+            reporter.job_context.check_interrupted()
 
-                reporter.print_section_heading('Retrieving {} from the cache', destination)
-                cache.get(hash, destination)
+            reporter.print_section_heading('Retrieving {} from the cache', destination)
+            if not cache.get(model_file, destination, reporter):
+                reporter.print('Will retry from the original source.')
+                reporter.print()
+                return False
             reporter.print()
             return True
     except Exception:
@@ -188,7 +209,7 @@ def try_update_cache(reporter, cache, hash, source):
 def try_retrieve(reporter, destination, model_file, cache, num_attempts, start_download):
     destination.parent.mkdir(parents=True, exist_ok=True)
 
-    if try_retrieve_from_cache(reporter, cache, [[model_file.sha256, destination]]):
+    if try_retrieve_from_cache(reporter, cache, model_file, destination):
         return True
 
     reporter.print_section_heading('Downloading {}', destination)

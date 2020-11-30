@@ -300,7 +300,9 @@ class SSDONNXAdapter(Adapter):
         parameters.update(
             {
                 'labels_out': StringField(description='name (or regex for it) of output layer with labels'),
-                'scores_out': StringField(description='name (or regex for it) of output layer with scores'),
+                'scores_out': StringField(
+                    description='name (or regex for it) of output layer with scores', optional=True
+                ),
                 'bboxes_out': StringField(description='name (or regex for it) of output layer with bboxes')
             }
         )
@@ -317,17 +319,36 @@ class SSDONNXAdapter(Adapter):
         results = []
         if not self.outputs_verified:
             self._get_output_names(raw_outputs)
-        for identifier, bboxes, scores, labels in zip(
-                identifiers, raw_outputs[self.bboxes_out], raw_outputs[self.scores_out], raw_outputs[self.labels_out]
-        ):
-            x_mins, y_mins, x_maxs, y_maxs = bboxes.T
-            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
+        boxes_out, labels_out = raw_outputs[self.bboxes_out], raw_outputs[self.labels_out]
+        if len(boxes_out.shape) == 2:
+            boxes_out = np.expand_dims(boxes_out, 0)
+            labels_out = np.expand_dims(labels_out, 0)
+        for idx, (identifier, bboxes, labels) in enumerate(zip(
+                identifiers, boxes_out, labels_out
+        )):
+            if self.scores_out:
+                scores = raw_outputs[self.scores_out][idx]
+                x_mins, y_mins, x_maxs, y_maxs = bboxes.T
+            else:
+                x_mins, y_mins, x_maxs, y_maxs, scores = bboxes.T
+            if labels.ndim > 1:
+                labels = np.squeeze(labels)
+            if scores.ndim > 1:
+                scores = np.squeeze(scores)
+            if x_mins.ndim > 1:
+                x_mins = np.squeeze(x_mins)
+                y_mins = np.squeeze(y_mins)
+                x_maxs = np.squeeze(x_maxs)
+                y_maxs = np.squeeze(y_maxs)
+            results.append(
+                DetectionPrediction(
+                    identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
 
         return results
 
     def _get_output_names(self, raw_outputs):
         labels_regex = re.compile(self.labels_out)
-        scores_regex = re.compile(self.scores_out)
+        scores_regex = re.compile(self.scores_out) if self.scores_out else ''
         bboxes_regex = re.compile(self.bboxes_out)
 
         def find_layer(regex, output_name, all_outputs):
@@ -341,7 +362,7 @@ class SSDONNXAdapter(Adapter):
             return suitable_layers[0]
 
         self.labels_out = find_layer(labels_regex, 'labels', raw_outputs)
-        self.scores_out = find_layer(scores_regex, 'scores', raw_outputs)
+        self.scores_out = find_layer(scores_regex, 'scores', raw_outputs) if self.scores_out else None
         self.bboxes_out = find_layer(bboxes_regex, 'bboxes', raw_outputs)
 
         self.outputs_verified = True

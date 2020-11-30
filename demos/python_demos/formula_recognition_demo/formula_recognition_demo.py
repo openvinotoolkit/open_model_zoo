@@ -207,9 +207,9 @@ def main():
             if tgt[0][0][0] == END_TOKEN:
                 break
         if args.perf_counts:
-            log.info("Encoder perfomance statistics")
+            log.info("Encoder performance statistics")
             print_stats(exec_net_encoder)
-            log.info("Decoder perfomanсe statistics")
+            log.info("Decoder performance statistics")
             print_stats(exec_net_decoder)
 
         logits = np.array(logits)

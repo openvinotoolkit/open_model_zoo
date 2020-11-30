@@ -48,7 +48,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        slog::info << "InferenceEngine: " << *GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << slog::endl;
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << "Device info" << slog::endl;
-        std::cout << ie.GetVersions(FLAGS_d);
+        slog::info << printable(ie.GetVersions(FLAGS_d)) << slog::endl;
 
         CNNNetwork network = ie.ReadNetwork(FLAGS_m);
 

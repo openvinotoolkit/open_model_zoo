@@ -51,7 +51,7 @@ public:
         outImg.create((cellSize.height * size.height) + presenter.graphSize.height,
                        cellSize.width * size.width, CV_8UC3);
         outImg.setTo(0);
-        
+
         textSize = cv::getTextSize("", fontType, fontScale, thickness, &baseline);
         accuracyMessageSize = cv::getTextSize("Accuracy (top 0): 0.000", fontType, fontScale, thickness, &baseline);
         testMessageSize = cv::getTextSize(testMessage, fontType, fontScale, thickness, &baseline);
@@ -65,7 +65,7 @@ public:
                   cv::Scalar(0, 0, 0), cv::FILLED);
 
         presenter.drawGraphs(outImg);
-        
+
         cv::Scalar textColor = cv::Scalar(255, 255, 255);
         int textPadding = 10;
 
@@ -77,7 +77,7 @@ public:
                     cv::format("Latency: %dms", static_cast<int>(avgLatency * 1000)),
                     cv::Point(textPadding, (textSize.height + textPadding) * 2),
                     fontType, fontScale, textColor, thickness);
-        
+
         if (showAccuracy) {
             cv::putText(outImg,
                         cv::format("Accuracy (top %d): %.3f", FLAGS_nt, accuracy),
@@ -131,13 +131,13 @@ public:
                         imageInfo.label,
                         cv::Point(labelThickness, cellSize.height - labelThickness - labelTextSize.height),
                         fontType, labelFontScale, textColor, 2);
-            
+
             prevImgs.push(frame);
 
-            cv::Mat cell = outImg(cv::Rect(points[currSourceId], cellSize));                                         
-            frame.copyTo(cell);                                                                                      
+            cv::Mat cell = outImg(cv::Rect(points[currSourceId], cellSize));
+            frame.copyTo(cell);
             cv::rectangle(cell, {0, 0}, {frame.cols, frame.rows}, {255, 50, 50}, labelThickness); // draw a border
-            
+
             if (currSourceId == points.size() - 1) {
                 currSourceId = 0;
             } else {

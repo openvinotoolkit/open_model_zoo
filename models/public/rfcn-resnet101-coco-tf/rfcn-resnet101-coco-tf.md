@@ -4,8 +4,6 @@
 
 R-FCN Resnet-101 model, pretrained on COCO\* dataset. Used for object detection. For details, see the [paper](https://arxiv.org/abs/1605.06409).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -21,8 +19,6 @@ R-FCN Resnet-101 model, pretrained on COCO\* dataset. Used for object detection.
 | ------ | ----- |
 | coco_precision | 28.40%|
 | mAP | 45.02%|
-
-## Performance
 
 ## Input
 

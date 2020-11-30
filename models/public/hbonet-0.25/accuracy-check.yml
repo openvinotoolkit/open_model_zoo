@@ -39,7 +39,6 @@ models:
       - framework: dlsdk
         adapter:
           type: classification
-          classification_output: output
 
     datasets:
       - name: imagenet_1000_classes

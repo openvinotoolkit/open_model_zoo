@@ -351,7 +351,7 @@ class CTCBeamSearchDecoderWithLm(Adapter):
         lm_vocabulary_length = self.get_value_from_config('lm_vocabulary_length')
 
         if '' not in self.alphabet:
-            raise ValueError("alphabet must containg an empty string for the CTC blank character")
+            raise ValueError("alphabet must contain an empty string for the CTC blank character")
         if self.sep not in self.alphabet  and  self.sep != '':
             raise ValueError("\"sep\" must be in alphabet or be an empty string")
         self.init_lm(lm_file, lm_vocabulary_offset, lm_vocabulary_length)
@@ -711,7 +711,7 @@ class TextState:
 
 def log_sum_exp(a, b):
     """
-    Logically equvalent to:
+    Logically equivalent to:
       return math.log(math.exp(a) + math.exp(b))
     but avoids the possible over/underflow in math.exp().
     """

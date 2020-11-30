@@ -18,4 +18,3 @@ double ExponentialAverager::getAveragedValue() const {
 void ExponentialAverager::updateValue(double newValue) {
     value = smoothingFactor * newValue + (1. - smoothingFactor) * value;
 }
-

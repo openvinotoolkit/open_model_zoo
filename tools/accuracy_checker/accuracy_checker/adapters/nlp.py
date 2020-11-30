@@ -126,8 +126,9 @@ class MachineTranslationAdapter(Adapter):
             best_sequence = best_beam[0]
             if self.eos_index is not None:
                 if self.eos_index:
-                    end_of_string = np.argwhere(best_sequence == self.eos_index)[0]
-                    best_sequence = best_sequence[:end_of_string[0]]
+                    end_of_string_args = np.argwhere(best_sequence == self.eos_index)
+                    if np.size(end_of_string_args) != 0:
+                        best_sequence = best_sequence[:end_of_string_args[0][0]]
             encoded_words = []
             for seq_id, idx in enumerate(best_sequence):
                 word = self.encoding_vocab.get(int(idx))
@@ -196,7 +197,34 @@ class QuestionAnsweringEmbeddingAdapter(Adapter):
 
         return result
 
+class QuestionAnsweringBiDAFAdapter(Adapter):
+    __provider__ = 'bidaf_question_answering'
+    prediction_types = (QuestionAnsweringPrediction, )
 
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'start_pos_output': StringField(description="Output layer name for answer start position."),
+            'end_pos_output': StringField(description="Output layer name for answer end position.")
+        })
+        return parameters
+
+    def configure(self):
+        self.start_pos = self.get_value_from_config('start_pos_output')
+        self.end_pos = self.get_value_from_config('end_pos_output')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_output = self._extract_predictions(raw, frame_meta)
+        result = []
+        for identifier, start, end in zip(
+                identifiers, raw_output[self.start_pos], raw_output[self.end_pos]
+        ):
+            result.append(
+                QuestionAnsweringPrediction(identifier=identifier, start_index=start, end_index=end)
+            )
+
+        return result
 
 class LanguageModelingAdapter(Adapter):
     __provider__ = 'common_language_modeling'
@@ -217,6 +245,8 @@ class LanguageModelingAdapter(Adapter):
         raw_output = self._extract_predictions(raw, frame_meta)
         result = []
         for identifier, token_output in zip(identifiers, raw_output[self.logits_out]):
+            if len(token_output.shape) == 3:
+                token_output = np.squeeze(token_output, axis=0)
             result.append(LanguageModelingPrediction(identifier, token_output))
 
         return result

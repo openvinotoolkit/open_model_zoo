@@ -12,7 +12,7 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="1" name="20/Output_0/Data__const" type="Const" version="opset1">
+		<layer id="1" name="22/Output_0/Data__const" type="Const" version="opset1">
 			<data element_type="f32" offset="0" shape="6,3,5,5" size="1800"/>
 			<output>
 				<port id="1" precision="FP32">
@@ -228,15 +228,84 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="13" name="fc1/flatten_fc_input/Cast_1924_const" type="Const" version="opset1">
-			<data element_type="i64" offset="11488" shape="2" size="16"/>
+		<layer id="13" name="fc1/weights_transpose/MinusOne709_const" type="Const" version="opset1">
+			<data element_type="i64" offset="11488" shape="1" size="8"/>
+			<output>
+				<port id="1" precision="I64">
+					<dim>1</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="14" name="fc1/WithoutBiases/1_port_transpose662_const" type="Const" version="opset1">
+			<data element_type="f32" offset="11496" shape="120,400" size="192000"/>
+			<output>
+				<port id="1" precision="FP32">
+					<dim>120</dim>
+					<dim>400</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="15" name="fc1/weights_transpose/Shape" type="ShapeOf" version="opset3">
+			<data output_type="i64"/>
+			<input>
+				<port id="0">
+					<dim>120</dim>
+					<dim>400</dim>
+				</port>
+			</input>
 			<output>
 				<port id="1" precision="I64">
 					<dim>2</dim>
 				</port>
 			</output>
 		</layer>
-		<layer id="14" name="fc1/flatten_fc_input" type="Reshape" version="opset1">
+		<layer id="16" name="fc1/weights_transpose/Shape/Gather/Cast_11154_const" type="Const" version="opset1">
+			<data element_type="i32" offset="203496" shape="1" size="4"/>
+			<output>
+				<port id="1" precision="I32">
+					<dim>1</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="17" name="fc1/weights_transpose/Shape/Gather/Cast_21156_const" type="Const" version="opset1">
+			<data element_type="i64" offset="203500" shape="" size="8"/>
+			<output>
+				<port id="1" precision="I64"/>
+			</output>
+		</layer>
+		<layer id="18" name="fc1/weights_transpose/Shape/Gather" type="Gather" version="opset1">
+			<input>
+				<port id="0">
+					<dim>2</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2"/>
+			</input>
+			<output>
+				<port id="3" precision="I64">
+					<dim>1</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="19" name="fc1/weights_transpose/MinusOne/shapes_concat" type="Concat" version="opset1">
+			<data axis="0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2" precision="I64">
+					<dim>2</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="20" name="fc1/flatten_fc_input" type="Reshape" version="opset1">
 			<data special_zero="True"/>
 			<input>
 				<port id="0">
@@ -256,16 +325,7 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="15" name="fc1/WithoutBiases/1_port_transpose658_const" type="Const" version="opset1">
-			<data element_type="f32" offset="11504" shape="120,400" size="192000"/>
-			<output>
-				<port id="1" precision="FP32">
-					<dim>120</dim>
-					<dim>400</dim>
-				</port>
-			</output>
-		</layer>
-		<layer id="16" name="fc1/WithoutBiases" type="MatMul" version="opset1">
+		<layer id="21" name="fc1/WithoutBiases" type="MatMul" version="opset1">
 			<data transpose_a="False" transpose_b="True"/>
 			<input>
 				<port id="0">
@@ -284,8 +344,8 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="17" name="23/Output_0/Data_/copy_const" type="Const" version="opset1">
-			<data element_type="f32" offset="203504" shape="1,120" size="480"/>
+		<layer id="22" name="21/Output_0/Data_/copy_const" type="Const" version="opset1">
+			<data element_type="f32" offset="203508" shape="1,120" size="480"/>
 			<output>
 				<port id="1" precision="FP32">
 					<dim>1</dim>
@@ -293,7 +353,7 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="18" name="fc1" type="Add" version="opset1">
+		<layer id="23" name="fc1" type="Add" version="opset1">
 			<input>
 				<port id="0">
 					<dim>1</dim>
@@ -311,7 +371,7 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="19" name="relu_fc1" type="ReLU" version="opset1">
+		<layer id="24" name="relu_fc1" type="ReLU" version="opset1">
 			<input>
 				<port id="0">
 					<dim>1</dim>
@@ -325,15 +385,84 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="20" name="fc2/flatten_fc_input/Cast_1926_const" type="Const" version="opset1">
-			<data element_type="i64" offset="11488" shape="2" size="16"/>
+		<layer id="25" name="fc2/weights_transpose/MinusOne685_const" type="Const" version="opset1">
+			<data element_type="i64" offset="11488" shape="1" size="8"/>
+			<output>
+				<port id="1" precision="I64">
+					<dim>1</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="26" name="fc2/WithoutBiases/1_port_transpose654_const" type="Const" version="opset1">
+			<data element_type="f32" offset="203988" shape="84,120" size="40320"/>
+			<output>
+				<port id="1" precision="FP32">
+					<dim>84</dim>
+					<dim>120</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="27" name="fc2/weights_transpose/Shape" type="ShapeOf" version="opset3">
+			<data output_type="i64"/>
+			<input>
+				<port id="0">
+					<dim>84</dim>
+					<dim>120</dim>
+				</port>
+			</input>
 			<output>
 				<port id="1" precision="I64">
 					<dim>2</dim>
 				</port>
 			</output>
 		</layer>
-		<layer id="21" name="fc2/flatten_fc_input" type="Reshape" version="opset1">
+		<layer id="28" name="fc2/weights_transpose/Shape/Gather/Cast_11164_const" type="Const" version="opset1">
+			<data element_type="i32" offset="203496" shape="1" size="4"/>
+			<output>
+				<port id="1" precision="I32">
+					<dim>1</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="29" name="fc2/weights_transpose/Shape/Gather/Cast_21166_const" type="Const" version="opset1">
+			<data element_type="i64" offset="203500" shape="" size="8"/>
+			<output>
+				<port id="1" precision="I64"/>
+			</output>
+		</layer>
+		<layer id="30" name="fc2/weights_transpose/Shape/Gather" type="Gather" version="opset1">
+			<input>
+				<port id="0">
+					<dim>2</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2"/>
+			</input>
+			<output>
+				<port id="3" precision="I64">
+					<dim>1</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="31" name="fc2/weights_transpose/MinusOne/shapes_concat" type="Concat" version="opset1">
+			<data axis="0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2" precision="I64">
+					<dim>2</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="32" name="fc2/flatten_fc_input" type="Reshape" version="opset1">
 			<data special_zero="True"/>
 			<input>
 				<port id="0">
@@ -351,16 +480,7 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="22" name="fc2/WithoutBiases/1_port_transpose662_const" type="Const" version="opset1">
-			<data element_type="f32" offset="203984" shape="84,120" size="40320"/>
-			<output>
-				<port id="1" precision="FP32">
-					<dim>84</dim>
-					<dim>120</dim>
-				</port>
-			</output>
-		</layer>
-		<layer id="23" name="fc2/WithoutBiases" type="MatMul" version="opset1">
+		<layer id="33" name="fc2/WithoutBiases" type="MatMul" version="opset1">
 			<data transpose_a="False" transpose_b="True"/>
 			<input>
 				<port id="0">
@@ -379,8 +499,8 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="24" name="17/Output_0/Data_/copy_const" type="Const" version="opset1">
-			<data element_type="f32" offset="244304" shape="1,84" size="336"/>
+		<layer id="34" name="19/Output_0/Data_/copy_const" type="Const" version="opset1">
+			<data element_type="f32" offset="244308" shape="1,84" size="336"/>
 			<output>
 				<port id="1" precision="FP32">
 					<dim>1</dim>
@@ -388,7 +508,7 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="25" name="fc2" type="Add" version="opset1">
+		<layer id="35" name="fc2" type="Add" version="opset1">
 			<input>
 				<port id="0">
 					<dim>1</dim>
@@ -406,7 +526,7 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="26" name="relu_fc2" type="ReLU" version="opset1">
+		<layer id="36" name="relu_fc2" type="ReLU" version="opset1">
 			<input>
 				<port id="0">
 					<dim>1</dim>
@@ -420,15 +540,84 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="27" name="fc3/flatten_fc_input/Cast_1928_const" type="Const" version="opset1">
-			<data element_type="i64" offset="11488" shape="2" size="16"/>
+		<layer id="37" name="fc3/weights_transpose/MinusOne697_const" type="Const" version="opset1">
+			<data element_type="i64" offset="11488" shape="1" size="8"/>
+			<output>
+				<port id="1" precision="I64">
+					<dim>1</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="38" name="fc3/WithoutBiases/1_port_transpose658_const" type="Const" version="opset1">
+			<data element_type="f32" offset="244644" shape="10,84" size="3360"/>
+			<output>
+				<port id="1" precision="FP32">
+					<dim>10</dim>
+					<dim>84</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="39" name="fc3/weights_transpose/Shape" type="ShapeOf" version="opset3">
+			<data output_type="i64"/>
+			<input>
+				<port id="0">
+					<dim>10</dim>
+					<dim>84</dim>
+				</port>
+			</input>
 			<output>
 				<port id="1" precision="I64">
 					<dim>2</dim>
 				</port>
 			</output>
 		</layer>
-		<layer id="28" name="fc3/flatten_fc_input" type="Reshape" version="opset1">
+		<layer id="40" name="fc3/weights_transpose/Shape/Gather/Cast_11150_const" type="Const" version="opset1">
+			<data element_type="i32" offset="203496" shape="1" size="4"/>
+			<output>
+				<port id="1" precision="I32">
+					<dim>1</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="41" name="fc3/weights_transpose/Shape/Gather/Cast_21152_const" type="Const" version="opset1">
+			<data element_type="i64" offset="203500" shape="" size="8"/>
+			<output>
+				<port id="1" precision="I64"/>
+			</output>
+		</layer>
+		<layer id="42" name="fc3/weights_transpose/Shape/Gather" type="Gather" version="opset1">
+			<input>
+				<port id="0">
+					<dim>2</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2"/>
+			</input>
+			<output>
+				<port id="3" precision="I64">
+					<dim>1</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="43" name="fc3/weights_transpose/MinusOne/shapes_concat" type="Concat" version="opset1">
+			<data axis="0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2" precision="I64">
+					<dim>2</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="44" name="fc3/flatten_fc_input" type="Reshape" version="opset1">
 			<data special_zero="True"/>
 			<input>
 				<port id="0">
@@ -446,16 +635,7 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="29" name="fc3/WithoutBiases/1_port_transpose654_const" type="Const" version="opset1">
-			<data element_type="f32" offset="244640" shape="10,84" size="3360"/>
-			<output>
-				<port id="1" precision="FP32">
-					<dim>10</dim>
-					<dim>84</dim>
-				</port>
-			</output>
-		</layer>
-		<layer id="30" name="fc3/WithoutBiases" type="MatMul" version="opset1">
+		<layer id="45" name="fc3/WithoutBiases" type="MatMul" version="opset1">
 			<data transpose_a="False" transpose_b="True"/>
 			<input>
 				<port id="0">
@@ -474,8 +654,8 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="31" name="19/Output_0/Data_/copy_const" type="Const" version="opset1">
-			<data element_type="f32" offset="248000" shape="1,10" size="40"/>
+		<layer id="46" name="17/Output_0/Data_/copy_const" type="Const" version="opset1">
+			<data element_type="f32" offset="248004" shape="1,10" size="40"/>
 			<output>
 				<port id="1" precision="FP32">
 					<dim>1</dim>
@@ -483,7 +663,7 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="32" name="fc3" type="Add" version="opset1">
+		<layer id="47" name="fc3" type="Add" version="opset1">
 			<input>
 				<port id="0">
 					<dim>1</dim>
@@ -501,7 +681,7 @@
 				</port>
 			</output>
 		</layer>
-		<layer id="33" name="fc3/sink_port_0" type="Result" version="opset1">
+		<layer id="48" name="fc3/sink_port_0" type="Result" version="opset1">
 			<input>
 				<port id="0">
 					<dim>1</dim>
@@ -523,30 +703,48 @@
 		<edge from-layer="9" from-port="1" to-layer="10" to-port="1"/>
 		<edge from-layer="10" from-port="2" to-layer="11" to-port="0"/>
 		<edge from-layer="11" from-port="1" to-layer="12" to-port="0"/>
-		<edge from-layer="12" from-port="1" to-layer="14" to-port="0"/>
-		<edge from-layer="13" from-port="1" to-layer="14" to-port="1"/>
-		<edge from-layer="14" from-port="2" to-layer="16" to-port="0"/>
-		<edge from-layer="15" from-port="1" to-layer="16" to-port="1"/>
-		<edge from-layer="16" from-port="2" to-layer="18" to-port="0"/>
-		<edge from-layer="17" from-port="1" to-layer="18" to-port="1"/>
-		<edge from-layer="18" from-port="2" to-layer="19" to-port="0"/>
-		<edge from-layer="19" from-port="1" to-layer="21" to-port="0"/>
-		<edge from-layer="20" from-port="1" to-layer="21" to-port="1"/>
+		<edge from-layer="14" from-port="1" to-layer="15" to-port="0"/>
+		<edge from-layer="15" from-port="1" to-layer="18" to-port="0"/>
+		<edge from-layer="16" from-port="1" to-layer="18" to-port="1"/>
+		<edge from-layer="17" from-port="1" to-layer="18" to-port="2"/>
+		<edge from-layer="13" from-port="1" to-layer="19" to-port="0"/>
+		<edge from-layer="18" from-port="3" to-layer="19" to-port="1"/>
+		<edge from-layer="12" from-port="1" to-layer="20" to-port="0"/>
+		<edge from-layer="19" from-port="2" to-layer="20" to-port="1"/>
+		<edge from-layer="20" from-port="2" to-layer="21" to-port="0"/>
+		<edge from-layer="14" from-port="1" to-layer="21" to-port="1"/>
 		<edge from-layer="21" from-port="2" to-layer="23" to-port="0"/>
 		<edge from-layer="22" from-port="1" to-layer="23" to-port="1"/>
-		<edge from-layer="23" from-port="2" to-layer="25" to-port="0"/>
-		<edge from-layer="24" from-port="1" to-layer="25" to-port="1"/>
-		<edge from-layer="25" from-port="2" to-layer="26" to-port="0"/>
-		<edge from-layer="26" from-port="1" to-layer="28" to-port="0"/>
-		<edge from-layer="27" from-port="1" to-layer="28" to-port="1"/>
-		<edge from-layer="28" from-port="2" to-layer="30" to-port="0"/>
-		<edge from-layer="29" from-port="1" to-layer="30" to-port="1"/>
-		<edge from-layer="30" from-port="2" to-layer="32" to-port="0"/>
-		<edge from-layer="31" from-port="1" to-layer="32" to-port="1"/>
+		<edge from-layer="23" from-port="2" to-layer="24" to-port="0"/>
+		<edge from-layer="26" from-port="1" to-layer="27" to-port="0"/>
+		<edge from-layer="27" from-port="1" to-layer="30" to-port="0"/>
+		<edge from-layer="28" from-port="1" to-layer="30" to-port="1"/>
+		<edge from-layer="29" from-port="1" to-layer="30" to-port="2"/>
+		<edge from-layer="25" from-port="1" to-layer="31" to-port="0"/>
+		<edge from-layer="30" from-port="3" to-layer="31" to-port="1"/>
+		<edge from-layer="24" from-port="1" to-layer="32" to-port="0"/>
+		<edge from-layer="31" from-port="2" to-layer="32" to-port="1"/>
 		<edge from-layer="32" from-port="2" to-layer="33" to-port="0"/>
+		<edge from-layer="26" from-port="1" to-layer="33" to-port="1"/>
+		<edge from-layer="33" from-port="2" to-layer="35" to-port="0"/>
+		<edge from-layer="34" from-port="1" to-layer="35" to-port="1"/>
+		<edge from-layer="35" from-port="2" to-layer="36" to-port="0"/>
+		<edge from-layer="38" from-port="1" to-layer="39" to-port="0"/>
+		<edge from-layer="39" from-port="1" to-layer="42" to-port="0"/>
+		<edge from-layer="40" from-port="1" to-layer="42" to-port="1"/>
+		<edge from-layer="41" from-port="1" to-layer="42" to-port="2"/>
+		<edge from-layer="37" from-port="1" to-layer="43" to-port="0"/>
+		<edge from-layer="42" from-port="3" to-layer="43" to-port="1"/>
+		<edge from-layer="36" from-port="1" to-layer="44" to-port="0"/>
+		<edge from-layer="43" from-port="2" to-layer="44" to-port="1"/>
+		<edge from-layer="44" from-port="2" to-layer="45" to-port="0"/>
+		<edge from-layer="38" from-port="1" to-layer="45" to-port="1"/>
+		<edge from-layer="45" from-port="2" to-layer="47" to-port="0"/>
+		<edge from-layer="46" from-port="1" to-layer="47" to-port="1"/>
+		<edge from-layer="47" from-port="2" to-layer="48" to-port="0"/>
 	</edges>
 	<meta_data>
-		<MO_version value=""/>
+		<MO_version value="unknown version"/>
 		<cli_parameters>
 			<caffe_parser_path value="DIR"/>
 			<data_type value="float"/>
@@ -565,13 +763,12 @@
 			<input_model_is_text value="False"/>
 			<input_proto value="DIR/SampLeNet.prototxt"/>
 			<k value="DIR/CustomLayersMapping.xml"/>
-			<keep_shape_ops value="False"/>
+			<keep_shape_ops value="True"/>
 			<legacy_mxnet_model value="False"/>
 			<log_level value="ERROR"/>
 			<mean_scale_values value="{}"/>
 			<mean_values value="()"/>
 			<model_name value="SampLeNet"/>
-			<move_to_preprocess value="False"/>
 			<output_dir value="DIR"/>
 			<placeholder_data_types value="{}"/>
 			<progress value="False"/>
@@ -581,8 +778,9 @@
 			<save_params_from_nd value="False"/>
 			<scale_values value="()"/>
 			<silent value="False"/>
+			<static_shape value="False"/>
 			<stream_output value="False"/>
-			<unset unset_cli_parameters="batch, counts, disable_fusing, disable_gfusing, finegrain_fusing, input, input_checkpoint, input_meta_graph, input_shape, input_symbol, mean_file, mean_file_offsets, nd_prefix_name, output, placeholder_shapes, pretrained_model_name, saved_model_dir, saved_model_tags, scale, tensorboard_logdir, tensorflow_custom_layer_libraries, tensorflow_custom_operations_config_update, tensorflow_object_detection_api_pipeline_config, tensorflow_use_custom_operations_config, transformations_config"/>
+			<unset unset_cli_parameters="batch, counts, disable_fusing, disable_gfusing, finegrain_fusing, input, input_checkpoint, input_meta_graph, input_shape, input_symbol, mean_file, mean_file_offsets, move_to_preprocess, nd_prefix_name, output, placeholder_shapes, pretrained_model_name, saved_model_dir, saved_model_tags, scale, tensorboard_logdir, tensorflow_custom_layer_libraries, tensorflow_custom_operations_config_update, tensorflow_object_detection_api_pipeline_config, tensorflow_use_custom_operations_config, transformations_config"/>
 		</cli_parameters>
 	</meta_data>
 </net>

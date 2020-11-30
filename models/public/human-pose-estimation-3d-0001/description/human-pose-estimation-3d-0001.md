@@ -17,8 +17,6 @@ Multi-person 3D human pose estimation model based on the [Lightweight OpenPose](
 | MParams                                                       | 5.074                   |
 | Source framework                                              | PyTorch\*               |
 
-## Performance
-
 ## Inputs
 
 Name: `data`, shape: `[1x3x256x448]`. An input image in the `[BxCxHxW]` format,

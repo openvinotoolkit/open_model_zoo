@@ -1,0 +1,118 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This model is a pair of encoder and decoder. The encoder is HRNetV2-W48 and the
+  decoder is C1 (one convolution module and interpolation). HRNetV2-W48 is semantic-segmentation
+  model based on architecture described in paper High-Resolution Representations for
+  Labeling Pixels and Regions <https://arxiv.org/abs/1904.04514>. This is PyTorch*
+  implementation based on retaining high resolution representations throughout the
+  model and pretrained on ADE20k dataset. For details about implementation of model,
+  check out the Semantic Segmentation on MIT ADE20K dataset in PyTorch <https://github.com/CSAILVision/semantic-segmentation-pytorch>
+  repository.
+task_type: semantic_segmentation
+files:
+  - name: mit_semseg/lib/__init__.py
+    size: 0
+    sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/__init__.py
+  - name: mit_semseg/lib/nn/__init__.py
+    size: 110
+    sha256: 2600acab3ede0102ff0bd8e8f8d62b21e4fff97f99a95996aa14679b6ec30d01
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/__init__.py
+  - name: mit_semseg/lib/nn/parallel/__init__.py
+    size: 92
+    sha256: fa04ce76f0e4d7a130a7cefca60690b53238010bb11d65b1c305221c36d1aaa1
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/parallel/__init__.py
+  - name: mit_semseg/lib/nn/parallel/data_parallel.py
+    size: 3399
+    sha256: 3e4075dc485b063be061c308d88134a644d0b3bc1507f42f40abd3fc69977ee4
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/parallel/data_parallel.py
+  - name: mit_semseg/lib/nn/modules/batchnorm.py
+    size: 13813
+    sha256: 42258e18cef5fb033e63f6e1a06c2897432c095a7177606ac6bb1119f5f2c856
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/modules/batchnorm.py
+  - name: mit_semseg/lib/nn/modules/comm.py
+    size: 4278
+    sha256: a480d504d651eef51b8419254f00d97d5f0b2d9a4af590713605c0148725b234
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/modules/comm.py
+  - name: mit_semseg/lib/nn/modules/__init__.py
+    size: 449
+    sha256: 0701e2062245ab6c90b3df6934a21be5c942b44b13c2ebb70695433599af7a15
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/modules/__init__.py
+  - name: mit_semseg/lib/nn/modules/replicate.py
+    size: 3226
+    sha256: 4498b873404fce05202d4f891262e249a95733816d3877e3aee3d2401138a6af
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/lib/nn/modules/replicate.py
+  - name: mit_semseg/models/__init__.py
+    size: 53
+    sha256: 9117afeac26d724bdba6f9f35d54b7ddab81e33847e717071c6ed789a458d84b
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/__init__.py
+  - name: mit_semseg/models/hrnet.py
+    size: 16811
+    sha256: f6e07d7448746b101a30f7b250896a9651b99fa6e02820afcfa69b93a8dd9a1d
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/hrnet.py
+  - name: mit_semseg/models/mobilenet.py
+    size: 4938
+    sha256: 2462300b9863d40da75d2cbcf785015e53930c3ce37219cb9d4c24b468b63a34
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/mobilenet.py
+  - name: mit_semseg/models/models.py
+    size: 21185
+    sha256: fea2849abca35a260a64e852397bcccad64e2fd495fad668ad1622b5080033eb
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/models.py
+  - name: mit_semseg/models/resnet.py
+    size: 6770
+    sha256: 685bb02446ce28eb1b110f3dfa9f6534a2ea34f50f09be0d7c165bd2c5c6c899
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/resnet.py
+  - name: mit_semseg/models/resnext.py
+    size: 5367
+    sha256: 271a95bdabb9e2c00ecc2e6765b7521f708cda5312b4d78bfb895374f3509044
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/resnext.py
+  - name: mit_semseg/models/utils.py
+    size: 577
+    sha256: 55a8f41269be28c17e456e5ae1f246bf71354765739dceca1e45becd58cba5e2
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/models/utils.py
+  - name: mit_semseg/__init__.py
+    size: 63
+    sha256: 7e58a465dbf83903f13d94ffce5b3353bcc8eb2154cd568bb405341f8a02ce5e
+    source: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/mit_semseg/__init__.py
+  - name: ckpt/decoder_epoch_30.pth
+    size: 4780389
+    sha256: 6060764940b620804befaca4df916de019c82c4e96ace00916991e223af37d1e
+    source: http://sceneparsing.csail.mit.edu/model/pytorch/ade20k-hrnetv2-c1/decoder_epoch_30.pth
+  - name: ckpt/encoder_epoch_30.pth
+    size: 262518297
+    sha256: 0bba1a5da1484b21a42f89e05459e434119c829d6aae64d1c6d3ae0c38d2b43c
+    source: http://sceneparsing.csail.mit.edu/model/pytorch/ade20k-hrnetv2-c1/encoder_epoch_30.pth
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir
+  - --model-name=HrnetV2C1
+  - --import-module=model
+  - --input-shape=1,3,320,320
+  - --output-file=$conv_dir/hrnet-v2-c1-segmentation.onnx
+  - --model-param=encoder_weights=r"$dl_dir/ckpt/encoder_epoch_30.pth"
+  - --model-param=decoder_weights=r"$dl_dir/ckpt/decoder_epoch_30.pth"
+  - --input-names=data
+  - --output-names=prob
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,3,320,320]
+  - --input=data
+  - --mean_values=data[123.675,116.28,103.53]
+  - --scale_values=data[58.395,57.12,57.375]
+  - --output=prob
+  - --input_model=$conv_dir/hrnet-v2-c1-segmentation.onnx
+framework: pytorch
+license: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/LICENSE

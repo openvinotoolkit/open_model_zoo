@@ -110,7 +110,7 @@ std::vector<std::string> ScorerBase::make_ngram(PathTrie* prefix) {
   PathTrie* current_node = prefix;
   PathTrie* new_node = nullptr;
 
-  for (int order = 0; order < max_order_; order++) {
+  for (size_t order = 0; order < max_order_; order++) {
     std::vector<int> prefix_vec;
     std::vector<int> prefix_steps;
 
@@ -128,7 +128,7 @@ std::vector<std::string> ScorerBase::make_ngram(PathTrie* prefix) {
 
     if (new_node->character == -1) {
       // No more spaces, but still need order
-      for (int i = 0; i < max_order_ - order - 1; i++) {
+      for (size_t i = 0; i < max_order_ - order - 1; i++) {
         ngram.push_back(START_TOKEN);
       }
       break;

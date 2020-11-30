@@ -119,4 +119,3 @@ private:
     float offset_;  ///< Offset parameter for the distance. Final distance is
                     /// computed as: scale * distance + offset.
 };
-

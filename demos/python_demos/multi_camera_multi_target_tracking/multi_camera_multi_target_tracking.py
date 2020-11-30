@@ -88,6 +88,7 @@ class FramesThreadBody:
         while self.process:
             if self.frames_queue.qsize() > self.max_queue_length:
                 time.sleep(0.1)
+                continue
             has_frames, frames = self.capture.get_frames()
             if not has_frames and self.frames_queue.empty():
                 self.process = False

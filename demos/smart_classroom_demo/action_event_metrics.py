@@ -436,7 +436,7 @@ def process_tracks(all_tracks, window_size, min_length):
 def calculate_metrics(all_tracks):
     """Calculates Precision and Recall metrics.
 
-    :param all_tracks: Input mathed events
+    :param all_tracks: Input matched events
     :return: Precision and Recall scalar values
     """
 

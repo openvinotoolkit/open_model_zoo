@@ -77,7 +77,7 @@ class ExtendSegmentationMask(Postprocessor):
     def _deprocess_prediction(prediction, meta):
         def _resize(entry, height, width):
             if len(entry.shape) == 2:
-                entry.mask = ResizeSegmentationMask.segm_resize(entry, width, height)
+                entry = ResizeSegmentationMask.segm_resize(entry, width, height)
                 return entry
 
             entry_mask = []

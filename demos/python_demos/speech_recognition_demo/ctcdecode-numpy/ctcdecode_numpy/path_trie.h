@@ -31,7 +31,7 @@ public:
   // get the prefix in index from root to current node
   PathTrie* get_path_vec(std::vector<int>& output, std::vector<int>& timesteps);
 
-  // get the prefix in index from some stop node to current nodel
+  // get the prefix in index from some stop node to current node
   PathTrie* get_path_vec(std::vector<int>& output,
                          std::vector<int>& timesteps,
                          int stop,

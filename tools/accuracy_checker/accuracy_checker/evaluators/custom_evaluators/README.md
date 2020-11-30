@@ -23,19 +23,23 @@ Optionally you can provide `module_config` section which contains config for cus
 
 ## Examples
 * **Sequential Action Recognition Evaluator** demonstrates how to run Action Recognition models with encoder + decoder architecture.
-  <a href="https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/sequential_action_recognition_evaluator.py">Evaluator code</a>.
-  Configuration file example: <a href="https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/configs/action-recognition-0001.yml">action-recognition-0001</a>.
+  <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/sequential_action_recognition_evaluator.py">Evaluator code</a>.
+  Configuration file example: <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/configs/action-recognition-0001.yml">action-recognition-0001</a>.
 
 * **MTCNN Evaluator** shows how to run MTCNN model.
-  <a href="https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/mtcnn_evaluator.py">Evaluator code</a>.
-  Configuration file example: <a href="https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/configs/mtcnn.yml">mtcnn</a>.
+  <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/mtcnn_evaluator.py">Evaluator code</a>.
+  Configuration file example: <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/configs/mtcnn.yml">mtcnn</a>.
 
-* **Text Spotting Evaluator** demonstrates how to evaluate the `text-spotting-0002` model via Accuracy Checker.
-  <a href="https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/text_spotting_evaluator.py">Evaluator code</a>.
-  Configuration file example: <a href="https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/configs/text-spotting-0002.yml">text-spotting-0002</a>.
+* **Text Spotting Evaluator** demonstrates how to evaluate the `text-spotting-0003` model via Accuracy Checker.
+  <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/text_spotting_evaluator.py">Evaluator code</a>.
+  Configuration file example: <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/configs/text-spotting-0003.yml">text-spotting-0003</a>.
 
 * **Automatic Speech Recognition Evaluator** shows how to evaluate speech recognition pipeline (encoder + decoder).
-<a href="https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/asr_encoder_decoder_evaluator.py">Evaluator code</a>.
-* **Im2latex formula recognition** demonstrates how to run encoder-decoder model for extractring latex formula from image
-  <a href="https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/im2latex_evaluator.py">Evaluator code</a>
-  Configuration file example: <a href="https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/configs/im2latex-medium-0002.yml">im2latex-medium-0002</a>
+  <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/asr_encoder_decoder_evaluator.py">Evaluator code</a>.
+
+* **Im2latex formula recognition** demonstrates how to run encoder-decoder model for extractring latex formula from image.
+  <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/im2latex_evaluator.py">Evaluator code</a>.
+  Configuration file example: <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/configs/im2latex-medium-0002.yml">im2latex-medium-0002</a>.
+
+* **I3D Evaluator** demonstrates how to evaluate two-stream I3D model (RGB + Flow).
+  <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/i3d_evaluator.py">Evaluator code</a>.

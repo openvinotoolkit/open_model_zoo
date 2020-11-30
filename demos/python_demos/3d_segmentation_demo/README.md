@@ -1,4 +1,4 @@
-# 3D Segmentation Python* Demo
+# 3D Segmentation Python\* Demo
 
 This topic demonstrates how to run the 3D Segmentation Demo, which segments 3D images using 3D convolutional networks.
 
@@ -56,18 +56,18 @@ Options:
 ```
 
 Running the application with the empty list of options yields the usage message and an error message.
-To run the demo, use public or pre-trained models that support 3D convolution, for example, UNet3D. You can download the pre-trained models using the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, use public or pre-trained models that support 3D convolution, for example, UNet3D. You can download the pre-trained models using the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
-For example, to do inference on a 3D TIFF image using a trained network with multiple outputs on CPU, run the following 
+For example, to do inference on a 3D TIFF image using a trained network with multiple outputs on CPU, run the following
 command:
 
 ```
 python3 3d_segmentation_demo.py -i <path_to_image>/inputImage.tiff -m <path_to_model>/brain-tumor-segmentation-0001.xml -d CPU -o <path_to_output>
 ```
-     
-For example, to do inference on 3D NIfTI images using a trained network with multiple outputs on CPU and save 
+
+For example, to do inference on 3D NIfTI images using a trained network with multiple outputs on CPU and save
 output TIFF and NIFTI images, run the following command:
 ```
 python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output> -nii -ms 2,0,3,1
@@ -81,7 +81,7 @@ python3 3d_segmentation_demo.py -i <path_to_nifti_image>/PackedImage.nii -m <pat
 python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/brain-tumor-segmentation-0002 -d CPU -o <path_to_output> -nii -ms 1,2,3,0 --full_intensities_range
 ```
 `--full_intensities_range` option is related to preprocessing of input data. It can be different for different models, for example, `brain-tumor-segmentation-0001` expects normalized data in [0,1] range and nullified non-positive values, while `brain-tumor-segmentation-0002` just requires z-score normalization in a full range. So to use `brain-tumor-segmentation-0002` model, the flag `--full_intensities_range` should be set, while for `brain-tumor-segmentation-0001` no preprocessing option is required.
-     
+
 ## Demo Output
 The demo outputs a multipage TIFF image and a NIFTI archive.
 

@@ -154,7 +154,7 @@ class SQUADConverterEMB(BaseFormatConverter):
         sep = [self.vocab["[SEP]"]]
 
         index_ref = [0]
-        def add_sample(ids, max_len, conext_pos_id, annotations):
+        def add_sample(ids, max_len, context_pos_id, annotations):
             ids_len = min(max_len - 2, len(ids))
             ids = ids[:ids_len]
             rest = max_len - (ids_len + 2)
@@ -166,7 +166,7 @@ class SQUADConverterEMB(BaseFormatConverter):
                 np.array([1] * (1 + ids_len + 1) + pad * rest),
                 np.array([0] * (1 + ids_len + 1) + pad * rest),
                 np.arange(max_len),
-                conext_pos_id
+                context_pos_id
             ))
             index_ref[0] += 1
 

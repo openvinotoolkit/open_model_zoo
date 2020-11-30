@@ -35,6 +35,7 @@ from .faster_rcnn_postprocessing_resize import FRCNNPostprocessingBboxResize
 from .correct_yolo_v2_boxes import CorrectYoloV2Boxes
 from .resize_segmentation_mask import ResizeSegmentationMask
 from .encode_segmentation_mask import EncodeSegMask
+from .shift import Shift, ShiftLabels
 from .normalize_landmarks_points import NormalizeLandmarksPoints
 from .clip_points import ClipPoints
 from .extend_segmentation_mask import ExtendSegmentationMask
@@ -43,18 +44,21 @@ from .crop_segmentation_mask import CropSegmentationMask, CropOrPadSegmentationM
 from .clip_segmentation_mask import ClipSegmentationMask
 from .normalize_boxes import NormalizeBoxes
 from .brats_postprocessing import SegmentationPredictionResample, TransformBratsPrediction
-from .extract_answers_tokens import ExtractSQUADPrediction
+from .extract_answers_tokens import ExtractSQUADPrediction, ExtractSQUADPredictionBiDAF
 from .translate_3d_poses import Translate3dPoses
 from .normalize_recomendation import MinMaxNormalizeRecommendation, SigmoidNormalizeRecommendation
 from .align_prediction_depth_map import AlignDepth
 from .resize_prediction_depth_map import ResizeDepthMap
 from .resize_super_resolution import ResizeSuperResolution
 from .resize_style_transfer import ResizeStyleTransfer
-from .crop_ground_truth_image import CropGTImage
+from .crop_ground_truth_image import CropGTImage, CornerCropGTImage
 from .resize import Resize
 from .to_gray_scale_ref_image import RGB2GRAYAnnotation, BGR2GRAYAnnotation
 from .remove_repeats import RemoveRepeatTokens
 from .tokens_to_lower_case import TokensToLowerCase
+from .super_resolution_image_recovery import SRImageRecovery, ColorizationLABRecovery
+from .argmax_segmentation_mask import ArgMaxSegmentationMask
+from .normalize_salient_map import SalientMapNormalizer
 
 
 __all__ = [
@@ -80,10 +84,13 @@ __all__ = [
 
     'ResizeSegmentationMask',
     'EncodeSegMask',
+    'Shift',
+    'ShiftLabels',
     'ExtendSegmentationMask',
     'ZoomSegMask',
     'CropSegmentationMask',
     'ClipSegmentationMask',
+    'ArgMaxSegmentationMask',
 
     'SegmentationPredictionResample',
     'TransformBratsPrediction',
@@ -91,6 +98,7 @@ __all__ = [
     'NormalizeLandmarksPoints',
 
     'ExtractSQUADPrediction',
+    'ExtractSQUADPredictionBiDAF',
 
     'Translate3dPoses',
 
@@ -108,9 +116,15 @@ __all__ = [
     'BGR2GRAYAnnotation',
 
     'CropGTImage',
+    'CornerCropGTImage',
 
     'Resize',
 
     'RemoveRepeatTokens',
     'TokensToLowerCase',
+
+    'SRImageRecovery',
+    'ColorizationLABRecovery',
+
+    'SalientMapNormalizer'
 ]

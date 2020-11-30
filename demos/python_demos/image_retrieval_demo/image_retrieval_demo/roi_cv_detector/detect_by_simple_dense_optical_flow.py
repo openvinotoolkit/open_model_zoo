@@ -882,7 +882,7 @@ class RoiDetector:
         """
         Constructor.
         The only parameter of the constructor is frame step that should be used during detection.
-        The value depends on the frome rate of the input video.
+        The value depends on the frame rate of the input video.
         The recommended value for video stream with frame rate 30 frames per second is frame_step=5.
         """
         self.frame_step = frame_step

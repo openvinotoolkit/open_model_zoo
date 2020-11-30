@@ -24,9 +24,7 @@ Feature Pyramid Networks block for feature maps refinement.
 | Source framework                | PyTorch\*                                 |
 
 Average Precision (AP) is defined and measured according to standard
-[MS COCO evaluation procedure](http://cocodataset.org/#detection-eval).
-
-## Performance
+[MS COCO evaluation procedure](https://cocodataset.org/#detection-eval).
 
 ## Inputs
 

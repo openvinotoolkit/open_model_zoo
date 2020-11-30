@@ -68,7 +68,7 @@ class CamVidConverter(FileBasedAnnotationConverter):
             image_path, gt_path = line.split(' ')
             if check_content:
                 if not check_file_existence(image_path):
-                    content_errors.append("{}: does not exists".format(image_path))
+                    content_errors.append("{}: does not exist".format(image_path))
                 if not check_file_existence(gt_path):
                     content_errors.append('{}: does not exist'.format(gt_path))
             identifier = '/'.join(image_path.split('/')[-2:])

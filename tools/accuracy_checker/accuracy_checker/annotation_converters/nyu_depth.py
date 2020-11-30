@@ -66,7 +66,7 @@ class NYUDepthV2Converter(BaseFormatConverter):
             identifier = image_path.name
             depth_file = identifier.replace('png', 'npy')
             if check_content and not check_file_existence(self.depths_dir / depth_file):
-                content_errors.append("{}: does not exists".format(self.depths_dir / depth_file))
+                content_errors.append("{}: does not exist".format(self.depths_dir / depth_file))
             annotations.append(DepthEstimationAnnotation(identifier, depth_file, GTLoader.NUMPY))
             if progress_callback and idx % progress_interval == 0:
                 progress_callback(idx * 100 / num_iterations)

@@ -121,7 +121,7 @@ public:
     /// \brief Descriptor size getter.
     /// \return Descriptor size.
     ///
-    virtual cv::Size size() const {
+    cv::Size size() const override {
         return cv::Size(1, handler.size());
     }
 
@@ -130,7 +130,7 @@ public:
     /// \param[in] mat Color image.
     /// \param[out] descr Computed descriptor.
     ///
-    virtual void Compute(const cv::Mat &mat, cv::Mat *descr) {
+    void Compute(const cv::Mat &mat, cv::Mat *descr) override {
         handler.Compute(mat, descr);
     }
 
@@ -139,13 +139,12 @@ public:
     /// \param[in] mats Images of interest.
     /// \param[out] descrs Matrices to store the computed descriptors.
     ///
-    virtual void Compute(const std::vector<cv::Mat> &mats,
-                         std::vector<cv::Mat> *descrs) {
+    void Compute(const std::vector<cv::Mat> &mats,
+                 std::vector<cv::Mat> *descrs) override {
         handler.Compute(mats, descrs);
     }
 
-    virtual void PrintPerformanceCounts(std::string fullDeviceName) const {
+    void PrintPerformanceCounts(std::string fullDeviceName) const override {
         handler.PrintPerformanceCounts(fullDeviceName);
     }
 };
-

@@ -25,22 +25,15 @@ description: >-
   matching with those in the ImageNet database.
 task_type: classification
 files:
-  - name: MobileNetV2.py
-    size: 4213
-    sha256: 7071e01e07e5f1b6127a2628d1be9c65cc20edfa745f4f4eb6354e7b27f5b444
-    source: https://raw.githubusercontent.com/tonylins/pytorch-mobilenet-v2/fa86a85e4026caa217fe8d62f370848195cedf4b/MobileNetV2.py
-  - name: mobilenet-v2.pth
-    sha256: ecbe2b568c8602549fa9e1d5833c63848f490a48d92e5d224d1eb2063e152cf8
-    size: 14205652
-    source:
-      $type: google_drive
-      id: 1jlto6HRVD3ipNkAl1lNhDbkBp7HylaqR
+  - name: mobilenet_v2-b0353104.pth
+    size: 14212972
+    sha256: b03531047ffacf1e2488318dcd2aba1126cde36e3bfe1aa5cb07700aeeee9889
+    source: https://download.pytorch.org/models/mobilenet_v2-b0353104.pth
 framework: pytorch
 conversion_to_onnx_args:
-  - --model-name=MobileNetV2
-  - --model-path=$dl_dir
-  - --weights=$dl_dir/mobilenet-v2.pth
-  - --import-module=MobileNetV2
+  - --model-name=mobilenet_v2
+  - --weights=$dl_dir/mobilenet_v2-b0353104.pth
+  - --import-module=torchvision.models
   - --input-shape=1,3,224,224
   - --output-file=$conv_dir/mobilenet-v2.onnx
   - --input-names=data
@@ -53,4 +46,4 @@ model_optimizer_args:
   - --output=prob
   - --input_model=$conv_dir/mobilenet-v2.onnx
 quantizable: yes
-license: https://raw.githubusercontent.com/tonylins/pytorch-mobilenet-v2/master/LICENSE
+license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE

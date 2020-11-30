@@ -8,8 +8,6 @@ The model input is a blob that consists of a single image of 1x3x227x227 in BGR 
 
 The model output for `squeezenet1.0` is the typical object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -25,8 +23,6 @@ The model output for `squeezenet1.0` is the typical object classifier output for
 | ------ | ----- |
 | Top 1  | 57.684%|
 | Top 5  | 80.38% |
-
-## Performance
 
 ## Input
 

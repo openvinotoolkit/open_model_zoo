@@ -39,11 +39,13 @@ class GTMaskLoader(Enum):
     NIFTI = 3
     NUMPY = 4
     NIFTI_CHANNELS_FIRST = 5
+    PILLOW_CONVERT_TO_RGB = 6
 
 
 LOADERS_MAPPING = {
     'opencv': GTMaskLoader.OPENCV,
     'pillow': GTMaskLoader.PILLOW,
+    'pillow_convert_to_rgb': GTMaskLoader.PILLOW_CONVERT_TO_RGB,
     'scipy': GTMaskLoader.SCIPY,
     'nifti': GTMaskLoader.NIFTI,
     'nifti_channels_first': GTMaskLoader.NIFTI_CHANNELS_FIRST,
@@ -58,6 +60,7 @@ class SegmentationRepresentation(BaseRepresentation):
 class SegmentationAnnotation(SegmentationRepresentation):
     LOADERS = {
         GTMaskLoader.PILLOW: 'pillow_imread',
+        GTMaskLoader.PILLOW_CONVERT_TO_RGB: {'type': 'pillow_imread', 'convert_to_rgb': True},
         GTMaskLoader.OPENCV: 'opencv_imread',
         GTMaskLoader.SCIPY: 'scipy_imread',
         GTMaskLoader.NIFTI: 'nifti_reader',
@@ -163,7 +166,7 @@ class SegmentationPrediction(SegmentationRepresentation):
         mask_source = Path.cwd() / 'dumped_masks'
         if not mask_source.exists():
             mask_source.mkdir()
-        mask_file = mask_source / '{}'.format(str(self.identifier).split('.')[0] + '.npy')
+        mask_file = mask_source / (str(self.identifier).split('.')[0] + '.npy')
         mask_shape = self.mask.shape
         if len(mask_shape) == 3 and mask_shape[0] != 1:
             argmaxed_mask = np.argmax(self.mask, axis=0).astype(np.uint8)
@@ -291,15 +294,21 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
 
         polygons = defaultdict(list)
         for elem, label in zip(self.raw_mask, self.labels):
-            elem = np.uint8(maskUtils.decode(elem))
-            obj_contours = []
-            contours, _ = cv.findContours(elem, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-            for contour in contours:
-                if contour.size < 6:
-                    continue
-                contour = np.squeeze(contour, axis=1)
-                obj_contours.append(contour)
-            polygons[label].append(obj_contours)
+            if isinstance(elem, dict):
+                if isinstance(elem['counts'], list):
+                    polygons[label].append(elem['counts'])
+                else:
+                    elem = np.uint8(maskUtils.decode(elem))
+                    obj_contours = []
+                    contours, _ = cv.findContours(elem, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+                    for contour in contours:
+                        if contour.size < 6:
+                            continue
+                        contour = np.squeeze(contour, axis=1)
+                        obj_contours.append(contour)
+                    polygons[label].append(obj_contours)
+            else:
+                polygons[label].append(elem)
 
         return polygons
 
@@ -334,6 +343,7 @@ class CoCocInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation
     def to_annotation(self, **kwargs):
         return CoCoInstanceSegmentationAnnotation(self.identifier, self.mask, self.labels)
 
+
 class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
     def __init__(self, identifier, path_to_mask):
         super().__init__(identifier, path_to_mask, GTMaskLoader.NUMPY)
@@ -349,3 +359,10 @@ class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
             return mask
 
         return self._mask
+
+
+class SalientRegionAnnotation(SegmentationAnnotation):
+    pass
+
+class SalientRegionPrediction(SegmentationPrediction):
+    pass

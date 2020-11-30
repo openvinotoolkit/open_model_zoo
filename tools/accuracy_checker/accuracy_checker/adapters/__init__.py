@@ -46,12 +46,12 @@ from .reidentification import ReidAdapter
 from .detection import (
     TFObjectDetectionAPIAdapter,
     MTCNNPAdapter,
-    RetinaNetAdapter,
     ClassAgnosticDetectionAdapter,
     FaceBoxesAdapter,
     FaceDetectionAdapter,
     FaceDetectionRefinementAdapter,
-    FasterRCNNONNX
+    FasterRCNNONNX,
+    TwoStageDetector
 )
 from .detection_person_vehicle import (
     PersonVehicleDetectionAdapter,
@@ -60,10 +60,14 @@ from .detection_person_vehicle import (
 from .detection_head import HeadDetectionAdapter
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
+from .retinanet import RetinaNetAdapter, MultiOutRetinaNet
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX
 from .classification import ClassificationAdapter
-from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
-from .pose_estimation import HumanPoseAdapter
+from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter
+from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
+from .pose_estimation_openpose import OpenPoseAdapter
+from .pose_estimation_associative_embedding import AssociativeEmbeddingAdapter
+
 from .pose_estimation_3d import HumanPose3dAdapter
 
 from .hit_ratio import HitRatioAdapter
@@ -72,7 +76,7 @@ from .mask_rcnn import MaskRCNNAdapter
 from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
 from .yolact import YolactAdapter
 
-from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
+from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter, QuestionAnsweringBiDAFAdapter
 
 from .centernet import CTDETAdapter
 
@@ -89,9 +93,12 @@ from .audio_recognition import (
     FastCTCBeamSearchDecoderWithLm
 )
 
-from .regression import RegressionAdapter
+from .regression import RegressionAdapter, MultiOutputRegression
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
+from .dna_seq_recognition import DNASeqRecognition
+from .optical_flow import PWCNetAdapter
+from .salient_objects_detection import SalientObjectDetection
 from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
 
 __all__ = [
@@ -116,6 +123,7 @@ __all__ = [
     'PersonVehicleDetectionRefinementAdapter',
     'HeadDetectionAdapter',
     'FasterRCNNONNX',
+    'TwoStageDetector',
 
     'TinyYOLOv1Adapter',
     'YoloV2Adapter',
@@ -128,8 +136,13 @@ __all__ = [
     'PyTorchSSDDecoder',
     'FacePersonAdapter',
 
+    'RetinaNetAdapter',
+    'MultiOutRetinaNet',
+
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
+    'DUCSegmentationAdapter',
+    'SalientObjectDetection',
 
     'ReidAdapter',
 
@@ -154,8 +167,12 @@ __all__ = [
     'LPRAdapter',
     'CTCGreedySearchDecoder',
 
+    'AssociativeEmbeddingAdapter',
     'HumanPoseAdapter',
     'HumanPose3dAdapter',
+    'OpenPoseAdapter',
+    'SingleHumanPoseAdapter',
+    'StackedHourGlassNetworkAdapter',
 
     'ActionDetection',
 
@@ -167,6 +184,7 @@ __all__ = [
 
     'MachineTranslationAdapter',
     'QuestionAnsweringAdapter',
+    'QuestionAnsweringBiDAFAdapter',
 
     'MonoDepthAdapter',
 
@@ -176,6 +194,7 @@ __all__ = [
     'AttributeClassificationAdapter',
 
     'RegressionAdapter',
+    'MultiOutputRegression',
     'MixedAdapter',
 
     'CTCBeamSearchDecoder',
@@ -184,6 +203,10 @@ __all__ = [
     'FastCTCBeamSearchDecoderWithLm',
 
     'QualityAssessmentAdapter',
+
+    'DNASeqRecognition',
+
+    'PWCNetAdapter',
 
     'GVADetectionAdapter',
     'GVAClassificationAdapter',

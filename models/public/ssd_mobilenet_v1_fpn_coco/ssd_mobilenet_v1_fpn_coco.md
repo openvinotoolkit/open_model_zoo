@@ -4,8 +4,6 @@
 
 MobileNetV1 FPN is used for object detection. For details, see the [paper](https://arxiv.org/abs/1807.03284).
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -20,8 +18,6 @@ MobileNetV1 FPN is used for object detection. For details, see the [paper](https
 | Metric | Value |
 | ------ | ----- |
 | coco_precision | 35.5453%|
-
-## Performance
 
 ## Input
 

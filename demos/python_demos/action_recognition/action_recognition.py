@@ -36,8 +36,7 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-i', '--input',
                       help='Required. Id of the video capturing device to open (to open default camera just pass 0), '
-                           'path to a video or a .txt file with a list of ids or video files (one object per line)',
-                      required=True, type=str)
+                           'path to a video', required=True, type=str)
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model', required=True, type=str)
     decoder_args = args.add_mutually_exclusive_group()
     decoder_args.add_argument('-m_de', '--m_decoder',
@@ -47,7 +46,6 @@ def build_argparser():
     decoder_args.add_argument('--seq', dest='decoder_seq_size',
                               help='Optional. Length of sequence that decoder takes as input',
                               default=16, type=int)
-
     args.add_argument('-l', '--cpu_extension',
                       help='Optional. For CPU custom layers, if any. Absolute path to a shared library with the '
                            'kernels implementation.', type=str, default=None)
@@ -59,6 +57,7 @@ def build_argparser():
     args.add_argument('--fps', help='Optional. FPS for renderer', default=30, type=int)
     args.add_argument('-lb', '--labels', help='Optional. Path to file with label names', type=str)
     args.add_argument('--no_show', action='store_true', help="Optional. Don't show output")
+    args.add_argument('--loop', default=False, action='store_true', help='Optional. Run the video in cycle mode')
     args.add_argument('-s', '--smooth', dest='label_smoothing', help='Optional. Number of frames used for output label smoothing',
                       default=30, type=int)
     args.add_argument('-u', '--utilization-monitors', default='', type=str,
@@ -69,18 +68,6 @@ def build_argparser():
 
 def main():
     args = build_argparser().parse_args()
-
-    full_name = path.basename(args.input)
-    extension = path.splitext(full_name)[1]
-
-    if '.txt' in  extension:
-        with open(args.input) as f:
-            videos = [line.strip() for line in f.read().split('\n')]
-    else:
-        videos = [args.input]
-
-    if not args.input:
-        raise ValueError('--input option is expected')
 
     if args.labels:
         with open(args.labels) as f:
@@ -116,11 +103,11 @@ def main():
     else:
         decoder = DummyDecoder(num_requests=2)
         decoder_seq_size = args.decoder_seq_size
-    
+
     presenter = monitors.Presenter(args.utilization_monitors, 70)
     result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
-    run_pipeline(videos, encoder, decoder, result_presenter.render_frame, decoder_seq_size=decoder_seq_size, fps=args.fps)
+    run_pipeline(args.input, args.loop, encoder, decoder, result_presenter.render_frame, decoder_seq_size=decoder_seq_size, fps=args.fps)
     print(presenter.reportMeans())
 
 

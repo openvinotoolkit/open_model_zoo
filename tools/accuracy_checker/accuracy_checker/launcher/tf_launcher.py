@@ -44,9 +44,9 @@ class TFLauncher(Launcher):
     def __init__(self, config_entry, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
         try:
-            import tensorflow as tf # pylint: disable=C0415
+            import tensorflow # pylint: disable=C0415
             from tensorflow.python.saved_model import tag_constants # pylint: disable=C0415
-            self.tf = tf
+            self.tf = tensorflow.compat.v1 if tensorflow.__version__ >= '2.0.0' else tensorflow
             self.tag_constants = tag_constants
         except ImportError as import_error:
             raise ValueError(
@@ -111,7 +111,9 @@ class TFLauncher(Launcher):
                     results.append(res)
             if metadata is not None:
                 for meta_ in metadata:
-                    meta_['input_shape'] = self.inputs_info_for_meta()
+                    meta_['input_shape'] = meta_.get('input_shape', {}).update(
+                        {name: data.shape for name, data in infer_input.items()}
+                    )
 
         return results
 

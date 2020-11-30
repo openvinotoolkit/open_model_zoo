@@ -1,0 +1,139 @@
+diff --git a/models/fatchord_version.py b/models/fatchord_version.py
+index d43e6ad..e5f7591 100644
+--- a/models/fatchord_version.py
++++ b/models/fatchord_version.py
+@@ -10,6 +10,28 @@ from pathlib import Path
+ from typing import Union
+
+
++def fuse(conv, bn):
++    w = conv.weight
++    mean = bn.running_mean
++    var_sqrt = torch.sqrt(bn.running_var + bn.eps)
++    beta = bn.weight
++    gamma = bn.bias
++    if conv.bias is not None:
++        b = conv.bias
++    else:
++        b = mean.new_zeros(mean.shape)
++    w = w * (beta / var_sqrt).reshape([conv.out_channels, 1, 1])
++    b = (b - mean)/var_sqrt * beta + gamma
++    fused_conv = nn.Conv1d(conv.in_channels,
++                         conv.out_channels,
++                         conv.kernel_size,
++                         conv.stride,
++                         conv.padding,
++                         bias=True)
++    fused_conv.weight = nn.Parameter(w)
++    fused_conv.bias = nn.Parameter(b)
++    return fused_conv
++
+ class ResBlock(nn.Module):
+     def __init__(self, dims):
+         super().__init__()
+@@ -17,16 +39,28 @@ class ResBlock(nn.Module):
+         self.conv2 = nn.Conv1d(dims, dims, kernel_size=1, bias=False)
+         self.batch_norm1 = nn.BatchNorm1d(dims)
+         self.batch_norm2 = nn.BatchNorm1d(dims)
++        self.fused = False
+
+     def forward(self, x):
+         residual = x
+-        x = self.conv1(x)
+-        x = self.batch_norm1(x)
+-        x = F.relu(x)
+-        x = self.conv2(x)
+-        x = self.batch_norm2(x)
++
++        if self.fused:
++            x = self.conv1_f(x)
++            x = F.relu(x)
++            x = self.conv2_f(x)
++        else:
++            x = self.conv1(x)
++            x = self.batch_norm1(x)
++            x = F.relu(x)
++            x = self.conv2(x)
++            x = self.batch_norm2(x)
+         return x + residual
+
++    def fuse(self):
++        self.conv1_f = fuse(self.conv1, self.batch_norm1)
++        self.conv2_f = fuse(self.conv2, self.batch_norm2)
++        self.fused = True
++
+
+ class MelResNet(nn.Module):
+     def __init__(self, res_blocks, in_dims, compute_dims, res_out_dims, pad):
+@@ -38,27 +72,34 @@ class MelResNet(nn.Module):
+         for i in range(res_blocks):
+             self.layers.append(ResBlock(compute_dims))
+         self.conv_out = nn.Conv1d(compute_dims, res_out_dims, kernel_size=1)
++        self.fused = False
+
+     def forward(self, x):
+-        x = self.conv_in(x)
+-        x = self.batch_norm(x)
++        if self.fused:
++            x = self.conv_in_f(x)
++        else:
++            x = self.conv_in(x)
++            x = self.batch_norm(x)
+         x = F.relu(x)
+         for f in self.layers: x = f(x)
+         x = self.conv_out(x)
+         return x
+
++    def fuse(self):
++        self.conv_in_f = fuse(self.conv_in, self.batch_norm)
++        self.fused = True
++
++        for l in self.layers:
++            l.fuse()
+
+-class Stretch2d(nn.Module):
+-    def __init__(self, x_scale, y_scale):
++
++class StretchUpsample(nn.Module):
++    def __init__(self, x_scale):
+         super().__init__()
+-        self.x_scale = x_scale
+-        self.y_scale = y_scale
++        self.upsample = nn.Upsample(scale_factor=x_scale)
+
+     def forward(self, x):
+-        b, c, h, w = x.size()
+-        x = x.unsqueeze(-1).unsqueeze(3)
+-        x = x.repeat(1, 1, 1, self.y_scale, 1, self.x_scale)
+-        return x.view(b, c, h * self.y_scale, w * self.x_scale)
++        return self.upsample(x)
+
+
+ class UpsampleNetwork(nn.Module):
+@@ -68,12 +109,12 @@ class UpsampleNetwork(nn.Module):
+         total_scale = np.cumproduct(upsample_scales)[-1]
+         self.indent = pad * total_scale
+         self.resnet = MelResNet(res_blocks, feat_dims, compute_dims, res_out_dims, pad)
+-        self.resnet_stretch = Stretch2d(total_scale, 1)
++        self.resnet_stretch = StretchUpsample((1,total_scale))
+         self.up_layers = nn.ModuleList()
+         for scale in upsample_scales:
+             k_size = (1, scale * 2 + 1)
+             padding = (0, scale)
+-            stretch = Stretch2d(scale, 1)
++            stretch = StretchUpsample((1, scale))
+             conv = nn.Conv2d(1, 1, kernel_size=k_size, padding=padding, bias=False)
+             conv.weight.data.fill_(1. / k_size[1])
+             self.up_layers.append(stretch)
+@@ -88,6 +129,9 @@ class UpsampleNetwork(nn.Module):
+         m = m.squeeze(1)[:, :, self.indent:-self.indent]
+         return m.transpose(1, 2), aux.transpose(1, 2)
+
++    def fuse(self):
++        self.resnet.fuse()
++
+
+ class WaveRNN(nn.Module):
+     def __init__(self, rnn_dims, fc_dims, bits, pad, upsample_factors,
+--
+2.7.4

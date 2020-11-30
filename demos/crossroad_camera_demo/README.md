@@ -64,7 +64,7 @@ Options:
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -89,7 +89,7 @@ If Person Attributes Recognition or Person Reidentification Retail are enabled, 
 	* **Person Attributes Recognition time** - Inference time of Person Attributes Recognition averaged by the number of detected persons.
 	* **Person Reidentification time** - Inference time of Person Reidentification averaged by the number of detected persons.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
 > * `person-attributes-recognition-crossroad-0230`
 > * `person-reidentification-retail-0031`
 > * `person-vehicle-bike-detection-crossroad-0078`

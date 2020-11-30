@@ -22,6 +22,7 @@ import numpy as np
 
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, ConfigError
+from ..preprocessor import ObjectCropWithScale
 from ..representation import PoseEstimationPrediction
 from ..utils import contains_any
 
@@ -69,13 +70,13 @@ class HumanPoseAdapter(Adapter):
                     'and part_affinity_fields_out or not contain them at all (in single output model case)'
                 )
             self._keypoints_heatmap_bias = self.keypoints_heatmap + '/add_'
-            self._part_affinity_fileds_bias = self.part_affinity_fields + '/add_'
+            self._part_affinity_fields_bias = self.part_affinity_fields + '/add_'
 
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.concat_out:
-            if not contains_any(raw_outputs, [self.part_affinity_fields, self._part_affinity_fileds_bias]):
+            if not contains_any(raw_outputs, [self.part_affinity_fields, self._part_affinity_fields_bias]):
                 raise ConfigError('part affinity fields output not found')
             if not contains_any(raw_outputs, [self.keypoints_heatmap, self._keypoints_heatmap_bias]):
                 raise ConfigError('keypoints heatmap output not found')
@@ -84,7 +85,7 @@ class HumanPoseAdapter(Adapter):
             ]
             pafs = raw_outputs[
                 self.part_affinity_fields if self.part_affinity_fields in raw_outputs
-                else self._part_affinity_fileds_bias
+                else self._part_affinity_fields_bias
             ]
             raw_output = zip(identifiers, keypoints_heatmap, pafs, frame_meta)
         else:
@@ -293,8 +294,8 @@ class HumanPoseAdapter(Adapter):
     def group_peaks(self, peaks, pafs, kpt_num=20, threshold=0.05):
         subset = []
         candidates = np.array([item for sublist in peaks for item in sublist])
-        for keypoint_id, maped_keypoints in enumerate(self.map_idx):
-            score_mid = pafs[:, :, [x - 19 for x in maped_keypoints]]
+        for keypoint_id, mapped_keypoints in enumerate(self.map_idx):
+            score_mid = pafs[:, :, [x - 19 for x in mapped_keypoints]]
             candidate_a = peaks[self.limb_seq[keypoint_id][0] - 1]
             candidate_b = peaks[self.limb_seq[keypoint_id][1] - 1]
             idx_joint_a = self.limb_seq[keypoint_id][0] - 1
@@ -423,3 +424,75 @@ class SingleHumanPoseAdapter(Adapter):
         new_pt = np.array([pt[0], pt[1], 1.])
         new_pt = np.dot(t, new_pt)
         return new_pt[:2]
+
+
+class StackedHourGlassNetworkAdapter(Adapter):
+    __provider__ = 'stacked_hourglass'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({'score_map_output': StringField(optional=True)})
+        return params
+
+    def configure(self):
+        self.score_map_out = self.get_value_from_config('score_map_out')
+
+    def process(self, raw, identifiers, frame_meta):
+        if self.score_map_out is None:
+            self.score_map_out = self.output_blob
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        score_map_batch = raw_outputs[self.score_map_out]
+        result = []
+        for identifier, score_map, meta in zip(identifiers, score_map_batch, frame_meta):
+            center = meta['center']
+            scale = meta['scale']
+            points = self.generate_points(score_map, center, scale, [64, 64])
+            x_points, y_points = points.T
+            result.append(PoseEstimationPrediction(identifier, x_values=x_points, y_values=y_points))
+        return result
+
+    @staticmethod
+    def generate_points(output, center, scale, res):
+        def transform_preds(coords, center, scale, res):
+            for p in range(coords.shape[0]):
+                coords[p] = ObjectCropWithScale.transform(coords[p], center, scale, res, 1)
+            return coords
+
+        def get_preds(scores):
+            assert len(scores.shape) == 3, 'Score maps should be 3-dim'
+
+            idx = np.argmax(scores.reshape((scores.shape[0], -1)), 1)
+
+            maxval = np.max(scores.reshape((scores.shape[0], -1)), 1)
+            idx = idx.reshape((scores.shape[0], 1)) + 1
+            maxval = maxval.reshape((scores.shape[0], 1))
+
+            preds = np.tile(idx, (1, 2))
+
+            preds[:, 0] = (preds[:, 0] - 1) % scores.shape[2] + 1
+            preds[:, 1] = np.floor((preds[:, 1] - 1) / scores.shape[2]) + 1
+
+            pred_mask = np.tile(maxval > 0, (1, 2))
+            preds *= pred_mask
+            return preds
+
+        coords = get_preds(output).astype(float)  # float type
+
+        # pose-processing
+        for p in range(coords.shape[0]):
+            hm = output[p]
+            px = int(math.floor(coords[p][0]))
+            py = int(math.floor(coords[p][1]))
+            if 1 < px < res[0] and  1 < py < res[1]:
+                diff = np.array([hm[py - 1][px] - hm[py - 1][px - 2], hm[py][px - 1] - hm[py - 2][px - 1]])
+                coords[p] += np.sign(diff).astype(float) * .25
+        coords += 0.5
+
+        # Transform back
+        preds = transform_preds(coords, center, scale, res)
+
+        if preds.size < 3:
+            preds = preds.reshape(1, preds.size)
+
+        return preds

@@ -129,6 +129,8 @@ class ConfigReader:
     @staticmethod
     def _read_configs(arguments):
         local_config = read_yaml(arguments.config)
+        if not isinstance(local_config, dict):
+            raise ConfigError('local config should be dict-like object')
         definitions = os.environ.get(DEFINITION_ENV_VAR) or local_config.get('global_definitions')
         if definitions:
             definitions = read_yaml(Path(arguments.config).parent / definitions)
@@ -332,15 +334,12 @@ class ConfigReader:
     def _provide_cmd_arguments(arguments, config, mode):
         profile_dataset = 'profile' in arguments and arguments.profile
         profile_report_type = arguments.profile_report_type if 'profile_report_type' in arguments else 'csv'
-        def _add_subset_specific_arg(dataset_entry):
-            if 'shuffle' in arguments and arguments.shuffle is not None:
-                dataset_entry['shuffle'] = arguments.shuffle
-
-            if 'subsample_size' in arguments and arguments.subsample_size is not None:
-                dataset_entry['subsample_size'] = arguments.subsample_size
 
         def merge_models(config, arguments, update_launcher_entry):
             def provide_models(launchers):
+                if input_precisions:
+                    for launcher in launchers:
+                        launcher['_input_precision'] = input_precisions
                 if 'models' not in arguments or not arguments.models:
                     return launchers
                 model_paths = arguments.models
@@ -358,13 +357,15 @@ class ConfigReader:
                         updated_launchers.append(copy_launcher)
                 return updated_launchers
 
+            input_precisions = arguments.input_precision if 'input_precision' in arguments else None
+
             for model in config['models']:
                 for launcher_entry in model['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry)
                 model['launchers'] = provide_models(model['launchers'])
 
                 for dataset_entry in model['datasets']:
-                    _add_subset_specific_arg(dataset_entry)
+                    _add_subset_specific_arg(dataset_entry, arguments)
 
                     if 'ie_preprocessing' in arguments and arguments.ie_preprocessing:
                         dataset_entry['_ie_preprocessing'] = arguments.ie_preprocessing
@@ -390,7 +391,7 @@ class ConfigReader:
                 if 'datasets' not in module_config:
                     continue
                 for dataset in module_config['datasets']:
-                    _add_subset_specific_arg(dataset)
+                    _add_subset_specific_arg(dataset, arguments)
                     dataset['_profile'] = profile_dataset
                     dataset['_report_type'] = profile_report_type
 
@@ -672,7 +673,7 @@ def filter_modules(config, target_devices, args):
 
 def process_config(
         config_item, entries_paths, args, dataset_identifier='datasets',
-        launchers_identifier='launchers', identifers_mapping=None, pipeline=False
+        launchers_identifier='launchers', identifiers_mapping=None, pipeline=False
 ):
     def process_dataset(datasets_configs):
         for datasets_config in datasets_configs:
@@ -719,7 +720,7 @@ def process_config(
         return updated_launchers
 
     for entry, command_line_arg in entries_paths.items():
-        entry_id = entry if not identifers_mapping else identifers_mapping[entry]
+        entry_id = entry if not identifiers_mapping else identifiers_mapping[entry]
         if entry_id not in config_item:
             continue
 
@@ -850,3 +851,11 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
             launcher_entry['affinity_map'] = arguments.affinity_map
 
     return launcher_entry
+
+
+def _add_subset_specific_arg(dataset_entry, arguments):
+    if 'shuffle' in arguments and arguments.shuffle is not None:
+        dataset_entry['shuffle'] = arguments.shuffle
+
+    if 'subsample_size' in arguments and arguments.subsample_size is not None:
+        dataset_entry['subsample_size'] = arguments.subsample_size
