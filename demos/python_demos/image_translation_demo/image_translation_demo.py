@@ -30,10 +30,10 @@ def build_argparser():
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS,
                       help='Show this help message and exit.')
-    args.add_argument("-t", "--translation_model",
+    args.add_argument("-m_trn", "--translation_model",
                       help="Required. Path to an .xml file with a trained translation model",
                       required=True, type=str)
-    args.add_argument("-s", "--segmentation_model",
+    args.add_argument("-m_seg", "--segmentation_model",
                       help="Optional. Path to an .xml file with a trained semantic segmentation model",
                       type=str)
     args.add_argument("-ii", "--input_images",
