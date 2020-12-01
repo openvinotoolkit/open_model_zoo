@@ -276,7 +276,7 @@ def non_interactive_demo(model, args):
         logits, targets = model.infer_sync(image)
         prob = calculate_probability(logits)
         log.info("Confidence score is %s", prob)
-        if prob >= args.conf_thresh:
+        if prob >= args.conf_thresh ** len(logits):
             phrase = model.vocab.construct_phrase(targets)
             if args.output_file:
                 with open(args.output_file, 'a') as output_file:
