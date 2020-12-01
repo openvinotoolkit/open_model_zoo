@@ -175,7 +175,7 @@ class Model:
         self.is_async = interactive_mode
         self.num_infers_decoder = 0
         self.check_model_dimensions()
-        if not args.interactive_mode:
+        if not interactive_mode:
             self.preprocess_inputs()
 
     def preprocess_inputs(self):
@@ -216,7 +216,7 @@ class Model:
         model_input = change_layout(model_input)
         assert self.is_async
         if self.model_status == Model.Status.ready:
-            infer_status_encoder = self._run_encoder(model_input)
+            self._run_encoder(model_input)
             return None
 
         if self.model_status == Model.Status.encoder_infer:
@@ -266,8 +266,6 @@ class Model:
         timeout = 0 if self.is_async else -1
         self._infer_request_handle_encoder = self._async_infer_encoder(model_input, req_id=0)
         self.model_status = Model.Status.encoder_infer
-        infer_status_encoder = self._infer_request_handle_encoder.wait(timeout=timeout)
-        return infer_status_encoder
 
     def _run_decoder(self):
         enc_res = self._infer_request_handle_encoder.output_blobs
