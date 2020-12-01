@@ -174,13 +174,11 @@ class Model:
         self.model_status = Model.Status.ready
         self.is_async = interactive_mode
         self.num_infers_decoder = 0
+        self.check_model_dimensions()
         if not args.interactive_mode:
             self.preprocess_inputs()
 
     def preprocess_inputs(self):
-        batch_dim, channels, height, width = self.encoder.input_info['imgs'].input_data.shape
-        assert batch_dim == 1, "Demo only works with batch size 1."
-        assert channels in (1, 3), "Input image is not 1 or 3 channeled image."
         target_shape = (height, width)
         if os.path.isdir(self.args.input):
             inputs = sorted(os.path.join(self.args.input, inp)
@@ -195,6 +193,11 @@ class Model:
                 PREPROCESSING[self.args.preprocessing_type], image_raw, target_shape)
             record = dict(img_name=filenm, img=image, formula=None)
             self.images_list.append(record)
+
+    def check_model_dimensions(self):
+        batch_dim, channels, height, width = self.encoder.input_info['imgs'].input_data.shape
+        assert batch_dim == 1, "Demo only works with batch size 1."
+        assert channels in (1, 3), "Input image is not 1 or 3 channeled image."
 
     def _async_infer_encoder(self, image, req_id):
         return self.exec_net_encoder.start_async(request_id=req_id, inputs={self.args.imgs_layer: image})
