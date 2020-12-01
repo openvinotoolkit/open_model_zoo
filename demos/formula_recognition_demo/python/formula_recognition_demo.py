@@ -222,7 +222,9 @@ def main():
         return 1
     while True:
         ret, frame = capture.read()
-        assert ret, "Error reading image from VideoCapture"
+        if not ret:
+            log.info("End of file or error reading from camera")
+            return 1
         bin_crop = demo.get_crop(frame)
         model_input = prerocess_crop(bin_crop, (height, width), preprocess_type=args.preprocessing_type)
         frame = demo.put_crop(frame, model_input)
