@@ -21,94 +21,6 @@ from .utils import Detection, resize_image, load_labels
 
 
 class SSD(Model):
-    class SingleOutputParser:
-        def __init__(self, all_outputs):
-            if len(all_outputs) != 1:
-                raise ValueError('Network must have only one output.')
-            self.output_name, output_data = next(iter(all_outputs.items()))
-            last_dim = np.shape(output_data)[-1]
-            if last_dim != 7:
-                raise ValueError('The last dimension of the output blob must be equal to 7, '
-                                 'got {} instead.'.format(last_dim))
-
-        def __call__(self, outputs):
-            return [Detection(xmin, ymin, xmax, ymax, score, label)
-                    for _, label, score, xmin, ymin, xmax, ymax in outputs[self.output_name][0][0]]
-
-    class MultipleOutputParser:
-        def __init__(self, layers, bboxes_layer='bboxes', scores_layer='scores', labels_layer='labels'):
-            def find_layer_by_name(name, layers):
-                suitable_layers = [layer_name for layer_name in layers if name in layer_name]
-                if not suitable_layers:
-                    raise ValueError('Suitable layer for "{}" output is not found'.format(name))
-
-                if len(suitable_layers) > 1:
-                    raise ValueError('More than 1 layer matched to "{}" output'.format(name))
-
-                return suitable_layers[0]
-            self.labels_layer = find_layer_by_name(labels_layer, layers)
-            self.scores_layer = find_layer_by_name(scores_layer, layers)
-            self.bboxes_layer = find_layer_by_name(bboxes_layer, layers)
-
-        def __call__(self, outputs):
-            bboxes = outputs[self.bboxes_layer][0]
-            scores = outputs[self.scores_layer][0]
-            labels = outputs[self.labels_layer][0]
-            return [Detection(*bbox, score, label) for label, score, bbox in zip(labels, scores, bboxes)]
-
-    class BoxesLabelsParser:
-        def __init__(self, input_size, all_outputs, labels_layer='labels', default_label=1):
-            def find_layer_by_name(name, layers):
-                suitable_layers = [layer_name for layer_name in layers if name in layer_name]
-                if not suitable_layers:
-                    raise ValueError('Suitable layer for "{}" output is not found'.format(name))
-
-                if len(suitable_layers) > 1:
-                    raise ValueError('More than 1 layer matched to "{}" output'.format(name))
-
-                return suitable_layers[0]
-            try:
-                self.labels_layer = find_layer_by_name(labels_layer, all_outputs) # ?
-                self.logger.info('Use output "{}" as the one containing labels of detected objects.'
-                                 .format(self.labels_layer))
-            except ValueError:
-                self.logger.warning('Suitable layer for "{}" output is not found. '
-                                    'Treating detector as class agnostic with output label {}'
-                                    .format(labels_layer, default_label))
-                self.labels_layer = None
-                self.default_label = default_label
-
-            self.input_size = input_size
-            self.bboxes_layer = self.find_layer_bboxes_output(all_outputs)
-            self.logger.info('Use auto-detected output "{}" as the one containing detected bounding boxes.'
-                             .format(self.bboxes_layer))
-
-        @staticmethod
-        def find_layer_bboxes_output(all_outputs):
-            filter_outputs = [
-                output_name for output_name, out_data in all_outputs.items()
-                if len(np.shape(out_data)) == 2 and np.shape(out_data)[-1] == 5
-            ]
-            if not filter_outputs:
-                raise ValueError('Suitable output with bounding boxes is not found')
-            if len(filter_outputs) > 1:
-                raise ValueError('More than 1 candidate for output with bounding boxes.')
-            return filter_outputs[0]
-
-        def __call__(self, outputs):
-            bboxes = outputs[self.bboxes_layer]
-            scores = bboxes[:, 4]
-            bboxes = bboxes[:, :4]
-            bboxes[:, 0::2] /= self.input_size[0]
-            bboxes[:, 1::2] /= self.input_size[1]
-            if self.labels_layer:
-                labels = outputs[self.labels_layer] + 1
-            else:
-                labels = np.full(len(bboxes), self.default_label, dtype=bboxes.dtype)
-
-            detections = [Detection(*bbox, score, label) for label, score, bbox in zip(labels, scores, bboxes)]
-            return detections
-
     def __init__(self, ie, model_path, labels=None, keep_aspect_ratio_resize=False):
         super().__init__(ie, model_path)
 
@@ -140,22 +52,21 @@ class SSD(Model):
 
     def _get_output_parser(self, net, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):
         try:
-            parser = self.SingleOutputParser(net.outputs)
+            parser = SingleOutputParser(net.outputs)
             self.logger.info('Use SingleOutputParser')
             return parser
         except ValueError:
             pass
 
         try:
-            parser = self.MultipleOutputParser(net.outputs, bboxes, scores, labels)
+            parser = MultipleOutputParser(net.outputs, bboxes, scores, labels)
             self.logger.info('Use MultipleOutputParser')
             return parser
         except ValueError:
             pass
 
         try:
-            h, w = net.input_info[image_blob_name].input_data.shape[2:]
-            parser = self.BoxesLabelsParser([w, h], net.outputs)
+            parser = BoxesLabelsParser(net.outputs, net.input_info[image_blob_name].input_data.shape[2:])
             self.logger.info('Use BoxesLabelsParser')
             return parser
         except ValueError:
@@ -192,4 +103,78 @@ class SSD(Model):
             detection.xmax *= scale_x
             detection.ymin *= scale_y
             detection.ymax *= scale_y
+        return detections
+
+
+def find_layer_by_name(name, layers):
+    suitable_layers = [layer_name for layer_name in layers if name in layer_name]
+    if not suitable_layers:
+        raise ValueError('Suitable layer for "{}" output is not found'.format(name))
+
+    if len(suitable_layers) > 1:
+        raise ValueError('More than 1 layer matched to "{}" output'.format(name))
+
+    return suitable_layers[0]
+
+
+class SingleOutputParser:
+    def __init__(self, all_outputs):
+        if len(all_outputs) != 1:
+            raise ValueError('Network must have only one output.')
+        self.output_name, output_data = next(iter(all_outputs.items()))
+        last_dim = np.shape(output_data)[-1]
+        if last_dim != 7:
+            raise ValueError('The last dimension of the output blob must be equal to 7, '
+                             'got {} instead.'.format(last_dim))
+
+    def __call__(self, outputs):
+        return [Detection(xmin, ymin, xmax, ymax, score, label)
+                for _, label, score, xmin, ymin, xmax, ymax in outputs[self.output_name][0][0]]
+
+
+class MultipleOutputParser:
+    def __init__(self, layers, bboxes_layer='bboxes', scores_layer='scores', labels_layer='labels'):
+        self.labels_layer = find_layer_by_name(labels_layer, layers)
+        self.scores_layer = find_layer_by_name(scores_layer, layers)
+        self.bboxes_layer = find_layer_by_name(bboxes_layer, layers)
+
+    def __call__(self, outputs):
+        bboxes = outputs[self.bboxes_layer][0]
+        scores = outputs[self.scores_layer][0]
+        labels = outputs[self.labels_layer][0]
+        return [Detection(*bbox, score, label) for label, score, bbox in zip(labels, scores, bboxes)]
+
+
+class BoxesLabelsParser:
+    def __init__(self, layers, input_size, labels_layer='labels', default_label=0):
+        try:
+            self.labels_layer = find_layer_by_name(labels_layer, layers)
+        except ValueError:
+            self.labels_layer = None
+            self.default_label = default_label
+
+        self.bboxes_layer = self.find_layer_bboxes_output(layers)
+        self.input_size = input_size
+
+    @staticmethod
+    def find_layer_bboxes_output(layers):
+        filter_outputs = [name for name, data in layers.items() if len(np.shape(data)) == 2 and np.shape(data)[-1] == 5]
+        if not filter_outputs:
+            raise ValueError('Suitable output with bounding boxes is not found')
+        if len(filter_outputs) > 1:
+            raise ValueError('More than 1 candidate for output with bounding boxes.')
+        return filter_outputs[0]
+
+    def __call__(self, outputs):
+        bboxes = outputs[self.bboxes_layer]
+        scores = bboxes[:, 4]
+        bboxes = bboxes[:, :4]
+        bboxes[:, 0::2] /= self.input_size[0]
+        bboxes[:, 1::2] /= self.input_size[1]
+        if self.labels_layer:
+            labels = outputs[self.labels_layer]
+        else:
+            labels = np.full(len(bboxes), self.default_label, dtype=bboxes.dtype)
+
+        detections = [Detection(*bbox, score, label) for label, score, bbox in zip(labels, scores, bboxes)]
         return detections
