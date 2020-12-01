@@ -1,17 +1,14 @@
 # This file can be used with the --list option of the model downloader.
 # For --architecture_type=ssd
-face-detection-0200
-face-detection-0202
-face-detection-0204
+face-detection-????
 face-detection-adas-????
 face-detection-retail-????
 pedestrian-and-vehicle-detector-adas-????
 pedestrian-detection-adas-????
 pelee-coco
-person-detection-0200
-person-detection-0201
-person-detection-0202
+person-detection-????
 person-detection-retail-0013
+product-detection-0001
 retinanet-tf
 ssd-resnet34-1200-onnx
 vehicle-detection-adas-????
