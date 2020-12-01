@@ -66,10 +66,8 @@ def remove_background(img, kernel_size=(7, 7), blur_kernel_size=21, invert_color
 
 def main():
     parser = argparse.ArgumentParser(description='Whiteboard inpainting demo')
-    parser.add_argument('-i', '--input',
-                         help='Required. An input to process. The input must be a single image, '
-                              'a folder of images or anything that cv2.VideoCapture can process',
-                         required=True, type=str)
+    parser.add_argument('-i', '--input', required=True,
+                         help='Required. Path to a video file or a device node of a web-camera')
     parser.add_argument('-loop', '--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop')
     parser.add_argument('-m_i', '--m_instance_segmentation', type=str, required=False,
@@ -93,6 +91,8 @@ def main():
     args = parser.parse_args()
 
     cap = open_images_capture(args.input, args.loop)
+    if cap.get_type() not in ('VIDEO', 'CAMERA'):
+        raise RuntimeError("The input should be a video file or a device node")
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")

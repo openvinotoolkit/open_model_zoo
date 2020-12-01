@@ -47,14 +47,14 @@ class DataStep(PipelineStep):
     def setup(self):
         pass
 
-      def process(self, item):
+    def process(self, item):
         frame = self.cap.read()
         if frame is None:
             return Signal.STOP
         return frame
 
     def end(self):
-        self.cap.release()
+        pass
 
 
 class EncoderStep(PipelineStep):

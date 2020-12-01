@@ -63,7 +63,6 @@ Options:
   -lb LABELS, --labels LABELS
                         Optional. Path to file with label names
   --no_show             Optional. Don't show output
-  --loop                Optional. Run a video in cycle mode
   -s LABEL_SMOOTHING, --smooth LABEL_SMOOTHING
                         Optional. Number of frames used for output label
                         smoothing

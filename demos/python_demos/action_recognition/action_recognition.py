@@ -35,10 +35,9 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument('-i', '--input',
+    args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
-                           'a folder of images or anything that cv2.VideoCapture can process',
-                      required=True, type=str)
+                           'a folder of images or anything that cv2.VideoCapture can process')
     args.add_argument('-loop', '--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop')
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model', required=True, type=str)

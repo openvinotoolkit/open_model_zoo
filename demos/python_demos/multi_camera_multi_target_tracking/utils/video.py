@@ -16,15 +16,16 @@ import cv2 as cv
 
 
 class MulticamCapture:
-    def __init__(self, sources):
+    def __init__(self, sources, loop):
         assert sources
         self.captures = []
         self.transforms = []
         self.fps = []
         for src in sources:
-            cap = open_images_capture(src, False)
-            self.captures.append(cap)
-            self.fps.append(cap.fps())
+            capture = open_images_capture(src, loop)
+            capture.cap.set(cv.CAP_PROP_FPS, 30)
+            self.captures.append(capture)
+            self.fps.append(capture.fps())
 
     def add_transform(self, t):
         self.transforms.append(t)

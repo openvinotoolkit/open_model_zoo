@@ -33,7 +33,7 @@ Options:
   -d DEVICE, --device DEVICE
                         Optional. Specify target device for infer: CPU, GPU,
                         FPGA, HDDL or MYRIAD. Default: CPU
-  -i "<path>", --input "<path>"
+  -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image,
                         a folder of images or anything that cv2.VideoCapture can process.
   -loop                 Optional. Enable reading the input in a loop.

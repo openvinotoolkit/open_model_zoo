@@ -23,7 +23,7 @@ optional arguments:
                         path to model of object detector in xml format
   -m_hpe MODEL_HPE, --model_hpe MODEL_HPE
                         path to model of human pose estimator in xml format
-  -i INPUT [INPUT ...], --input INPUT [INPUT ...]
+  -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image,
                         a folder of images or anything that cv2.VideoCapture can process.
   -loop                 Optional. Enable reading the input in a loop
