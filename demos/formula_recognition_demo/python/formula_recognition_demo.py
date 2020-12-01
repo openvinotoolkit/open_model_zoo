@@ -139,6 +139,49 @@ class InteractiveDemo:
         return frame
 
 
+def create_capture(input_source, demo_resolution):
+    if not input_source.endswith('.mp4'):
+        try:
+            input_source = int(input_source)
+        except ValueError as e:
+            raise ValueError("\n \tCannot recognize input as .mp4 video or device-id as int \n"
+                             "\tPlease, check the -i\--input arg and try again")
+    capture = cv.VideoCapture(input_source)
+    capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
+    capture.set(3, demo_resolution[0])
+    capture.set(4, demo_resolution[1])
+    return capture
+
+
+def non_interactive_demo(model, args):
+    renderer = create_renderer()
+    for rec in tqdm(model.images_list):
+        log.info("Starting inference for %s", rec['img_name'])
+        image = rec['img']
+        logits, targets = model.infer_sync(image)
+        prob = calculate_probability(logits)
+        log.info("Confidence score is %s", prob)
+        if prob >= args.conf_thresh ** len(logits):
+            phrase = model.vocab.construct_phrase(targets)
+            if args.output_file:
+                with open(args.output_file, 'a') as output_file:
+                    output_file.write(rec['img_name'] + '\t' + phrase + '\n')
+            else:
+                print("\n\tImage name: {}\n\tFormula: {}\n".format(rec['img_name'], phrase))
+                if renderer is not None:
+                    rendered_formula, _ = renderer.render(phrase)
+                    if rendered_formula is not None:
+                        cv.imshow("Predicted formula", rendered_formula)
+                        cv.waitKey(0)
+        else:
+            log.info("Confidence score is low. The formula was not recognized.")
+    if args.perf_counts:
+        log.info("Encoder performance statistics")
+        print_stats(model.exec_net_encoder)
+        log.info("Decoder performance statistics")
+        print_stats(model.exec_net_decoder)
+
+
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
@@ -254,49 +297,6 @@ def main():
 
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
              "from the openVINO toolkit\n")
-
-
-def create_capture(input_source, demo_resolution):
-    if not input_source.endswith('.mp4'):
-        try:
-            input_source = int(input_source)
-        except ValueError as e:
-            raise ValueError("\n \tCannot recognize input as .mp4 video or device-id as int \n"
-                             "\tPlease, check the -i\--input arg and try again")
-    capture = cv.VideoCapture(input_source)
-    capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
-    capture.set(3, demo_resolution[0])
-    capture.set(4, demo_resolution[1])
-    return capture
-
-
-def non_interactive_demo(model, args):
-    renderer = create_renderer()
-    for rec in tqdm(model.images_list):
-        log.info("Starting inference for %s", rec['img_name'])
-        image = rec['img']
-        logits, targets = model.infer_sync(image)
-        prob = calculate_probability(logits)
-        log.info("Confidence score is %s", prob)
-        if prob >= args.conf_thresh ** len(logits):
-            phrase = model.vocab.construct_phrase(targets)
-            if args.output_file:
-                with open(args.output_file, 'a') as output_file:
-                    output_file.write(rec['img_name'] + '\t' + phrase + '\n')
-            else:
-                print("\n\tImage name: {}\n\tFormula: {}\n".format(rec['img_name'], phrase))
-                if renderer is not None:
-                    rendered_formula, _ = renderer.render(phrase)
-                    if rendered_formula is not None:
-                        cv.imshow("Predicted formula", rendered_formula)
-                        cv.waitKey(0)
-        else:
-            log.info("Confidence score is low. The formula was not recognized.")
-    if args.perf_counts:
-        log.info("Encoder performance statistics")
-        print_stats(model.exec_net_encoder)
-        log.info("Decoder performance statistics")
-        print_stats(model.exec_net_decoder)
 
 
 if __name__ == '__main__':
