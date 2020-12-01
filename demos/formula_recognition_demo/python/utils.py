@@ -126,8 +126,7 @@ def read_net(model_xml, ie):
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
     log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
-    model = ie.read_network(model_xml, model_bin)
-    return model
+    return ie.read_network(model_xml, model_bin)
 
 
 def print_stats(module):
