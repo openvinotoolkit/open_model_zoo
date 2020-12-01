@@ -270,7 +270,7 @@ def main():
         ret, frame = capture.read()
         if not ret:
             log.info("End of file or error reading from camera")
-            return 1
+            break
         bin_crop = demo.get_crop(frame)
         model_input = prerocess_crop(bin_crop, (height, width), preprocess_type=args.preprocessing_type)
         frame = demo.put_crop(frame, model_input)
