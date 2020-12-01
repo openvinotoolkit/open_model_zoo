@@ -155,6 +155,7 @@ def create_capture(input_source, demo_resolution):
 
 def non_interactive_demo(model, args):
     renderer = create_renderer()
+    show_window = not args.no_show
     for rec in tqdm(model.images_list):
         log.info("Starting inference for %s", rec['img_name'])
         image = rec['img']
@@ -170,7 +171,7 @@ def non_interactive_demo(model, args):
                 print("\n\tImage name: {}\n\tFormula: {}\n".format(rec['img_name'], phrase))
                 if renderer is not None:
                     rendered_formula, _ = renderer.render(phrase)
-                    if rendered_formula is not None:
+                    if rendered_formula is not None and show_window:
                         cv.imshow("Predicted formula", rendered_formula)
                         cv.waitKey(0)
         else:
@@ -194,6 +195,8 @@ def build_argparser():
     args.add_argument("-i", "--input", help="Required. Path to a folder with images, path to an image files, integer "
                       "identificator of the camera or path to the video. See README.md for details.",
                       required=True, type=str)
+    args.add_argument("-no_show", "--no_show", action='store_true',
+                      help='Optional. Suppress pop-up window with rendered formula.')
     args.add_argument("-o", "--output_file",
                       help="Optional. Path to file where to store output. If not mentioned, result will be stored "
                       "in the console.",
@@ -259,6 +262,7 @@ def main():
     *_, height, width = model.encoder.input_info['imgs'].input_data.shape
     prev_text = ''
     demo = InteractiveDemo((height, width), resolution=args.resolution)
+    show_window = not args.no_show
     capture = create_capture(args.input, demo.resolution)
     if not capture.isOpened():
         log.error("Cannot open camera")
@@ -286,14 +290,15 @@ def main():
                 phrase = ''
         frame = demo.draw(frame, phrase)
         prev_text = phrase
-        cv.imshow('Press q to quit.', frame)
-        key = cv.waitKey(1) & 0xFF
-        if key in (ord('Q'), ord('q'), ord('\x1b')):
-            break
-        elif key in (ord('o'), ord('O')):
-            demo.resize_window("decrease")
-        elif key in (ord('p'), ord('P')):
-            demo.resize_window("increase")
+        if show_window:
+            cv.imshow('Press q to quit.', frame)
+            key = cv.waitKey(1) & 0xFF
+            if key in (ord('Q'), ord('q'), ord('\x1b')):
+                break
+            elif key in (ord('o'), ord('O')):
+                demo.resize_window("decrease")
+            elif key in (ord('p'), ord('P')):
+                demo.resize_window("increase")
 
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
              "from the openVINO toolkit\n")
