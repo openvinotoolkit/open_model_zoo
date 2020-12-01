@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 import argparse
 import time
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 
 
 def kspace_to_image(kspace):
@@ -29,10 +29,11 @@ if __name__ == '__main__':
     assert(xml_path.endswith('.xml'))
     bin_path = xml_path[:xml_path.rfind('.xml')] + '.bin'
 
-    net = IENetwork(xml_path, bin_path)
-
     ie = IECore()
     ie.add_extension(args.cpu_extension, "CPU")
+
+    net = ie.read_network(xml_path, bin_path)
+
     device = 'CPU' if args.device == 'CPU' else ('HETERO:' + args.device + ',CPU')
     exec_net = ie.load_network(net, device)
 
@@ -94,6 +95,7 @@ if __name__ == '__main__':
         cv.waitKey(1)
 
     cv.namedWindow(WIN_NAME, cv.WINDOW_NORMAL)
+    print(num_slices)
     cv.createTrackbar('Slice', WIN_NAME, num_slices // 2, num_slices - 1, callback)
     callback(num_slices // 2)  # Trigger initial visualization
     cv.waitKey()

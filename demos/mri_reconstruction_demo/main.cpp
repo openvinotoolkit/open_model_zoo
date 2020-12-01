@@ -1,8 +1,6 @@
 #include <inference_engine.hpp>
 #include <opencv2/opencv.hpp>
 
-#include <samples/slog.hpp>
-
 #include "mri_reconstruction_demo.hpp"
 #include "npy_reader.hpp"
 
@@ -39,10 +37,11 @@ int main(int argc, char** argv) {
         device = "HETERO:" + device + ",CPU";
 
     Core ie;
+    ie.AddExtension(make_so_pointer<IExtension>(FLAGS_l), "CPU");
+
     CNNNetwork net = ie.ReadNetwork(FLAGS_m);
     net.getInputsInfo().begin()->second->setLayout(Layout::NHWC);
 
-    ie.AddExtension(make_so_pointer<IExtension>(FLAGS_l), "CPU");
     ExecutableNetwork execNet = ie.LoadNetwork(net, device);
     InferRequest infReq = execNet.CreateInferRequest();
 
@@ -153,8 +152,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showUsage();
         return false;
     }
-
-    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
