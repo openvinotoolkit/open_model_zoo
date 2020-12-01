@@ -149,8 +149,8 @@ def change_layout(model_input):
     return model_input
 
 
-def calculate_probability(logits):
-    return np.prod(np.amax(logits, axis=1))
+def calculate_probability(probabilities):
+    return np.prod(np.amax(probabilities, axis=1))
 
 
 class Model:
