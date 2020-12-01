@@ -46,7 +46,12 @@ class TFLauncher(Launcher):
         try:
             import tensorflow # pylint: disable=C0415
             from tensorflow.python.saved_model import tag_constants # pylint: disable=C0415
-            self.tf = tensorflow.compat.v1 if tensorflow.__version__ >= '2.0.0' else tensorflow
+            if tensorflow.__version__ >= '2.0.0':
+                self.tf = tensorflow.compat.v1
+                self.tf_gfile = tensorflow.io.gfile
+            else:
+                self.tf = tensorflow
+                self.tf_gfile = tensorflow.gfile
             self.tag_constants = tag_constants
         except ImportError as import_error:
             raise ValueError(
@@ -117,6 +122,11 @@ class TFLauncher(Launcher):
 
         return results
 
+    def inputs_info_for_meta(self, feed_dict=None):
+        if feed_dict is None:
+            return super().inputs_info_for_meta()
+        return {input_name: input_data.shape for input_name, input_data in feed_dict.items()}
+
     @property
     def batch(self):
         return 1
@@ -168,7 +178,7 @@ class TFLauncher(Launcher):
         return graph
 
     def _load_frozen_graph(self, model):
-        with self.tf.gfile.GFile(model, 'rb') as file:
+        with self.tf_gfile.GFile(model, 'rb') as file:
             graph_def = self.tf.GraphDef()
             graph_def.ParseFromString(file.read())
 
