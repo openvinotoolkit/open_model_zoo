@@ -219,7 +219,7 @@ def main():
     capture = create_capture(args.input, demo.resolution)
     if not capture.isOpened():
         log.error("Cannot open camera")
-        return()
+        return 1
     while True:
         ret, frame = capture.read()
         assert ret, "Error reading image from VideoCapture"
