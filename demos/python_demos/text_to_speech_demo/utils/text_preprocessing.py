@@ -97,4 +97,4 @@ def _symbols_to_sequence(symbols):
 
 
 def _should_keep_symbol(s):
-    return s in _symbol_to_id and s is not '_' and s is not '~'
+    return s in _symbol_to_id and s != _pad
