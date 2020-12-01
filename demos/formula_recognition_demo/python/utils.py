@@ -159,7 +159,7 @@ class Model:
         encoder_infer = 1
         decoder_infer = 2
 
-    def __init__(self, args):
+    def __init__(self, args, interactive_mode):
         self.args = args
         log.info("Creating Inference Engine")
         self.ie = IECore()
@@ -172,7 +172,7 @@ class Model:
         self.images_list = []
         self.vocab = Vocab(self.args.vocab_path)
         self.model_status = Model.Status.ready
-        self.is_async = args.interactive_mode
+        self.is_async = interactive_mode
         self.num_infers_decoder = 0
         if not args.interactive_mode:
             self.preprocess_inputs()

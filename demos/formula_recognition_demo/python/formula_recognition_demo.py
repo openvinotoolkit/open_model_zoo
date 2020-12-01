@@ -253,8 +253,7 @@ def main():
 
     args = build_argparser().parse_args()
     interactive_mode = not (os.path.isdir(args.input) or args.input.endswith('.png') or args.input.endswith('.jpg'))
-    args.__dict__['interactive_mode'] = interactive_mode
-    model = Model(args)
+    model = Model(args, interactive_mode)
     if not interactive_mode:
         non_interactive_demo(model, args)
         return
