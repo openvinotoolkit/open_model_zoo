@@ -58,6 +58,15 @@ class SSD(Model):
 
     class BoxesLabelsParser:
         def __init__(self, input_size, all_outputs, labels_layer='labels', default_label=1):
+            def find_layer_by_name(name, layers):
+                suitable_layers = [layer_name for layer_name in layers if name in layer_name]
+                if not suitable_layers:
+                    raise ValueError('Suitable layer for "{}" output is not found'.format(name))
+
+                if len(suitable_layers) > 1:
+                    raise ValueError('More than 1 layer matched to "{}" output'.format(name))
+
+                return suitable_layers[0]
             try:
                 self.labels_layer = find_layer_by_name(labels_layer, all_outputs) # ?
                 self.logger.info('Use output "{}" as the one containing labels of detected objects.'
