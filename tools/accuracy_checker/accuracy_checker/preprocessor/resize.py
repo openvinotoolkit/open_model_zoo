@@ -250,15 +250,17 @@ class _TFResizer(_Resizer):
             import tensorflow as tf # pylint: disable=C0415
         except ImportError as import_error:
             UnsupportedPackage("tf", import_error.msg).raise_error(self.__provider__)
-        tf.enable_eager_execution()
+        if tf.__version__ < '2.0.0':
+            tf.enable_eager_execution()
+            self._resize = tf.image.resize_images
+        else:
+            self._resize = tf.image.resize
         self._supported_interpolations = {
             'BILINEAR': tf.image.ResizeMethod.BILINEAR,
             'AREA': tf.image.ResizeMethod.AREA,
             'BICUBIC': tf.image.ResizeMethod.BICUBIC,
         }
         self.default_interpolation = 'BILINEAR'
-        self._resize = tf.image.resize_images
-
         super().__init__(interpolation)
 
     def resize(self, data, new_height, new_width):

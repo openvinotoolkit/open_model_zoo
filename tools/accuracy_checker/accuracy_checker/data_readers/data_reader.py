@@ -470,10 +470,11 @@ class TensorflowImageReader(BaseReader):
                 'tf backend for image reading requires TensorFlow. '
                 'Please install it before usage. {}'.format(import_error.msg)
             )
-        tf.enable_eager_execution()
+        if tf.__version__ < '2.0.0':
+            tf.enable_eager_execution()
 
         def read_func(path):
-            img_raw = tf.read_file(str(path))
+            img_raw = tf.read_file(str(path)) if tf.__version__ < '2.0.0' else tf.io.read_file(str(path))
             img_tensor = tf.image.decode_image(img_raw, channels=3)
             return img_tensor.numpy()
 

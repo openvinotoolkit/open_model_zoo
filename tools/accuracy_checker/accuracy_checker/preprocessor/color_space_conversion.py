@@ -108,7 +108,8 @@ class TfConvertImageDType(Preprocessor):
                 '*tf_convert_image_dtype* operation requires TensorFlow. '
                 'Please install it before usage. {}'.format(import_error.msg)
             )
-        tf.enable_eager_execution()
+        if tf.__version__ < '2.0.0':
+            tf.enable_eager_execution()
         self.converter = tf.image.convert_image_dtype
         self.dtype = tf.float32
 
