@@ -86,7 +86,7 @@ AccuracyChecker supports following set of adapters:
   * `bboxes_out` - name of output layer with bboxes.
 * `retinanet` - converting output of RetinaNet-based model.
   * `loc_out` - name of output layer with bounding box deltas.
-  * `crlass_out` - name of output layer with classification probabilities.
+  * `class_out` - name of output layer with classification probabilities.
 * `retinanet_multihead` - converting output of RetinaNet model with multiple level outputs.
   * `boxes_outputs` - list of outputs with boxes.
   * `class_outputs` - list of outputs with class probabilities.
