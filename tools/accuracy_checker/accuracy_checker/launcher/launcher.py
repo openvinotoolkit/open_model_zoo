@@ -159,7 +159,7 @@ class Launcher(ClassProvider):
             data = np.array(data)
         return data.astype(precision) if precision else data
 
-    def inputs_info_for_meta(self):
+    def inputs_info_for_meta(self, *args, **kwargs):
         return {
             layer_name: shape for layer_name, shape in self.inputs.items()
             if layer_name not in self.const_inputs + self.image_info_inputs + self._ignore_inputs
