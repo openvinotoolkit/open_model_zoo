@@ -46,7 +46,12 @@ class TFLauncher(Launcher):
         try:
             import tensorflow # pylint: disable=C0415
             from tensorflow.python.saved_model import tag_constants # pylint: disable=C0415
-            self.tf = tensorflow.compat.v1 if tensorflow.__version__ >= '2.0.0' else tensorflow
+            if tensorflow.__version__ >= '2.0.0':
+                self.tf = tensorflow.compat.v1
+                self.tf_gfile = tensorflow.io.gfile
+            else:
+                self.tf = tensorflow
+                self.tf_gfile = tensorflow.gfile
             self.tag_constants = tag_constants
         except ImportError as import_error:
             raise ValueError(
@@ -101,7 +106,7 @@ class TFLauncher(Launcher):
         results = []
         for infer_input in inputs:
             with self.tf.device(self.device):
-                with self.tf.compat.v1.Session(graph=self._graph) as session:
+                with self.tf.Session(graph=self._graph) as session:
                     feed_dictionary = {
                         self.node_pattern.format(input_name): input_data
                         for input_name, input_data in infer_input.items()
@@ -173,8 +178,8 @@ class TFLauncher(Launcher):
         return graph
 
     def _load_frozen_graph(self, model):
-        with self.tf.compat.v1.gfile.GFile(model, 'rb') as file:
-            graph_def = self.tf.compat.v1.GraphDef()
+        with self.tf_gfile.GFile(model, 'rb') as file:
+            graph_def = self.tf.GraphDef()
             graph_def.ParseFromString(file.read())
 
         with self.tf.Graph().as_default() as graph:

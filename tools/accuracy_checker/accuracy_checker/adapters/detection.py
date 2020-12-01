@@ -17,7 +17,7 @@ limitations under the License.
 import itertools
 import math
 import warnings
-from collections import namedtuple, OrderedDict
+from collections import namedtuple
 import numpy as np
 
 from ..adapters import Adapter

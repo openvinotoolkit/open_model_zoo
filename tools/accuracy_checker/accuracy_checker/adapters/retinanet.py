@@ -404,8 +404,8 @@ class RetinaNetTF2(Adapter):
                     boxes = np.stack([
                         yv - half_anchor_size_y, xv - half_anchor_size_x,
                         yv + half_anchor_size_y, xv + half_anchor_size_x
-                    ],
-                        axis=1)
+                    ], axis=1
+                    )
                     boxes_l.append(boxes)
             boxes_l = np.stack(boxes_l, axis=1)
             boxes_l = np.reshape(boxes_l, [-1, 4])
