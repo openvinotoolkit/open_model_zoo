@@ -41,7 +41,7 @@ CT Image, name - `0`, shape - `1,1,512,512`, format is `B,C,H,W` where:
 
 #### Converted Model
 
-CT Image, name - 0, shape - `1,1,512,512`, format is `B,C,H,W` where:
+CT Image, name - `0`, shape - `1,1,512,512`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
