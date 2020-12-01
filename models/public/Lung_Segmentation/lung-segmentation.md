@@ -28,8 +28,6 @@ The CNN is defined according to [UNet](https://arxiv.org/abs/1505.04597).
 | GFlops    | 261.901      |
 | MParams   | 34.526       |
 
-### Performance 
-
 ### Input
 
 #### Original Model
