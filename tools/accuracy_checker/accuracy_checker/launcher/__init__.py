@@ -53,6 +53,13 @@ except ImportError as import_error:
         'tf_lite', "TensorFlow isn't installed. Please, install it before using. \n{}".format(import_error.msg)
     )
 
+try:
+    from .tf2_launcher import TF2Launcher
+except ImportError as import_error:
+    TF2Launcher = unsupported_launcher(
+        'tf2', "Tensorflow isn't installed. Please, install it before using. \n{}".format(import_error.msg)
+    )
+
 from .opencv_launcher import OpenCVLauncher
 
 try:
