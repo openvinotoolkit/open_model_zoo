@@ -212,7 +212,6 @@ class Model:
     def infer_async(self, model_input):
         model_input = change_layout(model_input)
         assert self.is_async
-        # asynchronous variant
         if self.model_status == Model.Status.ready:
             infer_status_encoder = self._run_encoder(model_input)
             return None
