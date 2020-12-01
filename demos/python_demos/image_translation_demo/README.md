@@ -25,18 +25,18 @@ python3 cocosnet_demo.py -h
 The command yields the following usage message:
 
 ```
-usage: image_translation_demo.py [-h] -t TRANSLATION_MODEL
-                                 [-s SEGMENTATION_MODEL] [-ii INPUT_IMAGES]
+usage: image_translation_demo.py [-h] -m_trn TRANSLATION_MODEL
+                                 [-m_seg SEGMENTATION_MODEL] [-ii INPUT_IMAGES]
                                  [-is INPUT_SEMANTICS] -ri REFERENCE_IMAGES
                                  [-rs REFERENCE_SEMANTICS] -o OUTPUT_DIR
                                  [-d DEVICE]
 
 Options:
   -h, --help            Show this help message and exit.
-  -t TRANSLATION_MODEL, --translation_model TRANSLATION_MODEL
+  -m_trn TRANSLATION_MODEL, --translation_model TRANSLATION_MODEL
                         Required. Path to an .xml file with a trained
                         translation model
-  -s SEGMENTATION_MODEL, --segmentation_model SEGMENTATION_MODEL
+  -m_seg SEGMENTATION_MODEL, --segmentation_model SEGMENTATION_MODEL
                         Optional. Path to an .xml file with a trained
                         semantic segmentation model
   -ii INPUT_IMAGES, --input_images INPUT_IMAGES
@@ -69,34 +69,34 @@ To run the demo, you can use public or pre-trained models. You can download the 
 
 There are two ways to use this demo:
 
-1. To use only translation model.
-   You can use the following command run demo on CPU using CoCosNet as translation model:
+1. Run with segmentation model in addition to translation model. You should use only models trained on ADE20k dataset.     Example: [hrnet-v2-c1-segmentation](../../../models/public/hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md).
+   In this case only input and reference images are required without any masks.
+   Segmentation masks will be generated via segmentation model.
+
+   You can use the following command to run demo on CPU using cocosnet and hrnet-v2-c1-segmentation models:
 
    ```
-   python3 cocosnet_demo.py \
+   python3 image_translation_demo.py \
        -d CPU \
-       -t  <path_to_translation_model>/CoCosNet.xml \
+       -m_trn <path_to_translation_model>/cocosnet.xml \
+       -m_seg <path_to_segmentation_model>/hrnet-v2-c1-segmentation.xml \
+       -ii <path_to_input_image>/input_image.jpg \
+       -ri <path_to_exemplar_image>/reference_image.jpg
+   ```
+
+2. Run with only translation model.
+   You can use the following command to run demo on CPU using cocosnet as translation model:
+
+   ```
+   python3 image_translation_demo.py \
+       -d CPU \
+       -m_trn <path_to_translation_model>/cocosnet.xml \
        -is <path_to_semantic_mask_of_image>/input_mask.png \
        -ri <path_to_exemplar_image>/reference_image.jpg \
        -rs <path_to_exemplar_semantic>/reference_mask.png
    ```
 
    > **NOTE**: For segmentation masks you should use mask (with shape: [height x width]) that specifies class for each pixel. Number of classes is 151 (from ADE20k), where '0' - background class.
-
-2. To use the segmentation model in addition to translation. You should use only models trained on ADE20k dataset.     Example: [hrnet-v2-c1-segmentation](../../../models/public/hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md).
-   In this case user have to set input image and reference image without any masks.
-   Segmentation masks will be generated via segmentation model.
-
-   You can use the following command run demo on CPU using CoCosNet as translation model:
-
-   ```
-   python3 cocosnet_demo.py \
-       -d CPU \
-       -t <path_to_translation_model>/CoCosNet.xml \
-       -s <path_to_segmentation_model>/Seg.xml \
-       -ii <path_to_input_image>/input_image.jpg \
-       -ri <path_to_exemplar_image>/reference_image.jpg
-   ```
 
 ## Demo Output
 
