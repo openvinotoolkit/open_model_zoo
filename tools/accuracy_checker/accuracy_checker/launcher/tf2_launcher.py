@@ -14,12 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import re
-from pathlib import Path
 import numpy as np
 from .launcher import Launcher, LauncherConfigValidator
 from ..config import BaseField, ListField, PathField, StringField, ConfigError
-from ..utils import contains_any, contains_all
 
 
 class TF2Launcher(Launcher):
@@ -81,9 +78,7 @@ class TF2Launcher(Launcher):
             results.append(res)
             if metadata is not None:
                 for meta_ in metadata:
-                    meta_['input_shape'] = meta_.get('input_shape', {}).update(
-                        {name: data.shape for name, data in infer_input.items()}
-                    )
+                    meta_['input_shape'] = self.inputs_info_for_meta(infer_input)
 
         return results
 
