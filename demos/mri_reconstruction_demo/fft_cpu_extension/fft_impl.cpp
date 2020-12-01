@@ -5,7 +5,6 @@
 #include "fft_op.hpp"
 #include <details/ie_exception.hpp>
 #include <ie_layouts.h>
-#include "ie_parallel.hpp"
 
 #include <opencv2/opencv.hpp>
 
@@ -101,7 +100,7 @@ InferenceEngine::StatusCode FFTImpl::execute(std::vector<InferenceEngine::Blob::
     const int h = inp.size[2];
     const int w = inp.size[3];
     cv::Mat complex(h, w, CV_32FC2), interleavedOut(h, w, CV_32FC2);
-    InferenceEngine::parallel_for(n, [&](size_t i) {
+    for (int i = 0; i < n; ++i) {
         std::vector<cv::Mat> components = {
             cv::Mat(h, w, CV_32F, inp.ptr<float>(i, 0)),
             cv::Mat(h, w, CV_32F, inp.ptr<float>(i, 1))
@@ -118,7 +117,7 @@ InferenceEngine::StatusCode FFTImpl::execute(std::vector<InferenceEngine::Blob::
             cv::Mat(h, w, CV_32F, out.ptr<float>(i, 1))
         };
         cv::split(interleavedOut, components);
-    });
+    }
     return InferenceEngine::OK;
 }
 //! [cpu_implementation:execute]
