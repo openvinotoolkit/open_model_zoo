@@ -9,8 +9,8 @@ SSH: Single Stage Headless Face Detector. More details provided in the [reposito
 | Metric                                                        | Value           |
 |---------------------------------------------------------------|-----------------|
 | Type                                                          | Object detection|
-| GFLOPs                                                        |                 |
-| MParams                                                       |                 |
+| GFLOPs                                                        | 267.0594        |
+| MParams                                                       | 19.7684         |
 | Source framework                                              | MXNet\*         |
 
 ## Accuracy
