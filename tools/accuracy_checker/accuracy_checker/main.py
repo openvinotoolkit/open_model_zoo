@@ -276,7 +276,8 @@ def build_arguments_parser():
         help='space-separated list of precisions for network inputs. '
              'Providing several values required <layer_name>:<precision> format. '
              'If single value without layer_name provided, then it will be applayed to all input layers.'
-    )
+    ),
+    parser.add_argument('--store_only', required=False, default=False, type=cast_to_bool)
 
     return parser
 
@@ -295,6 +296,7 @@ def main():
         evaluator_kwargs['intermediate_metrics_results'] = intermdeiate_metrics
         evaluator_kwargs['metrics_interval'] = args.metrics_interval
         evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
+    evaluator_kwargs['store_only'] = args.store_only
 
     config, mode = ConfigReader.merge(args)
     evaluator_class = EVALUATION_MODE.get(mode)
@@ -313,11 +315,12 @@ def main():
             evaluator.process_dataset(
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
             )
-            metrics_results, _ = evaluator.extract_metrics_results(
-                print_results=True, ignore_results_formatting=args.ignore_result_formatting
-            )
-            if args.csv_result:
-                write_csv_result(args.csv_result, processing_info, metrics_results)
+            if not args.store_only:
+                metrics_results, _ = evaluator.extract_metrics_results(
+                    print_results=True, ignore_results_formatting=args.ignore_result_formatting
+                )
+                if args.csv_result:
+                    write_csv_result(args.csv_result, processing_info, metrics_results)
             evaluator.release()
         except Exception as e:  # pylint:disable=W0703
             exception(e)

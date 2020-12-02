@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from ...utils import read_pickle
-from .loader import Loader, DictLoaderMixin
+from .loader import Loader, DictLoaderMixin, StoredPredictionBatch
 
 
 class PickleLoader(DictLoaderMixin, Loader):
@@ -28,7 +28,19 @@ class PickleLoader(DictLoaderMixin, Loader):
     def load(self, *args, **kwargs):
         data = read_pickle(self._data_path)
 
-        if isinstance(data, list) and all(hasattr(entry, 'identifier') for entry in data):
-            return dict(zip([representation.identifier for representation in data], data))
+        if isinstance(data, list):
+            if all(isinstance(entry, StoredPredictionBatch) for entry in data):
+                adapter = kwargs['adapter']
+                predictions = {}
+                for entry in data:
+                    pred_list = adapter.process(*entry)
+                    for pred in pred_list:
+                        predictions[pred.identifier] = pred
+                return predictions
+            if all(hasattr(entry, 'identifier') for entry in data):
+                return dict(zip([representation.identifier for representation in data], data))
+            if 'identifiers' in kwargs:
+                identifiers = kwargs['identifiers']
+                return dict(zip(identifiers, data))
 
         return data

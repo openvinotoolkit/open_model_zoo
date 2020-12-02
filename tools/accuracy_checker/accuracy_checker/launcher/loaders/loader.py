@@ -15,6 +15,9 @@ limitations under the License.
 """
 
 from pathlib import Path
+from collections import namedtuple
+
+StoredPredictionBatch = namedtuple('StoredPredictionBatch', ['raw_predictions', 'identifiers', 'meta'])
 
 from ...dependency import ClassProvider
 

@@ -26,7 +26,7 @@ class JSONLoader(DictLoaderMixin, Loader):
 
     __provider__ = 'json'
 
-    def load(self, identifiers=None, **kwargs):
+    def load(self, identifiers=None, adapter=None, **kwargs):
         detection_list = read_json(self._data_path)
         data = defaultdict(dict)
         idx = 0
@@ -37,5 +37,7 @@ class JSONLoader(DictLoaderMixin, Loader):
                 break
             identifier = identifiers[idx] if identifiers else idx
             idx += 1
+            if adapter:
+                detection = adapter.process(detection, [identifier], [{}])
             data[identifier] = detection
         return data
