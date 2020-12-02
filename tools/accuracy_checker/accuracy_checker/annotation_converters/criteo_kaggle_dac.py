@@ -49,7 +49,9 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
                                            description="Name of model sparse features input. " +
                                            "For multiple inputs use comma-separated list in form <name>:<index>"),
             "lso_features": StringField(optional=True, default='lS_o', description="Name of lS_o-like features input."),
-            "save_preprocessed_features": BoolField(optional=True, default=True, description='Save preprocessed features or not')
+            "save_preprocessed_features": BoolField(
+                optional=True, default=True, description='Save preprocessed features or not'
+            )
         })
 
         return parameters
@@ -81,9 +83,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
                 else:
                     ConfigError('Invalid configuration option {}'.format(feat))
 
-
     def convert(self, check_content=False, **kwargs):
-
         preprocessed_folder = Path(self.preprocessed_dir)
         input_folder = preprocessed_folder / "bs{}".format(self.batch) / 'input'
 
