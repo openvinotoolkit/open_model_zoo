@@ -15,8 +15,8 @@ class CTCCodec(object):
 
         self.dict = {}
         for i, char in enumerate(dict_character):
-             # NOTE: 0 is reserved for 'blank' token required by CTCLoss
-             self.dict[char] = i + 1
+            # NOTE: 0 is reserved for 'blank' token required by CTCLoss
+            self.dict[char] = i + 1
 
         # dummy '[blank]' token for CTCLoss (index 0)
         self.characters = ['[blank]'] + dict_character
