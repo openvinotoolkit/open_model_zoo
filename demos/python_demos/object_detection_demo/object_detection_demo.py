@@ -29,7 +29,7 @@ from openvino.inference_engine import IECore
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 
-from models import *
+import models
 import monitors
 from pipelines import AsyncPipeline
 from performance_metrics import PerformanceMetrics
@@ -126,16 +126,16 @@ class ColorPalette:
 
 def get_model(ie, args):
     if args.architecture_type == 'ssd':
-        return SSD(ie, args.model, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
+        return models.SSD(ie, args.model, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
     elif args.architecture_type == 'yolo':
-        return YOLO(ie, args.model, labels=args.labels,
-                    threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
+        return models.YOLO(ie, args.model, labels=args.labels,
+                           threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
     elif args.architecture_type == 'faceboxes':
-        return FaceBoxes(ie, args.model, threshold=args.prob_threshold)
+        return models.FaceBoxes(ie, args.model, threshold=args.prob_threshold)
     elif args.architecture_type == 'centernet':
-        return CenterNet(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
+        return models.CenterNet(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
     elif args.architecture_type == 'retina':
-        return RetinaFace(ie, args.model, threshold=args.prob_threshold)
+        return models.RetinaFace(ie, args.model, threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
@@ -185,7 +185,7 @@ def draw_detections(frame, detections, palette, labels, threshold):
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
             cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
                         (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
-            if isinstance(detection, DetectionWithLandmarks):
+            if isinstance(detection, models.DetectionWithLandmarks):
                 for landmark in detection.landmarks:
                     cv2.circle(frame, landmark, 2, (0, 255, 255), 2)
     return frame
