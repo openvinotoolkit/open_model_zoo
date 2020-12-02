@@ -79,7 +79,7 @@ def convert(lines):
             result += ' '
         result += line.rstrip('\n')
     result = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1 <\2>", result) # Links transformation
-    result = result.replace("`", "\"").replace("\*", "*")
+    result = result.replace("`", "\"").replace("\\*", "*")
     return result.strip()
 
 

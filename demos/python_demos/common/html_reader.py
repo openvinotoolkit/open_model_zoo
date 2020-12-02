@@ -32,7 +32,7 @@ def get_paragraphs(url_list):
             parser = HTMLDataExtractor(['title', 'p'])
             charset='utf-8'
             if 'Content-type' in response.headers:
-                m = re.match('.*charset=(\S+).*', response.headers['Content-type'])
+                m = re.match(r'.*charset=(\S+).*', response.headers['Content-type'])
                 if m:
                     charset = m.group(1)
             data = response.read()

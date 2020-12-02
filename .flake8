@@ -21,3 +21,5 @@ select=
     F8,
     # raise NotImplemented should be raise NotImplementedError
     F901,
+    # deprecation warnings
+    W6,
