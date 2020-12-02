@@ -73,7 +73,7 @@ public:
         presenter.drawGraphs(outImg);
 
         performanceMetrics.update(lastRequestStartTime, frame, cv::Point(textPadding, textSize.height + textPadding),
-                                  fontScale, cv::Scalar(255, 100, 100), thickness);
+                                  fontType, fontScale, cv::Scalar(255, 100, 100), thickness);
 
         if (showAccuracy) {
             cv::putText(outImg,
