@@ -23,7 +23,6 @@ class MulticamCapture:
         self.fps = []
         for src in sources:
             capture = open_images_capture(src, loop)
-            capture.cap.set(cv.CAP_PROP_FPS, 30)
             self.captures.append(capture)
             self.fps.append(capture.fps())
 
