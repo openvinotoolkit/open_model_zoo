@@ -230,7 +230,7 @@ def main(args):
             stop = time.perf_counter()
             print(translation)
             logger.info("time: " + str(stop - start) + " s.")
-        except Exception as e:
+        except Exception:
             log.error("an error occurred", exc_info=True)
 
 

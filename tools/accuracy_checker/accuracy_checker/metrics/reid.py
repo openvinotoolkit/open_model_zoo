@@ -82,7 +82,7 @@ def _precision_recall_curve(y_true, probas_pred):
 
 try:
     from sklearn.metrics import auc, precision_recall_curve
-except ImportError as import_error:
+except ImportError:
     auc = _auc
     precision_recall_curve = _precision_recall_curve
 
