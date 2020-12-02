@@ -111,6 +111,7 @@ class VideoCapWrapper(ImagesCapture):
             self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, camera_resolution[0])
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, camera_resolution[1])
+            self.cap.set(cv2.CAP_PROP_FPS, 30)
             self.cap.set(cv2.CAP_PROP_AUTOFOCUS, 1)
             self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
         except ValueError:
