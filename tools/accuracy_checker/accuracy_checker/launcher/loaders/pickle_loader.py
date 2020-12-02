@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ...utils import read_pickle
+import pickle
 from .loader import Loader, DictLoaderMixin, StoredPredictionBatch
 
 
@@ -27,7 +27,7 @@ class PickleLoader(DictLoaderMixin, Loader):
 
     def load(self, *args, **kwargs):
         progress_reporter = kwargs.get('progress')
-        data = read_pickle(self._data_path)
+        data = self.read_pickle(self._data_path)
 
         if isinstance(data, list):
             if progress_reporter:
@@ -54,3 +54,14 @@ class PickleLoader(DictLoaderMixin, Loader):
                 return dict(zip(identifiers, data))
 
         return data
+
+    @staticmethod
+    def read_pickle(data_path):
+        result = []
+        with open(data_path, 'rb') as content:
+            while True:
+                try:
+                    result.append(pickle.load(content))
+                except EOFError:
+                    break
+        return result

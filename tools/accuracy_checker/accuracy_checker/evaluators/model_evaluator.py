@@ -164,7 +164,6 @@ class ModelEvaluator(BaseEvaluator):
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
         _, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
-        predictions_to_store = []
         dataset_iterator = iter(enumerate(self.dataset))
         infer_requests_pool = {ir.request_id: ir for ir in self.launcher.get_async_requests()}
         free_irs = list(infer_requests_pool)
@@ -184,8 +183,8 @@ class ModelEvaluator(BaseEvaluator):
                     batch_identifiers = [annotation.identifier for annotation in batch_annotation]
                     free_irs.append(ready_ir_id)
                     if stored_predictions:
-                        predictions_to_store.append(
-                            self.prepare_prediction_to_store(batch_raw_predictions, batch_identifiers, batch_meta)
+                        self.prepare_prediction_to_store(
+                            batch_raw_predictions, batch_identifiers, batch_meta, stored_predictions
                         )
                     if not store_only:
                         self._process_batch_results(
@@ -203,7 +202,7 @@ class ModelEvaluator(BaseEvaluator):
             progress_reporter.finish()
 
         if stored_predictions:
-            self.store_predictions(stored_predictions, predictions_to_store)
+            print_info("prediction objects are save to {}".format(stored_predictions))
 
     def process_dataset_sync(self, stored_predictions, progress_reporter, *args, **kwargs):
         if progress_reporter:
@@ -218,14 +217,11 @@ class ModelEvaluator(BaseEvaluator):
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
         enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
-        predictions_to_store = []
         for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
             if stored_predictions:
-                predictions_to_store.append(
-                    self.prepare_prediction_to_store(batch_predictions, batch_identifiers, batch_meta)
-                )
+                self.prepare_prediction_to_store(batch_predictions, batch_identifiers, batch_meta, stored_predictions)
             if not store_only:
                 self._process_batch_results(
                     batch_predictions, batch_annotation, batch_identifiers,
@@ -240,7 +236,7 @@ class ModelEvaluator(BaseEvaluator):
             progress_reporter.finish()
 
         if stored_predictions:
-            self.store_predictions(stored_predictions, predictions_to_store)
+            print_info("prediction objects are save to {}".format(stored_predictions))
         return self._annotations, self._predictions
 
     def _process_batch_results(
@@ -276,17 +272,20 @@ class ModelEvaluator(BaseEvaluator):
             return False
 
     def _load_stored_predictions(self, stored_predictions, progress_reporter):
-        self._predictions = self.load(stored_predictions, progress_reporter)
-        self._annotations = self.dataset.annotation
+        predictions = self.load(stored_predictions, progress_reporter)
+        annotations = self.dataset.annotation
         if self.postprocessor.has_processors:
             print_info("Postprocess results:")
-            self.dataset.provide_data_info(self.reader, self._annotations, progress_reporter)
-            self._annotations, self._predictions = self.postprocessor.full_process(self._annotations, self._predictions)
+            self.dataset.provide_data_info(self.reader, annotations, progress_reporter)
+            annotations, predictions = self.postprocessor.full_process(annotations, predictions)
         self.metric_executor.update_metrics_on_batch(
-            range(len(self._annotations)), self._annotations, self._predictions
+            range(len(annotations)), annotations, predictions
         )
+        if self.metric_executor.need_store_predictions:
+            self._annotations = annotations
+            self._predictions = predictions
 
-        return self._annotations, self._predictions
+        return annotations, predictions
 
     def _fill_free_irs(self, free_irs, queued_irs, infer_requests_pool, dataset_iterator):
         for ir_id in free_irs:
@@ -390,9 +389,9 @@ class ModelEvaluator(BaseEvaluator):
 
         return predictions
 
-    @staticmethod
-    def prepare_prediction_to_store(batch_predictions, batch_identifiers, batch_meta):
-        return StoredPredictionBatch(batch_predictions, batch_identifiers, batch_meta)
+    def prepare_prediction_to_store(self, batch_predictions, batch_identifiers, batch_meta, stored_predictions):
+        prediction_to_store = StoredPredictionBatch(batch_predictions, batch_identifiers, batch_meta)
+        self.store_predictions(stored_predictions, prediction_to_store)
 
     @property
     def metrics_results(self):
@@ -419,9 +418,8 @@ class ModelEvaluator(BaseEvaluator):
     @staticmethod
     def store_predictions(stored_predictions, predictions):
         # since at the first time file does not exist and then created we can not use it as a pathlib.Path object
-        with open(stored_predictions, "wb") as content:
+        with open(stored_predictions, "ab") as content:
             pickle.dump(predictions, content)
-            print_info("prediction objects are save to {}".format(stored_predictions))
 
     def reset_progress(self, progress_reporter):
         progress_reporter.reset(self.dataset.size)

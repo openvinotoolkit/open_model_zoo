@@ -208,7 +208,6 @@ class TestModelEvaluatorAsync:
 
         self.evaluator.process_dataset('path', None)
 
-        assert self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
         assert not self.launcher.predict.called
         assert self.launcher.get_async_requests.called
