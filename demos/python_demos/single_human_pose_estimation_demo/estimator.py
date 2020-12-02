@@ -37,8 +37,8 @@ def extract_keypoints(heatmap, min_confidence=-100):
 
 
 def affine_transform(pt, t):
-        transformed_point = np.dot(t, [pt[0], pt[1], 1.])[:2]
-        return transformed_point
+    transformed_point = np.dot(t, [pt[0], pt[1], 1.])[:2]
+    return transformed_point
 
 
 class TransformedCrop(object):
