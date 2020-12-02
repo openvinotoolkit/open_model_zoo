@@ -71,13 +71,13 @@ def build_argparser():
 def find_sentence_range(context, s, e):
     # find start of sentence
     for c_s in range(s, max(-1, s - 200), -1):
-        if context[c_s] in "\n\.":
+        if context[c_s] in "\n.":
             c_s += 1
             break
 
     # find end of sentence
     for c_e in range(max(0, e - 1), min(len(context), e + 200), +1):
-        if context[c_e] in "\n\.":
+        if context[c_e] in "\n.":
             break
 
     return c_s, c_e
