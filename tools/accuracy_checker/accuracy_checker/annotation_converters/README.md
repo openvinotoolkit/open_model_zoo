@@ -372,7 +372,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `validation` - if provided, only second half of dataset converted to annotations, according to dataset definition
   * `preprocessed_dir` - path to store preprocessed batch files (e.g. `criteo/terabyte/preprocessed`).
   * `separator` - symbol used to separate feature identifiers from batch data filename.
-  * `save_preprocessed_features` - allow to save preprocessed input features into `preprocessed_dir` (Optional, default False).
+  * `save_preprocessed_features` - allow to save preprocessed input features into `preprocessed_dir` (Optional, default True).
 * `features_regression` - converts dataset stored in format of directories with preprocessed input numeric data (features) in text files and reference data in the same format to `FeatureRegressionAnnotation`.
  This approach allows comparing output of model from different frameworks (e.g. OpenVINO converted model and source framework realisation).
   * `input_dir` - directory with input data files.
