@@ -276,7 +276,7 @@ def build_arguments_parser():
         help='space-separated list of precisions for network inputs. '
              'Providing several values required <layer_name>:<precision> format. '
              'If single value without layer_name provided, then it will be applayed to all input layers.'
-    ),
+    )
     parser.add_argument('--store_only', required=False, default=False, type=cast_to_bool)
 
     return parser
