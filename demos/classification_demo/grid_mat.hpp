@@ -11,7 +11,6 @@
 #include <queue>
 
 #include <monitors/presenter.h>
-#include <samples/performance_metrics.hpp>
 
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core.hpp>
@@ -31,7 +30,6 @@ struct LabeledImage {
 class GridMat {
 public:
     cv::Mat outImg;
-    PerformanceMetrics performanceMetrics;
 
     explicit GridMat(Presenter& presenter,
                      const cv::Size maxDisp = cv::Size{1920, 1080},
@@ -60,8 +58,8 @@ public:
         testMessageSize = cv::getTextSize(testMessage, fontType, fontScale, thickness, &baseline);
     }
 
-    void textUpdate(PerformanceMetrics::TimePoint lastRequestStartTime,
-                    cv::Mat& frame,
+    void textUpdate(PerformanceMetrics& metrics,
+                    PerformanceMetrics::TimePoint lastRequestStartTime,
                     double accuracy,
                     bool isFpsTest,
                     bool showAccuracy,
@@ -72,7 +70,7 @@ public:
 
         presenter.drawGraphs(outImg);
 
-        performanceMetrics.update(lastRequestStartTime, frame, cv::Point(textPadding, textSize.height + textPadding),
+        metrics.update(lastRequestStartTime, outImg, cv::Point(textPadding, textSize.height + textPadding),
                                   fontType, fontScale, cv::Scalar(255, 100, 100), thickness);
 
         if (showAccuracy) {

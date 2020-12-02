@@ -19,6 +19,7 @@
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
 #include <samples/ocv_common.hpp>
+#include <samples/performance_metrics.hpp>
 
 #include <cldnn/cldnn_config.hpp>
 
@@ -106,6 +107,7 @@ std::vector<std::vector<unsigned>> topResults(Blob& inputBlob, unsigned numTop) 
 
 int main(int argc, char *argv[]) {
     try {
+        PerformanceMetrics metrics;
         std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -376,6 +378,7 @@ int main(int argc, char *argv[]) {
                 gridMat = GridMat(presenter, cv::Size(width, height), cv::Size(16, 9),
                                   (framesNum - framesNumOnCalculationStart) / std::chrono::duration_cast<Sec>(
                                     fpsCalculationDuration).count());
+                metrics = PerformanceMetrics();
                 startTime = std::chrono::steady_clock::now();
                 framesNum = 0;
                 correctPredictionsCount = 0;
@@ -432,7 +435,7 @@ int main(int argc, char *argv[]) {
 
                 gridMat.updateMat(shownImagesInfo);
                 accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
-                gridMat.textUpdate(completedInferRequestInfo->images[0].startTime, gridMat.outImg, accuracy, isTestMode,
+                gridMat.textUpdate(metrics, completedInferRequestInfo->images[0].startTime, accuracy, isTestMode,
                                    !FLAGS_gt.empty(), presenter);
 
                 if (!FLAGS_no_show) {
@@ -498,7 +501,7 @@ int main(int argc, char *argv[]) {
         } while (key != 27 && key != 'q' && key != 'Q'
                  && (FLAGS_time == -1 || elapsedSeconds < std::chrono::seconds{FLAGS_time}));
 
-        gridMat.performanceMetrics.printTotal();
+        metrics.printTotal();
         if (!FLAGS_gt.empty()) {
             std::cout << "Accuracy (top " << FLAGS_nt << "): " << accuracy << std::endl;
         }
