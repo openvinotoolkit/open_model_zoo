@@ -65,6 +65,10 @@ class Adapter(ClassProvider):
             return outputs_list
         return outputs_list[0]
 
+    def select_output_blob(self, outputs):
+        if self.output_blob is None:
+            self.output_blob = next(iter(outputs))
+
 
 class AdapterField(BaseField):
     def validate(self, entry, field_uri_=None):

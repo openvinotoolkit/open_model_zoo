@@ -89,6 +89,7 @@ class HumanPoseAdapter(Adapter):
             ]
             raw_output = zip(identifiers, keypoints_heatmap, pafs, frame_meta)
         else:
+            self.select_output_blob(raw_outputs)
             concat_out = raw_outputs[self.output_blob]
             keypoints_num = concat_out.shape[1] // 3
             keypoints_heat_map = concat_out[:, :keypoints_num, :]
@@ -380,7 +381,7 @@ class SingleHumanPoseAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-
+        self.select_output_blob(raw_outputs)
         outputs_batch = raw_outputs[self.output_blob]
         for i, heatmaps in enumerate(outputs_batch):
             heatmaps = np.transpose(heatmaps, (1, 2, 0))
@@ -439,9 +440,10 @@ class StackedHourGlassNetworkAdapter(Adapter):
         self.score_map_out = self.get_value_from_config('score_map_out')
 
     def process(self, raw, identifiers, frame_meta):
-        if self.score_map_out is None:
-            self.score_map_out = self.output_blob
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if self.score_map_out is None:
+            self.select_output_blob(raw_outputs)
+            self.score_map_out = self.output_blob
         score_map_batch = raw_outputs[self.score_map_out]
         result = []
         for identifier, score_map, meta in zip(identifiers, score_map_batch, frame_meta):

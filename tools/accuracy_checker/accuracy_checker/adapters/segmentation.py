@@ -47,6 +47,7 @@ class SegmentationAdapter(Adapter):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
         for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
             if self.make_argmax:
                 output = np.argmax(output, axis=0)
@@ -55,9 +56,10 @@ class SegmentationAdapter(Adapter):
         return result
 
     def _extract_predictions(self, outputs_list, meta):
-        if not 'tiles_shape' in (meta[-1] or {}):
+        if 'tiles_shape' not in (meta[-1] or {}):
             return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
 
+        self.select_output_blob(outputs_list[0])
         tiles_shapes = [meta['tiles_shape'] for meta in meta]
         restore_output = []
         offset = 0
@@ -96,6 +98,7 @@ class SegmentationOneClassAdapter(Adapter):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
         for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
             output = output > self.threshold
             result.append(SegmentationPrediction(identifier, output.astype(np.uint8)))
@@ -142,6 +145,7 @@ class BrainTumorSegmentationAdapter(Adapter):
                 raise ConfigError('segmentation output not found')
             segm_out = self.segmentation_out if self.segmentation_out in raw_outputs else self.segmentation_out_bias
         else:
+            self.select_output_blob(raw_outputs)
             segm_out = self.output_blob
         for identifier, output in zip(identifiers, raw_outputs[segm_out]):
             if self.argmax:
@@ -193,6 +197,7 @@ class DUCSegmentationAdapter(Adapter):
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
         for identifier, output, meta in zip(identifiers, raw_outputs[self.output_blob], frame_meta):
             _, _, h, w = next(iter(meta.get('input_shape', {'data': (1, 3, 800, 800)}).values()))
             feat_height = math.floor(h / self.ds_rate)

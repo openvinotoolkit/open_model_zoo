@@ -20,13 +20,16 @@ import numpy as np
 from .adapter import Adapter
 from ..representation import QualityAssessmentPrediction
 
+
 class QualityAssessmentAdapter(Adapter):
     __provider__ = 'face_recognition_quality_assessment'
-    predcition_types = (QualityAssessmentPrediction, )
+    prediction_types = (QualityAssessmentPrediction, )
     score_weight = [0.25, 0.50, 0.50, 0.75]
 
     def process(self, raw, identifiers=None, frame_meta=None):
-        prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        prediction = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(prediction)
+        prediction = prediction[self.output_blob]
         return [QualityAssessmentPrediction(identifier, quality_assessment=self.calculate_quality(embedding))
                 for identifier, embedding in zip(identifiers, prediction)]
 
@@ -41,7 +44,6 @@ class QualityAssessmentAdapter(Adapter):
         top_score2 = qa_feature[top_id2]
 
         # Calculate quality score
-        qs_val = 0.0
         if top_score1 > (top_score2 * 2):
             if top_id1 <= 1:
                 qs_val = self.score_weight[top_id1] - 0.25 * top_score1
@@ -52,8 +54,6 @@ class QualityAssessmentAdapter(Adapter):
 
             # Get top1 val
             top1_w = top_score1 / score_sum
-            max_val1 = 0.0
-            qs_val1 = 0.0
 
             if top_id1 <= 1:
                 max_val1 = self.score_weight[top_id1]
@@ -64,9 +64,6 @@ class QualityAssessmentAdapter(Adapter):
 
             # Get top2 val
             top2_w = top_score2 / score_sum
-            max_val2 = 0.0
-            qs_val2 = 0.0
-
             if top_id2 <= 1:
                 max_val2 = self.score_weight[top_id2]
                 qs_val2 = max_val2 - 0.25 * top2_w

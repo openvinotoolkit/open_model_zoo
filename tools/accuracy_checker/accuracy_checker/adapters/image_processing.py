@@ -76,6 +76,7 @@ class ImageProcessingAdapter(Adapter):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.target_out:
+            self.select_output_blob(raw_outputs)
             self.target_out = self.output_blob
 
         for identifier, out_img in zip(identifiers, raw_outputs[self.target_out]):
@@ -107,6 +108,7 @@ class SuperResolutionAdapter(ImageProcessingAdapter):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.target_out:
+            self.select_output_blob(raw_outputs)
             self.target_out = self.output_blob
 
         for identifier, img_sr in zip(identifiers, raw_outputs[self.target_out]):

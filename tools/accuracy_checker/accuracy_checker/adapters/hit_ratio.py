@@ -38,7 +38,9 @@ class HitRatioAdapter(Adapter):
             list of HitRatioPrediction objects.
         """
 
-        prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        raw_prediction = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_prediction)
+        prediction = raw_prediction[self.output_blob]
         prediction = np.reshape(prediction, -1)
 
         result = []

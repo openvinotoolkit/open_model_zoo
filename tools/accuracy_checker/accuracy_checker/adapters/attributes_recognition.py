@@ -177,6 +177,7 @@ class LandmarksRegressionAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         res = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         for identifier, values in zip(identifiers, raw_output[self.output_blob]):
             x_values, y_values = values[::2], values[1::2]
             res.append(FacialLandmarksPrediction(identifier, x_values.reshape(-1), y_values.reshape(-1)))
@@ -207,6 +208,7 @@ class PersonAttributesAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         self.attributes_recognition_out = self.attributes_recognition_out or self.output_blob
         for identifier, multi_label in zip(identifiers, raw_output[self.attributes_recognition_out]):
             multi_label[multi_label > 0.5] = 1.
@@ -224,6 +226,7 @@ class GazeEstimationAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         for identifier, output in zip(identifiers, raw_output[self.output_blob]):
             result.append(GazeVectorPrediction(identifier, output))
 
@@ -259,6 +262,7 @@ class PRNetAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         for identifier, pos, meta in zip(identifiers, raw_output[self.output_blob], frame_meta):
             input_shape = next(iter(meta['input_shape'].values()))
             if input_shape[1] == 3:

@@ -303,6 +303,8 @@ def main():
     if not evaluator_class:
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
+        config_entry['_store_only'] = args.store_only
+        config_entry['_stored_data'] = args.stored_predictions
         try:
             processing_info = evaluator_class.get_processing_info(config_entry)
             print_processing_info(*processing_info)

@@ -58,6 +58,9 @@ class ModelEvaluator(BaseEvaluator):
         dataset_name = dataset_config['name']
         data_reader_config = dataset_config.get('reader', 'opencv_imread')
         data_source = dataset_config.get('data_source')
+        postpone_model_loading = (
+            not model_config.get('_store_only', False) and cls._is_stored(model_config.get('_stored_data'))
+        )
 
         dataset = Dataset(dataset_config)
         if isinstance(data_reader_config, str):
@@ -70,7 +73,7 @@ class ModelEvaluator(BaseEvaluator):
         if data_reader_type in REQUIRES_ANNOTATIONS:
             data_source = dataset.annotation
         data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
-        launcher_kwargs = {}
+        launcher_kwargs = {'delayed_model_loading': postpone_model_loading}
         enable_ie_preprocessing = (
             dataset_config.get('_ie_preprocessing', False)
             if launcher_config['framework'] == 'dlsdk' else False
@@ -90,13 +93,15 @@ class ModelEvaluator(BaseEvaluator):
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)
+        launcher_inputs = launcher.inputs if not postpone_model_loading else {}
         input_feeder = InputFeeder(
-            launcher.config.get('inputs', []), launcher.inputs, launcher.fit_to_input, launcher.default_layout,
-            launcher_config['framework'] == 'dummy', input_precision
+            launcher.config.get('inputs', []), launcher_inputs, launcher.fit_to_input, launcher.default_layout,
+            launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision
         )
-        if input_precision:
-            launcher.update_input_configuration(input_feeder.inputs_config)
-        preprocessor.input_shapes = launcher.inputs_info_for_meta()
+        if not postpone_model_loading:
+            if input_precision:
+                launcher.update_input_configuration(input_feeder.inputs_config)
+            preprocessor.input_shapes = launcher.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
         metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
         if metric_dispatcher.profile_metrics:

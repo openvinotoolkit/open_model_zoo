@@ -41,7 +41,9 @@ class ReidAdapter(Adapter):
         Returns:
             list of ReIdentificationPrediction objects
         """
-        prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        raw_prediction = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_prediction)
+        prediction = raw_prediction[self.output_blob]
 
         if self.grn_workaround:
             # workaround: GRN layer
@@ -63,6 +65,7 @@ class ReidAdapter(Adapter):
             return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
 
         if len(outputs_list) == 2:
+            self.select_output_blob(outputs_list[0])
             emb1, emb2 = outputs_list[0][self.output_blob], outputs_list[1][self.output_blob]
             return {self.output_blob: emb1 + emb2}
 
