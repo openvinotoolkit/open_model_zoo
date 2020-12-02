@@ -49,6 +49,9 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
                                            description="Name of model sparse features input. " +
                                            "For multiple inputs use comma-separated list in form <name>:<index>"),
             "lso_features": StringField(optional=True, default='lS_o', description="Name of lS_o-like features input."),
+            "save_preprocessed_features": BoolField(
+                optional=True, default=True, description='Save preprocessed features or not'
+            )
         })
 
         return parameters
@@ -64,6 +67,7 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
         self.dense_features = self.get_value_from_config('dense_features')
         self.sparse_features = self.get_value_from_config('sparse_features')
         self.lso_features = self.get_value_from_config('lso_features')
+        self.save_preprocessed_features = self.get_value_from_config('save_preprocessed_features')
         self.parse_sparse_features()
 
     def parse_sparse_features(self):
@@ -79,13 +83,11 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
                 else:
                     ConfigError('Invalid configuration option {}'.format(feat))
 
-
     def convert(self, check_content=False, **kwargs):
-
         preprocessed_folder = Path(self.preprocessed_dir)
         input_folder = preprocessed_folder / "bs{}".format(self.batch) / 'input'
 
-        if not input_folder.exists():
+        if not input_folder.exists() and self.save_preprocessed_features:
             input_folder.mkdir(parents=True)
 
         annotations = []
@@ -109,22 +111,22 @@ class CriteoKaggleDACConverter(BaseFormatConverter):
 
         for i in range(start, samples - self.batch + 1, self.batch):
             c_input = input_folder / "{:02d}".format(subfolder)
-
-            if not c_input.exists():
-                c_input.mkdir(parents=True)
-
             c_input = c_input / "{:06d}.npz".format(i)
 
-            sample = {
-                self.dense_features: np.log1p(x_int[i:i+self.batch, ...]),
-                self.lso_features: np.dot(np.expand_dims(np.linspace(0, self.batch - 1, num=self.batch), -1),
-                                          np.ones((1, cat_feat))).T
-            }
+            if self.save_preprocessed_features:
+                if not c_input.parent.exists():
+                    c_input.parent.mkdir(parents=True)
 
-            for name in self.sparse_features.keys():
-                sample[name] = x_cat[i:i+self.batch, self.sparse_features[name]].T
+                sample = {
+                    self.dense_features: np.log1p(x_int[i:i+self.batch, ...]),
+                    self.lso_features: np.dot(np.expand_dims(np.linspace(0, self.batch - 1, num=self.batch), -1),
+                                              np.ones((1, cat_feat))).T
+                }
 
-            np.savez_compressed(str(c_input), **sample)
+                for name in self.sparse_features.keys():
+                    sample[name] = x_cat[i:i+self.batch, self.sparse_features[name]].T
+
+                np.savez_compressed(str(c_input), **sample)
 
             filecnt += 1
             filecnt %= 0x100
