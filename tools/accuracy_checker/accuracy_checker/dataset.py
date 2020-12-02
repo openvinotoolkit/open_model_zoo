@@ -313,10 +313,14 @@ class Dataset:
         self.name = self._config.get('name')
         self.subset = None
 
-    def provide_data_info(self, reader, annotations):
-        for ann in annotations:
+    def provide_data_info(self, reader, annotations, progress_reporter=None):
+        if progress_reporter:
+            progress_reporter.reset(len(annotations))
+        for idx, ann in enumerate(annotations):
             input_data = reader(ann.identifier)
             self.set_annotation_metadata(ann, input_data, reader.data_source)
+            if progress_reporter:
+                progress_reporter.update(idx, 1)
         return annotations
 
 

@@ -44,7 +44,7 @@ class DummyLauncher(Launcher):
 
         dummy_launcher_config = LauncherConfigValidator('Dummy_Launcher', fields=self.parameters())
         dummy_launcher_config.validate(self.config)
-
+        print_info('Predictions objects loading started')
         self.data_path = get_path(self.get_value_from_config('data_path'))
         identfiers_file = self.get_value_from_config('identifiers_list')
         if identfiers_file is not None:
@@ -52,7 +52,7 @@ class DummyLauncher(Launcher):
 
         self._loader = Loader.provide(self.get_value_from_config('loader'), self.data_path, **kwargs)
 
-        print_info("{} predictions objects loaded from {}".format(len(self._loader), self.data_path))
+        print_info("\n{} predictions objects loaded from {}".format(len(self._loader), self.data_path))
 
     def predict(self, identifiers, *args, **kwargs):
         return [self._loader[identifier] for identifier in identifiers]

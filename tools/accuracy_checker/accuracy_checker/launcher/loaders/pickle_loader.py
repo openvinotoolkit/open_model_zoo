@@ -26,19 +26,29 @@ class PickleLoader(DictLoaderMixin, Loader):
     __provider__ = 'pickle'
 
     def load(self, *args, **kwargs):
+        progress_reporter = kwargs.get('progress')
         data = read_pickle(self._data_path)
 
         if isinstance(data, list):
+            if progress_reporter:
+                progress_reporter.reset(len(data))
             if all(isinstance(entry, StoredPredictionBatch) for entry in data):
                 adapter = kwargs['adapter']
                 predictions = {}
-                for entry in data:
+                for idx, entry in enumerate(data):
                     pred_list = adapter.process(*entry)
                     for pred in pred_list:
                         predictions[pred.identifier] = pred
+                    if progress_reporter:
+                        progress_reporter.update(idx, 1)
                 return predictions
             if all(hasattr(entry, 'identifier') for entry in data):
-                return dict(zip([representation.identifier for representation in data], data))
+                predictions = {}
+                for idx, rep in enumerate(data):
+                    predictions[rep.identifier] = rep
+                    if progress_reporter:
+                        progress_reporter.update(idx, 1)
+                return predictions
             if 'identifiers' in kwargs:
                 identifiers = kwargs['identifiers']
                 return dict(zip(identifiers, data))
