@@ -116,7 +116,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                 }
                 catch (...) {
                     if (!this->callbackException) {
-                        this->callbackException = std::move(std::current_exception());
+                        this->callbackException = std::current_exception();
                     }
                 }
             }

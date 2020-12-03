@@ -30,8 +30,9 @@ public:
         float confidenceThreshold, bool useAutoResize,
         const std::vector<std::string>& labels = std::vector<std::string>());
 
-    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request);
-    virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
+    std::shared_ptr<InternalModelData> preprocess(
+        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+    std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
