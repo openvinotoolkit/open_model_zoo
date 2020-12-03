@@ -414,11 +414,20 @@ int main(int argc, char *argv[]) {
         size_t id = 0;
         cv::VideoWriter videoWriter;
 
-        slog::info << "Start inference " << slog::endl;
         Timer timer;
-        FLAGS_i == "cam" ?
-            stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(0)) :
-            stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
+
+        slog::info << "Setting media source" << slog::endl;            
+        try {
+            if (FLAGS_i == "cam")
+                stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(0));
+            else
+                stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
+        } catch (const std::exception& error) {
+            std::stringstream msg;
+            msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
+            throw std::invalid_argument(msg.str());
+        }
+        slog::info << "Start inference " << slog::endl;
         stream.start();
 
         const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
@@ -523,12 +532,26 @@ int main(int argc, char *argv[]) {
                 timer.finish("total");
             } else { // End of streaming
                 if(FLAGS_loop_video) {
-                    FLAGS_i == "cam" ?
-                        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(0)) :
-                        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
+                    slog::info << "Number of processed frames: " << framesCounter << slog::endl;
+                    slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
+
+                    std::cout << presenter->reportMeans() << '\n';
+
+                    slog::info << "Setting media source" << slog::endl;
+                    try {
+                        if (FLAGS_i == "cam")
+                            stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(0));
+                        else
+                            stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
+                    } catch (const std::exception& error) {
+                        std::stringstream msg;
+                        msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
+                        throw std::invalid_argument(msg.str());
+                    }
+                    slog::info << "Start inference " << slog::endl;
                     stream.start();
-                } else if (!FLAGS_no_wait) {
-                    std::cout << "No more frames to process!" << std::endl;
+                } else {
+                    slog::info << "No more frames to process!" << slog::endl;
                     cv::waitKey(0);
                 }
             }
