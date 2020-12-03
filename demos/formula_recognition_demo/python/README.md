@@ -99,10 +99,10 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder
-                                   M_DECODER -i INPUT [-o OUTPUT_FILE] -v
-                                   VOCAB_PATH
+                                   M_DECODER -i INPUT [-no_show]
+                                   [-o OUTPUT_FILE] -v VOCAB_PATH
                                    [--max_formula_len MAX_FORMULA_LEN]
-                                   [--conf_thresh CONF_THRESH] [-d DEVICE]
+                                   [-t CONF_THRESH] [-d DEVICE]
                                    [--resolution RESOLUTION RESOLUTION]
                                    [--preprocessing_type {crop,resize}] [-pc]
                                    [--imgs_layer IMGS_LAYER]
@@ -129,6 +129,8 @@ Options:
                         Required. Path to a folder with images, path to an
                         image files, integer identificator of the camera or
                         path to the video. See README.md for details.
+  -no_show, --no_show   Optional. Suppress pop-up window with rendered
+                        formula.
   -o OUTPUT_FILE, --output_file OUTPUT_FILE
                         Optional. Path to file where to store output. If not
                         mentioned, result will be stored in the console.
@@ -138,7 +140,7 @@ Options:
   --max_formula_len MAX_FORMULA_LEN
                         Optional. Defines maximum length of the formula
                         (number of tokens to decode)
-  --conf_thresh CONF_THRESH
+  -t CONF_THRESH, --conf_thresh CONF_THRESH
                         Optional. Probability threshold to treat model
                         prediction as meaningful
   -d DEVICE, --device DEVICE
