@@ -33,15 +33,8 @@ class PickleLoader(DictLoaderMixin, Loader):
             if progress_reporter:
                 progress_reporter.reset(len(data))
             if all(isinstance(entry, StoredPredictionBatch) for entry in data):
-                adapter = kwargs['adapter']
-                predictions = {}
-                for idx, entry in enumerate(data):
-                    pred_list = adapter.process(*entry)
-                    for pred in pred_list:
-                        predictions[pred.identifier] = pred
-                    if progress_reporter:
-                        progress_reporter.update(idx, 1)
-                return predictions
+                return self.load_batched_predictions(data, kwargs.get('adapter'), progress_reporter)
+
             if all(hasattr(entry, 'identifier') for entry in data):
                 predictions = {}
                 for idx, rep in enumerate(data):
@@ -65,3 +58,18 @@ class PickleLoader(DictLoaderMixin, Loader):
                 except EOFError:
                     break
         return result
+
+    @staticmethod
+    def load_batched_predictions(data, adapter=None, progress_reporter=None):
+        predictions = {}
+        for idx, entry in enumerate(data):
+            if adapter:
+                pred_list = adapter.process(*entry)
+                for pred in pred_list:
+                    predictions[pred.identifier] = pred
+            else:
+                for identifier in entry.identifiers:
+                    predictions[identifier] = entry
+            if progress_reporter:
+                progress_reporter.update(idx, 1)
+        return predictions

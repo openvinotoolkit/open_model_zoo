@@ -46,6 +46,7 @@ def no_available_myriad():
     except:
         return True
 
+
 def has_layers():
     try:
         from openvino.inference_engine import IENetwork

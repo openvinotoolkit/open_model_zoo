@@ -20,7 +20,7 @@ import pickle
 from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
 from ..launcher import create_launcher, DummyLauncher, InputFeeder
-from ..launcher.loaders import PickleLoader, StoredPredictionBatch
+from ..launcher.loaders import StoredPredictionBatch
 from ..logging import print_info, warning
 from ..metrics import MetricsExecutor
 from ..postprocessor import PostprocessingExecutor
@@ -384,7 +384,7 @@ class ModelEvaluator(BaseEvaluator):
         if not isinstance(launcher, DummyLauncher):
             launcher = DummyLauncher({
                 'framework': 'dummy',
-                'loader': PickleLoader.__provider__,
+                'loader': 'pickle',
                 'data_path': stored_predictions,
             }, adapter=self.adapter, identifiers=identifiers, progress=progress_reporter)
 
