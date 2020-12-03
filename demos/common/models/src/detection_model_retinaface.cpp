@@ -22,7 +22,7 @@
 using namespace InferenceEngine;
 
 ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize)
-    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {}),
+    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),  // Default label is "Face"
     iouThreshold(0.5), maskThreshold(0.8), shouldDetectMasks(false), landmarkStd(1.0),
     anchorCfg({ {32, { 32, 16 }, 16, { 1.0 }},
               { 16, { 8, 4 }, 16, { 1.0 }},
@@ -79,13 +79,13 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
         }
         else if(output.first.find("type") != -1) {
             type = OT_MASKSCORES;
+            labels.clear();
             labels.push_back("No Mask");
             labels.push_back("Mask");
             shouldDetectMasks = true;
             landmarkStd = 0.2;
         }
         else {
-            labels.push_back("Face");
             continue;
         }
 
