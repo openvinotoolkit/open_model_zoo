@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                    outFrame, { 10, 22 }, 0.65);
+                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 if (!FLAGS_no_show) {
                     cv::imshow("Segmentation Results", outFrame);
 
@@ -238,7 +238,7 @@ int main(int argc, char *argv[]) {
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                outFrame, { 10, 22 }, 0.65);
+                outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
             if (!FLAGS_no_show) {
                 cv::imshow("Segmentation Results", outFrame);
                 //--- Updating output window

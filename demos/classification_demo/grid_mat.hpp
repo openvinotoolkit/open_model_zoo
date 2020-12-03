@@ -11,6 +11,7 @@
 #include <queue>
 
 #include <monitors/presenter.h>
+
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core.hpp>
 
@@ -57,8 +58,11 @@ public:
         testMessageSize = cv::getTextSize(testMessage, fontType, fontScale, thickness, &baseline);
     }
 
-    void textUpdate(double avgFPS, double avgLatency, double accuracy,
-                    bool isFpsTest, bool showAccuracy,
+    void textUpdate(PerformanceMetrics& metrics,
+                    PerformanceMetrics::TimePoint lastRequestStartTime,
+                    double accuracy,
+                    bool isFpsTest,
+                    bool showAccuracy,
                     Presenter& presenter) {
         rectangle(outImg,
                   {0, 0}, {outImg.cols, presenter.graphSize.height},
@@ -66,23 +70,14 @@ public:
 
         presenter.drawGraphs(outImg);
 
-        cv::Scalar textColor = cv::Scalar(255, 255, 255);
-        int textPadding = 10;
-
-        cv::putText(outImg,
-                    cv::format("FPS: %0.01f", avgFPS),
-                    cv::Point(textPadding, textSize.height + textPadding),
-                    fontType, fontScale, textColor, thickness);
-        cv::putText(outImg,
-                    cv::format("Latency: %dms", static_cast<int>(avgLatency * 1000)),
-                    cv::Point(textPadding, (textSize.height + textPadding) * 2),
-                    fontType, fontScale, textColor, thickness);
+        metrics.update(lastRequestStartTime, outImg, cv::Point(textPadding, textSize.height + textPadding),
+                                  fontType, fontScale, cv::Scalar(255, 100, 100), thickness);
 
         if (showAccuracy) {
             cv::putText(outImg,
                         cv::format("Accuracy (top %d): %.3f", FLAGS_nt, accuracy),
                         cv::Point(outImg.cols - accuracyMessageSize.width - textPadding, textSize.height + textPadding),
-                        fontType, fontScale, textColor, thickness);
+                        fontType, fontScale, cv::Scalar(255, 255, 255), thickness);
         }
 
         if (isFpsTest) {
@@ -154,6 +149,7 @@ private:
     static const int fontType = cv::FONT_HERSHEY_PLAIN;
     static constexpr double fontScale = 1.5;
     static const int thickness = 2;
+    static const int textPadding = 10;
     static const std::string testMessage;
     int baseline;
     cv::Size textSize;
