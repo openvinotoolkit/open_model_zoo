@@ -15,8 +15,8 @@
 EmotionBarVisualizer::EmotionBarVisualizer(std::vector<std::string> const& emotionNames, cv::Size size, cv::Size padding,
                                      double opacity, double textScale, int textThickness):
                                      emotionNames(emotionNames), size(size), padding(padding),
-                                     opacity(opacity), textScale(textScale), textThickness(textThickness),
-                                     internalPadding(0) {
+                                     opacity(opacity), textScale(textScale), textThickness(textThickness)
+{
     auto itMax = std::max_element(emotionNames.begin(), emotionNames.end(), [] (std::string const& lhs, std::string const& rhs) {
         return lhs.length() < rhs.length();
     });
