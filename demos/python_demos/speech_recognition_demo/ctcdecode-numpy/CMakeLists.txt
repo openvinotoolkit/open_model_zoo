@@ -32,7 +32,7 @@ foreach(artifact IN ITEMS ARCHIVE LIBRARY PDB RUNTIME)
 endforeach()
 
 # SWIG-generated code causes some warnings; disable them.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if(COMPILER_IS_GCC_LIKE)
     target_compile_options(${target_name} PRIVATE -Wno-narrowing)
 endif()
 

@@ -40,28 +40,18 @@ if (WIN32)
         message(FATAL_ERROR "Only 64-bit supported on Windows")
     endif()
 
-    set_property (DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_WARNINGS)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_SCL_SECURE_NO_WARNINGS -DNOMINMAX")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc") #no asynchronous structured exception handling
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
+    add_definitions(-DNOMINMAX)
+endif()
 
-    if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251 /wd4275 /wd4267") #disable some warnings
-    endif()
-elseif(UNIX)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wuninitialized -Winit-self")
-    if(NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmaybe-uninitialized")
-    endif()
+if(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -DSCL_SECURE_NO_WARNINGS)
+    add_compile_options(/wd4251 /wd4275 /wd4267) #disable some warnings
 endif()
 
 ####################################
 ## to use C++11
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
-    set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-endif()
 ####################################
 
 set (GFLAGS_IS_SUBPROJECT TRUE)
@@ -70,8 +60,14 @@ set (HAVE_INTTYPES_H 1)
 
 add_subdirectory(thirdparty/gflags)
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+if(CMAKE_CXX_COMPILER_ID MATCHES "^GNU|(Apple)?Clang$")
+    set(COMPILER_IS_GCC_LIKE TRUE)
+else()
+    set(COMPILER_IS_GCC_LIKE FALSE)
+endif()
+
+if(COMPILER_IS_GCC_LIKE)
+    add_compile_options(-Wall)
 endif()
 
 add_subdirectory(common)
