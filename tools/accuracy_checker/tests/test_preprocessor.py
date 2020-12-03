@@ -877,7 +877,7 @@ class TestIEPreprocessor:
         assert preprocessor.steps[0].name == 'mean_variant'
         assert preprocessor.steps[0].value.name == 'MEAN_VALUE'
         assert preprocessor.mean_values == (255, )
-        assert preprocessor.std_values == None
+        assert preprocessor.std_values is None
 
     def test_std_values_only(self):
         config = [{'type': 'normalization', 'std': 255}]
@@ -887,7 +887,7 @@ class TestIEPreprocessor:
         assert preprocessor.steps[0].name == 'mean_variant'
         assert preprocessor.steps[0].value.name == 'MEAN_VALUE'
         assert preprocessor.std_values == (255, )
-        assert preprocessor.mean_values == None
+        assert preprocessor.mean_values is None
 
     def test_mean_and_std_values(self):
         config = [{'type': 'normalization', 'mean': 255, 'std': 255}]

@@ -41,7 +41,7 @@ def postprocess(scores, classes, boxes, raw_cls_masks,
                 im_h, im_w, im_scale_y=None, im_scale_x=None, im_scale=None,
                 full_image_masks=True, encode_masks=False,
                 confidence_threshold=0.0):
-    no_detections = (np.empty((0, ), dtype=np.float32), np.empty((0, ), dtype=np.float32),\
+    no_detections = (np.empty((0, ), dtype=np.float32), np.empty((0, ), dtype=np.float32),
                      np.empty((0, 4), dtype=np.float32), [])
     if scores is None:
         return no_detections

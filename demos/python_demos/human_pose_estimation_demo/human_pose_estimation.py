@@ -176,8 +176,8 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, 55,
         (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
 
-    while (cap.isOpened() \
-           or completed_request_results \
+    while (cap.isOpened()
+           or completed_request_results
            or len(hpes[mode].empty_requests) < len(hpes[mode].requests)) \
           and not exceptions:
         if next_frame_id_to_show in completed_request_results:
@@ -216,10 +216,10 @@ def main():
 
             # Frames count is always zero if mode has just been switched (i.e. prev_mode != mode).
             if mode_info[mode].frames_count != 0:
-                fps_message = 'FPS: {:.1f}'.format(mode_info[mode].frames_count / \
+                fps_message = 'FPS: {:.1f}'.format(mode_info[mode].frames_count /
                                                    (perf_counter() - mode_info[mode].last_start_time))
                 mode_info[mode].latency_sum += perf_counter() - start_time
-                latency_message = 'Latency: {:.1f} ms'.format((mode_info[mode].latency_sum / \
+                latency_message = 'Latency: {:.1f} ms'.format((mode_info[mode].latency_sum /
                                                               mode_info[mode].frames_count) * 1e3)
                 # Draw performance stats over frame.
                 put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
@@ -274,9 +274,9 @@ def main():
 
         end_time = mode_stats.last_end_time if mode_stats.last_end_time is not None \
                                             else perf_counter()
-        log.info('FPS: {:.1f}'.format(mode_stats.frames_count / \
+        log.info('FPS: {:.1f}'.format(mode_stats.frames_count /
                                       (end_time - mode_stats.last_start_time)))
-        log.info('Latency: {:.1f} ms'.format((mode_stats.latency_sum / \
+        log.info('Latency: {:.1f} ms'.format((mode_stats.latency_sum /
                                              mode_stats.frames_count) * 1e3))
     print(presenter.reportMeans())
 

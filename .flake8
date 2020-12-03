@@ -9,6 +9,20 @@ exclude=
 select=
     # indentation problems
     E10,E11,
+    # the backslash is redundant between brackets
+    E502,
+    # statement ends with a semicolon
+    E703,
+    # comparison to None should be `if cond is None`:
+    E711,
+    # comparison to True should be `if cond is True:` or `if cond`:
+    E712,
+    # test for membership should be not in
+    E713,
+    # test for object identity should be is not
+    E714,
+    # do not assign a lambda expression, use a def
+    E731,
     # parse errors
     E9,
     # formatting errors
