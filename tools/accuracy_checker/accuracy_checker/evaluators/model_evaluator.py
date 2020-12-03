@@ -141,14 +141,16 @@ class ModelEvaluator(BaseEvaluator):
             queued_irs.remove(request_id)
             ready_irs.append(request_id)
 
-        def prepare_dataset():
+        def prepare_dataset(store_only_mode):
             if self.dataset.batch is None:
                 self.dataset.batch = self.launcher.batch
             if progress_reporter:
                 progress_reporter.reset(self.dataset.size)
+            if self._is_stored(stored_predictions) and store_only_mode:
+                self._reset_stored_predictions(stored_predictions)
 
         store_only = kwargs.get('store_only', False)
-        prepare_dataset()
+        prepare_dataset(store_only)
 
         if (
                 self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
@@ -208,12 +210,15 @@ class ModelEvaluator(BaseEvaluator):
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
         store_only = kwargs.get('store_only', False)
+
         if (self._is_stored(stored_predictions) or isinstance(self.launcher, DummyLauncher)) and not store_only:
             self._load_stored_predictions(stored_predictions, progress_reporter)
             return self._annotations, self._predictions
 
         if self.dataset.batch is None:
             self.dataset.batch = self.launcher.batch
+        if store_only and self._is_stored(stored_predictions):
+            self._reset_stored_predictions(stored_predictions)
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
         enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
@@ -404,11 +409,19 @@ class ModelEvaluator(BaseEvaluator):
         self.metric_executor.set_profiling_dir(profiler_dir)
 
     def _configure_metrics(self, config, output_callback):
+        store_only = config.get('store_only', False)
         enable_profiling = config.get('profile', False)
         profile_type = 'json' if output_callback and enable_profiling else config.get('profile_report_type')
         if enable_profiling:
-            self.metric_executor.enable_profiling(self.dataset, profile_type)
+            if not store_only:
+                self.metric_executor.enable_profiling(self.dataset, profile_type)
+            else:
+                warning("Metric profiling disabled for prediction storing mode")
+                enable_profiling = False
         compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
+        if compute_intermediate_metric_res and store_only:
+            warning("Metric calculation disabled for prediction storing mode")
+            compute_intermediate_metric_res = False
         metric_interval, ignore_results_formatting = None, None
         if compute_intermediate_metric_res:
             metric_interval = config.get('metrics_interval', 1000)
@@ -420,6 +433,11 @@ class ModelEvaluator(BaseEvaluator):
         # since at the first time file does not exist and then created we can not use it as a pathlib.Path object
         with open(stored_predictions, "ab") as content:
             pickle.dump(predictions, content)
+
+    @staticmethod
+    def _reset_stored_predictions(stored_predictions):
+        with open(stored_predictions, 'wb'):
+            print_info("File {} will be cleared for storing predictions".format(stored_predictions))
 
     def reset_progress(self, progress_reporter):
         progress_reporter.reset(self.dataset.size)

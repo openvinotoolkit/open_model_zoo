@@ -49,8 +49,8 @@ class DictLoaderMixin:
         return len(self.data)
 
     def __getitem__(self, item):
-        # if item not in self.data:
-        #     raise IndexError('There is no prediction object for "{}" input data'.format(item))
+        if item not in self.data:
+            raise IndexError('There is no prediction object for "{}" input data'.format(item))
 
         return self.data[item]
 
