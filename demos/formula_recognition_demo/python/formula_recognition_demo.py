@@ -143,7 +143,7 @@ def create_capture(input_source, demo_resolution):
     if not input_source.endswith('.mp4'):
         try:
             input_source = int(input_source)
-        except ValueError as e:
+        except ValueError:
             raise ValueError("\n \tCannot recognize input as .mp4 video or device-id as int \n"
                              "\tPlease, check the -i\--input arg and try again")
     capture = cv.VideoCapture(input_source)
@@ -159,10 +159,10 @@ def non_interactive_demo(model, args):
     for rec in tqdm(model.images_list):
         log.info("Starting inference for %s", rec['img_name'])
         image = rec['img']
-        logits, targets = model.infer_sync(image)
-        prob = calculate_probability(logits)
+        distribution, targets = model.infer_sync(image)
+        prob = calculate_probability(distribution)
         log.info("Confidence score is %s", prob)
-        if prob >= args.conf_thresh ** len(logits):
+        if prob >= args.conf_thresh ** len(distribution):
             phrase = model.vocab.construct_phrase(targets)
             if args.output_file:
                 with open(args.output_file, 'a') as output_file:
@@ -278,10 +278,10 @@ def main():
         if not model_res:
             phrase = prev_text
         else:
-            logits, targets = model_res
-            prob = calculate_probability(logits)
+            distribution, targets = model_res
+            prob = calculate_probability(distribution)
             log.info("Confidence score is %s", prob)
-            if prob >= args.conf_thresh ** len(logits):
+            if prob >= args.conf_thresh ** len(distribution):
                 log.info("Prediction updated")
                 phrase = model.vocab.construct_phrase(targets)
             else:

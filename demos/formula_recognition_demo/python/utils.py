@@ -148,8 +148,8 @@ def change_layout(model_input):
     return model_input
 
 
-def calculate_probability(probabilities):
-    return np.prod(np.amax(probabilities, axis=1))
+def calculate_probability(distribution):
+    return np.prod(np.amax(distribution, axis=1))
 
 
 class Model:
@@ -178,6 +178,7 @@ class Model:
             self.preprocess_inputs()
 
     def preprocess_inputs(self):
+        batch_dim, channels, height, width = self.encoder.input_info['imgs'].input_data.shape
         target_shape = (height, width)
         if os.path.isdir(self.args.input):
             inputs = sorted(os.path.join(self.args.input, inp)
@@ -215,13 +216,13 @@ class Model:
         model_input = change_layout(model_input)
         assert self.is_async
         if self.model_status == Model.Status.ready:
-            self._run_encoder(model_input)
+            self._start_encoder(model_input)
             return None
 
         if self.model_status == Model.Status.encoder_infer:
             infer_status_encoder = self._infer_request_handle_encoder.wait(timeout=0)
             if infer_status_encoder == 0:
-                self._run_decoder()
+                self._start_decoder()
             return None
 
         return self._process_decoding_results()
@@ -229,8 +230,10 @@ class Model:
     def infer_sync(self, model_input):
         assert not self.is_async
         model_input = change_layout(model_input)
-        self._run_encoder(model_input)
-        self._run_decoder()
+        self._start_encoder(model_input)
+        infer_status_encoder = self._infer_request_handle_encoder.wait(timeout=-1)
+        assert infer_status_encoder == 0
+        self._start_decoder()
         res = None
         while res is None:
             res = self._process_decoding_results()
@@ -261,12 +264,11 @@ class Model:
 
         return None
 
-    def _run_encoder(self, model_input):
-        timeout = 0 if self.is_async else -1
+    def _start_encoder(self, model_input):
         self._infer_request_handle_encoder = self._async_infer_encoder(model_input, req_id=0)
         self.model_status = Model.Status.encoder_infer
 
-    def _run_decoder(self):
+    def _start_decoder(self):
         enc_res = self._infer_request_handle_encoder.output_blobs
         self._unpack_enc_results(enc_res)
         self._infer_request_handle_decoder = self._async_infer_decoder(
