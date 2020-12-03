@@ -904,17 +904,27 @@ class DLSDKLauncher(Launcher):
 
     def _configure_lstm_inputs(self):
         lstm_mapping = {}
+        lstm_buffered = {}
         config_inputs = self.config.get('inputs', [])
         for input_config in config_inputs:
             if input_config['type'] == 'LSTM_INPUT':
                 lstm_mapping[input_config['name']] = input_config['value']
+                if input_config.get('bufferize'):
+                    lstm_buffered[input_config['name']] = input_config['stage']
         self._lstm_inputs = lstm_mapping
+        self._lstm_buffered = lstm_buffered
 
     def _fill_lstm_inputs(self, infer_outputs=None):
         feed_dict = {}
         for lstm_var, output_layer in self._lstm_inputs.items():
             layer_shape = self.inputs[lstm_var].shape
-            input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(layer_shape)
+            stage = self._lstm_buffered.get(lstm_var)
+            if stage:
+                input_data = self._buffer_callback(output_layer, stage)
+                if input_data is None:
+                    input_data = np.zeros(layer_shape)
+            else:
+                input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(layer_shape)
             feed_dict[lstm_var] = input_data
         return feed_dict
 
@@ -994,3 +1004,6 @@ class DLSDKLauncher(Launcher):
             del self.ie_core
         if self._set_variable:
             del os.environ[FPGA_COMPILER_MODE_VAR]
+
+    def register_buffer_callback(self, callback):
+        self._buffer_callback = callback

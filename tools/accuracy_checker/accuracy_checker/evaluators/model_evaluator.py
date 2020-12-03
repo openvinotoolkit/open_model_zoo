@@ -49,6 +49,9 @@ class ModelEvaluator(BaseEvaluator):
         self._annotations = []
         self._predictions = []
         self._metrics_results = []
+        self._inference_stage_buffer = {}
+        self._adapter_stage_buffer = {}
+        self._postprocessor_stage_buffer = {}
 
     @classmethod
     def from_configs(cls, model_config):
@@ -121,6 +124,14 @@ class ModelEvaluator(BaseEvaluator):
     def _get_batch_input(self, batch_annotation):
         batch_identifiers = [annotation.identifier for annotation in batch_annotation]
         batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
+
+        for cfg in self.buffered_inputs_config:
+            stage = cfg.get('stage')
+            blob = cfg.get('blob')
+            idx = cfg.get('value')
+            data = self._buffer_callback(blob, stage)
+            batch_input[0].data[idx] = data
+
         for annotation, input_data in zip(batch_annotation, batch_input):
             self.dataset.set_annotation_metadata(annotation, input_data, self.reader.data_source)
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
@@ -210,6 +221,67 @@ class ModelEvaluator(BaseEvaluator):
         if stored_predictions:
             self.store_predictions(stored_predictions, predictions_to_store)
 
+    def _bufferize(self, prediction):
+        buffer = {}
+        for cfg in self.buffered_inputs_config:
+            blob = cfg.get('blob')
+        # blob = self.launcher.output_blob
+        # batch = self.launcher.batch
+            shape = self._inference_stage_buffer[blob].shape
+            layout = self.launcher.default_layout
+            blob_height = blob_width = blob_channels = blob_batch = 0
+            for ind, symb in enumerate(layout):
+                if symb == 'N':
+                    blob_batch = shape[ind]
+                elif symb == 'C':
+                    blob_channels = shape[ind]
+                elif symb == 'H':
+                    blob_height = shape[ind]
+                elif symb == 'W':
+                    blob_width = shape[ind]
+
+            value = [copy.deepcopy(p.value) for p in prediction]
+
+            buffer = {}
+            height = width = channels = 0
+            if len(value) == blob_batch:
+                shape = value[0].shape
+                if len(shape) == 3:
+                    for ind, symb in enumerate('HWC'):
+                        if symb == 'H':
+                            height = shape[ind]
+                        elif symb == 'W':
+                            width = shape[ind]
+                        elif symb == 'C':
+                            channels = shape[ind]
+                    if (height == blob_height) and (width == blob_width) and (channels == blob_channels):
+                        if len(value) == 1:
+                            value = value[0]
+                        buffer[blob] = value
+
+        return buffer
+
+    def _buffer_callback(self, blob, stage):
+        if stage == 'inference':
+            return self._inference_stage_buffer.get(blob)
+        elif stage == 'adapter':
+            return self._adapter_stage_buffer.get(blob)
+        elif stage == 'postprocessor':
+            return self._postprocessor_stage_buffer.get(blob)
+        else:
+            return None
+
+    def _initialize_buffers(self):
+        self.buffered_inputs_config= [t for t in self.input_feeder.inputs_config if t.get('bufferize')]
+        for cfg in self.buffered_inputs_config:
+            stage = cfg.get('stage')
+            blob = cfg.get('blob')
+            filename = cfg.get('initializer')
+            data = self.reader.read(filename)
+            self._adapter_stage_buffer[cfg.get('blob')] = data
+            self._postprocessor_stage_buffer[cfg.get('blob')] = data
+
+
     def process_dataset_sync(self, stored_predictions, progress_reporter, *args, **kwargs):
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
@@ -228,18 +300,27 @@ class ModelEvaluator(BaseEvaluator):
         metric_config = self._configure_metrics(kwargs, output_callback)
         enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
         predictions_to_store = []
+        self._inference_stage_buffer = {}
+        self._adapter_stage_buffer = {}
+        self._postprocessor_stage_buffer = {}
+        # self.launcher.register_buffer_callback(self._buffer_callback)
+        self._initialize_buffers()
+
         for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
+            self._inference_stage_buffer = copy.deepcopy(batch_predictions[0])
 
             if self.adapter:
                 self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
                 batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
+                self._adapter_stage_buffer = self._bufferize(batch_predictions)
 
             if stored_predictions:
                 predictions_to_store.extend(copy.deepcopy(batch_predictions))
 
             annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
+            self._postprocessor_stage_buffer = self._bufferize(predictions)
             _, profile_result = self.metric_executor.update_metrics_on_batch(
                 batch_input_ids, annotations, predictions, enable_profiling
             )

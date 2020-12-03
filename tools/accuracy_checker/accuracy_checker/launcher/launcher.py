@@ -50,7 +50,7 @@ class LauncherConfigValidator(ConfigValidator):
                 inputs_by_type[input_type].append(input_layer['name'])
                 if input_type == 'INPUT':
                     input_value = input_layer.get('value')
-                    if not input_value and count_non_const_inputs:
+                    if input_value is None and count_non_const_inputs:
                         raise ConfigError('input value should be specified in case of several non constant inputs')
                     count_non_const_inputs += 1
 
