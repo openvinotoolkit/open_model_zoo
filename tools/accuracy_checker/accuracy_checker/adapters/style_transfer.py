@@ -25,7 +25,9 @@ class StyleTransferAdapter(Adapter):
 
     def process(self, raw, identifiers, frame_meta):
         result = []
-        raw_outputs = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
+        raw_outputs = raw_outputs[self.output_blob]
         for identifier, img in zip(identifiers, raw_outputs):
             img = self._basic_postprocess(img)
             result.append(StyleTransferPrediction(identifier, img))

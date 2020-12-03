@@ -50,6 +50,7 @@ class DNASeqRecognition(Adapter):
             raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
         alphabet = list(self.label_map.values())
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
         result = []
         for identifier, out in zip(identifiers, np.exp(raw_outputs[self.output_blob])):
             if self.beam_size == 1:

@@ -96,6 +96,7 @@ class CTCBeamSearchDecoder(Adapter):
         multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
 
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
         if multi_infer:
             steps, _, _, _ = output.shape
@@ -234,6 +235,7 @@ class CTCGreedyDecoder(Adapter):
         multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
 
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
         if multi_infer:
             steps, _, _, _ = output.shape
@@ -375,7 +377,7 @@ class CTCBeamSearchDecoderWithLm(Adapter):
                 raise ValueError("Need lm_alpha and lm_beta to use lm_file")
 
     def process(self, raw, identifiers=None, frame_meta=None):
-        log_prob = self._extract_predictions(raw, frame_meta, self.probability_out)
+        log_prob = self._extract_predictions(raw, frame_meta)
         log_prob = np.concatenate(list(log_prob))
         if not self.logarithmic_prob:
             log_prob = np.log(log_prob.clip(min=np.finfo(log_prob.dtype).tiny))
@@ -391,8 +393,7 @@ class CTCBeamSearchDecoderWithLm(Adapter):
         decoded = decoded.upper()  # this should be responsibility of metric
         return [CharacterRecognitionPrediction(identifiers[0], decoded)]
 
-    @staticmethod
-    def _extract_predictions(outputs_list, meta, layer_out_name):
+    def _extract_predictions(self, outputs_list, meta):
         """
         Extract the value of network's output identified by the provided name.
         The result is returned as list(numpy.ndarray), arrays are to be
@@ -402,8 +403,8 @@ class CTCBeamSearchDecoderWithLm(Adapter):
         if isinstance(outputs_list, dict):
             outputs_list = [outputs_list]
         if not is_multi_infer:
-            return [outputs_list[0][layer_out_name]]
-        return [output[layer_out_name] for output in outputs_list]
+            return [outputs_list[0][self.probability_out]]
+        return [output[self.probability_out] for output in outputs_list]
 
     def decode(self, logp_audio):
         cand_set = CtcBeamSearchWithLmCandidateSet(

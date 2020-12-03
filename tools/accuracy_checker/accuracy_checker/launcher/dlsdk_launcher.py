@@ -200,7 +200,9 @@ class DLSDKLauncher(Launcher):
 
     @property
     def output_blob(self):
-        return next(iter(self.original_outputs))
+        if hasattr(self, 'original_outputs'):
+            return next(iter(self.original_outputs))
+        return None
 
     def predict(self, inputs, metadata=None, **kwargs):
         """

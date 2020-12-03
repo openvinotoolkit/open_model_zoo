@@ -43,7 +43,9 @@ class SSDAdapter(Adapter):
         Returns:
             list of DetectionPrediction objects
         """
-        prediction_batch = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        prediction_batch = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(prediction_batch)
+        prediction_batch = prediction_batch[self.output_blob]
         prediction_count = prediction_batch.shape[2] if len(prediction_batch.shape) > 2 else prediction_batch.shape[0]
         prediction_batch = prediction_batch.reshape(prediction_count, -1)
         prediction_batch = self.remove_empty_detections(prediction_batch)
@@ -281,6 +283,7 @@ class SSDAdapterMxNet(Adapter):
             list of DetectionPrediction objects
         """
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
         result = []
         for identifier, prediction_batch in zip(identifiers, raw_outputs[self.output_blob]):
             # Filter detections (get only detections with class_id >= 0)

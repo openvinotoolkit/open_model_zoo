@@ -20,7 +20,7 @@ import pickle
 from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
 from ..launcher import create_launcher, DummyLauncher, InputFeeder
-from ..launcher.loaders import PickleLoader
+from ..launcher.loaders import StoredPredictionBatch
 from ..logging import print_info, warning
 from ..metrics import MetricsExecutor
 from ..postprocessor import PostprocessingExecutor
@@ -58,6 +58,9 @@ class ModelEvaluator(BaseEvaluator):
         dataset_name = dataset_config['name']
         data_reader_config = dataset_config.get('reader', 'opencv_imread')
         data_source = dataset_config.get('data_source')
+        postpone_model_loading = (
+            not model_config.get('_store_only', False) and cls._is_stored(model_config.get('_stored_data'))
+        )
 
         dataset = Dataset(dataset_config)
         if isinstance(data_reader_config, str):
@@ -70,7 +73,7 @@ class ModelEvaluator(BaseEvaluator):
         if data_reader_type in REQUIRES_ANNOTATIONS:
             data_source = dataset.annotation
         data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
-        launcher_kwargs = {}
+        launcher_kwargs = {'delayed_model_loading': postpone_model_loading}
         enable_ie_preprocessing = (
             dataset_config.get('_ie_preprocessing', False)
             if launcher_config['framework'] == 'dlsdk' else False
@@ -90,13 +93,15 @@ class ModelEvaluator(BaseEvaluator):
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)
+        launcher_inputs = launcher.inputs if not postpone_model_loading else {}
         input_feeder = InputFeeder(
-            launcher.config.get('inputs', []), launcher.inputs, launcher.fit_to_input, launcher.default_layout,
-            launcher_config['framework'] == 'dummy', input_precision
+            launcher.config.get('inputs', []), launcher_inputs, launcher.fit_to_input, launcher.default_layout,
+            launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision
         )
-        if input_precision:
-            launcher.update_input_configuration(input_feeder.inputs_config)
-        preprocessor.input_shapes = launcher.inputs_info_for_meta()
+        if not postpone_model_loading:
+            if input_precision:
+                launcher.update_input_configuration(input_feeder.inputs_config)
+            preprocessor.input_shapes = launcher.inputs_info_for_meta()
         postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
         metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
         if metric_dispatcher.profile_metrics:
@@ -130,25 +135,22 @@ class ModelEvaluator(BaseEvaluator):
         return filled_inputs, batch_meta, batch_identifiers
 
     def process_dataset_async(self, stored_predictions, progress_reporter, *args, **kwargs):
-        def _process_ready_predictions(batch_predictions, batch_identifiers, batch_meta, adapter):
-            if adapter:
-                batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
-
-            return batch_predictions
-
         def completion_callback(status_code, request_id):
             if status_code:
                 warning('Request {} failed with status code {}'.format(request_id, status_code))
             queued_irs.remove(request_id)
             ready_irs.append(request_id)
 
-        def prepare_dataset():
+        def prepare_dataset(store_only_mode):
             if self.dataset.batch is None:
                 self.dataset.batch = self.launcher.batch
             if progress_reporter:
                 progress_reporter.reset(self.dataset.size)
+            if self._is_stored(stored_predictions) and store_only_mode:
+                self._reset_stored_predictions(stored_predictions)
 
-        prepare_dataset()
+        store_only = kwargs.get('store_only', False)
+        prepare_dataset(store_only)
 
         if (
                 self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
@@ -158,13 +160,12 @@ class ModelEvaluator(BaseEvaluator):
             warning('Model can not to be processed in async mode. Switched to sync.')
             return self.process_dataset_sync(stored_predictions, progress_reporter, *args, **kwargs)
 
-        if self._is_stored(stored_predictions) or isinstance(self.launcher, DummyLauncher):
-            self._annotations, self._predictions = self._load_stored_predictions(stored_predictions, progress_reporter)
+        if (self._is_stored(stored_predictions) or isinstance(self.launcher, DummyLauncher)) and not store_only:
+            return self._load_stored_predictions(stored_predictions, progress_reporter)
 
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
         _, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
-        predictions_to_store = []
         dataset_iterator = iter(enumerate(self.dataset))
         infer_requests_pool = {ir.request_id: ir for ir in self.launcher.get_async_requests()}
         free_irs = list(infer_requests_pool)
@@ -182,23 +183,18 @@ class ModelEvaluator(BaseEvaluator):
                     ready_data = infer_requests_pool[ready_ir_id].get_result()
                     (batch_id, batch_input_ids, batch_annotation), batch_meta, batch_raw_predictions = ready_data
                     batch_identifiers = [annotation.identifier for annotation in batch_annotation]
-                    batch_predictions = _process_ready_predictions(
-                        batch_raw_predictions, batch_identifiers, batch_meta, self.adapter
-                    )
                     free_irs.append(ready_ir_id)
                     if stored_predictions:
-                        predictions_to_store.extend(copy.deepcopy(batch_predictions))
-                    annotations, predictions = self.postprocessor.process_batch(
-                        batch_annotation, batch_predictions, batch_meta
-                    )
-                    self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
-
-                    if self.metric_executor.need_store_predictions:
-                        self._annotations.extend(annotations)
-                        self._predictions.extend(predictions)
+                        self.prepare_prediction_to_store(
+                            batch_raw_predictions, batch_identifiers, batch_meta, stored_predictions
+                        )
+                    if not store_only:
+                        self._process_batch_results(
+                            batch_raw_predictions, batch_annotation, batch_identifiers,
+                            batch_input_ids, batch_meta, False, output_callback)
 
                     if progress_reporter:
-                        progress_reporter.update(batch_id, len(batch_predictions))
+                        progress_reporter.update(batch_id, len(batch_identifiers))
                         if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
                             self.compute_metrics(
                                 print_results=True, ignore_results_formatting=ignore_results_formatting
@@ -208,48 +204,33 @@ class ModelEvaluator(BaseEvaluator):
             progress_reporter.finish()
 
         if stored_predictions:
-            self.store_predictions(stored_predictions, predictions_to_store)
+            print_info("prediction objects are save to {}".format(stored_predictions))
 
     def process_dataset_sync(self, stored_predictions, progress_reporter, *args, **kwargs):
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
-        if self._is_stored(stored_predictions) or isinstance(self.launcher, DummyLauncher):
-            self._annotations, self._predictions = self.load(stored_predictions, progress_reporter)
-            self._annotations, self._predictions = self.postprocessor.full_process(self._annotations, self._predictions)
+        store_only = kwargs.get('store_only', False)
 
-            self.metric_executor.update_metrics_on_batch(
-                range(len(self._annotations)), self._annotations, self._predictions
-            )
+        if (self._is_stored(stored_predictions) or isinstance(self.launcher, DummyLauncher)) and not store_only:
+            self._load_stored_predictions(stored_predictions, progress_reporter)
             return self._annotations, self._predictions
 
         if self.dataset.batch is None:
             self.dataset.batch = self.launcher.batch
+        if store_only and self._is_stored(stored_predictions):
+            self._reset_stored_predictions(stored_predictions)
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
         enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
-        predictions_to_store = []
         for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
-
-            if self.adapter:
-                self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
-                batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
-
             if stored_predictions:
-                predictions_to_store.extend(copy.deepcopy(batch_predictions))
-
-            annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
-            _, profile_result = self.metric_executor.update_metrics_on_batch(
-                batch_input_ids, annotations, predictions, enable_profiling
-            )
-            if output_callback:
-                callback_kwargs = {'profiling_result': profile_result} if enable_profiling else {}
-                output_callback(annotations, predictions, **callback_kwargs)
-
-            if self.metric_executor.need_store_predictions:
-                self._annotations.extend(annotations)
-                self._predictions.extend(predictions)
+                self.prepare_prediction_to_store(batch_predictions, batch_identifiers, batch_meta, stored_predictions)
+            if not store_only:
+                self._process_batch_results(
+                    batch_predictions, batch_annotation, batch_identifiers,
+                    batch_input_ids, batch_meta, enable_profiling, output_callback)
 
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_predictions))
@@ -260,8 +241,29 @@ class ModelEvaluator(BaseEvaluator):
             progress_reporter.finish()
 
         if stored_predictions:
-            self.store_predictions(stored_predictions, predictions_to_store)
+            print_info("prediction objects are save to {}".format(stored_predictions))
         return self._annotations, self._predictions
+
+    def _process_batch_results(
+            self, batch_predictions, batch_annotations, batch_identifiers, batch_input_ids, batch_meta,
+            enable_profiling=False, output_callback=None):
+        if self.adapter:
+            self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
+            batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
+
+        annotations, predictions = self.postprocessor.process_batch(
+            batch_annotations, batch_predictions, batch_meta
+        )
+        _, profile_result = self.metric_executor.update_metrics_on_batch(
+            batch_input_ids, annotations, predictions, enable_profiling
+        )
+        if output_callback:
+            callback_kwargs = {'profiling_result': profile_result} if enable_profiling else {}
+            output_callback(annotations, predictions, **callback_kwargs)
+
+        if self.metric_executor.need_store_predictions:
+            self._annotations.extend(annotations)
+            self._predictions.extend(predictions)
 
     @staticmethod
     def _is_stored(stored_predictions=None):
@@ -275,13 +277,20 @@ class ModelEvaluator(BaseEvaluator):
             return False
 
     def _load_stored_predictions(self, stored_predictions, progress_reporter):
-        self._annotations, self._predictions = self.load(stored_predictions, progress_reporter)
-        self._annotations, self._predictions = self.postprocessor.full_process(self._annotations, self._predictions)
+        predictions = self.load(stored_predictions, progress_reporter)
+        annotations = self.dataset.annotation
+        if self.postprocessor.has_processors:
+            print_info("Postprocess results:")
+            self.dataset.provide_data_info(self.reader, annotations, progress_reporter)
+            annotations, predictions = self.postprocessor.full_process(annotations, predictions)
         self.metric_executor.update_metrics_on_batch(
-            range(len(self._annotations)), self._annotations, self._predictions
+            range(len(annotations)), annotations, predictions
         )
+        if self.metric_executor.need_store_predictions:
+            self._annotations = annotations
+            self._predictions = predictions
 
-        return self._annotations, self._predictions
+        return annotations, predictions
 
     def _fill_free_irs(self, free_irs, queued_irs, infer_requests_pool, dataset_iterator):
         for ir_id in free_irs:
@@ -370,26 +379,24 @@ class ModelEvaluator(BaseEvaluator):
             presenter.write_result(metric_result, ignore_results_formatting)
 
     def load(self, stored_predictions, progress_reporter):
-        annotations = self.dataset.annotation
-        if self.postprocessor.has_processors:
-            self.dataset.provide_data_info(self.reader, annotations)
         launcher = self.launcher
+        identifiers = self.dataset.identifiers
         if not isinstance(launcher, DummyLauncher):
             launcher = DummyLauncher({
                 'framework': 'dummy',
-                'loader': PickleLoader.__provider__,
-                'data_path': stored_predictions
-            }, adapter=None)
+                'loader': 'pickle',
+                'data_path': stored_predictions,
+            }, adapter=self.adapter, identifiers=identifiers, progress=progress_reporter)
 
-        identifiers = self.dataset.identifiers
         predictions = launcher.predict(identifiers)
-        if self.adapter is not None:
-            predictions = self.adapter.process(predictions, identifiers, [])
-
         if progress_reporter:
             progress_reporter.finish(False)
 
-        return annotations, predictions
+        return predictions
+
+    def prepare_prediction_to_store(self, batch_predictions, batch_identifiers, batch_meta, stored_predictions):
+        prediction_to_store = StoredPredictionBatch(batch_predictions, batch_identifiers, batch_meta)
+        self.store_predictions(stored_predictions, prediction_to_store)
 
     @property
     def metrics_results(self):
@@ -402,11 +409,19 @@ class ModelEvaluator(BaseEvaluator):
         self.metric_executor.set_profiling_dir(profiler_dir)
 
     def _configure_metrics(self, config, output_callback):
+        store_only = config.get('store_only', False)
         enable_profiling = config.get('profile', False)
         profile_type = 'json' if output_callback and enable_profiling else config.get('profile_report_type')
         if enable_profiling:
-            self.metric_executor.enable_profiling(self.dataset, profile_type)
+            if not store_only:
+                self.metric_executor.enable_profiling(self.dataset, profile_type)
+            else:
+                warning("Metric profiling disabled for prediction storing mode")
+                enable_profiling = False
         compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
+        if compute_intermediate_metric_res and store_only:
+            warning("Metric calculation disabled for prediction storing mode")
+            compute_intermediate_metric_res = False
         metric_interval, ignore_results_formatting = None, None
         if compute_intermediate_metric_res:
             metric_interval = config.get('metrics_interval', 1000)
@@ -416,9 +431,13 @@ class ModelEvaluator(BaseEvaluator):
     @staticmethod
     def store_predictions(stored_predictions, predictions):
         # since at the first time file does not exist and then created we can not use it as a pathlib.Path object
-        with open(stored_predictions, "wb") as content:
+        with open(stored_predictions, "ab") as content:
             pickle.dump(predictions, content)
-            print_info("prediction objects are save to {}".format(stored_predictions))
+
+    @staticmethod
+    def _reset_stored_predictions(stored_predictions):
+        with open(stored_predictions, 'wb'):
+            print_info("File {} will be cleared for storing predictions".format(stored_predictions))
 
     def reset_progress(self, progress_reporter):
         progress_reporter.reset(self.dataset.size)

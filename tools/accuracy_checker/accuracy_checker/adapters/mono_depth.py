@@ -22,7 +22,9 @@ class MonoDepthAdapter(Adapter):
     __provider__ = 'mono_depth'
 
     def process(self, raw, identifiers, frame_meta):
-        batch_prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        raw_prediction = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_prediction)
+        batch_prediction = raw_prediction[self.output_blob]
         result = []
         for identifier, prediction in zip(identifiers, batch_prediction):
             result.append(DepthEstimationPrediction(identifier, prediction))
