@@ -17,17 +17,17 @@
 
 import colorsys
 import logging
-import os.path as osp
 import random
 import sys
 from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
 from time import perf_counter
 
 import cv2
 import numpy as np
 from openvino.inference_engine import IECore
 
-sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 
 from models import *
 import monitors
@@ -43,7 +43,7 @@ def build_argparser():
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=str)
+                      required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
                       type=str, required=True, choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
     args.add_argument('-i', '--input', required=True, type=str,
