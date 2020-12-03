@@ -48,6 +48,10 @@ if(MSVC)
     add_compile_options(/wd4251 /wd4275 /wd4267) #disable some warnings
 endif()
 
+if(COMPILER_IS_GCC_LIKE)
+    add_compile_options(-Wall)
+endif()
+
 ####################################
 ## to use C++11
 set (CMAKE_CXX_STANDARD 11)
@@ -64,10 +68,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^GNU|(Apple)?Clang$")
     set(COMPILER_IS_GCC_LIKE TRUE)
 else()
     set(COMPILER_IS_GCC_LIKE FALSE)
-endif()
-
-if(COMPILER_IS_GCC_LIKE)
-    add_compile_options(-Wall)
 endif()
 
 add_subdirectory(common)
