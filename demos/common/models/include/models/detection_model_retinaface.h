@@ -46,16 +46,11 @@ public:
     static const int INIT_VECTOR_SIZE = 200;
     /// Loads model and performs required initialization
     /// @param model_name name of model to load
-    /// @param cnnConfig - fine tuning configuration for CNN model
     /// @param confidenceThreshold - threshold to eleminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param useAutoResize - if true, image will be resized by IE.
-    /// @param shouldDetectMasks - if true, masks will be detected.
-    /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
-    /// @param engine - pointer to InferenceEngine::Core instance to use.
-    /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
     ModelRetinaFace(const std::string& model_name, float confidenceThreshold, bool useAutoResize);
     std::unique_ptr<ResultBase> postprocess(InferenceResult & infResult);
 
@@ -75,7 +70,7 @@ protected:
 
     std::vector <std::string> separateOutputsNames[OT_MAX];
     const std::vector<AnchorCfgLine> anchorCfg;
-    std::map<int, std::vector <Anchor>> _anchors_fpn;
+    std::map<int, std::vector <Anchor>> anchorsFpn;
 
     void generateAnchorsFpn();
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);

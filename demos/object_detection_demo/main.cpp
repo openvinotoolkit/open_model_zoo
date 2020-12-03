@@ -172,7 +172,7 @@ cv::Mat renderDetectionData(const DetectionResult& result) {
 
     try {
         for (auto lmark : result.asRef<RetinaFaceDetectionResult>().landmarks) {
-            cv::circle(outputImg, lmark, 4, cv::Scalar(255, 0, 255), -1);
+            cv::circle(outputImg, lmark, 2, cv::Scalar(0, 255, 255), -1);
         }
     }
     catch (...) {}
