@@ -102,22 +102,12 @@ class DirReader(ImagesCapture):
 
 class VideoCapWrapper(ImagesCapture):
 
-    def __init__(self, input, loop, camera_resolution):
+    def __init__(self, input, loop):
         super().__init__(loop)
         self.cap = cv2.VideoCapture()
-        try:
-            status = self.cap.open(int(input))
-            self.type = 'CAMERA'
-            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, camera_resolution[0])
-            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, camera_resolution[1])
-            self.cap.set(cv2.CAP_PROP_AUTOFOCUS, 1)
-            self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
-        except ValueError:
-            status = self.cap.open(input)
-            self.type = 'VIDEO'
+        status = self.cap.open(input)
         if not status:
-            raise InvalidInput("Can't open the {} from {}".format(self.get_type().lower(), input))
+            raise InvalidInput("Can't open the video from {}".format(input))
 
     def read(self):
         status, image = self.cap.read()
@@ -134,18 +124,49 @@ class VideoCapWrapper(ImagesCapture):
         return self.cap.get(cv2.CAP_PROP_FPS)
 
     def get_type(self):
-        return self.type
+        return 'VIDEO'
+
+
+class CameraCapWrapper(ImagesCapture):
+
+    def __init__(self, input, loop, camera_resolution):
+        super().__init__(loop)
+        self.cap = cv2.VideoCapture()
+        try:
+            status = self.cap.open(int(input))
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, camera_resolution[0])
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, camera_resolution[1])
+            self.cap.set(cv2.CAP_PROP_FPS, 30)
+            self.cap.set(cv2.CAP_PROP_AUTOFOCUS, 1)
+            self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
+            if not status:
+                raise OpenError("Can't open the camera from {}".format(input))
+        except ValueError:
+            raise InvalidInput("Can't find the camera {}".format(input))
+
+    def read(self):
+        status, image = self.cap.read()
+        if not status:
+            return None
+        return image
+
+    def fps(self):
+        return self.cap.get(cv2.CAP_PROP_FPS)
+
+    def get_type(self):
+        return 'CAMERA'
 
 
 def open_images_capture(input, loop, camera_resolution=(1280, 720)):
     errors = {InvalidInput: [], OpenError: []}
-    for reader in (ImreadWrapper, DirReader):
+    for reader in (ImreadWrapper, DirReader, VideoCapWrapper):
         try:
             return reader(input, loop)
         except (InvalidInput, OpenError) as e:
             errors[type(e)].append(e.message)
     try:
-        return VideoCapWrapper(input, loop, camera_resolution)
+        return CameraCapWrapper(input, loop, camera_resolution)
     except (InvalidInput, OpenError) as e:
         errors[type(e)].append(e.message)
     if not errors[OpenError]:
