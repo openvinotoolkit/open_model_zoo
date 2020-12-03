@@ -52,7 +52,7 @@ public:
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
     ModelRetinaFace(const std::string& model_name, float confidenceThreshold, bool useAutoResize);
-    std::unique_ptr<ResultBase> postprocess(InferenceResult & infResult);
+    std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult);
 
 protected:
 
@@ -73,6 +73,6 @@ protected:
     std::map<int, std::vector <Anchor>> anchorsFpn;
 
     void generateAnchorsFpn();
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork);
+    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork);
 };
 
