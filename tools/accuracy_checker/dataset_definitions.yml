@@ -541,6 +541,14 @@ datasets:
       - type: pairwise_accuracy_subsets
         subset_number: 2
 
+  - name: lfw_mtcnn_align
+    data_source: lfw_mtcnnpy_160
+    annotation_conversion:
+      converter: lfw
+      pairs_file: LFW/annotation/pairs.txt
+      extension: png
+    annotation: lfw_mtcnn_align.pickle
+
   - name: ICDAR2015
     data_source: ICDAR15_DET/ch4_test_images
     annotation_conversion:

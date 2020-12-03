@@ -6,10 +6,14 @@ models:
         adapter: reid
 
     datasets:
-      - name: lfw
+      - name: lfw_mtcnn_align
 
         preprocessing:
-          - type: point_alignment
-            size: 400
-          - type: resize
-            size: 160
+          - type: flip
+            mode: vertical
+            merge_with_original: True
+        metrics:
+          - type: pairwise_accuracy_subsets
+            min_score: best_train_threshold
+            distance_mode: '1'
+            subtract_mean: True

@@ -67,6 +67,6 @@ class ReidAdapter(Adapter):
         if len(outputs_list) == 2:
             self.select_output_blob(outputs_list[0])
             emb1, emb2 = outputs_list[0][self.output_blob], outputs_list[1][self.output_blob]
-            return {self.output_blob: emb1 + emb2}
+            return {self.output_blob: np.concatenate((emb1, emb2), axis=1)}
 
         return outputs_list[0]
