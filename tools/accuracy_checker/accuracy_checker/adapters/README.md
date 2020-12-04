@@ -201,6 +201,11 @@ AccuracyChecker supports following set of adapters:
   * `score_map_threshold` - threshold for score map (Optional, default 0.8).
   * `nms_threshold` - threshold for text boxes NMS (Optional, default 0.2).
   * `box_threshold` - minimal confidence threshold for text boxes (Optional, default 0.1).
+* `craft_text_detection` - converting output of CRAFT like model for text detection to `TextDetectionPrediction`.
+  * `score_out` - the name of output layer which contains score map.
+  * `text_threshold` - text confidence threshold (Optional, default 0.7).
+  * `link_threshold` - link confidence threshold (Optional, default 0.4).
+  * `low_text` - text low-bound score (Optional, default 0.4).
 * `human_pose_estimation` - converting output of model for human pose estimation to `PoseEstimationPrediction`.
   * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).
   * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
