@@ -19,8 +19,8 @@ class OpenError(Exception):
 
 class ImagesCapture:
 
-    def __init__(self, loop):
-        self.loop = loop
+    def __init__(self):
+        raise NotImplementedError
 
     def read():
         raise NotImplementedError
@@ -35,7 +35,7 @@ class ImagesCapture:
 class ImreadWrapper(ImagesCapture):
 
     def __init__(self, input, loop):
-        super().__init__(loop)
+        self.loop = loop
         if not os.path.isfile(input):
             raise InvalidInput("Can't find the image by {}".format(input))
         self.image = cv2.imread(input, cv2.IMREAD_COLOR)
@@ -61,7 +61,7 @@ class ImreadWrapper(ImagesCapture):
 class DirReader(ImagesCapture):
 
     def __init__(self, input, loop):
-        super().__init__(loop)
+        self.loop = loop
         self.dir = input
         if not os.path.isdir(self.dir):
             raise InvalidInput("Can't find the dir by {}".format(input))
@@ -103,7 +103,7 @@ class DirReader(ImagesCapture):
 class VideoCapWrapper(ImagesCapture):
 
     def __init__(self, input, loop):
-        super().__init__(loop)
+        self.loop = loop
         self.cap = cv2.VideoCapture()
         status = self.cap.open(input)
         if not status:
@@ -129,8 +129,7 @@ class VideoCapWrapper(ImagesCapture):
 
 class CameraCapWrapper(ImagesCapture):
 
-    def __init__(self, input, loop, camera_resolution):
-        super().__init__(loop)
+    def __init__(self, input, camera_resolution):
         self.cap = cv2.VideoCapture()
         try:
             status = self.cap.open(int(input))
@@ -166,7 +165,7 @@ def open_images_capture(input, loop, camera_resolution=(1280, 720)):
         except (InvalidInput, OpenError) as e:
             errors[type(e)].append(e.message)
     try:
-        return CameraCapWrapper(input, loop, camera_resolution)
+        return CameraCapWrapper(input, camera_resolution)
     except (InvalidInput, OpenError) as e:
         errors[type(e)].append(e.message)
     if not errors[OpenError]:
