@@ -885,6 +885,7 @@ class CRAFTTextDetectionAdapter(Adapter):
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
         score_out = raw_outputs[self.score_out] if self.score_out else raw_outputs[self.output_blob]
         results = []
         for identifier, score, meta in zip(identifiers, score_out, frame_meta):
