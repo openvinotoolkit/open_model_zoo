@@ -855,3 +855,115 @@ class EASTTextDetectionAdapter(Adapter):
             new_p_1 = np.zeros((0, 4, 2))
 
         return np.concatenate([new_p_0, new_p_1])
+
+
+class CRAFTTextDetectionAdapter(Adapter):
+    __provider__ = 'craft_text_detection'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'score_out': StringField(description='name of layer with score map', optional=True),
+            'text_threshold': NumberField(
+                value_type=float, optional=True, default=0.7, min_value=0, description='text confidence threshold'
+            ),
+            'link_threshold': NumberField(
+                value_type=float, optional=True, default=0.4, min_value=0, description='link confidence threshold'
+            ),
+            'low_text': NumberField(
+                value_type=float, optional=True, default=0.4, min_value=0, description='text low-bound score'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.score_out = self.get_value_from_config('score_out')
+        self.text_threshold = self.get_value_from_config('text_threshold')
+        self.link_threshold = self.get_value_from_config('link_threshold')
+        self.low_text = self.get_value_from_config('low_text')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        score_out = raw_outputs[self.score_out] if self.score_out else raw_outputs[self.output_blob]
+        results = []
+        for identifier, score, meta in zip(identifiers, score_out, frame_meta):
+            score_text = score[:, :, 0]
+            score_link = score[:, :, 1]
+
+            boxes = self.get_detection_boxes(score_text, score_link,
+                                             self.text_threshold, self.link_threshold, self.low_text)
+            boxes = self.adjust_result_coordinates(boxes, meta.get('scale', 1.0))
+            results.append(TextDetectionPrediction(identifier, boxes))
+
+        return results
+
+    @staticmethod
+    def get_detection_boxes(text, link, text_threshold, link_threshold, low_text):
+        img_h, img_w = text.shape
+
+        _, score_text = cv2.threshold(text.copy(), low_text, 1, 0)
+        _, score_link = cv2.threshold(link.copy(), link_threshold, 1, 0)
+
+        text_score_comb = np.clip(score_text + score_link, 0, 1)
+        count, labels, stats, _ = cv2.connectedComponentsWithStats(text_score_comb.astype(np.uint8), connectivity=4)
+
+        det = []
+        for k in range(1, count):
+            # size filtering
+            size = stats[k, cv2.CC_STAT_AREA]
+            if size < 10:
+                continue
+
+            # thresholding
+            if np.max(text[labels == k]) < text_threshold:
+                continue
+
+            # make segmentation map
+            segmap = np.zeros(text.shape, dtype=np.uint8)
+            segmap[labels == k] = 255
+            segmap[np.logical_and(score_link == 1, score_text == 0)] = 0  # remove link area
+            x, y = stats[k, cv2.CC_STAT_LEFT], stats[k, cv2.CC_STAT_TOP]
+            w, h = stats[k, cv2.CC_STAT_WIDTH], stats[k, cv2.CC_STAT_HEIGHT]
+            niter = int(np.sqrt(size * min(w, h) / (w * h)) * 2)
+            sx, ex, sy, ey = x - niter, x + w + niter + 1, y - niter, y + h + niter + 1
+            # boundary check
+            if sx < 0:
+                sx = 0
+            if sy < 0:
+                sy = 0
+            if ex >= img_w:
+                ex = img_w
+            if ey >= img_h:
+                ey = img_h
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1 + niter, 1 + niter))
+            segmap[sy:ey, sx:ex] = cv2.dilate(segmap[sy:ey, sx:ex], kernel)
+
+            # make box
+            np_contours = np.roll(np.array(np.where(segmap != 0)), 1, axis=0).transpose().reshape(-1, 2)
+            rectangle = cv2.minAreaRect(np_contours)
+            box = cv2.boxPoints(rectangle)
+
+            # align diamond-shape
+            w, h = np.linalg.norm(box[0] - box[1]), np.linalg.norm(box[1] - box[2])
+            box_ratio = max(w, h) / (min(w, h) + 1e-5)
+            if abs(1 - box_ratio) <= 0.1:
+                l, r = min(np_contours[:, 0]), max(np_contours[:, 0])
+                t, b = min(np_contours[:, 1]), max(np_contours[:, 1])
+                box = np.array([[l, t], [r, t], [r, b], [l, b]], dtype=np.float32)
+
+            # make clock-wise order
+            startidx = box.sum(axis=1).argmin()
+            box = np.roll(box, 4 - startidx, 0)
+            box = np.array(box)
+
+            det.append(box)
+
+        return det
+
+    @staticmethod
+    def adjust_result_coordinates(polys, scale, ratio_net=2):
+        polys = np.array(polys)
+        for k, _ in enumerate(polys):
+            polys[k] *= (scale * ratio_net, scale * ratio_net)
+        return polys
