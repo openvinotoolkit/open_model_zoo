@@ -3,6 +3,21 @@
 
 The documentation of the gflags library is available online at https://gflags.github.io/gflags/.
 
+
+11 November 2018
+----------------
+
+I've just released gflags 2.2.2.
+
+This maintenance release improves lives of Bazel users (no more "config.h" leaking into global include paths),
+fixes build with recent MinGW versions, and silences a number of static code analyzer and compiler warnings.
+The build targets exported by the CMake configuration of this library are now also prefixed by the package
+name "gflags::" following a more recent (unwritten) CMake convention. The unprefixed target names are still
+supported to avoid that dependent projects have to be modified due to this change in imported target names.
+
+Please report any further issues with this release using the GitHub issue tracker.
+
+
 11 July 2017
 ------------
 
