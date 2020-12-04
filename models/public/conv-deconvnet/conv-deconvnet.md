@@ -1,4 +1,4 @@
-# conv-deconvnet 
+# facies-classification 
 
 ## Use Case and High-Level Description
 
@@ -22,7 +22,7 @@ git checkout 2d03135
 ```
 3. Apply the `pytorch-onnx.patch` patch
 ```sh
-git apply /path/to/pytorch-onnx.patch
+git apply ../pytorch-onnx.patch
 ```
 4. Install requirements by the following command:
 ```sh
@@ -34,9 +34,14 @@ pip install -r requirements.txt
 python torch2onnx.py -i /path/to/downloaded/weights.pth
 ```
 
-## Example
+### Steps to Convert ONNX to IR
 
-![](./facies_classification_exapmle.png)
+```bash
+python3 /opt/intel/openvino/deployment_tools/model_optimizer/mo_onnx.py \
+    --input_model path/to/model.onnx \
+    --extension mo_extensions
+```
+
 
 ## Specification
 
