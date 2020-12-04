@@ -116,10 +116,10 @@ def main():
     max_length_c = 384
     max_length_q = 32
 
-    for l in [max_length_q, max_length_c]:
+    for length in [max_length_q, max_length_c]:
         new_shapes = {}
         for i,input_info in ie_encoder_emb.input_info.items():
-            new_shapes[i] = [1, l]
+            new_shapes[i] = [1, length]
             log.info("Reshaped input {} from {} to the {}".format(
                 i,
                 input_info.input_data.shape,
@@ -135,7 +135,7 @@ def main():
 
         # Loading model to the plugin
         log.info("Loading model to the plugin")
-        ie_encoder_exec_emb_dict[l] = ie.load_network(network=ie_encoder_emb, device_name=args.device)
+        ie_encoder_exec_emb_dict[length] = ie.load_network(network=ie_encoder_emb, device_name=args.device)
 
     # Read model for final exact qa
     if args.model_qa:

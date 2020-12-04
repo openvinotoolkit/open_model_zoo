@@ -54,7 +54,7 @@ class FaceBoxes(Model):
                 scores_blob_name = name
             else:
                 raise RuntimeError("Expected shapes [:,:,4] and [:,:2] for outputs, but got {} and {}"
-                                   .format(*[l.shape for l in self.net.outputs]))
+                                   .format(*[output.shape for output in self.net.outputs]))
         assert self.net.outputs[bboxes_blob_name].shape[1] == self.net.outputs[scores_blob_name].shape[1], \
             "Expected the same dimension for boxes and scores"
         return bboxes_blob_name, scores_blob_name
