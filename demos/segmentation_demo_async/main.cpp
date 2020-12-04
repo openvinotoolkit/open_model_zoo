@@ -21,7 +21,6 @@
 */
 
 #include <iostream>
-#include <vector>
 #include <string>
 
 #include <monitors/presenter.h>
@@ -33,13 +32,12 @@
 #include <samples/performance_metrics.hpp>
 #include <gflags/gflags.h>
 
-#include <iostream>
 #include <unordered_map>
 
-#include "pipelines/async_pipeline.h"
-#include "models/segmentation_model.h"
-#include "pipelines/config_factory.h"
-#include "pipelines/metadata.h"
+#include <pipelines/async_pipeline.h>
+#include <models/segmentation_model.h>
+#include <pipelines/config_factory.h>
+#include <pipelines/metadata.h>
 
 static const char help_message[] = "Print a usage message.";
 static const char video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
@@ -52,7 +50,7 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 "Absolute path to the .xml file with the kernel descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
 "Absolute path to a shared library with the kernel implementations.";
-static const char num_inf_req_message[] = "Optional. Number of infer requests.";
+static const char nireq_message[] = "Optional. Number of infer requests. Default value is determined automatically.";
 static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
 "throughput mode (for HETERO and MULTI device cases use format "
@@ -67,7 +65,7 @@ DEFINE_string(d, "CPU", target_device_message);
 DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
-DEFINE_uint32(nireq, 2, num_inf_req_message);
+DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(loop, false, loop_message);
@@ -79,7 +77,7 @@ DEFINE_string(u, "", utilization_monitors_message);
 */
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "object_detection_demo_ssd_async [OPTION]" << std::endl;
+    std::cout << "segmentation_demo_async [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
@@ -90,7 +88,7 @@ static void showUsage() {
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -pc                       " << performance_counter_message << std::endl;
-    std::cout << "    -nireq \"<integer>\"        " << num_inf_req_message << std::endl;
+    std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
     std::cout << "    -loop                     " << loop_message << std::endl;
@@ -180,7 +178,7 @@ int main(int argc, char *argv[]) {
         AsyncPipeline pipeline(std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m)),
             ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
             core);
-        Presenter presenter;
+        Presenter presenter(FLAGS_u);
 
         bool keepRunning = true;
         int64_t frameNum = -1;
@@ -188,7 +186,7 @@ int main(int argc, char *argv[]) {
 
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
-                //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
+                //--- Capturing frame
                 auto startTime = std::chrono::steady_clock::now();
                 curr_frame = cap->read();
                 if (curr_frame.empty()) {
@@ -253,11 +251,11 @@ int main(int argc, char *argv[]) {
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
-        slog::err << "[ ERROR ] " << error.what() << slog::endl;
+        std::cerr << "[ ERROR ] " << error.what() << '\n';
         return 1;
     }
     catch (...) {
-        slog::err << "[ ERROR ] Unknown/internal exception happened." << slog::endl;
+        std::cerr << "[ ERROR ] Unknown/internal exception happened.\n";
         return 1;
     }
 

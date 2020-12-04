@@ -65,7 +65,7 @@ InferenceEngine:
     API version ............ <version>
     Build .................. <number>
 
-object_detection_demo_async [OPTION]
+object_detection_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
@@ -81,7 +81,7 @@ Options:
     -r                        Optional. Inference results as raw values.
     -t                        Optional. Probability threshold for detections.
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
-    -nireq "<integer>"        Optional. Number of infer requests.
+    -nireq "<integer>"        Optional. Number of infer requests. Default value is determined automatically.
     -nthreads "<integer>"     Optional. Number of threads.
     -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
     -loop                     Optional. Enable reading the input in a loop.

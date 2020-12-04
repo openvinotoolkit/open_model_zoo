@@ -53,7 +53,7 @@ public:
     /// @param metaData - shared pointer to metadata container.
     /// Might be null. This pointer will be passed through pipeline and put to the final result structure.
     /// @returns -1 if image cannot be scheduled for processing (there's no free InferRequest available).
-    /// Otherwise returns unique sequential frame ID for this particular request. Same frame ID will be written in the response structure.
+    /// Otherwise returns unique sequential frame ID for this particular request. Same frame ID will be written in the result structure.
     virtual int64_t submitData(const InputData& inputData, const std::shared_ptr<MetaData>& metaData);
 
     /// Gets available data from the queue
