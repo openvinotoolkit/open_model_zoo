@@ -935,7 +935,7 @@ class CRAFTTextDetectionAdapter(Adapter):
                 sy = 0
             if ex > img_w:
                 ex = img_w
-            if ey >= img_h:
+            if ey > img_h:
                 ey = img_h
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1 + niter, 1 + niter))
             segmap[sy:ey, sx:ex] = cv2.dilate(segmap[sy:ey, sx:ex], kernel)
