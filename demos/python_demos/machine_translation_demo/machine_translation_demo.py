@@ -15,9 +15,9 @@
 import argparse
 import itertools
 import logging as log
-import os
 import sys
 import time
+from pathlib import Path
 
 import numpy as np
 from openvino.inference_engine import IECore
@@ -115,8 +115,8 @@ class Tokenizer:
         self.logger.info(f"path: {path}")
         self.logger.info(f"max_tokens: {max_tokens}")
         self.tokenizer = SentencePieceBPETokenizer(
-            os.path.join(path, "vocab.json"),
-            os.path.join(path, "merges.txt")
+            str(path / "vocab.json"),
+            str(path / "merges.txt"),
         )
         self.max_tokens = max_tokens
         self.idx = {}
@@ -184,11 +184,11 @@ def build_argparser():
     """ Build argument parser.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "--model", required=True, type=str,
+    parser.add_argument("-m", "--model", required=True, type=Path,
                         help="Required. Path to an .xml file with a trained model")
-    parser.add_argument('--tokenizer-src', type=str, required=True,
+    parser.add_argument('--tokenizer-src', type=Path, required=True,
                         help='Required. Path to the folder with src tokenizer that contains vocab.json and merges.txt.')
-    parser.add_argument('--tokenizer-tgt', type=str, required=True,
+    parser.add_argument('--tokenizer-tgt', type=Path, required=True,
                         help='Required. Path to the folder with tgt tokenizer that contains vocab.json and merges.txt.')
     parser.add_argument('-i', '--input', type=str, required=False, nargs='*',
                         help='Optional. Text for translation. Replaces console input.')
@@ -203,7 +203,7 @@ def main(args):
     logger.info("creating translator")
     model = Translator(
         model_xml=args.model,
-        model_bin=os.path.splitext(args.model)[0] + ".bin",
+        model_bin=args.model.with_suffix(".bin"),
         tokenizer_src=args.tokenizer_src,
         tokenizer_tgt=args.tokenizer_tgt,
         output_name=args.output_name
