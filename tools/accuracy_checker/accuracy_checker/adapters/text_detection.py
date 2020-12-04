@@ -933,7 +933,7 @@ class CRAFTTextDetectionAdapter(Adapter):
                 sx = 0
             if sy < 0:
                 sy = 0
-            if ex >= img_w:
+            if ex > img_w:
                 ex = img_w
             if ey >= img_h:
                 ey = img_h
