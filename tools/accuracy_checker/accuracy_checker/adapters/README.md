@@ -28,6 +28,7 @@ AccuracyChecker supports following set of adapters:
 * `tiny_yolo_v1` - converting output of Tiny YOLO v1 model to `DetectionPrediction` representation.
 * `reid` - converting output of reidentification model to `ReIdentificationPrediction` representation.
   * `grn_workaround` - enabling processing output with adding Global Region Normalization layer.
+  * `joining_method` - method used to join embeddings (optional, supported methods are `sum` and `concatenation`, default - `sum`).
 * `yolo_v2` - converting output of YOLO v2 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 20).
   * `anchors` - anchor values provided as comma-separated list or one of precomputed:

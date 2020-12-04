@@ -229,12 +229,13 @@ class PairwiseAccuracy(FullDatasetEvaluationMetric):
             'min_score': BaseField(
                 optional=True, default='train_median',
                 description="Min score for determining that objects are different. "
-                            "You can provide value or use train_median value which will be calculated "
-                            "if annotations has training subset."
+                            "You can provide value or use train_median or best_train_threshold values "
+                            "which will be calculated if annotations has training subset."
             ),
-            'distance_mode': StringField(
-                optional=True, default='0', description='Allows to choose one of the distance calculation mode',
-                choices=['0', '1']
+            'distance_method': StringField(
+                optional=True, default='euclidian_distance',
+                description='Allows to choose one of the distance calculation methods',
+                choices=['euclidian_distance', 'cosine_distance']
             ),
             'subtract_mean': BoolField(
                 optional=True, default=False, description='Allows to subtract mean calculated on train embeddings '
@@ -245,19 +246,19 @@ class PairwiseAccuracy(FullDatasetEvaluationMetric):
 
     def configure(self):
         self.min_score = self.get_value_from_config('min_score')
-        self.distance_mode = int(self.get_value_from_config('distance_mode'))
+        self.distance_method = self.get_value_from_config('distance_method')
         self.subtract_mean = self.get_value_from_config('subtract_mean')
 
     def evaluate(self, annotations, predictions):
         min_score = self.min_score
         if min_score == 'train_median':
             train_distances, _train_pairs, mean = get_embedding_distances(annotations, predictions, train=True,
-                                                                          distance_mode=self.distance_mode,
+                                                                          distance_method=self.distance_method,
                                                                           save_mean=self.subtract_mean)
             min_score_value = np.median(train_distances)
-        if min_score == 'best_train_threshold':
+        elif min_score == 'best_train_threshold':
             train_distances, train_pairs, mean = get_embedding_distances(annotations, predictions, train=True,
-                                                                         distance_mode=self.distance_mode,
+                                                                         distance_method=self.distance_method,
                                                                          save_mean=self.subtract_mean)
             thresholds = np.arange(0, 4, 0.01)
             accuracy_train = np.zeros((thresholds.size))
@@ -274,10 +275,12 @@ class PairwiseAccuracy(FullDatasetEvaluationMetric):
                         accuracy += 1
                 accuracy_train[threshold_idx] = accuracy
             min_score_value = thresholds[np.argmax(accuracy_train)]
-
+        else:
+            min_score_value = min_score
+            mean = 0.0
 
         embed_distances, pairs, _ = get_embedding_distances(annotations, predictions, mean=mean,
-                                                            distance_mode=self.distance_mode)
+                                                            distance_method=self.distance_method)
         if not pairs:
             return np.nan
 
@@ -312,12 +315,13 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
             'min_score': BaseField(
                 optional=True, default='train_median',
                 description="Min score for determining that objects are different. "
-                            "You can provide value or use train_median value which will be calculated "
-                            "if annotations has training subset."
+                            "You can provide value or use train_median or best_train_threshold values "
+                            "which will be calculated if annotations has training subset."
             ),
-            'distance_mode': StringField(
-                optional=True, default='0', description='Allows to choose one of the distance calculation mode',
-                choices=['0', '1']
+            'distance_method': StringField(
+                optional=True, default='euclidian_distance',
+                description='Allows to choose one of the distance calculation methods',
+                choices=['euclidian_distance', 'cosine_distance']
             ),
             'subtract_mean': BoolField(
                 optional=True, default=False, description='Allows to subtract mean calculated on train embeddings '
@@ -652,7 +656,8 @@ def get_valid_subset(gallery_cams, gallery_ids, query_index, indices, query_cams
     return valid
 
 
-def get_embedding_distances(annotation, prediction, train=False, distance_mode=0, save_mean=False, mean=0.0):
+def get_embedding_distances(annotation, prediction, train=False, distance_method='euclidian_distance',
+                            save_mean=False, mean=0.0):
     image_indexes = {}
     for i, pred in enumerate(prediction):
         image_indexes[pred.identifier] = i
@@ -677,12 +682,12 @@ def get_embedding_distances(annotation, prediction, train=False, distance_mode=0
         embed2 = np.asarray([prediction[idx].embedding for _, idx, _ in pairs])
         if save_mean:
             mean = np.mean(np.concatenate([embed1, embed2]), axis=0)
-        dist = distance(embed1 - mean, embed2 - mean, distance_mode)
+        dist = distance(embed1 - mean, embed2 - mean, distance_method)
         return dist, pairs, mean
     return None, pairs, mean
 
-def distance(embed1, embed2, distance_mode=0):
-    if distance_mode == 0:
+def distance(embed1, embed2, distance_method='euclidian_distance'):
+    if distance_method == 'euclidian_distance':
         dist = 0.5 * (1 - np.sum(embed1 * embed2, axis=1))
     else:
         # Distance based on cosine similarity

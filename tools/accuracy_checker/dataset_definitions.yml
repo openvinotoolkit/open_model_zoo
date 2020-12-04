@@ -542,6 +542,8 @@ datasets:
         subset_number: 2
 
   - name: lfw_mtcnn_align
+    # converted from LFW public dataset with using
+    # script https://github.com/davidsandberg/facenet/blob/master/src/align/align_dataset_mtcnn.py
     data_source: lfw_mtcnnpy_160
     annotation_conversion:
       converter: lfw

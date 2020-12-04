@@ -3,7 +3,9 @@ models:
 
     launchers:
       - framework: dlsdk
-        adapter: reid
+        adapter:
+          type: reid
+          joining_method: concatenation
 
     datasets:
       - name: lfw_mtcnn_align
@@ -15,5 +17,5 @@ models:
         metrics:
           - type: pairwise_accuracy_subsets
             min_score: best_train_threshold
-            distance_mode: '1'
+            distance_method: 'cosine_distance'
             subtract_mean: True
