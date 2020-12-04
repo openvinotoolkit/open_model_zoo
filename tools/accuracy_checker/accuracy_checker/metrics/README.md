@@ -80,9 +80,14 @@ More detailed information about calculation segmentation metrics you can find [h
 * `reid_map` - Mean Average Precision score for object reidentification. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
   * `uninterpolated_auc` - should area under precision recall curve be computed using trapezoidal rule or directly.
 * `pairwise_accuracy` - pairwise accuracy for object reidentification. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
-  * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` value which will be calculated if annotations has training subset.
+  * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` or `best_train_threshold` values which will be calculated if annotations has training subset.
+  * `distance_method` - allows to choose one of the distance calculation methods (optional, supported methods are `euclidian_distance` and `cosine_distance`, default - `euclidian_distance`).
+  * `subtract_mean` - allows to subtract mean calculated on train embeddings before calculating the distance(optional, default - `False`).
 * `pairwise_accuracy_subsets` - object reidentification pairwise accuracy with division dataset on test and train subsets for calculation mean score. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
   * `subset_number` - number of subsets for separating.
+  * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` or `best_train_threshold` values which will be calculated if annotations has training subset.
+  * `distance_method` - allows to choose one of the distance calculation methods (optional, supported methods are `euclidian_distance` and `cosine_distance`, default - `euclidian_distance`).
+  * `subtract_mean` - allows to subtract mean calculated on train embeddings before calculating the distance(optional, default - `False`).
 * `localization_recall` - recall metric used for evaluation place recognition task. Supported representations: `PlaceRecognitionAnnotation`, `ReidentificationPrediction`.
   * `top_k` - number of k highest ranked samples to consider when matching.
   * `distance_threshold` - distance threshold for search positive matching pairs between query and gallery (Optional, default 25).
