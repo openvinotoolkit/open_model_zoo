@@ -139,16 +139,10 @@ def preprocess_formula(l):
     if len(l) == 0:
         l = '\\hspace{1cm}'
     # \hspace {1 . 5 cm} -> \hspace {1.5cm}
-    for space in ["hspace", "vspace"]:
-        match = re.finditer(space + " {(.*?)}", l)
-        if match:
-            new_l = ""
-            last = 0
-            for m in match:
-                new_l = new_l + l[last:m.start(1)] + m.group(1).replace(" ", "")
-                last = m.end(1)
-            new_l = new_l + l[last:]
-            l = new_l
+    l = re.sub("([hv]space )({.*?})",
+               lambda m: m[1] + m[2].replace(" ", ""),
+               l)
+
     return l
 
 

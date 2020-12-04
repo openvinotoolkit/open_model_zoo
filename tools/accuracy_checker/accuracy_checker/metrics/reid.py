@@ -503,8 +503,7 @@ class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
         dist_mat *= valid_mask
         sorted_idx = np.argsort(-dist_mat, axis=1)[:, :self.top_k]
 
-        apply_func = lambda row: np.fromiter(map(lambda i: gallery_person_ids[i], row), dtype=np.int)
-        pred_top_k_query_ids = np.apply_along_axis(apply_func, 1, sorted_idx).T
+        pred_top_k_query_ids = gallery_person_ids[sorted_idx].T
         query_person_ids = np.tile(query_person_ids, (self.top_k, 1))
 
         tp = np.any(query_person_ids == pred_top_k_query_ids, axis=0).sum()
