@@ -19,9 +19,6 @@ class OpenError(Exception):
 
 class ImagesCapture:
 
-    def __init__(self):
-        raise NotImplementedError
-
     def read():
         raise NotImplementedError
 
