@@ -13,6 +13,11 @@
 
 import logging as log
 import cv2 as cv
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'common'))
+from images_capture import open_images_capture
 
 
 class MulticamCapture:
