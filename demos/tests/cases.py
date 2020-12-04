@@ -34,7 +34,7 @@ class Demo:
 
 class NativeDemo(Demo):
     def __init__(self, subdirectory, device_keys, test_cases):
-        self.subdirectory = subdirectory
+        self.subdirectory = subdirectory + '/cpp'
 
         self.device_keys = device_keys
 
@@ -54,7 +54,7 @@ class NativeDemo(Demo):
 
 class PythonDemo(Demo):
     def __init__(self, subdirectory, device_keys, test_cases):
-        self.subdirectory = 'python_demos/' + subdirectory
+        self.subdirectory = subdirectory + '/python'
 
         self.device_keys = device_keys
 
