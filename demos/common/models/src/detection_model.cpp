@@ -49,7 +49,8 @@ std::vector<std::string> DetectionModel::loadLabels(const std::string& labelFile
     /** Read labels (if any)**/
     if (!labelFilename.empty()) {
         std::ifstream inputFile(labelFilename);
-        if (!inputFile.is_open()) throw std::runtime_error("Can't open the labels file: " + labelFilename);
+        if (!inputFile.is_open()) 
+            throw std::runtime_error("Can't open the labels file: " + labelFilename);
         std::string label;
         while (std::getline(inputFile, label)) {
             labelsList.push_back(label);
