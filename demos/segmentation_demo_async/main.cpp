@@ -50,7 +50,7 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 "Absolute path to the .xml file with the kernel descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
 "Absolute path to a shared library with the kernel implementations.";
-static const char nireq_message[] = "Optional. Number of infer requests. Default value is determined automatically.";
+static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
 static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
 "throughput mode (for HETERO and MULTI device cases use format "

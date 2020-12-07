@@ -56,7 +56,7 @@ static const char custom_cpu_library_message[] = "Required for CPU custom layers
 static const char thresh_output_message[] = "Optional. Probability threshold for detections.";
 static const char raw_output_message[] = "Optional. Inference results as raw values.";
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
-static const char nireq_message[] = "Optional. Number of infer requests. Default value is determined automatically.";
+static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
 static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
 "throughput mode (for HETERO and MULTI device cases use format "
