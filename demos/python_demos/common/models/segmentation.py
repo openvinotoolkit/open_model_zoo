@@ -28,7 +28,6 @@ class SegmentationModel(Model):
         self.n, self.c, self.h, self.w = self.net.input_info[self.blob_name].input_data.shape
         self.prepare_outputs()
 
-
     def prepare_inputs(self):
         input_shapes = self.net.input_info
         if len(input_shapes) != 1:
@@ -44,7 +43,6 @@ class SegmentationModel(Model):
         blob.layout = "NHWC"
         blob.precision = "U8"
         return blob_name
-
 
     def prepare_outputs(self):
         if len(self.net.outputs) != 1:
@@ -68,7 +66,6 @@ class SegmentationModel(Model):
         else:
             raise Exception("Unexpected output blob shape {}. Only 4D and 3D output blobs are supported".format(out_size_vector))
 
-
     def preprocess(self, inputs):
         image = inputs
         resized_image = resize_image(image, (self.w, self.h))
@@ -79,7 +76,6 @@ class SegmentationModel(Model):
 
         dict_inputs = {self.blob_name: resized_image}
         return dict_inputs, meta
-
 
     def postprocess(self, outputs, meta):
         orginal_image_shape = meta['original_shape']
@@ -99,5 +95,4 @@ class SegmentationModel(Model):
                             max_prob = prob
                 result[row_id, col_id] = class_id
         result = cv2.resize(result, orginal_image_shape, cv2.INTER_NEAREST)
-        print('postprocess', result)
         return result
