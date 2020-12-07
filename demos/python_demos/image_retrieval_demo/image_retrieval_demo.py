@@ -30,7 +30,7 @@ from image_retrieval_demo.roi_detector_on_video import RoiDetectorOnVideo
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
-from images_capture import open_images_capture
+#from images_capture import open_images_capture
 
 
 INPUT_SIZE = 224
@@ -115,10 +115,11 @@ def main():
     img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE,
                                    args.cpu_extension)
 
-    cap = open_images_capture(args.input, args.loop)
-    if cap.get_type() not in ('VIDEO', 'CAMERA'):
-        raise RuntimeError("The input should be a video file or a device node")
-    frames = RoiDetectorOnVideo(cap)
+    #cap = open_images_capture(args.input, args.loop)
+    #if cap.get_type() not in ('VIDEO', 'CAMERA'):
+    #    raise RuntimeError("The input should be a video file or a device node")
+    #frames = RoiDetectorOnVideo(cap)
+    frames = RoiDetectorOnVideo(args.input)
 
     compute_embeddings_times = []
     search_in_gallery_times = []
