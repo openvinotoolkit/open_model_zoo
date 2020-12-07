@@ -114,7 +114,7 @@ class Tokenizer:
         self.logger.info("loading tokenizer")
         self.logger.info(f"path: {path}")
         self.logger.info(f"max_tokens: {max_tokens}")
-        self.tokenizer = SentencePieceBPETokenizer(
+        self.tokenizer = SentencePieceBPETokenizer.from_file(
             str(path / "vocab.json"),
             str(path / "merges.txt"),
         )
