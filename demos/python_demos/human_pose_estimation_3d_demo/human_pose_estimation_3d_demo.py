@@ -12,10 +12,10 @@
  limitations under the License.
 """
 
-from argparse import ArgumentParser, SUPPRESS
 import json
-import os
 import sys
+from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -24,7 +24,7 @@ from modules.inference_engine import InferenceEngine
 from modules.draw import Plotter3d, draw_poses
 from modules.parse_poses import parse_poses
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 import monitors
 from images_capture import open_images_capture
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
                       help='Show this help message and exit.')
     args.add_argument('-m', '--model',
                       help='Required. Path to an .xml file with a trained model.',
-                      type=str, required=True)
+                      type=Path, required=True)
     args.add_argument('-i', '--input',
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images or anything that cv2.VideoCapture can process.',
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     args.add_argument('--height_size', help='Optional. Network input layer height size.', type=int, default=256)
     args.add_argument('--extrinsics_path',
                       help='Optional. Path to file with camera extrinsics.',
-                      type=str, default=None)
+                      type=Path, default=None)
     args.add_argument('--fx', type=np.float32, default=-1, help='Optional. Camera focal length.')
     args.add_argument('--no_show', help='Optional. Do not display output.', action='store_true')
     args.add_argument("-u", "--utilization_monitors", default='', type=str,
@@ -81,7 +81,7 @@ if __name__ == '__main__':
 
     file_path = args.extrinsics_path
     if file_path is None:
-        file_path = os.path.join(os.path.dirname(__file__), 'data', 'extrinsics.json')
+        file_path = Path(__file__).parent / 'data/extrinsics.json'
     with open(file_path, 'r') as f:
         extrinsics = json.load(f)
     R = np.array(extrinsics['R'], dtype=np.float32)

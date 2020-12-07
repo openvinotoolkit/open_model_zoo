@@ -18,12 +18,12 @@
 from openvino.inference_engine import IECore
 import cv2 as cv
 import numpy as np
-import os
-from argparse import ArgumentParser, SUPPRESS
 import logging as log
 import sys
+from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 import monitors
 
 
@@ -32,7 +32,7 @@ def build_arg():
     in_args = parser.add_argument_group('Options')
     in_args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Help with the script.')
     in_args.add_argument("-m", "--model", help="Required. Path to .xml file with pre-trained model.",
-                         required=True, type=str)
+                         required=True, type=Path)
     in_args.add_argument("-d", "--device",
                          help="Optional. Specify target device for infer: CPU, GPU, FPGA, HDDL or MYRIAD. "
                               "Default: CPU",
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     log.debug("Load network")
     ie = IECore()
-    load_net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
+    load_net = ie.read_network(args.model, args.model.with_suffix(".bin"))
     load_net.batch_size = 1
     exec_net = ie.load_network(network=load_net, device_name=args.device)
 

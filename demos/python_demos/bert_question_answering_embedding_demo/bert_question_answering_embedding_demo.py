@@ -16,16 +16,16 @@
  limitations under the License.
 """
 import sys
-import os
 import time
 import logging as log
 from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
 
 import numpy as np
 
 from openvino.inference_engine import IENetwork, IECore
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
 
@@ -48,7 +48,7 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument("-m_emb", "--model_emb",
                       help="Required. Path to an .xml file with a trained model to build embeddings",
-                      required=True, type=str)
+                      required=True, type=Path)
     args.add_argument("--input_names_emb",
                       help="Optional. Names for inputs in MODEL_EMB network. "
                            "For example 'input_ids,attention_mask,token_type_ids','position_ids'",
@@ -57,7 +57,7 @@ def build_argparser():
     args.add_argument("-m_qa","--model_qa",
                       help="Optional. Path to an .xml file with a trained model to give exact answer",
                       default = None,
-                      required=False,type=str)
+                      required=False,type=Path)
     args.add_argument("--input_names_qa",
                       help="Optional. Names for inputs in MODEL_QA network. "
                            "For example 'input_ids,attention_mask,token_type_ids','position_ids'",
@@ -91,7 +91,7 @@ def main():
 
     #read model to calculate embedding
     model_xml_emb = args.model_emb
-    model_bin_emb = os.path.splitext(model_xml_emb)[0] + ".bin"
+    model_bin_emb = model_xml_emb.with_suffix(".bin")
 
     log.info("Loading embedding network files:\n\t{}\n\t{}".format(model_xml_emb, model_bin_emb))
     ie_encoder_emb = ie.read_network(model=model_xml_emb, weights=model_bin_emb)
@@ -140,7 +140,7 @@ def main():
     # Read model for final exact qa
     if args.model_qa:
         model_xml = args.model_qa
-        model_bin = os.path.splitext(model_xml)[0] + ".bin"
+        model_bin = model_xml.with_suffix(".bin")
         log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
 
         ie_encoder_qa = ie.read_network(model=model_xml, weights=model_bin)

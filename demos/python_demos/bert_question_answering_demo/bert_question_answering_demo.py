@@ -16,15 +16,15 @@
  limitations under the License.
 """
 import logging as log
-import os
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
 
 import numpy as np
 from openvino.inference_engine import IECore
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
 
@@ -36,7 +36,7 @@ def build_argparser():
     args.add_argument("-v", "--vocab", help="Required. path to the vocabulary file with tokens",
                       required=True, type=str)
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
-                      required=True, type=str)
+                      required=True, type=Path)
     args.add_argument("-i", "--input", help="Required. URL to a page with context",
                       action='append',
                       required=True, type=str)
@@ -114,7 +114,7 @@ def main():
 
     # read IR
     model_xml = args.model
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
+    model_bin = model_xml.with_suffix(".bin")
     log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
     ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
 
