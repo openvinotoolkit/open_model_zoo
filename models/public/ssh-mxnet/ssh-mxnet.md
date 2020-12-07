@@ -1,4 +1,4 @@
-# ssh
+# ssh-mxnet
 
 ## Use Case and High-Level Description
 

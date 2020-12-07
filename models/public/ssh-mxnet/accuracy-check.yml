@@ -1,5 +1,5 @@
 models:
-  - name: ssh
+  - name: ssh-mxnet
     launchers:
       - framework: dlsdk
         adapter:
