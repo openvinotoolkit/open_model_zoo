@@ -68,8 +68,8 @@ class TranslationEngine:
     def __init__(self, model_xml, model_bin, output_name):
         self.logger = log.getLogger("TranslationEngine")
         self.logger.info("loading network")
-        self.logger.info("model_xml: " + model_xml)
-        self.logger.info("model_bin: " + model_bin)
+        self.logger.info(f"model_xml: {model_xml}")
+        self.logger.info(f"model_bin: {model_bin}")
         self.ie = IECore()
         self.net = self.ie.read_network(
             model=model_xml,
@@ -112,8 +112,8 @@ class Tokenizer:
     def __init__(self, path, max_tokens):
         self.logger = log.getLogger("Tokenizer")
         self.logger.info("loading tokenizer")
-        self.logger.info("path: " + path)
-        self.logger.info("max_tokens: " + str(max_tokens))
+        self.logger.info(f"path: {path}")
+        self.logger.info(f"max_tokens: {max_tokens}")
         self.tokenizer = SentencePieceBPETokenizer(
             os.path.join(path, "vocab.json"),
             os.path.join(path, "merges.txt")
@@ -229,7 +229,7 @@ def main(args):
             translation = model(sentence)
             stop = time.perf_counter()
             print(translation)
-            logger.info("time: " + str(stop - start) + " s.")
+            logger.info(f"time: {stop - start} s.")
         except Exception:
             log.error("an error occurred", exc_info=True)
 
