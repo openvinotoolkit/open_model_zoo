@@ -295,11 +295,11 @@ int main(int argc, char *argv[]) {
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
-        std::cerr << "[ ERROR ] " << error.what() << '\n';
+        slog::err << error.what() << slog::endl;
         return 1;
     }
     catch (...) {
-        std::cerr << "[ ERROR ] Unknown/internal exception happened.\n";
+        slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
 
