@@ -436,7 +436,7 @@ class StackedHourGlassNetworkAdapter(Adapter):
         return params
 
     def configure(self):
-        self.score_map_out = self.get_value_from_config('score_map_out')
+        self.score_map_out = self.get_value_from_config('score_map_output')
 
     def process(self, raw, identifiers, frame_meta):
         if self.score_map_out is None:
@@ -484,7 +484,7 @@ class StackedHourGlassNetworkAdapter(Adapter):
             hm = output[p]
             px = int(math.floor(coords[p][0]))
             py = int(math.floor(coords[p][1]))
-            if 1 < px < res[0] and  1 < py < res[1]:
+            if 1 < px < res[0] and 1 < py < res[1]:
                 diff = np.array([hm[py - 1][px] - hm[py - 1][px - 2], hm[py][px - 1] - hm[py - 2][px - 1]])
                 coords[p] += np.sign(diff).astype(float) * .25
         coords += 0.5
