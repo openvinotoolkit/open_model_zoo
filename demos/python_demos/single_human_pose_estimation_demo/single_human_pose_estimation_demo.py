@@ -25,7 +25,7 @@ def build_argparser():
     parser.add_argument("-i", "--input", required=True,
                         help="Required. An input to process. The input must be a single image, "
                              "a folder of images or anything that cv2.VideoCapture can process.")
-    parser.add_argument("-loop", "--loop", default=False, action="store_true",
+    parser.add_argument("--loop", default=False, action="store_true",
                         help="Optional. Enable reading the input in a loop.")
     parser.add_argument("-d", "--device", type=str, default='CPU', required=False,
                         help="Specify the target to infer on CPU or GPU")

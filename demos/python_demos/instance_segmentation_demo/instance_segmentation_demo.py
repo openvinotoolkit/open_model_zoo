@@ -48,7 +48,7 @@ def build_argparser():
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images or anything that cv2.VideoCapture can process.')
-    args.add_argument('-loop', '--loop', default=False, action='store_true',
+    args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '

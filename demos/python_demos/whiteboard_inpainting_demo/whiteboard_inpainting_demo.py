@@ -68,7 +68,7 @@ def main():
     parser = argparse.ArgumentParser(description='Whiteboard inpainting demo')
     parser.add_argument('-i', '--input', required=True,
                          help='Required. Path to a video file or a device node of a web-camera')
-    parser.add_argument('-loop', '--loop', default=False, action='store_true',
+    parser.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop')
     parser.add_argument('-m_i', '--m_instance_segmentation', type=str, required=False,
                         help='Path to the instance segmentation model')

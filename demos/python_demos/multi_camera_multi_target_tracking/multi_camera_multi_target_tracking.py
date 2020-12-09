@@ -204,7 +204,7 @@ def main():
                                                   tracking live demo script')
     parser.add_argument('-i', '--input', required=True, nargs='+',
                         help='Input sources (indexes of cameras or paths to video files)')
-    parser.add_argument('-loop', '--loop', default=False, action='store_true',
+    parser.add_argument('--loop', default=False, action='store_true',
                         help='Optional. Enable reading the input in a loop')
     parser.add_argument('--config', type=str, default=os.path.join(current_dir, 'configs/person.py'), required=False,
                         help='Configuration file')

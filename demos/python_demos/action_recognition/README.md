@@ -44,7 +44,7 @@ Options:
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image,
                         a folder of images or anything that cv2.VideoCapture can process
-  -loop                 Optional. Enable reading the input in a loop
+  --loop                Optional. Enable reading the input in a loop
   -m_en M_ENCODER, --m_encoder M_ENCODER
                         Required. Path to encoder model
   -m_de M_DECODER, --m_decoder M_DECODER

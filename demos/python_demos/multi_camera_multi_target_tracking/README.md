@@ -63,7 +63,7 @@ optional arguments:
   -i INPUT, --input INPUT
                         Input sources (indexes of cameras or paths to video
                         files)
-  -loop                 Optional. Enable reading the input in a loop
+  --loop                Optional. Enable reading the input in a loop
   --config CONFIG       Configuration file
   --detections DETECTIONS
                         JSON file with bounding boxes

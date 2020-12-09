@@ -41,7 +41,7 @@ Options:
   -i INPUT, --input INPUT
                         Required. Path to a video file or a device node of a
                         web-camera.
-  -loop                 Optional. Enable reading the input in a loop.
+  --loop                Optional. Enable reading the input in a loop.
   -g GALLERY, --gallery GALLERY
                         Required. Path to a file listing gallery images.
   -gt GROUND_TRUTH, --ground_truth GROUND_TRUTH

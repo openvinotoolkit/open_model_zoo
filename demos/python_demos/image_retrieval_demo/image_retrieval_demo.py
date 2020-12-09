@@ -48,7 +48,7 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument('-i', '--input', required=True,
                       help='Required. Path to a video file or a device node of a web-camera.')
-    args.add_argument('-loop', '--loop', default=False, action='store_true',
+    args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
     args.add_argument('-g', '--gallery',
                       help='Required. Path to a file listing gallery images.',

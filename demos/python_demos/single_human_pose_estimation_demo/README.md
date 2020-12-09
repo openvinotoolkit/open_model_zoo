@@ -26,7 +26,7 @@ optional arguments:
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image,
                         a folder of images or anything that cv2.VideoCapture can process.
-  -loop                 Optional. Enable reading the input in a loop
+  --loop                Optional. Enable reading the input in a loop
   -d DEVICE, --device DEVICE
                         Specify the target to infer on CPU or GPU
   --person_label PERSON_LABEL
