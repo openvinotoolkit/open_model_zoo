@@ -133,8 +133,8 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
             if (op->get_friendly_name() == outputsNames[0]) {
                 auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
                 if (!detOutput) {
-                    THROW_IE_EXCEPTION << "Object Detection network output layer(" + op->get_friendly_name() +
-                        ") should be DetectionOutput, but was " + op->get_type_info().name;
+                    throw std::logic_error("Object Detection network output layer(" + op->get_friendly_name() +
+                        ") should be DetectionOutput, but was " + op->get_type_info().name);
                 }
 
                 num_classes = detOutput->get_attrs().num_classes;
