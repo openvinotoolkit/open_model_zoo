@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """
  Copyright (C) 2018-2020 Intel Corporation
+
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
+
       http://www.apache.org/licenses/LICENSE-2.0
+
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,11 +27,12 @@ import cv2
 import numpy as np
 from openvino.inference_engine import IECore
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 
 from models import *
 import monitors
 from pipelines import AsyncPipeline
+from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
@@ -63,22 +67,20 @@ CITYSCAPES_COLORS = [
 def apply_color_map(input):
     ### Initializing colors array if needed
     colors = []
+    input_3d = cv2.merge([input, input, input])
     rng = random.Random(0xACE)
     if not colors:
-        colors = np.zeros(size=(256, 1), dtype=np.uint8)
-        for i in range(len(CITYSCAPES_COLORS)):
-            colors[i, 0] = (CITYSCAPES_COLORS[i][0], CITYSCAPES_COLORS[i][1], CITYSCAPES_COLORS[i][2])
-        for i in range(len(colors)):
-            colors[i, 0] = (rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255))
-
-    # Converting class to color
-    out = cv2.applyColorMap(input, colors)
+        classes = np.array(CITYSCAPES_COLORS)
+        colors = np.zeros((256, 1, 3), dtype=np.uint8)
+        colors[:len(classes), 0, :] = classes.astype('uint8')
+        colors[len(classes):, 0, :] = rng.uniform(0, 255)
+    out = cv2.LUT(input_3d, colors)
     return out
 
 
 def render_segmentation_data(frame, objects):
     # Visualizing result data over source image
-    return frame / 2 + apply_color_map(objects) / 2
+    return (frame / 2 + apply_color_map(objects) / 2) / 255
 
 
 def build_argparser():
@@ -87,19 +89,13 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
-    args.add_argument('-i', '--input', required=True, type=str,
-                      help='Required. Path to an image, folder with images, video file or a numeric camera ID.')
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. An input to process. The input must be a single image, '
+                           'a folder of images or anything that cv2.VideoCapture can process.')
     args.add_argument('-d', '--device', default='CPU', type=str,
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
-
-    common_model_args = parser.add_argument_group('Common model options')
-    common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
-    common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
-                                   help='Optional. Probability threshold for detections filtering.')
-    common_model_args.add_argument('--keep_aspect_ratio', action='store_true', default=False,
-                                   help='Optional. Keeps aspect ratio on resize.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -113,15 +109,13 @@ def build_argparser():
                             help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
 
     io_args = parser.add_argument_group('Input/output options')
-    io_args.add_argument('-loop', '--loop', help='Optional. Loops input data.', action='store_true', default=False)
-    io_args.add_argument('-no_show', '--no_show', help="Optional. Don't show output.", action='store_true')
+    io_args.add_argument('--loop', default=False, action='store_true',
+                         help='Optional. Enable reading the input in a loop.')
+    io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
-
-    debug_args = parser.add_argument_group('Debug options')
-    debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
-                            default=False, action='store_true')
     return parser
+
 
 def get_plugin_configs(device, num_streams, num_threads):
     config_user_specified = {}
@@ -164,14 +158,7 @@ def main():
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    try:
-        input_stream = int(args.input)
-    except ValueError:
-        input_stream = args.input
-    cap = cv2.VideoCapture(input_stream)
-    if not cap.isOpened():
-        log.error('OpenCV: Failed to open capture: ' + str(input_stream))
-        sys.exit(1)
+    cap = open_images_capture(args.input, args.loop)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
@@ -179,11 +166,24 @@ def main():
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
-    presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                   (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4),
-                                    round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
+    while True:
+        if pipeline.is_ready():
+            # Get new image/frame
+            start_time = perf_counter()
+            frame = cap.read()
+            if frame is None:
+                break
+            if next_frame_id == 0:
+                frame_size = frame.shape
+                presenter = monitors.Presenter(args.utilization_monitors, 55,
+                                               (round(frame_size[1] / 4), round(frame_size[0] / 8)))
+            # Submit for inference
+            pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
+            next_frame_id += 1
+        else:
+            # Wait for empty request
+            pipeline.await_any()
 
-    while cap.isOpened():
         if pipeline.callback_exceptions:
             raise pipeline.callback_exceptions[0]
         # Process all completed requests
@@ -193,60 +193,32 @@ def main():
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
 
+            frame = render_segmentation_data(frame, objects)
             presenter.drawGraphs(frame)
-            #frame = render_segmentation_data(frame, objects)
             metrics.update(start_time, frame)
             if not args.no_show:
-                cv2.imshow('Detection Results', frame)
+                cv2.imshow('Segmentation Results', frame)
                 key = cv2.waitKey(1)
-
-                ESC_KEY = 27
-                # Quit.
-                if key in {ord('q'), ord('Q'), ESC_KEY}:
+                if key == 27 or key == 'q' or key == 'Q':
                     break
                 presenter.handleKey(key)
             next_frame_id_to_show += 1
-            continue
-
-        if pipeline.is_ready():
-            # Get new image/frame
-            start_time = perf_counter()
-            ret, frame = cap.read()
-            if not ret:
-                if args.loop:
-                    cap.open(input_stream)
-                else:
-                    cap.release()
-                continue
-
-            # Submit for inference
-            pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
-            next_frame_id += 1
-        else:
-            # Wait for empty request
-            pipeline.await_any()
 
     pipeline.await_all()
     # Process completed requests
     while pipeline.has_completed_request():
         results = pipeline.get_result(next_frame_id_to_show)
-        #print(results)
         if results:
             objects, frame_meta = results
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
+
+            frame = render_segmentation_data(frame, objects)
             presenter.drawGraphs(frame)
-            #frame = render_segmentation_data(frame, objects)
             metrics.update(start_time, frame)
             if not args.no_show:
                 cv2.imshow('Segmentation Results', frame)
                 key = cv2.waitKey(1)
-
-                ESC_KEY = 27
-                # Quit.
-                if key in {ord('q'), ord('Q'), ESC_KEY}:
-                    break
-                presenter.handleKey(key)
             next_frame_id_to_show += 1
         else:
             break
