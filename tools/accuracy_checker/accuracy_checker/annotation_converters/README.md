@@ -416,7 +416,9 @@ The main difference between this converter and `super_resolution` in data organi
   * `subset_file` - matlab file contains info about subset used in validation.
 * `mpii` - converts MPII Human Pose Estimation dataset to `PoseEstimationAnnotation`.
   * `annotation_file` - json-file with annotation.
-  * `headboxes_file` - file with boxes contained head coordinates for each image.
+  * `headboxes_file` - numpy file with boxes contained head coordinates for each image.
+  * `gt_pos_file` - numpy file with ground truth keypoints, optional, if not provided, default keypoints from annotation will be used.
+  * `joints_visibility_file` - numpy file with ground truth keypoints visibility level, optional, if not provided, default visibility level from annotation will be used.
 * `cluttered_mnist` - converts MNIST dataset from spatial transformer network [example](https://github.com/oarriaga/STN.keras/tree/master/datasets) to `ClassificationAnnotation`.
   * `data_file` - npz file with dataset.
   * `split` - dataset split: `train` - for training subset, `valid` - for train-validation subset, `test` - for testing subset (Optional, default test).

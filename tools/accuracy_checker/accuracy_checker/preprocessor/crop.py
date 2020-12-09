@@ -640,7 +640,7 @@ class ObjectCropWithScale(Preprocessor):
         # Preprocessing for efficient cropping
         height, width = img.shape[:2]
         sf = scale * 200.0 / self.dst_width
-        if sf <= 2:
+        if sf >= 2:
             new_size = int(np.math.floor(max(height, width) / sf))
             new_height = int(np.math.floor(height / sf))
             new_width = int(np.math.floor(width / sf))
