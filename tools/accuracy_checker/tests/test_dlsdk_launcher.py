@@ -43,7 +43,7 @@ def no_available_myriad():
     try:
         from openvino.inference_engine import IECore
         return 'MYRIAD' not in IECore().available_devices
-    except:
+    except Exception:
         return True
 
 
@@ -51,7 +51,7 @@ def has_layers():
     try:
         from openvino.inference_engine import IENetwork
         return hasattr(IENetwork, 'layers')
-    except:
+    except Exception:
         return False
 
 

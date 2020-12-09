@@ -158,7 +158,7 @@ def run_in_parallel(num_jobs, f, work_items):
 
         try:
             return [job.complete() for job in jobs]
-        except:
+        except BaseException:
             for job in jobs: job.cancel()
             raise
 
