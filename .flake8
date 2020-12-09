@@ -11,18 +11,8 @@ select=
     E10,E11,
     # the backslash is redundant between brackets
     E502,
-    # statement ends with a semicolon
-    E703,
-    # comparison to None should be `if cond is None`:
-    E711,
-    # comparison to True should be `if cond is True:` or `if cond`:
-    E712,
-    # test for membership should be not in
-    E713,
-    # test for object identity should be is not
-    E714,
-    # do not assign a lambda expression, use a def
-    E731,
+    # statement style issues
+    E7,
     # parse errors
     E9,
     # formatting errors
@@ -37,3 +27,9 @@ select=
     F901,
     # deprecation warnings
     W6,
+
+ignore=
+    # multiple statements on one line (colon/def)
+    # ignored because putting a statement after a colon is harmless and
+    # sometimes results in more compact code
+    E701,E704,
