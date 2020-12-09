@@ -37,9 +37,9 @@ class SegmentationModel(Model):
         blob.precision = "U8"
         blob.layout = "NCHW"
 
-        in_size_vector = blob.input_data.shape
-        if len(in_size_vector) == 4 and in_size_vector[1] == 3:
-            self.n, self.c, self.h, self.w = in_size_vector
+        input_size = blob.input_data.shape
+        if len(input_size) == 4 and input_size[1] == 3:
+            self.n, self.c, self.h, self.w = input_size
         else:
             raise RuntimeError("3-channel 4-dimensional model's input is expected")
 
@@ -54,17 +54,17 @@ class SegmentationModel(Model):
         blob = self.net.outputs[blob_name]
         blob.precision = "FP32"
 
-        out_size_vector = blob.shape
-        if len(out_size_vector) == 3:
+        out_size = blob.shape
+        if len(out_size) == 3:
             self.out_channels = 0
-            self.out_height = out_size_vector[1]
-            self.out_width = out_size_vector[2]
-        elif len(out_size_vector) == 4:
-            self.out_channels = out_size_vector[1]
-            self.out_height = out_size_vector[2]
-            self.out_width = out_size_vector[3]
+            self.out_height = out_size[1]
+            self.out_width = out_size[2]
+        elif len(out_size) == 4:
+            self.out_channels = out_size[1]
+            self.out_height = out_size[2]
+            self.out_width = out_size[3]
         else:
-            raise Exception("Unexpected output blob shape {}. Only 4D and 3D output blobs are supported".format(out_size_vector))
+            raise Exception("Unexpected output blob shape {}. Only 4D and 3D output blobs are supported".format(out_size))
 
         return blob_name
 
