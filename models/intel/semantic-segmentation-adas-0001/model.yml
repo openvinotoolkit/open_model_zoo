@@ -20,27 +20,27 @@ task_type: semantic_segmentation
 files:
   - name: FP32/semantic-segmentation-adas-0001.xml
     size: 196345
-    sha256: a1695091c4e3e61b70b4089f09d7b063b788a17d866ffd6fe898668809018b1f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.xml
+    sha256: 6453d8bd27ac7ae7ba523c1ca2ddd11192f052ff25bbfa6bb76779700805e3b2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.xml
   - name: FP32/semantic-segmentation-adas-0001.bin
     size: 26743532
     sha256: 62e92c031789e6f24ddcca7a5177635144058ec93c3cd52d09b434ec46377008
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.bin
   - name: FP16/semantic-segmentation-adas-0001.xml
     size: 196264
-    sha256: deb9034c9ce47e074e7981c6bd720d6c9d7582da802761988c824e9c3ffaf66f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.xml
+    sha256: 17aeaee87f8889643225ae6b4544b0ce5aac7e25ff8fe9b1e10cfa76461f7888
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.xml
   - name: FP16/semantic-segmentation-adas-0001.bin
     size: 13371792
     sha256: 3c161dbba54e5636fa995889d051f09cadd54768f1fd3e552d17d07a7625ff17
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
   - name: FP16-INT8/semantic-segmentation-adas-0001.xml
     size: 541868
-    sha256: 2c285f9be10eefd14660e8e7f0a67a638fd90093f5fc16eb6231b12b209504c8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/semantic-segmentation-adas-0001/FP16-INT8/semantic-segmentation-adas-0001.xml
+    sha256: 5ced07e0ac057d48bbef7f92d91612cf9891e3f40b044eb2632838a1e107e9bf
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/semantic-segmentation-adas-0001/FP16-INT8/semantic-segmentation-adas-0001.xml
   - name: FP16-INT8/semantic-segmentation-adas-0001.bin
     size: 6757652
     sha256: 0f542e8c8bbcc5fd7c32bbfab230a54d5a6dc75aefbb381e3835c6e44011dcc3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/semantic-segmentation-adas-0001/FP16-INT8/semantic-segmentation-adas-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/semantic-segmentation-adas-0001/FP16-INT8/semantic-segmentation-adas-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

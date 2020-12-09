@@ -18,19 +18,19 @@ task_type: detection
 files:
   - name: FP32/text-spotting-0003-detector.xml
     size: 762233
-    sha256: 0e9e2ec827bd7b6ce13c7aefda3c7a2cbf326ea762cf9cd98cb4d761beab0f21
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/text-spotting-0003/text-spotting-0003-detector/FP32/text-spotting-0003-detector.xml
+    sha256: 422c57a748fd11378dbe636be18e9d9e1240c8eb40edc689c8da0f4ce82088b6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/text-spotting-0003/text-spotting-0003-detector/FP32/text-spotting-0003-detector.xml
   - name: FP32/text-spotting-0003-detector.bin
     size: 103797692
     sha256: a090e41ace97be67430bc0048a9b727f2b10b2f444ea138a937bdc975a7091d1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/text-spotting-0003/text-spotting-0003-detector/FP32/text-spotting-0003-detector.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/text-spotting-0003/text-spotting-0003-detector/FP32/text-spotting-0003-detector.bin
   - name: FP16/text-spotting-0003-detector.xml
     size: 762111
-    sha256: 2c82bf9e2d8083e0097cad954dc28bdac9efde86ec70bb1a08236453dc1bfa36
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/text-spotting-0003/text-spotting-0003-detector/FP16/text-spotting-0003-detector.xml
+    sha256: ea659838699acb8e21e8bf8f2424dceb4cced6c31692c317466b30050e3c3996
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/text-spotting-0003/text-spotting-0003-detector/FP16/text-spotting-0003-detector.xml
   - name: FP16/text-spotting-0003-detector.bin
     size: 51899076
     sha256: ae2bd9227c11e3f4ae2cdc0fb350374c74645bb671a0fdee363c93ca1a9256d5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/text-spotting-0003/text-spotting-0003-detector/FP16/text-spotting-0003-detector.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/text-spotting-0003/text-spotting-0003-detector/FP16/text-spotting-0003-detector.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -22,19 +22,19 @@ task_type: question_answering
 files:
   - name: FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
     size: 1351134
-    sha256: de4f7417e8db0bd6ecc04c6415d642d63ef7513a8da3b913c7edd183584717a6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
+    sha256: a3062311904bb3640fcf79d3cff1ca581b6503b1fc29223f15596c5b183f5942
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
   - name: FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
     size: 41893904
     sha256: 08c5cc53e30d4056027a8d86544aff8457e30fe58a28ea6e1a247e12174d55ea
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP32-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
   - name: FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
     size: 1351134
-    sha256: e954391848198132c1c44021fc8b6b294add5e3141b509107ee8895c8a0870aa
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
+    sha256: b4327e00bacca071cda1380d0a52db67376c4f72a509d126a8c48afa4daa370b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.xml
   - name: FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
     size: 41737374
     sha256: 82cb74cef22f08e37887ceb4051c5a6d7f752c71d142983eb7296c71a422b3d4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/bert-small-uncased-whole-word-masking-squad-emb-int8-0001/FP16-INT8/bert-small-uncased-whole-word-masking-squad-emb-int8-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
