@@ -117,7 +117,7 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
     if cap.get_type() not in ('VIDEO', 'CAMERA'):
-        raise RuntimeError("The input should be a video file or a device node")
+        raise RuntimeError("The input should be a video file or a numeric camera ID")
     frames = RoiDetectorOnVideo(cap)
 
     compute_embeddings_times = []

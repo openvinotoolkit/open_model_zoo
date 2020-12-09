@@ -92,7 +92,7 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
     if cap.get_type() not in ('VIDEO', 'CAMERA'):
-        raise RuntimeError("The input should be a video file or a device node")
+        raise RuntimeError("The input should be a video file or a numeric camera ID")
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
