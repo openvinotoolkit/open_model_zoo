@@ -21,8 +21,10 @@
 class SegmentationModel : public ModelBase {
 public:
     /// Constructor
-    /// @param model_nameFileName of model to load
-    SegmentationModel(const std::string& modelFileName) : ModelBase(modelFileName) {}
+    /// @param modelFileName name of model to load
+    /// @param useAutoResize - if true, image will be resized by IE.
+    /// Otherwise, image will be preprocessed and resized using OpenCV routines.
+    SegmentationModel(const std::string& modelFileName, bool useAutoResize);
 
     std::shared_ptr<InternalModelData> preprocess(
         const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
@@ -34,4 +36,6 @@ protected:
     int outHeight = 0;
     int outWidth = 0;
     int outChannels = 0;
+
+    bool useAutoResize;
 };
