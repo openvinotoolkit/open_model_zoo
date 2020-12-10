@@ -6,6 +6,8 @@ find_package(InferenceEngine 2.0 REQUIRED)
 find_package(OpenCV REQUIRED COMPONENTS core imgcodecs videoio)
 
 add_subdirectory(monitors)
+add_subdirectory(models)
+add_subdirectory(pipelines)
 
 file(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*")
 file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*")

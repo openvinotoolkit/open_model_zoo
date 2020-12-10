@@ -1,4 +1,4 @@
-# 3D Human Pose Estimation Python* Demo
+# 3D Human Pose Estimation Python\* Demo
 
 This demo demonstrates how to run 3D Human Pose Estimation models using OpenVINO&trade;. The following pre-trained models can be used:
 
@@ -46,8 +46,9 @@ Options:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
-                        Required. Path to input image, images, video file or
-                        camera id.
+                        Required. An input to process. The input must be a single image,
+                        a folder of images or anything that cv2.VideoCapture can process.
+   -loop                Optional. Enable reading the input in a loop.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on: CPU,
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a

@@ -33,9 +33,25 @@ public:
     void update(TimePoint lastRequestStartTime,
                 cv::Mat& frame,
                 cv::Point position = {15, 30},
+                int fontFace = cv::FONT_HERSHEY_COMPLEX,
                 double fontScale = 0.75,
                 cv::Scalar color = {200, 10, 10},
                 int thickness = 2);
+    void update(TimePoint lastRequestStartTime);
+
+    /// Paints metrics over provided mat
+    /// @param frame frame to paint over
+    /// @param position left top corner of text block
+    /// @param fontScale font scale
+    /// @param color font color
+    /// @param thickness font thickness
+    void paintMetrics(cv::Mat& frame,
+        cv::Point position = { 15, 30 },
+        int fontFace = cv::FONT_HERSHEY_COMPLEX,
+        double fontScale = 0.75,
+        cv::Scalar color = { 200, 10, 10 },
+        int thickness = 2) const;
+
     Metrics getLast() const;
     Metrics getTotal() const;
     void printTotal() const;

@@ -172,6 +172,7 @@ Please view:
 - [How to configure MXNet Launcher](accuracy_checker/launcher/mxnet_launcher_readme.md)
 - [How to configure TensorFlow Launcher](accuracy_checker/launcher/tf_launcher_readme.md)
 - [How to configure TensorFlow Lite Launcher](accuracy_checker/launcher/tf_lite_launcher_readme.md)
+- [How to configure TensorFlow 2.0 Launcher](accuracy_checker/launcher/tf2_launcher_readme.md)
 - [How to configure ONNX Runtime Launcher](accuracy_checker/launcher/onnx_runtime_launcher_readme.md)
 - [How to configure PyTorch Launcher](accuracy_checker/launcher/pytorch_launcher_readme.md)
 

@@ -32,3 +32,6 @@ editdistance
 # DNA sequence matching
 parasail<=1.2
 fast-ctc-decode
+
+# pycocotools required numpy<1.18
+numpy>=1.16.3,<1.18

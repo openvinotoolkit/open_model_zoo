@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/person-attributes-recognition-crossroad-0238.xml
-    size: 290265
-    sha256: 11c4a8f94a7cc7aaf2f9fbe797718c9b8c1479bc14ba0a1c7b022ea6ffaa24f3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/person-attributes-recognition-crossroad-0238/FP32/person-attributes-recognition-crossroad-0238.xml
+    size: 290306
+    sha256: 8b418561025ae8b7f0bd9db558073434e39775b9b476fc4858eb02d657cb1b69
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-attributes-recognition-crossroad-0238/FP32/person-attributes-recognition-crossroad-0238.xml
   - name: FP32/person-attributes-recognition-crossroad-0238.bin
     size: 87188228
-    sha256: 92196b59de1e2f5a3043410c7c81133541cbed7755055c41520f36ac2e0e3468
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/person-attributes-recognition-crossroad-0238/FP32/person-attributes-recognition-crossroad-0238.bin
+    sha256: 8373c038b0646fd32b46fb352d379dc70e2f19641b2e1e7c545f5519bb19aafd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-attributes-recognition-crossroad-0238/FP32/person-attributes-recognition-crossroad-0238.bin
   - name: FP16/person-attributes-recognition-crossroad-0238.xml
-    size: 290159
-    sha256: c8b64bfd8b8c2ae180e76f77205ac6426a0418c99a1c2d95dd9f704310a0a105
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/person-attributes-recognition-crossroad-0238/FP16/person-attributes-recognition-crossroad-0238.xml
+    size: 290200
+    sha256: d1276513f952d972636ef625ad642009dcd4711c18af849b6b7189305449eaf5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-attributes-recognition-crossroad-0238/FP16/person-attributes-recognition-crossroad-0238.xml
   - name: FP16/person-attributes-recognition-crossroad-0238.bin
     size: 43594140
-    sha256: 07a6b815c734b5bdaf1c8474279560477666fe553b3d86b35952c986420d2b63
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/person-attributes-recognition-crossroad-0238/FP16/person-attributes-recognition-crossroad-0238.bin
+    sha256: 7f37084a0dfb73862b55ead9076817328270e80353c58373fae9aa08b322716c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-attributes-recognition-crossroad-0238/FP16/person-attributes-recognition-crossroad-0238.bin
   - name: FP16-INT8/person-attributes-recognition-crossroad-0238.xml
-    size: 722228
-    sha256: 6b7461eb58fb67e20f77b49bc31bc0c0503ceab148a606d0477c2c6612125f94
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/person-attributes-recognition-crossroad-0238/FP16-INT8/person-attributes-recognition-crossroad-0238.xml
+    size: 724335
+    sha256: 4daa76ce1d500a70ad3283220d95fc9f9ce9d4462a598297bd2a3c980eb8fdfe
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-attributes-recognition-crossroad-0238/FP16-INT8/person-attributes-recognition-crossroad-0238.xml
   - name: FP16-INT8/person-attributes-recognition-crossroad-0238.bin
     size: 22044738
-    sha256: 4bf6871c450bd0261fcce2db2e1a0e49b8cccacca14af4c5d978bbc0e59f94b0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/1/person-attributes-recognition-crossroad-0238/FP16-INT8/person-attributes-recognition-crossroad-0238.bin
+    sha256: 0f03ed04f151d3c1bc3e3df4c69ee60b6885d000fb8ea1b23b0da158220bc655
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-attributes-recognition-crossroad-0238/FP16-INT8/person-attributes-recognition-crossroad-0238.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

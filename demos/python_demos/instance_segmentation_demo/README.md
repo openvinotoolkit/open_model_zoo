@@ -1,4 +1,4 @@
-# Instance Segmentation Python* Demo
+# Instance Segmentation Python\* Demo
 
 This demo shows how to run Instance Segmentation models from [OpenVINO&trade; Training Extensions (OTE)](https://github.com/openvinotoolkit/training_extensions/tree/develop/pytorch_toolkit/instance_segmentation#get-pretrained-models) and `yolact` models family.
 

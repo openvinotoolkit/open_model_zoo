@@ -86,7 +86,8 @@ ACCEPTABLE_MODEL = [
     'mxnet_weights',
     'onnx_model',
     'kaldi_model',
-    'model'
+    'model',
+    'saved_model_dir'
 ]
 
 

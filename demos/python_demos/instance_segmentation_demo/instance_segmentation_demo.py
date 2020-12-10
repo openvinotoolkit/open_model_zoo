@@ -16,10 +16,10 @@
 """
 
 import logging as log
-import os
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -29,7 +29,7 @@ from instance_segmentation_demo.model_utils import check_model
 from instance_segmentation_demo.tracker import StaticIOUTracker
 from instance_segmentation_demo.visualizer import Visualizer
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 import monitors
 from images_capture import open_images_capture
 
@@ -41,7 +41,7 @@ def build_argparser():
                       help='Show this help message and exit.')
     args.add_argument('-m', '--model',
                       help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=str, metavar='"<path>"')
+                      required=True, type=Path, metavar='"<path>"')
     args.add_argument('--labels',
                       help='Required. Path to a text file with class labels.',
                       required=True, type=str, metavar='"<path>"')
@@ -102,7 +102,7 @@ def main():
         ie.add_extension(args.cpu_extension, 'CPU')
     # Read IR
     log.info('Loading network')
-    net = ie.read_network(args.model, os.path.splitext(args.model)[0] + '.bin')
+    net = ie.read_network(args.model, args.model.with_suffix('.bin'))
     image_input, image_info_input, (n, c, h, w), postprocessor = check_model(net)
 
     log.info('Loading IR to the plugin...')

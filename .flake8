@@ -1,0 +1,37 @@
+[flake8]
+exclude=
+    # generic excludes
+    .git,__pycache__,
+    # generated files
+    demos/python_demos/speech_recognition_demo/ctcdecode-numpy/ctcdecode_numpy/impl.py,
+    models/public/mozilla-deepspeech-0.8.2/mds_convert_utils/memmapped_file_system_pb2.py,
+
+select=
+    # indentation problems
+    E10,E11,
+    # the backslash is redundant between brackets
+    E502,
+    # statement style issues
+    E7,
+    # parse errors
+    E9,
+    # unused imports
+    F401,
+    # formatting errors
+    F5,
+    # semantic errors
+    F6,
+    # syntax errors
+    F7,
+    # name errors
+    F8,
+    # raise NotImplemented should be raise NotImplementedError
+    F901,
+    # deprecation warnings
+    W6,
+
+ignore=
+    # multiple statements on one line (colon/def)
+    # ignored because putting a statement after a colon is harmless and
+    # sometimes results in more compact code
+    E701,E704,

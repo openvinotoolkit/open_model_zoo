@@ -1,4 +1,4 @@
-# Image Retrieval Python* Demo
+# Image Retrieval Python\* Demo
 
 This demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 

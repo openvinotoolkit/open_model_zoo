@@ -7,8 +7,9 @@
 # so allow it.
 *.patch whitespace=-blank-at-eol
 
-.git* -omz.package
 .editorconfig -omz.package
+.flake8 -omz.package
+.git* -omz.package
 .yamllint -omz.package
 /ci/** -omz.package
 /demos/build_demos.sh omz.package=l,m

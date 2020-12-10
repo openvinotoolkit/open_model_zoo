@@ -252,11 +252,9 @@ def check_model(net):
         image_info_input = image_info_input[0]
     model_type = 'mask_rcnn' if image_info_input else 'yolact'
     model_attributes = MODEL_ATTRIBUTES[model_type]
-    assert (
-        set(model_attributes.required_outputs).issubset(net.outputs.keys()),
-        'Demo supports only topologies with the following output keys: '
-        '{}'.format(', '.join(model_attributes.required_outputs))
-    )
+    assert set(model_attributes.required_outputs) <= net.outputs.keys(), \
+        'Demo supports only topologies with the following output keys: {}'.format(
+            ', '.join(model_attributes.required_outputs))
 
     input_shape = net.input_info[image_input].input_data.shape
     assert input_shape[0] == 1, 'Only batch 1 is supported by the demo application'

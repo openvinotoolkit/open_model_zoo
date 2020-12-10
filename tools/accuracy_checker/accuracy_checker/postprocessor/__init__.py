@@ -89,6 +89,7 @@ __all__ = [
     'ExtendSegmentationMask',
     'ZoomSegMask',
     'CropSegmentationMask',
+    'CropOrPadSegmentationMask',
     'ClipSegmentationMask',
     'ArgMaxSegmentationMask',
 
@@ -96,6 +97,8 @@ __all__ = [
     'TransformBratsPrediction',
 
     'NormalizeLandmarksPoints',
+
+    'ClipPoints',
 
     'ExtractSQUADPrediction',
     'ExtractSQUADPredictionBiDAF',

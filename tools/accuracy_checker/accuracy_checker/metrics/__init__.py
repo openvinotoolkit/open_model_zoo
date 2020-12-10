@@ -115,6 +115,7 @@ __all__ = [
     'ClassificationAccuracyClasses',
     'ClipAccuracy',
     'ClassificationF1Score',
+    'MetthewsCorrelation',
 
     'DetectionMAP',
     'MissRate',
@@ -211,5 +212,6 @@ __all__ = [
 
     'SalienceMapMAE',
     'SalienceMapFMeasure',
+    'SalienceSMeasure',
     'SalienceEMeasure'
 ]

@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import pytest
 import json
 from accuracy_checker.serialize_parameters import fetch
 
@@ -50,84 +49,84 @@ def check_launchers(json_dict, launchers):
 
 class TestParameters:
     def test_all_parameters(self):
-         json_dict = fetch()
-         assert validate(json_dict) == True
-         assert 'datasets' in json_dict.keys()
-         dataset_content = json_dict['datasets'].keys()
-         assert 'adapter' in dataset_content
-         assert 'converter' in dataset_content
-         assert 'metric' in dataset_content
-         assert 'preprocessor' in dataset_content
-         assert 'postprocessor' in dataset_content
-         assert 'models' in json_dict.keys()
-         models_content = json_dict['models'].keys()
-         assert 'launcher' in models_content
-         assert 'topology_type' in json_dict.keys()
+        json_dict = fetch()
+        assert validate(json_dict)
+        assert 'datasets' in json_dict.keys()
+        dataset_content = json_dict['datasets'].keys()
+        assert 'adapter' in dataset_content
+        assert 'converter' in dataset_content
+        assert 'metric' in dataset_content
+        assert 'preprocessor' in dataset_content
+        assert 'postprocessor' in dataset_content
+        assert 'models' in json_dict.keys()
+        models_content = json_dict['models'].keys()
+        assert 'launcher' in models_content
+        assert 'topology_type' in json_dict.keys()
 
     def test_image_classification(self):
-         json_dict = fetch(topology_types=['image_classification'])
-         assert validate(json_dict) == True
-         check_topology_types(json_dict, ['image_classification'])
-         check_adapters(json_dict, ['classification' ])
-         check_converters(json_dict, [ 'imagenet' ])
+        json_dict = fetch(topology_types=['image_classification'])
+        assert validate(json_dict)
+        check_topology_types(json_dict, ['image_classification'])
+        check_adapters(json_dict, ['classification' ])
+        check_converters(json_dict, [ 'imagenet' ])
 
     def test_object_detection(self):
-         json_dict = fetch(topology_types=[ 'object_detection' ])
-         assert validate(json_dict) == True
-         check_topology_types(json_dict, [ 'object_detection' ])
-         check_adapters(json_dict, [ 'ssd', 'tiny_yolo_v1', 'yolo_v2', 'yolo_v3' ])
-         check_converters(json_dict, [ 'voc_detection' ])
+        json_dict = fetch(topology_types=[ 'object_detection' ])
+        assert validate(json_dict)
+        check_topology_types(json_dict, [ 'object_detection' ])
+        check_adapters(json_dict, [ 'ssd', 'tiny_yolo_v1', 'yolo_v2', 'yolo_v3' ])
+        check_converters(json_dict, [ 'voc_detection' ])
 
     def test_yolo(self):
-         json_dict = fetch(topology_types=[ 'yolo' ])
-         assert validate(json_dict) == True
-         check_topology_types(json_dict, [ 'yolo' ])
-         check_adapters(json_dict, [ 'tiny_yolo_v1', 'yolo_v2', 'yolo_v3' ])
-         check_converters(json_dict, [ 'voc_detection' ])
+        json_dict = fetch(topology_types=[ 'yolo' ])
+        assert validate(json_dict)
+        check_topology_types(json_dict, [ 'yolo' ])
+        check_adapters(json_dict, [ 'tiny_yolo_v1', 'yolo_v2', 'yolo_v3' ])
+        check_converters(json_dict, [ 'voc_detection' ])
 
     def test_yolo_v1_tiny(self):
-         json_dict = fetch(topology_types=[ 'yolo_v1_tiny' ])
-         assert validate(json_dict) == True
-         check_topology_types(json_dict, [ 'yolo_v1_tiny' ])
-         check_adapters(json_dict, [ 'tiny_yolo_v1' ])
-         check_converters(json_dict, [ 'voc_detection' ])
+        json_dict = fetch(topology_types=[ 'yolo_v1_tiny' ])
+        assert validate(json_dict)
+        check_topology_types(json_dict, [ 'yolo_v1_tiny' ])
+        check_adapters(json_dict, [ 'tiny_yolo_v1' ])
+        check_converters(json_dict, [ 'voc_detection' ])
 
     def test_yolo_v2(self):
         json_dict = fetch(topology_types=[ 'yolo_v2' ])
-        assert validate(json_dict) == True
+        assert validate(json_dict)
         check_topology_types(json_dict, [ 'yolo_v2' ])
         check_adapters(json_dict, [ 'yolo_v2' ])
         check_converters(json_dict, [ 'voc_detection' ])
 
     def test_yolo_v2_tiny(self):
-         json_dict = fetch(topology_types=[ 'yolo_v2_tiny' ])
-         assert validate(json_dict) == True
-         check_topology_types(json_dict, [ 'yolo_v2_tiny' ])
-         check_adapters(json_dict, [ 'yolo_v2' ])
-         check_converters(json_dict, [ 'voc_detection' ])
+        json_dict = fetch(topology_types=[ 'yolo_v2_tiny' ])
+        assert validate(json_dict)
+        check_topology_types(json_dict, [ 'yolo_v2_tiny' ])
+        check_adapters(json_dict, [ 'yolo_v2' ])
+        check_converters(json_dict, [ 'voc_detection' ])
 
     def test_yolo_v3(self):
         json_dict = fetch(topology_types=[ 'yolo_v3' ])
-        assert validate(json_dict) == True
+        assert validate(json_dict)
         check_topology_types(json_dict, [ 'yolo_v3' ])
         check_adapters(json_dict, [ 'yolo_v3' ])
         check_converters(json_dict, [ 'voc_detection' ])
 
     def test_yolo_v3_tiny(self):
-         json_dict = fetch(topology_types=[ 'yolo_v3_tiny' ])
-         assert validate(json_dict) == True
-         check_topology_types(json_dict, [ 'yolo_v3_tiny' ])
-         check_adapters(json_dict, [ 'yolo_v3' ])
-         check_converters(json_dict, [ 'voc_detection' ])
+        json_dict = fetch(topology_types=[ 'yolo_v3_tiny' ])
+        assert validate(json_dict)
+        check_topology_types(json_dict, [ 'yolo_v3_tiny' ])
+        check_adapters(json_dict, [ 'yolo_v3' ])
+        check_converters(json_dict, [ 'voc_detection' ])
 
     def test_faster_rcnn(self):
-         json_dict = fetch(topology_types=[ 'faster_rcnn' ])
-         assert validate(json_dict) == True
-         check_topology_types(json_dict, [ 'faster_rcnn' ])
-         check_adapters(json_dict, [ 'ssd' ])
-         check_converters(json_dict, [ 'voc_detection' ])
+        json_dict = fetch(topology_types=[ 'faster_rcnn' ])
+        assert validate(json_dict)
+        check_topology_types(json_dict, [ 'faster_rcnn' ])
+        check_adapters(json_dict, [ 'ssd' ])
+        check_converters(json_dict, [ 'voc_detection' ])
 
     def test_launchers(self):
-         json_dict = fetch(launchers=[ 'dlsdk', 'opencv' ])
-         assert validate(json_dict) == True
-         check_launchers(json_dict, ['dlsdk', 'opencv'])
+        json_dict = fetch(launchers=[ 'dlsdk', 'opencv' ])
+        assert validate(json_dict)
+        check_launchers(json_dict, ['dlsdk', 'opencv'])

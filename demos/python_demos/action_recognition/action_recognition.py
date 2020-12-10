@@ -19,7 +19,6 @@ import sys
 from argparse import ArgumentParser, SUPPRESS
 from os import path
 
-import numpy as np
 from openvino.inference_engine import IECore
 
 from action_recognition_demo.models import IEModel, DummyDecoder
@@ -73,7 +72,7 @@ def main():
 
     if args.labels:
         with open(args.labels) as f:
-            labels = [l.strip() for l in f.read().strip().split('\n')]
+            labels = [line.strip() for line in f]
     else:
         labels = None
 

@@ -19,6 +19,7 @@
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
 #include <samples/ocv_common.hpp>
+#include <samples/performance_metrics.hpp>
 
 #include <cldnn/cldnn_config.hpp>
 
@@ -106,6 +107,7 @@ std::vector<std::vector<unsigned>> topResults(Blob& inputBlob, unsigned numTop) 
 
 int main(int argc, char *argv[]) {
     try {
+        PerformanceMetrics metrics;
         std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -341,9 +343,6 @@ int main(int argc, char *argv[]) {
 
         // -----------------------------Prepare variables and data for main loop------------------------------
         typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
-        double avgFPS = 0;
-        double avgLatency = 0;
-        std::chrono::steady_clock::duration latencySum = std::chrono::steady_clock::duration::zero();
         unsigned framesNum = 0;
         long long correctPredictionsCount = 0;
         double accuracy = 0;
@@ -379,9 +378,9 @@ int main(int argc, char *argv[]) {
                 gridMat = GridMat(presenter, cv::Size(width, height), cv::Size(16, 9),
                                   (framesNum - framesNumOnCalculationStart) / std::chrono::duration_cast<Sec>(
                                     fpsCalculationDuration).count());
+                metrics = PerformanceMetrics();
                 startTime = std::chrono::steady_clock::now();
                 framesNum = 0;
-                latencySum = std::chrono::steady_clock::duration::zero();
                 correctPredictionsCount = 0;
                 accuracy = 0;
             }
@@ -434,16 +433,10 @@ int main(int argc, char *argv[]) {
 
                 framesNum += FLAGS_b;
 
-                avgFPS = framesNum / std::chrono::duration_cast<Sec>(
-                    std::chrono::steady_clock::now() - startTime).count();
                 gridMat.updateMat(shownImagesInfo);
-                auto processingEndTime = std::chrono::steady_clock::now();
-                for (const auto & image : completedInferRequestInfo->images) {
-                    latencySum += processingEndTime - image.startTime;
-                }
-                avgLatency = std::chrono::duration_cast<Sec>(latencySum).count() / framesNum;
                 accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
-                gridMat.textUpdate(avgFPS, avgLatency, accuracy, isTestMode, !FLAGS_gt.empty(), presenter);
+                gridMat.textUpdate(metrics, completedInferRequestInfo->images[0].startTime, accuracy, isTestMode,
+                                   !FLAGS_gt.empty(), presenter);
 
                 if (!FLAGS_no_show) {
                     cv::imshow("classification_demo", gridMat.outImg);
@@ -508,8 +501,7 @@ int main(int argc, char *argv[]) {
         } while (key != 27 && key != 'q' && key != 'Q'
                  && (FLAGS_time == -1 || elapsedSeconds < std::chrono::seconds{FLAGS_time}));
 
-        std::cout << "FPS: " << avgFPS << std::endl;
-        std::cout << "Latency: " << avgLatency << std::endl;
+        metrics.printTotal();
         if (!FLAGS_gt.empty()) {
             std::cout << "Accuracy (top " << FLAGS_nt << "): " << accuracy << std::endl;
         }

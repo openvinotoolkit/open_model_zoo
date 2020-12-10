@@ -1,0 +1,37 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Encoder part of text recognition head that takes features from text-spotting-0003-detector
+  as input.
+task_type: feature_extraction
+files:
+  - name: FP32/text-spotting-0003-recognizer-encoder.xml
+    size: 9894
+    sha256: 79c5721e8b1955dff76c01bda166b6f289a73022b539c1e8beddd63d47bb1211
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/text-spotting-0003/text-spotting-0003-recognizer-encoder/FP32/text-spotting-0003-recognizer-encoder.xml
+  - name: FP32/text-spotting-0003-recognizer-encoder.bin
+    size: 5311488
+    sha256: b941c3d30672345e3582ff80b01834650b5ad8246aab7351c2f54f7213108145
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/text-spotting-0003/text-spotting-0003-recognizer-encoder/FP32/text-spotting-0003-recognizer-encoder.bin
+  - name: FP16/text-spotting-0003-recognizer-encoder.xml
+    size: 9891
+    sha256: a3daf8b2f7857ff6ccb2c9aa7a0ab76794639aee19ea82476db050cb343ff133
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/text-spotting-0003/text-spotting-0003-recognizer-encoder/FP16/text-spotting-0003-recognizer-encoder.xml
+  - name: FP16/text-spotting-0003-recognizer-encoder.bin
+    size: 2655744
+    sha256: da26119bdf99385b17dbf03ada05c14dd2a5c69b3e80d95703945ea92a332647
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/text-spotting-0003/text-spotting-0003-recognizer-encoder/FP16/text-spotting-0003-recognizer-encoder.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

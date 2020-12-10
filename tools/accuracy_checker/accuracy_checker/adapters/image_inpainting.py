@@ -26,8 +26,9 @@ class ImageInpaintingAdapter(Adapter):
 
     def process(self, raw, identifiers, frame_meta):
         result = []
-        raw_outputs = self._extract_predictions(raw, frame_meta)[self.output_blob]
-        for identifier, img in zip(identifiers, raw_outputs):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
+        for identifier, img in zip(identifiers, raw_outputs[self.output_blob]):
             if img.shape[0] == 3:
                 img = np.transpose(img, (1, 2, 0))
             result.append(ImageInpaintingPrediction(identifier, img.astype(np.uint8)))
