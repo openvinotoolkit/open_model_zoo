@@ -29,7 +29,7 @@ from openvino.inference_engine import IECore
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 
-from models import *
+from models import SegmentationModel
 import monitors
 from pipelines import AsyncPipeline
 from images_capture import open_images_capture
@@ -106,7 +106,7 @@ def build_argparser():
                            'Default value is CPU.')
 
     common_model_args = parser.add_argument_group('Common model options')
-    common_model_args.add_argument('-c', '--colors', type=str,
+    common_model_args.add_argument('-c', '--colors', type=Path,
                                    help='Optional. Path to a text file containing colors for classes.')
 
     infer_args = parser.add_argument_group('Inference options')
