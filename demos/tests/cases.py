@@ -253,7 +253,7 @@ NATIVE_DEMOS = [
         single_option_cases('-m_va', None, ModelArg('vehicle-attributes-recognition-barrier-0039')),
     )),
 
-    NativeDemo(subdirectory='segmentation_demo_async', device_keys=['-d'], test_cases=combine_cases(
+    NativeDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None, **MONITORS}),
         [
             TestCase(options={
