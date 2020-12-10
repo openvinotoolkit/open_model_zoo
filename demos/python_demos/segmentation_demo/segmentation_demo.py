@@ -39,48 +39,56 @@ logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, 
 log = logging.getLogger()
 
 
-CITYSCAPES_COLORS = [
-    (128, 64, 128),
-    (232, 35, 244),
-    (70, 70, 70),
-    (156, 102, 102),
-    (153, 153, 190),
-    (153, 153, 153),
-    (30, 170, 250),
-    (0, 220, 220),
-    (35, 142, 107),
-    (152, 251, 152),
-    (180, 130, 70),
-    (60, 20, 220),
-    (0, 0, 255),
-    (142, 0, 0),
-    (70, 0, 0),
-    (100, 60, 0),
-    (90, 0, 0),
-    (230, 0, 0),
-    (32, 11, 119),
-    (0, 74, 111),
-    (81, 0, 81)
+default_color_map = [
+    (150, 150, 150),
+    (58, 55, 169),
+    (211, 51, 17),
+    (157, 80, 44),
+    (23, 95, 189),
+    (210, 133, 34),
+    (76, 226, 202),
+    (101, 138, 127),
+    (223, 91, 182),
+    (80, 128, 113),
+    (235, 155, 55),
+    (44, 151, 243),
+    (159, 80, 170),
+    (239, 208, 44),
+    (128, 50, 51),
+    (82, 141, 193),
+    (9, 107, 10),
+    (223, 90, 142),
+    (50, 248, 83),
+    (178, 101, 130),
+    (71, 30, 204)
 ]
 
 
-def apply_color_map(input):
-    ### Initializing colors array if needed
-    colors = []
-    input_3d = cv2.merge([input, input, input])
+def create_color_map(input):
+    global default_color_map
+    global color_map
+
+    if input and os.path.isfile(input):
+        default_color_map = []
+        with open(input, 'r') as file:
+            for line in file.readlines():
+                default_color_map.append(eval(line.strip()))
+
     rng = random.Random(0xACE)
-    if not colors:
-        classes = np.array(CITYSCAPES_COLORS)
-        colors = np.zeros((256, 1, 3), dtype=np.uint8)
-        colors[:len(classes), 0, :] = classes.astype('uint8')
-        colors[len(classes):, 0, :] = rng.uniform(0, 255)
-    out = cv2.LUT(input_3d, colors)
-    return out
+    classes = np.array(default_color_map)
+    color_map = np.zeros((256, 1, 3), dtype=np.uint8)
+    color_map[:len(classes), 0, :] = classes.astype('uint8')
+    color_map[len(classes):, 0, :] = rng.uniform(0, 255)
+
+
+def apply_color_map(input):
+    input_3d = cv2.merge([input, input, input])
+    return cv2.LUT(input_3d, color_map)
 
 
 def render_segmentation_data(frame, objects):
     # Visualizing result data over source image
-    return (frame / 2 + apply_color_map(objects) / 2) / 255
+    return np.floor_divide(frame, 2) + np.floor_divide(apply_color_map(objects), 2)
 
 
 def build_argparser():
@@ -96,6 +104,10 @@ def build_argparser():
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
+
+    common_model_args = parser.add_argument_group('Common model options')
+    common_model_args.add_argument('-c', '--colors', type=str,
+                                   help='Optional. Path to a text file containing colors for classes.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -159,6 +171,7 @@ def main():
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
     cap = open_images_capture(args.input, args.loop)
+    create_color_map(args.colors)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
