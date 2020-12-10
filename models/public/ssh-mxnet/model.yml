@@ -14,7 +14,7 @@
 
 description: >-
   SSH: Single Stage Headless Face Detector. More details provided in the repository
-  <https://github.com/deepinsight/mxnet-SSH> and paper <https://arxiv.org/abs/1708.03979>
+  <https://github.com/deepinsight/mxnet-SSH> and paper <https://arxiv.org/abs/1708.03979>.
 task_type: detection
 files:
   - name: ssh-model-final.zip

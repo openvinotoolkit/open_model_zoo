@@ -175,7 +175,6 @@ def draw_detections(frame, detections, palette, labels, threshold):
     size = frame.shape[:2]
     for detection in detections:
         if detection.score > threshold:
-            draw_landmarks = isinstance(detection, DetectionWithLandmarks)
             xmin = max(int(detection.xmin), 0)
             ymin = max(int(detection.ymin), 0)
             xmax = min(int(detection.xmax), size[1])
@@ -186,7 +185,7 @@ def draw_detections(frame, detections, palette, labels, threshold):
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
             cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
                         (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
-            if draw_landmarks:
+            if isinstance(detection, DetectionWithLandmarks):
                 for landmark in detection.landmarks:
                     cv2.circle(frame, landmark, 2, (0, 255, 255), 2)
     return frame

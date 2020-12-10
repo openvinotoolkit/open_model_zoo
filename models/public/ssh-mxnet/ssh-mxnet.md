@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-SSH: Single Stage Headless Face Detector. More details provided in the [repository](https://github.com/deepinsight/mxnet-SSH) and [paper](https://arxiv.org/abs/1708.03979)
+SSH: Single Stage Headless Face Detector. More details provided in the [repository](https://github.com/deepinsight/mxnet-SSH) and [paper](https://arxiv.org/abs/1708.03979).
 
 ## Specification
 

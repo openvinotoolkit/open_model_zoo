@@ -28,8 +28,8 @@ class RetinaFace(Model):
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         expected_outputs_count = (6, 9, 12)
-        assert len(self.net.outputs) in expected_outputs_count, "Expected {} output blobs".format(
-            ', '.join(str(count) for count in expected_outputs_count))
+        assert len(self.net.outputs) in expected_outputs_count, "Expected {} or {} output blobs".format(
+            ', '.join(str(count) for count in expected_outputs_count[:-1]), int(expected_outputs_count[-1]))
 
         self.threshold = threshold
         self.detect_masks = len(self.net.outputs) == 12
@@ -81,7 +81,6 @@ class RetinaFacePostprocessor:
         ))
         self.landmark_std = 0.2 if detect_attributes else 1.0
         self.nms_threshold = 0.5 if process_landmarks else 0.3
-        self.include_boundaries = False if process_landmarks else True
 
     @staticmethod
     def generate_anchors_fpn(cfg):
@@ -206,7 +205,8 @@ class RetinaFacePostprocessor:
             landmarks_list = np.array(landmarks_list)
             mask_scores_list = np.array(mask_scores_list)
             x_mins, y_mins, x_maxs, y_maxs = proposals_list.T
-            keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, scores_list, self.nms_threshold, self.include_boundaries)
+            keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, scores_list, self.nms_threshold,
+                            include_boundaries=not self._process_landmarks)
             proposals_list = proposals_list[keep]
             scores_list = scores_list[keep]
             if self._process_landmarks:
