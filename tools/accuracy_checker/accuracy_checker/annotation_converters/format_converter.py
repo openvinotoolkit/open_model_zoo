@@ -17,7 +17,6 @@ limitations under the License.
 from argparse import ArgumentParser
 from collections import namedtuple
 
-from ..topology_types import GenericTopology
 from ..config import ConfigValidator, StringField, PathField, ConfigError
 from ..dependency import ClassProvider
 from ..utils import format_key, get_parameter_value_from_config
@@ -27,7 +26,6 @@ ConverterReturn = namedtuple('ConverterReturn', ['annotations', 'meta', 'content
 
 class BaseFormatConverter(ClassProvider):
     __provider_type__ = 'converter'
-    topology_types = (GenericTopology, )
 
     @classmethod
     def parameters(cls):

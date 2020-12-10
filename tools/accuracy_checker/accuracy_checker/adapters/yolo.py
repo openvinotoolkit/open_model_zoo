@@ -22,7 +22,6 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import BoolField, NumberField, StringField, ConfigValidator, ListField, ConfigError
 from ..representation import DetectionPrediction
-from ..topology_types import YoloV1Tiny, YoloV2, YoloV2Tiny, YoloV3, YoloV3Tiny
 from ..utils import get_or_parse_value
 
 DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h", "confidence", "probabilities"])
@@ -59,7 +58,6 @@ class TinyYOLOv1Adapter(Adapter):
     """
     __provider__ = 'tiny_yolo_v1'
     prediction_types = (DetectionPrediction, )
-    topology_types = (YoloV1Tiny, )
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -159,7 +157,6 @@ class YoloV2Adapter(Adapter):
     """
     __provider__ = 'yolo_v2'
     prediction_types = (DetectionPrediction, )
-    topology_types = (YoloV2, YoloV2Tiny, )
 
     PRECOMPUTED_ANCHORS = {
         'yolo_v2': [1.3221, 1.73145, 3.19275, 4.00944, 5.05587, 8.09892, 9.47112, 4.84053, 11.2364, 10.0071],
@@ -259,7 +256,6 @@ class YoloV3Adapter(Adapter):
     """
     __provider__ = 'yolo_v3'
     prediction_types = (DetectionPrediction, )
-    topology_types = (YoloV3, YoloV3Tiny, )
 
     PRECOMPUTED_ANCHORS = {
         'yolo_v3': [
