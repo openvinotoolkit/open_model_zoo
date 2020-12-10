@@ -556,7 +556,7 @@ PYTHON_DEMOS = [
                 '-i': DataPatternArg('road-segmentation-adas'),
             }),
             *combine_cases(
-                TestCase(options={'-i': DataPatternArg['semantic-segmentation-adas']}),
+                TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
                 single_option_cases('-m',
                     ModelArg('semantic-segmentation-adas-0001'),
                     ModelArg('hrnet-v2-c1-segmentation'),
