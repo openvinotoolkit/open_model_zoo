@@ -90,7 +90,7 @@ def main():
     capture = VideoCapture(args.i)
 
     if bool(args.m_instance_segmentation) == bool(args.m_semantic_segmentation):
-        raise ValueError('Set up exactly one of segmentation models: '\
+        raise ValueError('Set up exactly one of segmentation models: '
                          '--m_instance_segmentation or --m_semantic_segmentation')
 
     frame_size, fps = capture.get_source_parameters()
@@ -180,7 +180,7 @@ def main():
                 cv2.imshow('Board', board)
 
         end = time.time()
-        print('\rProcessing frame: {}, fps = {:.3}' \
+        print('\rProcessing frame: {}, fps = {:.3}'
             .format(frame_number, 1. / (end - start)), end="")
         frame_number += 1
     print('')

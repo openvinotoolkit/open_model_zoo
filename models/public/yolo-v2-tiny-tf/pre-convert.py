@@ -38,7 +38,7 @@ def main():
         str(args.input_dir / 'keras-YOLOv3-model-set/tools/model_converter/keras_to_tensorflow.py'),
         '--input_model={}'.format(args.output_dir / 'yolo-v2-tiny.h5'),
         '--output_model={}'.format(args.output_dir / 'yolo-v2-tiny.pb'),
-    ], check=True);
+    ], check=True)
 
 if __name__ == '__main__':
     main()

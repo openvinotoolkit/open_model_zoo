@@ -54,7 +54,7 @@ class VideoReader(object):
     def __init__(self, file_name):
         try:
             self.file_name = int(file_name[0])
-        except:
+        except ValueError:
             self.file_name = file_name[0]
 
 

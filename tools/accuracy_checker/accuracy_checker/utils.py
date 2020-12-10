@@ -99,7 +99,7 @@ def string_to_tuple(string, casting_type=float):
     processed = processed.replace(')', '')
     processed = processed.split(',')
 
-    return tuple([casting_type(entry) for entry in processed]) if not casting_type is None else tuple(processed)
+    return tuple([casting_type(entry) for entry in processed]) if casting_type else tuple(processed)
 
 
 def string_to_list(string):
@@ -723,7 +723,6 @@ class MatlabDataReader():
         if isinstance(fields, str):
             fields = [fields]
 
-        empty = lambda: [list() for i in range(header['dims'][0])]
         array = {}
         for row in range(header['dims'][0]):
             for _col in range(header['dims'][1]):
@@ -731,7 +730,7 @@ class MatlabDataReader():
                     vheader, next_pos, fd_var = self.read_var_header(fd, endian)
                     data = self.read_var_array(fd_var, endian, vheader)
                     if field not in array:
-                        array[field] = empty()
+                        array[field] = [[] for _ in range(header['dims'][0])]
                     array[field][row].append(data)
                     fd.seek(next_pos)
         for field in fields:
