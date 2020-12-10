@@ -164,7 +164,7 @@ class DeepSpeechPipeline:
         features = melspectrum_to_mfcc(melspectrum, self.p['num_mfcc_dct_coefs'])
         return features
 
-    def extract_per_frame_probs(self, mfcc_features, state=None, return_state=False, wrap_iterator=lambda x:x):
+    def extract_per_frame_probs(self, mfcc_features, state=None, return_state=False, wrap_iterator=lambda x: x):
         assert self.exec_net is not None, "Need to call mds.activate(device) method before mds.stt(...)"
 
         padding = np.zeros((self.p['num_context_frames'] // 2, self.p['num_mfcc_dct_coefs']), dtype=mfcc_features.dtype)

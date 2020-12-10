@@ -32,7 +32,7 @@ class WaveRNNUpsamplerONNX(nn.Module):
         return mels, aux
 
     def forward(self, mels):
-        mels = mels.transpose(1,2)
+        mels = mels.transpose(1, 2)
         aux = self.model.upsample.resnet(mels)
         aux = aux.unsqueeze(1)
         aux = self.model.upsample.resnet_stretch(aux)

@@ -109,7 +109,7 @@ def parse_arguments():
     args.add_argument('-c', '--path_to_cldnn_config', type=str, required=False,
                         help="Required for GPU custom kernels. "
                              "Absolute path to an .xml file with the kernels description.")
-    args.add_argument('-ms', '--mri_sequence', type=mri_sequence, metavar='N1,N2,N3,N4', default=(0,1,2,3),
+    args.add_argument('-ms', '--mri_sequence', type=mri_sequence, metavar='N1,N2,N3,N4', default=(0, 1, 2, 3),
                       help='Optional. Transfer MRI-sequence from dataset order to the network order.')
     args.add_argument("--full_intensities_range", required=False, default=False, action="store_true",
                       help="Take intensities of the input image in a full range.")
@@ -186,7 +186,7 @@ def resample_np(data, output_shape, order):
 
 
 def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True,
-               mri_sequence_order=(0,1,2,3), full_intensities_range=False):
+               mri_sequence_order=(0, 1, 2, 3), full_intensities_range=False):
     images_list = []
     original_shape = ()
     bboxes = np.zeros(shape=(len(DATA_SUFFIXES),) + (2, 3))
@@ -351,7 +351,7 @@ def main():
             y = bbox[3] - bbox[2]
             z = bbox[5] - bbox[4]
             out_result = np.zeros(shape=((channels,) + original_size), dtype=float)
-            out_result[:,bbox[0]:bbox[1], bbox[2]:bbox[3], bbox[4]:bbox[5]] = \
+            out_result[:, bbox[0]:bbox[1], bbox[2]:bbox[3], bbox[4]:bbox[5]] = \
                 resample_np(data, (channels, x, y, z), 1)
         else:
             out_result = data

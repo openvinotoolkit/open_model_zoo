@@ -238,7 +238,7 @@ MODEL_ATTRIBUTES = {
 
 def check_model(net):
     num_inputs = len(net.input_info)
-    assert num_inputs <= 2,'Demo supports only topologies with 1 or 2 inputs.'
+    assert num_inputs <= 2, 'Demo supports only topologies with 1 or 2 inputs.'
     image_input = [input_name for input_name, in_info in net.input_info.items() if len(in_info.input_data.shape) == 4]
     assert len(image_input) == 1, 'Demo supports only model with single input for images'
     image_input = image_input[0]

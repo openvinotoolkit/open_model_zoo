@@ -70,7 +70,7 @@ ACTIONS_BACK = {
         2: 'raising_hand'
     },
 
-    'common_6_actions':{
+    'common_6_actions': {
         0: 'sitting',
         1: 'writing',
         2: 'raising_hand',

@@ -195,7 +195,7 @@ class TestAutoResize:
         input_rep = DataRepresentation(input_data)
         expected_meta = {
                     'preferable_width': 200,
-                    'preferable_height':200,
+                    'preferable_height': 200,
                     'image_info': [200, 200, 1],
                     'scale_x': 2.0,
                     'scale_y': 2.0,

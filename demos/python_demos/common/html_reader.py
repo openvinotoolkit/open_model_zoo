@@ -6,8 +6,8 @@ import logging as log
 class HTMLDataExtractor(HTMLParser):
     def __init__(self, tags):
         super(HTMLDataExtractor, self).__init__()
-        self.started_tags = {k:[] for k in tags}
-        self.ended_tags = {k:[] for k in tags}
+        self.started_tags = {k: [] for k in tags}
+        self.ended_tags = {k: [] for k in tags}
 
     def handle_starttag(self, tag, attrs):
         if tag in self.started_tags:

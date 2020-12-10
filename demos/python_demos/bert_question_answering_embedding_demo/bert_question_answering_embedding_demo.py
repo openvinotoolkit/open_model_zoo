@@ -54,10 +54,10 @@ def build_argparser():
                            "For example 'input_ids,attention_mask,token_type_ids','position_ids'",
                       default='input_ids,attention_mask,token_type_ids,position_ids',
                       required=False, type=str)
-    args.add_argument("-m_qa","--model_qa",
+    args.add_argument("-m_qa", "--model_qa",
                       help="Optional. Path to an .xml file with a trained model to give exact answer",
                       default = None,
-                      required=False,type=Path)
+                      required=False, type=Path)
     args.add_argument("--input_names_qa",
                       help="Optional. Names for inputs in MODEL_QA network. "
                            "For example 'input_ids,attention_mask,token_type_ids','position_ids'",
@@ -118,7 +118,7 @@ def main():
 
     for length in [max_length_q, max_length_c]:
         new_shapes = {}
-        for i,input_info in ie_encoder_emb.input_info.items():
+        for i, input_info in ie_encoder_emb.input_info.items():
             new_shapes[i] = [1, length]
             log.info("Reshaped input {} from {} to the {}".format(
                 i,
@@ -299,7 +299,7 @@ def main():
                 assert pad_len >= 0
 
                 input_ids = tok_cls + q_tokens_id + tok_sep + c_data.c_tokens_id + tok_sep + tok_pad*pad_len
-                token_type_ids = [0]*(len(q_tokens_id)+2) + [1] * (len(c_data.c_tokens_id)+1) + tok_pad * pad_len
+                token_type_ids = [0] * (len(q_tokens_id)+2) + [1] * (len(c_data.c_tokens_id)+1) + tok_pad * pad_len
                 attention_mask = [1] * req_len + [0] * pad_len
 
                 #create numpy inputs for IE
