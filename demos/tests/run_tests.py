@@ -27,14 +27,11 @@ For the tests to work, the test data directory must contain:
 """
 
 import argparse
-import collections
 import contextlib
 import csv
-import itertools
 import json
 import os
 import shlex
-import shutil
 import subprocess
 import sys
 import tempfile

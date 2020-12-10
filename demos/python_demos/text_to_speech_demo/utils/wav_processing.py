@@ -20,7 +20,6 @@ commit 3595219b2f2f5353f0867a7bb59abcb15aba8831 on Nov 27, 2019
 import math
 
 import numpy as np
-import numpy.random as rnd
 
 
 # for WaveRNN approach (https://github.com/fatchord/WaveRNN), first step before upsample

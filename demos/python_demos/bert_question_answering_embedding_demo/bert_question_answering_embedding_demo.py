@@ -23,7 +23,7 @@ from pathlib import Path
 
 import numpy as np
 
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 from tokens_bert import text_to_tokens, load_vocab_file

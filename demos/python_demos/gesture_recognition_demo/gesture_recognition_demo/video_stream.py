@@ -16,7 +16,6 @@
 
 import logging as log
 import time
-from os.path import exists
 from multiprocessing import Process, Value, Array
 
 import cv2

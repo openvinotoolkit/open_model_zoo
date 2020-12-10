@@ -19,7 +19,6 @@ import sys
 from argparse import ArgumentParser, SUPPRESS
 from os import path
 
-import numpy as np
 from openvino.inference_engine import IECore
 
 from action_recognition_demo.models import IEModel, DummyDecoder
