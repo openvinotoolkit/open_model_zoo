@@ -20,7 +20,6 @@ import argparse
 import logging
 import re
 import ruamel.yaml
-import shlex
 
 from pathlib import Path
 from ruamel.yaml.scalarstring import FoldedScalarString

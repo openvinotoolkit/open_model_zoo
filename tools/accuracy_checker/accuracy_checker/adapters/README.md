@@ -28,6 +28,7 @@ AccuracyChecker supports following set of adapters:
 * `tiny_yolo_v1` - converting output of Tiny YOLO v1 model to `DetectionPrediction` representation.
 * `reid` - converting output of reidentification model to `ReIdentificationPrediction` representation.
   * `grn_workaround` - enabling processing output with adding Global Region Normalization layer.
+  * `joining_method` - method used to join embeddings (optional, supported methods are `sum` and `concatenation`, default - `sum`).
 * `yolo_v2` - converting output of YOLO v2 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 20).
   * `anchors` - anchor values provided as comma-separated list or one of precomputed:
@@ -200,6 +201,11 @@ AccuracyChecker supports following set of adapters:
   * `score_map_threshold` - threshold for score map (Optional, default 0.8).
   * `nms_threshold` - threshold for text boxes NMS (Optional, default 0.2).
   * `box_threshold` - minimal confidence threshold for text boxes (Optional, default 0.1).
+* `craft_text_detection` - converting output of CRAFT like model for text detection to `TextDetectionPrediction`.
+  * `score_out` - the name of output layer which contains score map.
+  * `text_threshold` - text confidence threshold (Optional, default 0.7).
+  * `link_threshold` - link confidence threshold (Optional, default 0.4).
+  * `low_text` - text low-bound score (Optional, default 0.4).
 * `human_pose_estimation` - converting output of model for human pose estimation to `PoseEstimationPrediction`.
   * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).
   * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
@@ -308,6 +314,9 @@ AccuracyChecker supports following set of adapters:
    * `bboxes_outputs` - the list of names for output layers with face detection boxes in order belonging to 32-, 16-, 8-strides.
    * `landmarks_outputs` - the list of names for output layers with predicted facial landmarks in order belonging to 32-, 16-, 8-strides (optional, if not provided, only `DetectionPrediction` will be generated).
    * `type_scores_outputs` - the list of names for output layers with attributes detection score in order belonging to 32-, 16-, 8-strides (optional, if not provided, only `DetectionPrediction` will be generated).
+   * `nms_threshold` - overlap threshold for NMS (optional, default 0.5).
+   * `keep_top_k ` - maximal number of boxes which should be kept (optional).
+   * `include_boundaries` - allows include boundaries for NMS (optional, default False).
 * `faceboxes` - converting output of FaceBoxes model to `DetectionPrediction` representation.
   * `scores_out` - name of output layer with bounding boxes scores.
   * `boxes_out` - name of output layer with bounding boxes coordinates.
@@ -343,7 +352,7 @@ AccuracyChecker supports following set of adapters:
     * `cell_width` - Specifies cell width to extract predictions.
     * `label_num` - Specifies number of output label classes.
 * `stacked_hourglass` - converts output of Stacked Hourglass Networks for single human pose estimation to `PoseEstimationPrediction`.
-   * `score_map_out`- the name of output layers for getting score map (Optional, default output blob will be used if not provided).
+   * `score_map_output`- the name of output layers for getting score map (Optional, default output blob will be used if not provided).
 * `dna_seq_beam_search` - converts output of DNA sequencing model to `DNASequencePrediction` using beam search decoding.
   * `beam_size` - beam size for CTC Beam Search (Optional, default 5).
   * `threshold` - beam cut threshold (Optional, default 1e-3).

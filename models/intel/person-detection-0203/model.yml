@@ -17,20 +17,20 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-0203.xml
-    size: 1068626
-    sha256: b4f7f4e7fb614c9a2a8b46034879bacff36864e1c1b9b547815b1b731ed9731a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/person-detection-retail-0203/FP32/person-detection-retail-0203.xml
+    size: 1068612
+    sha256: f7b3590794ddb668573413e2c984edf3df365e8edba70ee2eda5a256afd14b8f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-0203/FP32/person-detection-0203.xml
   - name: FP32/person-detection-0203.bin
     size: 7804876
     sha256: f7fd0fbf2a29fcc370e561cf499bcecc4d2a684905a7d199c5cea13a896dbd5d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/person-detection-retail-0203/FP32/person-detection-retail-0203.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-0203/FP32/person-detection-0203.bin
   - name: FP16/person-detection-0203.xml
-    size: 1068454
-    sha256: 3a3458d8416a07866b94533e4fd593e09fe73f2b86b7b2264e738dc104f0a654
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/person-detection-retail-0203/FP16/person-detection-retail-0203.xml
+    size: 1068440
+    sha256: 0f3316a35412b48b760e97ba33063fedd82ef4aeb5521ceefe233a11f3a539eb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-0203/FP16/person-detection-0203.xml
   - name: FP16/person-detection-0203.bin
     size: 3902622
     sha256: e7ff7f360d42bd24476ce7e83e41bed99d9014058ac6f0ce70cc84f76d78fb12
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/2/person-detection-retail-0203/FP16/person-detection-retail-0203.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-0203/FP16/person-detection-0203.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

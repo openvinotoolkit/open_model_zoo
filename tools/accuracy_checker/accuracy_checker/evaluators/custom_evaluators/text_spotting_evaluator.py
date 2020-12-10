@@ -481,7 +481,6 @@ class SequentialModel:
             isinstance(self.detector.im_data_name, str) and self.detector.im_data_name.startswith('detector_')
         )
         if with_prefix != self.with_prefix:
-            self.detector.text_feats_out = generate_name('detector_', with_prefix, self.detector.text_feats_out)
             self.adapter.classes_out = generate_name('detector_', with_prefix, self.adapter.classes_out)
             if self.adapter.scores_out is not None:
                 self.adapter.scores_out = generate_name('detector_', with_prefix, self.adapter.scores_out)
@@ -519,12 +518,14 @@ class DetectorDLSDKModel(BaseModel):
                 if has_info else self.exec_network.inputs
             )
             self.im_info_name = [x for x in input_info if len(input_info[x].shape) == 2]
+            self.im_data_name = [x for x in input_info if len(input_info[x].shape) == 4][0]
             if self.im_info_name:
                 self.im_info_name = self.im_info_name[0]
-                self.text_feats_out = 'text_features'
+                self.text_feats_out = 'detector_text_features' if self.im_data_name.startswith(
+                    'detector_') else 'text_features'
             else:
-                self.text_feats_out = 'text_features.0'
-            self.im_data_name = [x for x in input_info if len(input_info[x].shape) == 4][0]
+                self.text_feats_out = 'detector_text_features.0' if self.im_data_name.startswith(
+                    'detector_') else 'text_features.0'
 
     def predict(self, identifiers, input_data):
         input_data = np.array(input_data)
@@ -572,9 +573,11 @@ class DetectorDLSDKModel(BaseModel):
         self.im_info_name = [x for x in input_info if len(input_info[x].shape) == 2]
         if self.im_info_name:
             self.im_info_name = self.im_info_name[0]
-            self.text_feats_out = 'text_features'
+            self.text_feats_out = 'detector_text_features' if self.im_data_name.startswith(
+                'detector_') else 'text_features'
         else:
-            self.text_feats_out = 'text_features.0'
+            self.text_feats_out = 'detector_text_features.0' if self.im_data_name.startswith(
+                'detector_') else 'text_features.0'
         if log:
             self.print_input_output_info()
 

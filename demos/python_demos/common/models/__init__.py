@@ -15,9 +15,20 @@
 """
 
 
-from .ssd import SSD
-from .yolo import YOLO
-from .faceboxes import FaceBoxes
 from .centernet import CenterNet
+from .faceboxes import FaceBoxes
 from .retinaface import RetinaFace
+from .ssd import SSD
+from .utils import DetectionWithLandmarks
+from .yolo import YOLO
 from .segmentation import SegmentationModel
+
+__all__ = [
+    'CenterNet',
+    'DetectionWithLandmarks',
+    'FaceBoxes',
+    'RetinaFace',
+    'SSD',
+    'YOLO',
+    'SegmentationModel'
+]

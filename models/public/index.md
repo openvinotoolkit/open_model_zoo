@@ -132,6 +132,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | SSD lite with MobileNet V2           | TensorFlow\*             | [ssdlite_mobilenet_v2](./ssdlite_mobilenet_v2/ssdlite_mobilenet_v2.md) | 24.2946% | 1.525 | 4.475 |
 | SSD with ResNet-50 V1 FPN            | TensorFlow\*             | [ssd_resnet50_v1_fpn_coco](./ssd_resnet50_v1_fpn_coco/ssd_resnet50_v1_fpn_coco.md)| 38.4557% | 178.6807 | 59.9326 |
 | SSD with ResNet 34 1200x1200         | PyTorch\*                | [ssd-resnet34-1200-onnx](./ssd-resnet34-1200-onnx/ssd-resnet34-1200-onnx.md) | 20.7198%/39.2752% | 433.411 | 20.058  |
+| SSH                                  | MXNet\*                  | [ssh-mxnet](./ssh-mxnet/ssh-mxnet.md) | 84.80% | 267.0594 | 19.7684 |
 | RetinaFace-R50                       | MXNet\*                  | [retinaface-resnet50](./retinaface-resnet50/retinaface-resnet50.md) | 87.2902% | 100.8478 | 29.427 |
 | RetinaFace-Anti-Cov                  | MXNet\*                  | [retinaface-anti-cov](./retinaface-anti-cov/retinaface-anti-cov.md)  | 77.1531% | 2.7781 | 0.5955 |
 | YOLO v1 Tiny                         | TensorFlow.js\*          | [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | 72.1716% | 6.9883	 |	15.8587 |
@@ -145,7 +146,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 
 | Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------------ | -------------- | -------------- | -------- |------ | ------- |
-| FaceNet                              | TensorFlow\*   | [facenet-20180408-102900](./facenet-20180408-102900/facenet-20180408-102900.md) | 98.4522% | 2.846 | 23.469 |
+| FaceNet                              | TensorFlow\*   | [facenet-20180408-102900](./facenet-20180408-102900/facenet-20180408-102900.md) | 99.14% | 2.846 | 23.469 |
 | LResNet34E-IR,ArcFace@ms1m-refine-v1 | MXNet\*        | [face-recognition-resnet34-arcface](./face-recognition-resnet34-arcface/face-recognition-resnet34-arcface.md) | 	98.7488%| 8.934 | 34.129 |
 | LResNet50E-IR,ArcFace@ms1m-refine-v1 | MXNet\*        | [face-recognition-resnet50-arcface](./face-recognition-resnet50-arcface/face-recognition-resnet50-arcface.md) | 98.8835%| 12.637 | 43.576 |
 | LResNet100E-IR,ArcFace@ms1m-refine-v2| MXNet\*        | [face-recognition-resnet100-arcface](./face-recognition-resnet100-arcface/face-recognition-resnet100-arcface.md) | 99.0218%| 24.209 | 65.131 |

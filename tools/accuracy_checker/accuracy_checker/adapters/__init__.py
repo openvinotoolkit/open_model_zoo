@@ -20,7 +20,8 @@ from .action_recognition import ActionDetection
 from .text_detection import (
     TextDetectionAdapter,
     TextProposalsDetectionAdapter,
-    EASTTextDetectionAdapter
+    EASTTextDetectionAdapter,
+    CRAFTTextDetectionAdapter
 )
 
 from .text_recognition import (
@@ -163,6 +164,7 @@ __all__ = [
     'TextDetectionAdapter',
     'TextProposalsDetectionAdapter',
     'EASTTextDetectionAdapter',
+    'CRAFTTextDetectionAdapter',
 
     'BeamSearchDecoder',
     'LPRAdapter',

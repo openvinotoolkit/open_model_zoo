@@ -13,7 +13,6 @@
 
 import json
 import logging as log
-from collections import namedtuple
 from abc import ABC, abstractmethod
 
 import cv2

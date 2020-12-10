@@ -102,13 +102,13 @@ class MultiOutRetinaNet(Adapter):
             pred_ctr = deltas[:, :2] * anchors_wh + ctr
             pred_wh = np.exp(deltas[:, 2:]) * anchors_wh
 
-            m = np.zeros([2])
-            M = np.array([size]) * stride - 1
-            clamp = lambda t: np.maximum(m, np.minimum(t, M))
-            return np.concatenate([
-                clamp(pred_ctr - 0.5 * pred_wh),
-                clamp(pred_ctr + 0.5 * pred_wh - 1)
-            ], 1)
+            boxes = np.concatenate([
+                pred_ctr - 0.5 * pred_wh,
+                pred_ctr + 0.5 * pred_wh - 1,
+            ], axis=1)
+
+            M = np.array([*size, *size]) * stride - 1
+            return np.clip(boxes, 0, M)
 
         num_boxes = 4
         num_anchors = anchors.shape[0] if anchors is not None else 1

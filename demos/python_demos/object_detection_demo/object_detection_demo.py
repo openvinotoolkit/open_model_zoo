@@ -171,7 +171,7 @@ def get_plugin_configs(device, num_streams, num_threads):
     return config_user_specified
 
 
-def draw_detections(frame, detections, palette, labels, threshold, draw_landmarks=False):
+def draw_detections(frame, detections, palette, labels, threshold):
     size = frame.shape[:2]
     for detection in detections:
         if detection.score > threshold:
@@ -185,7 +185,7 @@ def draw_detections(frame, detections, palette, labels, threshold, draw_landmark
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
             cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
                         (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
-            if draw_landmarks:
+            if isinstance(detection, DetectionWithLandmarks):
                 for landmark in detection.landmarks:
                     cv2.circle(frame, landmark, 2, (0, 255, 255), 2)
     return frame
@@ -216,7 +216,6 @@ def main():
     log.info('Loading network...')
 
     model = get_model(ie, args)
-    has_landmarks = args.architecture_type == 'retina'
 
     detector_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
@@ -257,7 +256,7 @@ def main():
                 print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
 
             presenter.drawGraphs(frame)
-            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, has_landmarks)
+            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
             metrics.update(start_time, frame)
             if not args.no_show:
                 cv2.imshow('Detection Results', frame)
@@ -303,7 +302,7 @@ def main():
                 print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
 
             presenter.drawGraphs(frame)
-            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, has_landmarks)
+            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
             metrics.update(start_time, frame)
             if not args.no_show:
                 cv2.imshow('Detection Results', frame)

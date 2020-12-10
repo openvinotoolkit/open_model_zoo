@@ -106,9 +106,6 @@ CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, const std::
         config.clKernelsConfigPath = flags_c;
     }
 
-    if (flags_nireq == 0) {
-        throw std::runtime_error("The value of -nireq must be greater than 0");
-    }
     config.maxAsyncRequests = flags_nireq;
 
     /** Per layer metrics **/
