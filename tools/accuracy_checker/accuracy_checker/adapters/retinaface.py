@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 from ..adapters import Adapter
-from ..config import ListField
+from ..config import ListField, BoolField, NumberField
 from ..postprocessor import NMS
 from ..representation import (
     DetectionPrediction,
@@ -34,10 +34,23 @@ class RetinaFaceAdapter(Adapter):
         params = super().parameters()
         params.update(
             {
-                'bboxes_outputs': ListField(),
-                'scores_outputs': ListField(),
-                'landmarks_outputs': ListField(optional=True),
-                'type_scores_outputs': ListField(optional=True)
+                'bboxes_outputs': ListField(description="Names for output layers with face detection boxes"),
+                'scores_outputs': ListField(description="Names for output layers with face detection score"),
+                'landmarks_outputs': ListField(
+                    optional=True, description="Names for output layers with predicted facial landmarks"
+                ),
+                'type_scores_outputs': ListField(
+                    optional=True, description="Names for output layers with attributes detection score"
+                ),
+                'include_boundaries': BoolField(
+                    optional=True, default=False, description="Allows include boundaries for NMS"
+                ),
+                'keep_top_k': NumberField(
+                    min_value=0, optional=True, description="Maximal number of boxes which should be kept"
+                ),
+                'nms_threshold': NumberField(
+                    min_value=0, optional=True, default=0.5, description="Overlap threshold for NMS"
+                )
             }
         )
         return params
@@ -47,6 +60,9 @@ class RetinaFaceAdapter(Adapter):
         self.scores_output = self.get_value_from_config('scores_outputs')
         self.landmarks_output = self.get_value_from_config('landmarks_outputs') or []
         self.type_scores_output = self.get_value_from_config('type_scores_outputs') or []
+        self.include_boundaries = self.get_value_from_config('include_boundaries')
+        self.keep_top_k = int(self.get_value_from_config('keep_top_k'))
+        self.nms_threshold = self.get_value_from_config('nms_threshold')
         _ratio = (1.,)
         self.anchor_cfg = {
             32: {'SCALES': (32, 16), 'BASE_SIZE': 16, 'RATIOS': _ratio},
@@ -82,7 +98,8 @@ class RetinaFaceAdapter(Adapter):
                 anchors = anchors.reshape((height * width * anchor_num, 4))
                 proposals = self._get_proposals(bbox_deltas, anchor_num, anchors)
                 x_mins, y_mins, x_maxs, y_maxs = proposals.T
-                keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, scores, 0.5, False)
+                keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, scores, self.nms_threshold,
+                               self.include_boundaries, self.keep_top_k)
                 proposals_list.extend(proposals[keep])
                 scores_list.extend(scores[keep])
                 if self.type_scores_output:
