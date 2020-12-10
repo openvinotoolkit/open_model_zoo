@@ -101,9 +101,8 @@ def main():
         raise ValueError('Set up exactly one of segmentation models: '
                          '--m_instance_segmentation or --m_semantic_segmentation')
 
-    frame_size = frame.shape
     fps = cap.fps()
-    out_frame_size = (frame_size[1], frame_size[0] * 2)
+    out_frame_size = (frame.shape[1], frame.shape[0] * 2)
     presenter = monitors.Presenter(args.utilization_monitors, 20,
                                    (out_frame_size[0] // 4, out_frame_size[1] // 16))
 
@@ -132,7 +131,7 @@ def main():
                                             args.threshold, args.device, args.cpu_extension)
 
     black_board = False
-    output_frame = np.full((frame_size[0], frame_size[1], 3), 255, dtype='uint8')
+    output_frame = np.full((frame.shape[0], frame.shape[1], 3), 255, dtype='uint8')
     frame_number = 0
     key = -1
     start = time.time()
@@ -140,7 +139,7 @@ def main():
     while frame is not None:
         mask = None
         detections = segmentation.get_detections([frame])
-        expand_mask(detections, frame_size[1] // 27)
+        expand_mask(detections, frame.shape[1] // 27)
         if len(detections[0]) > 0:
             mask = detections[0][0][2]
             for i in range(1, len(detections[0])):
