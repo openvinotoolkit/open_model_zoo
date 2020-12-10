@@ -253,21 +253,6 @@ NATIVE_DEMOS = [
         single_option_cases('-m_va', None, ModelArg('vehicle-attributes-recognition-barrier-0039')),
     )),
 
-    NativeDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-no_show': None, **MONITORS}),
-        [
-            TestCase(options={
-                '-m': ModelArg('road-segmentation-adas-0001'),
-                '-i': DataPatternArg('road-segmentation-adas'),
-            }),
-            *combine_cases(
-                TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
-                single_option_cases('-m',
-                    ModelArg('semantic-segmentation-adas-0001'),
-                    ModelArg('deeplabv3'))),
-        ],
-    )),
-
     NativeDemo(subdirectory='segmentation_demo_async', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None, **MONITORS}),
         [
