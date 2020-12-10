@@ -278,8 +278,8 @@ void landmarksDataUpdate(const Face::Ptr &face, const cv::Mat &out_landmark) {
     const float *lm_data = out_landmark.ptr<float>();
 
     size_t n_lm = 70;
-    std::vector<float> normedLandmarks;
-    normedLandmarks.insert(normedLandmarks.end(), &lm_data[0], &lm_data[n_lm]);
+
+    std::vector<float> normedLandmarks(&lm_data[0], &lm_data[n_lm]);
 
     face->updateLandmarks(normedLandmarks);
 }
@@ -444,8 +444,7 @@ int main(int argc, char *argv[]) {
                 // Init presenter
                 if (presenter == nullptr) {
                     cv::Size graphSize{static_cast<int>(frame.rows / 4), 60};
-                    // std::make_unique is available since C++14
-                    presenter = std::unique_ptr<Presenter>(new Presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, graphSize));
+                    presenter.reset(new Presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, graphSize));
                 }
 
                 //  Postprocessing
