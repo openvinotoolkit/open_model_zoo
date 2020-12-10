@@ -26,12 +26,16 @@ import wave
 from openvino.inference_engine import IECore
 
 from models.forward_tacotron_ie import ForwardTacotronIE
-from models.mel2wave_ie import WaveRNNIE
+from models.mel2wave_ie import WaveRNNIE, MelGANIE
 
 
-def save_wav(x, path):
+def save_wav(x, path, is_wavernn):
     sr = 22050
-    audio = (x * (2 ** 15 - 1)).astype("<h")
+    if is_wavernn:
+        audio = (x * (2 ** 15 - 1)).astype("<h")
+    else:
+        audio = x.astype(dtype=np.int16)
+
     with wave.open(path, "w") as f:
         f.setnchannels(1)
         f.setsampwidth(2)
@@ -49,30 +53,40 @@ def build_argparser():
     args.add_argument("-m_forward", "--model_forward",
                       help="Required. Path to ForwardTacotron`s mel-spectrogram regression part (*.xml format).",
                       required=True, type=str)
-    args.add_argument("-m_upsample", "--model_upsample",
-                      help="Required. Path to WaveRNN`s part for mel-spectrogram upsampling "
-                           "by time axis (*.xml format).",
-                      required=True, type=str)
-    args.add_argument("-m_rnn", "--model_rnn",
-                      help="Required. Path to WaveRNN`s part for waveform autoregression (*.xml format).",
-                      required=True, type=str)
-
     args.add_argument("-i", "--input", help="Text file with text.", required=True,
                       type=str)
     args.add_argument("-o", "--out", help="Required. Path to an output .wav file", default='out.wav',
                       type=str)
-
-    args.add_argument("--upsampler_width", default=-1,
-                      help="Width for reshaping of the model_upsample. "
-                           "If -1 then no reshape. Do not use with FP16 model.",
-                      required=False,
-                      type=int)
 
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL, MYRIAD or HETERO is "
                            "acceptable. The sample will look for a suitable plugin for device specified. "
                            "Default value is CPU",
                       default="CPU", type=str)
+
+    vocoder_parsers = parser.add_subparsers(dest='vocoder')
+
+    wavernn_parser = vocoder_parsers.add_parser('wavernn', aliases=['wr'])
+    wavernn_parser.add_argument("-m_upsample", "--model_upsample",
+                      help="Required. Path to WaveRNN`s part for mel-spectrogram upsampling "
+                           "by time axis (*.xml format).",
+                      required=True, type=str)
+    wavernn_parser.add_argument("-m_rnn", "--model_rnn",
+                      help="Required. Path to WaveRNN`s part for waveform autoregression (*.xml format).",
+                      required=True, type=str)
+    wavernn_parser.add_argument("--upsampler_width", default=-1,
+                                help="Width for reshaping of the model_upsample. "
+                                     "If -1 then no reshape. Do not use with FP16 model.",
+                                required=False,
+                                type=int)
+
+    melgan_parser = vocoder_parsers.add_parser('melgan', aliases=['mg'])
+    melgan_parser.add_argument("-m_melgan", "--model_melgan",
+                               help="Required. Path to model of the MelGAN (*.xml format).",
+                               required=True,
+                               type=str)
+
+
     return parser
 
 
@@ -80,8 +94,14 @@ def main():
     args = build_argparser().parse_args()
 
     ie = IECore()
-    vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, ie, device=args.device,
-                        upsampler_width=args.upsampler_width)
+
+    is_wavernn = args.vocoder in ['wavernn', 'wr']
+    if is_wavernn:
+        vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, ie, device=args.device,
+                            upsampler_width=args.upsampler_width)
+    else:
+        vocoder = MelGANIE(args.model_melgan, ie, device=args.device)
+
     forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, ie, args.device, verbose=False)
 
     audio_res = []
@@ -117,9 +137,10 @@ def main():
                 time_e = time.perf_counter()
                 time_forward += (time_e - time_s) * 1000
 
-                mel = (mel + 4) / 8
-                np.clip(mel, 0, 1, out=mel)
-                mel = np.transpose(mel)
+                if is_wavernn:
+                    mel = (mel + 4) / 8
+                    np.clip(mel, 0, 1, out=mel)
+                    mel = np.transpose(mel)
                 mel = np.expand_dims(mel, axis=0)
 
                 time_s = time.perf_counter()
@@ -137,7 +158,7 @@ def main():
     print('All time {:.3f}ms. WaveRNN time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'
           .format((time_e_all - time_s_all) * 1000, time_wavernn, time_forward))
 
-    save_wav(np.array(audio_res), args.out)
+    save_wav(np.array(audio_res), args.out, is_wavernn)
 
 
 if __name__ == '__main__':

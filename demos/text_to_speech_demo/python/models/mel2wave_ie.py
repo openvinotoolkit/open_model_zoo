@@ -178,3 +178,86 @@ class WaveRNNIE:
         output = output[:wave_len]
         output[-20 * self.hop_length:] *= fade_out
         return output
+
+
+class MelGANIE:
+    def __init__(self, model, ie, device='CPU'):
+        """
+        return class provided MelGAN inference.
+
+        :param model: path to xml with MelGAN model of WaveRNN
+        :param ie: instance of the IECore
+        :param device: target device
+        :return:
+        """
+        super().__init__()
+
+        self.device = device
+        self.ie = ie
+
+        self.scales = 4
+        self.hop_length = 256
+
+        self.net = self.load_network(model)
+        self.exec_net = self.create_exec_network(self.net, self.scales)
+
+        # fixed number of columns in mel-spectrogramm
+        self.mel_len = self.net.input_info['mel'].input_data.shape[2]
+        self.widths = [self.mel_len * (i + 1) for i in range(self.scales)]
+
+    def load_network(self, model_xml):
+        model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
+        model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
+        print("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+        net = self.ie.read_network(model=model_xml, weights=model_bin)
+        return net
+
+    def create_exec_network(self, net, scales=None):
+        if scales is not None:
+            orig_shape = net.input_info['mel'].input_data.shape
+            exec_net = []
+            for i in range(scales):
+                new_shape = (orig_shape[0], orig_shape[1], orig_shape[2] * (i + 1))
+                net.reshape({"mel": new_shape})
+                exec_net.append(self.ie.load_network(network=net, device_name=self.device))
+                net.reshape({"mel": orig_shape})
+        else:
+            exec_net = self.ie.load_network(network=net, device_name=self.device)
+        return exec_net
+
+    def forward(self, mel):
+        res_audio = []
+        last_padding = 0
+        if mel.shape[2] % self.mel_len:
+            last_padding = self.mel_len - mel.shape[2] % self.mel_len
+
+        mel = np.pad(mel, ((0, 0), (0, 0), (0, last_padding)), 'constant', constant_values=-11.5129)
+
+        active_net = -1
+        cur_w = -1
+        cols = mel.shape[2]
+
+        for i, w in enumerate(self.widths):
+            if cols >= w:
+                cur_w = w
+                active_net = i
+
+        c_begin = 0
+        c_end = cur_w
+        while c_begin < cols:
+            audio = self.exec_net[active_net].infer(inputs={"mel": mel[:, :, c_begin:c_end]})["audio"]
+            res_audio.extend(audio)
+
+            c_begin = c_end
+
+            if c_end + cur_w >= cols:
+                for i, w in enumerate(self.widths):
+                    if w <= cols - c_end:
+                        cur_w = w
+                        active_net = i
+
+            c_end += cur_w
+        if last_padding:
+            return res_audio[:-self.hop_length * last_padding]
+        else:
+            return res_audio
