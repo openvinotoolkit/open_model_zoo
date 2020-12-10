@@ -14,8 +14,6 @@
  limitations under the License.
 """
 
-import os
-
 import cv2
 from image_retrieval_demo.roi_cv_detector.detect_by_simple_dense_optical_flow import RoiDetector, \
     get_rect_tl, get_rect_br
