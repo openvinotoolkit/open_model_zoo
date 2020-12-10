@@ -193,6 +193,7 @@ class MSCocoDetectionConverter(BaseFormatConverter):
 class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
     __provider__ = 'mscoco_keypoints'
     annotation_types = (PoseEstimationAnnotation, )
+
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
