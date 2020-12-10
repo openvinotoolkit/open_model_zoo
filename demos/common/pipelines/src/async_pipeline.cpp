@@ -82,12 +82,14 @@ AsyncPipeline::~AsyncPipeline() {
     waitForTotalCompletion();
 }
 
-void AsyncPipeline::waitForData() {
+void AsyncPipeline::waitForData(bool shouldKeepOrder) {
     std::unique_lock<std::mutex> lock(mtx);
 
     condVar.wait(lock, [&] {return callbackException != nullptr ||
         requestsPool->isIdleRequestAvailable() ||
-        completedInferenceResults.find(outputFrameId) != completedInferenceResults.end();
+        (shouldKeepOrder ?
+            completedInferenceResults.find(outputFrameId) != completedInferenceResults.end() :
+            !completedInferenceResults.empty());
     });
 
     if (callbackException)
@@ -141,8 +143,8 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     return frameID;
 }
 
-std::unique_ptr<ResultBase> AsyncPipeline::getResult() {
-    auto infResult = AsyncPipeline::getInferenceResult();
+std::unique_ptr<ResultBase> AsyncPipeline::getResult(bool shouldKeepOrder) {
+    auto infResult = AsyncPipeline::getInferenceResult(shouldKeepOrder);
     if (infResult.IsEmpty()) {
         return std::unique_ptr<ResultBase>();
     }
@@ -153,12 +155,14 @@ std::unique_ptr<ResultBase> AsyncPipeline::getResult() {
     return result;
 }
 
-InferenceResult AsyncPipeline::getInferenceResult() {
+InferenceResult AsyncPipeline::getInferenceResult(bool shouldKeepOrder) {
     InferenceResult retVal;
     {
         std::lock_guard<std::mutex> lock(mtx);
 
-        const auto& it = completedInferenceResults.find(outputFrameId);
+        const auto& it = shouldKeepOrder ?
+            completedInferenceResults.find(outputFrameId) :
+            completedInferenceResults.begin();
 
         if (it != completedInferenceResults.end()) {
             retVal = std::move(it->second);
