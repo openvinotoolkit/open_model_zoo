@@ -9,6 +9,16 @@ exclude=
 select=
     # indentation problems
     E10,E11,
+    # whitespace before '('
+    E211,
+    # missing whitespace after ',', ';', or ':'
+    E231,
+    # missing whitespace after keyword
+    E275,
+    # expected 1 blank line, found 0
+    E301,
+    # blank lines found after function decorator
+    E304,
     # the backslash is redundant between brackets
     E502,
     # statement style issues
