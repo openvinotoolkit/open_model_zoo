@@ -16,7 +16,6 @@ limitations under the License.
 
 import numpy as np
 
-from ..topology_types import ImageClassification
 from ..adapters import Adapter
 from ..config import BoolField, StringField
 from ..representation import ClassificationPrediction, ArgMaxClassificationPrediction
@@ -27,7 +26,6 @@ class ClassificationAdapter(Adapter):
     Class for converting output of classification model to ClassificationPrediction representation
     """
     __provider__ = 'classification'
-    topology_types = (ImageClassification, )
     prediction_types = (ClassificationPrediction, )
 
     @classmethod
