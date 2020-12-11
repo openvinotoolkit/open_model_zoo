@@ -12,10 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import itertools
 import sys
 
-from args import *
+from args import (
+    DataDirectoryArg, DataDirectoryOrigFileNamesArg, DataPatternArg, DemoFileArg,
+    ModelArg, OMZ_DIR, TestDataArg, image_net_arg, image_retrieval_arg,
+)
 from data_sequences import DATA_SEQUENCES
 
 MONITORS = {'-u': 'cdm'}

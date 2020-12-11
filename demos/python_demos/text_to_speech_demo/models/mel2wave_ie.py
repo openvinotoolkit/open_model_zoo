@@ -18,7 +18,9 @@ import os.path as osp
 
 import numpy as np
 
-from utils.wav_processing import *
+from utils.wav_processing import (
+    fold_with_overlap, infer_from_discretized_mix_logistic, pad_tensor, xfade_and_unfold,
+)
 
 
 class WaveRNNIE:
