@@ -31,6 +31,7 @@ from instance_segmentation_demo.visualizer import Visualizer
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 import monitors
+from images_capture import open_images_capture
 
 
 def build_argparser():
@@ -44,10 +45,11 @@ def build_argparser():
     args.add_argument('--labels',
                       help='Required. Path to a text file with class labels.',
                       required=True, type=str, metavar='"<path>"')
-    args.add_argument('-i',
-                      dest='input_source',
-                      help='Required. Path to an image, video file or a numeric camera ID.',
-                      required=True, type=str, metavar='"<path>"')
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. An input to process. The input must be a single image, '
+                           'a folder of images or anything that cv2.VideoCapture can process.')
+    args.add_argument('--loop', default=False, action='store_true',
+                      help='Optional. Enable reading the input in a loop.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
@@ -82,7 +84,7 @@ def build_argparser():
                       help='Optional. Output inference results raw values.',
                       action='store_true')
     args.add_argument("--no_show",
-                      help="Optional. Don't show output",
+                      help="Optional. Don't show output.",
                       action='store_true')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
@@ -106,14 +108,10 @@ def main():
     log.info('Loading IR to the plugin...')
     exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)
 
-    try:
-        input_source = int(args.input_source)
-    except ValueError:
-        input_source = args.input_source
-    cap = cv2.VideoCapture(input_source)
-    if not cap.isOpened():
-        log.error('Failed to open "{}"'.format(args.input_source))
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+    cap = open_images_capture(args.input, args.loop)
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
 
     if args.no_track:
         tracker = None
@@ -123,19 +121,17 @@ def main():
     with open(args.labels, 'rt') as labels_file:
         class_labels = labels_file.read().splitlines()
 
+    frame_size = frame.shape
     presenter = monitors.Presenter(args.utilization_monitors, 45,
-        (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
+                (round(frame_size[1] / 4), round(frame_size[0] / 8)))
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
 
     render_time = 0
 
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
 
+    while frame is not None:
         if args.no_keep_aspect_ratio:
             # Resize the image to a target size.
             scale_x = w / frame.shape[1]
@@ -213,10 +209,10 @@ def main():
             if key == esc_code:
                 break
             presenter.handleKey(key)
+        frame = cap.read()
 
     print(presenter.reportMeans())
     cv2.destroyAllWindows()
-    cap.release()
 
 
 if __name__ == '__main__':

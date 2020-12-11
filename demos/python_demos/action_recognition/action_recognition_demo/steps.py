@@ -26,9 +26,9 @@ from .pipeline import AsyncPipeline, PipelineStep
 from .queue import Signal
 
 
-def run_pipeline(video, loop, encoder, decoder, render_fn, decoder_seq_size=16, fps=30):
+def run_pipeline(capture, encoder, decoder, render_fn, decoder_seq_size=16, fps=30):
     pipeline = AsyncPipeline()
-    pipeline.add_step("Data", DataStep(video, loop), parallel=False)
+    pipeline.add_step("Data", DataStep(capture), parallel=False)
     pipeline.add_step("Encoder", EncoderStep(encoder), parallel=False)
     pipeline.add_step("Decoder", DecoderStep(decoder, sequence_size=decoder_seq_size), parallel=False)
     pipeline.add_step("Render", RenderStep(render_fn, fps=fps), parallel=True)
@@ -40,31 +40,21 @@ def run_pipeline(video, loop, encoder, decoder, render_fn, decoder_seq_size=16, 
 
 class DataStep(PipelineStep):
 
-    def __init__(self, input, loop):
+    def __init__(self, capture):
         super().__init__()
-        self.video = input
-        self.loop = loop
-        self.cap = cv2.VideoCapture(self.video)
-        if not self.cap.isOpened():
-            print("Error: The input video cannot be opened")
-            exit(1)
+        self.cap = capture
 
     def setup(self):
         pass
 
     def process(self, item):
-        status, frame = self.cap.read()
-        if not status:
-            if not self.loop:
-                return Signal.STOP
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            status, frame = self.cap.read()
-            if not status:
-                return Signal.STOP
+        frame = self.cap.read()
+        if frame is None:
+            return Signal.STOP
         return frame
 
     def end(self):
-        self.cap.release()
+        pass
 
 
 class EncoderStep(PipelineStep):

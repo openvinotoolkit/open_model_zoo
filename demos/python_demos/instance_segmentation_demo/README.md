@@ -54,8 +54,10 @@ Options:
   -m "<path>", --model "<path>"
                         Required. Path to an .xml file with a trained model.
   --labels "<path>"     Required. Path to a text file with class labels.
-  -i "<path>"           Required. Path to an image, video file or a numeric
-                        camera ID.
+  -i INPUT, --input INPUT
+                        Required. An input to process. The input must be a single image,
+                        a folder of images or anything that cv2.VideoCapture can process.
+  --loop                Optional. Enable reading the input in a loop.
   -d "<device>", --device "<device>"
                         Optional. Specify the target device to infer on: CPU,
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a
