@@ -550,6 +550,7 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, **MONITORS}),
         [
             TestCase(options={
                 '-m': ModelArg('road-segmentation-adas-0001'),
