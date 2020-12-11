@@ -15,8 +15,8 @@ For details see [repository](https://github.com/clovaai/rexnet) and [paper](http
 | Metric           | Value          |
 | ---------------- | -------------- |
 | Type             | Classification |
-| GFLOPs           |          |
-| MParams          |        |
+| GFLOPs           | 0.8325         |
+| MParams          | 4.7779         |
 | Source framework | PyTorch\*      |
 
 ## Accuracy
