@@ -30,6 +30,7 @@ from image_retrieval_demo.roi_detector_on_video import RoiDetectorOnVideo
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
+from images_capture import open_images_capture
 
 
 INPUT_SIZE = 224
@@ -45,9 +46,10 @@ def build_argparser():
     args.add_argument('-m', '--model',
                       help='Required. Path to an .xml file with a trained model.',
                       required=True, type=str)
-    args.add_argument('-i',
-                      help='Required. Path to a video file or a device node of a web-camera.',
-                      required=True, type=str)
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. Path to a video file or a device node of a web-camera.')
+    args.add_argument('--loop', default=False, action='store_true',
+                      help='Optional. Enable reading the input in a loop.')
     args.add_argument('-g', '--gallery',
                       help='Required. Path to a file listing gallery images.',
                       required=True, type=str)
@@ -113,7 +115,10 @@ def main():
     img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE,
                                    args.cpu_extension)
 
-    frames = RoiDetectorOnVideo(args.i)
+    cap = open_images_capture(args.input, args.loop)
+    if cap.get_type() not in ('VIDEO', 'CAMERA'):
+        raise RuntimeError("The input should be a video file or a numeric camera ID")
+    frames = RoiDetectorOnVideo(cap)
 
     compute_embeddings_times = []
     search_in_gallery_times = []
