@@ -19,6 +19,11 @@
 
 using namespace InferenceEngine;
 
+SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useAutoResize) :
+    ModelBase(modelFileName),
+    useAutoResize(useAutoResize) {
+}
+
 void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input blobs -----------------------------------------------------
@@ -31,10 +36,14 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
 
     InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-    inputInfo.setLayout(Layout::NHWC);
     inputInfo.setPrecision(Precision::U8);
-
+    if (useAutoResize) {
+        inputInfo.getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
+        inputInfo.setLayout(Layout::NHWC);
+    }
+    else {
+        inputInfo.setLayout(Layout::NCHW);
+    }
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const OutputsDataMap& outputsDataMap = cnnNetwork.getOutputsInfo();
     if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
@@ -67,7 +76,16 @@ std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 
-    request->SetBlob(inputsNames[0], wrapMat2Blob(img));
+    if (useAutoResize) {
+        /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
+        request->SetBlob(inputsNames[0], wrapMat2Blob(img));
+    }
+    else {
+        /* Resize and copy data from the image to the input blob */
+        Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
+        matU8ToBlob<uint8_t>(img, frameBlob);
+    }
+
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
 }
 
