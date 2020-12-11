@@ -314,10 +314,10 @@ class Tiling(Preprocessor):
                 value_type=int, optional=True, min_value=1,
                 description="Destination size of tiled fragment for both dimensions."
             ),
-            'dst_width'  : NumberField(
+            'dst_width': NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination width of tiled fragment."
             ),
-            'dst_height' : NumberField(
+            'dst_height': NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination height of tiled fragment."
             ),
         })

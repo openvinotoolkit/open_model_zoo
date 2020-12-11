@@ -237,7 +237,7 @@ class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEv
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'fppi_level' : NumberField(min_value=0, max_value=1, description="False Positive Per Image level.")
+            'fppi_level': NumberField(min_value=0, max_value=1, description="False Positive Per Image level.")
         })
         return parameters
 
