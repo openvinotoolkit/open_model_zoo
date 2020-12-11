@@ -14,6 +14,8 @@
  limitations under the License.
 """
 
+import os
+
 import cv2
 from image_retrieval_demo.roi_cv_detector.detect_by_simple_dense_optical_flow import RoiDetector, \
     get_rect_tl, get_rect_br
@@ -22,9 +24,11 @@ from image_retrieval_demo.roi_cv_detector.detect_by_simple_dense_optical_flow im
 class RoiDetectorOnVideo:
     """ This class detects moving ROI on videos. """
 
-    def __init__(self, cap):
+    def __init__(self, path):
+        if not os.path.exists(path):
+            raise Exception('File not found: {}'.format(path))
 
-        self.cap = cap
+        self.cap = cv2.VideoCapture(path)
         self.frame_step = 5
         self.roi_detector = RoiDetector(self.frame_step)
 
@@ -34,7 +38,7 @@ class RoiDetectorOnVideo:
     def __next__(self):
         """ Returns cropped frame (ROI) and original frame with ROI drawn as a rectangle. """
 
-        frame = self.cap.read()
+        _, frame = self.cap.read()
 
         if frame is None:
             raise StopIteration
