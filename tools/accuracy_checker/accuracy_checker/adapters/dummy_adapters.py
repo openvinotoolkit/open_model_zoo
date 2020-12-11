@@ -103,6 +103,7 @@ class GVADetectionAdapter(Adapter):
 
 class GVAClassificationAdapter(Adapter):
     __provider__ = 'gva_classification'
+
     def process(self, raw, identifiers, frame_meta):
         results = []
         for identifier, image_data in zip(identifiers, raw):

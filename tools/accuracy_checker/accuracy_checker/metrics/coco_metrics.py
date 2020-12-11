@@ -47,7 +47,7 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
                 description="Max number of predicted results per image. If you have more predictions, "
                             "the results with minimal confidence will be ignored."
             ),
-            'threshold' : BaseField(
+            'threshold': BaseField(
                 optional=True, default='.50:.05:.95',
                 description="Intersection over union threshold. "
                             "You can specify one value or comma separated range of values. "

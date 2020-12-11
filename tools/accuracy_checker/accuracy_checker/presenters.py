@@ -120,7 +120,7 @@ class VectorPrintPresenter(BasePresenter):
                 value = value[0]
             result_dict = {
                 'name': value_names[0] if 'names' in meta else name,
-                'value':value,
+                'value': value,
                 'type': metric_type,
                 'ref': reference or ''
             }

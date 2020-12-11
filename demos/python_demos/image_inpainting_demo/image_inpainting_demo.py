@@ -124,7 +124,7 @@ def main():
 
     if args.auto_mask_color or args.auto_mask_random:
         # Command-line inpaining for just one image
-        concat_image, result = inpaint_auto(img,args)
+        concat_image, result = inpaint_auto(img, args)
         if args.output != "":
             cv2.imwrite(args.output, result)
         if not args.no_show:

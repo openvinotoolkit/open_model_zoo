@@ -150,8 +150,8 @@ def main():
 
         num_failures = 0
 
-        os.putenv('PYTHONPATH',  "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir))
-        os.putenv('PYTHONIOENCODING',  'utf-8')
+        os.putenv('PYTHONPATH', "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir))
+        os.putenv('PYTHONIOENCODING', 'utf-8')
 
         for demo in demos_to_test:
             print('Testing {}...'.format(demo.full_name))

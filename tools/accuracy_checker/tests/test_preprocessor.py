@@ -195,7 +195,7 @@ class TestAutoResize:
         input_rep = DataRepresentation(input_data)
         expected_meta = {
                     'preferable_width': 200,
-                    'preferable_height':200,
+                    'preferable_height': 200,
                     'image_info': [200, 200, 1],
                     'scale_x': 2.0,
                     'scale_y': 2.0,
@@ -719,7 +719,7 @@ class TestPreprocessorExtraArgs:
 
     def test_bgr_to_rgb_raise_config_error_on_extra_args(self):
         with pytest.raises(ConfigError):
-            Preprocessor.provide('bgr_to_rgb',  {'type': 'bgr_to_rgb', 'something_extra': 'extra'})
+            Preprocessor.provide('bgr_to_rgb', {'type': 'bgr_to_rgb', 'something_extra': 'extra'})
 
     def test_flip_raise_config_error_on_extra_args(self):
         with pytest.raises(ConfigError):

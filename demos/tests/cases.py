@@ -409,7 +409,7 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(subdirectory='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show':None,
+        TestCase(options={'--no_show': None,
                           **MONITORS,
                           '-m': ModelArg('image-retrieval-0001')}),
         single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),

@@ -139,7 +139,7 @@ class MultiCameraTracker:
             cam_tracks = sct.get_archived_tracks() + sct.get_tracks()
             for i in range(len(cam_tracks)):
                 cam_tracks[i] = {'id': cam_tracks[i].id,
-                                 'timestamps':  cam_tracks[i].timestamps,
+                                 'timestamps': cam_tracks[i].timestamps,
                                  'boxes': cam_tracks[i].boxes}
             history.append(cam_tracks)
         return history

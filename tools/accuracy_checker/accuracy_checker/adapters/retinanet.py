@@ -35,7 +35,7 @@ class MultiOutRetinaNet(Adapter):
             'pre_nms_top_k': NumberField(
                 description='pre nms keep top k boxes', value_type=int, optional=True, default=1000
             ),
-            'post_nms_top_k':  NumberField(
+            'post_nms_top_k': NumberField(
                 description='post nms keep top k boxes', value_type=int, optional=True, default=100
             ),
             'min_conf': NumberField(
@@ -230,7 +230,7 @@ class RetinaNetAdapter(Adapter):
         params = super().parameters()
         params.update({
             'loc_out': StringField(description='boxes localization output'),
-            'class_out':  StringField(description="output with classes probabilities")
+            'class_out': StringField(description="output with classes probabilities")
         })
         return params
 

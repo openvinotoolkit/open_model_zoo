@@ -163,7 +163,7 @@ def main():
 
         # Parse detection results of the current request
         scores, classes, boxes, masks = postprocessor(
-            outputs, scale_x, scale_y, *frame.shape[:2], h, w,  args.prob_threshold)
+            outputs, scale_x, scale_y, *frame.shape[:2], h, w, args.prob_threshold)
 
         render_start = time.time()
 

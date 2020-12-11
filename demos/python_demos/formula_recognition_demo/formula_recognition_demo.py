@@ -217,7 +217,7 @@ def main():
         targets = np.argmax(logits, axis=1)
         if args.output_file:
             with open(args.output_file, 'a') as output_file:
-                output_file.write(rec['img_name'] + '\t' +  vocab.construct_phrase(targets) + '\n')
+                output_file.write(rec['img_name'] + '\t' + vocab.construct_phrase(targets) + '\n')
         else:
             print("Image name: {}\nFormula: {}\n".format(rec['img_name'], vocab.construct_phrase(targets)))
 

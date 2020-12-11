@@ -29,6 +29,7 @@ class Shift(PostprocessorWithSpecificTargets):
 
     annotation_types = (SegmentationAnnotation, )
     prediction_types = (SegmentationPrediction, )
+
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
