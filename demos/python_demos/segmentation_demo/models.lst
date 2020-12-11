@@ -3,3 +3,6 @@ deeplabv3
 hrnet-v2-c1-segmentation
 road-segmentation-adas-????
 semantic-segmentation-adas-????
+icnet-camvid-ava-0001
+icnet-camvid-ava-sparse-??-0001
+unet-camvid-onnx-0001
