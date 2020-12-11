@@ -52,7 +52,7 @@ public:
     void textUpdate(PerformanceMetrics& metrics,
                     PerformanceMetrics::TimePoint lastRequestStartTime,
                     double accuracy,
-                    gflags::uint32 nTop,
+                    unsigned int nTop,
                     bool isFpsTest,
                     bool showAccuracy,
                     Presenter& presenter) {

@@ -123,13 +123,13 @@ void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnN
     if (outSizeVector.size() == 4 && outSizeVector[2] != 1 && outSizeVector[3] != 1)
         throw std::runtime_error("Demo supports topologies only with 4-dimensional ouput which has last two dimensions of size 1");
     if (nTop > outSizeVector[1])
-        throw std::runtime_error("The model provides " + std::to_string(outSizeVector[1]) + " classes, but " + std::to_string(nTop) + " id requested");
+        throw std::runtime_error("The model provides " + std::to_string(outSizeVector[1]) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
     if (outSizeVector[1] == labels.size() + 1) {
         labels.insert(labels.begin(), "other");
         slog::warn << "Inserted 'other' label as first.\n";
     }
     else if (outSizeVector[1] != labels.size())
-        throw std::logic_error("Incorrect size of model output layer. Must be BatchSize x NumberOfClasses.");
+        throw std::logic_error("Model's number of classes and parsed labels must match (" + std::to_string(outSizeVector[1]) + " and " + std::to_string(labels.size()) + ')');
 
     data.setPrecision(Precision::FP32);
 }
