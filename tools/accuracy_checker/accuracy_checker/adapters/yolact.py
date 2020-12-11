@@ -41,7 +41,7 @@ class YolactAdapter(Adapter):
             'prior_out': StringField(description='name of output with prior boxes', optional=True),
             'mask_out': StringField(description='name of output with masks'),
             'proto_out': StringField(description='name of output with proto for masks calculation'),
-            'confidence_threshold':  NumberField(
+            'confidence_threshold': NumberField(
                 value_type=float, optional=True, default=0.05, description='confidence threshold'
             ),
             'max_detections': NumberField(

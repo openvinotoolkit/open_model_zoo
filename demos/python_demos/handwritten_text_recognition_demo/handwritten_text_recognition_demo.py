@@ -63,7 +63,7 @@ def preprocess_input(image_name, height, width):
     img = rsz[None, :, :]
     _, h, w = img.shape
     # right edge padding
-    pad_img = np.pad(img, ((0, 0), (0, height - h), (0, width -  w)), mode='edge')
+    pad_img = np.pad(img, ((0, 0), (0, height - h), (0, width - w)), mode='edge')
     return pad_img
 
 

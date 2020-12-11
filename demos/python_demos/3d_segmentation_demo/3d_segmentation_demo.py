@@ -257,7 +257,7 @@ def main():
             ie.set_config({'CPU_THREADS_NUM': str(args.number_threads)}, "CPU")
     elif 'GPU' in args.target_device:
         if args.path_to_cldnn_config:
-            ie.set_config({'CONFIG_FILE':  args.path_to_cldnn_config}, "GPU")
+            ie.set_config({'CONFIG_FILE': args.path_to_cldnn_config}, "GPU")
             logger.info("GPU extensions is loaded {}".format(args.path_to_cldnn_config))
     else:
         raise AttributeError("Device {} do not support of 3D convolution. "

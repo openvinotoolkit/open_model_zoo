@@ -23,7 +23,7 @@ import numpy as np
 import cv2
 
 from ..base_evaluator import BaseEvaluator
-from ..quantization_model_evaluator import  create_dataset_attributes
+from ..quantization_model_evaluator import create_dataset_attributes
 from ...adapters import create_adapter, MTCNNPAdapter
 from ...launcher import create_launcher, InputFeeder
 from ...preprocessor import PreprocessingExecutor

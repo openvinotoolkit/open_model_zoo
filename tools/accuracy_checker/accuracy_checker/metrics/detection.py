@@ -104,7 +104,7 @@ class BaseDetectionMetricMixin(Metric):
                 self.ignore_difficult, self.allow_multiple_matches_per_ignored, self.include_boundaries,
                 self.use_filtered_tp
             )
-            gt_boxes = [np.array(ann.boxes)[ann.labels == label] for  ann in annotations]
+            gt_boxes = [np.array(ann.boxes)[ann.labels == label] for ann in annotations]
 
             if not tp.size:
                 labels_stat[label] = {

@@ -162,7 +162,7 @@ def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None
 
 
 def sanitize_coordinates(_x1, _x2, img_size, shift=0, padding=0):
-    _x1 = (_x1 + shift  / 2) * img_size
+    _x1 = (_x1 + shift / 2) * img_size
     _x2 = (_x2 + shift / 2) * img_size
     x1 = np.clip(_x1 - padding, 0, img_size)
     x2 = np.clip(_x2 + padding, 0, img_size)

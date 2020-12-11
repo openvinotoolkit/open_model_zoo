@@ -719,7 +719,7 @@ class TestPreprocessorExtraArgs:
 
     def test_bgr_to_rgb_raise_config_error_on_extra_args(self):
         with pytest.raises(ConfigError):
-            Preprocessor.provide('bgr_to_rgb',  {'type': 'bgr_to_rgb', 'something_extra': 'extra'})
+            Preprocessor.provide('bgr_to_rgb', {'type': 'bgr_to_rgb', 'something_extra': 'extra'})
 
     def test_flip_raise_config_error_on_extra_args(self):
         with pytest.raises(ConfigError):

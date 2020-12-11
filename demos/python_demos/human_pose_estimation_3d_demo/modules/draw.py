@@ -71,9 +71,9 @@ class Plotter3d:
     def _get_rotation(self, theta, phi):
         sin, cos = math.sin, math.cos
         return np.array([
-            [ cos(theta),  sin(theta) * sin(phi)],
-            [-sin(theta),  cos(theta) * sin(phi)],
-            [ 0,                       -cos(phi)]
+            [ cos(theta), sin(theta) * sin(phi)],
+            [-sin(theta), cos(theta) * sin(phi)],
+            [ 0,                      -cos(phi)]
         ], dtype=np.float32)  # transposed
 
     @staticmethod

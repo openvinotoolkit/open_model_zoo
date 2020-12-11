@@ -229,7 +229,7 @@ def main():
             c_wnd_len = max_length_qc - (max_length_q + 3)
         else:
             #to make context be able to pass model_emb without question
-            c_wnd_len =  max_length_c - 2
+            c_wnd_len = max_length_c - 2
 
         # token num between 2 neighbours context windows
         # 1/2 means that context windows are interleaved by half
@@ -299,7 +299,7 @@ def main():
                 assert pad_len >= 0
 
                 input_ids = tok_cls + q_tokens_id + tok_sep + c_data.c_tokens_id + tok_sep + tok_pad*pad_len
-                token_type_ids = [0]*(len(q_tokens_id)+2)   + [1] * (len(c_data.c_tokens_id)+1) + tok_pad * pad_len
+                token_type_ids = [0]*(len(q_tokens_id)+2) + [1] * (len(c_data.c_tokens_id)+1) + tok_pad * pad_len
                 attention_mask = [1] * req_len + [0] * pad_len
 
                 #create numpy inputs for IE

@@ -43,7 +43,7 @@ class PyTorchLauncher(Launcher):
                 description='appendix for PYTHONPATH for making network module visible in current python environment'
             ),
             'module_args': ListField(optional=True, description='positional arguments for network module'),
-            'module_kwargs':  DictField(
+            'module_kwargs': DictField(
                 key_type=str, validate_values=False, optional=True, default={},
                 description='keyword arguments for network module'
             ),
