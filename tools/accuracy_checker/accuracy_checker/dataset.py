@@ -248,7 +248,7 @@ class Dataset:
             (PlaceRecognitionAnnotation, ibl_subset),
             (ReIdentificationClassificationAnnotation, reid_pairwise_subset),
             (ReIdentificationAnnotation, reid_subset),
-            ]
+        ]
         subsample_set = OrderedSet()
         pairs_set = OrderedSet()
         for (dtype, func) in realisation:

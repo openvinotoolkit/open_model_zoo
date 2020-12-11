@@ -225,8 +225,7 @@ NATIVE_DEMOS = [
                     ModelArg('yolo-v3-tf'),
                     ModelArg('yolo-v3-tiny-tf'))),
         ],
-        )
-    ),
+    )),
 
     NativeDemo('pedestrian_tracker_demo', device_keys=['-d_det', '-d_reid'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,

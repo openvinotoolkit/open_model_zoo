@@ -17,7 +17,7 @@ limitations under the License.
 from ..representation import (
     CharacterRecognitionAnnotation,
     CharacterRecognitionPrediction,
-    )
+)
 from .metric import PerImageEvaluationMetric
 from ..utils import UnsupportedPackage
 

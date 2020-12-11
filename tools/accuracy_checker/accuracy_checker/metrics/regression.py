@@ -712,7 +712,7 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
             0.5 * (full_score[self.joints['lkne']] + full_score[self.joints['rkne']]),
             0.5 * (full_score[self.joints['lank']] + full_score[self.joints['rank']]),
             np.mean(full_score),
-            ]
+        ]
 
     def reset(self):
         self.jnt_count = np.zeros(self.num_joints)

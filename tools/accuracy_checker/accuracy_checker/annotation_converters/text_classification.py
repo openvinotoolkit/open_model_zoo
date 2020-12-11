@@ -171,7 +171,7 @@ class XNLIDatasetConverter(BaseGLUETextClassificationConverter):
                 description='comma-separated list of languages for selection only appropriate annotations.'
                 'If not provided full dataset used',
                 optional=True
-                )
+            )
         })
 
         return params

@@ -140,9 +140,9 @@ class TestResize:
                             'original_height': 480,
                             'preferable_width': 133,
                             'preferable_height': 150
-                            }
-                        )
-                    ],
+                        }
+                    )
+                ],
                 'image_info': [100, 133, 1],
                 'image_size': (480, 640, 3),
                 'original_height': 480,
@@ -151,7 +151,7 @@ class TestResize:
                 'preferable_width': 133,
                 'scale_x': 0.2078125,
                 'scale_y': 0.20833333333333334
-                }
+        }
 
     def test_resize_to_negative_size_raise_config_error(self):
         with pytest.raises(ConfigError):

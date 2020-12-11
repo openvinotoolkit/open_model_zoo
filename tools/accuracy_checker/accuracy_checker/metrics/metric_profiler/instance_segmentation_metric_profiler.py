@@ -125,7 +125,7 @@ class InstanceSegmentationProfiler(MetricProfiler):
             'prediction_matches': per_class_result['dt_matches'][0].tolist(),
             'annotation_matches': per_class_result['gt_matches'][0].tolist(),
             metric_name: per_class_result['result']
-            }
+        }
         return matching_result
 
     def register_metric(self, metric_name):
