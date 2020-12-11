@@ -32,7 +32,7 @@
 #include <samples/default_flags.hpp>
 #include <samples/performance_metrics.hpp>
 #include <unordered_map>
-#include <gflags/gflags.h>
+#include "samples/params_parser.h"
 
 #include <pipelines/async_pipeline.h>
 #include <pipelines/config_factory.h>
@@ -40,111 +40,38 @@
 #include <models/detection_model_yolo.h>
 #include <models/detection_model_ssd.h>
 
-static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Architecture type: ssd or yolo";
-static const char video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
-static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
-"Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
-"The demo will look for a suitable plugin for a specified device.";
-static const char labels_message[] = "Optional. Path to a file with labels mapping.";
-static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-"Absolute path to the .xml file with the kernel descriptions.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
-"Absolute path to a shared library with the kernel implementations.";
-static const char thresh_output_message[] = "Optional. Probability threshold for detections.";
-static const char raw_output_message[] = "Optional. Inference results as raw values.";
-static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
-static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
-static const char num_threads_message[] = "Optional. Number of threads.";
-static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
-"throughput mode (for HETERO and MULTI device cases use format "
-"<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
-static const char no_show_processed_video[] = "Optional. Do not show processed video.";
-static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes (YOLOv3 only).";
-static const char yolo_af_message[] = "Optional. Use advanced postprocessing/filtering algorithm for YOLO.";
-
-DEFINE_bool(h, false, help_message);
-DEFINE_string(at, "", at_message);
-DEFINE_string(i, "", video_message);
-DEFINE_string(m, "", model_message);
-DEFINE_string(d, "CPU", target_device_message);
-DEFINE_string(labels, "", labels_message);
-DEFINE_bool(pc, false, performance_counter_message);
-DEFINE_string(c, "", custom_cldnn_message);
-DEFINE_string(l, "", custom_cpu_library_message);
-DEFINE_bool(r, false, raw_output_message);
-DEFINE_double(t, 0.5, thresh_output_message);
-DEFINE_double(iou_t, 0.4, iou_thresh_output_message);
-DEFINE_bool(auto_resize, false, input_resizable_message);
-DEFINE_uint32(nireq, 0, nireq_message);
-DEFINE_uint32(nthreads, 0, num_threads_message);
-DEFINE_string(nstreams, "", num_streams_message);
-DEFINE_bool(loop, false, loop_message);
-DEFINE_bool(no_show, false, no_show_processed_video);
-DEFINE_string(u, "", utilization_monitors_message);
-DEFINE_bool(yolo_af, false, yolo_af_message);
-
-/**
-* \brief This function shows a help message
-*/
-static void showUsage() {
-    std::cout << std::endl;
-    std::cout << "object_detection_demo [OPTION]" << std::endl;
-    std::cout << "Options:" << std::endl;
-    std::cout << std::endl;
-    std::cout << "    -h                        " << help_message << std::endl;
-    std::cout << "    -at \"<type>\"              " << at_message << std::endl;
-    std::cout << "    -i \"<path>\"               " << video_message << std::endl;
-    std::cout << "    -m \"<path>\"               " << model_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
-    std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
-    std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
-    std::cout << "    -pc                       " << performance_counter_message << std::endl;
-    std::cout << "    -r                        " << raw_output_message << std::endl;
-    std::cout << "    -t                        " << thresh_output_message << std::endl;
-    std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
-    std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
-    std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
-    std::cout << "    -nstreams                 " << num_streams_message << std::endl;
-    std::cout << "    -loop                     " << loop_message << std::endl;
-    std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
-    std::cout << "    -u                        " << utilization_monitors_message << std::endl;
-    std::cout << "    -yolo_af                  " << yolo_af_message << std::endl;
+void PrepareParamsParser(ParamsParser& parser) {
+    parser.addParam("help", "h", "", "Print a usage message.", false, 0);
+    parser.addParam("architecture_type", "at", "", "Required. Architecture type: ssd or yolo", true);
+    parser.addParam("input", "i", "", "Required. Path to a video input (image, video, cameraID or directory with images).", true, 1);
+    parser.addParam("loop", "", "", "Required. Loop input", false);
+    parser.addParam("model", "m", "", "Required. Path to an .xml file with a trained model.", true, 1);
+    parser.addParam("device", "d", "CPU", "Optional. Specify the target device to infer on (the list of available devices is shown below)."
+                    "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
+                    "The demo will look for a suitable plugin for a specified device.", false);
+    parser.addParam("labels", "", "", "Optional. Path to a file with labels mapping.", false, 1);
+    parser.addParam("perf_count", "pc", "", "Optional. Enables per-layer performance report.", false, 0);
+    parser.addParam("cldnn", "c", "", "Required for GPU custom kernels. "
+                    "Absolute path to the .xml file with the kernel descriptions.", false, 1);
+    parser.addParam("layers", "l", "", "Required for CPU custom layers. "
+                    "Absolute path to a shared library with the kernel implementations.", false, 1);
+    parser.addParam("thresh", "t", "0.5", "Optional. Probability threshold for detections.", false, 1);
+    parser.addParam("raw_output", "r", "", "Optional. Inference results as raw values.", false, 0);
+    parser.addParam("auto_resize", "", "", "Optional. Enables resizable input with support of ROI crop & auto resize.", false, 0);
+    parser.addParam("nireq", "", "0", "Optional. Number of infer requests.", false, 1);
+    parser.addParam("nthreads", "", "0", "Optional. Number of threads.", false, 1);
+    parser.addParam("nstreams", "", "", "Optional. Number of streams to use for inference on the CPU or/and GPU in "
+                    "throughput mode (for HETERO and MULTI device cases use format "
+                    "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)", false);
+    parser.addParam("no_show", "", "", "Optional. Do not show processed video.", false, 0);
+    parser.addParam("utilization", "u", "", "Optional. List of monitors to show initially.", false);
+    parser.addParam("iou_t", "", "0.4", "Optional. Filtering intersection over union threshold for overlapping boxes (YOLOv3 only).", false, 1);
+    parser.addParam("yolo_af", "", "", "Optional. Use advanced postprocessing/filtering algorithm for YOLO.", false, 0);
 }
 
-
-bool ParseAndCheckCommandLine(int argc, char *argv[]) {
-    // ---------------------------Parsing and validation of input args--------------------------------------
-    gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
-    if (FLAGS_h) {
-        showUsage();
-        showAvailableDevices();
-        return false;
-    }
-    slog::info << "Parsing input parameters" << slog::endl;
-
-    if (FLAGS_i.empty()) {
-        throw std::logic_error("Parameter -i is not set");
-    }
-
-    if (FLAGS_m.empty()) {
-        throw std::logic_error("Parameter -m is not set");
-    }
-
-    if (FLAGS_at.empty()) {
-        throw std::logic_error("Parameter -at is not set");
-    }
-
-    return true;
-}
 
 // Input image is stored inside metadata, as we put it there during submission stage
-cv::Mat renderDetectionData(const DetectionResult& result) {
+cv::Mat renderDetectionData(const DetectionResult& result, bool showRawOutput) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -156,12 +83,12 @@ cv::Mat renderDetectionData(const DetectionResult& result) {
     }
 
     // Visualizing result data over source image
-    if (FLAGS_r) {
+    if (showRawOutput) {
         slog::info << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
     }
 
     for (auto obj : result.objects) {
-        if (FLAGS_r) {
+        if (showRawOutput) {
             slog::info << " "
                        << std::left << std::setw(9) << obj.label << " | "
                        << std::setw(10) << obj.confidence << " | "
@@ -192,36 +119,57 @@ int main(int argc, char *argv[]) {
         slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
-        if (!ParseAndCheckCommandLine(argc, argv)) {
-            return 0;
+        ParamsParser parser;
+        PrepareParamsParser(parser);
+        std::string parserErr = parser.parse(argc, argv);
+
+        if (parser.isPresent("help")) {
+            std::cout << std::endl;
+            std::cout << "object_detection_demo [OPTION]" << std::endl;
+            std::cout << "Options:" << std::endl;
+            std::cout << parser.GetParamsHelp();
+            showAvailableDevices();
+            return false;
+        }
+
+        if(parserErr!="")
+        {
+            throw std::invalid_argument(parserErr);
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
         slog::info << "Reading input" << slog::endl;
-        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        auto cap = openImagesCapture(parser["input"], parser.isPresent("loop"));
         cv::Mat curr_frame;
 
         //------------------------------ Running Detection routines ----------------------------------------------
         std::vector<std::string> labels;
-        if (!FLAGS_labels.empty())
-            labels = DetectionModel::loadLabels(FLAGS_labels);
+        if (parser.isPresent("labels"))
+            labels = DetectionModel::loadLabels(parser["labels"]);
 
         std::unique_ptr<ModelBase> model;
-        if (FLAGS_at == "ssd") {
-            model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
+        if (parser["architecture_type"] == "ssd") {
+            model.reset(new ModelSSD(parser["model"], (float)parser.getDouble("thresh"), parser.isPresent("auto_resize"), labels));
         }
-        else if (FLAGS_at == "yolo") {
-            model.reset(new ModelYolo3(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
+        else if (parser["architecture_type"] == "yolo") {
+            model.reset(new ModelYolo3(parser["model"], (float)parser.getDouble("thresh"), parser.isPresent("auto_resize"),
+                                       parser.isPresent("yolo_af"), (float)parser.getDouble("iou_t"), labels));
         }
         else {
-            slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
+            slog::err << "No model type or invalid model type (-at) provided: " + parser["architecture_type"] << slog::endl;
             return -1;
         }
 
         InferenceEngine::Core core;
         AsyncPipeline pipeline(std::move(model),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
-            core);
+            ConfigFactory::getUserConfig(parser["device"],
+                                         parser["layers"],
+                                         parser["cldnn"],
+                                         parser.isPresent("perf_count"),
+                                         parser.getInt("nireq"),
+                                         parser["nstreams"],
+                                         parser.getInt("nthreads")),
+                               core);
         Presenter presenter(FLAGS_u);
 
         bool keepRunning = true;
@@ -254,12 +202,12 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to DetectionResult*
             //    and use your own processing instead of calling renderDetectionData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
+                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), parser.isPresent("raw_output"));
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-                if (!FLAGS_no_show) {
+                if (!parser.isPresent("no_show")) {
                     cv::imshow("Detection Results", outFrame);
                     //--- Processing keyboard events
                     int key = cv::waitKey(1);
@@ -276,12 +224,12 @@ int main(int argc, char *argv[]) {
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
         while (result = pipeline.getResult()) {
-            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
+            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), parser.isPresent("raw_output"));
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                 outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-            if (!FLAGS_no_show) {
+            if (!parser.isPresent("no_show")) {
                 cv::imshow("Detection Results", outFrame);
                 //--- Updating output window
                 cv::waitKey(1);
