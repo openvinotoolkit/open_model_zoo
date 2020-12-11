@@ -35,4 +35,4 @@ __all__ = [
     'SegmentationDataAnalyzer',
     'ReIdentificationDataAnalyzer',
     'ReIdentificationClassificationDataAnalyzer'
-    ]
+]
