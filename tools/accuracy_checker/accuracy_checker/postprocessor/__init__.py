@@ -60,6 +60,7 @@ from .super_resolution_image_recovery import SRImageRecovery, ColorizationLABRec
 from .argmax_segmentation_mask import ArgMaxSegmentationMask
 from .normalize_salient_map import SalientMapNormalizer
 from .min_max_normalization import MinMaxRegressionNormalization
+from .corner_crop import CornerCropImage
 
 
 __all__ = [
@@ -133,4 +134,5 @@ __all__ = [
     'SalientMapNormalizer',
 
     'MinMaxRegressionNormalization',
+    'CornerCropImage'
 ]
