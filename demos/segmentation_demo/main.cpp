@@ -121,6 +121,30 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
+static const Color PASCAL_VOC_COLORS[] = {
+    { 0,   0,   0 },
+    { 128, 0,   0 },
+    { 0,   128, 0 },
+    { 128, 128, 0 },
+    { 0,   0,   128 },
+    { 128, 0,   128 },
+    { 0,   128, 128 },
+    { 128, 128, 128 },
+    { 64,  0,   0 },
+    { 192, 0,   0 },
+    { 64,  128, 0 },
+    { 192, 128, 0 },
+    { 64,  0,   128 },
+    { 192, 0,   128 },
+    { 64,  128, 128 },
+    { 192, 128, 128 },
+    { 0,   64,  0 },
+    { 128, 64,  0 },
+    { 0,   192, 0 },
+    { 128, 192, 0 },
+    { 0,   64,  128 }
+};
+
 cv::Mat applyColorMap(cv::Mat input) {
     // Initializing colors array if needed
     static cv::Mat colors;
@@ -130,8 +154,8 @@ cv::Mat applyColorMap(cv::Mat input) {
     if (colors.empty()) {
         colors = cv::Mat(256, 1, CV_8UC3);
         std::size_t i = 0;
-        for (; i < arraySize(CITYSCAPES_COLORS); ++i) {
-            colors.at<cv::Vec3b>(i, 0) = { CITYSCAPES_COLORS[i].blue(), CITYSCAPES_COLORS[i].green(), CITYSCAPES_COLORS[i].red() };
+        for (; i < arraySize(PASCAL_VOC_COLORS); ++i) {
+            colors.at<cv::Vec3b>(i, 0) = { PASCAL_VOC_COLORS[i].blue(), PASCAL_VOC_COLORS[i].green(), PASCAL_VOC_COLORS[i].red() };
         }
         for (; i < (std::size_t)colors.cols; ++i) {
             colors.at<cv::Vec3b>(i, 0) = cv::Vec3b(distr(rng), distr(rng), distr(rng));
