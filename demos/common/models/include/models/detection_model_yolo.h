@@ -57,7 +57,7 @@ public:
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
 
     void parseYOLOV3Output(const std::string& output_name, const InferenceEngine::Blob::Ptr& blob,
         const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,

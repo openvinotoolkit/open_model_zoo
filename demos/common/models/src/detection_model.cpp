@@ -46,7 +46,7 @@ std::shared_ptr<InternalModelData> DetectionModel::preprocess(const InputData& i
 std::vector<std::string> DetectionModel::loadLabels(const std::string& labelFilename) {
     std::vector<std::string> labelsList;
 
-    /** Read labels (if any)**/
+    /* Read labels (if any) */
     if (!labelFilename.empty()) {
         std::ifstream inputFile(labelFilename);
         if (!inputFile.is_open())
