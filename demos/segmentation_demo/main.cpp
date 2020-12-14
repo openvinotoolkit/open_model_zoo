@@ -121,7 +121,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-static UNUSED const Color PASCAL_VOC_COLORS[] = {
+static const Color PASCAL_VOC_COLORS[] = {
     { 0,   0,   0 },
     { 128, 0,   0 },
     { 0,   128, 0 },
