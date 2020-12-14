@@ -101,7 +101,7 @@ Accuracy Checker supports following set of postprocessors:
   * `target_color` - target color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `rgb`).
   * `size` - size of model input for recovering YCrCb image.
   * `dst_width` and `dst_height` - width and height of model input respectively for recovering YCrCb image.
-* `colorization_recovery` - restores RGB image from Colorization models results represented as AB-channels in LAB color space. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+* `colorization_recovery` - restores BGR image from Colorization models results represented as AB-channels in LAB color space. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
 * `argmax_segmentation_mask` - translates categorical annotation segmentation mask to numerical. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
 * `shift_labels` - shifts predicted detection labels. Supported representation: `DetectionPrediction`.
   * `offset` - value for shift.
