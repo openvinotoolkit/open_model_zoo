@@ -29,6 +29,10 @@ files:
     size: 6466
     sha256: baf7f973519c30644e6ba0f95ef73376963991c34bfc533e32dcc94fe15e51a0
     source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/master/models/fpn_inception.py
+  - name: models/inceptionresnetv2.py
+    size: 12055
+    sha256: 850ef83c94bcbd2fd5c89ddbbe88afb4d61315b50b5715d4988d028fd1615d5d
+    source: https://raw.githubusercontent.com/Cadene/pretrained-models.pytorch/master/pretrainedmodels/models/inceptionresnetv2.py
   - name: models/networks.py
     size: 12779
     sha256: 3857345de80c42dedc5162d3e82a173160041cf4e0b307fd7e29680a1115d097
@@ -43,6 +47,18 @@ postprocessing:
   - $type: regex_replace
     file: models/networks.py
     pattern: 'from models\.(fpn_mobilenet|fpn_inception_simple|unet_seresnext|fpn_densenet) '
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: models/fpn_inception.py
+    pattern: 'from pretrainedmodels import inceptionresnetv2'
+    replacement: 'from .inceptionresnetv2 import inceptionresnetv2'
+  - $type: regex_replace
+    file: models/fpn_inception.py
+    pattern: "pretrained='imagenet'"
+    replacement: 'pretrained=None'
+  - $type: regex_replace
+    file: models/fpn_inception.py
+    pattern: 'from torchsummary import summary'
     replacement: '# \g<0>'
 conversion_to_onnx_args:
   - --model-path=$config_dir

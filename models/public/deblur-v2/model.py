@@ -38,7 +38,7 @@ class batch_noramlization(nn.Module):
 
     def __call__(self, x):
         mean_cur = torch.mean(x, dim=(0, 2, 3))
-        var_cur = torch.var(x, dim=(0, 2, 3), unbiased=False)
+        var_cur = torch.std(x, dim=(0, 2, 3), unbiased=False)**2
         invstd = 1 / torch.sqrt(var_cur[:, None, None] + self.eps)
         out = self.weight[:, None, None] * (x - mean_cur[:, None, None]) * invstd + self.bias[:, None, None]
         return out
