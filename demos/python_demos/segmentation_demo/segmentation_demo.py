@@ -21,7 +21,6 @@ import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 from time import perf_counter
-import os
 
 import cv2
 import numpy as np
