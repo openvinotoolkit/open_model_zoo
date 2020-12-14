@@ -145,7 +145,7 @@ def create_capture(input_source, demo_resolution):
             input_source = int(input_source)
         except ValueError:
             raise ValueError("\n \tCannot recognize input as .mp4 video or device-id as int"
-                             "\n \tPlease, check the -i\--input arg and try again")
+                             "\n \tPlease, check the -i/--input arg and try again")
     capture = cv.VideoCapture(input_source)
     capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
     capture.set(3, demo_resolution[0])
