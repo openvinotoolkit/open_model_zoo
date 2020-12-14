@@ -80,7 +80,7 @@ class Visualizer(object):
 
     def create_color_map(self):
         rng = random.Random(0xACE)
-        classes = np.array(self.color_palette)
+        classes = np.array(self.color_palette)[:, ::-1] # BGR to RGB
         color_map = np.zeros((256, 1, 3), dtype=np.uint8)
         color_map[:len(classes), 0, :] = classes.astype('uint8')
         color_map[len(classes):, 0, :] = rng.uniform(0, 255)
@@ -189,11 +189,12 @@ def main():
             start_time = perf_counter()
             frame = cap.read()
             if frame is None:
+                if next_frame_id == 0:
+                    raise ValueError("Can't read an image from the input")
                 break
             if next_frame_id == 0:
-                frame_size = frame.shape
                 presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                               (round(frame_size[1] / 4), round(frame_size[0] / 8)))
+                                               (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
             # Submit for inference
             pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
