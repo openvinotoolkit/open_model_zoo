@@ -16,7 +16,6 @@
 """
 
 import logging
-import random
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -40,27 +39,27 @@ log = logging.getLogger()
 
 class Visualizer(object):
     pascal_voc_palette = [
-    (0, 0, 0),
-    (128, 0, 0),
-    (0, 128, 0),
+    (0,   0,   0),
+    (128, 0,   0),
+    (0,   128, 0),
     (128, 128, 0),
-    (0, 0, 128),
-    (128, 0, 128),
-    (0, 128, 128),
+    (0,   0,   128),
+    (128, 0,   128),
+    (0,   128, 128),
     (128, 128, 128),
-    (64, 0, 0),
-    (192, 0, 0),
-    (64, 128, 0),
+    (64,  0,   0),
+    (192, 0,   0),
+    (64,  128, 0),
     (192, 128, 0),
-    (64, 0, 128),
-    (192, 0, 128),
-    (64, 128, 128),
+    (64,  0,   128),
+    (192, 0,   128),
+    (64,  128, 128),
     (192, 128, 128),
-    (0, 64, 0),
-    (128, 64, 0),
-    (0, 192, 0),
+    (0,   64,  0),
+    (128, 64,  0),
+    (0,   192, 0),
     (128, 192, 0),
-    (0, 64, 128)
+    (0,   64,  128)
     ]
 
     def __init__(self, colors_path=None):
@@ -71,18 +70,15 @@ class Visualizer(object):
         self.color_map = self.create_color_map()
 
     def get_palette_from_file(self, colors_path):
-        color_palette = []
         with open(colors_path, 'r') as file:
-            for line in file.readlines():
-                color_palette.append(eval(line.strip()))
-        return color_palette
+            return [eval(line.strip()) for line in file.readlines()]
 
     def create_color_map(self):
-        rng = random.Random(0xACE)
-        classes = np.array(self.color_palette)[:, ::-1] # BGR to RGB
+        classes = np.array(self.color_palette, dtype=np.uint8)[:, ::-1] # BGR to RGB
         color_map = np.zeros((256, 1, 3), dtype=np.uint8)
-        color_map[:len(classes), 0, :] = classes.astype('uint8')
-        color_map[len(classes):, 0, :] = rng.uniform(0, 255)
+        classes_num = len(classes)
+        color_map[:classes_num, 0, :] = classes
+        color_map[classes_num:, 0, :] = np.random.uniform(0, 255, size=(256-classes_num, 3))
         return color_map
 
     def apply_color_map(self, input):
