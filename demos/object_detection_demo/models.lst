@@ -10,6 +10,13 @@ person-detection-retail-0013
 retinanet-tf
 vehicle-detection-adas-????
 vehicle-license-plate-detection-barrier-????
+ssd300
+ssd512
+ssd_mobilenet_v1_coco
+ssd_mobilenet_v1_fpn_coco
+ssd_mobilenet_v2_coco
+ssd_resnet50_v1_fpn_coco
+ssdlite_mobilenet_v2
 # For -at yolo
 yolo-v3-tf
 yolo-v3-tiny-tf
