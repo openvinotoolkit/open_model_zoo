@@ -39,7 +39,8 @@ logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, 
 log = logging.getLogger()
 
 
-default_color_map = [
+class Visualizer(object):
+    pascal_voc_palette = [
     (0, 0, 0),
     (128, 0, 0),
     (0, 128, 0),
@@ -61,34 +62,37 @@ default_color_map = [
     (0, 192, 0),
     (128, 192, 0),
     (0, 64, 128)
-]
+    ]
 
+    def __init__(self, colors_path=None):
+        if colors_path:
+            self.color_palette = self.get_palette_from_file(colors_path)
+        else:
+            self.color_palette = self.pascal_voc_palette
+        self.color_map = self.create_color_map()
 
-def create_color_map(input):
-    global default_color_map
-    global color_map
-
-    if input and os.path.isfile(input):
-        default_color_map = []
-        with open(input, 'r') as file:
+    def get_palette_from_file(self, colors_path):
+        color_palette = []
+        with open(colors_path, 'r') as file:
             for line in file.readlines():
-                default_color_map.append(eval(line.strip()))
+                color_palette.append(eval(line.strip()))
+        return color_palette
 
-    rng = random.Random(0xACE)
-    classes = np.array(default_color_map)
-    color_map = np.zeros((256, 1, 3), dtype=np.uint8)
-    color_map[:len(classes), 0, :] = classes.astype('uint8')
-    color_map[len(classes):, 0, :] = rng.uniform(0, 255)
+    def create_color_map(self):
+        rng = random.Random(0xACE)
+        classes = np.array(self.color_palette)
+        color_map = np.zeros((256, 1, 3), dtype=np.uint8)
+        color_map[:len(classes), 0, :] = classes.astype('uint8')
+        color_map[len(classes):, 0, :] = rng.uniform(0, 255)
+        return color_map
 
+    def apply_color_map(self, input):
+        input_3d = cv2.merge([input, input, input])
+        return cv2.LUT(input_3d, self.color_map)
 
-def apply_color_map(input):
-    input_3d = cv2.merge([input, input, input])
-    return cv2.LUT(input_3d, color_map)
-
-
-def render_segmentation_data(frame, objects):
-    # Visualizing result data over source image
-    return np.floor_divide(frame, 2) + np.floor_divide(apply_color_map(objects), 2)
+    def overlay_masks(self, frame, objects):
+        # Visualizing result data over source image
+        return np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2)
 
 
 def build_argparser():
@@ -171,7 +175,7 @@ def main():
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
     cap = open_images_capture(args.input, args.loop)
-    create_color_map(args.colors)
+    visualizer = Visualizer(args.colors)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
@@ -206,7 +210,7 @@ def main():
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
 
-            frame = render_segmentation_data(frame, objects)
+            frame = visualizer.overlay_masks(frame, objects)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
             if not args.no_show:
@@ -226,7 +230,7 @@ def main():
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
 
-            frame = render_segmentation_data(frame, objects)
+            frame = visualizer.overlay_masks(frame, objects)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
             if not args.no_show:
