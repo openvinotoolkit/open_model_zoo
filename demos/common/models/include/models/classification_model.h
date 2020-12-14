@@ -20,16 +20,16 @@
 class ClassificationModel : public ModelBase {
 public:
     /// Constructor
-    /// @param modelFileName name of model to load
-    /// @param confidenceThreshold - threshold to eleminate low-confidence detections.
+    /// @param modelFileName name of model to load.
+    /// @param nTop - number of top results.
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     /// @param labels - array of labels for every class.
     ClassificationModel(const std::string& modelFileName, size_t nTop, bool useAutoResize, const std::vector<std::string>& labels);
 
-    virtual std::shared_ptr<InternalModelData> preprocess(
-            const InputData& inputData, InferenceEngine::InferRequest::Ptr& request);
+    std::shared_ptr<InternalModelData> preprocess(
+            const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
@@ -39,5 +39,5 @@ protected:
     bool useAutoResize;
     std::vector<std::string> labels;
 
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
 };

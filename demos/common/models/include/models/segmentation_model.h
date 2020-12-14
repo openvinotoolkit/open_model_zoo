@@ -29,7 +29,7 @@ public:
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
+    void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
 
     int outHeight = 0;
     int outWidth = 0;
