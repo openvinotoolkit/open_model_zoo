@@ -27,7 +27,7 @@ std::string ParamsParser::parse(int argc, char* const argv[], bool commaSeparate
         else if (!strncmp(argv[i], "-", 1)) {
             currentParam = NULL;
             auto it = params.begin();
-            for (; it!= params.end(); it++) {
+            for (; it != params.end(); it++) {
                 if (it->second.shortName == argv[i] + 1) {
                     currentParam = &(it->second);
                     currentParam->isPresent = true;
@@ -51,15 +51,19 @@ std::string ParamsParser::parse(int argc, char* const argv[], bool commaSeparate
                     }
                     else {
                         std::string blob = argv[i];
-                        int st = 0;
-                        int end = 0;
                         currentParam->values.clear();
-                        while ((end = blob.find(','),st) != std::string::npos)
-                        {
-                            currentParam->values.push_back(blob.substr(st, end - st));
-                            st = end + 1;
+                        if (currentParam->unsplittable) {
+                            currentParam->values.push_back(blob);
                         }
-                        currentParam->values.push_back(blob.substr(st));
+                        else {
+                            size_t st = 0;
+                            size_t end = 0;
+                            while ((end = blob.find(',', st)) != std::string::npos) {
+                                currentParam->values.push_back(blob.substr(st, end - st));
+                                st = end + 1;
+                            }
+                            currentParam->values.push_back(blob.substr(st));
+                        }
                     }
                 }
                 else {
@@ -71,8 +75,7 @@ std::string ParamsParser::parse(int argc, char* const argv[], bool commaSeparate
                     currentParam->values.push_back(argv[i]);
                 }
             }
-            else
-            {
+            else {
                 return std::string("Invalid command line argument found: ") + std::string(argv[i]);
             }
         }
@@ -80,8 +83,7 @@ std::string ParamsParser::parse(int argc, char* const argv[], bool commaSeparate
 
     std::string paramsMissing = "";
     std::string errorMessage = "";
-    for(auto& paramsPair : params)
-    {
+    for (auto& paramsPair : params) {
         if (paramsPair.second.isPresent) {
             if (paramsPair.second.expectedArgumentsNumber != -1 &&
                 paramsPair.second.values.size() != paramsPair.second.expectedArgumentsNumber) {
@@ -92,66 +94,62 @@ std::string ParamsParser::parse(int argc, char* const argv[], bool commaSeparate
         }
         else {
             if (paramsPair.second.isRequired) {
-                paramsMissing += paramsPair.second.name + ",";
+                paramsMissing += paramsPair.second.name + ", ";
             }
         }
     }
-    if (paramsMissing != "" || errorMessage!="") {
-        return errorMessage+std::string("Some mandatory parameters are missing: ") +
-                                    paramsMissing.substr(0,paramsMissing.length()-1);
+    if (paramsMissing != "" || errorMessage != "") {
+        return errorMessage + std::string("Some mandatory command line parameters are missing: ") +
+            paramsMissing.substr(0, paramsMissing.length() - 2);
     }
     return "";
 }
 
 void ParamsParser::addParam(std::string name, std::string shortName, std::string defVal,
-                            std::string description, bool isRequired, int expectedArgumentsNumber) {
-    params.emplace(name, Param(name, shortName, defVal, description, isRequired, expectedArgumentsNumber));
+                            std::string description, bool isRequired, int expectedArgumentsNumber, bool unsplittable) {
+    params.emplace(name, Param(name, shortName, defVal, description, isRequired, expectedArgumentsNumber, unsplittable));
 }
 
 
 Param& ParamsParser::getParam(const char* name) {
     auto it = params.find(name);
-    if(it==params.end())
-    {
+    if (it == params.end()) {
         throw std::invalid_argument(std::string("Invalid parameter requested: ") + std::string(name));
     }
     return it->second;
 }
 
-std::vector<std::string> ParamsParser::getStrings(const char* name) {
+std::vector<std::string> ParamsParser::getStringsArray(const char* name) {
     return getParam(name).values;
 }
 
-std::string ParamsParser::getString(const char* name) {
+std::string ParamsParser::getStr(const char* name) {
     auto& param = getParam(name);
-    if(param.values.size()==0)
-    {
+    if (param.values.size() == 0) {
         throw std::out_of_range(std::string("No value for parameter: ") + std::string(name));
     }
     return param.values[0];
 }
 
 
-bool ParamsParser::isPresent(const char* name) {
+bool ParamsParser::operator[](const char* name) {
     return getParam(name).isPresent;
 }
 
 int ParamsParser::getInt(const char* name) {
-
-    return std::stoi(getString(name));
+    return std::stoi(getStr(name));
 }
 
-double ParamsParser::getDouble(const char* name) {
-    return std::stof(getString(name));
+double ParamsParser::getDbl(const char* name) {
+    return std::stof(getStr(name));
 }
 
 bool ParamsParser::getBool(const char* name) {
-    auto val = getString(name);
+    auto val = getStr(name);
     for (auto & c : val)
         c = toupper(c);
     return val == "TRUE" || std::stoi(val) != 0;
 }
-
 
 std::string ParamsParser::GetParamsHelp() {
     std::stringstream retVal;
