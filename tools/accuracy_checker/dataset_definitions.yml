@@ -1123,3 +1123,12 @@ datasets:
       bin_file:  lfw_bin/lfw.bin
       images_dir: lfw_bin/images
       convert_images: True
+
+  - name: imagenet_colorization
+    data_source: ImageNet
+    annotation_conversion:
+      converter: image_processing
+      data_dir: ImageNet
+      input_suffix: .JPEG
+      target_suffix: .JPEG
+      annotation_loader: opencv

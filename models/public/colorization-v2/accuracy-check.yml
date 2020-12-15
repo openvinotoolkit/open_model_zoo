@@ -1,24 +1,27 @@
-evaluations:
+models:
   - name: colorization-v2
-    module: custom_evaluators.colorization_evaluator.ColorizationEvaluator
-    module_config:
-      network_info:
-        colorization_network: {}
-
-        verification_network:
-          adapter: classification
-
-      launchers:
-        - framework: dlsdk
-
-      datasets:
-        - name: imagenet_1000_classes
-          reader: pillow_imread
-
-          preprocessing:
-            - type: resize
-              size: 256
-              use_pillow: True
-              interpolation: Bicubic
-            - type: normalization
-              std: 255
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: image_processing
+          std: 1
+          cast_to_uint8: false
+    datasets:
+      - name: imagenet_colorization
+        subsample_size: 2000
+        shuffle: False
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: bgr_to_lab
+          - type: select_channel
+            channel: 0
+        postprocessing:
+          - type: colorization_recovery
+          - type: resize
+            apply_to: prediction
+        metrics:
+          - type: psnr
+            presenter: print_vector
+          - type: ssim
+            presenter: print_vector
