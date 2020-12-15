@@ -29,7 +29,8 @@ size_t WordPrefixSet::add_words(const std::vector<std::vector<int> >& words) {
   std::sort(word_ptrs.begin(), word_ptrs.end(), lex_less);
 
   // Deduplicate
-  std::unique(word_ptrs.begin(), word_ptrs.end(), int_word_equal);
+  auto last_it = std::unique(word_ptrs.begin(), word_ptrs.end(), int_word_equal);
+  word_ptrs.erase(last_it, word_ptrs.end());
 
   trie_chars_.clear();
   trie_starts_.clear();

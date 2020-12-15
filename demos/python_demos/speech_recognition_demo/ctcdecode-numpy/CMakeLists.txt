@@ -34,6 +34,11 @@ endforeach()
 # SWIG-generated code causes some warnings; disable them.
 if(COMPILER_IS_GCC_LIKE)
     target_compile_options(${target_name} PRIVATE -Wno-narrowing)
+elseif(MSVC)
+    target_compile_options(${target_name} PRIVATE
+        /wd4244  # Disable conversion warning =
+        /wd4838  # Disable conversion warning in aggregate or list initialization
+    )
 endif()
 
 # The Python files have to be in the same directory as the native module,

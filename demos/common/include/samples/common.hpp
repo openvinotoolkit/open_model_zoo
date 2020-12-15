@@ -24,7 +24,7 @@
 #include <inference_engine.hpp>
 
 #ifndef UNUSED
-  #ifdef WIN32
+  #ifdef _WIN32
     #define UNUSED
   #else
     #define UNUSED  __attribute__((unused))
@@ -34,17 +34,6 @@
 template <typename T, std::size_t N>
 constexpr std::size_t arraySize(const T (&)[N]) noexcept {
     return N;
-}
-
-/**
- * @brief Gets filename without extension
- * @param filepath - full file name
- * @return filename without extension
- */
-static UNUSED std::string fileNameNoExt(const std::string &filepath) {
-    auto pos = filepath.rfind('.');
-    if (pos == std::string::npos) return filepath;
-    return filepath.substr(0, pos);
 }
 
 // Helpers to print IE version information.
