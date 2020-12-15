@@ -154,9 +154,9 @@ def calculate_probability(distribution):
 
 class Model:
     class Status(Enum):
-        ready = 0
-        encoder_infer = 1
-        decoder_infer = 2
+        READY = 0
+        ENCODER_INFER = 1
+        DECODER_INFER = 2
 
     def __init__(self, args, interactive_mode):
         self.args = args
@@ -170,7 +170,7 @@ class Model:
         self.exec_net_decoder = self.ie.load_network(network=self.dec_step, device_name=self.args.device)
         self.images_list = []
         self.vocab = Vocab(self.args.vocab_path)
-        self.model_status = Model.Status.ready
+        self.model_status = Model.Status.READY
         self.is_async = interactive_mode
         self.num_infers_decoder = 0
         self.check_model_dimensions()
@@ -178,7 +178,7 @@ class Model:
             self.preprocess_inputs()
 
     def preprocess_inputs(self):
-        batch_dim, channels, height, width = self.encoder.input_info['imgs'].input_data.shape
+        height, width = self.encoder.input_info['imgs'].input_data.shape[-2:]
         target_shape = (height, width)
         if os.path.isdir(self.args.input):
             inputs = sorted(os.path.join(self.args.input, inp)
@@ -215,11 +215,11 @@ class Model:
     def infer_async(self, model_input):
         model_input = change_layout(model_input)
         assert self.is_async
-        if self.model_status == Model.Status.ready:
+        if self.model_status == Model.Status.READY:
             self._start_encoder(model_input)
             return None
 
-        if self.model_status == Model.Status.encoder_infer:
+        if self.model_status == Model.Status.ENCODER_INFER:
             infer_status_encoder = self._infer_request_handle_encoder.wait(timeout=0)
             if infer_status_encoder == 0:
                 self._start_decoder()
@@ -252,7 +252,7 @@ class Model:
             self.logits = np.array(self.logits)
             logits = self.logits.squeeze(axis=1)
             targets = np.argmax(logits, axis=1)
-            self.model_status = Model.Status.ready
+            self.model_status = Model.Status.READY
             return logits, targets
         self._infer_request_handle_decoder = self._async_infer_decoder(self.row_enc_out,
                                                                        self.dec_states_c,
@@ -266,14 +266,14 @@ class Model:
 
     def _start_encoder(self, model_input):
         self._infer_request_handle_encoder = self._async_infer_encoder(model_input, req_id=0)
-        self.model_status = Model.Status.encoder_infer
+        self.model_status = Model.Status.ENCODER_INFER
 
     def _start_decoder(self):
         enc_res = self._infer_request_handle_encoder.output_blobs
         self._unpack_enc_results(enc_res)
         self._infer_request_handle_decoder = self._async_infer_decoder(
             self.row_enc_out, self.dec_states_c, self.dec_states_h, self.output, self.tgt, req_id=0)
-        self.model_status = Model.Status.decoder_infer
+        self.model_status = Model.Status.DECODER_INFER
 
     def _unpack_dec_results(self, dec_res):
         self.dec_states_h = dec_res[self.args.dec_st_h_t_layer].buffer
@@ -294,8 +294,8 @@ class Model:
 
 class Renderer:
     class Status(Enum):
-        ready = 0
-        rendering = 1
+        READY = 0
+        RENDERING = 1
 
     def __init__(self):
         with tempfile.NamedTemporaryFile() as temp_file:
@@ -303,11 +303,15 @@ class Renderer:
         self.output_file = '{}.png'.format(temp_file_name)
         self.cur_formula = None
         self.res_img = None
-        self._state = Renderer.Status.ready
+        self._state = Renderer.Status.READY
         self._worker = ThreadPool(processes=1)
         self._async_result = None
 
     def render(self, formula):
+        """
+        Synchronous method. Returns rendered image and text of the formula,
+        corresponding to the rendered image when rendering is done.
+        """
         if self.cur_formula is None:
             self.cur_formula = formula
         elif self.cur_formula == formula:
@@ -322,16 +326,21 @@ class Renderer:
         return self.res_img, self.cur_formula
 
     def thread_render(self, formula):
-        if self._state == Renderer.Status.ready:
+        """
+        Provides asynchronous interface to the rendering process.
+        In contrast with the self.render, this one returns image and formula only when rendering is complete.
+        If rendering is incomplete at the moment of method call, method returns None
+        """
+        if self._state == Renderer.Status.READY:
             self._async_result = self._worker.apply_async(self.render, args=(formula,))
-            self._state = Renderer.Status.rendering
+            self._state = Renderer.Status.RENDERING
             return None
-        if self._state == Renderer.Status.rendering:
+        if self._state == Renderer.Status.RENDERING:
             if self._async_result.ready() and self._async_result.successful():
-                self._state = Renderer.Status.ready
+                self._state = Renderer.Status.READY
                 return self.res_img, self.cur_formula
             elif self._async_result.ready() and not self._async_result.successful():
-                self._state = Renderer.Status.ready
+                self._state = Renderer.Status.READY
             return None
 
 
