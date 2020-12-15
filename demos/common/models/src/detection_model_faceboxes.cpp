@@ -20,12 +20,13 @@
 #include <ngraph/ngraph.hpp>
 
 using namespace InferenceEngine;
+using size = std::pair<int, int>;
 
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),
     boxIOUThreshold(boxIOUThreshold), variance({0.1, 0.2}), steps({32, 64, 128}), keepTopK(750),
-    ms({{32, 64, 128}, 256, 512}) {
+    minSizes({ {32, 64, 128}, {256}, {512} }) {
 }
 
 void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -72,13 +73,79 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     }
 
 }
-std::vector<double> priorBoxes(std::vector<std::pair<int, int>> featureMaps, int imgWidth, int imgHeight) {
-    for (int i = 0; i < featureMaps.size(); ++i) {
+std::vector<double> calculateAnchors(std::vector<double> vx, std::vector<double> vy, int minSize,
+    int imgWidth, int imgHeight, int step) {
+    std::vector<std::vector<double>> anchors;
+    double skx = minSize / imgWidth;
+    double sky = minSize / imgHeight;
+    std::vector<double> dense_cx, dense_cy;
 
+    for (auto x : vx) {
+        dense_cx.push_back(x * step / imgWidth);
+    }
+
+    for (auto y : vy) {
+        dense_cx.push_back(y * step / imgHeight);
+    }
+    for (auto cy : dense_cy) {
+        for (auto cx : dense_cx) {
+            anchors.push_back({ cx, cy, skx, sky });
+        }
+    }
+}
+std::vector<double> calculateAnchorsZeroLevel(int fx, int fy,  std::vector<int> minSizes, int imgWidth, int imgHeight, int step) {
+    std::vector<double> anchors;
+    std::vector<double> vx, vy;
+    for (auto s : minSizes) {
+        if (s == 32) {
+            vx.push_back(fx);
+            vx.push_back(fx + 0.25);
+            vx.push_back(fx + 0.75);
+
+            vy.push_back(fy);
+            vy.push_back(fy + 0.25);
+            vy.push_back(fy + 0.75);
+        }
+        else if (s == 64) {
+            vx.push_back(fx);
+            vx.push_back(fx + 0.5);
+
+            vy.push_back(fy);
+            vy.push_back(fy + 0.5);
+        }
+        else {
+            vx.push_back(fx + 0.5);
+            vy.push_back(fy + 0.5);
+        }
+        auto a = calculateAnchors(vx, vy, s, imgWidth, imgHeight, step);
+        anchors.insert(anchors.end(), anchors.begin(), anchors.end());
+    }
+    return anchors;
+}
+
+std::vector<double> ModelFaceBoxes::priorBoxes(std::vector<std::pair<int, int>> featureMaps, int imgWidth, int imgHeight) {
+    std::vector<double> anchors;
+
+    for (int k = 1; k < featureMaps.size(); ++k) {
+        std::vector<double> a;
+        for (int i = 0; i < featureMaps[i].first; ++i) {
+            for (int j = 0; j < featureMaps[j].second; ++j) {
+                if (k != 0) {
+                    a = calculateAnchors(j, i, minSizes[k], imgWidth, imgHeight, steps[k]);
+                }
+                else {
+                    a = calculateAnchorsZeroLevel(j, i, minSizes[k], imgWidth, imgHeight, steps[k]);
+                }
+                anchors.insert(anchors.end(), anchors.begin(), anchors.end())
+            }
+        }
     }
 }
 
 std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResult) {
+    //size imgSize{ infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth,infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight };
+    auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
+    auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
     auto bboxes = infResult.outputsData[outputsNames[0]];
     auto scores = infResult.outputsData[outputsNames[1]];
     std::vector<std::pair<int, int>> featureMaps;
