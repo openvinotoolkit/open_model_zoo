@@ -74,5 +74,11 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
 }
 
 std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResult) {
+    auto bboxes = infResult.outputsData[outputsNames[0]];
+    auto scores = infResult.outputsData[outputsNames[1]];
+    std::vector<std::pair<int, int>> featureMaps;
+    for (auto s : steps) {
+
+    }
     return std::unique_ptr<ResultBase>();
 }
