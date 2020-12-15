@@ -46,7 +46,7 @@ class InteractiveDemo:
         return frame[self.start_point[1]:self.end_point[1], self.start_point[0]:self.end_point[0], :]
 
     def _draw_rectangle(self, frame):
-        return cv.rectangle(frame, self.start_point, self.end_point, color=RED, thickness=2)
+        return cv.rectangle(frame, self.start_point, self.end_point, color=COLOR_RED, thickness=2)
 
     def resize_window(self, action):
         height = self.end_point[1] - self.start_point[1]
