@@ -20,9 +20,16 @@ Model give as output predict A- and B-channels of LAB-image.
 
 ## Accuracy
 
-The accuracy metrics calculated on ImageNet
-validation dataset using [VGG16](https://arxiv.org/abs/1409.1556) caffe
-model and colorization as preprocessing.
+The accuracy metrics were calculated between generated images by model and real validation images from ImageNet dataset.
+Results are obtained on subset of 2000 images.
+
+| Metric | Value     |
+| ------ | --------- |
+| PSNR   | 26.99dB   |
+| SSIM   | 0.90      |
+
+Also, metrics can be calculated using [VGG16](https://arxiv.org/abs/1409.1556) caffe model and colorization as preprocessing.
+The results below are obtained on the validation images from ImageNet dataset.
 
 For preprocessing `rgb -> gray -> colorization` recieved values:
 

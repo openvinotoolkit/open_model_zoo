@@ -8,6 +8,8 @@ models:
           cast_to_uint8: false
     datasets:
       - name: imagenet_colorization
+        subsample_size: 2000
+        shuffle: False
         preprocessing:
           - type: resize
             size: 256

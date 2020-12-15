@@ -13,6 +13,8 @@ models:
             type: IGNORE_INPUT
     datasets:
       - name: imagenet_colorization
+        subsample_size: 2000
+        shuffle: False
         preprocessing:
           - type: resize
             size: 256
