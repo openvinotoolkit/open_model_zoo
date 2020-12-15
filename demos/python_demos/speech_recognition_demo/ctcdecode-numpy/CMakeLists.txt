@@ -35,7 +35,11 @@ endforeach()
 if(COMPILER_IS_GCC_LIKE)
     target_compile_options(${target_name} PRIVATE -Wno-narrowing)
 elseif(MSVC)
-    target_compile_options(${target_name} PRIVATE /W0)
+    target_compile_options(${target_name} PRIVATE
+        /wd4244  # Disable conversion warning =
+        /wd4838  # Disable conversion warning in aggregate or list initialization
+        /wd4834  # Discarding return value of function with 'nodiscard' attribute
+    )
 endif()
 
 # The Python files have to be in the same directory as the native module,
