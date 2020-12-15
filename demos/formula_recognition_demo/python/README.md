@@ -77,7 +77,7 @@ python formula_recognition_demo.py <required args> -i input_video.mp4
 
 The window has four main sections:
 1. A red rectangle is placed on the center of this window. This is input "target", with the help of which User, moving the camera, can capture formula.
-2. Image from the input window will be binarized, preprocessed and fed to the network. Preprocessed and binarized image is placed on the top of the window (near `Model input` label)
+2. Image from the input target will be binarized, preprocessed and fed to the network. Preprocessed and binarized image is placed on the top of the window (near `Model input` label)
 3. If the formula will be predicted with sufficient confidence score, it will be placed right under preprocessed image (near `Predicted` label)
 4. If rendering is available (see the previous Paragraph for details) and predicted formula does not contain latex grammar errors, it will be rendered and placed near `Rendered` label.
 
