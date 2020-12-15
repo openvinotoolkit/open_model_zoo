@@ -55,11 +55,7 @@ def strip_internal_spaces(text):
     text = text.replace("( ", "(")
     text = text.replace(" )", ")")
     text = text.replace(" ^ ", "^")
-    prev_text = ""
-    while prev_text != text:
-        prev_text = text
-        text = re.sub(r"([\d.]) ([\d.])", r"\1\2", text)
-    return text
+    return re.sub(r'(?<=[\d.]) (?=[\d.])', '', text)
 
 
 def crop(img, target_shape):
