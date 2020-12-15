@@ -84,9 +84,9 @@ class SegmentationModel(Model):
         input_image_width = meta['original_shape'][1]
 
         if self.out_channels < 2: # assume the output is already ArgMax'ed
-            result = predictions.astype('uint8')
+            result = predictions.astype(np.uint8)
         else:
-            result = np.argmax(predictions, axis=0).astype('uint8')
+            result = np.argmax(predictions, axis=0).astype(np.uint8)
 
         result = cv2.resize(result, (input_image_width, input_image_height), 0, 0, interpolation=cv2.INTER_NEAREST)
         return result
