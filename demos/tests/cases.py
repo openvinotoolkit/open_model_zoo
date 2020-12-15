@@ -266,6 +266,7 @@ NATIVE_DEMOS = [
                 TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
                 single_option_cases('-m',
                     ModelArg('semantic-segmentation-adas-0001'),
+                    ModelArg('hrnet-v2-c1-segmentation'),
                     ModelArg('deeplabv3'))),
         ],
     )),
@@ -536,15 +537,21 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None, **MONITORS}),
         [
             TestCase(options={
                 '-m': ModelArg('road-segmentation-adas-0001'),
-                '-i': DATA_SEQUENCES['road-segmentation-adas'],
+                '-i': DataPatternArg('road-segmentation-adas'),
             }),
             *combine_cases(
-                TestCase(options={'-i': DATA_SEQUENCES['semantic-segmentation-adas']}),
+                TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
                 single_option_cases('-m',
                     ModelArg('semantic-segmentation-adas-0001'),
+                    ModelArg('hrnet-v2-c1-segmentation'),
+                    ModelArg('icnet-camvid-ava-0001'),
+                    ModelArg('icnet-camvid-ava-sparse-30-0001'),
+                    ModelArg('icnet-camvid-ava-sparse-60-0001'),
+                    ModelArg('unet-camvid-onnx-0001'),
                     ModelArg('deeplabv3'))),
         ],
     )),
