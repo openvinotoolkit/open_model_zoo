@@ -37,6 +37,7 @@
 #include <pipelines/async_pipeline.h>
 #include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
+#include <models/detection_model_faceboxes.h>
 #include <models/detection_model_yolo.h>
 #include <models/detection_model_ssd.h>
 
@@ -212,6 +213,9 @@ int main(int argc, char *argv[]) {
         }
         else if (FLAGS_at == "yolo") {
             model.reset(new ModelYolo3(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
+        }
+        else if (FLAGS_at == "faceboxes") {
+            model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
