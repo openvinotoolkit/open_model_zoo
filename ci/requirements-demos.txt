@@ -21,7 +21,7 @@ matplotlib==3.3.3         # via -r demos/python_demos/requirements.txt
 mccabe==0.6.1             # via flake8
 motmetrics==1.2.0         # via -r demos/python_demos/requirements.txt
 nibabel==3.2.1            # via -r demos/python_demos/requirements.txt
-numpy==1.19.4 ; python_version >= "3.4"  # via -r ${INTEL_OPENVINO_DIR}/python/requirements.txt, -r demos/python_demos/requirements.txt, matplotlib, motmetrics, nibabel, pandas, scikit-learn, scipy, tensorboard, tensorboardx
+numpy==1.19.3 ; python_version >= "3.4"  # via -r ${INTEL_OPENVINO_DIR}/python/requirements.txt, -r demos/python_demos/requirements.txt, matplotlib, motmetrics, nibabel, pandas, scikit-learn, scipy, tensorboard, tensorboardx
 oauthlib==3.1.0           # via requests-oauthlib
 packaging==20.8           # via nibabel, pytest
 pandas==1.1.5             # via motmetrics
