@@ -38,7 +38,6 @@ elseif(MSVC)
     target_compile_options(${target_name} PRIVATE
         /wd4244  # Disable conversion warning =
         /wd4838  # Disable conversion warning in aggregate or list initialization
-        /wd4834  # Discarding return value of function with 'nodiscard' attribute
     )
 endif()
 

@@ -29,7 +29,7 @@ size_t WordPrefixSet::add_words(const std::vector<std::vector<int> >& words) {
   std::sort(word_ptrs.begin(), word_ptrs.end(), lex_less);
 
   // Deduplicate
-  std::unique(word_ptrs.begin(), word_ptrs.end(), int_word_equal);
+  auto last_it = std::unique(word_ptrs.begin(), word_ptrs.end(), int_word_equal);
 
   trie_chars_.clear();
   trie_starts_.clear();
@@ -37,7 +37,8 @@ size_t WordPrefixSet::add_words(const std::vector<std::vector<int> >& words) {
 
   // Go through the sorted list, and update children lists at every layer of trie.
   // The new child may only be the last child in each list.
-  for (auto word : word_ptrs) {
+  for (auto word_it = word_ptrs.begin(); word_it != last_it; word_it++) {
+    const IntWord* word = *word_it;
     size_t char_index;
     // Skip the prefixes of the new word that are already present in the trie
     for (char_index = 0; char_index < word->size() && char_index < trie_chars_.size(); char_index++) {
