@@ -1,1 +1,2 @@
 sympy
+tqdm
