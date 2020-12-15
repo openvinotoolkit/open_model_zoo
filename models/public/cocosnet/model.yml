@@ -97,6 +97,11 @@ postprocessing:
     file: model_files/models/networks/correspondence.py
     pattern: '/ self.opt.down\)'
     replacement: '// self.opt.down)'
+  # fix deprecated function usage
+  - $type: regex_replace
+    file: model_files/models/networks/generator.py
+    pattern: '\bF\.tanh\b'
+    replacement: 'torch.tanh'
   - $type: regex_replace
     file: model_files/util/util.py
     pattern: 'colormap = scio.loadmat\(.\./util/color150.mat.\)\[.colors.\]'
