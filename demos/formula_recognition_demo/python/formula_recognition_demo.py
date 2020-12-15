@@ -140,7 +140,7 @@ class InteractiveDemo:
 
 
 def create_capture(input_source, demo_resolution):
-    if not input_source.endswith('.mp4'):
+    if input_source.isdigit():
         try:
             input_source = int(input_source)
         except ValueError:

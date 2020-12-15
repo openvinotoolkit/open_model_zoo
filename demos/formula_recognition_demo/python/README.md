@@ -26,8 +26,14 @@ Second model is Decoder that takes as input:
 * Target (`tgt`) - previous token (for the first time it is `START_TOKEN` )
 Second model is being executed until current decoded token is `END_TOKEN` or length of the formula is less then `--max_formula_len` producing one token per each decode step.
 
-As input, the demo application takes a path to a folder with images or a path to a single image file with a command-line argument `-i`. Another possible option is interactive mode, which will be explained in detail later.
+The demo application takes an input with the help of the `-i` argument. This could be:
 
+* Path to a single image
+* Path to a folder with images
+> In this Case non-interactive mode would be triggered. This means that demo will run the model over the input image(s) and will try to predict the formula. The output would be stored in the console or in the output file (if specified)
+* Integer identifier of the device (e.g. web-camera), typically 0.
+* Path to a video (.avi, .mp4, etc)
+> This will trigger interactive mode, which would be explained in detail later.
 
 ### Non-interactive mode
 Non-interactive mode assumes that demo processes inputs sequentially.
@@ -36,7 +42,7 @@ The demo workflow in non-interactive mode is the following:
 1. The demo application reads a single image or iterates over all images in the given folder, then crops or resizes and inputs to fit into the input image blob of the network (`imgs`). Crop and pad is used to keep size of the font.
 2. For each image, encoder extracts features from the image
 3. While length of the current formula is less then `--max_formula_len` or current token is not `END_TOKEN` Decode Step produces new tokens.
-5. The demo prints the decoded text to a file if `-o` parameter specified or into the console and (optionally) renders predicted formula into image.
+4. The demo prints the decoded text to a file if `-o` parameter specified or into the console and (optionally) renders predicted formula into image.
 
 #### Rendering of the LaTeX formula into image
 User has an option to render the latex formula predicted by the demo application into an image.
@@ -53,15 +59,11 @@ MacOS:
 > Note: Other latex systems should also work.
 
 
-Rendering of the latex formula is performed with the help of `Renderer` class from [utils.py](./utils.py). This class has two interfaces:
-1. `render` method is used as synchronous method. Method returns rendered image and text formula, corresponding to the rendered image when rendering is done.
-2. `thread_render` provides asynchronous interface to the rendering process. In contrast with the previous method, this one returns image and formula only when rendering is complete. If rendering is incomplete at the moment of method call, method returns `None`.
 
 ### Interactive mode
-Special class `InteractiveDemo` provides interface to interact with webcamera and recognize latex formulas.
-* The example of the interface:
+The example of the interface:
 ![](./interactive_interface.png)
-When User runs demo application with the `-i` option and passes `.mp4` video or number of the web-camera device as an argument (typically 1), window with the image simillar to above should pop up.
+When User runs demo application with the `-i` option and passes `.mp4` video or number of the web-camera device as an argument (typically 0), window with the image simillar to above should pop up.
 
 Example of usage of the interactive mode:
 ```
@@ -74,8 +76,8 @@ python formula_recognition_demo.py <required args> -i input_video.mp4
 
 
 The window has four main sections:
-1. On the center of this window is placed a red rectangle. This is input window, with the help of which User, moving the camera, can capture formula.
-2. Image from the 1st window will be binarized, preprocessed and fed to the network. Preprocessed and binarized image is placed on the top of the window (near `Model input` label)
+1. A red rectangle is placed on the center of this window. This is input "target", with the help of which User, moving the camera, can capture formula.
+2. Image from the input window will be binarized, preprocessed and fed to the network. Preprocessed and binarized image is placed on the top of the window (near `Model input` label)
 3. If the formula will be predicted with sufficient confidence score, it will be placed right under preprocessed image (near `Predicted` label)
 4. If rendering is available (see the previous Paragraph for details) and predicted formula does not contain latex grammar errors, it will be rendered and placed near `Rendered` label.
 
@@ -85,7 +87,7 @@ Navigation keys:
   * Use `p` to increase the size of the input window
 
 The model inference process on the image is simillar to the Non-interactive mode with the exception that model infers asynchronously.
-The phrase "Demo application works asynchronously" means, that model inference is performed in asynchronous mode and does not block main thread, so the image from the web-camera can move smoothly enough.
+Demo application works asynchronously. That means that model inference is performed in asynchronous mode and does not block main thread, so the image from the web-camera can move smoothly enough.
 Rendering of the image is also performed in asynchronous mode.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
