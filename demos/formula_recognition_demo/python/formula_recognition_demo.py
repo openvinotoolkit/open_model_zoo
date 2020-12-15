@@ -21,7 +21,11 @@ import sys
 from argparse import SUPPRESS, ArgumentParser
 
 import cv2 as cv
-from utils import *
+from tqdm import tqdm
+from utils import (COLOR_BLACK, COLOR_RED, COLOR_WHITE, DEFAULT_RESIZE_STEP,
+                   DEFAULT_WIDTH, MAX_HEIGHT, MAX_WIDTH, MIN_HEIGHT, MIN_WIDTH,
+                   PREPROCESSING, Model, calculate_probability, print_stats,
+                   create_renderer, prerocess_crop, strip_internal_spaces)
 
 
 class InteractiveDemo:
