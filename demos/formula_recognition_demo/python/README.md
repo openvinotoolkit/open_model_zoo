@@ -1,7 +1,7 @@
 # Formula Recognition Python\* Demo
 ![](./demo_intro.gif)
 
-This demo shows how to run im2latex models. Im2latex models allow to get a latex formula markup from the image.
+This demo shows how to run Im2LaTeX models. Im2LaTeX models allow to get a LaTeX formula markup from the image.
 
 > **NOTE**: Only batch size of 1 is supported.
 
@@ -45,18 +45,18 @@ The demo workflow in non-interactive mode is the following:
 4. The demo prints the decoded text to a file if `-o` parameter specified or into the console and (optionally) renders predicted formula into image.
 
 #### Rendering of the LaTeX formula into image
-User has an option to render the latex formula predicted by the demo application into an image.
+User has an option to render the LaTeX formula predicted by the demo application into an image.
 Regardless of what mode is selected (interactive or non-interactive) the process of the rendering of the formula is the same.
 ##### Requirements for rendering
 Sympy python package is used for rendering. To install it, please, run:
 `pip install -r requirements.txt`
-Sympy package needs latex system installed in the operating system.
+Sympy package needs LaTeX system installed in the operating system.
 For Windows you can use MiKTeX (just download and install it), for Ubuntu/MacOS you can use TeX Live:
 Ubuntu:
 `apt-get update && apt-get install texlive`
 MacOS:
 `brew install texlive`
-> Note: Other latex systems should also work.
+> Note: Other LaTeX systems should also work.
 
 
 
@@ -79,16 +79,15 @@ The window has four main sections:
 1. A red rectangle is placed on the center of this window. This is input "target", with the help of which User, moving the camera, can capture formula.
 2. Image from the input target will be binarized, preprocessed and fed to the network. Preprocessed and binarized image is placed on the top of the window (near `Model input` label)
 3. If the formula will be predicted with sufficient confidence score, it will be placed right under preprocessed image (near `Predicted` label)
-4. If rendering is available (see the previous Paragraph for details) and predicted formula does not contain latex grammar errors, it will be rendered and placed near `Rendered` label.
+4. If rendering is available (see the previous Paragraph for details) and predicted formula does not contain LaTeX grammar errors, it will be rendered and placed near `Rendered` label.
 
 Navigation keys:
   * Use `q` button to quit from program
   * Use `o` to decrease the size of the input (red) window
   * Use `p` to increase the size of the input window
 
-The model inference process on the image is simillar to the Non-interactive mode with the exception that model infers asynchronously.
-Demo application works asynchronously. That means that model inference is performed in asynchronous mode and does not block main thread, so the image from the web-camera can move smoothly enough.
-Rendering of the image is also performed in asynchronous mode.
+The overall process is simillar to the Non-interactive mode with the exception that it runs asynchronously.
+This means model inference and rendering of the formula does not block main thread, so the image from the web-camera can move smoothly enough.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
