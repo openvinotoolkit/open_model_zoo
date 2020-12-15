@@ -45,7 +45,8 @@ endif()
 
 if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS -DSCL_SECURE_NO_WARNINGS)
-    add_compile_options(/wd4251 /wd4275 /wd4267) #disable some warnings
+    add_compile_options(/wd4251 /wd4275 /wd4267  # disable some warnings
+                        /EHsc)  # Enable standard C++ stack unwinding, assume functions with extern "C" never throw
 endif()
 
 if(COMPILER_IS_GCC_LIKE)

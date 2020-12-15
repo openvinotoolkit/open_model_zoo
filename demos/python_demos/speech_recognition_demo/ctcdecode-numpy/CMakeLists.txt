@@ -34,6 +34,8 @@ endforeach()
 # SWIG-generated code causes some warnings; disable them.
 if(COMPILER_IS_GCC_LIKE)
     target_compile_options(${target_name} PRIVATE -Wno-narrowing)
+elseif(MSVC)
+    target_compile_options(${target_name} PRIVATE /W0)
 endif()
 
 # The Python files have to be in the same directory as the native module,
