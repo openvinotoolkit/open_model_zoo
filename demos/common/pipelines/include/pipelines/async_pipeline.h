@@ -37,8 +37,9 @@ public:
     virtual ~AsyncPipeline();
 
     /// Waits until either output data becomes available or pipeline allows to submit more input data.
-    /// Function will treat results as ready only if next sequential result (frame) is ready.
-    void waitForData();
+    /// @param shouldKeepOrder if true, function will treat results as ready only if next sequential result (frame) is
+    /// ready (so results can be extracted in the same order as they were submitted). Otherwise, function will return if any result is ready.
+    void waitForData(bool shouldKeepOrder = true);
 
     /// @returns true if there's available infer requests in the pool
     /// and next frame can be submitted for processing, false otherwise.
@@ -57,14 +58,16 @@ public:
     virtual int64_t submitData(const InputData& inputData, const std::shared_ptr<MetaData>& metaData);
 
     /// Gets available data from the queue
-    /// Function will treat results as ready only if next sequential result (frame) is ready.
-    virtual std::unique_ptr<ResultBase> getResult();
+    /// @param shouldKeepOrder if true, function will treat results as ready only if next sequential result (frame) is
+    /// ready (so results can be extracted in the same order as they were submitted). Otherwise, function will return if any result is ready.
+    virtual std::unique_ptr<ResultBase> getResult(bool shouldKeepOrder = true);
 
 protected:
     /// Returns processed result, if available
-    /// Function will treat results as ready only if next sequential result (frame) is ready.
+    /// @param shouldKeepOrder if true, function will return processed data sequentially,
+    /// keeping original frames order (as they were submitted). Otherwise, function will return processed data in random order.
     /// @returns InferenceResult with processed information or empty InferenceResult (with negative frameID) if there's no any results yet.
-    virtual InferenceResult getInferenceResult();
+    virtual InferenceResult getInferenceResult(bool shouldKeepOrder);
 
     std::unique_ptr<RequestsPool> requestsPool;
     std::unordered_map<int64_t, InferenceResult> completedInferenceResults;

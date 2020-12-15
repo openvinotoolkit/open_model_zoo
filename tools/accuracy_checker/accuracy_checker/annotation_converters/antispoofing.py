@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .format_converter import  ConverterReturn, FileBasedAnnotationConverter
+from .format_converter import ConverterReturn, FileBasedAnnotationConverter
 from ..representation import ClassificationAnnotation
 from ..utils import read_json, check_file_existence
 from ..config import PathField, NumberField

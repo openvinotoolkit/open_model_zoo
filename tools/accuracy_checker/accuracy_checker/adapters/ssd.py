@@ -24,7 +24,6 @@ from .adapter import Adapter
 from ..config import ConfigValidator, StringField, NumberField, ListField, BoolField
 from ..postprocessor import NMS
 from ..representation import DetectionPrediction, ContainerPrediction
-from ..topology_types import SSD, FasterRCNN
 
 
 class SSDAdapter(Adapter):
@@ -33,7 +32,6 @@ class SSDAdapter(Adapter):
     """
     __provider__ = 'ssd'
     prediction_types = (DetectionPrediction, )
-    topology_types = (SSD, FasterRCNN, )
 
     def process(self, raw, identifiers, frame_meta):
         """

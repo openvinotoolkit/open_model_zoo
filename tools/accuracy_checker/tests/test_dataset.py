@@ -122,7 +122,7 @@ class TestAnnotationConversion:
         converted_annotation = make_representation('0 0 0 5 5', True)
         mocker.patch(
             'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
-            return_value=ConverterReturn(converted_annotation,None, None)
+            return_value=ConverterReturn(converted_annotation, None, None)
         )
         mocker.patch('pathlib.Path.exists', return_value=False)
         annotation_saver_mock = mocker.patch(

@@ -119,14 +119,8 @@ def run(params, config, capture, detector, reid):
     frames_thread = Thread(target=thread_body)
     frames_thread.start()
 
-    if len(params.output_video):
-        frame_size, fps = capture.get_source_parameters()
-        target_width, target_height = get_target_size(frame_size, None, **config['visualization_config'])
-        video_output_size = (target_width, target_height)
-        fourcc = cv.VideoWriter_fourcc(*'XVID')
-        output_video = cv.VideoWriter(params.output_video, fourcc, min(fps), video_output_size)
-    else:
-        output_video = None
+    frames_read = False
+    set_output_params = False
 
     prev_frames = thread_body.frames_queue.get()
     detector.run_async(prev_frames, frame_number)
@@ -141,6 +135,7 @@ def run(params, config, capture, detector, reid):
         start = time.perf_counter()
         try:
             frames = thread_body.frames_queue.get_nowait()
+            frames_read = True
         except queue.Empty:
             frames = None
 
@@ -170,7 +165,18 @@ def run(params, config, capture, detector, reid):
         if not params.no_show:
             cv.imshow(win_name, vis)
 
-        if output_video:
+        if frames_read and not set_output_params:
+            set_output_params = True
+            if len(params.output_video):
+                frame_size = [frame.shape[::-1] for frame in frames]
+                fps = capture.get_fps()
+                target_width, target_height = get_target_size(frame_size, None, **config['visualization_config'])
+                video_output_size = (target_width, target_height)
+                fourcc = cv.VideoWriter_fourcc(*'XVID')
+                output_video = cv.VideoWriter(params.output_video, fourcc, min(fps), video_output_size)
+            else:
+                output_video = None
+        if set_output_params and output_video:
             output_video.write(cv.resize(vis, video_output_size))
 
         print('\rProcessing frame: {}, fps = {} (avg_fps = {:.3})'.format(
@@ -196,8 +202,10 @@ def main():
     """Prepares data for the object tracking demo"""
     parser = argparse.ArgumentParser(description='Multi camera multi object \
                                                   tracking live demo script')
-    parser.add_argument('-i', type=str, nargs='+', help='Input sources (indexes \
-                        of cameras or paths to video files)', required=True)
+    parser.add_argument('-i', '--input', required=True, nargs='+',
+                        help='Input sources (indexes of cameras or paths to video files)')
+    parser.add_argument('--loop', default=False, action='store_true',
+                        help='Optional. Enable reading the input in a loop')
     parser.add_argument('--config', type=str, default=os.path.join(current_dir, 'configs/person.py'), required=False,
                         help='Configuration file')
 
@@ -244,7 +252,7 @@ def main():
         sys.exit(1)
 
     random.seed(config['random_seed'])
-    capture = MulticamCapture(args.i)
+    capture = MulticamCapture(args.input, args.loop)
 
     log.info("Creating Inference Engine")
     ie = IECore()

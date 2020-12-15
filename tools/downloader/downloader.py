@@ -314,7 +314,7 @@ def main():
         help='download only models whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',
         help='download only models whose names match at least one of the patterns in the specified file')
-    parser.add_argument('--all',  action='store_true', help='download all available models')
+    parser.add_argument('--all', action='store_true', help='download all available models')
     parser.add_argument('--print_all', action='store_true', help='print all available models')
     parser.add_argument('--precisions', metavar='PREC[,PREC...]',
                         help='download only models with the specified precisions (actual for DLDT networks)')

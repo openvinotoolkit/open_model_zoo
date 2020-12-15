@@ -63,7 +63,7 @@ def preprocess_input(image_name, height, width):
     img = rsz[None, :, :]
     _, h, w = img.shape
     # right edge padding
-    pad_img = np.pad(img, ((0, 0), (0, height - h), (0, width -  w)), mode='edge')
+    pad_img = np.pad(img, ((0, 0), (0, height - h), (0, width - w)), mode='edge')
     return pad_img
 
 
@@ -91,7 +91,7 @@ def main():
     input_batch_size, input_channel, input_height, input_width= net.input_info[input_blob].input_data.shape
 
     # Read and pre-process input image (NOTE: one image only)
-    input_image = preprocess_input(args.input, height=input_height, width=input_width)[None,:,:,:]
+    input_image = preprocess_input(args.input, height=input_height, width=input_width)[None, :, :, :]
     assert input_batch_size == input_image.shape[0], "The net's input batch size should equal the input image's batch size "
     assert input_channel == input_image.shape[1], "The net's input channel should equal the input image's channel"
 

@@ -8,4 +8,4 @@ scipy           # via torchvision
 # release at the time of writing, so whether it helps, remains to be seen.
 # For now, just cap the PyTorch version at 1.6.x.
 torch>=1.5,<1.7
-torchvision
+torchvision<0.8

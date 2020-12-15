@@ -57,6 +57,10 @@ struct InferenceResult : public ResultBase {
     bool IsEmpty() { return outputsData.empty(); }
 };
 
+struct ClassificationResult : public ResultBase {
+    std::vector<std::pair<unsigned int, std::string>> topLabels;
+};
+
 struct DetectedObject : public cv::Rect2f {
     unsigned int labelID;
     std::string label;

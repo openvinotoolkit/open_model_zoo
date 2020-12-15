@@ -238,6 +238,7 @@ class ClassificationF1Score(PerImageEvaluationMetric):
 
     annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
     prediction_types = (ClassificationPrediction, )
+
     @classmethod
     def parameters(cls):
         parameters = super().parameters()

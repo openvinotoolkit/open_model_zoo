@@ -11,38 +11,24 @@
  limitations under the License.
 """
 
-import logging as log
 import cv2 as cv
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'common'))
+from images_capture import open_images_capture
 
 
 class MulticamCapture:
-    def __init__(self, sources):
+    def __init__(self, sources, loop):
         assert sources
         self.captures = []
         self.transforms = []
-
-        try:
-            sources = [int(src) for src in sources]
-            mode = 'cam'
-        except ValueError:
-            mode = 'video'
-
-        if mode == 'cam':
-            for id in sources:
-                log.info('Connection  cam {}'.format(id))
-                cap = cv.VideoCapture(id)
-                cap.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
-                cap.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
-                cap.set(cv.CAP_PROP_FPS, 30)
-                cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc(*'MJPG'))
-                assert cap.isOpened()
-                self.captures.append(cap)
-        else:
-            for video_path in sources:
-                log.info('Opening file {}'.format(video_path))
-                cap = cv.VideoCapture(video_path)
-                assert cap.isOpened()
-                self.captures.append(cap)
+        self.fps = []
+        for src in sources:
+            capture = open_images_capture(src, loop)
+            self.captures.append(capture)
+            self.fps.append(capture.fps())
 
     def add_transform(self, t):
         self.transforms.append(t)
@@ -50,8 +36,8 @@ class MulticamCapture:
     def get_frames(self):
         frames = []
         for capture in self.captures:
-            has_frame, frame = capture.read()
-            if has_frame:
+            frame = capture.read()
+            if frame is not None:
                 for t in self.transforms:
                     frame = t(frame)
                 frames.append(frame)
@@ -61,14 +47,8 @@ class MulticamCapture:
     def get_num_sources(self):
         return len(self.captures)
 
-    def get_source_parameters(self):
-        frame_size = []
-        fps = []
-        for cap in self.captures:
-            frame_size.append((int(cap.get(cv.CAP_PROP_FRAME_WIDTH)),
-                               int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))))
-            fps.append(int(cap.get(cv.CAP_PROP_FPS)))
-        return frame_size, fps
+    def get_fps(self):
+        return self.fps
 
 
 class NormalizerCLAHE:

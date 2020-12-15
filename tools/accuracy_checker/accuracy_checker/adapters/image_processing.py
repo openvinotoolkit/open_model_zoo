@@ -43,7 +43,7 @@ class ImageProcessingAdapter(Adapter):
                 description='The value which should be added to prediction pixels for scaling to range [0, 255]'
                             '(usually it is the same mean value which subtracted in preprocessing step))'
             ),
-            'std':  BaseField(
+            'std': BaseField(
                 optional=True, default=255,
                 description='The value on which prediction pixels should be multiplied for scaling to range '
                             '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
@@ -134,7 +134,7 @@ class MultiSuperResolutionAdapter(Adapter):
                 description='The value which should be added to prediction pixels for scaling to range [0, 255]'
                             '(usually it is the same mean value which subtracted in preprocessing step))'
             ),
-            'std':  BaseField(
+            'std': BaseField(
                 optional=True, default=255,
                 description='The value on which prediction pixels should be multiplied for scaling to range '
                             '[0, 255] (usually it is the same scale (std) used in preprocessing step))'

@@ -26,9 +26,7 @@ You can stop the demo by pressing "Esc" or "Q" button. After that, the average m
 ## Running
 
 Running the application with the <code>-h</code> option yields the following usage message:
-```sh
-./classification_demo -h
-
+```
 classification_demo [OPTION]
 Options:
 
@@ -38,10 +36,11 @@ Options:
       -l "<absolute_path>"    Required for CPU custom layers.Absolute path to a shared library with the kernels implementation.
           Or
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with kernels description.
+    -pc                       Optional. Enables per-layer performance report.
+    -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
     -labels "<path>"          Required. Path to .txt file with labels.
     -gt "<path>"              Optional. Path to ground truth .txt file.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Sample will look for a suitable plugin for device specified.
-    -b "<integer>"            Optional. Specify batch to infer. Default value is 1. The following models: googlenet-v4-tf, resnet18-xnor-binary-onnx-0001, resnet50-binary-0001, support only default batch size.
     -nthreads "<integer>"     Optional. Specify count of threads.
     -nstreams "<integer>"     Optional. Specify count of streams.
     -nireq "<integer>"        Optional. Number of infer requests.
@@ -83,7 +82,7 @@ If you want to see classification results, you must use "-gt" and "-labels" flag
 
 It has the following format:
 
-```sh
+```
 ./ILSVRC2012_val_00000001.JPEG 65
 ./ILSVRC2012_val_00000002.JPEG 970
 ./ILSVRC2012_val_00000003.JPEG 230

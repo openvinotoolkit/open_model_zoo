@@ -18,7 +18,9 @@ import os.path as osp
 
 import numpy as np
 
-from utils.wav_processing import *
+from utils.wav_processing import (
+    fold_with_overlap, infer_from_discretized_mix_logistic, pad_tensor, xfade_and_unfold,
+)
 
 
 class WaveRNNIE:
@@ -49,7 +51,7 @@ class WaveRNNIE:
         self.upsample_net = self.load_network(model_upsample)
         if upsampler_width > 0:
             orig_shape = self.upsample_net.input_info['mels'].input_data.shape
-            self.upsample_net.reshape({"mels" : (orig_shape[0], upsampler_width, orig_shape[2])})
+            self.upsample_net.reshape({"mels": (orig_shape[0], upsampler_width, orig_shape[2])})
 
         self.upsample_exec = self.create_exec_network(self.upsample_net)
 

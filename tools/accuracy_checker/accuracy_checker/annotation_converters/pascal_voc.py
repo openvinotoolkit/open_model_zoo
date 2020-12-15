@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..topology_types import ObjectDetection
 from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
@@ -136,7 +135,6 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
 class PascalVOCDetectionConverter(BaseFormatConverter):
     __provider__ = 'voc_detection'
     annotation_types = (DetectionAnnotation, )
-    topology_types = (ObjectDetection, )
 
     @classmethod
     def parameters(cls):

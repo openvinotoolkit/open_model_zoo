@@ -51,7 +51,7 @@ class InpaintingConverter(BaseFormatConverter):
         images = [
             im for im in self.image_dir.iterdir()
             if im.name.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'))
-            ]
+        ]
         if self.masks_dir is not None:
             masks = [
                 mask for mask in self.masks_dir.iterdir()

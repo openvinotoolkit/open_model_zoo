@@ -39,7 +39,7 @@ class ClipBoxes(PostprocessorWithSpecificTargets):
                 value_type=int, optional=True, min_value=1,
                 description="Destination size for box clipping for both dimensions."
             ),
-            'boxes_normalized' : BoolField(
+            'boxes_normalized': BoolField(
                 optional=True, default=False,
                 description="Flag which says that target bounding boxes are in normalized format."
             )

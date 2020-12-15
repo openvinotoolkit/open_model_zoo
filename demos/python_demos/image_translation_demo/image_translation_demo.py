@@ -21,7 +21,9 @@ import numpy as np
 from openvino.inference_engine import IECore
 
 from image_translation_demo.models import CocosnetModel, SegmentationModel
-from image_translation_demo.preprocessing import *
+from image_translation_demo.preprocessing import (
+    preprocess_for_seg_model, preprocess_image, preprocess_semantics,
+)
 from image_translation_demo.postprocessing import postprocess, save_result
 
 

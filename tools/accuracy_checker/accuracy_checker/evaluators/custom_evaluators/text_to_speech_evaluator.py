@@ -358,7 +358,7 @@ class SequentialModel:
             {'name': 'forward_tacotron_duration', 'model': self.forward_tacotron_duration.get_network()},
             {'name': 'forward_tacotron_regression', 'model': self.forward_tacotron_regression.get_network()},
             {'name': 'melgan', 'model': self.melgan.get_network()}
-            ]
+        ]
 
     @staticmethod
     def build_index(duration, x):

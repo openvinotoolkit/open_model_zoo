@@ -27,15 +27,18 @@ from action_recognition_demo.steps import run_pipeline
 
 sys.path.append(path.join(path.dirname(path.dirname(path.abspath(__file__))), 'common'))
 import monitors
+from images_capture import open_images_capture
 
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument('-i', '--input',
-                      help='Required. Id of the video capturing device to open (to open default camera just pass 0), '
-                           'path to a video', required=True, type=str)
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. An input to process. The input must be a single image, '
+                           'a folder of images or anything that cv2.VideoCapture can process')
+    args.add_argument('--loop', default=False, action='store_true',
+                      help='Optional. Enable reading the input in a loop')
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model', required=True, type=str)
     decoder_args = args.add_mutually_exclusive_group()
     decoder_args.add_argument('-m_de', '--m_decoder',
@@ -56,7 +59,6 @@ def build_argparser():
     args.add_argument('--fps', help='Optional. FPS for renderer', default=30, type=int)
     args.add_argument('-lb', '--labels', help='Optional. Path to file with label names', type=str)
     args.add_argument('--no_show', action='store_true', help="Optional. Don't show output")
-    args.add_argument('--loop', default=False, action='store_true', help='Optional. Run the video in cycle mode')
     args.add_argument('-s', '--smooth', dest='label_smoothing', help='Optional. Number of frames used for output label smoothing',
                       default=30, type=int)
     args.add_argument('-u', '--utilization-monitors', default='', type=str,
@@ -106,7 +108,8 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, 70)
     result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
-    run_pipeline(args.input, args.loop, encoder, decoder, result_presenter.render_frame, decoder_seq_size=decoder_seq_size, fps=args.fps)
+    cap = open_images_capture(args.input, args.loop)
+    run_pipeline(cap, encoder, decoder, result_presenter.render_frame, decoder_seq_size=decoder_seq_size, fps=args.fps)
     print(presenter.reportMeans())
 
 

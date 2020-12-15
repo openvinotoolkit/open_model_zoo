@@ -471,7 +471,7 @@ class SequentialModel:
             {'name': 'detector', 'model': self.detector.get_network()},
             {'name': 'recognizer_encoder', 'model': self.recognizer_encoder.get_network()},
             {'name': 'recognizer_decoder', 'model': self.recognizer_decoder.get_network()}
-            ]
+        ]
 
     def update_inputs_outputs_info(self):
         def generate_name(prefix, with_prefix, layer_name):

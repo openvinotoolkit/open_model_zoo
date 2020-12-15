@@ -347,7 +347,7 @@ class FileSourceGoogleDrive(FileSource):
     def start_download(self, session, chunk_size, offset):
         range_headers = self.http_range_headers(offset)
         URL = 'https://docs.google.com/uc?export=download'
-        response = session.get(URL, params={'id' : self.id}, headers=range_headers,
+        response = session.get(URL, params={'id': self.id}, headers=range_headers,
             stream=True, timeout=DOWNLOAD_TIMEOUT)
         response.raise_for_status()
 

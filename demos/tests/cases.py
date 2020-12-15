@@ -12,10 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import itertools
 import sys
 
-from args import *
+from args import (
+    DataDirectoryArg, DataDirectoryOrigFileNamesArg, DataPatternArg, DemoFileArg,
+    ModelArg, OMZ_DIR, TestDataArg, image_net_arg, image_retrieval_arg,
+)
 from data_sequences import DATA_SEQUENCES
 
 MONITORS = {'-u': 'cdm'}
@@ -131,8 +135,7 @@ NATIVE_DEMOS = [
             '-time': '5',
             '-i': DataDirectoryOrigFileNamesArg('classification'),
             '-labels': DemoFileArg('imagenet_2012_classes.txt'),
-            '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt"),
-            '-b': '8'}),
+            '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),
         single_option_cases('-m',
             ModelArg('alexnet'),
             ModelArg('densenet-121-tf'),
@@ -221,8 +224,7 @@ NATIVE_DEMOS = [
                     ModelArg('yolo-v3-tf'),
                     ModelArg('yolo-v3-tiny-tf'))),
         ],
-        )
-    ),
+    )),
 
     NativeDemo('pedestrian_tracker_demo', device_keys=['-d_det', '-d_reid'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -265,21 +267,6 @@ NATIVE_DEMOS = [
                 single_option_cases('-m',
                     ModelArg('semantic-segmentation-adas-0001'),
                     ModelArg('hrnet-v2-c1-segmentation'),
-                    ModelArg('deeplabv3'))),
-        ],
-    )),
-
-    NativeDemo(subdirectory='segmentation_demo_async', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-no_show': None, **MONITORS}),
-        [
-            TestCase(options={
-                '-m': ModelArg('road-segmentation-adas-0001'),
-                '-i': DataPatternArg('road-segmentation-adas'),
-            }),
-            *combine_cases(
-                TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
-                single_option_cases('-m',
-                    ModelArg('semantic-segmentation-adas-0001'),
                     ModelArg('deeplabv3'))),
         ],
     )),
@@ -425,7 +412,7 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(subdirectory='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show':None,
+        TestCase(options={'--no_show': None,
                           **MONITORS,
                           '-m': ModelArg('image-retrieval-0001')}),
         single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),

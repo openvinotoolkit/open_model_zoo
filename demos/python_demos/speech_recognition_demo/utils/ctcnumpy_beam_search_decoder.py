@@ -37,7 +37,11 @@ class CtcnumpyBeamSearchDecoder:
         output, scores, timesteps, out_seq_len = self.decoder_state.decode(probs[np.newaxis])
         assert out_seq_len.shape[0] == 1
         beam_results = [
-            dict(conf=scores[0,res_idx], text=self.alphabet.decode(output[0,res_idx,:out_seq_len[0,res_idx]]), ts=list(timesteps[0,res_idx]))
+            dict(
+                conf=scores[0, res_idx],
+                text=self.alphabet.decode(output[0, res_idx, :out_seq_len[0, res_idx]]),
+                ts=list(timesteps[0, res_idx]),
+            )
             for res_idx in range(out_seq_len.shape[1])
         ]
         return beam_results

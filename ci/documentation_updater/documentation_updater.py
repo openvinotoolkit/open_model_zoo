@@ -28,7 +28,7 @@ from sys import exit
 MODES = [
     'check',
     'update'
-    ]
+]
 
 LOG_LEVELS = [
     'CRITICAL',

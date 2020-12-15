@@ -64,7 +64,7 @@ def check_and_update_numpy(min_acceptable='1.15'):
 
 def install_dependencies_with_pip(dependencies):
     for dep in dependencies:
-        subprocess.call(['pip3', 'install',  str(dep)])
+        subprocess.call(['pip3', 'install', str(dep)])
 
 
 class CoreInstall(install_command):

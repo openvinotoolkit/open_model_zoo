@@ -9,24 +9,26 @@ exclude=
 select=
     # indentation problems
     E10,E11,
+    # closing bracket does not match indentation of opening brackets line
+    E123,
+    # whitespace before '('
+    E211,
+    # missing whitespace after ',', ';', or ':'
+    E231,
+    # missing whitespace after keyword
+    E275,
+    # expected 1 blank line, found 0
+    E301,
+    # blank lines found after function decorator
+    E304,
     # the backslash is redundant between brackets
     E502,
     # statement style issues
     E7,
     # parse errors
     E9,
-    # unused imports
-    F401,
-    # formatting errors
-    F5,
-    # semantic errors
-    F6,
-    # syntax errors
-    F7,
-    # name errors
-    F8,
-    # raise NotImplemented should be raise NotImplementedError
-    F901,
+    # pyflakes checks
+    F4,F5,F6,F7,F8,F9,
     # deprecation warnings
     W6,
 

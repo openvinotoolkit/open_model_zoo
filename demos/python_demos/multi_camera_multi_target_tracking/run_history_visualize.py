@@ -140,18 +140,10 @@ def main():
 
     assert len(history) == capture.get_num_sources()
 
-    # Configure output video files
     output_video = None
     output_video_gt = None
-    frame_size, fps_source = capture.get_source_parameters()
-    if len(args.output_video):
-        video_output_size, fps = calc_output_video_params(frame_size, fps_source, args.gt_files, args.merge_outputs)
-        fourcc = cv.VideoWriter_fourcc(*'XVID')
-        output_video = cv.VideoWriter(args.output_video, fourcc, fps, video_output_size)
-        if args.gt_files and not args.merge_outputs:
-            ext = args.output_video.split('.')[-1]
-            output_path = args.output_video[:len(args.output_video) - len(ext) - 1] + '_gt.' + ext
-            output_video_gt = cv.VideoWriter(output_path, fourcc, fps, video_output_size)
+    frames_read = False
+    set_output_params = False
 
     # Read GT tracks if necessary
     if args.gt_files:
@@ -179,6 +171,7 @@ def main():
         if key == 27:
             break
         has_frames, frames = capture.get_frames()
+        frames_read = True
         if not has_frames:
             break
 
@@ -202,6 +195,18 @@ def main():
             cv.imshow(win_name, vis)
         time += 1
 
+        if frames_read and not set_output_params:
+            set_output_params = True
+            if len(args.output_video):
+                frame_size = [frame.shape[::-1] for frame in frames]
+                fps_source = capture.get_fps()
+                video_output_size, fps = calc_output_video_params(frame_size, fps_source, args.gt_files, args.merge_outputs)
+                fourcc = cv.VideoWriter_fourcc(*'XVID')
+                output_video = cv.VideoWriter(args.output_video, fourcc, fps, video_output_size)
+                if args.gt_files and not args.merge_outputs:
+                    ext = args.output_video.split('.')[-1]
+                    output_path = args.output_video[:len(args.output_video) - len(ext) - 1] + '_gt.' + ext
+                    output_video_gt = cv.VideoWriter(output_path, fourcc, fps, video_output_size)
         if output_video:
             output_video.write(cv.resize(vis, video_output_size))
         if vis_gt is not None and output_video_gt is not None:

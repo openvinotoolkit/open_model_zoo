@@ -1,12 +1,13 @@
 # use update-requirements.py to update this file
 
 flake8==3.8.4             # via -r ci/requirements-check-basics.in
-importlib-metadata==3.1.0  # via flake8
+importlib-metadata==3.3.0  # via flake8
 mccabe==0.6.1             # via flake8
-pathspec==0.8.0           # via yamllint
+pathspec==0.8.1           # via yamllint
 pycodestyle==2.6.0        # via flake8
 pyflakes==2.2.0           # via flake8
 pyyaml==5.3.1             # via yamllint
+typing-extensions==3.7.4.3  # via importlib-metadata
 yamllint==1.25.0          # via -r ci/requirements-check-basics.in
 zipp==3.4.0               # via importlib-metadata
 

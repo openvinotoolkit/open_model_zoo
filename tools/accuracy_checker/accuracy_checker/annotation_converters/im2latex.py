@@ -77,6 +77,7 @@ class Im2latexDatasetConverter(DirectoryBasedAnnotationConverter):
             }
         )
         return configuration_parameters
+
     def configure(self):
         super().configure()
         self.images_dir = self.get_value_from_config('images_dir')

@@ -7,35 +7,37 @@
 //
 //      http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writingb  software
+// Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 */
-
-#include "model_base.h"
-#include "opencv2/core.hpp"
-
 #pragma once
-class SegmentationModel : public ModelBase {
+
+#include "models/model_base.h"
+
+class ClassificationModel : public ModelBase {
 public:
     /// Constructor
-    /// @param modelFileName name of model to load
+    /// @param modelFileName name of model to load.
+    /// @param nTop - number of top results.
+    /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
-    SegmentationModel(const std::string& modelFileName, bool useAutoResize);
+    /// @param labels - array of labels for every class.
+    ClassificationModel(const std::string& modelFileName, size_t nTop, bool useAutoResize, const std::vector<std::string>& labels);
 
     std::shared_ptr<InternalModelData> preprocess(
-        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+            const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
+    static std::vector<std::string> loadLabels(const std::string& labelFilename);
+
 protected:
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
-
-    int outHeight = 0;
-    int outWidth = 0;
-    int outChannels = 0;
-
+    size_t nTop;
     bool useAutoResize;
+    std::vector<std::string> labels;
+
+    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
 };
