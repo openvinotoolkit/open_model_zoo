@@ -39,7 +39,7 @@ MAX_WIDTH = 1200
 MIN_WIDTH = 260
 COLOR_WHITE = (255, 255, 255)
 COLOR_BLACK = (0, 0, 0)
-RED = (0, 0, 255)
+COLOR_RED = (0, 0, 255)
 # default value to resize input window's width in pixels
 DEFAULT_RESIZE_STEP = 10
 
@@ -88,8 +88,8 @@ def create_renderer():
     Checks if pdflatex is installed and rendering
     of latex formula could be performed
     """
-    command = subprocess.run("pdflatex --version", stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE, check=False, shell=True)
+    command = subprocess.run(["pdflatex", "--version"], stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL, check=False)
     if command.returncode != 0:
         renderer = None
         log.warning("pdflatex not installed, please, install it to use rendering")

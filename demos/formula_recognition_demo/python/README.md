@@ -26,26 +26,26 @@ Second model is Decoder that takes as input:
 * Target (`tgt`) - previous token (for the first time it is `START_TOKEN` )
 Second model is being executed until current decoded token is `END_TOKEN` or length of the formula is less then `--max_formula_len` producing one token per each decode step.
 
-As input, the demo application takes a path to a folder with images or a path to a single image file with a command-line argument `-i`. Another possible option is interactive mode, which will be explanined in details later.
+As input, the demo application takes a path to a folder with images or a path to a single image file with a command-line argument `-i`. Another possible option is interactive mode, which will be explained in detail later.
 
 
 ### Non-interactive mode
 Non-interactive mode assumes that demo processes inputs sequentially.
-The demo workflow in non-interactive is the following:
+The demo workflow in non-interactive mode is the following:
 
 1. The demo application reads a single image or iterates over all images in the given folder, then crops or resizes and inputs to fit into the input image blob of the network (`imgs`). Crop and pad is used to keep size of the font.
 2. For each image, encoder extracts features from the image
 3. While length of the current formula is less then `--max_formula_len` or current token is not `END_TOKEN` Decode Step produces new tokens.
-5. The demo prints the decoded text in a file if `-o` parameter specified or into the console and (optionally) renders predicted formula into image.
+5. The demo prints the decoded text to a file if `-o` parameter specified or into the console and (optionally) renders predicted formula into image.
 
-#### Rendering of the latex formula into image
-User has an option to render predicted by the demo application latex formula into image.
+#### Rendering of the LaTeX formula into image
+User has an option to render the latex formula predicted by the demo application into an image.
 Regardless of what mode is selected (interactive or non-interactive) the process of the rendering of the formula is the same.
 ##### Requirements for rendering
 Sympy python package is used for rendering. To install it, please, run:
 `pip install -r requirements.txt`
-Sympy package needs latex system installed in the operation system.
-For Windows you can use miktex (just download and install it), for Ubuntu\MacOS you can use texlive:
+Sympy package needs latex system installed in the operating system.
+For Windows you can use MiKTeX (just download and install it), for Ubuntu/MacOS you can use TeX Live:
 Ubuntu:
 `apt-get update && apt-get install texlive`
 MacOS:
@@ -77,12 +77,12 @@ The window has four main sections:
 1. On the center of this window is placed a red rectangle. This is input window, with the help of which User, moving the camera, can capture formula.
 2. Image from the 1st window will be binarized, preprocessed and fed to the network. Preprocessed and binarized image is placed on the top of the window (near `Model input` label)
 3. If the formula will be predicted with sufficient confidence score, it will be placed right under preprocessed image (near `Predicted` label)
-4. If rendering is available (see the previous Paragraph for details) and predicted formula does not contain latex grammar errors, it will be rendered and places near `Rendered` label.
+4. If rendering is available (see the previous Paragraph for details) and predicted formula does not contain latex grammar errors, it will be rendered and placed near `Rendered` label.
 
-Navigation buttons:
+Navigation keys:
   * Use `q` button to quit from program
-  * Use `o` (latin) to decrease the size of the input (red) window
-  * Use `p` (latin) to increase the size of the input widnow
+  * Use `o` to decrease the size of the input (red) window
+  * Use `p` to increase the size of the input window
 
 The model inference process on the image is simillar to the Non-interactive mode with the exception that model infers asynchronously.
 The phrase "Demo application works asynchronously" means, that model inference is performed in asynchronous mode and does not block main thread, so the image from the web-camera can move smoothly enough.

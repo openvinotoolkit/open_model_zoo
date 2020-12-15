@@ -193,7 +193,7 @@ def build_argparser():
     args.add_argument("-m_decoder", help="Required. Path to an .xml file with a trained decoder part of the model",
                       required=True, type=str)
     args.add_argument("-i", "--input", help="Required. Path to a folder with images, path to an image files, integer "
-                      "identificator of the camera or path to the video. See README.md for details.",
+                      "identifier of the camera or path to the video. See README.md for details.",
                       required=True, type=str)
     args.add_argument("-no_show", "--no_show", action='store_true',
                       help='Optional. Suppress pop-up window with rendered formula.')
@@ -258,7 +258,7 @@ def main():
         non_interactive_demo(model, args)
         return
 
-    *_, height, width = model.encoder.input_info['imgs'].input_data.shape
+    height, width = model.encoder.input_info['imgs'].input_data.shape[-2:]
     prev_text = ''
     demo = InteractiveDemo((height, width), resolution=args.resolution)
     show_window = not args.no_show
