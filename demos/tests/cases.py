@@ -226,7 +226,6 @@ NATIVE_DEMOS = [
                     ModelArg('ssd_mobilenet_v1_fpn_coco'),
                     ModelArg('ssd_mobilenet_v2_coco'),
                     ModelArg('ssd_resnet50_v1_fpn_coco'),
-                    ModelArg('ssd-resnet34-1200-onnx'),
                     ModelArg('ssdlite_mobilenet_v2'),
                     ModelArg('vehicle-detection-0200'),
                     ModelArg('vehicle-detection-0201'),
