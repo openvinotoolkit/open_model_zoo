@@ -15,7 +15,7 @@ conditions.
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | Mean Average Precision (mAP)    | 65.12%                                    |
-| AP people                       | 76.28%                                    |
+| AP people                       | 77.47%                                    |
 | AP vehicles                     | 74.94%                                    |
 | AP bikes                        | 44.14%                                    |
 | Max objects to detect           | 200                                       |
@@ -42,8 +42,6 @@ Similarly, training dataset has 160,297 images with:
 | Vehicle        | 501,548                  |
 | Pedestrian     | 706,786                  |
 | Bike           | 55,692                   |
-
-## Performance
 
 ## Inputs
 

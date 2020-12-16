@@ -76,6 +76,21 @@ If you see the error about directory/file not found, please try remove manually 
 pip install --upgrade --force-reinstall .
 ```
 
+#### Running the tool inside IDE for development purposes
+
+Accuracy Checker tool has entry point for running in CLI, however majority of popular code editors or IDE expects scripts as starting point of application.
+Sometimes it can be useful to have opportunity to run the tool as script for debugging or enabling new models.
+For usage Accuracy Checker inside the IDE, you need to create a script in accuracy_checker root directory (e.g. `<open_model_zoo>/tools/accuracy_checker/main.py`)
+with following code:
+```python
+from accuracy_checker.main import main
+
+if __name__ == '__main__':
+    main()
+
+```
+Now, you can use this script for running in IDE.
+
 #### Usage
 
 You may test your installation and get familiar with accuracy checker by running [sample](sample/README.md).
@@ -104,9 +119,12 @@ You may refer to `-h, --help` to full list of command line options. Some argumen
 - `--num_requests` number requests for async execution. Allows override provided in config info. Default is `AUTO`
 - `--model_attributes` directory with additional models attributes.
 - `--subsample_size` dataset subsample size.
-- `--shuffle` allow shuffle annotation during creation a subset if subsample_size argument is provided. Default is `True`.
+- `--shuffle` allows shuffle annotation during creation a subset if subsample_size argument is provided. Default is `True`.
+- `--intermediate_metrics_results` enables intermediate metrics results printing. Default is `False`
+- `--metrics_interval` number of iteration for updated metrics result printing if `--intermediate_metrics_results` flag enabled. Default is 1000.
 
 You are also able to replace some command line arguments with environment variables for path prefixing. Supported following list of variables:
+* `DEFINITIONS_FILE` - equivalent of `-d`, `-definitions`.
 * `DATA_DIR` -  equivalent of `-s`, `--source`.
 * `MODELS_DIR` - equivalent of `-m`, `--models`.
 * `EXTENSIONS` - equivalent of `-e`, `--extensions`.
@@ -138,7 +156,7 @@ models:
     - name: dataset_name
 ```
 Optionally you can use global configuration. It can be useful for avoiding duplication if you have several models which should be run on the same dataset.
-Example of global definitions file can be found <a href="https://github.com/opencv/open_model_zoo/blob/master/tools/accuracy_checker/dataset_definitions.yml">here</a>. Global definitions will be merged with evaluation config in the runtime by dataset name.
+Example of global definitions file can be found <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/master/tools/accuracy_checker/dataset_definitions.yml">here</a>. Global definitions will be merged with evaluation config in the runtime by dataset name.
 Parameters of global configuration can be overwritten by local config (e.g. if in definitions specified resize with destination size 224 and in the local config used resize with size 227, the value in config - 227 will be used as resize parameter)
 You can use field `global_definitions` for specifying path to global definitions directly in the model config or via command line arguments (`-d`, `--definitions`).
 
@@ -149,7 +167,7 @@ Each launcher configuration starts with setting `framework` name. Currently *caf
 Please view:
 
 - [How to configure Caffe launcher](accuracy_checker/launcher/caffe_launcher_readme.md)
-- [How to configure DLSDK launcher](accuracy_checker/launcher/dlsdk_launcher_readme.md)
+- [How to configure OpenVINO launcher](accuracy_checker/launcher/dlsdk_launcher_readme.md)
 - [How to configure OpenCV launcher](accuracy_checker/launcher/opencv_launcher_readme.md)
 - [How to configure MXNet Launcher](accuracy_checker/launcher/mxnet_launcher_readme.md)
 - [How to configure TensorFlow Launcher](accuracy_checker/launcher/tf_launcher_readme.md)
@@ -164,10 +182,10 @@ all required preprocessing and postprocessing/filtering steps,
 and metrics that will be used for evaluation.
 
 If your dataset data is a well-known competition problem (COCO, Pascal VOC, and others) and/or can be potentially reused for other models
-it is reasonable to declare it in some global configuration file (*definition* file). This way in your local configuration file you can provide only
+it is reasonable to declare it in some global configuration file ([definition file](dataset_definitions.yml)). This way in your local configuration file you can provide only
 `name` and all required steps will be picked from global one. To pass path to this global configuration use `--definition` argument of CLI.
 
-If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about dataset preparation you can find in <a href="https://github.com/opencv/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.
+If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about dataset preparation you can find in <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.
 
 Each dataset must have:
 

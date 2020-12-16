@@ -38,7 +38,7 @@ void IEWrapper::setExecPart() {
             layerData->setLayout(Layout::NC);
             layerData->setPrecision(Precision::FP32);
         } else {
-            throw std::runtime_error("Unknow type of input layer layout. Expected either 4 or 2 dimensional inputs");
+            throw std::runtime_error("Unknown type of input layer layout. Expected either 4 or 2 dimensional inputs");
         }
     }
 
@@ -99,7 +99,7 @@ void IEWrapper::getOutputBlob(const std::string& blobName,
     for (auto dim : blobDims) {
         dataSize *= dim;
     }
-    
+
     LockedMemory<const void> blobMapped = as<MemoryBlob>(request.GetBlob(blobName))->rmap();
     auto buffer = blobMapped.as<float *>();
 

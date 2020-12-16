@@ -65,29 +65,38 @@ Accuracy Checker supports following set of preprocessors:
 * `rgb_to_gray` - converting image in RGB to gray scale color space.
 * `bgr_to_yuv` - converting image in BGR to YUV.
   * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+  * `shrink_uv` - resize uv-channels in 1:2 resolution to y-channel (Optional, available only with `split_channels` combination).
 * `rgb_to_yuv` - converting image in RGB to YUV.
   * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+  * `shrink_uv` - resize uv-channels in 1:2 resolution to y-channel (Optional, available only with `split_channels` combination).
 * `bgr_to_nv12` - converting BGR image to NV12 format.
 * `rgb_to_nv12` - converting RGB image to NV12 format.
 * `nv12_to_bgr` - converting NV12 data to BGR format.
 * `nv12_to_rgb` - converting NV12 data to RGB format.
+* `bgr_to_ycrcb` - converting image in BGR to YCrCb.
+  * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+* `rgb_to_ycrcb` - converting image in RGB to YCrCb.
+  * `split_channels` - split image channels to independent input data after conversion (Optional, default `False`).
+* `bgr_to_lab` - converts image in RGB format to LAB.
+* `rgb_to_lab` - converts image in BGR format to LAB.
 * `select_channel` - select channel only one specified channel from multichannel image.
   * `channel` - channel id in image (e.g. if you read image in RGB and want to select green channel, you need to specify 1 as channel)
 * `flip` - image mirroring around specified axis.
   * `mode` specifies the axis for flipping (`vertical` or `horizontal`).
+  * `merge_with_original` - allows addition flipped image to original (Optional, default `False`, original image will be replaced with flipped).
 * `crop` - central cropping for image.
-  * `dst_width` and `dst_height` are destination width and height for image resizing respectively. You can also use `size` instead in case when destination sizes are equal or
-  `central_fraction` to define fraction of size to crop (float value (0, 1]))
+  * `dst_width` and `dst_height` are destination width and height for image resizing respectively. You can also use `size` instead in case when destination sizes are equal,
+  `central_fraction` to define fraction of size to crop (float value (0, 1])) or `max_square` for cropping central part for image by minimal image size (`True` value for enabling this feature).
   * `use_pillow` parameter specifies usage of Pillow library for cropping.
 * `crop_rectangle` - cropping region of interest using coordinates given as annotation metadata.
 * `extend_around_rect` - scaling region of interest using annotation metadata.
   * `augmentation_param` is scale factor for augmentation.
-* `point_aligment` - aligning keypoints stored in annotation metadata.
+* `point_alignment` - aligning keypoints stored in annotation metadata.
   * `draw_points` - allows visualize points.
   * `normalize` - allows to use normalization for keypoints.
   * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
-* `corner_crop` - Corner crop of the image. 
-  * `dst_width` and `dst_heigth` are destination width and height
+* `corner_crop` - Corner crop of the image.
+  * `dst_width` and `dst_height` are destination width and height
   * `corner_type` is type of the corner crop. Options are:
     * `top-left`
     * `top-right`
@@ -137,8 +146,10 @@ Accuracy Checker supports following set of preprocessors:
   * `max_brush_width` - Maximum brush width to draw mask.
   * `max_length` - Maximum line length to draw mask.
   * `max_vertex` - Maximum number vertex to draw mask.
+  * `inverse_mask` - Allows mask inversion (1 - real image, 0 - masked area). Optional, default `False` (0 - real image, 1- masked area).
 * `rect_mask` - Applies rectangle mask to the image.
   * `dst_width` and `dst_height` are width, and height of mask. You can also use `size` instead in case when destination sizes are equal.
+* `inverse_mask` - Allows mask inversion (1 - real image, 0 - masked area). Optional, default `False` (0 - real image, 1- masked areaa).
 * `custom_mask` - Applies masks from custom mask dataset.
   * `mask_dir` - path to mask dataset to be used for inpainting.
   * `inverse_mask` - inverse mask before apply
@@ -148,6 +159,7 @@ Accuracy Checker supports following set of preprocessors:
     * `scipy_imread` - read images using similar approach as in `scipy.misc.imread`.
     * `numpy_reader` - read numpy dumped files.
     * `tf_imread`- read images using TensorFlow. Default color space is RGB. Requires TensorFlow installation.
+    * `inverse_mask` - Allows mask inversion (1 - real image, 0 - masked area). Optional, default `False` (0 - real image, 1- masked areaa).
 * `warp_affine` - warp affine transformation. (supported only with OpenCV)
   * `src_landmarks` - source landmarks to set as markers for the warp affine transformation.
   * `dst_landmarks` - destination and target landmarks to transform `src_landmarks` to.
@@ -170,6 +182,13 @@ Accuracy Checker supports following set of preprocessors:
 * `candidate_crop` - crops candidates detected in previous stage model from input image with vertical and horizontal scaling.
   * `scale_width` - value to scale width relative to the original candidate width.
   * `scale_height` - value to scale height relative to the original candidate height.
+* `object_crop_with_scale` - crop region from image using `center` coordinate and `scale` from annotation.
+  * `dst_width` and `dst_height` are destination width and height for image cropping respectively. You can also use `size` instead in case when destination sizes are equal.
+* `one_hot_encoding` - create label map based on array of indexes (analog scatter).
+  * `value` - number for encoding label.
+  * `base` - number for encoding other classes.
+  * `axis` - axis responsible for classes.
+  * `number_of_classes` - number of used classes.
 
 ## Optimized preprocessing via OpenVINO Inference Engine
 OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`.

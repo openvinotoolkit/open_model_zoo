@@ -37,7 +37,12 @@ class BgrToGray(Preprocessor):
     __provider__ = 'bgr_to_gray'
 
     def process(self, image, annotation_meta=None):
-        image.data = np.expand_dims(cv2.cvtColor(image.data, cv2.COLOR_BGR2GRAY).astype(np.float32), -1)
+        def process_data(data):
+            return np.expand_dims(cv2.cvtColor(data, cv2.COLOR_BGR2GRAY).astype(np.float32), -1)
+
+        image.data = process_data(image.data) if not isinstance(image.data, list) else [
+            process_data(fragment) for fragment in image.data
+        ]
         return image
 
 
@@ -57,9 +62,39 @@ class RgbToGray(Preprocessor):
     __provider__ = 'rgb_to_gray'
 
     def process(self, image, annotation_meta=None):
-        image.data = np.expand_dims(cv2.cvtColor(image.data, cv2.COLOR_RGB2GRAY).astype(np.float32), -1)
+        def process_data(data):
+            return np.expand_dims(cv2.cvtColor(data, cv2.COLOR_RGB2GRAY).astype(np.float32), -1)
+
+        image.data = process_data(image.data) if not isinstance(image.data, list) else [
+            process_data(fragment) for fragment in image.data
+        ]
         return image
 
+
+class BGRToLAB(Preprocessor):
+    __provider__ = 'bgr_to_lab'
+
+    def process(self, image, annotation_meta=None):
+        def process_data(data):
+            return cv2.cvtColor(data.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
+
+        image.data = process_data(image.data) if not isinstance(image.data, list) else [
+            process_data(fragment) for fragment in image.data
+        ]
+        return image
+
+
+class RGBToLAB(Preprocessor):
+    __provider__ = 'bgr_to_lab'
+
+    def process(self, image, annotation_meta=None):
+        def process_data(data):
+            return cv2.cvtColor(data.astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
+
+        image.data = process_data(image.data) if not isinstance(image.data, list) else [
+            process_data(fragment) for fragment in image.data
+        ]
+        return image
 
 class TfConvertImageDType(Preprocessor):
     __provider__ = 'tf_convert_image_dtype'
@@ -118,12 +153,18 @@ class BGR2YUVConverter(Preprocessor):
         parameters.update({
             'split_channels': BoolField(
                 optional=True, default=False, description='Allow treat channels as independent input'
+            ),
+            'shrink_uv': BoolField(
+                optional=True, default=False, description='Allow shrink uv-channels after split'
             )
         })
         return parameters
 
     def configure(self):
         self.split_channels = self.get_value_from_config('split_channels')
+        self.shrink_uv = self.get_value_from_config('shrink_uv')
+        if self.shrink_uv and not self.split_channels:
+            self.split_channels = True
 
     def process(self, image, annotation_meta=None):
         data = image.data
@@ -134,6 +175,9 @@ class BGR2YUVConverter(Preprocessor):
             v = yuvdata[:, :, 2]
             identifier = image.identifier
             new_identifier = ['{}_y'.format(identifier), '{}_u'.format(identifier), '{}_v'.format(identifier)]
+            if self.shrink_uv:
+                u = cv2.resize(u, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+                v = cv2.resize(v, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
             yuvdata = [np.expand_dims(y, -1), np.expand_dims(u, -1), np.expand_dims(v, -1)]
             image.identifier = new_identifier
         image.data = yuvdata
@@ -208,3 +252,41 @@ class NV12toRGBConverter(Preprocessor):
     def process(self, image, annotation_meta=None):
         image.data = cv2.cvtColor(image.data, cv2.COLOR_YUV2RGB_NV12)
         return image
+
+
+class BGR2YCrCbConverter(Preprocessor):
+    __provider__ = 'bgr_to_ycrcb'
+    color = cv2.COLOR_BGR2YCrCb
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'split_channels': BoolField(
+                optional=True, default=False, description='Allow treat channels as independent input'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.split_channels = self.get_value_from_config('split_channels')
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        ycrcbdata = cv2.cvtColor(data, self.color)
+        if self.split_channels:
+            y = ycrcbdata[:, :, 0]
+            cr = ycrcbdata[:, :, 1]
+            cb = ycrcbdata[:, :, 2]
+            identifier = image.identifier
+            new_identifier = ['{}_y'.format(identifier), '{}_cr'.format(identifier), '{}_cb'.format(identifier)]
+            ycrcbdata = [np.expand_dims(y, -1), np.expand_dims(cr, -1), np.expand_dims(cb, -1)]
+            image.identifier = new_identifier
+        image.data = ycrcbdata
+
+        return image
+
+
+class RGB2YCrCbConverter(BGR2YCrCbConverter):
+    __provider__ = 'rgb_to_ycrcb'
+    color = cv2.COLOR_RGB2YCrCb

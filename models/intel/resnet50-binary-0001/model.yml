@@ -17,20 +17,20 @@ description: >-
 task_type: classification
 files:
   - name: FP32-INT1/resnet50-binary-0001.xml
-    size: 231891
-    sha256: 2fd440a25995c9c0357fe3632dbb7891bedffa03ca5ce69c5aff3883cdd4b673
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
+    size: 232680
+    sha256: 20bb30339b0913904bd9398e52efb344a66715b4ecfe75bf069c55900b60d9f9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
   - name: FP32-INT1/resnet50-binary-0001.bin
     size: 22112984
     sha256: e1b2cd17644699369284e7a0c6113b0ae1d6411ddca6ceba2423a4cbe139072c
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
   - name: FP16-INT1/resnet50-binary-0001.xml
-    size: 231792
-    sha256: c820860b29c43ed5df43d6ab2273c80777ad92968b9557d500ff51b4cf6446a7
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.xml
+    size: 232581
+    sha256: 15533a8781e8162158559a80068cc548fc469a1a5c34baf36324a8088c20ebcc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.xml
   - name: FP16-INT1/resnet50-binary-0001.bin
     size: 12348792
     sha256: fcc76148a770e81bfbb3c2af30397ee54a52532bdbc97c3bd5a29e9f7836ba58
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

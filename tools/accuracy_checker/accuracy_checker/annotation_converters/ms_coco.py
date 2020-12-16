@@ -15,15 +15,30 @@ limitations under the License.
 """
 
 import numpy as np
+from PIL import Image
 
 from ..config import BoolField, PathField, StringField
 from ..utils import read_json, convert_bboxes_xywh_to_x1y1x2y2, check_file_existence
 from ..representation import (
-    DetectionAnnotation, PoseEstimationAnnotation, CoCoInstanceSegmentationAnnotation, ContainerAnnotation
+    DetectionAnnotation,
+    PoseEstimationAnnotation,
+    CoCoInstanceSegmentationAnnotation,
+    ContainerAnnotation,
+    SegmentationAnnotation,
 )
 from .format_converter import BaseFormatConverter, FileBasedAnnotationConverter, ConverterReturn, verify_label_map
 from ..progress_reporters import PrintProgressReporter
 
+from ..utils import UnsupportedPackage
+
+try:
+    import pycocotools.mask as maskUtils
+except ImportError as import_error:
+    maskUtils = UnsupportedPackage("pycocotools", import_error.msg)
+
+from ..representation.segmentation_representation import GTMaskLoader
+
+from ..logging import warning
 
 def get_image_annotation(image_id, annotations_):
     return list(filter(lambda x: x['image_id'] == image_id, annotations_))
@@ -104,6 +119,7 @@ class MSCocoDetectionConverter(BaseFormatConverter):
         self.sort_key = self.get_value_from_config('sort_key')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
+        self.meta = {}
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         full_annotation = read_json(self.annotation_file)
@@ -257,10 +273,56 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
 
         return ConverterReturn(keypoints_annotations, {'label_map': label_map}, None)
 
+def make_segmentation_mask(height, width, path_to_mask, labels, segmentations):
+    polygons = []
+    for mask in segmentations:
+        rles = maskUtils.frPyObjects(mask, height, width)
+        rle = maskUtils.merge(rles)
+        polygons.append(rle)
+
+    masks = []
+    for polygon in polygons:
+        mask = maskUtils.decode(polygon)
+        if len(mask.shape) < 3:
+            mask = np.expand_dims(mask, axis=-1)
+        masks.append(mask)
+    if masks:
+        masks = np.stack(masks, axis=-1)
+    else:
+        masks = np.zeros((height, width, 0), dtype=np.uint8)
+    masks = (masks * np.asarray(labels, dtype=np.uint8)).max(axis=-1)
+    mask = np.squeeze(masks)
+
+    image = Image.frombytes('L', (width, height), mask.tostring())
+    image.save(path_to_mask)
+
+    return mask
+
 
 class MSCocoSegmentationConverter(MSCocoDetectionConverter):
     __provider__ = 'mscoco_segmentation'
     annotation_types = (CoCoInstanceSegmentationAnnotation, )
+
+    @classmethod
+    def parameters(cls):
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
+            'semantic_only': BoolField(
+                optional=True, default=False, description="Semantic segmentation only mode."
+            ),
+            'masks_dir': PathField(
+                is_directory=True, optional=True,
+                check_exists=False,
+                default='./segmentation_masks',
+                description='path to segmentation masks, used if semantic_only is True'
+            ),
+        })
+        return configuration_parameters
+
+    def configure(self):
+        super().configure()
+        self.semantic_only = self.get_value_from_config('semantic_only')
+        self.masks_dir = self.get_value_from_config('masks_dir')
 
     def _create_representations(
             self, image_info, annotations, label_id_to_label, check_content, progress_callback, progress_interval
@@ -270,13 +332,27 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
         num_iterations = len(image_info)
         progress_reporter = PrintProgressReporter(print_interval=progress_interval)
         progress_reporter.reset(num_iterations, 'annotations')
+        if self.semantic_only:
+            if not self.masks_dir.exists():
+                self.masks_dir.mkdir()
+                warning('Segmentation masks will be located in {} folder'.format(str(self.masks_dir.resolve())))
 
         for (image_id, image) in enumerate(image_info):
             image_labels, _, _, _, _, is_crowd, segmentations = self._read_image_annotation(
                 image, annotations,
                 label_id_to_label
             )
-            annotation = CoCoInstanceSegmentationAnnotation(image[1], segmentations, image_labels)
+
+            if not self.semantic_only:
+                annotation = CoCoInstanceSegmentationAnnotation(image[1], segmentations, image_labels)
+            else:
+                h, w, _ = image[2]
+                mask_file = self.masks_dir / "{:012}.png".format(image[0])
+                make_segmentation_mask(h, w, mask_file, image_labels, segmentations)
+                annotation = SegmentationAnnotation(image[1],
+                                                    str(mask_file.relative_to(self.masks_dir.parent)),
+                                                    mask_loader=GTMaskLoader.PILLOW)
+
             if check_content:
                 image_full_path = self.images_dir / image[1]
                 if not check_file_existence(image_full_path):

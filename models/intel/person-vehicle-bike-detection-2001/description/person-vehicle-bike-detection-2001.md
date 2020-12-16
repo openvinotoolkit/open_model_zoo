@@ -23,8 +23,6 @@ Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve.
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x384x384] - An input image in the format [BxCxHxW],

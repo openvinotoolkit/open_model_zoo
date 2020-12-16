@@ -23,8 +23,6 @@ Average Precision (AP) is defined as an area under the
 curve. All numbers were evaluated by taking into account only faces bigger than
 64 x 64 pixels.
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x640x640] - An input image in the format [BxCxHxW],
@@ -47,7 +45,7 @@ Expected color order: BGR.
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
     - `conf` - confidence for the predicted class
 2. The `labels` is a blob with the shape [N], where N is the number of detected
-   bounding boxes. It contains `label` per each detected box.
+   bounding boxes. It contains `label` (0 - face) per each detected box.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -24,32 +24,15 @@ if (NOT(BIN_FOLDER))
     set (BIN_FOLDER ${ARCH})
 endif()
 
-if (NOT(IE_MAIN_SOURCE_DIR))
-    # in case if samples are built out of IE repo
-    set (IE_MAIN_SAMPLES_DIR ${CMAKE_CURRENT_BINARY_DIR})
-else()
-    # in case if samples are built from IE repo
-    set (IE_MAIN_SAMPLES_DIR ${IE_MAIN_SOURCE_DIR})
-endif()
-
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
-if(NOT(UNIX))
-    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (CMAKE_LIBRARY_PATH ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (CMAKE_PDB_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (LIBRARY_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_DIRECTORY}) # compatibility issue: linux uses LIBRARY_OUTPUT_PATH, windows uses LIBRARY_OUTPUT_DIRECTORY
-else ()
-    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE}/lib)
-    set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE}/lib)
-    set (CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE})
-    set (CMAKE_PDB_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE})
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE})
-    set (LIBRARY_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE}/lib)
-    set (LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_DIRECTORY}/lib)
+
+foreach(artifact IN ITEMS ARCHIVE COMPILE_PDB LIBRARY PDB RUNTIME)
+    set("CMAKE_${artifact}_OUTPUT_DIRECTORY" "${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER}/$<CONFIG>")
+endforeach()
+
+if(UNIX)
+    string(APPEND CMAKE_LIBRARY_OUTPUT_DIRECTORY "/lib")
+    string(APPEND CMAKE_ARCHIVE_OUTPUT_DIRECTORY "/lib")
 endif()
 
 if (WIN32)
@@ -62,22 +45,13 @@ if (WIN32)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc") #no asynchronous structured exception handling
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
 
-    if (TREAT_WARNING_AS_ERROR)
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX") #treating warnings as errors
-    endif ()
-
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251 /wd4275 /wd4267") #disable some warnings
     endif()
-else()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror") #treating warnings as errors
-    if (APPLE)
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=unused-command-line-argument")
-    elseif(UNIX)
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wuninitialized -Winit-self")
-        if(NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmaybe-uninitialized")
-        endif()
+elseif(UNIX)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wuninitialized -Winit-self")
+    if(NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmaybe-uninitialized")
     endif()
 endif()
 
@@ -101,11 +75,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
 endif()
 
 add_subdirectory(common)
-
-# samples build can be switched off during whole IE build
-if (IE_MAIN_SOURCE_DIR AND NOT ENABLE_SAMPLES)
-    return()
-endif()
 
 function(add_samples_to_build)
     # check each passed sample subdirectory
@@ -214,7 +183,7 @@ list(REMOVE_ITEM samples_dirs common thirdparty)
 add_samples_to_build(${samples_dirs})
 
 if(ENABLE_PYTHON)
-    find_package(PythonInterp 3.5 REQUIRED)
+    find_package(PythonInterp 3.6 REQUIRED)
     find_package(PythonLibs "${PYTHON_VERSION_STRING}" EXACT REQUIRED)
 
     execute_process(

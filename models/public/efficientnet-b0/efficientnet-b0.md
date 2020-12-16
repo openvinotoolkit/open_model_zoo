@@ -8,8 +8,6 @@ This model was pretrained in TensorFlow\*.
 All the EfficientNet models have been pretrained on the ImageNet\* image database.
 For details about this family of models, check out the [TensorFlow Cloud TPU repository](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet).
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -25,8 +23,6 @@ For details about this family of models, check out the [TensorFlow Cloud TPU rep
 | ------ | -------------- | --------------- |
 | Top 1  | 75.70%          | 75.70%           |
 | Top 5  | 92.76%          | 92.76%           |
-
-## Performance
 
 ## Input
 
@@ -59,14 +55,14 @@ Channel order is `BGR`.
 Object classifier according to ImageNet classes, name - `logits`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in logits format
 
 ### Converted Model
 
 Object classifier according to ImageNet classes, name - `efficientnet-b0/model/head/dense/MatMul`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in logits format
 
 ## Legal Information
 

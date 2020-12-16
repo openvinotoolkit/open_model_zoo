@@ -17,28 +17,28 @@ description: >-
 task_type: human_pose_estimation
 files:
   - name: FP32/human-pose-estimation-0001.xml
-    size: 144190
-    sha256: 648215ffe9c7a8bff4c46a4203bd0e01b75caf898842222e5a4d5c4c4a761c47
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/human-pose-estimation-0001/FP32/human-pose-estimation-0001.xml
+    size: 145295
+    sha256: a7de7d9a50198badc8daffeb4aaca40cb945de6a91f0dc09458d677b463e6d5f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/human-pose-estimation-0001/FP32/human-pose-estimation-0001.xml
   - name: FP32/human-pose-estimation-0001.bin
     size: 16394712
     sha256: 6a277f9564dd7f296c84deefed785de2b43639ca1f0d03281367606033ba9aa6
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/human-pose-estimation-0001/FP32/human-pose-estimation-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/human-pose-estimation-0001/FP32/human-pose-estimation-0001.bin
   - name: FP16/human-pose-estimation-0001.xml
-    size: 144118
-    sha256: 1e7174267693b22c826c5f8ce997da0527c5c695996f9d7b5bbb2e9c361ef9c0
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/human-pose-estimation-0001/FP16/human-pose-estimation-0001.xml
+    size: 145223
+    sha256: 553a9e0b7d7039899bfbee6bde7e10b579132c0179b202e0dc686a5b8eb93e8b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/human-pose-estimation-0001/FP16/human-pose-estimation-0001.xml
   - name: FP16/human-pose-estimation-0001.bin
     size: 8197356
     sha256: c1c828d5d1ea2b03035692a8600f06d787fe1a20e79dac159c4293ed7063a382
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/human-pose-estimation-0001/FP16/human-pose-estimation-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/human-pose-estimation-0001/FP16/human-pose-estimation-0001.bin
   - name: FP16-INT8/human-pose-estimation-0001.xml
-    size: 434200
-    sha256: 1dec65f640865051f3daf2c91f6a37aecf5dee6939da5c0771fcce467566aeea
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/human-pose-estimation-0001/FP16-INT8/human-pose-estimation-0001.xml
+    size: 435357
+    sha256: c3a47de94906e6b3256eb16af7274141b2fc9f6c7889a02d96ef430b9bc321d3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/human-pose-estimation-0001/FP16-INT8/human-pose-estimation-0001.xml
   - name: FP16-INT8/human-pose-estimation-0001.bin
     size: 4170036
-    sha256: e0e996424edfd8b0435a0a5db8b66a2ebafc6435e7d963fb07276f19141fac9c
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/human-pose-estimation-0001/FP16-INT8/human-pose-estimation-0001.bin
+    sha256: fc7e9dde0f4a34876cfbbd266388a59526a8c8c1bc9394ce4827b7a007d20f82
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/human-pose-estimation-0001/FP16-INT8/human-pose-estimation-0001.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

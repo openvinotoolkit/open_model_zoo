@@ -14,9 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from functools import singledispatch
 from collections import OrderedDict, namedtuple
 from .postprocessor import Postprocessor
-from ..representation import QuestionAnsweringAnnotation, QuestionAnsweringPrediction
+from ..representation import (
+    QuestionAnsweringAnnotation, QuestionAnsweringPrediction,
+    QuestionAnsweringBiDAFAnnotation
+)
 from ..annotation_converters._nlp_common import WordPieceTokenizer
 from ..config import NumberField
 
@@ -181,3 +185,72 @@ class ExtractSQUADPrediction(Postprocessor):
 
         output_text = orig_text[orig_start_position:(orig_end_position + 1)]
         return output_text
+
+class ExtractSQUADPredictionBiDAF(Postprocessor):
+
+    __provider__ = 'bidaf_extract_answers_tokens'
+
+    annotation_types = (QuestionAnsweringBiDAFAnnotation, QuestionAnsweringAnnotation, )
+    prediction_types = (QuestionAnsweringPrediction, )
+
+    def process_image(self, annotation, prediction):
+        def _extended_check_indexes(start, end, context_word, words_idx_in_context):
+            if end >= len(context_word):
+                return False
+            if start >= len(words_idx_in_context) or end >= len(words_idx_in_context):
+                return False
+            if end < start:
+                return False
+            return True
+
+        def _get_text(raw_text, indexes, start, end, end_length):
+            return raw_text[indexes[start]:indexes[end] + end_length]
+
+        @singledispatch
+        def get_annotation_params(entry):
+            return None, None, None
+
+        @get_annotation_params.register(QuestionAnsweringBiDAFAnnotation)
+        def _(entry):
+            context = entry.context
+            context_word = list(entry.context_word.reshape(-1))
+            words_idx_in_context = entry.words_idx_in_context
+
+            return context, context_word, words_idx_in_context
+
+        @get_annotation_params.register(QuestionAnsweringAnnotation)
+        def _(entry):
+            def _get_tokens_indexes_in_context(context, words):
+                indexes = []
+                rem = context.lower()
+                offset = 0
+                for w in words:
+                    idx = rem.find(w)
+                    assert idx >= 0
+                    indexes.append(idx + offset)
+                    offset += idx + len(w)
+                    rem = rem[idx + len(w):]
+                return indexes
+
+            context = entry.paragraph_text
+            context_word = entry.tokens
+            words_idx_in_context = _get_tokens_indexes_in_context(context, context_word)
+
+            return context, context_word, words_idx_in_context
+
+
+        for annotation_, prediction_ in zip(annotation, prediction):
+            start_index = prediction_.start_index
+            end_index = prediction_.end_index
+            context, context_word, words_idx_in_context = get_annotation_params(annotation_)
+            tokens = []
+            if _extended_check_indexes(start_index, end_index, context_word, words_idx_in_context):
+                end_length = len(context_word[end_index])
+                tok_text = _get_text(context, words_idx_in_context,
+                                     start_index, end_index, end_length)
+                tokens.append(tok_text)
+            else:
+                tokens.append("")
+            prediction_.tokens = tokens
+
+        return annotation, prediction

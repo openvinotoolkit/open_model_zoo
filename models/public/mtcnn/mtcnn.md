@@ -34,8 +34,6 @@ The model output is a blob with a vector containing the first pass of face data.
 | MParams           | 0.007         |
 
 
-### Performance
-
 ### Input
 
 #### Original model
@@ -88,8 +86,6 @@ The model output is a blob with a vector containing the refined face data. If th
 | MParams           | 0.1           |
 
 
-### Performance
-
 ### Input
 
 #### Original model
@@ -141,8 +137,6 @@ The model output is a blob with a vector containing the output face data.
 | GFLOPs            | 0.026         |
 | MParams           | 0.389         |
 
-
-### Performance
 
 ### Input
 

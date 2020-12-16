@@ -110,7 +110,7 @@ def main():
     for time in tqdm(range(last_frame_idx + 1), 'Processing detections'):
         active_detections = get_detections_from_tracks(history, time)
         if check_contain_duplicates(active_detections):
-            log.info('Warning: at least one IDs collision has occured at the timestamp ' + str(time))
+            log.info('Warning: at least one IDs collision has occurred at the timestamp ' + str(time))
         gt_detections = get_detections_from_tracks(gt_tracks, time)
 
         for i, camera_gt_detections in enumerate(gt_detections):

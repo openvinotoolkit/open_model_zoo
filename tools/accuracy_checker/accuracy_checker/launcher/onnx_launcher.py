@@ -141,6 +141,8 @@ class ONNXLauncher(Launcher):
             return data.astype(input_precision)
         if len(np.shape(data)) == 5 and len(layout) == 5:
             return np.transpose(data, layout).astype(input_precision)
+        if len(np.shape(data))-1 == len(layer_shape):
+            return np.array(data[0]).astype(input_precision)
         return np.array(data).astype(input_precision)
 
     def predict_async(self, *args, **kwargs):

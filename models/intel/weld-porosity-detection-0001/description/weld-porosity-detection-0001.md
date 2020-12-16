@@ -19,8 +19,6 @@ This is a porosity weld recognition model. It runs on a video stream capturing w
 | Source framework                | PyTorch\*                                 |
 
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x224x224] - An input image in the format [BxCxHxW],

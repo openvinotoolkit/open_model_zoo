@@ -18,7 +18,7 @@ import numpy as np
 from ..adapters import AdapterField
 from ..config import ConfigValidator, StringField, ListField, ConfigError, InputField, ListInputsField
 from ..dependency import ClassProvider
-from ..utils import get_parameter_value_from_config
+from ..utils import get_parameter_value_from_config, contains_all
 
 
 class LauncherConfigValidator(ConfigValidator):
@@ -37,12 +37,17 @@ class LauncherConfigValidator(ConfigValidator):
         super().validate(entry, field_uri)
         inputs = entry.get('inputs')
         count_non_const_inputs = 0
+        required_input_params = ['type', 'name']
         if inputs:
             inputs_by_type = {input_type: [] for input_type in InputField.INPUTS_TYPES}
             for input_layer in inputs:
+                if not contains_all(input_layer, required_input_params):
+                    raise ConfigError('fields: {} are required for all input configurations'.format(
+                        ', '.join(required_input_params)))
                 input_type = input_layer['type']
+                if input_type not in InputField.INPUTS_TYPES:
+                    raise ConfigError('undefined input type {}'.format(input_type))
                 inputs_by_type[input_type].append(input_layer['name'])
-
                 if input_type == 'INPUT':
                     input_value = input_layer.get('value')
                     if not input_value and count_non_const_inputs:
@@ -71,6 +76,7 @@ class Launcher(ClassProvider):
         self.const_inputs = self.config.get('_list_const_inputs', [])
         self.image_info_inputs = self.config.get('_list_image_infos', [])
         self._lstm_inputs = self.config.get('_list_lstm_inputs', [])
+        self._ignore_inputs = self.config.get('_list_ignore_inputs', [])
 
     @classmethod
     def parameters(cls):
@@ -96,6 +102,12 @@ class Launcher(ClassProvider):
             ),
             '_list_lstm_inputs': ListField(
                 allow_empty=True, optional=True, default=[], description="List of lstm inputs."
+            ),
+            '_list_ignore_inputs': ListField(
+                allow_empty=True, optional=True, default=[], description='List of ignored inputs'
+            ),
+            '_input_precision': ListField(
+                allow_empty=True, optional=True, default=[], description='Input precision list from command line.'
             )
         }
 
@@ -150,8 +162,11 @@ class Launcher(ClassProvider):
     def inputs_info_for_meta(self):
         return {
             layer_name: shape for layer_name, shape in self.inputs.items()
-            if layer_name not in self.const_inputs + self.image_info_inputs
+            if layer_name not in self.const_inputs + self.image_info_inputs + self._ignore_inputs
         }
+
+    def update_input_configuration(self, input_config):
+        self.config['inputs'] = input_config
 
     @property
     def name(self):

@@ -82,7 +82,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         // ------------------------------ Parsing and validating of input arguments --------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {

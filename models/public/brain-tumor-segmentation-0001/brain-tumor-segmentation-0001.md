@@ -6,8 +6,6 @@ This model was created for participation in the [Brain Tumor Segmentation Challe
 The model is based on [the corresponding paper](https://arxiv.org/abs/1810.04008), where authors present deep cascaded approach for automatic brain tumor segmentation. The paper describes modifications to 3D UNet architecture and specific augmentation strategy to efficiently handle multimodal MRI input. Besides this, the approach to enhance segmentation quality with context obtained from models of the same topology operating on downscaled data is introduced.
 Each input modality has its own encoder which are later fused together to produce single output segmentation.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -35,8 +33,6 @@ The following accuracy metrics are measured on a `brain tumor` training subset o
 
 See [the original repository](https://github.com/lachinov/brats2018-graphlabunn).
 
-
-## Performance
 
 ## Input
 

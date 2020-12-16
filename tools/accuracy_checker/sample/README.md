@@ -1,12 +1,12 @@
 # Sample
 
-In this sample we will go through typical steps required to evaluate DL topologies. 
+In this sample we will go through typical steps required to evaluate DL topologies.
 
 We will try to evaluate **SampLeNet** topology as an example.
 
 ### 1. Download and extract dataset
 
-In this sample we will use toy dataset which we refer to as *sample dataset*, which contains 10K images 
+In this sample we will use toy dataset which we refer to as *sample dataset*, which contains 10K images
 of 10 different classes (classification problem), which is actually CIFAR10 dataset converted to PNG (image conversion will be done automatically in evaluation process)
 
 You can download original CIFAR10 dataset from [official website](https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz).
@@ -40,7 +40,7 @@ Now try edit config, to run SampLeNet on other device or framework (e.g. Caffe, 
 
 ###  Additional useful resources
 
-* <a href="https://github.com/opencv/open_model_zoo/blob/master/tools/accuracy_checker/sample/opencv_sample_config.yml">config</a>() for running SampleNet via [OpenCV launcher](../accuracy_checker/launcher/opencv_launcher_readme.md)
-* <a href="https://github.com/opencv/open_model_zoo/blob/master/tools/accuracy_checker/sample/sample_blob_config.yml">config</a> for running SampleNet using compiled executable network blob.
+* <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/master/tools/accuracy_checker/sample/opencv_sample_config.yml">config</a>() for running SampleNet via [OpenCV launcher](../accuracy_checker/launcher/opencv_launcher_readme.md)
+* <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/master/tools/accuracy_checker/sample/sample_blob_config.yml">config</a> for running SampleNet using compiled executable network blob.
 
 >**NOTE**: Not all Inference Engine plugins support compiled network blob execution.

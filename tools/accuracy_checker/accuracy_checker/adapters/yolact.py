@@ -17,7 +17,7 @@ limitations under the License.
 import cv2
 import numpy as np
 
-from ..config import StringField, NumberField
+from ..config import StringField, NumberField, ConfigError
 from ..postprocessor import NMS
 from ..representation import DetectionPrediction, CoCocInstanceSegmentationPrediction, ContainerPrediction
 from ..utils import UnsupportedPackage
@@ -35,9 +35,10 @@ class YolactAdapter(Adapter):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'loc_out': StringField(description='name of output with box locations'),
+            'boxes_out': StringField(description='name of output with decoded boxes', optional=True),
+            'loc_out': StringField(description='name of output with box locations', optional=True),
             'conf_out': StringField(description='name of output with confidence scores'),
-            'prior_out': StringField(description='name of output with prior boxes'),
+            'prior_out': StringField(description='name of output with prior boxes', optional=True),
             'mask_out': StringField(description='name of output with masks'),
             'proto_out': StringField(description='name of output with proto for masks calculation'),
             'confidence_threshold':  NumberField(
@@ -56,21 +57,25 @@ class YolactAdapter(Adapter):
         self.loc_out = self.get_value_from_config('loc_out')
         self.conf_out = self.get_value_from_config('conf_out')
         self.prior_out = self.get_value_from_config('prior_out')
+        self.boxes_out = self.get_value_from_config('boxes_out')
         self.mask_out = self.get_value_from_config('mask_out')
         self.proto_out = self.get_value_from_config('proto_out')
         self.conf_thresh = self.get_value_from_config('confidence_threshold')
         self.max_num_detections = self.get_value_from_config('max_detections')
+        if not self.loc_out and not self.prior_out and not self.boxes_out:
+            raise ConfigError('loc_out and prior_out or boxes_out should be provided')
+        if not self.boxes_out and not (self.prior_out and self.loc_out):
+            raise ConfigError('both loc_out and prior_out should be provided')
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        prior_boxes = raw_outputs[self.prior_out]
         result = []
-        for identifier, locs, conf, masks, proto, meta in zip(
-                identifiers, raw_outputs[self.loc_out], raw_outputs[self.conf_out],
+        for batch_id, (identifier, conf, masks, proto, meta) in enumerate(zip(
+                identifiers, raw_outputs[self.conf_out],
                 raw_outputs[self.mask_out], raw_outputs[self.proto_out], frame_meta
-        ):
+        )):
             h, w, _ = meta['image_size']
-            boxes = self.decode_boxes(locs, prior_boxes)
+            boxes = self.get_boxes(batch_id, raw_outputs)
             conf = np.transpose(conf)
             cur_scores = conf[1:, :]
             conf_scores = np.max(cur_scores, axis=0)
@@ -177,6 +182,15 @@ class YolactAdapter(Adapter):
         boxes[:, :2] -= boxes[:, 2:] / 2
         boxes[:, 2:] += boxes[:, :2]
 
+        return boxes
+
+    def get_boxes(self, batch_id, raw_outputs):
+        if self.boxes_out:
+            boxes = raw_outputs[self.boxes_out][batch_id]
+        else:
+            prior_boxes = raw_outputs[self.prior_out]
+            locs = raw_outputs[self.loc_out][batch_id]
+            boxes = self.decode_boxes(locs, prior_boxes)
         return boxes
 
     @staticmethod

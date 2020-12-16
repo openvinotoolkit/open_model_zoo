@@ -6,8 +6,6 @@ YOLO v3 Tiny is a real-time object detection model implemented with Keras\* from
 
 ## Conversion
 
-## Conversion
-
 1. Download or clone the original [repository](https://github.com/david8862/keras-YOLOv3-model-set) (tested on `d38c3d8` commit).
 2. Use the following commands to get original model (named `yolov3_tiny` in repository) and convert it to Keras\* format (see details in the [README.md](https://github.com/david8862/keras-YOLOv3-model-set/blob/d38c3d865f7190ee9b19a30e91f2b750a31320c1/README.md)  file in the official repository):
 
@@ -18,7 +16,7 @@ YOLO v3 Tiny is a real-time object detection model implemented with Keras\* from
 
    2. Convert model weights to Keras\*:
         ```
-        python tools/model_converter/convert.py cfg/yolov3.cfg weights/yolov3-tiny.weights weights/yolov3-tiny.h5
+        python tools/model_converter/convert.py cfg/yolov3-tiny.cfg weights/yolov3-tiny.weights weights/yolov3-tiny.h5
         ```
 3. Convert model to protobuf:
     ```
@@ -42,7 +40,7 @@ Accuracy metrics obtained on COCO\* validation dataset for converted model.
 | Metric | Value |
 | ------ | ------|
 | mAP    | 35.9% |
-| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 39.7% |
+| [COCO\* mAP](https://cocodataset.org/#detection-eval) | 39.7% |
 
 ## Input
 

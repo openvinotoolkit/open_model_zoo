@@ -33,6 +33,7 @@ from .detection_representation import (
 from .reid_representation import (
     ReIdentificationAnnotation,
     ReIdentificationClassificationAnnotation,
+    PlaceRecognitionAnnotation,
     ReIdentificationPrediction
 )
 from .segmentation_representation import (
@@ -44,6 +45,8 @@ from .segmentation_representation import (
     CoCoInstanceSegmentationAnnotation,
     CoCocInstanceSegmentationPrediction,
     OAR3DTilingSegmentationAnnotation,
+    SalientRegionAnnotation,
+    SalientRegionPrediction
 )
 from .character_recognition_representation import (
     CharacterRecognition,
@@ -77,7 +80,8 @@ from .nlp_representation import (
     QuestionAnsweringEmbeddingPrediction,
     TextClassificationAnnotation,
     LanguageModelingAnnotation,
-    LanguageModelingPrediction
+    LanguageModelingPrediction,
+    QuestionAnsweringBiDAFAnnotation
 )
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
 from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
@@ -85,6 +89,12 @@ from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
 from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPrediction
 from .image_processing import ImageProcessingAnnotation, ImageProcessingPrediction
 from .quality_assessment import QualityAssessmentAnnotation, QualityAssessmentPrediction
+from .dna_sequence import DNASequenceAnnotation, DNASequencePrediction
+
+from .raw_representation import RawTensorAnnotation, RawTensorPrediction
+
+from .optical_flow import OpticalFlowAnnotation, OpticalFlowPrediction
+
 __all__ = [
     'BaseRepresentation',
 
@@ -104,11 +114,15 @@ __all__ = [
 
     'ReIdentificationAnnotation',
     'ReIdentificationClassificationAnnotation',
+    'PlaceRecognitionAnnotation',
     'ReIdentificationPrediction',
 
     'SegmentationRepresentation',
     'SegmentationAnnotation',
     'SegmentationPrediction',
+
+    'SalientRegionAnnotation',
+    'SalientRegionPrediction',
 
     'BrainTumorSegmentationAnnotation',
     'BrainTumorSegmentationPrediction',
@@ -165,12 +179,23 @@ __all__ = [
     'QuestionAnsweringPrediction',
     'QuestionAnsweringEmbeddingAnnotation',
     'QuestionAnsweringEmbeddingPrediction',
+    'QuestionAnsweringBiDAFAnnotation',
     'TextClassificationAnnotation',
     'LanguageModelingAnnotation',
     'LanguageModelingPrediction',
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',
+
     'QualityAssessmentAnnotation',
     'QualityAssessmentPrediction',
+
+    'DNASequenceAnnotation',
+    'DNASequencePrediction',
+
+    'RawTensorAnnotation',
+    'RawTensorPrediction',
+
+    'OpticalFlowAnnotation',
+    'OpticalFlowPrediction',
 ]

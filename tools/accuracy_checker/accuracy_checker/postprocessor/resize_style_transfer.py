@@ -46,6 +46,8 @@ class ResizeStyleTransfer(Postprocessor):
 
     def process_image(self, annotation, prediction):
         for target in annotation:
+            if target is None:
+                continue
             data = Image.fromarray(target.value)
             data = data.resize((self.dst_width, self.dst_height), Image.BICUBIC)
             target.value = np.array(data)

@@ -15,11 +15,12 @@ limitations under the License.
 """
 
 from collections import OrderedDict
+import warnings
 
 from ..utils import read_json, read_txt, check_file_existence
 from ..representation import ClassificationAnnotation
 from ..data_readers import ClipIdentifier
-from ..config import PathField, NumberField, StringField, BoolField
+from ..config import PathField, NumberField, StringField, BoolField, ConfigError
 
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
@@ -50,7 +51,11 @@ class ActionRecognitionConverter(BaseFormatConverter):
             'dataset_meta_file': PathField(
                 description='path to json file with dataset meta (e.g. label_map)', optional=True
             ),
-            'numpy_input': BoolField(description='use numpy arrays instead of images', optional=True, default=False),
+            'numpy_input': BoolField(description='use numpy arrays as input', optional=True, default=False),
+            'two_stream_input': BoolField(description='use two streams: images and numpy arrays as input',
+                                          optional=True, default=False),
+            'image_subpath': StringField(description="sub-directory for images", optional=True),
+            'numpy_subpath': StringField(description="sub-directory for numpy arrays", optional=True),
             'num_samples': NumberField(
                 description='number of samples used for annotation', optional=True, value_type=int, min_value=1
             )
@@ -67,11 +72,38 @@ class ActionRecognitionConverter(BaseFormatConverter):
         self.subset = self.get_value_from_config('subset')
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
         self.numpy_input = self.get_value_from_config('numpy_input')
+        self.two_stream_input = self.get_value_from_config('two_stream_input')
+        self.numpy_subdir = self.get_value_from_config('numpy_subpath')
+        self.image_subdir = self.get_value_from_config('image_subpath')
         self.num_samples = self.get_value_from_config('num_samples')
+
+        if self.numpy_subdir and (self.numpy_input or
+                                  self.two_stream_input) and not (self.data_dir / self.numpy_subdir).exists():
+            raise ConfigError('Please check numpy_subpath or data_dir. '
+                              'Path {} does not exist'.format(self.data_dir / self.numpy_subdir))
+
+        if self.image_subdir and (not self.numpy_input or
+                                  self.two_stream_input) and not (self.data_dir / self.image_subdir).exists():
+            raise ConfigError('Please check image_subpath or data_dir. '
+                              'Path {} does not exist'.format(self.data_dir / self.image_subdir))
+
+        if self.two_stream_input:
+            if not self.numpy_subdir:
+                raise ConfigError('numpy_subpath should be provided in case of using two streams')
+
+            if not self.image_subdir:
+                raise ConfigError('image_subpath should be provided in case of using two streams')
+        else:
+            if self.numpy_input and self.numpy_subdir:
+                warnings.warn("numpy_subpath is provided. "
+                              "Make sure that data_source is {}".format(self.data_dir / self.numpy_subdir))
+            if not self.numpy_input and self.image_subdir:
+                warnings.warn("image_subpath is provided. "
+                              "Make sure that data_source is {}".format(self.data_dir / self.image_subdir))
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         full_annotation = read_json(self.annotation_file, object_pairs_hook=OrderedDict)
-        data_ext = 'jpg' if not self.numpy_input else 'npy'
+        data_ext, data_dir = self.get_ext_and_dir()
         label_map = dict(enumerate(full_annotation['labels']))
         if self.dataset_meta:
             dataset_meta = read_json(self.dataset_meta)
@@ -83,41 +115,13 @@ class ActionRecognitionConverter(BaseFormatConverter):
         video_names, annotations = self.get_video_names_and_annotations(full_annotation['database'], self.subset)
         class_to_idx = {v: k for k, v in label_map.items()}
 
-        videos = []
-        for video_name, annotation in zip(video_names, annotations):
-            video_path = self.data_dir / video_name
-            if not video_path.exists():
-                continue
-
-            n_frames_file = video_path / 'n_frames'
-            n_frames = (
-                int(read_txt(n_frames_file)[0].rstrip('\n\r')) if n_frames_file.exists()
-                else len(list(video_path.glob('*.{}'.format(data_ext))))
-            )
-            if n_frames <= 0:
-                continue
-
-            begin_t = 1
-            end_t = n_frames
-            sample = {
-                'video': video_path,
-                'video_name': video_name,
-                'segment': [begin_t, end_t],
-                'n_frames': n_frames,
-                'video_id': video_name,
-                'label': class_to_idx[annotation['label']]
-            }
-
-            videos.append(sample)
-            if self.num_samples and len(videos) == self.num_samples:
-                break
-
+        videos = self.get_videos(video_names, annotations, class_to_idx, data_dir, data_ext)
         videos = sorted(videos, key=lambda v: v['video_id'].split('/')[-1])
 
         clips = []
         for video in videos:
-            for clip in self.get_clips(video, self.clips_per_video, self.clip_duration, self.temporal_stride, data_ext):
-                clips.append(clip)
+            clips.extend(self.get_clips(video, self.clips_per_video,
+                                        self.clip_duration, self.temporal_stride, data_ext))
 
         annotations = []
         num_iterations = len(clips)
@@ -125,43 +129,108 @@ class ActionRecognitionConverter(BaseFormatConverter):
         for clip_idx, clip in enumerate(clips):
             if progress_callback is not None and clip_idx % progress_interval:
                 progress_callback(clip_idx * 100 / num_iterations)
-            identifier = ClipIdentifier(clip['video_name'], clip_idx, clip['frames'])
+            identifier = []
+            for ext in data_ext:
+                identifier.append(ClipIdentifier(clip['video_name'], clip_idx, clip['frames_{}'.format(ext)]))
             if check_content:
-                content_errors.extend([
-                    '{}: does not exist'.format(self.data_dir / frame)
-                    for frame in clip['frames'] if not check_file_existence(self.data_dir / frame)
-                ])
+                for ext, dir_ in zip(data_ext, data_dir):
+                    content_errors.extend([
+                        '{}: does not exist'.format(dir_ / frame)
+                        for frame in clip['frames_{}'.format(ext)] if not check_file_existence(dir_ / frame)
+                    ])
+            if len(identifier) == 1:
+                identifier = identifier[0]
+
             annotations.append(ClassificationAnnotation(identifier, clip['label']))
 
         return ConverterReturn(annotations, {'label_map': label_map}, content_errors)
 
+    def get_ext_and_dir(self):
+        if self.two_stream_input:
+            return ['jpg', 'npy'], [self.data_dir / self.image_subdir, self.data_dir / self.numpy_subdir]
+
+        if self.numpy_input:
+            return ['npy'], [self.data_dir / self.numpy_subdir if self.numpy_subdir else self.data_dir]
+
+        return ['jpg'], [self.data_dir / self.image_subdir if self.image_subdir else self.data_dir]
+
+    def get_videos(self, video_names, annotations, class_to_idx, data_dir, data_ext):
+        videos = []
+        for video_name, annotation in zip(video_names, annotations):
+            video_info = {
+                'video_name': video_name,
+                'video_id': video_name,
+                'label': class_to_idx[annotation['label']]
+            }
+            for dir_, ext in zip(data_dir, data_ext):
+                video_path = dir_ / video_name
+                if not video_path.exists():
+                    video_info.clear()
+                    continue
+
+                n_frames_file = video_path / 'n_frames'
+                n_frames = (
+                    int(read_txt(n_frames_file)[0].rstrip('\n\r')) if n_frames_file.exists()
+                    else len(list(video_path.glob('*.{}'.format(ext))))
+                )
+                if n_frames <= 0:
+                    video_info.clear()
+                    continue
+
+                begin_t = 1
+                end_t = n_frames
+                sample = {
+                    'video_{}'.format(ext): video_path,
+                    'segment_{}'.format(ext): [begin_t, end_t],
+                    'n_frames_{}'.format(ext): n_frames,
+                }
+                video_info.update(sample)
+
+            if video_info:
+                videos.append(video_info)
+            if self.num_samples and len(videos) == self.num_samples:
+                break
+        return videos
+
     @staticmethod
     def get_clips(video, clips_per_video, clip_duration, temporal_stride=1, file_ext='jpg'):
-        shift = int(file_ext == 'npy')
-        num_frames = video['n_frames'] - shift
         clip_duration *= temporal_stride
+        frames_ext = {}
+        for ext in file_ext:
+            frames = []
+            shift = int(ext == 'npy')
+            num_frames = video['n_frames_{}'.format(ext)] - shift
 
-        if clips_per_video == 0:
-            step = clip_duration
-        else:
-            step = max(1, (num_frames - clip_duration) // (clips_per_video - 1))
+            if clips_per_video == 0:
+                step = clip_duration
+            else:
+                step = max(1, (num_frames - clip_duration) // (clips_per_video - 1))
+            for clip_start in range(1, 1 + clips_per_video * step, step):
+                clip_end = min(clip_start + clip_duration, num_frames + 1)
 
-        for clip_start in range(1, 1 + clips_per_video * step, step):
-            clip_end = min(clip_start + clip_duration, num_frames + 1)
+                clip_idxs = list(range(clip_start, clip_end))
 
-            clip_idxs = list(range(clip_start, clip_end))
+                if not clip_idxs:
+                    return []
 
-            if not clip_idxs:
-                return
+                # loop clip if it is shorter than clip_duration
+                while len(clip_idxs) < clip_duration:
+                    clip_idxs = (clip_idxs * 2)[:clip_duration]
 
-            # loop clip if it is shorter than clip_duration
-            while len(clip_idxs) < clip_duration:
-                clip_idxs = (clip_idxs * 2)[:clip_duration]
+                frames_idx = clip_idxs[::temporal_stride]
+                frames.append(['image_{:05d}.{}'.format(frame_idx, ext) for frame_idx in frames_idx])
+            frames_ext.update({
+                ext: frames
+            })
 
-            clip = dict(video)
-            frames_idx = clip_idxs[::temporal_stride]
-            clip['frames'] = ['image_{:05d}.{}'.format(frame_idx, file_ext) for frame_idx in frames_idx]
-            yield clip
+        clips = []
+        for key, value in frames_ext.items():
+            if not clips:
+                for _ in range(len(value)):
+                    clips.append(dict(video))
+            for val, clip in zip(value, clips):
+                clip['frames_{}'.format(key)] = val
+        return clips
 
     @staticmethod
     def get_video_names_and_annotations(data, subset):

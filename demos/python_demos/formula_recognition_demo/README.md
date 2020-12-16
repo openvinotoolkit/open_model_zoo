@@ -10,10 +10,10 @@ The demo application expects an im2latex model that is split into two parts. Eve
 
 The First model is Encoder which extracts features from an image and prepares first steps of the decoder.
 
-* One input is `imgs` for input image 
+* One input is `imgs` for input image
 * Four outputs are:
     * Row encoding out (`row_enc_out`) extracts features from the image
-    * `hidden` and 
+    * `hidden` and
     * `context` are intermediate states of the LSTM
     * `init_0` - first state of the encoder
 
@@ -32,7 +32,7 @@ The demo workflow is the following:
 1. The demo application reads a single image or iterates over all images in the given folder, then crops or resizes and inputs to fit into the input image blob of the network (`imgs`). Crop and pad is used to keep size of the font.
 2. For each image, encoder extracts features from the image
 3. While length of the current formula is less then `--max_formula_len` or current token is not `END_TOKEN` Decode Step produces new tokens.
-5. The demo prints the decoded text into the console or in a file if `-o` parameter specified. 
+5. The demo prints the decoded text into the console or in a file if `-o` parameter specified.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
@@ -130,7 +130,7 @@ Options:
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

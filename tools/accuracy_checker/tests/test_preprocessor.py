@@ -193,7 +193,7 @@ class TestAutoResize:
 
         input_data = np.zeros((100, 100, 3))
         input_rep = DataRepresentation(input_data)
-        expoected_meta = {
+        expected_meta = {
                     'preferable_width': 200,
                     'preferable_height':200,
                     'image_info': [200, 200, 1],
@@ -207,7 +207,7 @@ class TestAutoResize:
         assert resize.dst_width == 200
         assert resize.dst_height == 200
         cv2_resize_mock.assert_called_once_with(input_data, (200, 200))
-        for key, value in expoected_meta.items():
+        for key, value in expected_meta.items():
             assert key in input_rep.metadata
             assert input_rep.metadata[key] == value
 
@@ -216,10 +216,9 @@ class TestAutoResize:
         with pytest.raises(ConfigError):
             Preprocessor.provide('auto_resize', {'type': 'auto_resize'})(DataRepresentation(input_mock))
 
-    def test_auto_resize_with_several_input_shapes_raise_config_error(self):
+    def test_auto_resize_with_non_image_input_raise_config_error(self):
         with pytest.raises(ConfigError):
-            Preprocessor.provide('auto_resize', {'type': 'auto_resize'}).set_input_shape({'data': [1, 3, 200, 200], 'data2': [1, 3, 300, 300]})
-
+            Preprocessor.provide('auto_resize', {'type': 'auto_resize'}).set_input_shape({'im_info': [200, 200, 1]})
 
     def test_auto_resize_empty_input_shapes_raise_config_error(self):
         with pytest.raises(ConfigError):

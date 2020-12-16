@@ -86,7 +86,7 @@ std::vector<std::vector<unsigned>> topResults(Blob& inputBlob, unsigned numTop) 
     TBlob<float>& tblob = dynamic_cast<TBlob<float>&>(inputBlob);
     size_t batchSize =  tblob.getTensorDesc().getDims()[0];
     numTop = static_cast<unsigned>(std::min<size_t>(size_t(numTop), tblob.size()));
-    
+
     std::vector<std::vector<unsigned>> output(batchSize);
     for (size_t i = 0; i < batchSize; i++) {
         size_t offset = i * (tblob.size() / batchSize);
@@ -100,13 +100,13 @@ std::vector<std::vector<unsigned>> topResults(Blob& inputBlob, unsigned numTop) 
 
         output[i].assign(indices.begin(), indices.begin() + numTop);
     }
-    
+
     return output;
 }
 
 int main(int argc, char *argv[]) {
     try {
-        std::cout << "InferenceEngine: " << *GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
             std::map<std::string, unsigned> classIndicesMap;
             std::ifstream inputGtFile(FLAGS_gt);
             if (!inputGtFile.is_open()) throw std::runtime_error("Can't open the ground truth file.");
-            
+
             std::string line;
             while (std::getline(inputGtFile, line))
             {
@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
         }
         if (inputShape[2] != inputShape[3]) {
             throw std::logic_error("Model input has incorrect image shape. Must be NxN square."
-                                   " Got " + std::to_string(inputShape[2]) + 
+                                   " Got " + std::to_string(inputShape[2]) +
                                    "x" + std::to_string(inputShape[3]) + ".");
         }
         int modelInputResolution = inputShape[2];
@@ -324,12 +324,12 @@ int main(int argc, char *argv[]) {
             inferRequests.push_back(executableNetwork.CreateInferRequest());
         }
         // ---------------------------------------------------------------------------------------------------
-        
+
         // ----------------------------------------Create output info-----------------------------------------
         Presenter presenter(FLAGS_u, 0);
         int width;
         int height;
-        std::vector<std::string> gridMatRowsCols = split(FLAGS_res, 'x');        
+        std::vector<std::string> gridMatRowsCols = split(FLAGS_res, 'x');
         if (gridMatRowsCols.size() != 2) {
             throw std::runtime_error("The value of GridMat resolution flag is not valid.");
         } else {
@@ -338,7 +338,7 @@ int main(int argc, char *argv[]) {
         }
         GridMat gridMat(presenter, cv::Size(width, height));
         // ---------------------------------------------------------------------------------------------------
-        
+
         // -----------------------------Prepare variables and data for main loop------------------------------
         typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
         double avgFPS = 0;
@@ -353,7 +353,7 @@ int main(int argc, char *argv[]) {
         std::condition_variable condVar;
         std::mutex mutex;
         std::exception_ptr irCallbackException;
-        
+
         std::queue<InferRequestInfo> emptyInferRequests;
         std::queue<InferRequestInfo> completedInferRequests;
         for (std::size_t i = 0; i < inferRequests.size(); i++) {
@@ -363,7 +363,7 @@ int main(int argc, char *argv[]) {
         auto startTime = std::chrono::steady_clock::now();
         auto elapsedSeconds = std::chrono::steady_clock::duration{0};
         // ---------------------------------------------------------------------------------------------------
-        
+
         // -------------------------------------Processing infer requests-------------------------------------
         int framesNumOnCalculationStart = 0;
         auto testDuration = std::chrono::seconds{3};
@@ -396,7 +396,7 @@ int main(int argc, char *argv[]) {
                 }
             }
             if (completedInferRequestInfo) {
-                emptyInferRequests.push({completedInferRequestInfo->inferRequest, 
+                emptyInferRequests.push({completedInferRequestInfo->inferRequest,
                                          std::vector<InferRequestInfo::InferRequestImage>()});
 
                 std::vector<unsigned> correctClasses = {};
@@ -433,7 +433,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 framesNum += FLAGS_b;
-                
+
                 avgFPS = framesNum / std::chrono::duration_cast<Sec>(
                     std::chrono::steady_clock::now() - startTime).count();
                 gridMat.updateMat(shownImagesInfo);
@@ -444,7 +444,7 @@ int main(int argc, char *argv[]) {
                 avgLatency = std::chrono::duration_cast<Sec>(latencySum).count() / framesNum;
                 accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
                 gridMat.textUpdate(avgFPS, avgLatency, accuracy, isTestMode, !FLAGS_gt.empty(), presenter);
-                
+
                 if (!FLAGS_no_show) {
                     cv::imshow("classification_demo", gridMat.outImg);
                     key = static_cast<char>(cv::waitKey(1));
@@ -474,7 +474,7 @@ int main(int argc, char *argv[]) {
                                                       &irCallbackException] {
                         {
                             std::lock_guard<std::mutex> callbackLock(mutex);
-                        
+
                             try {
                                 completedInferRequests.push(emptyInferRequest);
                             }
@@ -486,7 +486,7 @@ int main(int argc, char *argv[]) {
                         }
                         condVar.notify_one();
                     });
-                    
+
                     auto inputBlob = emptyInferRequest.inferRequest.GetBlob(inputBlobName);
                     for (unsigned i = 0; i < FLAGS_b; i++) {
                         matU8ToBlob<uint8_t>(emptyInferRequest.images[i].mat, inputBlob, i);
@@ -515,7 +515,7 @@ int main(int argc, char *argv[]) {
         }
         std::cout << presenter.reportMeans() << std::endl;
         // ---------------------------------------------------------------------------------------------------
-        
+
         // ------------------------------------Wait for all infer requests------------------------------------
         for (InferRequest& inferRequest : inferRequests)
             inferRequest.Wait(IInferRequest::WaitMode::RESULT_READY);

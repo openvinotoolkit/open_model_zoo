@@ -1,0 +1,33 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  WaveRNN model for text to speech task. Part for waveform autoregression.
+task_type: text_to_speech
+files:
+  - name: wavernn-rnn.zip
+    size: 14297518
+    sha256: bcde8bb9cda28092e2356d38856c35a2ca33531294b65fcb7ea9f432f041960c
+    source: https://download.01.org/opencv/public_models/102020/wavernn/wavernn-rnn.zip
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: wavernn-rnn.zip
+model_optimizer_args:
+  - --input=m_t,a1_t,a2_t,a3_t,a4_t,h1.1,h2.1,x
+  - --output=logits,h1,h2
+  - --input_model=$dl_dir/wavernn-rnn/wavernn_rnn.onnx
+framework: onnx
+
+license: https://github.com/fatchord/WaveRNN/blob/master/LICENSE.txt

@@ -225,7 +225,7 @@ public:
           minPeaksDistance(minPeaksDistance),
           peaksFromHeatMap(peaksFromHeatMap) {}
 
-    virtual void operator()(const cv::Range& range) const {
+    void operator()(const cv::Range& range) const override {
         for (int i = range.start; i < range.end; i++) {
             findPeaks(heatMaps, minPeaksDistance, peaksFromHeatMap, i);
         }

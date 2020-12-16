@@ -104,7 +104,7 @@ std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
 
         auto rectIntersection = faceRect & imageRect;
 
-        // Ignore faces whose bouding boxes do not fit entirely into the frame
+        // Ignore faces whose bounding boxes do not fit entirely into the frame
         if (rectIntersection.area() != faceRect.area())
             continue;
 

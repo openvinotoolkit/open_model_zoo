@@ -397,7 +397,7 @@ class YoloV3Adapter(Adapter):
                         cells = self.cells[layer_id]
                     except IndexError:
                         raise ConfigError('Number of output layers ({}) is more than detection grid size ({}). '
-                                          'Check "cells" option.'.format(len(outputs), len(self.cells)))
+                                          'Check "cells" option.'.format(len(prediction), len(self.cells)))
                     if self.output_format == 'BHW':
                         new_shape = (num * box_size, cells, cells)
                     else:
@@ -451,11 +451,16 @@ class YoloV3ONNX(Adapter):
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         result = []
+        indicies_out = raw_outputs[self.indices_out]
+        if len(indicies_out.shape) == 2:
+            indicies_out = np.expand_dims(indicies_out, 0)
         for identifier, boxes, scores, indices in zip(
-                identifiers, raw_outputs[self.boxes_out], raw_outputs[self.scores_out], raw_outputs[self.indices_out]
+                identifiers, raw_outputs[self.boxes_out], raw_outputs[self.scores_out], indicies_out
         ):
             out_boxes, out_scores, out_classes = [], [], []
             for idx_ in indices:
+                if idx_[0] == -1:
+                    break
                 out_classes.append(idx_[1])
                 out_scores.append(scores[tuple(idx_[1:])])
                 out_boxes.append(boxes[idx_[2]])

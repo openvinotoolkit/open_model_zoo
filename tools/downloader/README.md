@@ -22,7 +22,7 @@ future releases.
 
 ## Prerequisites
 
-1. Install Python (version 3.5.2 or higher)
+1. Install Python (version 3.6 or higher)
 2. Install the tools' dependencies with the following command:
 
 ```sh
@@ -33,31 +33,26 @@ For the model converter, you will also need to install the OpenVINO&trade;
 toolkit and the prerequisite libraries for Model Optimizer. See the
 [OpenVINO toolkit documentation](https://docs.openvinotoolkit.org/) for details.
 
-If you using models from PyTorch or Caffe2 framework, you will also need to use intermediate
-conversion to ONNX format. To use automatic conversion install additional dependencies.
+To convert models from certain frameworks, you will also need to install
+additional dependencies.
 
-For models from PyTorch:
-```sh
-python3 -mpip install --user -r ./requirements-pytorch.in
-```
 For models from Caffe2:
+
 ```sh
 python3 -mpip install --user -r ./requirements-caffe2.in
 ```
 
-When running the model downloader with Python 3.5.x on macOS, you may encounter
-an error similar to the following:
-
-> requests.exceptions.SSLError: [...] (Caused by SSLError(SSLError(1, '[SSL: TLSV1_ALERT_PROTOCOL_VERSION]
-tlsv1 alert protocol version (\_ssl.c:719)'),))
-
-You can work around this by installing additional packages:
+For models from PyTorch:
 
 ```sh
-python3 -mpip install --user 'requests[security]'
+python3 -mpip install --user -r ./requirements-pytorch.in
 ```
 
-Alternatively, upgrade to Python 3.6 or a later version.
+For models from TensorFlow:
+
+```sh
+python3 -mpip install --user -r ./requirements-tensorflow.in
+```
 
 ## Model downloader usage
 
@@ -308,7 +303,7 @@ the script.
 Before you run the model quantizer, you must prepare a directory with
 the datasets required for the quantization process. This directory will be
 referred to as `<DATASET_DIR>` below. You can find more detailed information
-about dataset preparation in the <a href="https://github.com/opencv/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.
+about dataset preparation in the <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.
 
 The basic usage is to run the script like this:
 
@@ -438,6 +433,7 @@ describing a single model. Each such object has the following keys:
   * `human_pose_estimation`
   * `image_inpainting`
   * `image_processing`
+  * `image_translation`
   * `instance_segmentation`
   * `machine_translation`
   * `monocular_depth_estimation`
@@ -449,6 +445,7 @@ describing a single model. Each such object has the following keys:
   * `speech_recognition`
   * `style_transfer`
   * `token_recognition`
+  * `text_to_speech`
 
   Additional possible values might be added in the future.
 

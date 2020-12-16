@@ -12,8 +12,6 @@
 
 #include <algorithm>
 #include <mutex>
-#include <condition_variable>
-#include <thread>
 #include <atomic>
 #include <queue>
 #include <chrono>
@@ -214,7 +212,8 @@ int main(int argc, char* argv[]) {
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
-        slog::info << "InferenceEngine: " << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: "
+            << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {

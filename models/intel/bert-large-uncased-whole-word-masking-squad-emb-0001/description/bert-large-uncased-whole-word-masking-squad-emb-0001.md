@@ -21,7 +21,7 @@ Tokenization occurs using the BERT tokenizer (see the demo code for implementati
 | MParams           | 333.96                |
 | Source framework  | PyTorch\*             |
 
-GOps is calculated for for [1,384] input size that is sutable for long context
+GOps is calculated for for [1,384] input size that is suitable for long context
 
 ## Accuracy
 
@@ -35,8 +35,6 @@ The top5 is calculated as follow:
 1. For each context from  SQuAD v1.1 dev set the context embedding vector is calculated.
 2. For each question from  SQuAD v1.1 dev set the question embedding vector is calculated and compared with each previously calculated context embedding vector. If the right context is in top 5 context embedding closest to question embedding then top5_count increased by 1.
 3. top5 = top5_count / question_number
-
-## Performance
 
 ## Input
 

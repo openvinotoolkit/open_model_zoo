@@ -4,8 +4,6 @@
 
 DeepLab is a state-of-art deep learning model for semantic image segmentation. For details see [paper](https://arxiv.org/abs/1706.05587).
 
-## Example
-
 ## Specification
 
 | Metric            | Value                |
@@ -20,8 +18,6 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 | Metric | Value |
 | ------ | ----- |
 | mean_iou  | 66.85%|
-
-## Performance
 
 ## Input
 

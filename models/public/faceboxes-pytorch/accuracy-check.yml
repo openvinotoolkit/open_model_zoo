@@ -5,8 +5,8 @@ models:
       - framework: dlsdk
         adapter:
           type: faceboxes
-          boxes_out: "342"
-          scores_out: "353"
+          boxes_out: "boxes"
+          scores_out: "scores"
 
     datasets:
       - name: wider

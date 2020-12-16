@@ -177,7 +177,7 @@ public:
         return running;
     }
 
-    void start() {
+    void start() override {
         running = true;
         workThread = std::thread([&]() {
             while (running) {
@@ -224,7 +224,7 @@ public:
         }
     }
 
-    bool read(VideoFrame& frame)  {
+    bool read(VideoFrame& frame) override {
         queue_elem_t elem;
 
         if (!running)
@@ -244,7 +244,7 @@ public:
         return elem.first && running;
     }
 
-    float getAvgReadTime() const {
+    float getAvgReadTime() const override {
         return perfTimer.getValue();
     }
 };
@@ -279,18 +279,18 @@ public:
     GeneralCaptureSource(bool async, bool collectStats_, const std::string& name, bool loopVideo,
                 size_t queueSize_, size_t pollingTimeMSec_, bool realFps_);
 
-    ~GeneralCaptureSource();
+    ~GeneralCaptureSource() override;
 
-    void start();
+    void start() override;
 
     bool isRunning() const override;
 
     void stop();
 
     bool read(cv::Mat& frame);
-    bool read(VideoFrame& frame);
+    bool read(VideoFrame& frame) override;
 
-    float getAvgReadTime() const {
+    float getAvgReadTime() const override {
         return perfTimer.getValue();
     }
 
@@ -328,15 +328,15 @@ public:
            const std::string& source, const mcam::camera::settings& settings,
            size_t queueSize, bool realFps, bool collectStats);
 
-    ~VideoSourceNative();
+    ~VideoSourceNative() override;
 
-    void start();
+    void start() override;
 
     bool isRunning() const override;
 
-    bool read(VideoFrame& frame);
+    bool read(VideoFrame& frame) override;
 
-    float getAvgReadTime() const {
+    float getAvgReadTime() const override {
         return perfTimer.getValue();
     }
 };

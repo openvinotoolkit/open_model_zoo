@@ -1,7 +1,7 @@
 # retinaface-resnet50
 
 ## Use Case and High-Level Description
-RetinaFace-R50 is a medium size model with ResNet50 backbone for Face Localization. It can output face bounding boxes and five facial landmarks in a single forward pass. More details provided in the [paper](https://arxiv.org/abs/1905.00641) and [repository](https://github.com/deepinsight/insightface/tree/master/RetinaFace)
+RetinaFace-R50 is a medium size model with ResNet50 backbone for Face Localization. It can output face bounding boxes and five facial landmarks in a single forward pass. More details provided in the [paper](https://arxiv.org/abs/1905.00641) and [repository](https://github.com/deepinsight/insightface/tree/master/detection/RetinaFace)
 
 ## Specification
 
@@ -18,7 +18,7 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 64 x 64 pixels.
 
 Accuracy validation approach different from described in the original repo.
-For details about original WIDER results please see [https://github.com/deepinsight/insightface/tree/master/RetinaFace]()
+For details about original WIDER results please see [https://github.com/deepinsight/insightface/tree/master/detection/RetinaFace]()
 
 ## Input
 
@@ -63,7 +63,7 @@ Model outputs are floating points tensors:
 8. name: `face_rpn_bbox_stride16`,  shape: `1,8,80,80`, format: `[B, Ax4, H, W]`, represents detection box deltas from Feature Pyramid Network (FPN) level with stride 8.
 
 9. name: `face_rpn_landmark_pred_stride16`, shape: `1,20,80,80`, format: `[B, Ax10, H, W]`, represents facial landmarks from Feature Pyramid Network (FPN) level with stride 8.
-   
+
 For each output format:
 - `B` - batch size
 - `A` - number of anchors

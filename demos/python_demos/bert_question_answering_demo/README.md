@@ -1,4 +1,4 @@
-# BERT Question Answering Python* Demo
+# BERT Question Answering Python\* Demo
 
 This README describes the Question Answering demo application that uses a Squad-tuned BERT model for inference.
 
@@ -17,20 +17,25 @@ python3 question_answering_demo.py -h
 ```
 The command yields the following usage message:
 ```
-usage: question_answering_demo.py [-h] -v VOCAB -m MODEL -i INPUT
-                                  [--input_names INPUT_NAMES]
-                                  [--output_names OUTPUT_NAMES]
-                                  [--model_squad_ver MODEL_SQUAD_VER]
-                                  [-a MAX_ANSWER_TOKEN_NUM] [-d DEVICE]
+usage: bert_question_answering_demo.py [-h] -v VOCAB -m MODEL -i INPUT
+                                       [--questions QUESTION [QUESTION ...]]
+                                       [--input_names INPUT_NAMES]
+                                       [--output_names OUTPUT_NAMES]
+                                       [--model_squad_ver MODEL_SQUAD_VER]
+                                       [-q MAX_QUESTION_TOKEN_NUM]
+                                       [-a MAX_ANSWER_TOKEN_NUM] [-d DEVICE]
+                                       [-r] [-c]
 
 Options:
   -h, --help            Show this help message and exit.
   -v VOCAB, --vocab VOCAB
-                        Required. path to vocabulary file with tokens
+                        Required. path to the vocabulary file with tokens
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model
   -i INPUT, --input INPUT
-                        Required. Url to a page with context
+                        Required. URL to a page with context
+  --questions QUESTION [QUESTION ...]
+                        Optional. Prepared questions
   --input_names INPUT_NAMES
                         Optional. Inputs names for the  network.
                         Default values are "input_ids,attention_mask,token_type_ids"
@@ -85,7 +90,7 @@ One specific flavor of that is so called "distilled" model (for that reason it c
 but don't get confused as it is still originated from the BERT Large) that is indeed substantially smaller and faster.
 
 The demo also works fine with [official MLPerf* BERT ONNX models fine-tuned on the Squad dataset](
-https://github.com/mlperf/inference/tree/master/v0.7/language/bert).
+https://github.com/mlperf/inference/tree/master/language/bert).
 Unlike [[Open Model Zoo Models](../../../models/intel/index.md) that come directly as the
 Intermediate Representation (IR), the MLPerf models should be explicitly converted with
 [OpenVINO Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).

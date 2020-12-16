@@ -4,8 +4,6 @@
 
 The `googlenet-v3` model is the first of the Inception family of models designed to perform image classification. For details about this family of models, check out the [paper](https://arxiv.org/abs/1602.07261).
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -21,8 +19,6 @@ The `googlenet-v3` model is the first of the Inception family of models designed
 | ------ | ----- |
 | Top 1  | 77.904% |
 | Top 5  | 93.808%|
-
-## Performance
 
 ## Input
 

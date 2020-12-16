@@ -14,20 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from functools import singledispatch
+import numpy as np
+
 from .postprocessor import PostprocessorWithSpecificTargets, Postprocessor
 from ..representation import (
     BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction, SegmentationAnnotation, SegmentationPrediction
 )
 from ..config import NumberField
-from ..preprocessor import Crop3D, CropOrPad
+from ..preprocessor import Crop3D, CropOrPad, Crop
 from ..utils import get_size_3d_from_config, get_size_from_config
 
 
 class CropSegmentationMask(PostprocessorWithSpecificTargets):
     __provider__ = 'crop_segmentation_mask'
 
-    annotation_types = (BrainTumorSegmentationAnnotation,)
-    prediction_types = (BrainTumorSegmentationPrediction,)
+    annotation_types = (BrainTumorSegmentationAnnotation, SegmentationAnnotation, )
+    prediction_types = (BrainTumorSegmentationPrediction, SegmentationPrediction, )
 
     @classmethod
     def parameters(cls):
@@ -53,11 +56,38 @@ class CropSegmentationMask(PostprocessorWithSpecificTargets):
         self.dst_height, self.dst_width, self.dst_volume = get_size_3d_from_config(self.config)
 
     def process_image(self, annotation, prediction):
+
+        @singledispatch
+        def crop_segmentation_mask(entry, height, width, volume):
+            return entry
+
+        @crop_segmentation_mask.register(SegmentationAnnotation)
+        @crop_segmentation_mask.register(SegmentationPrediction)
+        def _(entry, height, width, volume):
+            shape = len(entry.mask.shape)
+            if shape == 2:
+                entry.mask = Crop.process_data(entry.mask, height, width, None, False, False, True, {})
+            elif shape == 3:
+                entry_mask = []
+                for class_mask in entry.mask:
+                    mask_channel = Crop.process_data(class_mask, height, width, None, False, False, True, {})
+                    entry_mask.append(mask_channel)
+                entry.mask = np.array(entry_mask)
+            else:
+                raise ValueError("'arr' does not have a suitable array shape for any mode.")
+            return entry
+
+        @crop_segmentation_mask.register(BrainTumorSegmentationAnnotation)
+        @crop_segmentation_mask.register(BrainTumorSegmentationPrediction)
+        def _(entry, height, width, volume):
+            entry.mask = Crop3D.crop_center(entry.mask, height, width, volume)
+            return entry
+
         for target in annotation:
-            target.mask = Crop3D.crop_center(target.mask, self.dst_height, self.dst_width, self.dst_volume)
+            crop_segmentation_mask(target, self.dst_height, self.dst_width, self.dst_volume)
 
         for target in prediction:
-            target.mask = Crop3D.crop_center(target.mask, self.dst_height, self.dst_width, self.dst_volume)
+            crop_segmentation_mask(target, self.dst_height, self.dst_width, self.dst_volume)
 
         return annotation, prediction
 

@@ -13,11 +13,16 @@ PerformanceMetrics::PerformanceMetrics(Duration timeWindow)
 {}
 
 void PerformanceMetrics::update(TimePoint lastRequestStartTime,
-                                cv::Mat& frame,
-                                cv::Point position,
-                                double fontScale,
-                                cv::Scalar color,
-                                int thickness) {
+    cv::Mat& frame,
+    cv::Point position,
+    double fontScale,
+    cv::Scalar color,
+    int thickness) {
+    update(lastRequestStartTime);
+    paintMetrics(frame, position, fontScale, color, thickness);
+}
+
+void PerformanceMetrics::update(TimePoint lastRequestStartTime) {
     TimePoint currentTime = Clock::now();
 
     if (!firstFrameProcessed) {
@@ -25,7 +30,7 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime,
         firstFrameProcessed = true;
         return;
     }
-    
+
     currentMovingStatistic.latency += currentTime - lastRequestStartTime;
     currentMovingStatistic.period = currentTime - lastUpdateTime;
     currentMovingStatistic.frameCount++;
@@ -37,10 +42,12 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime,
 
         lastUpdateTime = currentTime;
     }
+}
 
+void PerformanceMetrics::paintMetrics(cv::Mat & frame, cv::Point position, double fontScale, cv::Scalar color, int thickness) const{
     // Draw performance stats over frame
     Metrics metrics = getLast();
-    
+
     std::ostringstream out;
     if (!std::isnan(metrics.latency)) {
         out << "Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms";
@@ -65,7 +72,7 @@ PerformanceMetrics::Metrics PerformanceMetrics::getLast() const {
                   ? lastMovingStatistic.frameCount
                     / std::chrono::duration_cast<Sec>(lastMovingStatistic.period).count()
                   : std::numeric_limits<double>::signaling_NaN();
-    
+
     return metrics;
 }
 

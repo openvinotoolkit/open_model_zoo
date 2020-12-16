@@ -122,7 +122,7 @@ class DummyDecoder:
 
     def async_infer(self, model_input, req_id):
         self.requests[req_id] = self._average(model_input)
-    
+
     def infer(self, model_input):
         return self._average(model_input)
 

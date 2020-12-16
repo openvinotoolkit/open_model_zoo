@@ -3,51 +3,92 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # This file is based in part on deepspeech_openvino_0.5.py by Feng Yen-Chang at
-# https://github.com/opencv/open_model_zoo/pull/419, commit 529805d011d9b405f142b2b40f4d202bd403a4f1 on Sep 19, 2019.
+# https://github.com/openvinotoolkit/open_model_zoo/pull/419, commit 529805d011d9b405f142b2b40f4d202bd403a4f1 on Sep 19, 2019.
 #
 import os.path
+from copy import deepcopy
 
 import numpy as np
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 
 import utils.alphabet as alphabet_module
-from utils.audio_features import audio_spectrogram, mfcc
+from utils.audio_features import samples_to_melspectrum, melspectrum_to_mfcc
 from utils.ctcnumpy_beam_search_decoder import CtcnumpyBeamSearchDecoder
 
 
+PROFILES = {
+    'mds06x_en': dict(
+        alphabet = None,  # the default alphabet
+        # alpha: Language model weight
+        alpha = 0.75,
+        # beta: Word insertion bonus (ignored without LM)
+        beta = 1.85,
+        model_sampling_rate = 16000,
+        frame_window_size_seconds = 32e-3,
+        frame_stride_seconds = 20e-3,
+        mel_num = 40,
+        mel_fmin = 20.,
+        mel_fmax = 4000.,
+        num_mfcc_dct_coefs = 26,
+        num_context_frames = 19,
+    ),
+    'mds07x_en': dict(
+        alphabet = None,  # the default alphabet
+        alpha = 0.93128901720047,
+        beta = 1.1834137439727783,
+        model_sampling_rate = 16000,
+        frame_window_size_seconds = 32e-3,
+        frame_stride_seconds = 20e-3,
+        mel_num = 40,
+        mel_fmin = 20.,
+        mel_fmax = 8000.,
+        num_mfcc_dct_coefs = 26,
+        num_context_frames = 19,
+    ),
+}
+PROFILES['mds08x_en'] = PROFILES['mds07x_en']
+
+
 class DeepSpeechPipeline:
-    def __init__(self, model, model_bin=None, lm=None, alphabet=None,
-            beam_width=500, alpha=0.75, beta=1.85,
-            ie=None, device='CPU', ie_extensions=[]):
+    def __init__(self, model, model_bin=None, lm=None, beam_width=500, max_candidates=None,
+            profile=PROFILES['mds08x_en'], ie=None, device='CPU', ie_extensions=[]):
         """
             Args:
         model (str), filename of IE IR .xml file of the network
-        model_bin (str), filename of IE IR .xml file of the network (deafult (None) is the same as :model:, but
+        model_bin (str), filename of IE IR .xml file of the network (default (None) is the same as :model:, but
             with extension replaced with .bin)
         lm (str), filename of LM (language model)
-        alphabet (None or str or list(str)), alphabet matching the model (default None):
-            None = [' ', 26 English letters, apostrophe];
-            str = filename of a text file with the alphabet (expluding separator=blank symbol)
-            list(str) = the alphabet itself (expluding separator=blank symbol)
         beam_width (int), the number of prefix candidates to retain during decoding in beam search (default 500)
-        alpha (float), LM weight relative to audio model (default 0.75)
-        beta (float), word insertion bonus to counteract LM's tendency to prefer fewer words (default 1.85)
-        ie (IECore or None), IECore object to run NN inference with.  Default is to use ie_core_singleton module.
+        max_candidates (int), limit the number of returned candidates; None = do not limit (default None)
+        profile (dict): a dict with pre/post-processing parameters
+            alphabet (None or str or list(str)), alphabet matching the model (default None):
+                None = [' ', 26 English letters, apostrophe];
+                str = filename of a text file with the alphabet (excluding separator=blank symbol)
+                list(str) = the alphabet itself (expluding separator=blank symbol)
+            alpha (float), LM weight relative to audio model (default 0.75)
+            beta (float), word insertion bonus to counteract LM's tendency to prefer fewer words (default 1.85)
+            model_sampling_rate (float, in Hz)
+            frame_window_size_seconds (float, in seconds)
+            frame_stride_seconds (float, in seconds)
+            mel_num (int)
+            mel_fmin (float, in Hz)
+            mel_fmax (float, in Hz)
+            num_mfcc_dct_coefs (int)
+            num_context_frames (int)
+         ie (IECore or None), IECore object to run NN inference with.  Default is to use ie_core_singleton module.
             (default None)
         device (str), inference device for IE, passed here to 1. set default device, and 2. check supported node types
             in the model load; None = do not check (default 'CPU')
         ie_extensions (list(tuple(str,str))), list of IE extensions to load, each extension is defined by a pair
             (device, filename). Records with filename=None are ignored.  (default [])
         """
+        self.p = deepcopy(profile)
         # model parameters
-        self.num_mfcc_dct_coefs = 26
-        self.num_context_frames = 19
         self.num_batch_frames = 16
-        self.model_sample_rate = 16000
-        self.frame_window_size_seconds = 32e-3
-        self.frame_stride_seconds = 20e-3
 
         self.beam_width = beam_width
+        self.max_candidates = max_candidates
+        alphabet = self.p['alphabet']
         if alphabet is None:
             self.alphabet = alphabet_module.get_default_alphabet()
         elif isinstance(alphabet, str):
@@ -61,8 +102,8 @@ class DeepSpeechPipeline:
         self.ie = ie if ie is not None else IECore()
         self._load_net(model, model_bin_fname=model_bin, device=device, ie_extensions=ie_extensions)
 
-        self.decoder = CtcnumpyBeamSearchDecoder(self.alphabet, self.beam_width,
-            scorer_lm_fname=lm, alpha=alpha, beta=beta)
+        self.decoder = CtcnumpyBeamSearchDecoder(self.alphabet, self.beam_width, max_candidates=max_candidates,
+            scorer_lm_fname=lm, alpha=self.p['alpha'], beta=self.p['beta'])
 
         if device is not None:
             self.activate_model(device)
@@ -107,31 +148,33 @@ class DeepSpeechPipeline:
 
     def extract_mfcc(self, audio, sampling_rate):
         # Audio feature extraction
-        if abs(sampling_rate - self.model_sample_rate) > self.model_sample_rate * 0.1  or  (audio.shape + (1,))[1] != 1:
-            raise ValueError("Input audio file should be {} kHz mono".format(self.model_sample_rate/1e3))
+        if abs(sampling_rate - self.p['model_sampling_rate']) > self.p['model_sampling_rate'] * 0.1  or  (audio.shape + (1,))[1] != 1:
+            raise ValueError("Input audio file should be {} kHz mono".format(self.p['model_sampling_rate']/1e3))
         if np.issubdtype(audio.dtype, np.integer):
             audio = audio/np.float32(32768) # normalize to -1 to 1, int16 to float32
-        audio = audio.reshape(-1, 1)
-        spectrogram = audio_spectrogram(
-            audio,
-            sampling_rate * self.frame_window_size_seconds,
-            sampling_rate * self.frame_stride_seconds,
-            True,
+        melspectrum = samples_to_melspectrum(
+            audio.flatten(),
+            sampling_rate,
+            sampling_rate * self.p['frame_window_size_seconds'],
+            sampling_rate * self.p['frame_stride_seconds'],
+            n_mels = self.p['mel_num'],
+            fmin = self.p['mel_fmin'],
+            fmax = self.p['mel_fmax'],
         )
-        features = mfcc(spectrogram.reshape(1, spectrogram.shape[0], -1), sampling_rate, self.num_mfcc_dct_coefs)
+        features = melspectrum_to_mfcc(melspectrum, self.p['num_mfcc_dct_coefs'])
         return features
 
     def extract_per_frame_probs(self, mfcc_features, state=None, return_state=False, wrap_iterator=lambda x:x):
         assert self.exec_net is not None, "Need to call mds.activate(device) method before mds.stt(...)"
 
-        padding = np.zeros((self.num_context_frames // 2, self.num_mfcc_dct_coefs), dtype=mfcc_features.dtype)
+        padding = np.zeros((self.p['num_context_frames'] // 2, self.p['num_mfcc_dct_coefs']), dtype=mfcc_features.dtype)
         mfcc_features = np.concatenate((padding, mfcc_features, padding))  # TODO: replace with np.pad
 
-        num_strides = len(mfcc_features) - self.num_context_frames + 1
+        num_strides = len(mfcc_features) - self.p['num_context_frames'] + 1
         # Create a view into the array with overlapping strides to simulate convolution with FC
         mfcc_features = np.lib.stride_tricks.as_strided(  # TODO: replace with conv1d
             mfcc_features,
-            (num_strides, self.num_context_frames, self.num_mfcc_dct_coefs),
+            (num_strides, self.p['num_context_frames'], self.p['num_mfcc_dct_coefs']),
             (mfcc_features.strides[0], mfcc_features.strides[0], mfcc_features.strides[1]),
             writeable = False,
         )

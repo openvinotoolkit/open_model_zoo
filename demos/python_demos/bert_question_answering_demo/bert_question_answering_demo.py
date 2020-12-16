@@ -40,6 +40,7 @@ def build_argparser():
     args.add_argument("-i", "--input", help="Required. URL to a page with context",
                       action='append',
                       required=True, type=str)
+    args.add_argument("--questions", type=str, nargs='+', metavar='QUESTION', help="Optional. Prepared questions")
     args.add_argument("--input_names",
                       help="Optional. Inputs names for the network. "
                            "Default values are \"input_ids,attention_mask,token_type_ids\" ",
@@ -157,10 +158,19 @@ def main():
     log.info("Loading model to the {}".format(args.device))
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
 
-    # loop on user's questions
-    while True:
-        question = input('Type question (empty string to exit):')
-        if not question:
+    if args.questions:
+        def questions():
+            for question in args.questions:
+                log.info("Question: {}".format(question))
+                yield question
+    else:
+        def questions():
+            while True:
+                yield input('Type question (empty string to exit):')
+
+    # loop on user's or prepared questions
+    for question in questions():
+        if not question.strip():
             break
 
         q_tokens_id, _ = text_to_tokens(question.lower(), vocab)

@@ -14,10 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import pickle
 from collections import defaultdict
 from pathlib import Path
 
-from ..config import PathField
+import cv2
+import numpy as np
+
+from ..config import PathField, BoolField
 from ..representation import ReIdentificationClassificationAnnotation
 from ..utils import read_txt, check_file_existence, OrderedSet
 
@@ -130,3 +134,62 @@ class LFWConverter(BaseFormatConverter):
                 progress_callback(image_id / num_iterations * 100)
 
         return ConverterReturn(annotations, None, content_errors)
+
+
+class FaceRecognitionBinary(BaseFormatConverter):
+    __provider__ = 'face_recognition_bin'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'bin_file': PathField(description='binary data file'),
+            'images_dir': PathField(
+                is_directory=True, optional=True, check_exists=False,
+                description='directory for saving converted images'),
+            'convert_images': BoolField(
+                optional=True, default=True,
+                description='flag that image conversion required or not'
+            )
+        })
+        return params
+
+    def configure(self):
+        self.bin_file = self.get_value_from_config('bin_file')
+        self.images_dir = self.get_value_from_config('images_dir') or self.bin_file.parent / 'converted_images'
+        self.convert_images = self.get_value_from_config('convert_images')
+        if self.convert_images and not self.images_dir.exists():
+            self.images_dir.mkdir(parents=True)
+
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        with self.bin_file.open('rb') as f:
+            bins, issame_list = pickle.load(f, encoding='bytes')
+        annotations = []
+        content_errors = None if not check_content else []
+        num_iterations = len(issame_list) * 2
+        for idx in range(0, num_iterations, 2):
+            first_img = '{}.png'.format(idx)
+            second_img = '{}.png'.format(idx + 1)
+            if self.convert_images:
+                self.save_image(bins[idx], first_img)
+                self.save_image(bins[idx + 1], second_img)
+            if check_content:
+                if not check_file_existence(self.images_dir / first_img):
+                    content_errors.append('{}: does not exist'.format(self.images_dir / first_img))
+                if not check_file_existence(self.images_dir / second_img):
+                    content_errors.append('{}: does not exist'.format(self.images_dir / second_img))
+            is_same = issame_list[int(idx // 2)]
+            positive = [second_img] if is_same else []
+            negative = [second_img] if not is_same else []
+            annotations.append(
+                ReIdentificationClassificationAnnotation(first_img, positive, negative)
+            )
+            annotations.append(ReIdentificationClassificationAnnotation(second_img, [], []))
+            if progress_callback and idx % progress_interval == 0:
+                progress_callback(idx * 100 / num_iterations)
+        return ConverterReturn(annotations, None, content_errors)
+
+    def save_image(self, data, image_name):
+        image = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
+        path_to_save = self.images_dir / image_name
+        cv2.imwrite(str(path_to_save), image)

@@ -58,9 +58,9 @@ class ReDWebDatasetConverter(BaseFormatConverter):
             identifier, depth_map_path = line.split(' ')
             if check_content:
                 if not check_file_existence(self.data_dir / depth_map_path):
-                    content_errors.append('{}: does not exists'.format(self.data_dir / depth_map_path))
+                    content_errors.append('{}: does not exist'.format(self.data_dir / depth_map_path))
                 if not check_file_existence(self.data_dir / identifier):
-                    content_errors.append('{}: does not exists'.format(self.data_dir / identifier))
+                    content_errors.append('{}: does not exist'.format(self.data_dir / identifier))
             annotations.append(DepthEstimationAnnotation(identifier, depth_map_path))
             if progress_callback and idx % progress_interval == 0:
                 progress_callback(idx * 100 / num_iterations)
@@ -80,7 +80,7 @@ class ReDWebDatasetConverter(BaseFormatConverter):
             depth_map_file = image_path.name.split(image_path.suffix)[0] + '.png'
             depth_map_path = '{}/{}'.format(relative_depth_prefix, depth_map_file)
             if check_content and not check_file_existence(self.data_dir / depth_map_path):
-                content_errors.append('{}: does not exists'.format(self.data_dir / depth_map_path))
+                content_errors.append('{}: does not exist'.format(self.data_dir / depth_map_path))
             annotations.append(DepthEstimationAnnotation(identifier, depth_map_path))
             if progress_callback and idx % progress_interval == 0:
                 progress_callback(idx * 100 / num_iterations)

@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import math
+import cv2
 import numpy as np
 from ..adapters import Adapter
 from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction
-from ..config import ConfigValidator, BoolField, ListField, NumberField, StringField
+from ..config import ConfigError, ConfigValidator, BoolField, ListField, NumberField, StringField
 from ..utils import contains_any
 
 
@@ -90,7 +92,7 @@ class SegmentationOneClassAdapter(Adapter):
     def configure(self):
         self.threshold = self.get_value_from_config('threshold')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
@@ -160,3 +162,46 @@ class BrainTumorSegmentationAdapter(Adapter):
             output_map[output_key] = output_data
 
         return output_map
+
+
+class DUCSegmentationAdapter(Adapter):
+    __provider__ = 'duc_segmentation'
+    prediction_types = (SegmentationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'ds_rate': NumberField(
+                optional=True, default=8, value_type=int, description="Specifies downsample rate."
+            ),
+            'cell_width': NumberField(
+                optional=True, default=2, value_type=int, description="Specifies cell width to extract predictions."
+            ),
+            'label_num': NumberField(
+                optional=True, default=19, value_type=int, description='Specifies number of output label classes.'
+            )
+        })
+
+        return parameters
+
+    def configure(self):
+        self.ds_rate = self.get_value_from_config('ds_rate')
+        self.cell_width = self.get_value_from_config('cell_width')
+        self.label_num = self.get_value_from_config('label_num')
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        for identifier, output, meta in zip(identifiers, raw_outputs[self.output_blob], frame_meta):
+            _, _, h, w = next(iter(meta.get('input_shape', {'data': (1, 3, 800, 800)}).values()))
+            feat_height = math.floor(h / self.ds_rate)
+            feat_width = math.floor(w / self.ds_rate)
+            labels = output.reshape((self.label_num, 4, 4, feat_height, feat_width))
+            labels = np.transpose(labels, (0, 3, 1, 4, 2))
+            labels = labels.reshape((self.label_num, int(h / self.cell_width), int(w / self.cell_width)))
+            labels = np.transpose(labels, [1, 2, 0])
+            labels = cv2.resize(labels, (w, h), interpolation=cv2.INTER_LINEAR)
+            labels = np.transpose(labels, [2, 0, 1])
+            result.append(SegmentationPrediction(identifier, labels))
+        return result

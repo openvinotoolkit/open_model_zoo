@@ -8,8 +8,6 @@ The model input is a blob that consists of a single image of 1x3x300x300 in BGR 
 
 The model output is a typical vector containing the tracked object data, as previously described.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -26,8 +24,6 @@ The model output is a typical vector containing the tracked object data, as prev
 |  mAP | 79.8377% |
 
 See [the original repository](https://github.com/chuanqi305/MobileNet-SSD).
-
-## Performance
 
 ## Input
 

@@ -90,16 +90,19 @@ class ColorizationEvaluator(BaseEvaluator):
             dataset_tag='',
             output_callback=None,
             allow_pairwise_subset=False,
-            dump_prediction_to_annotgiation=False,
+            dump_prediction_to_annotation=False,
+            calculate_metrics=True,
             **kwargs):
 
-        self._annotations, self._predictions = [], []
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
+
             self.select_dataset(dataset_tag)
-        if subset is not None:
-            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
-        elif num_images is not None:
-            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
+
+        self._annotations, self._predictions = [], []
+
+        self._create_subset(subset, num_images, allow_pairwise_subset)
+        metric_config = self.configure_intermediate_metrics_results(kwargs)
+        compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
         if 'progress_reporter' in kwargs:
             _progress_reporter = kwargs['progress_reporter']
             _progress_reporter.reset(self.dataset.size)
@@ -107,6 +110,10 @@ class ColorizationEvaluator(BaseEvaluator):
             _progress_reporter = None if not check_progress else self._create_progress_reporter(
                 check_progress, self.dataset.size
             )
+        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
+        if compute_intermediate_metric_res:
+            metric_interval = kwargs.get('metrics_interval', 1000)
+            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             extr_batch_inputs, _ = extract_image_representations(batch_inputs)
@@ -137,6 +144,10 @@ class ColorizationEvaluator(BaseEvaluator):
                 )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
+                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(
+                        print_results=True, ignore_results_formatting=ignore_results_formatting
+                    )
 
         if _progress_reporter:
             _progress_reporter.finish()
@@ -164,6 +175,8 @@ class ColorizationEvaluator(BaseEvaluator):
             presenter.write_results(metric_result, ignore_results_formatting)
 
     def release(self):
+        self.test_model.release()
+        self.check_model.release()
         self.launcher.release()
 
     def reset(self):
@@ -261,6 +274,23 @@ class ColorizationEvaluator(BaseEvaluator):
     def set_profiling_dir(self, profiler_dir):
         self.metric_executor.set_profiling_dir(profiler_dir)
 
+    def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
+        if self.dataset.batch is None:
+            self.dataset.batch = 1
+        if subset is not None:
+            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
+        elif num_images is not None:
+            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
+
+    @staticmethod
+    def configure_intermediate_metrics_results(config):
+        compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
+        metric_interval, ignore_results_formatting = None, None
+        if compute_intermediate_metric_res:
+            metric_interval = config.get('metrics_interval', 1000)
+            ignore_results_formatting = config.get('ignore_results_formatting', False)
+        return compute_intermediate_metric_res, metric_interval, ignore_results_formatting
+
 
 class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
@@ -298,7 +328,8 @@ class BaseModel:
         raise NotImplementedError
 
     def release(self):
-        pass
+        del self.network
+        del self.exec_network
 
     def load_model(self, network_info, launcher, log=False):
         model, weights = self.auto_model_search(network_info, self.net_type)
@@ -355,7 +386,6 @@ class ColorizationTestModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.net_type = 'colorization_network'
         super().__init__(network_info, launcher, delayed_model_loading)
-        self.color_coeff = np.load(network_info['color_coeff'])
 
     @staticmethod
     def data_preparation(input_data):
@@ -365,26 +395,29 @@ class ColorizationTestModel(BaseModel):
         img_l_rs = np.copy(img_lab[:, :, 0])
         return img_l, img_l_rs
 
-    def postprocessing(self, res, img_l, output_blob, img_size):
-        update_res = (res[output_blob] * self.color_coeff.transpose()[:, :, np.newaxis, np.newaxis]).sum(1)
+    @staticmethod
+    def central_crop(input_data, crop_size=(224, 224)):
+        h, w = input_data.shape[:2]
+        delta_h = (h - crop_size[0]) // 2
+        delta_w = (w - crop_size[1]) // 2
+        return input_data[delta_h:h - delta_h, delta_w: w - delta_w, :]
 
-        out = update_res.transpose((1, 2, 0)).astype(np.float32)
-        out = cv2.resize(out, img_size)
-        img_lab_out = np.concatenate((img_l[:, :, np.newaxis], out), axis=2)
-        new_result = [np.clip(cv2.cvtColor(img_lab_out, cv2.COLOR_Lab2BGR), 0, 1)]
-        return new_result
+    def postprocessing(self, res, img_l):
+        res = np.squeeze(res, axis=0)
+        res = res.transpose((1, 2, 0)).astype(np.float32)
+
+        out_lab = np.concatenate((img_l[:, :, np.newaxis], res), axis=2)
+        result_bgr = np.clip(cv2.cvtColor(out_lab, cv2.COLOR_Lab2BGR), 0, 1)
+
+        return [self.central_crop(result_bgr)]
 
     def predict(self, identifiers, input_data):
         img_l, img_l_rs = self.data_preparation(input_data)
-        h_orig, w_orig = input_data[0].shape[:2]
+
         res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})
 
-        new_result = self.postprocessing(res, img_l, self.output_blob, (w_orig, h_orig))
+        new_result = self.postprocessing(res[self.output_blob], img_l)
         return res, np.array(new_result)
-
-    def release(self):
-        del self.network
-        del self.exec_network
 
     def fit_to_input(self, input_data):
         has_info = hasattr(self.exec_network, 'input_info')
@@ -424,10 +457,6 @@ class ColorizationCheckModel(BaseModel):
         raw_result = self.exec_network.infer(self.fit_to_input(input_data))
         result = self.adapter.process([raw_result], identifiers, [{}])
         return raw_result, result
-
-    def release(self):
-        del self.network
-        del self.exec_network
 
     def fit_to_input(self, input_data):
         constant_normalization = 255.
