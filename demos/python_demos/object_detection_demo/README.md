@@ -1,5 +1,7 @@
 # Object Detection Python\* Demo
 
+![](./object_detection.gif)
+
 This demo showcases Object Detection with Sync and Async API.
 
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
