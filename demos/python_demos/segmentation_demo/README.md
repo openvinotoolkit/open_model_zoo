@@ -1,5 +1,7 @@
 # Image Segmentation Python\* Demo
 
+![](./segmentation.gif)
+
 This topic demonstrates how to run the Image Segmentation demo application, which does inference using semantic segmentation networks.
 
 ## How It Works
