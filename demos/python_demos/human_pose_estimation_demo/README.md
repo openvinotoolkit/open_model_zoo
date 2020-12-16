@@ -1,5 +1,7 @@
 # Human Pose Estimation Python\* Demo
 
+![](./human_pose_estimation.gif)
+
 This demo showcases the work of multi-person 2D pose estimation algorithms. The task is to predict a pose: body skeleton, which consists of a predefined set of keypoints and connections between them, for every person in an input image/video.
 
 Demo application supports inference in both sync and async modes. Please refer to [Optimization Guide](https://docs.openvinotoolkit.org/latest/_docs_optimization_guide_dldt_optimization_guide.html) and [Object Detection SSD, Async API performance showcase](../../object_detection_demo_ssd_async/README.md) demo for more information about Async API and its use.
