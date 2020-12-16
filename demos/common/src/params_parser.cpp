@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <cstring>
 
 Param Param::Nothing;
 
@@ -11,7 +12,7 @@ std::string ParamsParser::parse(int argc, char* const argv[], bool commaSeparate
 
     for (int i = 1; i < argc; i++) {
         //--- Searching for the key
-        if (!strncmp(argv[i], "--", 2)) {
+        if (!std::strncmp(argv[i], "--", 2)) {
             currentParam = NULL;
             auto it = params.find(argv[i] + 2);
             if (it != params.end()) {
@@ -24,7 +25,7 @@ std::string ParamsParser::parse(int argc, char* const argv[], bool commaSeparate
                 return std::string("Invalid command line argument found: ") + std::string(argv[i]);
             }
         }
-        else if (!strncmp(argv[i], "-", 1)) {
+        else if (!std::strncmp(argv[i], "-", 1)) {
             currentParam = NULL;
             auto it = params.begin();
             for (; it != params.end(); it++) {

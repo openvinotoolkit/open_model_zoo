@@ -43,8 +43,8 @@
 void PrepareParamsParser(ParamsParser& parser) {
     parser.addParam("help", "h", "", "Print a usage message.", false, 0);
     parser.addParam("architecture_type", "at", "", "Required. Architecture type: ssd or yolo", true);
-    parser.addParam("input", "i", "", "Required. Path to a video input (image, video, cameraID or directory with images)"
-                    " or multiple comma-separarted inputs.", true, -1);
+    parser.addParam("input", "i", "", "Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.",
+                    true, -1);
     parser.addParam("loop", "", "", "Required. Loop input", false);
     parser.addParam("model", "m", "", "Required. Path to an .xml file with a trained model.", true, 1);
     parser.addParam("device", "d", "CPU", "Optional. Specify the target device to infer on (the list of available devices is shown below)."
