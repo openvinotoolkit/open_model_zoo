@@ -70,7 +70,7 @@ Options:
 
     -h                        Print a usage message.
     -at "<type>"              Required. Architecture type: ssd or yolo
-    -i "<path>"               Required. Path to a video file (specify "cam" to work with camera).
+    -i "<path>"               Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
     -m "<path>"               Required. Path to an .xml file with a trained model.
       -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
           Or

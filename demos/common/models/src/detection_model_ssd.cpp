@@ -40,7 +40,7 @@ std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputDa
     return DetectionModel::preprocess(inputData, request);
 }
 
-    std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
+std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
     LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
     const float *detections = outputMapped.as<float*>();
 
