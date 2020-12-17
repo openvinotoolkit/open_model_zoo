@@ -87,7 +87,7 @@ Navigation keys:
   * Use `p` to increase the size of the input window
 
 The overall process is simillar to the Non-interactive mode with the exception that it runs asynchronously.
-This means model inference and rendering of the formula does not block main thread, so the image from the web-camera can move smoothly enough.
+This means model inference and rendering of the formula do not block main thread, so the image from the web camera can move smoothly.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
