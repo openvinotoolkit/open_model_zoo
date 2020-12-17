@@ -67,7 +67,7 @@ Object classifier according to ImageNet classes, name - `InceptionV1/Logits/Pred
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://github.com/tensorflow/models/blob/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).
 
 The original model uses the TF-Slim library, which is distributed under the
 [Apache License, Version 2.0](https://github.com/google-research/tf-slim/blob/master/LICENSE).
