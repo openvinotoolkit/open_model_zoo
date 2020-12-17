@@ -52,6 +52,7 @@ The models can be downloaded via Model Downloader
 | ResNet 18                   | PyTorch\*                          | [resnet-18-pytorch](./resnet-18-pytorch/resnet-18-pytorch.md) | 69.754%/89.088% | 3.637 |  11.68 |
 | ResNet 34                   | PyTorch\*                          | [resnet-34-pytorch](./resnet-34-pytorch/resnet-34-pytorch.md) | 73.30%/91.42% | 7.3409 | 21.7892 |
 | ResNet 50                   | PyTorch\*<br>Caffe2\*<br>TensorFlow\*| [resnet-50-pytorch](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[resnet-50-caffe2](./resnet-50-caffe2/resnet-50-caffe2.md)<br>[resnet-50-tf](./resnet-50-tf/resnet-50-tf.md)| 75.168%/92.212%<br>76.128%/92.858%<br>76.38%/93.188%<br>76.17%/92.98% | 6.996~8.216 | 25.53 |
+| ReXNet V1 x1.0              | PyTorch\*                          | [rexnet-v1-x1.0](./rexnet-v1-x1.0/rexnet-v1-x1.0.md) | 77.86%/93.87% | 0.8325 | 4.7779 |
 | SE-Inception                | Caffe\*                            | [se-inception](./se-inception/se-inception.md) | 75.996%/92.964% | 4.091 | 11.922 |
 | SE-ResNet 50                | Caffe\*                            | [se-resnet-50](./se-resnet-50/se-resnet-50.md) | 77.596%/93.85% | 7.775 | 28.061 |
 | SE-ResNet 101               | Caffe\*                            | [se-resnet-101](./se-resnet-101/se-resnet-101.md)   | 78.252%/94.206% | 15.239 | 49.274  |
