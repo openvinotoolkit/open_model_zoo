@@ -12,7 +12,7 @@ matplotlib==3.3.3         # via scikit-image
 networkx==2.5             # via scikit-image
 nibabel==3.2.1            # via -r tools/accuracy_checker/requirements.in
 nltk==3.5                 # via -r tools/accuracy_checker/requirements.in
-numpy==1.17.5             # via -r tools/accuracy_checker/requirements-core.in, -r tools/accuracy_checker/requirements.in, imageio, matplotlib, nibabel, parasail, pywavelets, scikit-image, scikit-learn, scipy, tifffile
+numpy==1.19.4             # via -r tools/accuracy_checker/requirements-core.in, -r tools/accuracy_checker/requirements.in, imageio, matplotlib, nibabel, parasail, pywavelets, scikit-image, scikit-learn, scipy, tifffile
 packaging==20.8           # via nibabel
 parasail==1.2             # via -r tools/accuracy_checker/requirements.in
 pillow==8.0.1             # via -r tools/accuracy_checker/requirements-core.in, imageio, matplotlib, scikit-image
