@@ -104,7 +104,7 @@ class CaffeLauncher(Launcher):
         if layer_shape != data_shape:
             self._do_reshape = True
 
-        return data.astype(precision) if precision else precision
+        return data.astype(precision) if precision else data
 
     def automatic_model_search(self):
         model = Path(self.get_value_from_config('model'))
