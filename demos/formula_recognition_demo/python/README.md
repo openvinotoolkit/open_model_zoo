@@ -63,7 +63,7 @@ MacOS:
 ### Interactive mode
 The example of the interface:
 ![](./interactive_interface.png)
-When User runs demo application with the `-i` option and passes `.mp4` video or number of the web-camera device as an argument (typically 0), window with the image simillar to above should pop up.
+When User runs demo application with the `-i` option and passes video or number of the web-camera device as an argument (typically 0), window with the image simillar to above should pop up.
 
 Example of usage of the interactive mode:
 ```
