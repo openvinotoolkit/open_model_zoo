@@ -1,5 +1,5 @@
 models:
-  - name: densenet-121-tf
+  - name: densenet-201-tf
     launchers:
       - framework: dlsdk
         adapter: classification

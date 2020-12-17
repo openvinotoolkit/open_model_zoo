@@ -1,25 +1,25 @@
-# densenet-169-tf
+# densenet-201-tf
 
 ## Use Case and High-Level Description
 
-This is a TensorFlow\* version of `densenet-169` model, one of the DenseNet\* group of models designed to perform image classification.
-For details, see [TensorFlow\* API docs](https://www.tensorflow.org/api_docs/python/tf/keras/applications/DenseNet169), [repository](https://github.com/tensorflow/tensorflow) and [paper](https://arxiv.org/abs/1608.06993).
+This is a TensorFlow\* version of `densenet-201` model, one of the DenseNet\* group of models designed to perform image classification.
+For details, see [TensorFlow\* API docs](https://www.tensorflow.org/api_docs/python/tf/keras/applications/DenseNet201), [repository](https://github.com/tensorflow/tensorflow) and [paper](https://arxiv.org/abs/1608.06993).
 
 ## Specification
 
 | Metric                          | Value           |
 |---------------------------------|-----------------|
 | Type                            | Classification  |
-| GFlops                          | 6.7932          |
-| MParams                         | 14.1389         |
+| GFlops                          | 8.6786          |
+| MParams                         | 20.0013         |
 | Source framework                | TensorFlow\*    |
 
 ## Accuracy
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 76.14%|
-| Top 5  | 93.12%|
+| Top 1  | 76.93%|
+| Top 5  | 93.56%|
 
 ## Input
 
@@ -52,7 +52,7 @@ Expected color order: BGR.
 
 ### Original Model
 
-Object classifier according to ImageNet classes, name - `StatefulPartitionedCall/densenet169/predictions/Softmax`,  shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `StatefulPartitionedCall/densenet201/predictions/Softmax`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
 - `C` - Predicted probabilities for each class in  [0, 1] range

@@ -9,6 +9,7 @@ densenet-161-tf
 densenet-169
 densenet-169-tf
 densenet-201
+densenet-201-tf
 efficientnet-b0
 efficientnet-b0_auto_aug
 efficientnet-b0-pytorch
