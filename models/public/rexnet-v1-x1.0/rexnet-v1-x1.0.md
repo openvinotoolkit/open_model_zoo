@@ -1,8 +1,8 @@
-# rexnet-v1-1.0x
+# rexnet-v1-x1.0
 
 ## Use Case and High-Level Description
 
-ReXNet V1 1.0x is image classification model pretrained on ImageNet dataset. Rank eXpansion Network(ReXNet): Diminishing Representational Bottleneck on Convolutional Neural Network.
+ReXNet V1 x1.0 is network from Rank eXpansion Network (ReXNet) models family, derived from research to mitigate the representational bottleneck. It is image classification model pretrained on ImageNet dataset.
 
 The model input is a blob that consists of a single image of "1x3x224x224" in RGB order.
 
@@ -55,7 +55,7 @@ Channel order is `BGR`.
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `1424`,  shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
 - `C` - Predicted probabilities for each class in  [0, 1] range
@@ -66,8 +66,8 @@ The converted model has the same parameters as the original model.
 
 ## Legal Information
 
-The original model is distributed under the following
-[license](https://raw.githubusercontent.com/clovaai/rexnet/master/LICENSE):
+The original model is distributed under
+[MIT license](https://raw.githubusercontent.com/clovaai/rexnet/master/LICENSE):
 
 ```
 Copyright (c) 2020-present NAVER Corp.

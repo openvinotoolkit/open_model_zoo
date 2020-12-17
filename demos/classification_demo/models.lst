@@ -50,7 +50,7 @@ resnet-50-pytorch
 resnet-50-tf
 resnet18-xnor-binary-onnx-0001
 resnet50-binary-0001
-rexnet-v1-1.0x
+rexnet-v1-x1.0
 se-inception
 se-resnet-101
 se-resnet-152
