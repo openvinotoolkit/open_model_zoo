@@ -1,5 +1,7 @@
 # Image Retrieval Python\* Demo
 
+![](./image_retrieval.gif)
+
 This demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 
 > **NOTE**: Only batch size of 1 is supported.
@@ -80,8 +82,6 @@ Examples of videos can be found [here](https://github.com/19900531/test).
 ## Demo Output
 
 The application uses OpenCV to display gallery searching result and current inference performance.
-
-![](./image_retrieval_demo.jpg)
 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
