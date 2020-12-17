@@ -148,7 +148,7 @@ class ForwardTacotronIE:
                 start_idx = edge
                 non_empty_symbols = None
                 if len(sub_sequence) < self.duration_len:
-                    non_empty_symbols = len(sub_sequence) + min(5, self.duration_len - len(sequence))
+                    non_empty_symbols = len(sub_sequence) + min(5, self.duration_len - len(sub_sequence))
                     sub_sequence += [_symbol_to_id[' ']] * (self.duration_len - len(sub_sequence))
                 sub_sequence = np.array(sub_sequence)
                 sub_sequence = np.expand_dims(sub_sequence, axis=0)
