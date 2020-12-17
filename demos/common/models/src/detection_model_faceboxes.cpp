@@ -14,6 +14,7 @@
 // limitations under the License.
 */
 
+#include <algorithm>
 #include "models/detection_model_faceboxes.h"
 #include <samples/slog.hpp>
 #include <samples/common.hpp>
@@ -73,9 +74,10 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     }
 
 }
-std::vector<double> calculateAnchors(std::vector<double> vx, std::vector<double> vy, int minSize,
+
+std::vector<ModelFaceBoxes::Anchor> calculateAnchors(std::vector<double> vx, std::vector<double> vy, int minSize,
     int imgWidth, int imgHeight, int step) {
-    std::vector<std::vector<double>> anchors;
+    std::vector<ModelFaceBoxes::Anchor> anchors;
     double skx = minSize / imgWidth;
     double sky = minSize / imgHeight;
     std::vector<double> dense_cx, dense_cy;
@@ -87,14 +89,18 @@ std::vector<double> calculateAnchors(std::vector<double> vx, std::vector<double>
     for (auto y : vy) {
         dense_cx.push_back(y * step / imgHeight);
     }
+
     for (auto cy : dense_cy) {
         for (auto cx : dense_cx) {
             anchors.push_back({ cx, cy, skx, sky });
         }
     }
+
+    return anchors;
 }
-std::vector<double> calculateAnchorsZeroLevel(int fx, int fy,  std::vector<int> minSizes, int imgWidth, int imgHeight, int step) {
-    std::vector<double> anchors;
+
+std::vector<ModelFaceBoxes::Anchor> calculateAnchorsZeroLevel(int fx, int fy,  std::vector<int> minSizes, int imgWidth, int imgHeight, int step) {
+    std::vector<ModelFaceBoxes::Anchor> anchors;
     std::vector<double> vx, vy;
     for (auto s : minSizes) {
         if (s == 32) {
@@ -118,27 +124,35 @@ std::vector<double> calculateAnchorsZeroLevel(int fx, int fy,  std::vector<int> 
             vy.push_back(fy + 0.5);
         }
         auto a = calculateAnchors(vx, vy, s, imgWidth, imgHeight, step);
-        anchors.insert(anchors.end(), anchors.begin(), anchors.end());
+        anchors.insert(anchors.end(), a.begin(), a.end());
     }
     return anchors;
 }
 
-std::vector<double> ModelFaceBoxes::priorBoxes(std::vector<std::pair<int, int>> featureMaps, int imgWidth, int imgHeight) {
-    std::vector<double> anchors;
+std::vector<ModelFaceBoxes::Anchor> ModelFaceBoxes::priorBoxes(std::vector<std::pair<int, int>> featureMaps, int imgWidth, int imgHeight) {
+    std::vector<Anchor> anchors;
 
     for (int k = 1; k < featureMaps.size(); ++k) {
-        std::vector<double> a;
+        std::vector<Anchor> a;
         for (int i = 0; i < featureMaps[i].first; ++i) {
             for (int j = 0; j < featureMaps[j].second; ++j) {
-                if (k != 0) {
-                    a = calculateAnchors(j, i, minSizes[k], imgWidth, imgHeight, steps[k]);
+                if (k == 0) {
+                    a = calculateAnchorsZeroLevel(j, i, minSizes[k], imgWidth, imgHeight, steps[k]);;
                 }
                 else {
-                    a = calculateAnchorsZeroLevel(j, i, minSizes[k], imgWidth, imgHeight, steps[k]);
+                    a = calculateAnchors({ j + 0.5 }, { i + 0.5 }, minSizes[k][0], imgWidth, imgHeight, steps[k]);
                 }
-                anchors.insert(anchors.end(), anchors.begin(), anchors.end())
+
+                anchors.insert(anchors.end(), a.begin(), a.end());
             }
         }
+    }
+
+    for (auto& anc : anchors) {
+        anc.cx = std::min(std::max(anc.cx, 0.), 1.);
+        anc.cy = std::min(std::max(anc.cx, 0.), 1.);
+        anc.skx = std::min(std::max(anc.cx, 0.), 1.);
+        anc.sky = std::min(std::max(anc.cx, 0.), 1.);
     }
 }
 
@@ -146,12 +160,15 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
     //size imgSize{ infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth,infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight };
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
-    auto bboxes = infResult.outputsData[outputsNames[0]];
-    auto scores = infResult.outputsData[outputsNames[1]];
+    auto bboxes = infResult.outputsData[outputsNames[0]]; //0:21824, each 4 el
+    auto scores = infResult.outputsData[outputsNames[1]]; //0:21824, each 2 el
     std::vector<std::pair<int, int>> featureMaps;
+
     for (auto s : steps) {
         featureMaps.push_back({ netInputHeight / s, netInputWidth / s });
     }
+
+    std::vector<Anchor> priorData = priorBoxes(featureMaps, imgWidth, imgHeight);
 
     return std::unique_ptr<ResultBase>();
 }

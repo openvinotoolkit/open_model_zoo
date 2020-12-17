@@ -18,12 +18,23 @@
 #include "detection_model.h"
 class ModelFaceBoxes : public DetectionModel {
 public:
+    struct Anchor {
+        double cx;
+        double cy;
+        double skx;
+        double sky;
+
+        //double getWidth() const { return (right - left) + 1; }
+        //double getHeight() const { return (bottom - top) + 1; }
+        //double getXCenter() const { return left + (getWidth() - 1.0) / 2.; }
+        //double getYCenter() const { return top + (getHeight() - 1.0) / 2.; }
+    };
     std::vector<std::vector<int>> minSizes;
     ModelFaceBoxes(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold);
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    std::vector<double> priorBoxes(std::vector<std::pair<int, int>> featureMaps, int imgWidth, int imgHeight);
+    std::vector<Anchor> priorBoxes(std::vector<std::pair<int, int>> featureMaps, int imgWidth, int imgHeight);
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     double boxIOUThreshold;
     int keepTopK;
