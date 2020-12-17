@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 This is a TensorFlow\* version of `densenet-201` model, one of the DenseNet\* group of models designed to perform image classification.
-The weights were converted from DenseNet-Keras Models. For details, see [TensorFlow\* API docs](https://www.tensorflow.org/api_docs/python/tf/keras/applications/DenseNet201), [repository](https://github.com/tensorflow/tensorflow) and [paper](https://arxiv.org/abs/1608.06993).
+For details, see [TensorFlow\* API docs](https://www.tensorflow.org/api_docs/python/tf/keras/applications/DenseNet201), [repository](https://github.com/tensorflow/tensorflow) and [paper](https://arxiv.org/abs/1608.06993).
 
 ## Specification
 

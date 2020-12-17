@@ -25,12 +25,12 @@ def main():
     parser.add_argument('output_dir', type=Path)
     args = parser.parse_args()
 
+    tf.keras.backend.set_image_data_format('channels_last')
+
     model = tf.keras.applications.DenseNet121(
-        include_top=True, weights=None, input_tensor=None,
-        input_shape=None, pooling=None, classes=1000
+        weights=str(args.input_dir / 'densenet121_weights_tf_dim_ordering_tf_kernels.h5')
     )
-    model.load_weights(filepath=args.input_dir / 'densenet121_weights_tf_dim_ordering_tf_kernels.h5')
-    model.save(filepath=args.output_dir)
+    model.save(filepath=args.output_dir / 'densenet-121.savedmodel')
 
 
 if __name__ == '__main__':
