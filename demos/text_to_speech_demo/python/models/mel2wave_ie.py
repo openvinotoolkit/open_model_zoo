@@ -238,9 +238,12 @@ class MelGANIE:
         cols = mel.shape[2]
 
         for i, w in enumerate(self.widths):
-            if cols >= w:
+            if cols <= w:
                 cur_w = w
                 active_net = i
+                break
+        if active_net == -1:
+            cur_w = self.widths[-1]
 
         c_begin = 0
         c_end = cur_w
@@ -252,9 +255,10 @@ class MelGANIE:
 
             if c_end + cur_w >= cols:
                 for i, w in enumerate(self.widths):
-                    if w <= cols - c_end:
+                    if w >= cols - c_end:
                         cur_w = w
                         active_net = i
+                        break
 
             c_end += cur_w
         if last_padding:
