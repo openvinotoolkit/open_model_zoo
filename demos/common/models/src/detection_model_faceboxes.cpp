@@ -254,7 +254,7 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
     }
 
 // --------------------------- Filter scores and get valid indices for bounding boxes----------------------------------
-    const auto scoresInfRes = infResult.outputsData[outputsNames[1]]; 
+    const auto scoresInfRes = infResult.outputsData[outputsNames[1]];
     auto scores = filterScores(scoresInfRes, confidenceThreshold);
 
 // --------------------------- Filter bounding boxes on indices -------------------------------------------------------
