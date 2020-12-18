@@ -144,12 +144,10 @@ class InteractiveDemo:
 
 
 def create_capture(input_source, demo_resolution):
-    if input_source.isdigit():
-        try:
-            input_source = int(input_source)
-        except ValueError:
-            raise ValueError("\n \tCannot recognize input as .mp4 video or device-id as int"
-                             "\n \tPlease, check the -i/--input arg and try again")
+    try:
+        input_source = int(input_source)
+    except ValueError:
+        pass
     capture = cv.VideoCapture(input_source)
     capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
     capture.set(cv.CAP_PROP_FRAME_WIDTH, demo_resolution[0])
