@@ -1,5 +1,7 @@
 # Gaze Estimation Demo
 
+![](./gaze_estimation.gif)
+
 This demo showcases the work of gaze estimation model.
 The corresponding pre-trained model `gaze-estimation-adas-0002` is delivered with the product.
 

@@ -1,5 +1,7 @@
 # Image Segmentation C++ Demo
 
+![](./segmentation.gif)
+
 This topic demonstrates how to run the Image Segmentation demo application, which does inference using semantic segmentation networks.
 
 > **NOTE:** This topic describes usage of C++ implementation of the Image Segmentation Demo. For the Python* implementation, refer to [Image Segmentation Python* Demo](../python_demos/segmentation_demo/README.md).
