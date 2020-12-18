@@ -19,7 +19,7 @@ public:
     void updateAge(float value);
     void updateGender(float value);
     void updateEmotions(const std::map<std::string, float>& values);
-    void updateHeadPose(double y, double p, double r);
+    void updateHeadPose(float y, float p, float r);
     void updateLandmarks(std::vector<float> values);
 
     int getAge();
@@ -38,9 +38,9 @@ public:
     float  _maleScore;
     float  _femaleScore;
     std::map<std::string, float> _emotions;
-    double _yaw;
-    double _pitch;
-    double _roll;
+    float _yaw;
+    float _pitch;
+    float _roll;
     std::vector<float> _landmarks;
 };
 

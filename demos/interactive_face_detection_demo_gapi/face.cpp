@@ -33,7 +33,7 @@ void Face::updateEmotions(const std::map<std::string, float>& values) {
     }
 }
 
-void Face::updateHeadPose(double y, double p, double r) {
+void Face::updateHeadPose(float y, float p, float r) {
     _yaw   = y;
     _pitch = p;
     _roll  = r;
