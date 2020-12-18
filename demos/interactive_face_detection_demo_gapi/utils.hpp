@@ -57,9 +57,6 @@ private:
 class Timer {
 public:
     void start(const std::string& name) {
-        if (_timers.find(name) == _timers.end()) {
-            _timers[name] = CallStat();
-        }
         _timers[name].setStartTime();
     }
 

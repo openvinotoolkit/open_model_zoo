@@ -54,13 +54,12 @@ Options:
     -d_em "<device>"           Optional. Target device for Emotions Recognition network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -d_lm "<device>"           Optional. Target device for Facial Landmarks Estimation network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -no_show                   Optional. Do not show processed video.
-    -pc                        Option \"-pc\" is not supported in this version of the demo. Optional. Enable per-layer performance report
     -r                         Optional. Output inference results as raw values
     -t                         Optional. Probability threshold for detections
     -bb_enlarge_coef           Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face
     -dx_coef                   Optional. Coefficient to shift the bounding box around the detected face along the Ox axis
     -dy_coef                   Optional. Coefficient to shift the bounding box around the detected face along the Oy axis
-    -loop_video                Optional. Enable playing video on a loop
+    -loop                Optional. Enable playing video on a loop
     -no_smooth                 Optional. Do not smooth person attributes
     -no_show_emotion_bar       Optional. Do not show emotion bar
     -u                         Optional. List of monitors to show initially.

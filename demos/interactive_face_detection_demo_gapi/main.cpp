@@ -38,9 +38,9 @@ static const std::vector<std::string> EMOTION_VECTOR = {"neutral",
 using AGInfo = std::tuple<cv::GMat, cv::GMat>;
 using HPInfo = std::tuple<cv::GMat, cv::GMat, cv::GMat>;
 G_API_NET(Faces,          <cv::GMat(cv::GMat)>, "face-detector");
-G_API_NET(AgeGender,      <AGInfo(cv::GMat)>,   "age-gender-recoginition");
-G_API_NET(HeadPose,       <HPInfo(cv::GMat)>,   "head-pose-recoginition");
-G_API_NET(FacialLandmark, <cv::GMat(cv::GMat)>, "facial-landmark-recoginition");
+G_API_NET(AgeGender,      <AGInfo(cv::GMat)>,   "age-gender-recognition");
+G_API_NET(HeadPose,       <HPInfo(cv::GMat)>,   "head-pose-recognition");
+G_API_NET(FacialLandmark, <cv::GMat(cv::GMat)>, "facial-landmark-recognition");
 G_API_NET(Emotions,       <cv::GMat(cv::GMat)>, "emotions-recognition");
 
 G_API_OP(PostProc, <cv::GArray<cv::Rect>(cv::GMat, cv::GMat, double, double, double, double)>, "custom.fd_postproc") {
@@ -530,10 +530,10 @@ int main(int argc, char *argv[]) {
                 framesCounter++;
                 timer.finish("total");
             } else { // End of streaming
-                if(FLAGS_loop_video) {
-                    slog::info << "Number of processed frames: " << framesCounter << slog::endl;
-                    slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
+                slog::info << "Number of processed frames: " << framesCounter << slog::endl;
+                slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
 
+                if(FLAGS_loop) {
                     std::cout << presenter->reportMeans() << '\n';
 
                     slog::info << "Setting media source" << slog::endl;
@@ -551,7 +551,6 @@ int main(int argc, char *argv[]) {
                     stream.start();
                 } else {
                     slog::info << "No more frames to process!" << slog::endl;
-                    cv::waitKey(0);
                 }
             }
         }
@@ -559,9 +558,6 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_o.empty()) {
             videoWriter.release();
         }
-
-        slog::info << "Number of processed frames: " << framesCounter << slog::endl;
-        slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
 
         std::cout << presenter->reportMeans() << '\n';
 
