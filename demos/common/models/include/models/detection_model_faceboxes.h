@@ -30,21 +30,21 @@ public:
         double getXCenter() const { return left + (getWidth() - 1.0) / 2.; }
         double getYCenter() const { return top + (getHeight() - 1.0) / 2.; }
     };
-
-    const std::vector<std::vector<int>> minSizes;
+    static const int INIT_VECTOR_SIZE = 200;
 
     ModelFaceBoxes(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold);
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
     int maxProposalsCount;
-    SizeVector objectSize;
+    std::vector<int> objectSize;
     const int keepTopK;
     const double boxIOUThreshold;
     const std::vector<int> steps;
     const std::vector<double> variance;
-
+    const std::vector<std::vector<int>> minSizes;
+    std::vector<Anchor> anchors;
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
-    std::vector<Anchor> priorBoxes(std::vector<std::pair<int, int>> featureMaps, int imgWidth, int imgHeight);
+    void priorBoxes(const std::vector<std::pair<int, int>>& featureMaps);
 
 };

@@ -73,7 +73,7 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     for (auto& output : outputInfo) {
         const TensorDesc& outputDesc = output.second->getTensorDesc();
         maxProposalsCount = outputDesc.getDims()[1];
-        objectSize.push_back(outputDesc.getDims()[2]);
+        objectSize.push_back(outputDesc.getDims()[2]);  // 0 - bboxes object size, 1 - score object size
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(InferenceEngine::Layout::CHW);
         outputsNames.push_back(output.first);
@@ -81,33 +81,31 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
 
 }
 
-void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>* anchors, const std::vector<double>& vx, const std::vector<double>& vy, int imgWidth, int imgHeight, int minSize,  int step) {
-    double skx = static_cast<double>(minSize) / imgWidth;
-    double sky = static_cast<double>(minSize) / imgHeight;
-    skx = std::min(std::max(skx, 0.), 1.);
-    sky = std::min(std::max(sky, 0.), 1.);
+void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>* anchors, const std::vector<double>& vx, const std::vector<double>& vy,
+    const int minSize, const int step) {
+    double skx = static_cast<double>(minSize);
+    double sky = static_cast<double>(minSize);
 
-    std::vector<double> dense_cx(vx.size()), dense_cy(vy.size);
+    std::vector<double> dense_cx, dense_cy;
 
     for (auto x : vx) {
-        dense_cx.push_back(x * step / imgWidth);
+        dense_cx.push_back(x * step);
     }
 
     for (auto y : vy) {
-        dense_cy.push_back(y * step / imgHeight);
+        dense_cy.push_back(y * step);
     }
 
     for (auto cy : dense_cy) {
         for (auto cx : dense_cx) {
-            cx = std::min(std::max(cx, 0.), 1.);
-            cy = std::min(std::max(cy, 0.), 1.);
-            anchors->push_back({ cx, cy, skx, sky });
+            anchors->push_back({ cx - 0.5 * skx, cy - 0.5 * sky, cx + 0.5 * skx, cy + 0.5 * sky });  // left top right bottom
         }
     }
 
 }
 
-void calculateAnchorsZeroLevel(std::vector<ModelFaceBoxes::Anchor>* anchors, int fx, int fy, int imgWidth, int imgHeight, const std::vector<int>& minSizes, int step) {
+void calculateAnchorsZeroLevel(std::vector<ModelFaceBoxes::Anchor>* anchors, const int fx, const int fy,
+    const std::vector<int>& minSizes, const int step) {
     for (auto s : minSizes) {
         std::vector<double> vx, vy;
         if (s == 32) {
@@ -132,50 +130,42 @@ void calculateAnchorsZeroLevel(std::vector<ModelFaceBoxes::Anchor>* anchors, int
             vx.push_back(fx + 0.5);
             vy.push_back(fy + 0.5);
         }
-        calculateAnchors(anchors, vx, vy, imgWidth, imgHeight, s, step);
+        calculateAnchors(anchors, vx, vy, s, step);
     }
 }
 
-std::vector<ModelFaceBoxes::Anchor> ModelFaceBoxes::priorBoxes(std::vector<std::pair<int, int>> featureMaps, int imgWidth, int imgHeight) {
-    std::vector<ModelFaceBoxes::Anchor> anchors(maxProposalsCount);
+void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<int, int>>& featureMaps) {
+    anchors.reserve(maxProposalsCount);
 
     for (int k = 0; k < featureMaps.size(); ++k) {
         std::vector<double> a;
         for (int i = 0; i < featureMaps[k].first; ++i) {
             for (int j = 0; j < featureMaps[k].second; ++j) {
                 if (k == 0) {
-                    calculateAnchorsZeroLevel(&anchors, j, i, imgWidth,  imgHeight,  minSizes[k], steps[k]);;
+                    calculateAnchorsZeroLevel(&anchors, j, i,  minSizes[k], steps[k]);;
                 }
                 else {
-                    calculateAnchors(&anchors, { j + 0.5 }, { i + 0.5 }, imgWidth, imgHeight, minSizes[k][0], steps[k]);
+                    calculateAnchors(&anchors, { j + 0.5 }, { i + 0.5 }, minSizes[k][0], steps[k]);
                 }
             }
         }
     }
-
-    for (auto& anc : anchors) {
-        //anc = std::min(std::max(anc, 0.), 1.);
-        //anc.cy = std::min(std::max(anc.cx, 0.), 1.);
-        //anc.skx = std::min(std::max(anc.cx, 0.), 1.);
-        //anc.sky = std::min(std::max(anc.cx, 0.), 1.);
-    }
-
-    return anchors;
 }
 
-std::vector<int> nms(const std::vector<ModelFaceBoxes::Anchor>& boxes, const std::vector<double>& scores, double thresh) {
+std::vector<int> nms(const std::vector<ModelFaceBoxes::Anchor>& boxes, const std::vector<double>& scores, const double thresh) {
 
     std::vector<double> areas(boxes.size());
 
     for (int i = 0; i < boxes.size(); ++i) {
         areas[i] = (boxes[i].right - boxes[i].left) * (boxes[i].bottom - boxes[i].top);
     }
+
     std::vector<int> order(scores.size());
     std::iota(order.begin(), order.end(), 0);
     std::sort(order.begin(), order.end(), [&scores](int o1, int o2) { return scores[o1] > scores[o2]; });
 
-    int ordersNum = scores.size();
-
+    int ordersNum = 0;
+    for (; ordersNum < order.size() && scores[order[ordersNum]] >= 0; ordersNum++);
     std::vector<int> keep;
     bool shouldContinue = true;
     for (int i = 0; shouldContinue && i < ordersNum; ++i) {
@@ -202,91 +192,110 @@ std::vector<int> nms(const std::vector<ModelFaceBoxes::Anchor>& boxes, const std
     return keep;
 }
 
-std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResult) {
-    auto start = std::chrono::high_resolution_clock::now();
-    //size imgSize{ infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth,infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight };
-   //auto imgWidth = ; // wrong
-    //auto imgHeight = ; // wrong 
 
-    std::vector<std::pair<int, int>> featureMaps(steps.size());
+std::pair<std::vector<size_t>, std::vector<double>> filterScores(InferenceEngine::MemoryBlob::Ptr scoreInfRes, const double confidenceThreshold) {
+    auto desc = scoreInfRes->getTensorDesc();
+    auto sz = desc.getDims();
+    LockedMemory<const void> outputMapped = scoreInfRes->rmap();
+    const float *scoresPtr = outputMapped.as<float*>();
 
-    for (auto s : steps) {
-        featureMaps.push_back({ netInputHeight / s, netInputWidth / s });
-    }
-
-    std::vector<Anchor> priorData = priorBoxes(featureMaps, netInputWidth, netInputHeight);
-
-    auto bboxesInfRes = infResult.outputsData[outputsNames[0]]; //0:21824, each 4 el
-    auto desc = bboxesInfRes->getTensorDesc();
-    auto bbSize = desc.getDims();
-    //auto landmarkPredLen = sz[1] / anchorNum;
-    auto blockWidth = bbSize[2];
-    LockedMemory<const void> bboxesOutputMapped = bboxesInfRes->rmap();
-    std::vector<double> bboxesData(bbSize[1] * bbSize[2]);
-    const float *bboxesPtr = bboxesOutputMapped.as<float*>();
-    size_t offset = blockWidth / 2;
-    for (size_t i = 0; i < bbSize[1] * bbSize[2]; ++i) {
-        if (i % blockWidth < offset) {
-            bboxesData[i] = bboxesPtr[i] * variance[0] * priorData[i + offset] + priorData[i];
-        }
-        else {
-            bboxesData[i] = exp(bboxesPtr[i] * variance[1]) * priorData[i];
-        }
-
-    }
-
-    auto scoresInfRes = infResult.outputsData[outputsNames[1]]; //0:21824, each 2 el
-    desc = scoresInfRes->getTensorDesc();
-    auto scSize = desc.getDims();
-    auto scWidth = scSize[2];
-    LockedMemory<const void> scoresOutputMapped = scoresInfRes->rmap();
-    std::vector<double> scores(scSize[1] * scSize[2]);
-    const float *scoresPtr = scoresOutputMapped.as<float*>();
-    std::vector<int> indices;
-    std::vector<double> filteredScores;
-    for (size_t i = 1; i < scSize[1] * scSize[2]; i = i + 2) {
+    std::vector<size_t> indices;
+    std::vector<double> scores;
+    scores.reserve(ModelFaceBoxes::INIT_VECTOR_SIZE);
+    indices.reserve(ModelFaceBoxes::INIT_VECTOR_SIZE);
+    for (size_t i = 1; i < sz[1] * sz[2]; i = i + 2) {
         if (scoresPtr[i] > confidenceThreshold) {
             indices.push_back(i / 2);
-            filteredScores.push_back(scoresPtr[i]);
+            scores.push_back(scoresPtr[i]);
         }
     }
 
-    std::vector<Anchor> filteredBBoxes;
-    auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
-    auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
-    // make anchors
-    for (auto i : indices) {
-        Anchor a;
-        a.left = (bboxesData[4 * i] - 0.5*bboxesData[4 * i + 2]) * imgWidth;
-        a.right = (bboxesData[4 * i] + 0.5*bboxesData[4 * i + 2]) * imgWidth;
-        a.top = (bboxesData[4 * i + 1] - 0.5*bboxesData[4 * i + 3]) * imgHeight;
-        a.bottom = (bboxesData[4 * i + 1]  + 0.5*bboxesData[4 * i + 3]) * imgHeight;
-        filteredBBoxes.push_back(a);
+    return { indices, scores };
+}
+
+std::vector<ModelFaceBoxes::Anchor> filterBBoxes(InferenceEngine::MemoryBlob::Ptr bboxesInfRes, const std::vector<ModelFaceBoxes::Anchor>& anchors,
+    const std::vector<size_t>& validIndices, const std::vector<double>& variance) {;
+    LockedMemory<const void> bboxesOutputMapped = bboxesInfRes->rmap();
+    auto desc = bboxesInfRes->getTensorDesc();
+    auto sz = desc.getDims();
+    const float *bboxesPtr = bboxesOutputMapped.as<float*>();
+
+    std::vector<ModelFaceBoxes::Anchor> bboxes;
+    bboxes.reserve(ModelFaceBoxes::INIT_VECTOR_SIZE);
+    for (auto i : validIndices) {
+        auto objStart = sz[2] * i;
+
+        auto dx = bboxesPtr[objStart];
+        auto dy = bboxesPtr[objStart + 1];
+        auto dw = bboxesPtr[objStart + 2];
+        auto dh = bboxesPtr[objStart + 3];
+
+        auto predCtrX = dx * variance[0] * anchors[i].getWidth() + anchors[i].getXCenter();
+        auto predCtrY = dy * variance[0] * anchors[i].getHeight() + anchors[i].getYCenter();
+        auto predW = exp(dw * variance[1]) * anchors[i].getWidth();
+        auto predH = exp(dh * variance[1]) * anchors[i].getHeight();
+
+        bboxes.push_back({ (predCtrX - 0.5 * predW), (predCtrY - 0.5 * predH),
+                                     (predCtrX + 0.5 * predW), (predCtrY + 0.5 * predH) });
     }
 
-    std::vector<int> keep = nms(filteredBBoxes, filteredScores, boxIOUThreshold);
+    return bboxes;
+}
 
+std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResult) {
+    auto start = std::chrono::high_resolution_clock::now();
+
+// --------------------------- Calculating anchors at first start ---------------------------------------------
+    if (anchors.size() == 0) {
+        std::vector<std::pair<int, int>> featureMaps;
+        for (auto s : steps) {
+            featureMaps.push_back({ netInputHeight / s, netInputWidth / s });
+        }
+
+        auto s = std::chrono::high_resolution_clock::now();
+        priorBoxes(featureMaps);
+        auto e = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> time =
+            std::chrono::duration_cast<std::chrono::milliseconds>(e - s);
+        std::cout << "anchors " << time.count() << "ms" << std::endl;
+    }
+
+// --------------------------- Filter scores and get valid indices for bounding boxes------------------------------------------
+    const auto scoresInfRes = infResult.outputsData[outputsNames[1]]; 
+    auto scores = filterScores(scoresInfRes, confidenceThreshold);
+
+// --------------------------- Filter bounding boxes on indices ---------------------------------------------
+    auto bboxesInfRes = infResult.outputsData[outputsNames[0]];
+    std::vector<Anchor> bboxes = filterBBoxes(bboxesInfRes, anchors, scores.first, variance);
+
+// --------------------------- Apply Non-maximum Suppression ---------------------------------------------
+    std::vector<int> keep = nms(bboxes, scores.second, boxIOUThreshold);
+
+// --------------------------- Creating detection result objects  ---------------------------------------------
     DetectionResult* result = new DetectionResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
+    auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
     double scaleX = ((double)netInputWidth) / imgWidth;
     double scaleY = ((double)netInputHeight) / imgHeight;
 
     result->objects.reserve(keep.size());
     for (auto i : keep) {
         DetectedObject desc;
-        desc.confidence = static_cast<float>(filteredScores[i]);
-        desc.x = static_cast<float>(filteredBBoxes[i].left);
-        desc.y = static_cast<float>(filteredBBoxes[i].top);
-        desc.width = static_cast<float>(filteredBBoxes[i].getWidth());
-        desc.height = static_cast<float>(filteredBBoxes[i].getHeight());
- 
+        desc.confidence = static_cast<float>(scores.second[i]);
+        desc.x = static_cast<float>(bboxes[i].left / scaleX);
+        desc.y = static_cast<float>(bboxes[i].top / scaleY);
+        desc.width = static_cast<float>(bboxes[i].getWidth() / scaleX);
+        desc.height = static_cast<float>(bboxes[i].getHeight() / scaleY);
         desc.labelID =  0;
         desc.label = labels[0];
+
         result->objects.push_back(desc);
     }
+
     auto stop = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> time_span =
-        std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+        std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     //std::cout << "p " << time_span.count() << "ms" << std::endl;
     return std::unique_ptr<ResultBase>(result);;
 }
