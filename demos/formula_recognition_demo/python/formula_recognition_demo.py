@@ -152,8 +152,8 @@ def create_capture(input_source, demo_resolution):
                              "\n \tPlease, check the -i/--input arg and try again")
     capture = cv.VideoCapture(input_source)
     capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
-    capture.set(3, demo_resolution[0])
-    capture.set(4, demo_resolution[1])
+    capture.set(cv.CAP_PROP_FRAME_WIDTH, demo_resolution[0])
+    capture.set(cv.CAP_PROP_FRAME_HEIGHT, demo_resolution[1])
     return capture
 
 
