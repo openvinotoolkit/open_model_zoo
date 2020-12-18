@@ -79,11 +79,6 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     else {
         throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
     }
-
-    if (!this->labels.empty() && static_cast<int>(labels.size()) != regions.begin()->second.classes) {
-        throw std::runtime_error(std::string("The number of labels (") + std::to_string(labels.size()) +
-            ") is different from numbers of model classes (" + std::to_string(regions.begin()->second.classes) + ")");
-    }
 }
 
 std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult) {

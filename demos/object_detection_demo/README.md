@@ -96,6 +96,8 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
+If labels file is used, it should correspond to model output. Demo suggests labels listed in the file to be indexed from 0, one line - one label (i.e. very first line contains label for ID 0). Note that s	ome models may return labels IDs in range 1..N, in this case label file should contain "background" label at the very first line.
+
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 ```sh
 ./object_detection_demo -i <path_to_video>/inputVideo.mp4 -at ssd -m <path_to_model>/ssd.xml -d GPU
