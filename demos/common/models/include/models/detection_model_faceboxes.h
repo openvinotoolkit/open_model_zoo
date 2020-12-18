@@ -43,6 +43,6 @@ protected:
     const std::vector<std::vector<int>> minSizes;
     std::vector<Anchor> anchors;
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
-    void priorBoxes(const std::vector<std::pair<int, int>>& featureMaps);
+    void priorBoxes(const std::vector<std::pair<size_t, size_t>>& featureMaps);
 
 };

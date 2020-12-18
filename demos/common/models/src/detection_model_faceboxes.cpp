@@ -134,7 +134,7 @@ void calculateAnchorsZeroLevel(std::vector<ModelFaceBoxes::Anchor>* anchors, con
     }
 }
 
-void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<int, int>>& featureMaps) {
+void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<size_t, size_t>>& featureMaps) {
     anchors.reserve(maxProposalsCount);
 
     for (int k = 0; k < featureMaps.size(); ++k) {
@@ -245,7 +245,7 @@ std::vector<ModelFaceBoxes::Anchor> filterBBoxes(InferenceEngine::MemoryBlob::Pt
 std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResult) {
 // --------------------------- Calculating anchors at first start ----------------------------------------------------
     if (anchors.size() == 0) {
-        std::vector<std::pair<int, int>> featureMaps;
+        std::vector<std::pair<size_t, size_t>> featureMaps;
         for (auto s : steps) {
             featureMaps.push_back({ netInputHeight / s, netInputWidth / s });
         }
