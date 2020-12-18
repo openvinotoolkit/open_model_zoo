@@ -418,10 +418,7 @@ int main(int argc, char *argv[]) {
 
         slog::info << "Setting media source" << slog::endl;            
         try {
-            if (FLAGS_i == "cam")
-                stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(0));
-            else
-                stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
+            stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
         } catch (const std::exception& error) {
             std::stringstream msg;
             msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
@@ -536,13 +533,9 @@ int main(int argc, char *argv[]) {
                 std::cout << presenter->reportMeans() << '\n';
 
                 if(FLAGS_loop) {
-
                     slog::info << "Setting media source" << slog::endl;
                     try {
-                        if (FLAGS_i == "cam")
-                            stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(0));
-                        else
-                            stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
+                        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
                     } catch (const std::exception& error) {
                         std::stringstream msg;
                         msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
