@@ -37,8 +37,6 @@ public:
 
 protected:
     int maxProposalsCount;
-    std::vector<int> objectSize;
-    const int keepTopK;
     const double boxIOUThreshold;
     const std::vector<int> steps;
     const std::vector<double> variance;

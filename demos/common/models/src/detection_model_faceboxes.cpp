@@ -25,7 +25,7 @@ using namespace InferenceEngine;
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),
-    boxIOUThreshold(boxIOUThreshold), variance({0.1, 0.2}), steps({32, 64, 128}), keepTopK(750),
+    boxIOUThreshold(boxIOUThreshold), variance({0.1, 0.2}), steps({32, 64, 128}),
     minSizes({ {32, 64, 128}, {256}, {512} }) {
 }
 
@@ -70,10 +70,10 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
         throw std::logic_error("This demo expect networks that have 2 outputs blobs");
     }
 
+    const TensorDesc& outputDesc = outputInfo.begin()->second->getTensorDesc();
+    maxProposalsCount = outputDesc.getDims()[1];
+
     for (auto& output : outputInfo) {
-        const TensorDesc& outputDesc = output.second->getTensorDesc();
-        maxProposalsCount = outputDesc.getDims()[1];
-        objectSize.push_back(outputDesc.getDims()[2]);  // 0 - bboxes object size, 1 - score object size
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(InferenceEngine::Layout::CHW);
         outputsNames.push_back(output.first);
@@ -243,35 +243,28 @@ std::vector<ModelFaceBoxes::Anchor> filterBBoxes(InferenceEngine::MemoryBlob::Pt
 }
 
 std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResult) {
-    auto start = std::chrono::high_resolution_clock::now();
-
-// --------------------------- Calculating anchors at first start ---------------------------------------------
+// --------------------------- Calculating anchors at first start ----------------------------------------------------
     if (anchors.size() == 0) {
         std::vector<std::pair<int, int>> featureMaps;
         for (auto s : steps) {
             featureMaps.push_back({ netInputHeight / s, netInputWidth / s });
         }
 
-        auto s = std::chrono::high_resolution_clock::now();
         priorBoxes(featureMaps);
-        auto e = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> time =
-            std::chrono::duration_cast<std::chrono::milliseconds>(e - s);
-        std::cout << "anchors " << time.count() << "ms" << std::endl;
     }
 
-// --------------------------- Filter scores and get valid indices for bounding boxes------------------------------------------
+// --------------------------- Filter scores and get valid indices for bounding boxes----------------------------------
     const auto scoresInfRes = infResult.outputsData[outputsNames[1]]; 
     auto scores = filterScores(scoresInfRes, confidenceThreshold);
 
-// --------------------------- Filter bounding boxes on indices ---------------------------------------------
+// --------------------------- Filter bounding boxes on indices -------------------------------------------------------
     auto bboxesInfRes = infResult.outputsData[outputsNames[0]];
     std::vector<Anchor> bboxes = filterBBoxes(bboxesInfRes, anchors, scores.first, variance);
 
-// --------------------------- Apply Non-maximum Suppression ---------------------------------------------
+// --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
     std::vector<int> keep = nms(bboxes, scores.second, boxIOUThreshold);
 
-// --------------------------- Creating detection result objects  ---------------------------------------------
+// --------------------------- Create detection result objects --------------------------------------------------------
     DetectionResult* result = new DetectionResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
@@ -293,9 +286,5 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
         result->objects.push_back(desc);
     }
 
-    auto stop = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> time_span =
-        std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    //std::cout << "p " << time_span.count() << "ms" << std::endl;
     return std::unique_ptr<ResultBase>(result);;
 }
