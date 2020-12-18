@@ -533,8 +533,9 @@ int main(int argc, char *argv[]) {
                 slog::info << "Number of processed frames: " << framesCounter << slog::endl;
                 slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
 
+                std::cout << presenter->reportMeans() << '\n';
+
                 if(FLAGS_loop) {
-                    std::cout << presenter->reportMeans() << '\n';
 
                     slog::info << "Setting media source" << slog::endl;
                     try {
@@ -558,8 +559,6 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_o.empty()) {
             videoWriter.release();
         }
-
-        std::cout << presenter->reportMeans() << '\n';
 
         cv::destroyAllWindows();
     }
