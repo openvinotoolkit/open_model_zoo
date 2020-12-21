@@ -46,7 +46,8 @@ class RetinaFaceAdapter(Adapter):
                     optional=True, default=False, description="Allows include boundaries for NMS"
                 ),
                 'keep_top_k': NumberField(
-                    min_value=0, optional=True, description="Maximal number of boxes which should be kept"
+                    min_value=1, optional=True, description="Maximal number of boxes which should be kept",
+                    value_type=int
                 ),
                 'nms_threshold': NumberField(
                     min_value=0, optional=True, default=0.5, description="Overlap threshold for NMS"
@@ -61,7 +62,7 @@ class RetinaFaceAdapter(Adapter):
         self.landmarks_output = self.get_value_from_config('landmarks_outputs') or []
         self.type_scores_output = self.get_value_from_config('type_scores_outputs') or []
         self.include_boundaries = self.get_value_from_config('include_boundaries')
-        self.keep_top_k = int(self.get_value_from_config('keep_top_k'))
+        self.keep_top_k = self.get_value_from_config('keep_top_k')
         self.nms_threshold = self.get_value_from_config('nms_threshold')
         _ratio = (1.,)
         self.anchor_cfg = {
@@ -78,6 +79,7 @@ class RetinaFaceAdapter(Adapter):
             self.landmark_std = 0.2
         else:
             self.landmark_std = 1.0
+        self._anchor_plane_cache = {}
 
     def process(self, raw, identifiers, frame_meta):
         raw_predictions = self._extract_predictions(raw, frame_meta)
@@ -94,8 +96,14 @@ class RetinaFaceAdapter(Adapter):
                 bbox_deltas = raw_predictions[self.bboxes_output[_idx]][batch_id]
                 height, width = bbox_deltas.shape[1], bbox_deltas.shape[2]
                 anchors_fpn = self._anchors_fpn[s]
-                anchors = self.anchors_plane(height, width, int(s), anchors_fpn)
-                anchors = anchors.reshape((height * width * anchor_num, 4))
+                if (height, width) in self._anchor_plane_cache and s in self._anchor_plane_cache[(height, width)]:
+                    anchors = self._anchor_plane_cache[(height, width)][s]
+                else:
+                    anchors = self.anchors_plane(height, width, int(s), anchors_fpn)
+                    anchors = anchors.reshape((height * width * anchor_num, 4))
+                    if (height, width) not in self._anchor_plane_cache:
+                        self._anchor_plane_cache[(height, width)] = {}
+                    self._anchor_plane_cache[(height, width)][s] = anchors
                 proposals = self._get_proposals(bbox_deltas, anchor_num, anchors)
                 x_mins, y_mins, x_maxs, y_maxs = proposals.T
                 keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, scores, self.nms_threshold,
