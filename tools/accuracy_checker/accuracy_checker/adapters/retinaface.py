@@ -78,6 +78,7 @@ class RetinaFaceAdapter(Adapter):
             self.landmark_std = 0.2
         else:
             self.landmark_std = 1.0
+        self._anchor_plane_cache = {}
 
     def process(self, raw, identifiers, frame_meta):
         raw_predictions = self._extract_predictions(raw, frame_meta)
@@ -94,7 +95,13 @@ class RetinaFaceAdapter(Adapter):
                 bbox_deltas = raw_predictions[self.bboxes_output[_idx]][batch_id]
                 height, width = bbox_deltas.shape[1], bbox_deltas.shape[2]
                 anchors_fpn = self._anchors_fpn[s]
-                anchors = self.anchors_plane(height, width, int(s), anchors_fpn)
+                if (height, width) in self._anchor_plane_cache and s in self._anchor_plane_cache[(height, width)]:
+                    anchors = self._anchor_plane_cache[(height, width)][s]
+                else:
+                    anchors = self.anchors_plane(height, width, int(s), anchors_fpn)
+                    if (height, width) not in self._anchor_plane_cache:
+                        self._anchor_plane_cache[(height, width)] = {}
+                    self._anchor_plane_cache[(height, width)][s] = anchors
                 anchors = anchors.reshape((height * width * anchor_num, 4))
                 proposals = self._get_proposals(bbox_deltas, anchor_num, anchors)
                 x_mins, y_mins, x_maxs, y_maxs = proposals.T
