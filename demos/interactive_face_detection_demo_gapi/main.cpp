@@ -416,7 +416,7 @@ int main(int argc, char *argv[]) {
 
         Timer timer;
 
-        slog::info << "Setting media source" << slog::endl;            
+        slog::info << "Setting media source" << slog::endl;
         try {
             stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
         } catch (const std::exception& error) {
