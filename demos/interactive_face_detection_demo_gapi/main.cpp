@@ -113,6 +113,17 @@ GAPI_OCV_KERNEL(OCVPostProc, PostProc) {
     }
 };
 
+/**
+ * @brief Gets filename without extension
+ * @param filepath - full file name
+ * @return filename without extension
+ */
+static UNUSED std::string fileNameNoExt(const std::string& filepath) {
+    auto pos = filepath.rfind('.');
+    if (pos == std::string::npos) return filepath;
+    return filepath.substr(0, pos);
+}
+
 void rawOutputDetections(const cv::Mat  &ssd_result,
                          const cv::Size &upscale,
                          const float detectionThreshold) {
@@ -419,7 +430,7 @@ int main(int argc, char *argv[]) {
         slog::info << "Setting media source" << slog::endl;
         try {
             stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
-        } catch (const std::exception& error) {
+        } catch (const std::exception&) {
             std::stringstream msg;
             msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
             throw std::invalid_argument(msg.str());
@@ -455,7 +466,7 @@ int main(int argc, char *argv[]) {
 
                 // Raw output of detected faces
                 if (FLAGS_r)
-                    rawOutputDetections(ssd_res, frame.size(), FLAGS_t);
+                    rawOutputDetections(ssd_res, frame.size(), (float)FLAGS_t);
 
                 // For every detected face
                 for (size_t i = 0; i < face_hub.size(); i++) {
@@ -536,7 +547,7 @@ int main(int argc, char *argv[]) {
                     slog::info << "Setting media source" << slog::endl;
                     try {
                         stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
-                    } catch (const std::exception& error) {
+                    } catch (const std::exception&) {
                         std::stringstream msg;
                         msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
                         throw std::invalid_argument(msg.str());

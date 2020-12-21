@@ -81,9 +81,9 @@ void HeadPoseVisualizer::buildCameraMatrix(cv::Mat& cameraMatrix, int cx, int cy
 }
 
 void HeadPoseVisualizer::draw(cv::Mat& frame, cv::Point3f cpoint, float yaw, float pitch, float roll) {
-    pitch *= CV_PI / 180.0;
-    yaw   *= CV_PI / 180.0;
-    roll  *= CV_PI / 180.0;
+    pitch *= static_cast<float>(CV_PI / 180.0);
+    yaw   *= static_cast<float>(CV_PI / 180.0);
+    roll  *= static_cast<float>(CV_PI / 180.0);
 
     cv::Matx33f Rx(1, 0, 0,
                    0, static_cast<float>(cos(pitch)), static_cast<float>(-sin(pitch)),
