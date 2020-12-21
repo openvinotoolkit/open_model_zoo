@@ -98,8 +98,8 @@ void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>* anchors, const std::v
 
     for (auto cy : dense_cy) {
         for (auto cx : dense_cx) {
-            anchors->push_back({ static_cast<int>(cx - 0.5 * skx), static_cast<int>(cy - 0.5 * sky),
-                static_cast<int>( cx + 0.5 * skx), static_cast<int>(cy + 0.5 * sky) });  // left top right bottom
+            anchors->push_back({ static_cast<int>(cx - 0.5f * skx), static_cast<int>(cy - 0.5f * sky),
+                static_cast<int>( cx + 0.5f * skx), static_cast<int>(cy + 0.5f * sky) });  // left top right bottom
         }
     }
 
@@ -141,7 +141,7 @@ void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<size_t, size_t>>& fe
     for (size_t k = 0; k < featureMaps.size(); ++k) {
         std::vector<float> a;
         for (int i = 0; i < featureMaps[k].first; ++i) {
-            for (int  j = 0; j < featureMaps[k].second; ++j) {
+            for (int j = 0; j < featureMaps[k].second; ++j) {
                 if (k == 0) {
                     calculateAnchorsZeroLevel(&anchors, j, i,  minSizes[k], steps[k]);;
                 }
@@ -198,7 +198,7 @@ std::pair<std::vector<size_t>, std::vector<float>> filterScores(InferenceEngine:
     auto desc = scoreInfRes->getTensorDesc();
     auto sz = desc.getDims();
     LockedMemory<const void> outputMapped = scoreInfRes->rmap();
-    const float *scoresPtr = outputMapped.as<float*>();
+    const float* scoresPtr = outputMapped.as<float*>();
 
     std::vector<size_t> indices;
     std::vector<float> scores;
@@ -236,8 +236,8 @@ std::vector<ModelFaceBoxes::Anchor> filterBBoxes(InferenceEngine::MemoryBlob::Pt
         auto predW = exp(dw * variance[1]) * anchors[i].getWidth();
         auto predH = exp(dh * variance[1]) * anchors[i].getHeight();
 
-        bboxes.push_back({ static_cast<int>(predCtrX - 0.5 * predW), static_cast<int>(predCtrY - 0.5 * predH),
-                                     static_cast<int>(predCtrX + 0.5 * predW), static_cast<int>(predCtrY + 0.5 * predH) });
+        bboxes.push_back({ static_cast<int>(predCtrX - 0.5f * predW), static_cast<int>(predCtrY - 0.5f * predH),
+                                     static_cast<int>(predCtrX + 0.5f * predW), static_cast<int>(predCtrY + 0.5f * predH) });
 
     }
 
