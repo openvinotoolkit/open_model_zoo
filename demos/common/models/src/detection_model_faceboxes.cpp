@@ -25,7 +25,7 @@ using namespace InferenceEngine;
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),
-    boxIOUThreshold(boxIOUThreshold), variance({0.1, 0.2}), steps({32, 64, 128}),
+    boxIOUThreshold(boxIOUThreshold), variance({0.1f, 0.2f}), steps({32, 64, 128}),
     minSizes({ {32, 64, 128}, {256}, {512} }) {
 }
 
@@ -81,12 +81,12 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
 
 }
 
-void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>* anchors, const std::vector<double>& vx, const std::vector<double>& vy,
+void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>* anchors, const std::vector<float>& vx, const std::vector<float>& vy,
     const int minSize, const int step) {
-    double skx = static_cast<double>(minSize);
-    double sky = static_cast<double>(minSize);
+    float skx = static_cast<float>(minSize);
+    float sky = static_cast<float>(minSize);
 
-    std::vector<double> dense_cx, dense_cy;
+    std::vector<float> dense_cx, dense_cy;
 
     for (auto x : vx) {
         dense_cx.push_back(x * step);
@@ -98,7 +98,8 @@ void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>* anchors, const std::v
 
     for (auto cy : dense_cy) {
         for (auto cx : dense_cx) {
-            anchors->push_back({ cx - 0.5 * skx, cy - 0.5 * sky, cx + 0.5 * skx, cy + 0.5 * sky });  // left top right bottom
+            anchors->push_back({ static_cast<int>(cx - 0.5 * skx), static_cast<int>(cy - 0.5 * sky),
+                static_cast<int>( cx + 0.5 * skx), static_cast<int>(cy + 0.5 * sky) });  // left top right bottom
         }
     }
 
@@ -107,28 +108,28 @@ void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>* anchors, const std::v
 void calculateAnchorsZeroLevel(std::vector<ModelFaceBoxes::Anchor>* anchors, const int fx, const int fy,
     const std::vector<int>& minSizes, const int step) {
     for (auto s : minSizes) {
-        std::vector<double> vx, vy;
+        std::vector<float> vx, vy;
         if (s == 32) {
-            vx.push_back(fx);
-            vx.push_back(fx + 0.25);
-            vx.push_back(fx + 0.5);
-            vx.push_back(fx + 0.75);
+            vx.push_back(static_cast<float>(fx));
+            vx.push_back(fx + 0.25f);
+            vx.push_back(fx + 0.5f);
+            vx.push_back(fx + 0.75f);
 
-            vy.push_back(fy);
-            vy.push_back(fy + 0.25);
-            vy.push_back(fy + 0.5);
-            vy.push_back(fy + 0.75);
+            vy.push_back(static_cast<float>(fy));
+            vy.push_back(fy + 0.25f);
+            vy.push_back(fy + 0.5f);
+            vy.push_back(fy + 0.75f);
         }
         else if (s == 64) {
-            vx.push_back(fx);
-            vx.push_back(fx + 0.5);
+            vx.push_back(static_cast<float>(fx));
+            vx.push_back(fx + 0.5f);
 
-            vy.push_back(fy);
-            vy.push_back(fy + 0.5);
+            vy.push_back(static_cast<float>(fy));
+            vy.push_back(fy + 0.5f);
         }
         else {
-            vx.push_back(fx + 0.5);
-            vy.push_back(fy + 0.5);
+            vx.push_back(fx + 0.5f);
+            vy.push_back(fy + 0.5f);
         }
         calculateAnchors(anchors, vx, vy, s, step);
     }
@@ -137,24 +138,24 @@ void calculateAnchorsZeroLevel(std::vector<ModelFaceBoxes::Anchor>* anchors, con
 void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<size_t, size_t>>& featureMaps) {
     anchors.reserve(maxProposalsCount);
 
-    for (int k = 0; k < featureMaps.size(); ++k) {
-        std::vector<double> a;
+    for (size_t k = 0; k < featureMaps.size(); ++k) {
+        std::vector<float> a;
         for (int i = 0; i < featureMaps[k].first; ++i) {
-            for (int j = 0; j < featureMaps[k].second; ++j) {
+            for (int  j = 0; j < featureMaps[k].second; ++j) {
                 if (k == 0) {
                     calculateAnchorsZeroLevel(&anchors, j, i,  minSizes[k], steps[k]);;
                 }
                 else {
-                    calculateAnchors(&anchors, { j + 0.5 }, { i + 0.5 }, minSizes[k][0], steps[k]);
+                    calculateAnchors(&anchors, { j + 0.5f }, { i + 0.5f }, minSizes[k][0], steps[k]);
                 }
             }
         }
     }
 }
 
-std::vector<int> nms(const std::vector<ModelFaceBoxes::Anchor>& boxes, const std::vector<double>& scores, const double thresh) {
+std::vector<int> nms(const std::vector<ModelFaceBoxes::Anchor>& boxes, const std::vector<float>& scores, const float thresh) {
 
-    std::vector<double> areas(boxes.size());
+    std::vector<int> areas(boxes.size());
 
     for (int i = 0; i < boxes.size(); ++i) {
         areas[i] = (boxes[i].right - boxes[i].left) * (boxes[i].bottom - boxes[i].top);
@@ -177,10 +178,10 @@ std::vector<int> nms(const std::vector<ModelFaceBoxes::Anchor>& boxes, const std
                 auto idx2 = order[j];
                 if (idx2 >= 0) {
                     shouldContinue = true;
-                    double overlappingWidth = fmin(boxes[idx1].right, boxes[idx2].right) - fmax(boxes[idx1].left, boxes[idx2].left);
-                    double overlappingHeight = fmin(boxes[idx1].bottom, boxes[idx2].bottom) - fmax(boxes[idx1].top, boxes[idx2].top);
+                    auto overlappingWidth = std::min(boxes[idx1].right, boxes[idx2].right) - std::max(boxes[idx1].left, boxes[idx2].left);
+                    auto overlappingHeight = std::min(boxes[idx1].bottom, boxes[idx2].bottom) - std::max(boxes[idx1].top, boxes[idx2].top);
                     auto intersection = overlappingWidth > 0 && overlappingHeight > 0 ? overlappingWidth * overlappingHeight : 0;
-                    auto overlap = intersection / (areas[idx1] + areas[idx2] - intersection);
+                    auto overlap = static_cast<float>(intersection) / (areas[idx1] + areas[idx2] - intersection);
 
                     if (overlap >= thresh) {
                         order[j] = -1;
@@ -193,14 +194,14 @@ std::vector<int> nms(const std::vector<ModelFaceBoxes::Anchor>& boxes, const std
 }
 
 
-std::pair<std::vector<size_t>, std::vector<double>> filterScores(InferenceEngine::MemoryBlob::Ptr scoreInfRes, const double confidenceThreshold) {
+std::pair<std::vector<size_t>, std::vector<float>> filterScores(InferenceEngine::MemoryBlob::Ptr scoreInfRes, const float confidenceThreshold) {
     auto desc = scoreInfRes->getTensorDesc();
     auto sz = desc.getDims();
     LockedMemory<const void> outputMapped = scoreInfRes->rmap();
     const float *scoresPtr = outputMapped.as<float*>();
 
     std::vector<size_t> indices;
-    std::vector<double> scores;
+    std::vector<float> scores;
     scores.reserve(ModelFaceBoxes::INIT_VECTOR_SIZE);
     indices.reserve(ModelFaceBoxes::INIT_VECTOR_SIZE);
     for (size_t i = 1; i < sz[1] * sz[2]; i = i + 2) {
@@ -214,7 +215,7 @@ std::pair<std::vector<size_t>, std::vector<double>> filterScores(InferenceEngine
 }
 
 std::vector<ModelFaceBoxes::Anchor> filterBBoxes(InferenceEngine::MemoryBlob::Ptr bboxesInfRes, const std::vector<ModelFaceBoxes::Anchor>& anchors,
-    const std::vector<size_t>& validIndices, const std::vector<double>& variance) {;
+    const std::vector<size_t>& validIndices, const std::vector<float>& variance) {
     LockedMemory<const void> bboxesOutputMapped = bboxesInfRes->rmap();
     auto desc = bboxesInfRes->getTensorDesc();
     auto sz = desc.getDims();
@@ -235,8 +236,9 @@ std::vector<ModelFaceBoxes::Anchor> filterBBoxes(InferenceEngine::MemoryBlob::Pt
         auto predW = exp(dw * variance[1]) * anchors[i].getWidth();
         auto predH = exp(dh * variance[1]) * anchors[i].getHeight();
 
-        bboxes.push_back({ (predCtrX - 0.5 * predW), (predCtrY - 0.5 * predH),
-                                     (predCtrX + 0.5 * predW), (predCtrY + 0.5 * predH) });
+        bboxes.push_back({ static_cast<int>(predCtrX - 0.5 * predW), static_cast<int>(predCtrY - 0.5 * predH),
+                                     static_cast<int>(predCtrX + 0.5 * predW), static_cast<int>(predCtrY + 0.5 * predH) });
+
     }
 
     return bboxes;
@@ -269,8 +271,8 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
-    double scaleX = ((double)netInputWidth) / imgWidth;
-    double scaleY = ((double)netInputHeight) / imgHeight;
+    float scaleX = static_cast<float>(netInputWidth) / imgWidth;
+    float scaleY = static_cast<float>(netInputHeight) / imgHeight;
 
     result->objects.reserve(keep.size());
     for (auto i : keep) {
@@ -286,5 +288,5 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
         result->objects.push_back(desc);
     }
 
-    return std::unique_ptr<ResultBase>(result);;
+    return std::unique_ptr<ResultBase>(result);
 }

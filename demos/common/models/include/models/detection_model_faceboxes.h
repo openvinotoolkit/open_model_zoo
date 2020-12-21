@@ -20,15 +20,15 @@
 class ModelFaceBoxes : public DetectionModel {
 public:
     struct Anchor {
-        double left;
-        double top;
-        double right;
-        double bottom;
+        int left;
+        int top;
+        int right;
+        int bottom;
 
-        double getWidth() const { return (right - left) + 1; }
-        double getHeight() const { return (bottom - top) + 1; }
-        double getXCenter() const { return left + (getWidth() - 1.0) / 2.; }
-        double getYCenter() const { return top + (getHeight() - 1.0) / 2.; }
+        int getWidth() const { return (right - left) + 1; }
+        int getHeight() const { return (bottom - top) + 1; }
+        int getXCenter() const { return left + (getWidth() - 1) / 2; }
+        int getYCenter() const { return top + (getHeight() - 1) / 2; }
     };
     static const int INIT_VECTOR_SIZE = 200;
 
@@ -37,9 +37,9 @@ public:
 
 protected:
     int maxProposalsCount;
-    const double boxIOUThreshold;
+    const float boxIOUThreshold;
     const std::vector<int> steps;
-    const std::vector<double> variance;
+    const std::vector<float> variance;
     const std::vector<std::vector<int>> minSizes;
     std::vector<Anchor> anchors;
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
