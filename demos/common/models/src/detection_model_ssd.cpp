@@ -126,35 +126,6 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     DataPtr& output = outputInfo.begin()->second;
     outputsNames.push_back(outputInfo.begin()->first);
 
-    int num_classes = 0;
-
-    if (auto ngraphFunction = cnnNetwork.getFunction()) {
-        for (const auto op : ngraphFunction->get_ops()) {
-            if (op->get_friendly_name() == outputsNames[0]) {
-                auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
-                if (!detOutput) {
-                    throw std::logic_error("Object Detection network output layer(" + op->get_friendly_name() +
-                        ") should be DetectionOutput, but was " + op->get_type_info().name);
-                }
-
-                num_classes = detOutput->get_attrs().num_classes;
-                break;
-            }
-        }
-    }
-    else {
-        throw std::logic_error("This demo requires IR version no older than 10");
-    }
-
-    if (labels.size()) {
-        if (static_cast<int>(labels.size()) == (num_classes - 1)) {  // if network assumes default "background" class, having no label
-            labels.insert(labels.begin(), "fake");
-        }
-        else if (static_cast<int>(labels.size()) != num_classes) {
-            throw std::logic_error("The number of labels is different from numbers of model classes");
-        }
-    }
-
     const SizeVector outputDims = output->getTensorDesc().getDims();
 
     if (outputDims.size() != 4) {
