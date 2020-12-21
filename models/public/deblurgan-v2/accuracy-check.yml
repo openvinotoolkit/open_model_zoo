@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: onnx_runtime
-        model:   deblur-v2.onnx
+        model:   deblurgan-v2.onnx
         adapter:
           type: image_processing
           mean: 127.5
@@ -36,7 +36,7 @@ models:
 
     launchers:
       - framework: dlsdk
-        model: deblur-v2.xml
+        model: deblurgan-v2.xml
         adapter:
           type: image_processing
           mean: 127.5
@@ -45,6 +45,9 @@ models:
     datasets:
       - name: GoPro
         preprocessing:
+          - type: normalization
+            mean: 127.5
+            std: 127.5
           - type: padding
             dst_height: 736
             dst_width: 1312

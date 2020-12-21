@@ -45,9 +45,9 @@ class batch_noramlization(nn.Module):
 
 
 class DeblurV2(nn.Module):
-    def __init__(self, weights):
+    def __init__(self, weights, model_name):
         super().__init__()
-        parameters = {'g_name': 'fpn_inception', 'norm_layer': 'instance'}
+        parameters = {'g_name': model_name, 'norm_layer': 'instance'}
         self.impl = get_generator(parameters)
         checkpoint = torch.load(weights, map_location='cpu')['model']
         self.impl.load_state_dict(checkpoint)

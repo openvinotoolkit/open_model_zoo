@@ -3,11 +3,13 @@
 ## Use Case and High-Level Description
 DeblurGAN-v2 is a generative adversarial network (GAN) for single image motion deblurring.
 This model is based on a relativistic conditional GAN with a double-scale discriminator.
-Model used Inception-ResNet-v2 as backbone and was trained on GoPro dataset.
+Model used Inception-ResNet-v2 or Mobilenet as backbone and was trained on GoPro, DVD, NFS datasets.
 For details about implementation of model,
 check out the [DeblurGAN-v2: Deblurring (Orders-of-Magnitude) Faster and Better](https://github.com/VITA-Group/DeblurGANv2) repository.
 
 ## Specification
+
+GFLOPs and MParams are presented at form: Mobilenet/Inception-ResNet-v2.
 
 | Metric            | Value           |
 |-------------------|-----------------|
@@ -18,12 +20,12 @@ check out the [DeblurGAN-v2: Deblurring (Orders-of-Magnitude) Faster and Better]
 
 ## Accuracy
 
-Model was tested on GoPro test dataset.
+Model was tested on GoPro test dataset. Metrics are presented at form: Mobilenet/Inception-ResNet-v2.
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| PSNR   | 30.55Db        | 30.38Db         |
-| SSIM   | 0.99           | 0.98            |
+| PSNR   | 28.25/30.55Db  | 28.25/30.55Db   |
+| SSIM   | 0.97/0.99      | 0.97/0.99       |
 
 ## Input
 

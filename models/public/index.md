@@ -255,9 +255,9 @@ The task of place recognition is to quickly and accurately recognize the locatio
 
 The task of image deblurring.
 
-| Model Name     | Implementation | OMZ Model Name                        | Accuracy | GFlops    | mParams  |
-| -------------- | -------------- | ------------------------------------- | -------- | --------- | -------- |
-| DeblurGAN-v2   | PyTorch\*      | [deblur-v2](./deblur-v2/deblur-v2.md) | 30.38dB  | ???       | ???      |
+| Model Name     | Implementation | OMZ Model Name                                 | Accuracy | GFlops | mParams  |
+| -------------- | -------------- | ---------------------------------------------- | -------- | -------| -------- |
+| DeblurGAN-v2   | PyTorch\*      | [deblurgan-v2](./deblurgan-v2/deblurgan-v2.md) | 30.55Db  | ???    | ???      |
 
 ## Legal Information
 
