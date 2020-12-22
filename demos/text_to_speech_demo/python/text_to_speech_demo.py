@@ -127,7 +127,7 @@ def main():
                 for i, c in enumerate(line):
                     if (c in delimiters and i - prev_begin > len_th) or i == len(line) - 1:
                         texts.append(line[prev_begin:i+1])
-                        prev_begin = i
+                        prev_begin = i + 1
             else:
                 texts = [line]
 
