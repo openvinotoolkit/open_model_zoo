@@ -20,7 +20,9 @@ import warnings
 import pickle
 import numpy as np
 
-from .annotation_converters import BaseFormatConverter, DatasetConversionInfo, save_annotation, make_subset, analyze_dataset
+from .annotation_converters import (
+    BaseFormatConverter, DatasetConversionInfo, save_annotation, make_subset, analyze_dataset
+)
 from .config import (
     ConfigValidator,
     StringField,
