@@ -204,10 +204,13 @@ NATIVE_DEMOS = [
             *combine_cases(
                 TestCase(options={'-at': 'ssd'}),
                 single_option_cases('-m',
+                    ModelArg('efficientdet-d0-tf'),
+                    ModelArg('efficientdet-d1-tf'),
                     ModelArg('face-detection-adas-0001'),
                     ModelArg('face-detection-retail-0004'),
                     ModelArg('face-detection-retail-0005'),
                     ModelArg('face-detection-retail-0044'),
+                    ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                     ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
                     ModelArg('pedestrian-detection-adas-0002'),
                     ModelArg('pelee-coco'),
@@ -237,8 +240,13 @@ NATIVE_DEMOS = [
             *combine_cases(
                 TestCase(options={'-at': 'yolo'}),
                 single_option_cases('-m',
+                    ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v3-tf'),
                     ModelArg('yolo-v3-tiny-tf'))),
+            *combine_cases(
+                TestCase(options={'-at': 'faceboxes'}),
+                single_option_cases('-m',
+                    ModelArg('faceboxes-pytorch'))),
         ],
     )),
 
@@ -500,6 +508,8 @@ PYTHON_DEMOS = [
             *combine_cases(
                 TestCase(options={'--architecture_type': 'ssd'}),
                 single_option_cases('-m',
+                    ModelArg('efficientdet-d0-tf'),
+                    ModelArg('efficientdet-d1-tf'),
                     ModelArg('face-detection-0200'),
                     ModelArg('face-detection-0202'),
                     ModelArg('face-detection-0204'),
@@ -509,6 +519,7 @@ PYTHON_DEMOS = [
                     ModelArg('face-detection-retail-0004'),
                     ModelArg('face-detection-retail-0005'),
                     ModelArg('face-detection-retail-0044'),
+                    ModelArg('faster-rcnn-resnet101-coco-sparse-60-0001'),
                     ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
                     ModelArg('pedestrian-detection-adas-0002'),
                     ModelArg('person-detection-0106'),

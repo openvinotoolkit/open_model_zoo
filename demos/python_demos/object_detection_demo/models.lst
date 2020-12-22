@@ -8,6 +8,7 @@ faceboxes-pytorch
 face-detection-????
 face-detection-adas-????
 face-detection-retail-????
+faster-rcnn-resnet101-coco-sparse-60-0001
 pedestrian-and-vehicle-detector-adas-????
 pedestrian-detection-adas-????
 pelee-coco
