@@ -50,6 +50,8 @@ def build_argparser():
                            'a folder of images or anything that cv2.VideoCapture can process.')
     args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
+    args.add_argument('-o', '--output_video', required=False,
+                      help='Optional. Path to an output video file.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
@@ -121,10 +123,21 @@ def main():
     with open(args.labels, 'rt') as labels_file:
         class_labels = labels_file.read().splitlines()
 
-    frame_size = frame.shape
+    if args.delay:
+        delay = args.delay
+    else:
+        delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
+    fps = cap.fps()
+    out_frame_size = (frame.shape[1], frame.shape[0])
     presenter = monitors.Presenter(args.utilization_monitors, 45,
-                (round(frame_size[1] / 4), round(frame_size[0] / 8)))
+                (round(out_frame_size[0] / 4), round(out_frame_size[1] / 8)))
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
+
+    if args.output_video:
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        output_video = cv2.VideoWriter(args.output_video, fourcc, fps, out_frame_size)
+    else:
+        output_video = None
 
     render_time = 0
 
@@ -196,6 +209,8 @@ def main():
             for layer, stats in perf_counts.items():
                 print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
                                                                   stats['status'], stats['real_time']))
+        if output_video is not None:
+            output_video.write(frame)
 
         if not args.no_show:
             # Show resulting image.
@@ -204,7 +219,7 @@ def main():
         render_time = render_end - render_start
 
         if not args.no_show:
-            key = cv2.waitKey(args.delay)
+            key = cv2.waitKey(delay)
             esc_code = 27
             if key == esc_code:
                 break

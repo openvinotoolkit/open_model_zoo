@@ -43,8 +43,8 @@ The demo workflow is the following:
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: instance_segmentation_demo.py [-h] -m "<path>" --labels "<path>" -i
-                                     "<path>" [-d "<device>"]
+usage: instance_segmentation_demo.py [-h] -m "<path>" --labels "<path>" -i INPUT
+                                     [--loop] [-o OUTPUT_VIDEO] [-d "<device>"]
                                      [-l "<absolute_path>"] [--delay "<num>"]
                                      [-pt "<num>"] [--no_keep_aspect_ratio]
                                      [--no_track] [--show_scores]
@@ -60,6 +60,8 @@ Options:
                         Required. An input to process. The input must be a single image,
                         a folder of images or anything that cv2.VideoCapture can process.
   --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT_VIDEO, --output_video OUTPUT_VIDEO
+                        Optional. Path to an output video file.
   -d "<device>", --device "<device>"
                         Optional. Specify the target device to infer on: CPU,
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a
