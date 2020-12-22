@@ -34,7 +34,7 @@ Refer to [Using Open Model Zoo demos](../../README.md), for instructions on how 
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: human_pose_estimation_3d_demo.py [-h] -m MODEL -i INPUT [--loop] 
+usage: human_pose_estimation_3d_demo.py [-h] -m MODEL -i INPUT [--loop]
                                         [-o OUTPUT_VIDEO] [-d DEVICE]
                                         [--height_size HEIGHT_SIZE]
                                         [--extrinsics_path EXTRINSICS_PATH]

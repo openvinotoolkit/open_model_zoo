@@ -12,7 +12,7 @@ On the start-up, the application reads command line parameters and loads detecti
 
 Running the application with the `-h` option yields the following usage message:
 ```
-usage: single_human_pose_estimation_demo.py [-h] -m_od MODEL_OD -m_hpe MODEL_HPE 
+usage: single_human_pose_estimation_demo.py [-h] -m_od MODEL_OD -m_hpe MODEL_HPE
                                             -i INPUT [--loop] [-o OUTPUT_VIDEO]
                                             [-d DEVICE]
                                             [--person_label PERSON_LABEL]

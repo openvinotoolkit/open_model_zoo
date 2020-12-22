@@ -23,7 +23,7 @@ Once the program receives an image, it performs the following steps:
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: colorization_demo.py [-h] -m MODEL [-d DEVICE] -i INPUT [--loop] 
+usage: colorization_demo.py [-h] -m MODEL [-d DEVICE] -i INPUT [--loop]
                             [-o OUTPUT_VIDEO] [--no_show] [-v] [-u UTILIZATION_MONITORS]
 
 Options:

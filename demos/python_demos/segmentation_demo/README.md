@@ -25,7 +25,7 @@ usage: segmentation_demo.py [-h] -m MODEL -i INPUT
                             [-d DEVICE] [-c COLORS]
                             [-nireq NUM_INFER_REQUESTS]
                             [-nstreams NUM_STREAMS]
-                            [-nthreads NUM_THREADS] 
+                            [-nthreads NUM_THREADS]
 							[-loop] [-o OUTPUT_VIDEO] [-no_show]
                             [-u UTILIZATION_MONITORS]
 Options:

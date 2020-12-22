@@ -217,7 +217,7 @@ def main():
             frame = visualizer.overlay_masks(frame, objects)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
- 
+
             if output_video is not None:
                 output_video.write(frame)
 
