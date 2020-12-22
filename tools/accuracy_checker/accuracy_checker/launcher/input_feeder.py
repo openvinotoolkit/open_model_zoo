@@ -33,7 +33,8 @@ LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
     'NDCWH': [0, 1, 4, 3, 2],
     'NCHWD': [0, 2, 3, 4, 1],
     'NC': [0, 1],
-    'CN': [1, 0]
+    'CN': [1, 0],
+    'CNH': [1, 0, 2]
 }
 
 DIM_IDS_TO_LAYOUT = {
@@ -43,7 +44,8 @@ DIM_IDS_TO_LAYOUT = {
     (0, 1, 4, 2, 3): 'NDHWC',
     (0, 1, 4, 3, 2): 'NDCWH',
     (0, 1): 'NC',
-    (1, 0): 'CN'
+    (1, 0): 'CN',
+    (1, 0, 2): 'CNH'
 }
 
 PRECISION_TO_DTYPE = {
