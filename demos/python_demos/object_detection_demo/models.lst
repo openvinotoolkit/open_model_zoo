@@ -5,6 +5,8 @@ ctdet_coco_dlav0_512
 # For --architecture_type=faceboxes
 faceboxes-pytorch
 # For --architecture_type=ssd
+efficientdet-d0-tf
+efficientdet-d1-tf
 face-detection-????
 face-detection-adas-????
 face-detection-retail-????
