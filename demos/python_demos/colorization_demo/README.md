@@ -23,8 +23,8 @@ Once the program receives an image, it performs the following steps:
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: colorization_demo.py [-h] -m MODEL [-d DEVICE] -i "<path>" [--no_show]
-                            [-v] [-u UTILIZATION_MONITORS]
+usage: colorization_demo.py [-h] -m MODEL [-d DEVICE] -i INPUT [--loop] 
+                            [-o OUTPUT_VIDEO] [--no_show] [-v] [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Help with the script.
@@ -37,6 +37,8 @@ Options:
                         Required. An input to process. The input must be a single image,
                         a folder of images or anything that cv2.VideoCapture can process.
   --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT_VIDEO, --output_video OUTPUT_VIDEO
+                        Optional. Path to an output video file.
   --no_show             Optional. Disable display of results on screen.
   -v, --verbose         Optional. Enable display of processing logs on screen.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS

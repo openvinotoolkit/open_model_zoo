@@ -43,6 +43,8 @@ def build_arg():
                               'a folder of images or anything that cv2.VideoCapture can process.')
     in_args.add_argument('--loop', default=False, action='store_true',
                          help='Optional. Enable reading the input in a loop.')
+    in_args.add_argument('-o', '--output_video', required=False,
+                        help='Optional. Path to an output video file.')
     in_args.add_argument("--no_show", help="Optional. Disable display of results on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
@@ -82,6 +84,13 @@ if __name__ == '__main__':
     imshow_size = (640, 480)
     graph_size = (imshow_size[0] // 2, imshow_size[1] // 4)
     presenter = monitors.Presenter(args.utilization_monitors, imshow_size[1] * 2 - graph_size[1], graph_size)
+
+    fps = cap.fps()
+    if args.output_video:
+        fourcc = cv.VideoWriter_fourcc(*'MJPG')
+        output_video = cv.VideoWriter(args.output_video, fourcc, fps, (1280, 960))
+    else:
+        output_video = None
 
     while original_frame is not None:
         log.debug("#############################")
@@ -125,6 +134,10 @@ if __name__ == '__main__':
         ir_image = [cv.hconcat([original_image, grayscale_image]),
                     cv.hconcat([lab_image, colorize_image])]
         final_image = cv.vconcat(ir_image)
+
+        if output_video is not None:
+            output_video.write(final_image)
+
         presenter.drawGraphs(final_image)
         if not args.no_show:
             log.debug("Show results")
@@ -134,4 +147,8 @@ if __name__ == '__main__':
                 break
             presenter.handleKey(key)
         original_frame = cap.read()
+
+        if output_video is not None:
+            output_video.release()
+
     print(presenter.reportMeans())
