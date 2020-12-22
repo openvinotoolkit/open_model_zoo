@@ -1,5 +1,7 @@
 # Object Detection C++ Demo
 
+![](./object_detection.gif)
+
 This demo showcases Object Detection and Async API.
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the app can continue doing things on the host, while accelerator is busy.
