@@ -12,27 +12,29 @@ On the start-up, the application reads command line parameters and loads detecti
 
 Running the application with the `-h` option yields the following usage message:
 ```
-usage: single_human_pose_estimation_demo.py [-h] -m_od MODEL_OD -m_hpe
-                                            MODEL_HPE [-i INPUT [INPUT ...]]
+usage: single_human_pose_estimation_demo.py [-h] -m_od MODEL_OD -m_hpe MODEL_HPE 
+                                            -i INPUT [--loop] [-o OUTPUT_VIDEO]
                                             [-d DEVICE]
                                             [--person_label PERSON_LABEL]
                                             [--no_show]
                                             [-u UTILIZATION_MONITORS]
 
 optional arguments:
-  -h, --help            show this help message and exit
+  -h, --help            Show this help message and exit.
   -m_od MODEL_OD, --model_od MODEL_OD
-                        path to model of object detector in xml format
+                        Required. Path to model of object detector in .xml format.
   -m_hpe MODEL_HPE, --model_hpe MODEL_HPE
-                        path to model of human pose estimator in xml format
+                        Required. Path to model of human pose estimator in .xml format.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image,
                         a folder of images or anything that cv2.VideoCapture can process.
-  --loop                Optional. Enable reading the input in a loop
+  --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT_VIDEO, --output_video OUTPUT_VIDEO
+                        Optional. Path to an output video file.
   -d DEVICE, --device DEVICE
-                        Specify the target to infer on CPU or GPU
+                        Optional. Specify the target to infer on CPU or GPU.
   --person_label PERSON_LABEL
-                        Label of class person for detector
+                        Optional. Label of class person for detector.
   --no_show             Optional. Do not display output.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.

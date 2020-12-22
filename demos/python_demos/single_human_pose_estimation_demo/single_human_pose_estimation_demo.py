@@ -19,7 +19,6 @@ def build_argparser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-m_od", "--model_od", type=str, required=True,
                         help="path to model of object detector in xml format")
-
     parser.add_argument("-m_hpe", "--model_hpe", type=str, required=True,
                         help="path to model of human pose estimator in xml format")
     parser.add_argument("-i", "--input", required=True,
@@ -27,6 +26,8 @@ def build_argparser():
                              "a folder of images or anything that cv2.VideoCapture can process.")
     parser.add_argument("--loop", default=False, action="store_true",
                         help="Optional. Enable reading the input in a loop.")
+    parser.add_argument("-o", "--output_video", required=False,
+                      help="Optional. Path to an output video file.")
     parser.add_argument("-d", "--device", type=str, default='CPU', required=False,
                         help="Specify the target to infer on CPU or GPU")
     parser.add_argument("--person_label", type=int, required=False, default=15, help="Label of class person for detector")
@@ -50,6 +51,15 @@ def run_demo(args):
         raise RuntimeError("Can't read an image from the input")
     delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
 
+    fps = cap.fps()
+    out_frame_size = (frame.shape[1], frame.shape[0])
+
+    if args.output_video:
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        output_video = cv2.VideoWriter(args.output_video, fourcc, fps, out_frame_size)
+    else:
+        output_video = None
+
     presenter = monitors.Presenter(args.utilization_monitors, 25)
     while frame is not None:
         bboxes = detector_person.detect(frame)
@@ -72,6 +82,10 @@ def run_demo(args):
             float(1 / (detector_person.infer_time + single_human_pose_estimator.infer_time * len(human_poses))),
             float(1 / single_human_pose_estimator.infer_time),
             float(1 / detector_person.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+
+        if output_video is not None:
+            output_video.write(frame)
+
         if not args.no_show:
             cv2.imshow('Human Pose Estimation Demo', frame)
             key = cv2.waitKey(delay)
@@ -80,6 +94,10 @@ def run_demo(args):
             presenter.handleKey(key)
         frame = cap.read()
     print(presenter.reportMeans())
+
+    if output_video is not None:
+        output_video.release()
+
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()
