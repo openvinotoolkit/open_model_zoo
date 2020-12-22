@@ -11,6 +11,7 @@ person-detection-????
 person-detection-retail-0013
 person-vehicle-bike-detection-????
 product-detection-0001
+rfcn-resnet101-coco-tf
 retinanet-tf
 ssd300
 ssd512

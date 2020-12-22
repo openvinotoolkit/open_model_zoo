@@ -1,4 +1,9 @@
 # This file can be used with the --list option of the model downloader.
+# For --architecture_type=centernet
+ctdet_coco_dlav0_384
+ctdet_coco_dlav0_512
+# For --architecture_type=faceboxes
+faceboxes-pytorch
 # For --architecture_type=ssd
 face-detection-????
 face-detection-adas-????
@@ -11,6 +16,7 @@ person-detection-retail-0013
 person-vehicle-bike-detection-????
 product-detection-0001
 retinanet-tf
+rfcn-resnet101-coco-tf
 ssd300
 ssd512
 ssd_mobilenet_v1_coco
@@ -22,6 +28,10 @@ ssdlite_mobilenet_v2
 vehicle-detection-????
 vehicle-detection-adas-????
 vehicle-license-plate-detection-barrier-????
+# For --architecture_type=retina
+retinaface-anti-cov
+retinaface-resnet50
+ssh-mxnet
 # For --architecture_type=yolo
 mobilefacedet-v1-mxnet
 person-vehicle-bike-detection-crossroad-yolov3-1020
@@ -35,12 +45,3 @@ yolo-v2-tiny-tf
 yolo-v2-tiny-vehicle-detection-0001
 yolo-v3-tf
 yolo-v3-tiny-tf
-# For --architecture_type=centernet
-ctdet_coco_dlav0_384
-ctdet_coco_dlav0_512
-# For --architecture_type=faceboxes
-faceboxes-pytorch
-# For --architecture_type=retina
-retinaface-anti-cov
-retinaface-resnet50
-ssh-mxnet
