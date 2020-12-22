@@ -44,7 +44,7 @@ def build_arg():
     in_args.add_argument('--loop', default=False, action='store_true',
                          help='Optional. Enable reading the input in a loop.')
     in_args.add_argument('-o', '--output_video', required=False,
-                        help='Optional. Path to an output video file.')
+                         help='Optional. Path to an output video file.')
     in_args.add_argument("--no_show", help="Optional. Disable display of results on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",

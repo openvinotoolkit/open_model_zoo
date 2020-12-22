@@ -49,12 +49,13 @@ if __name__ == '__main__':
     args.add_argument('-m', '--model',
                       help='Required. Path to an .xml file with a trained model.',
                       type=Path, required=True)
-    args.add_argument('-i', '--input',
+    args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
-                           'a folder of images or anything that cv2.VideoCapture can process.',
-                      required=True)
-    args.add_argument('-loop', '--loop', default=False, action='store_true',
+                           'a folder of images or anything that cv2.VideoCapture can process.')
+    args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
+    args.add_argument('-o', '--output_video', required=False,
+                      help='Optional. Path to an output video file.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
@@ -92,6 +93,16 @@ if __name__ == '__main__':
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
+
+    fps = cap.fps()
+    out_frame_size = (frame.shape[1], frame.shape[0])
+
+    if args.output_video:
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        output_video = cv2.VideoWriter(args.output_video, fourcc, fps, out_frame_size)
+    else:
+        output_video = None
+
     base_height = args.height_size
     fx = args.fx
 
@@ -133,6 +144,10 @@ if __name__ == '__main__':
             mean_time = mean_time * 0.95 + current_time * 0.05
         cv2.putText(frame, 'FPS: {}'.format(int(1 / mean_time * 10) / 10),
                     (40, 80), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255))
+
+        if output_video is not None:
+            output_video.write(frame)
+
         if not args.no_show:
             cv2.imshow(canvas_3d_window_name, canvas_3d)
             cv2.imshow('3D Human Pose Estimation', frame)
@@ -161,3 +176,6 @@ if __name__ == '__main__':
                     delay = 1
         frame = cap.read()
     print(presenter.reportMeans())
+
+    if output_video is not None:
+        output_video.release()
