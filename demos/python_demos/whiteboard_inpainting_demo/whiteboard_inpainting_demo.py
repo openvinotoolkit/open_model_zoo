@@ -70,16 +70,15 @@ def main():
                          help='Required. Path to a video file or a device node of a web-camera')
     parser.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop')
+    parser.add_argument('-o', '--output_video', required=False,
+                        help='Optional. Path to an output video file')
     parser.add_argument('-m_i', '--m_instance_segmentation', type=str, required=False,
                         help='Path to the instance segmentation model')
     parser.add_argument('-m_s', '--m_semantic_segmentation', type=str, required=False,
                         help='Path to the semantic segmentation model')
     parser.add_argument('-t', '--threshold', type=float, default=0.6,
                         help='Threshold for person instance segmentation model')
-    parser.add_argument('--output_video', type=str, default='', required=False,
-                        help='Optional. Path to output video')
-    parser.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
-
+    parser.add_argument('--no_show', help="Optional. Don't show output", action='store_true')
     parser.add_argument('-d', '--device', type=str, default='CPU',
                         help='Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is '
                              'acceptable. The demo will look for a suitable plugin for the device specified')
@@ -114,7 +113,7 @@ def main():
         cv2.setMouseCallback(WINNAME, mouse.get_points)
 
     if args.output_video:
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
         output_video = cv2.VideoWriter(args.output_video, fourcc, fps, out_frame_size)
     else:
         output_video = None
