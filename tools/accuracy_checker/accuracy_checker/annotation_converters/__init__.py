@@ -43,7 +43,7 @@ from .cifar import CifarFormatConverter
 from .mnist import MNISTCSVFormatConverter
 from .wmt import WMTConverter
 from .common_semantic_segmentation import CommonSegmentationConverter
-from .camvid import CamVidConverter
+from .camvid import CamVidConverter, CamVid32DatasetConverter
 from .lpr import LPRConverter
 from .image_retrieval import ImageRetrievalConverter
 from .cvat_object_detection import CVATObjectDetectionConverter
@@ -137,6 +137,7 @@ __all__ = [
     'WMTConverter',
     'CommonSegmentationConverter',
     'CamVidConverter',
+    'CamVid32DatasetConverter',
     'LPRConverter',
     'ImageRetrievalConverter',
     'CVATObjectDetectionConverter',
