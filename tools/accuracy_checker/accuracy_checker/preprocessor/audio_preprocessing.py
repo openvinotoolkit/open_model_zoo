@@ -64,17 +64,15 @@ class ClipAudio(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'duration': BaseField(
-                description="Length of audio clip in seconds or samples (with 'samples' suffix)."
-            ),
+            'duration': BaseField(description="Length of audio clip in seconds or samples (with 'samples' suffix)."),
             'max_clips': NumberField(
                 value_type=int, min_value=1, optional=True,
                 description="Maximum number of clips per audiofile."
             ),
-            'overlap': BaseField(
-                optional=True,
-                description="Overlapping part for each clip."
-            ),
+            'pad_to': NumberField(optional=True, default=0, description="Number of points each clip padded to."),
+            'pad_center': BoolField(optional=True, default=False, description="Place clip to center of padded frame"),
+            'multi_infer': BoolField(optional=True, default=True, description="Metadata multi infer value"),
+            'overlap': BaseField(optional=True, description="Overlapping part for each clip."),
         })
         return parameters
 
@@ -86,6 +84,10 @@ class ClipAudio(Preprocessor):
 
         overlap = self.get_value_from_config('overlap')
         self._parse_overlap(overlap)
+
+        self.pad_to = int(self.get_value_from_config('pad_to'))
+        self.pad_center = self.get_value_from_config('pad_center')
+        self.multi_infer = self.get_value_from_config('multi_infer')
 
     def process(self, image, annotation_meta=None):
         data = image.data
@@ -111,10 +113,21 @@ class ClipAudio(Preprocessor):
             clip = data[:, clip_start: clip_start + clip_duration]
             clipped_data.append(clip)
 
+        if self.pad_to is not None:
+            if self.pad_center:
+                clipped_data = self._pad_center(np.asarray(clipped_data), self.pad_to)
         image.data = clipped_data
-        image.metadata['multi_infer'] = True
+        image.metadata['multi_infer'] = self.multi_infer
 
         return image
+
+    def _pad_center(self, data, size, axis=-1):
+        # kwargs.setdefault('mode', 'constant')
+        n = data.shape[axis]
+        lpad = int((size - n) // 2)
+        lengths = [(0, 0)] * data.ndim
+        lengths[axis] = (lpad, int(size - n - lpad))
+        return np.pad(data, lengths)
 
     def _parse_overlap(self, overlap):
         self.is_overlap_in_samples = False
@@ -394,6 +407,43 @@ class TriangleFiltering(Preprocessor):
 
         return output_channels
 
+    class SpliceFrame(Preprocessor):
+        __provider__ = 'audio_splice'
+
+        @classmethod
+        def parameters(cls):
+            parameters = super().parameters()
+            parameters.update({
+                'frames': NumberField(optional=True, default=1, description="Number of frames to splice", value_type=int),
+                'axis': NumberField(optional=True, default=2, description="Axis to splice frames along", value_type=int),
+            })
+            return parameters
+
+        def configure(self):
+
+            self.frames = self.get_value_from_config('frames')
+            self.axis = self.get_value_from_config('axis')
+
+
+        def process(self, image, annotation_meta=None):
+            # if self.frame_splicing > 1:
+            #     seq = [x]
+            #     for n in range(1, self.frame_splicing):
+            #         tmp = torch.zeros_like(x)
+            #         tmp[:, :, :-n] = x[:, :, n:]
+            #         seq.append(tmp)
+            #     x = torch.cat(seq, dim=1)[:, :, ::self.frame_splicing]
+
+            if self.frames > 1:
+                seq = [image.data]
+                for n in range(1, self.frames):
+                    tmp = np.zeros_like(image.data)
+                    tmp[:,:-n] = image.data[:,n:]
+                    seq.append(tmp)
+                image.data = np.concatenate(seq, axis=self.axis)
+
+                return image
+
 class DCT(Preprocessor):
     __provider__ = 'audio_dct'
 
@@ -510,11 +560,12 @@ class PackCepstrum(Preprocessor):
             features = np.concatenate((features, empty_context))
             steps, context, numceps = features.shape # pylint:disable=E0633
 
-        features = np.expand_dims(features, 0)
+        # features = np.expand_dims(features, 0)
 
         packed = []
         for i in range(0, steps, self.step):
-            packed.append(features[:, i:i+self.step, ...])
+            # packed.append(features[:, i:i+self.step, ...])
+            packed.append(features[i:i+self.step, ...])
 
         image.data = packed
         image.metadata['multi_infer'] = True
@@ -634,8 +685,10 @@ class AudioToMelSpectrogram(Preprocessor):
             'window': StringField(
                 choices=windows.keys(), optional=True, default='hann'
             ),
-            'n_fft': NumberField(optional=True, value_type=int)
-
+            'n_fft': NumberField(optional=True, value_type=int),
+            'n_filt': NumberField(optional=True, value_type=int, default=80),
+            'splicing': NumberField(optional=True, value_type=int, default=1),
+            'sample_rate': NumberField(optional=True, value_type=float),
         })
         return params
 
@@ -646,12 +699,13 @@ class AudioToMelSpectrogram(Preprocessor):
         self.window_fn = windows.get(self.get_value_from_config('window'))
         self.normalize = 'per_feature'
         self.preemph = 0.97
-        self.nfilt = 64
+        self.nfilt = self.get_value_from_config('n_filt')
+        self.sample_rate = self.get_value_from_config('sample_rate')
         self.lowfreq = 0
         self.highfreq = None
         self.pad_to = 16
         self.max_duration = 16.7
-        self.frame_splicing = 1
+        self.frame_splicing = self.get_value_from_config('splicing')
         self.pad_value = 0
         self.mag_power = 2.0
         self.dither = 1e-05
@@ -660,14 +714,17 @@ class AudioToMelSpectrogram(Preprocessor):
         self.log_zero_guard_value = 2 ** -24
 
     def process(self, image, annotation_meta=None):
-        sample_rate = image.metadata.get('sample_rate')
-        if sample_rate is None:
-            raise RuntimeError(
-                'Operation "{}" failed: required "sample rate" in metadata.'.format(self.__provider__)
-            )
+        if self.sample_rate is None:
+            sample_rate = image.metadata.get('sample_rate')
+            if sample_rate is None:
+                raise RuntimeError(
+                    'Operation "{}" failed: required "sample rate" in metadata.'.format(self.__provider__)
+                )
+        else:
+            sample_rate = self.sample_rate
         self.window_length = int(self.window_size * sample_rate)
         self.hop_length = int(self.window_stride * sample_rate)
-        self.n_fft = self.n_fft or 2 ** np.ceil(np.log2(self.window_length))
+        self.n_fft = int(self.n_fft or 2 ** np.ceil(np.log2(self.window_length)))
         self.window = self.window_fn(self.window_length) if self.window_fn is not None else None
         highfreq = self.highfreq or (sample_rate / 2)
         filterbanks = np.expand_dims(self.mel(
