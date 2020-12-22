@@ -122,6 +122,8 @@ def build_argparser():
     io_args = parser.add_argument_group('Input/output options')
     io_args.add_argument('--loop', default=False, action='store_true',
                          help='Optional. Enable reading the input in a loop.')
+    io_args.add_argument('-o', '--output_video', required=False,
+                         help='Optional. Path to an output video file.')
     io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
@@ -170,6 +172,7 @@ def main():
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
     cap = open_images_capture(args.input, args.loop)
+    fps = cap.fps()
     visualizer = Visualizer(args.colors)
 
     next_frame_id = 0
@@ -190,6 +193,11 @@ def main():
             if next_frame_id == 0:
                 presenter = monitors.Presenter(args.utilization_monitors, 55,
                                                (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
+                if args.output_video:
+                    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+                    output_video = cv2.VideoWriter(args.output_video, fourcc, fps, (frame.shape[1], frame.shape[0]))
+                else:
+                    output_video = None
             # Submit for inference
             pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
@@ -209,6 +217,10 @@ def main():
             frame = visualizer.overlay_masks(frame, objects)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
+ 
+            if output_video is not None:
+                output_video.write(frame)
+
             if not args.no_show:
                 cv2.imshow('Segmentation Results', frame)
                 key = cv2.waitKey(1)
@@ -238,6 +250,9 @@ def main():
 
     metrics.print_total()
     print(presenter.reportMeans())
+
+    if output_video is not None:
+        output_video.release()
 
 
 if __name__ == '__main__':

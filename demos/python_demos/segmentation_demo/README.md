@@ -25,7 +25,8 @@ usage: segmentation_demo.py [-h] -m MODEL -i INPUT
                             [-d DEVICE] [-c COLORS]
                             [-nireq NUM_INFER_REQUESTS]
                             [-nstreams NUM_STREAMS]
-                            [-nthreads NUM_THREADS] [-loop] [-no_show]
+                            [-nthreads NUM_THREADS] 
+							[-loop] [-o OUTPUT_VIDEO] [-no_show]
                             [-u UTILIZATION_MONITORS]
 Options:
   -h, --help            Show this help message and exit.
@@ -61,6 +62,8 @@ Inference options:
 
 Input/output options:
   --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT_VIDEO, --output_video OUTPUT_VIDEO
+                        Optional. Path to an output video file.
   --no_show             Optional. Don't show output.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
