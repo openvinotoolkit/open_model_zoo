@@ -103,18 +103,30 @@ class VideoCapWrapper(ImagesCapture):
         self.loop = loop
         self.cap = cv2.VideoCapture()
         status = self.cap.open(input)
+        self.actual_frames_count = 0
+        self.expected_frames_count = self.cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        self.corrupted_frames_threshold = self.expected_frames_count * 0.05
         if not status:
             raise InvalidInput("Can't open the video from {}".format(input))
 
     def read(self):
         status, image = self.cap.read()
         if not status:
-            if not self.loop:
-                return None
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            status, image = self.cap.read()
-            if not status:
-                return None
+            if self.actual_frames_count == self.expected_frames_count:
+                if not self.loop:
+                    return None
+                self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                status, image = self.cap.read()
+                if not status:
+                    return None
+            else:
+                for _ in range(self.corrupted_frames_threshold-1):
+                    self.actual_frames_count += 1
+                    status, image = self.cap.read()
+                    if status:
+                        return image
+                raise RuntimeError("The video contains corrupted frames")
+        self.actual_frames_count += 1
         return image
 
     def fps(self):
@@ -144,7 +156,7 @@ class CameraCapWrapper(ImagesCapture):
     def read(self):
         status, image = self.cap.read()
         if not status:
-            return None
+            raise RuntimeError("The image can't be captured from the camera")
         return image
 
     def fps(self):
