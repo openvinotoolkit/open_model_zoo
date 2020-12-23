@@ -176,6 +176,3 @@ if __name__ == '__main__':
                     delay = 1
         frame = cap.read()
     print(presenter.reportMeans())
-
-    if output_video is not None:
-        output_video.release()

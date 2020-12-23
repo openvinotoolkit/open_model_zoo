@@ -147,8 +147,4 @@ if __name__ == '__main__':
                 break
             presenter.handleKey(key)
         original_frame = cap.read()
-
-        if output_video is not None:
-            output_video.release()
-
     print(presenter.reportMeans())

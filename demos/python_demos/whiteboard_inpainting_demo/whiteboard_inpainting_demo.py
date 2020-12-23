@@ -191,9 +191,6 @@ def main():
 
     log.info(presenter.reportMeans())
 
-    if output_video is not None:
-        output_video.release()
-
 
 if __name__ == '__main__':
     main()

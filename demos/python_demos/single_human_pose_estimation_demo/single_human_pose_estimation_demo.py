@@ -95,9 +95,6 @@ def run_demo(args):
         frame = cap.read()
     print(presenter.reportMeans())
 
-    if output_video is not None:
-        output_video.release()
-
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()

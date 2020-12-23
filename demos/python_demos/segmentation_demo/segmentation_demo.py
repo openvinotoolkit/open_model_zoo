@@ -253,9 +253,6 @@ def main():
     metrics.print_total()
     print(presenter.reportMeans())
 
-    if output_video is not None:
-        output_video.release()
-
 
 if __name__ == '__main__':
     sys.exit(main() or 0)
