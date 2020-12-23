@@ -510,9 +510,8 @@ PYTHON_DEMOS = [
                     ModelArg('ctdet_coco_dlav0_384'),
                     ModelArg('ctdet_coco_dlav0_512')),
             ),
-            *combine_cases(
-                TestCase(options={'--architecture_type': 'faceboxes',
-                                  '-m': ModelArg('faceboxes-pytorch')})
+            TestCase(options={'--architecture_type': 'faceboxes',
+                              '-m': ModelArg('faceboxes-pytorch')}
             ),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'retina'}),
