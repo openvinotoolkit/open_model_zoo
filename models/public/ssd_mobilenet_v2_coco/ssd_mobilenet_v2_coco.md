@@ -8,8 +8,6 @@ The model input is a blob that consists of a single image of 1x3x300x300 in RGB 
 
 The model output is a typical vector containing the tracked object data, as previously described. Note that the "class_id" data is now significant and should be used to determine the classification for any detected object.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -24,8 +22,6 @@ The model output is a typical vector containing the tracked object data, as prev
 | Metric | Value |
 | ------ | ----- |
 | coco_precision | 24.9452%|
-
-## Performance
 
 ## Input
 
@@ -80,4 +76,4 @@ The array of summary detection information, name - `detection_out`,  shape - `1,
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

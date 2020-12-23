@@ -23,8 +23,6 @@ For details about this model, check out the [repository](https://github.com/Robe
 
 See [here](https://github.com/Robert-JunWang/Pelee).
 
-## Performance
-
 ## Input
 
 ### Original model

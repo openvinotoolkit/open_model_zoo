@@ -30,8 +30,6 @@ Super resolution:
 
 For reference, PSNR for bicubic upsampling on test dataset is 26.79 dB.
 
-## Performance
-
 ## Inputs
 
 1. name: "0" , shape: [1x3x270x480] - An input image in the format [BxCxHxW],

@@ -6,8 +6,6 @@ YOLO v3 Tiny is a real-time object detection model implemented with Keras\* from
 
 ## Conversion
 
-## Conversion
-
 1. Download or clone the original [repository](https://github.com/david8862/keras-YOLOv3-model-set) (tested on `d38c3d8` commit).
 2. Use the following commands to get original model (named `yolov3_tiny` in repository) and convert it to Keras\* format (see details in the [README.md](https://github.com/david8862/keras-YOLOv3-model-set/blob/d38c3d865f7190ee9b19a30e91f2b750a31320c1/README.md)  file in the official repository):
 

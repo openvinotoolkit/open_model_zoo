@@ -17,20 +17,20 @@ description: >-
 task_type: token_recognition
 files:
   - name: FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
-    size: 49105
-    sha256: 6684a3f59fbc4b675771a83f0ce32746f4165bb58d547837a8c79d49b7b1e33e
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
+    size: 48826
+    sha256: 95590206f28dcf740db3696e94c9aaa33f5c3c0a19a1b9fe3e93de3b6bb5ed73
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
   - name: FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
     size: 10252352
     sha256: 47313e32aacd678ebddb01fc288e67159bad2996fa92f53fd4711bc6564defcb
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
   - name: FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
-    size: 49097
-    sha256: 27bd129490cb0f702d3691126f37b54a972ad5a75019a0dee55bb8381d2b2e02
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
+    size: 48818
+    sha256: a6c3507782f58a332eea8cf48631e4efedbda21c4a0c54a0e393434034c6c7a9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
   - name: FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
     size: 5126230
     sha256: 85c96b6cf2bbfaa79fc505717070e15236386d3aacc868ce044e3139eb2421ba
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

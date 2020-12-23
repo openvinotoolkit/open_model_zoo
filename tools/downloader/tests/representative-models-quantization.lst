@@ -1,0 +1,3 @@
+# A list of models for testing quantization features.
+
+mobilenet-v1-0.25-128

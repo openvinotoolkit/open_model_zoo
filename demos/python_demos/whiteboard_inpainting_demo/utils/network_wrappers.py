@@ -11,9 +11,6 @@
  limitations under the License.
 """
 
-import json
-import logging as log
-
 import cv2
 import numpy as np
 
@@ -22,7 +19,7 @@ from .segm_postprocess import postprocess
 
 
 class MaskRCNN(IEModel):
-    def __init__(self, ie, model_path, labels_file,  conf=.6, device='CPU', ext_path=''):
+    def __init__(self, ie, model_path, labels_file, conf=.6, device='CPU', ext_path=''):
         super().__init__(ie, model_path, labels_file, conf, device, ext_path)
 
         required_input_keys = {'im_info', 'im_data'}

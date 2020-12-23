@@ -122,7 +122,7 @@ def run(cmd, timeout_sec):
         timer.cancel()
 
 
-def preprocess_formula(l):
+def preprocess_formula(formula):
     """Formula preprocessing
 
     Args:
@@ -131,25 +131,19 @@ def preprocess_formula(l):
     Returns:
         str: Preprocessed formula
     """
-    l = l.strip()
-    l = l.replace(r'\pmatrix', r'\mypmatrix')
-    l = l.replace(r'\matrix', r'\mymatrix')
+    formula = formula.strip()
+    formula = formula.replace(r'\pmatrix', r'\mypmatrix')
+    formula = formula.replace(r'\matrix', r'\mymatrix')
     # remove leading comments
-    l = l.strip('%')
-    if len(l) == 0:
-        l = '\\hspace{1cm}'
+    formula = formula.strip('%')
+    if not formula:
+        formula = '\\hspace{1cm}'
     # \hspace {1 . 5 cm} -> \hspace {1.5cm}
-    for space in ["hspace", "vspace"]:
-        match = re.finditer(space + " {(.*?)}", l)
-        if match:
-            new_l = ""
-            last = 0
-            for m in match:
-                new_l = new_l + l[last:m.start(1)] + m.group(1).replace(" ", "")
-                last = m.end(1)
-            new_l = new_l + l[last:]
-            l = new_l
-    return l
+    formula = re.sub("([hv]space )({.*?})",
+                     lambda m: m[1] + m[2].replace(" ", ""),
+                     formula)
+
+    return formula
 
 
 def render_routine(line):

@@ -29,14 +29,11 @@ from .average_meter import AverageMeter
 from ..utils import UnsupportedPackage
 
 try:
-    from sklearn.metrics import roc_auc_score
-except ImportError as import_error:
-    roc_auc_score = UnsupportedPackage("sklearn.metric.roc_auc_score", import_error.msg)
-
-try:
-    from sklearn.metrics import accuracy_score
+    from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
 except ImportError as import_error:
     accuracy_score = UnsupportedPackage("sklearn.metric.accuracy_score", import_error.msg)
+    confusion_matrix = UnsupportedPackage("sklearn.metric.confusion_matrix", import_error.msg)
+    roc_auc_score = UnsupportedPackage("sklearn.metric.roc_auc_score", import_error.msg)
 
 class ClassificationAccuracy(PerImageEvaluationMetric):
     """
@@ -241,6 +238,7 @@ class ClassificationF1Score(PerImageEvaluationMetric):
 
     annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
     prediction_types = (ClassificationPrediction, )
+
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
@@ -349,6 +347,38 @@ class RocAucScore(PerImageEvaluationMetric):
         all_targets = np.concatenate(self.targets)
         roc_auc = roc_auc_score(all_targets, all_results)
         return roc_auc
+
+    def reset(self):
+        self.targets = []
+        self.results = []
+
+class AcerScore(PerImageEvaluationMetric):
+    __provider__ = 'acer_score'
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
+    prediction_types = (ClassificationPrediction, )
+
+    def configure(self):
+        if isinstance(confusion_matrix, UnsupportedPackage):
+            confusion_matrix.raise_error(self.__provider__)
+        self.reset()
+
+    def update(self, annotation, prediction):
+        self.targets.append(annotation.label)
+        self.results.append(prediction.label)
+        return prediction.label == annotation.label
+
+    def evaluate(self, annotations, predictions):
+        all_results = np.array(self.results)
+        all_targets = np.array(self.targets)
+        tn, fp, fn, tp = confusion_matrix(y_true=all_targets,
+                                          y_pred=all_results,
+                                          ).ravel()
+
+        apcer = fp / (tn + fp) if (tn + fp) != 0 else 0
+        bpcer = fn / (fn + tp) if (fn + tp) != 0 else 0
+        acer = (apcer + bpcer) / 2
+
+        return acer
 
     def reset(self):
         self.targets = []

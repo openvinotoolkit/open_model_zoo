@@ -18,7 +18,9 @@ rules:
   line-length: disable
   braces: enable
   brackets: enable
-  colons: disable
+  colons:
+    max-spaces-before: 0
+    max-spaces-after: -1
   commas: enable
   comments:
     level: warning
@@ -34,7 +36,7 @@ rules:
   key-ordering: disable
   new-line-at-end-of-file: enable
   new-lines: disable
-  octal-values: disable
+  octal-values: enable
   quoted-strings: disable
   trailing-spaces: enable
   truthy: disable

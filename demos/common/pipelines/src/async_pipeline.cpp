@@ -62,7 +62,17 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
     execNetwork = engine.LoadNetwork(cnnNetwork, cnnConfig.devices, cnnConfig.execNetworkConfig);
 
     // --------------------------- 5. Create infer requests ------------------------------------------------
-    requestsPool.reset(new RequestsPool(execNetwork, cnnConfig.maxAsyncRequests));
+    unsigned int nireq = cnnConfig.maxAsyncRequests;
+    if (nireq == 0) {
+        try {
+            // +1 to use it as a buffer of the pipeline
+            nireq = execNetwork.GetMetric(METRIC_KEY(OPTIMAL_NUMBER_OF_INFER_REQUESTS)).as<unsigned int>() + 1;
+        } catch (const details::InferenceEngineException& ex) {
+            throw std::runtime_error(std::string("Every device used with the demo should support "
+                "OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. Failed to query the metric with error: ") + ex.what());
+        }
+    }
+    requestsPool.reset(new RequestsPool(execNetwork, nireq));
 
     // --------------------------- 6. Call onLoadCompleted to complete initialization of model -------------
     model->onLoadCompleted(&execNetwork, requestsPool->getInferRequestsList());
@@ -72,12 +82,14 @@ AsyncPipeline::~AsyncPipeline() {
     waitForTotalCompletion();
 }
 
-void AsyncPipeline::waitForData() {
+void AsyncPipeline::waitForData(bool shouldKeepOrder) {
     std::unique_lock<std::mutex> lock(mtx);
 
     condVar.wait(lock, [&] {return callbackException != nullptr ||
         requestsPool->isIdleRequestAvailable() ||
-        completedInferenceResults.find(outputFrameId) != completedInferenceResults.end();
+        (shouldKeepOrder ?
+            completedInferenceResults.find(outputFrameId) != completedInferenceResults.end() :
+            !completedInferenceResults.empty());
     });
 
     if (callbackException)
@@ -116,7 +128,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                 }
                 catch (...) {
                     if (!this->callbackException) {
-                        this->callbackException = std::move(std::current_exception());
+                        this->callbackException = std::current_exception();
                     }
                 }
             }
@@ -131,8 +143,8 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     return frameID;
 }
 
-std::unique_ptr<ResultBase> AsyncPipeline::getResult() {
-    auto infResult = AsyncPipeline::getInferenceResult();
+std::unique_ptr<ResultBase> AsyncPipeline::getResult(bool shouldKeepOrder) {
+    auto infResult = AsyncPipeline::getInferenceResult(shouldKeepOrder);
     if (infResult.IsEmpty()) {
         return std::unique_ptr<ResultBase>();
     }
@@ -143,12 +155,14 @@ std::unique_ptr<ResultBase> AsyncPipeline::getResult() {
     return result;
 }
 
-InferenceResult AsyncPipeline::getInferenceResult() {
+InferenceResult AsyncPipeline::getInferenceResult(bool shouldKeepOrder) {
     InferenceResult retVal;
     {
         std::lock_guard<std::mutex> lock(mtx);
 
-        const auto& it = completedInferenceResults.find(outputFrameId);
+        const auto& it = shouldKeepOrder ?
+            completedInferenceResults.find(outputFrameId) :
+            completedInferenceResults.begin();
 
         if (it != completedInferenceResults.end()) {
             retVal = std::move(it->second);

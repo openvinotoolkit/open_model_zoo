@@ -1,4 +1,4 @@
-# Multi Camera Multi Target Python* Demo
+# Multi Camera Multi Target Python\* Demo
 
 This demo demonstrates how to run Multi Camera Multi Target (e.g. person or vehicle) demo using OpenVINO<sup>TM</sup>.
 
@@ -60,8 +60,10 @@ Multi camera multi target tracking live demo script
 
 optional arguments:
   -h, --help            show this help message and exit
-  -i I [I ...]          Input sources (indexes of cameras or paths to video
+  -i INPUT, --input INPUT
+                        Input sources (indexes of cameras or paths to video
                         files)
+  --loop                Optional. Enable reading the input in a loop
   --config CONFIG       Configuration file
   --detections DETECTIONS
                         JSON file with bounding boxes

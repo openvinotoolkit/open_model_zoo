@@ -14,20 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from pathlib import Path
 import numpy as np
 
 from ..config import PathField, BoolField
 from ..representation import ClassificationAnnotation
 from ..utils import read_txt, get_path, check_file_existence, read_json
 
-from ..topology_types import ImageClassification
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 
 class ImageNetFormatConverter(BaseFormatConverter):
     __provider__ = 'imagenet'
     annotation_types = (ClassificationAnnotation, )
-    topology_types = (ImageClassification, )
 
     @classmethod
     def parameters(cls):
@@ -67,6 +66,7 @@ class ImageNetFormatConverter(BaseFormatConverter):
         num_iterations = len(original_annotation)
         for image_id, image in enumerate(original_annotation):
             image_name, label = image.split()
+            image_name = Path(image_name).name.split('@')[-1]
             if check_content:
                 if not check_file_existence(self.images_dir / image_name):
                     content_errors.append('{}: does not exist'.format(self.images_dir / image_name))

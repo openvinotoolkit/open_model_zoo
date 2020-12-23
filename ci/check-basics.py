@@ -49,6 +49,8 @@ def main():
         cwd=OMZ_ROOT,
     ).stdout.strip()
 
+    print('running text checks...', flush=True)
+
     if subprocess.run(['git', '--no-pager', 'diff', '--check', empty_tree_hash, '--'],
             cwd=OMZ_ROOT).returncode != 0:
         all_passed = False
@@ -79,6 +81,28 @@ def main():
 
         mode = raw_diff.split()[1]
 
+        absolute_path = OMZ_ROOT / path
+
+        if path.startswith('tools/accuracy_checker/configs/') and path.endswith('.yml'):
+            if mode == '120000':
+                try:
+                    if absolute_path.is_symlink():
+                        real_path = absolute_path.resolve(strict=True)
+                    else:
+                        with open(absolute_path, 'r', newline='') as file:
+                            link_target = file.read()
+                        real_path = (absolute_path.parent / link_target).resolve(strict=True)
+                except FileNotFoundError:
+                    complain(f"{path}: should be a symbolic link to existing accuracy-check.yml from models directory")
+                else:
+                    model_name = absolute_path.stem
+                    if real_path.name != 'accuracy-check.yml' or real_path.parent.name != model_name:
+                        complain(f"{path}: should be a symbolic link to accuracy-check.yml from {model_name} model "
+                                 "directory")
+            else:
+                complain(f"{path}: isn't a symbolic link but it should be a symbolic link to accuracy-check.yml "
+                         "from models directory")
+
         if mode not in {'100644', '100755'}: # not a regular or executable file
             continue
 
@@ -88,7 +112,7 @@ def main():
         if path.startswith('demos/thirdparty/'):
             continue
 
-        with open(OMZ_ROOT / path, encoding='UTF-8') as f:
+        with open(absolute_path, encoding='UTF-8') as f:
             lines = list(f)
 
         if lines and not lines[-1].endswith('\n'):
@@ -113,7 +137,12 @@ def main():
                     shebang_program.endswith('/env') and shebang_args == 'python'):
                 complain(f"{path}:1: use 'python3', not 'python'")
 
+    print('running yamllint...', flush=True)
     if subprocess.run([sys.executable, '-m', 'yamllint', '-s', '.'], cwd=OMZ_ROOT).returncode != 0:
+        all_passed = False
+
+    print('running flake8...', flush=True)
+    if subprocess.run([sys.executable, '-m', 'flake8', '--config=.flake8'], cwd=OMZ_ROOT).returncode != 0:
         all_passed = False
 
     sys.exit(0 if all_passed else 1)

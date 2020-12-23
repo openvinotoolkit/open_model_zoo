@@ -12,8 +12,8 @@ This is an action detector for the Smart Classroom scenario. It is based on the 
 
 | Metric                            | Value                                     |
 |-----------------------------------|-------------------------------------------|
-| Detector AP (internal test set 2) | 81.50%                                    |
-| Accuracy (internal test set 2)    | 94.93%                                    |
+| Detector AP (internal test set 2) | 80.0%                                     |
+| Accuracy (internal test set 2)    | 90.5%                                     |
 | Pose coverage                     | Sitting, standing, raising hand           |
 | Support of occluded pedestrians   | YES                                       |
 | Occlusion coverage                | <50%                                      |
@@ -24,8 +24,6 @@ This is an action detector for the Smart Classroom scenario. It is based on the 
 
 Average Precision (AP) is defined as an area under the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve.
-
-## Performance
 
 ## Inputs
 

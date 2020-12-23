@@ -1,0 +1,64 @@
+models:
+  - name: rexnet-v1-x1.0
+
+    launchers:
+      - framework: onnx_runtime
+        model: rexnet-v1-x1.0.onnx
+        adapter: classification
+        inputs:
+          - name: input.1
+            type: INPUT
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: pillow_imread
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BICUBIC
+          - type: crop
+            use_pillow: True
+            size: 224
+          - type: normalization
+            mean: [123.675, 116.28, 103.53]
+            std: [58.395, 57.12, 57.375]
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+
+  - name: rexnet-v1-x1.0
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: pillow_imread
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BICUBIC
+          - type: crop
+            use_pillow: True
+            size: 224
+          - type: rgb_to_bgr
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5

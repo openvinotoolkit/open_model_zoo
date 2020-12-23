@@ -162,7 +162,7 @@ def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None
 
 
 def sanitize_coordinates(_x1, _x2, img_size, shift=0, padding=0):
-    _x1 = (_x1 + shift  / 2) * img_size
+    _x1 = (_x1 + shift / 2) * img_size
     _x2 = (_x2 + shift / 2) * img_size
     x1 = np.clip(_x1 - padding, 0, img_size)
     x2 = np.clip(_x2 + padding, 0, img_size)
@@ -238,7 +238,7 @@ MODEL_ATTRIBUTES = {
 
 def check_model(net):
     num_inputs = len(net.input_info)
-    assert num_inputs <= 2,'Demo supports only topologies with 1 or 2 inputs.'
+    assert num_inputs <= 2, 'Demo supports only topologies with 1 or 2 inputs.'
     image_input = [input_name for input_name, in_info in net.input_info.items() if len(in_info.input_data.shape) == 4]
     assert len(image_input) == 1, 'Demo supports only model with single input for images'
     image_input = image_input[0]
@@ -252,11 +252,9 @@ def check_model(net):
         image_info_input = image_info_input[0]
     model_type = 'mask_rcnn' if image_info_input else 'yolact'
     model_attributes = MODEL_ATTRIBUTES[model_type]
-    assert (
-        set(model_attributes.required_outputs).issubset(net.outputs.keys()),
-        'Demo supports only topologies with the following output keys: '
-        '{}'.format(', '.join(model_attributes.required_outputs))
-    )
+    assert set(model_attributes.required_outputs) <= net.outputs.keys(), \
+        'Demo supports only topologies with the following output keys: {}'.format(
+            ', '.join(model_attributes.required_outputs))
 
     input_shape = net.input_info[image_input].input_data.shape
     assert input_shape[0] == 1, 'Only batch 1 is supported by the demo application'

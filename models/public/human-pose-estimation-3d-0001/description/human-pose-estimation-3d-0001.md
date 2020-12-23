@@ -17,8 +17,6 @@ Multi-person 3D human pose estimation model based on the [Lightweight OpenPose](
 | MParams                                                       | 5.074                   |
 | Source framework                                              | PyTorch\*               |
 
-## Performance
-
 ## Inputs
 
 Name: `data`, shape: `[1x3x256x448]`. An input image in the `[BxCxHxW]` format,
@@ -39,6 +37,6 @@ The net outputs three blobs with the following shapes: `[1, 57, 32, 56]`, `[1, 1
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../../licenses/APACHE-2.0.txt).
+A copy of the license is provided in [APACHE-2.0.txt](../../licenses/APACHE-2.0.txt).
 
 [*] Other names and brands may be claimed as the property of others.

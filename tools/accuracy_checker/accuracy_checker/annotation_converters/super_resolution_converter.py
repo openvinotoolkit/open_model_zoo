@@ -110,7 +110,7 @@ class SRConverter(BaseFormatConverter):
                 try:
                     self.lr_dir.relative_to(self.data_dir)
                     self.upsampled_dir.relative_to(self.data_dir)
-                except:
+                except ValueError:
                     raise ConfigError('data_dir parameter should be provided for conversion as common part of paths '
                                       'lr_dir and upsampled_dir, if 2 streams used')
             self.relative_dir = self.data_dir or os.path.commonpath([self.lr_dir, self.upsampled_dir])
@@ -418,12 +418,12 @@ class SRDirectoryBased(BaseFormatConverter):
         if self.images_dir:
             try:
                 self.lr_dir.relative_to(self.images_dir)
-            except:
+            except ValueError:
                 raise ConfigError('lr_dir should be relative to images_dir')
             if self.two_streams:
                 try:
                     self.upsample_dir.relative_to(self.images_dir)
-                except:
+                except ValueError:
                     raise ConfigError('upsample_dir should be relative to images_dir')
         else:
             self.images_dir = (

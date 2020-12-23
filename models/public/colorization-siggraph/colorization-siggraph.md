@@ -9,8 +9,6 @@ For details about this family of models, check out the [repository](https://gith
 Model consumes as input L-channel of LAB-image (also user points and binary mask as optional inputs).
 Model give as output predict A- and B-channels of LAB-image.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -22,9 +20,16 @@ Model give as output predict A- and B-channels of LAB-image.
 
 ## Accuracy
 
-The accuracy metrics were calculated on the ImageNet
-validation dataset using [VGG16](https://arxiv.org/abs/1409.1556) Caffe
-model and colorization as preprocessing.
+The accuracy metrics were calculated between generated images by model and real validation images from ImageNet dataset.
+Results are obtained on subset of 2000 images.
+
+| Metric | Value     |
+| ------ | --------- |
+| PSNR   | 27.73dB   |
+| SSIM   | 0.92      |
+
+Also, metrics can be calculated using [VGG16](https://arxiv.org/abs/1409.1556) caffe model and colorization as preprocessing.
+The results below are obtained on the validation images from ImageNet dataset.
 
 For preprocessing `rgb -> gray -> colorization` recieved values:
 
@@ -32,8 +37,6 @@ For preprocessing `rgb -> gray -> colorization` recieved values:
 |----------------|----------------------------|-----------------------------|
 | Accuracy top-1 |                     58.25% |                      70.96% |
 | Accuracy top-5 |                     81.78% |                      89.88% |
-
-## Performance
 
 ## Input
 

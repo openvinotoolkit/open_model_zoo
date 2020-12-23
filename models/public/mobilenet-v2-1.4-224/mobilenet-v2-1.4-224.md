@@ -4,8 +4,6 @@
 
 `mobilenet-v2-1.4-224` is one of MobileNets - small, low-latency, low-power models parameterized to meet the resource constraints of a variety of use cases. They can be built upon for classification, detection, embeddings and segmentation similar to how other popular large scale models are used. For details, see the [paper](https://arxiv.org/abs/1704.04861).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -21,8 +19,6 @@
 | ------ | ----- |
 | Top 1  | 74.09%|
 | Top 5  | 91.97%|
-
-## Performance
 
 ## Input
 
@@ -67,4 +63,4 @@ Probabilities for all dataset classes (0 class is background). Probabilities are
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

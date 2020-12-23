@@ -52,7 +52,7 @@ class TestMetric:
     def test_accuracy_arguments(self):
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
         assert len(dispatcher.metrics) == 1
-        _, _, accuracy_metric,  _, _, _ = dispatcher.metrics[0]
+        _, _, accuracy_metric, _, _, _ = dispatcher.metrics[0]
         assert isinstance(accuracy_metric, ClassificationAccuracy)
         assert accuracy_metric.top_k == 1
 

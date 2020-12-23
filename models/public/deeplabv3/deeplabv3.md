@@ -4,8 +4,6 @@
 
 DeepLab is a state-of-art deep learning model for semantic image segmentation. For details see [paper](https://arxiv.org/abs/1706.05587).
 
-## Example
-
 ## Specification
 
 | Metric            | Value                |
@@ -20,8 +18,6 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 | Metric | Value |
 | ------ | ----- |
 | mean_iou  | 66.85%|
-
-## Performance
 
 ## Input
 
@@ -73,4 +69,4 @@ Integer values in a range [0, 20], which represent an index of a predicted class
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

@@ -36,8 +36,6 @@ applicable for children since their faces were not in the training set.
 | Avg. age error  | 6.99 years |
 | Gender accuracy |     95.80% |
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x62x62] - An input image in [1xCxHxW] format. Expected color order is BGR.

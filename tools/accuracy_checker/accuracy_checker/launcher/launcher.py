@@ -76,6 +76,7 @@ class Launcher(ClassProvider):
         self.const_inputs = self.config.get('_list_const_inputs', [])
         self.image_info_inputs = self.config.get('_list_image_infos', [])
         self._lstm_inputs = self.config.get('_list_lstm_inputs', [])
+        self._ignore_inputs = self.config.get('_list_ignore_inputs', [])
 
     @classmethod
     def parameters(cls):
@@ -101,6 +102,9 @@ class Launcher(ClassProvider):
             ),
             '_list_lstm_inputs': ListField(
                 allow_empty=True, optional=True, default=[], description="List of lstm inputs."
+            ),
+            '_list_ignore_inputs': ListField(
+                allow_empty=True, optional=True, default=[], description='List of ignored inputs'
             ),
             '_input_precision': ListField(
                 allow_empty=True, optional=True, default=[], description='Input precision list from command line.'
@@ -155,10 +159,10 @@ class Launcher(ClassProvider):
             data = np.array(data)
         return data.astype(precision) if precision else data
 
-    def inputs_info_for_meta(self):
+    def inputs_info_for_meta(self, *args, **kwargs):
         return {
             layer_name: shape for layer_name, shape in self.inputs.items()
-            if layer_name not in self.const_inputs + self.image_info_inputs
+            if layer_name not in self.const_inputs + self.image_info_inputs + self._ignore_inputs
         }
 
     def update_input_configuration(self, input_config):

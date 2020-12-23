@@ -7,8 +7,6 @@ This model was converted from Caffe\* to Caffe2\* format.
 For details see repository <https://github.com/facebookarchive/models/tree/master/resnet50>,
 paper <https://arxiv.org/abs/1512.03385>.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -24,8 +22,6 @@ paper <https://arxiv.org/abs/1512.03385>.
 | ------ | ----- |
 | Top 1  | 76.38% |
 | Top 5  | 93.188%|
-
-## Performance
 
 ## Input
 

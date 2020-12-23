@@ -30,23 +30,20 @@
 #include <samples/slog.hpp>
 #include <samples/images_capture.h>
 #include <samples/default_flags.hpp>
+#include <samples/performance_metrics.hpp>
 #include <unordered_map>
 #include <gflags/gflags.h>
 
-#include <iostream>
-
-#include <samples/performance_metrics.hpp>
-
-#include "pipelines/async_pipeline.h"
-#include "pipelines/config_factory.h"
-#include "pipelines/metadata.h"
-#include "models/detection_model_yolo.h"
-#include "models/detection_model_ssd.h"
+#include <pipelines/async_pipeline.h>
+#include <pipelines/config_factory.h>
+#include <pipelines/metadata.h>
+#include <models/detection_model_faceboxes.h>
 #include "models/detection_model_retinaface.h"
+#include <models/detection_model_ssd.h>
+#include <models/detection_model_yolo.h>
 
 static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Architecture type: ssd or yolo";
-static const char video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
@@ -60,7 +57,7 @@ static const char custom_cpu_library_message[] = "Required for CPU custom layers
 static const char thresh_output_message[] = "Optional. Probability threshold for detections.";
 static const char raw_output_message[] = "Optional. Inference results as raw values.";
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
-static const char num_inf_req_message[] = "Optional. Number of infer requests.";
+static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
 static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
 "throughput mode (for HETERO and MULTI device cases use format "
@@ -72,7 +69,7 @@ static const char yolo_af_message[] = "Optional. Use advanced postprocessing/fil
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
-DEFINE_string(i, "", video_message);
+DEFINE_string(i, "", input_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(labels, "", labels_message);
@@ -83,7 +80,7 @@ DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_double(iou_t, 0.4, iou_thresh_output_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
-DEFINE_uint32(nireq, 2, num_inf_req_message);
+DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(loop, false, loop_message);
@@ -96,12 +93,12 @@ DEFINE_bool(yolo_af, false, yolo_af_message);
 */
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "object_detection_demo_ssd_async [OPTION]" << std::endl;
+    std::cout << "object_detection_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
-    std::cout << "    -i \"<path>\"               " << video_message << std::endl;
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
+    std::cout << "    -i \"<path>\"               " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
@@ -112,7 +109,7 @@ static void showUsage() {
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
-    std::cout << "    -nireq \"<integer>\"        " << num_inf_req_message << std::endl;
+    std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
     std::cout << "    -loop                     " << loop_message << std::endl;
@@ -160,10 +157,25 @@ cv::Mat renderDetectionData(const DetectionResult& result) {
     }
 
     // Visualizing result data over source image
+    if (FLAGS_r) {
+        slog::info << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
+    }
 
     for (auto obj : result.objects) {
+        if (FLAGS_r) {
+            slog::info << " "
+                       << std::left << std::setw(9) << obj.label << " | "
+                       << std::setw(10) << obj.confidence << " | "
+                       << std::setw(4) << std::max(int(obj.x), 0) << " | "
+                       << std::setw(4) << std::max(int(obj.y), 0) << " | "
+                       << std::setw(4) << std::min(int(obj.width), outputImg.cols) << " | "
+                       << std::setw(4) << std::min(int(obj.height), outputImg.rows)
+                       << slog::endl;
+        }
+
         std::ostringstream conf;
         conf << ":" << std::fixed << std::setprecision(3) << obj.confidence;
+
         cv::putText(outputImg, obj.label + conf.str(),
             cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
             cv::Scalar(0, 0, 255));
@@ -203,14 +215,17 @@ int main(int argc, char *argv[]) {
             labels = DetectionModel::loadLabels(FLAGS_labels);
 
         std::unique_ptr<ModelBase> model;
-        if (FLAGS_at == "ssd") {
+        if (FLAGS_at == "faceboxes") {
+            model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
+        }
+        else if (FLAGS_at == "retinaface") {
+            model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize));
+        }
+        else if (FLAGS_at == "ssd") {
             model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
         else if (FLAGS_at == "yolo") {
             model.reset(new ModelYolo3(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
-        }
-        else if (FLAGS_at == "retinaface") {
-            model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
@@ -221,17 +236,19 @@ int main(int argc, char *argv[]) {
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
-        Presenter presenter;
+        Presenter presenter(FLAGS_u);
 
         bool keepRunning = true;
-        int64_t frameNum = 0;
+        int64_t frameNum = -1;
+        std::unique_ptr<ResultBase> result;
+
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
-                //--- Capturing frame. If previous frame hasn't been inferred yet, reuse it instead of capturing new one
+                //--- Capturing frame
                 auto startTime = std::chrono::steady_clock::now();
                 curr_frame = cap->read();
                 if (curr_frame.empty()) {
-                    if (!frameNum) {
+                    if (frameNum == -1) {
                         throw std::logic_error("Can't read an image from the input");
                     }
                     else {
@@ -250,13 +267,12 @@ int main(int argc, char *argv[]) {
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - cast result's underlying pointer to DetectionResult*
             //    and use your own processing instead of calling renderDetectionData().
-            std::unique_ptr<ResultBase> result;
             while ((result = pipeline.getResult()) && keepRunning) {
                 cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                    outFrame, { 10,22 }, 0.65);
+                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 if (!FLAGS_no_show) {
                     cv::imshow("Detection Results", outFrame);
                     //--- Processing keyboard events
@@ -271,6 +287,21 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
+        pipeline.waitForTotalCompletion();
+        while (result = pipeline.getResult()) {
+            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
+            //--- Showing results and device information
+            presenter.drawGraphs(outFrame);
+            metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+            if (!FLAGS_no_show) {
+                cv::imshow("Detection Results", outFrame);
+                //--- Updating output window
+                cv::waitKey(1);
+            }
+        }
+
         //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << slog::endl << "Metric reports:" << slog::endl;
         metrics.printTotal();
@@ -278,11 +309,11 @@ int main(int argc, char *argv[]) {
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
-        slog::err << "[ ERROR ] " << error.what() << slog::endl;
+        slog::err << error.what() << slog::endl;
         return 1;
     }
     catch (...) {
-        slog::err << "[ ERROR ] Unknown/internal exception happened." << slog::endl;
+        slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
 

@@ -16,15 +16,15 @@
  limitations under the License.
 """
 import logging as log
-import os
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
 
 import numpy as np
 from openvino.inference_engine import IECore
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
 
@@ -36,10 +36,11 @@ def build_argparser():
     args.add_argument("-v", "--vocab", help="Required. path to the vocabulary file with tokens",
                       required=True, type=str)
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
-                      required=True, type=str)
+                      required=True, type=Path)
     args.add_argument("-i", "--input", help="Required. URL to a page with context",
                       action='append',
                       required=True, type=str)
+    args.add_argument("--questions", type=str, nargs='+', metavar='QUESTION', help="Optional. Prepared questions")
     args.add_argument("--input_names",
                       help="Optional. Inputs names for the network. "
                            "Default values are \"input_ids,attention_mask,token_type_ids\" ",
@@ -70,13 +71,13 @@ def build_argparser():
 def find_sentence_range(context, s, e):
     # find start of sentence
     for c_s in range(s, max(-1, s - 200), -1):
-        if context[c_s] in "\n\.":
+        if context[c_s] in "\n.":
             c_s += 1
             break
 
     # find end of sentence
     for c_e in range(max(0, e - 1), min(len(context), e + 200), +1):
-        if context[c_e] in "\n\.":
+        if context[c_e] in "\n.":
             break
 
     return c_s, c_e
@@ -113,7 +114,7 @@ def main():
 
     # read IR
     model_xml = args.model
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
+    model_bin = model_xml.with_suffix(".bin")
     log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
     ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
 
@@ -157,10 +158,19 @@ def main():
     log.info("Loading model to the {}".format(args.device))
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
 
-    # loop on user's questions
-    while True:
-        question = input('Type question (empty string to exit):')
-        if not question:
+    if args.questions:
+        def questions():
+            for question in args.questions:
+                log.info("Question: {}".format(question))
+                yield question
+    else:
+        def questions():
+            while True:
+                yield input('Type question (empty string to exit):')
+
+    # loop on user's or prepared questions
+    for question in questions():
+        if not question.strip():
             break
 
         q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
@@ -208,7 +218,7 @@ def main():
                 input_names[2]: np.array([token_type_ids], dtype=np.int32),
             }
             if len(input_names)>3:
-                inputs[input_names[3]] = np.arange(len(input_ids), dtype=np.int32)[None,:]
+                inputs[input_names[3]] = np.arange(len(input_ids), dtype=np.int32)[None, :]
 
             t_start = time.perf_counter()
             # infer by IE

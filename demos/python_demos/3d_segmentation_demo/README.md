@@ -1,4 +1,4 @@
-# 3D Segmentation Python* Demo
+# 3D Segmentation Python\* Demo
 
 This topic demonstrates how to run the 3D Segmentation Demo, which segments 3D images using 3D convolutional networks.
 
@@ -56,7 +56,7 @@ Options:
 ```
 
 Running the application with the empty list of options yields the usage message and an error message.
-To run the demo, use public or pre-trained models that support 3D convolution, for example, UNet3D. You can download the pre-trained models using the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, use public or pre-trained models that support 3D convolution, for example, UNet3D. You can download the pre-trained models using the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

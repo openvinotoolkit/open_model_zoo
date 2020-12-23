@@ -258,7 +258,7 @@ class TestInputFeeder:
             {'input1': InputInfo_test(shape=(1, 3, 10, 10)), 'input2': InputInfo_test(shape=(1, 3, 10, 10))}
         )
         result = input_feeder.fill_non_constant_inputs(
-            [DataRepresentation([np.zeros((10, 10, 3)), np.ones((10, 10, 3))],identifier=['0', '1'])]
+            [DataRepresentation([np.zeros((10, 10, 3)), np.ones((10, 10, 3))], identifier=['0', '1'])]
         )[0]
         expected_data = [np.zeros((1, 3, 10, 10)), np.ones((1, 3, 10, 10))]
         assert 'input1' in result
@@ -363,7 +363,7 @@ class TestInputFeeder:
     def test_set_input_precision_for_non_constant_input(self):
         input_feeder = InputFeeder(
             [{'name': 'input_u8', 'type': 'INPUT', 'precision': 'U8'}],
-            {'input_u8': (1, 3,10, 10)})
+            {'input_u8': (1, 3, 10, 10)})
         result = input_feeder.fill_non_constant_inputs([
             DataRepresentation(
                 np.zeros((10, 10, 3)),
@@ -382,7 +382,7 @@ class TestInputFeeder:
     def test_set_input_precision_for_image_info_input(self):
         input_feeder = InputFeeder(
             [{'name': 'im_info', 'type': 'IMAGE_INFO', 'precision': 'U8'}],
-            {'input': (1, 3,10, 10), 'im_info': (1, 3)})
+            {'input': (1, 3, 10, 10), 'im_info': (1, 3)})
         result = input_feeder.fill_non_constant_inputs([
             DataRepresentation(
                 np.zeros((10, 10, 3)),

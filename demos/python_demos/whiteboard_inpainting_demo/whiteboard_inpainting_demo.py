@@ -22,12 +22,13 @@ from os import path as osp
 
 from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
 
-from utils.capture import VideoCapture
 from utils.network_wrappers import MaskRCNN, SemanticSegmentation
 from utils.misc import MouseClick, set_log_config, check_pressed_keys
 
 sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
 import monitors
+from images_capture import open_images_capture
+
 
 set_log_config()
 WINNAME = 'Whiteboard_inpainting_demo'
@@ -65,8 +66,10 @@ def remove_background(img, kernel_size=(7, 7), blur_kernel_size=21, invert_color
 
 def main():
     parser = argparse.ArgumentParser(description='Whiteboard inpainting demo')
-    parser.add_argument('-i', type=str, help='Input sources (index of camera \
-                        or path to a video file)', required=True)
+    parser.add_argument('-i', '--input', required=True,
+                         help='Required. Path to a video file or a device node of a web-camera')
+    parser.add_argument('--loop', default=False, action='store_true',
+                      help='Optional. Enable reading the input in a loop')
     parser.add_argument('-m_i', '--m_instance_segmentation', type=str, required=False,
                         help='Path to the instance segmentation model')
     parser.add_argument('-m_s', '--m_semantic_segmentation', type=str, required=False,
@@ -87,14 +90,19 @@ def main():
                         help='Optional. List of monitors to show initially')
     args = parser.parse_args()
 
-    capture = VideoCapture(args.i)
+    cap = open_images_capture(args.input, args.loop)
+    if cap.get_type() not in ('VIDEO', 'CAMERA'):
+        raise RuntimeError("The input should be a video file or a numeric camera ID")
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
 
     if bool(args.m_instance_segmentation) == bool(args.m_semantic_segmentation):
-        raise ValueError('Set up exactly one of segmentation models: '\
+        raise ValueError('Set up exactly one of segmentation models: '
                          '--m_instance_segmentation or --m_semantic_segmentation')
 
-    frame_size, fps = capture.get_source_parameters()
-    out_frame_size = (int(frame_size[0]), int(frame_size[1] * 2))
+    fps = cap.fps()
+    out_frame_size = (frame.shape[1], frame.shape[0] * 2)
     presenter = monitors.Presenter(args.utilization_monitors, 20,
                                    (out_frame_size[0] // 4, out_frame_size[1] // 16))
 
@@ -123,24 +131,19 @@ def main():
                                             args.threshold, args.device, args.cpu_extension)
 
     black_board = False
-    output_frame = np.full((frame_size[1], frame_size[0], 3), 255, dtype='uint8')
+    output_frame = np.full((frame.shape[0], frame.shape[1], 3), 255, dtype='uint8')
     frame_number = 0
     key = -1
+    start = time.time()
 
-    while True:
-        start = time.time()
-        _, frame = capture.get_frame()
-
+    while frame is not None:
         mask = None
-        if frame is not None:
-            detections = segmentation.get_detections([frame])
-            expand_mask(detections, frame_size[0] // 27)
-            if len(detections[0]) > 0:
-                mask = detections[0][0][2]
-                for i in range(1, len(detections[0])):
-                    mask = cv2.bitwise_or(mask, detections[0][i][2])
-        else:
-            break
+        detections = segmentation.get_detections([frame])
+        expand_mask(detections, frame.shape[1] // 27)
+        if len(detections[0]) > 0:
+            mask = detections[0][0][2]
+            for i in range(1, len(detections[0])):
+                mask = cv2.bitwise_or(mask, detections[0][i][2])
 
         if mask is not None:
             mask = np.stack([mask, mask, mask], axis=-1)
@@ -180,9 +183,11 @@ def main():
                 cv2.imshow('Board', board)
 
         end = time.time()
-        print('\rProcessing frame: {}, fps = {:.3}' \
+        print('\rProcessing frame: {}, fps = {:.3}'
             .format(frame_number, 1. / (end - start)), end="")
         frame_number += 1
+        start = time.time()
+        frame = cap.read()
     print('')
 
     log.info(presenter.reportMeans())

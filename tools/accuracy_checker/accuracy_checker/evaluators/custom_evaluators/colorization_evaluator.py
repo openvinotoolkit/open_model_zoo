@@ -175,6 +175,8 @@ class ColorizationEvaluator(BaseEvaluator):
             presenter.write_results(metric_result, ignore_results_formatting)
 
     def release(self):
+        self.test_model.release()
+        self.check_model.release()
         self.launcher.release()
 
     def reset(self):
@@ -326,7 +328,8 @@ class BaseModel:
         raise NotImplementedError
 
     def release(self):
-        pass
+        del self.network
+        del self.exec_network
 
     def load_model(self, network_info, launcher, log=False):
         model, weights = self.auto_model_search(network_info, self.net_type)
@@ -416,10 +419,6 @@ class ColorizationTestModel(BaseModel):
         new_result = self.postprocessing(res[self.output_blob], img_l)
         return res, np.array(new_result)
 
-    def release(self):
-        del self.network
-        del self.exec_network
-
     def fit_to_input(self, input_data):
         has_info = hasattr(self.exec_network, 'input_info')
         input_info = (
@@ -458,10 +457,6 @@ class ColorizationCheckModel(BaseModel):
         raw_result = self.exec_network.infer(self.fit_to_input(input_data))
         result = self.adapter.process([raw_result], identifiers, [{}])
         return raw_result, result
-
-    def release(self):
-        del self.network
-        del self.exec_network
 
     def fit_to_input(self, input_data):
         constant_normalization = 255.

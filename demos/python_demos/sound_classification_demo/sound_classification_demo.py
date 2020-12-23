@@ -171,7 +171,7 @@ def main():
     labels = []
     if args.labels:
         with open(args.labels, "r") as file:
-            labels = [l.rstrip() for l in file.readlines()]
+            labels = [line.rstrip() for line in file.readlines()]
 
     batch_size, channels, one, length = input_shape
     if one != 1:

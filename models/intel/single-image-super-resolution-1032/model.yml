@@ -17,28 +17,28 @@ description: >-
 task_type: image_processing
 files:
   - name: FP32/single-image-super-resolution-1032.xml
-    size: 77781
-    sha256: dec128010f885637da35608e48295ff157cb1890bf6a2c3396b7113fefccc0e6
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
+    size: 77646
+    sha256: ecfa7449bce7d04da9b59b46b66ccaa8fa367b415469f52e643f9d1e05e0fdf0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
   - name: FP32/single-image-super-resolution-1032.bin
     size: 119436
     sha256: d09c215077e7a95d15636c79d006039ffaacfaf1889ea07668cbf21120295287
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
   - name: FP16/single-image-super-resolution-1032.xml
-    size: 77704
-    sha256: d1c2fce6b1e2842fd7861894ceba07fabffc1696855ed8e183f6db03f159cf0e
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
+    size: 77569
+    sha256: 9e15d4a7bbddb080d874bb41218fbf39aa7a4c0828274dfa3bb425929ecdcd45
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
   - name: FP16/single-image-super-resolution-1032.bin
     size: 59762
     sha256: a52a4549011480d90246bbe6118718ee485c130480bbf5f7befdb3d5a2a1f057
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
   - name: FP16-INT8/single-image-super-resolution-1032.xml
-    size: 172956
-    sha256: 46d3024a38a3c2c488ddc74f2bda86b6f9f5858a0956a7157db0fd7b9de4b95c
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/single-image-super-resolution-1032/FP16-INT8/single-image-super-resolution-1032.xml
+    size: 173174
+    sha256: 958cbb09e0c5074175761fed47623948a77af618116d3b77909db32f00a0dc81
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/single-image-super-resolution-1032/FP16-INT8/single-image-super-resolution-1032.xml
   - name: FP16-INT8/single-image-super-resolution-1032.bin
     size: 31049
     sha256: 2a9acb9db263965cc74e2f881b0d3650e9691cf31510ec300145171efc47336a
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/single-image-super-resolution-1032/FP16-INT8/single-image-super-resolution-1032.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/single-image-super-resolution-1032/FP16-INT8/single-image-super-resolution-1032.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

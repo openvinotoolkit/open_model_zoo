@@ -21,16 +21,21 @@
 class SegmentationModel : public ModelBase {
 public:
     /// Constructor
-    /// @param model_nameFileName of model to load
-    SegmentationModel(const std::string& modelFileName) : ModelBase(modelFileName) {}
+    /// @param modelFileName name of model to load
+    /// @param useAutoResize - if true, image will be resized by IE.
+    /// Otherwise, image will be preprocessed and resized using OpenCV routines.
+    SegmentationModel(const std::string& modelFileName, bool useAutoResize);
 
-    virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
-    virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult);
+    std::shared_ptr<InternalModelData> preprocess(
+        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+    std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
+    void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
 
     int outHeight = 0;
     int outWidth = 0;
     int outChannels = 0;
+
+    bool useAutoResize;
 };

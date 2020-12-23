@@ -24,7 +24,6 @@ from .adapter import Adapter
 from ..config import ConfigValidator, StringField, NumberField, ListField, BoolField
 from ..postprocessor import NMS
 from ..representation import DetectionPrediction, ContainerPrediction
-from ..topology_types import SSD, FasterRCNN
 
 
 class SSDAdapter(Adapter):
@@ -33,7 +32,6 @@ class SSDAdapter(Adapter):
     """
     __provider__ = 'ssd'
     prediction_types = (DetectionPrediction, )
-    topology_types = (SSD, FasterRCNN, )
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -43,7 +41,9 @@ class SSDAdapter(Adapter):
         Returns:
             list of DetectionPrediction objects
         """
-        prediction_batch = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        prediction_batch = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(prediction_batch)
+        prediction_batch = prediction_batch[self.output_blob]
         prediction_count = prediction_batch.shape[2] if len(prediction_batch.shape) > 2 else prediction_batch.shape[0]
         prediction_batch = prediction_batch.reshape(prediction_count, -1)
         prediction_batch = self.remove_empty_detections(prediction_batch)
@@ -281,6 +281,7 @@ class SSDAdapterMxNet(Adapter):
             list of DetectionPrediction objects
         """
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
         result = []
         for identifier, prediction_batch in zip(identifiers, raw_outputs[self.output_blob]):
             # Filter detections (get only detections with class_id >= 0)
@@ -331,7 +332,18 @@ class SSDONNXAdapter(Adapter):
                 x_mins, y_mins, x_maxs, y_maxs = bboxes.T
             else:
                 x_mins, y_mins, x_maxs, y_maxs, scores = bboxes.T
-            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
+            if labels.ndim > 1:
+                labels = np.squeeze(labels)
+            if scores.ndim > 1:
+                scores = np.squeeze(scores)
+            if x_mins.ndim > 1:
+                x_mins = np.squeeze(x_mins)
+                y_mins = np.squeeze(y_mins)
+                x_maxs = np.squeeze(x_maxs)
+                y_maxs = np.squeeze(y_maxs)
+            results.append(
+                DetectionPrediction(
+                    identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
 
         return results
 

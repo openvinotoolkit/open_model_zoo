@@ -841,11 +841,14 @@ class RoiDetectorImpl:
 
     def get_res_bbox(self):
         return self.res_bbox
+
     def get_res_bbox_confidence(self):
         """ At the moment it either 0 or 1 """
         return self.res_bbox_confidence
+
     def get_num_summed_masks(self):
         return self.num_summed_masks
+
     def get_result_img_to_show(self):
         return self.result_img_to_show
 

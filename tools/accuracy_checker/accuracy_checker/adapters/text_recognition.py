@@ -56,6 +56,7 @@ class BeamSearchDecoder(Adapter):
         if self.blank_label is None:
             self.blank_label = len(self.label_map)
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
         output = np.swapaxes(output, 0, 1)
 
@@ -162,6 +163,7 @@ class CTCGreedySearchDecoder(Adapter):
         if self.blank_label is None:
             self.blank_label = 0
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
         preds_index = np.argmax(output, 2)
         preds_index = preds_index.transpose(1, 0)
@@ -200,6 +202,7 @@ class LPRAdapter(Adapter):
         if not self.label_map:
             raise ConfigError('LPR adapter requires dataset label map for correct decoding.')
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         predictions = raw_output[self.output_blob]
         result = []
         for identifier, output in zip(identifiers, predictions):

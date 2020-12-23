@@ -102,6 +102,19 @@ class TestModelEvaluator:
         assert not self.postprocessor.process_dataset.called
         assert not self.postprocessor.full_process.called
 
+    def test_process_dataset_store_only(self):
+        self.postprocessor.has_dataset_processors = False
+
+        self.evaluator.process_dataset('path', None, store_only=True)
+
+        assert self.evaluator.store_predictions.called
+        assert not self.evaluator.load.called
+        assert self.launcher.predict.called
+        assert not self.postprocessor.process_batch.called
+        assert not self.metric.update_metrics_on_batch.called
+        assert not self.postprocessor.process_dataset.called
+        assert not self.postprocessor.full_process.called
+
     def test_process_dataset_with_loading_predictions_and_without_dataset_processors(self, mocker):
         mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
         self.postprocessor.has_dataset_processors = False
@@ -208,7 +221,6 @@ class TestModelEvaluatorAsync:
 
         self.evaluator.process_dataset('path', None)
 
-        assert self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
         assert not self.launcher.predict.called
         assert self.launcher.get_async_requests.called

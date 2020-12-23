@@ -15,9 +15,9 @@
 import argparse
 import itertools
 import logging as log
-import os
 import sys
 import time
+from pathlib import Path
 
 import numpy as np
 from openvino.inference_engine import IECore
@@ -68,8 +68,8 @@ class TranslationEngine:
     def __init__(self, model_xml, model_bin, output_name):
         self.logger = log.getLogger("TranslationEngine")
         self.logger.info("loading network")
-        self.logger.info("model_xml: " + model_xml)
-        self.logger.info("model_bin: " + model_bin)
+        self.logger.info(f"model_xml: {model_xml}")
+        self.logger.info(f"model_bin: {model_bin}")
         self.ie = IECore()
         self.net = self.ie.read_network(
             model=model_xml,
@@ -112,11 +112,11 @@ class Tokenizer:
     def __init__(self, path, max_tokens):
         self.logger = log.getLogger("Tokenizer")
         self.logger.info("loading tokenizer")
-        self.logger.info("path: " + path)
-        self.logger.info("max_tokens: " + str(max_tokens))
+        self.logger.info(f"path: {path}")
+        self.logger.info(f"max_tokens: {max_tokens}")
         self.tokenizer = SentencePieceBPETokenizer(
-            os.path.join(path, "vocab.json"),
-            os.path.join(path, "merges.txt")
+            str(path / "vocab.json"),
+            str(path / "merges.txt"),
         )
         self.max_tokens = max_tokens
         self.idx = {}
@@ -184,12 +184,14 @@ def build_argparser():
     """ Build argument parser.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "--model", required=True, type=str,
+    parser.add_argument("-m", "--model", required=True, type=Path,
                         help="Required. Path to an .xml file with a trained model")
-    parser.add_argument('--tokenizer-src', type=str, required=True,
+    parser.add_argument('--tokenizer-src', type=Path, required=True,
                         help='Required. Path to the folder with src tokenizer that contains vocab.json and merges.txt.')
-    parser.add_argument('--tokenizer-tgt', type=str, required=True,
+    parser.add_argument('--tokenizer-tgt', type=Path, required=True,
                         help='Required. Path to the folder with tgt tokenizer that contains vocab.json and merges.txt.')
+    parser.add_argument('-i', '--input', type=str, required=False, nargs='*',
+                        help='Optional. Text for translation. Replaces console input.')
     parser.add_argument('--output-name', type=str, default='pred/Squeeze',
                         help='Optional. Name of the models output node.')
     return parser
@@ -201,23 +203,34 @@ def main(args):
     logger.info("creating translator")
     model = Translator(
         model_xml=args.model,
-        model_bin=os.path.splitext(args.model)[0] + ".bin",
+        model_bin=args.model.with_suffix(".bin"),
         tokenizer_src=args.tokenizer_src,
         tokenizer_tgt=args.tokenizer_tgt,
         output_name=args.output_name
     )
-    logger.info("enter empty string to exit.")
-    while True:
-        sentence = input("> ")
-        if not sentence:
+
+    if args.input:
+        def sentences():
+            for sentence in args.input:
+                print("> {}".format(sentence))
+                yield sentence
+    else:
+        def sentences():
+            while True:
+                yield input("> ")
+
+    # loop on user's or prepared questions
+    for sentence in sentences():
+        if not sentence.strip():
             break
+
         try:
             start = time.perf_counter()
             translation = model(sentence)
             stop = time.perf_counter()
             print(translation)
-            logger.info("time: " + str(stop - start) + " s.")
-        except Exception as e:
+            logger.info(f"time: {stop - start} s.")
+        except Exception:
             log.error("an error occurred", exc_info=True)
 
 

@@ -1,5 +1,7 @@
 # Security Barrier Camera C++ Demo
 
+![](./security_barrier_camera.gif)
+
 This demo showcases Vehicle and License Plate Detection network followed by the Vehicle Attributes Recognition and License Plate Recognition networks applied on top
 of the detection results. You can use a set of the following pre-trained models with the demo:
 * `vehicle-license-plate-detection-barrier-0106` or `vehicle-license-plate-detection-barrier-0123`, which is primary detection network to find the vehicles and license plates
@@ -81,7 +83,7 @@ Options:
 
 Running the application with an empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

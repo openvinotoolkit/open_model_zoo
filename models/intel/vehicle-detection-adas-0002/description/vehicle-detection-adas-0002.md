@@ -23,8 +23,6 @@ For Average Precision metric description, see [The PASCAL Visual Object Classes 
 
 Tested on a challenging internal dataset with 3000 images and 12585 vehicles to detect.
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x384x672] - An input image in the format [BxCxHxW],

@@ -2,41 +2,16 @@
 
 ## Use Case and High-Level Description
 
-CenterNet object detection model `ctdet_coco_dlav0_512` originally trained on PyTorch\*
-then converted to ONNX\* format. CenterNet models an object as a single point - the center point of its bounding box
+CenterNet object detection model `ctdet_coco_dlav0_512` originally trained with PyTorch\*.
+CenterNet models an object as a single point - the center point of its bounding box
 and uses keypoint estimation to find center points and regresses to object size.
 For details see [paper](https://arxiv.org/abs/1904.07850), [repository](https://github.com/xingyizhou/CenterNet/).
-
-### Steps to Reproduce PyTorch to ONNX Conversion
-Model is provided in ONNX format, which was obtained by the following steps.
-
-1. Clone the original repository
-```sh
-git clone https://github.com/xingyizhou/CenterNet
-cd CenterNet
-```
-2. Checkout the commit that the conversion was tested on:
-```sh
-git checkout 8ef87b4
-```
-3. Apply the `pytorch-onnx.patch` patch
-```sh
-git apply /path/to/pytorch-onnx.patch
-```
-4. Follow the original [installation steps](https://github.com/xingyizhou/CenterNet/blob/8ef87b4/readme/INSTALL.md)
-5. Download the [pretrained weights](https://drive.google.com/file/d/18yBxWOlhTo32_swSug_HM4q3BeWgxp_N/view)
-6. Run
-```sh
-python convert.py ctdet --load_model /path/to/downloaded/weights.pth --exp_id coco_dlav0_512 --arch dlav0_34 --input_res 512 --gpus -1
-```
-
-## Example
 
 ## Specification
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Type                            | Classification                            |
+| Type                            | Detection                                 |
 | GFlops                          | 62.211                                    |
 | MParams                         | 17.911                                    |
 | Source framework                | PyTorch\*                                 |
@@ -46,8 +21,6 @@ python convert.py ctdet --load_model /path/to/downloaded/weights.pth --exp_id co
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
 | mAP    | 44.2%           | 44.28%           |
-
-## Performance
 
 ## Input
 
@@ -78,9 +51,9 @@ Expected color order: BGR.
 
 ## Output
 
-1. Object center points heatmap, name: `508`. Contains predicted objects center point, for each of the 80 categories, according to MSCOCO\* dataset version with 80 categories of objects, without background label.
-2. Object size output, name: `511`. Contains predicted width and height for each object.
-3. Regression output, name: `514`. Contains offsets for each prediction.
+1. Object center points heatmap, name: `center_heatmap`. Contains predicted objects center point, for each of the 80 categories, according to MSCOCO\* dataset version with 80 categories of objects, without background label.
+2. Object size output, name: `width_height`. Contains predicted width and height for each object.
+3. Regression output, name: `regression`. Contains offsets for each prediction.
 
 ## Legal Information
 

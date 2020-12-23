@@ -33,14 +33,26 @@ from accuracy_checker.launcher.model_conversion import FrameworkParameters
 from tests.common import update_dict
 from accuracy_checker.data_readers import DataRepresentation
 from accuracy_checker.utils import contains_all
+try:
+    import ngraph as ng
+except ImportError:
+    ng = None
 
 
 def no_available_myriad():
     try:
         from openvino.inference_engine import IECore
         return 'MYRIAD' not in IECore().available_devices
-    except:
+    except Exception:
         return True
+
+
+def has_layers():
+    try:
+        from openvino.inference_engine import IENetwork
+        return hasattr(IENetwork, 'layers')
+    except Exception:
+        return False
 
 
 @pytest.fixture()
@@ -169,12 +181,15 @@ class TestDLSDKLauncherInfer:
         dlsdk_test_model.predict([{'data': input_blob.astype(np.float32)}], [image.metadata])
         assert dlsdk_test_model.output_blob == 'fc3'
 
-
-
+@pytest.mark.skipif(ng is None and not has_layers(), reason='no functionality to set affinity')
 class TestDLSDKLauncherAffinity:
     @pytest.mark.usefixtures('mock_affinity_map_exists')
     def test_dlsdk_launcher_valid_affinity_map(self, mocker, models_dir):
         affinity_map = {'conv1': 'GPU'}
+        if not has_layers():
+            affinity_map.update({
+                'conv1/Dims294/copy_const': 'GPU'
+            })
 
         mocker.patch(
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
@@ -183,9 +198,17 @@ class TestDLSDKLauncherAffinity:
         dlsdk_test_model = get_dlsdk_test_model(models_dir, {
             'device': 'HETERO:CPU,GPU', 'affinity_map': './affinity_map.yml'
         })
-        layers = dlsdk_test_model.network.layers
-        for key, value in affinity_map.items():
-            assert layers[key].affinity == value
+        if has_layers():
+            layers = dlsdk_test_model.network.layers
+            for key, value in affinity_map.items():
+                assert layers[key].affinity == value
+        else:
+            ng_function = ng.function_from_cnn(dlsdk_test_model.network)
+            for node in ng_function.get_ordered_ops():
+                if node.get_friendly_name() != 'conv1':
+                    continue
+                assert node.get_friendly_name() in affinity_map
+                assert node.get_rt_info()['affinity'] == affinity_map[node.get_friendly_name()]
 
     @pytest.mark.usefixtures('mock_file_exists')
     def test_dlsdk_launcher_affinity_map_invalid_device(self, mocker, models_dir):
@@ -196,18 +219,18 @@ class TestDLSDKLauncherAffinity:
         )
 
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,CPU', 'affinity_map' : './affinity_map.yml'})
+            get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,CPU', 'affinity_map': './affinity_map.yml'})
 
     @pytest.mark.usefixtures('mock_file_exists')
     def test_dlsdk_launcher_affinity_map_invalid_layer(self, mocker, models_dir):
-        affinity_map = {'none-existing-layer' : 'CPU'}
+        affinity_map = {'none-existing-layer': 'CPU'}
 
         mocker.patch(
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,CPU', 'affinity_map' : './affinity_map.yml'})
+            get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,CPU', 'affinity_map': './affinity_map.yml'})
 
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inference_engine', 'mock_inputs')

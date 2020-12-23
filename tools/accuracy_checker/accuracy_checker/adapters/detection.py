@@ -21,9 +21,10 @@ from collections import namedtuple
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, StringField, ListField, ConfigError
+from ..config import ConfigValidator, BaseField, NumberField, StringField, ListField, ConfigError
 from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction
+from ..utils import get_or_parse_value
 
 FaceDetectionLayerOutput = namedtuple('FaceDetectionLayerOutput', [
     'prob_name',
@@ -35,6 +36,7 @@ FaceDetectionLayerOutput = namedtuple('FaceDetectionLayerOutput', [
     'win_trans_x',
     'win_trans_y'
 ])
+
 
 class TFObjectDetectionAPIAdapter(Adapter):
     """
@@ -171,7 +173,6 @@ class MTCNNPAdapter(Adapter):
                 DetectionPrediction(identifier, np.full_like(scores, 1), scores, x_mins, y_mins, x_maxs, y_maxs)
             )
 
-
         return results
 
     @staticmethod
@@ -230,7 +231,7 @@ class ClassAgnosticDetectionAdapter(Adapter):
     DetectionPrediction representation
     """
     __provider__ = 'class_agnostic_detection'
-    prediction_types = (DetectionPrediction, )
+    prediction_types = (DetectionPrediction,)
 
     def validate_config(self):
         super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
@@ -240,14 +241,16 @@ class ClassAgnosticDetectionAdapter(Adapter):
         parameters = super().parameters()
         parameters.update({
             'output_blob': StringField(optional=True, default=None, description="Output blob name."),
-            'scale': NumberField(optional=True, default=1.0, description="Scale factor for bboxes."),
+            'scale': BaseField(optional=True, default=1.0, description="Scale factor for bboxes."),
         })
 
         return parameters
 
     def configure(self):
         self.out_blob_name = self.get_value_from_config('output_blob')
-        self.scale = self.get_value_from_config('scale')
+        self.scale = get_or_parse_value(self.get_value_from_config('scale'))
+        if isinstance(self.scale, list):
+            self.scale = self.scale * 2
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -360,11 +363,11 @@ class RFCNCaffe(Adapter):
         assert len(predicted_classes.shape) == 2
         assert predicted_deltas.shape[-1] == 8
         predicted_boxes = self.bbox_transform_inv(predicted_proposals, predicted_deltas)
-        num_classes = predicted_classes.shape[-1] - 1 # skip background
+        num_classes = predicted_classes.shape[-1] - 1  # skip background
         x_mins, y_mins, x_maxs, y_maxs = predicted_boxes[:, 4:].T
         detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
         for cls_id in range(num_classes):
-            cls_scores = predicted_classes[:, cls_id+1]
+            cls_scores = predicted_classes[:, cls_id + 1]
             keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, cls_scores, 0.3, include_boundaries=False)
             filtered_score = cls_scores[keep]
             x_cls_mins = x_mins[keep]
@@ -372,7 +375,7 @@ class RFCNCaffe(Adapter):
             x_cls_maxs = x_maxs[keep]
             y_cls_maxs = y_maxs[keep]
             # Save detections
-            labels = np.full_like(filtered_score, cls_id+1)
+            labels = np.full_like(filtered_score, cls_id + 1)
             detections['labels'].extend(labels)
             detections['scores'].extend(filtered_score)
             detections['x_mins'].extend(x_cls_mins)
@@ -383,6 +386,7 @@ class RFCNCaffe(Adapter):
             identifiers[0], detections['labels'], detections['scores'], detections['x_mins'],
             detections['y_mins'], detections['x_maxs'], detections['y_maxs']
         )]
+
     @staticmethod
     def bbox_transform_inv(boxes, deltas):
         if boxes.shape[0] == 0:
@@ -431,6 +435,7 @@ class FaceBoxesAdapter(Adapter):
     def configure(self):
         self.scores_out = self.get_value_from_config('scores_out')
         self.boxes_out = self.get_value_from_config('boxes_out')
+        self._anchors_cache = {}
 
         # Set default values
         self.min_sizes = [[32, 64, 128], [256], [512]]
@@ -501,11 +506,15 @@ class FaceBoxesAdapter(Adapter):
             image_info = meta.get("image_info")[0:2]
 
             # Prior boxes
-            feature_maps = [[math.ceil(image_info[0] / step), math.ceil(image_info[1] / step)] for step in
-                            self.steps]
-            prior_data = self.prior_boxes(feature_maps, image_info)
+            if (image_info[0], image_info[1]) not in self._anchors_cache:
+                feature_maps = [[math.ceil(image_info[0] / step), math.ceil(image_info[1] / step)] for step in
+                                self.steps]
+                prior_data = self.prior_boxes(feature_maps, image_info)
+                self._anchors_cache[(image_info[0], image_info[1])] = prior_data
+            else:
+                prior_data = self._anchors_cache[(image_info[0], image_info[1])]
 
-             # Boxes
+            # Boxes
             boxes[:, :2] = self.variance[0] * boxes[:, :2]
             boxes[:, 2:] = self.variance[1] * boxes[:, 2:]
             boxes[:, :2] = boxes[:, :2] * prior_data[:, 2:] + prior_data[:, :2]
@@ -566,12 +575,13 @@ class FaceBoxesAdapter(Adapter):
 
         return result
 
+
 class FaceDetectionAdapter(Adapter):
     """
     Class for converting output of Face Detection model to DetectionPrediction representation
     """
     __provider__ = 'face_detection'
-    predcition_types = (DetectionPrediction, )
+    predcition_types = (DetectionPrediction,)
 
     @classmethod
     def parameters(cls):
@@ -667,10 +677,10 @@ class FaceDetectionAdapter(Adapter):
                             candidate_width = layer.win_length
                             candidate_height = layer.win_length
 
-                            reg_x = reg_arr[0][layer.anchor_index*4+0][row][col] * layer.win_length
-                            reg_y = reg_arr[0][layer.anchor_index*4+1][row][col] * layer.win_length
-                            reg_width = reg_arr[0][layer.anchor_index*4+2][row][col] * layer.win_length
-                            reg_height = reg_arr[0][layer.anchor_index*4+3][row][col] * layer.win_length
+                            reg_x = reg_arr[0][layer.anchor_index * 4 + 0][row][col] * layer.win_length
+                            reg_y = reg_arr[0][layer.anchor_index * 4 + 1][row][col] * layer.win_length
+                            reg_width = reg_arr[0][layer.anchor_index * 4 + 2][row][col] * layer.win_length
+                            reg_height = reg_arr[0][layer.anchor_index * 4 + 3][row][col] * layer.win_length
 
                             candidate_x += reg_x
                             candidate_y += reg_y
@@ -701,10 +711,10 @@ class FaceDetectionAdapter(Adapter):
 
         return result
 
-class FaceDetectionRefinementAdapter(Adapter):
 
+class FaceDetectionRefinementAdapter(Adapter):
     __provider__ = 'face_detection_refinement'
-    prediction_types = (DetectionPrediction, )
+    prediction_types = (DetectionPrediction,)
 
     @classmethod
     def parameters(cls):
@@ -766,8 +776,8 @@ class FaceDetectionRefinementAdapter(Adapter):
             detections['scores'].append(score)
             detections['x_mins'].append(x)
             detections['y_mins'].append(y)
-            detections['x_maxs'].append(x+width)
-            detections['y_maxs'].append(y+height)
+            detections['x_maxs'].append(x + width)
+            detections['y_maxs'].append(y + height)
 
         return [
             DetectionPrediction(
@@ -816,3 +826,36 @@ class FasterRCNNONNX(Adapter):
         boxes[:, 1::2] /= im_scale_y
         x_mins, y_mins, x_maxs, y_maxs = boxes.T
         return [DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs)]
+
+
+class TwoStageDetector(Adapter):
+    __provider__ = 'two_stage_detection'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'boxes_out': StringField(description='boxes output'),
+            'cls_out': StringField(description='classes confidence output')
+        })
+        return params
+
+    def configure(self):
+        self.boxes_out = self.get_value_from_config('boxes_out')
+        self.cls_out = self.get_value_from_config('cls_out')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_output = self._extract_predictions(raw, frame_meta)
+        boxes_outputs = raw_output[self.boxes_out]
+        if len(boxes_outputs.shape) == 2:
+            boxes_outputs = np.expand_dims(boxes_outputs, 0)
+        conf_outputs = raw_output[self.cls_out]
+        if len(conf_outputs.shape) == 2:
+            conf_outputs = np.expand_dims(conf_outputs, 0)
+        result = []
+        for identifier, boxes, conf in zip(identifiers, boxes_outputs, conf_outputs):
+            x_mins, y_mins, w, h = boxes.T
+            labels = np.argmax(conf, axis=1)
+            scores = np.max(conf, axis=1)
+            result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_mins + w, y_mins + h))
+        return result

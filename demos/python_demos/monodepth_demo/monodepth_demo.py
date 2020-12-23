@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+
 import sys
-import os
 from argparse import ArgumentParser
+from pathlib import Path
+
 import cv2
 import numpy as np
 import logging as log
@@ -14,7 +16,7 @@ def main():
     parser = ArgumentParser()
 
     parser.add_argument(
-        "-m", "--model", help="Required. Path to an .xml file with a trained model", required=True, type=str)
+        "-m", "--model", help="Required. Path to an .xml file with a trained model", required=True, type=Path)
     parser.add_argument(
         "-i", "--input", help="Required. Path to a input image file", required=True, type=str)
     parser.add_argument("-l", "--cpu_extension",
@@ -36,7 +38,7 @@ def main():
         ie.add_extension(args.cpu_extension, "CPU")
 
     log.info("Loading network")
-    net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
+    net = ie.read_network(args.model, args.model.with_suffix(".bin"))
 
     assert len(net.input_info) == 1, "Sample supports only single input topologies"
     assert len(net.outputs) == 1, "Sample supports only single output topologies"

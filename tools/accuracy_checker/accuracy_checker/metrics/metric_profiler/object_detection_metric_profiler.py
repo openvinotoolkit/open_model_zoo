@@ -133,9 +133,9 @@ class DetectionProfiler(MetricProfiler):
         if contains_all(per_class_result, ['gt_matches', 'dt_matches']):
             matching_result = {
                 'prediction_matches': per_class_result['dt_matches'][0],
-                'annotation_matches':  per_class_result['gt_matches'][0],
+                'annotation_matches': per_class_result['gt_matches'][0],
                 metric_name: per_class_result['result']
-                }
+            }
             return matching_result
         matches = per_class_result['matched']
         dt_matches = np.zeros_like(per_class_result['scores'], dtype=int)

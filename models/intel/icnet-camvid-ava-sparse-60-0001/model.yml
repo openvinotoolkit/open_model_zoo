@@ -17,28 +17,28 @@ description: >-
 task_type: semantic_segmentation
 files:
   - name: FP32/icnet-camvid-ava-sparse-60-0001.xml
-    size: 210489
-    sha256: ce45d14ec3931c4033a5b0c7f28fc7db157350144a452b51183a94e7ae960c42
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/icnet-camvid-ava-sparse-60-0001/FP32/icnet-camvid-ava-sparse-60-0001.xml
+    size: 210527
+    sha256: c5125d2fc5730af3c251de1b1a65fe9cf8a4c2692e1a35de52d5b9086db1638e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/icnet-camvid-ava-sparse-60-0001/FP32/icnet-camvid-ava-sparse-60-0001.xml
   - name: FP32/icnet-camvid-ava-sparse-60-0001.bin
     size: 106816756
     sha256: eed6911e4a4e56613ea01317d386f51b7f5529f944b65a97aeb045f7afa4b9eb
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/icnet-camvid-ava-sparse-60-0001/FP32/icnet-camvid-ava-sparse-60-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/icnet-camvid-ava-sparse-60-0001/FP32/icnet-camvid-ava-sparse-60-0001.bin
   - name: FP16/icnet-camvid-ava-sparse-60-0001.xml
-    size: 210397
-    sha256: c63d8ec0dbdad3332ee00c31f6fb4856eb0b9f1e456daef8b8f836b018591bef
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/icnet-camvid-ava-sparse-60-0001/FP16/icnet-camvid-ava-sparse-60-0001.xml
+    size: 210435
+    sha256: f94e57277e44894962df3e9ccb384ec6a89b4d58f70f980104f36c12ea796c61
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/icnet-camvid-ava-sparse-60-0001/FP16/icnet-camvid-ava-sparse-60-0001.xml
   - name: FP16/icnet-camvid-ava-sparse-60-0001.bin
     size: 53408464
     sha256: 7a5d41199e2a121f67251bd7a4acb41f72033e24611b3333956f89bf27697e3b
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/icnet-camvid-ava-sparse-60-0001/FP16/icnet-camvid-ava-sparse-60-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/icnet-camvid-ava-sparse-60-0001/FP16/icnet-camvid-ava-sparse-60-0001.bin
   - name: FP16-INT8/icnet-camvid-ava-sparse-60-0001.xml
-    size: 589039
-    sha256: db62483e15499d5de7e5cb7b654c7b2beb113c2ccc303ea1b11ab4c45cbdfbcf
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/icnet-camvid-ava-sparse-60-0001/FP16-INT8/icnet-camvid-ava-sparse-60-0001.xml
+    size: 590482
+    sha256: bd8724bc72313f2be499cf12a99dca9a0b868ce9501502bd34ac187b6db5a3f9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/icnet-camvid-ava-sparse-60-0001/FP16-INT8/icnet-camvid-ava-sparse-60-0001.xml
   - name: FP16-INT8/icnet-camvid-ava-sparse-60-0001.bin
     size: 26847346
     sha256: 8a5af2c8055f3c02db4b59b5411a1f256d697923d8c86d5f56646553aee1964d
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/icnet-camvid-ava-sparse-60-0001/FP16-INT8/icnet-camvid-ava-sparse-60-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/icnet-camvid-ava-sparse-60-0001/FP16-INT8/icnet-camvid-ava-sparse-60-0001.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

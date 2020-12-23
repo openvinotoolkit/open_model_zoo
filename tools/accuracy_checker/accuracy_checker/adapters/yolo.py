@@ -22,7 +22,6 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import BoolField, NumberField, StringField, ConfigValidator, ListField, ConfigError
 from ..representation import DetectionPrediction
-from ..topology_types import YoloV1Tiny, YoloV2, YoloV2Tiny, YoloV3, YoloV3Tiny
 from ..utils import get_or_parse_value
 
 DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h", "confidence", "probabilities"])
@@ -59,17 +58,19 @@ class TinyYOLOv1Adapter(Adapter):
     """
     __provider__ = 'tiny_yolo_v1'
     prediction_types = (DetectionPrediction, )
-    topology_types = (YoloV1Tiny, )
 
     def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
             raw: output of model
+            frame_meta: meta info about prediction
         Returns:
              list of DetectionPrediction objects
         """
-        prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        prediction = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(prediction)
+        prediction = prediction[self.output_blob]
 
         PROBABILITY_SIZE = 980
         CONFIDENCE_SIZE = 98
@@ -156,7 +157,6 @@ class YoloV2Adapter(Adapter):
     """
     __provider__ = 'yolo_v2'
     prediction_types = (DetectionPrediction, )
-    topology_types = (YoloV2, YoloV2Tiny, )
 
     PRECOMPUTED_ANCHORS = {
         'yolo_v2': [1.3221, 1.73145, 3.19275, 4.00944, 5.05587, 8.09892, 9.47112, 4.84053, 11.2364, 10.0071],
@@ -224,10 +224,13 @@ class YoloV2Adapter(Adapter):
         Args:
             identifiers: list of input data identifiers
             raw: output of model
+            frame_meta: meta info about data processing
         Returns:
             list of DetectionPrediction objects
         """
-        predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        predictions = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(predictions)
+        predictions = predictions[self.output_blob]
 
         result = []
         box_size = self.classes + self.coords + 1
@@ -253,7 +256,6 @@ class YoloV3Adapter(Adapter):
     """
     __provider__ = 'yolo_v3'
     prediction_types = (DetectionPrediction, )
-    topology_types = (YoloV3, YoloV3Tiny, )
 
     PRECOMPUTED_ANCHORS = {
         'yolo_v3': [
@@ -459,6 +461,8 @@ class YoloV3ONNX(Adapter):
         ):
             out_boxes, out_scores, out_classes = [], [], []
             for idx_ in indices:
+                if idx_[0] == -1:
+                    break
                 out_classes.append(idx_[1])
                 out_scores.append(scores[tuple(idx_[1:])])
                 out_boxes.append(boxes[idx_[2]])

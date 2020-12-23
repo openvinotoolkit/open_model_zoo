@@ -1,39 +1,113 @@
-// Copyright (C) 2018-2019 Intel Corporation
-// SPDX-License-Identifier: Apache-2.0
+/*
+// Copyright (C) 2018-2020 Intel Corporation
 //
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+*/
 
-#include <chrono>
+/**
+* \brief The entry point for the Inference Engine segmentation_demo_async demo application
+* \file segmentation_demo_async/main.cpp
+* \example segmentation_demo_async/main.cpp
+*/
+
 #include <iostream>
 #include <string>
-#include <vector>
-
-#include <gflags/gflags.h>
-
-#include <opencv2/videoio.hpp>
-
-#include <inference_engine.hpp>
 
 #include <monitors/presenter.h>
-#include <samples/common.hpp>
-#include <samples/images_capture.h>
 #include <samples/ocv_common.hpp>
+#include <samples/args_helper.hpp>
 #include <samples/slog.hpp>
+#include <samples/images_capture.h>
+#include <samples/default_flags.hpp>
+#include <samples/performance_metrics.hpp>
+#include <gflags/gflags.h>
 
-#include "segmentation_demo.h"
+#include <unordered_map>
 
-using namespace InferenceEngine;
-typedef std::chrono::duration<double, std::chrono::milliseconds::period> Ms;
+#include <pipelines/async_pipeline.h>
+#include <models/segmentation_model.h>
+#include <pipelines/config_factory.h>
+#include <pipelines/metadata.h>
+
+static const char help_message[] = "Print a usage message.";
+static const char model_message[] = "Required. Path to an .xml file with a trained model.";
+static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
+"Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
+"The demo will look for a suitable plugin for a specified device.";
+static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
+static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
+"Absolute path to the .xml file with the kernel descriptions.";
+static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
+"Absolute path to a shared library with the kernel implementations.";
+static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
+static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
+static const char num_threads_message[] = "Optional. Number of threads.";
+static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
+"throughput mode (for HETERO and MULTI device cases use format "
+"<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
+static const char no_show_processed_video[] = "Optional. Do not show processed video.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+
+DEFINE_bool(h, false, help_message);
+DEFINE_string(i, "", input_message);
+DEFINE_string(m, "", model_message);
+DEFINE_string(d, "CPU", target_device_message);
+DEFINE_bool(pc, false, performance_counter_message);
+DEFINE_string(c, "", custom_cldnn_message);
+DEFINE_string(l, "", custom_cpu_library_message);
+DEFINE_uint32(nireq, 0, nireq_message);
+DEFINE_bool(auto_resize, false, input_resizable_message);
+DEFINE_uint32(nthreads, 0, num_threads_message);
+DEFINE_string(nstreams, "", num_streams_message);
+DEFINE_bool(loop, false, loop_message);
+DEFINE_bool(no_show, false, no_show_processed_video);
+DEFINE_string(u, "", utilization_monitors_message);
+
+/**
+* \brief This function shows a help message
+*/
+static void showUsage() {
+    std::cout << std::endl;
+    std::cout << "segmentation_demo_async [OPTION]" << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << std::endl;
+    std::cout << "    -h                        " << help_message << std::endl;
+    std::cout << "    -i \"<path>\"               " << input_message << std::endl;
+    std::cout << "    -m \"<path>\"               " << model_message << std::endl;
+    std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
+    std::cout << "          Or" << std::endl;
+    std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
+    std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
+    std::cout << "    -pc                       " << performance_counter_message << std::endl;
+    std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
+    std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
+    std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
+    std::cout << "    -nstreams                 " << num_streams_message << std::endl;
+    std::cout << "    -loop                     " << loop_message << std::endl;
+    std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
+    std::cout << "    -u                        " << utilization_monitors_message << std::endl;
+}
+
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
-    slog::info << "Parsing input parameters" << slog::endl;
-
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
         showAvailableDevices();
         return false;
     }
+    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -46,176 +120,161 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
+static const Color PASCAL_VOC_COLORS[] = {
+    { 0,   0,   0 },
+    { 128, 0,   0 },
+    { 0,   128, 0 },
+    { 128, 128, 0 },
+    { 0,   0,   128 },
+    { 128, 0,   128 },
+    { 0,   128, 128 },
+    { 128, 128, 128 },
+    { 64,  0,   0 },
+    { 192, 0,   0 },
+    { 64,  128, 0 },
+    { 192, 128, 0 },
+    { 64,  0,   128 },
+    { 192, 0,   128 },
+    { 64,  128, 128 },
+    { 192, 128, 128 },
+    { 0,   64,  0 },
+    { 128, 64,  0 },
+    { 0,   192, 0 },
+    { 128, 192, 0 },
+    { 0,   64,  128 }
+};
+
+cv::Mat applyColorMap(cv::Mat input) {
+    // Initializing colors array if needed
+    static cv::Mat colors;
+    static std::mt19937 rng;
+    static std::uniform_int_distribution<int> distr(0, 255);
+
+    if (colors.empty()) {
+        colors = cv::Mat(256, 1, CV_8UC3);
+        std::size_t i = 0;
+        for (; i < arraySize(PASCAL_VOC_COLORS); ++i) {
+            colors.at<cv::Vec3b>(i, 0) = { PASCAL_VOC_COLORS[i].blue(), PASCAL_VOC_COLORS[i].green(), PASCAL_VOC_COLORS[i].red() };
+        }
+        for (; i < (std::size_t)colors.cols; ++i) {
+            colors.at<cv::Vec3b>(i, 0) = cv::Vec3b(distr(rng), distr(rng), distr(rng));
+        }
+    }
+
+    // Converting class to color
+    cv::Mat out;
+    cv::applyColorMap(input, out, colors);
+    return out;
+}
+
+cv::Mat renderSegmentationData(const SegmentationResult& result) {
+    if (!result.metaData) {
+        throw std::invalid_argument("Renderer: metadata is null");
+    }
+
+    // Input image is stored inside metadata, as we put it there during submission stage
+    auto inputImg = result.metaData->asRef<ImageMetaData>().img;
+
+    if (inputImg.empty()) {
+        throw std::invalid_argument("Renderer: image provided in metadata is empty");
+    }
+
+    // Visualizing result data over source image
+    return inputImg / 2 + applyColorMap(result.mask) / 2;
+}
+
 int main(int argc, char *argv[]) {
     try {
-        slog::info << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << slog::endl;
+        PerformanceMetrics metrics;
+
+        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+
+        // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
 
-        Core ie;
+        //------------------------------- Preparing Input ------------------------------------------------------
+        slog::info << "Reading input" << slog::endl;
+        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        cv::Mat curr_frame;
 
-        if (!FLAGS_l.empty()) {
-            // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-            IExtensionPtr extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-            ie.AddExtension(extension_ptr, "CPU");
-            slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
-        }
-        if (!FLAGS_c.empty()) {
-            // clDNN Extensions are loaded from an .xml description and OpenCL kernel files
-            ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
-            slog::info << "GPU Extension loaded: " << FLAGS_c << slog::endl;
-        }
+        //------------------------------ Running Segmentation routines ----------------------------------------------
+        InferenceEngine::Core core;
+        AsyncPipeline pipeline(std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m, FLAGS_auto_resize)),
+            ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
+            core);
+        Presenter presenter(FLAGS_u);
 
-        slog::info << "Device info" << slog::endl;
-        slog::info << printable(ie.GetVersions(FLAGS_d)) << slog::endl;
+        bool keepRunning = true;
+        int64_t frameNum = -1;
+        std::unique_ptr<ResultBase> result;
 
-        CNNNetwork network = ie.ReadNetwork(FLAGS_m);
+        while (keepRunning) {
+            if (pipeline.isReadyToProcess()) {
+                //--- Capturing frame
+                auto startTime = std::chrono::steady_clock::now();
+                curr_frame = cap->read();
+                if (curr_frame.empty()) {
+                    if (frameNum == -1) {
+                        throw std::logic_error("Can't read an image from the input");
+                    }
+                    else {
+                        // Input stream is over
+                        break;
+                    }
+                }
 
-        ICNNNetwork::InputShapes inputShapes = network.getInputShapes();
-        if (inputShapes.size() != 1)
-            throw std::runtime_error("Demo supports topologies only with 1 input");
-        const std::string& inName = inputShapes.begin()->first;
-        SizeVector& inSizeVector = inputShapes.begin()->second;
-        if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
-            throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-        inSizeVector[0] = 1;  // set batch size to 1
-        network.reshape(inputShapes);
+                frameNum = pipeline.submitData(ImageInputData(curr_frame),
+                    std::make_shared<ImageMetaData>(curr_frame, startTime));
+            }
 
-        InputInfo& inputInfo = *network.getInputsInfo().begin()->second;
-        inputInfo.getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-        inputInfo.setLayout(Layout::NHWC);
-        inputInfo.setPrecision(Precision::U8);
+            //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
+            pipeline.waitForData();
 
-        const OutputsDataMap& outputsDataMap = network.getOutputsInfo();
-        if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
-        const std::string& outName = outputsDataMap.begin()->first;
-        Data& data = *outputsDataMap.begin()->second;
-        // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
-        // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
-        // postprocessing
-        data.setPrecision(Precision::FP32);
-        const SizeVector& outSizeVector = data.getTensorDesc().getDims();
-        int outChannels, outHeight, outWidth;
-        switch(outSizeVector.size()) {
-            case 3:
-                outChannels = 0;
-                outHeight = outSizeVector[1];
-                outWidth = outSizeVector[2];
-                break;
-            case 4:
-                outChannels = outSizeVector[1];
-                outHeight = outSizeVector[2];
-                outWidth = outSizeVector[3];
-                break;
-            default:
-                throw std::runtime_error("Unexpected output blob shape. Only 4D and 3D output blobs are"
-                    "supported.");
-        }
+            //--- Checking for results and rendering data if it's ready
+            //--- If you need just plain data without rendering - cast result's underlying pointer to SegmentationResult*
+            //    and use your own processing instead of calling renderSegmentationData().
+            while ((result = pipeline.getResult()) && keepRunning) {
+                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>());
+                //--- Showing results and device information
+                presenter.drawGraphs(outFrame);
+                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                if (!FLAGS_no_show) {
+                    cv::imshow("Segmentation Results", outFrame);
 
-        ExecutableNetwork executableNetwork = ie.LoadNetwork(network, FLAGS_d);
-        InferRequest inferRequest = executableNetwork.CreateInferRequest();
-
-        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
-        cv::Mat inImg = cap->read();
-        if (!inImg.data) {
-            throw std::runtime_error("Can't read an image from the input");
-        }
-
-        float blending = 0.3f;
-        constexpr char WIN_NAME[] = "segmentation";
-        if (!FLAGS_no_show) {
-            cv::namedWindow(WIN_NAME);
-            int initValue = static_cast<int>(blending * 100);
-            cv::createTrackbar("blending", WIN_NAME, &initValue, 100,
-                [](int position, void* blendingPtr){*static_cast<float*>(blendingPtr) = position * 0.01f;},
-                &blending);
-        }
-
-        cv::Mat resImg, maskImg(outHeight, outWidth, CV_8UC3);
-        std::vector<cv::Vec3b> colors(arraySize(CITYSCAPES_COLORS));
-        for (std::size_t i = 0; i < colors.size(); ++i)
-            colors[i] = {CITYSCAPES_COLORS[i].blue(), CITYSCAPES_COLORS[i].green(), CITYSCAPES_COLORS[i].red()};
-        std::mt19937 rng;
-        std::uniform_int_distribution<int> distr(0, 255);
-        int delay = FLAGS_delay;
-        Presenter presenter(FLAGS_u, 10, {inImg.cols / 4, 60});
-
-        std::chrono::steady_clock::duration latencySum{0};
-        unsigned latencySamplesNum = 0;
-        std::ostringstream latencyStream;
-
-        std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
-        while (inImg.data && delay >= 0) {
-            if (CV_8UC3 != inImg.type())
-                throw std::runtime_error("BGR (or RGB) image expected to come from input");
-            inferRequest.SetBlob(inName, wrapMat2Blob(inImg));
-            inferRequest.Infer();
-
-            LockedMemory<const void> outMapped = as<MemoryBlob>(inferRequest.GetBlob(outName))->rmap();
-            const float * const predictions = outMapped.as<float*>();
-            for (int rowId = 0; rowId < outHeight; ++rowId) {
-                for (int colId = 0; colId < outWidth; ++colId) {
-                    std::size_t classId = 0;
-                    if (outChannels < 2) {  // assume the output is already ArgMax'ed
-                        classId = static_cast<std::size_t>(predictions[rowId * outWidth + colId]);
+                    //--- Processing keyboard events
+                    auto key = cv::waitKey(1);
+                    if (27 == key || 'q' == key || 'Q' == key) { // Esc
+                        keepRunning = false;
                     } else {
-                        float maxProb = -1.0f;
-                        for (int chId = 0; chId < outChannels; ++chId) {
-                            float prob = predictions[chId * outHeight * outWidth + rowId * outWidth + colId];
-                            if (prob > maxProb) {
-                                classId = chId;
-                                maxProb = prob;
-                            }
-                        }
-                    }
-                    while (classId >= colors.size()) {
-                        cv::Vec3b color(distr(rng), distr(rng), distr(rng));
-                        colors.push_back(color);
-                    }
-                    maskImg.at<cv::Vec3b>(rowId, colId) = colors[classId];
-                }
-            }
-            cv::resize(maskImg, resImg, inImg.size());
-            resImg = inImg * blending + resImg * (1 - blending);
-            presenter.drawGraphs(resImg);
-
-            latencySum += std::chrono::steady_clock::now() - t0;
-            ++latencySamplesNum;
-            latencyStream.str("");
-            latencyStream << std::fixed << std::setprecision(1)
-                << (std::chrono::duration_cast<Ms>(latencySum) / latencySamplesNum).count() << " ms";
-            constexpr int FONT_FACE = cv::FONT_HERSHEY_SIMPLEX;
-            constexpr double FONT_SCALE = 2;
-            constexpr int THICKNESS = 2;
-            int baseLine;
-            cv::getTextSize(latencyStream.str(), FONT_FACE, FONT_SCALE, THICKNESS, &baseLine);
-            cv::putText(resImg, latencyStream.str(), cv::Size{0, resImg.rows - baseLine}, FONT_FACE, FONT_SCALE,
-                cv::Scalar{255, 0, 0}, THICKNESS);
-
-            if (!FLAGS_no_show) {
-                cv::imshow(WIN_NAME, resImg);
-                int key = cv::waitKey(delay);
-                switch(key) {
-                    case 'q':
-                    case 'Q':
-                    case 27: // Esc
-                        delay = -1;
-                        break;
-                    case 'p':
-                    case 'P':
-                    case ' ':
-                        delay = !delay * (FLAGS_delay + !FLAGS_delay);
-                        break;
-                    default:
                         presenter.handleKey(key);
+                    }
                 }
             }
-            t0 = std::chrono::steady_clock::now();
-            inImg = cap->read();
         }
-        std::cout << "Mean pipeline latency: " << latencyStream.str() << '\n';
-        std::cout << presenter.reportMeans() << '\n';
+
+        //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
+        pipeline.waitForTotalCompletion();
+        while (result = pipeline.getResult()) {
+            cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>());
+            //--- Showing results and device information
+            presenter.drawGraphs(outFrame);
+            metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+            if (!FLAGS_no_show) {
+                cv::imshow("Segmentation Results", outFrame);
+                //--- Updating output window
+                cv::waitKey(1);
+            }
+        }
+
+        //// --------------------------- Report metrics -------------------------------------------------------
+        slog::info << slog::endl << "Metric reports:" << slog::endl;
+        metrics.printTotal();
+
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -226,6 +285,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << "Execution successful" << slog::endl;
+    slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
     return 0;
 }

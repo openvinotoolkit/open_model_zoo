@@ -24,8 +24,6 @@ Average Precision metric described in: Mark Everingham et al.
 
 Tested on an internal dataset with 1001 pedestrian to detect.
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x384x672] - An input image in the format [BxCxHxW],

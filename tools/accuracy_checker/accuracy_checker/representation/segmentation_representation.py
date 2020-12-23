@@ -39,11 +39,13 @@ class GTMaskLoader(Enum):
     NIFTI = 3
     NUMPY = 4
     NIFTI_CHANNELS_FIRST = 5
+    PILLOW_CONVERT_TO_RGB = 6
 
 
 LOADERS_MAPPING = {
     'opencv': GTMaskLoader.OPENCV,
     'pillow': GTMaskLoader.PILLOW,
+    'pillow_convert_to_rgb': GTMaskLoader.PILLOW_CONVERT_TO_RGB,
     'scipy': GTMaskLoader.SCIPY,
     'nifti': GTMaskLoader.NIFTI,
     'nifti_channels_first': GTMaskLoader.NIFTI_CHANNELS_FIRST,
@@ -58,6 +60,7 @@ class SegmentationRepresentation(BaseRepresentation):
 class SegmentationAnnotation(SegmentationRepresentation):
     LOADERS = {
         GTMaskLoader.PILLOW: 'pillow_imread',
+        GTMaskLoader.PILLOW_CONVERT_TO_RGB: {'type': 'pillow_imread', 'convert_to_rgb': True},
         GTMaskLoader.OPENCV: 'opencv_imread',
         GTMaskLoader.SCIPY: 'scipy_imread',
         GTMaskLoader.NIFTI: 'nifti_reader',
@@ -135,7 +138,7 @@ class SegmentationAnnotation(SegmentationRepresentation):
         mask = self._encode_mask(self.mask, segmentation_colors) if segmentation_colors else self.mask
 
         polygons = defaultdict(list)
-        indexes = np.unique(mask) if not label_map else set(np.unique(mask))&set(label_map.keys())
+        indexes = np.unique(mask) if not label_map else set(np.unique(mask)) & set(label_map.keys())
         for i in indexes:
             binary_mask = np.uint8(mask == i)
             contours, _ = cv.findContours(binary_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -340,6 +343,7 @@ class CoCocInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation
     def to_annotation(self, **kwargs):
         return CoCoInstanceSegmentationAnnotation(self.identifier, self.mask, self.labels)
 
+
 class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
     def __init__(self, identifier, path_to_mask):
         super().__init__(identifier, path_to_mask, GTMaskLoader.NUMPY)
@@ -355,3 +359,10 @@ class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
             return mask
 
         return self._mask
+
+
+class SalientRegionAnnotation(SegmentationAnnotation):
+    pass
+
+class SalientRegionPrediction(SegmentationPrediction):
+    pass

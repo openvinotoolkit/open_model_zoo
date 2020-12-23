@@ -22,9 +22,9 @@ using namespace InferenceEngine;
 
 DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels) :
     ModelBase(modelFileName),
-    labels(labels),
+    confidenceThreshold(confidenceThreshold),
     useAutoResize(useAutoResize),
-    confidenceThreshold(confidenceThreshold) {
+    labels(labels) {
 }
 
 std::shared_ptr<InternalModelData> DetectionModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
@@ -46,15 +46,17 @@ std::shared_ptr<InternalModelData> DetectionModel::preprocess(const InputData& i
 std::vector<std::string> DetectionModel::loadLabels(const std::string& labelFilename) {
     std::vector<std::string> labelsList;
 
-    /** Read labels (if any)**/
+    /* Read labels (if any) */
     if (!labelFilename.empty()) {
         std::ifstream inputFile(labelFilename);
+        if (!inputFile.is_open())
+            throw std::runtime_error("Can't open the labels file: " + labelFilename);
         std::string label;
         while (std::getline(inputFile, label)) {
             labelsList.push_back(label);
         }
         if (labelsList.empty())
-            throw std::logic_error("File empty or not found: " + labelFilename);
+            throw std::logic_error("File is empty: " + labelFilename);
     }
 
     return labelsList;

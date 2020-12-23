@@ -103,16 +103,16 @@ class FocusedTextLocalizationMetric(PerImageEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'area_recall_constrain':  NumberField(
+            'area_recall_constrain': NumberField(
                 min_value=0, max_value=1, optional=True, default=0.5,
                 description="Minimal value for recall that allows to make decision "
                             "that prediction polygon matched with annotation."
             ),
-            'ignore_difficult':  BoolField(
+            'ignore_difficult': BoolField(
                 optional=True, default=True,
                 description="Allows to ignore difficult ground truth text polygons in metric calculation."
             ),
-            'area_precision_constrain':  NumberField(
+            'area_precision_constrain': NumberField(
                 min_value=0, max_value=1, optional=True, default=0.5,
                 description="Minimal value for precision that allows to make decision "
                             "that prediction polygon matched with annotation."
@@ -408,16 +408,16 @@ class IncidentalSceneTextLocalizationMetric(PerImageEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'iou_constrain':  NumberField(
+            'iou_constrain': NumberField(
                 min_value=0, max_value=1, optional=True, default=0.5,
                 description="Minimal value for intersection over union that allows to make decision "
                             "that prediction polygon is true positive."
             ),
-            'ignore_difficult':  BoolField(
+            'ignore_difficult': BoolField(
                 optional=True, default=True,
                 description="Allows to ignore difficult ground truth text polygons in metric calculation."
             ),
-            'area_precision_constrain':  NumberField(
+            'area_precision_constrain': NumberField(
                 min_value=0, max_value=1, optional=True, default=0.5,
                 description="Minimal value for intersection over union that allows to make decision "
                             "that prediction polygon matched with ignored annotation."

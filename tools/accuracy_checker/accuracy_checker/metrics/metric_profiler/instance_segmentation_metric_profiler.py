@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 import numpy as np
-from  .base_profiler import MetricProfiler
+from .base_profiler import MetricProfiler
 
 class InstanceSegmentationProfiler(MetricProfiler):
     __provider__ = 'instance_segmentation'
@@ -123,9 +123,9 @@ class InstanceSegmentationProfiler(MetricProfiler):
     def generate_result_matching(per_class_result, metric_name):
         matching_result = {
             'prediction_matches': per_class_result['dt_matches'][0].tolist(),
-            'annotation_matches':  per_class_result['gt_matches'][0].tolist(),
+            'annotation_matches': per_class_result['gt_matches'][0].tolist(),
             metric_name: per_class_result['result']
-            }
+        }
         return matching_result
 
     def register_metric(self, metric_name):

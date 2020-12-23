@@ -1,4 +1,4 @@
-# Text Spotting Python* Demo
+# Text Spotting Python\* Demo
 
 This demo shows how to run Text Spotting models. Text Spotting models allow us to simultaneously detect and recognize text.
 
@@ -111,16 +111,16 @@ Options:
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 To run the demo, please provide paths to the model in the IR format and to an input with images:
 ```bash
 python3 text_spotting_demo.py \
--m_m <path_to_models>/text-spotting-0002-detector.xml \
--m_te <path_to_models>/text-spotting-0002-recognizer-encoder.xml \
--m_td <path_to_models>/text-spotting-0002-recognizer-decoder.xml \
+-m_m <path_to_models>/text-spotting-0003-detector.xml \
+-m_te <path_to_models>/text-spotting-0003-recognizer-encoder.xml \
+-m_td <path_to_models>/text-spotting-0003-recognizer-decoder.xml \
 -i 0
 ```
 

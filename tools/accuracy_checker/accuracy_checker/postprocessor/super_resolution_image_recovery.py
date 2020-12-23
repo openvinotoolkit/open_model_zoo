@@ -20,15 +20,17 @@ from PIL import Image
 
 from ..config import StringField, NumberField, ConfigError
 from .postprocessor import Postprocessor
-from ..representation import SuperResolutionPrediction, SuperResolutionAnnotation
+from ..representation import (
+    SuperResolutionPrediction, SuperResolutionAnnotation, ImageProcessingAnnotation, ImageProcessingPrediction
+)
 from ..utils import get_size_from_config
 
 
 class SRImageRecovery(Postprocessor):
     __provider__ = 'sr_image_recovery'
 
-    annotation_types = (SuperResolutionAnnotation, )
-    prediction_types = (SuperResolutionPrediction, )
+    annotation_types = (SuperResolutionAnnotation, ImageProcessingAnnotation)
+    prediction_types = (SuperResolutionPrediction, ImageProcessingPrediction)
 
     @classmethod
     def parameters(cls):
@@ -71,4 +73,22 @@ class SRImageRecovery(Postprocessor):
             cb = np.expand_dims(np.array(cb).astype(np.uint8), axis=-1)
             ycrcb = np.concatenate([prediction_.value, cr, cb], axis=2)
             prediction_.value = cv2.cvtColor(ycrcb, self.color)
+        return annotation, prediction
+
+
+class ColorizationLABRecovery(Postprocessor):
+    __provider__ = 'colorization_recovery'
+    annotation_types = (ImageProcessingAnnotation, )
+    prediction_types = (ImageProcessingPrediction, )
+
+    def process_image(self, annotation, prediction):
+        for ann, pred in zip(annotation, prediction):
+            target = ann.value
+            h, w = pred.value.shape[:2]
+            r_target = cv2.resize(target, (w, h)).astype(np.float32)
+            target_l = cv2.cvtColor(r_target / 255, cv2.COLOR_BGR2LAB)[:, :, 0]
+            pred_ab = pred.value
+            out_lab = np.concatenate((target_l[:, :, np.newaxis], pred_ab), axis=2)
+            result_bgr = cv2.cvtColor(out_lab, cv2.COLOR_Lab2BGR) * 255
+            pred.value = result_bgr.astype(np.uint8)
         return annotation, prediction

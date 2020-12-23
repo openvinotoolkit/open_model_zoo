@@ -18,13 +18,14 @@
 from openvino.inference_engine import IECore
 import cv2 as cv
 import numpy as np
-import os
-from argparse import ArgumentParser, SUPPRESS
 import logging as log
 import sys
+from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 import monitors
+from images_capture import open_images_capture
 
 
 def build_arg():
@@ -32,14 +33,16 @@ def build_arg():
     in_args = parser.add_argument_group('Options')
     in_args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Help with the script.')
     in_args.add_argument("-m", "--model", help="Required. Path to .xml file with pre-trained model.",
-                         required=True, type=str)
+                         required=True, type=Path)
     in_args.add_argument("-d", "--device",
                          help="Optional. Specify target device for infer: CPU, GPU, FPGA, HDDL or MYRIAD. "
                               "Default: CPU",
                          default="CPU", type=str)
-    in_args.add_argument('-i', "--input",
-                         help='Required. Input to process.',
-                         required=True, type=str, metavar='"<path>"')
+    in_args.add_argument('-i', "--input", required=True,
+                         help='Required. An input to process. The input must be a single image, '
+                              'a folder of images or anything that cv2.VideoCapture can process.')
+    in_args.add_argument('--loop', default=False, action='store_true',
+                         help='Optional. Enable reading the input in a loop.')
     in_args.add_argument("--no_show", help="Optional. Disable display of results on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
@@ -57,7 +60,7 @@ if __name__ == '__main__':
 
     log.debug("Load network")
     ie = IECore()
-    load_net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
+    load_net = ie.read_network(args.model, args.model.with_suffix(".bin"))
     load_net.batch_size = 1
     exec_net = ie.load_network(network=load_net, device_name=args.device)
 
@@ -71,24 +74,17 @@ if __name__ == '__main__':
 
     _, _, h_in, w_in = input_shape
 
-    try:
-        input_source = int(args.input)
-    except ValueError:
-        input_source = args.input
-
-    cap = cv.VideoCapture(input_source)
-    if not cap.isOpened():
-        assert "{} not exist".format(input_source)
+    cap = open_images_capture(args.input, args.loop)
+    original_frame = cap.read()
+    if original_frame is None:
+        raise RuntimeError("Can't read an image from the input")
 
     imshow_size = (640, 480)
     graph_size = (imshow_size[0] // 2, imshow_size[1] // 4)
     presenter = monitors.Presenter(args.utilization_monitors, imshow_size[1] * 2 - graph_size[1], graph_size)
 
-    while True:
+    while original_frame is not None:
         log.debug("#############################")
-        hasFrame, original_frame = cap.read()
-        if not hasFrame:
-            break
         (h_orig, w_orig) = original_frame.shape[:2]
 
         log.debug("Preprocessing frame")
@@ -137,4 +133,5 @@ if __name__ == '__main__':
             if key in {ord("q"), ord("Q"), 27}:
                 break
             presenter.handleKey(key)
+        original_frame = cap.read()
     print(presenter.reportMeans())

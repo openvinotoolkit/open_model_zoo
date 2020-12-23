@@ -1,4 +1,6 @@
-# Instance Segmentation Python* Demo
+# Instance Segmentation Python\* Demo
+
+![](./instance_segmentation.gif)
 
 This demo shows how to run Instance Segmentation models from [OpenVINO&trade; Training Extensions (OTE)](https://github.com/openvinotoolkit/training_extensions/tree/develop/pytorch_toolkit/instance_segmentation#get-pretrained-models) and `yolact` models family.
 
@@ -54,8 +56,10 @@ Options:
   -m "<path>", --model "<path>"
                         Required. Path to an .xml file with a trained model.
   --labels "<path>"     Required. Path to a text file with class labels.
-  -i "<path>"           Required. Path to an image, video file or a numeric
-                        camera ID.
+  -i INPUT, --input INPUT
+                        Required. An input to process. The input must be a single image,
+                        a folder of images or anything that cv2.VideoCapture can process.
+  --loop                Optional. Enable reading the input in a loop.
   -d "<device>", --device "<device>"
                         Optional. Specify the target device to infer on: CPU,
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a
@@ -84,7 +88,7 @@ Options:
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

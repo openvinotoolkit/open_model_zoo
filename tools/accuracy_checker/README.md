@@ -167,11 +167,12 @@ Each launcher configuration starts with setting `framework` name. Currently *caf
 Please view:
 
 - [How to configure Caffe launcher](accuracy_checker/launcher/caffe_launcher_readme.md)
-- [How to configure DLSDK launcher](accuracy_checker/launcher/dlsdk_launcher_readme.md)
+- [How to configure OpenVINO launcher](accuracy_checker/launcher/dlsdk_launcher_readme.md)
 - [How to configure OpenCV launcher](accuracy_checker/launcher/opencv_launcher_readme.md)
 - [How to configure MXNet Launcher](accuracy_checker/launcher/mxnet_launcher_readme.md)
 - [How to configure TensorFlow Launcher](accuracy_checker/launcher/tf_launcher_readme.md)
 - [How to configure TensorFlow Lite Launcher](accuracy_checker/launcher/tf_lite_launcher_readme.md)
+- [How to configure TensorFlow 2.0 Launcher](accuracy_checker/launcher/tf2_launcher_readme.md)
 - [How to configure ONNX Runtime Launcher](accuracy_checker/launcher/onnx_runtime_launcher_readme.md)
 - [How to configure PyTorch Launcher](accuracy_checker/launcher/pytorch_launcher_readme.md)
 
@@ -182,7 +183,7 @@ all required preprocessing and postprocessing/filtering steps,
 and metrics that will be used for evaluation.
 
 If your dataset data is a well-known competition problem (COCO, Pascal VOC, and others) and/or can be potentially reused for other models
-it is reasonable to declare it in some global configuration file (*definition* file). This way in your local configuration file you can provide only
+it is reasonable to declare it in some global configuration file ([definition file](dataset_definitions.yml)). This way in your local configuration file you can provide only
 `name` and all required steps will be picked from global one. To pass path to this global configuration use `--definition` argument of CLI.
 
 If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about dataset preparation you can find in <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.

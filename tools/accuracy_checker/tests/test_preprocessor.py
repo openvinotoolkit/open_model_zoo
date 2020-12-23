@@ -140,9 +140,9 @@ class TestResize:
                             'original_height': 480,
                             'preferable_width': 133,
                             'preferable_height': 150
-                            }
-                        )
-                    ],
+                        }
+                    )
+                ],
                 'image_info': [100, 133, 1],
                 'image_size': (480, 640, 3),
                 'original_height': 480,
@@ -151,7 +151,7 @@ class TestResize:
                 'preferable_width': 133,
                 'scale_x': 0.2078125,
                 'scale_y': 0.20833333333333334
-                }
+        }
 
     def test_resize_to_negative_size_raise_config_error(self):
         with pytest.raises(ConfigError):
@@ -195,7 +195,7 @@ class TestAutoResize:
         input_rep = DataRepresentation(input_data)
         expected_meta = {
                     'preferable_width': 200,
-                    'preferable_height':200,
+                    'preferable_height': 200,
                     'image_info': [200, 200, 1],
                     'scale_x': 2.0,
                     'scale_y': 2.0,
@@ -719,7 +719,7 @@ class TestPreprocessorExtraArgs:
 
     def test_bgr_to_rgb_raise_config_error_on_extra_args(self):
         with pytest.raises(ConfigError):
-            Preprocessor.provide('bgr_to_rgb',  {'type': 'bgr_to_rgb', 'something_extra': 'extra'})
+            Preprocessor.provide('bgr_to_rgb', {'type': 'bgr_to_rgb', 'something_extra': 'extra'})
 
     def test_flip_raise_config_error_on_extra_args(self):
         with pytest.raises(ConfigError):
@@ -877,7 +877,7 @@ class TestIEPreprocessor:
         assert preprocessor.steps[0].name == 'mean_variant'
         assert preprocessor.steps[0].value.name == 'MEAN_VALUE'
         assert preprocessor.mean_values == (255, )
-        assert preprocessor.std_values == None
+        assert preprocessor.std_values is None
 
     def test_std_values_only(self):
         config = [{'type': 'normalization', 'std': 255}]
@@ -887,7 +887,7 @@ class TestIEPreprocessor:
         assert preprocessor.steps[0].name == 'mean_variant'
         assert preprocessor.steps[0].value.name == 'MEAN_VALUE'
         assert preprocessor.std_values == (255, )
-        assert preprocessor.mean_values == None
+        assert preprocessor.mean_values is None
 
     def test_mean_and_std_values(self):
         config = [{'type': 'normalization', 'mean': 255, 'std': 255}]

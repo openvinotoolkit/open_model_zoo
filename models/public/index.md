@@ -12,11 +12,12 @@ The models can be downloaded via Model Downloader
 | Model Name                  | Implementation                     | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------- | -----------------------------------| -------------- | -------- | ------ | ------- |
 | AlexNet                     | Caffe\*                            | [alexnet](./alexnet/alexnet.md)   | 56.598%/79.812% | 1.5 | 60.965 |
+| AntiSpoofNet                | PyTorch\*                          | [anti-spoof-mn3](./anti-spoof-mn3/anti-spoof-mn3.md) | 3.81% | 0.15 | 3.02 |
 | CaffeNet                    | Caffe\*                            | [caffenet](./caffenet/caffenet.md)  | 56.714%/79.916% | 1.5 | 60.965 |
-| DenseNet 121                | Caffe\*<br>TensorFlow\*<br>Caffe2\*| [densenet-121](./densenet-121/densenet-121.md)<br>[densenet-121-tf](./densenet-121-tf/densenet-121-tf.md)<br>[densenet-121-caffe2](./densenet-121-caffe2/densenet-121-caffe2.md) | 74.42%/92.136%<br>74.29%/91.98% <br>74.904%/92.192% | 5.289~5.724    | 7.971 |
+| DenseNet 121                | Caffe\*<br>TensorFlow\*<br>Caffe2\*| [densenet-121](./densenet-121/densenet-121.md)<br>[densenet-121-tf](./densenet-121-tf/densenet-121-tf.md)<br>[densenet-121-caffe2](./densenet-121-caffe2/densenet-121-caffe2.md) | 74.42%/92.136%<br>74.46%/92.13% <br>74.904%/92.192% | 5.723~5.7287 | 7.971 |
 | DenseNet 161                | Caffe\*<br>TensorFlow\*            | [densenet-161](./densenet-161/densenet-161.md)<br>[densenet-161-tf](./densenet-161-tf/densenet-161-tf.md) | 77.55%/93.92%<br>76.446%/93.228%| 14.128~15.561  | 28.666 |
-| DenseNet 169                | Caffe\*<br>TensorFlow\*            | [densenet-169](./densenet-169/densenet-169.md)<br>[densenet-169-tf](./densenet-169-tf/densenet-169-tf.md) | 76.106%/93.106%<br>75.76%/92.81%| 6.16~6.788 | 14.139 |
-| DenseNet 201                | Caffe\*                            | [densenet-201](./densenet-201/densenet-201.md)| 76.886%/93.556% | 8.673  | 20.001  |
+| DenseNet 169                | Caffe\*<br>TensorFlow\*            | [densenet-169](./densenet-169/densenet-169.md)<br>[densenet-169-tf](./densenet-169-tf/densenet-169-tf.md) | 76.106%/93.106%<br>76.14%/93.12%| 6.788~6.7932 | 14.139 |
+| DenseNet 201                | Caffe\*<br>TensorFlow\*            | [densenet-201](./densenet-201/densenet-201.md)<br>[densenet-201-tf](./densenet-201-tf/densenet-201-tf.md)| 76.886%/93.556%<br>76.93%/93.56% | 8.673~8.6786  | 20.001  |
 | EfficientNet B0             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b0](./efficientnet-b0/efficientnet-b0.md)<br>[efficientnet-b0-pytorch](./efficientnet-b0-pytorch/efficientnet-b0-pytorch.md) | 75.70%/92.76%<br>76.91%/93.21% | 0.819 | 5.268 |
 | EfficientNet B0 AutoAugment | TensorFlow\*                       | [efficientnet-b0_auto_aug](./efficientnet-b0_auto_aug/efficientnet-b0_auto_aug.md) | 76.43%/93.04% | 0.819 | 5.268 |
 | EfficientNet B5             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b5](./efficientnet-b5/efficientnet-b5.md)<br>[efficientnet-b5-pytorch](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | 83.33%/96.67%<br>83.69%/96.71% | 21.252 | 30.303 |
@@ -27,7 +28,7 @@ The models can be downloaded via Model Downloader
 | HBONet 0.25                 | PyTorch\*                          | [hbonet-0.25](./hbonet-0.25/hbonet-0.25.md) | 57.3%/79.8% | 0.0758 | 1.9299 |
 | Inception (GoogleNet) V1    | Caffe\*<br>TensorFlow\*            | [googlenet-v1](./googlenet-v1/googlenet-v1.md)<br>[googlenet-v1-tf](./googlenet-v1-tf/googlenet-v1-tf.md) | 68.928%/89.144%<br>69.814%/89.6% | 3.016~3.266 | 6.619~6.999 |
 | Inception (GoogleNet) V2    | Caffe\*<br>TensorFlow\*            | [googlenet-v2](./googlenet-v2/googlenet-v2.md)<br>[googlenet-v2-tf](./googlenet-v2-tf/googlenet-v2-tf.md) | 72.024%/90.844%<br>74.084%/91.798%| 4.058 | 11.185 |
-| Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/googlenet-v3.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | 77.904%/93.808%<br>77.696%/93.696% | 11.469 | 23.817 |
+| Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/googlenet-v3.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | 77.904%/93.808%<br>77.69%/93.7% | 11.469 | 23.817 |
 | Inception (GoogleNet) V4    | TensorFlow\*                       | [googlenet-v4-tf](./googlenet-v4-tf/googlenet-v4-tf.md) | 80.204%/95.21% | 24.584 | 42.648 |
 | Inception-ResNet V2         | TensorFlow\*                       | [inception-resnet-v2-tf](./inception-resnet-v2-tf/inception-resnet-v2-tf.md) | 80.14%/95.10% | 22.227 | 30.223 |
 | MobileNet V1 0.25 128       | Caffe\*                            | [mobilenet-v1-0.25-128](./mobilenet-v1-0.25-128/mobilenet-v1-0.25-128.md)  | 40.54%/65% | 0.028 | 0.468 |
@@ -51,6 +52,7 @@ The models can be downloaded via Model Downloader
 | ResNet 18                   | PyTorch\*                          | [resnet-18-pytorch](./resnet-18-pytorch/resnet-18-pytorch.md) | 69.754%/89.088% | 3.637 |  11.68 |
 | ResNet 34                   | PyTorch\*                          | [resnet-34-pytorch](./resnet-34-pytorch/resnet-34-pytorch.md) | 73.30%/91.42% | 7.3409 | 21.7892 |
 | ResNet 50                   | PyTorch\*<br>Caffe2\*<br>TensorFlow\*| [resnet-50-pytorch](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[resnet-50-caffe2](./resnet-50-caffe2/resnet-50-caffe2.md)<br>[resnet-50-tf](./resnet-50-tf/resnet-50-tf.md)| 75.168%/92.212%<br>76.128%/92.858%<br>76.38%/93.188%<br>76.17%/92.98% | 6.996~8.216 | 25.53 |
+| ReXNet V1 x1.0              | PyTorch\*                          | [rexnet-v1-x1.0](./rexnet-v1-x1.0/rexnet-v1-x1.0.md) | 77.86%/93.87% | 0.8325 | 4.7779 |
 | SE-Inception                | Caffe\*                            | [se-inception](./se-inception/se-inception.md) | 75.996%/92.964% | 4.091 | 11.922 |
 | SE-ResNet 50                | Caffe\*                            | [se-resnet-50](./se-resnet-50/se-resnet-50.md) | 77.596%/93.85% | 7.775 | 28.061 |
 | SE-ResNet 101               | Caffe\*                            | [se-resnet-101](./se-resnet-101/se-resnet-101.md)   | 78.252%/94.206% | 15.239 | 49.274  |
@@ -111,6 +113,8 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | CTPN                                 | TensorFlow\*             | [ctpn](./ctpn/ctpn.md) | 73.67% | 55.813 | 17.237 |
 | CenterNet (CTDET with DLAV0) 384x384 | ONNX\*                   | [ctdet_coco_dlav0_384](./ctdet_coco_dlav0_384/ctdet_coco_dlav0_384.md)| 41.6105%| 34.994 | 17.911 |
 | CenterNet (CTDET with DLAV0) 512x512 | ONNX\*                   | [ctdet_coco_dlav0_512](./ctdet_coco_dlav0_512/ctdet_coco_dlav0_512.md)| 44.2756%| 62.211 | 17.911 |
+| EfficientDet-D0                      | TensorFlow\*             | [efficientdet-d0-tf](./efficientdet-d0-tf/efficientdet-d0-tf.md)| 31.95% | 2.54 | 3.9 |
+| EfficientDet-D1                      | TensorFlow\*             | [efficientdet-d1-tf](./efficientdet-d1-tf/efficientdet-d1-tf.md)| 37.54% | 6.1 | 6.6 |
 | FaceBoxes                            | PyTorch\*                | [faceboxes-pytorch](./faceboxes-pytorch/faceboxes-pytorch.md)|83.565% | 1.8975 | 1.0059 |
 | Faster R-CNN with Inception-ResNet v2| TensorFlow\*             | [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/faster_rcnn_inception_resnet_v2_atrous_coco.md)| 36.76%/52.41% | 30.687 | 13.307 |
 | Faster R-CNN with Inception v2       | TensorFlow\*             | [faster_rcnn_inception_v2_coco](./faster_rcnn_inception_v2_coco/faster_rcnn_inception_v2_coco.md) | 25.65%/40.04%| 30.687 | 13.307 |
@@ -129,6 +133,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | SSD lite with MobileNet V2           | TensorFlow\*             | [ssdlite_mobilenet_v2](./ssdlite_mobilenet_v2/ssdlite_mobilenet_v2.md) | 24.2946% | 1.525 | 4.475 |
 | SSD with ResNet-50 V1 FPN            | TensorFlow\*             | [ssd_resnet50_v1_fpn_coco](./ssd_resnet50_v1_fpn_coco/ssd_resnet50_v1_fpn_coco.md)| 38.4557% | 178.6807 | 59.9326 |
 | SSD with ResNet 34 1200x1200         | PyTorch\*                | [ssd-resnet34-1200-onnx](./ssd-resnet34-1200-onnx/ssd-resnet34-1200-onnx.md) | 20.7198%/39.2752% | 433.411 | 20.058  |
+| SSH                                  | MXNet\*                  | [ssh-mxnet](./ssh-mxnet/ssh-mxnet.md) | 84.80% | 267.0594 | 19.7684 |
 | RetinaFace-R50                       | MXNet\*                  | [retinaface-resnet50](./retinaface-resnet50/retinaface-resnet50.md) | 87.2902% | 100.8478 | 29.427 |
 | RetinaFace-Anti-Cov                  | MXNet\*                  | [retinaface-anti-cov](./retinaface-anti-cov/retinaface-anti-cov.md)  | 77.1531% | 2.7781 | 0.5955 |
 | YOLO v1 Tiny                         | TensorFlow.js\*          | [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | 72.1716% | 6.9883	 |	15.8587 |
@@ -142,7 +147,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 
 | Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------------ | -------------- | -------------- | -------- |------ | ------- |
-| FaceNet                              | TensorFlow\*   | [facenet-20180408-102900](./facenet-20180408-102900/facenet-20180408-102900.md) | 98.4522% | 2.846 | 23.469 |
+| FaceNet                              | TensorFlow\*   | [facenet-20180408-102900](./facenet-20180408-102900/facenet-20180408-102900.md) | 99.14% | 2.846 | 23.469 |
 | LResNet34E-IR,ArcFace@ms1m-refine-v1 | MXNet\*        | [face-recognition-resnet34-arcface](./face-recognition-resnet34-arcface/face-recognition-resnet34-arcface.md) | 	98.7488%| 8.934 | 34.129 |
 | LResNet50E-IR,ArcFace@ms1m-refine-v1 | MXNet\*        | [face-recognition-resnet50-arcface](./face-recognition-resnet50-arcface/face-recognition-resnet50-arcface.md) | 98.8835%| 12.637 | 43.576 |
 | LResNet100E-IR,ArcFace@ms1m-refine-v2| MXNet\*        | [face-recognition-resnet100-arcface](./face-recognition-resnet100-arcface/face-recognition-resnet100-arcface.md) | 99.0218%| 24.209 | 65.131 |
@@ -206,8 +211,8 @@ Colorization task is to predict colors of scene from grayscale image.
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
-| colorization-v2           | PyTorch\* | [colorization-v2](./colorization-v2/colorization-v2.md) | 57.75%/81.50% | 83.6045 |  32.2360 |
-| colorization-siggraph     | PyTorch\* | [colorization-siggraph](./colorization-siggraph/colorization-siggraph.md) | 58.25%/81.78% | 150.5441 |  34.0511 |
+| colorization-v2           | PyTorch\* | [colorization-v2](./colorization-v2/colorization-v2.md) | 26.99dB | 83.6045 |  32.2360 |
+| colorization-siggraph     | PyTorch\* | [colorization-siggraph](./colorization-siggraph/colorization-siggraph.md) | 27.73dB | 150.5441 |  34.0511 |
 
 ## Sound Classification
 
@@ -224,6 +229,15 @@ The task of speech recognition is to recognize and translate spoken language int
 | Model Name        | Implementation | OMZ Model Name                                               | Accuracy | GFlops | mParams |
 | ----------------- | -------------- | ------------------------------------------------------------ | -------- | ------ | ------- |
 | DeepSpeech V0.6.1 | TensorFlow\*   | [mozilla-deepspeech-0.6.1](./mozilla-deepspeech-0.6.1/mozilla-deepspeech-0.6.1.md) | 7.55%    | 0.0472 | 47.2    |
+| DeepSpeech V0.8.2 | TensorFlow\*   | [mozilla-deepspeech-0.8.2](./mozilla-deepspeech-0.8.2/mozilla-deepspeech-0.8.2.md) | 6.13%    | 0.0472 | 47.2    |
+
+## Image Translation
+
+The task of image translation is to generate the output based on exemplar.
+
+| Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops    | mParams  |
+| -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
+| CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/cocosnet.md) | 12.93dB  | 1080.7032 | 167.9141 |
 
 ## Legal Information
 

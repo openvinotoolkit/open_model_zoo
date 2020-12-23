@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..topology_types import GenericTopology
 from ..config import BaseField, ConfigValidator, StringField, ConfigError
 from ..dependency import ClassProvider
 from ..utils import get_parameter_value_from_config
@@ -26,8 +25,6 @@ class Adapter(ClassProvider):
     """
 
     __provider_type__ = 'adapter'
-
-    topology_types = (GenericTopology, )
 
     def __init__(self, launcher_config, label_map=None, output_blob=None):
         self.launcher_config = launcher_config
@@ -64,6 +61,10 @@ class Adapter(ClassProvider):
         if isinstance(outputs_list, dict):
             return outputs_list
         return outputs_list[0]
+
+    def select_output_blob(self, outputs):
+        if self.output_blob is None:
+            self.output_blob = next(iter(outputs))
 
 
 class AdapterField(BaseField):

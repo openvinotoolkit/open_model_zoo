@@ -109,7 +109,7 @@ def parse_arguments():
     args.add_argument('-c', '--path_to_cldnn_config', type=str, required=False,
                         help="Required for GPU custom kernels. "
                              "Absolute path to an .xml file with the kernels description.")
-    args.add_argument('-ms', '--mri_sequence', type=mri_sequence, metavar='N1,N2,N3,N4', default=(0,1,2,3),
+    args.add_argument('-ms', '--mri_sequence', type=mri_sequence, metavar='N1,N2,N3,N4', default=(0, 1, 2, 3),
                       help='Optional. Transfer MRI-sequence from dataset order to the network order.')
     args.add_argument("--full_intensities_range", required=False, default=False, action="store_true",
                       help="Take intensities of the input image in a full range.")
@@ -185,8 +185,8 @@ def resample_np(data, output_shape, order):
     return interpolation.zoom(data, zoom=factor, order=order)
 
 
-def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True, \
-               mri_sequence_order=(0,1,2,3), full_intensities_range=False):
+def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True,
+               mri_sequence_order=(0, 1, 2, 3), full_intensities_range=False):
     images_list = []
     original_shape = ()
     bboxes = np.zeros(shape=(len(DATA_SUFFIXES),) + (2, 3))
@@ -257,7 +257,7 @@ def main():
             ie.set_config({'CPU_THREADS_NUM': str(args.number_threads)}, "CPU")
     elif 'GPU' in args.target_device:
         if args.path_to_cldnn_config:
-            ie.set_config({'CONFIG_FILE':  args.path_to_cldnn_config}, "GPU")
+            ie.set_config({'CONFIG_FILE': args.path_to_cldnn_config}, "GPU")
             logger.info("GPU extensions is loaded {}".format(args.path_to_cldnn_config))
     else:
         raise AttributeError("Device {} do not support of 3D convolution. "
@@ -351,7 +351,7 @@ def main():
             y = bbox[3] - bbox[2]
             z = bbox[5] - bbox[4]
             out_result = np.zeros(shape=((channels,) + original_size), dtype=float)
-            out_result[:,bbox[0]:bbox[1], bbox[2]:bbox[3], bbox[4]:bbox[5]] = \
+            out_result[:, bbox[0]:bbox[1], bbox[2]:bbox[3], bbox[4]:bbox[5]] = \
                 resample_np(data, (channels, x, y, z), 1)
         else:
             out_result = data
@@ -401,7 +401,7 @@ def main():
 
     # --------------------------------------------- 7. Save output -----------------------------------------------
     tiff_output_name = os.path.join(args.path_to_output, 'output.tiff')
-    Image.new('RGB', (original_data.shape[3], original_data.shape[2])).save(tiff_output_name, \
+    Image.new('RGB', (original_data.shape[3], original_data.shape[2])).save(tiff_output_name,
         append_images=list_img, save_all=True)
     logger.info("Result tiff file was saved to {}".format(tiff_output_name))
 

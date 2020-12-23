@@ -4,8 +4,6 @@
 
 Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection. For details see the [paper](https://arxiv.org/abs/1506.01497v3).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -21,8 +19,6 @@ Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection.
 | ------ | ----- |
 | coco_precision | 36.76% |
 | mAP| 52.41%|
-
-## Performance
 
 ## Input
 
@@ -82,4 +78,4 @@ bounding boxes. For each detection, the description has the format:
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

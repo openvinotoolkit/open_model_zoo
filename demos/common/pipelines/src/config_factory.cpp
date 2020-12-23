@@ -106,9 +106,7 @@ CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, const std::
         config.clKernelsConfigPath = flags_c;
     }
 
-    if (flags_nireq) {
-        config.maxAsyncRequests = flags_nireq;
-    }
+    config.maxAsyncRequests = flags_nireq;
 
     /** Per layer metrics **/
     if (flags_pc) {

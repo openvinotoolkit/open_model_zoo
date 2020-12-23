@@ -8,8 +8,6 @@ This is PyTorch\* implementation based on retaining high resolution representati
 and pretrained on ADE20k dataset.
 For details about implementation of model, check out the [Semantic Segmentation on MIT ADE20K dataset in PyTorch](https://github.com/CSAILVision/semantic-segmentation-pytorch) repository.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -25,8 +23,6 @@ For details about implementation of model, check out the [Semantic Segmentation 
 | ------ | -------------- | --------------- |
 | Pixel accuracy  | 77.69%          | 77.69%           |
 | mean IoU        | 33.02%          | 33.02%           |
-
-## Performance
 
 ## Input
 

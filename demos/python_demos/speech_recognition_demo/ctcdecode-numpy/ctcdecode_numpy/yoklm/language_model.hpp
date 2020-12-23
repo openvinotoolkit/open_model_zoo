@@ -38,7 +38,7 @@ struct MediumLayer {
 };
 
 struct LmConfig {
-  int order;  // the value of n in n-gram
+  size_t order;  // the value of n in n-gram
   std::vector<uint64_t> ngram_counts;  // ngram_count[k-1] = number of k-grams, vector length = order
   int prob_bits;  // size of quantized representation of log-probability values; guaranteed to be in [0,24]
   int backoff_bits;  // size of quantized representation of log-backoff values; guaranteed to be in [0,24]
@@ -70,7 +70,7 @@ class LanguageModel {
     //float log10_p_cond(const std::vector<WordIndex>& words) const;
     float log10_p_cond(WordIndex new_word, LmState& state) const;
 
-    int order() const { return config_.order; };
+    size_t order() const { return config_.order; };
     uint64_t num_words() const { return config_.ngram_counts[0]; };
 
   private:

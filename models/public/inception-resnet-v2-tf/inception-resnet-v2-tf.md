@@ -4,8 +4,6 @@
 
 The `inception-resnet-v2` model is one of the Inception family of models designed to perform image classification. For details about this family of models, check out the [paper](https://arxiv.org/abs/1602.07261).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -21,8 +19,6 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 | ------ | ----- |
 | Top 1  | 80.14% |
 | Top 5  | 95.10% |
-
-## Performance
 
 ## Input
 
@@ -69,4 +65,4 @@ Probabilities for all dataset classes (0 class is background). Probabilities are
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

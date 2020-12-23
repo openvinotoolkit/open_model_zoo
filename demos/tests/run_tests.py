@@ -23,17 +23,15 @@ For the tests to work, the test data directory must contain:
 * a "ILSVRC2012_img_val" subdirectory with the ILSVRC2012 dataset;
 * a "Image_Retrieval" subdirectory with image retrieval dataset (images, videos) (see https://github.com/19900531/test)
   and list of images (see https://github.com/openvinotoolkit/training_extensions/blob/develop/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt)
+* a "msasl" subdirectory with the MS-ASL dataset (https://www.microsoft.com/en-us/research/project/ms-asl/)
 """
 
 import argparse
-import collections
 import contextlib
 import csv
-import itertools
 import json
 import os
 import shlex
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -152,7 +150,10 @@ def main():
 
         num_failures = 0
 
-        os.putenv('PYTHONPATH',  "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir))
+        demo_environment = {**os.environ,
+            'PYTHONIOENCODING': 'utf-8',
+            'PYTHONPATH': "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir),
+        }
 
         for demo in demos_to_test:
             print('Testing {}...'.format(demo.full_name))
@@ -212,7 +213,8 @@ def main():
                         try:
                             start_time = timeit.default_timer()
                             subprocess.check_output(fixed_args + dev_arg + case_args,
-                                stderr=subprocess.STDOUT, universal_newlines=True)
+                                stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
+                                env=demo_environment)
                             execution_time = timeit.default_timer() - start_time
                         except subprocess.CalledProcessError as e:
                             print(e.output)

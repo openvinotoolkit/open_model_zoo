@@ -13,6 +13,7 @@
 """
 
 from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
 
 import numpy as np
 import cv2
@@ -27,7 +28,7 @@ def build_arg_parser():
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model.",
-                      required=True, type=str)
+                      required=True, type=Path)
     args.add_argument("-i", "--input", type=str, default='', help="path to image.")
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
@@ -123,7 +124,7 @@ def main():
 
     if args.auto_mask_color or args.auto_mask_random:
         # Command-line inpaining for just one image
-        concat_image, result = inpaint_auto(img,args)
+        concat_image, result = inpaint_auto(img, args)
         if args.output != "":
             cv2.imwrite(args.output, result)
         if not args.no_show:

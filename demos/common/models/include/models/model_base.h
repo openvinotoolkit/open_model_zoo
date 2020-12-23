@@ -20,7 +20,10 @@
 
 class ModelBase {
 public:
-    ModelBase(const std::string& modelFileName) { this->modelFileName = modelFileName; }
+    ModelBase(const std::string& modelFileName)
+        : execNetwork(nullptr), modelFileName(modelFileName)
+    {}
+
     virtual ~ModelBase() {}
 
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) = 0;

@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/vehicle-license-plate-detection-barrier-0106.xml
-    size: 212606
-    sha256: e69d158e881a84b76fb44d6fc3673a24209c59f38e9e43a66ce0a5c0e50f7530
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.xml
+    size: 212761
+    sha256: e305dea89c08501b66774fdcd31eee279c3531cbab04127c62aeac34682c0330
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.xml
   - name: FP32/vehicle-license-plate-detection-barrier-0106.bin
-    size: 2573368
-    sha256: 113b86e6ed156253eeccc9a61b3ad602e6980928b7fa47a8232a875079ece5df
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.bin
+    size: 2573360
+    sha256: def0179e5896b732d54654c369f1c0d896a457d7d3a50627dd9020e45fd6d6eb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.bin
   - name: FP16/vehicle-license-plate-detection-barrier-0106.xml
-    size: 212538
-    sha256: a7de48553fa055bae9c0cd07fe3a9ad504edbe84eb2ea5da27359d8decc4b417
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.xml
+    size: 212694
+    sha256: c1bdeca60af892ffc9c0458ccf8b9068ed27ac8020e5925cccd8363b6706be55
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.xml
   - name: FP16/vehicle-license-plate-detection-barrier-0106.bin
-    size: 1286746
-    sha256: 08fc0477fc69e343861c9b318ee0f5ce3c80eddac74220a209267b1742debbb4
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
+    size: 1286742
+    sha256: 8e32f212b544500168661b736d898831cd1d67633b6ab85e2505a9d9d04dc5e2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
   - name: FP16-INT8/vehicle-license-plate-detection-barrier-0106.xml
-    size: 558430
-    sha256: 31542d69971b243f23d03c1992364767aee8f92c5010a751b21c95be2537965d
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/vehicle-license-plate-detection-barrier-0106/FP16-INT8/vehicle-license-plate-detection-barrier-0106.xml
+    size: 559626
+    sha256: 4844c1c3f736578745a3eb71a225e77d703a2f1b83e15444bce77e54bfca21f5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/vehicle-license-plate-detection-barrier-0106/FP16-INT8/vehicle-license-plate-detection-barrier-0106.xml
   - name: FP16-INT8/vehicle-license-plate-detection-barrier-0106.bin
-    size: 693924
-    sha256: 4cd37f74a02c971023d9f5169f233313cd187246e08c3ae9c41214d247a9fb4a
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/vehicle-license-plate-detection-barrier-0106/FP16-INT8/vehicle-license-plate-detection-barrier-0106.bin
+    size: 693920
+    sha256: cb6704a2814c80176108d25d34b734ae8d01e6c7a0d8b9154d9948d5df1622e6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/vehicle-license-plate-detection-barrier-0106/FP16-INT8/vehicle-license-plate-detection-barrier-0106.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

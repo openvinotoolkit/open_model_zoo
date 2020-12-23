@@ -36,8 +36,6 @@ The formula-recognition-medium-scan-0001-encoder model is a ResNeXt-50 like back
 | MParams                                       | 1.69      |
 
 
-### Performance
-
 ### Inputs
 
 1.	Name: `imgs` , shape: [1x3x160x1400]. An input image in the [1xCxHxW] format.
@@ -61,8 +59,6 @@ The formula-recognition-medium-scan-0001-decoder model is an LSTM based decoder 
 | MParams                                       | 2.56      |
 
 
-
-### Performance
 
 ### Inputs
 

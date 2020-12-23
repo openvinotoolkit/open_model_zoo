@@ -33,8 +33,10 @@ Options:
   -d DEVICE, --device DEVICE
                         Optional. Specify target device for infer: CPU, GPU,
                         FPGA, HDDL or MYRIAD. Default: CPU
-  -i "<path>", --input "<path>"
-                        Required. Input to process.
+  -i INPUT, --input INPUT
+                        Required. An input to process. The input must be a single image,
+                        a folder of images or anything that cv2.VideoCapture can process.
+  --loop                Optional. Enable reading the input in a loop.
   --no_show             Optional. Disable display of results on screen.
   -v, --verbose         Optional. Enable display of processing logs on screen.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
@@ -43,7 +45,7 @@ Options:
 
 ```
 
-To run the demo, you can use public or Intel's pretrained models. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md) or go to the [Intel&reg; Open Source Technology Center](https://download.01.org/opencv/).
+To run the demo, you can use public or Intel's pretrained models. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

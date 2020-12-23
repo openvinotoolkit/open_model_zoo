@@ -4,8 +4,6 @@
 
 R-FCN Resnet-101 model, pretrained on COCO\* dataset. Used for object detection. For details, see the [paper](https://arxiv.org/abs/1605.06409).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -21,8 +19,6 @@ R-FCN Resnet-101 model, pretrained on COCO\* dataset. Used for object detection.
 | ------ | ----- |
 | coco_precision | 28.40%|
 | mAP | 45.02%|
-
-## Performance
 
 ## Input
 
@@ -82,4 +78,4 @@ bounding boxes. For each detection, the description has the format:
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

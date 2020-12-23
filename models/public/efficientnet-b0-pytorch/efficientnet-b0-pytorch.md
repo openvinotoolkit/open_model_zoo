@@ -12,8 +12,6 @@ order. Before passing the image blob to the network, do the following:
 The model output for `efficientnet-b0-pytorch` is the typical object classifier output for
 1000 different classifications matching those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -29,8 +27,6 @@ The model output for `efficientnet-b0-pytorch` is the typical object classifier 
 | ------ | -------------- | --------------- |
 | Top 1  | 76.91%          | 76.91%           |
 | Top 5  | 93.21%          | 93.21%           |
-
-## Performance
 
 ## Input
 

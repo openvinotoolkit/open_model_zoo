@@ -31,7 +31,7 @@ class NormalizeLandmarksPoints(Postprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'use_annotation_rect' : BoolField(
+            'use_annotation_rect': BoolField(
                 optional=True, default=False,
                 description="Allows to use size of rectangle saved in annotation metadata for point scaling"
                             " instead source image size."

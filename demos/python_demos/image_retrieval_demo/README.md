@@ -1,4 +1,6 @@
-# Image Retrieval Python* Demo
+# Image Retrieval Python\* Demo
+
+![](./image_retrieval.gif)
 
 This demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 
@@ -60,7 +62,7 @@ Options:
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -80,8 +82,6 @@ Examples of videos can be found [here](https://github.com/19900531/test).
 ## Demo Output
 
 The application uses OpenCV to display gallery searching result and current inference performance.
-
-![](./image_retrieval_demo.jpg)
 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)

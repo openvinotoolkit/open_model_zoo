@@ -19,8 +19,6 @@ The network is able to recognize case-insensitive alphanumeric text (36 unique s
 | MParams                                        | 5.568              |
 | Source framework                               | TensorFlow         |
 
-## Performance
-
 ## Inputs
 
 Shape: [1x1x32x120] - An input image in the format [BxCxHxW],

@@ -53,14 +53,15 @@ class CornerCrop(Preprocessor):
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
 
     def process(self, image, annotation_meta=None):
-        data = image.data
-        image.data = self.process_data(
-            data, self.dst_height, self.dst_width, self.corner_type
-            ) if not isinstance(data, list) else [
+        if isinstance(image.data, list):
+            image.data = [
                 self.process_data(
-                    fragment, self.dst_height, self.dst_width, self.corner_type
-                    ) for fragment in image.data
+                    fragment, self.dst_height, self.dst_width, self.corner_type)
+                for fragment in image.data
             ]
+        else:
+            image.data = self.process_data(
+                image.data, self.dst_height, self.dst_width, self.corner_type)
 
         return image
 
@@ -131,6 +132,9 @@ class Crop(Preprocessor):
             ),
             'central_fraction': NumberField(
                 value_type=float, min_value=0, max_value=1, optional=True, description="Central Fraction."
+            ),
+            'max_square': BoolField(
+                optional=True, default=False, description='crop center area by shortest side'
             )
         })
 
@@ -140,12 +144,17 @@ class Crop(Preprocessor):
         self.use_pillow = self.get_value_from_config('use_pillow')
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self.central_fraction = self.get_value_from_config('central_fraction')
-        if self.dst_height is None and self.dst_width is None and self.central_fraction is None:
-            raise ConfigError('sizes for crop or central_fraction should be provided')
+        self.max_square = self.get_value_from_config('max_square')
+        if self.dst_height is None and self.dst_width is None and self.central_fraction is None and not self.max_square:
+            raise ConfigError('sizes for crop or central_fraction or max_square should be provided')
         if self.dst_height and self.dst_width and self.central_fraction:
-            raise ConfigError('both sizes and central fraction provided  for cropping')
+            raise ConfigError('both sizes and central fraction provided for cropping')
+        if self.dst_height and self.dst_width and self.max_square:
+            raise ConfigError('both sizes and max_square provided for cropping')
+        if self.central_fraction and self.max_square:
+            raise ConfigError('both central fraction and nax_square provided for cropping')
 
-        if not self.central_fraction:
+        if not self.central_fraction and not self.max_square:
             if self.dst_height is None or self.dst_width is None:
                 raise ConfigError('one from crop dimensions is not provided')
 
@@ -154,11 +163,11 @@ class Crop(Preprocessor):
         data = image.data
 
         image.data = self.process_data(
-            data, self.dst_height, self.dst_width, self.central_fraction,
+            data, self.dst_height, self.dst_width, self.central_fraction, self.max_square,
             self.use_pillow, is_simple_case, image.metadata
         ) if not isinstance(data, list) else [
             self.process_data(
-                fragment, self.dst_height, self.dst_width, self.central_fraction,
+                fragment, self.dst_height, self.dst_width, self.central_fraction, self.max_square,
                 self.use_pillow, is_simple_case, image.metadata
             ) for fragment in image.data
         ]
@@ -166,11 +175,14 @@ class Crop(Preprocessor):
         return image
 
     @staticmethod
-    def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata):
+    def process_data(data, dst_height, dst_width, central_fraction, max_square, use_pillow, is_simple_case, metadata):
         height, width = data.shape[:2]
-        if not central_fraction:
+        if not central_fraction and not max_square:
             new_height = dst_height
             new_width = dst_width
+        elif max_square:
+            new_height = min(height, width)
+            new_width = min(height, width)
         else:
             new_height = int(height * central_fraction)
             new_width = int(width * central_fraction)
@@ -629,7 +641,7 @@ class ObjectCropWithScale(Preprocessor):
         # Preprocessing for efficient cropping
         height, width = img.shape[:2]
         sf = scale * 200.0 / self.dst_width
-        if sf <= 2:
+        if sf >= 2:
             new_size = int(np.math.floor(max(height, width) / sf))
             new_height = int(np.math.floor(height / sf))
             new_width = int(np.math.floor(width / sf))

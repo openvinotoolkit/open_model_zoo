@@ -15,9 +15,9 @@ limitations under the License.
 """
 
 from .postprocessor import Postprocessor
-from ..preprocessor import Crop
+from ..preprocessor import Crop, CornerCrop
 from ..representation import ImageInpaintingAnnotation, ImageInpaintingPrediction
-from ..config import NumberField
+from ..config import NumberField, StringField
 from ..utils import get_size_from_config
 
 
@@ -49,6 +49,41 @@ class CropGTImage(Postprocessor):
 
     def process_image(self, annotation, prediction):
         for target in annotation:
-            target.value = Crop.process_data(target.value, self.dst_height, self.dst_width, None, False, True, {})
+            target.value = Crop.process_data(
+                target.value, self.dst_height, self.dst_width, None, False, False, True, {}
+            )
+
+        return annotation, prediction
+
+class CornerCropGTImage(Postprocessor):
+    __provider__ = "corner_crop_ground_truth_image"
+
+    annotation_types = (ImageInpaintingAnnotation,)
+    prediction_types = (ImageInpaintingPrediction,)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'dst_width': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination width for mask cropping."
+            ),
+            'dst_height': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination height for mask cropping."
+            ),
+            'corner_type': StringField(
+                optional=True, choices=['top_left', 'top_right', 'bottom_left', 'bottom_right'],
+                default='top_left', description="Destination height for image cropping respectively."
+            ),
+        })
+        return parameters
+
+    def configure(self):
+        self.corner_type = self.get_value_from_config('corner_type')
+        self.dst_height, self.dst_width = get_size_from_config(self.config)
+
+    def process_image(self, annotation, prediction):
+        for target in annotation:
+            target.value = CornerCrop.process_data(target.value, self.dst_height, self.dst_width, self.corner_type)
 
         return annotation, prediction

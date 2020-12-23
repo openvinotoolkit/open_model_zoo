@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from .format_converter import BaseFormatConverter
-from .convert import make_subset, save_annotation, analyze_dataset
+from .convert import make_subset, save_annotation, analyze_dataset, DatasetConversionInfo
 from .market1501 import Market1501Converter
 from .veri776 import VeRi776Converter
 from .mars import MARSConverter
@@ -23,7 +23,7 @@ from .pascal_voc import PascalVOCDetectionConverter
 from .sample_converter import SampleConverter
 from .wider import WiderFormatConverter
 from .detection_opencv_storage import DetectionOpenCVStorageFormatConverter
-from .lfw import LFWConverter
+from .lfw import LFWConverter, FaceRecognitionBinary
 from .vgg_face_regression import VGGFaceRegressionConverter
 from .super_resolution_converter import (
     SRConverter, SRMultiFrameConverter, MultiTargetSuperResolutionConverter, SRDirectoryBased
@@ -43,7 +43,7 @@ from .cifar import CifarFormatConverter
 from .mnist import MNISTCSVFormatConverter
 from .wmt import WMTConverter
 from .common_semantic_segmentation import CommonSegmentationConverter
-from .camvid import CamVidConverter
+from .camvid import CamVidConverter, CamVid32DatasetConverter
 from .lpr import LPRConverter
 from .image_retrieval import ImageRetrievalConverter
 from .cvat_object_detection import CVATObjectDetectionConverter
@@ -83,16 +83,23 @@ from .ade20k_dataset_converter import ADE20kConverter
 
 from .librispeech import LibrispeechConverter
 from .criteo_kaggle_dac import CriteoKaggleDACConverter
-from .features_regression import FeaturesRegressionConverter
+from .features_regression import FeaturesRegressionConverter, MultiOutputFeaturesRegression
 from .nyu_depth import NYUDepthV2Converter
 from .dna_seq import DNASequenceDatasetConverter
 from .place_recognition import PlaceRecognitionDatasetConverter
 from .cluttered_mnist import ClutteredMNISTConverter
 from .mpii import MPIIDatasetConverter
-from .mapillary_20 import Mapillary20Converter
+from .mapillary_20 import Mapillary20Converter, MapillaryVistasConverter
+from .antispoofing import AntispoofingDatasetConverter
+from .sound_classification_converter import SoundClassificationFormatConverter
+from .ade20k_image_translation import ADE20kImageTranslationConverter
+from .salient_object_detection import SalientObjectDetectionConverter
+from .common_object_detection import CommonDetectionConverter
+from .wflw import WFLWConverter
 
 __all__ = [
     'BaseFormatConverter',
+    'DatasetConversionInfo',
     'make_subset',
     'save_annotation',
     'analyze_dataset',
@@ -106,6 +113,7 @@ __all__ = [
     'MARSConverter',
     'DetectionOpenCVStorageFormatConverter',
     'LFWConverter',
+    'FaceRecognitionBinary',
     'VGGFaceRegressionConverter',
     'SRConverter',
     'SRMultiFrameConverter',
@@ -114,11 +122,13 @@ __all__ = [
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
     'UnicodeCharacterRecognitionDatasetConverter',
+    'KondateNakayosiRecognitionDatasetConverter',
     'MSCocoKeypointsConverter',
     'MSCocoSingleKeypointsConverter',
     'MSCocoDetectionConverter',
     'CityscapesConverter',
     'Mapillary20Converter',
+    'MapillaryVistasConverter',
     'MovieLensConverter',
     'BratsConverter',
     'BratsNumpyConverter',
@@ -128,6 +138,7 @@ __all__ = [
     'WMTConverter',
     'CommonSegmentationConverter',
     'CamVidConverter',
+    'CamVid32DatasetConverter',
     'LPRConverter',
     'ImageRetrievalConverter',
     'CVATObjectDetectionConverter',
@@ -162,9 +173,16 @@ __all__ = [
     'LibrispeechConverter',
     'CriteoKaggleDACConverter',
     'FeaturesRegressionConverter',
+    'MultiOutputFeaturesRegression',
     'Im2latexDatasetConverter',
     'DNASequenceDatasetConverter',
     'PlaceRecognitionDatasetConverter',
     'ClutteredMNISTConverter',
-    'MPIIDatasetConverter'
+    'MPIIDatasetConverter',
+    'AntispoofingDatasetConverter',
+    'SoundClassificationFormatConverter',
+    'ADE20kImageTranslationConverter',
+    'SalientObjectDetectionConverter',
+    'CommonDetectionConverter',
+    'WFLWConverter',
 ]

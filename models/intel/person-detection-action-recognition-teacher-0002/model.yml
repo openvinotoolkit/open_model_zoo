@@ -18,28 +18,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-teacher-0002.xml
-    size: 655393
-    sha256: cec7849f78a29b0c87157012657f396360af809fda74fc5bd1816496cf245c7e
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
+    size: 659991
+    sha256: 07cffbacdc614adc78c427c92056a583dfa2549dfc66ffccdde8c61f881581f6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
   - name: FP32/person-detection-action-recognition-teacher-0002.bin
     size: 7800360
     sha256: ebe9c7cdca28a408302b3b1f241afdc670abc251bd692c13a3140c78b08b0498
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
   - name: FP16/person-detection-action-recognition-teacher-0002.xml
-    size: 655149
-    sha256: 820aaeecdfbddd4595c290bef9ca3f7badf2aa9e255da88385f51f8e311f51d1
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
+    size: 659746
+    sha256: db186cfe594453aa029367746f284e67f014cc1b32905d35cb5d8045a8bf18c7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
   - name: FP16/person-detection-action-recognition-teacher-0002.bin
     size: 3900234
     sha256: 190e9b71ae02e022c6afe2dc9fb59939066e046234ff35f4ceab6ddfabab7883
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
   - name: FP16-INT8/person-detection-action-recognition-teacher-0002.xml
-    size: 1957431
-    sha256: 812c21752fbc56e4eab71c339d3061b24372e3cb5877aad2e1f12a42ca87439f
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.xml
+    size: 1962033
+    sha256: 5bbccdb1598e230cdbefe75be4637d9abc2ea2c354214f8f439d1b1770b0fd69
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.xml
   - name: FP16-INT8/person-detection-action-recognition-teacher-0002.bin
     size: 2055074
     sha256: 96cad98eab14477f7428a145c8b80a3bdf294d45f79df453a36e95305400de1a
-    source: https://download.01.org/opencv/2021/openvinotoolkit/2021.1/open_model_zoo/models_bin/2/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -36,8 +36,17 @@ struct ImageMetaData : public MetaData {
     ImageMetaData() {
     }
 
-    ImageMetaData(cv::Mat img, std::chrono::steady_clock::time_point timeStamp):
+    ImageMetaData(cv::Mat img, std::chrono::steady_clock::time_point timeStamp) :
         img(img),
         timeStamp(timeStamp) {
+    }
+};
+
+struct ClassificationImageMetaData : public ImageMetaData {
+    unsigned int groundTruthId;
+
+    ClassificationImageMetaData(cv::Mat img, std::chrono::steady_clock::time_point timeStamp, unsigned int groundTruthId) :
+        ImageMetaData(img, timeStamp),
+        groundTruthId(groundTruthId) {
     }
 };

@@ -224,7 +224,7 @@ class TestRegressionMetric:
         ]
         config = [{'type': 'mae_on_interval', 'end': 1, 'ignore_values_not_in_interval': False}]
         expected = EvaluationResult(
-            pytest.approx([2.0, 0.0, 0.5, 0.0,  0.0, 0.0]),
+            pytest.approx([2.0, 0.0, 0.5, 0.0, 0.0, 0.0]),
             None,
             'mae_on_interval',
             'mae_on_interval',
@@ -328,7 +328,7 @@ class TestRegressionMetric:
             RegressionPrediction('identifier', 3),
             RegressionPrediction('identifier', 1)
         ]
-        config = [{'type': 'mae_on_interval', 'intervals': [2.0,  0.0, 4.0]}]
+        config = [{'type': 'mae_on_interval', 'intervals': [2.0, 0.0, 4.0]}]
         expected = EvaluationResult(
             pytest.approx([0.0, 0.0, 1.0, 0.0]),
             None,

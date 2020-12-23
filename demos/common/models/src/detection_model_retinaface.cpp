@@ -310,7 +310,7 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
     if (shouldDetectMasks) {
         masks.reserve(INIT_VECTOR_SIZE);
     }
-
+// --------------------------- Filter data from all levels ----------------------------------------------------------
     for (int idx = 0; idx < anchorCfg.size(); ++idx) {
         const auto bboxRaw = infResult.outputsData[separateOutputsNames[OT_BBOX][idx]];
         const auto scoresRaw = infResult.outputsData[separateOutputsNames[OT_SCORES][idx]];

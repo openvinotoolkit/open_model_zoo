@@ -5,8 +5,6 @@
 Mask R-CNN Inception V2 trained on the COCO dataset. The model is used for object instance segmentation.
 For details, see a [paper](https://arxiv.org/abs/1703.06870).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -22,8 +20,6 @@ For details, see a [paper](https://arxiv.org/abs/1703.06870).
 | ------ | ----- |
 | coco_orig_precision | 27.1199%|
 | coco_orig_segm_precision | 21.4805%|
-
-## Performance
 
 ## Input
 
@@ -90,4 +86,4 @@ bounding boxes.
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

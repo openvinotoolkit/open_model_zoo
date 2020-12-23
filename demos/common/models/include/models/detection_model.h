@@ -34,13 +34,13 @@ public:
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
 
 protected:
+    float confidenceThreshold;
+    bool useAutoResize;
+
     std::vector<std::string> labels;
 
     size_t netInputHeight = 0;
     size_t netInputWidth = 0;
-
-    bool useAutoResize;
-    float confidenceThreshold;
 
     std::string getLabelName(int labelID) { return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
 };

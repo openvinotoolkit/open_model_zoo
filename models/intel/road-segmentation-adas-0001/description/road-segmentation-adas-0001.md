@@ -36,8 +36,6 @@ that was converted for four class classification task are:
 - `FP` - number of false positive pixels for given class
 - `GT` - number of ground truth pixels for given class
 
-## Performance
-
 ## Inputs
 
 A blob with a BGR image in the format: [B, C=3, H=512, W=896], where:
