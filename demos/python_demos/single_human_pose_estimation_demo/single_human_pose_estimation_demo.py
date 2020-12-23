@@ -51,14 +51,12 @@ def run_demo(args):
         raise RuntimeError("Can't read an image from the input")
     delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
 
-    fps = cap.fps()
-    out_frame_size = (frame.shape[1], frame.shape[0])
-
-    if args.output_video:
-        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-        output_video = cv2.VideoWriter(args.output_video, fourcc, fps, out_frame_size)
-    else:
-        output_video = None
+    video_writer = cv2.VideoWriter()
+    if args.output:
+        video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                      (frame.shape[1], frame.shape[0]))
+        if not video_writer.isOpened():
+            raise RuntimeError("Can't open video writer")
 
     presenter = monitors.Presenter(args.utilization_monitors, 25)
     while frame is not None:
@@ -83,8 +81,8 @@ def run_demo(args):
             float(1 / single_human_pose_estimator.infer_time),
             float(1 / detector_person.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
 
-        if output_video is not None:
-            output_video.write(frame)
+        if video_writer.isOpened():
+            video_writer.write(frame)
 
         if not args.no_show:
             cv2.imshow('Human Pose Estimation Demo', frame)

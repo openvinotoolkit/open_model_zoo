@@ -85,12 +85,12 @@ if __name__ == '__main__':
     graph_size = (imshow_size[0] // 2, imshow_size[1] // 4)
     presenter = monitors.Presenter(args.utilization_monitors, imshow_size[1] * 2 - graph_size[1], graph_size)
 
-    fps = cap.fps()
-    if args.output_video:
-        fourcc = cv.VideoWriter_fourcc(*'MJPG')
-        output_video = cv.VideoWriter(args.output_video, fourcc, fps, (1280, 960))
-    else:
-        output_video = None
+    video_writer = cv.VideoWriter()
+    if args.output:
+        video_writer = cv.VideoWriter(args.output, cv.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                      (imshow_size[0] * 2, imshow_size[1] * 2))
+        if not video_writer.isOpened():
+            raise RuntimeError("Can't open video writer")
 
     while original_frame is not None:
         log.debug("#############################")
@@ -135,8 +135,8 @@ if __name__ == '__main__':
                     cv.hconcat([lab_image, colorize_image])]
         final_image = cv.vconcat(ir_image)
 
-        if output_video is not None:
-            output_video.write(final_image)
+        if video_writer.isOpened():
+            video_writer.write(final_image)
 
         presenter.drawGraphs(final_image)
         if not args.no_show:

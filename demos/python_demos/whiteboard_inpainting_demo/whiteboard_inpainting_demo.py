@@ -100,7 +100,6 @@ def main():
         raise ValueError('Set up exactly one of segmentation models: '
                          '--m_instance_segmentation or --m_semantic_segmentation')
 
-    fps = cap.fps()
     out_frame_size = (frame.shape[1], frame.shape[0] * 2)
     presenter = monitors.Presenter(args.utilization_monitors, 20,
                                    (out_frame_size[0] // 4, out_frame_size[1] // 16))
@@ -112,11 +111,12 @@ def main():
         cv2.namedWindow(WINNAME)
         cv2.setMouseCallback(WINNAME, mouse.get_points)
 
-    if args.output_video:
-        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-        output_video = cv2.VideoWriter(args.output_video, fourcc, fps, out_frame_size)
-    else:
-        output_video = None
+    video_writer = cv2.VideoWriter()
+    if args.output:
+        video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                       out_frame_size)
+        if not video_writer.isOpened():
+            raise RuntimeError("Can't open video writer")
 
     log.info("Initializing Inference Engine")
     ie = IECore()
@@ -155,8 +155,8 @@ def main():
         merged_frame = np.vstack([frame, output_frame])
         merged_frame = cv2.resize(merged_frame, out_frame_size)
 
-        if output_video is not None:
-            output_video.write(merged_frame)
+        if video_writer.isOpened():
+            video_writer.write(merged_frame)
 
         presenter.drawGraphs(merged_frame)
         if not args.no_show:

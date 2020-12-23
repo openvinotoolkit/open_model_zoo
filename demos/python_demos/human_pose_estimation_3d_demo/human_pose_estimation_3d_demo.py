@@ -94,14 +94,12 @@ if __name__ == '__main__':
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
 
-    fps = cap.fps()
-    out_frame_size = (frame.shape[1], frame.shape[0])
-
-    if args.output_video:
-        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-        output_video = cv2.VideoWriter(args.output_video, fourcc, fps, out_frame_size)
-    else:
-        output_video = None
+    video_writer = cv2.VideoWriter()
+    if args.output:
+        video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                      (frame.shape[1], frame.shape[0]))
+        if not video_writer.isOpened():
+            raise RuntimeError("Can't open video writer")
 
     base_height = args.height_size
     fx = args.fx
@@ -145,8 +143,8 @@ if __name__ == '__main__':
         cv2.putText(frame, 'FPS: {}'.format(int(1 / mean_time * 10) / 10),
                     (40, 80), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255))
 
-        if output_video is not None:
-            output_video.write(frame)
+        if video_writer.isOpened():
+            video_writer.write(frame)
 
         if not args.no_show:
             cv2.imshow(canvas_3d_window_name, canvas_3d)

@@ -226,7 +226,6 @@ def main():
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
     cap = open_images_capture(args.input, args.loop)
-    fps = cap.fps()
 
     next_frame_id = 0
     next_frame_id_to_show = 0
@@ -237,7 +236,7 @@ def main():
     palette = ColorPalette(len(model.labels) if model.labels else 100)
     metrics = PerformanceMetrics()
     presenter = None
-    output_video = None
+    video_writer = cv2.VideoWriter()
 
     while True:
         if detector_pipeline.callback_exceptions:
@@ -256,8 +255,8 @@ def main():
             frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
             metrics.update(start_time, frame)
 
-            if output_video is not None:
-                output_video.write(frame)
+            if video_writer.isOpened():
+                video_writer.write(frame)
 
             if not args.no_show:
                 cv2.imshow('Detection Results', frame)
@@ -282,10 +281,11 @@ def main():
             if next_frame_id == 0:
                 presenter = monitors.Presenter(args.utilization_monitors, 55,
                                                (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
-                if args.output_video:
-                    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-                    output_video = cv2.VideoWriter(args.output_video, fourcc, fps, (frame.shape[1], frame.shape[0]))
-
+                if args.output:
+                    video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                                   (frame.shape[1], frame.shape[0]))
+                    if not video_writer.isOpened():
+                        raise RuntimeError("Can't open video writer")
             # Submit for inference
             detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1

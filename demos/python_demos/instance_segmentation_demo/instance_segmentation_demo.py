@@ -127,17 +127,17 @@ def main():
         delay = args.delay
     else:
         delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
-    fps = cap.fps()
+
     out_frame_size = (frame.shape[1], frame.shape[0])
     presenter = monitors.Presenter(args.utilization_monitors, 45,
                 (round(out_frame_size[0] / 4), round(out_frame_size[1] / 8)))
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
-
-    if args.output_video:
-        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-        output_video = cv2.VideoWriter(args.output_video, fourcc, fps, out_frame_size)
-    else:
-        output_video = None
+    video_writer = cv2.VideoWriter()
+    if args.output:
+        video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                       out_frame_size)
+        if not video_writer.isOpened():
+            raise RuntimeError("Can't open video writer")
 
     render_time = 0
 
@@ -209,8 +209,8 @@ def main():
             for layer, stats in perf_counts.items():
                 print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
                                                                   stats['status'], stats['real_time']))
-        if output_video is not None:
-            output_video.write(frame)
+        if video_writer.isOpened():
+            video_writer.write(frame)
 
         if not args.no_show:
             # Show resulting image.
