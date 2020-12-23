@@ -202,6 +202,10 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('object-detection-demo')}),
         [
             *combine_cases(
+                TestCase(options={'--architecture_type': 'faceboxes',
+                                  '-m': ModelArg('faceboxes-pytorch')})
+            ),
+            *combine_cases(
                 TestCase(options={'-at': 'ssd'}),
                 single_option_cases('-m',
                     ModelArg('efficientdet-d0-tf'),
@@ -243,10 +247,6 @@ NATIVE_DEMOS = [
                     ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
                     ModelArg('yolo-v3-tf'),
                     ModelArg('yolo-v3-tiny-tf'))),
-            *combine_cases(
-                TestCase(options={'-at': 'faceboxes'}),
-                single_option_cases('-m',
-                    ModelArg('faceboxes-pytorch'))),
         ],
     )),
 
@@ -506,6 +506,22 @@ PYTHON_DEMOS = [
         TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('object-detection-demo')}),
         [
             *combine_cases(
+                TestCase(options={'--architecture_type': 'centernet'}),
+                single_option_cases('-m',
+                    ModelArg('ctdet_coco_dlav0_384'),
+                    ModelArg('ctdet_coco_dlav0_512')),
+            ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'faceboxes',
+                                  '-m': ModelArg('faceboxes-pytorch')})
+            ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'retina'}),
+                single_option_cases('-m',
+                    ModelArg('retinaface-anti-cov'),
+                    ModelArg('retinaface-resnet50'))
+            ),
+            *combine_cases(
                 TestCase(options={'--architecture_type': 'ssd'}),
                 single_option_cases('-m',
                     ModelArg('efficientdet-d0-tf'),
@@ -564,22 +580,6 @@ PYTHON_DEMOS = [
                     ModelArg('yolo-v2-tiny-tf'),
                     ModelArg('yolo-v2-tiny-vehicle-detection-0001'),
                     ModelArg('yolo-v3-tf')),
-            ),
-            *combine_cases(
-                TestCase(options={'--architecture_type': 'centernet'}),
-                single_option_cases('-m',
-                    ModelArg('ctdet_coco_dlav0_384'),
-                    ModelArg('ctdet_coco_dlav0_512')),
-            ),
-            *combine_cases(
-                TestCase(options={'--architecture_type': 'faceboxes',
-                                  '-m': ModelArg('faceboxes-pytorch')})
-            ),
-            *combine_cases(
-                TestCase(options={'--architecture_type': 'retina'}),
-                single_option_cases('-m',
-                    ModelArg('retinaface-anti-cov'),
-                    ModelArg('retinaface-resnet50'))
             ),
         ],
     )),
