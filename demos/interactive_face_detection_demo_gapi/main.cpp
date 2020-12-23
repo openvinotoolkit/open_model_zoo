@@ -557,7 +557,7 @@ int main(int argc, char *argv[]) {
                 if(FLAGS_loop) {
                     slog::info << "Setting media source" << slog::endl;
                     try {
-                        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
+                        setInput(stream, FLAGS_i);
                     } catch (const std::exception& error) {
                         std::stringstream msg;
                         msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
