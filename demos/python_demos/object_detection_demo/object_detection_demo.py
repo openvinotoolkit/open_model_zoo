@@ -236,6 +236,8 @@ def main():
 
     palette = ColorPalette(len(model.labels) if model.labels else 100)
     metrics = PerformanceMetrics()
+    presenter = None
+    output_video = None
 
     while True:
         if detector_pipeline.callback_exceptions:
@@ -283,8 +285,7 @@ def main():
                 if args.output_video:
                     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
                     output_video = cv2.VideoWriter(args.output_video, fourcc, fps, (frame.shape[1], frame.shape[0]))
-                else:
-                    output_video = None
+
             # Submit for inference
             detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1

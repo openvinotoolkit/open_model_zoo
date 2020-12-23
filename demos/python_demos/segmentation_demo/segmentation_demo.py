@@ -173,13 +173,16 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
     fps = cap.fps()
-    visualizer = Visualizer(args.colors)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
 
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
+
+    visualizer = Visualizer(args.colors)
+    presenter = None
+    output_video = None
 
     while True:
         if pipeline.is_ready():
@@ -196,8 +199,7 @@ def main():
                 if args.output_video:
                     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
                     output_video = cv2.VideoWriter(args.output_video, fourcc, fps, (frame.shape[1], frame.shape[0]))
-                else:
-                    output_video = None
+
             # Submit for inference
             pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
