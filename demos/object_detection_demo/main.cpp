@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
         else if (FLAGS_at == "yolo") {
             model.reset(new ModelYolo3(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
         }
-        else if (FLAGS_at == "retina") {
+        else if (FLAGS_at == "retinaface") {
             model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize));
         }
         else {
