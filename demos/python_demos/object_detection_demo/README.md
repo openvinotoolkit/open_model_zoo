@@ -55,8 +55,8 @@ usage: object_detection_demo.py [-h] -m MODEL -at
                                 [-d DEVICE] [--labels LABELS]
                                 [-t PROB_THRESHOLD] [--keep_aspect_ratio]
                                 [-nireq NUM_INFER_REQUESTS]
-                                [-nstreams NUM_STREAMS]
-                                [-nthreads NUM_THREADS] [-loop] [-no_show]
+                                [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS]
+                                [--loop] [-o OUTPUT_VIDEO] [--no_show]
                                 [-u UTILIZATION_MONITORS] [-r]
 
 Options:
@@ -95,8 +95,10 @@ Inference options:
                         CPU (including HETERO cases).
 
 Input/output options:
-  -loop, --loop         Optional. Loops input data.
-  -no_show, --no_show   Optional. Don't show output.
+  --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT_VIDEO, --output_video OUTPUT_VIDEO
+                        Optional. Path to an output video file.
+  --no_show             Optional. Don't show output.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 

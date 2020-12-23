@@ -26,7 +26,7 @@ usage: segmentation_demo.py [-h] -m MODEL -i INPUT
                             [-nireq NUM_INFER_REQUESTS]
                             [-nstreams NUM_STREAMS]
                             [-nthreads NUM_THREADS]
-							[-loop] [-o OUTPUT_VIDEO] [-no_show]
+                            [--loop] [-o OUTPUT_VIDEO] [--no_show]
                             [-u UTILIZATION_MONITORS]
 Options:
   -h, --help            Show this help message and exit.

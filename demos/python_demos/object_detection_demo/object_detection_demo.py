@@ -32,6 +32,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 import models
 import monitors
 from pipelines import AsyncPipeline
+from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
@@ -72,8 +73,11 @@ def build_argparser():
                             help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
 
     io_args = parser.add_argument_group('Input/output options')
-    io_args.add_argument('-loop', '--loop', help='Optional. Loops input data.', action='store_true', default=False)
-    io_args.add_argument('-no_show', '--no_show', help="Optional. Don't show output.", action='store_true')
+    io_args.add_argument('--loop', default=False, action='store_true',
+                         help='Optional. Enable reading the input in a loop.')
+    io_args.add_argument('-o', '--output_video', required=False,
+                         help='Optional. Path to an output video file.')
+    io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
@@ -220,14 +224,8 @@ def main():
     detector_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
-    try:
-        input_stream = int(args.input)
-    except ValueError:
-        input_stream = args.input
-    cap = cv2.VideoCapture(input_stream)
-    if not cap.isOpened():
-        log.error('OpenCV: Failed to open capture: ' + str(input_stream))
-        sys.exit(1)
+    cap = open_images_capture(args.input, args.loop)
+    fps = cap.fps()
 
     next_frame_id = 0
     next_frame_id_to_show = 0
@@ -236,13 +234,9 @@ def main():
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     palette = ColorPalette(len(model.labels) if model.labels else 100)
-    presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                   (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4),
-                                    round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
-
     metrics = PerformanceMetrics()
 
-    while cap.isOpened():
+    while True:
         if detector_pipeline.callback_exceptions:
             raise detector_pipeline.callback_exceptions[0]
         # Process all completed requests
@@ -258,6 +252,10 @@ def main():
             presenter.drawGraphs(frame)
             frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
             metrics.update(start_time, frame)
+
+            if output_video is not None:
+                output_video.write(frame)
+
             if not args.no_show:
                 cv2.imshow('Detection Results', frame)
                 key = cv2.waitKey(1)
@@ -273,14 +271,19 @@ def main():
         if detector_pipeline.is_ready():
             # Get new image/frame
             start_time = perf_counter()
-            ret, frame = cap.read()
-            if not ret:
-                if args.loop:
-                    cap.open(input_stream)
+            frame = cap.read()
+            if frame is None:
+                if next_frame_id == 0:
+                    raise ValueError("Can't read an image from the input")
+                break
+            if next_frame_id == 0:
+                presenter = monitors.Presenter(args.utilization_monitors, 55,
+                                               (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
+                if args.output_video:
+                    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+                    output_video = cv2.VideoWriter(args.output_video, fourcc, fps, (frame.shape[1], frame.shape[0]))
                 else:
-                    cap.release()
-                continue
-
+                    output_video = None
             # Submit for inference
             detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
@@ -319,6 +322,9 @@ def main():
 
     metrics.print_total()
     print(presenter.reportMeans())
+
+    if output_video is not None:
+        output_video.release()
 
 
 if __name__ == '__main__':
