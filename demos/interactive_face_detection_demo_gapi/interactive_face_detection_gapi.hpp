@@ -14,15 +14,15 @@ static const char age_gender_model_message[] = "Optional. Path to an .xml file w
 static const char head_pose_model_message[] = "Optional. Path to an .xml file with a trained Head Pose Estimation model.";
 static const char emotions_model_message[] = "Optional. Path to an .xml file with a trained Emotions Recognition model.";
 static const char facial_landmarks_model_message[] = "Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.";
-static const char target_device_message[] = "Optional. Target device for Face Detection network (the list of available devices is shown below). " \
+static const char target_device_message[] = "Optional. Target device for Face Detection network (the list of available devices is shown below). "
                                             "Default value is CPU. The demo will look for a suitable plugin for a specified device.";
-static const char target_device_message_ag[] = "Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). " \
+static const char target_device_message_ag[] = "Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). "
                                                "Default value is CPU. The demo will look for a suitable plugin for a specified device.";
-static const char target_device_message_hp[] = "Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). " \
+static const char target_device_message_hp[] = "Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). "
                                                "Default value is CPU. The demo will look for a suitable plugin for a specified device.";
-static const char target_device_message_em[] = "Optional. Target device for Emotions Recognition network (the list of available devices is shown below). " \
+static const char target_device_message_em[] = "Optional. Target device for Emotions Recognition network (the list of available devices is shown below). "
                                                "Default value is CPU. The demo will look for a suitable plugin for a specified device.";
-static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network " \
+static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network "
                                                "(the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.";
 static const char thresh_output_message[] = "Optional. Probability threshold for detections";
 static const char bb_enlarge_coef_output_message[] = "Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face";

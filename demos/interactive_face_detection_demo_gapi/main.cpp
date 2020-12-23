@@ -284,6 +284,27 @@ void landmarksDataUpdate(const Face::Ptr &face, const cv::Mat &out_landmark) {
     face->updateLandmarks(normedLandmarks);
 }
 
+bool isNumber(const std::string& str)
+{
+    if(str.empty() || ((!isdigit(str[0])) && (str[0] != '-') && (str[0] != '+'))) 
+        return false;
+
+   char * p;
+   strtol(str.c_str(), &p, 10);
+
+   return (*p == 0);
+}
+
+void setInput(cv::GStreamingCompiled stream, const std::string& input ) {
+    if (input == "cam") {
+        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(0));
+    } else if (isNumber(input)) {
+        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(std::stoi(input)));
+    } else {
+        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(input));
+    }
+}
+
 int main(int argc, char *argv[]) {
     try {
         // ------------------------------ Parsing and validating of input arguments --------------------------
@@ -418,12 +439,13 @@ int main(int argc, char *argv[]) {
 
         slog::info << "Setting media source" << slog::endl;            
         try {
-            stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(FLAGS_i));
+            setInput(stream, FLAGS_i);
         } catch (const std::exception& error) {
             std::stringstream msg;
             msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
             throw std::invalid_argument(msg.str());
         }
+
         slog::info << "Start inference " << slog::endl;
         stream.start();
 
@@ -433,7 +455,7 @@ int main(int argc, char *argv[]) {
         while (stream.running()) {
             timer.start("total");
 
-            if (stream.pull(std::move(out_vector))) {
+            if (stream.pull(cv::GRunArgsP(out_vector))) {
                 if (!FLAGS_no_show && !FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
                     visualizer->enableEmotionBar(frame.size(), EMOTION_VECTOR);
                 }
