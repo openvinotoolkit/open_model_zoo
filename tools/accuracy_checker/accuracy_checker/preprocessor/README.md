@@ -189,6 +189,9 @@ Accuracy Checker supports following set of preprocessors:
   * `base` - number for encoding other classes.
   * `axis` - axis responsible for classes.
   * `number_of_classes` - number of used classes.
+* `pack_raw_image` - pack raw image to [H, W, 4] normalized image format with black level removal.
+  * `black_level` - black level on the input image.
+  * `ratio` - exposure scale ratio, optional, can be replaced by value from annotation if not provided.
 
 ## Optimized preprocessing via OpenVINO Inference Engine
 OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`.

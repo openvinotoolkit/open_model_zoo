@@ -24,7 +24,7 @@ from ..data_readers import BaseReader
 class GTLoader(Enum):
     PILLOW = 0
     OPENCV = 1
-    DICOM = 2,
+    DICOM = 2
     RAWPY = 3
 
 

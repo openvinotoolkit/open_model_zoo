@@ -38,12 +38,13 @@ class PackBayerImage(Preprocessor):
     def process(self, image, annotation_meta=None):
         ratio = (annotation_meta or {}).get('ratio', self.ratio)
         im = image.data
-        np.maximum(im - self.black_level, 0) / (16383 - self.black_level)
+        im = np.maximum(im - self.black_level, 0) / (16383 - self.black_level)
         im = np.expand_dims(im, axis=2)
         height, width = im.shape[:2]
-        out = np.concatenate((im[0:height:2, 0:width:2, :],
-                          im[0:height:2, 1:width:2, :],
-                          im[1:height:2, 1:width:2, :],
-                          im[1:height:2, 0:width:2, :]), axis=2)
+        out = np.concatenate((
+            im[0:height:2, 0:width:2, :],
+            im[0:height:2, 1:width:2, :],
+            im[1:height:2, 1:width:2, :],
+            im[1:height:2, 0:width:2, :]), axis=2)
         image.data = out * ratio
         return image
