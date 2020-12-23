@@ -459,7 +459,8 @@ The main difference between this converter and `super_resolution` in data organi
   * `pairs_file` - path to file where described image and annotation file pairs (Optional, if not provided list will be created according to annotation_dir content).
   * `has_background` - flag that background label should be added to label_map (Optional, default False).
   * `add_background_to_label_id` - flag that label_ids defined in annotation should be shifted if `has_background` enabled.
-
+* `see_in_the_dark` - converts See-in-the-Dark dataset described in the [paper](https://cchen156.github.io/paper/18CVPR_SID.pdf) to `ImageProcessingAnnotation`.
+  * `annotation_file` - path to image pairs file in txt format.
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)

@@ -52,8 +52,10 @@ from ..utils import string_to_tuple, finalize_metric_result, contains_all
 
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
-    annotation_types = (RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation)
-    prediction_types = (RegressionPrediction, DepthEstimationPrediction)
+    annotation_types = (
+        RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation, ImageProcessingAnnotation
+    )
+    prediction_types = (RegressionPrediction, DepthEstimationPrediction, ImageProcessingPrediction)
 
     def __init__(self, value_differ, *args, **kwargs):
         super().__init__(*args, **kwargs)

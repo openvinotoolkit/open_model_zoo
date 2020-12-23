@@ -61,6 +61,7 @@ from .centernet_preprocessing import CenterNetAffineTransformation
 from .brats_preprocessing import Resize3D, NormalizeBrats, CropBraTS, SwapModalitiesBrats
 from .inpainting_preprocessor import FreeFormMask, RectMask, CustomMask
 from .one_hot_encoding import OneHotEncoding
+from .raw_image_preprocessing import PackBayerImage
 
 __all__ = [
     'PreprocessingExecutor',
@@ -131,5 +132,7 @@ __all__ = [
     'CustomMask',
     'RGB2YCrCbConverter',
     'BGR2YCrCbConverter',
-    'OneHotEncoding'
+    'OneHotEncoding',
+
+    'PackBayerImage'
 ]

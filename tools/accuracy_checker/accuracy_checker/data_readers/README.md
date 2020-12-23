@@ -56,3 +56,5 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
 * `pickle_reader` - read data stored in pickle file. Supported formats of pickle content:
   1. numeric data array
   2. numeric data array + metadata stored in dictionary
+* `rawpy` - read raw image formats using rawpy library.
+  * `postprocess` - allow image postprocessing and normalization (Optional, default `True`).

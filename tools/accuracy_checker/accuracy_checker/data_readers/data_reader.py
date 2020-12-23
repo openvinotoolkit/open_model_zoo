@@ -44,6 +44,11 @@ try:
 except ImportError as import_error:
     sk = UnsupportedPackage('skimage.io', import_error.msg)
 
+try:
+    import rawpy
+except ImportError as import_error:
+    rawpy = UnsupportedPackage('rawpy', import_error.msg)
+
 REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
 
 
@@ -588,3 +593,27 @@ class SkimageReader(BaseReader):
 
     def read(self, data_id):
         return sk.imread(str(self.data_source / data_id))
+
+
+class RawpyReader(BaseReader):
+    __provider__ = 'rawpy'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'postprocess': BoolField(optional=True, default=True)
+        })
+        return params
+
+    def configure(self):
+        if isinstance(rawpy, UnsupportedPackage):
+            rawpy.raise_error(self.__provider__)
+        self.postprocess = self.get_value_from_config('postprocess')
+
+    def read(self, data_id):
+        raw = rawpy.imread(str(self.data_source / data_id))
+        if not self.postprocess:
+            return raw.raw_image_visible.astype(np.float32)
+        postprocessed = raw.postprocess(use_camera_wb=True, half_size=False, no_auto_bright=True, output_bps=16)
+        return np.float32(postprocessed / 65535.0)
