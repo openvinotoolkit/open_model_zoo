@@ -243,6 +243,10 @@ def main():
             frame = visualizer.overlay_masks(frame, objects)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
+
+            if video_writer.isOpened():
+                video_writer.write(frame)
+
             if not args.no_show:
                 cv2.imshow('Segmentation Results', frame)
                 key = cv2.waitKey(1)

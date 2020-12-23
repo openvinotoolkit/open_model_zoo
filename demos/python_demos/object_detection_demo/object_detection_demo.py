@@ -309,6 +309,10 @@ def main():
             presenter.drawGraphs(frame)
             frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
             metrics.update(start_time, frame)
+
+            if video_writer.isOpened():
+                video_writer.write(frame)
+
             if not args.no_show:
                 cv2.imshow('Detection Results', frame)
                 key = cv2.waitKey(1)
