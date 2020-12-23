@@ -32,6 +32,7 @@ from .data_reader import (
     DicomReader,
     PickleReader,
     SkimageReader,
+    RawpyReader,
 
     DataRepresentation,
     ClipIdentifier,
@@ -61,6 +62,7 @@ __all__ = [
     'NumpyTXTReader',
     'NumpyDictReader',
     'SkimageReader',
+    'RawpyReader',
 
     'DataRepresentation',
     'ClipIdentifier',
