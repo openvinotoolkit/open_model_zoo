@@ -13,7 +13,7 @@ On the start-up, the application reads command line parameters and loads detecti
 Running the application with the `-h` option yields the following usage message:
 ```
 usage: single_human_pose_estimation_demo.py [-h] -m_od MODEL_OD -m_hpe MODEL_HPE
-                                            -i INPUT [--loop] [-o OUTPUT_VIDEO]
+                                            -i INPUT [--loop] [-o OUTPUT]
                                             [-d DEVICE]
                                             [--person_label PERSON_LABEL]
                                             [--no_show]
@@ -29,8 +29,8 @@ optional arguments:
                         Required. An input to process. The input must be a single image,
                         a folder of images or anything that cv2.VideoCapture can process.
   --loop                Optional. Enable reading the input in a loop.
-  -o OUTPUT_VIDEO, --output_video OUTPUT_VIDEO
-                        Optional. Path to an output video file.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target to infer on CPU or GPU.
   --person_label PERSON_LABEL

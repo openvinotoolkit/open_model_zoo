@@ -37,7 +37,7 @@ pip3 install -r requirements.txt
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: whiteboard_inpainting_demo.py [-h] -i INPUT [--loop] [-o OUTPUT_VIDEO]
+usage: whiteboard_inpainting_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
                                      -m_i M_INSTANCE_SEGMENTATION
                                      -m_s M_SEMANTIC_SEGMENTATION
                                      [-t THRESHOLD] [--no_show]
@@ -52,8 +52,8 @@ optional arguments:
                         Required. Path to a video file or a device node of a
                         web-camera.
   --loop                Optional. Enable reading the input in a loop.
-  -o OUTPUT_VIDEO, --output_video OUTPUT_VIDEO
-                        Optional. Path to an output video file.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
   -m_i M_INSTANCE_SEGMENTATION, --m_instance_segmentation M_INSTANCE_SEGMENTATION
                         Required. Path to the instance segmentation model.
   -m_s M_SEMANTIC_SEGMENTATION, --m_semantic_segmentation M_SEMANTIC_SEGMENTATION

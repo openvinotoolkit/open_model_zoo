@@ -54,8 +54,8 @@ if __name__ == '__main__':
                            'a folder of images or anything that cv2.VideoCapture can process.')
     args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
-    args.add_argument('-o', '--output_video', required=False,
-                      help='Optional. Path to an output video file.')
+    args.add_argument('-o', '--output', required=False,
+                      help='Optional. Name of output to save.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '

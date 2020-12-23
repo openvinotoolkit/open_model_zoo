@@ -122,8 +122,8 @@ def build_argparser():
     io_args = parser.add_argument_group('Input/output options')
     io_args.add_argument('--loop', default=False, action='store_true',
                          help='Optional. Enable reading the input in a loop.')
-    io_args.add_argument('-o', '--output_video', required=False,
-                         help='Optional. Path to an output video file.')
+    io_args.add_argument('-o', '--output', required=False,
+                         help='Optional. Name of output to save.')
     io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')

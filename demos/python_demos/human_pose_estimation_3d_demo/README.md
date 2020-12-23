@@ -35,7 +35,7 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: human_pose_estimation_3d_demo.py [-h] -m MODEL -i INPUT [--loop]
-                                        [-o OUTPUT_VIDEO] [-d DEVICE]
+                                        [-o OUTPUT] [-d DEVICE]
                                         [--height_size HEIGHT_SIZE]
                                         [--extrinsics_path EXTRINSICS_PATH]
                                         [--fx FX] [--no_show]
@@ -52,8 +52,8 @@ Options:
                         Required. An input to process. The input must be a single image,
                         a folder of images or anything that cv2.VideoCapture can process.
   --loop                Optional. Enable reading the input in a loop.
-  -o OUTPUT_VIDEO, --output_video OUTPUT_VIDEO
-                        Optional. Path to an output video file.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on: CPU,
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a

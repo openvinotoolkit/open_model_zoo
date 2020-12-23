@@ -70,8 +70,8 @@ def main():
                          help='Required. Path to a video file or a device node of a web-camera')
     parser.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop')
-    parser.add_argument('-o', '--output_video', required=False,
-                        help='Optional. Path to an output video file')
+    parser.add_argument('-o', '--output', required=False,
+                        help='Optional. Name of output to save')
     parser.add_argument('-m_i', '--m_instance_segmentation', type=str, required=False,
                         help='Path to the instance segmentation model')
     parser.add_argument('-m_s', '--m_semantic_segmentation', type=str, required=False,
