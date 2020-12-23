@@ -201,9 +201,8 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('object-detection-demo')}),
         [
-            *combine_cases(
-                TestCase(options={'--architecture_type': 'faceboxes',
-                                  '-m': ModelArg('faceboxes-pytorch')})
+            TestCase(options={'-at': 'faceboxes',
+                              '-m': ModelArg('faceboxes-pytorch')}
             ),
             *combine_cases(
                 TestCase(options={'-at': 'ssd'}),
