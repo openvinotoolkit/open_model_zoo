@@ -47,8 +47,9 @@ def build_argparser():
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
                       type=str, required=True, choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
-    args.add_argument('-i', '--input', required=True, type=str,
-                      help='Required. Path to an image, folder with images, video file or a numeric camera ID.')
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. An input to process. The input must be a single image, '
+                           'a folder of images or anything that cv2.VideoCapture can process.')
     args.add_argument('-d', '--device', default='CPU', type=str,
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '

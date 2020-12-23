@@ -27,7 +27,7 @@ def build_argparser():
     parser.add_argument("--loop", default=False, action="store_true",
                         help="Optional. Enable reading the input in a loop.")
     parser.add_argument("-o", "--output_video", required=False,
-                      help="Optional. Path to an output video file.")
+                        help="Optional. Path to an output video file.")
     parser.add_argument("-d", "--device", type=str, default='CPU', required=False,
                         help="Specify the target to infer on CPU or GPU")
     parser.add_argument("--person_label", type=int, required=False, default=15, help="Label of class person for detector")

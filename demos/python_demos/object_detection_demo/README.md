@@ -66,8 +66,9 @@ Options:
   -at {ssd,yolo,faceboxes,centernet,retina}, --architecture_type {ssd,yolo,faceboxes,centernet,retina}
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
-                        Required. Path to an image, folder with images, video
-                        file or a numeric camera ID.
+                        Required. An input to process. The input must be a
+                        single image, a folder of images or anything that
+                        cv2.VideoCapture can process.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The sample
