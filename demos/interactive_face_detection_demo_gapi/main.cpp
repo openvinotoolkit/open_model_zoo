@@ -327,6 +327,7 @@ int main(int argc, char *argv[]) {
         if (FLAGS_i.empty())
             throw std::logic_error("Parameter -i is not set");
         if (FLAGS_m.empty())
+            throw std::logic_error("Parameter -m is not set");
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
