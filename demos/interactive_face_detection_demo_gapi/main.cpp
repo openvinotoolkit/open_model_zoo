@@ -286,7 +286,7 @@ void landmarksDataUpdate(const Face::Ptr &face, const cv::Mat &out_landmark) {
 
 bool isNumber(const std::string& str)
 {
-    if(str.empty() || ((!isdigit(str[0])) && (str[0] != '-') && (str[0] != '+'))) 
+    if(str.empty() || ((!isdigit(str[0])) && (str[0] != '-') && (str[0] != '+')))
         return false;
 
    char * p;
