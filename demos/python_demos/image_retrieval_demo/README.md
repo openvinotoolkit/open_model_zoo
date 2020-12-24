@@ -40,8 +40,10 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -i I                  Required. Path to a video file or a device node of a
+  -i INPUT, --input INPUT
+                        Required. Path to a video file or a device node of a
                         web-camera.
+  --loop                Optional. Enable reading the input in a loop.
   -g GALLERY, --gallery GALLERY
                         Required. Path to a file listing gallery images.
   -gt GROUND_TRUTH, --ground_truth GROUND_TRUTH
