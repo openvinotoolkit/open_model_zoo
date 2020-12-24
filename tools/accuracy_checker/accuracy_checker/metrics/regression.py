@@ -108,8 +108,14 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         if isinstance(prediction.value, dict):
             if len(prediction.value) != 1:
                 raise ConfigError('annotation for all predictions should be provided')
-            return self.value_differ(annotation.value, next(iter(prediction.value.values())))
-        return self.value_differ(annotation.value, prediction.value)
+            diff = self.value_differ(annotation.value, next(iter(prediction.value.values())))
+            if not np.isscalar(diff) and np.ndim(diff) > 1:
+                diff = np.mean(diff)
+            return diff
+        diff = self.value_differ(annotation.value, prediction.value)
+        if not np.isscalar(diff) and np.ndim(diff) > 1:
+            diff = np.mean(diff)
+        return diff
 
     def _calculate_diff_depth_estimation_rep(self, annotation, prediction):
         diff = annotation.mask * self.value_differ(annotation.depth_map, prediction.depth_map)
@@ -543,7 +549,8 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             'color_order': StringField(
                 optional=True, choices=['BGR', 'RGB'], default='RGB',
                 description="The field specified which color order BGR or RGB will be used during metric calculation."
-            )
+            ),
+            'normalized_images': BoolField(optional=True, default=False, description='images in [0, 1] range or not')
         })
 
         return parameters
@@ -562,6 +569,8 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
         }
         self.meta['postfix'] = 'Db'
         self.channel_order = channel_order[color_order]
+        self.normalized_images = self.get_value_from_config('normalized_images')
+        self.color_scale = 255 if not self.normalized_images else 1
 
     def _psnr_differ(self, annotation_image, prediction_image):
         prediction = np.asarray(prediction_image).astype(np.float)
@@ -576,7 +585,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             self.scale_border:height - self.scale_border,
             self.scale_border:width - self.scale_border
         ]
-        image_difference = (prediction - ground_truth) / 255
+        image_difference = (prediction - ground_truth) / self.color_scale
         if len(ground_truth.shape) == 3 and ground_truth.shape[2] == 3:
             r_channel_diff = image_difference[:, :, self.channel_order[0]]
             g_channel_diff = image_difference[:, :, self.channel_order[1]]
@@ -603,8 +612,10 @@ def angle_differ(gt_gaze_vector, predicted_gaze_vector):
 def log10_differ(annotation_val, prediction_val):
     return np.abs(np.log10(annotation_val) - np.log10(prediction_val))
 
+
 def mape_differ(annotation_val, prediction_val):
     return np.abs(annotation_val - prediction_val) / annotation_val
+
 
 class AngleError(BaseRegressionMetric):
     __provider__ = 'angle_error'
