@@ -447,7 +447,7 @@ int main(int argc, char *argv[]) {
         slog::info << "Setting media source" << slog::endl;
         try {
             setInput(stream, FLAGS_i);
-        } catch (const std::exception& error) {
+        } catch (const std::exception&) {
             std::stringstream msg;
             msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
             throw std::invalid_argument(msg.str());
