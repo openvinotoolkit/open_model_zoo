@@ -1,5 +1,7 @@
 # Object Detection C++ Demo
 
+![](./object_detection.gif)
+
 This demo showcases Object Detection and Async API.
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the app can continue doing things on the host, while accelerator is busy.
@@ -95,6 +97,8 @@ Running the application with the empty list of options yields the usage message 
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
+
+If labels file is used, it should correspond to model output. Demo suggests labels listed in the file to be indexed from 0, one line - one label (i.e. very first line contains label for ID 0). Note that some models may return labels IDs in range 1..N, in this case label file should contain "background" label at the very first line.
 
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 ```sh

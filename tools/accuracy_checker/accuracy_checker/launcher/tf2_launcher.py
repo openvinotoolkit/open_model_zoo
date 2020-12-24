@@ -93,7 +93,10 @@ class TF2Launcher(Launcher):
     def inputs_info_for_meta(self, feed_dict=None):
         if feed_dict is None:
             return super().inputs_info_for_meta()
-        return {input_name: input_data.shape for input_name, input_data in feed_dict.items()}
+        return {
+            input_name: tuple(input_data.shape)
+            for input_name, input_data in feed_dict.items()
+        }
 
     @property
     def batch(self):

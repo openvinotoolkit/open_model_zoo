@@ -17,9 +17,12 @@ limitations under the License.
 from copy import deepcopy
 from pathlib import Path
 import warnings
+import pickle
 import numpy as np
 
-from .annotation_converters import BaseFormatConverter, save_annotation, make_subset, analyze_dataset
+from .annotation_converters import (
+    BaseFormatConverter, DatasetConversionInfo, save_annotation, make_subset, analyze_dataset
+)
 from .config import (
     ConfigValidator,
     StringField,
@@ -122,7 +125,7 @@ class Dataset:
                     dataset_name=self._config['name'], file=meta_name))
             print_info('Converted annotation for {dataset_name} dataset will be saved to {file}'.format(
                 dataset_name=self._config['name'], file=Path(annotation_name)))
-            save_annotation(annotation, meta, Path(annotation_name), meta_name)
+            save_annotation(annotation, meta, Path(annotation_name), meta_name, self._config)
 
         self._annotation = annotation
         self._meta = meta or {}
@@ -329,6 +332,14 @@ def read_annotation(annotation_file: Path):
 
     result = []
     with annotation_file.open('rb') as file:
+        try:
+            first_obj = pickle.load(file)
+            if isinstance(first_obj, DatasetConversionInfo):
+                describe_cached_dataset(first_obj)
+            else:
+                result.append(first_obj)
+        except EOFError:
+            return result
         while True:
             try:
                 result.append(BaseRepresentation.load(file))
@@ -356,6 +367,21 @@ def create_subset(annotation, subsample_size, subsample_seed, shuffle=True):
     if subsample_size < 1:
         raise ConfigError('subsample_size should be > 0')
     return make_subset(annotation, subsample_size, subsample_seed, shuffle)
+
+
+def describe_cached_dataset(dataset_info):
+    print_info('Loaded dataset info:')
+    if dataset_info.dataset_name:
+        print_info('\tDataset name: {}'.format(dataset_info.dataset_name))
+    print_info('\tAccuracy Checker version {}'.format(dataset_info.ac_version))
+    print_info('\tDataset size {}'.format(dataset_info.dataset_size))
+    print_info('\tConversion parameters:')
+    for key, value in dataset_info.conversion_parameters.items():
+        print_info('\t\t{key}: {value}'.format(key=key, value=value))
+    if dataset_info.subset_parameters:
+        print_info('\nSubset selection parameters:')
+        for key, value in dataset_info.subset_parameters.items():
+            print_info('\t\t{key}: {value}'.format(key=key, value=value))
 
 
 class DatasetWrapper:
