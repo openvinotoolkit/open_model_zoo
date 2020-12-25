@@ -177,13 +177,9 @@ def render_routine(line):
         if not os.path.exists(pdf_filename):
             logging.info('ERROR: %s cannot compile\n', file_idx)
         else:
-            if os.name == 'nt':
-                subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
-                                                  pdf_filename, png_filename],
-                                                 check=True, stdout=PIPE, stderr=PIPE, shell=True)
-            else:
-                subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
-                                                  pdf_filename, png_filename], check=True, stdout=PIPE, stderr=PIPE)
+            subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
+                            pdf_filename, png_filename],
+                           check=True, stdout=PIPE, stderr=PIPE, shell=True)
             if os.path.exists(pdf_filename):
                 os.remove(pdf_filename)
             if os.path.exists(png_filename):
