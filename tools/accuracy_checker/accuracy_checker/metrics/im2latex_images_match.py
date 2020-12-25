@@ -157,10 +157,7 @@ def render_routine(line):
     """
     formula, file_idx, folder_path = line
     output_path = os.path.join(folder_path, file_idx)
-    if os.name == 'nt':
-        pre_name = output_path.replace('\\', '_').replace('.', '_').replace(":", "_")
-    else:
-        pre_name = output_path.replace('/', '_').replace('.', '_')
+        pre_name = os.path.normcase(output_path).replace('/', '_').replace('.', '_')
     formula = preprocess_formula(formula)
     if not os.path.exists(output_path):
         tex_filename = pre_name + '.tex'
