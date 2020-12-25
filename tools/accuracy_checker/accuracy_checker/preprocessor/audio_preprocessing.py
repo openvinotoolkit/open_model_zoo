@@ -122,7 +122,6 @@ class ClipAudio(Preprocessor):
         return image
 
     def _pad_center(self, data, size, axis=-1):
-        # kwargs.setdefault('mode', 'constant')
         n = data.shape[axis]
         lpad = int((size - n) // 2)
         lengths = [(0, 0)] * data.ndim
@@ -426,14 +425,6 @@ class TriangleFiltering(Preprocessor):
 
 
         def process(self, image, annotation_meta=None):
-            # if self.frame_splicing > 1:
-            #     seq = [x]
-            #     for n in range(1, self.frame_splicing):
-            #         tmp = torch.zeros_like(x)
-            #         tmp[:, :, :-n] = x[:, :, n:]
-            #         seq.append(tmp)
-            #     x = torch.cat(seq, dim=1)[:, :, ::self.frame_splicing]
-
             if self.frames > 1:
                 seq = [image.data]
                 for n in range(1, self.frames):
@@ -560,11 +551,8 @@ class PackCepstrum(Preprocessor):
             features = np.concatenate((features, empty_context))
             steps, context, numceps = features.shape # pylint:disable=E0633
 
-        # features = np.expand_dims(features, 0)
-
         packed = []
         for i in range(0, steps, self.step):
-            # packed.append(features[:, i:i+self.step, ...])
             packed.append(features[i:i+self.step, ...])
 
         image.data = packed
