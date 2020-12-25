@@ -31,10 +31,12 @@ TEXT_LEFT_MARGIN = 15
 
 
 class ResultRenderer:
-    def __init__(self, no_show, presenter, display_fps=False, display_confidence=True, number_of_predictions=1,
+    def __init__(self, no_show, presenter, output, display_fps=False, display_confidence=True, number_of_predictions=1,
                  label_smoothing_window=30, labels=None, output_height=720):
         self.no_show = no_show
         self.presenter = presenter
+        self.output = output
+        self.video_writer = cv2.VideoWriter()
         self.number_of_predictions = number_of_predictions
         self.display_confidence = display_confidence
         self.display_fps = display_fps
@@ -50,7 +52,7 @@ class ResultRenderer:
         self.meters['decoder'].update(timers['decoder'])
         return self.meters['encoder'].avg + self.meters['decoder'].avg
 
-    def render_frame(self, frame, logits, timers, frame_ind):
+    def render_frame(self, frame, logits, timers, frame_ind, fps):
         inference_time = self.update_timers(timers)
 
         if logits is not None:
@@ -82,11 +84,21 @@ class ResultRenderer:
 
             cv2.putText(frame, display_text, text_loc, FONT_STYLE, FONT_SIZE, FONT_COLOR)
 
+        if self.output and not self.video_writer.isOpened():
+            self.video_writer = cv2.VideoWriter(self.output, cv2.VideoWriter_fourcc(*'MJPG'), fps, 
+                                                (frame.shape[1], frame.shape[0]))
+            if not self.video_writer.isOpened():
+                print("Error: Can't open video writer")
+                return -1
+
         if self.display_fps:
             fps = 1000 / (inference_time + 1e-6)
             text_loc = (TEXT_LEFT_MARGIN, TEXT_VERTICAL_INTERVAL * (len(labels) + 1))
             cv2.putText(frame, "Inference time: {:.2f}ms ({:.2f} FPS)".format(inference_time, fps),
                         text_loc, FONT_STYLE, FONT_SIZE, FONT_COLOR)
+
+        if self.video_writer.isOpened():
+            self.video_writer.write(frame)
 
         if not self.no_show:
             cv2.imshow("Action Recognition", frame)

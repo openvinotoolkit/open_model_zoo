@@ -130,7 +130,7 @@ class RenderStep(PipelineStep):
         self._sync_time()
         # status = None
         render_start = time.time()
-        status = self.render(*item, self._frames_processed)
+        status = self.render(*item, self._frames_processed, self.fps)
         self._render_time.update(time.time() - render_start)
 
         self._frames_processed += 1
