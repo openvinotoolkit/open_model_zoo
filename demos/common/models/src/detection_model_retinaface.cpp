@@ -100,8 +100,9 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
         outputsSizes[type].insert(outputsSizes[type].begin() + i, num);
     }
 
-    if (outputsNames.size() != 9 && outputsNames.size() != 12)
+    if (outputsNames.size() != 9 && outputsNames.size() != 12) {
         throw std::logic_error("Expected 12 or 9 output blobs");
+    }
 }
 
 std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& anchor, const std::vector<int>& ratios) {
@@ -110,6 +111,7 @@ std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& an
     auto h = anchor.getHeight();
     auto xCtr = anchor.getXCenter();
     auto yCtr = anchor.getYCenter();
+
     for (auto ratio : ratios) {
         auto size = w * h;
         auto sizeRatio = static_cast<float>(size) / ratio;
@@ -137,7 +139,7 @@ std::vector<ModelRetinaFace::Anchor> scaleEnum(const ModelRetinaFace::Anchor& an
 }
 
 std::vector<ModelRetinaFace::Anchor> generateAnchors(const int baseSize, const std::vector<int>& ratios, const std::vector<int>& scales) {
-    ModelRetinaFace::Anchor baseAnchor{ 0, 0, baseSize - 1.0f, baseSize - 1.0f };
+    ModelRetinaFace::Anchor baseAnchor{ 0.0f, 0.0f, baseSize - 1.0f, baseSize - 1.0f };
     auto ratioAnchors = ratioEnum(baseAnchor, ratios);
     std::vector<ModelRetinaFace::Anchor> retVal;
 
@@ -310,7 +312,8 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
     if (shouldDetectMasks) {
         masks.reserve(INIT_VECTOR_SIZE);
     }
-// --------------------------- Filter data from all levels ----------------------------------------------------------
+
+// --------------------------- Gather & Filter output from all levels ----------------------------------------------------------
     for (int idx = 0; idx < anchorCfg.size(); ++idx) {
         const auto bboxRaw = infResult.outputsData[separateOutputsNames[OT_BBOX][idx]];
         const auto scoresRaw = infResult.outputsData[separateOutputsNames[OT_SCORES][idx]];
@@ -349,8 +352,8 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
             filterMasksScores(&masks, validIndices, masksRaw, anchorNum);
         }
     }
- // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
-    auto keep = scores.size() ? nms(bboxes, scores, iouThreshold) : std::vector<int>();
+// --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
+    auto keep = nms(bboxes, scores, iouThreshold);
 
 // --------------------------- Create detection result objects --------------------------------------------------------
     RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult;
@@ -358,8 +361,8 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
 
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
-    float scaleX = static_cast<float>(netInputWidth) / imgWidth;
-    float scaleY = static_cast<float>(netInputHeight) / imgHeight;
+    auto scaleX = static_cast<float>(netInputWidth) / imgWidth;
+    auto scaleY = static_cast<float>(netInputHeight) / imgHeight;
 
     result->objects.reserve(keep.size());
     result->landmarks.reserve(keep.size() * ModelRetinaFace::LANDMARKS_NUM);
@@ -368,8 +371,6 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         desc.confidence = scores[i];
         desc.x = bboxes[i].left / scaleX;
         desc.y = bboxes[i].top / scaleY;
-        auto maxx = bboxes[i].right / scaleX;
-        auto maxy = bboxes[i].bottom / scaleY;
         desc.width = bboxes[i].getWidth() / scaleX;
         desc.height = bboxes[i].getHeight() / scaleY;
         //--- Default label 0 - Face. If detecting masks then labels would be 0 - No Mask, 1 - Mask

@@ -27,10 +27,10 @@ public:
         float right;
         float bottom;
 
-        float getWidth() const { return (right - left) + 1; }
-        float getHeight() const { return (bottom - top) + 1; }
-        float getXCenter() const { return left + (getWidth() - 1) / 2.0f; }
-        float getYCenter() const { return top + (getHeight() - 1) / 2.0f; }
+        float getWidth() const { return (right - left) + 1.0f; }
+        float getHeight() const { return (bottom - top) + 1.0f; }
+        float getXCenter() const { return left + (getWidth() - 1.0f) / 2.0f; }
+        float getYCenter() const { return top + (getHeight() - 1.0f) / 2.0f; }
     };
 
     static const int LANDMARKS_NUM = 5;
