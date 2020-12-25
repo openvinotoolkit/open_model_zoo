@@ -112,11 +112,11 @@ std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& an
     auto yCtr = anchor.getYCenter();
     for (auto ratio : ratios) {
         auto size = w * h;
-        auto sizeRatio = size / ratio;
-        auto ws = std::round(sqrt(sizeRatio));
-        auto hs = std::round(ws * ratio);
-        retVal.push_back({ static_cast<int>(xCtr - 0.5f * (ws - 1)), static_cast<int>(yCtr - 0.5f * (hs - 1)),
-            static_cast<int>(xCtr + 0.5f * (ws - 1)), static_cast<int>(yCtr + 0.5f * (hs - 1)) });
+        auto sizeRatio = static_cast<float>(size) / ratio;
+        auto ws = sqrt(sizeRatio);
+        auto hs = ws * ratio;
+        retVal.push_back({xCtr - 0.5f * (ws - 1.0f), yCtr - 0.5f * (hs - 1.0f),
+            xCtr + 0.5f * (ws - 1.0f), yCtr + 0.5f * (hs - 1.0F) });
     }
     return retVal;
 }
@@ -130,14 +130,14 @@ std::vector<ModelRetinaFace::Anchor> scaleEnum(const ModelRetinaFace::Anchor& an
     for (auto scale : scales) {
         auto ws = w * scale;
         auto hs = h * scale;
-        retVal.push_back({ static_cast<int>(xCtr - 0.5f * (ws - 1)), static_cast<int>(yCtr - 0.5f * (hs - 1)),
-            static_cast<int>(xCtr + 0.5f * (ws - 1)), static_cast<int>(yCtr + 0.5f * (hs - 1)) });
+        retVal.push_back({xCtr - 0.5f * (ws - 1.0f),  yCtr - 0.5f * (hs - 1.0f),
+            xCtr + 0.5f * (ws - 1.0f),  yCtr + 0.5f * (hs - 1.0f)});
     }
     return retVal;
 }
 
 std::vector<ModelRetinaFace::Anchor> generateAnchors(const int baseSize, const std::vector<int>& ratios, const std::vector<int>& scales) {
-    ModelRetinaFace::Anchor baseAnchor{ 0, 0, baseSize - 1, baseSize - 1 };
+    ModelRetinaFace::Anchor baseAnchor{ 0, 0, baseSize - 1.0f, baseSize - 1.0f };
     auto ratioAnchors = ratioEnum(baseAnchor, ratios);
     std::vector<ModelRetinaFace::Anchor> retVal;
 
@@ -219,8 +219,8 @@ void filterBBoxes(std::vector<ModelRetinaFace::Anchor>* bboxes, const std::vecto
         auto predW = exp(dw) * anchors[i].getWidth();
         auto predH = exp(dh) * anchors[i].getHeight();
 
-        bboxes->push_back({ static_cast<int>(predCtrX - 0.5f * (predW - 1.0f)), static_cast<int>(predCtrY - 0.5f * (predH - 1.0f)),
-           static_cast<int>(predCtrX + 0.5f * (predW - 1.0f)), static_cast<int>(predCtrY + 0.5f * (predH - 1.0f)) });
+        bboxes->push_back({ predCtrX - 0.5f * (predW - 1.0f), predCtrY - 0.5f * (predH - 1.0f),
+           predCtrX + 0.5f * (predW - 1.0f), predCtrY + 0.5f * (predH - 1.0f)});
     }
 }
 
@@ -241,8 +241,8 @@ void filterLandmarks(std::vector<cv::Point2f>* landmarks, const std::vector<size
             auto offset = (i % anchorNum) * landmarkPredLen * sz[2] * sz[3] + i / anchorNum;
             auto deltaX = memPtr[offset + j * 2 * blockWidth] * landmarkStd;
             auto deltaY = memPtr[offset + (j * 2 + 1) * blockWidth] * landmarkStd;
-            landmarks->push_back({ static_cast<float>(deltaX * anchors[i].getWidth() + anchors[i].getXCenter()),
-                static_cast<float>(deltaY * anchors[i].getHeight() + anchors[i].getYCenter()) });
+            landmarks->push_back({deltaX * anchors[i].getWidth() + anchors[i].getXCenter(),
+               deltaY * anchors[i].getHeight() + anchors[i].getYCenter() });
         }
     }
 }
@@ -261,7 +261,7 @@ void filterMasksScores(std::vector<float>* masks, const std::vector<size_t>& ind
 }
 
 std::vector<int> nms(const std::vector<ModelRetinaFace::Anchor>& boxes, const std::vector<float>& scores, const float thresh) {
-    std::vector<int> areas(boxes.size());
+    std::vector<float> areas(boxes.size());
     for (int i = 0; i < boxes.size(); ++i) {
         areas[i] = (boxes[i].right - boxes[i].left) * (boxes[i].bottom - boxes[i].top);
     }
@@ -283,10 +283,10 @@ std::vector<int> nms(const std::vector<ModelRetinaFace::Anchor>& boxes, const st
                 auto idx2 = order[j];
                 if (idx2 >= 0) {
                     shouldContinue = true;
-                    auto overlappingWidth = std::min(boxes[idx1].right, boxes[idx2].right) - std::max(boxes[idx1].left, boxes[idx2].left);
-                    auto overlappingHeight = std::min(boxes[idx1].bottom, boxes[idx2].bottom) - std::max(boxes[idx1].top, boxes[idx2].top);
+                    auto overlappingWidth = std::fminf(boxes[idx1].right, boxes[idx2].right) - std::fmaxf(boxes[idx1].left, boxes[idx2].left);
+                    auto overlappingHeight = std::fminf(boxes[idx1].bottom, boxes[idx2].bottom) - std::fmaxf(boxes[idx1].top, boxes[idx2].top);
                     auto intersection = overlappingWidth > 0 && overlappingHeight > 0 ? overlappingWidth * overlappingHeight : 0;
-                    auto overlap = static_cast<float>(intersection) / (areas[idx1] + areas[idx2] - intersection);
+                    auto overlap = intersection / (areas[idx1] + areas[idx2] - intersection);
 
                     if (overlap >= thresh) {
                         order[j] = -1;
@@ -365,11 +365,13 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
     result->landmarks.reserve(keep.size() * ModelRetinaFace::LANDMARKS_NUM);
     for (auto i : keep) {
         DetectedObject desc;
-        desc.confidence = static_cast<float>(scores[i]);
-        desc.x = static_cast<float>(bboxes[i].left / scaleX);
-        desc.y = static_cast<float>(bboxes[i].top / scaleY);
-        desc.width = static_cast<float>(bboxes[i].getWidth() / scaleX);
-        desc.height = static_cast<float>(bboxes[i].getHeight() / scaleY);
+        desc.confidence = scores[i];
+        desc.x = bboxes[i].left / scaleX;
+        desc.y = bboxes[i].top / scaleY;
+        auto maxx = bboxes[i].right / scaleX;
+        auto maxy = bboxes[i].bottom / scaleY;
+        desc.width = bboxes[i].getWidth() / scaleX;
+        desc.height = bboxes[i].getHeight() / scaleY;
         //--- Default label 0 - Face. If detecting masks then labels would be 0 - No Mask, 1 - Mask
         desc.labelID = shouldDetectMasks ? (masks[i] > maskThreshold) : 0;
         desc.label = labels[desc.labelID];
