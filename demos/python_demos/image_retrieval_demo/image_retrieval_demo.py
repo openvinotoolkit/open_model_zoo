@@ -163,7 +163,7 @@ def main():
                         np.mean(search_in_gallery_times), imshow_delay=3, presenter=presenter, no_show=args.no_show)
 
         if args.output and not video_writer.isOpened():
-            video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(), 
+            video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
                                            (image.shape[1], image.shape[0]))
             if not video_writer.isOpened():
                 raise RuntimeError("Error: Can't open video writer")

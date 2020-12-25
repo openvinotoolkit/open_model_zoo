@@ -85,7 +85,7 @@ class ResultRenderer:
             cv2.putText(frame, display_text, text_loc, FONT_STYLE, FONT_SIZE, FONT_COLOR)
 
         if self.output and not self.video_writer.isOpened():
-            self.video_writer = cv2.VideoWriter(self.output, cv2.VideoWriter_fourcc(*'MJPG'), fps, 
+            self.video_writer = cv2.VideoWriter(self.output, cv2.VideoWriter_fourcc(*'MJPG'), fps,
                                                 (frame.shape[1], frame.shape[0]))
             if not self.video_writer.isOpened():
                 print("Error: Can't open video writer")
