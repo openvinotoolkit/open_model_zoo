@@ -21,9 +21,9 @@
 
 using namespace InferenceEngine;
 
-ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize)
+ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),  // Default label is "Face"
-    iouThreshold(0.5f), maskThreshold(0.8f), shouldDetectMasks(false), landmarkStd(1.0f),
+    boxIOUThreshold(boxIOUThreshold), maskThreshold(0.8f), shouldDetectMasks(false), landmarkStd(1.0f),
     anchorCfg({ {32, { 32, 16 }, 16, { 1 }},
               { 16, { 8, 4 }, 16, { 1 }},
               { 8, { 2, 1 }, 16, { 1 }} }) {
@@ -353,7 +353,7 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         }
     }
 // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
-    auto keep = nms(bboxes, scores, iouThreshold);
+    auto keep = nms(bboxes, scores, boxIOUThreshold);
 
 // --------------------------- Create detection result objects --------------------------------------------------------
     RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult;

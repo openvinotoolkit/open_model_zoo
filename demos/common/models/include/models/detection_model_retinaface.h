@@ -42,7 +42,7 @@ public:
     /// @param useAutoResize - if true, image will be resized by IE.
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
-    ModelRetinaFace(const std::string& model_name, float confidenceThreshold, bool useAutoResize);
+    ModelRetinaFace(const std::string& model_name, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold);
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult);
 
 protected:
@@ -53,10 +53,10 @@ protected:
         std::vector<int> ratios;
     };
 
-    float landmarkStd;
-    float maskThreshold;
-    float iouThreshold;
     bool shouldDetectMasks;
+    float landmarkStd;
+    const float boxIOUThreshold;
+    const float maskThreshold;
 
     enum EOutputType {
         OT_BBOX,
