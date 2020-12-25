@@ -179,11 +179,11 @@ def render_routine(line):
         else:
             if os.name == 'nt':
                 convert_command = subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
-                            pdf_filename, png_filename],
-                     check=False, stdout=PIPE, stderr=PIPE, shell=True)
+                                                  pdf_filename, png_filename],
+                                                 check=False, stdout=PIPE, stderr=PIPE, shell=True)
             else:
                 convert_command = subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
-                            pdf_filename, png_filename], check=False, stdout=PIPE, stderr=PIPE)
+                                                  pdf_filename, png_filename], check=False, stdout=PIPE, stderr=PIPE)
             if os.path.exists(pdf_filename):
                 os.remove(pdf_filename)
             if os.path.exists(png_filename):
