@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import numpy as np
 import re
 from pathlib import Path
 from .launcher import Launcher, LauncherConfigValidator
 from ..config import BaseField, ListField, PathField, StringField, ConfigError
 from ..utils import contains_any, contains_all
-import numpy as np
 
 class TFLauncher(Launcher):
     __provider__ = 'tf'
@@ -175,7 +175,6 @@ class TFLauncher(Launcher):
         results = []
         for feed_dict in inputs:
             feed_dict.update(lstm_inputs_feed)
-            # output_result = self.exec_network.infer(feed_dict)
 
             with self.tf.device(self.device):
                 with self.tf.Session(graph=self._graph) as session:
@@ -189,19 +188,12 @@ class TFLauncher(Launcher):
 
 
             lstm_inputs_feed = self._fill_lstm_inputs(res)
-            # results.append(result)
-
-            # if self._do_reshape:
-            #     input_shapes = {layer_name: data.shape for layer_name, data in feed_dict.items()}
-            #     self._reshape_input(input_shapes)
 
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
                 if self._output_layouts:
                     meta_['output_layout'] = self._output_layouts
-
-        # self._do_reshape = False
 
         return results
 
