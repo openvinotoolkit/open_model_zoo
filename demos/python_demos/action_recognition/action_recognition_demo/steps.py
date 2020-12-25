@@ -16,7 +16,6 @@
 
 import time
 from collections import deque
-from itertools import cycle
 
 import cv2
 import numpy as np
@@ -27,9 +26,9 @@ from .pipeline import AsyncPipeline, PipelineStep
 from .queue import Signal
 
 
-def run_pipeline(video, encoder, decoder, render_fn, decoder_seq_size=16, fps=30):
+def run_pipeline(capture, encoder, decoder, render_fn, decoder_seq_size=16, fps=30):
     pipeline = AsyncPipeline()
-    pipeline.add_step("Data", DataStep(video), parallel=False)
+    pipeline.add_step("Data", DataStep(capture), parallel=False)
     pipeline.add_step("Encoder", EncoderStep(encoder), parallel=False)
     pipeline.add_step("Decoder", DecoderStep(decoder, sequence_size=decoder_seq_size), parallel=False)
     pipeline.add_step("Render", RenderStep(render_fn, fps=fps), parallel=True)
@@ -41,40 +40,21 @@ def run_pipeline(video, encoder, decoder, render_fn, decoder_seq_size=16, fps=30
 
 class DataStep(PipelineStep):
 
-    def __init__(self, video_list, loop=True):
+    def __init__(self, capture):
         super().__init__()
-        self.video_list = video_list
-        self.cap = None
-
-        if loop:
-            self._video_cycle = cycle(self.video_list)
-        else:
-            self._video_cycle = iter(self.video_list)
+        self.cap = capture
 
     def setup(self):
-        self._open_video()
+        pass
 
     def process(self, item):
-        if not self.cap.isOpened() and not self._open_video():
-            return Signal.STOP
-        status, frame = self.cap.read()
-        if not status:
+        frame = self.cap.read()
+        if frame is None:
             return Signal.STOP
         return frame
 
     def end(self):
-        self.cap.release()
-
-    def _open_video(self):
-        next_video = next(self._video_cycle)
-        try:
-            next_video = int(next_video)
-        except ValueError:
-            pass
-        self.cap = cv2.VideoCapture(next_video)
-        if not self.cap.isOpened():
-            return False
-        return True
+        pass
 
 
 class EncoderStep(PipelineStep):

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..utils import get_path
+from ..utils import get_path, read_txt
 from ..logging import print_info
 from ..config import PathField, StringField, BoolField
 from .loaders import Loader
@@ -34,7 +34,8 @@ class DummyLauncher(Launcher):
         parameters.update({
             'loader': StringField(choices=Loader.providers, description="Loader."),
             'data_path': PathField(description="Data path."),
-            'provide_identifiers': BoolField(optional=True, default=False)
+            'provide_identifiers': BoolField(optional=True, default=False),
+            'identifiers_list': PathField(optional=True)
         })
         return parameters
 
@@ -43,12 +44,15 @@ class DummyLauncher(Launcher):
 
         dummy_launcher_config = LauncherConfigValidator('Dummy_Launcher', fields=self.parameters())
         dummy_launcher_config.validate(self.config)
-
+        print_info('Predictions objects loading started')
         self.data_path = get_path(self.get_value_from_config('data_path'))
+        identfiers_file = self.get_value_from_config('identifiers_list')
+        if identfiers_file is not None:
+            kwargs['identifiers'] = read_txt(identfiers_file)
 
         self._loader = Loader.provide(self.get_value_from_config('loader'), self.data_path, **kwargs)
 
-        print_info("{} predictions objects loaded from {}".format(len(self._loader), self.data_path))
+        print_info("\n{} predictions objects loaded from {}".format(len(self._loader), self.data_path))
 
     def predict(self, identifiers, *args, **kwargs):
         return [self._loader[identifier] for identifier in identifiers]

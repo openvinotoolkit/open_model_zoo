@@ -324,4 +324,3 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
     return poses;
 }
 } // namespace human_pose_estimation
-

@@ -347,7 +347,7 @@ class TestPresenter:
             ),
             call(
                 result.evaluated_value[1], result.name,
-                postfix='%', scale=100, value_name=result.meta['names'][1],  result_format='{:.2f}'
+                postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
                 np.mean(np.multiply(result.evaluated_value, 100)), result.name, result.threshold,
@@ -384,7 +384,7 @@ class TestPresenter:
         ]
         mock_write_scalar_res.assert_has_calls(calls)
 
-    def test_vector_presenter_with_vector_data_with_default_formating_compare_with_ref(self, mocker):
+    def test_vector_presenter_with_vector_data_with_default_formatting_compare_with_ref(self, mocker):
         mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
@@ -403,7 +403,7 @@ class TestPresenter:
             ),
             call(
                 result.evaluated_value[1], result.name,
-                postfix='%', scale=100, value_name=result.meta['names'][1],  result_format='{:.2f}'
+                postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
                 np.mean(np.multiply(result.evaluated_value, 100)), result.name, result.threshold,
@@ -434,7 +434,7 @@ class TestPresenter:
                 postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 1)), result.name,  result.threshold, 1,
+                np.mean(np.multiply(result.evaluated_value, 1)), result.name, result.threshold, 1,
                 value_name='mean', postfix=' ', scale=1, result_format='{}'
             )
         ]
@@ -490,7 +490,7 @@ class TestPresenter:
             ),
             call(
                 np.mean(np.multiply(result.evaluated_value, 100)), result.name,
-                result.threshold, None, value_name='mean', postfix=result.meta['postfix'], scale=1,  result_format='{:.2f}'
+                result.threshold, None, value_name='mean', postfix=result.meta['postfix'], scale=1, result_format='{:.2f}'
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)

@@ -225,7 +225,6 @@ class FlagValue {
   bool Equal(const FlagValue& x) const;
   FlagValue* New() const;   // creates a new one with default value
   void CopyFrom(const FlagValue& x);
-  int ValueSize() const;
 
   // Calls the given validate-fn on value_buffer_, and returns
   // whatever it returns.  But first casts validate_fn_proto to a
@@ -485,23 +484,6 @@ void FlagValue::CopyFrom(const FlagValue& x) {
   }
 }
 
-int FlagValue::ValueSize() const {
-  if (type_ > FV_MAX_INDEX) {
-    assert(false);  // unknown type
-    return 0;
-  }
-  static const uint8 valuesize[] = {
-    sizeof(bool),
-    sizeof(int32),
-    sizeof(uint32),
-    sizeof(int64),
-    sizeof(uint64),
-    sizeof(double),
-    sizeof(string),
-  };
-  return valuesize[type_];
-}
-
 // --------------------------------------------------------------------
 // CommandLineFlag
 //    This represents a single flag, including its name, description,
@@ -580,26 +562,14 @@ CommandLineFlag::~CommandLineFlag() {
 }
 
 const char* CommandLineFlag::CleanFileName() const {
-  // Compute top-level directory & file that this appears in
-  // search full path backwards.
-  // Stop going backwards at kRootDir; and skip by the first slash.
-  static const char kRootDir[] = "";    // can set this to root directory,
-
-  if (sizeof(kRootDir)-1 == 0)          // no prefix to strip
-    return filename();
-
-  const char* clean_name = filename() + strlen(filename()) - 1;
-  while ( clean_name > filename() ) {
-    if (*clean_name == PATH_SEPARATOR) {
-      if (sizeof(kRootDir) > 1 && strncmp(clean_name, kRootDir, sizeof(kRootDir)-1) == 0) {
-        clean_name += sizeof(kRootDir)-1;    // past root-dir
-        break;
-      }
-    }
-    --clean_name;
-  }
-  while ( *clean_name == PATH_SEPARATOR ) ++clean_name;  // Skip any slashes
-  return clean_name;
+  // This function has been used to strip off a common prefix from
+  // flag source file names. Because flags can be defined in different
+  // shared libraries, there may not be a single common prefix.
+  // Further, this functionality hasn't been active for many years.
+  // Need a better way to produce more user friendly help output or
+  // "anonymize" file paths in help output, respectively.
+  // Follow issue at: https://github.com/gflags/gflags/issues/86
+  return filename();
 }
 
 void CommandLineFlag::FillCommandLineFlagInfo(
@@ -972,7 +942,6 @@ class CommandLineFlagParser {
   // Stage 3: validate all the commandline flags that have validators
   // registered and were not set/modified by ParseNewCommandLineFlags.
   void ValidateFlags(bool all);
-  void ValidateAllFlags();
   void ValidateUnmodifiedFlags();
 
   // Stage 4: report any errors and return true if any were found.
@@ -1067,17 +1036,15 @@ uint32 CommandLineFlagParser::ParseNewCommandLineFlags(int* argc, char*** argv,
     char* arg = (*argv)[i];
 
     // Like getopt(), we permute non-option flags to be at the end.
-    if (arg[0] != '-' ||           // must be a program argument
-        (arg[0] == '-' && arg[1] == '\0')) {  // "-" is an argument, not a flag
+    if (arg[0] != '-' || arg[1] == '\0') {	// must be a program argument: "-" is an argument, not a flag
       memmove((*argv) + i, (*argv) + i+1, (*argc - (i+1)) * sizeof((*argv)[i]));
       (*argv)[*argc-1] = arg;      // we go last
       first_nonopt--;              // we've been pushed onto the stack
       i--;                         // to undo the i++ in the loop
       continue;
     }
-
-    if (arg[0] == '-') arg++;      // allow leading '-'
-    if (arg[0] == '-') arg++;      // or leading '--'
+    arg++;                     // skip leading '-'
+    if (arg[0] == '-') arg++;  // or leading '--'
 
     // -- alone means what it does for GNU: stop options parsing
     if (*arg == '\0') {
@@ -1257,10 +1224,6 @@ void CommandLineFlagParser::ValidateFlags(bool all) {
   }
 }
 
-void CommandLineFlagParser::ValidateAllFlags() {
-  ValidateFlags(true);
-}
-
 void CommandLineFlagParser::ValidateUnmodifiedFlags() {
   ValidateFlags(false);
 }
@@ -1378,8 +1341,8 @@ string CommandLineFlagParser::ProcessOptionsFromStringLocked(
             || fnmatch(glob.c_str(), ProgramInvocationName(),      FNM_PATHNAME) == 0
             || fnmatch(glob.c_str(), ProgramInvocationShortName(), FNM_PATHNAME) == 0
 #elif defined(HAVE_SHLWAPI_H)
-            || PathMatchSpec(glob.c_str(), ProgramInvocationName())
-            || PathMatchSpec(glob.c_str(), ProgramInvocationShortName())
+            || PathMatchSpecA(glob.c_str(), ProgramInvocationName())
+            || PathMatchSpecA(glob.c_str(), ProgramInvocationShortName())
 #endif
             ) {
           flags_are_relevant = true;

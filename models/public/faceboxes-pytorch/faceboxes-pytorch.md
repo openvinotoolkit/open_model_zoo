@@ -5,8 +5,6 @@
 FaceBoxes: A CPU Real-time Face Detector with High Accuracy. For details see
 the [repository](https://github.com/zisianw/FaceBoxes.PyTorch), [paper](https://arxiv.org/pdf/1708.05234.pdf)
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                    |
@@ -21,8 +19,6 @@ the [repository](https://github.com/zisianw/FaceBoxes.PyTorch), [paper](https://
 | Metric | Value |
 | ------ | ----- |
 | mAP   | 83.565%|
-
-## Performance
 
 ## Input
 
@@ -55,13 +51,13 @@ Image, name - `input.1` , shape - [1x3x1024x1024], format [BxCxHxW],
 
 ### Original model
 
-1. Bounding boxes deltas , name: `342`, shape - [1x21824x4]. Presented in format [BxAx4],
+1. Bounding boxes deltas , name: `boxes`, shape - [1x21824x4]. Presented in format [BxAx4],
     where:
 
     - B - batch size
     - A - number of prior box anchors
 
-2. Scores, name: `353`, shape - [1x21824x2]. Contains scores for 2 classes - the first is background, the second is face.
+2. Scores, name: `scores`, shape - [1x21824x2]. Contains scores for 2 classes - the first is background, the second is face.
 
 ### Converted model
 

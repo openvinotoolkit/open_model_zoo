@@ -323,7 +323,7 @@ class SquadWordPieseTokenizer(WordPieceTokenizer):
                 return text
             raise ValueError(
                 "Input is not valid. Should be a string, a list/tuple of strings or a list/tuple of integers."
-                )
+            )
 
         first_ids = get_input_ids(text)
         second_ids = get_input_ids(text_pair) if text_pair is not None else None
@@ -462,7 +462,7 @@ class SquadWordPieseTokenizer(WordPieceTokenizer):
         if already_has_special_tokens:
             if token_ids_1 is not None:
                 raise ValueError("You should not supply a second sequence if the provided sequence of "
-                                 "ids is already formated with special tokens for the model.")
+                                 "ids is already formatted with special tokens for the model.")
             return list(map(lambda x: 1 if x in [self.sep_token_id, self.cls_token_id] else 0, token_ids_0))
 
         if token_ids_1 is not None:

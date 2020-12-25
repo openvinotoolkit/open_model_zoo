@@ -26,8 +26,6 @@ Average Precision (AP) is defined as an area under the
 [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve. Validation dataset consists of ~50K of images from ~100 different scenes.
 
-## Performance
-
 ## Inputs
 
 1.	name: `data` , shape: [1x3x544x992] - An input image in following format

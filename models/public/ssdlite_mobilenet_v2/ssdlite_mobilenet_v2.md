@@ -4,8 +4,6 @@
 
 The `ssdlite_mobilenet_v2` model is used for object detection. For details, see the [paper](https://arxiv.org/abs/1801.04381), MobileNetV2: Inverted Residuals and Linear Bottlenecks.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -20,8 +18,6 @@ The `ssdlite_mobilenet_v2` model is used for object detection. For details, see 
 | Metric | Value |
 | ------ | ----- |
 | coco_precision | 24.2946%|
-
-## Performance
 
 ## Input
 
@@ -75,4 +71,4 @@ bounding boxes. For each detection, the description has the format:
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

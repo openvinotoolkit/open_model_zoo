@@ -99,7 +99,7 @@ class TestPostprocessor:
             'type': 'filter', 'annotation_source': 'annotation', 'labels': [1], 'remove_filtered': False
         }]
         annotation = ContainerAnnotation({
-            'annotation':  make_representation('0 0 0 10 10; 1 0 0 11 11', is_ground_truth=True)[0]
+            'annotation': make_representation('0 0 0 10 10; 1 0 0 11 11', is_ground_truth=True)[0]
         })
         expected = ContainerAnnotation({
             'annotation': make_representation(
@@ -377,7 +377,7 @@ class TestPostprocessor:
         prediction = ContainerPrediction({
             'detection_out': make_representation('0 0 0 10 10; 1 0 0 11 11', score=1)[0]
         })
-        expected = ContainerPrediction({'detection_out':  make_representation('1 0 0 11 11', score=1)[0]})
+        expected = ContainerPrediction({'detection_out': make_representation('1 0 0 11 11', score=1)[0]})
 
         postprocess_data(PostprocessingExecutor(config), [None], [prediction])
 
@@ -955,7 +955,7 @@ class TestPostprocessor:
             postprocess_data(PostprocessingExecutor(config), [None], [None])
 
     def test_extend_segmentation_mask_with_float_filling_raise_config_error(self):
-        config = [{'type': 'extend_segmentation_mask', 'filling_label':  0.5}]
+        config = [{'type': 'extend_segmentation_mask', 'filling_label': 0.5}]
 
         with pytest.raises(ConfigError):
             postprocess_data(PostprocessingExecutor(config), [None], [None])

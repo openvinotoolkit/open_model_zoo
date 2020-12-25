@@ -11149,19 +11149,20 @@ SWIGINTERN PyObject *_wrap_numpy_beam_decode(PyObject *SWIGUNUSEDPARM(self), PyO
   std::vector< std::string,std::allocator< std::string > > arg7 ;
   size_t arg8 ;
   size_t arg9 ;
-  float arg10 ;
-  size_t arg11 ;
+  size_t arg10 ;
+  float arg11 ;
   size_t arg12 ;
-  bool arg13 ;
-  void *arg14 = (void *) 0 ;
-  int **arg15 = (int **) 0 ;
-  size_t *arg16 = (size_t *) 0 ;
-  int **arg17 = (int **) 0 ;
-  size_t *arg18 = (size_t *) 0 ;
-  float **arg19 = (float **) 0 ;
-  size_t *arg20 = (size_t *) 0 ;
-  int **arg21 = (int **) 0 ;
-  size_t *arg22 = (size_t *) 0 ;
+  size_t arg13 ;
+  bool arg14 ;
+  void *arg15 = (void *) 0 ;
+  int **arg16 = (int **) 0 ;
+  size_t *arg17 = (size_t *) 0 ;
+  int **arg18 = (int **) 0 ;
+  size_t *arg19 = (size_t *) 0 ;
+  float **arg20 = (float **) 0 ;
+  size_t *arg21 = (size_t *) 0 ;
+  int **arg22 = (int **) 0 ;
+  size_t *arg23 = (size_t *) 0 ;
   PyArrayObject *array1 = NULL ;
   int is_new_object1 = 0 ;
   PyArrayObject *array5 = NULL ;
@@ -11170,23 +11171,25 @@ SWIGINTERN PyObject *_wrap_numpy_beam_decode(PyObject *SWIGUNUSEDPARM(self), PyO
   int ecode8 = 0 ;
   size_t val9 ;
   int ecode9 = 0 ;
-  float val10 ;
+  size_t val10 ;
   int ecode10 = 0 ;
-  size_t val11 ;
+  float val11 ;
   int ecode11 = 0 ;
   size_t val12 ;
   int ecode12 = 0 ;
-  bool val13 ;
+  size_t val13 ;
   int ecode13 = 0 ;
-  int res14 ;
-  int *data_temp15 = NULL ;
-  size_t dim_temp15 ;
-  int *data_temp17 = NULL ;
-  size_t dim_temp17 ;
-  float *data_temp19 = NULL ;
-  size_t dim_temp19 ;
-  int *data_temp21 = NULL ;
-  size_t dim_temp21 ;
+  bool val14 ;
+  int ecode14 = 0 ;
+  int res15 ;
+  int *data_temp16 = NULL ;
+  size_t dim_temp16 ;
+  int *data_temp18 = NULL ;
+  size_t dim_temp18 ;
+  float *data_temp20 = NULL ;
+  size_t dim_temp20 ;
+  int *data_temp22 = NULL ;
+  size_t dim_temp22 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -11197,24 +11200,25 @@ SWIGINTERN PyObject *_wrap_numpy_beam_decode(PyObject *SWIGUNUSEDPARM(self), PyO
   PyObject * obj7 = 0 ;
   PyObject * obj8 = 0 ;
   PyObject * obj9 = 0 ;
+  PyObject * obj10 = 0 ;
   
   {
-    arg15 = &data_temp15;
-    arg16 = &dim_temp15;
+    arg16 = &data_temp16;
+    arg17 = &dim_temp16;
   }
   {
-    arg17 = &data_temp17;
-    arg18 = &dim_temp17;
+    arg18 = &data_temp18;
+    arg19 = &dim_temp18;
   }
   {
-    arg19 = &data_temp19;
-    arg20 = &dim_temp19;
+    arg20 = &data_temp20;
+    arg21 = &dim_temp20;
   }
   {
-    arg21 = &data_temp21;
-    arg22 = &dim_temp21;
+    arg22 = &data_temp22;
+    arg23 = &dim_temp22;
   }
-  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOOO:numpy_beam_decode",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8,&obj9)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOOOO:numpy_beam_decode",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8,&obj9,&obj10)) SWIG_fail;
   {
     npy_intp size[3] = {
       -1, -1, -1 
@@ -11259,31 +11263,307 @@ SWIGINTERN PyObject *_wrap_numpy_beam_decode(PyObject *SWIGUNUSEDPARM(self), PyO
     SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "numpy_beam_decode" "', argument " "9"" of type '" "size_t""'");
   } 
   arg9 = static_cast< size_t >(val9);
-  ecode10 = SWIG_AsVal_float(obj5, &val10);
+  ecode10 = SWIG_AsVal_size_t(obj5, &val10);
   if (!SWIG_IsOK(ecode10)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "numpy_beam_decode" "', argument " "10"" of type '" "float""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "numpy_beam_decode" "', argument " "10"" of type '" "size_t""'");
   } 
-  arg10 = static_cast< float >(val10);
-  ecode11 = SWIG_AsVal_size_t(obj6, &val11);
+  arg10 = static_cast< size_t >(val10);
+  ecode11 = SWIG_AsVal_float(obj6, &val11);
   if (!SWIG_IsOK(ecode11)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode11), "in method '" "numpy_beam_decode" "', argument " "11"" of type '" "size_t""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode11), "in method '" "numpy_beam_decode" "', argument " "11"" of type '" "float""'");
   } 
-  arg11 = static_cast< size_t >(val11);
+  arg11 = static_cast< float >(val11);
   ecode12 = SWIG_AsVal_size_t(obj7, &val12);
   if (!SWIG_IsOK(ecode12)) {
     SWIG_exception_fail(SWIG_ArgError(ecode12), "in method '" "numpy_beam_decode" "', argument " "12"" of type '" "size_t""'");
   } 
   arg12 = static_cast< size_t >(val12);
-  ecode13 = SWIG_AsVal_bool(obj8, &val13);
+  ecode13 = SWIG_AsVal_size_t(obj8, &val13);
   if (!SWIG_IsOK(ecode13)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode13), "in method '" "numpy_beam_decode" "', argument " "13"" of type '" "bool""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode13), "in method '" "numpy_beam_decode" "', argument " "13"" of type '" "size_t""'");
   } 
-  arg13 = static_cast< bool >(val13);
-  res14 = SWIG_ConvertPtr(obj9,SWIG_as_voidptrptr(&arg14), 0, 0);
-  if (!SWIG_IsOK(res14)) {
-    SWIG_exception_fail(SWIG_ArgError(res14), "in method '" "numpy_beam_decode" "', argument " "14"" of type '" "void *""'"); 
+  arg13 = static_cast< size_t >(val13);
+  ecode14 = SWIG_AsVal_bool(obj9, &val14);
+  if (!SWIG_IsOK(ecode14)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode14), "in method '" "numpy_beam_decode" "', argument " "14"" of type '" "bool""'");
+  } 
+  arg14 = static_cast< bool >(val14);
+  res15 = SWIG_ConvertPtr(obj10,SWIG_as_voidptrptr(&arg15), 0, 0);
+  if (!SWIG_IsOK(res15)) {
+    SWIG_exception_fail(SWIG_ArgError(res15), "in method '" "numpy_beam_decode" "', argument " "15"" of type '" "void *""'"); 
   }
-  numpy_beam_decode((float const *)arg1,arg2,arg3,arg4,(int const *)arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15,arg16,arg17,arg18,arg19,arg20,arg21,arg22);
+  numpy_beam_decode((float const *)arg1,arg2,arg3,arg4,(int const *)arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15,arg16,arg17,arg18,arg19,arg20,arg21,arg22,arg23);
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[1] = {
+      *arg17 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_INT, (void*)(*arg16));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg16), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg16), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  {
+    npy_intp dims[1] = {
+      *arg19 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_INT, (void*)(*arg18));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg18), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg18), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  {
+    npy_intp dims[1] = {
+      *arg21 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT, (void*)(*arg20));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg20), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg20), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  {
+    npy_intp dims[1] = {
+      *arg23 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_INT, (void*)(*arg22));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg22), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg22), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
+  {
+    if (is_new_object5 && array5)
+    {
+      Py_DECREF(array5); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
+  {
+    if (is_new_object5 && array5)
+    {
+      Py_DECREF(array5); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_numpy_beam_decode_no_lm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  float *arg1 = (float *) 0 ;
+  size_t arg2 ;
+  size_t arg3 ;
+  size_t arg4 ;
+  int *arg5 = (int *) 0 ;
+  size_t arg6 ;
+  std::vector< std::string,std::allocator< std::string > > arg7 ;
+  size_t arg8 ;
+  size_t arg9 ;
+  size_t arg10 ;
+  float arg11 ;
+  size_t arg12 ;
+  size_t arg13 ;
+  bool arg14 ;
+  int **arg15 = (int **) 0 ;
+  size_t *arg16 = (size_t *) 0 ;
+  int **arg17 = (int **) 0 ;
+  size_t *arg18 = (size_t *) 0 ;
+  float **arg19 = (float **) 0 ;
+  size_t *arg20 = (size_t *) 0 ;
+  int **arg21 = (int **) 0 ;
+  size_t *arg22 = (size_t *) 0 ;
+  PyArrayObject *array1 = NULL ;
+  int is_new_object1 = 0 ;
+  PyArrayObject *array5 = NULL ;
+  int is_new_object5 = 0 ;
+  size_t val8 ;
+  int ecode8 = 0 ;
+  size_t val9 ;
+  int ecode9 = 0 ;
+  size_t val10 ;
+  int ecode10 = 0 ;
+  float val11 ;
+  int ecode11 = 0 ;
+  size_t val12 ;
+  int ecode12 = 0 ;
+  size_t val13 ;
+  int ecode13 = 0 ;
+  bool val14 ;
+  int ecode14 = 0 ;
+  int *data_temp15 = NULL ;
+  size_t dim_temp15 ;
+  int *data_temp17 = NULL ;
+  size_t dim_temp17 ;
+  float *data_temp19 = NULL ;
+  size_t dim_temp19 ;
+  int *data_temp21 = NULL ;
+  size_t dim_temp21 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  PyObject * obj6 = 0 ;
+  PyObject * obj7 = 0 ;
+  PyObject * obj8 = 0 ;
+  PyObject * obj9 = 0 ;
+  
+  {
+    arg15 = &data_temp15;
+    arg16 = &dim_temp15;
+  }
+  {
+    arg17 = &data_temp17;
+    arg18 = &dim_temp17;
+  }
+  {
+    arg19 = &data_temp19;
+    arg20 = &dim_temp19;
+  }
+  {
+    arg21 = &data_temp21;
+    arg22 = &dim_temp21;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOOO:numpy_beam_decode_no_lm",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8,&obj9)) SWIG_fail;
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array1 = obj_to_array_contiguous_allow_conversion(obj0, NPY_FLOAT,
+      &is_new_object1);
+    if (!array1 || !require_dimensions(array1, 3) ||
+      !require_size(array1, size, 3)) SWIG_fail;
+    arg1 = (float*) array_data(array1);
+    arg2 = (size_t) array_size(array1,0);
+    arg3 = (size_t) array_size(array1,1);
+    arg4 = (size_t) array_size(array1,2);
+  }
+  {
+    npy_intp size[1] = {
+      -1 
+    };
+    array5 = obj_to_array_contiguous_allow_conversion(obj1,
+      NPY_INT,
+      &is_new_object5);
+    if (!array5 || !require_dimensions(array5, 1) ||
+      !require_size(array5, size, 1)) SWIG_fail;
+    arg5 = (int*) array_data(array5);
+    arg6 = (size_t) array_size(array5,0);
+  }
+  {
+    std::vector< std::string,std::allocator< std::string > > *ptr = (std::vector< std::string,std::allocator< std::string > > *)0;
+    int res = swig::asptr(obj2, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "numpy_beam_decode_no_lm" "', argument " "7"" of type '" "std::vector< std::string,std::allocator< std::string > > const""'"); 
+    }
+    arg7 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  ecode8 = SWIG_AsVal_size_t(obj3, &val8);
+  if (!SWIG_IsOK(ecode8)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "numpy_beam_decode_no_lm" "', argument " "8"" of type '" "size_t""'");
+  } 
+  arg8 = static_cast< size_t >(val8);
+  ecode9 = SWIG_AsVal_size_t(obj4, &val9);
+  if (!SWIG_IsOK(ecode9)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "numpy_beam_decode_no_lm" "', argument " "9"" of type '" "size_t""'");
+  } 
+  arg9 = static_cast< size_t >(val9);
+  ecode10 = SWIG_AsVal_size_t(obj5, &val10);
+  if (!SWIG_IsOK(ecode10)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "numpy_beam_decode_no_lm" "', argument " "10"" of type '" "size_t""'");
+  } 
+  arg10 = static_cast< size_t >(val10);
+  ecode11 = SWIG_AsVal_float(obj6, &val11);
+  if (!SWIG_IsOK(ecode11)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode11), "in method '" "numpy_beam_decode_no_lm" "', argument " "11"" of type '" "float""'");
+  } 
+  arg11 = static_cast< float >(val11);
+  ecode12 = SWIG_AsVal_size_t(obj7, &val12);
+  if (!SWIG_IsOK(ecode12)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode12), "in method '" "numpy_beam_decode_no_lm" "', argument " "12"" of type '" "size_t""'");
+  } 
+  arg12 = static_cast< size_t >(val12);
+  ecode13 = SWIG_AsVal_size_t(obj8, &val13);
+  if (!SWIG_IsOK(ecode13)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode13), "in method '" "numpy_beam_decode_no_lm" "', argument " "13"" of type '" "size_t""'");
+  } 
+  arg13 = static_cast< size_t >(val13);
+  ecode14 = SWIG_AsVal_bool(obj9, &val14);
+  if (!SWIG_IsOK(ecode14)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode14), "in method '" "numpy_beam_decode_no_lm" "', argument " "14"" of type '" "bool""'");
+  } 
+  arg14 = static_cast< bool >(val14);
+  numpy_beam_decode_no_lm((float const *)arg1,arg2,arg3,arg4,(int const *)arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15,arg16,arg17,arg18,arg19,arg20,arg21,arg22);
   resultobj = SWIG_Py_Void();
   {
     npy_intp dims[1] = {
@@ -11367,268 +11647,6 @@ SWIGINTERN PyObject *_wrap_numpy_beam_decode(PyObject *SWIGUNUSEDPARM(self), PyO
     PyObject* cap = PyCapsule_New((void*)(*arg21), SWIGPY_CAPSULE_NAME, free_cap);
 #else
     PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg21), free);
-#endif
-    
-#if NPY_API_VERSION < 0x00000007
-    PyArray_BASE(array) = cap;
-#else
-    PyArray_SetBaseObject(array,cap);
-#endif
-    
-    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
-  }
-  {
-    if (is_new_object1 && array1)
-    {
-      Py_DECREF(array1); 
-    }
-  }
-  {
-    if (is_new_object5 && array5)
-    {
-      Py_DECREF(array5); 
-    }
-  }
-  return resultobj;
-fail:
-  {
-    if (is_new_object1 && array1)
-    {
-      Py_DECREF(array1); 
-    }
-  }
-  {
-    if (is_new_object5 && array5)
-    {
-      Py_DECREF(array5); 
-    }
-  }
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_numpy_beam_decode_no_lm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  float *arg1 = (float *) 0 ;
-  size_t arg2 ;
-  size_t arg3 ;
-  size_t arg4 ;
-  int *arg5 = (int *) 0 ;
-  size_t arg6 ;
-  std::vector< std::string,std::allocator< std::string > > arg7 ;
-  size_t arg8 ;
-  size_t arg9 ;
-  float arg10 ;
-  size_t arg11 ;
-  size_t arg12 ;
-  bool arg13 ;
-  int **arg14 = (int **) 0 ;
-  size_t *arg15 = (size_t *) 0 ;
-  int **arg16 = (int **) 0 ;
-  size_t *arg17 = (size_t *) 0 ;
-  float **arg18 = (float **) 0 ;
-  size_t *arg19 = (size_t *) 0 ;
-  int **arg20 = (int **) 0 ;
-  size_t *arg21 = (size_t *) 0 ;
-  PyArrayObject *array1 = NULL ;
-  int is_new_object1 = 0 ;
-  PyArrayObject *array5 = NULL ;
-  int is_new_object5 = 0 ;
-  size_t val8 ;
-  int ecode8 = 0 ;
-  size_t val9 ;
-  int ecode9 = 0 ;
-  float val10 ;
-  int ecode10 = 0 ;
-  size_t val11 ;
-  int ecode11 = 0 ;
-  size_t val12 ;
-  int ecode12 = 0 ;
-  bool val13 ;
-  int ecode13 = 0 ;
-  int *data_temp14 = NULL ;
-  size_t dim_temp14 ;
-  int *data_temp16 = NULL ;
-  size_t dim_temp16 ;
-  float *data_temp18 = NULL ;
-  size_t dim_temp18 ;
-  int *data_temp20 = NULL ;
-  size_t dim_temp20 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  PyObject * obj4 = 0 ;
-  PyObject * obj5 = 0 ;
-  PyObject * obj6 = 0 ;
-  PyObject * obj7 = 0 ;
-  PyObject * obj8 = 0 ;
-  
-  {
-    arg14 = &data_temp14;
-    arg15 = &dim_temp14;
-  }
-  {
-    arg16 = &data_temp16;
-    arg17 = &dim_temp16;
-  }
-  {
-    arg18 = &data_temp18;
-    arg19 = &dim_temp18;
-  }
-  {
-    arg20 = &data_temp20;
-    arg21 = &dim_temp20;
-  }
-  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOO:numpy_beam_decode_no_lm",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8)) SWIG_fail;
-  {
-    npy_intp size[3] = {
-      -1, -1, -1 
-    };
-    array1 = obj_to_array_contiguous_allow_conversion(obj0, NPY_FLOAT,
-      &is_new_object1);
-    if (!array1 || !require_dimensions(array1, 3) ||
-      !require_size(array1, size, 3)) SWIG_fail;
-    arg1 = (float*) array_data(array1);
-    arg2 = (size_t) array_size(array1,0);
-    arg3 = (size_t) array_size(array1,1);
-    arg4 = (size_t) array_size(array1,2);
-  }
-  {
-    npy_intp size[1] = {
-      -1 
-    };
-    array5 = obj_to_array_contiguous_allow_conversion(obj1,
-      NPY_INT,
-      &is_new_object5);
-    if (!array5 || !require_dimensions(array5, 1) ||
-      !require_size(array5, size, 1)) SWIG_fail;
-    arg5 = (int*) array_data(array5);
-    arg6 = (size_t) array_size(array5,0);
-  }
-  {
-    std::vector< std::string,std::allocator< std::string > > *ptr = (std::vector< std::string,std::allocator< std::string > > *)0;
-    int res = swig::asptr(obj2, &ptr);
-    if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "numpy_beam_decode_no_lm" "', argument " "7"" of type '" "std::vector< std::string,std::allocator< std::string > > const""'"); 
-    }
-    arg7 = *ptr;
-    if (SWIG_IsNewObj(res)) delete ptr;
-  }
-  ecode8 = SWIG_AsVal_size_t(obj3, &val8);
-  if (!SWIG_IsOK(ecode8)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "numpy_beam_decode_no_lm" "', argument " "8"" of type '" "size_t""'");
-  } 
-  arg8 = static_cast< size_t >(val8);
-  ecode9 = SWIG_AsVal_size_t(obj4, &val9);
-  if (!SWIG_IsOK(ecode9)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "numpy_beam_decode_no_lm" "', argument " "9"" of type '" "size_t""'");
-  } 
-  arg9 = static_cast< size_t >(val9);
-  ecode10 = SWIG_AsVal_float(obj5, &val10);
-  if (!SWIG_IsOK(ecode10)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "numpy_beam_decode_no_lm" "', argument " "10"" of type '" "float""'");
-  } 
-  arg10 = static_cast< float >(val10);
-  ecode11 = SWIG_AsVal_size_t(obj6, &val11);
-  if (!SWIG_IsOK(ecode11)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode11), "in method '" "numpy_beam_decode_no_lm" "', argument " "11"" of type '" "size_t""'");
-  } 
-  arg11 = static_cast< size_t >(val11);
-  ecode12 = SWIG_AsVal_size_t(obj7, &val12);
-  if (!SWIG_IsOK(ecode12)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode12), "in method '" "numpy_beam_decode_no_lm" "', argument " "12"" of type '" "size_t""'");
-  } 
-  arg12 = static_cast< size_t >(val12);
-  ecode13 = SWIG_AsVal_bool(obj8, &val13);
-  if (!SWIG_IsOK(ecode13)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode13), "in method '" "numpy_beam_decode_no_lm" "', argument " "13"" of type '" "bool""'");
-  } 
-  arg13 = static_cast< bool >(val13);
-  numpy_beam_decode_no_lm((float const *)arg1,arg2,arg3,arg4,(int const *)arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15,arg16,arg17,arg18,arg19,arg20,arg21);
-  resultobj = SWIG_Py_Void();
-  {
-    npy_intp dims[1] = {
-      *arg15 
-    };
-    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_INT, (void*)(*arg14));
-    PyArrayObject* array = (PyArrayObject*) obj;
-    
-    if (!array) SWIG_fail;
-    
-#ifdef SWIGPY_USE_CAPSULE
-    PyObject* cap = PyCapsule_New((void*)(*arg14), SWIGPY_CAPSULE_NAME, free_cap);
-#else
-    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg14), free);
-#endif
-    
-#if NPY_API_VERSION < 0x00000007
-    PyArray_BASE(array) = cap;
-#else
-    PyArray_SetBaseObject(array,cap);
-#endif
-    
-    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
-  }
-  {
-    npy_intp dims[1] = {
-      *arg17 
-    };
-    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_INT, (void*)(*arg16));
-    PyArrayObject* array = (PyArrayObject*) obj;
-    
-    if (!array) SWIG_fail;
-    
-#ifdef SWIGPY_USE_CAPSULE
-    PyObject* cap = PyCapsule_New((void*)(*arg16), SWIGPY_CAPSULE_NAME, free_cap);
-#else
-    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg16), free);
-#endif
-    
-#if NPY_API_VERSION < 0x00000007
-    PyArray_BASE(array) = cap;
-#else
-    PyArray_SetBaseObject(array,cap);
-#endif
-    
-    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
-  }
-  {
-    npy_intp dims[1] = {
-      *arg19 
-    };
-    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT, (void*)(*arg18));
-    PyArrayObject* array = (PyArrayObject*) obj;
-    
-    if (!array) SWIG_fail;
-    
-#ifdef SWIGPY_USE_CAPSULE
-    PyObject* cap = PyCapsule_New((void*)(*arg18), SWIGPY_CAPSULE_NAME, free_cap);
-#else
-    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg18), free);
-#endif
-    
-#if NPY_API_VERSION < 0x00000007
-    PyArray_BASE(array) = cap;
-#else
-    PyArray_SetBaseObject(array,cap);
-#endif
-    
-    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
-  }
-  {
-    npy_intp dims[1] = {
-      *arg21 
-    };
-    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_INT, (void*)(*arg20));
-    PyArrayObject* array = (PyArrayObject*) obj;
-    
-    if (!array) SWIG_fail;
-    
-#ifdef SWIGPY_USE_CAPSULE
-    PyObject* cap = PyCapsule_New((void*)(*arg20), SWIGPY_CAPSULE_NAME, free_cap);
-#else
-    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg20), free);
 #endif
     
 #if NPY_API_VERSION < 0x00000007

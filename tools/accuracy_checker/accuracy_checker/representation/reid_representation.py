@@ -29,6 +29,13 @@ class ReIdentificationAnnotation(ReIdentification):
         self.query = query
 
 
+class PlaceRecognitionAnnotation(ReIdentification):
+    def __init__(self, identifier, coords, query):
+        super().__init__(identifier)
+        self.coords = coords
+        self.query = query
+
+
 class ReIdentificationClassificationAnnotation(ReIdentification):
     def __init__(self, identifier, positive_pairs=None, negative_pairs=None):
         super().__init__(identifier)

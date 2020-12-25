@@ -3,7 +3,7 @@
 This demo provides an inference pipeline for multi-channel yolo v3. The demo uses Yolo v3 Object Detection network. You can follow [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page convert the YOLO V3 and tiny YOLO V3 into IR model and execute this demo with converted IR model.
 
 > **NOTES**:
-> If you don't use [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page to convert the model, it may not work. 
+> If you don't use [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page to convert the model, it may not work.
 
 Other demo objectives are:
 
@@ -49,7 +49,7 @@ Options:
     -u                           Optional. List of monitors to show initially.
 ```
 
-To run the demo, you can use public pre-train model and follow [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page for instruction of how to convert it to IR model. 
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -67,7 +67,7 @@ Video files will be processed repeatedly.
 To achieve 100% utilization of one Myriad X, the thumb rule is to run 4 infer requests on each Myriad X. Option `-nireq 32` can be added to above command to use 100% of HDDL-R card. The 32 here is 8 (Myriad X on HDDL-R card) x 4 (infer requests), such as following command:
 
 ```sh
-./multi_channel_object_detection_demo_yolov3 -m $PATH_OF_YOLO_V3_MODEL -d HDDL 
+./multi_channel_object_detection_demo_yolov3 -m $PATH_OF_YOLO_V3_MODEL -d HDDL
 -i /path/to/file1 /path/to/file2 /path/to/file3 /path/to/file4 -nireq 32
 ```
 

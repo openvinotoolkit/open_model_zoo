@@ -16,6 +16,7 @@ limitations under the License.
 
 import warnings
 import math
+from collections import OrderedDict
 from functools import singledispatch
 import numpy as np
 
@@ -38,17 +39,23 @@ from ..representation import (
     ImageProcessingPrediction,
     StyleTransferAnnotation,
     StyleTransferPrediction,
-    FeaturesRegressionAnnotation
+    FeaturesRegressionAnnotation,
+    PoseEstimationAnnotation,
+    PoseEstimationPrediction,
+    OpticalFlowAnnotation,
+    OpticalFlowPrediction
 )
 
 from .metric import PerImageEvaluationMetric
 from ..config import BaseField, NumberField, BoolField, ConfigError, StringField
-from ..utils import string_to_tuple, finalize_metric_result
+from ..utils import string_to_tuple, finalize_metric_result, contains_all
 
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
-    annotation_types = (RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation)
-    prediction_types = (RegressionPrediction, DepthEstimationPrediction)
+    annotation_types = (
+        RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation, ImageProcessingAnnotation
+    )
+    prediction_types = (RegressionPrediction, DepthEstimationPrediction, ImageProcessingPrediction)
 
     def __init__(self, value_differ, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -64,6 +71,15 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
 
     def update(self, annotation, prediction):
         diff = self.calculate_diff(annotation, prediction)
+        if isinstance(diff, dict):
+            if not self.magnitude:
+                self.magnitude = OrderedDict()
+            for key, difference in diff.items():
+                v_mag = self.magnitude.get(key, [])
+                v_mag.append(difference)
+                self.magnitude[key] = v_mag
+            return np.mean(next(iter(diff.values())))
+
         if self.profiler:
             if isinstance(annotation, RegressionAnnotation):
                 ann_value, pred_value = annotation.value, prediction.value
@@ -77,7 +93,29 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         return diff
 
     def _calculate_diff_regression_rep(self, annotation, prediction):
-        return self.value_differ(annotation.value, prediction.value)
+        if isinstance(annotation.value, dict):
+            if not isinstance(prediction.value, dict):
+                if len(annotation.value) != 1:
+                    raise ConfigError('both annotation and prediction should be dict-like in case of multiple outputs')
+                return self.value_differ(next(iter(annotation.value.values())), prediction.value)
+            diff_dict = OrderedDict()
+            for key in annotation.value:
+                diff = self.value_differ(annotation.value[key], prediction.value[key])
+                if np.ndim(diff) > 1:
+                    diff = np.mean(diff)
+                diff_dict[key] = diff
+            return diff_dict
+        if isinstance(prediction.value, dict):
+            if len(prediction.value) != 1:
+                raise ConfigError('annotation for all predictions should be provided')
+            diff = self.value_differ(annotation.value, next(iter(prediction.value.values())))
+            if not np.isscalar(diff) and np.ndim(diff) > 1:
+                diff = np.mean(diff)
+            return diff
+        diff = self.value_differ(annotation.value, prediction.value)
+        if not np.isscalar(diff) and np.ndim(diff) > 1:
+            diff = np.mean(diff)
+        return diff
 
     def _calculate_diff_depth_estimation_rep(self, annotation, prediction):
         diff = annotation.mask * self.value_differ(annotation.depth_map, prediction.depth_map)
@@ -91,6 +129,14 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         if self.profiler:
             self.profiler.finish()
+        if isinstance(self.magnitude, dict):
+            names, result = [], []
+            for key, values in self.magnitude.items():
+                names.extend(['{}@mean'.format(key), '{}@std'.format(key)])
+                result.extend([np.mean(values), np.std(values)])
+            self.meta['names'] = names
+            return result
+
         return np.mean(self.magnitude), np.std(self.magnitude)
 
     def reset(self):
@@ -503,7 +549,8 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             'color_order': StringField(
                 optional=True, choices=['BGR', 'RGB'], default='RGB',
                 description="The field specified which color order BGR or RGB will be used during metric calculation."
-            )
+            ),
+            'normalized_images': BoolField(optional=True, default=False, description='images in [0, 1] range or not')
         })
 
         return parameters
@@ -522,6 +569,8 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
         }
         self.meta['postfix'] = 'Db'
         self.channel_order = channel_order[color_order]
+        self.normalized_images = self.get_value_from_config('normalized_images')
+        self.color_scale = 255 if not self.normalized_images else 1
 
     def _psnr_differ(self, annotation_image, prediction_image):
         prediction = np.asarray(prediction_image).astype(np.float)
@@ -536,7 +585,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             self.scale_border:height - self.scale_border,
             self.scale_border:width - self.scale_border
         ]
-        image_difference = (prediction - ground_truth) / 255
+        image_difference = (prediction - ground_truth) / self.color_scale
         if len(ground_truth.shape) == 3 and ground_truth.shape[2] == 3:
             r_channel_diff = image_difference[:, :, self.channel_order[0]]
             g_channel_diff = image_difference[:, :, self.channel_order[1]]
@@ -563,8 +612,10 @@ def angle_differ(gt_gaze_vector, predicted_gaze_vector):
 def log10_differ(annotation_val, prediction_val):
     return np.abs(np.log10(annotation_val) - np.log10(prediction_val))
 
+
 def mape_differ(annotation_val, prediction_val):
     return np.abs(annotation_val - prediction_val) / annotation_val
+
 
 class AngleError(BaseRegressionMetric):
     __provider__ = 'angle_error'
@@ -602,3 +653,91 @@ class StructuralSimilarity(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)
         self.meta['target'] = 'higher-better'
+
+
+class PercentageCorrectKeypoints(PerImageEvaluationMetric):
+    __provider__ = 'pckh'
+    annotation_types = (PoseEstimationAnnotation, )
+    prediction_types = (PoseEstimationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'threshold': NumberField(optional=True, default=0.5),
+            'score_bias': NumberField(optional=True, default=0.6),
+            'num_joints': NumberField(optional=True, default=16, value_type=int)
+        })
+        return params
+
+    def configure(self):
+        if not self.dataset.metadata or 'joints' not in self.dataset.metadata:
+            raise ConfigError('PCKh metrics require joints providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
+        self.joints = self.dataset.metadata['joints']
+        self.num_joints = self.get_value_from_config('num_joints')
+        self.jnt_count = np.zeros(self.num_joints)
+        self.pck = np.zeros(self.num_joints)
+        self.threshold = self.get_value_from_config('threshold')
+        self.score_bias = self.get_value_from_config('score_bias')
+        self.meta.update({
+            'names': ['head', 'shoulder', 'elbow', 'wrist', 'hip', 'knee', 'ankle', 'mean'],
+            'calculate_mean': False
+        })
+        if not contains_all(
+                self.joints, ['head', 'lsho', 'rsho', 'lwri', 'rwri', 'lhip', 'rhip', 'lkne', 'rkne', 'lank', 'rank']
+        ):
+            raise ConfigError('not all important joints are provided')
+
+    def update(self, annotation, prediction):
+        jnt_visible = annotation.visibility
+        pos_pred = np.array([[x, y] for x, y in zip(prediction.x_values, prediction.y_values)])
+        pos_gt = np.array([[x, y] for x, y in zip(annotation.x_values, annotation.y_values)])
+        uv_error = pos_pred - pos_gt
+        uv_err = np.linalg.norm(uv_error, axis=1)
+        headbox = np.array(annotation.metadata['headbox'])
+        headsizes = headbox[1] - headbox[0]
+        headsizes = np.linalg.norm(headsizes, axis=0)
+        headsizes *= self.score_bias
+        scale = headsizes
+        scaled_uv_err = np.divide(uv_err, scale)
+        scaled_uv_err = np.multiply(scaled_uv_err, jnt_visible)
+        self.jnt_count += jnt_visible
+        less_than_threshold = np.multiply((scaled_uv_err < self.threshold), jnt_visible)
+        self.pck += less_than_threshold
+        return np.divide(
+            less_than_threshold.astype(float),
+            jnt_visible.astype(float),
+            out=np.zeros_like(less_than_threshold, dtype=float),
+            where=jnt_visible != 0
+        )
+
+    def evaluate(self, annotations, predictions):
+        full_score = np.divide(self.pck, self.jnt_count, out=np.zeros_like(self.jnt_count), where=self.jnt_count != 0)
+        full_score = np.ma.array(full_score, mask=False)
+        full_score[6:8].mask = True
+        return [
+            full_score[self.joints['head']],
+            0.5 * (full_score[self.joints['lsho']] + full_score[self.joints['rsho']]),
+            0.5 * (full_score[self.joints['lelb']] + full_score[self.joints['relb']]),
+            0.5 * (full_score[self.joints['lwri']] + full_score[self.joints['rwri']]),
+            0.5 * (full_score[self.joints['lhip']] + full_score[self.joints['rhip']]),
+            0.5 * (full_score[self.joints['lkne']] + full_score[self.joints['rkne']]),
+            0.5 * (full_score[self.joints['lank']] + full_score[self.joints['rank']]),
+            np.mean(full_score),
+        ]
+
+    def reset(self):
+        self.jnt_count = np.zeros(self.num_joints)
+        self.pck = np.zeros(self.num_joints)
+
+
+class EndPointError(BaseRegressionMetric):
+    __provider__ = 'epe'
+    annotation_types = (OpticalFlowAnnotation, )
+    prediction_types = (OpticalFlowPrediction, )
+
+    def __init__(self, *args, **kwargs):
+        def l2_diff(ann_value, pred_value):
+            return np.mean(np.linalg.norm(ann_value - pred_value, ord=2, axis=2))
+        super().__init__(l2_diff, *args, **kwargs)

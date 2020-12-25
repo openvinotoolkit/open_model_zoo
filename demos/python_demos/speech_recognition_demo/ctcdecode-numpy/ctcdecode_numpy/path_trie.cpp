@@ -23,6 +23,7 @@ PathTrie::PathTrie() {
   log_prob_nb_cur = -NUM_FLT_INF;
   log_prob_c = -NUM_FLT_INF;
   score = -NUM_FLT_INF;
+  approx_ctc = -NUM_FLT_INF;
 
   ROOT_ = -1;
   character = ROOT_;
@@ -32,6 +33,7 @@ PathTrie::PathTrie() {
 
   dictionary_ = nullptr;
   has_dictionary_ = false;
+  dictionary_state_ = {};
 }
 
 PathTrie::~PathTrie() {

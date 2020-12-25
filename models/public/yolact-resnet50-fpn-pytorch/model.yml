@@ -1,0 +1,105 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  YOLACT ResNet 50 is a simple, fully convolutional model for real-time instance segmentation
+  described in "YOLACT: Real-time Instance Segmentation" paper <https://arxiv.org/abs/1904.02689>.
+  Model pretrained in Pytorch* on COCO dataset. For details, see the repository <https://github.com/dbolya/yolact>.
+
+task_type: instance_segmentation
+
+files:
+  - name: yolact/yolact.py
+    size: 31516
+    sha256: b8d43734955dbcedddaa781643000d49309a10d7a3113d8333891d879459f8bb
+    source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/yolact.py
+  - name: yolact/backbone.py
+    size: 17286
+    sha256: 66e53aa5bd7ad35f978a13f3f5c82728a7c073c463c2a2b22a67f924008ed6a7
+    source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/backbone.py
+  - name: yolact/data/config.py
+    size: 31172
+    sha256: f1386cb5787eb260638f127a8bb6d04843506c527aa85c655574967819238139
+    source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/data/config.py
+  - name: yolact/utils/timer.py
+    size: 3508
+    sha256: 082ecd0fdd58a9e66fa7e8e9618e22ed3886ca1ceef286aa9e265d98bf35cfd2
+    source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/utils/timer.py
+  - name: yolact/utils/functions.py
+    size: 6503
+    sha256: e3adc9e8121c0a20c95539bee00045f541427d883fdbbb8ca05a0d160203c902
+    source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/utils/functions.py
+  - name: yolact/layers/interpolate.py
+    size: 412
+    sha256: e502fdd29086933d3a5aa10cfaa19b3063d97609e0aed217771001d9b87251a3
+    source: https://raw.githubusercontent.com/dbolya/yolact/57b8f2d95e62e2e649b382f516ab41f949b57239/layers/interpolate.py
+  - name: yolact/yolact_resnet50_54_800000.pth
+    size: 127300392
+    sha256: c12bb7a7e0343281db7f1407b376970bb52651f121d0b60bc4a49207acb6d6d7
+    source:
+      $type: google_drive
+      id: 1yp7ZbbDwvMiFJEq4ptVKTYTI2VeRDXl0
+framework: pytorch
+postprocessing:
+  - $type: regex_replace
+    file: yolact/yolact.py
+    # Original postprocessing https://github.com/dbolya/yolact/blob/33912fb1056fedbbcac8c9cd1b1e357bbb12df7d/layers/functions/detection.py
+    # can not to be converted to ONNX due to some limitations.
+    # Changes: rewritten on PyTorch*, enabled work with batch in boxes decoding, removed dynamic configurable part.
+    pattern: 'from layers import Detect'
+    replacement: |
+      def detect(preds_out, _):
+          loc, priors = preds_out.pop('loc'), preds_out.pop('priors')
+          variances = [0.1, 0.2]
+          boxes = torch.cat((priors[:, :2] + loc[:, :, :2] * variances[0] * priors[:, 2:], priors[:, 2:] * torch.exp(loc[:, :, 2:] * variances[1])), 2)
+          boxes_copy = boxes.clone()
+          boxes_result1 = boxes_copy[:, :, :2] - boxes[:, :, 2:] / 2
+          boxes_result2 = boxes_copy[:, :, 2:] + boxes_result1
+          boxes_result = torch.cat((boxes_result1, boxes_result2), 2)
+          preds_out['boxes'] = boxes_result
+          return preds_out
+  - $type: regex_replace
+    file: yolact/yolact.py
+    pattern: 'use_jit = torch.cuda.device_count\(\) <= 1'
+    replacement: 'use_jit = False'
+  - $type: regex_replace
+    file: yolact/yolact.py
+    pattern: 'torch.cuda.current_device\(\)'
+    replacement: ''
+  - $type: regex_replace
+    file: yolact/yolact.py
+    pattern: 'self.detect = Detect\(cfg.num_classes, bkg_label=0, top_k=cfg.nms_top_k,\n            conf_thresh=cfg.nms_conf_thresh, nms_thresh=cfg.nms_thresh\)'
+    replacement: "self.detect = detect"
+  - $type: regex_replace
+    file: yolact/yolact.py
+    pattern: 'torch.load\(path\)'
+    replacement: "torch.load(path, map_location=torch.device('cpu'))"
+conversion_to_onnx_args:
+  - --model-name=create_model
+  - --model-path=$config_dir
+  - --model-path=$dl_dir/yolact
+  - --import-module=model
+  - --input-shape=1,3,550,550
+  - --output-file=$conv_dir/yolact-resnet50-fpn.onnx
+  - --model-param=weights=r"$dl_dir/yolact/yolact_resnet50_54_800000.pth"
+  - --input-names=input.1
+  - --output-names=conf,mask,proto,boxes
+model_optimizer_args:
+  - --input=input.1
+  - --mean_values=input.1[123.675,116.28,103.53]
+  - --scale_values=input.1[51.525,50.4,50.625]
+  - --reverse_input_channels
+  - --output=conf,mask,proto,boxes
+  - --input_model=$conv_dir/yolact-resnet50-fpn.onnx
+license: https://raw.githubusercontent.com/dbolya/yolact/master/LICENSE

@@ -1,5 +1,7 @@
 # Whiteboard Inpainting Demo
 
+![](./whiteboard_inpainting.gif)
+
 This demo focuses on a whiteboard text overlapped by a person. The demo shows
 how to use the OpenVINO<sup>TM</sup> toolkit to detect and hide a person on a
 video so that all text on a whiteboard is visible.
@@ -46,8 +48,10 @@ Whiteboard inpainting demo
 
 optional arguments:
   -h, --help            show this help message and exit
-  -i I                  Input sources (index of camera or path to a video
-                        file)
+  -i INPUT, --input INPUT
+                        Required. Path to a video file or a device node of a
+                        web-camera
+  --loop                Optional. Enable reading the input in a loop
   -m_i M_INSTANCE_SEGMENTATION, --m_instance_segmentation M_INSTANCE_SEGMENTATION
                         Path to the instance segmentation model
   -m_s M_SEMANTIC_SEGMENTATION, --m_semantic_segmentation M_SEMANTIC_SEGMENTATION

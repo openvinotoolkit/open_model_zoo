@@ -6,8 +6,8 @@ import logging as log
 class HTMLDataExtractor(HTMLParser):
     def __init__(self, tags):
         super(HTMLDataExtractor, self).__init__()
-        self.started_tags = {k:[] for k in tags}
-        self.ended_tags = {k:[] for k in tags}
+        self.started_tags = {k: [] for k in tags}
+        self.ended_tags = {k: [] for k in tags}
 
     def handle_starttag(self, tag, attrs):
         if tag in self.started_tags:
@@ -32,7 +32,7 @@ def get_paragraphs(url_list):
             parser = HTMLDataExtractor(['title', 'p'])
             charset='utf-8'
             if 'Content-type' in response.headers:
-                m = re.match('.*charset=(\S+).*', response.headers['Content-type'])
+                m = re.match(r'.*charset=(\S+).*', response.headers['Content-type'])
                 if m:
                     charset = m.group(1)
             data = response.read()

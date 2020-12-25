@@ -1,0 +1,34 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  ForwardTacotron model for text to speech task. Regression part.
+task_type: text_to_speech
+files:
+  - name: forward-tacotron-regression.zip
+    size: 29948456
+    sha256: 4a087de0f6126335f804bd4b15b672778d824e0f3538f6cc08710291c753ad29
+    source: https://download.01.org/opencv/public_models/102020/forward-tacotron/forward-tacotron-regression.zip
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: forward-tacotron-regression.zip
+model_optimizer_args:
+  - --input_shape=[1,805,512]
+  - --input=data
+  - --output=mel
+  - --input_model=$dl_dir/forward-tacotron-regression/forward_tacotron_regression.onnx
+framework: onnx
+
+license: https://github.com/as-ideas/ForwardTacotron/blob/master/LICENSE

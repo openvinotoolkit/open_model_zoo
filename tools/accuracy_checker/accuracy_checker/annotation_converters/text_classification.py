@@ -69,7 +69,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
 
     def read_tsv(self):
         lines = []
-        with self.annotation_file.open('r') as ann_file:
+        with open(str(self.annotation_file), 'r', encoding="utf-8-sig") as ann_file:
             reader = csv.reader(ann_file, delimiter="\t", quotechar=None)
             for idx, line in enumerate(reader):
                 if idx == 0:
@@ -171,7 +171,7 @@ class XNLIDatasetConverter(BaseGLUETextClassificationConverter):
                 description='comma-separated list of languages for selection only appropriate annotations.'
                 'If not provided full dataset used',
                 optional=True
-                )
+            )
         })
 
         return params
@@ -277,7 +277,7 @@ class BertXNLITFRecordConverter(BertTextClassificationTFRecordConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations, _, errors = super().convert(check_content, progress_callback, progress_interval, **kwargs)
 
-        return ConverterReturn(annotations, {'label_map':  dict(enumerate(labels['xnli']))}, errors)
+        return ConverterReturn(annotations, {'label_map': dict(enumerate(labels['xnli']))}, errors)
 
 
 class MRPCConverter(BaseGLUETextClassificationConverter):

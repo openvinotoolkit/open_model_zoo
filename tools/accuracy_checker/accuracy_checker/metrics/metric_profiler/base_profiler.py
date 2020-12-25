@@ -17,6 +17,7 @@ limitations under the License.
 import json
 from csv import DictWriter
 from pathlib import Path
+from collections import OrderedDict
 from ...dependency import ClassProvider
 
 PROFILERS_MAPPING = {
@@ -50,17 +51,21 @@ PROFILERS_MAPPING = {
     ('coco_orig_segm_precision', ): 'instance_segmentation'
 }
 
+PROFILERS_WITH_DATA_IS_LIST = {'detection', 'instance_segmentation'}
+
 
 class MetricProfiler(ClassProvider):
     __provider_class__ = 'metric_profiler'
     fields = ['identifier']
 
-    def __init__(self, dump_iterations=100, report_type='csv'):
+    def __init__(self, dump_iterations=100, report_type='csv', name=None):
         self.report_type = report_type
-        self.report_file = '{}.{}'.format(self.__provider__, report_type)
+        self.report_file = '{}_{}.{}'.format(
+            self.__provider__, name, report_type) if name is not None else '{}.{}'.format(
+                self.__provider__, report_type)
         self.out_dir = Path()
         self.dump_iterations = dump_iterations
-        self.storage = []
+        self.storage = OrderedDict()
         self.write_result = self.write_csv_result if report_type == 'csv' else self.write_json_result
         self._last_profile = None
 
@@ -74,34 +79,51 @@ class MetricProfiler(ClassProvider):
         profiling_data = self.generate_profiling_data(*args, **kwargs)
         self._last_profile = profiling_data
         if isinstance(profiling_data, list):
-            finished = True
-            if finished:
-                self.storage.extend(profiling_data)
-        else:
-            finished = True
-            if finished:
-                self.storage.append(profiling_data)
+            if len(profiling_data) > 0:
+                last_identifier = profiling_data[0]['identifier']
+            else:
+                return
 
+            self.storage[last_identifier] = profiling_data
+            finished = True
+        else:
+            last_identifier = profiling_data['identifier']
+            if self.storage.get(last_identifier):
+                self.storage[last_identifier].update(profiling_data)
+            else:
+                self.storage[last_identifier] = profiling_data
+            finished = len(self.fields) == len(self.storage[last_identifier])
         if len(self.storage) % self.dump_iterations == 0 and finished:
             self.write_result()
-            self.storage = []
 
     def finish(self):
         if self.storage:
             self.write_result()
 
     def reset(self):
-        self.storage = []
+        self._reset_storage()
+
+    def _reset_storage(self):
+        self.storage = OrderedDict()
 
     def write_csv_result(self):
         out_path = self.out_dir / self.report_file
         new_file = not out_path.exists()
 
+        data_to_store = []
+        for value in self.storage.values():
+            if isinstance(value, list):
+                data_to_store.extend(value)
+            else:
+                data_to_store.append(value)
+
         with open(str(out_path), 'a+', newline='') as f:
             writer = DictWriter(f, fieldnames=self.fields)
             if new_file:
                 writer.writeheader()
-            writer.writerows(self.storage)
+            writer.writerows(data_to_store)
+
+        self._reset_storage()
 
     def write_json_result(self):
         out_path = self.out_dir / self.report_file
@@ -109,7 +131,7 @@ class MetricProfiler(ClassProvider):
         if not new_file:
             with open(str(out_path), 'r') as f:
                 out_dict = json.load(f)
-            out_dict['report'].extend(self.storage)
+            out_dict['report'].extend(list(self.storage.values()))
         else:
             out_dict = {
                 'processing_info': {
@@ -119,12 +141,14 @@ class MetricProfiler(ClassProvider):
                     'device': self.device,
                     'tags': self.tags
                 },
-                'report': self.storage,
+                'report': list(self.storage.values()),
                 'report_type': self.__provider__,
                 'dataset_meta': self.dataset_meta
             }
         with open(str(out_path), 'w') as f:
             json.dump(out_dict, f)
+
+        self._reset_storage()
 
     def set_output_dir(self, out_dir):
         self.out_dir = out_dir

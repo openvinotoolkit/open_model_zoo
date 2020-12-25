@@ -122,7 +122,7 @@ class TestAnnotationConversion:
         converted_annotation = make_representation('0 0 0 5 5', True)
         mocker.patch(
             'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
-            return_value=ConverterReturn(converted_annotation,None, None)
+            return_value=ConverterReturn(converted_annotation, None, None)
         )
         mocker.patch('pathlib.Path.exists', return_value=False)
         annotation_saver_mock = mocker.patch(
@@ -130,7 +130,7 @@ class TestAnnotationConversion:
         )
         Dataset(config)
 
-        annotation_saver_mock.assert_called_once_with(converted_annotation, None, Path('custom'), None)
+        annotation_saver_mock.assert_called_once_with(converted_annotation, None, Path('custom'), None, config)
 
     def test_annotation_conversion_subset_size(self, mocker):
         addition_options = {
@@ -165,7 +165,7 @@ class TestAnnotationConversion:
         Dataset(config)
         subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666, True)
 
-    def test_annoation_conversion_subset_more_than_dataset_size(self, mocker):
+    def test_annotation_conversion_subset_more_than_dataset_size(self, mocker):
         addition_options = {
             'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
             'subsample_size': 3,
@@ -326,7 +326,7 @@ class TestAnnotationConversion:
         )
         mocker.patch('pathlib.Path.exists', return_value=False)
         Dataset(config)
-        annotation_saver_mock.assert_called_once_with([converted_annotation[1]], None, Path('custom'), None)
+        annotation_saver_mock.assert_called_once_with([converted_annotation[1]], None, Path('custom'), None, config)
 
     def test_annotation_conversion_subset_with_disabled_shuffle(self, mocker):
         addition_options = {

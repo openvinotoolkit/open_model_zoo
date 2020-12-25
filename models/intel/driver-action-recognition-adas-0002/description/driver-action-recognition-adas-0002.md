@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is an action recognition composite model for the driver monitoring use case, consisting of encoder and decoder parts. The encoder model uses Video Transformer approach with MobileNetv2 encoder. It is able to recognize the following actions: drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting.
+This is an action recognition composite model for the driver monitoring use case, consisting of encoder and decoder parts. The encoder model uses Video Transformer approach with MobileNetv2 encoder. It is able to recognize actions such as drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting. The full list of recognized actions is located <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/demos/python_demos/action_recognition/driver_actions.txt">here</a>.
 
 ## Example
 
@@ -26,8 +26,6 @@ Video frames should be sampled to cover ~1 second fragment (i.e. skip every seco
 | MParams                         | 2.863                                     |
 
 
-### Performance
-
 ### Inputs
 
 1. name: "0" , shape: [1x3x224x224] - An input image in the format [BxCxHxW],
@@ -41,7 +39,7 @@ Video frames should be sampled to cover ~1 second fragment (i.e. skip every seco
 
 ### Outputs
 
-The model outputs a tensor with the shape [1x512x1x1], representing embedding of precessed frame.
+The model outputs a tensor with the shape [1x512x1x1], representing embedding of processed frame.
 
 
 ## Decoder model specification
@@ -53,8 +51,6 @@ The driver-action-recognition-adas-0002-decoder model accepts stack of frame emb
 | GFlops                          | 0.147                                     |
 | MParams                         | 4.205                                     |
 
-
-### Performance
 
 ### Inputs
 

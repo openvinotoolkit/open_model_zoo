@@ -2,8 +2,8 @@
 
 ## Use Case and High-Level Description
 
-A tiny model to upscale scanned images with text. The model used the `ConvTranspose2d` layer instead 
-of the `PixelShuffle` layer. As a result, the model can be launched on GPU and MYRIAD devices and 
+A tiny model to upscale scanned images with text. The model used the `ConvTranspose2d` layer instead
+of the `PixelShuffle` layer. As a result, the model can be launched on GPU and MYRIAD devices and
 support the `reshape` function.
 
 ## Example
@@ -30,8 +30,6 @@ support the `reshape` function.
 | MParams                         | 0.003                                     |
 | Source framework                | PyTorch\*                                  |
 
-
-## Performance
 
 ## Inputs
 

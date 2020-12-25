@@ -1,0 +1,38 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  FCRN ResNet50 UpProj is a model for monocular depth estimation trained by NYU Depth V2 dataset;
+  as described in the paper "Deeper Depth Prediction with Fully Convolutional Residual Networks"
+  <https://arxiv.org/abs/1606.00373>.
+  The model input is a blob that consists of a single image of "1x228x304x3" in RGB order.
+  The model output is an inverse depth map that is defined up to an unknown scale factor.
+task_type: monocular_depth_estimation
+framework: tf
+files:
+  - name: NYU_FCRN-checkpoint.zip
+    size: 472588519
+    sha256: 9d97ed165c4a5b3f085eb83b8814de1e883c6348da60da4b2568ddd64bb2d5c4
+    source: http://campar.in.tum.de/files/rupprecht/depthpred/NYU_FCRN-checkpoint.zip
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: NYU_FCRN-checkpoint.zip
+model_optimizer_args:
+  - --input=Placeholder
+  - --reverse_input_channels
+  - --input_shape=[1,228,304,3]
+  - --output=ConvPred/ConvPred
+  - --input_meta=$dl_dir/NYU_FCRN.ckpt.meta
+license: https://raw.githubusercontent.com/iro-cp/FCRN-DepthPrediction/master/LICENSE

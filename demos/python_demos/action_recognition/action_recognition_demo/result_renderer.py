@@ -38,7 +38,7 @@ class ResultRenderer:
         self.number_of_predictions = number_of_predictions
         self.display_confidence = display_confidence
         self.display_fps = display_fps
-        self.lables = labels
+        self.labels = labels
         self.output_height = output_height
         self.meters = defaultdict(partial(WindowAverageMeter, 16))
         self.postprocessing = [LabelPostprocessing(n_frames=label_smoothing_window, history_size=label_smoothing_window)
@@ -54,7 +54,7 @@ class ResultRenderer:
         inference_time = self.update_timers(timers)
 
         if logits is not None:
-            labels, probs = decode_output(logits, self.lables, top_k=self.number_of_predictions,
+            labels, probs = decode_output(logits, self.labels, top_k=self.number_of_predictions,
                                           label_postprocessing=self.postprocessing)
             print("Frame {}: {} - {:.2f}% -- {:.2f}ms".format(frame_ind, labels[0], probs[0] * 100, inference_time))
         else:

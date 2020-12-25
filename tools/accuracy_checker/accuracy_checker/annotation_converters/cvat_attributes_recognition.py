@@ -16,7 +16,6 @@ limitations under the License.
 
 from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ..representation import ClassificationAnnotation, ContainerAnnotation
-from ..topology_types import ImageClassification
 from ..utils import read_xml, check_file_existence
 from ..config import StringField, PathField, ConfigError
 
@@ -24,7 +23,6 @@ from ..config import StringField, PathField, ConfigError
 class CVATAttributesRecognitionConverter(FileBasedAnnotationConverter):
     __provider__ = 'cvat_attributes_recognition'
     annotation_types = (ClassificationAnnotation, )
-    topology_types = (ImageClassification, )
 
     @classmethod
     def parameters(cls):

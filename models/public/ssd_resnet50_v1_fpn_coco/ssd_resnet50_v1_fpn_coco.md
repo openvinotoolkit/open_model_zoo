@@ -4,10 +4,8 @@
 
 The `ssd_resnet50_v1_fpn_coco` model is a SSD FPN object detection architecture based on ResNet-50.
 The model has been trained from the Common Objects in Context (COCO) image dataset.
-For details see the [repository](https://github.com/tensorflow/models/blob/master/research/object_detection)
+For details see the [repository](https://github.com/tensorflow/models/tree/master/research/object_detection)
 and [paper](https://arxiv.org/abs/1708.02002).
-
-## Example
 
 ## Specification
 
@@ -23,8 +21,6 @@ and [paper](https://arxiv.org/abs/1708.02002).
 | Metric | Value |
 | ------ | ----- |
 | coco_precision | 38.4557% |
-
-## Performance
 
 ## Input
 
@@ -77,4 +73,4 @@ The array of summary detection information, name - `detection_out`,  shape - `[1
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

@@ -7,8 +7,6 @@ based on a combination of complementary search techniques as well as a novel arc
 `mobilenet-v3-large-1.0-224-tf` is targeted for high resource use cases.
 For details see [paper](https://arxiv.org/abs/1905.02244).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -24,8 +22,6 @@ For details see [paper](https://arxiv.org/abs/1905.02244).
 | ------ | -------------- | --------------- |
 | Top 1  | 75.70%          | 75.70%          |
 | Top 5  | 92.76%          | 92.76%           |
-
-## Performance
 
 ## Input
 
@@ -76,4 +72,4 @@ shape: [1,1001], format: [BxC],
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

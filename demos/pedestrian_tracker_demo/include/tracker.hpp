@@ -358,7 +358,7 @@ private:
 
     void ComputeFastDesciptors(const cv::Mat &frame,
                                const TrackedObjects &detections,
-                               std::vector<cv::Mat> *desriptors);
+                               std::vector<cv::Mat> *descriptors);
 
     void ComputeDissimilarityMatrix(const std::set<size_t> &active_track_ids,
                                     const TrackedObjects &detections,
@@ -456,4 +456,3 @@ private:
 
     uint64_t prev_timestamp_;
 };
-

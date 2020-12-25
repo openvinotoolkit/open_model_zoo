@@ -50,7 +50,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        std::cout << "InferenceEngine: " << *InferenceEngine::GetInferenceEngineVersion() << std::endl;
+        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 
         /** Printing version **/
         slog::info << "Device info: " << slog::endl;
-        std::cout << ie.GetVersions(FLAGS_d);
+        slog::info << printable(ie.GetVersions(FLAGS_d)) << slog::endl;
 
         // -----------------------------------------------------------------------------------------------------
 
@@ -252,10 +252,10 @@ int main(int argc, char *argv[]) {
             float y1 = std::min(std::max(0.0f, box_info[4] * images[batch].rows), static_cast<float>(images[batch].rows));
             float x2 = std::min(std::max(0.0f, box_info[5] * images[batch].cols), static_cast<float>(images[batch].cols));
             float y2 = std::min(std::max(0.0f, box_info[6] * images[batch].rows), static_cast<float>(images[batch].rows));
-            int box_width = std::min(static_cast<int>(std::max(0.0f, x2 - x1)), images[batch].cols);
-            int box_height = std::min(static_cast<int>(std::max(0.0f, y2 - y1)), images[batch].rows);
+            int box_width = static_cast<int>(x2 - x1);
+            int box_height = static_cast<int>(y2 - y1);
             auto class_id = static_cast<size_t>(box_info[1] + 1e-6f);
-            if (prob > PROBABILITY_THRESHOLD) {
+            if (prob > PROBABILITY_THRESHOLD && box_width > 0 && box_height > 0) {
                 size_t color_index = class_color.emplace(class_id, class_color.size()).first->second;
                 auto& color = CITYSCAPES_COLORS[color_index % arraySize(CITYSCAPES_COLORS)];
                 float* mask_arr = masks_data + box_stride * box + H * W * (class_id - 1);

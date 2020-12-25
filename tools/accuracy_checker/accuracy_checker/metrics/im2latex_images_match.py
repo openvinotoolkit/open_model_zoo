@@ -122,7 +122,7 @@ def run(cmd, timeout_sec):
         timer.cancel()
 
 
-def preprocess_formula(l):
+def preprocess_formula(formula):
     """Formula preprocessing
 
     Args:
@@ -131,25 +131,19 @@ def preprocess_formula(l):
     Returns:
         str: Preprocessed formula
     """
-    l = l.strip()
-    l = l.replace(r'\pmatrix', r'\mypmatrix')
-    l = l.replace(r'\matrix', r'\mymatrix')
+    formula = formula.strip()
+    formula = formula.replace(r'\pmatrix', r'\mypmatrix')
+    formula = formula.replace(r'\matrix', r'\mymatrix')
     # remove leading comments
-    l = l.strip('%')
-    if len(l) == 0:
-        l = '\\hspace{1cm}'
+    formula = formula.strip('%')
+    if not formula:
+        formula = '\\hspace{1cm}'
     # \hspace {1 . 5 cm} -> \hspace {1.5cm}
-    for space in ["hspace", "vspace"]:
-        match = re.finditer(space + " {(.*?)}", l)
-        if match:
-            new_l = ""
-            last = 0
-            for m in match:
-                new_l = new_l + l[last:m.start(1)] + m.group(1).replace(" ", "")
-                last = m.end(1)
-            new_l = new_l + l[last:]
-            l = new_l
-    return l
+    formula = re.sub("([hv]space )({.*?})",
+                     lambda m: m[1] + m[2].replace(" ", ""),
+                     formula)
+
+    return formula
 
 
 def render_routine(line):
@@ -215,7 +209,7 @@ def preprocess(img):
     Returns:
         np.array: preprocessed image
     """
-    # transpose for more convinient work
+    # transpose for more convenient work
     img = np.transpose(img)
     img = (img >= 160).astype(np.uint8)
     return img
@@ -254,7 +248,7 @@ def match_images(params):
     if (padded_im_1 == padded_im_2).all():
         return True, True
 
-    # check if difference realy is (e.g. it is not shift on 1-2 px)
+    # check if difference really is (e.g. it is not shift on 1-2 px)
     diff = np.zeros((*padded_im_1.shape, 3), dtype=np.uint8)
     diff[(padded_im_1 == 1) * (padded_im_2 == 1), :] = (255, 255, 255)
     diff[(padded_im_1 == 1) * (padded_im_2 == 0), :] = (255, 0, 0)

@@ -29,7 +29,7 @@ def read_vocab(vocab_path):
         vocab_path (str): path to vocab file
 
     Raises:
-        ValueError: If wrong extenson of the file
+        ValueError: If wrong extension of the file
 
     Returns:
         Vocab: Vocab object with sign2id and id2sign dictinaries
@@ -40,9 +40,8 @@ def read_vocab(vocab_path):
     elif vocab_path.suffix == '.json':
         with open(vocab_path, "r") as f:
             vocab_dict = json.load(f)
-            for k, v in vocab_dict['id2sign'].items():
-                del vocab_dict['id2sign'][k]
-                vocab_dict['id2sign'][int(k)] = v
+            id2sign = {int(k): v for k, v in vocab_dict['id2sign'].items()}
+            vocab_dict['id2sign'] = id2sign
     else:
         raise ValueError("Wrong extension of the vocab file")
     return vocab_dict["id2sign"]
@@ -78,6 +77,7 @@ class Im2latexDatasetConverter(DirectoryBasedAnnotationConverter):
             }
         )
         return configuration_parameters
+
     def configure(self):
         super().configure()
         self.images_dir = self.get_value_from_config('images_dir')

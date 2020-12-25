@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ...utils import read_pickle
-from .loader import Loader, DictLoaderMixin
+import pickle
+from .loader import Loader, DictLoaderMixin, StoredPredictionBatch
 
 
 class PickleLoader(DictLoaderMixin, Loader):
@@ -26,9 +26,50 @@ class PickleLoader(DictLoaderMixin, Loader):
     __provider__ = 'pickle'
 
     def load(self, *args, **kwargs):
-        data = read_pickle(self._data_path)
+        progress_reporter = kwargs.get('progress')
+        data = self.read_pickle(self._data_path)
 
-        if isinstance(data, list) and all(hasattr(entry, 'identifier') for entry in data):
-            return dict(zip([representation.identifier for representation in data], data))
+        if isinstance(data, list):
+            if progress_reporter:
+                progress_reporter.reset(len(data))
+            if all(isinstance(entry, StoredPredictionBatch) for entry in data):
+                return self.load_batched_predictions(data, kwargs.get('adapter'), progress_reporter)
+
+            if all(hasattr(entry, 'identifier') for entry in data):
+                predictions = {}
+                for idx, rep in enumerate(data):
+                    predictions[rep.identifier] = rep
+                    if progress_reporter:
+                        progress_reporter.update(idx, 1)
+                return predictions
+            if 'identifiers' in kwargs:
+                identifiers = kwargs['identifiers']
+                return dict(zip(identifiers, data))
 
         return data
+
+    @staticmethod
+    def read_pickle(data_path):
+        result = []
+        with open(data_path, 'rb') as content:
+            while True:
+                try:
+                    result.append(pickle.load(content))
+                except EOFError:
+                    break
+        return result
+
+    @staticmethod
+    def load_batched_predictions(data, adapter=None, progress_reporter=None):
+        predictions = {}
+        for idx, entry in enumerate(data):
+            if adapter:
+                pred_list = adapter.process(*entry)
+                for pred in pred_list:
+                    predictions[pred.identifier] = pred
+            else:
+                for identifier in entry.identifiers:
+                    predictions[identifier] = entry
+            if progress_reporter:
+                progress_reporter.update(idx, 1)
+        return predictions

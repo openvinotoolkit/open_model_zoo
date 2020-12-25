@@ -16,7 +16,6 @@ from argparse import ArgumentParser
 from collections import namedtuple
 from os.path import exists
 
-import json
 import numpy as np
 from builtins import range
 from lxml import etree
@@ -436,7 +435,7 @@ def process_tracks(all_tracks, window_size, min_length):
 def calculate_metrics(all_tracks):
     """Calculates Precision and Recall metrics.
 
-    :param all_tracks: Input mathed events
+    :param all_tracks: Input matched events
     :return: Precision and Recall scalar values
     """
 

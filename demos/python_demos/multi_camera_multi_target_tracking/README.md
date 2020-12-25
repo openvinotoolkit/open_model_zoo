@@ -1,4 +1,4 @@
-# Multi Camera Multi Target Python* Demo
+# Multi Camera Multi Target Python\* Demo
 
 This demo demonstrates how to run Multi Camera Multi Target (e.g. person or vehicle) demo using OpenVINO<sup>TM</sup>.
 
@@ -60,8 +60,10 @@ Multi camera multi target tracking live demo script
 
 optional arguments:
   -h, --help            show this help message and exit
-  -i I [I ...]          Input sources (indexes of cameras or paths to video
+  -i INPUT, --input INPUT
+                        Input sources (indexes of cameras or paths to video
                         files)
+  --loop                Optional. Enable reading the input in a loop
   --config CONFIG       Configuration file
   --detections DETECTIONS
                         JSON file with bounding boxes
@@ -173,7 +175,7 @@ The demo provides tools for measure quality of the multi camera multi target tra
 
 For MOT metrics evaluation we use [py-motmetrics](https://github.com/cheind/py-motmetrics) module.
 It is necessary to have ground truth annotation file for the evaluation. Supported format
-of the ground truth annotation can be obtained via the annotation tool [CVAT](https://github.com/opencv/cvat).
+of the ground truth annotation can be obtained via the annotation tool [CVAT](https://github.com/openvinotoolkit/cvat).
 The annotation must includes the following labels and attributes:
 ```json
 [

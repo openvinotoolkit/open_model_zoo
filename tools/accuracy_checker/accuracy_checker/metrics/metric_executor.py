@@ -35,9 +35,8 @@ class MetricsExecutor:
     def __init__(self, metrics_config, dataset=None, state=None):
         self.state = state or {}
         dataset_name = dataset.name if dataset else ''
-        message_prefix = '{}'.format(dataset_name)
         if not metrics_config:
-            raise ConfigError('{} dataset config must specify "{}"'.format(message_prefix, 'metrics'))
+            raise ConfigError('{} dataset config must specify "{}"'.format(dataset_name, 'metrics'))
 
         self._dataset = dataset
         self.profile_metrics = False if dataset is None else dataset.config.get('_profile', False)
@@ -176,7 +175,7 @@ class MetricsExecutor:
     def get_metrics_attributes(self):
         return {
             metric.name: {
-                'direction':  metric.metric_fn.meta.get('target', 'higher-better'),
+                'direction': metric.metric_fn.meta.get('target', 'higher-better'),
                 'type': metric.metric_type
             } for metric in self.metrics
         }

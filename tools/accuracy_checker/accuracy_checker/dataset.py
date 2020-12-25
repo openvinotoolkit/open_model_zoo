@@ -17,8 +17,12 @@ limitations under the License.
 from copy import deepcopy
 from pathlib import Path
 import warnings
+import pickle
+import numpy as np
 
-from .annotation_converters import BaseFormatConverter, save_annotation, make_subset, analyze_dataset
+from .annotation_converters import (
+    BaseFormatConverter, DatasetConversionInfo, save_annotation, make_subset, analyze_dataset
+)
 from .config import (
     ConfigValidator,
     StringField,
@@ -31,7 +35,9 @@ from .config import (
     BoolField
 )
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
-from .representation import BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
+from .representation import (
+    BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
+)
 from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS
 from .logging import print_info
 
@@ -119,7 +125,7 @@ class Dataset:
                     dataset_name=self._config['name'], file=meta_name))
             print_info('Converted annotation for {dataset_name} dataset will be saved to {file}'.format(
                 dataset_name=self._config['name'], file=Path(annotation_name)))
-            save_annotation(annotation, meta, Path(annotation_name), meta_name)
+            save_annotation(annotation, meta, Path(annotation_name), meta_name, self._config)
 
         self._annotation = annotation
         self._meta = meta or {}
@@ -159,13 +165,6 @@ class Dataset:
     def full_size(self):
         return len(self._annotation)
 
-    def __call__(self, context, *args, **kwargs):
-        batch_input_ids, batch_annotation = self.__getitem__(self.iteration)
-        self.iteration += 1
-        context.annotation_batch = batch_annotation
-        context.identifiers_batch = [annotation.identifier for annotation in batch_annotation]
-        context.input_ids_batch = batch_input_ids
-
     def __getitem__(self, item):
         if self.batch is None:
             self.batch = 1
@@ -183,7 +182,9 @@ class Dataset:
 
     def make_subset(self, ids=None, start=0, step=1, end=None, accept_pairs=False):
         pairwise_subset = isinstance(
-            self._annotation[0], (ReIdentificationAnnotation, ReIdentificationClassificationAnnotation)
+            self._annotation[0], (
+                ReIdentificationAnnotation, ReIdentificationClassificationAnnotation, PlaceRecognitionAnnotation
+            )
         )
         if ids:
             self.subset = ids if not pairwise_subset else self._make_subset_pairwise(ids, accept_pairs)
@@ -194,9 +195,7 @@ class Dataset:
         self.subset = ids if not pairwise_subset else self._make_subset_pairwise(ids, accept_pairs)
 
     def _make_subset_pairwise(self, ids, add_pairs=False):
-        subsample_set = OrderedSet()
-        pairs_set = OrderedSet()
-        if isinstance(self._annotation[0], ReIdentificationClassificationAnnotation):
+        def reid_pairwise_subset(pairs_set, subsample_set, ids):
             identifier_to_index = {annotation.identifier: index for index, annotation in enumerate(self._annotation)}
             for idx in ids:
                 subsample_set.add(idx)
@@ -209,7 +208,9 @@ class Dataset:
                     identifier_to_index[pair_identifier] for pair_identifier in current_annotation.positive_pairs
                 ]
                 pairs_set |= negative_pairs
-        else:
+            return pairs_set, subsample_set
+
+        def reid_subset(pairs_set, subsample_set, ids):
             for idx in ids:
                 subsample_set.add(idx)
                 selected_annotation = self._annotation[idx]
@@ -225,7 +226,38 @@ class Dataset:
                         if annotation.person_id == selected_annotation.person_id and not annotation.query
                     ]
                     pairs_set |= OrderedSet(gallery_for_person)
+            return pairs_set, subsample_set
 
+        def ibl_subset(pairs_set, subsample_set, ids):
+            queries_ids = [idx for idx, ann in enumerate(self._annotation) if ann.query]
+            gallery_ids = [idx for idx, ann in enumerate(self._annotation) if not ann.query]
+            subset_id_to_q_id = {s_id: idx for idx, s_id in enumerate(queries_ids)}
+            subset_id_to_g_id = {s_id: idx for idx, s_id in enumerate(gallery_ids)}
+            queries_loc = [ann.coords for ann in self._annotation if ann.query]
+            gallery_loc = [ann.coords for ann in self._annotation if not ann.query]
+            dist_mat = np.zeros((len(queries_ids), len(gallery_ids)))
+            for idx, query_loc in enumerate(queries_loc):
+                dist_mat[idx] = np.linalg.norm(np.array(query_loc) - np.array(gallery_loc), axis=1)
+            for idx in ids:
+                if idx in subset_id_to_q_id:
+                    pair = gallery_ids[np.argmin(dist_mat[subset_id_to_q_id[idx]])]
+                else:
+                    pair = queries_ids[np.argmin(dist_mat[:, subset_id_to_g_id[idx]])]
+                subsample_set.add(idx)
+                pairs_set.add(pair)
+            return pairs_set, subsample_set
+
+        realisation = [
+            (PlaceRecognitionAnnotation, ibl_subset),
+            (ReIdentificationClassificationAnnotation, reid_pairwise_subset),
+            (ReIdentificationAnnotation, reid_subset),
+        ]
+        subsample_set = OrderedSet()
+        pairs_set = OrderedSet()
+        for (dtype, func) in realisation:
+            if isinstance(self._annotation[0], dtype):
+                pairs_set, subsample_set = func(pairs_set, subsample_set, ids)
+                break
         if add_pairs:
             subsample_set |= pairs_set
 
@@ -284,10 +316,14 @@ class Dataset:
         self.name = self._config.get('name')
         self.subset = None
 
-    def provide_data_info(self, reader, annotations):
-        for ann in annotations:
+    def provide_data_info(self, reader, annotations, progress_reporter=None):
+        if progress_reporter:
+            progress_reporter.reset(len(annotations))
+        for idx, ann in enumerate(annotations):
             input_data = reader(ann.identifier)
             self.set_annotation_metadata(ann, input_data, reader.data_source)
+            if progress_reporter:
+                progress_reporter.update(idx, 1)
         return annotations
 
 
@@ -296,6 +332,14 @@ def read_annotation(annotation_file: Path):
 
     result = []
     with annotation_file.open('rb') as file:
+        try:
+            first_obj = pickle.load(file)
+            if isinstance(first_obj, DatasetConversionInfo):
+                describe_cached_dataset(first_obj)
+            else:
+                result.append(first_obj)
+        except EOFError:
+            return result
         while True:
             try:
                 result.append(BaseRepresentation.load(file))
@@ -323,6 +367,21 @@ def create_subset(annotation, subsample_size, subsample_seed, shuffle=True):
     if subsample_size < 1:
         raise ConfigError('subsample_size should be > 0')
     return make_subset(annotation, subsample_size, subsample_seed, shuffle)
+
+
+def describe_cached_dataset(dataset_info):
+    print_info('Loaded dataset info:')
+    if dataset_info.dataset_name:
+        print_info('\tDataset name: {}'.format(dataset_info.dataset_name))
+    print_info('\tAccuracy Checker version {}'.format(dataset_info.ac_version))
+    print_info('\tDataset size {}'.format(dataset_info.dataset_size))
+    print_info('\tConversion parameters:')
+    for key, value in dataset_info.conversion_parameters.items():
+        print_info('\t\t{key}: {value}'.format(key=key, value=value))
+    if dataset_info.subset_parameters:
+        print_info('\nSubset selection parameters:')
+        for key, value in dataset_info.subset_parameters.items():
+            print_info('\t\t{key}: {value}'.format(key=key, value=value))
 
 
 class DatasetWrapper:

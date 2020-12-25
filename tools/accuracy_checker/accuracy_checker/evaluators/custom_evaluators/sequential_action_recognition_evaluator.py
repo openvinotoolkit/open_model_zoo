@@ -64,6 +64,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             output_callback=None,
             allow_pairwise_subset=False,
             dump_prediction_to_annotation=False,
+            calculate_metrics=True,
             **kwargs):
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
@@ -79,6 +80,8 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             _progress_reporter = None if not check_progress else self._create_progress_reporter(
                 check_progress, self.dataset.size
             )
+        metric_config = self.configure_intermediate_metrics_results(kwargs)
+        compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             batch_inputs_extr, _ = extract_image_representations(batch_inputs)
@@ -93,7 +96,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                 batch_identifiers, batch_inputs_extr, encoder_callback=encoder_callback
             )
             metrics_result = None
-            if self.metric_executor:
+            if self.metric_executor and calculate_metrics:
                 metrics_result, _ = self.metric_executor.update_metrics_on_batch(
                     batch_input_ids, batch_annotation, batch_prediction
                 )
@@ -110,6 +113,10 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                 )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
+                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(
+                        print_results=True, ignore_results_formatting=ignore_results_formatting
+                    )
 
         if _progress_reporter:
             _progress_reporter.finish()
@@ -239,6 +246,15 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             pr_kwargs = {"print_interval": check_progress}
 
         return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
+
+    @staticmethod
+    def configure_intermediate_metrics_results(config):
+        compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
+        metric_interval, ignore_results_formatting = None, None
+        if compute_intermediate_metric_res:
+            metric_interval = config.get('metrics_interval', 1000)
+            ignore_results_formatting = config.get('ignore_results_formatting', False)
+        return compute_intermediate_metric_res, metric_interval, ignore_results_formatting
 
 
 class BaseModel:

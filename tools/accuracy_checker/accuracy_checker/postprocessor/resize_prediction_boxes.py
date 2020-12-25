@@ -16,7 +16,7 @@ limitations under the License.
 
 from ..representation import DetectionPrediction, DetectionAnnotation
 from ..postprocessor.postprocessor import Postprocessor
-from  ..config import BoolField
+from ..config import BoolField
 
 
 class ResizePredictionBoxes(Postprocessor):

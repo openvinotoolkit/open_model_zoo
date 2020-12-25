@@ -33,7 +33,7 @@ class CorrectYoloV2Boxes(Postprocessor):
             'dst_width': NumberField(value_type=int, optional=True, min_value=1, description="Destination width."),
             'dst_height': NumberField(value_type=int, optional=True, min_value=1, description="Destination height."),
             'size': NumberField(
-                value_type=int, optional=True, min_value=1, description="Destination size for both dimentions."
+                value_type=int, optional=True, min_value=1, description="Destination size for both dimensions."
             )
         })
         return parameters

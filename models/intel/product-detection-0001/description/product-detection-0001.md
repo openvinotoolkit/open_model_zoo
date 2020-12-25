@@ -18,8 +18,6 @@ The network can detect 12 classes of objects (`sprite`, `kool-aid`, `extra`, `oc
 | MParams                                                           | 3.212    |
 | Source framework                                                  | PyTorch* |
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x512x512]. An input image in the format [BxCxHxW],

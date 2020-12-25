@@ -5,8 +5,6 @@
 This is a reimplemented and retrained version of the [YOLO v2](https://arxiv.org/abs/1612.08242) object detection network trained with the VOC2012 training dataset.
 [Network weight pruning](https://arxiv.org/abs/1710.01878) is applied to sparsify convolution layers (35% of network parameters are set to zeros).
 
-## Example
-
 ## Specification
 
 | Metric                       | Value        |
@@ -15,10 +13,8 @@ This is a reimplemented and retrained version of the [YOLO v2](https://arxiv.org
 | Flops                        | 48.29Bn*     |
 | Source framework             | TensorFlow\* |
 
-For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
+For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](https://doi.org/10.1007/s11263-009-0275-4).
 Tested on the VOC 2012 validation dataset.
-
-## Performance
 
 ## Inputs
 

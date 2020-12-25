@@ -5,8 +5,6 @@
 This is a TensorFlow\* version of `densenet-161` model, one of the DenseNet
 group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details see [repository](https://github.com/pudae/tensorflow-densenet/), [paper](https://arxiv.org/abs/1608.06993).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -22,8 +20,6 @@ group of models designed to perform image classification. The weights were conve
 | ------ | ----- |
 | Top 1  | 76.446% |
 | Top 5  | 93.228%|
-
-## Performance
 
 ## Input
 

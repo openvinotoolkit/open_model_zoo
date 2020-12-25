@@ -12,4 +12,3 @@ HumanPose::HumanPose(const std::vector<cv::Point3f>& keypoints,
     : keypoints(keypoints),
       score(score) {}
 } // namespace human_pose_estimation
-

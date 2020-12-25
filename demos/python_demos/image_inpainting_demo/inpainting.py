@@ -11,14 +11,13 @@
  limitations under the License.
 """
 
-import os
 import cv2
 import numpy as np
 
 
 class ImageInpainting:
     def __init__(self, ie, model_path, device='CPU'):
-        model = ie.read_network(model_path, os.path.splitext(model_path)[0] + '.bin')
+        model = ie.read_network(model_path, model_path.with_suffix('.bin'))
 
         assert len(model.input_info) == 2, "Expected 2 input blob"
         assert len(model.outputs) == 1, "Expected 1 output blobs"

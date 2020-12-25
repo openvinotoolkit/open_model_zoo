@@ -18,4 +18,3 @@
 #define PT_CHECK_GT(actual, expected) PT_CHECK_BINARY(actual, expected, >)
 #define PT_CHECK_LE(actual, expected) PT_CHECK_BINARY(actual, expected, <=)
 #define PT_CHECK_GE(actual, expected) PT_CHECK_BINARY(actual, expected, >=)
-

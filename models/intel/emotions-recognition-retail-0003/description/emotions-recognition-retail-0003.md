@@ -34,8 +34,6 @@ only the images containing five aforementioned emotions is chosen. The total amo
 |-----------------|------------|
 | Accuracy        |     70.20% |
 
-## Performance
-
 ## Inputs
 
 Name: `input`, shape: [1x3x64x64] - An input image in [1xCxHxW] format. Expected color order is BGR.

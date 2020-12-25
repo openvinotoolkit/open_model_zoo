@@ -16,20 +16,22 @@
 """
 
 import logging as log
-import os
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
 
 import cv2
 import numpy as np
 from openvino.inference_engine import IECore
 
+from instance_segmentation_demo.model_utils import check_model
 from instance_segmentation_demo.tracker import StaticIOUTracker
 from instance_segmentation_demo.visualizer import Visualizer
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 import monitors
+from images_capture import open_images_capture
 
 
 def build_argparser():
@@ -39,14 +41,15 @@ def build_argparser():
                       help='Show this help message and exit.')
     args.add_argument('-m', '--model',
                       help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=str, metavar='"<path>"')
+                      required=True, type=Path, metavar='"<path>"')
     args.add_argument('--labels',
                       help='Required. Path to a text file with class labels.',
                       required=True, type=str, metavar='"<path>"')
-    args.add_argument('-i',
-                      dest='input_source',
-                      help='Required. Path to an image, video file or a numeric camera ID.',
-                      required=True, type=str, metavar='"<path>"')
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. An input to process. The input must be a single image, '
+                           'a folder of images or anything that cv2.VideoCapture can process.')
+    args.add_argument('--loop', default=False, action='store_true',
+                      help='Optional. Enable reading the input in a loop.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
@@ -81,43 +84,11 @@ def build_argparser():
                       help='Optional. Output inference results raw values.',
                       action='store_true')
     args.add_argument("--no_show",
-                      help="Optional. Don't show output",
+                      help="Optional. Don't show output.",
                       action='store_true')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
     return parser
-
-
-def expand_box(box, scale):
-    w_half = (box[2] - box[0]) * .5
-    h_half = (box[3] - box[1]) * .5
-    x_c = (box[2] + box[0]) * .5
-    y_c = (box[3] + box[1]) * .5
-    w_half *= scale
-    h_half *= scale
-    box_exp = np.zeros(box.shape)
-    box_exp[0] = x_c - w_half
-    box_exp[2] = x_c + w_half
-    box_exp[1] = y_c - h_half
-    box_exp[3] = y_c + h_half
-    return box_exp
-
-
-def segm_postprocess(box, raw_cls_mask, im_h, im_w):
-    # Add zero border to prevent upsampling artifacts on segment borders.
-    raw_cls_mask = np.pad(raw_cls_mask, ((1, 1), (1, 1)), 'constant', constant_values=0)
-    extended_box = expand_box(box, raw_cls_mask.shape[0] / (raw_cls_mask.shape[0] - 2.0)).astype(int)
-    w, h = np.maximum(extended_box[2:] - extended_box[:2] + 1, 1)
-    x0, y0 = np.clip(extended_box[:2], a_min=0, a_max=[im_w, im_h])
-    x1, y1 = np.clip(extended_box[2:] + 1, a_min=0, a_max=[im_w, im_h])
-
-    raw_cls_mask = cv2.resize(raw_cls_mask, (w, h)) > 0.5
-    mask = raw_cls_mask.astype(np.uint8)
-    # Put an object mask in an image mask.
-    im_mask = np.zeros((im_h, im_w), dtype=np.uint8)
-    im_mask[y0:y1, x0:x1] = mask[(y0 - extended_box[1]):(y1 - extended_box[1]),
-                            (x0 - extended_box[0]):(x1 - extended_box[0])]
-    return im_mask
 
 
 def main():
@@ -131,29 +102,16 @@ def main():
         ie.add_extension(args.cpu_extension, 'CPU')
     # Read IR
     log.info('Loading network')
-    net = ie.read_network(args.model, os.path.splitext(args.model)[0] + '.bin')
-
-    required_input_keys = {'im_data', 'im_info'}
-    assert required_input_keys == set(net.input_info), \
-        'Demo supports only topologies with the following input keys: {}'.format(', '.join(required_input_keys))
-    required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks'}
-    assert required_output_keys.issubset(net.outputs.keys()), \
-        'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
-
-    n, c, h, w = net.input_info['im_data'].input_data.shape
-    assert n == 1, 'Only batch 1 is supported by the demo application'
+    net = ie.read_network(args.model, args.model.with_suffix('.bin'))
+    image_input, image_info_input, (n, c, h, w), postprocessor = check_model(net)
 
     log.info('Loading IR to the plugin...')
     exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)
 
-    try:
-        input_source = int(args.input_source)
-    except ValueError:
-        input_source = args.input_source
-    cap = cv2.VideoCapture(input_source)
-    if not cap.isOpened():
-        log.error('Failed to open "{}"'.format(args.input_source))
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+    cap = open_images_capture(args.input, args.loop)
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
 
     if args.no_track:
         tracker = None
@@ -163,19 +121,17 @@ def main():
     with open(args.labels, 'rt') as labels_file:
         class_labels = labels_file.read().splitlines()
 
+    frame_size = frame.shape
     presenter = monitors.Presenter(args.utilization_monitors, 45,
-        (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
+                (round(frame_size[1] / 4), round(frame_size[0] / 8)))
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
 
     render_time = 0
 
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
 
+    while frame is not None:
         if args.no_keep_aspect_ratio:
             # Resize the image to a target size.
             scale_x = w / frame.shape[1]
@@ -198,28 +154,16 @@ def main():
 
         # Run the net.
         inf_start = time.time()
-        outputs = exec_net.infer({'im_data': input_image, 'im_info': input_image_info})
+        feed_dict = {image_input: input_image}
+        if image_info_input:
+            feed_dict[image_info_input] = input_image_info
+        outputs = exec_net.infer(feed_dict)
         inf_end = time.time()
         det_time = inf_end - inf_start
 
         # Parse detection results of the current request
-        boxes = outputs['boxes']
-        boxes[:, 0::2] /= scale_x
-        boxes[:, 1::2] /= scale_y
-        scores = outputs['scores']
-        classes = outputs['classes'].astype(np.uint32)
-        masks = []
-        for box, cls, raw_mask in zip(boxes, classes, outputs['raw_masks']):
-            raw_cls_mask = raw_mask[cls, ...]
-            mask = segm_postprocess(box, raw_cls_mask, frame.shape[0], frame.shape[1])
-            masks.append(mask)
-
-        # Filter out detections with low confidence.
-        detections_filter = scores > args.prob_threshold
-        scores = scores[detections_filter]
-        classes = classes[detections_filter]
-        boxes = boxes[detections_filter]
-        masks = list(segm for segm, is_valid in zip(masks, detections_filter) if is_valid)
+        scores, classes, boxes, masks = postprocessor(
+            outputs, scale_x, scale_y, *frame.shape[:2], h, w, args.prob_threshold)
 
         render_start = time.time()
 
@@ -265,10 +209,10 @@ def main():
             if key == esc_code:
                 break
             presenter.handleKey(key)
+        frame = cap.read()
 
     print(presenter.reportMeans())
     cv2.destroyAllWindows()
-    cap.release()
 
 
 if __name__ == '__main__':

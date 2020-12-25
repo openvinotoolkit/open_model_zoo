@@ -26,14 +26,27 @@ class JSONLoader(DictLoaderMixin, Loader):
 
     __provider__ = 'json'
 
-    def load(self, identifiers=None, **kwargs):
+    def load(self, identifiers=None, adapter=None, **kwargs):
+        progress_reporter = kwargs.get('progress')
         detection_list = read_json(self._data_path)
+        if progress_reporter:
+            num_iters = len(identifiers) if identifiers else len(detection_list)
+            progress_reporter.reset(num_iters)
         data = defaultdict(dict)
         idx = 0
         for detection in detection_list:
             if 'timestamp' in detection:
                 idx = int(detection['timestamp']) // 1000000000
+            if identifiers and idx >= len(identifiers):
+                break
             identifier = identifiers[idx] if identifiers else idx
             idx += 1
+            if adapter:
+                detection = adapter.process(detection, [identifier], [{}])
             data[identifier] = detection
+            if progress_reporter:
+                progress_reporter.update(idx, 1)
         return data
+
+    def __getitem__(self, item):
+        return self.data[item]

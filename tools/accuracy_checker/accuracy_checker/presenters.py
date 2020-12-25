@@ -113,13 +113,14 @@ class VectorPrintPresenter(BasePresenter):
 
     def extract_result(self, evaluation_result):
         value, reference, name, metric_type, _, meta = evaluation_result
-        value_names = ['{}@{}'.format(name, value_name) for value_name in meta.get('names', range(0, len(value)))]
+        len_value = len(value) if not np.isscalar(value) else 1
+        value_names = ['{}@{}'.format(name, value_name) for value_name in meta.get('names', range(0, len_value))]
         if np.isscalar(value) or np.size(value) == 1:
             if not np.isscalar(value):
                 value = value[0]
             result_dict = {
                 'name': value_names[0] if 'names' in meta else name,
-                'value':value,
+                'value': value,
                 'type': metric_type,
                 'ref': reference or ''
             }

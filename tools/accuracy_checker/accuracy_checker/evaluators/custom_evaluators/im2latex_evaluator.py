@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from pathlib import Path
+from collections import OrderedDict
 import numpy as np
 
 from ..base_evaluator import BaseEvaluator
@@ -22,6 +23,7 @@ from ...utils import contains_all, extract_image_representations
 from ...launcher import create_launcher
 from ...data_readers import BaseReader
 from ...dataset import Dataset
+from ...logging import print_info
 from ...metrics import MetricsExecutor
 from ...preprocessor import PreprocessingExecutor
 from ...representation import CharacterRecognitionPrediction
@@ -64,6 +66,10 @@ class Im2latexEvaluator(BaseEvaluator):
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         self._annotations, self._predictions = [], []
+        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
+        if compute_intermediate_metric_res:
+            metric_interval = kwargs.get('metrics_interval', 1000)
+            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
 
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
@@ -80,7 +86,10 @@ class Im2latexEvaluator(BaseEvaluator):
             self._annotations.extend(batch_annotation)
             self._predictions.extend(batch_prediction)
 
-            progress_reporter.update(batch_id, len(batch_input))
+            if progress_reporter:
+                progress_reporter.update(batch_id, len(batch_input))
+                if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting)
 
         if progress_reporter:
             progress_reporter.finish()
@@ -178,11 +187,44 @@ class BaseModel:
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
+            print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
         if model.suffix == '.blob':
             return model, None
         weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
+        if 'weights' not in network_info:
+            print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
 
         return model, weights
+
+    def print_input_output_info(self):
+        print_info('{} - Input info:'.format(self.default_model_suffix))
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
+        if self.network:
+            if has_info:
+                network_inputs = OrderedDict(
+                    [(name, data.input_data) for name, data in self.network.input_info.items()]
+                )
+            else:
+                network_inputs = self.network.inputs
+            network_outputs = self.network.outputs
+        else:
+            if has_info:
+                network_inputs = OrderedDict([
+                    (name, data.input_data) for name, data in self.exec_network.input_info.items()
+                ])
+            else:
+                network_inputs = self.exec_network.inputs
+            network_outputs = self.exec_network.outputs
+        for name, input_info in network_inputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(input_info.precision))
+            print_info('\tshape {}\n'.format(input_info.shape))
+        print_info('{} - Output info'.format(self.default_model_suffix))
+        for name, output_info in network_outputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(output_info.precision))
+            print_info('\tshape: {}\n'.format(output_info.shape))
+
 
 
 def create_recognizer(model_config, launcher, suffix):
@@ -294,6 +336,7 @@ class RecognizerDLSDKModel(BaseModel):
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
+        self.print_input_output_info()
 
     def predict(self, inputs, identifiers=None):
         return self.exec_network.infer(inputs)
