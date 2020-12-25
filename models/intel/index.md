@@ -2,11 +2,10 @@
 
 OpenVINO&trade; toolkit provides a set of pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
-software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
+software. Most recent version is available in the [repo on GitHub](https://github.com/openvinotoolkit/open_model_zoo).
 
 The models can be downloaded via Model Downloader
 (`<OPENVINO_INSTALL_DIR>/deployment_tools/open_model_zoo/tools/downloader`).
-They can also be downloaded manually from [01.org](https://download.01.org/opencv).
 
 > **TIP**: You also can download and profile Intel® pretrained models inside the OpenVINO™ [Deep Learning Workbench](@ref workbench_docs_Workbench_DG_Introduction) (DL Workbench).
 > [DL Workbench](@ref workbench_docs_Workbench_DG_Introduction) is a platform built upon OpenVINO™ and provides a web-based graphical environment that enables you to optimize, fine-tune, analyze, visualize, and compare 
