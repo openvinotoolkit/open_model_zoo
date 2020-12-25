@@ -31,7 +31,8 @@ The demo workflow is the following:
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: image_retrieval_demo.py [-h] -m MODEL -i I -g GALLERY
+usage: image_retrieval_demo.py [-h] -m MODEL -i INPUT [--loop]
+                               [-o OUTPUT] -g GALLERY
                                [-gt GROUND_TRUTH] [-d DEVICE]
                                [-l CPU_EXTENSION] [--no_show]
                                [-u UTILIZATION_MONITORS]
@@ -44,6 +45,8 @@ Options:
                         Required. Path to a video file or a device node of a
                         web-camera.
   --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
   -g GALLERY, --gallery GALLERY
                         Required. Path to a file listing gallery images.
   -gt GROUND_TRUTH, --ground_truth GROUND_TRUTH
