@@ -60,6 +60,8 @@ class IncrementalTimer:
         self.tock()
 
     def __repr__(self):
+        if not self._times:
+            return "{:.2f}ms (+/-: {:.2f}) {:.2f}fps".format(0, 0, 0)
         return "{:.2f}ms (+/-: {:.2f}) {:.2f}fps".format(self.avg, self.std, self.fps)
 
 
