@@ -5,9 +5,12 @@ ctdet_coco_dlav0_512
 # For --architecture_type=faceboxes
 faceboxes-pytorch
 # For --architecture_type=ssd
+efficientdet-d0-tf
+efficientdet-d1-tf
 face-detection-????
 face-detection-adas-????
 face-detection-retail-????
+faster-rcnn-resnet101-coco-sparse-60-0001
 pedestrian-and-vehicle-detector-adas-????
 pedestrian-detection-adas-????
 pelee-coco
