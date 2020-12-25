@@ -78,9 +78,10 @@ def check_environment():
     command = subprocess.run("pdflatex --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
         raise EnvironmentError("pdflatex not installed, please install it: \n{}".format(command.stderr))
-    command = subprocess.run("gs --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
-    if command.stderr:
-        raise EnvironmentError("ghostscript not installed, please install it: \n{}".format(command.stderr))
+    if os.name != 'nt':
+        command = subprocess.run("gs --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
+        if command.stderr:
+            raise EnvironmentError("ghostscript not installed, please install it: \n{}".format(command.stderr))
     command = subprocess.run("convert --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
         raise EnvironmentError("imagemagick not installed, please install it: \n{}".format(command.stderr))
@@ -154,7 +155,10 @@ def render_routine(line):
     """
     formula, file_idx, folder_path = line
     output_path = os.path.join(folder_path, file_idx)
-    pre_name = output_path.replace('/', '_').replace('.', '_')
+    if os.name == 'nt':
+        pre_name = output_path.replace('\\', '_').replace('.', '_').replace(":", "_")
+    else:
+        pre_name = output_path.replace('/', '_').replace('.', '_')
     formula = preprocess_formula(formula)
     if not os.path.exists(output_path):
         tex_filename = pre_name + '.tex'
@@ -171,8 +175,13 @@ def render_routine(line):
         if not os.path.exists(pdf_filename):
             logging.info('ERROR: %s cannot compile\n', file_idx)
         else:
-            subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
-                            pdf_filename, png_filename], check=True, stdout=PIPE, stderr=PIPE)
+            if os.name == 'nt':
+                convert_command = subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
+                            pdf_filename, png_filename],
+                     check=False, stdout=PIPE, stderr=PIPE, shell=True)
+            else:
+                convert_command = subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
+                            pdf_filename, png_filename], check=False, stdout=PIPE, stderr=PIPE)
             if os.path.exists(pdf_filename):
                 os.remove(pdf_filename)
             if os.path.exists(png_filename):
