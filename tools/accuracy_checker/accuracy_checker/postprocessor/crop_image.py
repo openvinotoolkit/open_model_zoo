@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,15 +17,68 @@ limitations under the License.
 from ..config import NumberField, StringField
 from ..utils import get_size_from_config
 from .postprocessor import PostprocessorWithSpecificTargets
-from ..preprocessor import CornerCrop
-from ..representation import ImageProcessingAnnotation, ImageProcessingPrediction
+from ..preprocessor import Crop, CornerCrop
+from ..representation import (
+    ImageProcessingAnnotation,
+    ImageProcessingPrediction,
+    ImageInpaintingAnnotation,
+    ImageInpaintingPrediction
+)
+
+
+class CropImage(PostprocessorWithSpecificTargets):
+    __provider__ = "crop_image"
+
+    annotation_types = (ImageInpaintingAnnotation, ImageProcessingAnnotation)
+    prediction_types = (ImageInpaintingPrediction, ImageProcessingPrediction)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'dst_width': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination width for mask cropping"
+            ),
+            'dst_height': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination height for mask cropping."
+            ),
+            'size': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination size for mask cropping for both dimensions."
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
+
+    def process_image(self, annotation, prediction):
+        target_height = self.dst_height or self.image_size[0]
+        target_width = self.dst_width or self.image_size[1]
+
+        for target in annotation:
+            target.value = Crop.process_data(
+                target.value, target_height, target_width, None, False, False, True, {}
+            )
+
+        for target in annotation:
+            target.value = Crop.process_data(
+                target.value, target_height, target_width, None, False, False, True, {}
+            )
+
+        return annotation, prediction
+
+    def process_image_with_metadata(self, annotations, predictions, image_metadata=None):
+        if 'image_size' in image_metadata:
+            self.image_size = image_metadata['image_size']
+        self.process_image(annotations, predictions)
 
 
 class CornerCropImage(PostprocessorWithSpecificTargets):
     __provider__ = 'corner_crop_image'
 
-    annotation_types = (ImageProcessingAnnotation, )
-    prediction_types = (ImageProcessingPrediction, )
+    annotation_types = (ImageInpaintingAnnotation, ImageProcessingAnnotation)
+    prediction_types = (ImageInpaintingPrediction, ImageProcessingPrediction)
 
     @classmethod
     def parameters(cls):

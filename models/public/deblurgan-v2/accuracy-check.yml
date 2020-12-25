@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: onnx_runtime
-        model:   deblurgan-v2.onnx
+        model: deblurgan-v2.onnx
         adapter:
           type: image_processing
           mean: 127.5
@@ -24,7 +24,6 @@ models:
         postprocessing:
           - type: corner_crop_image
             apply_to: prediction
-            corner_type: top_left
         metrics:
           - type: psnr
             scale_border: 0
@@ -36,7 +35,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        model: deblurgan-v2.xml
         adapter:
           type: image_processing
           mean: 127.5
@@ -56,7 +54,6 @@ models:
         postprocessing:
           - type: corner_crop_image
             apply_to: prediction
-            corner_type: top_left
         metrics:
           - type: psnr
             scale_border: 0

@@ -51,7 +51,6 @@ from .align_prediction_depth_map import AlignDepth
 from .resize_prediction_depth_map import ResizeDepthMap
 from .resize_super_resolution import ResizeSuperResolution
 from .resize_style_transfer import ResizeStyleTransfer
-from .crop_ground_truth_image import CropGTImage, CornerCropGTImage
 from .resize import Resize
 from .to_gray_scale_ref_image import RGB2GRAYAnnotation, BGR2GRAYAnnotation
 from .remove_repeats import RemoveRepeatTokens
@@ -60,7 +59,7 @@ from .super_resolution_image_recovery import SRImageRecovery, ColorizationLABRec
 from .argmax_segmentation_mask import ArgMaxSegmentationMask
 from .normalize_salient_map import SalientMapNormalizer
 from .min_max_normalization import MinMaxRegressionNormalization
-from .corner_crop import CornerCropImage
+from .crop_image import CropImage, CornerCropImage
 
 
 __all__ = [
@@ -120,9 +119,6 @@ __all__ = [
     'RGB2GRAYAnnotation',
     'BGR2GRAYAnnotation',
 
-    'CropGTImage',
-    'CornerCropGTImage',
-
     'Resize',
 
     'RemoveRepeatTokens',
@@ -134,5 +130,6 @@ __all__ = [
     'SalientMapNormalizer',
 
     'MinMaxRegressionNormalization',
+    'CropImage',
     'CornerCropImage'
 ]
