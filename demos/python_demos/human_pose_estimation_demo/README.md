@@ -34,7 +34,8 @@ python3 human_pose_estimation.py -h
 ```
 The command yields the following usage message:
 ```
-usage: human_pose_estimation.py [-h] -i INPUT -m MODEL -at {ae,openpose}
+usage: human_pose_estimation.py [-h] -i INPUT [--loop] [-o OUTPUT]
+                                -m MODEL -at {ae,openpose}
                                 [--tsize TSIZE] [-t PROB_THRESHOLD] [-r]
                                 [-d DEVICE] [-nireq NUM_INFER_REQUESTS]
                                 [-nstreams NUM_STREAMS]
@@ -44,8 +45,12 @@ usage: human_pose_estimation.py [-h] -i INPUT -m MODEL -at {ae,openpose}
 Options:
   -h, --help            Show this help message and exit.
   -i INPUT, --input INPUT
-                        Required. Path to an image, video file or a numeric
-                        camera ID.
+                        Required. An input to process. The input must be a
+                        single image, a folder of images or anything that
+                        cv2.VideoCapture can process.
+  --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -at {ae,openpose}, --architecture_type {ae,openpose}
@@ -72,19 +77,17 @@ Options:
                         will look for a suitable plugin for device specified.
                         Default value is CPU.
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
-                        Optional. Number of infer requests
+                        Optional. Number of infer requests.
   -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
                         Optional. Number of streams to use for inference on
                         the CPU or/and GPU in throughput mode (for HETERO and
                         MULTI device cases use format
                         <device1>:<nstreams1>,<device2>:<nstreams2> or just
-                        <nstreams>)
+                        <nstreams>).
   -nthreads NUM_THREADS, --num_threads NUM_THREADS
                         Optional. Number of threads to use for inference on
-                        CPU (including HETERO cases)
-  -loop LOOP, --loop LOOP
-                        Optional. Number of times to repeat the input.
-  -no_show, --no_show   Optional. Don't show output
+                        CPU (including HETERO cases).
+  -no_show, --no_show   Optional. Don't show output.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```
