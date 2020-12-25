@@ -166,7 +166,7 @@ def main():
             video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
                                            (image.shape[1], image.shape[0]))
             if not video_writer.isOpened():
-                raise RuntimeError("Error: Can't open video writer")
+                raise RuntimeError("Can't open video writer")
         if video_writer.isOpened():
             video_writer.write(image)
 
