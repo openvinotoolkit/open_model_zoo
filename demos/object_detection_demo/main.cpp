@@ -167,8 +167,8 @@ cv::Mat renderDetectionData(const DetectionResult& result) {
                        << std::setw(10) << obj.confidence << " | "
                        << std::setw(4) << std::max(int(obj.x), 0) << " | "
                        << std::setw(4) << std::max(int(obj.y), 0) << " | "
-                       << std::setw(4) << std::min(int(obj.width), outputImg.cols) << " | "
-                       << std::setw(4) << std::min(int(obj.height), outputImg.rows)
+                       << std::setw(4) << std::min(int(obj.x + obj.width), outputImg.cols) << " | "
+                       << std::setw(4) << std::min(int(obj.y + obj.height), outputImg.rows)
                        << slog::endl;
         }
 
