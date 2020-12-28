@@ -26,7 +26,7 @@ class LauncherConfigValidator(ConfigValidator):
         super().__init__(config_uri, fields=fields, **kwarg)
         self.delayed_model_loading = delayed_model_loading
 
-    def validate(self, entry, field_uri=None):
+    def validate(self, entry, field_uri=None, fetch_only=False):
         if self.delayed_model_loading:
             if 'model' in self.fields:
                 self.fields['model'].optional = True
@@ -34,32 +34,55 @@ class LauncherConfigValidator(ConfigValidator):
             if 'weights' in self.fields:
                 self.fields['weights'].optional = True
                 self.fields['weights'].check_exists = False
-        super().validate(entry, field_uri)
+        error_stack = super().validate(entry, field_uri, fetch_only)
+        if 'inputs' in entry:
+            error_stack.extend(self._validate_inputs(entry, fetch_only))
+
+        return error_stack
+
+    def _validate_inputs(self, entry, fetch_only):
         inputs = entry.get('inputs')
+        error_stack = []
         count_non_const_inputs = 0
         required_input_params = ['type', 'name']
-        if inputs:
-            inputs_by_type = {input_type: [] for input_type in InputField.INPUTS_TYPES}
-            for input_layer in inputs:
-                if not contains_all(input_layer, required_input_params):
-                    raise ConfigError('fields: {} are required for all input configurations'.format(
-                        ', '.join(required_input_params)))
-                input_type = input_layer['type']
-                if input_type not in InputField.INPUTS_TYPES:
-                    raise ConfigError('undefined input type {}'.format(input_type))
-                inputs_by_type[input_type].append(input_layer['name'])
-                if input_type == 'INPUT':
-                    input_value = input_layer.get('value')
-                    if not input_value and count_non_const_inputs:
-                        raise ConfigError('input value should be specified in case of several non constant inputs')
-                    count_non_const_inputs += 1
+        inputs_by_type = {input_type: [] for input_type in InputField.INPUTS_TYPES}
+        for input_layer in inputs:
+            if not contains_all(input_layer, required_input_params):
+                req = ', '.join(required_input_params)
+                reason = 'fields: {} are required for all input configurations'.format(req)
+                if not fetch_only:
+                    raise ConfigError(reason)
+                error_stack.append(self.build_error(input_layer, '{}.inputs'.format(self.field_uri), reason))
+            input_type = input_layer['type']
+            if input_type not in InputField.INPUTS_TYPES:
+                reason = 'undefined input type {}'.format(input_type)
+                if not fetch_only:
+                    raise ConfigError(reason)
+                error_stack.append(
+                    self.build_error(input_type, '{}.inputs.{}'.format(self.field_uri, input_layer['name']), reason)
+                )
+            inputs_by_type[input_type].append(input_layer['name'])
+            if input_type == 'INPUT':
+                reason = 'input value should be specified in case of several non constant inputs'
+                input_value = input_layer.get('value')
+                if not input_value and count_non_const_inputs:
+                    if not fetch_only:
+                        raise ConfigError(reason)
+                    error_stack.append(
+                        self.build_error(
+                            input_layer,
+                            '{}.inputs.{}'.format(self.field_uri, input_layer['name']), reason)
+                    )
+                count_non_const_inputs += 1
 
-            additional_attributes = {
-                '_list_{}s'.format(input_type.lower()): inputs for input_type, inputs in inputs_by_type.items()
-            }
+        additional_attributes = {
+            '_list_{}s'.format(input_type.lower()): inputs for input_type, inputs in inputs_by_type.items()
+        }
 
-            for additional_attribute, values in additional_attributes.items():
-                entry[additional_attribute] = values
+        for additional_attribute, values in additional_attributes.items():
+            entry[additional_attribute] = values
+
+        return error_stack
 
 
 class Launcher(ClassProvider):
@@ -111,8 +134,9 @@ class Launcher(ClassProvider):
             )
         }
 
-    def validate(self):
-        LauncherConfigValidator('Launcher', fields=self.parameters()).validate(self.config)
+    @classmethod
+    def validate(cls, config, fetch_only=False):
+        return LauncherConfigValidator('Launcher', fields=cls.parameters()).validate(config, fetch_only=fetch_only)
 
     def get_value_from_config(self, key):
         return get_parameter_value_from_config(self.config, self.parameters(), key)

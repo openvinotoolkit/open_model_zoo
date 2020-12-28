@@ -31,7 +31,7 @@ class Adapter(ClassProvider):
         self.output_blob = output_blob
         self.label_map = label_map
 
-        self.validate_config()
+        self.validate_config(launcher_config)
         self.configure()
 
     def get_value_from_config(self, key):
@@ -51,10 +51,11 @@ class Adapter(ClassProvider):
     def configure(self):
         pass
 
-    def validate_config(self, **kwargs):
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
-        ConfigValidator(self.__class__.__name__, fields=self.parameters(), **kwargs).validate(self.launcher_config)
+        return ConfigValidator(cls.__provider__, fields=cls.parameters(), **kwargs).validate(config, fetch_only)
 
     @staticmethod
     def _extract_predictions(outputs_list, meta):

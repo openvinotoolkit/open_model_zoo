@@ -44,8 +44,11 @@ class TFObjectDetectionAPIAdapter(Adapter):
     """
     __provider__ = 'tf_object_detection'
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
 
     @classmethod
     def parameters(cls):
@@ -233,8 +236,11 @@ class ClassAgnosticDetectionAdapter(Adapter):
     __provider__ = 'class_agnostic_detection'
     prediction_types = (DetectionPrediction,)
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
 
     @classmethod
     def parameters(cls):
@@ -419,8 +425,11 @@ class FaceBoxesAdapter(Adapter):
     """
     __provider__ = 'faceboxes'
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
 
     @classmethod
     def parameters(cls):

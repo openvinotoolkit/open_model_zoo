@@ -43,8 +43,11 @@ class AttributeClassificationAdapter(Adapter):
         super().configure()
         self.output_layers = self.get_value_from_config('output_layer_map')
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
 
     def process(self, raw, identifiers, frame_meta):
         """

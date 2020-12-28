@@ -33,17 +33,17 @@ class BaseFormatConverter(ClassProvider):
             'converter': StringField(description="Converter name.")
         }
 
-    @property
-    def config_validator(self):
+    @classmethod
+    def config_validator(cls):
         return ConfigValidator(
-            '{}_converter_config'.format(self.get_name()), fields=self.parameters(),
+            '{}_converter_config'.format(cls.get_name()), fields=cls.parameters(),
             on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
         )
 
     def __init__(self, config=None):
         self.config = config
         if config:
-            self.validate_config()
+            self.validate_config(config)
             self.configure()
 
     def get_value_from_config(self, key):
@@ -70,7 +70,7 @@ class BaseFormatConverter(ClassProvider):
 
     def get_argparser(self):
         parser = ArgumentParser(add_help=False)
-        config_validator = self.config_validator
+        config_validator = self.config_validator()
         fields = config_validator.fields
         for field_name, field in fields.items():
             if field_name == 'converter':
@@ -87,8 +87,9 @@ class BaseFormatConverter(ClassProvider):
 
         return parser
 
-    def validate_config(self):
-        self.config_validator.validate(self.config)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False):
+        return cls.config_validator().validate(config, fetch_only=fetch_only)
 
     def configure(self):
         pass

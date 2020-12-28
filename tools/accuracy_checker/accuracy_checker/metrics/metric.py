@@ -49,7 +49,7 @@ class Metric(ClassProvider):
         self.meta = {'target': 'higher-better'}
         self._initial_state = copy.deepcopy(state)
 
-        self.validate_config()
+        self.validate_config(config)
         self.configure()
         message_unsupported_multi_source = 'metric {} does not support several {} sources'
         self.annotation_source = self.config.get('annotation_source')
@@ -115,13 +115,14 @@ class Metric(ClassProvider):
 
         pass
 
-    def validate_config(self):
+    @classmethod
+    def validate_config(cls, config, fetch_only=False):
         """
         Validate that metric entry meets all configuration structure requirements.
         """
-        ConfigValidator(
-            self.name, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=self.parameters()
-        ).validate(self.config)
+        return ConfigValidator(
+            cls.__provider__, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
+        ).validate(config, fetch_only=fetch_only)
 
     def _update_state(self, fn, state_key, default_factory=None):
         iter_key = "{}_global_it".format(state_key)
