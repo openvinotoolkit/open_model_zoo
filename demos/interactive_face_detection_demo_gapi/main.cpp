@@ -284,23 +284,11 @@ void landmarksDataUpdate(const Face::Ptr &face, const cv::Mat &out_landmark) {
     face->updateLandmarks(normedLandmarks);
 }
 
-bool isNumber(const std::string& str)
-{
-    if(str.empty() || ((!isdigit(str[0])) && (str[0] != '-') && (str[0] != '+'))) 
-        return false;
-
-   char * p;
-   strtol(str.c_str(), &p, 10);
-
-   return (*p == 0);
-}
-
 void setInput(cv::GStreamingCompiled stream, const std::string& input ) {
-    if (input == "cam") {
-        stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(0));
-    } else if (isNumber(input)) {
+    try {
+        // If stoi() throws exception input should be a path not a camera id
         stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(std::stoi(input)));
-    } else {
+    } catch (std::invalid_argument &err) {
         stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(input));
     }
 }
