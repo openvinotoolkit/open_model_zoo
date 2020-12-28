@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import numpy as np
 import re
 from pathlib import Path
+import numpy as np
+
 from .launcher import Launcher, LauncherConfigValidator
 from ..config import BaseField, ListField, PathField, StringField, ConfigError
 from ..utils import contains_any, contains_all
