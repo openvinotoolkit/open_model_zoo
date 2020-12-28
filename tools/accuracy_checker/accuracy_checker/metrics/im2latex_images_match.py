@@ -78,7 +78,8 @@ def check_environment():
     command = subprocess.run("pdflatex --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
         raise EnvironmentError("pdflatex not installed, please install it: \n{}".format(command.stderr))
-    command = subprocess.run("gs --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
+    gs_executable = "gs" if os.name != 'nt' else "gswin64c.exe"
+    command = subprocess.run("{} --version".format(gs_executable), stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
         raise EnvironmentError("ghostscript not installed, please install it: \n{}".format(command.stderr))
     command = subprocess.run("convert --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
