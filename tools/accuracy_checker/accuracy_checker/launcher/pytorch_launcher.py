@@ -21,7 +21,7 @@ from collections import OrderedDict
 
 import numpy as np
 from ..config import PathField, StringField, DictField, NumberField, ListField
-from .launcher import Launcher, LauncherConfigValidator
+from .launcher import Launcher
 
 MODULE_REGEX = r'(?:\w+)(?:(?:.\w+)*)'
 DEVICE_REGEX = r'(?P<device>cpu$|cuda)?'
@@ -64,8 +64,7 @@ class PyTorchLauncher(Launcher):
         except ImportError as import_error:
             raise ValueError("PyTorch isn't installed. Please, install it before using. \n{}".format(import_error.msg))
         self._torch = torch
-        pytorch_launcher_config = LauncherConfigValidator('Pytorch_Launcher', fields=self.parameters())
-        pytorch_launcher_config.validate(self.config)
+        self.validate_config(config_entry)
         module_args = config_entry.get("module_args", ())
         module_kwargs = config_entry.get("module_kwargs", {})
         self.cuda = 'cuda' in self.get_value_from_config('device')

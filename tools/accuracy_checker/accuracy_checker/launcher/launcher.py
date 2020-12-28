@@ -100,6 +100,7 @@ class Launcher(ClassProvider):
         self.image_info_inputs = self.config.get('_list_image_infos', [])
         self._lstm_inputs = self.config.get('_list_lstm_inputs', [])
         self._ignore_inputs = self.config.get('_list_ignore_inputs', [])
+        self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
     @classmethod
     def parameters(cls):
@@ -135,8 +136,10 @@ class Launcher(ClassProvider):
         }
 
     @classmethod
-    def validate(cls, config, fetch_only=False):
-        return LauncherConfigValidator('Launcher', fields=cls.parameters()).validate(config, fetch_only=fetch_only)
+    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False):
+        return LauncherConfigValidator(
+            'Launcher', fields=cls.parameters(), delayed_model_loading=delayed_model_loading
+        ).validate(config, fetch_only=fetch_only)
 
     def get_value_from_config(self, key):
         return get_parameter_value_from_config(self.config, self.parameters(), key)
