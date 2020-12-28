@@ -66,13 +66,6 @@ class MetricsExecutor:
     def _set_dataset(self, dataset):
         self._dataset = dataset
 
-    def __call__(self, context, *args, **kwargs):
-        self.update_metrics_on_batch(
-            context.input_ids_batch, context.annotation_batch, context.prediction_batch
-        )
-        context.annotations.extend(context.annotation_batch)
-        context.predictions.extend(context.prediction_batch)
-
     def update_metrics_on_object(self, annotation, prediction):
         """
         Updates metric value corresponding given annotation and prediction objects.

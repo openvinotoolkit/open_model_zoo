@@ -350,8 +350,9 @@ class TestConfigValidator:
 
         stub = mocker.stub(name='custom_on_error')
         sample_validator = SampleValidator('Sample', on_error=stub)
-        sample_validator.validate({})
-        stub.assert_called_once_with(ANY, 'Sample', ANY)
+        with pytest.raises(ConfigError):
+            sample_validator.validate({})
+            stub.assert_called_once_with(ANY, 'Sample', ANY)
 
     def test_custom_validator(self, mocker):
         class SampleValidator(ConfigValidator):
