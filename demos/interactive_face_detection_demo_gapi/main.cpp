@@ -315,6 +315,7 @@ int main(int argc, char *argv[]) {
         if (FLAGS_i.empty())
             throw std::logic_error("Parameter -i is not set");
         if (FLAGS_m.empty())
+            throw std::logic_error("Parameter -m is not set");
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
@@ -432,10 +433,10 @@ int main(int argc, char *argv[]) {
 
         Timer timer;
 
-        slog::info << "Setting media source" << slog::endl;            
+        slog::info << "Setting media source" << slog::endl;
         try {
             setInput(stream, FLAGS_i);
-        } catch (const std::exception& error) {
+        } catch (const std::exception&) {
             std::stringstream msg;
             msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
             throw std::invalid_argument(msg.str());
@@ -472,7 +473,7 @@ int main(int argc, char *argv[]) {
 
                 // Raw output of detected faces
                 if (FLAGS_r)
-                    rawOutputDetections(ssd_res, frame.size(), FLAGS_t);
+                    rawOutputDetections(ssd_res, frame.size(), (float)FLAGS_t);
 
                 // For every detected face
                 for (size_t i = 0; i < face_hub.size(); i++) {
@@ -553,7 +554,7 @@ int main(int argc, char *argv[]) {
                     slog::info << "Setting media source" << slog::endl;
                     try {
                         setInput(stream, FLAGS_i);
-                    } catch (const std::exception& error) {
+                    } catch (const std::exception&) {
                         std::stringstream msg;
                         msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
                         throw std::invalid_argument(msg.str());
