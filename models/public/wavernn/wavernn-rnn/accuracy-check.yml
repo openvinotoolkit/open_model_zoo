@@ -4,10 +4,10 @@ models:
       - framework: dlsdk
         adapter:
           type: multi_output_regression
-        outputs:
-          - h1
-          - h2
-          - logits
+          outputs:
+            - h1
+            - h2
+            - logits
         inputs:
           - name: a1_t
             type: INPUT
