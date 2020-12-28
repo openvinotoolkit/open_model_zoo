@@ -71,7 +71,7 @@ class Postprocessor(ClassProvider):
         if self.prediction_source and not isinstance(self.prediction_source, list):
             self.prediction_source = string_to_list(self.prediction_source)
 
-        self.validate_config()
+        self.validate_config(config)
         self.setup()
 
     def __call__(self, *args, **kwargs):
@@ -117,10 +117,11 @@ class Postprocessor(ClassProvider):
     def configure(self):
         pass
 
-    def validate_config(self):
-        ConfigValidator(
-            self.name, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=self.parameters()
-        ).validate(self.config)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False):
+        return ConfigValidator(
+            cls.__provider__, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
+        ).validate(config, fetch_only=fetch_only)
 
     def get_entries(self, annotation, prediction):
         message_not_found = '{}: {} is not found in container'

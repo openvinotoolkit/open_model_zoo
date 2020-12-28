@@ -62,8 +62,11 @@ class HumanPose3dAdapter(Adapter):
 
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         self.features_3d = self.get_value_from_config('features_3d_out')

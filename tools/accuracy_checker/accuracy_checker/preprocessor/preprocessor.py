@@ -30,7 +30,7 @@ class Preprocessor(ClassProvider):
         self.name = name
         self.input_shapes = None
 
-        self.validate_config()
+        self.validate_config(config)
         self.configure()
 
     def __call__(self, *args, **kwargs):
@@ -53,10 +53,11 @@ class Preprocessor(ClassProvider):
     def configure(self):
         pass
 
-    def validate_config(self):
-        ConfigValidator(
-            self.name, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=self.parameters()
-        ).validate(self.config)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False):
+        return ConfigValidator(
+            cls.__provider__, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
+        ).validate(config, fetch_only=fetch_only)
 
     def set_input_shape(self, input_shape):
         pass

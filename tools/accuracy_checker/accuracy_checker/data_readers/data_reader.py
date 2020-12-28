@@ -111,7 +111,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(ImagePairIdentifier, self._read_pair)
         self.multi_infer = False
 
-        self.validate_config()
+        self.validate_config(config)
         self.configure()
 
     def __call__(self, identifier):
@@ -138,10 +138,11 @@ class BaseReader(ClassProvider):
         self.data_source = get_path(self.data_source, is_directory=True)
         self.multi_infer = self.get_value_from_config('multi_infer')
 
-    def validate_config(self, **kwargs):
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
-        ConfigValidator(self.__class__.__name__, fields=self.parameters(), **kwargs).validate(self.config)
+        return ConfigValidator(cls.__provider__, fields=cls.parameters(), **kwargs).validate(config, fetch_only)
 
     def read(self, data_id):
         raise NotImplementedError

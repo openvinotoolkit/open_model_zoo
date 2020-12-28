@@ -458,26 +458,23 @@ class PathField(BaseField):
             reason = "values is expected to be path-like"
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
-            else:
-                error_stack.append(self.build_error(entry, field_uri, reason))
+            error_stack.append(self.build_error(entry, field_uri, reason))
         except FileNotFoundError:
             reason = "path does not exist"
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
-            else:
-                error_stack.append(self.build_error(entry, field_uri, reason))
+            error_stack.append(self.build_error(entry, field_uri, reason))
         except NotADirectoryError:
             reason = "path is not a directory"
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
-            else:
-                error_stack.append(self.build_error(entry, field_uri, reason))
+            error_stack.append(self.build_error(entry, field_uri, reason))
         except IsADirectoryError:
             reason = "path is a directory, regular file expected"
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
-            else:
-                error_stack.append(self.build_error(entry, field_uri, reason))
+            error_stack.append(self.build_error(entry, field_uri, reason))
+
         return error_stack
 
     @property
