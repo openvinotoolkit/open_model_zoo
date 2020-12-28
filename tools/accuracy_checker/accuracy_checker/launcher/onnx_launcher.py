@@ -21,7 +21,7 @@ import onnxruntime.backend as backend
 import onnxruntime as onnx_rt
 from ..logging import warning
 from ..config import PathField, StringField, ListField, ConfigError
-from .launcher import Launcher, LauncherConfigValidator
+from .launcher import Launcher
 from ..utils import contains_all
 from ..logging import print_info
 
@@ -36,10 +36,7 @@ class ONNXLauncher(Launcher):
         super().__init__(config_entry, *args, **kwargs)
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        onnx_launcher_config = LauncherConfigValidator(
-            'ONNX_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading,
-        )
-        onnx_launcher_config.validate(self.config)
+        self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
         if not self._delayed_model_loading:
             self.model = self.automatic_model_search()
             self._inference_session = self.create_inference_session(str(self.model))

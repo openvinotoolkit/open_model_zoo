@@ -82,18 +82,19 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         )
         self.fields['device'].set_regex(self.supported_device_regex)
 
-    def validate(self, entry, field_uri=None, ie_core=None):
+    def validate(self, entry, field_uri=None, ie_core=None, fetch_only=False):
         """
         Validate that launcher entry meets all configuration structure requirements.
         Args:
             entry: launcher configuration file entry.
             field_uri: id of launcher entry.
             ie_core: IECore instance.
+            fetch_only: only fetch possible error without raising
         """
         if not self.delayed_model_loading:
             framework_parameters = self.check_model_source(entry)
             self._set_model_source(framework_parameters)
-        super().validate(entry, field_uri)
+        error_stack = super().validate(entry, field_uri, fetch_only)
         self.create_device_regex(known_plugins)
         try:
             self.fields['device'].validate(entry['device'], field_uri)
@@ -106,7 +107,10 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
                     # workaround for devices where this metric is non implemented
                     warning('unknown device: {}'.format(entry['device']))
             else:
-                raise error
+                if not fetch_only:
+                    raise error
+                error_stack.append(error)
+        return error_stack
 
     def _set_model_source(self, framework):
         self.need_conversion = framework.name != 'dlsdk'

@@ -16,7 +16,7 @@ limitations under the License.
 
 import re
 from pathlib import Path
-from .launcher import Launcher, LauncherConfigValidator
+from .launcher import Launcher
 from ..config import BaseField, ListField, PathField, StringField, ConfigError
 from ..utils import contains_any, contains_all
 
@@ -59,12 +59,7 @@ class TFLauncher(Launcher):
             )
         self.default_layout = 'NHWC'
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
-
-        tf_launcher_config = LauncherConfigValidator(
-            'TF_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
-        )
-        tf_launcher_config.validate(self.config)
-
+        self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
         if not self._delayed_model_loading:
             if not contains_any(self.config, ['model', 'saved_model_dir']):
                 raise ConfigError('model or saved model directory should be provided')
