@@ -27,7 +27,11 @@ from ..utils import get_path, cast_to_bool
 
 
 class ConfigError(ValueError):
-    pass
+    def __init__(self, message="", entry='', field_uri=''):
+        self.entry = entry
+        self.field_uri = field_uri
+        self.message = message
+        super().__init__(self.message)
 
 
 class BaseValidator:
@@ -58,7 +62,7 @@ class BaseValidator:
         error_message = 'Invalid value "{value}" for {field_uri}'.format(value=value, field_uri=field_uri)
         if reason:
             error_message = '{error_message}: {reason}'.format(error_message=error_message, reason=reason)
-        return ConfigError(error_message)
+        return ConfigError(error_message, value, field_uri)
 
 
 class _ExtraArgumentBehaviour(enum.Enum):
