@@ -34,8 +34,7 @@ Options:
                         Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
-                        single image, a folder of images or anything that
-                        cv2.VideoCapture can process.
+                        single image, a folder of images, video file or camera id.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The demo
@@ -49,7 +48,7 @@ Common model options:
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
-                        Optional. Number of infer requests
+                        Optional. Number of infer requests.
   -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
                         Optional. Number of streams to use for inference on
                         the CPU or/and GPU in throughput mode (for HETERO and

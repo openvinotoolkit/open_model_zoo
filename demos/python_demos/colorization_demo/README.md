@@ -35,7 +35,7 @@ Options:
                         FPGA, HDDL or MYRIAD. Default: CPU
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image,
-                        a folder of images or anything that cv2.VideoCapture can process.
+                        a folder of images, video file or camera id.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.

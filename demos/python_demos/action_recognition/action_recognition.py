@@ -36,19 +36,19 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
-                           'a folder of images or anything that cv2.VideoCapture can process')
+                           'a folder of images, video file or camera id.')
     args.add_argument('--loop', default=False, action='store_true',
-                      help='Optional. Enable reading the input in a loop')
+                      help='Optional. Enable reading the input in a loop.')
     args.add_argument('-o', '--output', required=False,
                       help='Optional. Name of output to save.')
-    args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model', required=True, type=str)
+    args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
     decoder_args = args.add_mutually_exclusive_group()
     decoder_args.add_argument('-m_de', '--m_decoder',
                               help="Optional. Path to decoder model. If not specified, "
-                                   "simple averaging of encoder's outputs over a time window is applied",
+                                   "simple averaging of encoder's outputs over a time window is applied.",
                               default=None, type=str)
     decoder_args.add_argument('--seq', dest='decoder_seq_size',
-                              help='Optional. Length of sequence that decoder takes as input',
+                              help='Optional. Length of sequence that decoder takes as input.',
                               default=16, type=int)
     args.add_argument('-l', '--cpu_extension',
                       help='Optional. For CPU custom layers, if any. Absolute path to a shared library with the '
@@ -56,11 +56,11 @@ def build_argparser():
     args.add_argument('-d', '--device',
                       help='Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for the device specified. '
-                           'Default value is CPU',
+                           'Default value is CPU.',
                       default='CPU', type=str)
-    args.add_argument('-lb', '--labels', help='Optional. Path to file with label names', type=str)
-    args.add_argument('--no_show', action='store_true', help="Optional. Don't show output")
-    args.add_argument('-s', '--smooth', dest='label_smoothing', help='Optional. Number of frames used for output label smoothing',
+    args.add_argument('-lb', '--labels', help='Optional. Path to file with label names.', type=str)
+    args.add_argument('--no_show', action='store_true', help="Optional. Don't show output.")
+    args.add_argument('-s', '--smooth', dest='label_smoothing', help='Optional. Number of frames used for output label smoothing.',
                       default=30, type=int)
     args.add_argument('-u', '--utilization-monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')

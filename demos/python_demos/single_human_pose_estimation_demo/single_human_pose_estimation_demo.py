@@ -18,19 +18,19 @@ from images_capture import open_images_capture
 def build_argparser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-m_od", "--model_od", type=str, required=True,
-                        help="path to model of object detector in xml format")
+                        help="Required. Path to model of object detector in .xml format.")
     parser.add_argument("-m_hpe", "--model_hpe", type=str, required=True,
-                        help="path to model of human pose estimator in xml format")
+                        help="Required. Path to model of human pose estimator in .xml format.")
     parser.add_argument("-i", "--input", required=True,
                         help="Required. An input to process. The input must be a single image, "
-                             "a folder of images or anything that cv2.VideoCapture can process.")
+                             "a folder of images, video file or camera id.")
     parser.add_argument("--loop", default=False, action="store_true",
                         help="Optional. Enable reading the input in a loop.")
     parser.add_argument("-o", "--output", required=False,
                         help="Optional. Name of output to save.")
     parser.add_argument("-d", "--device", type=str, default='CPU', required=False,
-                        help="Specify the target to infer on CPU or GPU")
-    parser.add_argument("--person_label", type=int, required=False, default=15, help="Label of class person for detector")
+                        help="Optional. Specify the target to infer on CPU or GPU.")
+    parser.add_argument("--person_label", type=int, required=False, default=15, help="Optional. Label of class person for detector.")
     parser.add_argument("--no_show", help='Optional. Do not display output.', action='store_true')
     parser.add_argument("-u", "--utilization_monitors", default="", type=str,
                         help="Optional. List of monitors to show initially.")

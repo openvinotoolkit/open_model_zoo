@@ -98,7 +98,7 @@ def build_argparser():
                       required=True, type=Path)
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
-                           'a folder of images or anything that cv2.VideoCapture can process.')
+                           'a folder of images, video file or camera id.')
     args.add_argument('-d', '--device', default='CPU', type=str,
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
@@ -109,7 +109,7 @@ def build_argparser():
                                    help='Optional. Path to a text file containing colors for classes.')
 
     infer_args = parser.add_argument_group('Inference options')
-    infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
+    infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
                             default=1, type=int)
     infer_args.add_argument('-nstreams', '--num_streams',
                             help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '

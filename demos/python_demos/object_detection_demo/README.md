@@ -67,8 +67,7 @@ Options:
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
-                        single image, a folder of images or anything that
-                        cv2.VideoCapture can process.
+                        single image, a folder of images, video file or camera id.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The sample

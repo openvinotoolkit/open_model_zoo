@@ -40,7 +40,7 @@ def build_arg():
                          default="CPU", type=str)
     in_args.add_argument('-i', "--input", required=True,
                          help='Required. An input to process. The input must be a single image, '
-                              'a folder of images or anything that cv2.VideoCapture can process.')
+                              'a folder of images, video file or camera id.')
     in_args.add_argument('--loop', default=False, action='store_true',
                          help='Optional. Enable reading the input in a loop.')
     in_args.add_argument('-o', '--output', required=False,

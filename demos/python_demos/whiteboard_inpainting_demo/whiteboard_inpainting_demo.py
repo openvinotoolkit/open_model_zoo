@@ -67,26 +67,26 @@ def remove_background(img, kernel_size=(7, 7), blur_kernel_size=21, invert_color
 def main():
     parser = argparse.ArgumentParser(description='Whiteboard inpainting demo')
     parser.add_argument('-i', '--input', required=True,
-                         help='Required. Path to a video file or a device node of a web-camera')
+                         help='Required. Path to a video file or a device node of a web-camera.')
     parser.add_argument('--loop', default=False, action='store_true',
-                      help='Optional. Enable reading the input in a loop')
+                        help='Optional. Enable reading the input in a loop.')
     parser.add_argument('-o', '--output', required=False,
-                        help='Optional. Name of output to save')
+                        help='Optional. Name of output to save.')
     parser.add_argument('-m_i', '--m_instance_segmentation', type=str, required=False,
-                        help='Path to the instance segmentation model')
+                        help='Required. Path to the instance segmentation model.')
     parser.add_argument('-m_s', '--m_semantic_segmentation', type=str, required=False,
-                        help='Path to the semantic segmentation model')
+                        help='Required. Path to the semantic segmentation model.')
     parser.add_argument('-t', '--threshold', type=float, default=0.6,
-                        help='Threshold for person instance segmentation model')
-    parser.add_argument('--no_show', help="Optional. Don't show output", action='store_true')
+                        help='Optional. Threshold for person instance segmentation model.')
+    parser.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     parser.add_argument('-d', '--device', type=str, default='CPU',
                         help='Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is '
-                             'acceptable. The demo will look for a suitable plugin for the device specified')
+                             'acceptable. The demo will look for a suitable plugin for the device specified.')
     parser.add_argument('-l', '--cpu_extension', type=str, default=None,
-                        help='MKLDNN (CPU)-targeted custom layers.Absolute \
+                        help='MKLDNN (CPU)-targeted custom layers. Absolute \
                               path to a shared library with the kernels impl.')
     parser.add_argument('-u', '--utilization_monitors', default='', type=str,
-                        help='Optional. List of monitors to show initially')
+                        help='Optional. List of monitors to show initially.')
     args = parser.parse_args()
 
     cap = open_images_capture(args.input, args.loop)
