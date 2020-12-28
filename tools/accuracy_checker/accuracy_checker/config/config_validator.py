@@ -62,6 +62,7 @@ class BaseValidator:
         error_message = 'Invalid value "{value}" for {field_uri}'.format(value=value, field_uri=field_uri)
         if reason:
             error_message = '{error_message}: {reason}'.format(error_message=error_message, reason=reason)
+
         return ConfigError(error_message, value, field_uri)
 
 
