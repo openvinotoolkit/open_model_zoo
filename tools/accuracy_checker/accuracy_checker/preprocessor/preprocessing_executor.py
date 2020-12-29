@@ -15,8 +15,7 @@ limitations under the License.
 """
 
 import warnings
-from ..config import ConfigValidator, StringField, ConfigError
-from ..dependency import UnregisteredProviderException
+from ..config import ConfigValidator, StringField
 from .preprocessor import Preprocessor, MULTI_INFER_PREPROCESSORS
 from .ie_preprocessor import IEPreprocessor, ie_preprocess_available
 
@@ -107,26 +106,9 @@ class PreprocessingExecutor:
     def validate_config(cls, processors, fetch_only=False):
         if not processors:
             return []
-        identifier = 'type'
         errors = []
         for processor in processors:
-            processor_provider = processor.get(identifier)
-            if not processor_provider:
-                error = ConfigError('{} does not found'.format(identifier), processor, 'preprocessing')
-                if not fetch_only:
-                    raise error
-                errors.append(error)
-                continue
-            try:
-                preprocessor_cls = Preprocessor.resolve(processor_provider)
-            except UnregisteredProviderException as exception:
-                if not fetch_only:
-                    raise exception
-                errors.append(
-                    ConfigError("preprocessor {} unregistered".format(processor_provider), processor, 'preprocessing')
-                )
-                continue
-            errors.extend(preprocessor_cls.validate_config(processor, fetch_only=fetch_only))
+            errors.extend(Preprocessor.validate_config(processor, fetch_only=fetch_only))
 
         return errors
 

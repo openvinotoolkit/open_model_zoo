@@ -14,8 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..config import ConfigValidator, StringField, ConfigError
-from ..dependency import UnregisteredProviderException
+from ..config import ConfigValidator, StringField
 from ..utils import overrides, zipped_transform
 from .postprocessor import Postprocessor
 
@@ -101,26 +100,9 @@ class PostprocessingExecutor:
     def validate_config(cls, processors, fetch_only=False):
         if not processors:
             return []
-        identifier = 'type'
         errors = []
         for processor in processors:
-            processor_provider = processor.get(identifier)
-            if not processor_provider:
-                error = ConfigError('{} does not found'.format(identifier), processor, 'postprocessing')
-                if not fetch_only:
-                    raise error
-                errors.append(error)
-                continue
-            try:
-                postprocessor_cls = Postprocessor.resolve(processor_provider)
-            except UnregisteredProviderException as exception:
-                if not fetch_only:
-                    raise exception
-                errors.append(
-                    ConfigError("postprocessor {} unregistered".format(processor_provider), processor, 'postprocessing')
-                )
-                continue
-            errors.extend(postprocessor_cls.validate_config(processor, fetch_only=fetch_only))
+            errors.extend(Postprocessor.validate_config(processor, fetch_only=fetch_only))
 
         return errors
 

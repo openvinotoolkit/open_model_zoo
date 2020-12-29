@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..config import ConfigValidator, StringField
-from ..dependency import ClassProvider
+from ..config import ConfigValidator, StringField, ConfigError
+from ..dependency import ClassProvider, UnregisteredProviderException
 from ..utils import get_parameter_value_from_config
 
 
@@ -55,6 +55,27 @@ class Preprocessor(ClassProvider):
 
     @classmethod
     def validate_config(cls, config, fetch_only=False):
+        errors = []
+        if cls.__name__ == Preprocessor.__name__:
+            processing_provider = config.get('type')
+            if not processing_provider:
+                error = ConfigError('type does not found', config, 'preprocessing')
+                if not fetch_only:
+                    raise error
+                errors.append(error)
+                return errors
+            try:
+                preprocessor_cls = cls.resolve(processing_provider)
+            except UnregisteredProviderException as exception:
+                if not fetch_only:
+                    raise exception
+                errors.append(
+                    ConfigError("preprocessor {} unregistered".format(processing_provider), config, 'preprocessing')
+                )
+                return errors
+            errors.extend(preprocessor_cls.validate_config(config, fetch_only=fetch_only))
+            return errors
+
         return ConfigValidator(
             cls.__provider__, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
         ).validate(config, fetch_only=fetch_only)

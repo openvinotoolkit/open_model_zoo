@@ -17,7 +17,6 @@ limitations under the License.
 from collections import namedtuple, OrderedDict
 
 from ..config import ConfigValidator, ConfigError, StringField
-from ..dependency import UnregisteredProviderException
 from ..presenters import BasePresenter, EvaluationResult
 from .metric import Metric, FullDatasetEvaluationMetric
 from .metric_profiler import ProfilingExecutor
@@ -186,26 +185,10 @@ class MetricsExecutor:
     @classmethod
     def validate_config(cls, metrics, fetch_only=False):
         if not metrics:
-            return [ConfigError("Metrics are not provided", metrics, 'metrics')]
-        identifier = 'type'
+            if fetch_only:
+                return [ConfigError("Metrics are not provided", metrics, 'metrics')]
         errors = []
         for metric in metrics:
-            metric_provider = metric.get(identifier)
-            if not metric_provider:
-                error = ConfigError('{} does not found'.format(identifier), metric, 'metrics')
-                if not fetch_only:
-                    raise error
-                errors.append(error)
-                continue
-            try:
-                metric_cls = Metric.resolve(metric_provider)
-            except UnregisteredProviderException as exception:
-                if not fetch_only:
-                    raise exception
-                errors.append(
-                    ConfigError("metric {} unregistered".format(metric_provider), metric, 'metrics')
-                )
-                continue
-            errors.extend(metric_cls.validate_config(metric, fetch_only=fetch_only))
+            errors.extend(Metric.validate_config(metric, fetch_only=fetch_only))
 
         return errors

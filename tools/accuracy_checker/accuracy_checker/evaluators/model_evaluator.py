@@ -122,8 +122,12 @@ class ModelEvaluator(BaseEvaluator):
         config_errors.extend(Launcher.validate_config(launcher_config, fetch_only=True))
         config_errors.extend(Dataset.validate_config(dataset_config, fetch_only=True))
         config_errors.extend(BaseReader.validate_config(data_reader_config, fetch_only=True))
-        config_errors.extend(PreprocessingExecutor.validate_config(dataset_config.get('preprocessing'), fetch_only=True))
-        config_errors.extend(PostprocessingExecutor.validate_config(dataset_config.get('postprocessing'), fetch_only=True))
+        config_errors.extend(
+            PreprocessingExecutor.validate_config(dataset_config.get('preprocessing'), fetch_only=True)
+        )
+        config_errors.extend(
+            PostprocessingExecutor.validate_config(dataset_config.get('postprocessing'), fetch_only=True)
+        )
         config_errors.extend(MetricsExecutor.validate_config(dataset_config.get('metrics', []), fetch_only=True))
 
         return config_errors
