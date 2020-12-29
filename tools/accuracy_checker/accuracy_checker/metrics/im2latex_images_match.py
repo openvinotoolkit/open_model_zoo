@@ -165,8 +165,8 @@ def render_routine(line):
             w.write(template % formula)
         run("pdflatex -interaction=nonstopmode {}".format(tex_filename), TIMEOUT)
         for filename in (tex_filename, log_filename, aux_filename):
-            if os.path.exists(filename):
-                os.remove(filename)
+            #if os.path.exists(filename):
+            #    os.remove(filename)
         pdf_filename = tex_filename[:-4] + '.pdf'
         png_filename = tex_filename[:-4] + '.png'
         if not os.path.exists(pdf_filename):
@@ -175,8 +175,8 @@ def render_routine(line):
             subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
                             pdf_filename, png_filename],
                            check=True, stdout=PIPE, stderr=PIPE, shell=True)
-            if os.path.exists(pdf_filename):
-                os.remove(pdf_filename)
+            #if os.path.exists(pdf_filename):
+            #    os.remove(pdf_filename)
             if os.path.exists(png_filename):
                 crop_image(png_filename, output_path)
                 #os.remove(png_filename)
