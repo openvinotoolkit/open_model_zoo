@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 from ..adapters import AdapterField
 from ..config import ConfigValidator, StringField, ListField, ConfigError, InputField, ListInputsField
-from ..dependency import ClassProvider
+from ..dependency import ClassProvider, UnregisteredProviderException
 from ..utils import get_parameter_value_from_config, contains_all
 
 
@@ -136,7 +136,24 @@ class Launcher(ClassProvider):
         }
 
     @classmethod
-    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False):
+    def validate_config(cls, config, delayed_model_loading=False, fetch_only=False):
+        if cls.__name__ == Launcher.__name__:
+            errors = []
+            framework = config.get('framework')
+            if not framework:
+                error = ConfigError('framework is not provided', config, 'launcher')
+                if not fetch_only:
+                    raise error
+                errors.append(error)
+                return errors
+            try:
+                launcher_cls = cls.resolve(framework)
+                return launcher_cls.validate_config(config, fetch_only=fetch_only)
+            except UnregisteredProviderException as exception:
+                if not fetch_only:
+                    raise exception
+                errors.append(ConfigError("launcher {} unregistered".format(framework), config, 'launcher'))
+                return errors
         return LauncherConfigValidator(
             'Launcher', fields=cls.parameters(), delayed_model_loading=delayed_model_loading
         ).validate(config, fetch_only=fetch_only)

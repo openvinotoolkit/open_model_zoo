@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from ..config import BaseField, ConfigValidator, StringField, ConfigError
-from ..dependency import ClassProvider
+from ..dependency import ClassProvider, UnregisteredProviderException
 from ..utils import get_parameter_value_from_config
 
 
@@ -53,6 +53,24 @@ class Adapter(ClassProvider):
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, **kwargs):
+        if cls.__name__ == Adapter.__name__:
+            errors = []
+            adapter_type = config if isinstance(config, str) else config.get('type')
+            if not adapter_type:
+                error = ConfigError('type is not provided', config, 'adapter')
+                if not fetch_only:
+                    raise error
+                errors.append(error)
+                return errors
+            try:
+                adapter_cls = cls.resolve(adapter_type)
+                adapter_config = config if isinstance(config, dict) else {'type': adapter_type}
+                return adapter_cls.validate_config(adapter_config, fetch_only=fetch_only)
+            except UnregisteredProviderException as exception:
+                if not fetch_only:
+                    raise exception
+                errors.append(ConfigError("adapter {} unregistered".format(adapter_type), config, 'adapter'))
+                return errors
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
         return ConfigValidator(cls.__provider__, fields=cls.parameters(), **kwargs).validate(config, fetch_only)

@@ -26,7 +26,7 @@ import numpy as np
 from numpy.lib.npyio import NpzFile
 
 from ..utils import get_path, read_json, read_pickle, contains_all, UnsupportedPackage, get_parameter_value_from_config
-from ..dependency import ClassProvider
+from ..dependency import ClassProvider, UnregisteredProviderException
 from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField
 
 try:
@@ -140,6 +140,24 @@ class BaseReader(ClassProvider):
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, **kwargs):
+        if cls.__name__ == BaseReader.__name__:
+            errors = []
+            reader_type = config if isinstance(config, str) else config.get('type')
+            if not reader_type:
+                error = ConfigError('type is not provided', config, 'reader')
+                if not fetch_only:
+                    raise error
+                errors.append(error)
+                return errors
+            try:
+                reader_cls = cls.resolve(reader_type)
+                reader_config = config if isinstance(config, dict) else {'type': reader_type}
+                return reader_cls.validate_config(reader_config, fetch_only=fetch_only)
+            except UnregisteredProviderException as exception:
+                if not fetch_only:
+                    raise exception
+                errors.append(ConfigError("reader {} unregistered".format(reader_type), config, 'reader'))
+                return errors
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
         return ConfigValidator(cls.__provider__, fields=cls.parameters(), **kwargs).validate(config, fetch_only)

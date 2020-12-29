@@ -134,7 +134,7 @@ class Postprocessor(ClassProvider):
                 if not fetch_only:
                     raise exception
                 errors.append(
-                    ConfigError("postprocessor {} unregistered".format(processing_provider), config, 'preprocessing')
+                    ConfigError("postprocessor {} unregistered".format(processing_provider), config, 'postprocessing')
                 )
                 return errors
             errors.extend(processor_cls.validate_config(config, fetch_only=fetch_only))
