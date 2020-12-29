@@ -179,7 +179,7 @@ def render_routine(line):
                 os.remove(pdf_filename)
             if os.path.exists(png_filename):
                 crop_image(png_filename, output_path)
-                os.remove(png_filename)
+                #os.remove(png_filename)
 
 
 def check_differ(diff):
