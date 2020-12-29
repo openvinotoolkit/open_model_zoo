@@ -19,7 +19,7 @@ import pickle
 
 from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
-from ..launcher import create_launcher, DummyLauncher, InputFeeder
+from ..launcher import create_launcher, DummyLauncher, InputFeeder, Launcher
 from ..launcher.loaders import StoredPredictionBatch
 from ..logging import print_info, warning
 from ..metrics import MetricsExecutor
@@ -111,6 +111,22 @@ class ModelEvaluator(BaseEvaluator):
             launcher, input_feeder, adapter, data_reader,
             preprocessor, postprocessor, dataset, metric_dispatcher, async_mode
         )
+
+    @classmethod
+    def validate_config(cls, model_config):
+        config_errors = []
+        launcher_config = model_config['launchers'][0]
+        dataset_config = model_config['datasets'][0]
+        data_reader_config = dataset_config.get('reader', 'opencv_imread')
+
+        config_errors.extend(Launcher.validate_config(launcher_config, fetch_only=True))
+        config_errors.extend(Dataset.validate_config(dataset_config, fetch_only=True))
+        config_errors.extend(BaseReader.validate_config(data_reader_config, fetch_only=True))
+        config_errors.extend(PreprocessingExecutor.validate_config(dataset_config.get('preprocessing'), fetch_only=True))
+        config_errors.extend(PostprocessingExecutor.validate_config(dataset_config.get('postprocessing'), fetch_only=True))
+        config_errors.extend(MetricsExecutor.validate_config(dataset_config.get('metrics', []), fetch_only=True))
+
+        return config_errors
 
     @staticmethod
     def get_processing_info(config):

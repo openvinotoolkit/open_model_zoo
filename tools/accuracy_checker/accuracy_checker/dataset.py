@@ -34,6 +34,7 @@ from .config import (
     ConfigError,
     BoolField
 )
+from .dependency import UnregisteredProviderException
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
 from .representation import (
     BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
@@ -325,6 +326,32 @@ class Dataset:
             if progress_reporter:
                 progress_reporter.update(idx, 1)
         return annotations
+
+    @classmethod
+    def validate_config(cls, config, fetch_only=False):
+        dataset_config = DatasetConfig('Dataset')
+        errors = dataset_config.validate(config, fetch_only)
+        if 'annotation_conversion' in config:
+            conversion_params = config['annotation_conversion']
+            converter = conversion_params.get('converter')
+            if not converter:
+                error = ConfigError('converter does not found', conversion_params, 'annotation_conversion')
+                if not fetch_only:
+                    raise error
+                errors.append(error)
+                return errors
+            try:
+                converter_cls = BaseFormatConverter.resolve(converter)
+            except UnregisteredProviderException as exception:
+                if not fetch_only:
+                    raise exception
+                errors.append(
+                    ConfigError(
+                        'converter {} unregistered'.format(converter), conversion_params, 'annotation_conversion')
+                )
+                return errors
+            errors.extend(converter_cls.validate_config(conversion_params, fetch_only=fetch_only))
+        return errors
 
 
 def read_annotation(annotation_file: Path):
