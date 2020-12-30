@@ -16,12 +16,18 @@
 
 #include "pipelines/async_pipeline.h"
 #include <cldnn/cldnn_config.hpp>
+<<<<<<< HEAD:demos/common/cpp/pipelines/src/async_pipeline.cpp
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
+=======
+#include <samples/common.hpp>
+#include <samples/slog.hpp>
+#include "models/hpe_model_openpose.h"
+>>>>>>> 0eaa7e90 (hpe):demos/common/pipelines/src/async_pipeline.cpp
 
 using namespace InferenceEngine;
 
-AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine) :
+AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine, int reshape) :
     model(std::move(modelInstance)) {
 
     // --------------------------- 1. Load inference engine ------------------------------------------------
@@ -51,6 +57,9 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
     auto shapes = cnnNetwork.getInputShapes();
     for (auto& shape : shapes) {
         shape.second[0] = 1;
+        if (reshape) {
+            shape.second[3] = reshape;
+        }
     }
     cnnNetwork.reshape(shapes);
 
@@ -146,9 +155,10 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
 std::unique_ptr<ResultBase> AsyncPipeline::getResult(bool shouldKeepOrder) {
     auto infResult = AsyncPipeline::getInferenceResult(shouldKeepOrder);
     if (infResult.IsEmpty()) {
+        //std::cout << "EMPTY!!!\n";
         return std::unique_ptr<ResultBase>();
     }
-
+    //std::cout << "NOT EMPTY!!!\n";
     auto result = model->postprocess(infResult);
     *result = static_cast<ResultBase&>(infResult);
 
