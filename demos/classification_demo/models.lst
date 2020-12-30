@@ -45,6 +45,7 @@ octave-resnet-50-0.125
 octave-resnext-101-0.25
 octave-resnext-50-0.25
 octave-se-resnet-50-0.125
+regnetx-3.2gf
 resnest-50-pytorch
 resnet-18-pytorch
 resnet-50-caffe2
