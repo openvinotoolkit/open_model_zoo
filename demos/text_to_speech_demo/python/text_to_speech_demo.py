@@ -149,7 +149,7 @@ def main():
                 time_wavernn += (time_e - time_s) * 1000
 
                 audio_res.extend(audio)
-                audio_res.extend(silent * min(audio))
+                audio_res.extend(silent * np.mean(audio))
 
             if count % 5 == 0:
                 print('WaveRNN time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'.format(time_wavernn, time_forward))
