@@ -163,7 +163,7 @@ def render_routine(line):
         aux_filename = pre_name + '.aux'
         with open(tex_filename, "w") as w:
             w.write(template % formula)
-        subprocess.run(["pdflatex", "-interaction=nonstopmode", tex_filename, "-output-directory", folder_path],
+        subprocess.run(["pdflatex", "-interaction=nonstopmode", "-output-directory", folder_path, tex_filename],
                        check=True, shell=True)
         for filename in (tex_filename, log_filename, aux_filename):
             if os.path.exists(filename):
