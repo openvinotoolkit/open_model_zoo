@@ -164,8 +164,7 @@ def render_routine(line):
         with open(tex_filename, "w") as w:
             w.write(template % formula)
         subprocess.run([
-            "pdflatex", "-interaction=nonstopmode", tex_filename, "-output-directory", folder_path
-            ],
+            "pdflatex", "-interaction=nonstopmode", tex_filename, "-output-directory", folder_path],
             stdout=PIPE, stderr=PIPE,
             check=True, shell=True)
         for filename in (tex_filename, log_filename, aux_filename):
