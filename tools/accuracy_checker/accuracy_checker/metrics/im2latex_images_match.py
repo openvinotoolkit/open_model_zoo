@@ -308,7 +308,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'num_threads': NumberField(value_type=int, optional=True),
+            'num_threads': NumberField(value_type=int, optional=True, default=1),
             'max_pixel_column_diff': NumberField(value_type=int)
         })
 
