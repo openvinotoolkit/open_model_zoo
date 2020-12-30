@@ -164,7 +164,7 @@ def render_routine(line):
         with open(tex_filename, "w") as w:
             w.write(template % formula)
         run("pdflatex -interaction=nonstopmode {}".format(tex_filename), TIMEOUT)
-        for filename in (tex_filename, log_filename, aux_filename):
+        #for filename in (tex_filename, log_filename, aux_filename):
             #if os.path.exists(filename):
             #    os.remove(filename)
         pdf_filename = tex_filename[:-4] + '.pdf'
