@@ -164,7 +164,7 @@ def render_routine(line):
         with open(tex_filename, "w") as w:
             w.write(template % formula)
         subprocess.run(["pdflatex", "-interaction=nonstopmode", "-output-directory", folder_path, tex_filename],
-                       check=True, shell=True, stdout=PIPE, stderr=PIPE)
+                       check=False, shell=True, stdout=PIPE, stderr=PIPE)
         for filename in (tex_filename, log_filename, aux_filename):
             if os.path.exists(filename):
                 os.remove(filename)
