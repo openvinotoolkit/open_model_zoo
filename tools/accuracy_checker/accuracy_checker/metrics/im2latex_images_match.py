@@ -75,9 +75,9 @@ template = r"""
 
 
 def check_environment():
-    #command = subprocess.run("pdflatex --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
-    #if command.stderr:
-    #    raise EnvironmentError("pdflatex not installed, please install it: \n{}".format(command.stderr))
+    command = subprocess.run("pdflatex --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
+    if command.stderr:
+        raise EnvironmentError("pdflatex not installed, please install it: \n{}".format(command.stderr))
     gs_executable = "gs" if os.name != 'nt' else "gswin64c.exe"
     command = subprocess.run("{} --version".format(gs_executable), stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
@@ -163,23 +163,29 @@ def render_routine(line):
         aux_filename = pre_name + '.aux'
         with open(tex_filename, "w") as w:
             w.write(template % formula)
-        run("pdflatex -interaction=nonstopmode {}".format(tex_filename), TIMEOUT)
-        #for filename in (tex_filename, log_filename, aux_filename):
-            #if os.path.exists(filename):
-            #    os.remove(filename)
+        subprocess.run([
+            "pdflatex", "-interaction=nonstopmode", tex_filename, "-output-directory", folder_path
+            ],
+            stdout=PIPE, stderr=PIPE,
+            check=True, shell=True)
+        for filename in (tex_filename, log_filename, aux_filename):
+            if os.path.exists(filename):
+                os.remove(filename)
         pdf_filename = tex_filename[:-4] + '.pdf'
         png_filename = tex_filename[:-4] + '.png'
         if not os.path.exists(pdf_filename):
-            logging.info('ERROR: %s cannot compile\n', file_idx)
+            print_info('ERROR: {} cannot compile\n'.format(file_idx))
         else:
             subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
                             pdf_filename, png_filename],
                            check=True, stdout=PIPE, stderr=PIPE, shell=True)
-            #if os.path.exists(pdf_filename):
-            #    os.remove(pdf_filename)
+            if os.path.exists(pdf_filename):
+                os.remove(pdf_filename)
             if os.path.exists(png_filename):
                 crop_image(png_filename, output_path)
-                #os.remove(png_filename)
+                os.remove(png_filename)
+            else:
+                print_info("ERROR: {png_filename} does not exists".format(png_filename=png_filename))
 
 
 def check_differ(diff):
@@ -305,7 +311,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'num_threads': NumberField(value_type=int, optional=True),
+            'num_threads': NumberField(value_type=int, optional=True, default=1),
             'max_pixel_column_diff': NumberField(value_type=int)
         })
 
