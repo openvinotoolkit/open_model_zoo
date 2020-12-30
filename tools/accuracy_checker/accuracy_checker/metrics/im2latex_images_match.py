@@ -402,7 +402,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         result = 0
-        with tempfile.TemporaryDirectory() as images_dir:
+        with tempfile.TemporaryDirectory(prefix='im2latex') as images_dir:
             self.render_images(annotations, predictions, images_dir)
             result = self.compare_pics(images_dir)
         return result
