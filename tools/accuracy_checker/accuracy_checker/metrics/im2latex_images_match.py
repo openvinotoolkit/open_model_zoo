@@ -78,7 +78,8 @@ def check_environment():
     command = subprocess.run("pdflatex --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
         raise EnvironmentError("pdflatex not installed, please install it: \n{}".format(command.stderr))
-    command = subprocess.run("gs --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
+    gs_executable = "gs" if os.name != 'nt' else "gswin64c.exe"
+    command = subprocess.run("{} --version".format(gs_executable), stdout=PIPE, stderr=PIPE, check=False, shell=True)
     if command.stderr:
         raise EnvironmentError("ghostscript not installed, please install it: \n{}".format(command.stderr))
     command = subprocess.run("convert --version", stdout=PIPE, stderr=PIPE, check=False, shell=True)
@@ -154,7 +155,7 @@ def render_routine(line):
     """
     formula, file_idx, folder_path = line
     output_path = os.path.join(folder_path, file_idx)
-    pre_name = output_path.replace('/', '_').replace('.', '_')
+    pre_name = os.path.normcase(output_path).replace('/', '_').replace('.', '_')
     formula = preprocess_formula(formula)
     if not os.path.exists(output_path):
         tex_filename = pre_name + '.tex'
@@ -162,22 +163,26 @@ def render_routine(line):
         aux_filename = pre_name + '.aux'
         with open(tex_filename, "w") as w:
             w.write(template % formula)
-        run("pdflatex -interaction=nonstopmode {}".format(tex_filename), TIMEOUT)
+        subprocess.run(["pdflatex", "-interaction=nonstopmode", "-output-directory", folder_path, tex_filename],
+                       check=False, shell=True, stdout=PIPE, stderr=PIPE)
         for filename in (tex_filename, log_filename, aux_filename):
             if os.path.exists(filename):
                 os.remove(filename)
         pdf_filename = tex_filename[:-4] + '.pdf'
         png_filename = tex_filename[:-4] + '.png'
         if not os.path.exists(pdf_filename):
-            logging.info('ERROR: %s cannot compile\n', file_idx)
+            print_info('ERROR: {} cannot compile\n'.format(file_idx))
         else:
             subprocess.run(['convert', '+profile', '"icc"', '-density', '200', '-quality', '100',
-                            pdf_filename, png_filename], check=True, stdout=PIPE, stderr=PIPE)
+                            pdf_filename, png_filename],
+                           check=True, stdout=PIPE, stderr=PIPE, shell=True)
             if os.path.exists(pdf_filename):
                 os.remove(pdf_filename)
             if os.path.exists(png_filename):
                 crop_image(png_filename, output_path)
                 os.remove(png_filename)
+            else:
+                print_info("ERROR: {png_filename} does not exists".format(png_filename=png_filename))
 
 
 def check_differ(diff):
@@ -312,7 +317,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
     def configure(self):
         self.num_threads = self.get_value_from_config('num_threads')
         if self.num_threads is None:
-            self.num_threads = cpu_count()
+            self.num_threads = cpu_count() if os.name != 'nt' else 1
         self.max_pixel_column_diff = self.get_value_from_config('max_pixel_column_diff')
         check_environment()
 
@@ -397,7 +402,7 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         result = 0
-        with tempfile.TemporaryDirectory() as images_dir:
+        with tempfile.TemporaryDirectory(prefix='im2latex', dir=os.getcwd()) as images_dir:
             self.render_images(annotations, predictions, images_dir)
             result = self.compare_pics(images_dir)
         return result
