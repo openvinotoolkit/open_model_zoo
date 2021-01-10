@@ -36,7 +36,7 @@ class BaseFormatConverter(ClassProvider):
     @classmethod
     def config_validator(cls):
         return ConfigValidator(
-            '{}_converter_config'.format(cls.get_name()), fields=cls.parameters(),
+            '{}'.format(cls.get_name()), fields=cls.parameters(),
             on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
         )
 

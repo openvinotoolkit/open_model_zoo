@@ -117,23 +117,36 @@ class ModelEvaluator(BaseEvaluator):
         if 'models' in model_config:
             model_config = model_config['models'][0]
         config_errors = []
-        launcher_config = model_config['launchers'][0]
-        dataset_config = model_config['datasets'][0]
-        data_reader_config = dataset_config.get('reader', 'opencv_imread')
-        adapter_config = launcher_config.get('adapter')
+        if 'launchers' not in model_config or not model_config['launchers']:
+            config_errors.append(
+                ConfigError('launchers section is not provided', model_config.get('launchers', []), 'model'))
+        else:
+            launcher_config = model_config['launchers'][0]
+            adapter_config = launcher_config.get('adapter')
 
-        config_errors.extend(Launcher.validate_config(launcher_config, fetch_only=True))
-        if adapter_config:
-            config_errors.extend(Adapter.validate_config(adapter_config, fetch_only=True))
-        config_errors.extend(Dataset.validate_config(dataset_config, fetch_only=True))
-        config_errors.extend(BaseReader.validate_config(data_reader_config, fetch_only=True))
-        config_errors.extend(
-            PreprocessingExecutor.validate_config(dataset_config.get('preprocessing'), fetch_only=True)
-        )
-        config_errors.extend(
-            PostprocessingExecutor.validate_config(dataset_config.get('postprocessing'), fetch_only=True)
-        )
-        config_errors.extend(MetricsExecutor.validate_config(dataset_config.get('metrics', []), fetch_only=True))
+            config_errors.extend(Launcher.validate_config(launcher_config, fetch_only=True))
+            if adapter_config:
+                config_errors.extend(Adapter.validate_config(adapter_config, fetch_only=True))
+
+        if 'datasets' not in model_config or not model_config['datasets']:
+            config_errors.append(
+                ConfigError('datasets section is not provided', model_config.get('datasets', []), 'model'))
+        else:
+            dataset_config = model_config['datasets'][0]
+            data_reader_config = dataset_config.get('reader', 'opencv_imread')
+            config_errors.extend(Dataset.validate_config(dataset_config, fetch_only=True))
+            config_errors.extend(
+                BaseReader.validate_config(
+                    data_reader_config, data_source=dataset_config.get('data_source'), fetch_only=True
+                )
+            )
+            config_errors.extend(
+                PreprocessingExecutor.validate_config(dataset_config.get('preprocessing'), fetch_only=True)
+            )
+            config_errors.extend(
+                PostprocessingExecutor.validate_config(dataset_config.get('postprocessing'), fetch_only=True)
+            )
+            config_errors.extend(MetricsExecutor.validate_config(dataset_config.get('metrics', []), fetch_only=True))
 
         return config_errors
 

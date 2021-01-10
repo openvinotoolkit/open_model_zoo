@@ -59,7 +59,7 @@ class Preprocessor(ClassProvider):
         if cls.__name__ == Preprocessor.__name__:
             processing_provider = config.get('type')
             if not processing_provider:
-                error = ConfigError('type does not found', config, 'preprocessing')
+                error = ConfigError('type is not found', config, 'preprocessing')
                 if not fetch_only:
                     raise error
                 errors.append(error)

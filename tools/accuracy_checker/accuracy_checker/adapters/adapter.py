@@ -69,7 +69,6 @@ class Adapter(ClassProvider):
             except UnregisteredProviderException as exception:
                 if not fetch_only:
                     raise exception
-                errors.append(ConfigError("adapter {} unregistered".format(adapter_type), config, 'adapter'))
                 return errors
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT

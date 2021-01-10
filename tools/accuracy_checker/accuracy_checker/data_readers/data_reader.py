@@ -27,7 +27,9 @@ from numpy.lib.npyio import NpzFile
 
 from ..utils import get_path, read_json, read_pickle, contains_all, UnsupportedPackage, get_parameter_value_from_config
 from ..dependency import ClassProvider, UnregisteredProviderException
-from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField
+from ..config import (
+    BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField, PathField
+)
 
 try:
     import nibabel as nib
@@ -50,6 +52,8 @@ except ImportError as import_error:
     rawpy = UnsupportedPackage('rawpy', import_error.msg)
 
 REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
+DOES_NOT_REQUIRED_DATA_SOURCE = REQUIRES_ANNOTATIONS + ['ncf_reader']
+DATA_SOURCE_IS_FILE = ['opencv_capture']
 
 
 class DataRepresentation:
@@ -77,15 +81,15 @@ def create_reader(config):
 
 
 class DataReaderField(BaseField):
-    def validate(self, entry_, field_uri=None):
-        super().validate(entry_, field_uri)
+    def validate(self, entry_, field_uri=None, fetch_only=False):
+        errors = super().validate(entry_, field_uri)
 
         if entry_ is None:
-            return
+            return errors
 
         field_uri = field_uri or self.field_uri
         if isinstance(entry_, str):
-            StringField(choices=BaseReader.providers).validate(entry_, 'reader')
+            errors.extend(StringField(choices=BaseReader.providers).validate(entry_, field_uri, fetch_only=fetch_only))
         elif isinstance(entry_, dict):
             class DictReaderValidator(ConfigValidator):
                 type = StringField(choices=BaseReader.providers)
@@ -93,9 +97,14 @@ class DataReaderField(BaseField):
             dict_reader_validator = DictReaderValidator(
                 'reader', on_extra_argument=DictReaderValidator.IGNORE_ON_EXTRA_ARGUMENT
             )
-            dict_reader_validator.validate(entry_)
+            errors.extend(dict_reader_validator.validate(entry_, field_uri, fetch_only=fetch_only))
         else:
-            self.raise_error(entry_, field_uri, 'reader must be either string or dictionary')
+            msg = 'reader must be either string or dictionary'
+            if not fetch_only:
+                self.raise_error(entry_, field_uri, msg)
+            errors.append(self.build_error(entry_, field_uri, msg))
+
+        return errors
 
 
 class BaseReader(ClassProvider):
@@ -111,7 +120,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(ImagePairIdentifier, self._read_pair)
         self.multi_infer = False
 
-        self.validate_config(config)
+        self.validate_config(config, data_source)
         self.configure()
 
     def __call__(self, identifier):
@@ -139,7 +148,7 @@ class BaseReader(ClassProvider):
         self.multi_infer = self.get_value_from_config('multi_infer')
 
     @classmethod
-    def validate_config(cls, config, fetch_only=False, **kwargs):
+    def validate_config(cls, config, data_source=None, fetch_only=False, **kwargs):
         if cls.__name__ == BaseReader.__name__:
             errors = []
             reader_type = config if isinstance(config, str) else config.get('type')
@@ -152,15 +161,20 @@ class BaseReader(ClassProvider):
             try:
                 reader_cls = cls.resolve(reader_type)
                 reader_config = config if isinstance(config, dict) else {'type': reader_type}
-                return reader_cls.validate_config(reader_config, fetch_only=fetch_only)
+                if reader_type not in DOES_NOT_REQUIRED_DATA_SOURCE:
+                    data_source_field = PathField(is_directory=reader_type not in DATA_SOURCE_IS_FILE)
+                    errors.extend(data_source_field.validate(data_source, 'data_source', fetch_only=fetch_only))
+                errors.extend(reader_cls.validate_config(reader_config, fetch_only=fetch_only))
+                return errors
             except UnregisteredProviderException as exception:
                 if not fetch_only:
                     raise exception
-                errors.append(ConfigError("reader {} unregistered".format(reader_type), config, 'reader'))
                 return errors
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
-        return ConfigValidator(cls.__provider__, fields=cls.parameters(), **kwargs).validate(config, fetch_only)
+        return ConfigValidator(cls.__provider__, fields=cls.parameters(), **kwargs).validate(
+            config, 'reader', fetch_only=fetch_only
+        )
 
     def read(self, data_id):
         raise NotImplementedError

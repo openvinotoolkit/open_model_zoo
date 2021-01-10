@@ -152,7 +152,7 @@ class Launcher(ClassProvider):
             except UnregisteredProviderException as exception:
                 if not fetch_only:
                     raise exception
-                errors.append(ConfigError("launcher {} unregistered".format(framework), config, 'launcher'))
+                errors.append(ConfigError("launcher {} is not unregistered".format(framework), config, 'Launcher'))
                 return errors
         return LauncherConfigValidator(
             'Launcher', fields=cls.parameters(), delayed_model_loading=delayed_model_loading

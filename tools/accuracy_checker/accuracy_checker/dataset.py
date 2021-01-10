@@ -35,7 +35,10 @@ from .config import (
     BoolField
 )
 from .dependency import UnregisteredProviderException
-from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
+from .utils import (
+    JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet, contains_any
+)
+
 from .representation import (
     BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
 )
@@ -73,7 +76,7 @@ class Dataset:
         self._config = config_entry
         self.batch = self.config.get('batch')
         self.iteration = 0
-        dataset_config = DatasetConfig('Dataset')
+        dataset_config = DatasetConfig('dataset')
         dataset_config.validate(self._config)
         if not delayed_annotation_loading:
             self._load_annotation()
@@ -329,13 +332,13 @@ class Dataset:
 
     @classmethod
     def validate_config(cls, config, fetch_only=False):
-        dataset_config = DatasetConfig('Dataset')
-        errors = dataset_config.validate(config, fetch_only)
+        dataset_config = DatasetConfig('dataset')
+        errors = dataset_config.validate(config, fetch_only=fetch_only)
         if 'annotation_conversion' in config:
             conversion_params = config['annotation_conversion']
             converter = conversion_params.get('converter')
             if not converter:
-                error = ConfigError('converter does not found', conversion_params, 'annotation_conversion')
+                error = ConfigError('converter is not found', conversion_params, 'annotation_conversion')
                 if not fetch_only:
                     raise error
                 errors.append(error)
@@ -351,6 +354,10 @@ class Dataset:
                 )
                 return errors
             errors.extend(converter_cls.validate_config(conversion_params, fetch_only=fetch_only))
+        if not contains_any(config, ['annotation_conversion', 'annotation']):
+            errors.append(
+                ConfigError('annotation_conversion or annotation field should be provided', config, 'dataset')
+            )
         return errors
 
 

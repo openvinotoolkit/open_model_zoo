@@ -51,17 +51,20 @@ class BaseValidator:
                 errors.append(self.build_error(entry, field_uri))
         return errors
 
-    def raise_error(self, value, field_uri, reason=None):
+    def raise_error(self, value, field_uri, reason=None, override_message=False):
         if self.on_error:
             self.on_error(value, field_uri, reason)
-        error = self.build_error(value, field_uri, reason)
+        error = self.build_error(value, field_uri, reason, override_message)
         raise error
 
     @staticmethod
-    def build_error(value, field_uri, reason=None):
+    def build_error(value, field_uri, reason=None, override_message=False):
         error_message = 'Invalid value "{value}" for {field_uri}'.format(value=value, field_uri=field_uri)
         if reason:
-            error_message = '{error_message}: {reason}'.format(error_message=error_message, reason=reason)
+            if not override_message:
+                error_message = '{error_message}: {reason}'.format(error_message=error_message, reason=reason)
+            else:
+                error_message = reason
 
         return ConfigError(error_message, value, field_uri)
 
@@ -105,7 +108,7 @@ class ConfigValidator(BaseValidator):
                 self.fields[name] = field_copy
 
     def validate(self, entry, field_uri=None, fetch_only=False):
-        error_stack = super().validate(entry, field_uri, fetch_only)
+        error_stack = super().validate(entry, field_uri, fetch_only=fetch_only)
         field_uri = field_uri or self.field_uri
         if not _is_dict_like(entry):
             error = ConfigError("{} is expected to be dict-like".format(field_uri))
@@ -131,10 +134,10 @@ class ConfigValidator(BaseValidator):
             missing_error = "Invalid config for {}: missing required fields: {}".format(field_uri, arguments)
             if not fetch_only:
                 self.raise_error(
-                    entry, field_uri, missing_error
+                    entry, field_uri, missing_error, override_message=True
                 )
             else:
-                error_stack.append(self.build_error(entry, field_uri, missing_error))
+                error_stack.append(self.build_error(entry, field_uri, missing_error, override_message=True))
 
         if extra_arguments:
             error_stack.extend(self._extra_args_error_handle(entry, field_uri, extra_arguments, fetch_only))
@@ -151,7 +154,7 @@ class ConfigValidator(BaseValidator):
             if not fetch_only:
                 self.raise_error(entry, field_uri, message)
             else:
-                return [self.build_error(entry, field_uri, message)]
+                return [self.build_error(entry, field_uri, message, override_message=True)]
         return []
 
     @property

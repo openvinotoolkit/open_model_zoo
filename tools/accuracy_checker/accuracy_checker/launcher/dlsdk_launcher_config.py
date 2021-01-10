@@ -38,16 +38,20 @@ class CPUExtensionPathField(PathField):
     def __init__(self, **kwargs):
         super().__init__(is_directory=False, **kwargs)
 
-    def validate(self, entry, field_uri=None):
+    def validate(self, entry, field_uri=None, fetch_only=False):
+        errors = []
         if entry is None:
-            return
+            return errors
 
         field_uri = field_uri or self.field_uri
         validation_entry = ''
         try:
             validation_entry = Path(entry)
         except TypeError:
-            self.raise_error(entry, field_uri, "values is expected to be path-like")
+            msg = "values is expected to be path-like"
+            if not fetch_only:
+                self.raise_error(entry, field_uri, msg)
+            errors.append(self.build_error(entry, field_uri, msg))
         is_directory = False
         if validation_entry.parts[-1] == 'AUTO':
             validation_entry = validation_entry.parent
@@ -55,11 +59,21 @@ class CPUExtensionPathField(PathField):
         try:
             get_path(validation_entry, is_directory)
         except FileNotFoundError:
-            self.raise_error(validation_entry, field_uri, "path does not exist")
+            msg = "path does not exist"
+            if not fetch_only:
+                self.raise_error(validation_entry, field_uri, msg)
+            errors.append(self.build_error(validation_entry, field_uri, msg))
         except NotADirectoryError:
-            self.raise_error(validation_entry, field_uri, "path is not a directory")
+            msg = "path is not a directory"
+            if not fetch_only:
+                self.raise_error(validation_entry, field_uri, msg)
+            errors.append(self.build_error(validation_entry, field_uri, msg))
         except IsADirectoryError:
-            self.raise_error(validation_entry, field_uri, "path is a directory, regular file expected")
+            msg = "path is a directory, regular file expected"
+            if not fetch_only:
+                self.raise_error(validation_entry, field_uri, msg)
+            errors.append(self.build_error(validation_entry, field_uri, msg))
+        return errors
 
 
 class DLSDKLauncherConfigValidator(LauncherConfigValidator):
@@ -96,6 +110,8 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
             self._set_model_source(framework_parameters)
         error_stack = super().validate(entry, field_uri, fetch_only)
         self.create_device_regex(known_plugins)
+        if 'device' not in entry:
+            return error_stack
         try:
             self.fields['device'].validate(entry['device'], field_uri)
         except ConfigError as error:
