@@ -19,8 +19,8 @@ range of flop regimes. This model was pretrained in PyTorch\*. All RegNet classi
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 78.17%         | 78.17%          |
-| Top 5  | 94.08%         | 94.08%          |
+| Top 1  | 78.15%         | 78.15%          |
+| Top 5  | 94.09%         | 94.09%          |
 
 ## Input
 

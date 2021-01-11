@@ -12,10 +12,7 @@ models:
 
     datasets:
       - name: imagenet_1000_classes
-        reader: pillow_imread
-
         preprocessing:
-          - type: rgb_to_bgr
           - type: resize
             size: 256
             aspect_ratio_scale: greater
@@ -36,8 +33,6 @@ models:
 
     datasets:
       - name: imagenet_1000_classes
-        reader: pillow_imread
-
         preprocessing:
           - type: resize
             size: 256
