@@ -17,13 +17,13 @@
 #include "model_base.h"
 #include "human_pose.h"
 
-class OpenPose : public ModelBase {
+class HPEOpenPose : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
     /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
-    OpenPose(const std::string& modelFileName, bool useAutoResize);
+    HPEOpenPose(const std::string& modelFileName, bool useAutoResize);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 

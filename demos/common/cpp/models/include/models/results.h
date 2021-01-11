@@ -76,6 +76,6 @@ struct SegmentationResult : public ResultBase {
     cv::Mat mask;
 };
 
-struct OpenPoseResult : public ResultBase {
+struct HumanPoseResult : public ResultBase {
     std::vector<HumanPose> poses;
 };

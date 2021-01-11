@@ -29,12 +29,12 @@
 
 using namespace InferenceEngine;
 
-OpenPose::OpenPose(const std::string& modelFileName, bool useAutoResize) :
+HPEOpenPose::HPEOpenPose(const std::string& modelFileName, bool useAutoResize) :
     ModelBase(modelFileName),
     useAutoResize(useAutoResize) {
 }
 
-void OpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void HPEOpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
@@ -71,7 +71,7 @@ void OpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
         throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
 }
 
-int OpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork, const InputData& inputData) {
+int HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork, const InputData& inputData) {
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     SizeVector& imageInputDims = inputShapes.begin()->second;
     inputLayerSize = cv::Size(imageInputDims[3], imageInputDims[2]);
@@ -97,7 +97,7 @@ int OpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork, const InputData& 
     }
 }
 
-std::shared_ptr<InternalModelData> OpenPose::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
 
     if (useAutoResize) {
@@ -124,8 +124,8 @@ std::shared_ptr<InternalModelData> OpenPose::preprocess(const InputData& inputDa
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(image.cols, image.rows));
 }
 
-std::unique_ptr<ResultBase> OpenPose::postprocess(InferenceResult & infResult) {
-    OpenPoseResult* result = new OpenPoseResult;
+std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult & infResult) {
+    HumanPoseResult* result = new HumanPoseResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     auto outputMapped = infResult.outputsData[outputsNames[0]];
@@ -184,7 +184,7 @@ std::unique_ptr<ResultBase> OpenPose::postprocess(InferenceResult & infResult) {
     return std::unique_ptr<ResultBase>(result);
 }
 
-void OpenPose::resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const {
+void HPEOpenPose::resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const {
     for (auto& featureMap : featureMaps) {
         cv::resize(featureMap, featureMap, cv::Size(),
                    upsampleRatio, upsampleRatio, cv::INTER_CUBIC);
@@ -211,7 +211,7 @@ private:
     std::vector<std::vector<Peak> >& peaksFromHeatMap;
 };
 
-std::vector<HumanPose> OpenPose::extractPoses(
+std::vector<HumanPose> HPEOpenPose::extractPoses(
         const std::vector<cv::Mat>& heatMaps,
         const std::vector<cv::Mat>& pafs) const {
     std::vector<std::vector<Peak>> peaksFromHeatMap(heatMaps.size());

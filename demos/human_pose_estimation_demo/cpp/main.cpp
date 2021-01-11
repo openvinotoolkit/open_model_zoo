@@ -135,7 +135,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 }
 
 
-cv::Mat renderHumanPose(const OpenPoseResult& result) {
+cv::Mat renderHumanPose(const HumanPoseResult& result) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
         }
@@ -145,7 +145,7 @@ cv::Mat renderHumanPose(const OpenPoseResult& result) {
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
    }
-    static const cv::Scalar colors[OpenPose::keypointsNumber] = {
+    static const cv::Scalar colors[HPEOpenPose::keypointsNumber] = {
         cv::Scalar(255, 0, 0), cv::Scalar(255, 85, 0), cv::Scalar(255, 170, 0),
         cv::Scalar(255, 255, 0), cv::Scalar(170, 255, 0), cv::Scalar(85, 255, 0),
         cv::Scalar(0, 255, 0), cv::Scalar(0, 255, 85), cv::Scalar(0, 255, 170),
@@ -165,7 +165,7 @@ cv::Mat renderHumanPose(const OpenPoseResult& result) {
     const int stickWidth = 4;
     const cv::Point2f absentKeypoint(-1.0f, -1.0f);
     for (auto pose : result.poses) {
-        CV_Assert(pose.keypoints.size() == OpenPose::keypointsNumber);
+        CV_Assert(pose.keypoints.size() == HPEOpenPose::keypointsNumber);
 
         for (size_t keypointIdx = 0; keypointIdx < pose.keypoints.size(); keypointIdx++) {
             if (pose.keypoints[keypointIdx] != absentKeypoint) {
@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
-            model.reset(new OpenPose(FLAGS_m, FLAGS_auto_resize));
+            model.reset(new HPEOpenPose(FLAGS_m, FLAGS_auto_resize));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
@@ -261,10 +261,10 @@ int main(int argc, char *argv[]) {
             pipeline.waitForData();
 
             //--- Checking for results and rendering data if it's ready
-            //--- If you need just plain data without rendering - cast result's underlying pointer to OpenPoseResult*
+            //--- If you need just plain data without rendering - cast result's underlying pointer to HumanPoseResult*
             //    and use your own processing instead of calling renderDetectionData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderHumanPose(result->asRef<OpenPoseResult>());
+                cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -286,7 +286,7 @@ int main(int argc, char *argv[]) {
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
         while (result = pipeline.getResult()) {
-            cv::Mat outFrame = renderHumanPose(result->asRef<OpenPoseResult>());
+            cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
