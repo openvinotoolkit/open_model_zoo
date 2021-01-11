@@ -180,7 +180,7 @@ class BaseReader(ClassProvider):
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
         reader_uri = '{}'.format(cls.__provider__)
         return ConfigValidator(reader_uri, fields=cls.parameters(), **kwargs).validate(
-            config, fetch_only=fetch_only
+            config or {}, fetch_only=fetch_only
         )
 
     def read(self, data_id):
