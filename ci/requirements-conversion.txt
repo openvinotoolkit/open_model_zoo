@@ -25,7 +25,7 @@ numpy==1.18.5             # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_
 oauthlib==3.1.0           # via requests-oauthlib
 onnx==1.8.0               # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_onnx.txt, -r tools/downloader/requirements-caffe2.in, -r tools/downloader/requirements-pytorch.in
 opt-einsum==3.3.0         # via tensorflow
-pillow==8.0.1             # via torchvision
+pillow==8.1.0             # via torchvision
 protobuf==3.14.0          # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_caffe.txt, onnx, tensorboard, tensorflow
 pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.8             # via pyasn1-modules, rsa

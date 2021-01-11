@@ -1,4 +1,4 @@
 # core components
 numpy>=1.16.3
 PyYAML
-pillow>=2.6.1
+pillow>=8.1
