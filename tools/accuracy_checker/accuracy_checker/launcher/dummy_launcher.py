@@ -18,7 +18,7 @@ from ..utils import get_path, read_txt
 from ..logging import print_info
 from ..config import PathField, StringField, BoolField
 from .loaders import Loader
-from .launcher import Launcher, LauncherConfigValidator
+from .launcher import Launcher
 
 
 class DummyLauncher(Launcher):
@@ -42,8 +42,7 @@ class DummyLauncher(Launcher):
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
 
-        dummy_launcher_config = LauncherConfigValidator('Dummy_Launcher', fields=self.parameters())
-        dummy_launcher_config.validate(self.config)
+        self.validate_config(config_entry)
         print_info('Predictions objects loading started')
         self.data_path = get_path(self.get_value_from_config('data_path'))
         identfiers_file = self.get_value_from_config('identifiers_list')

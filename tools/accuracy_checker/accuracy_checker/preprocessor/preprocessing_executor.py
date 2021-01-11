@@ -102,6 +102,17 @@ class PreprocessingExecutor:
             return []
         return self.ie_processor.steps
 
+    @classmethod
+    def validate_config(cls, processors, fetch_only=False, uri_prefix=''):
+        if not processors:
+            return []
+        errors = []
+        for preprocessor_id, processor in enumerate(processors):
+            preprocessor_uri = '{}.{}'.format(uri_prefix or 'preprocessing', preprocessor_id)
+            errors.extend(Preprocessor.validate_config(processor, fetch_only=fetch_only, uri_prefix=preprocessor_uri))
+
+        return errors
+
 
 class PreprocessorConfig(ConfigValidator):
     type = StringField(choices=Preprocessor.providers)

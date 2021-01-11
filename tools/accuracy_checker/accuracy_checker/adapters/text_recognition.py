@@ -44,8 +44,13 @@ class BeamSearchDecoder(Adapter):
         })
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
+        )
+
+    def configure(self):
         self.beam_size = self.get_value_from_config('beam_size')
         self.blank_label = self.launcher_config.get('blank_label')
         self.softmaxed_probabilities = self.get_value_from_config('softmaxed_probabilities')
@@ -153,9 +158,14 @@ class CTCGreedySearchDecoder(Adapter):
         })
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
-        self.blank_label = self.launcher_config.get('blank_label')
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
+        )
+
+    def configure(self):
+        self.blank_label = self.get_value_from_config('blank_label')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         if not self.label_map:

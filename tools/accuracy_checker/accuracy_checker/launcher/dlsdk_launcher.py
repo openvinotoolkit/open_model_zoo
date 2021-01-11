@@ -174,16 +174,18 @@ class DLSDKLauncher(Launcher):
         if '_list_lstm_inputs' in self.config:
             self._configure_lstm_inputs()
 
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
+        return DLSDKLauncherConfigValidator(
+            uri_prefix or 'launcher', fields=cls.parameters(), delayed_model_loading=delayed_model_loading
+        ).validate(config, fetch_only=fetch_only)
+
     @property
     def device(self):
         return self._device
 
     @property
     def inputs(self):
-        """
-        Returns:
-            inputs in NCHW format.
-        """
         if self.network is None:
             has_info = hasattr(self.exec_network, 'input_info')
             if not has_info:
@@ -205,13 +207,6 @@ class DLSDKLauncher(Launcher):
         return None
 
     def predict(self, inputs, metadata=None, **kwargs):
-        """
-        Args:
-            inputs: dictionary where keys are input layers names and values are data for them.
-            metadata: metadata of input representations
-        Returns:
-            raw data from network.
-        """
         if self._lstm_inputs:
             return self._predict_sequential(inputs, metadata)
 

@@ -26,13 +26,17 @@ DEVICE_REGEX = r'(?P<device>cpu$|gpu)(_(?P<identifier>\d+))?'
 
 
 class MxNetLauncherConfigValidator(LauncherConfigValidator):
-    def validate(self, entry, field_uri=None):
-        super().validate(entry, field_uri)
-        inputs = entry['inputs']
-
-        for input_layer in inputs:
-            if 'shape' not in input_layer:
-                raise ConfigError('shape for input {} is not provided'.format(input_layer['name']))
+    def validate(self, entry, field_uri=None, fetch_only=False):
+        self.fields['inputs'].optional = self.delayed_model_loading
+        error_stack = super().validate(entry, field_uri)
+        if not self.delayed_model_loading:
+            inputs = entry.get('inputs')
+            for input_layer in inputs:
+                if 'shape' not in input_layer:
+                    if not fetch_only:
+                        raise ConfigError('input value should have shape field')
+                    error_stack.extend(self.build_error(entry, field_uri, 'input value should have shape field'))
+        return error_stack
 
 
 class MxNetLauncher(Launcher):
@@ -64,10 +68,7 @@ class MxNetLauncher(Launcher):
         super().__init__(config_entry, *args, **kwargs)
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        mxnet_launcher_config = MxNetLauncherConfigValidator(
-            'MxNet_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
-        )
-        mxnet_launcher_config.validate(self.config)
+        self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
         if not self._delayed_model_loading:
             # Get model name, prefix, epoch
             self.model = self.automatic_model_search()
@@ -117,6 +118,12 @@ class MxNetLauncher(Launcher):
     @property
     def inputs(self):
         return self._inputs
+
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
+        return MxNetLauncherConfigValidator(
+            uri_prefix or 'launcher', fields=cls.parameters(), delayed_model_loading=delayed_model_loading
+        ).validate(config, fetch_only=fetch_only)
 
     def predict(self, inputs, metadata=None, **kwargs):
         """

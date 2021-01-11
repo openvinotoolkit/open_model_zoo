@@ -37,8 +37,11 @@ class SegmentationAdapter(Adapter):
         })
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         self.make_argmax = self.launcher_config.get('make_argmax', False)

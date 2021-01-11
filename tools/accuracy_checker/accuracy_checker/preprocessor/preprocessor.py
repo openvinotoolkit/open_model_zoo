@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..config import ConfigValidator, StringField
-from ..dependency import ClassProvider
+from ..config import ConfigValidator, StringField, ConfigError
+from ..dependency import ClassProvider, UnregisteredProviderException
 from ..utils import get_parameter_value_from_config
 
 
@@ -30,7 +30,7 @@ class Preprocessor(ClassProvider):
         self.name = name
         self.input_shapes = None
 
-        self.validate_config()
+        self.validate_config(config)
         self.configure()
 
     def __call__(self, *args, **kwargs):
@@ -53,10 +53,35 @@ class Preprocessor(ClassProvider):
     def configure(self):
         pass
 
-    def validate_config(self):
-        ConfigValidator(
-            self.name, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=self.parameters()
-        ).validate(self.config)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, uri_prefix=''):
+        errors = []
+        if cls.__name__ == Preprocessor.__name__:
+            processing_provider = config.get('type')
+            if not processing_provider:
+                error = ConfigError('type is not found', config, uri_prefix or 'preprocessing')
+                if not fetch_only:
+                    raise error
+                errors.append(error)
+                return errors
+            try:
+                preprocessor_cls = cls.resolve(processing_provider)
+            except UnregisteredProviderException as exception:
+                if not fetch_only:
+                    raise exception
+                errors.append(
+                    ConfigError(
+                        "preprocessor {} unregistered".format(processing_provider), config,
+                        uri_prefix or 'preprocessing')
+                )
+                return errors
+            errors.extend(preprocessor_cls.validate_config(config, fetch_only=fetch_only, uri_prefix=uri_prefix))
+            return errors
+
+        preprocessor_uri = '{}.{}'.format(uri_prefix or 'preprocessing', cls.__provider__)
+        return ConfigValidator(
+            preprocessor_uri, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
+        ).validate(config, fetch_only=fetch_only)
 
     def set_input_shape(self, input_shape):
         pass

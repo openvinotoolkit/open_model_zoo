@@ -55,8 +55,11 @@ class OpenPoseAdapter(Adapter):
         })
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         self.upscale_factor = self.get_value_from_config('upscale_factor')

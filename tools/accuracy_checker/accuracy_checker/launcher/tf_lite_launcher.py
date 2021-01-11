@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .launcher import Launcher, LauncherConfigValidator, ListInputsField
+from .launcher import Launcher, ListInputsField
 from ..config import PathField, StringField
 
 
@@ -46,10 +46,7 @@ class TFLiteLauncher(Launcher):
         self.default_layout = 'NHWC'
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        tf_launcher_config = LauncherConfigValidator(
-            'TF_Lite_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
-        )
-        tf_launcher_config.validate(self.config)
+        self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
         if not self._delayed_model_loading:
             self._interpreter = self.tf_lite.Interpreter(model_path=str(self.config['model']))
             self._interpreter.allocate_tensors()

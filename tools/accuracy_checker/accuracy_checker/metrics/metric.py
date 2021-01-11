@@ -17,11 +17,10 @@ limitations under the License.
 import copy
 from collections import namedtuple
 from ..representation import ContainerRepresentation
-from ..config import ConfigError
 from ..utils import is_single_metric_source, get_supported_representations
 from ..presenters import BasePresenter
-from ..config import ConfigValidator, NumberField, StringField
-from ..dependency import ClassProvider
+from ..config import ConfigValidator, NumberField, StringField, ConfigError
+from ..dependency import ClassProvider, UnregisteredProviderException
 from ..utils import zipped_transform, get_parameter_value_from_config, contains_any
 
 PerImageMetricResult = namedtuple('PerImageMetricResult', ['metric_name', 'metric_type', 'result', 'direction'])
@@ -49,7 +48,7 @@ class Metric(ClassProvider):
         self.meta = {'target': 'higher-better'}
         self._initial_state = copy.deepcopy(state)
 
-        self.validate_config()
+        self.validate_config(config)
         self.configure()
         message_unsupported_multi_source = 'metric {} does not support several {} sources'
         self.annotation_source = self.config.get('annotation_source')
@@ -115,13 +114,35 @@ class Metric(ClassProvider):
 
         pass
 
-    def validate_config(self):
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, uri_prefix=''):
         """
         Validate that metric entry meets all configuration structure requirements.
         """
-        ConfigValidator(
-            self.name, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=self.parameters()
-        ).validate(self.config)
+        errors = []
+        if cls.__name__ == Metric.__name__:
+            metric_provider = config.get('type')
+            if not metric_provider:
+                error = ConfigError('type does not found', config, uri_prefix or 'metric')
+                if not fetch_only:
+                    raise error
+                errors.append(error)
+                return errors
+            try:
+                metric_cls = cls.resolve(metric_provider)
+            except UnregisteredProviderException as exception:
+                if not fetch_only:
+                    raise exception
+                errors.append(
+                    ConfigError("metric {} unregistered".format(metric_provider), config, uri_prefix or 'metric')
+                )
+                return errors
+            errors.extend(metric_cls.validate_config(config, fetch_only=fetch_only, uri_prefix=uri_prefix))
+            return errors
+        metric_uri = '{}.{}'.format(uri_prefix or 'metrics', cls.__provider__)
+        return ConfigValidator(
+            metric_uri, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
+        ).validate(config, fetch_only=fetch_only)
 
     def _update_state(self, fn, state_key, default_factory=None):
         iter_key = "{}_global_it".format(state_key)
