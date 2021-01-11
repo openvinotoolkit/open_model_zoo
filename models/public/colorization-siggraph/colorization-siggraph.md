@@ -70,7 +70,7 @@ For preprocessing `rgb -> gray -> colorization` recieved values:
    from user-specified gray points with (a,b) = 0.
    If point(pixel) was specified the flag will be equal to 1.
 
-> **NOTE**: You don't need to specify all 3 inputs to use the model. If you dont't want to use local user hints (user points), you can use only `data_l` input.
+> **NOTE**: You don't need to specify all 3 inputs to use the model. If you dont't want to use local user hints (user points), you can use only `data_l` input. In this case, the remaining inputs (`user_ab` and `user_map`) must be filled with zeros.
 
 ## Output
 

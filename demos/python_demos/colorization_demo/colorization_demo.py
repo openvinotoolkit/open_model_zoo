@@ -48,7 +48,7 @@ def build_arg():
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-u", "--utilization_monitors", default="", type=str,
-                      help="Optional. List of monitors to show initially.")
+                         help="Optional. List of monitors to show initially.")
     return parser
 
 
@@ -67,6 +67,10 @@ if __name__ == '__main__':
     input_blob = next(iter(load_net.input_info))
     input_shape = load_net.input_info[input_blob].input_data.shape
     assert input_shape[1] == 1, "Expected model input shape with 1 channel"
+
+    inputs = {}
+    for input_name in load_net.input_info:
+        inputs[input_name] = np.zeros(load_net.input_info[input_name].input_data.shape)
 
     assert len(load_net.outputs) == 1, "Expected number of outputs is equal 1"
     output_blob = next(iter(load_net.outputs))
@@ -96,9 +100,11 @@ if __name__ == '__main__':
         img_rgb = frame.astype(np.float32) / 255
         img_lab = cv.cvtColor(img_rgb, cv.COLOR_RGB2Lab)
         img_l_rs = cv.resize(img_lab.copy(), (w_in, h_in))[:, :, 0]
+        inputs[input_blob] = img_l_rs
 
         log.debug("Network inference")
-        res = exec_net.infer(inputs={input_blob: [img_l_rs]})
+
+        res = exec_net.infer(inputs=inputs)
 
         update_res = np.squeeze(res[output_blob])
 
