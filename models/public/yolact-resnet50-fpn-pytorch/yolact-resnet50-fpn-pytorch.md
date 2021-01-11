@@ -34,7 +34,7 @@ Image, name: `input.1`, shape: [1x3x550x550], format: [BxCxHxW],
     - C - number of channels
 
    Expected color order: `RGB`.
-   Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
+   Mean values - [123.675,116.78,103.94], scale values - [58.395,57.12,57.375].
 
 
 ### Converted Model
