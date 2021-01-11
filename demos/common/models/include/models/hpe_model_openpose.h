@@ -51,5 +51,4 @@ protected:
     void resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const;
 
     int reshape(InferenceEngine::CNNNetwork & cnnNetwork, const InputData& inputData) override;
-
 };

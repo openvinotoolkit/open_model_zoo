@@ -33,11 +33,10 @@ OpenPose::OpenPose(const std::string& modelFileName, bool useAutoResize) :
     HumanPoseEstimator(modelFileName, useAutoResize) {
 }
 
-
 void OpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     if (inputShapes.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 input");
     inputsNames.push_back(inputShapes.begin()->first);
@@ -67,15 +66,13 @@ void OpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     const SizeVector& heatmapsOutputDims = (*outputIt++).second->getTensorDesc().getDims();
     if (heatmapsOutputDims.size() != 4 || heatmapsOutputDims[0] != 1 || heatmapsOutputDims[1] != keypointsNumber + 1)
         throw std::runtime_error("1x" + std::to_string(keypointsNumber + 1) + "xHFMxWFM dimension of model's heatmap is expected");
-
     if (pafsOutputDims[2] != heatmapsOutputDims[2] || pafsOutputDims[3] != heatmapsOutputDims[3])
         throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
 }
 
 int OpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork, const InputData& inputData) {
-    const auto& inputInfo = cnnNetwork.getInputsInfo();
-    const auto& imageInputInfo = *inputInfo.begin();
-    const auto& imageInputDims = imageInputInfo.second->getTensorDesc().getDims();
+    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+    SizeVector& imageInputDims = inputShapes.begin()->second;
     inputLayerSize = cv::Size(imageInputDims[3], imageInputDims[2]);
     auto& imageSize = inputData.asRef<ImageInputData>().inputImage.size();
     double scale = static_cast<double>(inputLayerSize.height) / static_cast<double>(imageSize.height);
@@ -90,62 +87,58 @@ int OpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork, const InputData& 
     pad(1) = static_cast<int>(std::floor((scaledImageSize.width - scaledSize.width) / 2.0));
     pad(2) = scaledImageSize.height - minHeight - pad(0);
     pad(3) = scaledImageSize.width - scaledSize.width - pad(1);
-    //
-    //if (scaledImageSize.width != (inputLayerSize.width - pad(1) - pad(3)))
-        //networkShapes[3] = scaledImageSize.width;
-    //std::cout << "result is" << scaledImageSize.width;
-    return scaledImageSize.width;
-}
 
+    if (scaledImageSize.width != (inputLayerSize.width - pad(1) - pad(3))) {
+        return scaledImageSize.width;
+    }
+    else { 
+        return 0;
+    }
+}
 
 std::shared_ptr<InternalModelData> OpenPose::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
-    Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-    InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(frameBlob)->wmap();
-    uint8_t* blob_data = blobMapped.as<uint8_t*>();
 
-    cv::Mat resizedImage;
-    double scale = inputLayerSize.height / static_cast<double>(image.rows);
-    cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
-    cv::Mat paddedImage;
-    cv::copyMakeBorder(resizedImage, paddedImage, pad(0), pad(2), pad(1), pad(3),
-                       cv::BORDER_CONSTANT, meanPixel);
-
-    //for (size_t pId = 0; pId < inputLayerSize.area(); ++pId)
-    //    for (int ch = 0; ch < 3; ++ch) {
-    //        blob_data[ch * inputLayerSize.area() + pId] = paddedImage.at<cv::Vec3b>(pId)[ch];
-    //}
-
-    std::vector<cv::Mat> planes(3);
-    for (size_t pId = 0; pId < planes.size(); pId++) {
-        planes[pId] = cv::Mat(inputLayerSize, CV_8UC1, blob_data + pId * inputLayerSize.area());
+    if (useAutoResize) {
+        /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
+        request->SetBlob(inputsNames[0], wrapMat2Blob(image));
     }
-    cv::split(paddedImage, planes);
+    else {
+        /* Resize and copy data from the image to the input blob */
+        Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
+        InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(frameBlob)->wmap();
+        uint8_t* blob_data = blobMapped.as<uint8_t*>();
+        cv::Mat resizedImage;
+        double scale = inputLayerSize.height / static_cast<double>(image.rows);
+        cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
+        cv::Mat paddedImage;
+        cv::copyMakeBorder(resizedImage, paddedImage, pad(0), pad(2), pad(1), pad(3),
+                       cv::BORDER_CONSTANT, meanPixel);
+        std::vector<cv::Mat> planes(3);
+        for (size_t pId = 0; pId < planes.size(); pId++) {
+            planes[pId] = cv::Mat(inputLayerSize, CV_8UC1, blob_data + pId * inputLayerSize.area());
+            }
+        cv::split(paddedImage, planes);
+    }
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(image.cols, image.rows));
 }
-
 
 std::unique_ptr<ResultBase> OpenPose::postprocess(InferenceResult & infResult) {
     OpenPoseResult* result = new OpenPoseResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
-    auto outMapped = infResult.outputsData[outputsNames[0]]->getTensorDesc();
-    auto heatMapsMapped = infResult.outputsData[outputsNames[1]]->getTensorDesc();
+    auto outputMapped = infResult.outputsData[outputsNames[0]];
+    auto heatMapsMapped = infResult.outputsData[outputsNames[1]];
 
-    const SizeVector& outputDims = outMapped.getDims();
-    const SizeVector& heatMapDims = heatMapsMapped.getDims();
-    //std::cout << "Size of outputDims: " << outputDims.size() << " " << outputDims[0] << " " << outputDims[1] << " " << outputDims[2] << " " << outputDims[3] << "\n";
-    //std::cout << "Size of heatMapDims: " << heatMapDims.size() << " " << heatMapDims[0] << " " << heatMapDims[1] << " " << heatMapDims[2] << " " << heatMapDims[3] << "\n";
+    const SizeVector& outputDims = outputMapped->getTensorDesc().getDims();
+    const SizeVector& heatMapDims = heatMapsMapped->getTensorDesc().getDims();
 
-    //LockedMemory<const void> outMapped = infResult.getFirstOutputBlob();
-    //LockedMemory<const void> heatMapsMapped = infResult.getSecondOutputBlob();
-    const float * const predictions = infResult.outputsData[outputsNames[0]]->rmap().as<float*>();
-    const float * const heats = infResult.outputsData[outputsNames[1]]->rmap().as<float*>();
-    //const float * const predictions = infResult.getFirstOutputBlob()->rmap().as<float*>();
-    //const float * const heats = infResult.outputsData[outputsNames[1]]->rmap().as<float*>();
+    const float *predictions = outputMapped->rmap().as<float*>();
+    const float *heats = heatMapsMapped->rmap().as<float*>();
+
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
-    std::vector<cv::Mat> heatMaps(keypointsNumber);
 
+    std::vector<cv::Mat> heatMaps(keypointsNumber);
     for (size_t i = 0; i < heatMaps.size(); i++) {
         heatMaps[i] = cv::Mat(heatMapDims[2], heatMapDims[3], CV_32FC1,
                               reinterpret_cast<void*>(
@@ -189,7 +182,6 @@ std::unique_ptr<ResultBase> OpenPose::postprocess(InferenceResult & infResult) {
 
     return std::unique_ptr<ResultBase>(result);
 }
-
 
 void OpenPose::resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const {
     for (auto& featureMap : featureMaps) {

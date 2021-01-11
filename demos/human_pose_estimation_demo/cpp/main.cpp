@@ -43,7 +43,6 @@
 #include <pipelines/metadata.h>
 #include <models/hpe_model_openpose.h>
 
-//using namespace human_pose_estimation;
 
 static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Architecture type: openpose or ae";
@@ -216,7 +215,7 @@ int main(int argc, char *argv[]) {
         cv::Mat curr_frame;
         curr_frame = cap->read();
 
-        //------------------------------ Running Detection routines ----------------------------------------------
+        //------------------------------ Running Human Pose Estimation routines ----------------------------------------------
 
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
