@@ -37,6 +37,7 @@
 #include <pipelines/async_pipeline.h>
 #include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
+#include <models/detection_model_centernet.h>
 #include <models/detection_model_faceboxes.h>
 #include <models/detection_model_yolo.h>
 #include <models/detection_model_ssd.h>
@@ -207,7 +208,10 @@ int main(int argc, char *argv[]) {
             labels = DetectionModel::loadLabels(FLAGS_labels);
 
         std::unique_ptr<ModelBase> model;
-        if (FLAGS_at == "faceboxes") {
+        if (FLAGS_at == "centernet") {
+            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t, labels));
+        }
+        else if (FLAGS_at == "faceboxes") {
             model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
         }
         else if (FLAGS_at == "ssd") {

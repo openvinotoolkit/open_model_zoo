@@ -181,7 +181,6 @@ class CenterNet(Model):
             return A_w.max(axis=(1, 2)).reshape(output_shape)
 
         pad = (kernel - 1) // 2
-
         hmax = np.array([max_pool2d(channel, kernel, pad) for channel in heat])
         keep = (hmax == heat)
         return heat * keep
