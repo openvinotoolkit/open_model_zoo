@@ -155,10 +155,8 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
 std::unique_ptr<ResultBase> AsyncPipeline::getResult(bool shouldKeepOrder) {
     auto infResult = AsyncPipeline::getInferenceResult(shouldKeepOrder);
     if (infResult.IsEmpty()) {
-        //std::cout << "EMPTY!!!\n";
         return std::unique_ptr<ResultBase>();
     }
-    //std::cout << "NOT EMPTY!!!\n";
     auto result = model->postprocess(infResult);
     *result = static_cast<ResultBase&>(infResult);
 

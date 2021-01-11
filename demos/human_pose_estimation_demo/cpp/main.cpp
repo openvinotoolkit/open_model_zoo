@@ -45,9 +45,10 @@
 
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Architecture type: openpose or ae";
+static const char at_message[] = "Required. Type of the network, either 'ae' for Associative Embedding or 'openpose' for OpenPose.";
 static const char video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
+static const char target_size_message[] = "Optional. Target input size.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
@@ -56,6 +57,7 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 "Absolute path to the .xml file with the kernel descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
 "Absolute path to a shared library with the kernel implementations.";
+static const char thresh_output_message[] = "Optional. Probability threshold for poses filtering.";
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
 static const char num_threads_message[] = "Optional. Number of threads.";
@@ -69,10 +71,12 @@ DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
 DEFINE_string(i, "", video_message);
 DEFINE_string(m, "", model_message);
+DEFINE_uint32(tsize, 0, target_size_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
+DEFINE_double(t, 0.1, thresh_output_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
@@ -94,11 +98,13 @@ static void showUsage() {
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -i \"<path>\"               " << video_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
+    std::cout << "    -tsize                      " << target_size_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -pc                       " << performance_counter_message << std::endl;
+    std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
@@ -135,7 +141,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 }
 
 
-cv::Mat renderHumanPose(const HumanPoseResult& result) {
+cv::Mat renderHumanPose(const HumanPoseResult& result, float poseScoreThreshold) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
         }
@@ -166,7 +172,9 @@ cv::Mat renderHumanPose(const HumanPoseResult& result) {
     const cv::Point2f absentKeypoint(-1.0f, -1.0f);
     for (auto pose : result.poses) {
         CV_Assert(pose.keypoints.size() == HPEOpenPose::keypointsNumber);
-
+        /*if (pose.score <= poseScoreThreshold) {
+            continue;
+        }*/
         for (size_t keypointIdx = 0; keypointIdx < pose.keypoints.size(); keypointIdx++) {
             if (pose.keypoints[keypointIdx] != absentKeypoint) {
                 cv::circle(outputImg, pose.keypoints[keypointIdx], 4, colors[keypointIdx], -1);
@@ -228,6 +236,13 @@ int main(int argc, char *argv[]) {
 
         InferenceEngine::Core core;
         InferenceEngine::CNNNetwork cnnNetwork = core.ReadNetwork(model->getModelFileName());
+        /*int reshape;
+        if (FLAGS_tsize) {
+            reshape = FLAGS_tsize;
+        }
+        else {
+            reshape = model->reshape(cnnNetwork, curr_frame.size());
+        }*/
         int reshape = model->reshape(cnnNetwork, ImageInputData(curr_frame));
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
@@ -240,8 +255,11 @@ int main(int argc, char *argv[]) {
 
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
-                //--- Capturing frame
                 auto startTime = std::chrono::steady_clock::now();
+                frameNum = pipeline.submitData(ImageInputData(curr_frame),
+                    std::make_shared<ImageMetaData>(curr_frame, startTime));
+
+                //--- Capturing frame
                 curr_frame = cap->read();
                 if (curr_frame.empty()) {
                     if (frameNum == -1) {
@@ -252,9 +270,6 @@ int main(int argc, char *argv[]) {
                         break;
                     }
                 }
-
-                frameNum = pipeline.submitData(ImageInputData(curr_frame),
-                    std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
@@ -264,7 +279,7 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to HumanPoseResult*
             //    and use your own processing instead of calling renderDetectionData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
+                cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), (float)FLAGS_t);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -286,7 +301,7 @@ int main(int argc, char *argv[]) {
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
         while (result = pipeline.getResult()) {
-            cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
+            cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), (float)FLAGS_t);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
