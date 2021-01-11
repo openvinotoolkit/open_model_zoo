@@ -25,7 +25,7 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
 * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
 * `metthews_correlation_coef` - [Matthews correlation coefficient (MCC)](https://en.wikipedia.org/wiki/Matthews_correlation_coefficient) for binary classification. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
 * `roc_auc_score` - [ROC AUC score](https://en.wikipedia.org/wiki/Receiver_operating_characteristic) for binary classification. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction` `ArgMaxClassificationPrediction`.
-* `acer_score` - metric for the classification tasks. Can be obtained from the following formula: `ACER = (APCER + BPCER)/2 = ((fp / (tn + fp)) + (fn / (fn + tp)))/2`. For more details about metrics see the section 9.3: <https://arxiv.org/pdf/2007.12342.pdf>. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
+* `acer_score` - metric for the classification tasks. Can be obtained from the following formula: `ACER = (APCER + BPCER)/2 = ((fp / (tn + fp)) + (fn / (fn + tp)))/2`. For more details about metrics see the section 9.3: <https://arxiv.org/abs/2007.12342>. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
 * `map` - mean average precision. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
   * `overlap_method` - method for calculation bbox overlap. You can choose between intersection over union (`iou`), defined as area of intersection divided by union of annotation and prediction boxes areas, and intersection over area (`ioa`), defined as area of intersection divided by ara of prediction box.
@@ -70,7 +70,7 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
 * `frequency_weighted_accuracy` - frequency weighted accuracy for semantic segmentation models. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
   * `use_argmax` - allows to use argmax for prediction mask.
   * `ignore_label` - specified which class_id prediction should be ignored during metric calculation. (Optional, if not provided, all labels will be used)
-More detailed information about calculation segmentation metrics you can find [here](https://arxiv.org/abs/1411.4038v2).
+More detailed information about calculation segmentation metrics you can find [here](https://arxiv.org/abs/1411.4038).
 * `cmc` - Cumulative Matching Characteristics (CMC) score. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
   * `top_k` -  number of k highest ranked samples to consider when matching.
   * `separate_camera_set` - should identities from the same camera view be filtered out.
@@ -231,7 +231,7 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
 * `dna_seq_accuracy` - accuracy for DNA sequencing task. Supported representations: `DNASequenceAnnotation`, `DNASequencePrediction`, `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
   * `min_coverage` - minimum sequence coverage between predicted sequence and reference for positive measurement (Optional, default 0.5).
   * `balansed` - balanced accuracy metric (Optional, default false).
-* `inception_score` - [Inception score](https://arxiv.org/pdf/1801.01973) for generated images by GAN models. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+* `inception_score` - [Inception score](https://arxiv.org/abs/1801.01973) for generated images by GAN models. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
   * `eps` - epsilon to avoid nan during calculate log for metric.
   * `length` - length of input feature vector for metric.
 * `fid` - Frechet Inception Distance to measure the distance between the distributions of synthesized images and real images. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.

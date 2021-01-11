@@ -24,7 +24,7 @@ description: >-
   with those in the ImageNet database.
 
   For details see repository <https://github.com/zhanghang1989/ResNeSt> and paper
-  <https://arxiv.org/pdf/2004.08955.pdf>.
+  <https://arxiv.org/abs/2004.08955>.
 task_type: classification
 files:
   - name: resnest50-528c19ca.pth
