@@ -70,7 +70,6 @@ void OpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 
     if (pafsOutputDims[2] != heatmapsOutputDims[2] || pafsOutputDims[3] != heatmapsOutputDims[3])
         throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
-    std::cout << "\nPrepare done \n";
 }
 
 int OpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork, const InputData& inputData) {
@@ -111,7 +110,7 @@ std::shared_ptr<InternalModelData> OpenPose::preprocess(const InputData& inputDa
     cv::Mat paddedImage;
     cv::copyMakeBorder(resizedImage, paddedImage, pad(0), pad(2), pad(1), pad(3),
                        cv::BORDER_CONSTANT, meanPixel);
-    
+
     //for (size_t pId = 0; pId < inputLayerSize.area(); ++pId)
     //    for (int ch = 0; ch < 3; ++ch) {
     //        blob_data[ch * inputLayerSize.area() + pId] = paddedImage.at<cv::Vec3b>(pId)[ch];
@@ -132,7 +131,7 @@ std::unique_ptr<ResultBase> OpenPose::postprocess(InferenceResult & infResult) {
 
     auto outMapped = infResult.outputsData[outputsNames[0]]->getTensorDesc();
     auto heatMapsMapped = infResult.outputsData[outputsNames[1]]->getTensorDesc();
-    
+
     const SizeVector& outputDims = outMapped.getDims();
     const SizeVector& heatMapDims = heatMapsMapped.getDims();
     //std::cout << "Size of outputDims: " << outputDims.size() << " " << outputDims[0] << " " << outputDims[1] << " " << outputDims[2] << " " << outputDims[3] << "\n";

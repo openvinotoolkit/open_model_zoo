@@ -136,18 +136,16 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 }
 
 
-void renderHumanPose(const OpenPoseResult& result, cv::Mat& image) {
-    CV_Assert(image.type() == CV_8UC3);
-    
-    //if (!result.metaData) {
-    //    throw std::invalid_argument("Renderer: metadata is null");
-   // }
+cv::Mat renderHumanPose(const OpenPoseResult& result) {
+    if (!result.metaData) {
+        throw std::invalid_argument("Renderer: metadata is null");
+        }
 
-    //auto outputImg = result.metaData->asRef<ImageMetaData>().img;
+    auto outputImg = result.metaData->asRef<ImageMetaData>().img;
 
-    //if (outputImg.empty()) {
-    //    throw std::invalid_argument("Renderer: image provided in metadata is empty");
-   // }
+    if (outputImg.empty()) {
+        throw std::invalid_argument("Renderer: image provided in metadata is empty");
+   }
     static const cv::Scalar colors[OpenPose::keypointsNumber] = {
         cv::Scalar(255, 0, 0), cv::Scalar(255, 85, 0), cv::Scalar(255, 170, 0),
         cv::Scalar(255, 255, 0), cv::Scalar(170, 255, 0), cv::Scalar(85, 255, 0),
@@ -172,11 +170,11 @@ void renderHumanPose(const OpenPoseResult& result, cv::Mat& image) {
 
         for (size_t keypointIdx = 0; keypointIdx < pose.keypoints.size(); keypointIdx++) {
             if (pose.keypoints[keypointIdx] != absentKeypoint) {
-                cv::circle(image, pose.keypoints[keypointIdx], 4, colors[keypointIdx], -1);
+                cv::circle(outputImg, pose.keypoints[keypointIdx], 4, colors[keypointIdx], -1);
             }
         }
     }
-    cv::Mat pane = image.clone();
+    cv::Mat pane = outputImg.clone();
     for (auto pose : result.poses) {
         for (const auto& limbKeypointsId : limbKeypointsIds) {
             std::pair<cv::Point2f, cv::Point2f> limbKeypoints(pose.keypoints[limbKeypointsId.first],
@@ -197,8 +195,8 @@ void renderHumanPose(const OpenPoseResult& result, cv::Mat& image) {
             cv::fillConvexPoly(pane, polygon, colors[limbKeypointsId.second]);
         }
     }
-    cv::addWeighted(image, 0.4, pane, 0.6, 0, image);
-    //return outputImg;
+    cv::addWeighted(outputImg, 0.4, pane, 0.6, 0, outputImg);
+    return outputImg;
 }
 
 int main(int argc, char *argv[]) {
@@ -219,7 +217,7 @@ int main(int argc, char *argv[]) {
         curr_frame = cap->read();
 
         //------------------------------ Running Detection routines ----------------------------------------------
-        
+
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
             model.reset(new OpenPose(FLAGS_m, FLAGS_auto_resize));
@@ -232,7 +230,6 @@ int main(int argc, char *argv[]) {
         InferenceEngine::Core core;
         InferenceEngine::CNNNetwork cnnNetwork = core.ReadNetwork(model->getModelFileName());
         int reshape = model->reshape(cnnNetwork, ImageInputData(curr_frame));
-        std::cout << "Reshape is " << reshape << "\n";
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core, reshape);
@@ -268,14 +265,13 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to OpenPoseResult*
             //    and use your own processing instead of calling renderDetectionData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                //cv::Mat outFrame = renderHumanPose(result->asRef<OpenPoseResult>());
-                renderHumanPose(result->asRef<OpenPoseResult>(), curr_frame);
+                cv::Mat outFrame = renderHumanPose(result->asRef<OpenPoseResult>());
                 //--- Showing results and device information
-                presenter.drawGraphs(curr_frame);
+                presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                    curr_frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 if (!FLAGS_no_show) {
-                    cv::imshow("Human Pose Estimation Results", curr_frame);
+                    cv::imshow("Human Pose Estimation Results", outFrame);
                     //--- Processing keyboard events
                     int key = cv::waitKey(1);
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc
@@ -291,13 +287,13 @@ int main(int argc, char *argv[]) {
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
         while (result = pipeline.getResult()) {
-            renderHumanPose(result->asRef<OpenPoseResult>(), curr_frame);
+            cv::Mat outFrame = renderHumanPose(result->asRef<OpenPoseResult>());
             //--- Showing results and device information
-            presenter.drawGraphs(curr_frame);
+            presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                curr_frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
             if (!FLAGS_no_show) {
-                cv::imshow("Human Pose Estimation Results", curr_frame);
+                cv::imshow("Human Pose Estimation Results", outFrame);
                 //--- Updating output window
                 cv::waitKey(1);
             }

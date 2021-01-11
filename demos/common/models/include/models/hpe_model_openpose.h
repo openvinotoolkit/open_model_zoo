@@ -26,7 +26,7 @@ public:
     OpenPose(const std::string& modelFileName, bool useAutoResize);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
-    
+
     std::shared_ptr<InternalModelData> preprocess(
         const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
 
@@ -49,7 +49,7 @@ protected:
     std::vector<HumanPose> extractPoses(const std::vector<cv::Mat>& heatMaps,
                                         const std::vector<cv::Mat>& pafs) const;
     void resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const;
-    
+
     int reshape(InferenceEngine::CNNNetwork & cnnNetwork, const InputData& inputData) override;
 
 };
