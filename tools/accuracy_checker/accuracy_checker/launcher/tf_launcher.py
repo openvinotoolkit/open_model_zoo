@@ -22,6 +22,7 @@ from .launcher import Launcher
 from ..config import BaseField, ListField, PathField, StringField, ConfigError
 from ..utils import contains_any, contains_all
 
+
 class TFLauncher(Launcher):
     __provider__ = 'tf'
 

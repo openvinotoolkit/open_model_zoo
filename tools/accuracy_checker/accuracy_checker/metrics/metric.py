@@ -115,7 +115,7 @@ class Metric(ClassProvider):
         pass
 
     @classmethod
-    def validate_config(cls, config, fetch_only=False):
+    def validate_config(cls, config, fetch_only=False, uri_prefix=''):
         """
         Validate that metric entry meets all configuration structure requirements.
         """
@@ -123,7 +123,7 @@ class Metric(ClassProvider):
         if cls.__name__ == Metric.__name__:
             metric_provider = config.get('type')
             if not metric_provider:
-                error = ConfigError('type does not found', config, 'metric')
+                error = ConfigError('type does not found', config, uri_prefix or 'metric')
                 if not fetch_only:
                     raise error
                 errors.append(error)
@@ -134,13 +134,14 @@ class Metric(ClassProvider):
                 if not fetch_only:
                     raise exception
                 errors.append(
-                    ConfigError("metric {} unregistered".format(metric_provider), config, 'metric')
+                    ConfigError("metric {} unregistered".format(metric_provider), config, uri_prefix or 'metric')
                 )
                 return errors
-            errors.extend(metric_cls.validate_config(config, fetch_only=fetch_only))
+            errors.extend(metric_cls.validate_config(config, fetch_only=fetch_only, uri_prefix=uri_prefix))
             return errors
+        metric_uri = '{}.{}'.format(uri_prefix or 'metrics', cls.__provider__)
         return ConfigValidator(
-            cls.__provider__, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
+            metric_uri, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
         ).validate(config, fetch_only=fetch_only)
 
     def _update_state(self, fn, state_key, default_factory=None):

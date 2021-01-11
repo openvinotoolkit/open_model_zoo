@@ -97,12 +97,13 @@ class PostprocessingExecutor:
             self._dataset_processors.append(postprocessor)
 
     @classmethod
-    def validate_config(cls, processors, fetch_only=False):
+    def validate_config(cls, processors, fetch_only=False, uri_prefix=''):
         if not processors:
             return []
         errors = []
-        for processor in processors:
-            errors.extend(Postprocessor.validate_config(processor, fetch_only=fetch_only))
+        for processor_id, processor in enumerate(processors):
+            processor_uri = '{}.{}'.format(uri_prefix or 'postprocessing', processor_id)
+            errors.extend(Postprocessor.validate_config(processor, fetch_only=fetch_only, uri_prefix=processor_uri))
 
         return errors
 

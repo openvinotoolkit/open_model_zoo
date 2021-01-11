@@ -34,9 +34,10 @@ class BaseFormatConverter(ClassProvider):
         }
 
     @classmethod
-    def config_validator(cls):
+    def config_validator(cls, uri_prefix=''):
+        converter_uri = '{}.{}'.format(uri_prefix or 'annotation_conversion', cls.get_name())
         return ConfigValidator(
-            '{}'.format(cls.get_name()), fields=cls.parameters(),
+            converter_uri, fields=cls.parameters(),
             on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
         )
 
@@ -88,8 +89,8 @@ class BaseFormatConverter(ClassProvider):
         return parser
 
     @classmethod
-    def validate_config(cls, config, fetch_only=False):
-        return cls.config_validator().validate(config, fetch_only=fetch_only)
+    def validate_config(cls, config, fetch_only=False, uri_prefix=''):
+        return cls.config_validator(uri_prefix=uri_prefix).validate(config, fetch_only=fetch_only)
 
     def configure(self):
         pass

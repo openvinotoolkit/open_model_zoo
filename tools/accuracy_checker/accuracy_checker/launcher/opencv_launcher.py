@@ -108,9 +108,9 @@ class OpenCVLauncher(Launcher):
             self.output_names = self.network.getUnconnectedOutLayersNames()
 
     @classmethod
-    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False):
+    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
         return OpenCVLauncherConfigValidator(
-            'Launcher', fields=cls.parameters(), delayed_model_loading=delayed_model_loading
+            uri_prefix or 'launcher', fields=cls.parameters(), delayed_model_loading=delayed_model_loading
         ).validate(config, fetch_only=fetch_only)
 
     @property

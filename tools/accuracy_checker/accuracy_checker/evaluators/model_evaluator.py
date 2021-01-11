@@ -114,39 +114,64 @@ class ModelEvaluator(BaseEvaluator):
 
     @classmethod
     def validate_config(cls, model_config):
+        uri_prefix = ''
         if 'models' in model_config:
             model_config = model_config['models'][0]
+            uri_prefix = 'models'
         config_errors = []
         if 'launchers' not in model_config or not model_config['launchers']:
             config_errors.append(
-                ConfigError('launchers section is not provided', model_config.get('launchers', []), 'model'))
-        else:
-            launcher_config = model_config['launchers'][0]
-            adapter_config = launcher_config.get('adapter')
-
-            config_errors.extend(Launcher.validate_config(launcher_config, fetch_only=True))
-            if adapter_config:
-                config_errors.extend(Adapter.validate_config(adapter_config, fetch_only=True))
-
-        if 'datasets' not in model_config or not model_config['datasets']:
-            config_errors.append(
-                ConfigError('datasets section is not provided', model_config.get('datasets', []), 'model'))
-        else:
-            dataset_config = model_config['datasets'][0]
-            data_reader_config = dataset_config.get('reader', 'opencv_imread')
-            config_errors.extend(Dataset.validate_config(dataset_config, fetch_only=True))
-            config_errors.extend(
-                BaseReader.validate_config(
-                    data_reader_config, data_source=dataset_config.get('data_source'), fetch_only=True
+                ConfigError(
+                    'launchers section is not provided', model_config.get('launchers', []),
+                    '{}.launchers'.format(uri_prefix) if uri_prefix else 'launchers'
                 )
             )
-            config_errors.extend(
-                PreprocessingExecutor.validate_config(dataset_config.get('preprocessing'), fetch_only=True)
-            )
-            config_errors.extend(
-                PostprocessingExecutor.validate_config(dataset_config.get('postprocessing'), fetch_only=True)
-            )
-            config_errors.extend(MetricsExecutor.validate_config(dataset_config.get('metrics', []), fetch_only=True))
+        else:
+            for launcher_id, launcher_config in enumerate(model_config['launchers']):
+                adapter_config = launcher_config.get('adapter')
+                launcher_uri_prefix = '{}.launchers.{}'.format(
+                    uri_prefix, launcher_id) if uri_prefix else 'launchers.{}'.format(launcher_id)
+                config_errors.extend(
+                    Launcher.validate_config(launcher_config, fetch_only=True, uri_prefix=launcher_uri_prefix))
+                if adapter_config:
+                    adapter_uri = '{}.adapter'.format(launcher_uri_prefix)
+                    config_errors.extend(
+                        Adapter.validate_config(adapter_config, fetch_only=True, uri_prefix=adapter_uri))
+
+        datasets_uri = '{}.datasets'.format(uri_prefix) if uri_prefix else 'datasets'
+        if 'datasets' not in model_config or not model_config['datasets']:
+            config_errors.append(
+                ConfigError('datasets section is not provided', model_config.get('datasets', []), datasets_uri))
+        else:
+            for dataset_id, dataset_config in enumerate(model_config['datasets']):
+                data_reader_config = dataset_config.get('reader', 'opencv_imread')
+                current_dataset_uri = '{}.{}'.format(datasets_uri, dataset_id)
+                config_errors.extend(
+                    Dataset.validate_config(dataset_config, fetch_only=True, uri_prefix=current_dataset_uri)
+                )
+                config_errors.extend(
+                    BaseReader.validate_config(
+                        data_reader_config, data_source=dataset_config.get('data_source'), fetch_only=True,
+                        uri_prefix='{}.reader'.format(current_dataset_uri)
+                    )
+                )
+                config_errors.extend(
+                    PreprocessingExecutor.validate_config(
+                        dataset_config.get('preprocessing'), fetch_only=True,
+                        uri_prefix='{}.preprocessing'.format(current_dataset_uri)
+                    )
+                )
+                config_errors.extend(
+                    PostprocessingExecutor.validate_config(
+                        dataset_config.get('postprocessing'), fetch_only=True,
+                        uri_prefix='{}.postprocessing'.format(current_dataset_uri)
+                    )
+                )
+                config_errors.extend(
+                    MetricsExecutor.validate_config(
+                        dataset_config.get('metrics', []), fetch_only=True,
+                        uri_prefix='{}.metrics'.format(current_dataset_uri))
+                )
 
         return config_errors
 

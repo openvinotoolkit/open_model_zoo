@@ -120,9 +120,9 @@ class MxNetLauncher(Launcher):
         return self._inputs
 
     @classmethod
-    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False):
+    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
         return MxNetLauncherConfigValidator(
-            'Launcher', fields=cls.parameters(), delayed_model_loading=delayed_model_loading
+            uri_prefix or 'launcher', fields=cls.parameters(), delayed_model_loading=delayed_model_loading
         ).validate(config, fetch_only=fetch_only)
 
     def predict(self, inputs, metadata=None, **kwargs):

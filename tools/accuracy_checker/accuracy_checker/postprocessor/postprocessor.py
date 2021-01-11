@@ -118,12 +118,12 @@ class Postprocessor(ClassProvider):
         pass
 
     @classmethod
-    def validate_config(cls, config, fetch_only=False):
+    def validate_config(cls, config, fetch_only=False, uri_prefix=''):
         errors = []
         if cls.__name__ == Postprocessor.__name__:
             processing_provider = config.get('type')
             if not processing_provider:
-                error = ConfigError('type does not found', config, 'postprocessing')
+                error = ConfigError('type does not found', config, uri_prefix or 'postprocessing')
                 if not fetch_only:
                     raise error
                 errors.append(error)
@@ -134,14 +134,17 @@ class Postprocessor(ClassProvider):
                 if not fetch_only:
                     raise exception
                 errors.append(
-                    ConfigError("postprocessor {} unregistered".format(processing_provider), config, 'postprocessing')
+                    ConfigError(
+                        "postprocessor {} unregistered".format(processing_provider), config,
+                        uri_prefix or 'postprocessing')
                 )
                 return errors
-            errors.extend(processor_cls.validate_config(config, fetch_only=fetch_only))
+            errors.extend(processor_cls.validate_config(config, fetch_only=fetch_only, uri_prefix=uri_prefix))
             return errors
 
+        postprocessing_uri = '{}.{}'.format(uri_prefix or 'postprocessing', cls.__provider__)
         return ConfigValidator(
-            cls.__provider__, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
+            postprocessing_uri, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
         ).validate(config, fetch_only=fetch_only)
 
     def get_entries(self, annotation, prediction):

@@ -34,9 +34,9 @@ class LauncherConfigValidator(ConfigValidator):
             if 'weights' in self.fields:
                 self.fields['weights'].optional = True
                 self.fields['weights'].check_exists = False
-        error_stack = super().validate(entry, field_uri, fetch_only)
+        error_stack = super().validate(entry, field_uri, fetch_only=fetch_only)
         if 'inputs' in entry:
-            error_stack.extend(self._validate_inputs(entry, fetch_only))
+            error_stack.extend(self._validate_inputs(entry, fetch_only=fetch_only))
 
         return error_stack
 
@@ -136,26 +136,29 @@ class Launcher(ClassProvider):
         }
 
     @classmethod
-    def validate_config(cls, config, delayed_model_loading=False, fetch_only=False):
+    def validate_config(cls, config, delayed_model_loading=False, fetch_only=False, uri_prefix=''):
         if cls.__name__ == Launcher.__name__:
             errors = []
             framework = config.get('framework')
             if not framework:
-                error = ConfigError('framework is not provided', config, 'launcher')
+                error = ConfigError('framework is not provided', config, uri_prefix or 'launcher')
                 if not fetch_only:
                     raise error
                 errors.append(error)
                 return errors
             try:
                 launcher_cls = cls.resolve(framework)
-                return launcher_cls.validate_config(config, fetch_only=fetch_only)
+                return launcher_cls.validate_config(config, fetch_only=fetch_only, uri_prefix=uri_prefix)
             except UnregisteredProviderException as exception:
                 if not fetch_only:
                     raise exception
-                errors.append(ConfigError("launcher {} is not unregistered".format(framework), config, 'Launcher'))
+                errors.append(
+                    ConfigError("launcher {} is not unregistered".format(framework), config, uri_prefix or 'launcher')
+                )
                 return errors
+        uri = '{}.{}'.format(uri_prefix, cls.__provider__) if uri_prefix else 'launcher.{}'.format(cls.__provider__)
         return LauncherConfigValidator(
-            'Launcher', fields=cls.parameters(), delayed_model_loading=delayed_model_loading
+            uri, fields=cls.parameters(), delayed_model_loading=delayed_model_loading
         ).validate(config, fetch_only=fetch_only)
 
     def get_value_from_config(self, key):

@@ -183,12 +183,13 @@ class MetricsExecutor:
             metric.metric_fn.reset()
 
     @classmethod
-    def validate_config(cls, metrics, fetch_only=False):
+    def validate_config(cls, metrics, fetch_only=False, uri_prefix=''):
         if not metrics:
             if fetch_only:
-                return [ConfigError("Metrics are not provided", metrics, 'metrics')]
+                return [ConfigError("Metrics are not provided", metrics, uri_prefix or 'metrics')]
         errors = []
-        for metric in metrics:
-            errors.extend(Metric.validate_config(metric, fetch_only=fetch_only))
+        for metric_id, metric in enumerate(metrics):
+            metric_uri = '{}.{}'.format(uri_prefix or 'metrics', metric_id)
+            errors.extend(Metric.validate_config(metric, fetch_only=fetch_only, uri_prefix=metric_uri))
 
         return errors

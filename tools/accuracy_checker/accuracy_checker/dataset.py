@@ -331,14 +331,15 @@ class Dataset:
         return annotations
 
     @classmethod
-    def validate_config(cls, config, fetch_only=False):
-        dataset_config = DatasetConfig('dataset')
+    def validate_config(cls, config, fetch_only=False, uri_prefix=''):
+        dataset_config = DatasetConfig(uri_prefix or 'dataset')
         errors = dataset_config.validate(config, fetch_only=fetch_only)
         if 'annotation_conversion' in config:
+            conversion_uri = '{}.annotation_conversion'.format(uri_prefix) if uri_prefix else 'annotation_conversion'
             conversion_params = config['annotation_conversion']
             converter = conversion_params.get('converter')
             if not converter:
-                error = ConfigError('converter is not found', conversion_params, 'annotation_conversion')
+                error = ConfigError('converter is not found', conversion_params, conversion_uri)
                 if not fetch_only:
                     raise error
                 errors.append(error)
@@ -350,13 +351,14 @@ class Dataset:
                     raise exception
                 errors.append(
                     ConfigError(
-                        'converter {} unregistered'.format(converter), conversion_params, 'annotation_conversion')
+                        'converter {} unregistered'.format(converter), conversion_params, conversion_uri)
                 )
                 return errors
             errors.extend(converter_cls.validate_config(conversion_params, fetch_only=fetch_only))
         if not contains_any(config, ['annotation_conversion', 'annotation']):
             errors.append(
-                ConfigError('annotation_conversion or annotation field should be provided', config, 'dataset')
+                ConfigError(
+                    'annotation_conversion or annotation field should be provided', config, uri_prefix or 'dataset')
             )
         return errors
 

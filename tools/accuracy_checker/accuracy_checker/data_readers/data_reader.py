@@ -149,11 +149,13 @@ class BaseReader(ClassProvider):
 
     @classmethod
     def validate_config(cls, config, data_source=None, fetch_only=False, **kwargs):
+        uri_prefix = kwargs.pop('uri_prefix', '')
+        reader_uri = '{}'.format(uri_prefix) if uri_prefix else 'reader'
         if cls.__name__ == BaseReader.__name__:
             errors = []
             reader_type = config if isinstance(config, str) else config.get('type')
             if not reader_type:
-                error = ConfigError('type is not provided', config, 'reader')
+                error = ConfigError('type is not provided', config, reader_uri)
                 if not fetch_only:
                     raise error
                 errors.append(error)
@@ -163,8 +165,12 @@ class BaseReader(ClassProvider):
                 reader_config = config if isinstance(config, dict) else {'type': reader_type}
                 if reader_type not in DOES_NOT_REQUIRED_DATA_SOURCE:
                     data_source_field = PathField(is_directory=reader_type not in DATA_SOURCE_IS_FILE)
-                    errors.extend(data_source_field.validate(data_source, 'data_source', fetch_only=fetch_only))
-                errors.extend(reader_cls.validate_config(reader_config, fetch_only=fetch_only))
+                    errors.extend(
+                        data_source_field.validate(
+                            data_source, '{}.data_source'.format(reader_uri), fetch_only=fetch_only)
+                    )
+                errors.extend(
+                    reader_cls.validate_config(reader_config, fetch_only=fetch_only, **kwargs, uri_prefix=uri_prefix))
                 return errors
             except UnregisteredProviderException as exception:
                 if not fetch_only:
@@ -172,8 +178,9 @@ class BaseReader(ClassProvider):
                 return errors
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
-        return ConfigValidator(cls.__provider__, fields=cls.parameters(), **kwargs).validate(
-            config, 'reader', fetch_only=fetch_only
+        reader_uri = '{}'.format(cls.__provider__)
+        return ConfigValidator(reader_uri, fields=cls.parameters(), **kwargs).validate(
+            config, fetch_only=fetch_only
         )
 
     def read(self, data_id):
