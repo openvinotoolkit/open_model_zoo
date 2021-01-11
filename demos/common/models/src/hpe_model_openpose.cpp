@@ -30,7 +30,8 @@
 using namespace InferenceEngine;
 
 OpenPose::OpenPose(const std::string& modelFileName, bool useAutoResize) :
-    HumanPoseEstimator(modelFileName, useAutoResize) {
+    ModelBase(modelFileName),
+    useAutoResize(useAutoResize) {
 }
 
 void OpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {

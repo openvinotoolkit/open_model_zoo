@@ -14,10 +14,10 @@
 // limitations under the License.
 */
 #pragma once
-#include "hpe_model.h"
+#include "model_base.h"
 #include "human_pose.h"
 
-class OpenPose : public HumanPoseEstimator {
+class OpenPose : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
@@ -34,6 +34,8 @@ public:
 
 protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
+
+    bool useAutoResize;
 
     const int minJointsNumber = 3;
     const int stride = 8;
