@@ -31,7 +31,7 @@ public:
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
         virtual void onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, const std::vector<InferenceEngine::InferRequest::Ptr>& requests) {
         this->execNetwork = execNetwork; }
-    virtual int reshape(InferenceEngine::CNNNetwork & cnnNetwork, const InputData& inputData) = 0;
+    virtual int reshape(InferenceEngine::CNNNetwork & cnnNetwork, const InputData& inputData) { return 0; }
     const std::vector<std::string>& getOutputsNames() const { return outputsNames; }
     const std::vector<std::string>& getInputsNames() const { return inputsNames; }
 
