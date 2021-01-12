@@ -119,7 +119,7 @@ NATIVE_DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('human-pose-estimation')}),
-        TestCase(options={'-m': ModelArg('human-pose-estimation-0001')}),
+        TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
     )),
 
     CppDemo(name='classification_demo',
