@@ -183,7 +183,7 @@ std::vector<float> maxPool2d(const std::vector<float>& mat, int kernelSize, int 
     return {};
 }
 
-std::vector<int> nms(const std::vector<float>& heat, int kernel = 3) {
+std::vector<std::pair<size_t, float>> nms(const float *scoresPtr, SizeVector sz, float threshold, int kernel = 3) {
     //def max_pool2d(A, kernel_size, padding = 1, stride = 1) :
     //    A = np.pad(A, padding, mode = 'constant')
     //    output_shape = ((A.shape[0] - kernel_size)//stride + 1,
@@ -202,26 +202,38 @@ std::vector<int> nms(const std::vector<float>& heat, int kernel = 3) {
 //        hmax = np.array([max_pool2d(channel, kernel, pad) for channel in heat])
 //        keep = (hmax == heat)
 //        return heat * keep
+
     int pad = (kernel - 1) / 2;
-    std::vector<int> indices;
-    for (int ch = 0; ch < 80; ++ch) {
-        for (int w = 0; w < 128; ++w) {
-            for (int h = 0; h < 128; ++h) {
-                float max = heat[128 * w + h];
-                indices.push_back(128 * w + h);
+    std::vector<std::pair<size_t, float>> scores;
+    scores.reserve(100);
+    //std::vector<float> scores;
+    //std::vector<float> classes;
+    //std::vector<float> x;
+    //std::vector<float> y;
+    int chSize = sz[2] * sz[3];
+    int k = 100;
+    for (int ch = 0; ch < sz[1]; ++ch) {
+        int count = 0;
+        for (int w = 0; w < sz[2]; ++w) {
+            for (int h = 0; h < sz[3]; ++h) {
+                float max = scoresPtr[chSize * ch + sz[2] * w + h];
+                if (max < threshold) {
+                    continue;
+                }
+                scores.push_back({ chSize * ch + sz[2] * w + h, max });
                 bool next = true;
                 for (int i = -kernel / 2; i < kernel / 2 + 1 && next; ++i) {
                     for (int j = -kernel / 2; j < kernel / 2 + 1; ++j) {
-                        if (w + i >= 0 && w + i < 128 && h + j >= 0 && h + j <= 128) {
-                            if (heat[128 * (w + i) + h + j] > max) {
-                                indices.pop_back();
+                        if (w + i >= 0 && w + i < sz[2] && h + j >= 0 && h + j < sz[3]) {
+                            if (scoresPtr[chSize * ch + sz[2] * (w + i) + h + j] > max) {
+                                scores.pop_back();
                                 next = false;
                                 break;
                             }
                         }
                         else {
                             if (max < 0) {
-                                indices.pop_back();
+                                scores.pop_back();
                                 next = false;
                                 break;
                             }
@@ -231,34 +243,70 @@ std::vector<int> nms(const std::vector<float>& heat, int kernel = 3) {
             }
         }
     }
+    //for (int i = 0; i < k; ++i) {
+    //    auto ki = q.top();
+    //    newScores[k - i - 1] = ki;
+    //    q.pop();
+    //}
 
-    return indices;
+    //for (auto i : indices) {
+    //    scores.push_back(heat[i]);
+    //    classes.push_back(i / chSize);
+    //    x.push_back(i / sz[2]);
+    //    y.push_back(i % sz[2]);
+    //}
+    return scores;
 }
 
-std::vector<float> heatProcessing(InferenceEngine::MemoryBlob::Ptr heat) {
-    LockedMemory<const void> bboxesOutputMapped = heat->rmap();
-    auto desc = heat->getTensorDesc();
+
+std::vector<std::pair<size_t, float>> filterScores(InferenceEngine::MemoryBlob::Ptr scoresInfRes, float threshold) {
+    LockedMemory<const void> scoresOutputMapped = scoresInfRes->rmap();
+    auto desc = scoresInfRes->getTensorDesc();
     auto sz = desc.getDims();
-    const float *heatPtr = bboxesOutputMapped.as<float*>();
+    const float *scoresPtr = scoresOutputMapped.as<float*>();
 
-    std::vector<float> retVal;
+    return nms(scoresPtr, sz, threshold);
+}
 
-    for (int i = 0; i < sz[0] * sz[1] * sz[2] * sz[3]; ++i) {
-        retVal.push_back(expf(heatPtr[i]) / (1 + expf(heatPtr[i])));
+std::vector<std::pair<float, float>> filterReg(InferenceEngine::MemoryBlob::Ptr regInfRes, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
+    LockedMemory<const void> bboxesOutputMapped = regInfRes->rmap();
+    //auto desc = regInfRes->getTensorDesc();
+    //auto sz = desc.getDims();
+    //auto chSize = sz[1] * sz[2];
+    const float *regPtr = bboxesOutputMapped.as<float*>();
+    std::vector<std::pair<float, float>> reg;
+
+    //for (int i = 0; i < sz[1] * sz[2] * sz[3]; ++i) {
+    //    reg.push_back({ regPtr[i], regPtr[i] } );
+    //}
+
+    for (auto s : scores) {
+        reg.push_back({ regPtr[s.first % chSize], regPtr[chSize + s.first % chSize] });
+    }
+    return reg;
+}
+
+std::vector<std::pair<float, float>> filterWH(InferenceEngine::MemoryBlob::Ptr whInfRes, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
+    LockedMemory<const void> bboxesOutputMapped = whInfRes->rmap();
+    //auto desc = whInfRes->getTensorDesc();
+    //auto sz = desc.getDims();
+    const float *whPtr = bboxesOutputMapped.as<float*>();
+    std::vector<std::pair<float, float>> wh;
+
+    //for (int i = 0; i < sz[1] * sz[2] * sz[3]; ++i) {
+    //    wh.push_back({ whPtr[i], whPtr[i] } );
+    //}
+
+    for (auto s : scores) {
+        wh.push_back({ whPtr[s.first % chSize], whPtr[chSize + s.first % chSize] });
     }
 
-    nms(retVal);
-    return retVal;
+    return wh;
 }
 
-std::vector<float> getTopKScores() {
-
-    return {};
+void transform() {
+    //cv::Mat getAffineTransform(float centerX, float centerY, float scale, float rot, int outputWidth, int outputHeight, bool inv = false) {
 }
-
-void topK() {
-}
-
 
 std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResult) {
         //heat = outputs[self._output_layer_names[0]][0]
@@ -293,13 +341,62 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
         //dets = [Detection(x[0], x[1], x[2], x[3], score = x[4], id = x[5]) for x in dets]
         //return dets
 
-    auto heat = infResult.outputsData[outputsNames[0]];
-    heatProcessing(heat);
+    auto heatInfRes = infResult.outputsData[outputsNames[0]];
+    auto sz = heatInfRes->getTensorDesc().getDims();;
+    auto chSize = sz[2] * sz[3];
 
-    auto reg = infResult.outputsData[outputsNames[1]];
+    auto scores = filterScores(heatInfRes, confidenceThreshold);
 
-    auto wh = infResult.outputsData[outputsNames[2]];
+    for (auto& s : scores) {
+        s.second = expf(s.second) / (1 + expf(s.second));
+    }
 
+    auto regInfRes = infResult.outputsData[outputsNames[1]];
 
-    return {};
+    auto reg = filterReg(regInfRes, scores, chSize);
+
+    auto whInfRes = infResult.outputsData[outputsNames[2]];
+
+    auto wh = filterWH(whInfRes, scores, chSize);
+    std::vector<BBoxes> bboxes;
+    bboxes.reserve(scores.size());
+    for (int i = 0; i < bboxes.size(); ++i) {
+        size_t chIdx = scores[i].first % chSize;
+        auto xCenter = chIdx % sz[3];
+        auto yCenter = chIdx / sz[3];
+        bboxes[i].left = xCenter + reg[i].first - wh[i].first / 2.0f;
+        bboxes[i].top = xCenter + reg[i].second- wh[i].second / 2.0f;
+        bboxes[i].right = yCenter + reg[i].first + wh[i].first / 2.0f;
+        bboxes[i].bottom = yCenter + reg[i].second + wh[i].second / 2.0f;
+    }
+    auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
+    auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
+    auto scale = std::max(imgWidth, imgHeight);
+    float centerX = imgWidth / 2.0f;
+    float centerY = imgHeight / 2.0f;
+    getAffineTransform(centerX, centerY, scale, 0, sz[2], sz[3], true);
+
+    // --------------------------- Create detection result objects --------------------------------------------------------
+    DetectionResult* result = new DetectionResult;
+    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    //float scaleX = static_cast<float>(netInputWidth) / imgWidth;
+    //float scaleY = static_cast<float>(netInputHeight) / imgHeight;
+
+    result->objects.reserve(scores.size());
+    for (int i = 0; i < scores.size(); ++i) {
+        size_t chIdx = scores[i].first % chSize;
+        DetectedObject desc;
+        desc.confidence = static_cast<float>(scores[i].second);
+        desc.labelID = scores[i].first / chSize;
+        desc.label = getLabelName(desc.labelID);
+        desc.x = static_cast<float>(chIdx % sz[3] + reg[i].first - wh[i].first / 2.0f);
+        desc.y = static_cast<float>(chIdx / sz[3] + reg[i].second - wh[i].second / 2.0f );
+        desc.width = static_cast<float>(wh[i].first);
+        desc.height = static_cast<float>(wh[i].second);
+
+        result->objects.push_back(desc);
+    }
+
+    return std::unique_ptr<ResultBase>(result);
+   // return {};
 }
