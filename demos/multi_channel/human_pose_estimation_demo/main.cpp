@@ -37,8 +37,8 @@
 #include <opencv2/opencv.hpp>
 
 #include <monitors/presenter.h>
-#include <samples/slog.hpp>
-#include <samples/args_helper.hpp>
+#include <utils/slog.hpp>
+#include <utils/args_helper.hpp>
 
 #include "input.hpp"
 #include "multichannel_params.hpp"

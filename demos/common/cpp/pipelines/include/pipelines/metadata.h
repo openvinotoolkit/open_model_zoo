@@ -15,7 +15,7 @@
 */
 
 #pragma once
-#include <samples/ocv_common.hpp>
+#include <utils/ocv_common.hpp>
 
 struct MetaData {
     virtual ~MetaData() {}

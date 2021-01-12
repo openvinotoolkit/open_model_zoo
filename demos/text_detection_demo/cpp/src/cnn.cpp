@@ -8,7 +8,7 @@
 #include <map>
 #include <string>
 
-#include <samples/common.hpp>
+#include <utils/common.hpp>
 
 
 void Cnn::Init(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {

@@ -14,8 +14,8 @@
 #include <inference_engine.hpp>
 
 #include <monitors/presenter.h>
-#include <samples/images_capture.h>
-#include <samples/ocv_common.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
 
 #include "human_pose_estimation_demo.hpp"
 #include "human_pose_estimator.hpp"

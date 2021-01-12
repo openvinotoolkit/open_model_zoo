@@ -8,7 +8,7 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include <samples/common.hpp>
+#include <utils/common.hpp>
 
 #include "human_pose_estimator.hpp"
 #include "peak.hpp"

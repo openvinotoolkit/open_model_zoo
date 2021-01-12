@@ -25,11 +25,11 @@
 #include <string>
 
 #include <monitors/presenter.h>
-#include <samples/ocv_common.hpp>
-#include <samples/args_helper.hpp>
-#include <samples/slog.hpp>
-#include <samples/images_capture.h>
-#include <samples/default_flags.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/args_helper.hpp>
+#include <utils/slog.hpp>
+#include <utils/images_capture.h>
+#include <utils/default_flags.hpp>
 #include <samples/performance_metrics.hpp>
 #include <unordered_map>
 #include <gflags/gflags.h>

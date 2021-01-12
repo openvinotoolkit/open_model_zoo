@@ -15,7 +15,7 @@
 #include <deque>
 #include <map>
 
-#include <samples/common.hpp>
+#include <utils/common.hpp>
 
 ///
 /// \brief The DetectionLogEntry struct

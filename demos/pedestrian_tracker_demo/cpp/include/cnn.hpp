@@ -10,7 +10,7 @@
 #include <vector>
 #include <functional>
 
-#include <samples/ocv_common.hpp>
+#include <utils/ocv_common.hpp>
 
 #include <inference_engine.hpp>
 

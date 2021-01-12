@@ -107,4 +107,4 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(${TARGET_NAME}
     PRIVATE ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} Threads::Threads
-    PUBLIC common)
+    PUBLIC utils)

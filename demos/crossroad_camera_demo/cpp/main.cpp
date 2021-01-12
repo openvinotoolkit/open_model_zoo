@@ -24,9 +24,9 @@
 #include <inference_engine.hpp>
 
 #include <monitors/presenter.h>
-#include <samples/images_capture.h>
-#include <samples/slog.hpp>
-#include <samples/ocv_common.hpp>
+#include <utils/images_capture.h>
+#include <utils/slog.hpp>
+#include <utils/ocv_common.hpp>
 #include "crossroad_camera_demo.hpp"
 
 using namespace InferenceEngine;

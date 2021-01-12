@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-#include <samples/common.hpp>
+#include <utils/common.hpp>
 
 #include "peak.hpp"
 

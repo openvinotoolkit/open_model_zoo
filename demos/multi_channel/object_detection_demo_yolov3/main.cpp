@@ -27,7 +27,7 @@
 #include <ngraph/ngraph.hpp>
 
 #include <monitors/presenter.h>
-#include <samples/slog.hpp>
+#include <utils/slog.hpp>
 
 #include "input.hpp"
 #include "multichannel_params.hpp"

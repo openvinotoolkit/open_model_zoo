@@ -19,10 +19,10 @@
 #include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 #include <models/classification_model.h>
-#include <samples/common.hpp>
-#include <samples/slog.hpp>
-#include <samples/args_helper.hpp>
-#include <samples/ocv_common.hpp>
+#include <utils/common.hpp>
+#include <utils/slog.hpp>
+#include <utils/args_helper.hpp>
+#include <utils/ocv_common.hpp>
 #include <samples/performance_metrics.hpp>
 
 #include "grid_mat.hpp"

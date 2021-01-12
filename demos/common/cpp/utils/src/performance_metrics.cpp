@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "samples/performance_metrics.hpp"
+#include "utils/performance_metrics.hpp"
 
 #include <limits>
 

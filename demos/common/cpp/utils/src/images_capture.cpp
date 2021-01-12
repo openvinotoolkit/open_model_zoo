@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "samples/images_capture.h"
+#include "utils/images_capture.h"
 
 #ifdef _WIN32
 #include "w_dirent.hpp"

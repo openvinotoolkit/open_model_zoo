@@ -6,10 +6,10 @@
 
 #include <gflags/gflags.h>
 #include <monitors/presenter.h>
-#include <samples/args_helper.hpp>
-#include <samples/images_capture.h>
-#include <samples/ocv_common.hpp>
-#include <samples/slog.hpp>
+#include <utils/args_helper.hpp>
+#include <utils/images_capture.h>
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 #include <string>
 #include <memory>
 #include <limits>

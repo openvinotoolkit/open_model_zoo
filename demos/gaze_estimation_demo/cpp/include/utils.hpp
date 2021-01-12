@@ -13,8 +13,8 @@
 
 #include <inference_engine.hpp>
 
-#include <samples/ocv_common.hpp>
-#include <samples/slog.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 
 namespace gaze_estimation {
 void initializeIEObject(InferenceEngine::Core& ie,

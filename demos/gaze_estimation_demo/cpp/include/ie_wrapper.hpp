@@ -10,9 +10,9 @@
 #include <map>
 #include <vector>
 
-#include <samples/common.hpp>
-#include <samples/ocv_common.hpp>
-#include <samples/slog.hpp>
+#include <utils/common.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 
 namespace gaze_estimation {
 class IEWrapper {

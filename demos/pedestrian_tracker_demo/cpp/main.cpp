@@ -11,7 +11,7 @@
 #include "pedestrian_tracker_demo.hpp"
 
 #include <monitors/presenter.h>
-#include <samples/images_capture.h>
+#include <utils/images_capture.h>
 
 #include <opencv2/core.hpp>
 

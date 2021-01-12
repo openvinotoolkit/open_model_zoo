@@ -16,8 +16,8 @@
 
 #include "pipelines/async_pipeline.h"
 #include <cldnn/cldnn_config.hpp>
-#include <samples/common.hpp>
-#include <samples/slog.hpp>
+#include <utils/common.hpp>
+#include <utils/slog.hpp>
 
 using namespace InferenceEngine;
 

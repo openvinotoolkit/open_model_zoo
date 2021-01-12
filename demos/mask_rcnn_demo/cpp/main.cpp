@@ -18,9 +18,9 @@
 
 #include <inference_engine.hpp>
 
-#include <samples/ocv_common.hpp>
-#include <samples/slog.hpp>
-#include <samples/args_helper.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
+#include <utils/args_helper.hpp>
 
 #include "mask_rcnn_demo.h"
 

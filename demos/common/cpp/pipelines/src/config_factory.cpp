@@ -18,8 +18,8 @@
 
 #include <set>
 
-#include <samples/args_helper.hpp>
-#include <samples/common.hpp>
+#include <utils/args_helper.hpp>
+#include <utils/common.hpp>
 #include <cldnn/cldnn_config.hpp>
 
 using namespace InferenceEngine;

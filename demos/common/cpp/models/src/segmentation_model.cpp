@@ -15,7 +15,7 @@
 */
 
 #include "models/segmentation_model.h"
-#include "samples/ocv_common.hpp"
+#include "utils/ocv_common.hpp"
 
 using namespace InferenceEngine;
 

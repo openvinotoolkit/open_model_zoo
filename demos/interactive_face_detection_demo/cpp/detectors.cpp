@@ -19,8 +19,8 @@
 #include <inference_engine.hpp>
 #include <ngraph/ngraph.hpp>
 
-#include <samples/ocv_common.hpp>
-#include <samples/slog.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 
 #include "detectors.hpp"
 

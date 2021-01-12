@@ -21,9 +21,9 @@
 #include <inference_engine.hpp>
 
 #include <monitors/presenter.h>
-#include <samples/common.hpp>
-#include <samples/images_capture.h>
-#include <samples/slog.hpp>
+#include <utils/common.hpp>
+#include <utils/images_capture.h>
+#include <utils/slog.hpp>
 
 #include "cnn.hpp"
 #include "text_detection.hpp"

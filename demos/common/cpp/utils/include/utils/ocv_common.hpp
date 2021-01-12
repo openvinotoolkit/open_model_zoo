@@ -11,7 +11,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "samples/common.hpp"
+#include "utils/common.hpp"
 
 /**
 * @brief Sets image data stored in cv::Mat object to a given Blob object.

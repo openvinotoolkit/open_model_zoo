@@ -20,8 +20,8 @@
 
 #include <inference_engine.hpp>
 
-#include <samples/common.hpp>
-#include <samples/slog.hpp>
+#include <utils/common.hpp>
+#include <utils/slog.hpp>
 
 #include <opencv2/opencv.hpp>
 

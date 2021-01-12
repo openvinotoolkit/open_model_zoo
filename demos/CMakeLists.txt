@@ -149,7 +149,7 @@ macro(ie_add_sample)
     endif()
 
     target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
-                                                    ${IE_SAMPLE_DEPENDENCIES} common gflags)
+                                                    ${IE_SAMPLE_DEPENDENCIES} utils gflags)
 
     if(UNIX)
         target_link_libraries(${IE_SAMPLE_NAME} PRIVATE pthread)
