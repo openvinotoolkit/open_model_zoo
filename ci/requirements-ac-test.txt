@@ -19,7 +19,7 @@ nltk==3.5                 # via -r tools/accuracy_checker/requirements.in
 numpy==1.17.5             # via -r tools/accuracy_checker/requirements-core.in, -r tools/accuracy_checker/requirements.in, imageio, matplotlib, nibabel, parasail, pywavelets, scikit-image, scikit-learn, scipy, tifffile
 packaging==20.8           # via nibabel, pytest
 parasail==1.2             # via -r tools/accuracy_checker/requirements.in
-pillow==8.0.1             # via -r tools/accuracy_checker/requirements-core.in, imageio, matplotlib, scikit-image
+pillow==8.1.0             # via -r tools/accuracy_checker/requirements-core.in, imageio, matplotlib, scikit-image
 pluggy==0.13.1            # via pytest
 py-cpuinfo==7.0.0         # via -r tools/accuracy_checker/requirements.in
 py==1.10.0                # via pytest
